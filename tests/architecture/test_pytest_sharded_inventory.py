@@ -123,7 +123,6 @@ def test_pytest_shard_inventory_declares_canonical_schema_and_aliases() -> None:
         "S1-domain-services",
         "S2-comp-iface",
         "S7-crosscutting-architecture-a",
-        "S7-crosscutting-architecture-a2",
         "S7-crosscutting-architecture-a3",
         "S3-app-foundation",
         "S4-app-services",
@@ -139,7 +138,6 @@ def test_pytest_shard_inventory_declares_canonical_schema_and_aliases() -> None:
     aliases = inventory["aliases"]
     assert aliases["S7-crosscutting-architecture"]["expands_to"] == [
         "S7-crosscutting-architecture-a",
-        "S7-crosscutting-architecture-a2",
         "S7-crosscutting-architecture-a3",
         "S7-crosscutting-architecture-b",
         "S7-crosscutting-architecture-c",
@@ -147,7 +145,6 @@ def test_pytest_shard_inventory_declares_canonical_schema_and_aliases() -> None:
     ]
     assert aliases["S7-architecture-fast-boundary"]["expands_to"] == [
         "S7-crosscutting-architecture-a",
-        "S7-crosscutting-architecture-a2",
         "S7-crosscutting-architecture-a3",
         "S7-crosscutting-architecture-b",
         "S7-crosscutting-architecture-c",

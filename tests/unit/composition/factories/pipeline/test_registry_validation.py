@@ -183,6 +183,54 @@ def test_validate_registry_manifest_reports_drift_and_missing_bindings(
     assert any("missing contracts section" in error for error in errors)
 
 
+def test_validate_registry_manifest_missing_provider_config(
+    tmp_path: Path,
+) -> None:
+    """TEST-SYS-02: missing provider YAML is a hard registry error."""
+    configs_root = tmp_path / "configs"
+    _write_entity_config(configs_root, provider="pubchem", entity="compound")
+
+    errors = validate_registry_manifest(
+        configs_root=configs_root,
+        pipeline_configs=(
+            _registry_entry(
+                pipeline_name="pubchem_compound",
+                provider="pubchem",
+                entity="compound",
+            ),
+        ),
+    )
+    assert any("no provider config" in error for error in errors)
+    assert any("pubchem.yaml" in error for error in errors)
+
+
+def test_validate_registry_manifest_missing_transformer_binding(
+    tmp_path: Path,
+) -> None:
+    configs_root = tmp_path / "configs"
+    _write_provider_config(configs_root, "pubchem")
+    _write_entity_config(configs_root, provider="pubchem", entity="compound")
+    entry = _registry_entry(
+        pipeline_name="pubchem_compound",
+        provider="pubchem",
+        entity="compound",
+    )
+    entry = PipelineFactoryConfig(
+        pipeline_name=entry.pipeline_name,
+        provider=entry.provider,
+        entity_type=entry.entity_type,
+        transformer_class=None,
+        silver_schema=None,
+        gold_schema=entry.gold_schema,
+        pandera_silver_schema=entry.pandera_silver_schema,
+    )
+    errors = validate_registry_manifest(
+        configs_root=configs_root,
+        pipeline_configs=(entry,),
+    )
+    assert any("missing transformer binding" in error for error in errors)
+
+
 def test_validate_registry_manifest_ignores_legacy_composite_entity_stubs(
     tmp_path: Path,
 ) -> None:

@@ -244,9 +244,22 @@ def _write_publish_json(records: list[IssueRecord]) -> None:
     )
 
 
-def _update_pack(records: list[IssueRecord]) -> None:
-    text = ISSUE_PACK.read_text(encoding="utf-8")
-    by_code = {r.code: r for r in records}
+def _rewrite_pack_table_row(line: str, by_code: dict[str, IssueRecord]) -> str:
+    """Rewrite one issue-pack markdown table body row when the code is known."""
+    cells = [c.strip() for c in line.strip("|").split("|")]
+    if len(cells) < 4 or cells[0] not in by_code:
+        return line
+    rec = by_code[cells[0]]
+    return f"| {rec.code} | {cells[1]} | #{rec.number} | {rec.url} |"
+
+
+def _is_pack_table_separator(line: str) -> bool:
+    return line.startswith("|------") or line.startswith("| ---")
+
+
+def _update_pack_table_lines(
+    text: str, by_code: dict[str, IssueRecord]
+) -> list[str]:
     lines: list[str] = []
     in_table = False
     for line in text.splitlines():
@@ -254,26 +267,42 @@ def _update_pack(records: list[IssueRecord]) -> None:
             in_table = True
             lines.append(line)
             continue
-        if in_table:
-            if not line.startswith("|"):
-                in_table = False
-                lines.append(line)
-                continue
-            if line.startswith("|------") or line.startswith("| ---"):
-                lines.append(line)
-                continue
-            cells = [c.strip() for c in line.strip("|").split("|")]
-            if len(cells) >= 4 and cells[0] in by_code:
-                rec = by_code[cells[0]]
-                pri = cells[1]
-                lines.append(
-                    f"| {rec.code} | {pri} | #{rec.number} | {rec.url} |"
-                )
-                continue
+        if not in_table:
             lines.append(line)
             continue
-        lines.append(line)
+        if not line.startswith("|"):
+            in_table = False
+            lines.append(line)
+            continue
+        if _is_pack_table_separator(line):
+            lines.append(line)
+            continue
+        lines.append(_rewrite_pack_table_row(line, by_code))
+    return lines
+
+
+def _update_pack(records: list[IssueRecord]) -> None:
+    text = ISSUE_PACK.read_text(encoding="utf-8")
+    by_code = {r.code: r for r in records}
+    lines = _update_pack_table_lines(text, by_code)
     ISSUE_PACK.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+_GITHUB_ISSUE_LINE_RE = re.compile(r"^github_issue:\s*\d+\s*$", flags=re.MULTILINE)
+_ASSIGNEES_LINE_RE = re.compile(r"^(assignees:\s*\S.*)$", flags=re.MULTILINE)
+
+
+def _stamp_one_issue_frontmatter(path: Path, rec: IssueRecord) -> None:
+    content = path.read_text(encoding="utf-8")
+    if _GITHUB_ISSUE_LINE_RE.search(content):
+        content = _GITHUB_ISSUE_LINE_RE.sub(f"github_issue: {rec.number}", content, count=1)
+    else:
+        content = _ASSIGNEES_LINE_RE.sub(
+            rf"\1\ngithub_issue: {rec.number}",
+            content,
+            count=1,
+        )
+    path.write_text(content, encoding="utf-8")
 
 
 def _stamp_frontmatter_github_issue(records: list[IssueRecord]) -> None:
@@ -284,25 +313,7 @@ def _stamp_frontmatter_github_issue(records: list[IssueRecord]) -> None:
         code = _code_from_path(path)
         if code is None or code not in by_code:
             continue
-        rec = by_code[code]
-        content = path.read_text(encoding="utf-8")
-        if re.search(r"^github_issue:\s*\d+", content, flags=re.MULTILINE):
-            content = re.sub(
-                r"^github_issue:\s*\d+.*$",
-                f"github_issue: {rec.number}",
-                content,
-                count=1,
-                flags=re.MULTILINE,
-            )
-        else:
-            content = re.sub(
-                r"^(assignees:.*)$",
-                rf"\1\ngithub_issue: {rec.number}",
-                content,
-                count=1,
-                flags=re.MULTILINE,
-            )
-        path.write_text(content, encoding="utf-8")
+        _stamp_one_issue_frontmatter(path, by_code[code])
 
 
 def main(argv: list[str] | None = None) -> int:

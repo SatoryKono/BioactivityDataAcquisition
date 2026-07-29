@@ -154,7 +154,7 @@ duration_telemetry:
     - S5-infra-adapters.xml
     - S6-crosscutting-unit.xml
     - S7-crosscutting-architecture-a.xml
-    - S7-crosscutting-architecture-a2.xml
+    - S7-crosscutting-architecture-a.xml
     - S7-crosscutting-architecture-a3.xml
     - S7-crosscutting-architecture-b.xml
     - S7-crosscutting-architecture-c.xml
@@ -175,8 +175,7 @@ duration_telemetry:
       S4-app-services.xml: 33.052
       S5-infra-adapters.xml: 136.002
       S6-crosscutting-unit.xml: 30.191
-      S7-crosscutting-architecture-a.xml: 265.502
-      S7-crosscutting-architecture-a2.xml: 419.688
+      S7-crosscutting-architecture-a.xml: 685.19
       S7-crosscutting-architecture-a3.xml: 553.6
       S7-crosscutting-architecture-b.xml: 199.806
       S7-crosscutting-architecture-c.xml: 1261.941

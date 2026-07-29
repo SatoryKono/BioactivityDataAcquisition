@@ -69,18 +69,24 @@ def test_closeout_ratchets_are_fully_classified() -> None:
 
 def test_closeout_ratchet_entries_are_live_and_actionable() -> None:
     """Retained closeout tests must enforce live invariants, not stale history."""
+    allowed_dispositions = set(_load_triage()["policy"]["allowed_dispositions"])
     for entry in _triage_entries():
-        assert entry["disposition"] == "retain_active"
+        assert entry["disposition"] in allowed_dispositions
         assert entry["classification"] in ALLOWED_CLASSIFICATIONS
         assert (PROJECT_ROOT / entry["path"]).is_file()
         assert isinstance(entry["live_guard"], str) and len(entry["live_guard"]) >= 20
         assert isinstance(entry["rationale"], str) and len(entry["rationale"]) >= 20
+        if entry["disposition"] == "retain_nightly":
+            assert entry["classification"] == "budget_closeout_ratchet", (
+                "retain_nightly is reserved for budget freezes already excluded "
+                "from PR S7 fast boundary (TEST-SYS-03)"
+            )
 
 
 def test_closeout_ratchet_policy_does_not_allow_stale_historical_tests() -> None:
     """Historical-only closeout files should be removed or documented elsewhere."""
     policy = _load_triage()["policy"]
-    assert policy["allowed_dispositions"] == ["retain_active"]
+    assert set(policy["allowed_dispositions"]) == {"retain_active", "retain_nightly"}
     assert "removed" not in policy["allowed_dispositions"]
     assert "historical_evidence" not in policy["allowed_classifications"]
 

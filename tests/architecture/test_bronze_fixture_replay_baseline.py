@@ -136,3 +136,53 @@ def test_replay_critical_families_keep_ci_visible_consumer_paths() -> None:
                 missing.append(f"{key}: missing consumer path {rel_path}")
 
     assert not missing, "\n".join(missing)
+
+
+def test_non_chembl_exact_replay_families_have_edge_fixtures() -> None:
+    """TEST-SYS-01: non-ChEMBL exact-replay families need edge depth, not only CI samples."""
+    manifest = _load_yaml(MANIFEST_PATH).get("fixtures", {})
+    assert isinstance(manifest, dict)
+
+    supported_fixture_keys = {
+        family.replace(".", "/", 1)
+        for family in published_supported_reproducibility_families()
+    }
+    missing_edges: list[str] = []
+    for key in sorted(supported_fixture_keys):
+        if key.startswith("chembl/"):
+            continue
+        entry = manifest.get(key)
+        assert isinstance(entry, dict), f"Missing manifest entry for {key}"
+        edges = entry.get("edge_fixtures") or []
+        if not edges:
+            missing_edges.append(key)
+            continue
+        for edge in edges:
+            assert isinstance(edge, dict)
+            edge_path = edge.get("fixture_path")
+            assert isinstance(edge_path, str)
+            assert (PROJECT_ROOT / edge_path).is_file(), edge_path
+            assert edge.get("validation_status") == "valid"
+    assert not missing_edges, (
+        f"Non-ChEMBL exact-replay families missing edge fixtures: {missing_edges}"
+    )
+
+
+def test_test_sys_01_bronze_inventory_artifact_is_current() -> None:
+    """Committed inventory keeps non-ChEMBL bronze promotion evidence honest."""
+    inv_path = (
+        PROJECT_ROOT / "reports/quality/test-sys-01-bronze-nonchembl-inventory.json"
+    )
+    assert inv_path.is_file()
+    import json
+
+    payload = json.loads(inv_path.read_text(encoding="utf-8"))
+    summary = payload["summary"]
+    assert summary["non_chembl_family_count"] >= 7
+    assert (
+        summary["non_chembl_with_edge_fixtures"] == summary["non_chembl_family_count"]
+    )
+    assert summary["gaps_registry_empty"] is True
+    assert (
+        payload["acceptance"]["non_chembl_major_providers_have_edge_fixtures"] is True
+    )
