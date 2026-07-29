@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2126 |
-| Tracked doc-like files | 2072 |
+| Doc-like files | 2141 |
+| Tracked doc-like files | 2087 |
 | Ignored local docs/reports files | 54 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -19,14 +19,14 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 54 |
-| tracked | 2072 |
+| tracked | 2087 |
 
 ## Lifecycle Counts
 
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_draft | 109 |
+| active_draft | 121 |
 | active_quality_baseline | 22 |
 | closeout_evidence | 37 |
 | docs_reports_curated_entrypoint | 2 |
@@ -38,20 +38,20 @@
 | generated_test_run_evidence | 4 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 35 |
+| issue_pack | 37 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
-| working_report | 67 |
+| working_report | 68 |
 
 ## GitHub Issue Drafts And Packs
 
 | Lifecycle | Count |
 | --- | --- |
-| active_draft | 109 |
+| active_draft | 121 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 35 |
+| issue_pack | 37 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
@@ -62,7 +62,7 @@
 | Archived | 130 |
 | Canonical | 71 |
 | Generated | 763 |
-| Working | 309 |
+| Working | 324 |
 
 ## Surface Families
 
@@ -72,14 +72,14 @@
 | archive | 130 |
 | canonical | 71 |
 | generated | 763 |
-| working | 309 |
+| working | 324 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 144 |
-| archive-after-migration | 102 |
+| archive-after-github-state-check | 158 |
+| archive-after-migration | 103 |
 | generate-automatically | 763 |
 | keep | 1113 |
 | reconcile-with-github-state | 4 |
@@ -144,6 +144,7 @@
 | `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-coderabbit-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture-coderabbit-2026-07-29-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-refactoring-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-residual-2026-07-27-issue-publish.json` | Working | 0 | archive-after-migration |
@@ -167,7 +168,6 @@
 | `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
-| `reports/quality/sonar/live-issues-20260728-manifest.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -264,6 +264,7 @@
 | `.github/ISSUES/AI-RUNTIME-AUDIT-002-Eliminate-Tracked-Devin-MCP-Workstation-Paths.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCH-CONT-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCH-CR-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
+| `.github/ISSUES/ARCH-CR2-2026-07-29-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCH-QA-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCH-REF-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCH-RES-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
@@ -297,7 +298,6 @@
 | `.github/ISSUES/CHEMBL-ISSUES-INDEX.md` | index |  | keep |
 | `.github/ISSUES/CODERABBIT-REAUDIT-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/CREATION_GUIDE.md` | guide |  | keep |
-| `.github/ISSUES/CROSS-001-Unified-Enum-Configuration.md` | active_draft |  | archive-after-github-state-check |
 
 ## Docs Reports Evidence Examples
 

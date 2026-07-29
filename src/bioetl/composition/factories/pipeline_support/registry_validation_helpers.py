@@ -19,6 +19,9 @@ class RegistryEntryProtocol(Protocol):
     pipeline_name: str
     provider: str
     entity_type: str
+    transformer_class: object | None
+    gold_schema: object | None
+    pandera_silver_schema: object | None
 
 __all__ = ["RegistryEntryProtocol"]
 

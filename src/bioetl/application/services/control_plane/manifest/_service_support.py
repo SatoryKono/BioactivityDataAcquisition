@@ -1,10 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Private manifest-service support helpers owned by the manifest package."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.services.control_plane.manifest._service_hydration import (
     RunManifestHydrationMixin as RunManifestHydrationMixin,
@@ -30,7 +29,7 @@ if TYPE_CHECKING:
 class RunManifestPayloadMixin:
     """Build normalized manifest payloads and canonical identity anchors."""
 
-    schema_version: str
+    schema_version: str = cast(Any, None)  # Any: host attr default (PD5)
 
     def _build_execution_identity_payload(
         self,

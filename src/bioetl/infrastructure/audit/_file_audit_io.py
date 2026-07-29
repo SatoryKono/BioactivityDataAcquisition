@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Synchronous file operations for ``FileAuditAdapter``."""
 
@@ -6,6 +5,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
+from typing import Any, cast
 
 from bioetl.domain.ports import AuditEntry, AuditLayer
 from bioetl.domain.serialization import serialize_to_json
@@ -19,7 +19,7 @@ from bioetl.infrastructure.audit._file_audit_readers import process_audit_file
 class FileAuditIOMixin:
     """Synchronous audit file read/write helpers."""
 
-    base_path: Path
+    base_path: Path = cast(Any, None)  # Any: host attr default (PD5)
 
     def _get_audit_file_path(self, date: datetime) -> Path:
         """Get the audit file path for a specific date."""

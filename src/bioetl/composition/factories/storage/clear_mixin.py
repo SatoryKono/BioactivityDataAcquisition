@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.composition.factories.storage._blocking import run_storage_blocking
 
@@ -18,8 +18,8 @@ class StorageBundleClearMixin:
     """Mixin providing clear/cleanup operations for Silver, Gold, CSV, and Delta."""
 
     # ARCH-CR2-06: typed host attributes (set by StorageBundle.__init__).
-    silver: SilverWriter
-    gold: GoldWriter
+    silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD5)
+    gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD5)
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Silver layer data for a specific table.

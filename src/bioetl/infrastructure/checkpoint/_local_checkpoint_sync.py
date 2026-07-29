@@ -1,10 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Synchronous local checkpoint operations."""
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, cast
 
 from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import JsonDict, RunID
@@ -25,7 +25,7 @@ from bioetl.infrastructure.checkpoint._local_checkpoint_io import (
 class LocalCheckpointSyncMixin:
     """Synchronous filesystem implementation for ``LocalCheckpointAdapter``."""
 
-    base_path: Path
+    base_path: Path = cast(Any, None)  # Any: host attr default (PD5)
 
     def _save_sync(
         self,

@@ -1,10 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Computed storage paths for application settings."""
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, cast
 
 __all__ = ["StoragePathSettingsMixin"]
 
@@ -12,7 +12,7 @@ __all__ = ["StoragePathSettingsMixin"]
 class StoragePathSettingsMixin:
     """Computed local storage paths derived from ``data_dir``."""
 
-    data_dir: Path
+    data_dir: Path = cast(Any, None)  # Any: host attr default (PD5)
 
     @property
     def bronze_path(self) -> Path:

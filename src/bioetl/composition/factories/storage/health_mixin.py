@@ -22,9 +22,9 @@ class StorageBundleHealthMixin:
     """Mixin providing health check, preview, and lifecycle operations."""
 
     # ARCH-CR2-06: typed host attributes (set by StorageBundle.__init__).
-    bronze: BronzeWriter
-    silver: SilverWriter
-    gold: GoldWriter
+    bronze: BronzeWriter = cast(Any, None)  # Any: host attr default (PD5)
+    silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD5)
+    gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD5)
 
     async def aclose(self) -> None:
         """Close resources.

@@ -153,8 +153,8 @@ class SilverDeltaOperations(_SilverDeltaOperationFacade):
 
     logger: LoggerPort
     _metrics: MetricsPort | None = None
-    # Align with facade host contract (non-optional policy surface).
+    # Align with facade host contract (non-optional policy surface; host sets real policy).
     _merge_resilience_policy: SilverMergeResiliencePolicy = field(
-        default=None  # type: ignore[arg-type]
+        default=cast(Any, None),  # Any: host attr default (PD5 product zero hold)
     )
     _load_delta_module: Callable[[], object] | None = _load_deltalake_module

@@ -2,93 +2,73 @@
 
 Linked campaigns:
 
-- PD (closed): `#6925` … `#6935`
-- PD2 (closed): `#6949` … `#6960` (product errors → 0)
-- PD3 (closed): `#6961` … `#6971` (suppression inventory + partial structural debt)
-- **PD4 (active):** `#6972` … `#6981` — Host Protocol burn-down of remaining file-level suppressions
+- PD–PD4 (closed): product errors → 0; suppression inventory; Host Protocol partial burn-down
+- **PD5 (active):** `#6994` … `#7004` — workspace ~10k (tests-dominated) + product suppression residual
 
-## Gate semantics (normative for contributors)
+## Gate semantics
 
 | Surface | Tool | Role | Merge-blocking? |
 | --- | --- | --- | --- |
-| Product type gate | `mypy` on `src/bioetl` (strict, CI `type-check`) | Contract for merge | **Yes** |
-| Product basedpyright residual | basedpyright on `src/bioetl` | Shrink-only burn-down | **No** (advisory unless ADR promotes) |
-| Product `# pyright:` suppressions | file-level residual flags | Structural debt ledger | **No** — shrink-only inventory |
-| Tests/scripts basedpyright residual | basedpyright on workspace / tests | IDE UX / advisory | **No** |
-| basedpyright **warnings** | high volume (`reportAny`, `reportUnknown*`, …) | Noise budget | **Not** merge-blocking |
+| Product type gate | `mypy` on `src/bioetl` | Merge contract | **Yes** |
+| Product basedpyright **errors** | basedpyright `src/bioetl` | Must stay **0** | No (advisory) |
+| Product `# pyright:` suppressions | file-level flags | Shrink-only debt ledger | No |
+| Workspace / tests diagnostics | basedpyright full tree | IDE UX (~10k errors, tests ~88%) | **No** |
+| Warnings | basedpyright | Noise budget ~15k product | **No** |
 
-Do **not** treat the IDE error count as the CI type gate. Green CI mypy remains sufficient for type-merge policy.
+### Interpreting large IDE counts (~12k)
 
-## Dual KPI lock (PD4-0)
+| Figure | Meaning |
+| --- | --- |
+| IDE “~12662 errors” | Problems panel composite; not exact CLI total |
+| Live workspace errors | **~10005** (`reports/bp_workspace_live.json`) |
+| of which tests | **~8784 (87.8%)** |
+| Product `src/bioetl` errors | **0** |
+| Entity unit tests errors | **0** |
+
+**Do not** treat ~12k IDE diagnostics as product CI failure. Product truth = error snapshot + mypy.
+
+## Dual product KPIs
 
 | KPI | Artifact | Guard |
 | --- | --- | --- |
-| Product **errors = 0** | `reports/quality/basedpyright-error-snapshot.json` | `report_basedpyright_error_snapshot --check` |
-| Suppression **files/rules shrink-only** | `reports/quality/basedpyright-suppression-inventory.json` | `report_basedpyright_suppression_inventory --check` |
-| Tests/scripts advisory | `reports/quality/basedpyright-tests-snapshot.json` | optional `--check` |
+| Product errors = 0 | `basedpyright-error-snapshot.json` | `report_basedpyright_error_snapshot --check` |
+| Suppressions shrink-only | `basedpyright-suppression-inventory.json` | `report_basedpyright_suppression_inventory --check` |
+| Tests/scripts advisory | `basedpyright-tests-snapshot.json` | optional `--check` |
 
-**PD4 floor (start of campaign):** product errors **0**; suppressions **239 files / 296 rules** (do not grow).
+**PD5 floors:** product errors **0**; suppressions **≤228 files** (start); workspace advisory baseline **10005 errors**.
 
-### PR checklist for typing / diagnostics changes
-
-When a PR touches `src/bioetl/**` typing, mixins, ports, or `# pyright:` directives:
-
-1. [ ] `basedpyright --outputjson src/bioetl > reports/bp_live.json`
-2. [ ] `python -m scripts.engineering.qa.report_basedpyright_error_snapshot --source reports/bp_live.json --check` → product errors non-growth (**must stay 0**)
-3. [ ] `python -m scripts.engineering.qa.report_basedpyright_suppression_inventory --check` → suppressions non-growth
-4. [ ] If you **remove** a `# pyright: reportX=false`, include structural fix (Host Protocol / `self: Host` / TYPE_CHECKING / typed boundary) and say so in the PR body
-5. [ ] If you **add** a `# pyright: reportX=false`, link a GH issue and one-line rationale
-6. [ ] mypy CI path still green (do not weaken strict product gate)
-
-### Regen recipes
+### Regen
 
 ```bash
-# Product errors
+# Product
 basedpyright --outputjson src/bioetl > reports/bp_live.json
-python -m scripts.engineering.qa.report_basedpyright_error_snapshot --source reports/bp_live.json
 python -m scripts.engineering.qa.report_basedpyright_error_snapshot --source reports/bp_live.json --check
-
-# Suppression ledger
-python -m scripts.engineering.qa.report_basedpyright_suppression_inventory
 python -m scripts.engineering.qa.report_basedpyright_suppression_inventory --check
 
-# Tests/scripts advisory (optional)
-basedpyright --outputjson > reports/bp_workspace.json
-python -m scripts.engineering.qa.report_basedpyright_tests_snapshot --source reports/bp_workspace.json
+# Workspace / IDE surface
+basedpyright --outputjson > reports/bp_workspace_live.json
+python -m scripts.engineering.qa.report_basedpyright_tests_snapshot --source reports/bp_workspace_live.json
 ```
 
-### Suppression debt rules
+### PR checklist (typing / diagnostics)
 
-1. Prefer Protocol host contracts over permanent suppressions.
-2. On edit of a suppressed file: **try remove the directive first**, then structural fix until basedpyright is clean.
-3. Import cycles: `configs/quality/basedpyright_import_cycle_allowlist.json` shrink-only.
-4. Warnings stay advisory (PD4-8 pilot only unless ADR promotes).
+1. Product snapshot `--check` (errors stay 0)
+2. Suppression inventory `--check` (no growth)
+3. Removing a product `# pyright:` flag requires structural fix in the same PR
+4. Adding a product `# pyright:` flag requires issue + rationale
+5. Test diagnostics PRs should use `tests/helpers/typed_ids.py`, `protocol_stubs.py`, `settings_doubles.py` (see `tests/helpers/TYPED_DOUBLES.md`)
+6. mypy CI remains green
 
-### Wave targets (PD4)
+### Optional IDE filter
 
-| Wave | Target |
-| --- | --- |
-| W1 Host Protocols | uninit ≤25; attr ≤20; files ≤190 |
-| W2 InvalidCast | cast flags ≤15 |
-| W3 Cycles | cycle flags ≤18 |
-| W4 ArgumentType | arg flags ≤20 |
-| Stretch epic close | suppression files ≤150; product errors=0 |
+Locally exclude `tests/**` and/or `scripts/**` if Problems floods. Do not commit product error-rule disables.
 
-## Warning budget policy
+## Warning policy
 
-1. **CI blocking** remains mypy on `src/bioetl`.
-2. **Product basedpyright errors** must stay **0**.
-3. **Suppression debt** is the active structural burn-down (PD4).
-4. **Warnings** are advisory; optional personal IDE demotion only.
-5. Do not bulk-edit `infrastructure/schemas/silver_*.py` megawarn modules without a generator strategy.
-
-### Optional personal IDE filter
-
-Contributors may exclude `tests/**` from IDE type checking locally. Do **not** commit repo-wide disable of product error rules.
+Warnings are advisory. Prefer narrow pilots (`reportImplicitOverride` / Port `Any`). Avoid bulk `silver_*.py` without generator plan.
 
 ## Related
 
-- Plan/audit: `reports/quality/PROJECT_DIAGNOSTICS_AUDIT_AND_PLAN_2026-07-28.md`
-- PD4 pack: `.github/ISSUES/PD4-2026-07-28-PROJECT-DIAGNOSTICS-HOST-PROTOCOL-ISSUE-PACK.md`
-- `docs/00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md`
-- `docs/00-project/governance/05-github-policy.md` — CI `gate.types` = mypy
+- Plan: `reports/quality/PROJECT_DIAGNOSTICS_12662_AUDIT_AND_PLAN_2026-07-28.md`
+- PD5 pack: `.github/ISSUES/PD5-2026-07-29-PROJECT-DIAGNOSTICS-WORKSPACE-ISSUE-PACK.md`
+- `docs/00-project/governance/05-github-policy.md` — `gate.types` = mypy

@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Synchronous quarantine admin timing helpers for QuarantineService."""
 
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.runtime_timestamps import (
     capture_runtime_timing_anchor,
@@ -26,7 +25,7 @@ class QuarantineServiceSyncMixin(
 ):
     """Sync quarantine timing helpers plus delegated admin operations."""
 
-    clock: ClockPort
+    clock: ClockPort = cast(Any, None)  # Any: host attr default (PD5)
 
     def _capture_operator_timing_anchor(self) -> tuple[datetime, float]:
         """Capture the canonical operator timing anchor for one sync admin flow."""

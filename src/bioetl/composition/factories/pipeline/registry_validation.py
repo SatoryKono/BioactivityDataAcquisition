@@ -7,8 +7,9 @@ surface. This module validates that the two remain in sync.
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from pathlib import Path
+from typing import cast
 
 from bioetl.composition.factories.pipeline_support.registry_validation_helpers import (
     RegistryEntryProtocol,
@@ -41,7 +42,12 @@ def validate_registry_manifest(
             PIPELINE_CONFIGS,
         )
 
-        registry_entries = tuple(PIPELINE_CONFIGS)
+        # NamedTuple registry entries are structurally RegistryEntryProtocol;
+        # cast keeps basedpyright from union-widening against the concrete type.
+        registry_entries: Sequence[RegistryEntryProtocol] = cast(
+            Sequence[RegistryEntryProtocol],
+            tuple(PIPELINE_CONFIGS),
+        )
     else:
         registry_entries = tuple(pipeline_configs)
     errors: list[str] = []

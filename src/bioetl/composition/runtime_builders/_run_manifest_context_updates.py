@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Control-plane context update helpers for run manifest attachment."""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
     CONTRACT_IDENTITY_FIELD_NAMES,
@@ -44,7 +43,7 @@ _CONTROL_PLANE_CONTEXT_UPDATE_FIELDS: tuple[str, ...] = (
 
 
 class _MutableManifestContext:
-    manifest_id: str | None
+    manifest_id: str | None = cast(Any, None)  # Any: host attr default (PD5)
 
 
 def iter_optional_control_plane_updates(
