@@ -25,7 +25,7 @@ flowchart LR
     GoldColumns["Allowed values<br/>standard_type in IC50, Ki<br/>standard_units in nM<br/>standard_relation in =<br/>assay_type in B, F<br/>potential_duplicate in 0"]
     GoldRanges["Ranges<br/>activity_id range [1.0, 10000000000.0]<br/>standard_value range (0.0, +inf]<br/>pchembl_value range [3.0, 10.0]<br/>publication_year range [1950.0, 2050.0]"]
     GoldRequired["Required values<br/>standard_type<br/>standard_value<br/>standard_units<br/>target_id"]
-    DQ["Effective DQ policy<br/>thresholds 0.05 / 0.25<br/>29 field rules<br/>6 cross-field rules<br/>6 conditional rules"]
+    DQ["Effective DQ policy<br/>thresholds 0.05 / 0.5<br/>29 field rules<br/>6 cross-field rules<br/>6 conditional rules"]
 
     Source --> Extract1 --> Input
     Source --> Extract2 --> Input
