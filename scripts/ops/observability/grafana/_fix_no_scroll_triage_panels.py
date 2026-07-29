@@ -111,12 +111,12 @@ RUNTIME_PROVENANCE = (
 PROVIDER_PROVENANCE = (
     '<div style="padding:2px 6px;border-left:3px solid #ff9830;'
     "background:rgba(255,152,48,0.08);line-height:1.2;font-size:12px;"
-    'overflow:hidden;white-space:normal">'
+    'white-space:normal">'
     "<strong>Which provider is degraded, and why?</strong> "
-    "Start with GLOBAL severity + telemetry freshness · "
+    "Provider-global scope: GLOBAL severity + telemetry freshness · "
     "Selected-provider Status can disagree by design<br>"
     "Blank Provider → <strong>Selection required</strong>. "
-    "UNKNOWN freshness = telemetry missing — inspect scrape target."
+    "UNKNOWN freshness = missing Runtime telemetry — inspect scrape target."
     "</div>"
 )
 
@@ -142,6 +142,61 @@ INCIDENT_NEXT_BEST = (
     "</div>"
 )
 
+TRUST_REPLAY_SAFETY_REVIEW = (
+    '<div style="padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal">'
+    "<strong>Remaining replay-safety signals:</strong> duplicate-record evidence and "
+    "occurrence-only vs semantic drift classification.<br>"
+    "Keep high-cardinality IDs out of Prometheus. Use identity evidence, manifests, "
+    "ledger/checkpoint diagnostics, and artifact lineage for exact proof."
+    "</div>"
+)
+
+OVERVIEW_DIAGNOSTICS_NAVIGATION = (
+    '<div style="padding:4px 8px;line-height:1.35;font-size:12px;white-space:normal">'
+    "<strong>Raw metric entrypoints</strong><br>"
+    "<code>bioetl_l0_status</code> — current verdict · "
+    "<code>bioetl_l0_next_action_route</code> — first-action route<br>"
+    "<code>bioetl_l0_input_status_selected</code> — input status. "
+    "Open Trust, Pipeline Diagnostics, Data Quality, or Provider Health for reasons."
+    "</div>"
+)
+
+RUNTIME_ESCALATION_REVIEW = (
+    '<div style="padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal">'
+    "<strong>Runtime escalation:</strong> blockers → phase evidence → action.<br>"
+    "Use Incident Workspace for multi-domain impact; Run Explorer for exact-run proof."
+    "</div>"
+)
+
+INCIDENT_IMPACT_CONFIDENCE = (
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;'
+    'padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal">'
+    "<div><strong>Impact</strong><br>Affected pipeline/provider scope from suspects "
+    "and current alerts.</div>"
+    "<div><strong>Confidence</strong><br>High with mapped Status + suspects; low with "
+    "UNKNOWN or missing telemetry.</div>"
+    "<div><strong>Basis</strong><br>Domain label + alertname; read-only evidence, "
+    "not AI diagnosis.</div>"
+    "</div>"
+)
+
+RUN_LAYERS_ACCOUNTING = (
+    '<div style="padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal">'
+    "<strong>Layer accounting:</strong> use Processed Records for the compact view "
+    "and <code>pipeline_run_report_v1.layers</code> for exact counts.<br>"
+    "Actions: Open JSON · Open Markdown · inspect reconciliation before escalation."
+    "</div>"
+)
+
+RUN_STAGE_TIMINGS_FAILURE = (
+    '<div style="padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal">'
+    "<strong>Stage timing / failure:</strong> optional blocks appear only when the "
+    "selected run report recorded them.<br>"
+    "Empty means not recorded for this run, not zero duration or successful execution. "
+    "Open JSON or Markdown for exact evidence."
+    "</div>"
+)
+
 
 def _set_html_panel(panel: dict, content: str) -> None:
     opts = dict(panel.get("options") or {})
@@ -162,6 +217,24 @@ def fix_runtime() -> None:
             print(
                 "Runtime Provenance compact, h=", (panel.get("gridPos") or {}).get("h")
             )
+    for row in data.get("panels") or []:
+        if row.get("type") != "row" or row.get("title") != "Escalate":
+            continue
+        children = row.get("panels") or []
+        escalation = next(
+            (panel for panel in children if panel.get("id") == 2541),
+            None,
+        )
+        if escalation is None:
+            continue
+        grid = escalation.get("gridPos") or {}
+        if grid.get("h") == 2:
+            grid["h"] = 3
+            for panel in children:
+                child_grid = panel.get("gridPos") or {}
+                if child_grid.get("y", -1) >= 34:
+                    child_grid["y"] += 1
+        _set_html_panel(escalation, RUNTIME_ESCALATION_REVIEW)
     save(path, data)
 
 
@@ -193,6 +266,8 @@ def fix_incident() -> None:
                 "Incident Next Best Actions compact, h=",
                 (panel.get("gridPos") or {}).get("h"),
             )
+        if title == "Impact / confidence (honest bounds)" and panel.get("id") == 2007:
+            _set_html_panel(panel, INCIDENT_IMPACT_CONFIDENCE)
     save(path, data)
 
 
@@ -245,21 +320,74 @@ def fix_overview() -> None:
             fc["defaults"] = defaults
             fc["overrides"] = overrides
             panel["fieldConfig"] = fc
+            grid = panel.get("gridPos") or {}
+            if grid.get("h") == 6:
+                grid["h"] = 7
+                for sibling in data.get("panels") or []:
+                    sibling_grid = sibling.get("gridPos") or {}
+                    if sibling_grid.get("y", -1) >= 12:
+                        sibling_grid["y"] += 1
+                first_action = next(
+                    (
+                        sibling
+                        for sibling in data.get("panels") or []
+                        if sibling.get("id") == 215
+                    ),
+                    None,
+                )
+                if first_action is not None:
+                    (first_action.get("gridPos") or {})["h"] = 7
             print(
                 "Overview Inputs cellHeight=sm, applyToRow cleared, h=",
                 (panel.get("gridPos") or {}).get("h"),
                 "y=",
                 (panel.get("gridPos") or {}).get("y"),
             )
+        if title == "Diagnostics Navigation" and pid == 9021:
+            _set_html_panel(panel, OVERVIEW_DIAGNOSTICS_NAVIGATION)
+            (panel.get("gridPos") or {})["h"] = 5
+    save(path, data)
+
+
+def fix_trust_replay_review() -> None:
+    path = DASH / "bioetl-control-plane-v1.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    for panel in walk(data.get("panels")):
+        if panel.get("id") == 139:
+            _set_html_panel(panel, TRUST_REPLAY_SAFETY_REVIEW)
+            (panel.get("gridPos") or {})["h"] = 4
+            panel["description"] = (
+                "No-scroll review card. The identity evidence endpoint already covers "
+                "manifest/run identity, execution/config/contract/input anchors, replay "
+                "parentage, copyable full values, and checkpoint anchor comparison. "
+                "Checkpoint freshness lag supplies bounded age evidence. Remaining "
+                "signals are replay duplicate-record evidence and occurrence-only versus "
+                "semantic drift classification. Exact IDs remain in identity evidence, "
+                "manifest, ledger, checkpoint, artifact, and lineage diagnostics rather "
+                "than Prometheus labels."
+            )
+    save(path, data)
+
+
+def fix_run_explorer() -> None:
+    path = DASH / "bioetl-run-explorer-v1.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    for panel in walk(data.get("panels")):
+        if panel.get("id") == 3016:
+            _set_html_panel(panel, RUN_LAYERS_ACCOUNTING)
+        if panel.get("id") == 3014:
+            _set_html_panel(panel, RUN_STAGE_TIMINGS_FAILURE)
     save(path, data)
 
 
 def main() -> None:
     fix_trust()
+    fix_trust_replay_review()
     fix_overview()
     fix_runtime()
     fix_provider()
     fix_incident()
+    fix_run_explorer()
 
 
 if __name__ == "__main__":

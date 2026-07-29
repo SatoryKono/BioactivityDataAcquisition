@@ -3964,19 +3964,19 @@
         },
         {
           "gridPos": {
-            "h": 3,
+            "h": 4,
             "w": 24,
             "x": 0,
             "y": 59
           },
           "id": 139,
           "options": {
-            "content": "Remaining replay-safety signals\n\nThe ID evidence endpoint now exposes manifest/run identity, execution/config/contract/input anchors, replay parentage, copy-friendly full values, and checkpoint anchor compare without adding high-cardinality Prometheus labels. The first-screen checkpoint freshness lag panel now provides bounded checkpoint-age evidence from Prometheus without exposing raw checkpoint identifiers.\n\nSignals still intentionally outside this dashboard section:\n\n- replay duplicate-record evidence metric\n- occurrence-only vs semantic drift classification beyond bounded replay_drift labels\n\nDo not add PromQL panels for high-cardinality IDs. Use `/ops/control-plane/identity-evidence`, manifest inspection, ledger inspection, checkpoint diagnostics, and artifact/lineage drilldowns for full identity values.",
-            "mode": "markdown"
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Remaining replay-safety signals:</strong> duplicate-record evidence and occurrence-only vs semantic drift classification.<br>Keep high-cardinality IDs out of Prometheus. Use identity evidence, manifests, ledger/checkpoint diagnostics, and artifact lineage for exact proof.</div>",
+            "mode": "html"
           },
           "title": "Review: Remaining Replay-Safety Signals",
           "type": "text",
-          "description": "DUX5: triage copy shortened; caveats in description; no raw endpoints. Companion note for replay-safety evidence that remains metric- or runbook-backed after the identity evidence refactor. This text must not list anchors already available through /ops/control-plane/identity-evidence as missing."
+          "description": "No-scroll review card. The identity evidence endpoint already covers manifest/run identity, execution/config/contract/input anchors, replay parentage, copyable full values, and checkpoint anchor comparison. Checkpoint freshness lag supplies bounded age evidence. Remaining signals are replay duplicate-record evidence and occurrence-only versus semantic drift classification. Exact IDs remain in identity evidence, manifest, ledger, checkpoint, artifact, and lineage diagnostics rather than Prometheus labels."
         }
       ]
     },

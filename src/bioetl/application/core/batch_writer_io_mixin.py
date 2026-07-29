@@ -29,28 +29,28 @@ class BatchWriterIOMixin:
 
     # Host attributes from BatchWriter + sibling mixins (PD3 structural host; Any:
     # concrete MRO supplies runtime types without NotImplementedError stubs).
-    _context: Any = cast(Any, None)
-    _storage: Any = cast(Any, None)
-    _config: Any = cast(Any, None)
+    _context: Any = cast(Any, None)  # Any: BatchWriter MRO host attribute
+    _storage: Any = cast(Any, None)  # Any: BatchWriter MRO host attribute
+    _config: Any = cast(Any, None)  # Any: BatchWriter MRO host attribute
     _provider: str = ""
     _entity_type: str = ""
-    _silver_schema: Any = cast(Any, None)
-    _gold_schema: Any = cast(Any, None)
-    _gold_schema_policy_by_version: Any = cast(Any, None)
-    _gold_validator: Any = cast(Any, None)
+    _silver_schema: Any = cast(Any, None)  # Any: provider-specific schema type
+    _gold_schema: Any = cast(Any, None)  # Any: provider-specific schema type
+    _gold_schema_policy_by_version: Any = cast(Any, None)  # Any: schema policy host
+    _gold_validator: Any = cast(Any, None)  # Any: provider-specific validator
     _silver_table_name: str = ""
     _gold_table_name: str = ""
-    _table_config: Any = cast(Any, None)
-    _silver_mode: Any = cast(Any, None)
-    _gold_mode: Any = cast(Any, None)
-    _validate_lock: Any = cast(Any, None)
-    _start_span: Any = cast(Any, None)
-    _end_span: Any = cast(Any, None)
-    _collect_record_columns: Any = cast(Any, None)
-    _resolve_layer_columns: Any = cast(Any, None)
-    _project_schema_for_layer: Any = cast(Any, None)
-    _apply_renames_to_records: Any = cast(Any, None)
-    _get_schema_columns: Any = cast(Any, None)
+    _table_config: Any = cast(Any, None)  # Any: BatchWriter MRO host attribute
+    _silver_mode: Any = cast(Any, None)  # Any: storage-specific write mode
+    _gold_mode: Any = cast(Any, None)  # Any: storage-specific write mode
+    _validate_lock: Any = cast(Any, None)  # Any: sibling mixin host method
+    _start_span: Any = cast(Any, None)  # Any: sibling mixin host method
+    _end_span: Any = cast(Any, None)  # Any: sibling mixin host method
+    _collect_record_columns: Any = cast(Any, None)  # Any: sibling mixin host method
+    _resolve_layer_columns: Any = cast(Any, None)  # Any: sibling mixin host method
+    _project_schema_for_layer: Any = cast(Any, None)  # Any: sibling mixin host method
+    _apply_renames_to_records: Any = cast(Any, None)  # Any: sibling mixin host method
+    _get_schema_columns: Any = cast(Any, None)  # Any: sibling mixin host method
 
     def _resolve_gold_ingestion_ts(self) -> datetime:
         """Return the deterministic timestamp anchor for Gold write side effects."""

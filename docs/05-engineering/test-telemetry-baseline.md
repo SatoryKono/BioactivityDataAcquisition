@@ -28,15 +28,15 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `pending`
-- Source run id: `pending`
+- Source commit: `667c3020ce74f87c319f77612c765a5aaf30e6ad`
+- Source run id: `local-duration-rebuild-2026-07-23`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-07-29T12:03:59.632345+00:00`
+- Refreshed at (UTC): `2026-07-27T18:08:35.600453+00:00`
 
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `95.38%`
+- Actual coverage: `96.49%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry

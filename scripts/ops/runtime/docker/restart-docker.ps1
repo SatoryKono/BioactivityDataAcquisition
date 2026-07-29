@@ -11,6 +11,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $Started = Get-Date
 $RecoveryDeadline = $Started.AddSeconds($TimeoutSeconds)
+$ProcessExitObservationGraceMilliseconds = 500
 $Observations = [System.Collections.Generic.List[object]]::new()
 $Actions = [System.Collections.Generic.List[string]]::new()
 $LastResortToken = 'I_UNDERSTAND_FORCE_TERMINATION_IS_DESTRUCTIVE'
@@ -251,7 +252,17 @@ function Invoke-BoundedProcess {
         if (-not $Process.Start()) { throw "Unable to start $Name" }
         $StdOutTask = $Process.StandardOutput.ReadToEndAsync()
         $StdErrTask = $Process.StandardError.ReadToEndAsync()
-        if (-not $Process.WaitForExit($WaitMilliseconds)) {
+        $ExitedWithinDeadline = $Process.WaitForExit($WaitMilliseconds)
+        # Windows PATHEXT shims add a short cmd.exe -> child-process handoff.
+        # Give an already-finishing detached command one bounded observation
+        # grace before classifying it as timed out and killing its process tree.
+        if (
+            -not $ExitedWithinDeadline -and
+            $Process.WaitForExit($ProcessExitObservationGraceMilliseconds)
+        ) {
+            $ExitedWithinDeadline = $true
+        }
+        if (-not $ExitedWithinDeadline) {
             $TimedOut = $true
             $Code = 124
             $ProcessId = $Process.Id

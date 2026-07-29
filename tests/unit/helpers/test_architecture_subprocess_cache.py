@@ -105,3 +105,17 @@ def test_effective_subprocess_timeout_keeps_non_pycharm_windows_timeout(
     monkeypatch.setattr(architecture_conftest.sys, "argv", ["pytest"])
 
     assert architecture_conftest._effective_subprocess_timeout(60) == 60
+
+
+def test_effective_subprocess_timeout_extends_mounted_worktree_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Repo-wide scanners need the established slow-filesystem allowance."""
+    monkeypatch.setattr(architecture_conftest.sys, "platform", "linux")
+    monkeypatch.setattr(
+        architecture_conftest.Path,
+        "resolve",
+        lambda self: Path("/mnt/worktree/tests/architecture/conftest.py"),
+    )
+
+    assert architecture_conftest._effective_subprocess_timeout(60) == 180.0

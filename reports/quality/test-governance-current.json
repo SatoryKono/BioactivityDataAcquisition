@@ -258,13 +258,6 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "481",
-      "path": "tests/unit/domain/test_partial_coverage_burndown_td04.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_noop_metadata_writer__attach_artifact_recorder_accepts_none"
-    },
-    {
-      "category": "intentional_no_exception_contract",
       "line": "553",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -786,7 +779,7 @@
     "architecture_helper_guard": 16,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 91,
+    "intentional_no_exception_contract": 90,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -973,12 +966,6 @@
         "intentional_no_exception_contract": 1
       }
     },
-    "tests/unit/domain/test_partial_coverage_burndown_td04.py": {
-      "assertless_tests": 1,
-      "categories": {
-        "intentional_no_exception_contract": 1
-      }
-    },
     "tests/unit/infrastructure/adapters/decorators/test_circuit_breaker_decorator.py": {
       "assertless_tests": 1,
       "categories": {
@@ -1136,7 +1123,7 @@
       }
     }
   },
-  "assertless_total_candidates": 107,
+  "assertless_total_candidates": 106,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1310,7 +1297,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 91,
+  "intentional_no_exception_contract": 90,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1581,13 +1568,6 @@
         "path": "tests/unit/composition/factories/storage/test_health_mixin.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_skips_writers_without_explicit_audit"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "481",
-        "path": "tests/unit/domain/test_partial_coverage_burndown_td04.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_noop_metadata_writer__attach_artifact_recorder_accepts_none"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -2112,7 +2092,7 @@
       "architecture_helper_guard": 16,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 91,
+      "intentional_no_exception_contract": 90,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -2142,7 +2122,7 @@
       "tests/unit/application/core/test_otel_spans.py:584",
       "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129"
     ],
-    "assertless_total_candidates": 107,
+    "assertless_total_candidates": 106,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2376,20 +2356,20 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2124,
-    "total_test_functions": 23157,
+    "total_test_functions": 23158,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "1ec9ea34d5d753bcaff7e4aaed64b66fdae2aff8295d6080ee37944e221fecda",
+  "source_tree_sha256": "ac1febcd834772f282b4e34494592424fa395fc36280185b48735dd795c372bf",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 107,
+    "assertless_total_candidates": 106,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 91,
+    "intentional_no_exception_contract": 90,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
@@ -2443,7 +2423,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2124,
-  "total_test_functions": 23157,
+  "total_test_functions": 23158,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

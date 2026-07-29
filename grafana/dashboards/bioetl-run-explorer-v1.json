@@ -811,8 +811,8 @@
             "y": 16
           },
           "options": {
-            "mode": "markdown",
-            "content": "**Record accounting available** on Processed Records and run report.\n\nActions: Open JSON · Open Markdown · View stage timing / failure in report.\n\n_Endpoint syntax and full paths live in the report artifact, not here._"
+            "mode": "html",
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Layer accounting:</strong> use Processed Records for the compact view and <code>pipeline_run_report_v1.layers</code> for exact counts.<br>Actions: Open JSON · Open Markdown · inspect reconciliation before escalation.</div>"
           }
         },
         {
@@ -908,8 +908,8 @@
             "y": 24
           },
           "options": {
-            "mode": "markdown",
-            "content": "**Record accounting available** on Processed Records and run report.\n\nActions: Open JSON · Open Markdown · View stage timing / failure in report.\n\n_Endpoint syntax and full paths live in the report artifact, not here._"
+            "mode": "html",
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Stage timing / failure:</strong> optional blocks appear only when the selected run report recorded them.<br>Empty means not recorded for this run, not zero duration or successful execution. Open JSON or Markdown for exact evidence.</div>"
           }
         }
       ],

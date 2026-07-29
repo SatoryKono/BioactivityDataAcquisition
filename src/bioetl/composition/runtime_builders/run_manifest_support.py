@@ -42,8 +42,6 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
-)
-from bioetl.domain.control_plane.reproducibility_policy import (
     resolve_replay_capability as _resolve_policy_replay_capability,
 )
 

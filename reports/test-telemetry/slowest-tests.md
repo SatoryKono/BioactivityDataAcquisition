@@ -1,7 +1,7 @@
 # Slowest Tests
 
-Source commit: `pending`
-Source run id: `pending`
+Source commit: `667c3020ce74f87c319f77612c765a5aaf30e6ad`
+Source run id: `local-duration-rebuild-2026-07-23`
 Refresh status: `captured`
 Collected test cases: `23360`
 Freshness guard: `<=45 days`
