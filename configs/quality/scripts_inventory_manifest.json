@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-29T18:59:15.355561+00:00",
+  "generated_at": "2026-07-29T19:04:15.514797+00:00",
   "summary": {
     "total_scripts": 561,
     "status_counts": {
-      "active": 343,
-      "supporting": 213,
+      "active": 341,
+      "supporting": 215,
       "temporary_diagnostic": 5
     },
     "reference_group_coverage": {
@@ -15934,7 +15934,7 @@
     {
       "path": "scripts/ops/_build_arch_review_report.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -15946,14 +15946,14 @@
         }
       ],
       "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
+      "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the bounded formatter for ad-hoc CodeRabbit architecture-review evidence; remove it when that review campaign is complete or fold it into a canonical review-report command if the workflow becomes recurring."
     },
     {
       "path": "scripts/ops/_run_cr_arch_review_remaining.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -15965,7 +15965,7 @@
         }
       ],
       "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
+      "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the bounded resume helper for the current CodeRabbit architecture-review campaign; remove it after the remaining-layer review is complete rather than treating it as a public active script."
     },
