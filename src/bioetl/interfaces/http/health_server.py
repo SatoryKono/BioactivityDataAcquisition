@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """HTTP Health Server for BioETL.
 
@@ -104,7 +103,7 @@ class HealthServer(
                     + ", ".join(sorted(str(k) for k in unknown))
                 )
             control_plane = HealthServerControlPlaneDeps(
-                **{k: legacy_ports.get(k) for k in allowed}  # type: ignore[arg-type]
+                **{k: legacy_ports.get(k) for k in allowed}  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             )
         deps = control_plane or HealthServerControlPlaneDeps()
         self.host = host

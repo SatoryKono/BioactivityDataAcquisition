@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Private runtime helpers for CLI run command orchestration."""
 
@@ -51,7 +50,7 @@ def get_pipeline_runner_service(
         get_pipeline_runner_service as _impl,
     )
 
-    return cast(PipelineRunnerService, _impl(registry=registry))
+    return cast(PipelineRunnerService, _impl(registry=registry))  # pyright: ignore[reportInvalidCast]
 
 
 def build_run_command_input(

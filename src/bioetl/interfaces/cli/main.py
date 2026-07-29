@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Main CLI entry point for BioETL.
 
@@ -209,7 +208,7 @@ def _build_main_registry() -> object:
 
 def register_all_pipelines(*, registry: object | None = None) -> None:
     """Historical CLI patch seam for pipeline registration."""
-    _register_all_pipelines(registry=registry)  # type: ignore[arg-type]
+    _register_all_pipelines(registry=registry)  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
 
 
 def build_cli_registry() -> object:

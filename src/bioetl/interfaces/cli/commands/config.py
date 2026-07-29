@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """Configuration commands for BioETL CLI.
 
@@ -9,7 +8,7 @@ Uses ConfigService from composition entrypoints for clean layering.
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
@@ -63,7 +62,7 @@ def _config_to_dict(config: object) -> JsonDict:
         JSON-serializable dict representation of the config object.
     """
     if hasattr(config, "model_dump"):
-        model_dump = config.model_dump
+        model_dump = cast(Any, config).model_dump  # Any: pydantic model_dump duck-type
         result: JsonDict = model_dump()
         return result
     if hasattr(config, "__dict__"):

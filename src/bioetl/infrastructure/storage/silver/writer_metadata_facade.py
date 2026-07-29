@@ -1,5 +1,4 @@
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Canonical SilverWriter metadata helper facade."""
 
@@ -59,7 +58,7 @@ class SilverWriterMetadataFacade:
     async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
         """Get the schema of an existing Silver table."""
         return await BaseDeltaWriter._get_table_schema(
-            cast(BaseDeltaWriter, self), table_name
+            cast(BaseDeltaWriter, self), table_name  # pyright: ignore[reportInvalidCast]
         )
 
     async def _detect_schema_drift(
@@ -170,7 +169,7 @@ class SilverWriterMetadataFacade:
         if self._should_skip_silver_metadata_write(records=request.records):
             return
         await _execute_silver_metadata_write(
-            cast(_SilverMetadataWriteHostProtocol, self),
+            cast(_SilverMetadataWriteHostProtocol, self),  # pyright: ignore[reportInvalidCast]
             request=request,
             prepare=_prepare_silver_metadata_write,
         )

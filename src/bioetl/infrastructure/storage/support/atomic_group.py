@@ -1,4 +1,3 @@
-# pyright: reportPossiblyUnboundVariable=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Atomic multi-file write group implementation."""
 
@@ -64,7 +63,7 @@ class AtomicWriteGroup:
         except (OSError, ValueError, TypeError, RuntimeError) as e:
             self._cleanup_uncommitted(committed)
             raise AtomicWriteError(
-                target, f"Commit failed after {len(committed)} files: {e}"
+                target, f"Commit failed after {len(committed)} files: {e}"  # pyright: ignore[reportPossiblyUnboundVariable]
             ) from e
         finally:
             self._pending.clear()

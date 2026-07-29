@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """Runtime helpers for optional lineage-fragment materialization."""
 
@@ -7,7 +6,7 @@ from __future__ import annotations
 import asyncio
 from collections import Counter
 from collections.abc import Callable, Mapping, Sequence
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar, cast, Any
 
 from bioetl.domain.behavior.composite_metadata_helpers import (
     parse_composite_field_sources,
@@ -184,10 +183,13 @@ def resolve_metadata_and_lineage_fragment[MetadataT](
         )
         if callable(bundle_factory):
             bundle = bundle_factory(input_data)
-            metadata = cast("MetadataT", bundle.metadata)
+            metadata = cast(
+                "MetadataT",
+                cast(Any, bundle).metadata,  # Any: lineage bundle duck-type
+            )
             lineage_fragment = cast(
                 "LineageGraphFragment | None",
-                bundle.lineage_fragment,
+                cast(Any, bundle).lineage_fragment,  # Any: lineage bundle duck-type
             )
             return metadata, lineage_fragment
         if coordinator_factory_name is not None and _has_explicit_member(

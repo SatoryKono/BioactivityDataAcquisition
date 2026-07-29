@@ -1,4 +1,3 @@
-# pyright: reportIncompatibleMethodOverride=false
 # MRO/override residual on mixin or client hierarchies.
 """Runtime protocol for ``SilverWriterMetadataMixin`` delegates."""
 
@@ -50,13 +49,13 @@ class _SilverWriterMetadataRuntimeProtocol(
     _audit: AuditPort | None
     _dq_calculator: DQMetricsCalculator
     _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
-    _metadata_coordinator: MetadataCoordinatorPort | None
-    _lineage_store: LineageStorePort | None
+    _metadata_coordinator: MetadataCoordinatorPort | None  # pyright: ignore[reportIncompatibleMethodOverride]
+    _lineage_store: LineageStorePort | None  # pyright: ignore[reportIncompatibleMethodOverride]
     _metadata_writer: MetadataWriterPort
-    _metrics: MetricsPort | None
-    _flat_structure: bool
-    _transform_version: str | None
-    _transform_steps: tuple[str, ...]
+    _metrics: MetricsPort | None  # pyright: ignore[reportIncompatibleMethodOverride]
+    _flat_structure: bool  # pyright: ignore[reportIncompatibleMethodOverride]
+    _transform_version: str | None  # pyright: ignore[reportIncompatibleMethodOverride]
+    _transform_steps: tuple[str, ...]  # pyright: ignore[reportIncompatibleMethodOverride]
 
     def _should_skip_silver_metadata_write(
         self,

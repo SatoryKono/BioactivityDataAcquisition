@@ -1,5 +1,3 @@
-# pyright: reportArgumentType=false
-# pyright: reportCallIssue=false
 # Boundary object/payload typing residual at this module.
 """Private startup orchestration for the detached observability backend."""
 
@@ -122,10 +120,10 @@ def _start_observability_backend_detached[ResultT](
     append_backend_startup_diagnostic_fn = hooks["append_backend_startup_diagnostic_fn"]
     python_executable_to_tuple_fn = hooks["python_executable_to_tuple_fn"]
     try:
-        process = start_fn(bind_host=bind_host, port=port)  # type: ignore[operator]
+        process = start_fn(bind_host=bind_host, port=port)  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
     except OSError as exc:
-        startup_detail = build_startup_failure_detail_fn(startup_log_path)  # type: ignore[operator]
-        warning_printer(  # type: ignore[operator]
+        startup_detail = build_startup_failure_detail_fn(startup_log_path)  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
+        warning_printer(  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
             "Observability backend: failed to start detached Quarantine Explorer "
             f"backend on port {port} ({exc}). {startup_detail} Grafana ID panels "
             "may remain empty."
@@ -136,18 +134,18 @@ def _start_observability_backend_detached[ResultT](
             message=f"{exc}. {startup_detail}",
         )
 
-    ready = wait_fn(  # type: ignore[operator]
+    ready = wait_fn(  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
         health_url,
         timeout_seconds=ready_timeout_seconds,
         poll_seconds=poll_seconds,
         probe_fn=probe_fn,
     )
     command = (
-        python_executable_to_tuple_fn(process.args)  # type: ignore[operator]
+        python_executable_to_tuple_fn(process.args)  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
         if hasattr(process, "args")
         else ()
     )
-    if ready and wait_required_paths_fn(  # type: ignore[operator]
+    if ready and wait_required_paths_fn(  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
         health_url,
         required_probe_paths=required_probe_paths,
         timeout_seconds=max(
@@ -162,7 +160,7 @@ def _start_observability_backend_detached[ResultT](
             health_url=health_url,
             process=process,
             command=command,
-            info_printer=info_printer,  # type: ignore[arg-type]
+            info_printer=info_printer,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             result_factory=result_factory,
         )
 
@@ -173,11 +171,11 @@ def _start_observability_backend_detached[ResultT](
         command=command,
         required_probe_paths=required_probe_paths,
         required_probe_timeout_seconds=required_probe_timeout_seconds,
-        warning_printer=warning_printer,  # type: ignore[arg-type]
+        warning_printer=warning_printer,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
         result_factory=result_factory,
-        build_startup_failure_detail_fn=build_startup_failure_detail_fn,  # type: ignore[arg-type]
-        describe_required_probe_failure_fn=describe_required_probe_failure_fn,  # type: ignore[arg-type]
-        append_backend_startup_diagnostic_fn=append_backend_startup_diagnostic_fn,  # type: ignore[arg-type]
+        build_startup_failure_detail_fn=build_startup_failure_detail_fn,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        describe_required_probe_failure_fn=describe_required_probe_failure_fn,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        append_backend_startup_diagnostic_fn=append_backend_startup_diagnostic_fn,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
     )
 
 
