@@ -30,10 +30,11 @@ The intended retrieval order is:
 catalog -> graph -> rag -> source
 ```
 
-Select `BIOETL_AI_MEMORY_MODE=off|read-only|read-write` before work. Use `off`
-when repository-owned persistent memory must not be used, `read-only` for
-retrieval without writes, and `read-write` only when persistent updates are
-authorized. Vendor-hosted conversation and IDE state are **NOT_PROVEN** and are
+Select `BIOETL_AI_MEMORY_MODE=off|read-only|read-write` before work. Use
+`read-only` for retrieval without writes and `read-write` only when persistent
+updates are authorized. In `off` mode, pre-task returns a bounded disabled
+result before persistent surface resolution, retrieval, refresh, or note
+creation. Vendor-hosted conversation and IDE state are **NOT_PROVEN** and are
 not controlled merely by setting this variable.
 
 ## Pre-Task

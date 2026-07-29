@@ -11,9 +11,11 @@ import pytest
 from memory.backup import (
     BackupVerificationError,
     create_backup,
+    quarantine_backup,
     recover_backup,
     verify_backup,
 )
+from memory.records import SecurityClass
 
 
 def _source(tmp_path: Path) -> Path:
@@ -40,7 +42,12 @@ def test_backup_is_deterministic_and_idempotent(tmp_path: Path) -> None:
 
 
 def test_backup_manifest_has_stable_sorted_paths(tmp_path: Path) -> None:
-    result = create_backup(_source(tmp_path), tmp_path / "backups")
+    result = create_backup(
+        _source(tmp_path),
+        tmp_path / "backups",
+        security_class=SecurityClass.CONFIDENTIAL,
+        retention_days=7,
+    )
 
     manifest = json.loads(
         (result.bundle_path / "manifest.json").read_text(encoding="utf-8")
@@ -50,6 +57,8 @@ def test_backup_manifest_has_stable_sorted_paths(tmp_path: Path) -> None:
         "a.json",
         "nested/b.md",
     ]
+    assert manifest["security_class"] == "confidential"
+    assert manifest["retention_days"] == 7
 
 
 def test_recovery_dry_run_does_not_write(tmp_path: Path) -> None:
@@ -87,6 +96,10 @@ def test_tampered_backup_is_rejected_before_recovery(tmp_path: Path) -> None:
         recover_backup(result.bundle_path, target, apply=True)
 
     assert not target.exists()
+
+    quarantined = quarantine_backup(result.bundle_path, tmp_path / "quarantine")
+    assert quarantined.exists()
+    assert not result.bundle_path.exists()
 
 
 def test_failed_recovery_restores_original_target(

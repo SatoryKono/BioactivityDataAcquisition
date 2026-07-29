@@ -17,6 +17,10 @@ ______________________________________________________________________
 Источник истины: `grafana/dashboards/*.json` (7 shipped dashboards after
 monitoring surface reduction 2026-07-23)
 
+ADR-053 also permits an optional, read-only six-route Scenes adapter during
+shadow review. The seven JSON UIDs remain authoritative and reachable. See
+[Optional Scenes dual path](scenes-dual-path.md) for ownership and rollback.
+
 ## Актуальные документы
 
 ### Dashboard System 2.0

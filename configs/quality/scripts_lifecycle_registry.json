@@ -812,6 +812,12 @@
       "review_by": "2026-10-31",
       "next_step": "Retain as the supporting QA helper behind dashboard PromQL scope checks while dashboard selector and forbidden-label governance remains split across static dashboard audits and live Grafana evidence; promote to active only with an explicit active-surface budget reduction elsewhere."
     },
+    "scripts/engineering/qa/report_dashboard_scenes_parity.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded dashboard-scenes parity reporter pending consolidation into the canonical observability quality-report command surface."
+    },
     "scripts/engineering/qa/report_domain_io_taint_inventory.py": {
       "owner": "@bioetl-architecture",
       "decision": "shared_helper_module",
@@ -955,6 +961,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain as an optional Docker-based screenshot fallback for hosts where the canonical Grafana render flow cannot launch Chromium; keep it supporting and do not make Docker monitoring mandatory."
+    },
+    "scripts/ops/observability/grafana/ensure_quarantine_explorer.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the fail-closed compatibility stub for the removed Quarantine Explorer command; keep it supporting while documented legacy invocations must receive the explicit exit-2 retirement message."
     },
     "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1": {
       "owner": "@bioetl-platform",

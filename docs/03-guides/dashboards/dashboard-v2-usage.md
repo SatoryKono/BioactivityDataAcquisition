@@ -16,6 +16,10 @@ ______________________________________________________________________
 > **Removed 2026-07-23:** Silver Reject Explorer dashboard, Loki/Tempo Explore adjuncts, Quarantine Explorer datasource (replaced by BioETL Ops HTTP on :8000).
 > Use CLI ioetl quarantine inspect for record-level forensics. See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
 
+The primary path remains the seven provisioned JSON dashboards. ADR-053 allows
+an optional Scenes app for shadow usability review; it does not own datasource
+or query semantics. See [Optional Scenes dual path](scenes-dual-path.md).
+
 
 
 Дата сверки: **2026-07-23**

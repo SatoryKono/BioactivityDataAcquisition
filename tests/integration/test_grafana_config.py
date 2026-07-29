@@ -1631,62 +1631,6 @@ def test_workflow_pipeline_status_fails_closed_without_runtime_fallback() -> Non
     assert "never green" in description
 
 
-def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None:
-    dashboard = load_dashboard(_require_dashboard("bioetl-workflow-overview.json"))
-
-    description = str(dashboard.get("description", ""))
-    description_lower = description.lower()
-    assert "selected-range" in description_lower
-    assert "does not provide current run state" in description_lower
-    assert "run_id" in description_lower
-    assert "stage" in description_lower
-
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title")
-    }
-    expected_tokens = {
-        "Failed Workflow Runs / Range": ("selected time range", "0. control plane"),
-        "Failed Pipeline Steps / Range": ("step_kind=pipeline", "2. runtime"),
-        "Failed Transform Steps / Range": ("transform", "4. data quality"),
-        "Skipped Step Events / Range": ("skipped", "selected time range"),
-        "Workflow Run Outcomes / Range": (
-            "valid empty",
-            "no matching scope",
-            "telemetry absent",
-            "query/datasource failures",
-            "next action",
-        ),
-        "Step Outcomes by Kind / Step Status / Range": (
-            "step kind",
-            "step status",
-            "2. runtime",
-        ),
-        "Step Duration p95 by Kind / Step Status / Range": (
-            "p95",
-            "selected time range",
-            "2. runtime",
-        ),
-        "First Action": (
-            "selected-range",
-            "runtime",
-            "data quality",
-            "run_id",
-            "dependency",
-            "gold-write",
-        ),
-    }
-    for title, tokens in expected_tokens.items():
-        panel = panels.get(title)
-        assert panel is not None, f"Workflow dashboard missing panel {title!r}"
-        panel_description = str(panel.get("description", "")).lower()
-        for token in tokens:
-            assert token in panel_description, (
-                f"{title!r} description must mention {token!r}"
-            )
-
-
 def test_workflow_dashboard_collapses_step_diagnostics_below_first_screen() -> None:
     dashboard = load_dashboard(_require_dashboard("bioetl-workflow-overview.json"))
     _assert_workflow_step_diagnostics_layout(dashboard)

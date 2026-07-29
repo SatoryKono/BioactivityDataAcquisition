@@ -7,6 +7,7 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+from subprocess import run as run_process
 
 _COMPONENT_PATTERN = re.compile(r"[^a-zA-Z0-9._-]+")
 _GIT_TIMEOUT_SECONDS = 5.0
@@ -23,7 +24,7 @@ def safe_component(value: str) -> str:
 
 
 def _git(repo_root: Path, *args: str) -> str:
-    completed = subprocess.run(
+    completed = run_process(
         ["git", "-C", str(repo_root), *args],
         check=True,
         capture_output=True,

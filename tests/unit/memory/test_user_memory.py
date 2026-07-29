@@ -7,7 +7,13 @@ from pathlib import Path
 import pytest
 
 from memory.access import AccessAction, AccessContext, AccessDeniedError
-from memory.records import ActorIdentity, RecordEnvelope, RecordStatus, RecordType
+from memory.records import (
+    ActorIdentity,
+    RecordEnvelope,
+    RecordStatus,
+    RecordType,
+    TrustLevel,
+)
 from memory.user_memory import (
     UserMemoryConsent,
     UserMemoryConsentError,
@@ -42,6 +48,7 @@ def _envelope(
         task_id="task-a",
         actor=ActorIdentity(runtime="test", agent="test-agent"),
         source_refs=("explicit-user-input",),
+        trust=TrustLevel.TRUSTED_REPOSITORY,
         created_at="2026-07-29T00:00:00+00:00",
     )
 

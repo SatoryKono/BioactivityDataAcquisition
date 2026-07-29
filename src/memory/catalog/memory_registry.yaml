@@ -260,6 +260,82 @@ surfaces:
     runtime_usage_proven: false
     evidence: [.gitignore, docs/00-project/ai]
     status: NOT_PROVEN
+  - memory_id: MEM-EVIDENCE-STORE
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: evidence
+    subtype: immutable-content-addressed-events
+    path_or_backend: repository-operator-selected/evidence.jsonl
+    format: jsonl
+    scope: repository-commit-task
+    owner: memory-governance
+    canonicality: canonical
+    source_of_truth: collected-source-evidence
+    readers: [authorized-agents, decision-replay]
+    writers: [evidence-store-api]
+    lifetime: durable
+    retention_policy: classification-bound
+    cleanup_policy: archive-by-reviewed-policy
+    runtime_usage_proven: true
+    evidence: [src/memory/evidence.py, tests/unit/memory/test_evidence_store.py]
+    status: PASS
+  - memory_id: MEM-DECISION-STORE
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: decision
+    subtype: supersedable-evidence-bound-decisions
+    path_or_backend: repository-operator-selected/decisions.jsonl
+    format: jsonl
+    scope: repository-commit-task
+    owner: architecture-governance
+    canonicality: canonical
+    source_of_truth: approved-decision-records
+    readers: [authorized-agents, decision-replay]
+    writers: [decision-store-api]
+    lifetime: durable
+    retention_policy: supersession-history
+    cleanup_policy: archive-never-silent-overwrite
+    runtime_usage_proven: true
+    evidence: [src/memory/evidence.py, src/memory/replay.py]
+    status: PASS
+  - memory_id: MEM-MUTATION-LEDGER
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: shared
+    subtype: append-only-mutation-audit
+    path_or_backend: repository-operator-selected/audit.jsonl
+    format: jsonl
+    scope: repository-commit-task
+    owner: memory-governance
+    canonicality: canonical
+    source_of_truth: mutation-events
+    readers: [authorized-auditors]
+    writers: [mutation-ledger-api]
+    lifetime: durable
+    retention_policy: classification-bound
+    cleanup_policy: governed-archive
+    runtime_usage_proven: true
+    evidence: [src/memory/ledger.py, tests/unit/memory/test_mutation_ledger.py]
+    status: PASS
+  - memory_id: MEM-USER-REPOSITORY
+    <<: *surface_defaults
+    agent_or_runtime: repository-memory-api
+    memory_type: user
+    subtype: consent-gated-preferences
+    path_or_backend: repository-operator-selected/users
+    format: json
+    scope: repository-user
+    owner: data-subject
+    canonicality: local-only
+    source_of_truth: explicit-user-input
+    readers: [consented-user]
+    writers: [consented-user]
+    lifetime: consent-bound
+    retention_policy: revoke-correct-export-delete
+    cleanup_policy: tombstone-or-explicit-delete
+    runtime_usage_proven: true
+    evidence: [src/memory/user_memory.py, tests/unit/memory/test_user_memory.py]
+    status: PASS
   - memory_id: MEM-PYTHON-CACHE
     <<: *surface_defaults
     agent_or_runtime: python

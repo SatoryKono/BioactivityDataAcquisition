@@ -9,6 +9,11 @@ from pathlib import Path
 from typing import Any
 
 from memory.records import RecordEnvelope, RecordType
+from memory.security import (
+    UnsafeMemoryContentError,
+    assert_safe_for_persistence,
+    inspect_memory_content,
+)
 from memory.storage import append_jsonl
 
 _SHA256_HEX_LENGTH = 64
@@ -143,6 +148,10 @@ class EvidenceStore:
 
     def append_evidence(self, event: EvidenceEvent) -> str:
         """Append new evidence, rejecting duplicate identity or digest."""
+        rendered = json.dumps(event.content_payload(), sort_keys=True)
+        findings = inspect_memory_content(rendered)
+        if findings:
+            raise UnsafeMemoryContentError(findings)
         existing = _read_jsonl(self._evidence_path)
         digest = event.evidence_digest
         record_id = event.envelope.record_id
@@ -157,6 +166,10 @@ class EvidenceStore:
 
     def append_decision(self, record: DecisionRecord) -> str:
         """Append a decision after resolving all cited evidence exactly."""
+        assert_safe_for_persistence(
+            f"{record.decision}\n{record.rationale}",
+            trust=record.envelope.trust,
+        )
         missing: list[str] = []
         for digest in record.evidence_digests:
             try:
