@@ -964,9 +964,11 @@ def test_bash_fetch_wrapper_executes_resolved_uvx(tmp_path: Path) -> None:
         f"executable={_bash_path(fake_uvx)}",
         f"executable={fake_uvx.as_posix()}",
     }
-    assert captured[1:5] == [
+    assert captured[1:7] == [
         "arg=--python",
         "arg=3.13",
+        "arg=--with",
+        "arg=mcp<2",
         "arg=--from",
         "arg=mcp-server-fetch==2025.4.7",
     ]
@@ -992,6 +994,8 @@ def test_powershell_fetch_wrapper_executes_resolved_uvx(
     captured = capture_file.read_text(encoding="utf-8").splitlines()
     assert "arg=--python" in captured
     assert "arg=3.13" in captured
+    assert "arg=--with" in captured
+    assert "arg=mcp<2" in captured
     assert "arg=--from" in captured
     assert "arg=mcp-server-fetch==2025.4.7" in captured
     assert "arg=mcp-server-fetch" in captured
@@ -1005,6 +1009,7 @@ def test_fetch_source_assertions_accept_and_reject_contract_fixtures() -> None:
     )
     assert patterns == [
         "mcp-server-fetch==2025.4.7",
+        "mcp<2",
         "bioetl_resolve_uvx_bin",
         "--python 3.13",
     ]

@@ -39,5 +39,5 @@ Invoke-BioetlUvxWithScopedBypass `
     -UvxPath $uvx `
     -Package "mcp-server-fetch==2025.4.7" `
     -Command "mcp-server-fetch" `
-    -UvxArguments @("--python", "3.13")
+    -UvxArguments @("--python", "3.13", "--with", "mcp<2")
 exit $LASTEXITCODE

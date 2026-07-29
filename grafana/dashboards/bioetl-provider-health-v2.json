@@ -108,7 +108,7 @@
       "type": "text",
       "title": "Provenance",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
@@ -116,7 +116,7 @@
       "description": "DUX5: status-card shell (reason/action beside Status; no internal scroll). DUX4-22: Full prose shortened on-canvas to remove internal scroll; details in description/docs. DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW/RANGE/RUN/WORKFLOW/GLOBAL. Unified context/provenance banner for 3. Provider Health. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only. Provider health is owned by provider-status telemetry, while ID and Processed Records below are bounded pipeline-context evidence only.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:2px 6px;border-left:3px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.2;font-size:12px;white-space:normal\"><strong>Which provider is degraded, and why?</strong> Provider-global scope: GLOBAL severity + telemetry freshness · Selected-provider Status can disagree by design<br>Blank Provider → <strong>Selection required</strong>. UNKNOWN freshness = missing Runtime telemetry — inspect scrape target.</div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which provider is degraded, and why?</div><div><b>Scope:</b> <b>GLOBAL</b> = provider-global fleet severity/freshness · <b>SELECTED PROVIDER</b> = provider status</div><div><b>UNKNOWN freshness</b> = missing Runtime telemetry — inspect scrape target</div></div></div>"
       }
     },
     {
@@ -124,7 +124,7 @@
       "type": "stat",
       "title": "Status",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 8,
         "x": 16,
         "y": 3
@@ -252,7 +252,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "options": {
         "content": "**Next actions (≤4)**\n\n1. Confirm **Telemetry Freshness** (missing vs degraded).\n2. Open worst row in **Severity Matrix**.\n3. Read **Top Causes** for selected provider.\n4. If selector blank → choose provider (Selection required).",
@@ -369,7 +369,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 8
+        "y": 9
       },
       "id": 9101,
       "options": {
@@ -505,7 +505,7 @@
         "h": 6,
         "w": 6,
         "x": 8,
-        "y": 8
+        "y": 9
       },
       "id": 9102,
       "options": {
@@ -618,7 +618,7 @@
         "h": 6,
         "w": 10,
         "x": 14,
-        "y": 8
+        "y": 9
       },
       "id": 9103,
       "options": {
@@ -748,7 +748,7 @@
         "h": 4,
         "w": 8,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "id": 9104,
       "options": {
@@ -787,7 +787,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "id": 91,
       "title": "Selected Provider Detail",
@@ -1765,7 +1765,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 20
       },
       "id": 9404,
       "panels": [
@@ -2273,7 +2273,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "id": 9405,
       "panels": [

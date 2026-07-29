@@ -981,6 +981,14 @@ Common context panels on primary dashboards outside Overview:
 | `ID Empty State` | `9410` | Control Plane-only neutral fallback text shown below the identity table when the selected scope returns no visible rows. |
 | `Processed Records Empty State` | `9411` | Control Plane-only neutral fallback text shown below the accounting table when the selected scope returns no visible rows. |
 
+All seven shipped dashboards enforce one Provenance readability contract based
+on `4. Data Quality`: orange `4px` accent, `16px` body (12 pt equivalent),
+`18px` operator question (13.5 pt equivalent), `line-height:1.35`, normal
+wrapping, and a four-grid-row first-screen panel. Run Explorer preserves
+stable panel `id=1` as `Provenance · Run Scope`. Selector values remain in
+Grafana controls and panel descriptions instead of expanding into
+clipping-prone on-canvas strings.
+
 `0. Control Plane` adds Control Plane-only identity evidence panels outside the
 shared shell. Panels `9404..9409` call
 `/ops/control-plane/identity-evidence` for overview anchors, P1/P2 evidence,

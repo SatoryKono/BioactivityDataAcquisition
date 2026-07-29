@@ -53,6 +53,10 @@ Primary dashboards `0..5` share the Overview-derived context shell
 `Provenance` / `Status` / `ID` / `Processed Records` panels. `run_id` remains
 HTTP identity context, is preserved between primary dashboards, and must not
 become a Prometheus label.
+The shipped Provenance readability contract uses the `4. Data Quality` visual
+pattern across all seven dashboards: 16px body, 18px question, orange accent,
+normal wrapping, and a four-grid-row first-screen panel. Run Explorer maps its
+stable `id=1` panel to `Provenance · Run Scope`.
 `Processed Records` is the shared compact Bronze/Silver/Gold stage/outcome
 accounting table from `/ops/observability/processed-records`. Exact `$run_id`
 scopes resolve from RunLedger artifact/metrics evidence; aggregate scopes are

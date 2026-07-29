@@ -28,7 +28,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 14
       },
       "panels": [
         {
@@ -298,14 +298,14 @@
     },
     {
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"padding:2px 6px;border-left:3px solid #64748b;background:rgba(100,116,139,0.10);line-height:1.2;font-size:12px;overflow:hidden;white-space:normal\"><strong>What is broken or degraded right now</strong>, and <strong>where should the operator drill down first</strong>? Status → First Action → Inputs · <code>$workflow</code>/<code>$pipeline</code>/<code>$run_type</code>/run <code>$run_id</code><br>UNKNOWN = evidence incomplete. Prefer First Action over raw numbers.</div>",
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is broken or degraded right now?</div><div><b>Scope:</b> <b>CURRENT</b> = Status + First Action · <b>SELECTED RUN</b> = exact-run evidence</div><div><b>TIME RANGE</b> = Inputs and trends · <b>UNKNOWN</b> = evidence incomplete</div></div></div>",
         "mode": "html"
       },
       "description": "DUX5: status-card shell (reason/action beside Status; no internal scroll). DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW=current, RANGE=selected window, RUN=exact run_id HTTP, WORKFLOW/GLOBAL=blast radius/fleet. L0 v3 scope/provenance banner. Primary question: what is broken now and where should the operator drill down first? Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Provenance: shipped Prometheus current-status recording rules plus selected-range evidence. Verdict grammar: state x confidence x basis x next_action. Known limitation: first-screen PromQL remains pipeline/run_type-scoped; workflow is context/evidence-first, and run_id is resolved from persisted control-plane manifests. run_id is local control-plane identity context only.",
@@ -380,7 +380,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 8,
         "x": 16,
         "y": 3
@@ -450,7 +450,7 @@
         "h": 7,
         "w": 10,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "datasource": {
         "type": "prometheus",
@@ -775,7 +775,7 @@
         "h": 7,
         "w": 14,
         "x": 10,
-        "y": 6
+        "y": 7
       },
       "datasource": {
         "type": "prometheus",
@@ -1033,7 +1033,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "collapsed": true,
       "panels": [
@@ -1326,7 +1326,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 16
       },
       "collapsed": true,
       "panels": [
@@ -1650,7 +1650,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 17
       },
       "description": "Domain status matrix detail (Control Plane / Runtime / DQ / Provider / Validation / Workflow) plus diagnostics nav. Collapsed by default — first screen uses Status + Inputs + First Action only (DSA-02).",
       "panels": [
@@ -2828,7 +2828,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "id": 9602,
       "panels": [

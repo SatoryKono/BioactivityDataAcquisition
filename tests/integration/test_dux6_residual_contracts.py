@@ -49,12 +49,67 @@ def test_run_explorer_orientation_is_compact_html() -> None:
     )
     for panel in _walk(data.get("panels")):
         title = panel.get("title") or ""
-        if title == "Run Scope" or title.startswith("Next actions"):
+        if title == "Provenance · Run Scope" or title.startswith("Next actions"):
             opts = panel.get("options") or {}
             content = opts.get("content") or ""
             assert opts.get("mode") == "html"
-            assert len(content) < 450
-            assert "overflow:hidden" in content or "font-size:12px" in content
+            assert len(content) < 700
+            if title == "Provenance · Run Scope":
+                assert "font-size:16px" in content
+                assert "font-size:18px" in content
+                assert "overflow-wrap:anywhere" in content
+            else:
+                assert "overflow:hidden" in content or "font-size:12px" in content
+
+
+def test_provenance_panels_share_readability_contract() -> None:
+    specs = {
+        "bioetl-control-plane-v1.json": 9400,
+        "bioetl-overview-v2.json": 99,
+        "bioetl-runtime.json": 9400,
+        "bioetl-provider-health-v2.json": 9400,
+        "bioetl-dq-v2.json": 9400,
+        "bioetl-incident-v1.json": 9400,
+        "bioetl-run-explorer-v1.json": 1,
+    }
+    required_css = (
+        "padding:6px 10px",
+        "border-left:4px solid #ff9830",
+        "background:rgba(255,152,48,0.08)",
+        "font-size:16px",
+        "font-size:18px",
+        "line-height:1.35",
+        "white-space:normal",
+        "overflow-wrap:anywhere",
+        "max-width:96ch",
+    )
+
+    for filename, panel_id in specs.items():
+        data = json.loads((DASH / filename).read_text(encoding="utf-8"))
+        panels = {panel.get("id"): panel for panel in _walk(data.get("panels"))}
+        provenance = panels[panel_id]
+        content = str((provenance.get("options") or {}).get("content") or "")
+
+        assert provenance.get("gridPos", {}).get("h", 0) >= 4, filename
+        assert provenance.get("options", {}).get("mode") == "html", filename
+        assert "<div style=\"font-size:18px;font-weight:700\">" in content, filename
+        assert all(token in content for token in required_css), filename
+        assert "white-space:nowrap" not in content, filename
+        assert "font-size:12px" not in content, filename
+
+        status = next(
+            (
+                panel
+                for panel in data.get("panels", [])
+                if panel.get("title") == "Status"
+            ),
+            None,
+        )
+        if status is not None:
+            assert status.get("gridPos", {}).get("h") == 4, filename
+            assert status.get("gridPos", {}).get("y") == provenance.get(
+                "gridPos", {}
+            ).get("y"), filename
 
 
 def test_browse_hides_raw_path_columns() -> None:

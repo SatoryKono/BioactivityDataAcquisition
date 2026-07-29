@@ -107,7 +107,7 @@
       "type": "text",
       "title": "Provenance",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
@@ -115,7 +115,7 @@
       "description": "DUX5: status-card shell (reason/action beside Status; no internal scroll). DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW/RANGE/RUN/WORKFLOW/GLOBAL. Unified context/provenance banner for 2. Runtime. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:2px 6px;border-left:3px solid #64748b;background:rgba(100,116,139,0.10);line-height:1.2;font-size:12px;overflow:hidden;white-space:normal\"><strong>Pipeline diagnostics</strong> · Status/Health → Phase → Blockers → Action · <code>$pipeline</code>/<code>$run_type</code>/stage <code>$stage</code>/run <code>$run_id</code><br>SCRAPING = execution evidence, not delivery OK. Silver/Gold zeros while scraping = <strong>Not started</strong>.</div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is the pipeline progressing, and what is blocking delivery?</div><div><b>Scope:</b> <b>CURRENT</b> = health/phase/blockers · <b>SELECTED RUN</b> = ID/accounting</div><div><b>STAGE</b> = diagnostic context · <b>SCRAPING</b> does not mean delivery OK</div></div></div>"
       }
     },
     {
@@ -123,7 +123,7 @@
       "type": "stat",
       "title": "Status",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 8,
         "x": 16,
         "y": 3
@@ -244,7 +244,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "options": {
         "content": "**First Action**\n\n1. Read labelled Status + freshness.\n2. Open the highest-impact evidence panel.\n3. Confirm scope (pipeline/run_type/run).\n4. Hand off to Run Explorer or Incident as needed.",
@@ -363,7 +363,7 @@
         "h": 5,
         "w": 16,
         "x": 0,
-        "y": 8
+        "y": 9
       },
       "id": 9101,
       "options": {
@@ -486,7 +486,7 @@
         "h": 4,
         "w": 8,
         "x": 16,
-        "y": 8
+        "y": 9
       },
       "id": 9102,
       "options": {
@@ -528,7 +528,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 14
       },
       "panels": [
         {
@@ -1136,7 +1136,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "panels": [
         {
@@ -1470,7 +1470,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 16
       },
       "panels": [
         {
@@ -2395,7 +2395,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 17
       },
       "id": 9992,
       "panels": [
@@ -2651,7 +2651,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "id": 9993,
       "panels": [
@@ -3090,7 +3090,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "id": 9994,
       "panels": [

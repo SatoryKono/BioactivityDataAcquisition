@@ -147,7 +147,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 2006 | Alert State History (range) |
 | bioetl-incident-v1.json | 2007 | Impact / confidence (honest bounds) |
 | bioetl-run-explorer-v1.json | 1000 | Navigation |
-| bioetl-run-explorer-v1.json | 1 | Run Scope |
+| bioetl-run-explorer-v1.json | 1 | Provenance · Run Scope |
 | bioetl-run-explorer-v1.json | 9402 | ID |
 | bioetl-run-explorer-v1.json | 9403 | Processed Records |
 | bioetl-run-explorer-v1.json | 3001 | Next actions (≤4) |

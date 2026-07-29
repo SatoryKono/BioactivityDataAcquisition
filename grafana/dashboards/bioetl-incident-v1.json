@@ -99,14 +99,14 @@
       "title": "Provenance",
       "description": "DUX5: status-card shell (reason/action beside Status; no internal scroll). DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW/RANGE/RUN/WORKFLOW/GLOBAL. Incident scope. Variables are filters; suspects use fleet metrics. role=scope_provenance; scope=pipeline,run_type,provider run_id is local control-plane identity context only. Scope: workflow, pipeline, run_type, run_id.",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:2px 6px;border-left:3px solid #64748b;background:rgba(100,116,139,0.10);line-height:1.2;font-size:12px;overflow:hidden;white-space:normal\"><strong>Incident triage</strong> · Status → Impact/confidence → Next action · <code>$workflow</code>/<code>$pipeline</code>/<code>$run_type</code>/run <code>$run_id</code><br>Read labelled Status (never bare numbers). Empty domain = <strong>No active suspects</strong>, not healthy fleet.</div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is the highest-confidence active suspect?</div><div><b>Scope:</b> <b>CURRENT</b> = Status/active suspects · <b>SELECTED RUN</b> = exact-run proof</div><div><b>EMPTY DOMAIN</b> = no active suspects, not a healthy-fleet verdict</div></div></div>"
       }
     },
     {
@@ -115,7 +115,7 @@
       "title": "Status",
       "description": "DUX6: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error/selection). Pair with Provenance reason + action; never read as OK. DUX5: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error); pair with Provenance reason + action. Not a healthy OK. DUX3-14: Incident status is read-only. Ranked suspects may be WORKFLOW/GLOBAL blast radius — check scope labels on tables. Incident header status (labelled only). Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace.",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 8,
         "x": 16,
         "y": 3
@@ -219,7 +219,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "options": {
         "mode": "html",
@@ -236,7 +236,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 10
       },
       "datasource": {
         "type": "prometheus",
@@ -422,7 +422,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "datasource": {
         "type": "prometheus",
@@ -532,7 +532,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 17
+        "y": 18
       },
       "datasource": {
         "type": "prometheus",
@@ -582,7 +582,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 24
       },
       "options": {
         "mode": "html",
@@ -597,7 +597,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 28
       },
       "collapsed": true,
       "panels": [
