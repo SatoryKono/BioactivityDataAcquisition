@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """Key resolver strategies for dependency coordinator (ADR-026)."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Mapping
-from typing import TypeVar
+from typing import Any, TypeVar, cast
 
 import polars as pl
 import pyarrow as pa
@@ -170,7 +169,8 @@ class ChainedKeyResolver:
             return seed_keys
         if not isinstance(pa_table, pa.Table):
             raise TypeError("Delta reader must return a PyArrow table")
-        if pa_table.num_rows == 0:
+        table = cast(Any, pa_table)  # Any: pyarrow Table after isinstance gate
+        if table.num_rows == 0:
             self._resolver_helper.log_warning(
                 "Source Silver table is empty, falling back to seed keys",
                 dependency=dependency.pipeline,
@@ -179,7 +179,7 @@ class ChainedKeyResolver:
             )
             return seed_keys
 
-        source_keys = self._to_source_keys(pa_table, source_table)
+        source_keys = self._to_source_keys(table, source_table)
         self._validate_join_key(source_keys, dependency, source_table)
         source_keys = self._apply_key_filter(source_keys, dependency)
         source_keys = normalize_join_key_dataframe_columns(

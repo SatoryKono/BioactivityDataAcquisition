@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-28T19:34:52.321233+00:00",
+  "generated_at": "2026-07-29T05:31:14.792938+00:00",
   "summary": {
     "total_scripts": 541,
     "status_counts": {
@@ -176,7 +176,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 136,
+          "line": 146,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.bat\").exists()"
         }
@@ -215,7 +215,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 135,
+          "line": 145,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.ps1\").exists()"
         }
@@ -266,13 +266,13 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 131,
+          "line": 141,
           "source_group": "tests",
           "text": "assert \"../ai/codex/diagnose_wsl.sh\" in ops_router"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 134,
+          "line": 144,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.sh\").exists()"
         }
@@ -365,7 +365,7 @@
         },
         {
           "path": "tests/architecture/test_env_file_write_governance.py",
-          "line": 39,
+          "line": 49,
           "source_group": "tests",
           "text": "\"scripts/ai/codex/helper/check-env.ps1\","
         }
@@ -551,7 +551,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 730,
+          "line": 740,
           "source_group": "tests",
           "text": "ensure_script = _to_bash_path(root / \"scripts/ai/codex/helper/ensure-mcp.sh\")"
         }
@@ -637,7 +637,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 439,
+          "line": 449,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -668,7 +668,7 @@
         },
         {
           "path": "tests/architecture/test_env_file_write_governance.py",
-          "line": 37,
+          "line": 47,
           "source_group": "tests",
           "text": "\"scripts/ai/codex/helper/setup-env.sh\","
         }
@@ -1243,31 +1243,31 @@
         },
         {
           "path": "tests/architecture/test_env_file_write_governance.py",
-          "line": 34,
+          "line": 44,
           "source_group": "tests",
           "text": "\"scripts/ai/codex/setup.ps1\","
         },
         {
           "path": "tests/architecture/test_root_hygiene_issues_5992_5999_closeout.py",
-          "line": 57,
+          "line": 67,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.ps1\": \"scripts/ai/codex/setup.ps1\","
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 502,
+          "line": 512,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.ps1\": \"scripts/ai/codex/setup.ps1\","
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5834_5838_closeout.py",
-          "line": 259,
+          "line": 269,
           "source_group": "tests",
           "text": "== \"scripts/ai/codex/setup.ps1\""
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 187,
+          "line": 197,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.ps1\": \"scripts/ai/codex/setup.ps1\","
         }
@@ -1292,19 +1292,19 @@
         },
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 26,
+          "line": 36,
           "source_group": "tests",
           "text": "\"scripts/ai/codex/setup_agents.sh\","
         },
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 65,
+          "line": 75,
           "source_group": "tests",
           "text": "assert \"../ai/codex/setup_agents.sh\" in ops_router"
         },
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 68,
+          "line": 78,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"setup_agents.sh\""
         }
@@ -1376,7 +1376,7 @@
       "references": [
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 47,
+          "line": 57,
           "source_group": "tests",
           "text": "\"scripts/ai/codex/setup_skills.sh\","
         }
@@ -1830,7 +1830,7 @@
         },
         {
           "path": "tests/architecture/test_env_file_write_governance.py",
-          "line": 38,
+          "line": 48,
           "source_group": "tests",
           "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
         }
@@ -2190,7 +2190,7 @@
       "references": [
         {
           "path": "tests/unit/scripts/ai/mcp/test_check_env_keys.py",
-          "line": 1,
+          "line": 11,
           "source_group": "tests",
           "text": "\"\"\"Tests for _check_env_keys.py .env parsing logic.\"\"\""
         }
@@ -2209,7 +2209,7 @@
       "references": [
         {
           "path": "tests/unit/scripts/ai/mcp/test_patch_grok_mcp_tokens.py",
-          "line": 1,
+          "line": 11,
           "source_group": "tests",
           "text": "\"\"\"Tests for _patch_grok_mcp_tokens.py token patching logic.\"\"\""
         }
@@ -2352,19 +2352,19 @@
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
-          "line": 1,
+          "line": 11,
           "source_group": "tests",
           "text": "\"\"\"Tests for export_mcp_env_from_dotenv.ps1 MCP env export logic.\"\"\""
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
-          "line": 15,
+          "line": 25,
           "source_group": "tests",
           "text": "EXPORT_SCRIPT = REPO_ROOT / \"scripts\" / \"ai\" / \"mcp\" / \"export_mcp_env_from_dotenv.ps1\""
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
-          "line": 80,
+          "line": 90,
           "source_group": "tests",
           "text": "reason=\"PowerShell (pwsh or powershell) is required to run export_mcp_env_from_dotenv.ps1\","
         }
@@ -2395,13 +2395,13 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 339,
+          "line": 349,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 55,
+          "line": 65,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\": \"Test-McpRequiredToken\","
         }
@@ -2428,13 +2428,13 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 336,
+          "line": 346,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 41,
+          "line": 51,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\": \"mcp_validate_required_token\","
         }
@@ -2473,7 +2473,7 @@
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_adr_analysis_wrapper_contracts.py",
-          "line": 10,
+          "line": 20,
           "source_group": "tests",
           "text": "PS1 = ROOT / \"scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1\""
         }
@@ -2498,7 +2498,7 @@
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_adr_analysis_wrapper_contracts.py",
-          "line": 11,
+          "line": 21,
           "source_group": "tests",
           "text": "SH = ROOT / \"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
         }
@@ -2569,7 +2569,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 56,
+          "line": 66,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\": \"Test-McpRequiredToken\","
         }
@@ -2600,7 +2600,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 42,
+          "line": 52,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\": \"mcp_validate_required_token\","
         }
@@ -2850,7 +2850,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 558,
+          "line": 568,
           "source_group": "tests",
           "text": "powershell_wrapper = (ROOT / \"scripts/ai/mcp/mcp_docker_wrapper.ps1\").read_text("
         }
@@ -3076,7 +3076,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 57,
+          "line": 67,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\": \"Test-McpOptionalToken\","
         }
@@ -3107,7 +3107,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 43,
+          "line": 53,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\": \"mcp_validate_optional_token\","
         }
@@ -3134,13 +3134,13 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 194,
+          "line": 204,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 425,
+          "line": 435,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         }
@@ -3155,13 +3155,13 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 194,
+          "line": 204,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 425,
+          "line": 435,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         }
@@ -3313,13 +3313,13 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 59,
+          "line": 69,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1134,
+          "line": 1140,
           "source_group": "tests",
           "text": "powershell_source = (MCP_DIR / \"mcp_neo4j_cypher_wrapper.ps1\").read_text("
         }
@@ -3344,7 +3344,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 45,
+          "line": 55,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\": \"mcp_validate_neo4j_credentials\","
         },
@@ -3383,7 +3383,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 60,
+          "line": 70,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
         }
@@ -3490,7 +3490,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 58,
+          "line": 68,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\": \"Test-McpOptionalToken\","
         }
@@ -3515,7 +3515,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 44,
+          "line": 54,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\": \"mcp_validate_optional_token\","
         }
@@ -3596,7 +3596,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 538,
+          "line": 548,
           "source_group": "tests",
           "text": "smoke = ROOT / \"scripts/ai/mcp/protocol_smoke.py\""
         }
@@ -3633,7 +3633,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 548,
+          "line": 558,
           "source_group": "tests",
           "text": "powershell = (ROOT / \"scripts/ai/mcp/support/docker_cli_resolver.ps1\").read_text("
         }
@@ -4052,7 +4052,7 @@
         },
         {
           "path": "tests/unit/scripts/ai/mcp/support/test_uv_resolver.py",
-          "line": 1,
+          "line": 11,
           "source_group": "tests",
           "text": "\"\"\"Tests for uv_resolver.sh uv/uvx resolution logic.\"\"\""
         }
@@ -4089,7 +4089,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 70,
+          "line": 80,
           "source_group": "tests",
           "text": "text = _read(\"scripts/ai/mcp/test_env_loading.sh\")"
         }
@@ -4368,7 +4368,7 @@
         },
         {
           "path": "tests/architecture/test_env_file_write_governance.py",
-          "line": 41,
+          "line": 51,
           "source_group": "tests",
           "text": "\"scripts/ai/vibe/helper/setup-env.sh\","
         }
@@ -4482,7 +4482,7 @@
         },
         {
           "path": "tests/architecture/test_ai_vibe_surface_contract.py",
-          "line": 29,
+          "line": 39,
           "source_group": "tests",
           "text": "assert \"launch.sh\" in top_level_router"
         }
@@ -4633,7 +4633,7 @@
         },
         {
           "path": "tests/architecture/test_silver_filter_boundary_inventory.py",
-          "line": 417,
+          "line": 427,
           "source_group": "tests",
           "text": "\"Run: python scripts/data_quality/inventory_silver_filters_migration.py\\n\""
         }
@@ -5285,7 +5285,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_quality_budget_security.py",
-          "line": 19,
+          "line": 29,
           "source_group": "tests",
           "text": "repo_root / \"scripts\" / \"diagrams\" / \"enforce_diagram_quality_budget.py\""
         }
@@ -5324,13 +5324,13 @@
         },
         {
           "path": "tests/architecture/test_fix_mermaid_operators.py",
-          "line": 1,
+          "line": 11,
           "source_group": "tests",
           "text": "\"\"\"Tests for scripts/diagrams/fix_mermaid_operators.py.\"\"\""
         },
         {
           "path": "tests/architecture/test_fix_mermaid_operators.py",
-          "line": 18,
+          "line": 28,
           "source_group": "tests",
           "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"fix_mermaid_operators.py\""
         }
@@ -5459,13 +5459,13 @@
         },
         {
           "path": "tests/architecture/test_diagram_description_index_contracts.py",
-          "line": 18,
+          "line": 28,
           "source_group": "tests",
           "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"generate_description_indexes.py\""
         },
         {
           "path": "tests/architecture/test_diagram_description_index_contracts.py",
-          "line": 83,
+          "line": 93,
           "source_group": "tests",
           "text": "assert \"generate_description_indexes.py\" in content"
         }
@@ -5791,13 +5791,13 @@
         },
         {
           "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 74,
+          "line": 84,
           "source_group": "tests",
           "text": "wrapper_path = REPO_ROOT / \"scripts\" / \"diagrams\" / \"mmdc_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_diagram_issues_6205_6211_closeout.py",
-          "line": 62,
+          "line": 72,
           "source_group": "tests",
           "text": "wrapper = _read(\"scripts/diagrams/mmdc_wrapper.sh\")"
         }
@@ -5949,7 +5949,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_regression_workflow.py",
-          "line": 113,
+          "line": 123,
           "source_group": "tests",
           "text": "wrapper = Path(\"scripts/diagrams/render.ps1\")"
         }
@@ -6176,13 +6176,13 @@
         },
         {
           "path": "tests/architecture/test_strip_svg_foreign_object.py",
-          "line": 1,
+          "line": 11,
           "source_group": "tests",
           "text": "\"\"\"Tests for scripts/diagrams/strip_svg_foreign_object.py.\"\"\""
         },
         {
           "path": "tests/architecture/test_strip_svg_foreign_object.py",
-          "line": 19,
+          "line": 29,
           "source_group": "tests",
           "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"strip_svg_foreign_object.py\""
         }
@@ -6248,7 +6248,7 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 44,
+          "line": 54,
           "source_group": "tests",
           "text": "svg2png_path = \"/\".join([\"scripts\", \"diagrams\", \"svg2png.mjs\"])"
         }
@@ -6305,7 +6305,7 @@
         },
         {
           "path": "tests/architecture/test_uniform_diagram_group_width.py",
-          "line": 17,
+          "line": 27,
           "source_group": "tests",
           "text": "\"\"\"Load scripts/diagrams/uniform_diagram_sizes.py as a module.\"\"\""
         }
@@ -6391,7 +6391,7 @@
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
-          "line": 15,
+          "line": 25,
           "source_group": "tests",
           "text": "\"scripts/docker-setup.ps1\","
         }
@@ -6422,7 +6422,7 @@
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
-          "line": 16,
+          "line": 26,
           "source_group": "tests",
           "text": "\"scripts/docker-setup.sh\","
         }
@@ -6601,19 +6601,19 @@
         },
         {
           "path": "tests/architecture/test_docs_build_site_router.py",
-          "line": 17,
+          "line": 27,
           "source_group": "tests",
           "text": "shell_wrapper = (root / \"scripts\" / \"docs\" / \"build_docs_site.sh\").read_text("
         },
         {
           "path": "tests/unit/scripts/repo/test_generate_scripts_wrapper_caller_matrix.py",
-          "line": 21,
+          "line": 31,
           "source_group": "tests",
           "text": "test_file.write_text(\"scripts/docs/build_docs_site.sh\\n\", encoding=\"utf-8\")"
         },
         {
           "path": "tests/unit/scripts/repo/test_generate_scripts_wrapper_caller_matrix.py",
-          "line": 32,
+          "line": 42,
           "source_group": "tests",
           "text": "assert \"`scripts/docs/build_docs_site.sh`\" in report"
         }
@@ -6719,7 +6719,7 @@
         },
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 17,
+          "line": 27,
           "source_group": "tests",
           "text": "\"scripts/docs/check_docstring_coverage.py\","
         }
@@ -6762,7 +6762,7 @@
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
-          "line": 13,
+          "line": 23,
           "source_group": "tests",
           "text": "\"scripts/docs/checks/check_docstrings.py\","
         }
@@ -6795,7 +6795,7 @@
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
-          "line": 14,
+          "line": 24,
           "source_group": "tests",
           "text": "\"scripts/docs/checks/check_drift.py\","
         }
@@ -6881,7 +6881,7 @@
         },
         {
           "path": "tests/architecture/test_documentation_cleanup_inventory.py",
-          "line": 313,
+          "line": 323,
           "source_group": "tests",
           "text": "route[\"generator\"] == \"scripts/docs/checks/documentation_cleanup_inventory.py\""
         }
@@ -6908,7 +6908,7 @@
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
-          "line": 16,
+          "line": 26,
           "source_group": "tests",
           "text": "\"scripts/docs/checks/report_docs_kpi.py\","
         }
@@ -6944,7 +6944,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 18,
+          "line": 28,
           "source_group": "tests",
           "text": "\"scripts/docs/chembl_matrix_structural_contract.py\","
         }
@@ -7020,7 +7020,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 19,
+          "line": 29,
           "source_group": "tests",
           "text": "\"scripts/docs/enrich_chembl_matrix_normalization_details.py\","
         }
@@ -7039,7 +7039,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 20,
+          "line": 30,
           "source_group": "tests",
           "text": "\"scripts/docs/export_chembl_matrix_structural_contract.py\","
         }
@@ -7058,7 +7058,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 21,
+          "line": 31,
           "source_group": "tests",
           "text": "\"scripts/docs/filter_chembl_matrix_rows.py\","
         }
@@ -7077,7 +7077,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 22,
+          "line": 32,
           "source_group": "tests",
           "text": "\"scripts/docs/fix_doc_links_auto.py\","
         }
@@ -7096,7 +7096,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 23,
+          "line": 33,
           "source_group": "tests",
           "text": "\"scripts/docs/fix_doc_links_explicit.py\","
         }
@@ -7111,7 +7111,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 24,
+          "line": 34,
           "source_group": "tests",
           "text": "\"scripts/docs/fix_link_warnings.py\","
         }
@@ -7251,7 +7251,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 25,
+          "line": 35,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_chembl_activity_field_matrix.py\","
         }
@@ -7270,7 +7270,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 26,
+          "line": 36,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_chembl_matrix_dictionaries.py\","
         }
@@ -7291,7 +7291,7 @@
         },
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 27,
+          "line": 37,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\","
         },
@@ -7340,7 +7340,7 @@
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
-          "line": 17,
+          "line": 27,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/build_matrix_dicts.py\","
         }
@@ -7371,7 +7371,7 @@
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
-          "line": 18,
+          "line": 28,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/enrich_normalization_details.py\","
         }
@@ -7402,7 +7402,7 @@
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
-          "line": 19,
+          "line": 29,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/export_structural_contract.py\","
         }
@@ -7433,7 +7433,7 @@
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
-          "line": 20,
+          "line": 30,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/filter_rows.py\","
         }
@@ -7464,7 +7464,7 @@
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
-          "line": 21,
+          "line": 31,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/generate_field_matrix.py\","
         }
@@ -7552,7 +7552,7 @@
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
-          "line": 23,
+          "line": 33,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/normalize_values.py\","
         }
@@ -7571,7 +7571,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
-          "line": 24,
+          "line": 34,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/structural_contract.py\","
         }
@@ -7602,7 +7602,7 @@
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
-          "line": 25,
+          "line": 35,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/sync_structural_policy.py\","
         }
@@ -7617,7 +7617,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 28,
+          "line": 38,
           "source_group": "tests",
           "text": "\"scripts/docs/normalize_chembl_matrix_workbook.py\","
         }
@@ -7638,7 +7638,7 @@
         },
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 29,
+          "line": 39,
           "source_group": "tests",
           "text": "\"scripts/docs/report_docs_kpi.py\","
         }
@@ -7657,7 +7657,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 30,
+          "line": 40,
           "source_group": "tests",
           "text": "\"scripts/docs/sentence_doc_audit.py\","
         }
@@ -7672,7 +7672,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 31,
+          "line": 41,
           "source_group": "tests",
           "text": "\"scripts/docs/sync_chembl_matrix_structural_policy.py\","
         }
@@ -7687,7 +7687,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 32,
+          "line": 42,
           "source_group": "tests",
           "text": "\"scripts/docs/sync_repo_identity.py\","
         }
@@ -7702,7 +7702,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 33,
+          "line": 43,
           "source_group": "tests",
           "text": "\"scripts/docs/verify_docs.py\","
         }
@@ -7912,13 +7912,13 @@
         },
         {
           "path": "tests/architecture/test_curated_surface_telemetry_reporting.py",
-          "line": 35,
+          "line": 45,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_registry.py\","
         },
         {
           "path": "tests/architecture/test_public_facade_inventory.py",
-          "line": 64,
+          "line": 74,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_registry.py\","
         }
@@ -7955,13 +7955,13 @@
         },
         {
           "path": "tests/architecture/test_curated_surface_telemetry_reporting.py",
-          "line": 28,
+          "line": 38,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_telemetry.py\","
         },
         {
           "path": "tests/architecture/test_debt_governance_telemetry_reporting.py",
-          "line": 37,
+          "line": 47,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_telemetry.py\","
         }
@@ -8030,7 +8030,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 279,
+          "line": 289,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"apply_ci_fixes.py\""
         }
@@ -8069,13 +8069,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 589,
+          "line": 599,
           "source_group": "tests",
           "text": "skip_rate = Path(\"scripts/engineering/ci/check_e2e_matrix_skip_rate.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 613,
+          "line": 623,
           "source_group": "tests",
           "text": "assert \"check_e2e_matrix_skip_rate.py\" in content"
         }
@@ -8108,13 +8108,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 590,
+          "line": 600,
           "source_group": "tests",
           "text": "rerun = Path(\"scripts/engineering/ci/check_e2e_rerun_stability.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 614,
+          "line": 624,
           "source_group": "tests",
           "text": "assert \"check_e2e_rerun_stability.py\" in content"
         }
@@ -8171,13 +8171,13 @@
         },
         {
           "path": "tests/architecture/test_environment_limited_green_policy.py",
-          "line": 35,
+          "line": 45,
           "source_group": "tests",
           "text": "== \"scripts/engineering/ci/quality_integral_gate.py\""
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 180,
+          "line": 190,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         }
@@ -8210,7 +8210,7 @@
         },
         {
           "path": "tests/architecture/test_quality_debt_weekly_workflow.py",
-          "line": 28,
+          "line": 38,
           "source_group": "tests",
           "text": "assert \"scripts/engineering/ci/report_quality_debt_weekly.py\" in workflow"
         }
@@ -8261,7 +8261,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 174,
+          "line": 184,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\""
         }
@@ -8282,7 +8282,7 @@
         },
         {
           "path": "tests/architecture/test_test_telemetry_governance.py",
-          "line": 61,
+          "line": 71,
           "source_group": "tests",
           "text": "\"python scripts/engineering/ci/update_test_telemetry_baseline.py\""
         }
@@ -8303,7 +8303,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 108,
+          "line": 118,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_identity.py\","
         }
@@ -8324,13 +8324,13 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 109,
+          "line": 119,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_registry.py\","
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py",
-          "line": 143,
+          "line": 153,
           "source_group": "tests",
           "text": "assert \"validate_contract_registry.py\" in contract_workflow"
         }
@@ -8384,25 +8384,25 @@
         },
         {
           "path": "tests/architecture/test_architecture_quality_scorecard.py",
-          "line": 166,
+          "line": 176,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload\""
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 110,
+          "line": 120,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py\","
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py",
-          "line": 131,
+          "line": 141,
           "source_group": "tests",
           "text": "== \"scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload\""
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py",
-          "line": 144,
+          "line": 154,
           "source_group": "tests",
           "text": "assert \"validate_registry_dq_refs.py\" in contract_workflow"
         }
@@ -8441,7 +8441,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 111,
+          "line": 121,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_schema_classifier_gate.py\","
         }
@@ -8468,19 +8468,19 @@
       "references": [
         {
           "path": "tests/unit/scripts/engineering/common/test_repo_paths.py",
-          "line": 21,
+          "line": 31,
           "source_group": "tests",
           "text": "target = REPO_ROOT / \"scripts\" / \"engineering\" / \"common\" / \"repo_paths.py\""
         },
         {
           "path": "tests/unit/scripts/engineering/common/test_repo_paths.py",
-          "line": 49,
+          "line": 59,
           "source_group": "tests",
           "text": "resolved = argparse_repo_path(\"scripts/engineering/common/repo_paths.py\")"
         },
         {
           "path": "tests/unit/scripts/engineering/common/test_repo_paths.py",
-          "line": 53,
+          "line": 63,
           "source_group": "tests",
           "text": "REPO_ROOT / \"scripts\" / \"engineering\" / \"common\" / \"repo_paths.py\""
         }
@@ -9258,13 +9258,13 @@
         },
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 15,
+          "line": 25,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/run_tests.ps1\": 'Join-Path $PSScriptRoot \"../../..\"',"
         },
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 50,
+          "line": 60,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/run_tests.ps1\").read_text("
         }
@@ -9354,13 +9354,13 @@
         },
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 13,
+          "line": 23,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/run_tests.sh\": 'dirname \"$0\")/../../..',"
         },
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 40,
+          "line": 50,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/run_tests.sh\").read_text("
         }
@@ -9591,13 +9591,13 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 14,
+          "line": 24,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/test_changed.sh\": 'dirname \"$0\")/../../..',"
         },
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 60,
+          "line": 70,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/test_changed.sh\").read_text("
         }
@@ -10362,7 +10362,7 @@
         },
         {
           "path": "tests/architecture/test_adr_enforcement_matrix.py",
-          "line": 85,
+          "line": 95,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/check_dashboard_visual_semantics.py\","
         }
@@ -10383,13 +10383,13 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 151,
+          "line": 161,
           "source_group": "tests",
           "text": "target = root / \"scripts\" / \"engineering\" / \"qa\" / \"check_docs_drift.py\""
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 167,
+          "line": 177,
           "source_group": "tests",
           "text": "for item in refs[\"scripts/engineering/qa/check_docs_drift.py\"]"
         }
@@ -10531,7 +10531,7 @@
         },
         {
           "path": "tests/architecture/test_layer_aware_suffix_policy.py",
-          "line": 18,
+          "line": 28,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"check_naming_package_consistency.py\""
         }
@@ -10810,13 +10810,13 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5700_5706_closeout.py",
-          "line": 94,
+          "line": 104,
           "source_group": "tests",
           "text": "assert \"scripts/engineering/qa/check_test_audit_preflight.py --strict\" in workflow"
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 462,
+          "line": 472,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         }
@@ -10892,7 +10892,7 @@
         },
         {
           "path": "scripts/schema/generate_config_matrix.py",
-          "line": 717,
+          "line": 718,
           "source_group": "scripts",
           "text": "Path(\"scripts/engineering/qa/config_surface_governance.py\"),"
         }
@@ -11311,13 +11311,13 @@
         },
         {
           "path": "tests/architecture/test_architecture_debt_agent_surface.py",
-          "line": 33,
+          "line": 43,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 363,
+          "line": 373,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         }
@@ -11675,13 +11675,13 @@
         },
         {
           "path": "tests/architecture/test_architecture_debt_agent_surface.py",
-          "line": 36,
+          "line": 46,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 366,
+          "line": 376,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         }
@@ -11696,7 +11696,7 @@
       "references": [
         {
           "path": "tests/architecture/test_architecture_audit_closeout_gates.py",
-          "line": 228,
+          "line": 238,
           "source_group": "tests",
           "text": "assert (ROOT / \"scripts/engineering/qa/refresh_governance_artifacts.py\").is_file()"
         }
@@ -11735,7 +11735,7 @@
         },
         {
           "path": "tests/architecture/test_architecture_quality_scorecard.py",
-          "line": 157,
+          "line": 167,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload\""
         }
@@ -11766,7 +11766,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-          "line": 201,
+          "line": 211,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py\""
         }
@@ -11785,7 +11785,7 @@
       "references": [
         {
           "path": "tests/architecture/test_architecture_quality_scorecard.py",
-          "line": 34,
+          "line": 44,
           "source_group": "tests",
           "text": "\"`python scripts/engineering/qa/report_architecture_quality_scorecard.py`, \""
         }
@@ -11816,7 +11816,7 @@
         },
         {
           "path": "tests/architecture/test_artifact_duplication_audit.py",
-          "line": 61,
+          "line": 71,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_artifact_duplication_audit.py\""
         }
@@ -12108,7 +12108,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-          "line": 204,
+          "line": 214,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_debt_governance_gates.py\""
         }
@@ -12135,7 +12135,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 112,
+          "line": 122,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_domain_io_taint_inventory.py\","
         }
@@ -12211,7 +12211,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 113,
+          "line": 123,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_flaky_test_burndown_review.py\","
         }
@@ -12327,13 +12327,13 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 134,
+          "line": 144,
           "source_group": "tests",
           "text": "assert committed[\"generated_by\"].endswith(\"report_module_coverage_inventory.py\")"
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 788,
+          "line": 798,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -12366,7 +12366,7 @@
         },
         {
           "path": "tests/architecture/test_normalization_evidence_governance.py",
-          "line": 36,
+          "line": 46,
           "source_group": "tests",
           "text": "assert \"report_normalization_fallback_inventory.py\" in plan_text"
         }
@@ -12411,7 +12411,7 @@
         },
         {
           "path": "tests/architecture/test_observability_metric_governance.py",
-          "line": 259,
+          "line": 269,
           "source_group": "tests",
           "text": "== \"scripts/engineering/qa/report_observability_metric_inventory.py\""
         }
@@ -12598,7 +12598,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 380,
+          "line": 390,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
         }
@@ -12637,7 +12637,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_lane_policy.py",
-          "line": 345,
+          "line": 355,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/run_architecture_audit_read_only.py\""
         }
@@ -12711,7 +12711,7 @@
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 284,
+          "line": 294,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_closure_campaign.py\" in runbook"
         }
@@ -12762,13 +12762,13 @@
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 198,
+          "line": 208,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_universe_campaign.py\" in text"
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 327,
+          "line": 337,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_universe_campaign.py\" in runbook"
         }
@@ -12789,7 +12789,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 277,
+          "line": 287,
           "source_group": "tests",
           "text": "Path(\"scripts/engineering/qa/run_observability_closure_campaign.py\"),"
         }
@@ -12862,9 +12862,9 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 183,
+          "line": 181,
           "source_group": "scripts",
-          "text": "\"run-tests\": module_command(\"scripts.engineering.qa.test_health\", \"run-tests\"),"
+          "text": "TEST_HEALTH_MODULE = \"scripts.engineering.qa.test_health\""
         }
       ]
     },
@@ -13130,13 +13130,13 @@
         },
         {
           "path": "tests/architecture/test_fixture_governance_rollout.py",
-          "line": 165,
+          "line": 175,
           "source_group": "tests",
           "text": "\"python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90\""
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 197,
+          "line": 207,
           "source_group": "tests",
           "text": "\"python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90\""
         }
@@ -13661,7 +13661,7 @@
         },
         {
           "path": "tests/architecture/test_repo_cleanup_branch_router.py",
-          "line": 15,
+          "line": 25,
           "source_group": "tests",
           "text": "assert '\"cleanup-branch-candidates\": \"cleanup_branch_candidates.sh\"' in router"
         }
@@ -13694,7 +13694,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 151,
+          "line": 161,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"cleanup_root_local_clutter.py\""
         }
@@ -13758,7 +13758,7 @@
         },
         {
           "path": "tests/unit/scripts/repo/test_preflight_cleanup.py",
-          "line": 14,
+          "line": 24,
           "source_group": "tests",
           "text": "SCRIPT = ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"preflight_cleanup.sh\""
         }
@@ -14062,7 +14062,7 @@
         },
         {
           "path": "tests/integration/memory/test_workflow_tooling.py",
-          "line": 230,
+          "line": 240,
           "source_group": "tests",
           "text": "\"source_path\": \"src/memory/query.py\","
         },
@@ -14247,7 +14247,7 @@
       "references": [
         {
           "path": "scripts/ops/_build_arch_review_report.py",
-          "line": 230,
+          "line": 243,
           "source_group": "scripts",
           "text": "\"- Helper scripts: `scripts/ops/_run_cr_arch_review_wsl.sh`, `scripts/ops/_run_cr_arch_review_remaining.sh`\""
         }
@@ -15054,7 +15054,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 75,
+          "line": 85,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"start-codex.bat\""
         }
@@ -15075,7 +15075,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 78,
+          "line": 88,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.bat\""
         }
@@ -15114,7 +15114,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 81,
+          "line": 91,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.ps1\""
         }
@@ -15205,19 +15205,19 @@
         },
         {
           "path": "tests/architecture/test_fixture_governance_rollout.py",
-          "line": 233,
+          "line": 243,
           "source_group": "tests",
           "text": "\"scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check\""
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 381,
+          "line": 391,
           "source_group": "tests",
           "text": "\"scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 431,
+          "line": 441,
           "source_group": "tests",
           "text": "assert \"backfill_vcr_metadata_sidecars.py\" in migrations_readme"
         }
@@ -15346,13 +15346,13 @@
       "references": [
         {
           "path": "tests/architecture/test_test_structural_debt.py",
-          "line": 17,
+          "line": 27,
           "source_group": "tests",
           "text": "\"tests/testing_support/neo4j_memory_sync.py\": 3300,"
         },
         {
           "path": "tests/architecture/test_test_structural_debt.py",
-          "line": 23,
+          "line": 33,
           "source_group": "tests",
           "text": "\"tests/testing_support/neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces\": 295,"
         }
@@ -15388,7 +15388,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_check_published_observability_endpoints.py",
-          "line": 125,
+          "line": 135,
           "source_group": "tests",
           "text": "expected_target=\"observability/check_published_observability_endpoints.py\","
         }
@@ -15403,7 +15403,7 @@
       "references": [
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 45,
+          "line": 55,
           "source_group": "tests",
           "text": "\"_apply_ds2_all.py\","
         }
@@ -15422,7 +15422,7 @@
       "references": [
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 46,
+          "line": 56,
           "source_group": "tests",
           "text": "\"_apply_dsa_residual.py\","
         }
@@ -15447,7 +15447,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 47,
+          "line": 57,
           "source_group": "tests",
           "text": "\"apply_dux2_residual.py\","
         }
@@ -15478,13 +15478,13 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 247,
+          "line": 257,
           "source_group": "tests",
           "text": "/ \"audit_live_grafana_panels.py\""
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 275,
+          "line": 285,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\"),"
         },
@@ -15530,13 +15530,13 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 379,
+          "line": 389,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 124,
+          "line": 134,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/check_grafana_dashboard_audit_preflight.py\","
         }
@@ -15654,13 +15654,13 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 232,
+          "line": 242,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 276,
+          "line": 286,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/rerender_grafana_screenshots.py\"),"
         }
@@ -15681,13 +15681,13 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 274,
+          "line": 284,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py\"),"
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 799,
+          "line": 809,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
@@ -15763,7 +15763,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 376,
+          "line": 386,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         },
@@ -15813,7 +15813,7 @@
       "references": [
         {
           "path": "tests/unit/scripts/ops/observability/test_start_read_only_audit_stack.py",
-          "line": 17,
+          "line": 27,
           "source_group": "tests",
           "text": "path = Path(\"scripts/ops/observability/start_read_only_audit_stack.py\")"
         }
@@ -15903,7 +15903,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/test_run_coderabbit_reviews.py",
-          "line": 22,
+          "line": 32,
           "source_group": "tests",
           "text": "SCRIPT = ROOT / \"scripts\" / \"ops\" / \"run-coderabbit-reviews.sh\""
         }
@@ -16124,7 +16124,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 22,
+          "line": 32,
           "source_group": "tests",
           "text": "PREFLIGHT_PATH = ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\""
         },
@@ -16175,7 +16175,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 760,
+          "line": 770,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         }
@@ -16904,7 +16904,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 309,
+          "line": 319,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         }
@@ -16965,7 +16965,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 308,
+          "line": 318,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         }
@@ -17252,7 +17252,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 20,
+          "line": 30,
           "source_group": "tests",
           "text": "shell_loader = _read(\"scripts/ops/support/load_repo_env.sh\")"
         },
@@ -17307,13 +17307,13 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_workflow.py",
-          "line": 53,
+          "line": 63,
           "source_group": "tests",
           "text": "assert \"cleanup_repository.py\" in workflow"
         },
         {
           "path": "tests/unit/scripts/repo/test_cleanup_repository.py",
-          "line": 641,
+          "line": 651,
           "source_group": "tests",
           "text": "\"cleanup_repository.py\","
         }
@@ -17750,13 +17750,13 @@
       "references": [
         {
           "path": "tests/architecture/test_protein_class_target_type_codegen_contract.py",
-          "line": 23,
+          "line": 33,
           "source_group": "tests",
           "text": "/ \"generate_protein_class_l1_target_type_artifacts.py\""
         },
         {
           "path": "tests/architecture/test_protein_class_target_type_codegen_contract.py",
-          "line": 58,
+          "line": 68,
           "source_group": "tests",
           "text": "\"Run: python scripts/schema/generate_protein_class_l1_target_type_artifacts.py\""
         }
@@ -17787,13 +17787,13 @@
         },
         {
           "path": "tests/architecture/test_publication_type_codegen_contract.py",
-          "line": 24,
+          "line": 34,
           "source_group": "tests",
           "text": "/ \"generate_publication_type_classification_artifacts.py\""
         },
         {
           "path": "tests/architecture/test_publication_type_codegen_contract.py",
-          "line": 65,
+          "line": 75,
           "source_group": "tests",
           "text": "\"Run: python scripts/schema/generate_publication_type_classification_artifacts.py\""
         }
@@ -17838,7 +17838,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 107,
+          "line": 117,
           "source_group": "tests",
           "text": "\"scripts/schema/generate_schema_artifacts.py\","
         },
@@ -17991,25 +17991,25 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 533,
+          "line": 543,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 697,
+          "line": 707,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
-          "line": 19,
+          "line": 29,
           "source_group": "tests",
           "text": "\"scripts/shutdown.ps1\","
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
-          "line": 32,
+          "line": 42,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"shutdown.ps1\","
         }
@@ -18028,19 +18028,19 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 533,
+          "line": 543,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
-          "line": 20,
+          "line": 30,
           "source_group": "tests",
           "text": "\"scripts/shutdown.sh\","
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
-          "line": 33,
+          "line": 43,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"shutdown.sh\","
         }
@@ -18059,25 +18059,25 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 533,
+          "line": 543,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 697,
+          "line": 707,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
-          "line": 17,
+          "line": 27,
           "source_group": "tests",
           "text": "\"scripts/startup.ps1\","
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
-          "line": 30,
+          "line": 40,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"startup.ps1\","
         }
@@ -18096,19 +18096,19 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 533,
+          "line": 543,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
-          "line": 18,
+          "line": 28,
           "source_group": "tests",
           "text": "\"scripts/startup.sh\","
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
-          "line": 31,
+          "line": 41,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"startup.sh\","
         }
@@ -18363,7 +18363,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 106,
+          "line": 116,
           "source_group": "tests",
           "text": "\"src/tools/generate_docs_export.py\","
         }
@@ -18402,7 +18402,7 @@
         },
         {
           "path": "tests/architecture/test_non_chembl_json_field_typing_policy.py",
-          "line": 119,
+          "line": 129,
           "source_group": "tests",
           "text": "assert \"src/tools/generate_json_field_typing_inventory.py\" in actual"
         }

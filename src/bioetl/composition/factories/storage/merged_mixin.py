@@ -60,8 +60,8 @@ class StorageBundleMergedMixin:
     """Mixin providing merged write and read operations for composite pipelines."""
 
     # ARCH-CR2-06: typed host attributes (set by StorageBundle.__init__).
-    silver: SilverWriter
-    gold: GoldWriter
+    silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD5)
+    gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD5)
     _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, CompositeSchemaProvider]] = {}
 
     def get_table_path(

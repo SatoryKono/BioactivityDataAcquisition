@@ -1,3 +1,13 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: no new datetime.now() / datetime.now(UTC) in test code.
 
 This is the test-side counterpart of test_no_datetime_now_in_infrastructure.py.

@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.composite.join_planner import JoinPlannerService
+from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
 from bioetl.application.composite.merger_output_mixin import MergeOutputWriterMixin
 from bioetl.domain.composite.result import MergeResult
 
@@ -28,8 +29,13 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class MergeIOMixin(MergeOutputWriterMixin):
-    """Mixin for merge cross-validation, output persistence, and result assembly."""
+class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
+    """Mixin for merge cross-validation, output persistence, and result assembly.
+
+    Inherits ``MergeMetricsRecorderMixin`` so basedpyright sees
+    ``_count_fully_enriched`` / ``_calculate_field_coverage`` on this class
+    without host-default shadowing (PD5 product zero hold).
+    """
 
     # -- Host-class attributes (set by MergeService.__init__) --
     _config: MergeConfig = cast(Any, None)  # Any: host default (PD4)
@@ -38,9 +44,6 @@ class MergeIOMixin(MergeOutputWriterMixin):
     _cross_validator: EnrichmentCrossValidator | None = cast(Any, None)  # Any: host default (PD4)
     _gold_schema: Any | None = cast(Any, None)  # Any: host default (PD4)
     _join_planner: JoinPlannerService = cast(Any, None)  # Any: host default (PD4)
-    # NOTE: _count_fully_enriched / _calculate_field_coverage are real methods on
-    # MergeMetricsRecorderMixin (later in MergeService MRO). Do NOT declare them as
-    # host defaults here — class attrs set to None would shadow those methods.
 
     async def _apply_dependency_joins_if_needed(
         self,

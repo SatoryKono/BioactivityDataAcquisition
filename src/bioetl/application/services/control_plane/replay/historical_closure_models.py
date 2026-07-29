@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """Models for historical replay closure reporting."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Literal
+from typing import Any, Literal, cast
 
 RESIDUAL_BLOCKED_STATUSES = frozenset(
     {
@@ -74,7 +73,11 @@ class HistoricalReplayClosureReportRecord:
 
     def to_dict(self) -> dict[str, object]:
         inventory = self.inventory
-        inventory_dict = inventory.to_dict() if hasattr(inventory, "to_dict") else {}
+        inventory_dict = (
+            cast(Any, inventory).to_dict()  # Any: structural to_dict duck-type
+            if hasattr(inventory, "to_dict")
+            else {}
+        )
         return {
             "generated_at": self.generated_at.astimezone(UTC).isoformat(),
             "report_id": self.report_id,

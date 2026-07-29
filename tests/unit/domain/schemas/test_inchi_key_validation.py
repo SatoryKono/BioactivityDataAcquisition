@@ -1,3 +1,13 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Tests for InChI Key regex validation across Pandera schemas.
 
 Tests INCHI_KEY_REGEX_PATTERN constant and schema InChI Key field validation.
