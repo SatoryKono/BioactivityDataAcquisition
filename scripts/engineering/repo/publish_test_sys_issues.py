@@ -375,7 +375,8 @@ def main(argv: list[str] | None = None) -> int:
     print("Done.")
     for rec in records:
         print(f"  {rec.code}: #{rec.number} {rec.url}")
-    return 0
+    # Non-zero when apply produced no durable issue records (S3516).
+    return 0 if records else 1
 
 
 if __name__ == "__main__":

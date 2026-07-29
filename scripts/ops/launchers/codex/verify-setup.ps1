@@ -2,8 +2,11 @@
 # Compatibility facade for the canonical Codex setup verification launcher.
 
 param(
-    [switch]$Pause = $true
+    [switch]$Pause
 )
+if (-not $PSBoundParameters.ContainsKey('Pause')) {
+    $Pause = $true
+}
 
 $Target = Join-Path $PSScriptRoot "..\..\..\ai\codex\run-codex.ps1"
 & $Target check

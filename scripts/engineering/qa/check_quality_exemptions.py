@@ -36,7 +36,7 @@ def main(argv: list[str] | None = None) -> int:
     sys.argv = [str(script), *(argv or [])]
     try:
         runpy.run_path(str(script), run_name="__main__")
-    except SystemExit as exc:
+    except SystemExit as exc:  # NOSONAR - intentional CLI exit-code bridge
         # Convert integer/None SystemExit from the delegated script into a
         # process return code. Re-raise unexpected payloads (S5754).
         if exc.code is None:

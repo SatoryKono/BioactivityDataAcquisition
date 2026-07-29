@@ -98,9 +98,13 @@ class ADRRegistryGenerator:
         if not self.adr_index_file.exists():
             return {}
 
+        # Fixed 5-column ADR index rows; avoid nested quantifiers (S8786/S5843).
         pattern = re.compile(
-            # Non-greedy cells replaced with negated classes (S8786).
-            r"\|\s*\[ADR-(\d+)\]\([^)]+\)\s*\|\s*([^|]*)\s*\|\s*([^|]*)\s*\|\s*([^|]*)\s*\|\s*([^|]*)\s*\|"
+            r"\|[ \t]*\[ADR-(\d+)\]\([^)\n]+\)[ \t]*"
+            r"\|[ \t]*([^|\n]*)[ \t]*"
+            r"\|[ \t]*([^|\n]*)[ \t]*"
+            r"\|[ \t]*([^|\n]*)[ \t]*"
+            r"\|[ \t]*([^|\n]*)[ \t]*\|"
         )
         metadata_by_number: dict[str, dict[str, str]] = {}
         for line in self.adr_index_file.read_text(encoding="utf-8").splitlines():
