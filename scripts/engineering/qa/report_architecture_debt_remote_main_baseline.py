@@ -283,6 +283,39 @@ def _write_artifacts(
     )  # NOSONAR - path confined by resolve_output_path
 
 
+def _json_artifact_matches(
+    json_out: Path, *, expected_json: str, payload: dict[str, object]
+) -> bool:
+    if not json_out.exists():
+        return False
+    actual_json = json_out.read_text(  # NOSONAR - path confined by resolve_output_path
+        encoding="utf-8"
+    )
+    if actual_json == expected_json:
+        return True
+    try:
+        committed_payload = json.loads(actual_json)
+    except json.JSONDecodeError:
+        return False
+    if not isinstance(committed_payload, dict):
+        return False
+    return payloads_semantically_equivalent(committed_payload, payload)
+
+
+def _remote_artifact_availability_errors(
+    payload: dict[str, object],
+) -> list[str]:
+    errors: list[str] = []
+    for row in payload["artifacts"]:
+        assert isinstance(row, dict)
+        summary = row["summary"]
+        assert isinstance(summary, dict)
+        required_on_remote = row.get("required_on_remote", row.get("required"))
+        if required_on_remote and not summary.get("available"):
+            errors.append(f"Remote-main baseline artifact unavailable: {row['path']}")
+    return errors
+
+
 def _check_artifacts(
     payload: dict[str, object],
     *,
@@ -298,24 +331,9 @@ def _check_artifacts(
     errors: list[str] = []
     expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     expected_md = render_markdown(payload)
-    json_matches = False
-    if json_out.exists():
-        actual_json = (
-            json_out.read_text(  # NOSONAR - path confined by resolve_output_path
-                encoding="utf-8"
-            )
-        )
-        json_matches = actual_json == expected_json
-        if not json_matches:
-            try:
-                committed_payload = json.loads(actual_json)
-            except json.JSONDecodeError:
-                committed_payload = None
-            if isinstance(committed_payload, dict):
-                json_matches = payloads_semantically_equivalent(
-                    committed_payload, payload
-                )
-    if not json_matches:
+    if not _json_artifact_matches(
+        json_out, expected_json=expected_json, payload=payload
+    ):
         errors.append(f"Remote-main debt baseline JSON artifact is stale: {json_out}")
     if (
         not md_out.exists()
@@ -329,13 +347,7 @@ def _check_artifacts(
         errors.append(
             "Local tracking ref does not match remote main; fetch before closeout"
         )
-    for row in payload["artifacts"]:
-        assert isinstance(row, dict)
-        summary = row["summary"]
-        assert isinstance(summary, dict)
-        required_on_remote = row.get("required_on_remote", row.get("required"))
-        if required_on_remote and not summary.get("available"):
-            errors.append(f"Remote-main baseline artifact unavailable: {row['path']}")
+    errors.extend(_remote_artifact_availability_errors(payload))
     return errors
 
 

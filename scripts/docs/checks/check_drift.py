@@ -53,7 +53,8 @@ SRC_DIR = PROJECT_ROOT / "src" / "bioetl"
 MANDATORY_TRACING_COVERAGE_PATH = (
     PROJECT_ROOT / "configs" / "quality" / "mandatory_tracing_coverage.yaml"
 )
-ROOT_README_PATH = PROJECT_ROOT / "README.md"
+README_FILENAME = "README.md"
+ROOT_README_PATH = PROJECT_ROOT / README_FILENAME
 WORKFLOW_GUIDE_PATH = DOCS_DIR / "03-guides" / "workflows.md"
 
 
@@ -301,7 +302,7 @@ ROLE_PROFILE_MEMO_DOC_BY_RUNTIME: dict[Path, tuple[str, ...]] = {
     Path(".codex/agents/py-plan-bot.md"): (
         RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)
     ),
-    Path(".codex/agents/py-config-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(CODEX_PY_CONFIG_BOT_DOC_PATH): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".codex/agents/py-debug-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".codex/agents/py-doc-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".codex/agents/py-test-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
@@ -402,7 +403,7 @@ AI_ROLE_PROFILE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
         RUNTIME_AGENT_MEMORY_PATH,
         "docs/00-project/ai/memory/memory-py-plan-bot.md",
     ),
-    Path(".codex/agents/py-config-bot.md"): (
+    Path(CODEX_PY_CONFIG_BOT_DOC_PATH): (
         *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
         "docs/00-project/ai/memory/memory-py-config-bot.md",
@@ -942,7 +943,7 @@ def check_providers(report: DriftReport) -> None:
     if not providers_doc.exists():
         return
 
-    readme = providers_doc / "README.md"
+    readme = providers_doc / README_FILENAME
     if not readme.exists():
         return
 
@@ -953,7 +954,7 @@ def check_providers(report: DriftReport) -> None:
             report.add(
                 "providers",
                 "WARNING",
-                "docs/04-reference/providers/README.md",
+                f"docs/04-reference/providers/{README_FILENAME}",
                 f"Provider `{provider}` has adapter but not referenced in provider docs",
             )
 
@@ -1533,7 +1534,7 @@ def _agent_docs_mirror_targets(project_root: Path) -> list[AIDocsMirrorTarget]:
     agents_root = project_root / "docs" / "00-project" / "ai" / "agents" / "agents"
     targets: list[AIDocsMirrorTarget] = []
     for path in sorted(agents_root.glob("*.md")):
-        if path.name == "README.md":
+        if path.name == README_FILENAME:
             continue
         canonical_sources = tuple(
             candidate

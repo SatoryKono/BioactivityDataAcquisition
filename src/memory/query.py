@@ -49,8 +49,9 @@ from memory.resources import (
 from memory.timeline._common import read_jsonl
 from memory.tooling.refresh_all import refresh_all
 
-LEGACY_RAG_CHUNKS = MEMORY_ROOT / "rag" / "manifests" / "chunks.jsonl"
-DERIVED_RAG_CHUNKS = MEMORY_ROOT / "derived" / "rag" / "manifests" / "chunks.jsonl"
+RAG_CHUNKS_FILENAME = "chunks.jsonl"
+LEGACY_RAG_CHUNKS = MEMORY_ROOT / "rag" / "manifests" / RAG_CHUNKS_FILENAME
+DERIVED_RAG_CHUNKS = MEMORY_ROOT / "derived" / "rag" / "manifests" / RAG_CHUNKS_FILENAME
 LEGACY_TIMELINE_DIR = MEMORY_ROOT / "timeline" / "events"
 DERIVED_TIMELINE_DIR = MEMORY_ROOT / "derived" / "timeline" / "events"
 DEFAULT_FILE_RELATION_INDEX = MEMORY_ROOT / "graph" / "indexes" / "file_relations.json"
@@ -94,8 +95,8 @@ def default_rag_chunks_path(memory_root: Path | None = None) -> Path:
     resolved_root = _resolve_memory_root(memory_root)
     repo_root = resolved_root.parent.parent
     semantic_root = repo_root if (repo_root / ".git").exists() else None
-    derived_path = resolved_root / "derived" / "rag" / "manifests" / "chunks.jsonl"
-    legacy_path = resolved_root / "rag" / "manifests" / "chunks.jsonl"
+    derived_path = resolved_root / "derived" / "rag" / "manifests" / RAG_CHUNKS_FILENAME
+    legacy_path = resolved_root / "rag" / "manifests" / RAG_CHUNKS_FILENAME
     if rag_chunks_ready(
         derived_path,
         repo_root=semantic_root,
@@ -343,6 +344,36 @@ def _resolve_entity_relation_index(
     )
 
 
+def _pick_refreshed_chunks(
+    *,
+    chunks_path: Path,
+    output_root: Path,
+    require_chunks: bool,
+    chunks_ready: bool,
+) -> Path:
+    if not (require_chunks and not chunks_ready):
+        return chunks_path
+    refreshed_chunks_path = output_root / "rag" / "manifests" / RAG_CHUNKS_FILENAME
+    if rag_chunks_ready(refreshed_chunks_path):
+        return refreshed_chunks_path
+    return chunks_path
+
+
+def _pick_refreshed_events(
+    *,
+    events_dir: Path,
+    output_root: Path,
+    require_events: bool,
+    events_ready: bool,
+) -> Path:
+    if not (require_events and not events_ready):
+        return events_dir
+    refreshed_events_dir = output_root / "timeline" / "events"
+    if timeline_events_ready(refreshed_events_dir):
+        return refreshed_events_dir
+    return events_dir
+
+
 def _resolve_query_paths(
     *,
     chunks_path: Path,
@@ -372,17 +403,22 @@ def _resolve_query_paths(
         include_timeline=require_events and not events_ready,
         retrieval_query=retrieval_query,
     )
-    resolved_chunks_path = chunks_path
-    if require_chunks and not chunks_ready:
-        refreshed_chunks_path = output_root / "rag" / "manifests" / "chunks.jsonl"
-        if rag_chunks_ready(refreshed_chunks_path):
-            resolved_chunks_path = refreshed_chunks_path
-    resolved_events_dir = events_dir
-    if require_events and not events_ready:
-        refreshed_events_dir = output_root / "timeline" / "events"
-        if timeline_events_ready(refreshed_events_dir):
-            resolved_events_dir = refreshed_events_dir
-    return resolved_chunks_path, resolved_events_dir, output_root, report
+    return (
+        _pick_refreshed_chunks(
+            chunks_path=chunks_path,
+            output_root=output_root,
+            require_chunks=require_chunks,
+            chunks_ready=chunks_ready,
+        ),
+        _pick_refreshed_events(
+            events_dir=events_dir,
+            output_root=output_root,
+            require_events=require_events,
+            events_ready=events_ready,
+        ),
+        output_root,
+        report,
+    )
 
 
 def query_file_refs(

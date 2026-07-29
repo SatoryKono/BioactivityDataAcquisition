@@ -168,25 +168,20 @@ def snapshot_required() -> dict[str, object]:
     return snaps
 
 
-def restore_topology() -> dict[str, object]:
-    # Prefer existing grafana/main for secrets; fall back across name variants.
-    grafana_env: dict[str, str] | None = None
-    main_env: dict[str, str] | None = None
-    for candidate in ("bioetl-grafana",):
+def _env_of_first(candidates: tuple[str, ...]) -> dict[str, str] | None:
+    for candidate in candidates:
         try:
-            grafana_env = env_of(candidate)
-            break
+            return env_of(candidate)
         except RuntimeError:
             continue
-    for candidate in ("bioetl-main-bioetl-1", "bioetl"):
-        try:
-            main_env = env_of(candidate)
-            break
-        except RuntimeError:
-            continue
+    return None
+
+
+def _compose_env_from_live() -> dict[str, str]:
+    grafana_env = _env_of_first(("bioetl-grafana",))
+    main_env = _env_of_first(("bioetl-main-bioetl-1", "bioetl"))
     if grafana_env is None or main_env is None:
         raise RuntimeError("cannot capture secrets from live containers")
-
     env = dict(os.environ)
     env["GF_SECURITY_ADMIN_PASSWORD"] = grafana_env["GF_SECURITY_ADMIN_PASSWORD"]
     env["GF_RENDERING_RENDERER_TOKEN"] = grafana_env["GF_RENDERING_RENDERER_TOKEN"]
@@ -200,7 +195,10 @@ def restore_topology() -> dict[str, object]:
     env["LOG_LEVEL"] = main_env.get("LOG_LEVEL", "INFO")
     env["NEO4J_USERNAME"] = main_env.get("NEO4J_USERNAME", "neo4j")
     env["NEO4J_PASSWORD"] = main_env["NEO4J_PASSWORD"]
+    return env
 
+
+def _ensure_networks() -> None:
     for network in ("bioetl-monitoring", "bioetl-runtime"):
         if run(["docker", "network", "inspect", network], timeout=30).returncode != 0:
             created = run(["docker", "network", "create", network], timeout=30)
@@ -209,6 +207,8 @@ def restore_topology() -> dict[str, object]:
                     f"network create failed: {network}: {created.stderr}"
                 )
 
+
+def _force_remove_existing_stacks() -> None:
     labeled = run(
         [
             "docker",
@@ -225,46 +225,35 @@ def restore_topology() -> dict[str, object]:
     force_remove(MONITORING_NAMES)
     force_remove(MAIN_NAMES)
 
-    mon = [
+
+def _compose_up_project(
+    *,
+    project: str,
+    compose_file: Path,
+    env: dict[str, str],
+    profile: str | None = None,
+) -> None:
+    cmd = [
         "docker",
         "compose",
         "--project-directory",
         str(RUNTIME),
         "-p",
-        "bioetl-monitoring",
+        project,
         "-f",
-        str(RUNTIME / "docker-compose.monitoring.yml"),
-        "--profile",
-        "tracing",
-        "up",
-        "-d",
-        "--remove-orphans",
+        str(compose_file),
     ]
-    up_mon = run(mon, env=env, timeout=420)
-    print(up_mon.stdout)
-    print(up_mon.stderr, file=sys.stderr)
-    if up_mon.returncode != 0:
-        raise RuntimeError(f"monitoring up failed: {up_mon.returncode}")
+    if profile is not None:
+        cmd.extend(["--profile", profile])
+    cmd.extend(["up", "-d", "--remove-orphans"])
+    completed = run(cmd, env=env, timeout=420)
+    print(completed.stdout)
+    print(completed.stderr, file=sys.stderr)
+    if completed.returncode != 0:
+        raise RuntimeError(f"{project} up failed: {completed.returncode}")
 
-    main_cmd = [
-        "docker",
-        "compose",
-        "--project-directory",
-        str(RUNTIME),
-        "-p",
-        "bioetl-main",
-        "-f",
-        str(RUNTIME / "docker-compose.yml"),
-        "up",
-        "-d",
-        "--remove-orphans",
-    ]
-    up_main = run(main_cmd, env=env, timeout=420)
-    print(up_main.stdout)
-    print(up_main.stderr, file=sys.stderr)
-    if up_main.returncode != 0:
-        raise RuntimeError(f"main up failed: {up_main.returncode}")
 
+def _detach_warp_from_main() -> None:
     for name in MAIN_NAMES:
         nets = networks_of(name)
         if "warp-network" in nets:
@@ -273,17 +262,34 @@ def restore_topology() -> dict[str, object]:
                 timeout=60,
             )
 
-    # Resolve actual main container name after recreate.
-    main_name = "bioetl" if is_ready("bioetl") or True else "bioetl-main-bioetl-1"
+
+def _resolve_main_container_name() -> str:
     for candidate in ("bioetl", "bioetl-main-bioetl-1"):
         if run(["docker", "inspect", candidate], timeout=30).returncode == 0:
-            main_name = candidate
-            break
-    wait_ready([*REQUIRED_HEALTHY, main_name], timeout_s=540)
+            return candidate
+    return "bioetl"
 
-    projects = compose_ls()
+
+def restore_topology() -> dict[str, object]:
+    env = _compose_env_from_live()
+    _ensure_networks()
+    _force_remove_existing_stacks()
+    _compose_up_project(
+        project="bioetl-monitoring",
+        compose_file=RUNTIME / "docker-compose.monitoring.yml",
+        env=env,
+        profile="tracing",
+    )
+    _compose_up_project(
+        project="bioetl-main",
+        compose_file=RUNTIME / "docker-compose.yml",
+        env=env,
+    )
+    _detach_warp_from_main()
+    main_name = _resolve_main_container_name()
+    wait_ready([*REQUIRED_HEALTHY, main_name], timeout_s=540)
     return {
-        "compose_projects": projects,
+        "compose_projects": compose_ls(),
         "snapshots": snapshot_required(),
         "main_container": main_name,
     }

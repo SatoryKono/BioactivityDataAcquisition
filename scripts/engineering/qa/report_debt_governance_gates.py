@@ -677,6 +677,38 @@ def _collect_changed_paths(
     return {line.strip() for line in result.stdout.splitlines() if line.strip()}
 
 
+def _string_paths_from(values: object) -> set[str]:
+    if not isinstance(values, list):
+        return set()
+    return {
+        str(path)
+        for path in values
+        if isinstance(path, str) and path.strip()
+    }
+
+
+def _emitter_paths_from_fields(
+    runtime_cardinality: dict[str, Any],
+    field_names: object,
+) -> set[str]:
+    trigger_paths: set[str] = set()
+    if not isinstance(field_names, list):
+        return trigger_paths
+    for field_name in field_names:
+        if not isinstance(field_name, str):
+            continue
+        field_mapping = runtime_cardinality.get(field_name, {})
+        if not isinstance(field_mapping, dict):
+            continue
+        for emitters in field_mapping.values():
+            if not isinstance(emitters, list):
+                continue
+            for emitter_path in emitters:
+                if isinstance(emitter_path, str) and emitter_path.strip():
+                    trigger_paths.add(emitter_path)
+    return trigger_paths
+
+
 def _collect_metric_change_trigger_paths(
     runtime_cardinality: dict[str, Any],
     observability_governance: dict[str, Any],
@@ -691,28 +723,17 @@ def _collect_metric_change_trigger_paths(
     if not isinstance(change_gate, dict):
         return set()
 
-    trigger_paths = {
-        str(path)
-        for path in change_gate.get("changed_path_trigger_static_paths", [])
-        if isinstance(path, str) and path.strip()
-    }
-    trigger_paths.update(
-        str(path)
-        for path in change_gate.get("changed_path_trigger_prefixes", [])
-        if isinstance(path, str) and path.strip()
+    trigger_paths = _string_paths_from(
+        change_gate.get("changed_path_trigger_static_paths", [])
     )
-    for field_name in change_gate.get("changed_path_trigger_fields", []):
-        if not isinstance(field_name, str):
-            continue
-        field_mapping = runtime_cardinality.get(field_name, {})
-        if not isinstance(field_mapping, dict):
-            continue
-        for emitters in field_mapping.values():
-            if not isinstance(emitters, list):
-                continue
-            for emitter_path in emitters:
-                if isinstance(emitter_path, str) and emitter_path.strip():
-                    trigger_paths.add(emitter_path)
+    trigger_paths.update(
+        _string_paths_from(change_gate.get("changed_path_trigger_prefixes", []))
+    )
+    trigger_paths.update(
+        _emitter_paths_from_fields(
+            runtime_cardinality, change_gate.get("changed_path_trigger_fields", [])
+        )
+    )
     return trigger_paths
 
 

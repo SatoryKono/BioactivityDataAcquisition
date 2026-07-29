@@ -157,6 +157,56 @@ def _validate_identical_node_coverage(
         )
 
 
+def _load_empirical_run(
+    metadata_path: Path,
+    *,
+    resolved_run_dir: Path,
+    outcomes_by_node: dict[str, set[str]],
+    node_sets: list[tuple[str, frozenset[str]]],
+    replay_fingerprints: set[str],
+    source_shas: set[str],
+) -> dict[str, object]:
+    metadata = _load_json_mapping(metadata_path)
+    run_id = metadata.get("run_id")
+    seed = metadata.get("seed")
+    source_sha = metadata.get("source_sha")
+    replay_fingerprint = _sha256_digest(
+        metadata.get("replay_tree_sha256"),
+        label=f"{metadata_path}.replay_tree_sha256",
+    )
+    if not isinstance(run_id, str) or not run_id:
+        raise ValueError(f"Invalid run_id in {metadata_path}")
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise ValueError(f"Invalid seed in {metadata_path}")
+    if not isinstance(source_sha, str) or not source_sha:
+        raise ValueError(f"Invalid source_sha in {metadata_path}")
+    junit_path = resolved_run_dir / f"junit-{run_id}.xml"
+    if not junit_path.exists():
+        raise ValueError(f"Missing JUnit for {run_id}: {junit_path}")
+    outcomes = _junit_outcomes(junit_path)
+    if not outcomes:
+        raise ValueError(f"Empirical run executed zero tests: {run_id}")
+    node_sets.append((run_id, frozenset(outcomes)))
+    for nodeid, status in outcomes.items():
+        outcomes_by_node.setdefault(nodeid, set()).add(status)
+    outcome_sha = _semantic_sha256(outcomes)
+    replay_fingerprints.add(replay_fingerprint)
+    source_shas.add(source_sha)
+    return {
+        "run_id": run_id,
+        "seed": seed,
+        "order_mode": metadata.get("order_mode", "seeded-random"),
+        "shard_id": metadata.get("shard_id", "determinism-critical"),
+        "source_sha": source_sha,
+        "executed_count": len(outcomes),
+        "outcomes": outcomes,
+        "artifact_hashes": {
+            "node_outcomes_sha256": outcome_sha,
+            "replay_tree_sha256": replay_fingerprint,
+        },
+    }
+
+
 def build_empirical_payload(
     repo_root: Path,
     *,
@@ -178,46 +228,15 @@ def build_empirical_payload(
     replay_fingerprints: set[str] = set()
     source_shas: set[str] = set()
     for metadata_path in sorted(resolved_run_dir.glob("run-*.json")):
-        metadata = _load_json_mapping(metadata_path)
-        run_id = metadata.get("run_id")
-        seed = metadata.get("seed")
-        source_sha = metadata.get("source_sha")
-        replay_fingerprint = _sha256_digest(
-            metadata.get("replay_tree_sha256"),
-            label=f"{metadata_path}.replay_tree_sha256",
-        )
-        if not isinstance(run_id, str) or not run_id:
-            raise ValueError(f"Invalid run_id in {metadata_path}")
-        if isinstance(seed, bool) or not isinstance(seed, int):
-            raise ValueError(f"Invalid seed in {metadata_path}")
-        if not isinstance(source_sha, str) or not source_sha:
-            raise ValueError(f"Invalid source_sha in {metadata_path}")
-        junit_path = resolved_run_dir / f"junit-{run_id}.xml"
-        if not junit_path.exists():
-            raise ValueError(f"Missing JUnit for {run_id}: {junit_path}")
-        outcomes = _junit_outcomes(junit_path)
-        if not outcomes:
-            raise ValueError(f"Empirical run executed zero tests: {run_id}")
-        node_sets.append((run_id, frozenset(outcomes)))
-        for nodeid, status in outcomes.items():
-            outcomes_by_node.setdefault(nodeid, set()).add(status)
-        outcome_sha = _semantic_sha256(outcomes)
-        replay_fingerprints.add(replay_fingerprint)
-        source_shas.add(source_sha)
         runs.append(
-            {
-                "run_id": run_id,
-                "seed": seed,
-                "order_mode": metadata.get("order_mode", "seeded-random"),
-                "shard_id": metadata.get("shard_id", "determinism-critical"),
-                "source_sha": source_sha,
-                "executed_count": len(outcomes),
-                "outcomes": outcomes,
-                "artifact_hashes": {
-                    "node_outcomes_sha256": outcome_sha,
-                    "replay_tree_sha256": replay_fingerprint,
-                },
-            }
+            _load_empirical_run(
+                metadata_path,
+                resolved_run_dir=resolved_run_dir,
+                outcomes_by_node=outcomes_by_node,
+                node_sets=node_sets,
+                replay_fingerprints=replay_fingerprints,
+                source_shas=source_shas,
+            )
         )
     if len(runs) < 3:
         raise ValueError("Empirical flaky telemetry requires at least three runs")

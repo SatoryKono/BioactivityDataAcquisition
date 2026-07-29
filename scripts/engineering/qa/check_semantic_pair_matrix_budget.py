@@ -177,6 +177,65 @@ def _cluster_has_review(
     return False
 
 
+def _missing_required_fields(
+    payload: dict[str, Any],
+    *,
+    fields: tuple[str, ...],
+    kind: str,
+    row_key: str,
+    cluster_id: str,
+    message_prefix: str,
+) -> list[PairMatrixFinding]:
+    findings: list[PairMatrixFinding] = []
+    for field in fields:
+        if payload.get(field):
+            continue
+        findings.append(
+            PairMatrixFinding(
+                kind=kind,
+                row_key=row_key,
+                cluster_id=cluster_id,
+                message=f"{message_prefix} is missing {field}",
+            )
+        )
+    return findings
+
+
+def _expiry_findings(
+    expires_on: object,
+    *,
+    today: date,
+    invalid_kind: str,
+    expired_kind: str,
+    row_key: str,
+    cluster_id: str,
+    message_prefix: str,
+) -> list[PairMatrixFinding]:
+    if not isinstance(expires_on, str):
+        return []
+    try:
+        expiry = date.fromisoformat(expires_on)
+    except ValueError:
+        return [
+            PairMatrixFinding(
+                kind=invalid_kind,
+                row_key=row_key,
+                cluster_id=cluster_id,
+                message=f"{message_prefix} has invalid expiry {expires_on!r}",
+            )
+        ]
+    if expiry < today:
+        return [
+            PairMatrixFinding(
+                kind=expired_kind,
+                row_key=row_key,
+                cluster_id=cluster_id,
+                message=f"{message_prefix} expired on {expires_on}",
+            )
+        ]
+    return []
+
+
 def _review_registry_metadata_findings(
     review_registry: dict[str, Any],
     *,
@@ -191,41 +250,28 @@ def _review_registry_metadata_findings(
             if not isinstance(review, dict):
                 continue
             review_id = str(review.get("id") or UNKNOWN_VALUE)
-            for field in ("owner", "rationale", "expires_on"):
-                if review.get(field):
-                    continue
-                findings.append(
-                    PairMatrixFinding(
-                        kind="missing_review_registry_metadata",
-                        row_key=review_id,
-                        cluster_id=review_id,
-                        message=f"{section} entry {review_id} is missing {field}",
-                    )
+            prefix = f"{section} entry {review_id}"
+            findings.extend(
+                _missing_required_fields(
+                    review,
+                    fields=("owner", "rationale", "expires_on"),
+                    kind="missing_review_registry_metadata",
+                    row_key=review_id,
+                    cluster_id=review_id,
+                    message_prefix=prefix,
                 )
-            expires_on = review.get("expires_on")
-            if not isinstance(expires_on, str):
-                continue
-            try:
-                expiry = date.fromisoformat(expires_on)
-            except ValueError:
-                findings.append(
-                    PairMatrixFinding(
-                        kind="invalid_review_registry_expiry",
-                        row_key=review_id,
-                        cluster_id=review_id,
-                        message=f"{section} entry {review_id} has invalid expiry {expires_on!r}",
-                    )
+            )
+            findings.extend(
+                _expiry_findings(
+                    review.get("expires_on"),
+                    today=today,
+                    invalid_kind="invalid_review_registry_expiry",
+                    expired_kind="expired_review_registry_entry",
+                    row_key=review_id,
+                    cluster_id=review_id,
+                    message_prefix=prefix,
                 )
-                continue
-            if expiry < today:
-                findings.append(
-                    PairMatrixFinding(
-                        kind="expired_review_registry_entry",
-                        row_key=review_id,
-                        cluster_id=review_id,
-                        message=f"{section} entry {review_id} expired on {expires_on}",
-                    )
-                )
+            )
     return findings
 
 
@@ -237,41 +283,28 @@ def _metadata_findings(
     findings: list[PairMatrixFinding] = []
     for row_key, row in reviewed.items():
         cluster_id = str(row.get("cluster_id") or UNKNOWN_VALUE)
-        for field in ("owner", "rationale", "expires_on"):
-            if row.get(field):
-                continue
-            findings.append(
-                PairMatrixFinding(
-                    kind="missing_review_metadata",
-                    row_key=row_key,
-                    cluster_id=cluster_id,
-                    message=f"reviewed row {row_key} is missing {field}",
-                )
+        prefix = f"reviewed row {row_key}"
+        findings.extend(
+            _missing_required_fields(
+                row,
+                fields=("owner", "rationale", "expires_on"),
+                kind="missing_review_metadata",
+                row_key=row_key,
+                cluster_id=cluster_id,
+                message_prefix=prefix,
             )
-        expires_on = row.get("expires_on")
-        if not isinstance(expires_on, str):
-            continue
-        try:
-            expiry = date.fromisoformat(expires_on)
-        except ValueError:
-            findings.append(
-                PairMatrixFinding(
-                    kind="invalid_review_expiry",
-                    row_key=row_key,
-                    cluster_id=cluster_id,
-                    message=f"reviewed row {row_key} has invalid expiry {expires_on!r}",
-                )
+        )
+        findings.extend(
+            _expiry_findings(
+                row.get("expires_on"),
+                today=today,
+                invalid_kind="invalid_review_expiry",
+                expired_kind="expired_review",
+                row_key=row_key,
+                cluster_id=cluster_id,
+                message_prefix=prefix,
             )
-            continue
-        if expiry < today:
-            findings.append(
-                PairMatrixFinding(
-                    kind="expired_review",
-                    row_key=row_key,
-                    cluster_id=cluster_id,
-                    message=f"reviewed row {row_key} expired on {expires_on}",
-                )
-            )
+        )
     return findings
 
 

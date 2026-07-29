@@ -9,6 +9,7 @@ import re
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
 
 _DASHBOARDS_DIR = Path("grafana/dashboards")
 _DEFAULT_ALLOWLIST = Path("configs/quality/dashboard_query_duplicate_allowlist.yaml")
@@ -123,6 +124,30 @@ def _panel_refs(uses: tuple[QueryUse, ...]) -> tuple[str, ...]:
     return tuple(sorted({f"{use.dashboard} :: {use.panel_title}" for use in uses}))
 
 
+def _panel_query_uses_for_dashboard(
+    dashboard_path: Path,
+    panels: list[dict[str, Any]],
+) -> list[QueryUse]:
+    query_uses: list[QueryUse] = []
+    for panel in panels:
+        title = panel.get("title")
+        if not isinstance(title, str):
+            continue
+        for index, target in enumerate(panel.get("targets", []), start=1):
+            expr = target.get("expr")
+            if not isinstance(expr, str) or not expr.strip():
+                continue
+            query_uses.append(
+                QueryUse(
+                    dashboard=dashboard_path.name,
+                    panel_title=title,
+                    target_ref=f"target[{index}]",
+                    expression=_normalize_expression(expr),
+                )
+            )
+    return query_uses
+
+
 def collect_panel_query_uses(
     dashboards_dir: Path = _DASHBOARDS_DIR,
 ) -> tuple[QueryUse, ...]:
@@ -133,22 +158,7 @@ def collect_panel_query_uses(
         panels = _walk_panels(list(dashboard.get("panels", [])))
         for row in dashboard.get("rows", []):
             panels.extend(_walk_panels(row.get("panels", [])))
-        for panel in panels:
-            title = panel.get("title")
-            if not isinstance(title, str):
-                continue
-            for index, target in enumerate(panel.get("targets", []), start=1):
-                expr = target.get("expr")
-                if not isinstance(expr, str) or not expr.strip():
-                    continue
-                query_uses.append(
-                    QueryUse(
-                        dashboard=dashboard_path.name,
-                        panel_title=title,
-                        target_ref=f"target[{index}]",
-                        expression=_normalize_expression(expr),
-                    )
-                )
+        query_uses.extend(_panel_query_uses_for_dashboard(dashboard_path, panels))
     return tuple(query_uses)
 
 

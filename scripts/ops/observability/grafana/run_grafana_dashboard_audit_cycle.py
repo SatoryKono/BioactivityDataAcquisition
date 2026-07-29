@@ -663,80 +663,33 @@ def _start_managed_observability_backend(
     )
 
 
-def _ensure_backend(config: AuditCycleConfig) -> BackendEnsureOutcome:
-    required_probe_paths = (
+def _required_backend_probe_paths(config: AuditCycleConfig) -> tuple[str, ...]:
+    return (
         "/ops/control-plane/checkpoint-freshness?"
         f"pipeline={config.pipeline}&run_type={config.run_type}&run_id={config.run_id}",
     )
-    if config.ensure_observability_backend and config.refresh_observability_backend:
-        refreshed = drop_listening_backend_on_port(config.observability_backend_port)
-        if not refreshed:
-            reused_existing = _reuse_existing_backend_if_healthy(
-                config,
-                required_probe_paths=required_probe_paths,
-            )
-            if reused_existing is not None:
-                return BackendEnsureOutcome(result=reused_existing)
-            fallback_port = _find_available_local_port()
-            print(
-                "grafana-audit-cycle: could not refresh observability backend in place; "
-                f"starting on fallback port {fallback_port}"
-            )
-            fallback_result = ensure_observability_backend_started(
-                enabled=True,
-                port=fallback_port,
-                required_probe_paths=required_probe_paths,
-            )
-            if fallback_result.backend_available:
-                print(
-                    "grafana-audit-cycle: observability backend fallback is ready at "
-                    f"{fallback_result.health_url}"
-                )
-                return BackendEnsureOutcome(result=fallback_result)
-            reused_existing = _reuse_existing_backend_if_healthy(
-                config,
-                required_probe_paths=required_probe_paths,
-            )
-            if reused_existing is not None:
-                return BackendEnsureOutcome(result=reused_existing)
-            managed = _start_managed_observability_backend(
-                port=config.observability_backend_port,
-                required_probe_paths=required_probe_paths,
-            )
-            if managed.result.backend_available:
-                return managed
-            managed = _start_managed_observability_backend(
-                port=fallback_port,
-                required_probe_paths=required_probe_paths,
-            )
-            return managed
-    result = ensure_observability_backend_started(
-        enabled=config.ensure_observability_backend,
-        port=config.observability_backend_port,
-        required_probe_paths=required_probe_paths,
-    )
-    if result.backend_available or not config.ensure_observability_backend:
-        return BackendEnsureOutcome(result=result)
 
+
+def _fallback_when_refresh_drop_failed(
+    config: AuditCycleConfig,
+    *,
+    required_probe_paths: tuple[str, ...],
+) -> BackendEnsureOutcome:
     reused_existing = _reuse_existing_backend_if_healthy(
         config,
         required_probe_paths=required_probe_paths,
     )
     if reused_existing is not None:
         return BackendEnsureOutcome(result=reused_existing)
-
     fallback_port = _find_available_local_port()
     print(
-        "grafana-audit-cycle: retrying observability backend on fallback port "
-        f"{fallback_port}"
+        "grafana-audit-cycle: could not refresh observability backend in place; "
+        f"starting on fallback port {fallback_port}"
     )
     fallback_result = ensure_observability_backend_started(
         enabled=True,
         port=fallback_port,
-        required_probe_paths=(
-            "/ops/control-plane/checkpoint-freshness?"
-            f"pipeline={config.pipeline}&run_type={config.run_type}&run_id={config.run_id}",
-        ),
+        required_probe_paths=required_probe_paths,
     )
     if fallback_result.backend_available:
         print(
@@ -756,11 +709,76 @@ def _ensure_backend(config: AuditCycleConfig) -> BackendEnsureOutcome:
     )
     if managed.result.backend_available:
         return managed
-    managed = _start_managed_observability_backend(
+    return _start_managed_observability_backend(
         port=fallback_port,
         required_probe_paths=required_probe_paths,
     )
-    return managed
+
+
+def _retry_backend_on_fallback_port(
+    config: AuditCycleConfig,
+    *,
+    required_probe_paths: tuple[str, ...],
+) -> BackendEnsureOutcome:
+    fallback_port = _find_available_local_port()
+    print(
+        "grafana-audit-cycle: retrying observability backend on fallback port "
+        f"{fallback_port}"
+    )
+    fallback_result = ensure_observability_backend_started(
+        enabled=True,
+        port=fallback_port,
+        required_probe_paths=required_probe_paths,
+    )
+    if fallback_result.backend_available:
+        print(
+            "grafana-audit-cycle: observability backend fallback is ready at "
+            f"{fallback_result.health_url}"
+        )
+        return BackendEnsureOutcome(result=fallback_result)
+    reused_existing = _reuse_existing_backend_if_healthy(
+        config,
+        required_probe_paths=required_probe_paths,
+    )
+    if reused_existing is not None:
+        return BackendEnsureOutcome(result=reused_existing)
+    managed = _start_managed_observability_backend(
+        port=config.observability_backend_port,
+        required_probe_paths=required_probe_paths,
+    )
+    if managed.result.backend_available:
+        return managed
+    return _start_managed_observability_backend(
+        port=fallback_port,
+        required_probe_paths=required_probe_paths,
+    )
+
+
+def _ensure_backend(config: AuditCycleConfig) -> BackendEnsureOutcome:
+    required_probe_paths = _required_backend_probe_paths(config)
+    if config.ensure_observability_backend and config.refresh_observability_backend:
+        refreshed = drop_listening_backend_on_port(config.observability_backend_port)
+        if not refreshed:
+            return _fallback_when_refresh_drop_failed(
+                config, required_probe_paths=required_probe_paths
+            )
+    result = ensure_observability_backend_started(
+        enabled=config.ensure_observability_backend,
+        port=config.observability_backend_port,
+        required_probe_paths=required_probe_paths,
+    )
+    if result.backend_available or not config.ensure_observability_backend:
+        return BackendEnsureOutcome(result=result)
+
+    reused_existing = _reuse_existing_backend_if_healthy(
+        config,
+        required_probe_paths=required_probe_paths,
+    )
+    if reused_existing is not None:
+        return BackendEnsureOutcome(result=reused_existing)
+    return _retry_backend_on_fallback_port(
+        config, required_probe_paths=required_probe_paths
+    )
 
 
 def _run_live_audit(config: AuditCycleConfig, *, app_base_url: str) -> int:

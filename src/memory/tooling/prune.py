@@ -93,27 +93,38 @@ def _is_prunable_note_path(path: Path, root: Path) -> bool:
     )
 
 
+def _unquote_front_matter_value(value: str) -> str:
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+        return value[1:-1]
+    return value
+
+
+def _parse_prune_front_matter_line(line: str) -> tuple[str, object] | None:
+    if ":" not in line:
+        return None
+    key, raw_value = line.split(":", 1)
+    key = key.strip()
+    if key not in {"created_at", "ttl_days"}:
+        return None
+    value = _unquote_front_matter_value(raw_value.strip())
+    if key != "ttl_days":
+        return key, value
+    try:
+        return key, int(value)
+    except ValueError:
+        return None
+
+
 def _read_prune_fields_from_front_matter(handle: IO[str]) -> dict[str, Any]:
     metadata: dict[str, Any] = {}
     for line in handle:
         if line == "---\n":
             return metadata
-        if ":" not in line:
+        parsed = _parse_prune_front_matter_line(line)
+        if parsed is None:
             continue
-        key, raw_value = line.split(":", 1)
-        key = key.strip()
-        if key not in {"created_at", "ttl_days"}:
-            continue
-        value = raw_value.strip()
-        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
-            value = value[1:-1]
-        if key == "ttl_days":
-            try:
-                metadata[key] = int(value)
-            except ValueError:
-                continue
-        else:
-            metadata[key] = value
+        key, value = parsed
+        metadata[key] = value
     return metadata
 
 

@@ -1418,6 +1418,91 @@ def _check_json_artifact(path: Path, payload: dict[str, Any]) -> bool:
     return False
 
 
+def _resolve_check_default_paths(
+    *,
+    check: bool,
+    safe_root: Path,
+    json_out: Path | None,
+    fixture_duplication_out: Path | None,
+    duplicate_name_inventory_out: Path | None,
+) -> tuple[Path | None, Path | None, Path | None]:
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    if check and json_out is None:
+        candidate = safe_root / DEFAULT_JSON_ARTIFACT
+        if candidate.exists():
+            json_out = candidate
+    if check and fixture_duplication_out is None:
+        candidate = safe_root / DEFAULT_FIXTURE_DUPLICATION_ARTIFACT
+        if candidate.exists():
+            fixture_duplication_out = candidate
+    if check and duplicate_name_inventory_out is not None:
+        duplicate_name_inventory_out = resolve_output_path(
+            duplicate_name_inventory_out
+            if duplicate_name_inventory_out.is_absolute()
+            else safe_root / duplicate_name_inventory_out,
+            root=safe_root,
+        )
+    return json_out, fixture_duplication_out, duplicate_name_inventory_out
+
+
+def _write_json_payload(path: Path, payload: dict[str, Any] | str) -> None:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    text = payload if isinstance(payload, str) else _canonical_json(payload)
+    safe_path.write_text(  # NOSONAR - path confined by resolve_output_path
+        text, encoding="utf-8"
+    )
+
+
+def _run_check_mode(
+    *,
+    json_out: Path | None,
+    fixture_duplication_out: Path | None,
+    duplicate_name_inventory_out: Path | None,
+    payload: dict[str, Any],
+    fixture_duplication_payload: dict[str, Any],
+    duplicate_name_inventory_payload: dict[str, Any],
+) -> int:
+    exit_code = 0
+    if json_out is not None and not _check_json_artifact(json_out, payload):
+        exit_code = 1
+    if fixture_duplication_out is not None and not _check_json_artifact(
+        fixture_duplication_out,
+        fixture_duplication_payload,
+    ):
+        exit_code = 1
+    if duplicate_name_inventory_out is not None and not _check_json_artifact(
+        duplicate_name_inventory_out,
+        duplicate_name_inventory_payload,
+    ):
+        exit_code = 1
+    return exit_code
+
+
+def _run_write_mode(
+    *,
+    json_out: Path | None,
+    fixture_duplication_out: Path | None,
+    duplicate_name_inventory_out: Path | None,
+    output: str,
+    fixture_duplication_payload: dict[str, Any],
+    duplicate_name_inventory_payload: dict[str, Any],
+) -> None:
+    if json_out:
+        _write_json_payload(json_out, output)
+    else:
+        print(output)
+    if fixture_duplication_out:
+        _write_json_payload(fixture_duplication_out, fixture_duplication_payload)
+    if duplicate_name_inventory_out:
+        _write_json_payload(
+            duplicate_name_inventory_out, duplicate_name_inventory_payload
+        )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Report static BioETL test-governance debt budgets.",
@@ -1450,24 +1535,15 @@ def main(argv: list[str] | None = None) -> int:
     safe_root = resolve_output_path(args.root, root=REPO_ROOT)
     safe_config = resolve_output_path(args.config, root=REPO_ROOT)
     payload = collect_test_governance_report(safe_root)
-    json_out = args.json_out
-    fixture_duplication_out = args.fixture_duplication_out
-    duplicate_name_inventory_out = args.duplicate_name_inventory_out
-    if args.check and json_out is None:
-        candidate = safe_root / DEFAULT_JSON_ARTIFACT
-        if candidate.exists():
-            json_out = candidate
-    if args.check and fixture_duplication_out is None:
-        candidate = safe_root / DEFAULT_FIXTURE_DUPLICATION_ARTIFACT
-        if candidate.exists():
-            fixture_duplication_out = candidate
-    if args.check and duplicate_name_inventory_out is not None:
-        duplicate_name_inventory_out = resolve_output_path(
-            duplicate_name_inventory_out
-            if duplicate_name_inventory_out.is_absolute()
-            else safe_root / duplicate_name_inventory_out,
-            root=safe_root,
+    json_out, fixture_duplication_out, duplicate_name_inventory_out = (
+        _resolve_check_default_paths(
+            check=args.check,
+            safe_root=safe_root,
+            json_out=args.json_out,
+            fixture_duplication_out=args.fixture_duplication_out,
+            duplicate_name_inventory_out=args.duplicate_name_inventory_out,
         )
+    )
     exit_code = 0
 
     if safe_config.exists():
@@ -1484,46 +1560,24 @@ def main(argv: list[str] | None = None) -> int:
     }
     output = _canonical_json(payload)
     if args.check:
-        if json_out is not None and not _check_json_artifact(json_out, payload):
-            exit_code = 1
-        if fixture_duplication_out is not None and not _check_json_artifact(
-            fixture_duplication_out,
-            fixture_duplication_payload,
-        ):
-            exit_code = 1
-        if duplicate_name_inventory_out is not None and not _check_json_artifact(
-            duplicate_name_inventory_out,
-            duplicate_name_inventory_payload,
-        ):
-            exit_code = 1
-    elif json_out:
-        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
-
-        safe_json_out = resolve_output_path(json_out, root=REPO_ROOT)
-        safe_json_out.parent.mkdir(parents=True, exist_ok=True)
-        safe_json_out.write_text(  # NOSONAR - path confined by resolve_output_path
-            output, encoding="utf-8"
+        check_code = _run_check_mode(
+            json_out=json_out,
+            fixture_duplication_out=fixture_duplication_out,
+            duplicate_name_inventory_out=duplicate_name_inventory_out,
+            payload=payload,
+            fixture_duplication_payload=fixture_duplication_payload,
+            duplicate_name_inventory_payload=duplicate_name_inventory_payload,
         )
-    else:
-        print(output)
-    if fixture_duplication_out and not args.check:
-        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+        return max(exit_code, check_code)
 
-        safe_fixture_out = resolve_output_path(fixture_duplication_out, root=REPO_ROOT)
-        safe_fixture_out.parent.mkdir(parents=True, exist_ok=True)
-        safe_fixture_out.write_text(  # NOSONAR - path confined by resolve_output_path
-            _canonical_json(fixture_duplication_payload),
-            encoding="utf-8",
-        )
-    if duplicate_name_inventory_out and not args.check:
-        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
-
-        safe_dup_out = resolve_output_path(duplicate_name_inventory_out, root=REPO_ROOT)
-        safe_dup_out.parent.mkdir(parents=True, exist_ok=True)
-        safe_dup_out.write_text(  # NOSONAR - path confined by resolve_output_path
-            _canonical_json(duplicate_name_inventory_payload),
-            encoding="utf-8",
-        )
+    _run_write_mode(
+        json_out=json_out,
+        fixture_duplication_out=fixture_duplication_out,
+        duplicate_name_inventory_out=duplicate_name_inventory_out,
+        output=output,
+        fixture_duplication_payload=fixture_duplication_payload,
+        duplicate_name_inventory_payload=duplicate_name_inventory_payload,
+    )
     return exit_code
 
 

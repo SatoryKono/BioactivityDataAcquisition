@@ -311,20 +311,32 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _validate_manifest_render_contract(
+_ALLOWED_TERMINAL_STATES = frozenset(
+    {
+        "healthy",
+        "explicit-error",
+        "valid-empty",
+        "telemetry-absent",
+        "not-applicable",
+        "incomplete",
+    }
+)
+_SILVER_BACKEND_HEALTH_TERMINAL = frozenset(
+    {"healthy", "explicit-error", "valid-empty"}
+)
+
+
+def _parse_requested_render_context(
     manifest: dict[str, object],
-    *,
-    expected_uids: tuple[str, ...],
-    expected_panel_ids: dict[str, tuple[int, ...]] | None = None,
-    screenshot_dir: Path | None = None,
-) -> str | None:
+) -> tuple[int, object, str | None]:
+    """Return (requested_width, requested_theme, error)."""
     requested = manifest.get("requested")
     if not isinstance(requested, dict):
-        return "render manifest is missing requested viewport/theme evidence"
+        return 0, None, "render manifest is missing requested viewport/theme evidence"
     requested_viewport = requested.get("viewport")
     requested_theme = requested.get("theme")
     if not isinstance(requested_viewport, dict):
-        return "render manifest requested.viewport is missing"
+        return 0, None, "render manifest requested.viewport is missing"
     requested_width = requested_viewport.get("width")
     requested_height = requested_viewport.get("height")
     if (
@@ -333,12 +345,19 @@ def _validate_manifest_render_contract(
         or not isinstance(requested_height, int)
         or requested_height <= 0
     ):
-        return "render manifest requested.viewport must contain positive width/height"
+        return (
+            0,
+            None,
+            "render manifest requested.viewport must contain positive width/height",
+        )
     if requested_theme not in {"dark", "light"}:
-        return "render manifest requested.theme must be dark or light"
+        return 0, None, "render manifest requested.theme must be dark or light"
     if manifest.get("expand_collapsed_rows") is not True:
-        return "render manifest must prove expand_collapsed_rows=true"
+        return 0, None, "render manifest must prove expand_collapsed_rows=true"
+    return requested_width, requested_theme, None
 
+
+def _validate_global_terminal_state(manifest: dict[str, object]) -> str | None:
     terminal_validation = manifest.get("terminal_state_validation")
     if not isinstance(terminal_validation, dict):
         return "render manifest is missing terminal_state_validation"
@@ -347,148 +366,261 @@ def _validate_manifest_render_contract(
             "render manifest terminal_state_validation did not pass: "
             f"status={terminal_validation.get('status')!r}"
         )
+    return None
 
+
+def _index_manifest_dashboards(
+    manifest: dict[str, object],
+) -> tuple[dict[str, dict[str, object]], str | None]:
     dashboard_payload = manifest.get("dashboards")
     if not isinstance(dashboard_payload, list):
-        return "render manifest dashboards must be a list"
-    dashboards = {
-        item.get("uid"): item
+        return {}, "render manifest dashboards must be a list"
+    dashboards: dict[str, dict[str, object]] = {
+        item.get("uid"): item  # type: ignore[misc]
         for item in dashboard_payload
         if isinstance(item, dict) and isinstance(item.get("uid"), str)
     }
+    return dashboards, None
+
+
+def _validate_dashboard_viewport_theme(
+    uid: str,
+    dashboard: dict[str, object],
+    *,
+    requested_width: int,
+    requested_theme: object,
+) -> str | None:
+    if dashboard.get("renderStatus") != "rendered":
+        return (
+            f"render manifest dashboard {uid} is not rendered: "
+            f"status={dashboard.get('renderStatus')!r}"
+        )
+    actual_viewport = dashboard.get("actualViewport")
+    if not isinstance(actual_viewport, dict):
+        return f"render manifest dashboard {uid} lacks actualViewport"
+    actual_width = actual_viewport.get("width")
+    actual_height = actual_viewport.get("height")
+    if actual_width != requested_width:
+        return (
+            f"render manifest dashboard {uid} width drift: "
+            f"requested={requested_width!r} actual={actual_width!r}"
+        )
+    if not isinstance(actual_height, int) or actual_height <= 0:
+        return f"render manifest dashboard {uid} has invalid actual height"
+    if dashboard.get("actualTheme") != requested_theme:
+        return (
+            f"render manifest dashboard {uid} theme drift: "
+            f"requested={requested_theme!r} "
+            f"actual={dashboard.get('actualTheme')!r}"
+        )
+    return None
+
+
+def _extract_panel_states(
+    uid: str,
+    dashboard: dict[str, object],
+) -> tuple[dict[str, object] | None, list[object] | None, str | None]:
+    dashboard_terminal = dashboard.get("terminalStateValidation")
+    if not isinstance(dashboard_terminal, dict):
+        return None, None, f"render manifest dashboard {uid} lacks terminal panel evidence"
+    if dashboard_terminal.get("status") != "ok":
+        return None, None, f"render manifest dashboard {uid} terminal validation failed"
+    panel_states = dashboard_terminal.get("panelStates")
+    if not isinstance(panel_states, list) or not panel_states:
+        return None, None, f"render manifest dashboard {uid} has no required panel states"
+    invalid_states = [
+        state
+        for state in panel_states
+        if not isinstance(state, dict)
+        or state.get("classification") not in _ALLOWED_TERMINAL_STATES
+    ]
+    if invalid_states:
+        panel_ids = ", ".join(
+            str(state.get("id")) if isinstance(state, dict) else "unknown"
+            for state in invalid_states
+        )
+        return (
+            None,
+            None,
+            (
+                f"render manifest dashboard {uid} contains non-terminal or "
+                f"contradictory required panel(s): {panel_ids}"
+            ),
+        )
+    return dashboard_terminal, panel_states, None
+
+
+def _validate_panel_id_coverage(
+    uid: str,
+    *,
+    dashboard_terminal: dict[str, object],
+    panel_states: list[object],
+    expected_ids: tuple[int, ...],
+) -> str | None:
+    actual_ids = [
+        state.get("id") for state in panel_states if isinstance(state, dict)
+    ]
+    if any(not isinstance(panel_id, int) for panel_id in actual_ids):
+        return f"render manifest dashboard {uid} has non-integer panel IDs"
+    if len(actual_ids) != len(set(actual_ids)):
+        return f"render manifest dashboard {uid} repeats panel evidence"
+    if set(actual_ids) != set(expected_ids):
+        missing_ids = sorted(set(expected_ids) - set(actual_ids))
+        extra_ids = sorted(set(actual_ids) - set(expected_ids))
+        return (
+            f"render manifest dashboard {uid} panel coverage drift: "
+            f"missing={missing_ids} extra={extra_ids}"
+        )
+    if dashboard_terminal.get("requiredPanelCount") != len(expected_ids):
+        return f"render manifest dashboard {uid} requiredPanelCount drift"
+    if dashboard_terminal.get("checkedPanelCount") != len(expected_ids):
+        return f"render manifest dashboard {uid} checkedPanelCount drift"
+    return None
+
+
+def _validate_silver_backend_health_panel(panel_states: list[object]) -> str | None:
+    backend_health = next(
+        (
+            state
+            for state in panel_states
+            if isinstance(state, dict) and state.get("id") == 13
+        ),
+        None,
+    )
+    if not isinstance(backend_health, dict):
+        return "Silver Backend Health panel 13 terminal evidence is missing"
+    if backend_health.get("classification") not in _SILVER_BACKEND_HEALTH_TERMINAL:
+        return (
+            "Silver Backend Health panel 13 is not terminal: "
+            f"{backend_health.get('classification')!r}"
+        )
+    return None
+
+
+def _validate_screenshot_evidence(
+    uid: str,
+    dashboard: dict[str, object],
+    *,
+    requested_width: int,
+    screenshot_dir: Path,
+) -> str | None:
+    file_name = dashboard.get("file")
+    evidence = dashboard.get("screenshotEvidence")
+    if file_name != f"{uid}.png" or not isinstance(evidence, dict):
+        return f"render manifest dashboard {uid} lacks bound PNG evidence"
+    if evidence.get("file") != file_name:
+        return f"render manifest dashboard {uid} PNG filename drift"
+    screenshot_path = screenshot_dir / file_name
+    try:
+        screenshot_size = screenshot_path.stat().st_size
+    except OSError as exc:
+        return f"render manifest dashboard {uid} PNG is unreadable: {exc}"
+    dimensions = rerender_screenshots._png_dimensions(screenshot_path)
+    if dimensions is None:
+        return f"render manifest dashboard {uid} screenshot is not a valid PNG"
+    if dimensions[0] != requested_width or dimensions[1] <= 0:
+        return (
+            f"render manifest dashboard {uid} PNG dimensions drift: "
+            f"requested_width={requested_width} actual={dimensions}"
+        )
+    if evidence.get("bytes") != screenshot_size:
+        return f"render manifest dashboard {uid} PNG byte-size drift"
+    if (
+        evidence.get("width") != dimensions[0]
+        or evidence.get("height") != dimensions[1]
+    ):
+        return f"render manifest dashboard {uid} PNG IHDR evidence drift"
+    if evidence.get("sha256") != _sha256(screenshot_path):
+        return f"render manifest dashboard {uid} PNG sha256 drift"
+    return None
+
+
+def _validate_one_dashboard_render(
+    uid: str,
+    dashboard: dict[str, object],
+    *,
+    requested_width: int,
+    requested_theme: object,
+    expected_panel_ids: dict[str, tuple[int, ...]] | None,
+    screenshot_dir: Path | None,
+) -> str | None:
+    viewport_error = _validate_dashboard_viewport_theme(
+        uid,
+        dashboard,
+        requested_width=requested_width,
+        requested_theme=requested_theme,
+    )
+    if viewport_error:
+        return viewport_error
+
+    dashboard_terminal, panel_states, panel_error = _extract_panel_states(uid, dashboard)
+    if panel_error:
+        return panel_error
+    assert dashboard_terminal is not None and panel_states is not None
+
+    if expected_panel_ids is not None:
+        expected_ids = expected_panel_ids.get(uid)
+        if expected_ids is None:
+            return f"dashboard panel contract is missing for {uid}"
+        coverage_error = _validate_panel_id_coverage(
+            uid,
+            dashboard_terminal=dashboard_terminal,
+            panel_states=panel_states,
+            expected_ids=expected_ids,
+        )
+        if coverage_error:
+            return coverage_error
+
+    if uid == "bioetl-silver-reject-explorer":
+        silver_error = _validate_silver_backend_health_panel(panel_states)
+        if silver_error:
+            return silver_error
+
+    if screenshot_dir is not None:
+        return _validate_screenshot_evidence(
+            uid,
+            dashboard,
+            requested_width=requested_width,
+            screenshot_dir=screenshot_dir,
+        )
+    return None
+
+
+def _validate_manifest_render_contract(
+    manifest: dict[str, object],
+    *,
+    expected_uids: tuple[str, ...],
+    expected_panel_ids: dict[str, tuple[int, ...]] | None = None,
+    screenshot_dir: Path | None = None,
+) -> str | None:
+    requested_width, requested_theme, request_error = _parse_requested_render_context(
+        manifest
+    )
+    if request_error:
+        return request_error
+
+    terminal_error = _validate_global_terminal_state(manifest)
+    if terminal_error:
+        return terminal_error
+
+    dashboards, index_error = _index_manifest_dashboards(manifest)
+    if index_error:
+        return index_error
+
     for uid in expected_uids:
         dashboard = dashboards.get(uid)
         if not isinstance(dashboard, dict):
             return f"render manifest is missing dashboard evidence for {uid}"
-        if dashboard.get("renderStatus") != "rendered":
-            return (
-                f"render manifest dashboard {uid} is not rendered: "
-                f"status={dashboard.get('renderStatus')!r}"
-            )
-        actual_viewport = dashboard.get("actualViewport")
-        if not isinstance(actual_viewport, dict):
-            return f"render manifest dashboard {uid} lacks actualViewport"
-        actual_width = actual_viewport.get("width")
-        actual_height = actual_viewport.get("height")
-        if actual_width != requested_width:
-            return (
-                f"render manifest dashboard {uid} width drift: "
-                f"requested={requested_width!r} actual={actual_width!r}"
-            )
-        if not isinstance(actual_height, int) or actual_height <= 0:
-            return f"render manifest dashboard {uid} has invalid actual height"
-        if dashboard.get("actualTheme") != requested_theme:
-            return (
-                f"render manifest dashboard {uid} theme drift: "
-                f"requested={requested_theme!r} "
-                f"actual={dashboard.get('actualTheme')!r}"
-            )
-
-        dashboard_terminal = dashboard.get("terminalStateValidation")
-        if not isinstance(dashboard_terminal, dict):
-            return f"render manifest dashboard {uid} lacks terminal panel evidence"
-        if dashboard_terminal.get("status") != "ok":
-            return f"render manifest dashboard {uid} terminal validation failed"
-        panel_states = dashboard_terminal.get("panelStates")
-        if not isinstance(panel_states, list) or not panel_states:
-            return f"render manifest dashboard {uid} has no required panel states"
-        allowed_terminal_states = {
-            "healthy",
-            "explicit-error",
-            "valid-empty",
-            "telemetry-absent",
-            "not-applicable",
-            "incomplete",
-        }
-        invalid_states = [
-            state
-            for state in panel_states
-            if not isinstance(state, dict)
-            or state.get("classification") not in allowed_terminal_states
-        ]
-        if invalid_states:
-            panel_ids = ", ".join(
-                str(state.get("id")) if isinstance(state, dict) else "unknown"
-                for state in invalid_states
-            )
-            return (
-                f"render manifest dashboard {uid} contains non-terminal or "
-                f"contradictory required panel(s): {panel_ids}"
-            )
-
-        if expected_panel_ids is not None:
-            expected_ids = expected_panel_ids.get(uid)
-            if expected_ids is None:
-                return f"dashboard panel contract is missing for {uid}"
-            actual_ids = [
-                state.get("id") for state in panel_states if isinstance(state, dict)
-            ]
-            if any(not isinstance(panel_id, int) for panel_id in actual_ids):
-                return f"render manifest dashboard {uid} has non-integer panel IDs"
-            if len(actual_ids) != len(set(actual_ids)):
-                return f"render manifest dashboard {uid} repeats panel evidence"
-            if set(actual_ids) != set(expected_ids):
-                missing_ids = sorted(set(expected_ids) - set(actual_ids))
-                extra_ids = sorted(set(actual_ids) - set(expected_ids))
-                return (
-                    f"render manifest dashboard {uid} panel coverage drift: "
-                    f"missing={missing_ids} extra={extra_ids}"
-                )
-            if dashboard_terminal.get("requiredPanelCount") != len(expected_ids):
-                return f"render manifest dashboard {uid} requiredPanelCount drift"
-            if dashboard_terminal.get("checkedPanelCount") != len(expected_ids):
-                return f"render manifest dashboard {uid} checkedPanelCount drift"
-
-        if uid == "bioetl-silver-reject-explorer":
-            backend_health = next(
-                (
-                    state
-                    for state in panel_states
-                    if isinstance(state, dict) and state.get("id") == 13
-                ),
-                None,
-            )
-            if not isinstance(backend_health, dict):
-                return "Silver Backend Health panel 13 terminal evidence is missing"
-            if backend_health.get("classification") not in {
-                "healthy",
-                "explicit-error",
-                "valid-empty",
-            }:
-                return (
-                    "Silver Backend Health panel 13 is not terminal: "
-                    f"{backend_health.get('classification')!r}"
-                )
-
-        if screenshot_dir is not None:
-            file_name = dashboard.get("file")
-            evidence = dashboard.get("screenshotEvidence")
-            if file_name != f"{uid}.png" or not isinstance(evidence, dict):
-                return f"render manifest dashboard {uid} lacks bound PNG evidence"
-            if evidence.get("file") != file_name:
-                return f"render manifest dashboard {uid} PNG filename drift"
-            screenshot_path = screenshot_dir / file_name
-            try:
-                screenshot_size = screenshot_path.stat().st_size
-            except OSError as exc:
-                return f"render manifest dashboard {uid} PNG is unreadable: {exc}"
-            dimensions = rerender_screenshots._png_dimensions(screenshot_path)
-            if dimensions is None:
-                return f"render manifest dashboard {uid} screenshot is not a valid PNG"
-            if dimensions[0] != requested_width or dimensions[1] <= 0:
-                return (
-                    f"render manifest dashboard {uid} PNG dimensions drift: "
-                    f"requested_width={requested_width} actual={dimensions}"
-                )
-            if evidence.get("bytes") != screenshot_size:
-                return f"render manifest dashboard {uid} PNG byte-size drift"
-            if (
-                evidence.get("width") != dimensions[0]
-                or evidence.get("height") != dimensions[1]
-            ):
-                return f"render manifest dashboard {uid} PNG IHDR evidence drift"
-            if evidence.get("sha256") != _sha256(screenshot_path):
-                return f"render manifest dashboard {uid} PNG sha256 drift"
+        dashboard_error = _validate_one_dashboard_render(
+            uid,
+            dashboard,
+            requested_width=requested_width,
+            requested_theme=requested_theme,
+            expected_panel_ids=expected_panel_ids,
+            screenshot_dir=screenshot_dir,
+        )
+        if dashboard_error:
+            return dashboard_error
     return None
 
 

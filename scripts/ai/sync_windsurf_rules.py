@@ -147,6 +147,34 @@ def _validate_rule(path: Path, content: str) -> list[str]:
     return issues
 
 
+def _render_cursor_rules(
+    cursor_files: list[Path], *, windsurf_rules_dir: Path
+) -> tuple[dict[Path, str], list[str]]:
+    rendered: dict[Path, str] = {}
+    issues: list[str] = []
+    for cursor_path in cursor_files:
+        if cursor_path.name == "sonarqube_mcp_instructions.mdc":
+            continue
+        rule = _load_cursor_rule(cursor_path)
+        content = _render_windsurf_rule(rule)
+        target = windsurf_rules_dir / f"{cursor_path.stem}.md"
+        rendered[target] = content
+        issues.extend(_validate_rule(target, content))
+    return rendered, issues
+
+
+def _check_rendered_targets(
+    rendered: dict[Path, str], *, root: Path
+) -> list[str]:
+    issues: list[str] = []
+    for target, content in rendered.items():
+        if not target.exists():
+            issues.append(f"{target.relative_to(root)}: missing")
+        elif target.read_text(encoding="utf-8") != content:
+            issues.append(f"{target.relative_to(root)}: out of sync")
+    return issues
+
+
 def sync_rules(
     *,
     root: Path,
@@ -157,38 +185,50 @@ def sync_rules(
     windsurf_rules_dir = root / "docs/00-project/ai/rules/windsurf/rules"
     local_rules_dir = root / ".windsurf/rules"
 
-    issues: list[str] = []
     cursor_files = sorted(cursor_dir.glob("*.mdc"))
     if not cursor_files:
-        issues.append(f"No cursor rules found in {cursor_dir}")
-        return issues
+        return [f"No cursor rules found in {cursor_dir}"]
 
-    rendered: dict[Path, str] = {}
-    for cursor_path in cursor_files:
-        if cursor_path.name == "sonarqube_mcp_instructions.mdc":
-            continue
-        rule = _load_cursor_rule(cursor_path)
-        out_name = cursor_path.stem + ".md"
-        content = _render_windsurf_rule(rule)
-        target = windsurf_rules_dir / out_name
-        rendered[target] = content
-        issues.extend(_validate_rule(target, content))
-
+    rendered, issues = _render_cursor_rules(
+        cursor_files, windsurf_rules_dir=windsurf_rules_dir
+    )
     if check_only:
-        for target, content in rendered.items():
-            if target.exists():
-                if target.read_text(encoding="utf-8") != content:
-                    issues.append(f"{target.relative_to(root)}: out of sync")
-            else:
-                issues.append(f"{target.relative_to(root)}: missing")
+        issues.extend(_check_rendered_targets(rendered, root=root))
         return issues
 
     for target, content in rendered.items():
         _atomic_write(target, content)
         if deploy_local:
             _atomic_write(local_rules_dir / target.name, content)
-
     return issues
+
+
+def _workflow_governance_issues(source: Path, content: str) -> list[str]:
+    return [
+        f"{source.name}: missing governance token {token!r}"
+        for token in GOVERNANCE_TOKENS
+        if token not in content
+    ]
+
+
+def _check_or_deploy_workflow(
+    *,
+    source: Path,
+    content: str,
+    target: Path,
+    root: Path,
+    deploy_local: bool,
+    check_only: bool,
+) -> list[str]:
+    if check_only:
+        if not target.exists():
+            return [f"{target.relative_to(root)}: missing"]
+        if target.read_text(encoding="utf-8") != content:
+            return [f"{target.relative_to(root)}: out of sync"]
+        return []
+    if deploy_local:
+        _atomic_write(target, content)
+    return []
 
 
 def sync_workflows(
@@ -199,27 +239,23 @@ def sync_workflows(
 ) -> list[str]:
     source_dir = root / "docs/00-project/ai/rules/windsurf/workflows"
     local_dir = root / ".windsurf/workflows"
-    issues: list[str] = []
-
     if not source_dir.exists():
-        issues.append(f"Missing workflows source: {source_dir}")
-        return issues
+        return [f"Missing workflows source: {source_dir}"]
 
+    issues: list[str] = []
     for source in sorted(source_dir.glob("*.md")):
         content = source.read_text(encoding="utf-8")
-        for token in GOVERNANCE_TOKENS:
-            if token not in content:
-                issues.append(f"{source.name}: missing governance token {token!r}")
-        target = local_dir / source.name
-        if check_only:
-            if not target.exists():
-                issues.append(f"{target.relative_to(root)}: missing")
-            elif target.read_text(encoding="utf-8") != content:
-                issues.append(f"{target.relative_to(root)}: out of sync")
-            continue
-        if deploy_local:
-            _atomic_write(target, content)
-
+        issues.extend(_workflow_governance_issues(source, content))
+        issues.extend(
+            _check_or_deploy_workflow(
+                source=source,
+                content=content,
+                target=local_dir / source.name,
+                root=root,
+                deploy_local=deploy_local,
+                check_only=check_only,
+            )
+        )
     return issues
 
 

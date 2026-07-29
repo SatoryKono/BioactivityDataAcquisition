@@ -122,6 +122,95 @@ def _resolve_rag_sources(
     )
 
 
+def _section_symbol_name(section: Any) -> str | None:
+    if section.symbol_kind in {"class", "function", "async_function"}:
+        return section.title
+    return None
+
+
+def _section_symbol_display(section: Any) -> str | None:
+    if section.symbol_kind not in {None, "markdown_section", "config_document"}:
+        return section.title
+    return None
+
+
+def _build_section_chunk_record(
+    *,
+    rel_path_str: str,
+    source_type: str,
+    domain: str,
+    owner: str | None,
+    repo_zone: str | None,
+    section: Any,
+) -> dict[str, Any]:
+    symbol_name = _section_symbol_name(section)
+    return {
+        "id": build_chunk_id(rel_path_str, section.title, section.index),
+        "source_path": rel_path_str,
+        "source_type": source_type,
+        "domain": domain,
+        "repo_zone": repo_zone,
+        "title": section.title,
+        "heading_level": section.level,
+        "symbol": _section_symbol_display(section),
+        "symbol_kind": section.symbol_kind,
+        "content": section.content,
+        "content_hash": content_hash(section.content),
+        "graph_node_refs": graph_refs_for_source(
+            rel_path_str,
+            source_type,
+            symbol_kind=section.symbol_kind,
+            symbol_name=symbol_name,
+        ),
+        "related_refs": related_refs_for_source(
+            rel_path_str,
+            source_type,
+            symbol_kind=section.symbol_kind,
+            symbol_name=symbol_name,
+        ),
+        "owner": owner,
+        "freshness_class": "warm",
+    }
+
+
+def _build_standard_source_records(
+    root: Path,
+    rel_path: Path,
+    *,
+    source_type: str,
+    domain: str,
+    owner: str | None,
+    repo_zone: str | None,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    rel_path_str = rel_path.as_posix()
+    source_path = root / rel_path
+    if not source_path.is_file():
+        raise FileNotFoundError(f"RAG source does not exist: {rel_path_str}")
+    text = source_path.read_text(encoding="utf-8")
+    sections = chunk_source(rel_path, text)
+    corpus_source = {
+        "source_path": rel_path_str,
+        "source_type": source_type,
+        "domain": domain,
+        "repo_zone": repo_zone,
+        "owner": owner,
+        "content_hash": content_hash(text),
+        "section_count": len(sections),
+    }
+    chunk_records = [
+        _build_section_chunk_record(
+            rel_path_str=rel_path_str,
+            source_type=source_type,
+            domain=domain,
+            owner=owner,
+            repo_zone=repo_zone,
+            section=section,
+        )
+        for section in sections
+    ]
+    return corpus_source, chunk_records
+
+
 def build_rag_manifests(
     root: Path,
     *,
@@ -157,63 +246,16 @@ def build_rag_manifests(
             corpus_sources.append(corpus_source)
             chunk_records.extend(chunk_rows)
             continue
-
-        source_path = root / rel_path
-        if not source_path.is_file():
-            raise FileNotFoundError(f"RAG source does not exist: {rel_path_str}")
-
-        text = source_path.read_text(encoding="utf-8")
-        sections = chunk_source(rel_path, text)
-        corpus_sources.append(
-            {
-                "source_path": rel_path_str,
-                "source_type": source_type,
-                "domain": domain,
-                "repo_zone": repo_zone,
-                "owner": owner,
-                "content_hash": content_hash(text),
-                "section_count": len(sections),
-            }
+        corpus_source, chunk_rows = _build_standard_source_records(
+            root,
+            rel_path,
+            source_type=source_type,
+            domain=domain,
+            owner=owner,
+            repo_zone=repo_zone,
         )
-        for section in sections:
-            chunk_records.append(
-                {
-                    "id": build_chunk_id(rel_path_str, section.title, section.index),
-                    "source_path": rel_path_str,
-                    "source_type": source_type,
-                    "domain": domain,
-                    "repo_zone": repo_zone,
-                    "title": section.title,
-                    "heading_level": section.level,
-                    "symbol": section.title
-                    if section.symbol_kind
-                    not in {None, "markdown_section", "config_document"}
-                    else None,
-                    "symbol_kind": section.symbol_kind,
-                    "content": section.content,
-                    "content_hash": content_hash(section.content),
-                    "graph_node_refs": graph_refs_for_source(
-                        rel_path_str,
-                        source_type,
-                        symbol_kind=section.symbol_kind,
-                        symbol_name=section.title
-                        if section.symbol_kind
-                        in {"class", "function", "async_function"}
-                        else None,
-                    ),
-                    "related_refs": related_refs_for_source(
-                        rel_path_str,
-                        source_type,
-                        symbol_kind=section.symbol_kind,
-                        symbol_name=section.title
-                        if section.symbol_kind
-                        in {"class", "function", "async_function"}
-                        else None,
-                    ),
-                    "owner": owner,
-                    "freshness_class": "warm",
-                }
-            )
+        corpus_sources.append(corpus_source)
+        chunk_records.extend(chunk_rows)
 
     source_identity = capture_rag_source_identity(
         root,

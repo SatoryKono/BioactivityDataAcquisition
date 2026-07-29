@@ -180,6 +180,56 @@ def wait_healthy(containers: list[str], *, timeout_seconds: float = 300.0) -> No
         raise RuntimeError(f"containers not healthy before timeout: {sorted(pending)}")
 
 
+def _ensure_shared_networks() -> None:
+    for network in ("bioetl-monitoring", "bioetl-runtime"):
+        exists = _run(["docker", "network", "inspect", network], timeout=30.0)
+        if exists.returncode != 0:
+            created = _run(["docker", "network", "create", network], timeout=30.0)
+            if created.returncode != 0:
+                raise RuntimeError(
+                    f"failed to create network {network}: {created.stderr}"
+                )
+
+
+def _detach_warp_network(containers: tuple[str, ...]) -> None:
+    for container in containers:
+        inspect = _run(["docker", "inspect", container], timeout=30.0)
+        if inspect.returncode != 0:
+            continue
+        payload = json.loads(inspect.stdout)[0]
+        networks = payload.get("NetworkSettings", {}).get("Networks", {})
+        if "warp-network" not in networks:
+            continue
+        detach = _run(
+            ["docker", "network", "disconnect", "-f", "warp-network", container],
+            timeout=60.0,
+        )
+        print(detach.stdout)
+        if detach.stderr:
+            print(detach.stderr, file=sys.stderr)
+
+
+def _capture_recreate_env() -> tuple[dict[str, str], dict[str, str]]:
+    grafana_env = _container_env("bioetl-grafana")
+    main_env = _container_env("bioetl-main-bioetl-1")
+    monitoring_overrides = _pick_env(grafana_env, MONITORING_ENV_KEYS)
+    main_overrides = _pick_env(main_env, MAIN_ENV_KEYS)
+    main_overrides.setdefault("LOG_LEVEL", "INFO")
+    main_overrides.setdefault("NEO4J_USERNAME", "neo4j")
+    required_monitoring = (
+        "GF_SECURITY_ADMIN_PASSWORD",
+        "GF_RENDERING_RENDERER_TOKEN",
+    )
+    missing_mon = [k for k in required_monitoring if k not in monitoring_overrides]
+    if missing_mon:
+        raise RuntimeError(
+            f"missing monitoring secrets from live containers: {missing_mon}"
+        )
+    if "NEO4J_PASSWORD" not in main_overrides:
+        raise RuntimeError("missing NEO4J_PASSWORD from live main container")
+    return monitoring_overrides, main_overrides
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -201,39 +251,10 @@ def main() -> int:
     args = parser.parse_args()
     runtime: Path = args.runtime
 
-    grafana_env = _container_env("bioetl-grafana")
-    main_env = _container_env("bioetl-main-bioetl-1")
-
-    monitoring_overrides = _pick_env(grafana_env, MONITORING_ENV_KEYS)
-    main_overrides = _pick_env(main_env, MAIN_ENV_KEYS)
-    # Defaults for non-secret main keys if missing.
-    main_overrides.setdefault("LOG_LEVEL", "INFO")
-    main_overrides.setdefault("NEO4J_USERNAME", "neo4j")
-
-    required_monitoring = (
-        "GF_SECURITY_ADMIN_PASSWORD",
-        "GF_RENDERING_RENDERER_TOKEN",
-    )
-    missing_mon = [k for k in required_monitoring if k not in monitoring_overrides]
-    if missing_mon:
-        raise RuntimeError(
-            f"missing monitoring secrets from live containers: {missing_mon}"
-        )
-    if "NEO4J_PASSWORD" not in main_overrides:
-        raise RuntimeError("missing NEO4J_PASSWORD from live main container")
-
+    monitoring_overrides, main_overrides = _capture_recreate_env()
     _print_env_summary("monitoring_env", monitoring_overrides)
     _print_env_summary("main_env", main_overrides)
-
-    # Ensure shared networks exist (external in compose).
-    for network in ("bioetl-monitoring", "bioetl-runtime"):
-        exists = _run(["docker", "network", "inspect", network], timeout=30.0)
-        if exists.returncode != 0:
-            created = _run(["docker", "network", "create", network], timeout=30.0)
-            if created.returncode != 0:
-                raise RuntimeError(
-                    f"failed to create network {network}: {created.stderr}"
-                )
+    _ensure_shared_networks()
 
     recreate_stack(
         runtime=runtime,
@@ -251,21 +272,7 @@ def main() -> int:
             env_overrides=main_overrides,
         )
 
-    # Detach residual warp-network if still attached after recreate.
-    for container in ("bioetl", "bioetl-main-bioetl-1"):
-        inspect = _run(["docker", "inspect", container], timeout=30.0)
-        if inspect.returncode != 0:
-            continue
-        payload = json.loads(inspect.stdout)[0]
-        networks = payload.get("NetworkSettings", {}).get("Networks", {})
-        if "warp-network" in networks:
-            detach = _run(
-                ["docker", "network", "disconnect", "-f", "warp-network", container],
-                timeout=60.0,
-            )
-            print(detach.stdout)
-            if detach.stderr:
-                print(detach.stderr, file=sys.stderr)
+    _detach_warp_network(("bioetl", "bioetl-main-bioetl-1"))
 
     healthy_targets = [
         "bioetl-prometheus",

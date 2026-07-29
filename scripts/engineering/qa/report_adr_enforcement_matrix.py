@@ -25,6 +25,8 @@ DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "adr-enforcement-matr
 _TEXT_SUFFIXES = frozenset(
     {".cfg", ".ini", ".json", ".md", ".py", ".toml", ".yaml", ".yml"}
 )
+_SCRIPTS_PREFIX = "scripts/"
+_TESTS_PREFIX = "tests/"
 _SCAN_PREFIXES = (
     ".github/workflows/",
     "configs/",
@@ -34,9 +36,9 @@ _SCAN_PREFIXES = (
     "docs/04-reference/",
     "docs/05-operations/",
     "grafana/",
-    "scripts/",
+    _SCRIPTS_PREFIX,
     "src/bioetl/",
-    "tests/",
+    _TESTS_PREFIX,
 )
 _EXCLUDED_PREFIXES = (
     "docs/02-architecture/adr-registry/",
@@ -47,8 +49,8 @@ _EXCLUDED_PREFIXES = (
 _ENFORCEMENT_PREFIXES = (
     ".github/workflows/",
     "configs/quality/",
-    "scripts/",
-    "tests/",
+    _SCRIPTS_PREFIX,
+    _TESTS_PREFIX,
 )
 _IMPLEMENTATION_PREFIXES = (
     "configs/",
@@ -58,9 +60,9 @@ _IMPLEMENTATION_PREFIXES = (
     "docs/04-reference/",
     "docs/05-operations/",
     "grafana/",
-    "scripts/",
+    _SCRIPTS_PREFIX,
     "src/bioetl/",
-    "tests/",
+    _TESTS_PREFIX,
 )
 _MANUAL_EXCEPTION_PREFIX = "manual-exception:"
 _ADR_REFERENCE_RE = re.compile(r"\bADR-\d{3}\b", flags=re.IGNORECASE)
@@ -277,6 +279,14 @@ def _read_python_reference_lines(
     return tuple(reference_lines)
 
 
+def _iter_prefix_files(prefix_path: Path) -> tuple[Path, ...]:
+    if prefix_path.is_dir():
+        return tuple(path for path in prefix_path.rglob("*") if path.is_file())
+    if prefix_path.is_file():
+        return (prefix_path,)
+    return ()
+
+
 def _python_scan_paths(repo_root: Path) -> tuple[str, ...]:
     """Return repo-relative scan paths without relying on Git discovery."""
     discovered: set[str] = set()
@@ -284,10 +294,7 @@ def _python_scan_paths(repo_root: Path) -> tuple[str, ...]:
         prefix_path = repo_root / prefix
         if not prefix_path.exists():
             continue
-        candidates = prefix_path.rglob("*") if prefix_path.is_dir() else (prefix_path,)
-        for path in candidates:
-            if not path.is_file():
-                continue
+        for path in _iter_prefix_files(prefix_path):
             try:
                 rel_path = path.relative_to(repo_root).as_posix()
             except ValueError:

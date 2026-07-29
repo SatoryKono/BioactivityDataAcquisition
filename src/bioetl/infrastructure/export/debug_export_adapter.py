@@ -4,8 +4,6 @@
 
 from __future__ import annotations
 
-import csv
-import hashlib
 import json
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -13,6 +11,16 @@ from uuid import UUID
 
 from bioetl.domain.types import DebugExportResult, RunID
 from bioetl.infrastructure.control_plane import FileLineageStore
+from bioetl.infrastructure.export.debug_export_ops import (
+    collect_headers,
+    compute_pack_hash,
+    fingerprint_artifact,
+    normalize_csv_value,
+    resolve_debug_export_root,
+    write_debug_csv,
+    write_debug_schema,
+    write_debug_xlsx,
+)
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 if TYPE_CHECKING:
@@ -69,7 +77,9 @@ class DebugExportAdapter:
             except ModuleNotFoundError as exc:
                 if exc.name != "openpyxl":
                     raise
-                xlsx_skip_reason = "openpyxl is not installed; CSV artifacts remain the source of truth"
+                xlsx_skip_reason = (
+                    "openpyxl is not installed; CSV artifacts remain the source of truth"
+                )
             else:
                 workbook_path = candidate_path
                 file_paths.append(str(workbook_path))
@@ -111,10 +121,7 @@ class DebugExportAdapter:
         )
 
     def _resolve_root(self, pack: DebugExportPack) -> Path:
-        configured = Path(pack.output_root)
-        if not configured.is_absolute():
-            configured = Path.cwd() / configured
-        return configured / pack.workflow_id / pack.pipeline_id / pack.run_id
+        return resolve_debug_export_root(pack)
 
     def _write_csv(
         self,
@@ -123,49 +130,14 @@ class DebugExportAdapter:
         *,
         include_bom: bool,
     ) -> None:
-        headers = self._collect_headers(rows)
-        encoding = "utf-8-sig" if include_bom else "utf-8"
-        with output_path.open("w", encoding=encoding, newline="") as handle:
-            writer = csv.DictWriter(
-                handle,
-                fieldnames=headers,
-                extrasaction="ignore",
-                quoting=csv.QUOTE_ALL,
-            )
-            writer.writeheader()
-            for row in rows:
-                writer.writerow(
-                    {
-                        header: self._normalize_csv_value(row.get(header))
-                        for header in headers
-                    }
-                )
+        write_debug_csv(output_path, rows, include_bom=include_bom)
 
     def _write_schema(
         self,
         output_path: Path,
         rows: tuple[dict[str, object], ...],
     ) -> None:
-        headers = self._collect_headers(rows)
-        types = {
-            header: sorted(
-                {
-                    type(row.get(header)).__name__
-                    for row in rows
-                    if row.get(header) is not None
-                }
-            )
-            for header in headers
-        }
-        atomic_write_text(
-            output_path,
-            json.dumps(
-                {"columns": [{"name": h, "types": types[h]} for h in headers]},
-                indent=2,
-                sort_keys=True,
-            )
-            + "\n",
-        )
+        write_debug_schema(output_path, rows)
 
     def _write_xlsx(
         self,
@@ -174,63 +146,20 @@ class DebugExportAdapter:
         *,
         max_rows_per_sheet: int,
     ) -> None:
-        from openpyxl import Workbook  # pyright: ignore[reportMissingModuleSource]
-
-        workbook = Workbook()
-        workbook.properties.created = None
-        workbook.properties.modified = None
-        first_sheet = True
-        for table_name, rows in tables.items():
-            headers = self._collect_headers(rows)
-            chunk_size = max(1, min(max_rows_per_sheet - 1, 1_000_000))
-            chunks = [rows[i : i + chunk_size] for i in range(0, len(rows), chunk_size)]
-            if not chunks:
-                chunks = [()]
-            for chunk_index, chunk in enumerate(chunks, start=1):
-                sheet_name = (
-                    table_name
-                    if len(chunks) == 1
-                    else f"{table_name}_{chunk_index:04d}"
-                )[:31]
-                if first_sheet:
-                    worksheet = workbook.active
-                    if worksheet is None:
-                        raise RuntimeError(
-                            "new workbook must contain an active worksheet"
-                        )
-                    worksheet.title = sheet_name
-                    first_sheet = False
-                else:
-                    worksheet = workbook.create_sheet(title=sheet_name)
-                worksheet.freeze_panes = "A2"
-                worksheet.append(headers)
-                for row in chunk:
-                    worksheet.append(
-                        [
-                            self._normalize_csv_value(row.get(header))
-                            for header in headers
-                        ]
-                    )
-                worksheet.auto_filter.ref = worksheet.dimensions
-        workbook.save(output_path)
+        write_debug_xlsx(
+            output_path,
+            tables,
+            max_rows_per_sheet=max_rows_per_sheet,
+        )
 
     def _collect_headers(
         self,
         rows: tuple[dict[str, object], ...],
     ) -> list[str]:
-        headers: list[str] = []
-        for row in rows:
-            for key in row:
-                if key not in headers:
-                    headers.append(key)
-        return headers
+        return collect_headers(rows)
 
     def _normalize_csv_value(self, value: object | None) -> object:
-        if value is None:
-            return ""
-        if isinstance(value, (dict, list, tuple)):
-            return json.dumps(value, ensure_ascii=False, sort_keys=True)
-        return value
+        return normalize_csv_value(value)
 
     def _fingerprint(
         self,
@@ -239,28 +168,21 @@ class DebugExportAdapter:
         include_content_hash: bool = True,
         root_path: Path | None = None,
     ) -> dict[str, object]:
-        payload = path.read_bytes()
-        relative_path = (
-            str(path.relative_to(root_path)) if root_path is not None else str(path)
+        return fingerprint_artifact(
+            path,
+            include_content_hash=include_content_hash,
+            root_path=root_path,
         )
-        result = {
-            "path": relative_path,
-            "size_bytes": len(payload),
-        }
-        if include_content_hash:
-            result["sha256"] = hashlib.sha256(payload).hexdigest()
-        return result
 
     def _compute_pack_hash(
         self,
         artifacts: list[dict[str, object]],
     ) -> str:
-        payload = json.dumps(artifacts, sort_keys=True, separators=(",", ":")).encode(
-            "utf-8"
-        )
-        return hashlib.sha256(payload).hexdigest()
+        return compute_pack_hash(artifacts)
 
     def _load_lineage_rows(self, pack: DebugExportPack) -> list[dict[str, object]]:
+        # Keep FileLineageStore resolution in this module so unit tests can
+        # monkeypatch bioetl.infrastructure.export.debug_export_adapter.FileLineageStore.
         if self._lineage_store_path is None:
             return []
         try:

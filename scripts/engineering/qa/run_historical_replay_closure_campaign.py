@@ -473,11 +473,11 @@ def _build_composite_auto_specs(
     return tuple(specs)
 
 
-def main() -> int:
-    args = _parse_args()
-    settings = get_settings()
+def _build_campaign_services(
+    settings: object,
+) -> tuple[object, object, object, object, Path, dict[str, object]]:
     metrics = create_metrics(settings)
-    output_root = Path(settings.data_dir) / "output" / "control"
+    output_root = Path(settings.data_dir) / "output" / "control"  # type: ignore[attr-defined]
     manifest_store = FileRunManifestStore(
         base_path=output_root / "run_manifest",
         metrics=metrics,
@@ -495,14 +495,31 @@ def main() -> int:
         ),
     )
     closure_service = HistoricalReplayClosureService(corpus_service=corpus_service)
-    bronze_root = Path(settings.data_dir) / "output" / "bronze"
+    bronze_root = Path(settings.data_dir) / "output" / "bronze"  # type: ignore[attr-defined]
     bronze_meta_index = _build_bronze_meta_index(bronze_root)
+    return (
+        manifest_store,
+        ledger_store,
+        corpus_service,
+        closure_service,
+        bronze_root,
+        bronze_meta_index,
+    )
 
+
+def _maybe_auto_certify(
+    *,
+    args: object,
+    inventory: object,
+    corpus_service: object,
+    manifest_store: object,
+    ledger_store: object,
+    bronze_root: Path,
+    bronze_meta_index: dict[str, object],
+) -> tuple[object | None, object | None, object]:
     source_certification_result = None
     composite_certification_result = None
-    inventory = corpus_service.build_certifiability_inventory()
-
-    if args.auto_certify_sources:
+    if getattr(args, "auto_certify_sources", False):
         source_specs = _build_source_auto_specs(
             inventory=inventory,
             manifest_store=manifest_store,
@@ -510,24 +527,49 @@ def main() -> int:
             bronze_meta_index=bronze_meta_index,
         )
         if source_specs:
-            source_certification_result = corpus_service.certify_retained_corpus(
+            source_certification_result = corpus_service.certify_retained_corpus(  # type: ignore[attr-defined]
                 specs=source_specs
             )
             inventory = source_certification_result.inventory_after
-
-    if args.auto_certify_composites:
+    if getattr(args, "auto_certify_composites", False):
         composite_specs = _build_composite_auto_specs(
             inventory=inventory,
             manifest_store=manifest_store,
             ledger_store=ledger_store,
         )
         if composite_specs:
-            composite_certification_result = corpus_service.certify_retained_corpus(
+            composite_certification_result = corpus_service.certify_retained_corpus(  # type: ignore[attr-defined]
                 specs=composite_specs
             )
             inventory = composite_certification_result.inventory_after
+    return source_certification_result, composite_certification_result, inventory
 
-    inventory_payload = inventory.to_dict()
+
+def main() -> int:
+    args = _parse_args()
+    settings = get_settings()
+    (
+        manifest_store,
+        ledger_store,
+        corpus_service,
+        closure_service,
+        bronze_root,
+        bronze_meta_index,
+    ) = _build_campaign_services(settings)
+    inventory = corpus_service.build_certifiability_inventory()  # type: ignore[attr-defined]
+    source_certification_result, composite_certification_result, inventory = (
+        _maybe_auto_certify(
+            args=args,
+            inventory=inventory,
+            corpus_service=corpus_service,
+            manifest_store=manifest_store,
+            ledger_store=ledger_store,
+            bronze_root=bronze_root,
+            bronze_meta_index=bronze_meta_index,
+        )
+    )
+
+    inventory_payload = inventory.to_dict()  # type: ignore[attr-defined]
 
     if args.dispositions_path is not None:
         dispositions = _load_dispositions(args.dispositions_path)
@@ -539,7 +581,7 @@ def main() -> int:
         )
         dispositions_path = None
 
-    closure_report = closure_service.build_closure_report(
+    closure_report = closure_service.build_closure_report(  # type: ignore[attr-defined]
         residual_dispositions=dispositions,
         claim_scope_mode=args.claim_scope_mode,
     )

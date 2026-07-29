@@ -35,6 +35,8 @@ from bioetl.infrastructure.config.source_config_loader import (
 )
 from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
 
+YAML_GLOB = "*.yaml"
+
 
 def _canonical_script() -> Path:
     """Return the canonical validate-configs implementation path."""
@@ -52,26 +54,26 @@ def load_schema(schema_path: Path) -> dict[str, Any]:
 def _find_entity_files(entities_dir: Path) -> list[Path]:
     return [
         p
-        for p in sorted(entities_dir.rglob("*.yaml"))
+        for p in sorted(entities_dir.rglob(YAML_GLOB))
         if not p.name.startswith("_") and not _is_legacy_composite_entity_stub(p)
     ]
 
 
 def _find_composite_files(composites_dir: Path) -> list[Path]:
     return [
-        p for p in sorted(composites_dir.glob("*.yaml")) if not p.name.startswith("_")
+        p for p in sorted(composites_dir.glob(YAML_GLOB)) if not p.name.startswith("_")
     ]
 
 
 def _find_provider_files(providers_dir: Path) -> list[Path]:
     return [
-        p for p in sorted(providers_dir.glob("*.yaml")) if not p.name.startswith("_")
+        p for p in sorted(providers_dir.glob(YAML_GLOB)) if not p.name.startswith("_")
     ]
 
 
 def _find_workflow_files(workflows_dir: Path) -> list[Path]:
     return [
-        p for p in sorted(workflows_dir.glob("*.yaml")) if not p.name.startswith("_")
+        p for p in sorted(workflows_dir.glob(YAML_GLOB)) if not p.name.startswith("_")
     ]
 
 
@@ -384,6 +386,51 @@ def _validate_entity_cross_file_references(
     return errors
 
 
+def _validate_provider_entity_set(
+    *,
+    provider_name: str,
+    declared_entities: object,
+    known_entities: dict[str, set[str]],
+) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(declared_entities, list) or not declared_entities:
+        return ["entities must be a non-empty list"]
+    normalized_declared_entities = {str(item).strip() for item in declared_entities}
+    if "" in normalized_declared_entities:
+        errors.append("entities contains an empty entity name")
+    actual_entities = known_entities.get(provider_name, set())
+    missing_entity_configs = sorted(normalized_declared_entities - actual_entities)
+    unexpected_entity_configs = sorted(actual_entities - normalized_declared_entities)
+    if missing_entity_configs:
+        errors.append(
+            "entities references missing entity configs: "
+            + ", ".join(
+                f"configs/entities/{provider_name}/{entity}.yaml"
+                for entity in missing_entity_configs
+            )
+        )
+    if unexpected_entity_configs:
+        errors.append(
+            "provider config is missing declared entities present under configs/entities: "
+            + ", ".join(unexpected_entity_configs)
+        )
+    return errors
+
+
+def _validate_entity_notes(
+    entity_notes: object, *, declared_entities: set[str]
+) -> list[str]:
+    if entity_notes is None:
+        return []
+    if not isinstance(entity_notes, dict):
+        return ["entity_notes must be a mapping when present"]
+    note_keys = {str(key).strip() for key in entity_notes}
+    extra_notes = sorted(note_keys - declared_entities)
+    if not extra_notes:
+        return []
+    return ["entity_notes contains undeclared entities: " + ", ".join(extra_notes)]
+
+
 def _validate_provider_cross_file_references(
     config_path: Path,
     payload: dict[str, Any],
@@ -418,45 +465,22 @@ def _validate_provider_cross_file_references(
             f"'{provider_name}', got '{validated.provider}'"
         )
 
-    declared_entities = payload.get("entities")
-    if not isinstance(declared_entities, list) or not declared_entities:
-        errors.append("entities must be a non-empty list")
+    entity_errors = _validate_provider_entity_set(
+        provider_name=provider_name,
+        declared_entities=payload.get("entities"),
+        known_entities=known_entities,
+    )
+    errors.extend(entity_errors)
+    if any(err.startswith("entities must") for err in entity_errors):
         return errors
-
-    normalized_declared_entities = {str(item).strip() for item in declared_entities}
-    if "" in normalized_declared_entities:
-        errors.append("entities contains an empty entity name")
-
-    actual_entities = known_entities.get(provider_name, set())
-    missing_entity_configs = sorted(normalized_declared_entities - actual_entities)
-    unexpected_entity_configs = sorted(actual_entities - normalized_declared_entities)
-    if missing_entity_configs:
-        errors.append(
-            "entities references missing entity configs: "
-            + ", ".join(
-                f"configs/entities/{provider_name}/{entity}.yaml"
-                for entity in missing_entity_configs
-            )
-        )
-    if unexpected_entity_configs:
-        errors.append(
-            "provider config is missing declared entities present under configs/entities: "
-            + ", ".join(unexpected_entity_configs)
-        )
-
-    entity_notes = payload.get("entity_notes")
-    if entity_notes is not None:
-        if not isinstance(entity_notes, dict):
-            errors.append("entity_notes must be a mapping when present")
-        else:
-            note_keys = {str(key).strip() for key in entity_notes}
-            extra_notes = sorted(note_keys - normalized_declared_entities)
-            if extra_notes:
-                errors.append(
-                    "entity_notes contains undeclared entities: "
-                    + ", ".join(extra_notes)
-                )
-
+    declared = {
+        str(item).strip()
+        for item in (payload.get("entities") or [])
+        if str(item).strip()
+    }
+    errors.extend(
+        _validate_entity_notes(payload.get("entity_notes"), declared_entities=declared)
+    )
     return errors
 
 

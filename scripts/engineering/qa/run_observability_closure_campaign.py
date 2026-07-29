@@ -33,6 +33,8 @@ from bioetl.infrastructure.storage.support.atomic_ops import (
     atomic_write_text,
 )
 
+JSONL_ZST_SUFFIX = ".jsonl.zst"
+OBSERVABILITY_CLOSURE_CAMPAIGN_REPORT = "observability-closure-campaign.json"
 CHEMBL_PIPELINES = (
     "chembl_activity",
     "chembl_assay",
@@ -402,7 +404,7 @@ def _validate_fresh_audit_root(audit_root: Path) -> None:
     """Reject retained runtime state while allowing prebuilt evidence manifests."""
     if not audit_root.exists():
         return
-    forbidden = ("data", "logs", "attempts", "observability-closure-campaign.json")
+    forbidden = ("data", "logs", "attempts", OBSERVABILITY_CLOSURE_CAMPAIGN_REPORT)
     present = [name for name in forbidden if (audit_root / name).exists()]
     if present:
         raise ValueError(
@@ -841,7 +843,7 @@ def _find_bronze_record(
     )
     for path in paths:
         try:
-            if path.name.endswith(".jsonl.zst"):
+            if path.name.endswith(JSONL_ZST_SUFFIX):
                 compressed = path.open("rb")
                 reader = zstandard.ZstdDecompressor().stream_reader(compressed)
                 stream_context = io.TextIOWrapper(reader, encoding="utf-8")
@@ -963,7 +965,7 @@ def _write_standalone_fixture_files(
     )
     destination.parent.mkdir(parents=True, exist_ok=True)
     atomic_write_bytes(destination, raw)
-    compressed = destination.with_suffix(".jsonl.zst")
+    compressed = destination.with_suffix(JSONL_ZST_SUFFIX)
     atomic_write_bytes(compressed, compressor.compress(raw))
     return destination, compressed
 
@@ -1159,7 +1161,7 @@ def _write_workflow_fixture_entity(
     destination.parent.mkdir(parents=True, exist_ok=True)
     rendered = json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
     atomic_write_text(destination, rendered)
-    compressed_destination = destination.with_suffix(".jsonl.zst")
+    compressed_destination = destination.with_suffix(JSONL_ZST_SUFFIX)
     atomic_write_bytes(
         compressed_destination,
         zstandard.ZstdCompressor(level=3).compress(rendered.encode("utf-8")),
@@ -2851,12 +2853,11 @@ def _load_finalize_report(
     source_provenance: dict[str, object],
 ) -> dict[str, object]:
     """Load and validate the awaiting-evidence campaign report for finalization."""
-    expected_report_path = (
-        audit_root / "observability-closure-campaign.json"
-    ).resolve()
+    expected_report_path = (audit_root / OBSERVABILITY_CLOSURE_CAMPAIGN_REPORT).resolve()
     if report_path != expected_report_path or not report_path.is_file():
         raise ValueError(
-            "--finalize-report must name AUDIT_ROOT/observability-closure-campaign.json"
+            "--finalize-report must name AUDIT_ROOT/"
+            f"{OBSERVABILITY_CLOSURE_CAMPAIGN_REPORT}"
         )
     payload = json.loads(report_path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict) or payload.get("schema_version") != 1:
@@ -3386,7 +3387,7 @@ def main(argv: list[str] | None = None) -> int:
         residual_finding_gate=residual_finding_gate,
         core_complete=core_complete,
     )
-    output_path = audit_root / "observability-closure-campaign.json"
+    output_path = audit_root / OBSERVABILITY_CLOSURE_CAMPAIGN_REPORT
     atomic_write_text(
         output_path,
         json.dumps(report, indent=2, sort_keys=True) + "\n",

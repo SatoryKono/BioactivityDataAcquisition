@@ -17,6 +17,9 @@ import yaml
 CATALOG_SCHEMA_VERSION = 1
 DEFAULT_VCR_ROOT = Path("tests/fixtures/vcr")
 DEFAULT_OUTPUT = Path("reports/quality/vcr-metadata-catalog.json")
+VCR_META_YAML_SUFFIX = "_meta.yaml"
+VCR_META_YML_SUFFIX = "_meta.yml"
+VCR_META_SUFFIXES = (VCR_META_YAML_SUFFIX, VCR_META_YML_SUFFIX)
 REACHABILITY_SCAN_ROOTS = (Path("tests"),)
 REVIEWED_UNREFERENCED_STATUS = "reviewed_unreferenced"
 RF013_HEALTH_CASE_PATTERN = re.compile(
@@ -111,14 +114,14 @@ def _parse_args() -> argparse.Namespace:
 
 
 def _metadata_path_for(cassette_path: Path) -> Path:
-    return cassette_path.with_name(f"{cassette_path.stem}_meta.yaml")
+    return cassette_path.with_name(f"{cassette_path.stem}{VCR_META_YAML_SUFFIX}")
 
 
 def _is_cassette_file(path: Path) -> bool:
     return (
         path.is_file()
         and path.suffix.lower() in {".yaml", ".yml"}
-        and not (path.name.endswith("_meta.yaml") or path.name.endswith("_meta.yml"))
+        and not path.name.endswith(VCR_META_SUFFIXES)
     )
 
 
@@ -397,7 +400,7 @@ def iter_catalog_rows(vcr_root: Path) -> list[CassetteCatalogRow]:
     metadata_payloads = {
         path: _load_existing_metadata_payload(path)
         for path in vcr_root.rglob("*")
-        if path.is_file() and path.name.endswith(("_meta.yaml", "_meta.yml"))
+        if path.is_file() and path.name.endswith(VCR_META_SUFFIXES)
     }
 
     for cassette_path in cassette_paths:
@@ -445,7 +448,7 @@ def build_catalog(vcr_root: Path) -> dict[str, object]:
     actual_metadata_paths = {
         path.as_posix()
         for path in vcr_root.rglob("*")
-        if path.is_file() and path.name.endswith(("_meta.yaml", "_meta.yml"))
+        if path.is_file() and path.name.endswith(VCR_META_SUFFIXES)
     }
 
     for row in rows:

@@ -40,6 +40,8 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort, TracingPort
 
+CHECKPOINT_FOUND_ATTR = "bioetl.checkpoint_found"
+
 
 @dataclass
 class CheckpointService:
@@ -185,7 +187,7 @@ class CheckpointService:
             self._set_trace_result(
                 span,
                 success=True,
-                attributes={"bioetl.checkpoint_found": checkpoint is not None},
+                attributes={CHECKPOINT_FOUND_ATTR: checkpoint is not None},
             )
             return checkpoint
 
@@ -227,7 +229,7 @@ class CheckpointService:
             self._set_trace_result(
                 span,
                 success=True,
-                attributes={"bioetl.checkpoint_found": checkpoint is not None},
+                attributes={CHECKPOINT_FOUND_ATTR: checkpoint is not None},
             )
             return checkpoint
 
@@ -269,7 +271,7 @@ class CheckpointService:
             self._set_trace_result(
                 span,
                 success=True,
-                attributes={"bioetl.checkpoint_found": checkpoint is not None},
+                attributes={CHECKPOINT_FOUND_ATTR: checkpoint is not None},
             )
             return checkpoint
 

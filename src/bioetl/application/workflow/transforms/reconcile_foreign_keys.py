@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Mapping
-from typing import cast
+from typing import Any, cast
 
 from bioetl.application.services.workflow_transform_artifacts import (
     WorkflowTransformArtifactContext,
@@ -27,6 +27,79 @@ from bioetl.domain.workflow import WorkflowTransformSpec
 __all__ = ["build_reconcile_foreign_keys_executor"]
 
 
+def _runtime_flag(
+    runtime_context: WorkflowTransformRuntimeContext | None, name: str, default: bool
+) -> bool:
+    if runtime_context is None:
+        return default
+    return bool(getattr(runtime_context, name, default))
+
+
+def _build_reconcile_payload(
+    *,
+    spec: WorkflowTransformSpec,
+    request: ForeignKeyReconciliationRequest,
+    result: object,
+    workflow_name: object,
+) -> dict[str, object]:
+    # Port result is structural; keep boundary free of concrete infra result types.
+    r = cast(Any, result)  # Any: structural FK reconcile result port
+    payload = {
+        "transform_name": spec.transform_name,
+        "fingerprint": spec.fingerprint,
+        "workflow_name": workflow_name,
+        "workflow_run_id": request.workflow_run_id,
+        "manifest_id": request.manifest_id,
+        "step_id": spec.step_id,
+        "source_table": r.source_table,
+        "reference_table": r.reference_table,
+        "source_key": r.source_key,
+        "reference_key": r.reference_key,
+        "source_layer": r.source_layer,
+        "reference_layer": r.reference_layer,
+        "mutation_layer": r.mutation_layer,
+        "source_keys": list(request.source_keys or (request.source_key,)),
+        "reference_keys": list(request.reference_keys or (request.reference_key,)),
+        "action": r.action,
+        "nulls_equal": request.nulls_equal,
+        "scanned_rows": r.scanned_rows,
+        "retained_rows": r.retained_rows,
+        "orphan_rows_deleted": r.orphan_rows_deleted,
+        "mutated": r.mutated,
+        "dry_run": r.dry_run,
+        "would_mutate": r.would_mutate,
+        "mutation_mode": r.mutation_mode,
+        "quarantine_batch_id": r.quarantine_batch_id,
+        "quarantine_rows_written": r.quarantine_rows_written,
+        "quarantine_error_code": r.quarantine_error_code,
+    }
+    if r.dry_run and r.would_mutate:
+        payload["mutation_blocked_reason"] = "workflow_dry_run"
+    return payload
+
+
+def _record_reconcile_destructive_commit(
+    runtime_context: WorkflowTransformRuntimeContext | None,
+    *,
+    spec: WorkflowTransformSpec,
+    result: object,
+    payload: dict[str, object],
+) -> None:
+    r = cast(Any, result)  # Any: structural FK reconcile result port
+    if not r.mutated or r.dry_run:
+        return
+    if runtime_context is None or not hasattr(
+        runtime_context, "record_destructive_commit"
+    ):
+        return
+    runtime_context.record_destructive_commit(
+        step_id=spec.step_id,
+        transform_name=spec.transform_name,
+        fingerprint=spec.fingerprint,
+        details=payload,
+    )
+
+
 def build_reconcile_foreign_keys_executor(
     reconciliation_port: ForeignKeyReconciliationPort,
 ) -> WorkflowTransformCallable:
@@ -38,11 +111,6 @@ def build_reconcile_foreign_keys_executor(
         runtime_context: WorkflowTransformRuntimeContext | None = None,
     ) -> dict[str, object]:
         del upstream_outputs
-        context_dry_run = (
-            False
-            if runtime_context is None
-            else getattr(runtime_context, "dry_run", False)
-        )
         workflow_name = (
             getattr(runtime_context, "workflow_name", None)
             if runtime_context is not None
@@ -50,61 +118,25 @@ def build_reconcile_foreign_keys_executor(
         )
         request = _build_request(
             spec,
-            dry_run=context_dry_run,
+            dry_run=_runtime_flag(runtime_context, "dry_run", False),
             workflow_name=workflow_name,
             workflow_run_id=_optional_runtime_str(runtime_context, "workflow_run_id"),
             manifest_id=_optional_runtime_str(runtime_context, "manifest_id"),
-            debug_export_enabled=(
-                bool(getattr(runtime_context, "debug_export_enabled", False))
-                if runtime_context is not None
-                else False
+            debug_export_enabled=_runtime_flag(
+                runtime_context, "debug_export_enabled", False
             ),
             debug_export_dir=_optional_runtime_str(runtime_context, "debug_export_dir"),
         )
         result = await reconciliation_port.reconcile_foreign_keys(request)
-        payload = {
-            "transform_name": spec.transform_name,
-            "fingerprint": spec.fingerprint,
-            "workflow_name": workflow_name,
-            "workflow_run_id": request.workflow_run_id,
-            "manifest_id": request.manifest_id,
-            "step_id": spec.step_id,
-            "source_table": result.source_table,
-            "reference_table": result.reference_table,
-            "source_key": result.source_key,
-            "reference_key": result.reference_key,
-            "source_layer": result.source_layer,
-            "reference_layer": result.reference_layer,
-            "mutation_layer": result.mutation_layer,
-            "source_keys": list(request.source_keys or (request.source_key,)),
-            "reference_keys": list(request.reference_keys or (request.reference_key,)),
-            "action": result.action,
-            "nulls_equal": request.nulls_equal,
-            "scanned_rows": result.scanned_rows,
-            "retained_rows": result.retained_rows,
-            "orphan_rows_deleted": result.orphan_rows_deleted,
-            "mutated": result.mutated,
-            "dry_run": result.dry_run,
-            "would_mutate": result.would_mutate,
-            "mutation_mode": result.mutation_mode,
-            "quarantine_batch_id": result.quarantine_batch_id,
-            "quarantine_rows_written": result.quarantine_rows_written,
-            "quarantine_error_code": result.quarantine_error_code,
-        }
-        if result.dry_run and result.would_mutate:
-            payload["mutation_blocked_reason"] = "workflow_dry_run"
-        if (
-            result.mutated
-            and not result.dry_run
-            and runtime_context is not None
-            and hasattr(runtime_context, "record_destructive_commit")
-        ):
-            runtime_context.record_destructive_commit(
-                step_id=spec.step_id,
-                transform_name=spec.transform_name,
-                fingerprint=spec.fingerprint,
-                details=payload,
-            )
+        payload = _build_reconcile_payload(
+            spec=spec,
+            request=request,
+            result=result,
+            workflow_name=workflow_name,
+        )
+        _record_reconcile_destructive_commit(
+            runtime_context, spec=spec, result=result, payload=payload
+        )
         artifact_refs = await _persist_reconcile_result_artifact(
             runtime_context,
             spec=spec,

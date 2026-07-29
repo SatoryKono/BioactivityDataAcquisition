@@ -287,28 +287,32 @@ def echo_export_preview(preview: TablePreview) -> None:
     click.echo()
 
 
+def _echo_optional_export_fields(result: ExportResult) -> None:
+    if result.audit_ref:
+        click.echo(f"Audit ref: {result.audit_ref}")
+    if result.expires_at:
+        click.echo(f"Expires at: {result.expires_at}")
+    if result.redaction_profile:
+        click.echo(f"Redaction profile: {result.redaction_profile}")
+    if result.redacted_columns:
+        click.echo(f"Redacted columns: {', '.join(result.redacted_columns)}")
+    if result.checksum_manifest_path:
+        click.echo(f"Checksum manifest: {result.checksum_manifest_path}")
+    if result.manifest_paths:
+        click.echo("Manifests:")
+        for manifest_path in result.manifest_paths:
+            click.echo(f"  {manifest_path}")
+
+
 def echo_export_result(result: ExportResult) -> None:
     """Output export operation result.
 
     Args:
         result: ExportResult with export outcome.
     """
-    if result.success:
-        click.echo(f"\nExported {result.row_count:,} rows to {result.format.upper()}")
-        click.echo(f"Output: {result.output_path}")
-        if result.audit_ref:
-            click.echo(f"Audit ref: {result.audit_ref}")
-        if result.expires_at:
-            click.echo(f"Expires at: {result.expires_at}")
-        if result.redaction_profile:
-            click.echo(f"Redaction profile: {result.redaction_profile}")
-        if result.redacted_columns:
-            click.echo(f"Redacted columns: {', '.join(result.redacted_columns)}")
-        if result.checksum_manifest_path:
-            click.echo(f"Checksum manifest: {result.checksum_manifest_path}")
-        if result.manifest_paths:
-            click.echo("Manifests:")
-            for manifest_path in result.manifest_paths:
-                click.echo(f"  {manifest_path}")
-    else:
+    if not result.success:
         click.echo(f"\nExport failed: {result.error}", err=True)
+        return
+    click.echo(f"\nExported {result.row_count:,} rows to {result.format.upper()}")
+    click.echo(f"Output: {result.output_path}")
+    _echo_optional_export_fields(result)

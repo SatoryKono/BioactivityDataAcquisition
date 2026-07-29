@@ -250,6 +250,150 @@ def validate_panel_query(
     return False, "No valid queries found in panel"
 
 
+def _panel_query_execution_result(
+    panel: dict[str, Any],
+    *,
+    dashboard_uid: str,
+    panel_id: object,
+    panel_title: str,
+    prometheus_url: str,
+    timeout: float,
+) -> MetricPanelValidationResult:
+    has_template_vars = any(
+        "$" in target.get("expr", "") for target in panel.get("targets", [])
+    )
+    datasource = panel.get("datasource", {})
+    datasource_type = (
+        datasource.get("type", "") if isinstance(datasource, dict) else ""
+    )
+    is_loki_query = datasource_type.lower() == "loki"
+    if is_loki_query:
+        return MetricPanelValidationResult(
+            dashboard_uid=dashboard_uid,
+            panel_id=panel_id,
+            panel_title=panel_title,
+            metric_name="query_execution",
+            status="skip",
+            message="Panel uses Loki datasource, skipping Prometheus query validation",
+            details={"datasource_type": "loki"},
+        )
+    if has_template_vars:
+        return MetricPanelValidationResult(
+            dashboard_uid=dashboard_uid,
+            panel_id=panel_id,
+            panel_title=panel_title,
+            metric_name="query_execution",
+            status="skip",
+            message="Panel contains template variables, skipping query validation",
+            details={"has_template_vars": True},
+        )
+    query_valid, query_message = validate_panel_query(panel, prometheus_url, timeout)
+    return MetricPanelValidationResult(
+        dashboard_uid=dashboard_uid,
+        panel_id=panel_id,
+        panel_title=panel_title,
+        metric_name="query_execution",
+        status="pass" if query_valid else "fail",
+        message=query_message,
+        details={"query_valid": query_valid},
+    )
+
+
+def _validate_panel_metrics(
+    panel: dict[str, Any],
+    *,
+    dashboard_uid: str,
+    prometheus_metrics: set[str],
+    prometheus_url: str,
+    timeout: float,
+) -> list[MetricPanelValidationResult]:
+    panel_id = panel.get("id")
+    panel_title = panel.get("title", f"panel-{panel_id}")
+    panel_metrics = extract_panel_metrics(panel)
+    if not panel_metrics:
+        return [
+            MetricPanelValidationResult(
+                dashboard_uid=dashboard_uid,
+                panel_id=panel_id,
+                panel_title=panel_title,
+                metric_name="N/A",
+                status="skip",
+                message="Panel has no PromQL metrics (text/row panel)",
+            )
+        ]
+    results: list[MetricPanelValidationResult] = []
+    for metric_name in panel_metrics:
+        exists, message = validate_metric_exists(
+            metric_name, prometheus_metrics, prometheus_url, timeout
+        )
+        results.append(
+            MetricPanelValidationResult(
+                dashboard_uid=dashboard_uid,
+                panel_id=panel_id,
+                panel_title=panel_title,
+                metric_name=metric_name,
+                status="pass" if exists else "fail",
+                message=message,
+                details={"metric_exists": exists},
+            )
+        )
+    results.append(
+        _panel_query_execution_result(
+            panel,
+            dashboard_uid=dashboard_uid,
+            panel_id=panel_id,
+            panel_title=panel_title,
+            prometheus_url=prometheus_url,
+            timeout=timeout,
+        )
+    )
+    return results
+
+
+def _collect_panel_mapping_results(
+    panels: list[dict[str, Any]],
+    *,
+    dashboard_uid: str,
+    prometheus_metrics: set[str],
+    prometheus_url: str,
+    timeout: float,
+) -> list[MetricPanelValidationResult]:
+    results: list[MetricPanelValidationResult] = []
+    for panel in panels:
+        if panel.get("type") == "row":
+            results.extend(
+                _collect_panel_mapping_results(
+                    panel.get("panels", []),
+                    dashboard_uid=dashboard_uid,
+                    prometheus_metrics=prometheus_metrics,
+                    prometheus_url=prometheus_url,
+                    timeout=timeout,
+                )
+            )
+            continue
+        results.extend(
+            _validate_panel_metrics(
+                panel,
+                dashboard_uid=dashboard_uid,
+                prometheus_metrics=prometheus_metrics,
+                prometheus_url=prometheus_url,
+                timeout=timeout,
+            )
+        )
+        nested = panel.get("panels", [])
+        if nested:
+            results.extend(
+                _collect_panel_mapping_results(
+                    nested,
+                    dashboard_uid=dashboard_uid,
+                    prometheus_metrics=prometheus_metrics,
+                    prometheus_url=prometheus_url,
+                    timeout=timeout,
+                )
+            )
+    return results
+
+
 def validate_dashboard_metric_mapping(
     dashboard_path: Path,
     prometheus_metrics: set[str],
@@ -257,116 +401,18 @@ def validate_dashboard_metric_mapping(
     timeout: float,
 ) -> list[MetricPanelValidationResult]:
     """Validate metric-to-panel mapping for a single dashboard."""
-    results = []
-
     try:
         dashboard = load_dashboard(dashboard_path)
         dashboard_uid = dashboard.get("uid", dashboard_path.stem)
-
-        def process_panels(panels: list[dict[str, Any]]) -> None:
-            for panel in panels:
-                panel_id = panel.get("id")
-                panel_title = panel.get("title", f"panel-{panel_id}")
-
-                # Skip row panels
-                if panel.get("type") == "row":
-                    process_panels(panel.get("panels", []))
-                    continue
-
-                # Extract metrics from panel
-                panel_metrics = extract_panel_metrics(panel)
-
-                if not panel_metrics:
-                    # Panels without explicit metrics (e.g., text panels)
-                    results.append(
-                        MetricPanelValidationResult(
-                            dashboard_uid=dashboard_uid,
-                            panel_id=panel_id,
-                            panel_title=panel_title,
-                            metric_name="N/A",
-                            status="skip",
-                            message="Panel has no PromQL metrics (text/row panel)",
-                        )
-                    )
-                    process_panels(panel.get("panels", []))
-                    continue
-
-                # Validate each metric
-                for metric_name in panel_metrics:
-                    exists, message = validate_metric_exists(
-                        metric_name, prometheus_metrics, prometheus_url, timeout
-                    )
-
-                    results.append(
-                        MetricPanelValidationResult(
-                            dashboard_uid=dashboard_uid,
-                            panel_id=panel_id,
-                            panel_title=panel_title,
-                            metric_name=metric_name,
-                            status="pass" if exists else "fail",
-                            message=message,
-                            details={"metric_exists": exists},
-                        )
-                    )
-
-                # Validate panel query execution (skip if contains template variables or Loki queries)
-                has_template_vars = any(
-                    "$" in target.get("expr", "") for target in panel.get("targets", [])
-                )
-                datasource = panel.get("datasource", {})
-                datasource_type = (
-                    datasource.get("type", "") if isinstance(datasource, dict) else ""
-                )
-                is_loki_query = datasource_type.lower() == "loki"
-
-                if not has_template_vars and not is_loki_query:
-                    query_valid, query_message = validate_panel_query(
-                        panel, prometheus_url, timeout
-                    )
-
-                    results.append(
-                        MetricPanelValidationResult(
-                            dashboard_uid=dashboard_uid,
-                            panel_id=panel_id,
-                            panel_title=panel_title,
-                            metric_name="query_execution",
-                            status="pass" if query_valid else "fail",
-                            message=query_message,
-                            details={"query_valid": query_valid},
-                        )
-                    )
-                elif is_loki_query:
-                    results.append(
-                        MetricPanelValidationResult(
-                            dashboard_uid=dashboard_uid,
-                            panel_id=panel_id,
-                            panel_title=panel_title,
-                            metric_name="query_execution",
-                            status="skip",
-                            message="Panel uses Loki datasource, skipping Prometheus query validation",
-                            details={"datasource_type": "loki"},
-                        )
-                    )
-                else:
-                    results.append(
-                        MetricPanelValidationResult(
-                            dashboard_uid=dashboard_uid,
-                            panel_id=panel_id,
-                            panel_title=panel_title,
-                            metric_name="query_execution",
-                            status="skip",
-                            message="Panel contains template variables, skipping query validation",
-                            details={"has_template_vars": True},
-                        )
-                    )
-
-                # Process nested panels
-                process_panels(panel.get("panels", []))
-
-        process_panels(dashboard.get("panels", []))
-
+        return _collect_panel_mapping_results(
+            dashboard.get("panels", []),
+            dashboard_uid=dashboard_uid,
+            prometheus_metrics=prometheus_metrics,
+            prometheus_url=prometheus_url,
+            timeout=timeout,
+        )
     except Exception as e:
-        results.append(
+        return [
             MetricPanelValidationResult(
                 dashboard_uid=dashboard_path.stem,
                 panel_id=0,
@@ -376,9 +422,7 @@ def validate_dashboard_metric_mapping(
                 message=f"Failed to load dashboard: {e}",
                 details={"error": str(e)},
             )
-        )
-
-    return results
+        ]
 
 
 def run_metric_panel_validation(

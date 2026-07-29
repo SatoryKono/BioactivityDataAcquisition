@@ -179,6 +179,106 @@ def validate_source_files(
     return missing_paths, content_stale_paths
 
 
+def _validate_chunk_id(
+    chunk: dict[str, Any],
+    *,
+    issue_path: str,
+    seen_ids: set[str],
+    issues: list[RagValidationIssue],
+    index: int,
+    stale_indices: set[int],
+) -> None:
+    chunk_id = chunk.get("id")
+    if not isinstance(chunk_id, str) or not chunk_id:
+        add_issue(
+            issues, "invalid_chunk_id", issue_path, "id must be a non-empty string"
+        )
+        return
+    if chunk_id in seen_ids:
+        stale_indices.add(index)
+        add_issue(
+            issues,
+            "duplicate_chunk_id",
+            issue_path,
+            f"duplicate chunk id: {chunk_id}",
+        )
+        return
+    seen_ids.add(chunk_id)
+
+
+def _validate_chunk_source_path(
+    chunk: dict[str, Any],
+    *,
+    issue_path: str,
+    sources: dict[str, dict[str, Any]],
+    issues: list[RagValidationIssue],
+    index: int,
+    chunk_sources: dict[int, str | None],
+    chunks_by_source: dict[str, int],
+    stale_indices: set[int],
+) -> None:
+    raw_source_path = chunk.get("source_path")
+    if not isinstance(raw_source_path, str):
+        chunk_sources[index] = None
+        stale_indices.add(index)
+        add_issue(
+            issues,
+            "invalid_source_path",
+            issue_path,
+            "source_path must be a string",
+        )
+        return
+    try:
+        source_path = normalize_rag_source_path(
+            raw_source_path,
+            allow_virtual_fragment=True,
+        )
+    except ValueError as exc:
+        chunk_sources[index] = None
+        stale_indices.add(index)
+        add_issue(issues, "invalid_source_path", issue_path, str(exc))
+        return
+    chunk_sources[index] = source_path
+    chunks_by_source[source_path] = chunks_by_source.get(source_path, 0) + 1
+    if source_path not in sources:
+        stale_indices.add(index)
+        add_issue(
+            issues,
+            "chunk_source_not_cataloged",
+            issue_path,
+            f"chunk source is absent from catalog: {source_path}",
+        )
+
+
+def _validate_chunk_content_hash(
+    chunk: dict[str, Any],
+    *,
+    issue_path: str,
+    issues: list[RagValidationIssue],
+    index: int,
+    stale_indices: set[int],
+) -> None:
+    chunk_content = chunk.get("content")
+    chunk_hash = chunk.get("content_hash")
+    if not isinstance(chunk_content, str) or not isinstance(chunk_hash, str):
+        stale_indices.add(index)
+        add_issue(
+            issues,
+            "invalid_chunk_content",
+            issue_path,
+            "content and content_hash must be strings",
+        )
+        return
+    if content_hash(chunk_content) != chunk_hash:
+        stale_indices.add(index)
+        add_issue(
+            issues,
+            "chunk_content_hash_mismatch",
+            issue_path,
+            "chunk content_hash does not match content",
+        )
+
+
 def validate_chunks(
     chunks: list[dict[str, Any]],
     sources: dict[str, dict[str, Any]],
@@ -196,72 +296,31 @@ def validate_chunks(
             stale_indices.add(index)
             add_issue(issues, "invalid_chunk", issue_path, "chunk must be an object")
             continue
-        chunk_id = chunk.get("id")
-        if not isinstance(chunk_id, str) or not chunk_id:
-            add_issue(
-                issues, "invalid_chunk_id", issue_path, "id must be a non-empty string"
-            )
-        elif chunk_id in seen_ids:
-            stale_indices.add(index)
-            add_issue(
-                issues,
-                "duplicate_chunk_id",
-                issue_path,
-                f"duplicate chunk id: {chunk_id}",
-            )
-        else:
-            seen_ids.add(chunk_id)
-
-        raw_source_path = chunk.get("source_path")
-        if not isinstance(raw_source_path, str):
-            chunk_sources[index] = None
-            stale_indices.add(index)
-            add_issue(
-                issues,
-                "invalid_source_path",
-                issue_path,
-                "source_path must be a string",
-            )
-        else:
-            try:
-                source_path = normalize_rag_source_path(
-                    raw_source_path,
-                    allow_virtual_fragment=True,
-                )
-            except ValueError as exc:
-                chunk_sources[index] = None
-                stale_indices.add(index)
-                add_issue(issues, "invalid_source_path", issue_path, str(exc))
-            else:
-                chunk_sources[index] = source_path
-                chunks_by_source[source_path] = chunks_by_source.get(source_path, 0) + 1
-                if source_path not in sources:
-                    stale_indices.add(index)
-                    add_issue(
-                        issues,
-                        "chunk_source_not_cataloged",
-                        issue_path,
-                        f"chunk source is absent from catalog: {source_path}",
-                    )
-
-        chunk_content = chunk.get("content")
-        chunk_hash = chunk.get("content_hash")
-        if not isinstance(chunk_content, str) or not isinstance(chunk_hash, str):
-            stale_indices.add(index)
-            add_issue(
-                issues,
-                "invalid_chunk_content",
-                issue_path,
-                "content and content_hash must be strings",
-            )
-        elif content_hash(chunk_content) != chunk_hash:
-            stale_indices.add(index)
-            add_issue(
-                issues,
-                "chunk_content_hash_mismatch",
-                issue_path,
-                "chunk content_hash does not match content",
-            )
+        _validate_chunk_id(
+            chunk,
+            issue_path=issue_path,
+            seen_ids=seen_ids,
+            issues=issues,
+            index=index,
+            stale_indices=stale_indices,
+        )
+        _validate_chunk_source_path(
+            chunk,
+            issue_path=issue_path,
+            sources=sources,
+            issues=issues,
+            index=index,
+            chunk_sources=chunk_sources,
+            chunks_by_source=chunks_by_source,
+            stale_indices=stale_indices,
+        )
+        _validate_chunk_content_hash(
+            chunk,
+            issue_path=issue_path,
+            issues=issues,
+            index=index,
+            stale_indices=stale_indices,
+        )
     return chunks_by_source, chunk_sources, stale_indices
 
 

@@ -554,6 +554,99 @@ def _validate_current_anchors(
     return violations
 
 
+def _validate_finding_identity(
+    row: dict[str, Any],
+    *,
+    seen_ids: set[str],
+) -> list[str]:
+    violations: list[str] = []
+    finding_id = str(row.get("finding_id", ""))
+    if not finding_id:
+        violations.append("finding row has empty finding_id")
+    if finding_id in seen_ids:
+        violations.append(f"duplicate finding_id: {finding_id}")
+    seen_ids.add(finding_id)
+    classification = str(row.get("classification", ""))
+    if classification not in ALLOWED_CLASSIFICATIONS:
+        violations.append(f"{finding_id}: invalid classification {classification!r}")
+    return violations
+
+
+def _extract_finding_anchor_lists(
+    finding_id: str,
+    row: dict[str, Any],
+) -> tuple[list[Any], list[Any], list[Any], list[str]] | None:
+    cited_paths = row.get("cited_paths")
+    if not isinstance(cited_paths, list):
+        return None
+    source_anchors = row.get("current_source_anchors")
+    test_anchors = row.get("current_test_anchors")
+    issue_anchors = row.get("existing_issue_anchors")
+    shape_errors: list[str] = []
+    if not isinstance(source_anchors, list):
+        shape_errors.append(f"{finding_id}: current_source_anchors must be a list")
+    if not isinstance(test_anchors, list):
+        shape_errors.append(f"{finding_id}: current_test_anchors must be a list")
+    if not isinstance(issue_anchors, list):
+        shape_errors.append(f"{finding_id}: existing_issue_anchors must be a list")
+    if shape_errors:
+        return None
+    assert isinstance(source_anchors, list)
+    assert isinstance(test_anchors, list)
+    assert isinstance(issue_anchors, list)
+    missing_cited_paths = [
+        str(path_status.get("path"))
+        for path_status in cited_paths
+        if isinstance(path_status, dict) and not bool(path_status.get("exists"))
+    ]
+    return source_anchors, test_anchors, issue_anchors, missing_cited_paths
+
+
+def _validate_finding_anchors(
+    row: dict[str, Any],
+    *,
+    repo_root: Path,
+    known_issues: set[str] | None,
+) -> list[str]:
+    finding_id = str(row.get("finding_id", ""))
+    classification = str(row.get("classification", ""))
+    if not isinstance(row.get("cited_paths"), list):
+        return [f"{finding_id}: cited_paths must be a list"]
+    extracted = _extract_finding_anchor_lists(finding_id, row)
+    if extracted is None:
+        violations: list[str] = []
+        if not isinstance(row.get("current_source_anchors"), list):
+            violations.append(f"{finding_id}: current_source_anchors must be a list")
+        if not isinstance(row.get("current_test_anchors"), list):
+            violations.append(f"{finding_id}: current_test_anchors must be a list")
+        if not isinstance(row.get("existing_issue_anchors"), list):
+            violations.append(f"{finding_id}: existing_issue_anchors must be a list")
+        return violations
+    source_anchors, test_anchors, issue_anchors, missing_cited_paths = extracted
+    violations = []
+    if missing_cited_paths and not (source_anchors or test_anchors or issue_anchors):
+        violations.append(
+            f"{finding_id}: missing cited paths require current anchors or issues"
+        )
+    if classification in {"duplicate-existing-issue", "stale-evidence"} and not (
+        issue_anchors or source_anchors or test_anchors
+    ):
+        violations.append(
+            f"{finding_id}: {classification} rows need duplicate or current evidence"
+        )
+    violations.extend(_validate_current_anchors(row, repo_root=repo_root))
+    if known_issues is not None:
+        missing_issues = [
+            str(anchor) for anchor in issue_anchors if str(anchor) not in known_issues
+        ]
+        if missing_issues:
+            violations.append(
+                f"{finding_id}: issue anchors missing from issue export: "
+                + ", ".join(missing_issues)
+            )
+    return violations
+
+
 def validate_rebaseline_report(
     report: dict[str, Any],
     *,
@@ -578,65 +671,12 @@ def validate_rebaseline_report(
         if not isinstance(row, dict):
             violations.append("finding rows must be mappings")
             continue
-        finding_id = str(row.get("finding_id", ""))
-        if not finding_id:
-            violations.append("finding row has empty finding_id")
-        if finding_id in seen_ids:
-            violations.append(f"duplicate finding_id: {finding_id}")
-        seen_ids.add(finding_id)
-
-        classification = str(row.get("classification", ""))
-        if classification not in ALLOWED_CLASSIFICATIONS:
-            violations.append(
-                f"{finding_id}: invalid classification {classification!r}"
+        violations.extend(_validate_finding_identity(row, seen_ids=seen_ids))
+        violations.extend(
+            _validate_finding_anchors(
+                row, repo_root=repo_root, known_issues=known_issues
             )
-
-        cited_paths = row.get("cited_paths")
-        if not isinstance(cited_paths, list):
-            violations.append(f"{finding_id}: cited_paths must be a list")
-            continue
-        missing_cited_paths = [
-            str(path_status.get("path"))
-            for path_status in cited_paths
-            if isinstance(path_status, dict) and not bool(path_status.get("exists"))
-        ]
-        source_anchors = row.get("current_source_anchors")
-        test_anchors = row.get("current_test_anchors")
-        issue_anchors = row.get("existing_issue_anchors")
-        if not isinstance(source_anchors, list):
-            violations.append(f"{finding_id}: current_source_anchors must be a list")
-            continue
-        if not isinstance(test_anchors, list):
-            violations.append(f"{finding_id}: current_test_anchors must be a list")
-            continue
-        if not isinstance(issue_anchors, list):
-            violations.append(f"{finding_id}: existing_issue_anchors must be a list")
-            continue
-
-        if missing_cited_paths and not (
-            source_anchors or test_anchors or issue_anchors
-        ):
-            violations.append(
-                f"{finding_id}: missing cited paths require current anchors or issues"
-            )
-        if classification in {"duplicate-existing-issue", "stale-evidence"} and not (
-            issue_anchors or source_anchors or test_anchors
-        ):
-            violations.append(
-                f"{finding_id}: {classification} rows need duplicate or current evidence"
-            )
-        violations.extend(_validate_current_anchors(row, repo_root=repo_root))
-        if known_issues is not None:
-            missing_issues = [
-                str(anchor)
-                for anchor in issue_anchors
-                if str(anchor) not in known_issues
-            ]
-            if missing_issues:
-                violations.append(
-                    f"{finding_id}: issue anchors missing from issue export: "
-                    + ", ".join(missing_issues)
-                )
+        )
 
     return violations
 

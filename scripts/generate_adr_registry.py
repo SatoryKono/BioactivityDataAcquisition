@@ -220,6 +220,17 @@ class ADRRegistryGenerator:
             return [item for item in value if isinstance(item, str)]
         return []
 
+    def _date_from_table_line(self, line: str) -> str | None:
+        if "|" not in line:
+            return None
+        lowered = line.lower()
+        if "**дата**" not in lowered and "**date**" not in lowered:
+            return None
+        for cell in (cell.strip().strip("`") for cell in line.split("|")):
+            if re.fullmatch(r"\d{4}-\d{2}-\d{2}", cell):
+                return cell
+        return None
+
     def _extract_decision_date(
         self,
         content: str,
@@ -237,16 +248,10 @@ class ADRRegistryGenerator:
             )
             if normalized is not None:
                 return normalized
-
         for line in content.splitlines():
-            if "|" not in line:
-                continue
-            lowered = line.lower()
-            if "**дата**" not in lowered and "**date**" not in lowered:
-                continue
-            for cell in (cell.strip().strip("`") for cell in line.split("|")):
-                if re.fullmatch(r"\d{4}-\d{2}-\d{2}", cell):
-                    return cell
+            found = self._date_from_table_line(line)
+            if found is not None:
+                return found
         return None
 
     @staticmethod

@@ -70,6 +70,42 @@ def _strip_occurrence_only_fields(value: object) -> object:
     return value
 
 
+def _mapping_difference_paths(
+    left: Mapping[object, object],
+    right: Mapping[object, object],
+    *,
+    prefix: str,
+) -> tuple[str, ...]:
+    paths: list[str] = []
+    for key in sorted(set(left) | set(right), key=str):
+        key_text = str(key)
+        next_prefix = f"{prefix}.{key_text}" if prefix else key_text
+        if key not in left or key not in right:
+            paths.append(next_prefix)
+            continue
+        paths.extend(
+            _collect_difference_paths(left[key], right[key], prefix=next_prefix)
+        )
+    return tuple(paths)
+
+
+def _list_difference_paths(
+    left: list[object],
+    right: list[object],
+    *,
+    prefix: str,
+) -> tuple[str, ...]:
+    if len(left) != len(right):
+        return (prefix or "value",)
+    list_paths: list[str] = []
+    for index, (left_item, right_item) in enumerate(zip(left, right, strict=True)):
+        next_prefix = f"{prefix}[{index}]" if prefix else f"[{index}]"
+        list_paths.extend(
+            _collect_difference_paths(left_item, right_item, prefix=next_prefix)
+        )
+    return tuple(list_paths)
+
+
 def _collect_difference_paths(
     left: object,
     right: object,
@@ -77,35 +113,9 @@ def _collect_difference_paths(
     prefix: str = "",
 ) -> tuple[str, ...]:
     if isinstance(left, Mapping) and isinstance(right, Mapping):
-        paths: list[str] = []
-        for key in sorted(set(left) | set(right), key=str):
-            key_text = str(key)
-            next_prefix = f"{prefix}.{key_text}" if prefix else key_text
-            if key not in left or key not in right:
-                paths.append(next_prefix)
-                continue
-            paths.extend(
-                _collect_difference_paths(
-                    left[key],
-                    right[key],
-                    prefix=next_prefix,
-                )
-            )
-        return tuple(paths)
+        return _mapping_difference_paths(left, right, prefix=prefix)
     if isinstance(left, list) and isinstance(right, list):
-        if len(left) != len(right):
-            return (prefix or "value",)
-        list_paths: list[str] = []
-        for index, (left_item, right_item) in enumerate(zip(left, right, strict=True)):
-            next_prefix = f"{prefix}[{index}]" if prefix else f"[{index}]"
-            list_paths.extend(
-                _collect_difference_paths(
-                    left_item,
-                    right_item,
-                    prefix=next_prefix,
-                )
-            )
-        return tuple(list_paths)
+        return _list_difference_paths(left, right, prefix=prefix)
     if left == right:
         return ()
     return (prefix or "value",)

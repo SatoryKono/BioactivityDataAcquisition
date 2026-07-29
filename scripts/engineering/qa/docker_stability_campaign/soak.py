@@ -76,6 +76,109 @@ def _load_or_create_baselines(
     return baselines, pinned_ids
 
 
+def _start_soak_stacks(
+    *,
+    state: dict[str, Any],
+    state_path: Path,
+    evidence_dir: Path,
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+    soak_dir: Path,
+) -> bool:
+    for spec in bundle:
+        result = manager_step(
+            runtime_origin,
+            contract,
+            spec,
+            "start",
+            soak_dir / f"manager-start-{spec.stack}",
+            180.0,
+        )
+        if result["returncode"] != 0:
+            state["soak_window_interrupted"] = True
+            state["last_failure"] = f"soak-start-{spec.stack}"
+            index_and_save(state, state_path, evidence_dir)
+            return False
+    return True
+
+
+def _collect_soak_sample(
+    *,
+    state: dict[str, Any],
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+    soak_dir: Path,
+    baselines: dict[str, Path],
+    pinned_ids: dict[str, dict[str, str]],
+    sequence: int,
+) -> tuple[bool, list[dict[str, Any]], dict[str, Any]]:
+    sample_steps: list[dict[str, Any]] = []
+    clean = True
+    for spec in bundle:
+        output = soak_dir / f"probe-{sequence:07d}-{spec.stack}.json"
+        result = probe_command(
+            runtime_origin,
+            spec,
+            output,
+            75.0,
+            contract=contract,
+            baseline=baselines[spec.stack],
+        )
+        sample_steps.append({"stack": spec.stack, "result": result})
+        if (
+            result["returncode"] != 0
+            or probe_services(output) != pinned_ids[spec.stack]
+        ):
+            clean = False
+        if output.exists():
+            record_probe(state, output)
+    capacity = observe_docker_vm_reserve(state, runtime_origin)
+    clean = clean and capacity["returncode"] == 0
+    return clean, sample_steps, capacity
+
+
+def _record_soak_sample(
+    *,
+    state: dict[str, Any],
+    state_path: Path,
+    evidence_dir: Path,
+    soak_dir: Path,
+    sequence: int,
+    sampled_at: float,
+    previous: object,
+    clean: bool,
+    capacity: dict[str, Any],
+    sample_steps: list[dict[str, Any]],
+) -> bool:
+    atomic_json(
+        soak_dir / f"sample-{sequence:07d}.json",
+        {
+            "sample": sequence,
+            "sampled_at": sampled_at,
+            "clean": clean,
+            "capacity": capacity,
+            "steps": sample_steps,
+        },
+        replace=False,
+    )
+    if not clean:
+        state["soak_window_interrupted"] = True
+        state["last_failure"] = f"soak-sample-{sequence:07d}"
+        index_and_save(state, state_path, evidence_dir)
+        return False
+    if previous is not None:
+        state["soak_observed_seconds"] = float(state["soak_observed_seconds"]) + (
+            sampled_at - float(previous)
+        )
+    state["soak_last_sample_at"] = sampled_at
+    state["soak_samples_current_window"] = sequence
+    state["last_failure"] = None
+    index_and_save(state, state_path, evidence_dir)
+    return True
+
+
 def run_soak(
     state: dict[str, Any],
     state_path: Path,
@@ -97,20 +200,16 @@ def run_soak(
         reset_soak_window(state, now)
     generation = int(state["soak_generation"])
     soak_dir = evidence_dir / "soak" / f"window-{generation:03d}"
-    for spec in bundle:
-        result = manager_step(
-            runtime_origin,
-            contract,
-            spec,
-            "start",
-            soak_dir / f"manager-start-{spec.stack}",
-            180.0,
-        )
-        if result["returncode"] != 0:
-            state["soak_window_interrupted"] = True
-            state["last_failure"] = f"soak-start-{spec.stack}"
-            index_and_save(state, state_path, evidence_dir)
-            return False
+    if not _start_soak_stacks(
+        state=state,
+        state_path=state_path,
+        evidence_dir=evidence_dir,
+        runtime_origin=runtime_origin,
+        contract=contract,
+        bundle=bundle,
+        soak_dir=soak_dir,
+    ):
+        return False
     prepared = _load_or_create_baselines(
         state,
         state_path,
@@ -143,52 +242,29 @@ def run_soak(
                 sample_seconds,
             )
         sequence += 1
-        sample_steps: list[dict[str, Any]] = []
-        clean = True
-        for spec in bundle:
-            output = soak_dir / f"probe-{sequence:07d}-{spec.stack}.json"
-            result = probe_command(
-                runtime_origin,
-                spec,
-                output,
-                75.0,
-                contract=contract,
-                baseline=baselines[spec.stack],
-            )
-            sample_steps.append({"stack": spec.stack, "result": result})
-            if (
-                result["returncode"] != 0
-                or probe_services(output) != pinned_ids[spec.stack]
-            ):
-                clean = False
-            if output.exists():
-                record_probe(state, output)
-        capacity = observe_docker_vm_reserve(state, runtime_origin)
-        clean = clean and capacity["returncode"] == 0
-        atomic_json(
-            soak_dir / f"sample-{sequence:07d}.json",
-            {
-                "sample": sequence,
-                "sampled_at": sampled_at,
-                "clean": clean,
-                "capacity": capacity,
-                "steps": sample_steps,
-            },
-            replace=False,
+        clean, sample_steps, capacity = _collect_soak_sample(
+            state=state,
+            runtime_origin=runtime_origin,
+            contract=contract,
+            bundle=bundle,
+            soak_dir=soak_dir,
+            baselines=baselines,
+            pinned_ids=pinned_ids,
+            sequence=sequence,
         )
-        if not clean:
-            state["soak_window_interrupted"] = True
-            state["last_failure"] = f"soak-sample-{sequence:07d}"
-            index_and_save(state, state_path, evidence_dir)
+        if not _record_soak_sample(
+            state=state,
+            state_path=state_path,
+            evidence_dir=evidence_dir,
+            soak_dir=soak_dir,
+            sequence=sequence,
+            sampled_at=sampled_at,
+            previous=previous,
+            clean=clean,
+            capacity=capacity,
+            sample_steps=sample_steps,
+        ):
             return False
-        if previous is not None:
-            state["soak_observed_seconds"] = float(state["soak_observed_seconds"]) + (
-                sampled_at - float(previous)
-            )
-        state["soak_last_sample_at"] = sampled_at
-        state["soak_samples_current_window"] = sequence
-        state["last_failure"] = None
-        index_and_save(state, state_path, evidence_dir)
         if float(state["soak_observed_seconds"]) < required:
             time.sleep(
                 min(sample_seconds, required - float(state["soak_observed_seconds"]))

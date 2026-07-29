@@ -65,6 +65,7 @@ _CANONICAL_METRIC_RE = re.compile(r"\bbioetl_[a-z0-9_]+\b")
 _PROMETHEUS_METRIC_NAME_RE = re.compile(r"^[A-Za-z_:][A-Za-z0-9_:]*$")
 
 _RUNTIME_SCAN_ROOT = Path("src/bioetl")
+_INFRASTRUCTURE_PATH_PREFIX = "src/bioetl/infrastructure"
 _REGISTERED_SCAN_ROOT = Path("src/bioetl/infrastructure/observability")
 _DOC_SCAN_ROOTS = (
     Path("docs/02-architecture"),
@@ -811,7 +812,7 @@ def _iter_runtime_event_candidate_paths(repo_root: Path) -> list[Path]:
     discovered = _iter_candidate_paths_with_git_grep(
         root,
         markers=_RUNTIME_EVENT_SCAN_MARKERS,
-        excluded_parts=("src/bioetl/infrastructure",),
+        excluded_parts=(_INFRASTRUCTURE_PATH_PREFIX,),
     )
     if discovered is not None:
         _RUNTIME_EVENT_CANDIDATE_PATH_CACHE[cache_key] = tuple(discovered)
@@ -827,7 +828,7 @@ def _iter_runtime_event_candidate_paths(repo_root: Path) -> list[Path]:
         if path.suffix != ".py":
             continue
         path_str = path.as_posix()
-        if "src/bioetl/infrastructure" in path_str:
+        if _INFRASTRUCTURE_PATH_PREFIX in path_str:
             continue
         if _read_runtime_event_candidate_text(path) is not None:
             fallback.append(path)
@@ -841,7 +842,7 @@ def _iter_runtime_event_candidate_paths_with_rg(root: Path) -> list[Path]:
     return _iter_candidate_paths_with_rg(
         root,
         markers=_RUNTIME_EVENT_SCAN_MARKERS,
-        excluded_parts=("src/bioetl/infrastructure",),
+        excluded_parts=(_INFRASTRUCTURE_PATH_PREFIX,),
     )
 
 

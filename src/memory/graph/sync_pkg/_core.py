@@ -55,6 +55,7 @@ LEGACY_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
 ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS = 2.0
 INIT_PY = "__init__.py"
 MAIN_PY = "__main__.py"
+YAML_SUFFIX = ".yaml"
 GITHUB_DIR = ".github"
 GITHUB_PATH_PREFIX = f"{GITHUB_DIR}/"
 GITHUB_WORKFLOWS_PREFIX = f"{GITHUB_DIR}/workflows/"
@@ -5322,7 +5323,7 @@ def _impact_analysis_context(
 
 
 def _is_doc_artifact_file(relative_file: str, file_extension: str) -> bool:
-    return file_extension in {".md", ".yml", ".yaml"} and (
+    return file_extension in {".md", ".yml", YAML_SUFFIX} and (
         relative_file in {"README.md", "mkdocs.yml"}
         or relative_file.startswith("docs/")
         or relative_file.startswith(GITHUB_PATH_PREFIX)
@@ -9445,7 +9446,7 @@ _DOCS_REFERENCE_ALLOWED_PREFIXES = (
 )
 
 _DOC_LIKE_LABELS = {"doc_source_surface", "doc_artifact", "policy_surface"}
-_DOCS_DRIFT_TEXT_EXTENSIONS = {".md", ".rst", ".txt", ".yaml", ".yml"}
+_DOCS_DRIFT_TEXT_EXTENSIONS = {".md", ".rst", ".txt", YAML_SUFFIX, ".yml"}
 _DOCS_DRIFT_EXCLUDED_PREFIXES = (
     ".github/ISSUES",
     ".github/ISSUE_TEMPLATE",
@@ -10745,7 +10746,7 @@ def _add_contract_policy_config(
 def _contract_policy_config_path(context: ContractEntryContext) -> Path:
     return (
         context.root / "configs" / "contracts" / context.contract_ref.replace(".", "/")
-    ).with_suffix(".yaml")
+    ).with_suffix(YAML_SUFFIX)
 
 
 def _contract_policy_fields(contract_config: dict[str, object]) -> dict[str, object]:

@@ -533,6 +533,50 @@ def _plan_dict_rule(
     return plans
 
 
+def _as_rule_list(value: object) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _as_rule_dict(value: object) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _extend_list_rule_plans(
+    plan: EntityPlan,
+    *,
+    silver: dict[str, Any],
+    gold_dict: dict[str, Any],
+    provider: str,
+    entity: str,
+) -> None:
+    for rule_type in ("required_fields", "exclude_if_present"):
+        silver_items = silver.get(rule_type) or []
+        if not isinstance(silver_items, list):
+            continue
+        gold_items = _as_rule_list(gold_dict.get(rule_type) or [])
+        plan.rules.extend(
+            _plan_list_rule(rule_type, silver_items, gold_items, provider, entity)
+        )
+
+
+def _extend_dict_rule_plans(
+    plan: EntityPlan,
+    *,
+    silver: dict[str, Any],
+    gold_dict: dict[str, Any],
+    provider: str,
+    entity: str,
+) -> None:
+    for rule_type in ("columns", "ranges", "list_lengths", "list_contains"):
+        silver_dict = silver.get(rule_type) or {}
+        if not isinstance(silver_dict, dict):
+            continue
+        gold_dict_rule = _as_rule_dict(gold_dict.get(rule_type) or {})
+        plan.rules.extend(
+            _plan_dict_rule(rule_type, silver_dict, gold_dict_rule, provider, entity)
+        )
+
+
 def build_entity_plan(provider: str, entity: str, path: Path) -> EntityPlan:
     """Build a per-entity migration plan from a YAML config."""
     raw = _load_yaml(path)
@@ -549,39 +593,15 @@ def build_entity_plan(provider: str, entity: str, path: Path) -> EntityPlan:
         silver_raw=silver,
         gold_raw=gold,
     )
-
     if not isinstance(silver, dict):
         return plan
-
-    if isinstance(gold, dict):
-        gold_dict: dict[str, Any] = gold
-    else:
-        gold_dict = {}
-
-    # Structural list-shaped rules
-    for rule_type in ("required_fields", "exclude_if_present"):
-        silver_items = silver.get(rule_type) or []
-        gold_items = gold_dict.get(rule_type) or []
-        if not isinstance(silver_items, list):
-            continue
-        if not isinstance(gold_items, list):
-            gold_items = []
-        plan.rules.extend(
-            _plan_list_rule(rule_type, silver_items, gold_items, provider, entity)
-        )
-
-    # Semantic dict-shaped rules
-    for rule_type in ("columns", "ranges", "list_lengths", "list_contains"):
-        silver_dict = silver.get(rule_type) or {}
-        gold_dict_rule = gold_dict.get(rule_type) or {}
-        if not isinstance(silver_dict, dict):
-            continue
-        if not isinstance(gold_dict_rule, dict):
-            gold_dict_rule = {}
-        plan.rules.extend(
-            _plan_dict_rule(rule_type, silver_dict, gold_dict_rule, provider, entity)
-        )
-
+    gold_dict = _as_rule_dict(gold)
+    _extend_list_rule_plans(
+        plan, silver=silver, gold_dict=gold_dict, provider=provider, entity=entity
+    )
+    _extend_dict_rule_plans(
+        plan, silver=silver, gold_dict=gold_dict, provider=provider, entity=entity
+    )
     return plan
 
 
