@@ -30,18 +30,23 @@
 
 ## Issue codes
 
-| Code | Pri | Theme |
-| --- | --- | --- |
-| ARCH-CR2-00 | meta | Epic: CodeRabbit residual architecture wave 2 |
-| ARCH-CR2-01 | P0 | Async bronze storage I/O residual (to_thread) |
-| ARCH-CR2-02 | P0 | Control-plane hydration strictness + medallion lifecycle errors |
-| ARCH-CR2-03 | P0 | Health server lifecycle: quarantine deps before build |
-| ARCH-CR2-04 | P1 | Maintenance CLI: do not mutate shared command objects |
-| ARCH-CR2-05 | P1 | Architecture program test densification (checkpoint/registry/CLI/composite) |
-| ARCH-CR2-06 | P1 | Typing residual: cast(Any,None) mixins + entity TypedDict (coord with PD) |
-| ARCH-CR2-07 | P2 | Docs/ADR residual SSOT (RULES version, ownership table, ADR-052/053 rollback) |
-| ARCH-CR2-08 | P2 | Config governance residual (scorecard, allowlists, pytest shards) |
-| ARCH-CR2-09 | P2 | Architecture test honesty (closeout/live residual / any-budget) |
+## Issue codes — published
+
+| Code | Pri | Issue | URL |
+|------|-----|------:|-----|
+| ARCH-CR2-00 | meta | #7005 | https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7005 |
+| ARCH-CR2-01 | P0 | #7006 | https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7006 |
+| ARCH-CR2-02 | P0 | #7007 | https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7007 |
+| ARCH-CR2-03 | P0 | #7008 | https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7008 |
+| ARCH-CR2-04 | P1 | #7009 | https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7009 |
+| ARCH-CR2-05 | P1 | #7010 | https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7010 |
+| ARCH-CR2-06 | P1 | #7011 | https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7011 |
+| ARCH-CR2-07 | P2 | #7012 | https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7012 |
+| ARCH-CR2-08 | P2 | #7013 | https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7013 |
+| ARCH-CR2-09 | P2 | #7014 | https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7014 |
+
+Publish record: `reports/quality/architecture-coderabbit-2026-07-29-issue-publish.json`
+
 
 ## Acceptance (epic)
 

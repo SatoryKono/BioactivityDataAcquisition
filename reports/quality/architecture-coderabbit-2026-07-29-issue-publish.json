@@ -1,0 +1,68 @@
+{
+  "audit_report": "reports/grok/review_coderabbit_architecture_audit_20260728_1520_FINAL.md",
+  "audit_json": "reports/grok/review_coderabbit_architecture_audit_20260728_1520.json",
+  "stamp": "20260728_1520",
+  "base": "f7ec4386fda4549fa44faa071ab6627e219ba6c1",
+  "issues": [
+    {
+      "code": "ARCH-CR2-00",
+      "number": 7005,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7005",
+      "title": "[meta][architecture] ARCH-CR2: CodeRabbit residual architecture remediation wave 2"
+    },
+    {
+      "code": "ARCH-CR2-01",
+      "number": 7006,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7006",
+      "title": "[P0][architecture] ARCH-CR2-01: Async bronze storage I/O residual (to_thread)"
+    },
+    {
+      "code": "ARCH-CR2-02",
+      "number": 7007,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7007",
+      "title": "[P0][architecture] ARCH-CR2-02: Control-plane hydration strictness + medallion lifecycle errors"
+    },
+    {
+      "code": "ARCH-CR2-03",
+      "number": 7008,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7008",
+      "title": "[P0][architecture] ARCH-CR2-03: Health server lifecycle resolves quarantine before build"
+    },
+    {
+      "code": "ARCH-CR2-04",
+      "number": 7009,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7009",
+      "title": "[P1][architecture] ARCH-CR2-04: Maintenance CLI must not mutate shared command objects"
+    },
+    {
+      "code": "ARCH-CR2-05",
+      "number": 7010,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7010",
+      "title": "[P1][architecture] ARCH-CR2-05: Test densification for checkpoint, registry, CLI, composite, CP helpers"
+    },
+    {
+      "code": "ARCH-CR2-06",
+      "number": 7011,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7011",
+      "title": "[P1][architecture] ARCH-CR2-06: Typing residual \u2014 cast(Any,None) storage mixins + entity TypedDict"
+    },
+    {
+      "code": "ARCH-CR2-07",
+      "number": 7012,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7012",
+      "title": "[P2][architecture] ARCH-CR2-07: Docs/ADR residual SSOT after CR re-audit"
+    },
+    {
+      "code": "ARCH-CR2-08",
+      "number": 7013,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7013",
+      "title": "[P2][architecture] ARCH-CR2-08: Config governance residual (scorecard, allowlists, shards)"
+    },
+    {
+      "code": "ARCH-CR2-09",
+      "number": 7014,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7014",
+      "title": "[P2][architecture] ARCH-CR2-09: Architecture test honesty (closeout / live residual / any-budget)"
+    }
+  ]
+}
