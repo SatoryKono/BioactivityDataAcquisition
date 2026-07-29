@@ -376,9 +376,10 @@
             "align": "auto",
             "cellOptions": {
               "type": "color-background",
-              "mode": "basic"
+              "mode": "basic",
+              "wrapText": true
             },
-            "inspect": false
+            "inspect": true
           },
           "mappings": [
             {

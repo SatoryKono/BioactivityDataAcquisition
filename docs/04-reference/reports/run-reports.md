@@ -99,6 +99,9 @@ bioetl report prune --kind pipeline --owner chembl_assay --max-count 50 --apply
 - `GET /ops/observability/workflow-run-reports?workflow=…&limit=20`
 
 Missing artifact → structured 404 (`status=not_found`), not invented zeros.
+An empty list is a successful artifact-index response
+(`status=ok`, `count=0`, `items=[]`); it is distinct from the bounded forensic
+endpoint timeout response (`504`, `contract=forensic_endpoint_error_v1`).
 
 ## Conservation
 

@@ -69,7 +69,7 @@ PRED = {
     "DUX6-22": "#7130 DUX5-22 closed — residual: empty-chart No data patterns inconsistent",
     "DUX6-23": "#7131 DUX5-23 closed — residual: 100.00% drift if overrides regress",
     "DUX6-30": "#7132 DUX5-30 closed — residual: library-panel extraction deferred",
-    "DUX6-31": "#7133 DUX5-31 closed — residual: live screenshot matrix not automated",
+    "DUX6-31": "#7133 DUX5-31 closed — residual: live render matrix not automated",
 }
 SG = {
     "DUX6-01": "SG-01..SG-07",
@@ -207,7 +207,7 @@ def main() -> None:
 
             {it["scope"]}
 
-            Screenshot groups: {SG[dux]}
+            Render groups: {SG[dux]}
 
             ## Concrete change
 

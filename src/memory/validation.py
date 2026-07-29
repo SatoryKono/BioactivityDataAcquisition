@@ -16,6 +16,7 @@ from memory.notes import (
     parse_markdown_note,
     parse_markdown_note_metadata,
 )
+from memory.registry import REGISTRY_RELATIVE_PATH, validate_memory_registry
 from memory.resources import (
     CATALOG_DIR,
     MEMORY_ROOT,
@@ -1009,8 +1010,16 @@ def validate_memory_scaffold(
     policy_paths = _required_policy_paths(memory_root)
     catalog_paths = _required_catalog_paths(memory_root)
     schema_paths = _required_schema_paths(memory_root)
+    registry_path = memory_root / REGISTRY_RELATIVE_PATH
+    registry_schema_path = memory_root / "schemas" / "memory_registry.schema.json"
 
-    for path in (*policy_paths, *catalog_paths, *schema_paths):
+    for path in (
+        *policy_paths,
+        *catalog_paths,
+        *schema_paths,
+        registry_path,
+        registry_schema_path,
+    ):
         _validate_exists(path, issues)
 
     if issues:
@@ -1019,6 +1028,8 @@ def validate_memory_scaffold(
     policy_payloads = {path.name: load_yaml_resource(path) for path in policy_paths}
     catalog_payloads = {path.name: load_yaml_resource(path) for path in catalog_paths}
     schema_payloads = {path.name: load_json_resource(path) for path in schema_paths}
+    registry_payload = load_yaml_resource(registry_path)
+    registry_schema = load_json_resource(registry_schema_path)
 
     for name, payload in {**policy_payloads, **catalog_payloads}.items():
         if not isinstance(payload, dict):
@@ -1028,6 +1039,11 @@ def validate_memory_scaffold(
 
     for name, payload in schema_payloads.items():
         _validate_schema_shape(Path("schemas") / name, payload, issues)
+    _validate_schema_shape(registry_schema_path, registry_schema, issues)
+    issues.extend(
+        ValidationIssue(path=issue.path, message=issue.message)
+        for issue in validate_memory_registry(registry_payload)
+    )
 
     source_priority = policy_payloads.get("source_priority.yaml")
     storage_policy = policy_payloads.get("storage.yaml")
