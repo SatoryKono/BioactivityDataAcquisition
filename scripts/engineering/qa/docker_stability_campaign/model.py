@@ -262,9 +262,9 @@ def bundle_identity(bundle: Sequence[StackSpec]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for spec in bundle:
         row = asdict(spec)
-        for key, value in list(row.items()):
-            if isinstance(value, tuple):
-                row[key] = list(value)
+        tuple_keys = [key for key, value in row.items() if isinstance(value, tuple)]
+        for key in tuple_keys:
+            row[key] = list(row[key])
         rows.append(row)
     return rows
 
