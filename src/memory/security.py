@@ -15,14 +15,14 @@ class SecurityClassification(StrEnum):
     PUBLIC = "public"
     INTERNAL = "internal"
     CONFIDENTIAL = "confidential"
-    SECRET = "secret"
+    SECRET = "secret"  # pragma: allowlist secret
 
 
 class FindingKind(StrEnum):
     """Kinds of content that must not silently cross a persistence boundary."""
 
     PROMPT_INJECTION = "prompt_injection"
-    SECRET = "secret"
+    SECRET = "secret"  # pragma: allowlist secret
     PII = "pii"
 
 
