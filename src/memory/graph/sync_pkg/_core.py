@@ -67,6 +67,9 @@ DOCS_VERIFICATION_GUIDE_PATH = "docs/03-guides/docs-verification.md"
 INTEGRATION_VCR_POLICY_PATH = "configs/quality/integration_vcr_policy.yaml"
 TEST_MATRIX_CONFIG_PATH = "configs/quality/test_matrix.yaml"
 RUN_MANIFEST_LEDGER_DOC_PATH = "docs/04-reference/contracts/run-manifest-ledger.md"
+GOVERNANCE_DECISIONS_SUMMARY_PATH = (
+    "docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md"
+)
 RUN_MANIFEST_INSPECTION_DOC_PATH = (
     "docs/05-operations/runbooks/run-manifest-inspection.md"
 )
@@ -668,7 +671,7 @@ CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
     },
     {
         "name": "governance decisions summary",
-        "path": "docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md",
+        "path": GOVERNANCE_DECISIONS_SUMMARY_PATH,
         "summary": "Accepted governance decisions and risks.",
     },
     {
@@ -4107,16 +4110,14 @@ def _add_governance_decisions_and_risks(
     project: NodeKey,
     today: str,
 ) -> None:
-    summary_path = (
-        root / "docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md"
-    )
+    summary_path = root / GOVERNANCE_DECISIONS_SUMMARY_PATH
     if not summary_path.is_file():
         return
     governance_summary, governance_doc = _evidence_summary_doc(
         snapshot,
         root,
         today,
-        path="docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md",
+        path=GOVERNANCE_DECISIONS_SUMMARY_PATH,
         summary="Accepted governance decisions and associated risks.",
     )
     governance_text = _read_text(governance_summary)

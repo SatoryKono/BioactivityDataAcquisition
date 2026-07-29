@@ -58,3 +58,20 @@ CLI is not installed.
 - It does not open a generic "clean the repo" umbrella issue.
 - All previously identified tracked-tree gaps for this pack are now addressed in-draft.
 - The pack currently acts as closeout evidence and audit traceability for completed root-hygiene work.
+
+## RH5 (2026-07-29) — published
+
+Post deep-audit residual (allowlist drift: 40 tracked vs 37 allowlist).
+
+| Code | Issue | Pri |
+|------|-------|-----|
+| RH5-00 | [#7015](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7015) | meta |
+| RH5-01 | [#7016](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7016) | P0 |
+| RH5-02 | [#7017](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7017) | P1 |
+| RH5-03 | [#7018](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7018) | P1 |
+| RH5-04 | [#7019](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7019) | P2 |
+| RH5-05 | [#7021](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7021) | P3 track |
+| RH5-06 | [#7023](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7023) | P3 REVIEW |
+
+Pack: `RH5-2026-07-29-ROOT-HYGIENE-POST-AUDIT-RESIDUAL-ISSUE-PACK.md`  
+Publish: `reports/quality/rh5-2026-07-29-issue-publish.json`

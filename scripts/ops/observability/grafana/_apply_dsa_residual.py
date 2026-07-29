@@ -12,6 +12,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[4]
 DASH = ROOT / "grafana" / "dashboards"
+RUN_CONTEXT_THIN_TITLE = "Run context (thin) -> Run Explorer hub"
+THIN_SHELL_EXACT_RUN_HUB = "Thin shell only. Canonical exact-run hub: Run Explorer."
 
 
 def load(name: str) -> dict[str, Any]:
@@ -88,7 +90,7 @@ def apply_overview() -> None:
     )
     rc = by_id(ov, 9602)
     if rc is not None:
-        rc["title"] = "Run context (thin) -> Run Explorer hub"
+        rc["title"] = RUN_CONTEXT_THIN_TITLE
         set_desc(
             rc,
             "DSA-04: exact-run ID/Processed Records live on Run Explorer. "
@@ -144,11 +146,11 @@ def apply_runtime() -> None:
         sec["title"] = "Secondary KPIs (collapsed; not peer first-screen cards)"
     rc = by_id(rt, 9993)
     if rc is not None:
-        rc["title"] = "Run context (thin) -> Run Explorer hub"
+        rc["title"] = RUN_CONTEXT_THIN_TITLE
     for pid in (9402, 9403):
         set_desc(
             by_id(rt, pid),
-            "Thin shell only. Canonical exact-run hub: Run Explorer.",
+            THIN_SHELL_EXACT_RUN_HUB,
         )
     set_desc(
         by_id(rt, 9401),
