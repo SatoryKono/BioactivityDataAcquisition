@@ -106,7 +106,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is the highest-confidence active suspect?</div><div><b>Scope:</b> <b>CURRENT</b> = Status/active suspects · <b>SELECTED RUN</b> = exact-run proof</div><div><b>EMPTY DOMAIN</b> = no active suspects, not a healthy-fleet verdict</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is the highest-confidence active suspect?</div><div><b>Scope:</b> <b>CURRENT</b> = suspects · <b>SELECTED RUN</b> = exact proof</div><div><b>EMPTY DOMAIN</b> = no suspects, not a healthy-fleet verdict</div></div></div>"
       }
     },
     {

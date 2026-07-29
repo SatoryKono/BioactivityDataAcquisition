@@ -2,7 +2,7 @@
 record_id: close-passport-issues-7211-7220
 record_type: working
 repo_id: bioactivitydataacquisition
-git_commit: a8cb14eb8ddb05b8bf1ac7396c34fc6d0cfb65c6
+git_commit: 2cb32b8ec0e3bd17816224877a24b11728156026
 branch: main
 worktree_id: ccd98afae0adb4ee
 task_id: close-passport-issues-7211-7220
@@ -10,34 +10,35 @@ actor:
   runtime: unknown
   agent: memory-workflow
   model: null
-created_at: '2026-07-29T18:37:16.766097+00:00'
+created_at: '2026-07-29T18:56:09.344478+00:00'
 source_refs:
-- github:issues/7211-7220
+- issues/7211-7220;main@7517676ae76b481db44b8d7a0c5669f206bfdf66
 source_hashes: {}
 trust: trusted_repository
 security_class: internal
 status: active
 supersedes: []
 schema_version: 1
-content_digest: 14a3a15440af05adb202f2f8267e1a3ecb355b8fa70c4d45c7030dcc4a434458
+content_digest: 14f97eca49ecbe28975585cbb2769778dc4be0f9b12b977e7c33c30d740dd6fb
 id: close-passport-issues-7211-7220
-title: Close evidence-backed passport epic
+title: Close passport program issues 7211-7220
 ttl_days: 14
 confidence: episodic
-summary: Implemented deterministic passport inventory/projectors/schemas/sidecars,
-  generated 54 pipeline/workflow passports, added governance and tests, verified zero
-  completeness diagnostics, published main, and closed GitHub issues 7211-7220.
+summary: Completed canonical registry inventory, strict schema negatives, shared deterministic
+  facts, full pipeline/composite/workflow projections, fail-closed invariants, manual
+  rollout, CI governance, generated synchronization, validation, remote-main audit,
+  and GitHub closeout. All issues 7211-7220 are CLOSED.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Close evidence-backed passport epic
+- Title: Close passport program issues 7211-7220
 
 ## Outcome
 
-- Implemented deterministic passport inventory/projectors/schemas/sidecars, generated 54 pipeline/workflow passports, added governance and tests, verified zero completeness diagnostics, published main, and closed GitHub issues 7211-7220.
+- Completed canonical registry inventory, strict schema negatives, shared deterministic facts, full pipeline/composite/workflow projections, fail-closed invariants, manual rollout, CI governance, generated synchronization, validation, remote-main audit, and GitHub closeout. All issues 7211-7220 are CLOSED.
 
 ## Lessons learned
 
