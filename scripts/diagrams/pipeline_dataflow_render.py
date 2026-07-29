@@ -537,6 +537,12 @@ def render_passport(ir: PipelineDataflowIR) -> str:
             "it does not widen or repair the pipeline contract."
         ),
         "",
+        (
+            "Canonical cross-layer passport: "
+            f"[`{ir.pipeline_name}`](../../../../04-reference/passports/pipelines/"
+            f"{ir.pipeline_name}.md). This file remains a diagram companion."
+        ),
+        "",
         "## Linked Views",
         "",
         *diagram_links,

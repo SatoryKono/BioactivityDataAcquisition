@@ -998,6 +998,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded manual dashboard JSON regeneration helper while navigation-bus generation remains owned by the Grafana dashboard extension workflow; keep it supporting until it is exposed through a canonical governed command surface."
     },
+    "scripts/ops/observability/grafana/run_grafana_render_matrix.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the matrix orchestration backend invoked through the canonical scripts.ops command surface; keep the implementation module supporting so the active script inventory does not duplicate the dispatcher entrypoint."
+    },
     "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",

@@ -762,7 +762,7 @@
         "validator": null
       }
     ],
-    "hard_fail_threshold": 0.25,
+    "hard_fail_threshold": 0.5,
     "invalid_record_policy": "quarantine",
     "soft_fail_threshold": 0.05,
     "strict_validation": false

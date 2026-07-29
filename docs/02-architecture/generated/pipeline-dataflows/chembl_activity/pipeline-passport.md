@@ -10,6 +10,8 @@ Effective loader: `bioetl.infrastructure.config.pipeline_config_api.load_pipelin
 
 This passport is generated from the resolved effective configuration and live schema contracts. It describes the current runtime projection; it does not widen or repair the pipeline contract.
 
+Canonical cross-layer passport: [`chembl_activity`](../../../../04-reference/passports/pipelines/chembl_activity.md). This file remains a diagram companion.
+
 ## Linked Views
 
 - [49-chembl-pipeline-activity-dataflow](../../../diagrams/architecture/svg/49-chembl-pipeline-activity-dataflow.svg)
@@ -111,7 +113,7 @@ Machine-readable companions: [IR JSON](pipeline-dataflow-ir.json) and [field CSV
 ## Effective DQ Policy
 
 - Soft-fail threshold: `0.05`
-- Hard-fail threshold: `0.25`
+- Hard-fail threshold: `0.5`
 - Strict validation: `false`
 - Invalid-record policy: `quarantine`
 
