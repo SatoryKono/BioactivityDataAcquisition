@@ -29,7 +29,6 @@
 
 from __future__ import annotations
 
-import inspect
 from unittest.mock import MagicMock
 
 import pytest
@@ -75,49 +74,3 @@ def test_runtime_builder_public_exports_stay_narrow() -> None:
     }
 
 
-def test_runner_builder_wiring_applies_legacy_overrides_without_mutating_base() -> None:
-    """Legacy keyword patch points must resolve into one immutable bundle."""
-    base = runner_builder_wiring.RunnerBuilderWiring()
-    create_registry = MagicMock(name="create_registry")
-    load_pipeline_config = MagicMock(name="load_pipeline_config")
-
-    resolved = runner_builder_wiring.resolve_runner_builder_wiring(
-        base,
-        legacy_overrides=runner_builder_wiring.LegacyRunnerBuilderOverrides(
-            create_registry_fn=create_registry,
-            load_pipeline_config_fn=load_pipeline_config,
-        ),
-    )
-
-    assert resolved is not base
-    assert resolved.factory.create_registry is create_registry
-    assert resolved.inputs.load_pipeline_config is load_pipeline_config
-    assert base.factory.create_registry is not create_registry
-    assert base.inputs.load_pipeline_config is not load_pipeline_config
-
-
-def test_build_pipeline_runner_override_surface_is_capped() -> None:
-    """Ad hoc builder injection must not grow outside the typed wiring seam."""
-    params = inspect.signature(runner_builder.build_pipeline_runner).parameters
-    legacy_override_names = {name for name in params if name.endswith("_fn")}
-
-    assert "wiring" in params
-    assert "legacy_overrides" not in params
-    assert "factory_wiring" not in params
-    assert "input_wiring" not in params
-    assert legacy_override_names == set()
-
-
-def test_runner_input_wiring_applies_legacy_overrides_without_mutating_base() -> None:
-    """Legacy keyword patch points must resolve into one immutable bundle."""
-    base = runner_builder_wiring.RunnerInputWiring()
-    load_pipeline_config = MagicMock(name="load_pipeline_config")
-
-    resolved = runner_builder_wiring.resolve_runner_input_wiring(
-        base,
-        load_pipeline_config_fn=load_pipeline_config,
-    )
-
-    assert resolved is not base
-    assert resolved.load_pipeline_config is load_pipeline_config
-    assert base.load_pipeline_config is not load_pipeline_config

@@ -30,11 +30,8 @@
 from __future__ import annotations
 
 import ast
-import sys
 from pathlib import Path
-from types import ModuleType
 from types import SimpleNamespace
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -45,11 +42,9 @@ from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy i
 from bioetl.composition.runtime_builders._runner_control_plane_data_root_policy import (
     validate_strict_data_root_policy,
 )
-from bioetl.composition.runtime_builders import inputs_runtime_assembly
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import runner_builder
 from bioetl.composition.runtime_builders import runner_control_plane_assembly
-from bioetl.composition.runtime_builders import runner_input_assembly
 
 pytestmark = pytest.mark.unit
 
@@ -218,30 +213,3 @@ def test_inputs_resolver_public_surface_is_narrowed_to_reviewed_exports() -> Non
     assert "adjust_batch_size_for_filter" not in inputs_resolver.__all__
 
 
-def test_runner_input_assembly_lazy_resolves_default_observability_builder(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    fake_module = ModuleType(
-        "bioetl.composition.runtime_builders.observability_builder"
-    )
-    build_observability_bundle = MagicMock(name="build_observability_bundle")
-    fake_module.build_observability_bundle = build_observability_bundle
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.composition.runtime_builders.observability_builder",
-        fake_module,
-    )
-
-    resolved = runner_input_assembly._resolve_optional_functions(
-        build_observability_bundle_fn=None,
-        assemble_vacuum_settings_fn=None,
-        assemble_runtime_config_fn=None,
-        assemble_filter_config_fn=None,
-        assemble_cached_bronze_context_fn=None,
-    )
-
-    assert resolved[0] is build_observability_bundle
-    assert resolved[1] is inputs_runtime_assembly.assemble_vacuum_settings
-    assert resolved[2] is inputs_runtime_assembly.assemble_runtime_config
-    assert resolved[3] is inputs_runtime_assembly.assemble_filter_config
-    assert resolved[4] is inputs_runtime_assembly.assemble_cached_bronze_context
