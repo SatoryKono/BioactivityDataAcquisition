@@ -179,11 +179,15 @@ def prune_episodic_notes(
     active_count = max(total_count - len(candidates), 0)
     removed_paths: list[str] = []
     if apply:
+        from memory.storage import exclusive_lock
+
         for candidate in candidates:
             candidate_path = Path(candidate.path)
             if candidate_path.exists():
-                candidate_path.unlink()
-                removed_paths.append(candidate.path)
+                with exclusive_lock(candidate_path):
+                    if candidate_path.exists():
+                        candidate_path.unlink()
+                        removed_paths.append(candidate.path)
     effective_max_active = _default_max_active() if max_active is None else max_active
     density_status = "not_checked"
     density_excess = 0

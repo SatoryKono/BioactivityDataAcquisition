@@ -10,6 +10,8 @@ Stable commands:
     check-observability-ports
                        Compare published observability endpoints with container health
     rerender-grafana   Rerender Grafana dashboard screenshots
+    render-grafana-matrix
+                       Render the standard, full-page, kiosk, and repeat matrix
     audit-live-grafana Run reviewed live Grafana datasource/frame audit
     check-grafana-audit-preflight
                        Check local stack readiness for a full Grafana dashboard audit
@@ -46,6 +48,9 @@ COMMAND_SPECS = {
     "salt-rotate": "maintenance/security/salt_rotate.py",
     "check-observability-ports": "observability/check_published_observability_endpoints.py",
     "rerender-grafana": "observability/grafana/rerender_grafana_screenshots.py",
+    "render-grafana-matrix": (
+        "observability/grafana/run_grafana_render_matrix.py"
+    ),
     "audit-live-grafana": "observability/grafana/audit_live_grafana_panels.py",
     "check-grafana-audit-preflight": (
         "observability/grafana/check_grafana_dashboard_audit_preflight.py"

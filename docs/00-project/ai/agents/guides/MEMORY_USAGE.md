@@ -16,6 +16,7 @@ as a replacement for runtime truth.
 
 ## Required Workflow
 
+1. Select `BIOETL_AI_MEMORY_MODE=off|read-only|read-write` for the task.
 1. Run `python -m memory.tooling.workflow pre-task ...` before substantial work,
    using `--profile` when a task-specific ranking profile applies.
    If rebuild-only artifacts are missing, the workflow refreshes only the
@@ -28,6 +29,30 @@ as a replacement for runtime truth.
    and accepted ADRs.
 1. Run `python -m memory.tooling.workflow post-task ...` after the task.
 1. Promote only durable lessons, incidents, or decisions.
+
+## Repository-Owned Contracts
+
+- Inventory and ownership: `src/memory/catalog/memory_registry.yaml`.
+- Identity and provenance: `src/memory/records.py` and `src/memory/scope.py`.
+- Persistence capability: `src/memory/persistence.py`.
+- Evidence and decisions: `src/memory/evidence.py`.
+- Bounded subagent context: `src/memory/handoff.py`.
+- Security and authorization: `src/memory/security.py` and
+  `src/memory/access.py`.
+- Consent-gated user memory: `src/memory/user_memory.py`.
+
+Evidence is immutable. Conclusions cite evidence digests and change through
+supersession. Handoffs MUST NOT contain full conversations, hidden scratchpads,
+unrelated user context, or secrets.
+
+Repository-owned user memory requires explicit repository-scoped consent and
+operation grants. Vendor-hosted user or conversation memory is outside this
+contract; its retention, deletion, compaction, and cross-session behavior
+remain **NOT_PROVEN**.
+
+General schema migration, backup/restore, and external MCP/Neo4j recovery are
+not complete repository capabilities. Preserve original digests, avoid
+implicit retention extension, and fail closed on corrupt or mismatched records.
 
 ## Durable Guardrail
 

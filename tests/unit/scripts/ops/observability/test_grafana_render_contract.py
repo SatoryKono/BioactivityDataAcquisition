@@ -21,6 +21,9 @@ from scripts.ops.observability.grafana import (
 from scripts.ops.observability.grafana import (
     rerender_grafana_screenshots as rerender,
 )
+from scripts.ops.observability.grafana import (
+    run_grafana_render_matrix as render_matrix,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -183,3 +186,72 @@ def test_playwright_retry_gate_rejects_unbound_or_dimension_drifted_png(
 
     assert dimension_error is not None
     assert "dimension evidence drift" in dimension_error
+
+
+def test_render_matrix_covers_standard_full_repeat_and_kiosk_profiles() -> None:
+    names = {profile.name for profile in render_matrix.build_profiles()}
+
+    assert names == {
+        "1366x768-dark",
+        "1366x768-light",
+        "1440x900-dark",
+        "1440x900-light",
+        "1920x1080-dark",
+        "1920x1080-light",
+        "1440x900-dark-full",
+        "1440x900-dark-repeat",
+        "2560x1440-dark-kiosk",
+        "2560x1440-light-kiosk",
+        "3840x2160-dark-kiosk",
+        "3840x2160-light-kiosk",
+    }
+
+
+def test_repeat_geometry_comparison_ignores_values_and_detects_layout_drift() -> None:
+    baseline: dict[str, object] = {
+        "dashboards": [
+            {
+                "uid": "bioetl-runtime",
+                "layoutGeometry": {
+                    "panelGeometry": {"1": {"x": 0, "y": 0, "width": 100, "height": 40}}
+                },
+                "terminalStateValidation": {
+                    "panelStates": [{"id": 1, "bodyText": "10"}]
+                },
+            }
+        ]
+    }
+    repeat: dict[str, object] = {
+        "dashboards": [
+            {
+                "uid": "bioetl-runtime",
+                "layoutGeometry": {
+                    "panelGeometry": {"1": {"x": 0, "y": 0, "width": 100, "height": 40}}
+                },
+                "terminalStateValidation": {
+                    "panelStates": [{"id": 1, "bodyText": "11"}]
+                },
+            }
+        ]
+    }
+
+    assert render_matrix.compare_repeat_geometry(baseline, repeat)["status"] == "ok"
+
+    repeat_dashboards = repeat["dashboards"]
+    assert isinstance(repeat_dashboards, list)
+    repeat_dashboard = repeat_dashboards[0]
+    assert isinstance(repeat_dashboard, dict)
+    repeat_dashboard["layoutGeometry"] = {
+        "panelGeometry": {"1": {"x": 0, "y": 0, "width": 101, "height": 40}}
+    }
+    assert render_matrix.compare_repeat_geometry(baseline, repeat)["status"] == "error"
+
+
+def test_retired_quarantine_explorer_is_not_applicable() -> None:
+    assert preflight._quarantine_explorer_is_applicable() is False
+    checks = [
+        preflight.PreflightCheck("grafana", "ok", "reachable"),
+        preflight.PreflightCheck("quarantine-explorer", "not_applicable", "retired"),
+    ]
+
+    assert preflight._exit_code_for_checks(checks) == preflight.EXIT_OK
