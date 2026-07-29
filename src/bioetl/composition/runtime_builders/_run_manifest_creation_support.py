@@ -132,6 +132,17 @@ def emit_replay_reconstructability_metric(
         increment_counter_obj,
     )
     set_gauge_obj = _read_attr(metrics, "set_gauge", None)
+    # Bind under the inventory-scanned helper name (set_gauge), same pattern as
+    # increment_counter above. Calling cast(...)(obj)(...) hides the helper
+    # method name from the observability inventory AST scan.
+    set_gauge: Callable[..., Any] | None = (  # Any: MetricsPort method bound as object
+        cast(
+            Callable[..., Any],  # Any: MetricsPort method bound as object
+            set_gauge_obj,
+        )
+        if callable(set_gauge_obj)
+        else None
+    )
     launch_context = request.launch_context
     strict_replay_requested = bool(
         launch_context.get("exact_replay", False)
@@ -179,15 +190,13 @@ def emit_replay_reconstructability_metric(
         "run_type": bounded_run_type,
         "replay_capability": request.replay_capability.value,
     }
-    if callable(set_gauge_obj):
-        cast(
-            Callable[..., Any],  # Any: MetricsPort method bound as object
-            set_gauge_obj,
-        )(
+    if set_gauge is not None:
+        set_gauge(
             "bioetl_replay_lag_seconds",
             value=0.0,
             labels={**replay_labels, "status": lag_status},
         )
+
     if status == "not_reconstructable":
         increment_counter(
             "bioetl_replay_drift_events_total",

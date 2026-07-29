@@ -44,9 +44,21 @@ def test_powershell_wrapper_respects_existing_npm_config_ignore_scripts() -> Non
 
 
 def test_bash_wrapper_defaults_npm_config_ignore_scripts_without_overwrite() -> None:
-    """Bash counterpart keeps the `${var:-true}` default form."""
+    """Bash keeps `${VAR:-true}` default and passes lowercase only to the child.
+
+    Shell-export of lowercase ``npm_config_ignore_scripts`` was dropped for
+    Sonar shell:S7684; the documented npm config is still applied via
+    ``env`` on the ``npx`` child process.
+    """
     source = SH.read_text(encoding="utf-8")
     assert (
-        'export npm_config_ignore_scripts="${npm_config_ignore_scripts:-true}"'
+        'export NPM_CONFIG_IGNORE_SCRIPTS="${NPM_CONFIG_IGNORE_SCRIPTS:-true}"'
         in source
     )
+    assert (
+        '"npm_config_ignore_scripts=${NPM_CONFIG_IGNORE_SCRIPTS}"' in source
+        or "npm_config_ignore_scripts=${NPM_CONFIG_IGNORE_SCRIPTS}" in source
+    )
+    # Must not force-overwrite an operator-set value (no bare assignment).
+    assert "export npm_config_ignore_scripts=true" not in source
+    assert "export NPM_CONFIG_IGNORE_SCRIPTS=true" not in source

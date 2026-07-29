@@ -1,6 +1,8 @@
 # pyright: reportUninitializedInstanceVariable=false
 # mypy: disable-error-code=attr-defined
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
+"""Context-manager helpers for UnifiedHTTPClient."""
+
 from __future__ import annotations
 
 from types import TracebackType
@@ -14,8 +16,8 @@ from bioetl.infrastructure.adapters.base import build_json_accept_headers
 class HTTPClientContextMixin:
     """Async context lifecycle and client-access helpers."""
 
-    # Annotation-only host surface. Avoid class-level None on numeric counters:
-    # getattr(self, name, 0) still returns None when the class attr is None.
+    # Annotation-only host surface. Do not seed numeric counters with class-level
+    # None: getattr(self, name, 0) still returns None when the class attr is None.
     _client: httpx.AsyncClient | None
     _client_enter_depth: int
     user_agent: str

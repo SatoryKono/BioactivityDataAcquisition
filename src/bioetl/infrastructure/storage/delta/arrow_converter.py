@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import orjson
 import pyarrow as pa
@@ -151,9 +151,12 @@ class ArrowDataConverter:
             inner = self.sanitize_type_for_delta(dtype.value_type)
             return pa.large_list(inner)
         elif pa.types.is_struct(dtype):
+            # StructType is iterable at runtime; local pyarrow stubs type DataType
+            # without __iter__, so cast through Any for static checkers.
+            struct_fields = cast(Sequence[pa.Field], cast(Any, dtype))
             new_fields = [
                 pa.field(f.name, self.sanitize_type_for_delta(f.type), f.nullable)
-                for f in dtype
+                for f in struct_fields
             ]
             return pa.struct(new_fields)
         elif pa.types.is_map(dtype):

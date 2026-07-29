@@ -229,7 +229,7 @@ class ChainedKeyResolver:
         pa_table: object,
         source_table: str,
     ) -> pl.DataFrame:
-        source_keys_result = pl.from_arrow(pa_table)
+        source_keys_result = pl.from_arrow(cast(Any, pa_table))
         if isinstance(source_keys_result, pl.DataFrame):
             return source_keys_result
         raise TypeError(
