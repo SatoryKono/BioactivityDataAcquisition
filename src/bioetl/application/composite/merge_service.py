@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Merge service implementation for composite pipelines. See ADR-026."""
 
@@ -182,4 +181,4 @@ class MergeService(
         request: MergeExecutionRequest,
     ) -> MergeResult:
         """Execute a canonical merge request envelope."""
-        return await execute_merge_request(cast(MergeWorkflowContext, self), request)
+        return await execute_merge_request(cast(MergeWorkflowContext, self), request)  # pyright: ignore[reportInvalidCast]

@@ -20,7 +20,7 @@ import sys
 import tempfile
 import threading
 import time
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -38,8 +38,46 @@ type JsonScalar = str | int | float | bool | None
 type JsonValue = JsonScalar | list["JsonValue"] | dict[str, "JsonValue"]
 type RelationSpec = tuple[str, frozenset[str], frozenset[str]]
 type ShardFilterSpec = tuple[frozenset[str], tuple[RelationSpec, ...]]
+# Relation / shard filter keys used by snapshot filtering helpers.
+# NodeKey is defined later; PEP 695 type aliases evaluate lazily.
+type RelationKey = tuple[NodeKey, str, NodeKey]
+type ShardFilter = ShardFilterSpec
 T = TypeVar("T")
 BIOETL_METRIC_PATTERN = re.compile(r"\bbioetl_[a-zA-Z0-9_:]+")
+
+
+
+def _as_mapping(value: object) -> dict[str, object]:
+    if isinstance(value, dict):
+        return {str(k): v for k, v in value.items()}
+    return {}
+
+
+def _as_iterable(value: object) -> list[object]:
+    if isinstance(value, list):
+        return list(value)
+    if isinstance(value, tuple):
+        return list(value)
+    if isinstance(value, set):
+        return list(value)
+    return []
+
+def _coerce_int(value: object, default: int = 0) -> int:
+    """Coerce mapping/JSON payload values to int for static checkers and runtime."""
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    if isinstance(value, str):
+        try:
+            return int(value)
+        except ValueError:
+            return default
+    return default
 
 SRC_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_ROOT = Path(__file__).resolve().parents[4]
@@ -1753,6 +1791,11 @@ class ComplexityMetrics:
     api_surface_to_logic_ratio: float
 
 
+# Canonical names used by complexity/retirement analysis surfaces (PD-C01).
+type SurfaceAnchorSets = AnalysisAnchors
+type SurfaceComplexityMetrics = ComplexityMetrics
+
+
 @dataclass(frozen=True)
 class AnalysisLabelSets:
     ignored_relation_types: set[str]
@@ -1843,7 +1886,9 @@ def _read_analysis_source_text(
 
     status, payload = result.get_nowait()
     if status == "error":
-        raise payload
+        if isinstance(payload, BaseException):
+            raise payload
+        raise RuntimeError(str(payload))
     return str(payload)
 
 
@@ -1936,7 +1981,7 @@ def _int_node_property(
     if node is None:
         return 0
     raw_value = node.properties.get(property_name)
-    return int(raw_value) if isinstance(raw_value, int | float) else 0
+    return _coerce_int(raw_value, 0) if isinstance(raw_value, (int, float, str)) else 0
 
 
 def _aggregate_callable_metrics(
@@ -2316,8 +2361,8 @@ def _duplication_analysis_config(
     families = _configured_duplication_families(payload.get("families", {}))
     return {
         "enabled": bool(payload.get("enabled", True)),
-        "min_cluster_size": int(payload.get("min_cluster_size", 2) or 2),
-        "min_ast_nodes": int(payload.get("min_ast_nodes", 12) or 12),
+        "min_cluster_size": _coerce_int(payload.get("min_cluster_size", 2), 2),
+        "min_ast_nodes": _coerce_int(payload.get("min_ast_nodes", 12), 12),
         "families": tuple(families),
     }
 
@@ -2380,9 +2425,9 @@ def _retirement_analysis_config(
     return RetirementAnalysisConfig(
         enabled=bool(payload.get("enabled", True)),
         family_names=family_names,
-        current_cycle_age_days=int(payload.get("current_cycle_age_days", 45) or 45),
-        stale_age_days=int(payload.get("stale_age_days", 180) or 180),
-        dead_score_threshold=int(payload.get("dead_score_threshold", 6) or 6),
+        current_cycle_age_days=_coerce_int(payload.get("current_cycle_age_days", 45), 45),
+        stale_age_days=_coerce_int(payload.get("stale_age_days", 180), 180),
+        dead_score_threshold=_coerce_int(payload.get("dead_score_threshold", 6), 6),
         wip_markers=_casefolded_markers(
             payload,
             "wip_markers",
@@ -2417,7 +2462,7 @@ def _complexity_analysis_config(
         complexity_score_threshold=int(
             payload.get("complexity_score_threshold", 4) or 4
         ),
-        removable_score_threshold=int(payload.get("removable_score_threshold", 7) or 7),
+        removable_score_threshold=_coerce_int(payload.get("removable_score_threshold", 7), 7),
         indirection_markers=_casefolded_markers(
             payload,
             "indirection_markers",
@@ -2439,7 +2484,7 @@ def _complexity_analysis_config(
             ["checkpoint", "resume", "state", "fsm", "transition", "runner"],
         ),
         deprecation_markers=retirement_config.deprecation_markers,
-        blocker_anchor_limit=int(payload.get("blocker_anchor_limit", 3) or 3),
+        blocker_anchor_limit=_coerce_int(payload.get("blocker_anchor_limit", 3), 3),
     )
 
 
@@ -2589,7 +2634,7 @@ def _git_last_commit_age_days(
     if result.returncode != 0 or not timestamp.isdigit():
         cache[relative_path] = None
         return None
-    committed_at = datetime.fromtimestamp(int(timestamp), tz=UTC).date()
+    committed_at = datetime.fromtimestamp(_coerce_int(timestamp), tz=UTC).date()
     age = max(0, (today - committed_at).days)
     cache[relative_path] = age
     return age
@@ -2749,7 +2794,7 @@ def _parse_git_chunk_age_output(
             continue
         if line.startswith("__TS__"):
             timestamp = line.removeprefix("__TS__")
-            current_timestamp = int(timestamp) if timestamp.isdigit() else None
+            current_timestamp = _coerce_int(timestamp) if timestamp.isdigit() else None
             continue
         if current_timestamp is None or line not in unresolved:
             continue
@@ -7210,7 +7255,7 @@ def _entity_storage_context(
         config_artifact=NodeKey("config_artifact", _rel_path(root, entity_path)),
         today=today,
         contract_ref=f"{provider_name}.{entity_name}",
-        retention_days=int(retention_days)
+        retention_days=_coerce_int(retention_days)
         if isinstance(retention_days, int | float)
         else None,
         config_version=_optional_text(payload.get("version")),
@@ -8115,7 +8160,7 @@ def _runtime_state_properties(spec: dict[str, object]) -> dict[str, object]:
         "manifest_id": _optional_text(spec.get("manifest_id")),
         "state_kind": _optional_text(spec.get("state_kind")),
         "state_status": _optional_text(spec.get("state_status")),
-        "retry_count": int(spec["retry_count"])
+        "retry_count": _coerce_int(spec["retry_count"])
         if isinstance(spec.get("retry_count"), int)
         else None,
         "retry_strategy": _optional_text(spec.get("retry_strategy")),
@@ -11334,7 +11379,7 @@ def _duplication_callable_descriptor(
         surface_kind=surface_kind,
         ast_shape_hash=str(callable_node.properties["ast_shape_hash"]),
         signature_hash=str(callable_node.properties["signature_hash"]),
-        ast_node_count=int(callable_node.properties["ast_node_count"]),
+        ast_node_count=_coerce_int(callable_node.properties["ast_node_count"]),
         semantic_tags=tuple(_semantic_tags(relative_path, callable_name)),
     )
 
@@ -11757,7 +11802,7 @@ def _extract_code_duplication_surfaces(
 
 
 def _duplication_cluster_thresholds(config: dict[str, object]) -> tuple[int, int]:
-    return int(config.get("min_cluster_size", 2)), int(config.get("min_ast_nodes", 12))
+    return _coerce_int(config.get("min_cluster_size", 2), 2), _coerce_int(config.get("min_ast_nodes", 12), 12)
 
 
 def _add_retirement_analysis_surfaces(
@@ -12099,12 +12144,12 @@ def _emit_retirement_candidate(
 
 def _retirement_candidate_metrics(payload: dict[str, object]) -> dict[str, int]:
     return {
-        "cycle_score": int(payload["cycle_score"]),
-        "runtime_count": int(payload["runtime_count"]),
-        "config_count": int(payload["config_count"]),
-        "doc_count": int(payload["doc_count"]),
-        "test_count": int(payload["test_count"]),
-        "deletion_score": int(payload["deletion_score"]),
+        "cycle_score": _coerce_int(payload["cycle_score"]),
+        "runtime_count": _coerce_int(payload["runtime_count"]),
+        "config_count": _coerce_int(payload["config_count"]),
+        "doc_count": _coerce_int(payload["doc_count"]),
+        "test_count": _coerce_int(payload["test_count"]),
+        "deletion_score": _coerce_int(payload["deletion_score"]),
     }
 
 
@@ -13285,16 +13330,16 @@ def _accumulate_field_matrix_evidence(
         )
         source = str(row.get("normalization_source", "")).strip()
         if source == "profile":
-            payload["profile_field_count"] = int(payload["profile_field_count"]) + 1
+            payload["profile_field_count"] = _coerce_int(payload["profile_field_count"]) + 1
             continue
-        payload["fallback_field_count"] = int(payload["fallback_field_count"]) + 1
+        payload["fallback_field_count"] = _coerce_int(payload["fallback_field_count"]) + 1
         if source == fallback_business:
             payload["fallback_business_field_count"] = (
-                int(payload["fallback_business_field_count"]) + 1
+                _coerce_int(payload["fallback_business_field_count"]) + 1
             )
         elif source == fallback_technical_passthrough:
             payload["fallback_technical_passthrough_field_count"] = (
-                int(payload["fallback_technical_passthrough_field_count"]) + 1
+                _coerce_int(payload["fallback_technical_passthrough_field_count"]) + 1
             )
 
 
@@ -13376,14 +13421,10 @@ def _normalization_evidence_update_payload(
         "normalization_profile_module_path": (
             str(module_path) if isinstance(module_path, str) and module_path else None
         ),
-        "profile_field_count": int(evidence.get("profile_field_count", 0)),
-        "fallback_field_count": int(evidence.get("fallback_field_count", 0)),
-        "fallback_business_field_count": int(
-            evidence.get("fallback_business_field_count", 0)
-        ),
-        "fallback_technical_passthrough_field_count": int(
-            evidence.get("fallback_technical_passthrough_field_count", 0)
-        ),
+        "profile_field_count": _coerce_int(evidence.get("profile_field_count", 0), 0),
+        "fallback_field_count": _coerce_int(evidence.get("fallback_field_count", 0), 0),
+        "fallback_business_field_count": _coerce_int(evidence.get("fallback_business_field_count", 0), 0),
+        "fallback_technical_passthrough_field_count": _coerce_int(evidence.get("fallback_technical_passthrough_field_count", 0), 0),
     }
 
 
@@ -13474,14 +13515,10 @@ def _normalization_statement_params(
             evidence.get("normalization_profile_registered", False)
         ),
         "normalization_profile_module_path": normalized_module_path,
-        "profile_field_count": int(evidence.get("profile_field_count", 0)),
-        "fallback_field_count": int(evidence.get("fallback_field_count", 0)),
-        "fallback_business_field_count": int(
-            evidence.get("fallback_business_field_count", 0)
-        ),
-        "fallback_technical_passthrough_field_count": int(
-            evidence.get("fallback_technical_passthrough_field_count", 0)
-        ),
+        "profile_field_count": _coerce_int(evidence.get("profile_field_count", 0), 0),
+        "fallback_field_count": _coerce_int(evidence.get("fallback_field_count", 0), 0),
+        "fallback_business_field_count": _coerce_int(evidence.get("fallback_business_field_count", 0), 0),
+        "fallback_technical_passthrough_field_count": _coerce_int(evidence.get("fallback_technical_passthrough_field_count", 0), 0),
         "module_path": normalized_module_path,
     }
 
@@ -15453,7 +15490,7 @@ def _delete_managed_wave_if_requested(
                 delete_statement["statement"],
                 delete_statement["parameters"],
             )
-            deleted = int(rows[0]["deleted"]) if rows else 0
+            deleted = _coerce_int(rows[0]["deleted"]) if rows else 0
             if deleted == 0:
                 break
 
@@ -15806,7 +15843,7 @@ def _count_rows_by_key(
         key_value = row.get(key_field)
         count = row.get("count")
         if isinstance(key_value, str) and isinstance(count, (int, float)):
-            counts[key_value] = int(count)
+            counts[key_value] = _coerce_int(count)
     return counts
 
 
@@ -15949,7 +15986,7 @@ def _missing_anchor_keys_in_chunk(
 
 def _anchor_count_rows(rows: list[dict[str, JsonValue]]) -> dict[NodeKey, int]:
     return {
-        NodeKey(str(row["label"]), str(row["name"])): int(row["count"])
+        NodeKey(str(row["label"]), str(row["name"])): _coerce_int(row["count"])
         for row in rows
         if isinstance(row.get("label"), str)
         and isinstance(row.get("name"), str)
@@ -17350,7 +17387,7 @@ def _missing_required_population(
     return [
         f"missing required {kind} population: {name}"
         for name in names
-        if int(counts.get(name, 0)) <= 0
+        if _coerce_int(counts.get(name, 0), 0) <= 0
     ]
 
 
@@ -17536,9 +17573,9 @@ def _live_repo_label_rows(
     return [
         {
             "label": str(row["label"]),
-            "total": int(row["total"]),
-            "managed": int(row["managed"]),
-            "unmanaged": int(row["unmanaged"]),
+            "total": _coerce_int(row["total"]),
+            "managed": _coerce_int(row["managed"]),
+            "unmanaged": _coerce_int(row["unmanaged"]),
         }
         for row in rows
         if isinstance(row.get("label"), str)
@@ -17589,13 +17626,13 @@ def _live_orphan_rows(
     return [
         {
             "label": str(row["label"]),
-            "count": int(row["count"]),
+            "count": _coerce_int(row["count"]),
             "samples": row.get("samples", []),
         }
         for row in rows
         if isinstance(row.get("label"), str)
         and isinstance(row.get("count"), (int, float))
-        and int(row["count"]) > 0
+        and _coerce_int(row["count"]) > 0
     ]
 
 
@@ -17621,13 +17658,13 @@ def _live_unmanaged_repo_rows(
     return [
         {
             "label": str(row["label"]),
-            "count": int(row["count"]),
+            "count": _coerce_int(row["count"]),
             "samples": row.get("samples", []),
         }
         for row in rows
         if isinstance(row.get("label"), str)
         and isinstance(row.get("count"), (int, float))
-        and int(row["count"]) > 0
+        and _coerce_int(row["count"]) > 0
     ]
 
 
@@ -17642,14 +17679,14 @@ def _live_scalar(
 
 
 def _row_int_total(rows: list[dict[str, JsonValue]], key: str) -> int:
-    return sum(int(row[key]) for row in rows if isinstance(row.get(key), (int, float)))
+    return sum(_coerce_int(row[key]) for row in rows if isinstance(row.get(key), (int, float)))
 
 
 def _managed_label_counts_from_rows(
     rows: list[dict[str, JsonValue]],
 ) -> dict[str, int]:
     return {
-        str(row["label"]): int(row["managed"])
+        str(row["label"]): _coerce_int(row["managed"])
         for row in rows
         if isinstance(row.get("label"), str)
     }
@@ -17659,7 +17696,7 @@ def _managed_relation_counts_from_rows(
     rows: list[dict[str, JsonValue]],
 ) -> dict[str, int]:
     return {
-        str(row["relation_type"]): int(row["total"])
+        str(row["relation_type"]): _coerce_int(row["total"])
         for row in rows
         if isinstance(row.get("relation_type"), str)
     }
@@ -17672,7 +17709,7 @@ def _snapshot_count_map(
     raw_counts = snapshot_stats[key]
     if not isinstance(raw_counts, dict):
         return {}
-    return {str(name): int(count) for name, count in raw_counts.items()}
+    return {str(name): _coerce_int(count) for name, count in raw_counts.items()}
 
 
 def _snapshot_subset_count_map(
@@ -17683,7 +17720,7 @@ def _snapshot_subset_count_map(
     raw_counts = snapshot_stats[key]
     if not isinstance(raw_counts, dict):
         return {}
-    return {name: int(raw_counts.get(name, 0)) for name in names}
+    return {name: _coerce_int(raw_counts.get(name, 0)) for name in names}
 
 
 def _managed_label_summary_from_counts(
@@ -17917,7 +17954,7 @@ def _active_critical_names(
     raw_counts = snapshot_stats.get(key)
     if not isinstance(raw_counts, dict):
         return ()
-    return tuple(name for name in critical_names if int(raw_counts.get(name, 0)) > 0)
+    return tuple(name for name in critical_names if _coerce_int(raw_counts.get(name, 0)) > 0)
 
 
 def _fast_audit_snapshot_payload(

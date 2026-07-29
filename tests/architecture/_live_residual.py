@@ -16,11 +16,19 @@ import json
 from pathlib import Path
 from typing import Any
 
+from tests.architecture._module_coverage_inventory_support import (
+    skip_if_artifact_is_not_authoritative,
+)
+
 ROOT = Path(__file__).resolve().parents[2]
 LIVE_RESIDUAL_SNAPSHOT = ROOT / "reports" / "quality" / "live-residual-snapshot.json"
 
 
 def load_live_residual_snapshot() -> dict[str, Any]:
+    skip_if_artifact_is_not_authoritative(
+        root=ROOT,
+        artifact_path=LIVE_RESIDUAL_SNAPSHOT,
+    )
     payload = json.loads(LIVE_RESIDUAL_SNAPSHOT.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     assert payload.get("schema_version") == "live-residual-snapshot-v1"

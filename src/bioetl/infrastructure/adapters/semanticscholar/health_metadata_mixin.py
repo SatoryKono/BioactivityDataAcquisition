@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Health and metadata helpers for SemanticScholarAdapter."""
 
@@ -124,7 +123,7 @@ class SemanticScholarHealthMetadataMixin(SemanticScholarHealthMetadataMixinABC):
         Returns:
             SemanticScholarHealthMetadataDependencies cast of the current adapter instance.
         """
-        return cast("SemanticScholarHealthMetadataDependencies", self)
+        return cast("SemanticScholarHealthMetadataDependencies", self)  # pyright: ignore[reportInvalidCast]
 
     async def _probe_health(
         self,

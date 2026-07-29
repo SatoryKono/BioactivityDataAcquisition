@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Mutation and quarantine helpers for workflow FK reconciliation."""
 
@@ -188,7 +187,7 @@ async def expire_gold_orphan_rows(
         )
 
     await _run_gold_write_with_retry(
-        cast(GoldWriteRetryModuleProtocol, module),
+        cast(GoldWriteRetryModuleProtocol, module),  # pyright: ignore[reportInvalidCast]
         _execute_expiry_attempt,
     )
 

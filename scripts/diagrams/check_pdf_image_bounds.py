@@ -9,7 +9,10 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-import fitz
+try:
+    import fitz  # type: ignore[import-not-found]  # pyright: ignore[reportMissingImports]
+except ImportError:  # pragma: no cover - optional PyMuPDF
+    fitz = None  # type: ignore[assignment]
 
 
 @dataclass(frozen=True)

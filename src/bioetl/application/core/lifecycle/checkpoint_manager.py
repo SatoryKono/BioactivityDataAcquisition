@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Runtime checkpoint service for ETL pipelines."""
 
@@ -159,7 +158,7 @@ class CheckpointRuntimeService:
         )
         checkpoint_metadata = resolve_checkpoint_metadata(checkpoint_data)
         compatible_checkpoint, status_already_emitted = validate_loaded_checkpoint(
-            self,
+            self,  # pyright: ignore[reportArgumentType]
             checkpoint_metadata,
             current_metadata=current_metadata,
         )

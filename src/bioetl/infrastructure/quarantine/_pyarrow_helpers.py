@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """PyArrow compute helpers for quarantine operations."""
 
@@ -36,7 +35,7 @@ def _require_pyarrow_compute() -> _PyArrowComputeModule:
             "Quarantine read operations require pyarrow.compute, but it could not "
             "be imported in the current environment"
         )
-    return cast(_PyArrowComputeModule, pc)
+    return cast(_PyArrowComputeModule, pc)  # pyright: ignore[reportInvalidCast]
 
 
 def equal_mask(left: object, right: object) -> pa.Array | pa.ChunkedArray:

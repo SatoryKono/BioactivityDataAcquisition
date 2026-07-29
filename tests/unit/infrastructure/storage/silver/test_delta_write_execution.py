@@ -127,6 +127,36 @@ async def test_write_plain_delta_request_times_out_promptly_without_executor_joi
 
 
 @pytest.mark.asyncio
+async def test_inline_plain_write_does_not_fail_after_successful_slow_write() -> None:
+    """Completed inline writes must not be rewritten as TimeoutError.
+
+    Regression: GDrive/network mounts often exceed the budget wall-clock while
+    still committing durable Delta data. Failing after success aborts workflows
+    with partially-written tables (chembl_baseline silver assay path).
+    """
+    request = _make_request()
+    calls: list[dict[str, object]] = []
+
+    def _slow_write(**kwargs: object) -> None:
+        time.sleep(0.05)
+        calls.append(dict(kwargs))
+
+    module = SimpleNamespace(
+        __name__="bioetl.infrastructure.storage.silver_writer",
+        write_deltalake=_slow_write,
+    )
+
+    await _write_plain_delta_request(
+        load_module=lambda: module,
+        request=request,
+        mode="append",
+        timeout_seconds=0.01,
+    )
+
+    assert len(calls) == 1
+
+
+@pytest.mark.asyncio
 async def test_write_plain_delta_request_can_use_process_isolation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

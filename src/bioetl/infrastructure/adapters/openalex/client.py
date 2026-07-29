@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# pyright: reportUnsafeMultipleInheritance=false
 # MRO/override residual on mixin or client hierarchies.
 """OpenAlex data source adapter implementing FilterableDataSourcePort for OpenAlex Works API.
 
@@ -70,7 +68,7 @@ OPENALEX_RUNTIME_ERRORS = COMMON_ADAPTER_HEALTH_ERRORS_WITH_KEYERROR
 
 
 @dataclass
-class OpenAlexAdapter(
+class OpenAlexAdapter(  # pyright: ignore[reportUnsafeMultipleInheritance]
     OpenAlexAdapterFilterFetchMixin,
     OpenAlexAdapterHealthMixin,
     OpenAlexAdapterHelpersMixin,
@@ -96,7 +94,7 @@ class OpenAlexAdapter(
 
     """
 
-    http_client: UnifiedHTTPClient
+    http_client: UnifiedHTTPClient  # pyright: ignore[reportIncompatibleVariableOverride]
     logger: LoggerPort
     mailto: str | None = None
     api_key: str | None = None

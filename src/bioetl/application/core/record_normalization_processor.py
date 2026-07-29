@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Application-owned record normalization stage for Bronze -> Silver flow."""
 
@@ -71,7 +70,7 @@ class RecordNormalizationProcessor(
             object.__setattr__(
                 self,
                 "profile",
-                cast(_NormalizationProfileLike, resolved_profile),
+                cast(_NormalizationProfileLike, resolved_profile),  # pyright: ignore[reportInvalidCast]
             )
 
     def normalize_record(self, record: JsonDict) -> JsonDict:

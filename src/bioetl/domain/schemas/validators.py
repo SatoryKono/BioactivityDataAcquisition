@@ -1,4 +1,3 @@
-# pyright: reportGeneralTypeIssues=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Custom Pandera checks for schema validation.
 
@@ -58,7 +57,7 @@ def rows_are_valid_json(series: pd.Series) -> pd.Series:
         Returns:
             Check result as bool.
         """
-        if pd.isna(val):  # type: ignore[call-overload]
+        if pd.isna(val):  # type: ignore[call-overload]  # pyright: ignore[reportGeneralTypeIssues]
             return True
         try:
             json.loads(str(val))
@@ -88,7 +87,7 @@ def rows_are_valid_json_array(series: pd.Series) -> pd.Series:
         Returns:
             Check result as bool.
         """
-        if pd.isna(val):  # type: ignore[call-overload]
+        if pd.isna(val):  # type: ignore[call-overload]  # pyright: ignore[reportGeneralTypeIssues]
             return True
         try:
             parsed = json.loads(str(val))
@@ -118,7 +117,7 @@ def rows_are_valid_json_object(series: pd.Series) -> pd.Series:
         Returns:
             Check result as bool.
         """
-        if pd.isna(val):  # type: ignore[call-overload]
+        if pd.isna(val):  # type: ignore[call-overload]  # pyright: ignore[reportGeneralTypeIssues]
             return True
         try:
             parsed = json.loads(str(val))

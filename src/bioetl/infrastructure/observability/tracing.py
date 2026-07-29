@@ -1,5 +1,3 @@
-# pyright: reportInvalidCast=false
-# pyright: reportPossiblyUnboundVariable=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """OpenTelemetry tracer adapter — real TracingPort implementation.
 
@@ -263,7 +261,7 @@ def _build_telemetry_exporter() -> (
     """Create the most appropriate tracing exporter for the current runtime."""
     exporter_class = _load_otlp_exporter_class()
     if exporter_class is None:
-        return ConsoleSpanExporter()
+        return ConsoleSpanExporter()  # pyright: ignore[reportPossiblyUnboundVariable]
 
     exporter_kwargs: dict[str, str | bool] = {}
     endpoint = _get_otlp_endpoint()
@@ -315,14 +313,14 @@ class OpenTelemetryTracer:
             )
 
         resolved_service_name = _resolve_service_name(service_name)
-        self._provider = TracerProvider(
-            resource=Resource.create({"service.name": resolved_service_name})
+        self._provider = TracerProvider(  # pyright: ignore[reportPossiblyUnboundVariable]
+            resource=Resource.create({"service.name": resolved_service_name})  # pyright: ignore[reportPossiblyUnboundVariable]
         )
 
         # Prefer OTLP if available (production), fall back to Console (dev/debug)
         exporter = _build_telemetry_exporter()
 
-        processor = BatchSpanProcessor(exporter)
+        processor = BatchSpanProcessor(exporter)  # pyright: ignore[reportPossiblyUnboundVariable]
         self._provider.add_span_processor(processor)
         self._closed = False
 
@@ -336,7 +334,7 @@ class OpenTelemetryTracer:
             OpenTelemetry tracer instance.
 
         """
-        return _TracerAdapter(cast(_TracerProtocol, self._provider.get_tracer(name)))
+        return _TracerAdapter(cast(_TracerProtocol, self._provider.get_tracer(name)))  # pyright: ignore[reportInvalidCast]
 
     def flush(self) -> None:
         """Force-flush pending spans without shutting down the provider."""

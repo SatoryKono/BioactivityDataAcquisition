@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Built-in workflow transform for deterministic A/B row reconciliation."""
 
@@ -197,7 +196,7 @@ async def _persist_reconcile_rows_artifact(
         ),
         payload=payload,
     )
-    return artifact_refs_as_dicts(tuple(refs))
+    return artifact_refs_as_dicts(tuple(refs))  # pyright: ignore[reportArgumentType]
 
 
 def _optional_runtime_str(

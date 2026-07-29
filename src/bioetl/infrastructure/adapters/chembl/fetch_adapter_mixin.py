@@ -1,7 +1,5 @@
 # mypy: disable-error-code=attr-defined
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Adapter mixin orchestrating ChEMBL fetch flows."""
 
@@ -56,14 +54,14 @@ class ChemblFetchAdapterMixin(
         Returns:
             Async iterator of deduplicated BronzeRecord dicts.
         """
-        host = cast(FilteredBatchRecoveryHost, self)
+        host = cast(FilteredBatchRecoveryHost, self)  # pyright: ignore[reportInvalidCast]
         async for record in iter_deduplicated_filtered_id_batches(
             host,
             entity_type=entity_type,
             limit=limit,
             filter_ids=filter_ids,
             filter_field=filter_field,
-            batch_size=self._filter_batch_size,
+            batch_size=self._filter_batch_size,  # pyright: ignore[reportAttributeAccessIssue]
         ):
             yield record
 
@@ -85,8 +83,8 @@ class ChemblFetchAdapterMixin(
         """
         total_fetched = 0
         seen_keys: set[str] = set()
-        pk_field = self._get_api_pk_field(entity_type)
-        pk_fields = self._get_api_dedup_fields(entity_type)
+        pk_field = self._get_api_pk_field(entity_type)  # pyright: ignore[reportAttributeAccessIssue]
+        pk_fields = self._get_api_dedup_fields(entity_type)  # pyright: ignore[reportAttributeAccessIssue]
         logger = getattr(self, "_logger", None)
         metrics = getattr(self, "_adapter_metrics", None)
 

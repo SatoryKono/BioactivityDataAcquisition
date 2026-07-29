@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Extension mixin for ActivityAggregator utility operations."""
 
@@ -47,7 +46,7 @@ class _ActivityAggregatorExtensions:
         if not concentrations:
             raise ValueError("Cannot aggregate empty sequence of concentrations")
         nm_values = [c.to_nanomolar().value for c in concentrations]
-        host = cast("_AggregatorHost", self)
+        host = cast("_AggregatorHost", self)  # pyright: ignore[reportInvalidCast]
         aggregated = host.aggregate_values(nm_values, method)
         return Concentration(value=aggregated, unit=ConcentrationUnit.NANOMOLAR)
 
@@ -66,7 +65,7 @@ class _ActivityAggregatorExtensions:
         if not concentrations:
             raise ValueError("Cannot aggregate empty sequence of concentrations")
         nm_values = [c.to_nanomolar().value for c in concentrations]
-        host = cast("_AggregatorHost", self)
+        host = cast("_AggregatorHost", self)  # pyright: ignore[reportInvalidCast]
         aggregated, uncertainty = host.aggregate_with_uncertainty(nm_values, method)
         result_conc = Concentration(
             value=aggregated,
@@ -113,5 +112,5 @@ class _ActivityAggregatorExtensions:
         filtered = _filter_values_by_range(values, min_value, max_value)
         if not filtered:
             return None
-        host = cast("_AggregatorHost", self)
+        host = cast("_AggregatorHost", self)  # pyright: ignore[reportInvalidCast]
         return host.aggregate_values(filtered, method)

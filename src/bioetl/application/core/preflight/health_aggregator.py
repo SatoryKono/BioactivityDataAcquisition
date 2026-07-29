@@ -1,6 +1,3 @@
-# pyright: reportArgumentType=false
-# pyright: reportAttributeAccessIssue=false
-# pyright: reportOptionalMemberAccess=false
 # Host attrs/methods provided by concrete composition.
 """Health aggregation helper for preflight infrastructure validation."""
 
@@ -8,7 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.application.core.preflight.health_aggregator_runtime import (
     build_component_result,
@@ -129,7 +126,11 @@ class HealthAggregator:
 
         try:
             if hasattr(services.data_source, "check_health"):
-                health_result = await services.data_source.check_health()
+                # Port may expose optional enhanced health API; cast after None guard.
+                raw_health = await services.data_source.check_health()  # pyright: ignore[reportAttributeAccessIssue]
+                if raw_health is None:
+                    raise TypeError("data_source.check_health() returned None")
+                health_result = cast("HealthCheckResult", raw_health)
                 status = health_result.status
                 fallback_reason = resolve_probe_fallback_reason(
                     health_check_mode=self._health_check_mode,
@@ -139,7 +140,8 @@ class HealthAggregator:
 
                 if self._health_monitor is not None:
                     self._health_monitor.update_from_health_check_result(
-                        health_result, self._logger
+                        health_result,
+                        self._logger,
                     )
 
                 result = build_component_result(

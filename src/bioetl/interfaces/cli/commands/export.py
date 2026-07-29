@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Export commands for BioETL CLI."""
 
@@ -32,7 +31,7 @@ __all__ = ["ExportFormat", "export_command"]
 
 def _scrub_helper_module_binding() -> None:
     """Keep helper-only export_support off the package-root public seam."""
-    package = sys.modules.get(__package__)
+    package = sys.modules.get(__package__)  # pyright: ignore[reportArgumentType]
     if package is not None and hasattr(package, "export_support"):
         delattr(package, "export_support")
 

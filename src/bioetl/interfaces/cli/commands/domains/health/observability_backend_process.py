@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """Detached observability backend process helpers."""
 
@@ -12,7 +11,7 @@ import tempfile
 import time
 from pathlib import Path
 from shutil import which
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
@@ -196,11 +195,17 @@ def _build_detached_backend_popen_kwargs(
             sw_hide = int(getattr(subprocess_module, "SW_HIDE", 0))
             if startf_use_show_window:
                 existing_dw_flags = (
-                    int(startupinfo.dwFlags) if hasattr(startupinfo, "dwFlags") else 0
+                    int(cast(Any, startupinfo).dwFlags)  # Any: Windows STARTUPINFO duck-type
+                    if hasattr(startupinfo, "dwFlags")
+                    else 0
                 )
-                startupinfo.dwFlags = existing_dw_flags | startf_use_show_window
+                cast(Any, startupinfo).dwFlags = (  # Any: Windows STARTUPINFO duck-type
+                    existing_dw_flags | startf_use_show_window
+                )
             if has_sw_hide:
-                startupinfo.wShowWindow = sw_hide
+                cast(Any, startupinfo).wShowWindow = (  # Any: Windows STARTUPINFO duck-type
+                    sw_hide
+                )
             kwargs["startupinfo"] = startupinfo
     else:
         kwargs["start_new_session"] = True

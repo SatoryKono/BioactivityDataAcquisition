@@ -1,5 +1,3 @@
-# pyright: reportArgumentType=false
-# pyright: reportIncompatibleMethodOverride=false
 # MRO/override residual on mixin or client hierarchies.
 """Gold layer writer — RULES.md §2.1.1, REQ-DATA-009/010, REQ-CONTRACT-001."""
 
@@ -151,7 +149,7 @@ GOLD_WRITE_RETRY_ERRORS = (
 )
 
 
-class GoldWriter(
+class GoldWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
     GoldWriterValidationMixin,
     GoldWriterIOMixin,
     GoldWriterMetadataMixin,
@@ -307,7 +305,7 @@ class GoldWriter(
     ) -> _PreparedGoldWriteContext:
         """Run validation and path resolution before a Gold write."""
         return await _prepare_write_gold_impl(
-            self,
+            self,  # pyright: ignore[reportArgumentType]
             table_name=table_name,
             records=records,
             mode=mode,

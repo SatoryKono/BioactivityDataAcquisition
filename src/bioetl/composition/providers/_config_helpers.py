@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Configuration helpers for provider registration."""
 
@@ -233,7 +232,7 @@ def _wrap_with_filter(
             CsvFilterReader,
         )
 
-        return cast(
+        return cast(  # pyright: ignore[reportInvalidCast]
             DataSourcePort,
             FilteredDataSource(
                 data_source=data_source,

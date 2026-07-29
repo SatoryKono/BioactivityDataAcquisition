@@ -18,7 +18,7 @@ from pathlib import Path
 try:
     from .diagram_paths import DIAGRAM_ROOT
 except ImportError:  # pragma: no cover - direct script execution
-    from diagram_paths import DIAGRAM_ROOT
+    from scripts.diagrams.diagram_paths import DIAGRAM_ROOT
 
 # Page break block that works for both DOCX (pandoc) and PDF (wkhtmltopdf)
 PAGE_BREAK = '\n\\newpage\n\n<div style="page-break-before: always;"></div>\n'

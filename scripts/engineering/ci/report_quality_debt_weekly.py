@@ -10,7 +10,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 
 if __package__ in {None, ""}:
-    from _compatibility_telemetry import (  # type: ignore[import-not-found]
+    from scripts.engineering.ci._compatibility_telemetry import (  # type: ignore[import-not-found]
         CompatibilitySurfaceSnapshot,
         DebtGovernanceSnapshot,
         collect_debt_governance_snapshot,

@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Execution helpers for Gold merged writes."""
 
@@ -72,7 +71,7 @@ async def _write_gold_merged_sidecar(
     prepared: _PreparedGoldMergedWrite,
 ) -> None:
     """Write merged Gold metadata sidecar after data write completes."""
-    metadata_writer = cast(_GoldMergedMetadataWriterProtocol, host)
+    metadata_writer = cast(_GoldMergedMetadataWriterProtocol, host)  # pyright: ignore[reportInvalidCast]
     await metadata_writer._write_gold_merged_metadata(
         table_path=prepared.table_path,
         table_name=prepared.request.table_name,

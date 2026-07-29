@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Key nullability validation operations for Silver layer.
 
@@ -68,7 +67,7 @@ def _validate_key_nullability_impl(
         return
 
     rules = {(rule.field, rule.key_type): rule for rule in key_nullability_rules}
-    violations = _collect_key_violations(records, rules, primary_keys, partition_cols)
+    violations = _collect_key_violations(records, rules, primary_keys, partition_cols)  # pyright: ignore[reportArgumentType]
 
     if violations:
         details = [

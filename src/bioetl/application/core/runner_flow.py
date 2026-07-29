@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # pyright: reportImportCycles=false
 # Import cycle residual tracked in allowlist (product burn-down).
 """Lifecycle helpers for :mod:`bioetl.application.core.runner`."""
@@ -119,7 +118,7 @@ def extract_checkpoint_offset(
         return None
     if hasattr(checkpoint_meta, "records_processed"):
         return int(cast("CheckpointMetadata", checkpoint_meta).records_processed)
-    raw_records = checkpoint_meta.get("records_processed")
+    raw_records = checkpoint_meta.get("records_processed")  # pyright: ignore[reportAttributeAccessIssue]
     return raw_records if isinstance(raw_records, int) else None
 
 

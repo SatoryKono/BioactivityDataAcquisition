@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# pyright: reportUnsafeMultipleInheritance=false
 # MRO/override residual on mixin or client hierarchies.
 """PubMed adapter implementation for Entrez E-utilities API.
 
@@ -76,7 +74,7 @@ def _create_default_pubmed_title_fallback_handler(
 
 
 @dataclass
-class PubMedAdapter(
+class PubMedAdapter(  # pyright: ignore[reportUnsafeMultipleInheritance]
     _PubMedFallbackPolicyMixin,
     FallbackPolicyMixin,
     NotSupportedMultiFilterMixin,
@@ -95,7 +93,7 @@ class PubMedAdapter(
     - PubMedHealthMixin: health probes and metadata
     """
 
-    http_client: UnifiedHTTPClient
+    http_client: UnifiedHTTPClient  # pyright: ignore[reportIncompatibleVariableOverride]
     logger: LoggerPort
     # Technical NCBI contact email for API identification; record-level hashing
     # and anonymization apply to extracted payload fields, not this credential.

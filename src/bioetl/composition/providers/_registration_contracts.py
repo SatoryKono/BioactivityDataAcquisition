@@ -1,5 +1,3 @@
-# pyright: reportArgumentType=false
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Leaf contracts and injected support for provider registration assembly."""
 
@@ -176,7 +174,7 @@ def create_provider_assembly_support(
             _create_http_client_for_provider,
             provider_registry=resolved_registry,
         ),
-        create_adapter=partial(
+        create_adapter=partial(  # pyright: ignore[reportArgumentType]
             _create_adapter_for_provider,
             provider_registry=resolved_registry,
         ),
@@ -221,7 +219,7 @@ def bind_provider_data_source_creator(
     assembly_support: ProviderAssemblySupport,
 ) -> DataSourceCreatorProtocol:
     """Bind the shared assembly support to a support-aware data-source creator."""
-    return cast(
+    return cast(  # pyright: ignore[reportInvalidCast]
         DataSourceCreatorProtocol,
         partial(creator, assembly_support=assembly_support),
     )

@@ -38,7 +38,7 @@ try:
         write_report,
     )
 except ImportError:  # pragma: no cover - direct script execution
-    from runtime_manager import (
+    from scripts.ops.runtime.docker.runtime_manager import (
         DEFAULT_CONTRACT,
         ROOT,
         CommandResult,

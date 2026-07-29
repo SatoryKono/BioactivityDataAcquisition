@@ -1,5 +1,4 @@
 # mypy: disable-error-code="import-untyped"
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """PubMed publication transformer."""
 
@@ -148,7 +147,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         try:
             self._cached_xml_root = defused_ET.fromstring(raw_xml)
-        except (ET.ParseError, defused_ET.EntitiesForbidden) as e:
+        except (
+            ET.ParseError,
+            cast(type[BaseException], getattr(defused_ET, "EntitiesForbidden", Exception)),
+        ) as e:
             context.logger.warning(
                 "XML_parse_error",
                 error=str(e),

@@ -1,5 +1,4 @@
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Observability and quarantine helpers for CompositePipelineRunner."""
 
@@ -211,7 +210,7 @@ class CompositeRunnerObservabilityMixin:
                     pipeline=pipeline_name,
                     error_code="CROSS_VALIDATION_QUARANTINE",
                     payload=dict(payload),
-                    bronze_batch_id=cast(BatchID, self._run_id),
+                    bronze_batch_id=cast(BatchID, self._run_id),  # pyright: ignore[reportInvalidCast]
                     run_id=self._run_id,
                     metadata=quarantine_metadata,
                     ingestion_ts=quarantine_timestamp,

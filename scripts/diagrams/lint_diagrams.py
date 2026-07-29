@@ -1043,7 +1043,7 @@ def check_orphan_nodes(path: Path, lines: list[str]) -> list[Issue]:
 
     _sys.path.insert(0, str(Path(__file__).parent))
     try:
-        from prune_orphan_nodes import (
+        from scripts.diagrams.prune_orphan_nodes import (
             detect_diagram_type,
             parse_flowchart_orphans,
             parse_keep_orphans,

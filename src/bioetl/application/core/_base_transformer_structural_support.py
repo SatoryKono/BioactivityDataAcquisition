@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Private structural-policy helpers for BaseTransformer execution."""
 
@@ -72,7 +71,7 @@ def apply_silver_filter(
     ):
         return
 
-    decision = owner._silver_filters.evaluate(cast("GoldRecord", result))
+    decision = owner._silver_filters.evaluate(cast("GoldRecord", result))  # pyright: ignore[reportInvalidCast]
     if decision.include:
         return
 
@@ -102,7 +101,7 @@ def evaluate_semantic_shadow_decision(
         or owner._silver_filters.is_empty()
     ):
         return None
-    return owner._silver_filters.evaluate(cast("GoldRecord", result))
+    return owner._silver_filters.evaluate(cast("GoldRecord", result))  # pyright: ignore[reportInvalidCast]
 
 
 def record_structural_policy_metrics(

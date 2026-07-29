@@ -8,7 +8,7 @@ if __package__ in {None, ""}:
     from pathlib import Path
 
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from _compat_shim import load_main
+    from scripts.docs._compat_shim import load_main
 else:
     from ._compat_shim import load_main
 

@@ -1,4 +1,3 @@
-# pyright: reportOptionalMemberAccess=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Memory monitoring for adaptive batch processing.
 
@@ -29,6 +28,7 @@ from bioetl.domain.config import MemoryConfig
 
 # Re-export MemoryStats from domain for backward compatibility
 from bioetl.domain.ports import MemoryStats
+from bioetl.typing_support import as_mixin_host
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -102,7 +102,7 @@ class MemoryMonitor:
         vm = psutil.virtual_memory()
         if self._cached_process is None:
             object.__setattr__(self, "_cached_process", psutil.Process())
-        process_memory = self._cached_process.memory_info()
+        process_memory = as_mixin_host(self)._cached_process.memory_info()  # Any: mixin host surface (self attrs/methods)
 
         return MemoryStats(
             used_mb=vm.used / (1024 * 1024),

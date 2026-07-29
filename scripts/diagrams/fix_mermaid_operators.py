@@ -33,7 +33,7 @@ for bootstrap_path in (REPO_ROOT, SCRIPT_DIR):
 try:
     from .diagram_paths import DIAGRAM_ROOT
 except ImportError:  # pragma: no cover - direct script execution
-    from diagram_paths import DIAGRAM_ROOT
+    from scripts.diagrams.diagram_paths import DIAGRAM_ROOT
 
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 TARGET_DIAGRAM_TYPES = {"classdiagram", "sequencediagram"}

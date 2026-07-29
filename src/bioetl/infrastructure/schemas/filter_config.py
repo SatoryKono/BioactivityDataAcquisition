@@ -1,5 +1,4 @@
 # mypy: disable-error-code="misc,untyped-decorator"
-# pyright: reportIncompatibleMethodOverride=false
 # MRO/override residual on mixin or client hierarchies.
 """Pydantic schemas for standalone filter configuration files.
 
@@ -92,7 +91,7 @@ class SilverFiltersFileConfig(BaseGoldFiltersConfig):
             validate_structural_silver_filter_payload(data)
         return data
 
-    def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]
+    def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]  # pyright: ignore[reportIncompatibleMethodOverride]
         """Convert to a structural-only domain SilverFilterConfig dataclass.
 
         Returns:

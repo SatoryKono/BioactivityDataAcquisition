@@ -1,4 +1,3 @@
-# pyright: reportIncompatibleMethodOverride=false
 # MRO/override residual on mixin or client hierarchies.
 """UniProt Target transformer.
 
@@ -34,7 +33,7 @@ if TYPE_CHECKING:
 __all__ = ["UniProtProteinTransformer"]
 
 
-class UniProtProteinTransformer(
+class UniProtProteinTransformer(  # pyright: ignore[reportIncompatibleMethodOverride]
     PreSilverAdapterMixin, BaseTransformer, UniProtBusinessDataMixin
 ):
     """Transformer for UniProt protein records."""

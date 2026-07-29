@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Typed spec and coercion helpers for standard normalization profiles."""
 
@@ -156,4 +155,4 @@ def coerce_standard_profile_spec(
     }
     resolved_values["profile_name"] = str(resolved_values["profile_name"])
     resolved_values["description"] = str(resolved_values["description"])
-    return StandardProfileSpec(**cast(_StandardProfileSpecKwargs, resolved_values))
+    return StandardProfileSpec(**cast(_StandardProfileSpecKwargs, resolved_values))  # pyright: ignore[reportInvalidCast]

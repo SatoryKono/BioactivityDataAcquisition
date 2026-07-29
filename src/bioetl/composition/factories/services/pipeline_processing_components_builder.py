@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Assembly helpers for batch processing components."""
 
@@ -103,7 +102,7 @@ def create_batch_processing_components(
         else None
     )
     writer = BatchWriter(
-        storage=cast("BatchWriteStorageProtocol", services.storage),
+        storage=cast("BatchWriteStorageProtocol", services.storage),  # pyright: ignore[reportInvalidCast]
         context=context,
         config=config,
         gold_validator=gold_validator,

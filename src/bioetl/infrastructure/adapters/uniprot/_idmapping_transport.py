@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Transport and result retrieval logic for UniProt ID mapping."""
 
@@ -56,7 +55,7 @@ class IDMappingTransportMixin:
         Returns:
             IDMappingTransportDependencies cast of the current client instance.
         """
-        return cast("IDMappingTransportDependencies", self)
+        return cast("IDMappingTransportDependencies", self)  # pyright: ignore[reportInvalidCast]
 
     async def _map_batch(
         self,

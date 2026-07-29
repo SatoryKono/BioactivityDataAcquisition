@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual (PD3).
 """Main composition-root bootstrap for runtime pipeline execution."""
 
@@ -103,4 +102,4 @@ def bootstrap_pipeline_runner(
         factory=phases.factory_wiring, inputs=phases.input_wiring
     )
     runner = _build_pipeline_runner(ctx=ctx, registry=phases.registry, wiring=wiring)
-    return cast("PipelineRunner", runner)
+    return cast("PipelineRunner", runner)  # pyright: ignore[reportInvalidCast]

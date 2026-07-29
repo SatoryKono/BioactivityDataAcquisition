@@ -1,4 +1,3 @@
-# pyright: reportMissingSuperCall=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Molecular weight Value Object.
 
@@ -53,7 +52,7 @@ class MolecularWeight(ValueObject[float]):
     _value: float
     _config: ValidationConfig
 
-    def __init__(
+    def __init__(  # pyright: ignore[reportMissingSuperCall]
         self,
         value: float | int | str,
         *,

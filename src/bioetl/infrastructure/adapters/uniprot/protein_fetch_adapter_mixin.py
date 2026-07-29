@@ -1,5 +1,4 @@
 # mypy: disable-error-code=attr-defined
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Protein fetch internals for UniProtAdapter."""
 
@@ -7,7 +6,7 @@ from __future__ import annotations
 
 import contextlib
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Protocol
 
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.uniprot.query_builder import (
@@ -16,6 +15,7 @@ from bioetl.infrastructure.adapters.uniprot.query_builder import (
 from bioetl.infrastructure.adapters.uniprot.response_parser import (
     parse_uniprot_protein_response,
 )
+from bioetl.typing_support import as_mixin_host
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -125,24 +125,24 @@ class UniProtProteinFetchAdapterMixin:
         async def _pagination_callback(
             cursor: str | None, fetched: int
         ) -> tuple[list[BronzeRecord], str | None]:
-            params = self._build_protein_fetch_params(
+            params = as_mixin_host(self)._build_protein_fetch_params(  # Any: mixin host surface (self attrs/methods)
                 query, size, fetched, limit, cursor
             )
             try:
                 start_time = time.perf_counter()
-                with self._adapter_metrics.measure_request("/uniprotkb/search"):
-                    response = await self._http_client.get(
-                        f"{self.base_url}/uniprotkb/search", params=params
+                with as_mixin_host(self)._adapter_metrics.measure_request("/uniprotkb/search"):  # Any: mixin host surface (self attrs/methods)
+                    response = await as_mixin_host(self)._http_client.get(  # Any: mixin host surface (self attrs/methods)
+                        f"{as_mixin_host(self).base_url}/uniprotkb/search", params=params  # Any: mixin host surface (self attrs/methods)
                     )
                 duration_ms = (time.perf_counter() - start_time) * 1000
                 with contextlib.suppress(Exception):
-                    self._request_collector.record_from_response(response, duration_ms)
-                return self._parse_response(response)
+                    as_mixin_host(self)._request_collector.record_from_response(response, duration_ms)  # Any: mixin host surface (self attrs/methods)
+                return as_mixin_host(self)._parse_response(response)  # Any: mixin host surface (self attrs/methods)
             except _UNIPROT_FETCH_ERRORS as error:
-                self._handle_fetch_error("protein", query, cursor, error=error)
+                as_mixin_host(self)._handle_fetch_error("protein", query, cursor, error=error)  # Any: mixin host surface (self attrs/methods)
                 return [], None
 
-        async for item in self.paginated_fetch(_pagination_callback, limit=limit):
+        async for item in as_mixin_host(self).paginated_fetch(_pagination_callback, limit=limit):  # Any: mixin host surface (self attrs/methods)
             yield item
 
     def _handle_fetch_error(
@@ -155,22 +155,22 @@ class UniProtProteinFetchAdapterMixin:
         """Handle fetch errors with strict/non-strict behavior."""
         context = {"query": query, "cursor": cursor, "entity_type": entity_type}
         if error is not None:
-            self._error_handler.log_error(
-                provider=self.provider_name,
+            as_mixin_host(self)._error_handler.log_error(  # Any: mixin host surface (self attrs/methods)
+                provider=as_mixin_host(self).provider_name,  # Any: mixin host surface (self attrs/methods)
                 operation=f"{entity_type}_fetch",
                 error=error,
                 context=context,
             )
         else:
-            self._logger.error(
+            as_mixin_host(self)._logger.error(  # Any: mixin host surface (self attrs/methods)
                 "external_api_error",
-                provider=self.provider_name,
+                provider=as_mixin_host(self).provider_name,  # Any: mixin host surface (self attrs/methods)
                 operation=f"{entity_type}_fetch",
                 **context,
             )
 
-        if self.strict_error_handling and error is not None:
-            wrapped = self._error_handler.wrap_error(
-                error=error, provider=self.provider_name
+        if as_mixin_host(self).strict_error_handling and error is not None:  # Any: mixin host surface (self attrs/methods)
+            wrapped = as_mixin_host(self)._error_handler.wrap_error(  # Any: mixin host surface (self attrs/methods)
+                error=error, provider=as_mixin_host(self).provider_name  # Any: mixin host surface (self attrs/methods)
             )
             raise wrapped from error

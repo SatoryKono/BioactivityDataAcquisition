@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 # Annotation-only host surface: do NOT assign None defaults — dataclass subclasses
 # inherit those as field defaults (e.g. CrossRef mailto after logger). PD7 residual.
@@ -90,10 +89,10 @@ class HealthCheckMixin:
 
     # Annotation-only host surface. Do NOT assign None defaults: dataclass
     # subclasses inherit those as field defaults (e.g. CrossRef mailto after logger).
-    logger: LoggerPort
-    metrics: MetricsPort | None
-    provider_name: str
-    _logger: LoggerPort
+    logger: LoggerPort  # pyright: ignore[reportUninitializedInstanceVariable]
+    metrics: MetricsPort | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    provider_name: str  # pyright: ignore[reportUninitializedInstanceVariable]
+    _logger: LoggerPort  # pyright: ignore[reportUninitializedInstanceVariable]
 
     def _get_metrics(self) -> MetricsPort | None:
         """Get metrics port for best-effort health-check telemetry.

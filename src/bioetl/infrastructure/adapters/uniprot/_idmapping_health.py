@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Health endpoint helpers for UniProt ID mapping client."""
 
@@ -37,7 +36,7 @@ class IDMappingHealthMixin:
         Returns:
             IDMappingHealthDependencies cast of the current client instance.
         """
-        return cast("IDMappingHealthDependencies", self)
+        return cast("IDMappingHealthDependencies", self)  # pyright: ignore[reportInvalidCast]
 
     async def _probe_health(self) -> HealthStatus:
         """Perform health probe for ID Mapping API.

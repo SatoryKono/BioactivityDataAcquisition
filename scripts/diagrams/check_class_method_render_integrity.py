@@ -26,7 +26,7 @@ if str(REPO_ROOT) not in sys.path:
 try:
     from .diagram_paths import source_dir as diagram_source_dir
 except ImportError:  # pragma: no cover - direct script execution
-    from diagram_paths import source_dir as diagram_source_dir
+    from scripts.diagrams.diagram_paths import source_dir as diagram_source_dir
 
 SVG_NS = urlunsplit(("http", "www.w3.org", "/2000/svg", "", ""))
 NS = {"svg": SVG_NS}

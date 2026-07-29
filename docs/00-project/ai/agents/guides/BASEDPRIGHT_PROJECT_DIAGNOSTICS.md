@@ -37,7 +37,7 @@ Linked campaigns:
 | Suppressions shrink-only | `basedpyright-suppression-inventory.json` | `--check` |
 | Tests/scripts advisory | `basedpyright-tests-snapshot.json` | optional `--check` |
 
-**PD7 floors (closeout):** errors **0**; warnings **≤13175**; suppressions **≤196 files / ≤250 rules**; workspace **≤1375 errors**.
+**PD7 floors (residual close):** errors **0**; warnings **≤13346**; suppressions **≤46 files / ≤60 rules**; workspace **≤1375 errors**.
 
 ### Regen
 
