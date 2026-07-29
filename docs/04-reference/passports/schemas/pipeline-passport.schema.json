@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bioetl.local/schemas/pipeline-passport.schema.json",
+  "title": "BioETL pipeline passport",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "passport_schema_version",
+    "kind",
+    "identity",
+    "provenance",
+    "source_references",
+    "execution",
+    "observability",
+    "diagnostics"
+  ],
+  "properties": {
+    "passport_schema_version": {"const": "1.0.0"},
+    "kind": {"const": "pipeline"},
+    "identity": {
+      "type": "object",
+      "required": ["typed_id", "pipeline_id", "pipeline_type", "status"],
+      "properties": {
+        "typed_id": {"type": "string", "pattern": "^(pipeline|composite):"},
+        "pipeline_id": {"type": "string", "minLength": 1},
+        "provider": {"type": "string"},
+        "entity": {"type": "string"},
+        "pipeline_type": {"enum": ["provider_entity", "composite"]},
+        "status": {"const": "active"},
+        "aliases": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "source_references": {"$ref": "#/$defs/sourceReferences"},
+    "extraction": {"type": "object"},
+    "bronze": {"type": "object"},
+    "silver": {"type": "object"},
+    "gold": {"type": "object"},
+    "composite": {"type": "object"},
+    "execution": {"type": "object"},
+    "observability": {"$ref": "#/$defs/observability"},
+    "diagnostics": {"type": "array", "items": {"type": "object"}}
+  },
+  "$defs": {
+    "provenance": {
+      "type": "object",
+      "required": ["source_revision", "projector_version", "semantic_content_hash"],
+      "properties": {
+        "source_revision": {"type": "string", "minLength": 7},
+        "projector_version": {"type": "string"},
+        "semantic_content_hash": {"type": "string", "pattern": "^sha256:"}
+      },
+      "additionalProperties": false
+    },
+    "sourceReferences": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["role", "path"],
+        "properties": {
+          "role": {"type": "string"},
+          "path": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "observability": {
+      "type": "object",
+      "required": ["metric_labels", "correlation_fields"],
+      "properties": {
+        "metric_labels": {
+          "type": "array",
+          "not": {
+            "contains": {
+              "enum": ["run_id", "manifest_id", "payload_hash", "record_id"]
+            }
+          }
+        },
+        "correlation_fields": {"type": "array"}
+      },
+      "additionalProperties": true
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bioetl.local/schemas/workflow-passport.schema.json",
+  "title": "BioETL workflow passport",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "passport_schema_version",
+    "kind",
+    "identity",
+    "provenance",
+    "source_references",
+    "dag",
+    "external_data_operations",
+    "control_plane",
+    "observability",
+    "diagnostics"
+  ],
+  "properties": {
+    "passport_schema_version": {"const": "1.0.0"},
+    "kind": {"const": "workflow"},
+    "identity": {
+      "type": "object",
+      "required": ["typed_id", "workflow_id", "status"],
+      "properties": {
+        "typed_id": {"type": "string", "pattern": "^workflow:"},
+        "workflow_id": {"type": "string", "minLength": 1},
+        "version": {"type": ["string", "number"]},
+        "status": {"const": "active"}
+      },
+      "additionalProperties": false
+    },
+    "provenance": {"type": "object"},
+    "source_references": {"type": "array", "minItems": 1},
+    "dag": {
+      "type": "object",
+      "required": ["step_count", "edge_count", "steps", "edges"]
+    },
+    "external_data_operations": {"type": "array"},
+    "control_plane": {"type": "object"},
+    "observability": {
+      "type": "object",
+      "required": [
+        "metric_labels",
+        "prohibited_metric_labels",
+        "correlation_fields"
+      ]
+    },
+    "diagnostics": {"type": "array", "items": {"type": "object"}}
+  }
+}
