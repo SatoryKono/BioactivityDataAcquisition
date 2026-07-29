@@ -87,8 +87,10 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
         source_refs.append(
             {"role": "dq_contract", "path": _repo_path(contract_path)}
         )
-    schema = payload.get("schema") if isinstance(payload.get("schema"), dict) else {}
-    sink = pipeline.get("sink") if isinstance(pipeline.get("sink"), dict) else {}
+    raw_schema = payload.get("schema")
+    schema: JsonObject = raw_schema if isinstance(raw_schema, dict) else {}
+    raw_sink = pipeline.get("sink")
+    sink: JsonObject = raw_sink if isinstance(raw_sink, dict) else {}
     return {
         "passport_schema_version": SCHEMA_VERSION,
         "kind": "pipeline",
@@ -161,7 +163,8 @@ def _composite_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
     payload = _load_yaml(unit.config_path)
     composite = payload["composite"]
     assert isinstance(composite, dict)
-    seed = composite.get("seed") if isinstance(composite.get("seed"), dict) else {}
+    raw_seed = composite.get("seed")
+    seed: JsonObject = raw_seed if isinstance(raw_seed, dict) else {}
     output_keys = {
         str(value) for value in seed.get("output_keys", []) if isinstance(value, str)
     }
