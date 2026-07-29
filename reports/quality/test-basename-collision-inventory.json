@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "linked_issue": 7032,
-  "duplicate_basename_count": 69,
-  "duplicate_file_instances": 155,
+  "duplicate_basename_count": 70,
+  "duplicate_file_instances": 158,
   "top_collisions": [
     {
       "basename": "test_adapter.py",
