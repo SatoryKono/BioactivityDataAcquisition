@@ -8,6 +8,11 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.services.control_plane.manifest._reference_hydration import (
+    hydrate_input_snapshots,
+    hydrate_planned_artifacts,
+    hydrate_source_refs,
+)
 from bioetl.domain.control_plane import (
     RunArtifactRef,
     RunCodeProvenance,
@@ -29,22 +34,6 @@ def _optional_payload_string(
 ) -> str | None:
     value = payload.get(key)
     return None if value is None else str(value)
-
-
-def _optional_snapshot_string(
-    payload: dict[str, object],
-    key: str,
-) -> str | None:
-    value = payload.get(key)
-    return None if value is None else str(value)
-
-
-def _optional_snapshot_datetime(
-    payload: dict[str, object],
-    key: str,
-) -> datetime | None:
-    value = payload.get(key)
-    return None if value is None else datetime.fromisoformat(str(value))
 
 
 class RunManifestHydrationMixin:
@@ -118,57 +107,21 @@ class RunManifestHydrationMixin:
         self,
         payload: list[object],
     ) -> tuple[RunSourceRef, ...]:
-        return tuple(
-            RunSourceRef(
-                provider=str(item["provider"]),
-                entity=str(item["entity"]),
-                pipeline_name=str(item["pipeline_name"]),
-                query=(None if item.get("query") is None else str(item["query"])),
-                input_snapshots=self._hydrate_input_snapshots(
-                    list(item.get("input_snapshots", []))
-                ),
-            )
-            for item in payload
-            if isinstance(item, dict)
-        )
+        return hydrate_source_refs(payload)
 
     def _hydrate_input_snapshots(
         self,
         payload: list[object],
+        *,
+        context: str = "input_snapshots",
     ) -> tuple[RunInputSnapshotRef, ...]:
-        return tuple(
-            RunInputSnapshotRef(
-                snapshot_id=str(item["snapshot_id"]),
-                content_hash=str(item["content_hash"]),
-                immutable_uri=_optional_snapshot_string(item, "immutable_uri"),
-                query_fingerprint=_optional_snapshot_string(
-                    item,
-                    "query_fingerprint",
-                ),
-                storage_provider=_optional_snapshot_string(item, "storage_provider"),
-                object_bucket=_optional_snapshot_string(item, "object_bucket"),
-                object_key=_optional_snapshot_string(item, "object_key"),
-                object_version_id=_optional_snapshot_string(
-                    item,
-                    "object_version_id",
-                ),
-                etag=_optional_snapshot_string(item, "etag"),
-                last_modified=_optional_snapshot_string(item, "last_modified"),
-                captured_at=_optional_snapshot_datetime(item, "captured_at"),
-            )
-            for item in payload
-            if isinstance(item, dict)
-        )
+        return hydrate_input_snapshots(payload, context=context)
 
     def _hydrate_planned_artifacts(
         self,
         payload: list[object],
     ) -> tuple[RunArtifactRef, ...]:
-        return tuple(
-            RunArtifactRef(layer=str(item["layer"]), path=str(item["path"]))
-            for item in payload
-            if isinstance(item, dict)
-        )
+        return hydrate_planned_artifacts(payload)
 
     def _build_manifest(
         self,

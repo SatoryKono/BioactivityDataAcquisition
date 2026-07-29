@@ -59,11 +59,10 @@ class _GoldMergedWriteProtocol(Protocol):
 class StorageBundleMergedMixin:
     """Mixin providing merged write and read operations for composite pipelines."""
 
-    silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD3)
-    gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD3)
-    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, CompositeSchemaProvider]] = cast(
-        Any, None  # Any: host attr default (PD3)
-    )
+    # ARCH-CR2-06: typed host attributes (set by StorageBundle.__init__).
+    silver: SilverWriter
+    gold: GoldWriter
+    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, CompositeSchemaProvider]] = {}
 
     def get_table_path(
         self,

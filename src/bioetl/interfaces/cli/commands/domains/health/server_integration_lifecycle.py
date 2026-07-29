@@ -55,23 +55,21 @@ async def _run_health_server(
         if data_root is None
         else _deps.get_health_server_dependencies(data_root=data_root)
     )
+    # ARCH-CR2-03: resolve optional quarantine before building the health graph
+    # so build_health_server receives a consistent dependency set.
+    quarantine_service = (
+        _deps._get_optional_health_server_quarantine_service()
+        if data_root is None
+        else _deps._get_optional_health_server_quarantine_service(data_root=data_root)
+    )
     server = _deps.build_health_server(
         host=host,
         port=port,
         deps=deps,
-        quarantine_service=None,
+        quarantine_service=quarantine_service,
     )
-    quarantine_service = None
     try:
         await server.start()
-        quarantine_service = (
-            _deps._get_optional_health_server_quarantine_service()
-            if data_root is None
-            else _deps._get_optional_health_server_quarantine_service(
-                data_root=data_root
-            )
-        )
-        server._quarantine_service = quarantine_service
         if start_metrics:
             _observability._start_health_observability()
         while True:

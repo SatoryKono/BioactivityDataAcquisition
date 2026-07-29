@@ -41,7 +41,8 @@ class BronzeWriterReadCleanupMixin:
                 data: bytes = reader.read()
                 return data
 
-        decompressed_data = _read_and_decompress()
+        # ARCH-CR2-01: keep blocking FS/decompress off the event loop.
+        decompressed_data = await asyncio.to_thread(_read_and_decompress)
         for line in decompressed_data.decode("utf-8").splitlines():
             if line.strip():
                 yield orjson.loads(line)

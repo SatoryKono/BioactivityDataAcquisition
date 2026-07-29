@@ -1,3 +1,13 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Live residual snapshot freeze for architecture closeout non-growth (#6891)."""
 
 from __future__ import annotations
@@ -103,13 +113,22 @@ def test_live_residual_snapshot_dead_code_and_clusters_match_committed_artifacts
 
 
 def test_historical_tech_debt_closeout_json_artifacts_remain_present() -> None:
-    """Evidence of closed issue packs remains as reports, not thrashing freezes."""
+    """Evidence of closed issue packs remains as reports, not thrashing freezes.
+
+    ARCH-CR2-09: require parseable JSON objects (not mere path existence) so a
+    truncated/corrupt closeout cannot satisfy the gate.
+    """
     closeouts = sorted(
         (ROOT / "reports" / "quality").glob("tech-debt-issues-*-closeout.json")
     )
     assert closeouts, "expected historical tech-debt closeout JSON artifacts"
+    assert len(closeouts) >= 1
     for path in closeouts:
         payload = json.loads(path.read_text(encoding="utf-8"))
         assert isinstance(payload, dict)
+        assert payload, f"closeout JSON must be a non-empty object: {path.name}"
         assert path.is_file()
     assert LIVE_RESIDUAL_SNAPSHOT.is_file()
+    snapshot = json.loads(LIVE_RESIDUAL_SNAPSHOT.read_text(encoding="utf-8"))
+    assert isinstance(snapshot, dict)
+    assert snapshot, "live residual snapshot must be a non-empty object"

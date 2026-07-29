@@ -83,6 +83,26 @@ Risks without an ADR:
 7. **ADR-010 preserved.** Local-only default remains; Docker/Grafana remain
    optional. The app package is operator tooling, not a BioETL core dependency.
 
+## Migration
+
+1. Keep JSON dashboards under `grafana/dashboards/*.json` as the rollback SSOT
+   during dual-surface period.
+2. Introduce Scenes routes/UIDs only behind explicit feature flags / optional
+   package paths (see DSS epic issues).
+3. Parity tests (counts/status/reasons/links for same scope/time) **MUST** pass
+   before any UID or route retirement.
+4. Document dual-path provisioning (JSON import vs Scenes app) before cutover.
+
+## Rollback
+
+1. **Parity failure:** keep JSON dashboards authoritative; disable Scenes routes
+   / hide dual navigation; do not delete JSON UIDs.
+2. **UID/route cutover failure:** restore previous JSON dashboard UIDs from git;
+   re-enable dual-path redirects for ≥1 release if already partially cut over.
+3. **Operator confusion:** set documentation banners that Scenes is optional
+   adjunct (ADR-010); Local-Only core runtime does not require Grafana.
+4. Tech-debt / quality budgets **MUST NOT** increase to force Scenes adoption.
+
 ## Consequences
 
 ### Positive

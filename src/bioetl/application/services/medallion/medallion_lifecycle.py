@@ -51,12 +51,12 @@ class MedallionStorageProtocol(StorageMaintenancePort, Protocol):
 
 
 # Programming errors (ValueError/TypeError) must propagate, not look like storage
-# failures (ARCH-CR-04 / #6866).
+# failures (ARCH-CR-04 / #6866). Do not catch bare RuntimeError — it masks
+# programming bugs as lifecycle/storage failures (ARCH-CR2-02 / #7007).
 _LIFECYCLE_OPERATION_ERRORS = (
     StorageError,
     BioETLError,
     OSError,
-    RuntimeError,
 )
 
 
