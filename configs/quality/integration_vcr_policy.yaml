@@ -197,7 +197,9 @@ tracked_suite_inventory:
       - tests/integration/test_grafana_dashboard_provisioning.py
       - tests/integration/test_grafana_dashboard_query_governance.py
       - tests/integration/test_grafana_datasource_provisioning.py
+      - tests/integration/test_grafana_design_system_policy.py
       - tests/integration/test_grafana_ds2_gates.py
+      - tests/integration/test_grafana_empty_state_contracts.py
       - tests/integration/test_grafana_layout_and_metadata.py
       - tests/integration/test_grafana_navigation_matrix.py
       - tests/integration/test_grafana_overview_config.py
@@ -207,6 +209,7 @@ tracked_suite_inventory:
       - tests/integration/test_grafana_surface_contracts.py
       - tests/integration/test_grafana_technical_policy.py
       - tests/integration/test_grafana_variable_reference.py
+      - tests/integration/test_grafana_workflow_descriptions.py
       - tests/integration/test_pipeline_runtime_dashboard.py
       prometheus:
       - tests/integration/test_observability_emission_integration.py
