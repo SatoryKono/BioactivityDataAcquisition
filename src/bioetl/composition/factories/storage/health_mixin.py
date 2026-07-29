@@ -21,9 +21,10 @@ __all__ = ["StorageBundleHealthMixin"]
 class StorageBundleHealthMixin:
     """Mixin providing health check, preview, and lifecycle operations."""
 
-    bronze: BronzeWriter = cast(Any, None)  # Any: host attr default (PD3)
-    silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD3)
-    gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD3)
+    # ARCH-CR2-06: typed host attributes (set by StorageBundle.__init__).
+    bronze: BronzeWriter
+    silver: SilverWriter
+    gold: GoldWriter
 
     async def aclose(self) -> None:
         """Close resources.

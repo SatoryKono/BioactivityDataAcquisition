@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, cast, TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal
 
 from bioetl.application.runtime_clock import current_utc_time
 from bioetl.composition.factories.storage._blocking import run_storage_blocking
@@ -29,9 +29,10 @@ def _is_delta_table_dir(path: Path) -> bool:
 class StorageBundleMaintenanceMixin:
     """Mixin providing maintenance operations: optimize, vacuum, archive, cleanup."""
 
-    bronze: BronzeWriter = cast(Any, None)  # Any: host attr default (PD3)
-    silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD3)
-    gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD3)
+    # ARCH-CR2-06: typed host attributes (set by StorageBundle.__init__).
+    bronze: BronzeWriter
+    silver: SilverWriter
+    gold: GoldWriter
 
     def is_table_initialized(
         self,

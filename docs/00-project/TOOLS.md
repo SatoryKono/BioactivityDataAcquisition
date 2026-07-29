@@ -167,5 +167,10 @@ ______________________________________________________________________
 ## CodeRabbit audits
 
 - Playbook: [coderabbit-audit-playbook.md](../03-guides/coderabbit-audit-playbook.md)
-- Workflow: ::error::Unexpected CodeRabbit install script content
-- Config: 
+- Workflow: `.github/workflows/coderabbit.yml` (CLI on trusted `main` push /
+  `workflow_dispatch`; GitHub App on PRs)
+- Config: `.coderabbit.yaml` (assertive profile)
+- Residual audit report example:
+  `reports/grok/review_coderabbit_architecture_audit_20260728_1520_FINAL.md`
+- Issue pack example: `.github/ISSUES/ARCH-CR2-2026-07-29-ISSUE-PACK.md`
+ 

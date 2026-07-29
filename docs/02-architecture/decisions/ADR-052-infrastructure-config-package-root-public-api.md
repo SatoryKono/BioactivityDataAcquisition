@@ -51,6 +51,25 @@ Two end-states were open:
 - Compatibility census continues to fail-fast if first-party src importers reappear.
 - Future removal would require a new ADR and external breaking-change process.
 
+## Migration
+
+1. First-party code **MUST** already import owner modules under
+   `bioetl.infrastructure.config.*` (not the package root). Census gates enforce
+   `max_src_importer_count = 0` for the root facade.
+2. External consumers may keep package-root imports of sanctioned symbols listed
+   in `public_lazy_facade_inventory.yaml`.
+3. New exports on the package root require inventory review in the same change.
+
+## Rollback
+
+1. Rollback of this permanence decision requires a **new ADR** that supersedes
+   ADR-052 and an external breaking-change process for consumers.
+2. Short-term incident rollback (bad export surface): restore previous
+   `__init__.py` export set from git and re-run facade importer census +
+   architecture tests.
+3. Do not reclassify as `compatibility_debt` without updating scorecard
+   semantics — that confuses transition burn-down metrics.
+
 ## Alternatives considered
 
 - Hard sunset after 2026-10-21: rejected for now — zero product benefit vs

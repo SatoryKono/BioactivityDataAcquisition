@@ -8,6 +8,7 @@ sanctioned external public seam that re-exports this group.
 
 from __future__ import annotations
 
+import copy
 from importlib import import_module
 from typing import cast
 
@@ -67,14 +68,28 @@ _EAGER_MAINTENANCE_COMMANDS: dict[str, tuple[click.Command | click.Group, str]] 
 }
 
 
+def _with_command_name(
+    command: click.Command | click.Group, name: str
+) -> click.Command | click.Group:
+    """Return command with ``name`` without mutating shared registry objects.
+
+    ARCH-CR2-04 / #7009: eager/lazy registries may hold module-level Click
+    command singletons; renaming in place leaks across loads.
+    """
+    if getattr(command, "name", name) == name:
+        return command
+    # Shallow copy preserves callbacks while isolating Click metadata.
+    aliased = copy.copy(command)
+    aliased.name = name
+    return aliased
+
+
 def _load_maintenance_command(name: str) -> click.Command | click.Group | None:
     """Import one maintenance subcommand only when it is requested."""
     eager_spec = _EAGER_MAINTENANCE_COMMANDS.get(name)
     if eager_spec is not None:
         command, _help_text = eager_spec
-        if getattr(command, "name", name) != name:
-            command.name = name
-        return command
+        return _with_command_name(command, name)
 
     spec = _LAZY_MAINTENANCE_COMMANDS.get(name)
     if spec is None:
@@ -85,9 +100,7 @@ def _load_maintenance_command(name: str) -> click.Command | click.Group | None:
         raise TypeError(
             f"{module_name}.{attribute_name} must resolve to a Click command"
         )
-    if getattr(command, "name", name) != name:
-        command.name = name
-    return command
+    return _with_command_name(command, name)
 
 
 def _configure_lazy_maintenance_group(group: Group) -> Group:

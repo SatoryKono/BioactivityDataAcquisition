@@ -1,5 +1,5 @@
-# pyright: reportInvalidCast=false
-# Host/cast bridge residual; prefer Protocol self when rewriting module.
+# Casts below are boundary-only (lazy import of composition owner types).
+# Prefer Protocol-typed seams when rewriting this module (ARCH-CR2-06 / #7011).
 """Narrow health-service access seam for first-party interface callers."""
 
 from __future__ import annotations
