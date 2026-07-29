@@ -82,7 +82,9 @@ class CrossRefAdapter(
     """CrossRef adapter with thin-facade delegation to flow components."""
 
     http_client: UnifiedHTTPClient
-    logger: LoggerPort
+    # field() keeps logger required: HealthCheckMixin defines logger=None class
+    # attr which dataclasses would otherwise treat as a default (mailto order).
+    logger: LoggerPort = field()
     mailto: str
     batch_size: int = 50
     metrics: MetricsPort | None = None
