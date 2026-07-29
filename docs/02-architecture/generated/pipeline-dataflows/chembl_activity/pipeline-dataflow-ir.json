@@ -767,37 +767,10 @@
     "soft_fail_threshold": 0.05,
     "strict_validation": false
   },
-  "effective_config_loader": "bioetl.infrastructure.config.pipeline_config_api.load_pipeline_config_from_root",
+  "effective_config_loader": "scripts.docs.passports.source_facts.load_effective_pipeline_facts",
   "effective_config_sha256": "90b2b848882ce0d0681dd613c91724859a19ad23d2d82e43686e2054919a4204",
   "entity": "activity",
   "extraction_criteria": [
-    {
-      "category": "api query",
-      "enabled": true,
-      "field": "standard_type",
-      "operator": "in",
-      "source_key": "standard_type__in",
-      "stage": "source",
-      "value": "IC50,Ki"
-    },
-    {
-      "category": "api query",
-      "enabled": true,
-      "field": "standard_units",
-      "operator": "=",
-      "source_key": "standard_units",
-      "stage": "source",
-      "value": "nM"
-    },
-    {
-      "category": "api query",
-      "enabled": true,
-      "field": "standard_relation",
-      "operator": "=",
-      "source_key": "standard_relation",
-      "stage": "source",
-      "value": "="
-    },
     {
       "category": "api query",
       "enabled": true,
@@ -806,15 +779,6 @@
       "source_key": "assay_type__in",
       "stage": "source",
       "value": "B,F"
-    },
-    {
-      "category": "api query",
-      "enabled": true,
-      "field": "potential_duplicate",
-      "operator": "=",
-      "source_key": "potential_duplicate",
-      "stage": "source",
-      "value": 0
     },
     {
       "category": "api query",
@@ -837,11 +801,47 @@
     {
       "category": "api query",
       "enabled": true,
+      "field": "potential_duplicate",
+      "operator": "=",
+      "source_key": "potential_duplicate",
+      "stage": "source",
+      "value": 0
+    },
+    {
+      "category": "api query",
+      "enabled": true,
       "field": "standard_flag",
       "operator": "=",
       "source_key": "standard_flag",
       "stage": "source",
       "value": 1
+    },
+    {
+      "category": "api query",
+      "enabled": true,
+      "field": "standard_relation",
+      "operator": "=",
+      "source_key": "standard_relation",
+      "stage": "source",
+      "value": "="
+    },
+    {
+      "category": "api query",
+      "enabled": true,
+      "field": "standard_type",
+      "operator": "in",
+      "source_key": "standard_type__in",
+      "stage": "source",
+      "value": "IC50,Ki"
+    },
+    {
+      "category": "api query",
+      "enabled": true,
+      "field": "standard_units",
+      "operator": "=",
+      "source_key": "standard_units",
+      "stage": "source",
+      "value": "nM"
     },
     {
       "category": "api query",
@@ -1543,40 +1543,6 @@
     {
       "category": "column",
       "enabled": true,
-      "field": "standard_type",
-      "operator": "in",
-      "source_key": "columns.standard_type",
-      "stage": "gold",
-      "value": [
-        "IC50",
-        "Ki"
-      ]
-    },
-    {
-      "category": "column",
-      "enabled": true,
-      "field": "standard_units",
-      "operator": "in",
-      "source_key": "columns.standard_units",
-      "stage": "gold",
-      "value": [
-        "nM"
-      ]
-    },
-    {
-      "category": "column",
-      "enabled": true,
-      "field": "standard_relation",
-      "operator": "in",
-      "source_key": "columns.standard_relation",
-      "stage": "gold",
-      "value": [
-        "="
-      ]
-    },
-    {
-      "category": "column",
-      "enabled": true,
       "field": "assay_type",
       "operator": "in",
       "source_key": "columns.assay_type",
@@ -1598,6 +1564,40 @@
       ]
     },
     {
+      "category": "column",
+      "enabled": true,
+      "field": "standard_relation",
+      "operator": "in",
+      "source_key": "columns.standard_relation",
+      "stage": "gold",
+      "value": [
+        "="
+      ]
+    },
+    {
+      "category": "column",
+      "enabled": true,
+      "field": "standard_type",
+      "operator": "in",
+      "source_key": "columns.standard_type",
+      "stage": "gold",
+      "value": [
+        "IC50",
+        "Ki"
+      ]
+    },
+    {
+      "category": "column",
+      "enabled": true,
+      "field": "standard_units",
+      "operator": "in",
+      "source_key": "columns.standard_units",
+      "stage": "gold",
+      "value": [
+        "nM"
+      ]
+    },
+    {
       "category": "range",
       "enabled": true,
       "field": "activity_id",
@@ -1609,20 +1609,6 @@
         "include_min": true,
         "max": 10000000000.0,
         "min": 1.0
-      }
-    },
-    {
-      "category": "range",
-      "enabled": true,
-      "field": "standard_value",
-      "operator": "range",
-      "source_key": "ranges.standard_value",
-      "stage": "gold",
-      "value": {
-        "include_max": true,
-        "include_min": false,
-        "max": null,
-        "min": 0.0
       }
     },
     {
@@ -1651,6 +1637,20 @@
         "include_min": true,
         "max": 2050.0,
         "min": 1950.0
+      }
+    },
+    {
+      "category": "range",
+      "enabled": true,
+      "field": "standard_value",
+      "operator": "range",
+      "source_key": "ranges.standard_value",
+      "stage": "gold",
+      "value": {
+        "include_max": true,
+        "include_min": false,
+        "max": null,
+        "min": 0.0
       }
     },
     {

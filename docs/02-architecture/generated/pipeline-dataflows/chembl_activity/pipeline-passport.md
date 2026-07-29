@@ -6,7 +6,7 @@ Generated: **2026-07-29**
 Generator: **1.0.0**  
 IR schema: **1.0.0**  
 Effective config SHA256: `90b2b848882ce0d0681dd613c91724859a19ad23d2d82e43686e2054919a4204`  
-Effective loader: `bioetl.infrastructure.config.pipeline_config_api.load_pipeline_config_from_root`
+Effective loader: `scripts.docs.passports.source_facts.load_effective_pipeline_facts`
 
 This passport is generated from the resolved effective configuration and live schema contracts. It describes the current runtime projection; it does not widen or repair the pipeline contract.
 
@@ -35,14 +35,14 @@ Machine-readable companions: [IR JSON](pipeline-dataflow-ir.json) and [field CSV
 
 | Stage | Category | Field | Operator | Value | Enabled |
 |---|---|---|---|---|---:|
-| source | api query | standard_type | in | IC50,Ki | true |
-| source | api query | standard_units | = | nM | true |
-| source | api query | standard_relation | = | = | true |
 | source | api query | assay_type | in | B,F | true |
-| source | api query | potential_duplicate | = | 0 | true |
 | source | api query | data_validity_comment | is null | true | true |
 | source | api query | pchembl_value | is not null | false | true |
+| source | api query | potential_duplicate | = | 0 | true |
 | source | api query | standard_flag | = | 1 | true |
+| source | api query | standard_relation | = | = | true |
+| source | api query | standard_type | in | IC50,Ki | true |
+| source | api query | standard_units | = | nM | true |
 | source | api query | target_tax_id | is not null | false | true |
 
 ## Input-file Criteria
@@ -89,15 +89,15 @@ Machine-readable companions: [IR JSON](pipeline-dataflow-ir.json) and [field CSV
 
 | Stage | Category | Field | Operator | Value | Enabled |
 |---|---|---|---|---|---:|
-| gold | column | standard_type | in | IC50, Ki | true |
-| gold | column | standard_units | in | nM | true |
-| gold | column | standard_relation | in | = | true |
 | gold | column | assay_type | in | B, F | true |
 | gold | column | potential_duplicate | in | 0 | true |
+| gold | column | standard_relation | in | = | true |
+| gold | column | standard_type | in | IC50, Ki | true |
+| gold | column | standard_units | in | nM | true |
 | gold | range | activity_id | range | [1.0, 10000000000.0] | true |
-| gold | range | standard_value | range | (0.0, +inf] | true |
 | gold | range | pchembl_value | range | [3.0, 10.0] | true |
 | gold | range | publication_year | range | [1950.0, 2050.0] | true |
+| gold | range | standard_value | range | (0.0, +inf] | true |
 | gold | structural | standard_type | is not null | true | true |
 | gold | structural | standard_value | is not null | true | true |
 | gold | structural | standard_units | is not null | true | true |
