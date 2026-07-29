@@ -18,7 +18,6 @@ aliases:
   S7-crosscutting-architecture:
     expands_to:
       - S7-crosscutting-architecture-a
-      - S7-crosscutting-architecture-a2
       - S7-crosscutting-architecture-a3
       - S7-crosscutting-architecture-b
       - S7-crosscutting-architecture-c
@@ -26,7 +25,6 @@ aliases:
   S7-architecture-fast-boundary:
     expands_to:
       - S7-crosscutting-architecture-a
-      - S7-crosscutting-architecture-a2
       - S7-crosscutting-architecture-a3
       - S7-crosscutting-architecture-b
       - S7-crosscutting-architecture-c
@@ -54,7 +52,7 @@ shards:
       - tests/unit/domain/lineage
       - tests/unit/domain/hash_policy
       - tests/unit/domain/normalization
-    workers_override: 0
+    # TEST-SYS-05: pure domain unit surface is parallel-safe (default workers).
   - name: S1-domain-services
     wave: 1
     paths:
@@ -65,7 +63,7 @@ shards:
       - tests/unit/domain/registry
       - tests/unit/domain/services
       - tests/unit/domain/test_*.py
-    workers_override: 0
+    # TEST-SYS-05: domain services unit surface is parallel-safe (default workers).
   - name: S2-comp-iface
     wave: 1
     paths:
@@ -84,7 +82,8 @@ shards:
       - --ignore-glob=tests/architecture/**/*closeout*.py
       - --ignore-glob=tests/architecture/test_tech_debt*.py
       - --ignore-glob=tests/architecture/test_issue_*.py
-      - --ignore-glob=tests/architecture/test_[c-z]*.py
+      # TEST-SYS-04: merged former a2 (letter c) into a → letters a–c
+      - --ignore-glob=tests/architecture/test_[d-z]*.py
       - --ignore=tests/architecture/test_antipatterns.py
       - --ignore=tests/architecture/test_any_budget.py
       - --ignore=tests/architecture/test_scripts_catalog_governance.py
@@ -112,33 +111,7 @@ shards:
       - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
       - --ignore=tests/architecture/test_config_root_governance.py
       - --ignore=tests/architecture/test_config_surface_entity_residual_plateau.py
-  - name: S7-crosscutting-architecture-a2
-    wave: 1
-    paths:
-      - tests/architecture
-    workers_override: 0
-    extra_pytest_args:
-      - --timeout=300
-      - --ignore-glob=tests/architecture/**/*closeout*.py
-      - --ignore-glob=tests/architecture/test_tech_debt*.py
-      - --ignore-glob=tests/architecture/test_issue_*.py
-      - --ignore-glob=tests/architecture/test_[a-b]*.py
-      - --ignore-glob=tests/architecture/test_[d-z]*.py
-      - --ignore=tests/architecture/test_code_metrics.py
-      - --ignore=tests/architecture/test_check_doc_links_guardrails.py
-      - --ignore=tests/architecture/test_public_facade_inventory.py
-      - --ignore=tests/architecture/test_public_surface_importer_census_governance.py
       - --ignore=tests/architecture/test_contract_coverage_matrix_drift.py
-      - --ignore=tests/architecture/test_contract_registry_loader_boundary.py
-      - --ignore=tests/architecture/test_config_ci_invariants.py
-      - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
-      - --ignore=tests/architecture/test_checkpoint_runtime_facade_usage.py
-      - --ignore=tests/architecture/test_cli_command_import_guards.py
-      - --ignore=tests/architecture/test_removed_surface_freeze_guards.py
-      - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
-      - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
-      - --ignore=tests/architecture/test_config_root_governance.py
-      - --ignore=tests/architecture/test_config_surface_entity_residual_plateau.py
   - name: S7-crosscutting-architecture-a3
     wave: 2
     paths:

@@ -128,6 +128,11 @@ log_test.txt
 !/reports/quality/architecture-coderabbit-2026-07-29-issue-publish.json
 !/reports/quality/architecture-coderabbit-2026-07-29-arch-cr2-closeout.md
 !/reports/quality/docs-open-runs-2-4-closeout-2026-07-28.md
+!/reports/quality/test-sys-2026-07-29-closeout.md
+!/reports/quality/test-sys-01-bronze-nonchembl-inventory.json
+!/reports/quality/test-basename-collision-inventory.json
+!/reports/quality/test-system-audit-2026-07-29-issue-publish.json
+!/reports/quality/test-system-architecture-audit-20260729_FULL.md
 !/reports/docs-evidence/
 /reports/docs-evidence/*
 !/reports/docs-evidence/README.md

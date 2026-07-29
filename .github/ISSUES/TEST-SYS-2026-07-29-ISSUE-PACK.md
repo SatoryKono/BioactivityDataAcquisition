@@ -1,9 +1,9 @@
 # Test System Architecture Audit Issue Pack — 2026-07-29
 
-**Audit basis:** Architecture-strict test-system audit (fact inventory)  
-**Report:** `reports/grok/review_test_system_architecture_audit_20260729_FULL.md`  
-**Branch / SHA (audit):** `main` @ `73bc2ac3c6`  
-**Scope:** `tests/**`, `configs/quality/test_*`, fixtures, coverage inventory, scorecard  
+**Audit basis:** Architecture-strict test-system audit (fact inventory)
+**Report:** `reports/grok/review_test_system_architecture_audit_20260729_FULL.md`
+**Branch / SHA (audit):** `main` @ `73bc2ac3c6`
+**Scope:** `tests/**`, `configs/quality/test_*`, fixtures, coverage inventory, scorecard
 **Constraints:** No debt-budget growth; domain I/O-free; DI in composition only; keep determinism/idempotency/replay gates; no global xdist by default
 
 ## Snapshot
@@ -52,12 +52,14 @@ Publish record: `reports/quality/test-system-audit-2026-07-29-issue-publish.json
 
 ## Acceptance (epic)
 
-- [ ] All child issues closed or explicitly rejected with code/evidence
-- [ ] Architecture closeout surface reduced (PR path lighter) without losing live invariants
-- [ ] Non-ChEMBL bronze exact-replay improved for claimed families
-- [ ] unit-parallel-safe expanded; pure unit lane hygiene enforced
-- [ ] No quality debt budget growth
-- [ ] Domain purity / determinism gates remain green
+- [x] All child issues closed or explicitly rejected with code/evidence
+- [x] Architecture closeout surface reduced (PR path lighter) without losing live invariants
+- [x] Non-ChEMBL bronze exact-replay improved for claimed families
+- [x] unit-parallel-safe expanded; pure unit lane hygiene enforced
+- [x] No quality debt budget growth
+- [x] Domain purity / determinism gates remain green
+
+**Closeout:** `reports/quality/test-sys-2026-07-29-closeout.md` (2026-07-29)
 
 ## Source findings mapping
 
@@ -66,10 +68,10 @@ and per-issue bodies under `.github/ISSUES/TEST-SYS-*.md`.
 
 ## Recommended execution order
 
-1. **TEST-SYS-00** (epic tracking)  
-2. **TEST-SYS-01**, **TEST-SYS-02** (P0 correctness / replay)  
-3. **TEST-SYS-03**, **TEST-SYS-04**, **TEST-SYS-05** (CI velocity)  
-4. **TEST-SYS-06**, **TEST-SYS-07** (fixture cost + coverage quality)  
+1. **TEST-SYS-00** (epic tracking)
+2. **TEST-SYS-01**, **TEST-SYS-02** (P0 correctness / replay)
+3. **TEST-SYS-03**, **TEST-SYS-04**, **TEST-SYS-05** (CI velocity)
+4. **TEST-SYS-06**, **TEST-SYS-07** (fixture cost + coverage quality)
 5. **TEST-SYS-08**, **TEST-SYS-09**, **TEST-SYS-10** (P2 quality/hygiene)
 
 ## Publish

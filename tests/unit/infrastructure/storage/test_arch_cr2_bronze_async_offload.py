@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import orjson
 import pytest
@@ -48,3 +48,22 @@ async def test_read_bronze_uses_to_thread(
     rows = [row async for row in host.read_bronze(rel)]
     assert rows == [{"a": 1}]
     assert calls, "read_bronze must offload decompress/read via to_thread"
+
+
+@pytest.mark.asyncio
+async def test_read_bronze_missing_file_raises(tmp_path: Path) -> None:
+    """Failure path: missing bronze artifact must not yield silent empty success."""
+    host = _Host(tmp_path)
+    with pytest.raises(FileNotFoundError):
+        _ = [row async for row in host.read_bronze("missing/path.jsonl.zst")]
+
+
+@pytest.mark.asyncio
+async def test_read_bronze_corrupt_payload_raises(tmp_path: Path) -> None:
+    rel = "chembl/activity/2026-07-01/batch_bad.jsonl.zst"
+    full = tmp_path / rel
+    full.parent.mkdir(parents=True)
+    full.write_bytes(b"not-zstd-payload")
+    host = _Host(tmp_path)
+    with pytest.raises(Exception):
+        _ = [row async for row in host.read_bronze(rel)]

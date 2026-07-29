@@ -57,3 +57,43 @@ def test_hydrate_planned_artifacts_rejects_non_mapping() -> None:
     h = _Hydrator()
     with pytest.raises(ValueError, match="planned_artifacts\\[0\\]"):
         h._hydrate_planned_artifacts([123])  # type: ignore[list-item]
+
+
+def test_hydrate_code_provenance_accepts_partial_payload() -> None:
+    """Nominal path: optional provenance fields hydrate without requiring full lock."""
+    h = _Hydrator()
+    prov = h._hydrate_code_provenance(
+        {
+            "pipeline_version": "1.2.3",
+            "git_commit": "abc123",
+            "config_hash": "cfg",
+        }
+    )
+    assert prov.pipeline_version == "1.2.3"
+    assert prov.git_commit == "abc123"
+    assert prov.config_hash == "cfg"
+    assert prov.dependency_lock_hash is None
+
+
+def test_hydrate_code_provenance_empty_payload_is_all_none() -> None:
+    h = _Hydrator()
+    prov = h._hydrate_code_provenance({})
+    assert prov.pipeline_version is None
+    assert prov.git_commit is None
+    assert prov.config_hash is None
+
+
+def test_hydrate_planned_artifacts_requires_artifact_keys() -> None:
+    h = _Hydrator()
+    with pytest.raises(ValueError, match="missing required key: layer"):
+        h._hydrate_planned_artifacts([{"path": "only-path"}])
+
+
+def test_hydrate_planned_artifacts_nominal() -> None:
+    h = _Hydrator()
+    arts = h._hydrate_planned_artifacts(
+        [{"layer": "bronze", "path": "chembl/activity/out.jsonl"}]
+    )
+    assert len(arts) == 1
+    assert arts[0].layer == "bronze"
+    assert arts[0].path == "chembl/activity/out.jsonl"
