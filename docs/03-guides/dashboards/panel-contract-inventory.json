@@ -5126,7 +5126,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "gray",
+          "color": "green",
           "value": null
         },
         {
