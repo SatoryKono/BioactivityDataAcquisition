@@ -156,14 +156,18 @@ def test_issue_5562_skip_inventory_entries_are_individually_accountable() -> Non
     payload = _load_yaml(SKIP_INVENTORY)
     entries = payload["entries"]
 
-    assert len(entries) == 19
+    entries_by_issue: dict[str, int] = {}
     for entry in entries:
         assert entry["owner"].startswith("@bioetl-")
-        assert entry["linked_issue"] == "#5562"
+        linked_issue = str(entry["linked_issue"])
+        assert linked_issue.startswith("#")
+        entries_by_issue[linked_issue] = entries_by_issue.get(linked_issue, 0) + 1
         assert entry["lifecycle"] in {"permanent_policy", "temporary_debt"}
         if entry["lifecycle"] == "temporary_debt":
             assert str(entry.get("expires_on", "")).strip()
         assert str(entry["rationale"]).strip()
+
+    assert entries_by_issue == {"#5562": 19, "#6570": 1}
 
 
 def test_issue_5563_excluded_non_gold_rows_are_burned_down_to_zero() -> None:
