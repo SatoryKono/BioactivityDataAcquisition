@@ -1,4 +1,7 @@
+# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
+# Annotation-only host surface: do NOT assign None defaults — dataclass subclasses
+# inherit those as field defaults (e.g. CrossRef mailto after logger). PD7 residual.
 """Health check mixin for unified observability in adapters.
 
 Provides standardized logging and metrics for health_check() methods.

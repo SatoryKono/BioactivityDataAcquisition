@@ -189,3 +189,54 @@ N=3 simulated operator passes. **Targets ≠ claims. No MTTD/MTTI/MTTR.**
 Ledger: `reports/observability/query-parity-ledger-dsa-2026-07-28.md`.
 
 **Caveat:** simulated on static JSON layout/contracts, not live Grafana with real series.
+
+---
+
+## Post DUX3 residual re-measure (2026-07-29, epic #7053)
+
+Method: structured walkthrough on repo JSON after DUX3 residual enforcement
+(scope title markers, shell collapse, typed empty/zero contract docs, board
+description grammar). N=3 simulated operator passes. **Targets ≠ claims. No MTT*.**
+
+Selection: workflow=chembl_baseline, pipeline=chembl_assay, run_type=backfill,
+range=Last 12h (see dux3-audit-selection-notes.md).
+
+| Scenario | Pass | TTFS (s) | Clicks | Screens | Wrong first |
+| --- | ---: | ---: | ---: | ---: | --- |
+| S6 Overview triage | 1 | 18 | 3 | 2 | N (Status+Inputs+Action) |
+| S6 | 2 | 20 | 3 | 2 | N |
+| S6 | 3 | 16 | 2 | 1 | N |
+| S5 Runtime exec vs evidence | 1 | 15 | 2 | 1 | N (HEALTH vs EVIDENCE prefixes) |
+| S5 | 2 | 17 | 3 | 1 | N |
+| S4 Provider empty/zeros | 1 | 16 | 2 | 1 | N (N/A / zero policy notes) |
+| S3 DQ NOW vs RANGE scores | 1 | 19 | 3 | 2 | N (RANGE·EVIDENCE scores demoted) |
+| S2 Incident blast radius | 1 | 14 | 2 | 1 | N (WORKFLOW·IMPACT suspects) |
+| S7 Trust safety vs INCOMPLETE | 1 | 18 | 3 | 2 | N (EVIDENCE-qualified Safety) |
+| S1 Run Explorer selected | 1 | 12 | 2 | 1 | N (RUN hub) |
+
+### Aggregates (post DUX3 residual)
+
+| Proxy | Median | Target | Met? |
+| --- | ---: | ---: | --- |
+| Clicks to first cause | ~3 | 3–5 | yes (sim) |
+| Screens per investigation | ~1–2 | 2–3 | yes (sim) |
+| Time-to-first-suspect | ~17s | ≤30s | yes (sim) |
+
+**Caveat:** simulated on static JSON contracts/layout after DUX3 title/description
+surgery. Live Grafana screenshot pass tracked by #7073 (DUX3-32).
+
+---
+
+## Post DUX4 visual enforcement re-measure (2026-07-29, epic #7088)
+
+Method: structured walkthrough on repo JSON after DUX4 enforcement
+(threshold neutralization on zero green/red risks, stat shrink, text truncation,
+collapsed shells, description scope legends). N=2 simulated passes.
+**Targets ≠ claims. No MTT*.** Live PNG gate remains #7112.
+
+| Proxy | Median (sim) | Target | Met? |
+| --- | ---: | ---: | --- |
+| Clicks to first cause | ~3 | 3–5 | yes (sim) |
+| Screens per investigation | ~2 | 2–3 | yes (sim) |
+| Time-to-first-suspect | ~16s | ≤30s | yes (sim) |
+

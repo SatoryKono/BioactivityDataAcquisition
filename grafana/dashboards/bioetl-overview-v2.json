@@ -207,10 +207,10 @@
       "id": 1000,
       "options": {
         "mode": "html",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><span aria-current=\"page\" title=\"1. Overview (Overview)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">1. Overview</span><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" \n\n_(DUX4-22: truncated; full text in panel description/docs.)_"
       },
       "title": "Navigation",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is disabled (aria-current). Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
+      "description": "DUX4-22: Full prose shortened on-canvas to remove internal scroll; details in description/docs. Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is disabled (aria-current). Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
       "type": "text",
       "links": [
         {
@@ -293,7 +293,7 @@
         "content": "### Scope — what is broken or degraded right now?\nworkflow=`$workflow` · pipeline=`$pipeline` · run_type=`$run_type` · run_id=`$run_id` (HTTP only)\n\nRead order: **Status → First Action → Inputs** (where should the operator drill down first).\nNav bus is the portfolio switcher.\n",
         "mode": "html"
       },
-      "description": "L0 v3 scope/provenance banner. Primary question: what is broken now and where should the operator drill down first? Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Provenance: shipped Prometheus current-status recording rules plus selected-range evidence. Verdict grammar: state x confidence x basis x next_action. Known limitation: first-screen PromQL remains pipeline/run_type-scoped; workflow is context/evidence-first, and run_id is resolved from persisted control-plane manifests.",
+      "description": "DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW=current, RANGE=selected window, RUN=exact run_id HTTP, WORKFLOW/GLOBAL=blast radius/fleet. L0 v3 scope/provenance banner. Primary question: what is broken now and where should the operator drill down first? Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Provenance: shipped Prometheus current-status recording rules plus selected-range evidence. Verdict grammar: state x confidence x basis x next_action. Known limitation: first-screen PromQL remains pipeline/run_type-scoped; workflow is context/evidence-first, and run_id is resolved from persisted control-plane manifests.",
       "title": "Provenance",
       "type": "text"
     },
@@ -425,7 +425,7 @@
       ],
       "title": "Status",
       "type": "stat",
-      "description": "Composite fleet verdict (state x confidence x basis). Current L0 fleet status (bioetl_l0_status). 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Confidence is low when series is absent (UNKNOWN). Evidence age follows the recording/refresh window, not range history. Primary action is First Action; deeper proof is on domain boards. Empty Inputs with Status=OK is VALID_EMPTY fleet. null Status is TELEMETRY_ABSENT_OR_STALE/UNKNOWN, not OK. Domain tables are collapsed matrix detail, not peer first-screen badges."
+      "description": "DUX4-16: First strip = health + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: Composite NOW health. Pair with Inputs + First Action; domain matrix stays collapsed. Composite fleet verdict (state x confidence x basis). Current L0 fleet status (bioetl_l0_status). 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Confidence is low when series is absent (UNKNOWN). Evidence age follows the recording/refresh window, not range history. Primary action is First Action; deeper proof is on domain boards. Empty Inputs with Status=OK is VALID_EMPTY fleet. null Status is TELEMETRY_ABSENT_OR_STALE/UNKNOWN, not OK. Domain tables are collapsed matrix detail, not peer first-screen badges."
     },
     {
       "id": 215,
@@ -734,7 +734,7 @@
           }
         }
       ],
-      "description": "Ranked next-best-action (<=4). Prefer domain handoff with scope preserved. Not a multi-paragraph runbook. Open Incident when multi-domain; domain board for localization."
+      "description": "DUX4-16: First strip = health + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: ≤4 actionable CTAs with time/vars preserved. Ranked next-best-action (<=4). Prefer domain handoff with scope preserved. Not a multi-paragraph runbook. Open Incident when multi-domain; domain board for localization."
     },
     {
       "id": 9002,
@@ -976,7 +976,7 @@
           }
         }
       ],
-      "description": "Compact L0 input summary for the selected pipeline/run_type scope. Rows are shown in the canonical operator order: Control Plane, Runtime, Provider, Data Quality, Data Validation, Workflow. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Use the panel links to open the matching drilldown; Workflow resets scope on handoff. This is the deviation-first first-level matrix; the six repeated subsystem cards are available only in the collapsed Diagnostics & Docs row. Phase-2: status cells use color-background thresholds (OK/WARN/CRIT). Not peer-comparable to Range evidence elsewhere."
+      "description": "DUX4-16: First strip = health + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: Domain input evidence / freshness proxies for first-screen confidence. Compact L0 input summary for the selected pipeline/run_type scope. Rows are shown in the canonical operator order: Control Plane, Runtime, Provider, Data Quality, Data Validation, Workflow. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Use the panel links to open the matching drilldown; Workflow resets scope on handoff. This is the deviation-first first-level matrix; the six repeated subsystem cards are available only in the collapsed Diagnostics & Docs row. Phase-2: status cells use color-background thresholds (OK/WARN/CRIT). Not peer-comparable to Range evidence elsewhere."
     },
     {
       "id": 9014,
@@ -2658,7 +2658,7 @@
           "type": "table",
           "title": "ID",
           "gridPos": {
-            "h": 10,
+            "h": 6,
             "w": 12,
             "x": 0,
             "y": 0
@@ -2783,7 +2783,7 @@
           "type": "table",
           "title": "Processed Records",
           "gridPos": {
-            "h": 10,
+            "h": 6,
             "w": 12,
             "x": 12,
             "y": 0
@@ -3240,7 +3240,7 @@
           ]
         }
       ],
-      "description": "DSA-04: exact-run ID/Processed Records live on Run Explorer. This shell is collapsed forensic handoff only."
+      "description": "DUX4-23: Collapsed by default — Run Explorer owns first-class ID/Processed Records. DUX3-26: Collapsed thin shell only. Canonical ID/Processed Records hub is Run Explorer. DSA-04: exact-run ID/Processed Records live on Run Explorer. This shell is collapsed forensic handoff only."
     }
   ],
   "refresh": "60s",

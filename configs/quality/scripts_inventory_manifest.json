@@ -1,20 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-29T06:41:27.391403+00:00",
+  "generated_at": "2026-07-29T07:26:28.581387+00:00",
   "summary": {
-    "total_scripts": 543,
+    "total_scripts": 546,
     "status_counts": {
       "active": 341,
-      "orphan": 1,
-      "supporting": 197,
-      "temporary_diagnostic": 3,
+      "supporting": 199,
+      "temporary_diagnostic": 5,
       "unknown": 1
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 12,
       "ci": 64,
-      "docs": 215,
+      "docs": 216,
       "other": 74,
       "scripts": 418,
       "skills": 17,
@@ -11261,7 +11260,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/report_test_governance_audit.py",
-          "line": 35,
+          "line": 36,
           "source_group": "scripts",
           "text": "Path(\"scripts/engineering/qa/file_discovery.py\"),"
         }
@@ -11873,10 +11872,14 @@
     {
       "path": "scripts/engineering/qa/report_basedpyright_warning_snapshot.py",
       "type": "py",
-      "status": "orphan",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
-      "references": []
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded basedpyright warning-snapshot utility while the typing debt campaign needs reproducible shrink-only evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
     },
     {
       "path": "scripts/engineering/qa/report_chembl_observed_value_inventory.py",
@@ -13787,7 +13790,7 @@
     {
       "path": "scripts/engineering/repo/publish_test_sys_issues.py",
       "type": "py",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -13797,7 +13800,11 @@
           "source_group": "other",
           "text": "python scripts/engineering/repo/publish_test_sys_issues.py --apply --update-pack"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual TEST-SYS issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget."
     },
     {
       "path": "scripts/engineering/repo/split_testing_roadmap_issue.py",
@@ -15468,6 +15475,21 @@
       "next_step": "Retain only as a one-off DUX2 residual migration helper for auditability; do not promote it to an active operator workflow."
     },
     {
+      "path": "scripts/ops/observability/grafana/apply_dux4_enforcement.py",
+      "type": "py",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
+          "line": 144,
+          "source_group": "docs",
+          "text": "- Apply script: `scripts/ops/observability/grafana/apply_dux4_enforcement.py`"
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",
       "type": "py",
       "status": "active",
@@ -15568,6 +15590,18 @@
       ]
     },
     {
+      "path": "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded DUX4 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
+    },
+    {
       "path": "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1",
       "type": "ps1",
       "status": "supporting",
@@ -15593,7 +15627,7 @@
       "agent_usage": [
         "grafana-dashboard-extension"
       ],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-extension/SKILL.md",
@@ -15606,6 +15640,12 @@
           "line": 130,
           "source_group": "other",
           "text": "- Residual scripts: `scripts/ops/observability/grafana/apply_dux2_residual.py`, `render_nav_bus.py`"
+        },
+        {
+          "path": ".github/ISSUES/_dux3_bodies/DUX3-34.md",
+          "line": 30,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/grafana/render_nav_bus.py`"
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-extension/SKILL.md",
@@ -15636,12 +15676,6 @@
           "line": 31,
           "source_group": "docs",
           "text": "| **Nav bus** | Full portfolio switcher `0–6` (Trust…Run Explorer) | `h≤3`, wrap at 1024px; owned by `render_nav_bus.py` |"
-        },
-        {
-          "path": "grafana/README.md",
-          "line": 46,
-          "source_group": "other",
-          "text": "python scripts/ops/observability/grafana/render_nav_bus.py"
         }
       ],
       "owner": "@bioetl-platform",
@@ -15749,7 +15783,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 134,
+          "line": 141,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -15761,13 +15795,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1015,
+          "line": 1018,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1102,
+          "line": 1105,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -17859,6 +17893,18 @@
           "text": "/ \"generate_schema_artifacts.py\""
         }
       ]
+    },
+    {
+      "path": "scripts/schema/generate_typed_arrow_schema_sources.py",
+      "type": "py",
+      "status": "temporary_diagnostic",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only for the bounded PD7-4 typed Arrow schema migration and its check mode; consolidate into the canonical schema command surface or retire it after the migration closes."
     },
     {
       "path": "scripts/schema/generate_unified_schema_map.py",

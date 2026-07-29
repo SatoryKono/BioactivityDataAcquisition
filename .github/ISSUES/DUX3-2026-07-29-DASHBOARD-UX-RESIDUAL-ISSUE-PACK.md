@@ -1,6 +1,6 @@
 # Dashboard UX residual — post-DSA screenshot audit (DUX3)
 
-**Status:** published (local pack; GH numbers filled after publish)
+**Status:** closed (implementation landed 2026-07-29; issues #7053–#7077)
 **Wave code:** DUX3
 **Date:** 2026-07-29
 **Source audit:** `BIOETL-GRAFANA-UX-AUDIT-20260729-085334` (screenshot-first, read-only)

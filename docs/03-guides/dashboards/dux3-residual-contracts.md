@@ -18,11 +18,11 @@ edits must obey.
 Related:
 
 - Issue pack: `.github/ISSUES/DUX3-2026-07-29-DASHBOARD-UX-RESIDUAL-ISSUE-PACK.md`
-- Inventory: `reports/observability/dux3-first-screen-inventory.json`
+- Inventory: `docs/03-guides/dashboards/dux3-first-screen-inventory.json`
 - Operator UX: [operator-ux-v2.md](operator-ux-v2.md)
 - Verdict ontology: [verdict-ontology.md](verdict-ontology.md)
 - Synthetic zero policy: [contracts/synthetic-zero-policy.yaml](contracts/synthetic-zero-policy.yaml)
-- Audit selection notes: `reports/observability/dux3-audit-selection-notes.md`
+- Audit selection notes: `docs/03-guides/dashboards/dux3-audit-selection-notes.md`
 
 ## 1. Scope enum (DUX3-02)
 

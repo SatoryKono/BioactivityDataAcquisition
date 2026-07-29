@@ -222,6 +222,7 @@
         "configs/quality/docker_runtime_contracts.yaml",
         "configs/quality/scripts_inventory_manifest.json",
         "configs/quality/scripts_lifecycle_registry.json",
+        "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
         "scripts/ops/runtime/docker/runtime_manager.py",
         "tests/architecture/test_docker_runtime_contracts.py",
         "tests/architecture/test_docs_root_surface_governance_alignment.py",
@@ -342,6 +343,7 @@
         "docs/05-operations/vacuum-retention.md",
         "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
         "grafana/README.md",
+        "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
         "scripts/ops/runtime/docker/runtime_manager.py",
         "src/bioetl/domain/locking.py",
         "src/bioetl/infrastructure/observability/tracing.py",
@@ -1862,6 +1864,7 @@
       "decision_date": "2026-07-28",
       "decision_path": "docs/02-architecture/decisions/ADR-053-optional-grafana-scenes-app-shell.md",
       "enforcement_owner_paths": [
+        "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/unit/scripts/test_documentation_governance_check.py"
@@ -1873,6 +1876,7 @@
         "docs/03-guides/dashboards/dashboard-system-2.0-phase2-residual.md",
         "docs/03-guides/dashboards/dux3-residual-contracts.md",
         "docs/03-guides/dashboards/operator-ux-v2.md",
+        "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/unit/scripts/test_documentation_governance_check.py"
