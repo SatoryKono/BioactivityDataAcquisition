@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:chembl_target_component`
 - Schema: `1.0.0`
-- Source revision: `b502aa73ed561cd30b5317e5531677a073694912`
+- Source revision: `ec0f2a1d64cc5d30ee263677982ba2f60cfc1172`
 
 ## Evidence
 
@@ -35,6 +35,9 @@
         "pipeline_name": "chembl_target_component",
         "step_id": "run_chembl_target_component"
       }
+    ],
+    "topological_order": [
+      "run_chembl_target_component"
     ]
   },
   "diagnostics": [],
@@ -71,7 +74,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:a345e1ab54e7d6870fe44ec7cfcc3a32c12f769fd3a7ec5d7aabd9db13425715",
-    "source_revision": "b502aa73ed561cd30b5317e5531677a073694912"
+    "source_revision": "ec0f2a1d64cc5d30ee263677982ba2f60cfc1172"
   },
   "source_references": [
     {

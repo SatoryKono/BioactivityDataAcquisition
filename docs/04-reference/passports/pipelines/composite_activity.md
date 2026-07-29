@@ -5,7 +5,7 @@
 - Kind: `pipeline`
 - Typed identity: `composite:composite_activity`
 - Schema: `1.0.0`
-- Source revision: `b502aa73ed561cd30b5317e5531677a073694912`
+- Source revision: `ec0f2a1d64cc5d30ee263677982ba2f60cfc1172`
 
 ## Evidence
 
@@ -384,7 +384,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:89722f5089d793afd9a25d7ae30c29f64a2d5f2364152ad906e8da78742e935a",
-    "source_revision": "b502aa73ed561cd30b5317e5531677a073694912"
+    "source_revision": "ec0f2a1d64cc5d30ee263677982ba2f60cfc1172"
   },
   "source_references": [
     {

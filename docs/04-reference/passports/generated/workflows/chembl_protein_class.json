@@ -18,6 +18,9 @@
         "pipeline_name": "chembl_protein_class",
         "step_id": "run_chembl_protein_class"
       }
+    ],
+    "topological_order": [
+      "run_chembl_protein_class"
     ]
   },
   "diagnostics": [],
@@ -54,7 +57,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:c2c883371501a1d4f646be76bcc1372a4cf1051c36717ed6adce8cc63d497938",
-    "source_revision": "b502aa73ed561cd30b5317e5531677a073694912"
+    "source_revision": "ec0f2a1d64cc5d30ee263677982ba2f60cfc1172"
   },
   "source_references": [
     {

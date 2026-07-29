@@ -23,6 +23,10 @@
         "pipeline_name": "uniprot_idmapping",
         "step_id": "run_uniprot_idmapping"
       }
+    ],
+    "topological_order": [
+      "run_uniprot_idmapping",
+      "run_uniprot_protein"
     ]
   },
   "diagnostics": [],
@@ -59,7 +63,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:3047b05777e58b59403e1da784676283d545918b137d1b32a857513a3dcf10df",
-    "source_revision": "b502aa73ed561cd30b5317e5531677a073694912"
+    "source_revision": "ec0f2a1d64cc5d30ee263677982ba2f60cfc1172"
   },
   "source_references": [
     {

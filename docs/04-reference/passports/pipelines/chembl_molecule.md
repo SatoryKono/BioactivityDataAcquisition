@@ -5,7 +5,7 @@
 - Kind: `pipeline`
 - Typed identity: `pipeline:chembl_molecule`
 - Schema: `1.0.0`
-- Source revision: `b502aa73ed561cd30b5317e5531677a073694912`
+- Source revision: `ec0f2a1d64cc5d30ee263677982ba2f60cfc1172`
 
 ## Evidence
 
@@ -102,7 +102,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:795101d6b628d760ccb45e2ca82d13254ae3a3cec2f1dff7199129f801c38aeb",
-    "source_revision": "b502aa73ed561cd30b5317e5531677a073694912"
+    "source_revision": "ec0f2a1d64cc5d30ee263677982ba2f60cfc1172"
   },
   "silver": {
     "column_projection": {

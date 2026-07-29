@@ -5,7 +5,7 @@
 - Kind: `pipeline`
 - Typed identity: `pipeline:pubmed_publication`
 - Schema: `1.0.0`
-- Source revision: `b502aa73ed561cd30b5317e5531677a073694912`
+- Source revision: `ec0f2a1d64cc5d30ee263677982ba2f60cfc1172`
 
 ## Evidence
 
@@ -111,7 +111,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:790b4f6e533862819e3f7098bb1fd368c0e532f74c3216cc62dbb2ce9861b6ed",
-    "source_revision": "b502aa73ed561cd30b5317e5531677a073694912"
+    "source_revision": "ec0f2a1d64cc5d30ee263677982ba2f60cfc1172"
   },
   "silver": {
     "column_projection": {

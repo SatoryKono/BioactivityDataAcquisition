@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:publication_provider_pack`
 - Schema: `1.0.0`
-- Source revision: `b502aa73ed561cd30b5317e5531677a073694912`
+- Source revision: `ec0f2a1d64cc5d30ee263677982ba2f60cfc1172`
 
 ## Evidence
 
@@ -50,6 +50,12 @@
         "pipeline_name": "semanticscholar_publication",
         "step_id": "run_semanticscholar_publication"
       }
+    ],
+    "topological_order": [
+      "run_crossref_publication",
+      "run_openalex_publication",
+      "run_pubmed_publication",
+      "run_semanticscholar_publication"
     ]
   },
   "diagnostics": [],
@@ -86,7 +92,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:b7e1e544b55a11eeecef4fc54abf4e06b2ad905ff604973ee2218f89ff749089",
-    "source_revision": "b502aa73ed561cd30b5317e5531677a073694912"
+    "source_revision": "ec0f2a1d64cc5d30ee263677982ba2f60cfc1172"
   },
   "source_references": [
     {

@@ -2,6 +2,14 @@
 
 Generated, evidence-backed documentation projections.
 
+## Governance
+
+- [ADR-054: passport documentation projections](../../02-architecture/decisions/ADR-054-passport-documentation-projections.md)
+- [ADR-055: workflow reconciliation ownership](../../02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md)
+- [Pipeline passport schema](schemas/pipeline-passport.schema.json)
+- [Workflow passport schema](schemas/workflow-passport.schema.json)
+- [Manual metadata schema](schemas/manual-passport-metadata.schema.json)
+
 ## Pipelines
 
 - [composite_activity](pipelines/composite_activity.md)

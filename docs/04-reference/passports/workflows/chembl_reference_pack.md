@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:chembl_reference_pack`
 - Schema: `1.0.0`
-- Source revision: `b502aa73ed561cd30b5317e5531677a073694912`
+- Source revision: `ec0f2a1d64cc5d30ee263677982ba2f60cfc1172`
 
 ## Evidence
 
@@ -119,6 +119,18 @@
         "pipeline_name": "chembl_publication_similarity",
         "step_id": "run_chembl_publication_similarity"
       }
+    ],
+    "topological_order": [
+      "run_chembl_cell_line",
+      "run_chembl_protein_class",
+      "run_chembl_publication",
+      "run_chembl_subcellular_fraction",
+      "run_chembl_target",
+      "run_chembl_tissue",
+      "run_chembl_publication_similarity",
+      "run_chembl_publication_term",
+      "run_chembl_target_component",
+      "run_chembl_target_protein_classification"
     ]
   },
   "diagnostics": [],
@@ -155,7 +167,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:af8a9911fdccdd9c9f1d44175a8b3680d54339214ee098e41d4915489a5bed18",
-    "source_revision": "b502aa73ed561cd30b5317e5531677a073694912"
+    "source_revision": "ec0f2a1d64cc5d30ee263677982ba2f60cfc1172"
   },
   "source_references": [
     {
