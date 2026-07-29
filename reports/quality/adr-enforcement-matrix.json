@@ -1972,12 +1972,14 @@
       "decision_date": "2026-07-29",
       "decision_path": "docs/02-architecture/decisions/ADR-054-passport-documentation-projections.md",
       "enforcement_owner_paths": [
-        "scripts/docs/passports/projector.py"
+        "scripts/docs/passports/projector.py",
+        "tests/architecture/test_adr_registry_governance_sync.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/04-reference/passports/index.md",
-        "scripts/docs/passports/projector.py"
+        "scripts/docs/passports/projector.py",
+        "tests/architecture/test_adr_registry_governance_sync.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
@@ -1991,6 +1993,7 @@
       "decision_path": "docs/02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md",
       "enforcement_owner_paths": [
         "scripts/docs/passports/projector.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_passport_documentation_projections.py"
       ],
       "gap_reasons": [],
@@ -2001,6 +2004,7 @@
         "docs/04-reference/passports/workflows/chembl_baseline.md",
         "docs/04-reference/passports/workflows/chembl_core.md",
         "scripts/docs/passports/projector.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_passport_documentation_projections.py"
       ],
       "manual_exception": null,
