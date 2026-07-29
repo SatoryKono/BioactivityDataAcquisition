@@ -105,6 +105,23 @@ def test_list_pipeline_run_reports(tmp_path: Path) -> None:
     assert payload["items"][0]["run_id"] == "run1"
 
 
+def test_list_pipeline_run_reports_distinguishes_no_artifacts(
+    tmp_path: Path,
+) -> None:
+    """An empty on-disk index is a successful empty result, not backend failure."""
+    payload = list_pipeline_run_report_payloads(
+        pipeline_name="chembl_activity",
+        limit=5,
+        root=tmp_path,
+    )
+
+    assert payload == {
+        "status": "ok",
+        "count": 0,
+        "items": [],
+    }
+
+
 def test_load_rejects_wrong_schema_version(tmp_path: Path) -> None:
     target = tmp_path / "workflow" / "demo" / "wf1" / "workflow-run-report.json"
     target.parent.mkdir(parents=True)

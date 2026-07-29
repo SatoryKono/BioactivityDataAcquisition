@@ -60,9 +60,7 @@ class SemanticScholarFetchAdapterMixin(
         """
         del offset
         if filter_ids:
-            async for record in as_mixin_host(
-                self
-            )._fetch_from_filter_ids(  # Any: mixin host
+            async for record in as_mixin_host(self)._fetch_from_filter_ids(
                 entity_type=entity_type,
                 filter_ids=filter_ids,
                 filter_field=filter_field,
@@ -138,9 +136,7 @@ class SemanticScholarFetchAdapterMixin(
             0, len(dois), as_mixin_host(self).batch_size
         ):  # Any: mixin host
             batch = dois[idx : idx + as_mixin_host(self).batch_size]  # Any: mixin host
-            async for record in as_mixin_host(self)._fetch_by_dois(
-                batch
-            ):  # Any: mixin host
+            async for record in as_mixin_host(self)._fetch_by_dois(batch):
                 record["_lookup_method"] = "doi"
                 yield record
                 fetched += 1

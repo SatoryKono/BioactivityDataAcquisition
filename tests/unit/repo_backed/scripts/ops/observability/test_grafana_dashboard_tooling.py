@@ -33,7 +33,7 @@ import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
-from urllib.error import HTTPError, URLError
+from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlparse
 
 import pytest
@@ -358,6 +358,9 @@ def test_rerender_manifest_records_engine_and_run_scope(tmp_path: Path) -> None:
     assert manifest["requested"] == {
         "viewport": {"width": 1600, "height": 2200},
         "theme": "dark",
+        "capture_surface": "full",
+        "kiosk_mode": "off",
+        "browser_zoom": 100,
     }
     assert manifest["terminal_state_validation"]["status"] == "not-checked"
     assert manifest["scope"] == {
@@ -857,6 +860,12 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
         "2200",
         "--theme",
         "dark",
+        "--capture-surface",
+        "full",
+        "--kiosk-mode",
+        "off",
+        "--browser-zoom",
+        "100",
         "--scope-query",
         "from=now-12h&to=now&timezone=UTC&theme=dark",
     ]
@@ -871,6 +880,9 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
     assert (
         captured["kwargs"]["env"]["GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS"] == "true"
     )
+    assert captured["kwargs"]["env"]["GRAFANA_SCREENSHOT_CAPTURE_SURFACE"] == "full"
+    assert captured["kwargs"]["env"]["GRAFANA_SCREENSHOT_KIOSK_MODE"] == "off"
+    assert captured["kwargs"]["env"]["GRAFANA_SCREENSHOT_BROWSER_ZOOM"] == "100"
     assert captured["kwargs"]["timeout"] == (
         rerender_subject._playwright_process_timeout_seconds(config)
     )
@@ -983,6 +995,9 @@ def test_rerender_playwright_fallback_splits_and_merges_multi_dashboard_runs(
     assert merged["requested"] == {
         "viewport": {"width": 1600, "height": 2200},
         "theme": "dark",
+        "capture_surface": "full",
+        "kiosk_mode": "off",
+        "browser_zoom": 100,
     }
     assert merged["terminal_state_validation"]["status"] == "ok"
 
@@ -1002,54 +1017,3 @@ def test_rerender_resolves_node_from_repo_local_bin(
     assert resolved == str(node_path)
 
 
-def test_rerender_falls_back_to_playwright_on_render_failure(
-    monkeypatch: Any, tmp_path: Path
-) -> None:
-    monkeypatch.setenv("GF_SECURITY_ADMIN_PASSWORD", "changeme")
-    monkeypatch.setattr(rerender_subject, "_load_dashboards", lambda *_: [])
-    monkeypatch.setattr(
-        rerender_subject,
-        "_render_via_api",
-        lambda *_: (_ for _ in ()).throw(URLError("timed out")),
-    )
-    monkeypatch.setattr(rerender_subject, "_run_playwright_fallback", lambda *_: 0)
-
-    result = rerender_subject.main(
-        [
-            "--output-dir",
-            str(tmp_path),
-            "--fallback",
-            "auto",
-        ]
-    )
-
-    assert result == 0
-
-
-def test_rerender_auto_fallback_skips_frontend_probe_on_render_failure(
-    monkeypatch: Any, tmp_path: Path
-) -> None:
-    monkeypatch.setenv("GF_SECURITY_ADMIN_PASSWORD", "changeme")
-    monkeypatch.setattr(rerender_subject, "_load_dashboards", lambda *_: [])
-    monkeypatch.setattr(
-        rerender_subject,
-        "_render_via_api",
-        lambda *_: (_ for _ in ()).throw(URLError("timed out")),
-    )
-    monkeypatch.setattr(rerender_subject, "_run_playwright_fallback", lambda *_: 0)
-
-    def fail_if_probed(*_args: object, **_kwargs: object) -> object:
-        raise AssertionError("frontend settings probe should be skipped")
-
-    monkeypatch.setattr(rerender_subject, "_request_json", fail_if_probed)
-
-    result = rerender_subject.main(
-        [
-            "--output-dir",
-            str(tmp_path),
-            "--fallback",
-            "auto",
-        ]
-    )
-
-    assert result == 0

@@ -26,6 +26,9 @@ This page is the config-backed inventory of active provider/entity/composite
 pipeline surfaces. It is not the architectural rationale page and it is not the
 workflow lifecycle spec.
 
+Evidence-backed per-unit projections are published in the
+[Pipeline and Workflow Passports](passports/index.md) index.
+
 Per-pipeline operational facet coverage is normalized in
 [pipelines/INDEX.md#operational-facet-coverage](pipelines/INDEX.md#operational-facet-coverage).
 Use that matrix to audit Bronze, Silver, Gold, quarantine, DQ, replay,

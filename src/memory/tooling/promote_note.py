@@ -12,6 +12,7 @@ from memory.notes import (
     write_markdown_note,
 )
 from memory.resources import discover_memory_root, load_yaml_resource
+from memory.security import TrustLevel, assert_safe_for_persistence
 
 
 def _curated_targets() -> dict[str, Path]:
@@ -177,14 +178,18 @@ def promote_note(
         raise ValueError("source episodic note still contains placeholder source_refs")
     if _contains_placeholder(summary):
         raise ValueError("promotion summary must be explicit and non-placeholder")
+    assert_safe_for_persistence(
+        f"{summary}\n{note.body}",
+        trust=TrustLevel.TRUSTED_REPOSITORY,
+    )
 
     duplicates = _detect_duplicates(note_id, title)
     if duplicates and not force_duplicate:
         raise ValueError(f"duplicate curated note detected: {', '.join(duplicates)}")
 
     metadata.pop("task_id", None)
-    metadata.pop("ttl_days", None)
     metadata.pop("created_at", None)
+    metadata.pop("ttl_days", None)
     metadata.pop("confidence", None)
     metadata["id"] = note_id
     metadata["title"] = title
@@ -199,7 +204,10 @@ def promote_note(
     write_markdown_note(output, metadata, body)
 
     if move:
-        source.unlink()
+        from memory.storage import exclusive_lock
+
+        with exclusive_lock(source):
+            source.unlink(missing_ok=True)
 
     return output
 

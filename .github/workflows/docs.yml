@@ -110,6 +110,9 @@ jobs:
             --pipeline chembl_activity \
             --check
 
+      - name: Check pipeline and workflow passport drift
+        run: uv run --frozen --no-build python -m scripts.docs passports check
+
       - name: Run docs-governance architecture tests
         run: |
           uv run --frozen --no-build pytest \

@@ -30,6 +30,13 @@ The intended retrieval order is:
 catalog -> graph -> rag -> source
 ```
 
+Select `BIOETL_AI_MEMORY_MODE=off|read-only|read-write` before work. Use
+`read-only` for retrieval without writes and `read-write` only when persistent
+updates are authorized. In `off` mode, pre-task returns a bounded disabled
+result before persistent surface resolution, retrieval, refresh, or note
+creation. Vendor-hosted conversation and IDE state are **NOT_PROVEN** and are
+not controlled merely by setting this variable.
+
 ## Pre-Task
 
 Run the standard pre-task workflow:
@@ -84,6 +91,12 @@ After pre-task retrieval:
 - inspect retrieved RAG chunks and timeline events
 - read the canonical source files directly before making a conclusion
 - keep task-local findings in the session note instead of inventing hidden state
+- capture durable observations as evidence before drawing a decision
+- provide subagents only bounded files, symbols, commands, findings,
+  constraints, and evidence digests
+
+Evidence and conclusions are separate. A changed conclusion creates a
+superseding decision; it does not mutate cited evidence.
 
 Typical follow-up commands:
 
@@ -139,6 +152,11 @@ What it does:
 - bounds both validation and the default post-task refresh when run through the
   CLI, returning an explicit degraded JSON payload instead of hanging on slow
   validation or timeline/RAG refresh work.
+
+Do not use the write-capable post-task path in `off` or `read-only` mode.
+Retention apply remains explicit; archive and deletion are distinct.
+Migration, general backup/restore, and external-service deletion are not
+automated by this workflow.
 
 Use `python -m memory.tooling.prune --json` for the policy-default density
 report or `python -m memory.tooling.prune --max-active <N> --json` for an

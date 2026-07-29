@@ -21,6 +21,9 @@ runtime control flow, see [Running Pipelines](../03-guides/running-pipelines.md)
 
 This page is not the formal lifecycle-state specification.
 
+Evidence-backed DAG, control-plane, and transform classifications are published
+in the [Pipeline and Workflow Passports](passports/index.md) index.
+
 Runtime model evidence:
 
 - Domain config: `src/bioetl/domain/workflow/config.py`

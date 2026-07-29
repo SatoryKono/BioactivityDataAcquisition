@@ -407,6 +407,18 @@ tests:
           - labels: '{provider="chembl"}'
             value: 1
 
+  - name: provider-current-status-projects-healthy-raw-status
+    interval: 1m
+    input_series:
+      - series: 'bioetl_provider_health_status{provider="chembl"}'
+        values: "2+0x20"
+    promql_expr_test:
+      - expr: bioetl_provider_current_status{provider="chembl"}
+        eval_time: 5m
+        exp_samples:
+          - labels: '{__name__="bioetl_provider_current_status",provider="chembl"}'
+            value: 0
+
   - name: provider-range-operational-ok-from-adapter-activity
     interval: 1m
     input_series:

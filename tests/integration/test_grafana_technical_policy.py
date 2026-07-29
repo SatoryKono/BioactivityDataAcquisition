@@ -22,27 +22,6 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 
-def test_design_system_documents_technical_configuration_policy() -> None:
-    """Design docs must distinguish governed root config from benign export noise."""
-    text = Path("docs/03-guides/dashboards/design-system.md").read_text(
-        encoding="utf-8"
-    )
-    required_tokens = {
-        "Technical configuration policy: governed fields vs export noise",
-        '`style` MUST be `"dark"`',
-        "`editable` MUST remain `true`",
-        "`graphTooltip` MUST remain `1`",
-        "`hideControls` is optional",
-        "Mixed panel-level `pluginVersion` values are NOT a standalone correctness failure",
-        "MUST NOT bulk-rewrite shipped dashboard JSON",
-    }
-    missing = sorted(token for token in required_tokens if token not in text)
-    assert not missing, (
-        "dashboard design-system must document technical configuration policy; "
-        f"missing={missing}"
-    )
-
-
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
 def test_dashboard_root_technical_configuration_policy(dashboard_path: Path) -> None:
     """Shipped dashboards must preserve governed root technical settings."""

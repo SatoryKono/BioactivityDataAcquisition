@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DecisionRecord",
+  "type": "object",
+  "required": ["envelope", "decision", "rationale", "evidence_digests", "decision_digest"],
+  "properties": {
+    "envelope": {"$ref": "record_envelope.schema.json"},
+    "decision": {"type": "string", "minLength": 1},
+    "rationale": {"type": "string", "minLength": 1},
+    "evidence_digests": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "decision_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false
+}

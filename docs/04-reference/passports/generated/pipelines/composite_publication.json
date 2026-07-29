@@ -1,0 +1,591 @@
+{
+  "composite": {
+    "cross_validation": {
+      "enabled": true,
+      "enricher_pairings": [
+        {
+          "enricher_pipeline": "crossref_publication",
+          "fields": [
+            {
+              "field": "doi",
+              "method": "exact"
+            },
+            {
+              "field": "title",
+              "method": "fuzzy",
+              "threshold": 0.8
+            },
+            {
+              "field": "volume",
+              "method": "exact"
+            },
+            {
+              "field": "issue",
+              "method": "exact"
+            },
+            {
+              "field": "page_first",
+              "method": "exact"
+            },
+            {
+              "field": "page_last",
+              "method": "exact"
+            },
+            {
+              "field": "publication_year",
+              "method": "exact"
+            },
+            {
+              "field": "citations_received",
+              "method": "numeric_tolerance",
+              "threshold": 0.1
+            }
+          ]
+        },
+        {
+          "enricher_pipeline": "openalex_publication",
+          "fields": [
+            {
+              "field": "doi",
+              "method": "exact"
+            },
+            {
+              "field": "pmid",
+              "method": "exact"
+            },
+            {
+              "field": "title",
+              "method": "fuzzy",
+              "threshold": 0.8
+            },
+            {
+              "field": "volume",
+              "method": "exact"
+            },
+            {
+              "field": "issue",
+              "method": "exact"
+            },
+            {
+              "field": "page_first",
+              "method": "exact"
+            },
+            {
+              "field": "page_last",
+              "method": "exact"
+            },
+            {
+              "field": "publication_year",
+              "method": "exact"
+            },
+            {
+              "field": "citations_received",
+              "method": "numeric_tolerance",
+              "threshold": 0.1
+            }
+          ]
+        },
+        {
+          "enricher_pipeline": "pubmed_publication",
+          "fields": [
+            {
+              "field": "doi",
+              "method": "exact"
+            },
+            {
+              "field": "pmid",
+              "method": "exact"
+            },
+            {
+              "field": "title",
+              "method": "fuzzy",
+              "threshold": 0.8
+            },
+            {
+              "field": "volume",
+              "method": "exact"
+            },
+            {
+              "field": "issue",
+              "method": "exact"
+            },
+            {
+              "field": "page_first",
+              "method": "exact"
+            },
+            {
+              "field": "page_last",
+              "method": "exact"
+            },
+            {
+              "field": "publication_year",
+              "method": "exact"
+            }
+          ]
+        },
+        {
+          "enricher_pipeline": "semanticscholar_publication",
+          "fields": [
+            {
+              "field": "doi",
+              "method": "exact"
+            },
+            {
+              "field": "pmid",
+              "method": "exact"
+            },
+            {
+              "field": "title",
+              "method": "fuzzy",
+              "threshold": 0.8
+            },
+            {
+              "field": "volume",
+              "method": "exact"
+            },
+            {
+              "field": "issue",
+              "method": "exact"
+            },
+            {
+              "field": "page_first",
+              "method": "exact"
+            },
+            {
+              "field": "page_last",
+              "method": "exact"
+            },
+            {
+              "field": "publication_year",
+              "method": "exact"
+            },
+            {
+              "field": "citations_received",
+              "method": "numeric_tolerance",
+              "threshold": 0.1
+            }
+          ]
+        }
+      ],
+      "error_threshold": 2,
+      "fuzzy_threshold": 0.8,
+      "numeric_tolerance": 0.1,
+      "quarantine_threshold": 2,
+      "warning_threshold": 1
+    },
+    "dependencies": [],
+    "enrichers": [
+      {
+        "filter_condition": "doi IS NOT NULL",
+        "join_keys": [
+          "doi",
+          "title"
+        ],
+        "pipeline": "crossref_publication",
+        "required": false,
+        "silver_table": "silver/crossref/publication",
+        "timeout_seconds": 3600
+      },
+      {
+        "filter_condition": "doi IS NOT NULL OR pmid IS NOT NULL",
+        "join_keys": [
+          "doi",
+          "title"
+        ],
+        "pipeline": "openalex_publication",
+        "required": false,
+        "silver_table": "silver/openalex/publication",
+        "timeout_seconds": 3600
+      },
+      {
+        "filter_condition": "pmid IS NOT NULL",
+        "join_keys": [
+          "pmid",
+          "doi"
+        ],
+        "pipeline": "pubmed_publication",
+        "required": false,
+        "silver_table": "silver/pubmed/publication",
+        "timeout_seconds": 3600
+      },
+      {
+        "filter_condition": "doi IS NOT NULL OR title IS NOT NULL",
+        "join_keys": [
+          "doi",
+          "title"
+        ],
+        "pipeline": "semanticscholar_publication",
+        "required": false,
+        "silver_table": "silver/semanticscholar/publication",
+        "timeout_seconds": 7200
+      }
+    ],
+    "execution": {
+      "checkpoint_enabled": true,
+      "max_concurrency": 4,
+      "retry": {
+        "backoff_multiplier": 2.0,
+        "max_attempts": 3
+      }
+    },
+    "merge": {
+      "column_groups": [
+        {
+          "fields": [
+            "entity_id",
+            "content_hash",
+            "_source",
+            "_index",
+            "_lookup_method",
+            "_original_id"
+          ],
+          "name": "system",
+          "pattern": "^_composite_|^_source_providers|^_enrichment_|^_lineage_",
+          "provider_order": [
+            "chembl",
+            "crossref",
+            "openalex",
+            "pubmed",
+            "semanticscholar"
+          ]
+        },
+        {
+          "fields": [
+            "alternative_id",
+            "chembl_release",
+            "corpus_id",
+            "dblp_id",
+            "mag_id",
+            "nlm_unique_id",
+            "openalex_id",
+            "paper_id",
+            "pmc_id",
+            "pmid",
+            "publication_id",
+            "src_id"
+          ],
+          "name": "provider_ids",
+          "provider_order": [
+            "semanticscholar",
+            "openalex",
+            "pubmed",
+            "chembl",
+            "crossref"
+          ]
+        },
+        {
+          "fields": [
+            "abstract",
+            "abstract_structured",
+            "doi",
+            "issn",
+            "issn_electronic",
+            "issn_list",
+            "issn_print",
+            "issue",
+            "journal",
+            "journal_iso_abbrev",
+            "journal_issn_type",
+            "journal_name_short",
+            "publisher",
+            "title",
+            "venue",
+            "volume"
+          ],
+          "name": "journal",
+          "provider_order": [
+            "pubmed",
+            "semanticscholar",
+            "chembl",
+            "crossref",
+            "openalex"
+          ]
+        },
+        {
+          "fields": [
+            "medline_pgn",
+            "page_first",
+            "page_last",
+            "page_range"
+          ],
+          "name": "pagination",
+          "provider_order": [
+            "pubmed",
+            "chembl",
+            "crossref",
+            "openalex",
+            "semanticscholar"
+          ]
+        },
+        {
+          "fields": [
+            "author_count",
+            "author_details",
+            "author_h_indices",
+            "author_openalex_ids",
+            "author_orcids",
+            "author_s2_ids",
+            "authors",
+            "authors_with_affiliations"
+          ],
+          "name": "authors",
+          "provider_order": [
+            "pubmed",
+            "semanticscholar",
+            "openalex",
+            "chembl",
+            "crossref"
+          ]
+        },
+        {
+          "fields": [
+            "affiliation_list",
+            "affiliation_structured",
+            "institution_country_codes",
+            "institution_ids",
+            "ror_ids",
+            "country"
+          ],
+          "name": "affiliations",
+          "provider_order": [
+            "pubmed",
+            "openalex",
+            "semanticscholar",
+            "chembl",
+            "crossref"
+          ]
+        },
+        {
+          "fields": [
+            "creation_date",
+            "date_completed",
+            "date_revised",
+            "pub_date",
+            "pub_day",
+            "pub_month",
+            "publication_date",
+            "publication_year",
+            "year"
+          ],
+          "name": "date",
+          "provider_order": [
+            "chembl",
+            "crossref",
+            "openalex",
+            "pubmed",
+            "semanticscholar"
+          ]
+        },
+        {
+          "fields": [
+            "keyword_count",
+            "mesh_heading_count",
+            "primary_topic",
+            "subject_fields",
+            "subject_keywords",
+            "subject_mesh",
+            "subject_topics",
+            "tldr"
+          ],
+          "name": "subjects",
+          "provider_order": [
+            "pubmed",
+            "openalex",
+            "semanticscholar",
+            "crossref",
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "chemicals",
+            "chemical_count",
+            "gene_symbols",
+            "databanks",
+            "grants",
+            "grant_count"
+          ],
+          "name": "biomedical",
+          "provider_order": [
+            "pubmed",
+            "openalex",
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "citation_contexts",
+            "citation_subset",
+            "citations_made",
+            "citations_received",
+            "fwci",
+            "influential_citation_count",
+            "references"
+          ],
+          "name": "citations",
+          "provider_order": [
+            "semanticscholar",
+            "crossref",
+            "openalex",
+            "pubmed",
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "content_domain_crossmark_restriction",
+            "content_domain_domains",
+            "is_oa",
+            "is_retracted",
+            "language",
+            "license_url",
+            "oa_status",
+            "open_access_url",
+            "publication_class",
+            "publication_status",
+            "publication_subclass",
+            "publication_type",
+            "publication_type_unified",
+            "publication_types"
+          ],
+          "name": "doc_type",
+          "provider_order": [
+            "semanticscholar",
+            "pubmed",
+            "chembl",
+            "crossref",
+            "openalex"
+          ]
+        }
+      ],
+      "conflict_resolution": "seed_priority",
+      "exclude_fields": [
+        "crossref.publication.doi",
+        "crossref.publication.title",
+        "crossref.publication.volume",
+        "crossref.publication.issue",
+        "crossref.publication.page_first",
+        "crossref.publication.page_last",
+        "crossref.publication.publication_year",
+        "openalex.publication.doi",
+        "openalex.publication.pmid",
+        "openalex.publication.title",
+        "openalex.publication.volume",
+        "openalex.publication.issue",
+        "openalex.publication.page_first",
+        "openalex.publication.page_last",
+        "openalex.publication.publication_year",
+        "pubmed.publication.doi",
+        "pubmed.publication.pmid",
+        "pubmed.publication.title",
+        "pubmed.publication.volume",
+        "pubmed.publication.issue",
+        "pubmed.publication.page_first",
+        "pubmed.publication.page_last",
+        "pubmed.publication.publication_year",
+        "semanticscholar.publication.doi",
+        "semanticscholar.publication.pmid",
+        "semanticscholar.publication.title",
+        "semanticscholar.publication.volume",
+        "semanticscholar.publication.issue",
+        "semanticscholar.publication.page_first",
+        "semanticscholar.publication.page_last",
+        "semanticscholar.publication.publication_year",
+        "chembl.publication.affiliation_list",
+        "chembl.publication.author_orcids",
+        "chembl.publication.citations_made",
+        "chembl.publication.citations_received",
+        "chembl.publication.is_oa",
+        "chembl.publication.language",
+        "chembl.publication.pmc_id",
+        "chembl.publication.publication_date",
+        "crossref.publication.abstract",
+        "crossref.publication.affiliation_list",
+        "crossref.publication.author_orcids",
+        "crossref.publication.content_domain_domains",
+        "crossref.publication.pmc_id",
+        "crossref.publication.pmid",
+        "openalex.publication.grants",
+        "openalex.publication.pmc_id",
+        "semanticscholar.publication.dblp_id",
+        "semanticscholar.publication.affiliation_list",
+        "semanticscholar.publication.author_orcids",
+        "semanticscholar.publication.citation_contexts",
+        "semanticscholar.publication.influential_citation_count",
+        "semanticscholar.publication.pmc_id"
+      ],
+      "output": {
+        "gold": "data/output/gold/composite/publication",
+        "silver": "data/output/silver/composite/publication"
+      },
+      "preserve_all_sources": true,
+      "sort_by": {
+        "gold": [
+          "entity_id",
+          "publication_id"
+        ],
+        "silver": [
+          "entity_id",
+          "publication_id"
+        ]
+      },
+      "strategy": "left_outer"
+    },
+    "seed": {
+      "output_keys": [
+        "publication_id",
+        "doi",
+        "pmid",
+        "pmc_id",
+        "title"
+      ],
+      "pipeline": "chembl_publication",
+      "silver_table": "silver/chembl/publication"
+    },
+    "version": "1.1.0"
+  },
+  "diagnostics": [],
+  "execution": {
+    "control_plane": {
+      "checkpoints": true,
+      "run_manifest": true
+    }
+  },
+  "identity": {
+    "aliases": [],
+    "entity": "publication",
+    "pipeline_id": "composite_publication",
+    "pipeline_type": "composite",
+    "provider": "composite",
+    "status": "active",
+    "typed_id": "composite:composite_publication"
+  },
+  "kind": "pipeline",
+  "observability": {
+    "correlation_fields": [
+      "run_id",
+      "manifest_id"
+    ],
+    "metric_labels": [
+      "pipeline",
+      "run_type",
+      "status"
+    ]
+  },
+  "passport_schema_version": "1.0.0",
+  "provenance": {
+    "projector_version": "1.0.0",
+    "semantic_content_hash": "sha256:d5de91911fd1bc4292fc03d7b12c15b62c9b49ccc9124c96424cd6f457887475",
+    "source_revision": "b502aa73ed561cd30b5317e5531677a073694912"
+  },
+  "source_references": [
+    {
+      "path": "configs/composites/publication.yaml",
+      "role": "composite_config"
+    },
+    {
+      "path": "configs/contracts/composite/publication.yaml",
+      "role": "gold_contract"
+    }
+  ]
+}

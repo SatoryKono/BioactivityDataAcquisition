@@ -8,12 +8,30 @@ Import-BioetlRepoEnv -RepoRoot $repoRoot
 Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
 . (Join-Path $scriptDir 'support\token_validation.ps1')
 
+Exit-McpValidateOnly -ServerName 'memory'
+
+$memoryMode = if ([string]::IsNullOrWhiteSpace($env:BIOETL_AI_MEMORY_MODE)) {
+    'off'
+} else {
+    $env:BIOETL_AI_MEMORY_MODE.ToLowerInvariant()
+}
+if ($memoryMode -notin @('read-write', 'readwrite', 'rw')) {
+    if ($memoryMode -in @('off', 'disabled', 'read-only', 'readonly', 'ro')) {
+        [Console]::Error.WriteLine(
+            "Persistent MCP memory is disabled by BIOETL_AI_MEMORY_MODE=$memoryMode"
+        )
+        exit 78
+    }
+    [Console]::Error.WriteLine(
+        'Invalid BIOETL_AI_MEMORY_MODE; expected off, read-only, or read-write'
+    )
+    exit 64
+}
+
 if (-not $env:NPM_CONFIG_CACHE) {
     $env:NPM_CONFIG_CACHE = Join-Path $repoRoot '.cache\npm-cache'
 }
 New-Item -ItemType Directory -Force -Path $env:NPM_CONFIG_CACHE | Out-Null
-Exit-McpValidateOnly -ServerName 'memory'
-
 if ([string]::IsNullOrWhiteSpace($env:MEMORY_FILE_PATH)) {
     $env:MEMORY_FILE_PATH = Join-Path $repoRoot 'docs\00-project\ai\memory\mcp-memory.json'
 }

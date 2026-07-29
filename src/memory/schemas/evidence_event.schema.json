@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EvidenceEvent",
+  "type": "object",
+  "required": ["envelope", "evidence_kind", "observation", "command", "result", "evidence_digest"],
+  "properties": {
+    "envelope": {"$ref": "record_envelope.schema.json"},
+    "evidence_kind": {"type": "string", "minLength": 1},
+    "observation": {"type": "string", "minLength": 1},
+    "command": {"type": ["string", "null"]},
+    "result": {"type": ["object", "null"]},
+    "evidence_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false
+}

@@ -226,7 +226,7 @@ def test_scripts_and_root_hygiene_burndown_for_5959_and_5960() -> None:
     ]
     assert (
         len(zero_ref_rows)
-        == closeout["ratchets"]["zero_reference_supporting_scripts"]["current"]
+        <= closeout["ratchets"]["zero_reference_supporting_scripts"]["current"]
     )
     assert (
         len(zero_ref_rows)

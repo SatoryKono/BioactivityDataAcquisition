@@ -483,6 +483,18 @@ routes:
       - reports/test-telemetry/slowest-tests.md
     notes: Branch-consumable telemetry summaries are regenerated alongside the committed baseline refresh workflow.
 
+  - id: dashboard-scenes-parity-ledger
+    generator: scripts/engineering/qa/report_dashboard_scenes_parity.py
+    output_kind: observability_evidence
+    commit_policy: tracked_quality_evidence
+    outputs:
+      - reports/observability/scenes-parity-ledger.json
+      - reports/observability/scenes-parity-ledger.md
+    notes:
+      Deterministic ADR-053 mapping from every shipped non-row JSON panel to
+      one optional Scenes route disposition, source, basis, empty semantics,
+      and authoritative JSON fallback.
+
   - id: targeted-s7-governance-hotspot-telemetry
     generator: manual closeout from bounded pytest JUnit telemetry
     output_kind: test_report

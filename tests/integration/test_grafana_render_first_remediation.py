@@ -392,3 +392,20 @@ def test_rf007_counts_and_dense_legends_are_bounded() -> None:
         assert "full identifiers remain available" in str(
             _panel(dq, panel_id).get("description", "")
         )
+
+
+def test_operator_critical_tables_expose_full_values() -> None:
+    expected_panels = {
+        "bioetl-dq-v2.json": (9102,),
+        "bioetl-incident-v1.json": (2010, 2002, 2003, 2004, 2005),
+        "bioetl-run-explorer-v1.json": (9402,),
+    }
+
+    for dashboard_name, panel_ids in expected_panels.items():
+        dashboard = _load(dashboard_name)
+        for panel_id in panel_ids:
+            panel = _panel(dashboard, panel_id)
+            custom = panel["fieldConfig"]["defaults"]["custom"]
+            assert custom["inspect"] is True
+            if dashboard_name != "bioetl-run-explorer-v1.json":
+                assert custom["cellOptions"]["wrapText"] is True

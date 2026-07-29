@@ -48,6 +48,7 @@ EXIT_QUARANTINE = 7
 EXIT_SCREENSHOTS = 8
 EXIT_CREDENTIALS = 9
 EXIT_BIOETL_TARGET = 10
+QUARANTINE_EXPLORER_UID = "bioetl-silver-reject-explorer"
 
 
 @dataclass(frozen=True)
@@ -232,6 +233,18 @@ def _check_expanded_row_capture(playwright_check: PreflightCheck) -> PreflightCh
             "full-state audits and materializes lazy-rendered panels."
         ),
     )
+
+
+def _quarantine_explorer_is_applicable() -> bool:
+    """Return whether a shipped dashboard still requires the retired HTTP UI."""
+    for dashboard_path in _DASHBOARD_DIR.glob("*.json"):
+        try:
+            payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if payload.get("uid") == QUARANTINE_EXPLORER_UID:
+            return True
+    return False
 
 
 def _expected_dashboard_screenshot_pairs(
@@ -750,42 +763,56 @@ def run_checks(
         checks.extend([playwright_check, _check_expanded_row_capture(playwright_check)])
 
     if include_semantic_checks:
-        try:
-            resolved_app_base_url = live_audit._resolve_app_base_url(
-                live_audit.AuditConfig(
-                    prometheus_base_url=prometheus_base_url.rstrip("/"),
-                    app_base_url=app_base_url.rstrip("/"),
-                    loki_base_url=live_audit.DEFAULT_LOKI_BASE_URL,
-                    tempo_base_url=live_audit.DEFAULT_TEMPO_BASE_URL,
-                    grafana_base_url=grafana_base_url.rstrip("/"),
-                    grafana_username=grafana_username,
-                    grafana_password=grafana_password,
-                    workflow=live_audit.DEFAULT_WORKFLOW,
-                    pipeline=live_audit.DEFAULT_PIPELINE,
-                    run_type=live_audit.DEFAULT_RUN_TYPE,
-                    run_id=live_audit.DEFAULT_RUN_ID,
-                    range_hours=live_audit.DEFAULT_RANGE_HOURS,
-                    output_path=live_audit.DEFAULT_OUTPUT_PATH,
-                    request_timeout_seconds=timeout_seconds,
-                )
-            )
+        if not _quarantine_explorer_is_applicable():
             checks.append(
                 PreflightCheck(
                     name="quarantine-explorer",
-                    status="ok",
+                    status="not_applicable",
                     detail=(
-                        f"canonical health probe reachable via {resolved_app_base_url}"
+                        "Quarantine Explorer HTTP/UI surface is retired from the "
+                        "shipped dashboard portfolio; domain quarantine write/storage "
+                        "remains unchanged."
                     ),
                 )
             )
-        except Exception as exc:  # pragma: no cover - exercised by callers
-            checks.append(
-                PreflightCheck(
-                    name="quarantine-explorer",
-                    status="error",
-                    detail=str(exc),
+        else:
+            try:
+                resolved_app_base_url = live_audit._resolve_app_base_url(
+                    live_audit.AuditConfig(
+                        prometheus_base_url=prometheus_base_url.rstrip("/"),
+                        app_base_url=app_base_url.rstrip("/"),
+                        loki_base_url=live_audit.DEFAULT_LOKI_BASE_URL,
+                        tempo_base_url=live_audit.DEFAULT_TEMPO_BASE_URL,
+                        grafana_base_url=grafana_base_url.rstrip("/"),
+                        grafana_username=grafana_username,
+                        grafana_password=grafana_password,
+                        workflow=live_audit.DEFAULT_WORKFLOW,
+                        pipeline=live_audit.DEFAULT_PIPELINE,
+                        run_type=live_audit.DEFAULT_RUN_TYPE,
+                        run_id=live_audit.DEFAULT_RUN_ID,
+                        range_hours=live_audit.DEFAULT_RANGE_HOURS,
+                        output_path=live_audit.DEFAULT_OUTPUT_PATH,
+                        request_timeout_seconds=timeout_seconds,
+                    )
                 )
-            )
+                checks.append(
+                    PreflightCheck(
+                        name="quarantine-explorer",
+                        status="ok",
+                        detail=(
+                            "canonical health probe reachable via "
+                            f"{resolved_app_base_url}"
+                        ),
+                    )
+                )
+            except Exception as exc:  # pragma: no cover - exercised by callers
+                checks.append(
+                    PreflightCheck(
+                        name="quarantine-explorer",
+                        status="error",
+                        detail=str(exc),
+                    )
+                )
 
     if include_screenshot_check:
         checks.append(
@@ -892,7 +919,7 @@ def _format_text(checks: Iterable[PreflightCheck]) -> str:
 
 def _exit_code_for_checks(checks: list[PreflightCheck]) -> int:
     """Map failed checks to distinct non-zero outcomes for operator triage."""
-    if all(check.status == "ok" for check in checks):
+    if all(check.status in {"ok", "not_applicable"} for check in checks):
         return EXIT_OK
     by_name = {check.name: check for check in checks}
     if by_name.get("credentials", PreflightCheck("", "ok", "")).status != "ok":
