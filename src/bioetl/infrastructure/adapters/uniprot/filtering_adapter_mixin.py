@@ -22,7 +22,7 @@ from bioetl.infrastructure.adapters.uniprot.fallback_resolver import (
     iter_uniprot_fallback_records,
     resolve_uniprot_missing_ids,
 )
-from bioetl.typing_support import as_mixin_host
+from bioetl.domain.mixin_host import as_mixin_host
 
 _FetchStrategy = Callable[..., AsyncIterator[BronzeRecord]]
 

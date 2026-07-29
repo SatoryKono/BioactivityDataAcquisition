@@ -13,7 +13,7 @@ from bioetl.application.pipelines.common.publication_vocab_observability import 
     emit_unknown_publication_vocab_metrics,
 )
 from bioetl.domain.value_objects import PublicationYear
-from bioetl.typing_support import as_mixin_host
+from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext

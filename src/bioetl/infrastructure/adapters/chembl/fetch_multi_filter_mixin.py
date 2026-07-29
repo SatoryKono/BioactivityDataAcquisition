@@ -14,7 +14,7 @@ from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.common.deduplication import (
     iter_deduplicated_records,
 )
-from bioetl.typing_support import as_mixin_host
+from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator

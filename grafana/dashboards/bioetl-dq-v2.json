@@ -133,7 +133,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "DUX5: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error); pair with Provenance reason + action. Not a healthy OK. DUX4-13: Composite first strip owner — pair with evidence freshness + delivery impact. DUX3-12: NOW DQ health only. Not peer with RANGE scores or RUN accounting. NOW-lane current DQ status only (bioetl_dq_current_status). Not comparable to Range freshness or Run reject tables as a peer badge. Primary compact Data Quality verdict for the selected pipeline scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Monitor DQ Current Status below is an expanded first-screen mirror of this same current-status recording rule, not an independent second verdict. Sole first-screen status (dual twin removed #6572). UNKNOWN — DQ status series absent (not healthy zero). DSA-03: Now/Run/Range not peer badges.",
+      "description": "DUX6: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error/selection). Pair with Provenance reason + action; never read as OK. DUX5: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error); pair with Provenance reason + action. Not a healthy OK. DUX4-13: Composite first strip owner — pair with evidence freshness + delivery impact. DUX3-12: NOW DQ health only. Not peer with RANGE scores or RUN accounting. NOW-lane current DQ status only (bioetl_dq_current_status). Not comparable to Range freshness or Run reject tables as a peer badge. Primary compact Data Quality verdict for the selected pipeline scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Monitor DQ Current Status below is an expanded first-screen mirror of this same current-status recording rule, not an independent second verdict. Sole first-screen status (dual twin removed #6572). UNKNOWN — DQ status series absent (not healthy zero). DSA-03: Now/Run/Range not peer badges.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -267,7 +267,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Status mapping: 0=OK, 1=WARN, 2=CRIT; null=UNKNOWN. Threshold state stays bounded: hard-fail reasons map to CRIT, warning-only reasons map to WARN, and explicit current OK stays OK. Disabled or noop DQ monitoring is treated as a warning-state reason, not unconditional green. Current threshold state is pipeline-wide; use selected-range panels below for scoped evidence.",
+      "description": "DUX6: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error/selection). Pair with Provenance reason + action; never read as OK. Status mapping: 0=OK, 1=WARN, 2=CRIT; null=UNKNOWN. Threshold state stays bounded: hard-fail reasons map to CRIT, warning-only reasons map to WARN, and explicit current OK stays OK. Disabled or noop DQ monitoring is treated as a warning-state reason, not unconditional green. Current threshold state is pipeline-wide; use selected-range panels below for scoped evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -402,7 +402,7 @@
             ]
           },
           "unit": "short",
-          "noValue": "VALID_EMPTY — no current DQ reasons in NOW window"
+          "noValue": "None observed"
         },
         "overrides": [
           {
@@ -468,7 +468,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "DUX5: zero means none observed or Not started/Not available — never bare success; red only on validated failure. Silver structural reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range. Gold contract/semantic reject outcomes are excluded from this guardrail.",
+          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). DUX5: zero means none observed or Not started/Not available — never bare success; red only on validated failure. Silver structural reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range. Gold contract/semantic reject outcomes are excluded from this guardrail.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -621,7 +621,7 @@
           ],
           "title": "Inspect: Top Silver Reject Reasons (Pareto)",
           "type": "bargauge",
-          "description": "Pareto ranking of bounded Silver structural reject reasons across the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/reason_code and then validate representative payload_hash rows. Gold contract/semantic rejects are intentionally excluded. No data means no bounded reject breakdown samples were observed in range; the panel must not invent a synthetic reason bucket."
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). Pareto ranking of bounded Silver structural reject reasons across the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/reason_code and then validate representative payload_hash rows. Gold contract/semantic rejects are intentionally excluded. No data means no bounded reject breakdown samples were observed in range; the panel must not invent a synthetic reason bucket."
         },
         {
           "datasource": {
@@ -698,14 +698,14 @@
           ],
           "title": "Inspect: Top Silver Reject Fields",
           "type": "bargauge",
-          "description": "Bounded Silver structural schema-field summary for the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/field and then compare top reason signatures inside the explorer. Gold contract/semantic rejects are intentionally excluded. No data means no bounded reject field samples were observed in range; the panel must not invent a synthetic field bucket."
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). Bounded Silver structural schema-field summary for the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/field and then compare top reason signatures inside the explorer. Gold contract/semantic rejects are intentionally excluded. No data means no bounded reject field samples were observed in range; the panel must not invent a synthetic field bucket."
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range pipeline breakdown of Silver structural rejects from the filtered_out stage-total counter. This is a scope/distribution panel, not a reason_code summary, and it intentionally excludes Gold contract/semantic rejects. No data means no filtered_out samples were observed in the active window; the panel must not invent a synthetic pipeline row.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). Selected-range pipeline breakdown of Silver structural rejects from the filtered_out stage-total counter. This is a scope/distribution panel, not a reason_code summary, and it intentionally excludes Gold contract/semantic rejects. No data means no filtered_out samples were observed in the active window; the panel must not invent a synthetic pipeline row.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -782,7 +782,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range Gold reject outcomes by pipeline. This panel separates Gold contract quarantines and semantic/contract exclusions from Silver structural FILTERED_OUT_SILVER rows; use it when DQ pressure is not explained by the Silver Reject Explorer. No data means no Gold reject outcome samples were observed in the active window.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). Selected-range Gold reject outcomes by pipeline. This panel separates Gold contract quarantines and semantic/contract exclusions from Silver structural FILTERED_OUT_SILVER rows; use it when DQ pressure is not explained by the Silver Reject Explorer. No data means no Gold reject outcome samples were observed in the active window.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -886,7 +886,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range evidence only. This panel no longer drives current DQ status; use Monitor DQ Current Status for incident state. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). Selected-range evidence only. This panel no longer drives current DQ status; use Monitor DQ Current Status for incident state. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1038,7 +1038,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range Gold output count for DQ deliverability triage. 0 means no Gold records were observed inside the active window; it does not prove the current DQ verdict is OK or UNKNOWN. Compare with Bronze denominator, blocked-share, and the shared Processed Records table before interpreting data loss.",
+          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). Selected-range Gold output count for DQ deliverability triage. 0 means no Gold records were observed inside the active window; it does not prove the current DQ verdict is OK or UNKNOWN. Compare with Bronze denominator, blocked-share, and the shared Processed Records table before interpreting data loss.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1107,7 +1107,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range count of Silver validation failures. Non-zero means Silver validation blocked or degraded promotion in the active window, and this can drive current CRIT even when filtered_out stays zero. Correlate with current DQ reasons and quarantine evidence before replay.",
+          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). Selected-range count of Silver validation failures. Non-zero means Silver validation blocked or degraded promotion in the active window, and this can drive current CRIT even when filtered_out stays zero. Correlate with current DQ reasons and quarantine evidence before replay.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1277,7 +1277,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range quarantine breakdown by error_type. Use it to determine whether current DQ pressure is dominated by a specific quarantine signature before moving to logs, traces, or downstream validation surfaces. Horizontal bars are intentional here because category comparison matters more than composition percentage. No data means no quarantined records were observed in the active window; the panel must not invent a synthetic error_type bucket.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). Selected-range quarantine breakdown by error_type. Use it to determine whether current DQ pressure is dominated by a specific quarantine signature before moving to logs, traces, or downstream validation surfaces. Horizontal bars are intentional here because category comparison matters more than composition percentage. No data means no quarantined records were observed in the active window; the panel must not invent a synthetic error_type bucket.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1343,7 +1343,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range count of canonical Silver validation failures. Non-zero means Silver validation blocked or degraded promotion and should be correlated with current DQ reasons and reject/quarantine evidence.",
+          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). Selected-range count of canonical Silver validation failures. Non-zero means Silver validation blocked or degraded promotion and should be correlated with current DQ reasons and reject/quarantine evidence.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1426,7 +1426,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range Gold strict-validation hard-fail count. Non-zero means Gold promotion was blocked. Zero means no hard-fail samples were observed in the selected window; it does not prove Gold validation ran or that Gold output exists.",
+          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). Selected-range Gold strict-validation hard-fail count. Non-zero means Gold promotion was blocked. Zero means no hard-fail samples were observed in the selected window; it does not prove Gold validation ran or that Gold output exists.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1508,7 +1508,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range anomaly counts by severity and anomaly type. WARN-only anomalies indicate drift; CRIT anomalies are blocking and should be correlated with current DQ reasons before replay or promotion. No data means no anomaly events were observed in the current window; the panel must not invent a synthetic severity/type series. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range anomaly counts by severity and anomaly type. WARN-only anomalies indicate drift; CRIT anomalies are blocking and should be correlated with current DQ reasons before replay or promotion. No data means no anomaly events were observed in the current window; the panel must not invent a synthetic severity/type series. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1587,7 +1587,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range p95 duration of DQ checks. This is a diagnostics/performance surface, not a quality outcome; use it when DQ checks themselves look slow or noisy during an incident. Samples exist only when the runtime emitted bioetl_dq_check_duration_ms, which requires an active DQ monitor path rather than disabled/noop monitoring. No data means no DQ duration samples were observed in range or DQ timing telemetry is absent; it is not equivalent to fast checks. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range p95 duration of DQ checks. This is a diagnostics/performance surface, not a quality outcome; use it when DQ checks themselves look slow or noisy during an incident. Samples exist only when the runtime emitted bioetl_dq_check_duration_ms, which requires an active DQ monitor path rather than disabled/noop monitoring. No data means no DQ duration samples were observed in range or DQ timing telemetry is absent; it is not equivalent to fast checks. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1666,7 +1666,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range trend of domain-emitted DQ threshold events. Uses bioetl_dq_soft_threshold_exceeded_total and hard_fail validation counters only; Grafana does not recompute entity YAML thresholds here. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range trend of domain-emitted DQ threshold events. Uses bioetl_dq_soft_threshold_exceeded_total and hard_fail validation counters only; Grafana does not recompute entity YAML thresholds here. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1739,7 +1739,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "DUX4-13: RANGE evidence only — not peer NOW health; dual 100% ≠ healthy if Status UNKNOWN. DUX3-12: RANGE evidence score — not a substitute for NOW status. Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Quality score trend over selected time range. Kept separate from operational gating indicators. Score thresholds: <0.80=CRIT, 0.80-0.95=WARN, >=0.95=OK; null=UNKNOWN. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. DUX4-13: RANGE evidence only — not peer NOW health; dual 100% ≠ healthy if Status UNKNOWN. DUX3-12: RANGE evidence score — not a substitute for NOW status. Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Quality score trend over selected time range. Kept separate from operational gating indicators. Score thresholds: <0.80=CRIT, 0.80-0.95=WARN, >=0.95=OK; null=UNKNOWN. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1818,7 +1818,7 @@
           "interval": "1m"
         },
         {
-          "description": "DUX5: triage copy shortened; caveats in description; no raw endpoints. Lineage-reference gaps remain a replay/control-plane trust signal owned by `0. Control Plane`. This DQ surface keeps only a compact handoff so the trends row can stay focused on local DQ evidence. Open the canonical control-plane panels when missing lineage must be reviewed together with replay blockers, manifest / ledger evidence, and artifact identity anchors.",
+          "description": "DUX6: handoff copy compacted; full runbook in description/docs. DUX5: triage copy shortened; caveats in description; no raw endpoints. Lineage-reference gaps remain a replay/control-plane trust signal owned by `0. Control Plane`. This DQ surface keeps only a compact handoff so the trends row can stay focused on local DQ evidence. Open the canonical control-plane panels when missing lineage must be reviewed together with replay blockers, manifest / ledger evidence, and artifact identity anchors.",
           "fieldConfig": {
             "defaults": {
               "mappings": [],
@@ -1843,7 +1843,7 @@
             }
           ],
           "options": {
-            "content": "Open Control Plane for lineage trust\n- Use **0. Control Plane** for the canonical `Monitor: Lineage Refs Missing` signal.\n- Review lineage gaps together with replay blockers, manifest / ledger integrity, and artifact identity anchors.\n- This DQ row keeps local reject, quarantine, validation, and trend evidence separate from control-plane trust ownership.\n",
+            "content": "<div style=\"padding:2px 8px;font-size:12px;line-height:1.25;overflow:hidden\"><strong>Lineage handoff</strong> — open Trust/Control Plane for lineage trust, checkpoint integrity, and replay blockers. Preserve time range + pipeline scope.</div>",
             "dataLinks": [
               {
                 "includeVars": false,
@@ -1853,7 +1853,7 @@
                 "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=904&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id"
               }
             ],
-            "mode": "markdown"
+            "mode": "html"
           },
           "title": "Review: Lineage Handoff to Control Plane",
           "type": "text"
@@ -1877,10 +1877,10 @@
             "y": 82
           },
           "id": 150,
-          "description": "DUX5: triage copy shortened; caveats in description; no raw endpoints. Compact handoff note for aggregate control-plane symptoms. Keep this as footer guidance only; operational evidence still lives in `0. Control Plane` and its runbook surfaces.",
+          "description": "DUX6: handoff copy compacted; full runbook in description/docs. DUX5: triage copy shortened; caveats in description; no raw endpoints. Compact handoff note for aggregate control-plane symptoms. Keep this as footer guidance only; operational evidence still lives in `0. Control Plane` and its runbook surfaces.",
           "options": {
-            "content": "Use Control Plane for aggregate failures\n- Open `0. Control Plane` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
-            "mode": "markdown"
+            "content": "<div style=\"padding:2px 8px;font-size:12px;line-height:1.25;overflow:hidden\"><strong>Aggregate control-plane handoff</strong> — open Trust for store/manifest failures and fleet-wide control-plane reliability. Use when DQ impact is global.</div>",
+            "mode": "html"
           },
           "title": "Review: Aggregate Control-plane Handoff",
           "type": "text"
@@ -2151,7 +2151,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "DUX5: zero means none observed or Not started/Not available — never bare success; red only on validated failure. TIME RANGE delivery impact. Selected-range blocked-record evidence only. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds in Grafana. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for the denominator/magnitude context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State (bioetl_dq_current_* recording rules) for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window.",
+          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). DUX5: zero means none observed or Not started/Not available — never bare success; red only on validated failure. TIME RANGE delivery impact. Selected-range blocked-record evidence only. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds in Grafana. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for the denominator/magnitude context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State (bioetl_dq_current_* recording rules) for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2237,7 +2237,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "DUX5: zero means none observed or Not started/Not available — never bare success; red only on validated failure. TIME RANGE delivery impact. Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. TIME RANGE evidence only — not a peer verdict with Now.",
+          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). DUX5: zero means none observed or Not started/Not available — never bare success; red only on validated failure. TIME RANGE delivery impact. Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. TIME RANGE evidence only — not a peer verdict with Now.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2393,7 +2393,7 @@
           ],
           "title": "Range · Silver Filter Rejects",
           "type": "stat",
-          "description": "DUX5: zero means none observed or Not started/Not available — never bare success; red only on validated failure. TIME RANGE delivery impact. Selected-range Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field. TIME RANGE evidence only — not a peer verdict with Now."
+          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). DUX5: zero means none observed or Not started/Not available — never bare success; red only on validated failure. TIME RANGE delivery impact. Selected-range Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field. TIME RANGE evidence only — not a peer verdict with Now."
         }
       ]
     },
@@ -2420,7 +2420,7 @@
             "y": 0
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
+          "description": "DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2561,7 +2561,7 @@
             "y": 0
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Current Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
+          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Current Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
           "fieldConfig": {
             "defaults": {
               "custom": {

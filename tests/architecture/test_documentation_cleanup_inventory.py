@@ -151,15 +151,22 @@ def test_documentation_cleanup_inventory_routes_diagram_artifacts() -> None:
 
 def test_documentation_cleanup_inventory_covers_github_issue_drafts() -> None:
     """Issue drafts and packs must be lifecycle-classified before cleanup."""
+    from scripts.docs.checks.documentation_cleanup_inventory import _is_doc_like
+
     rows = _rows_by_path()
-    tracked_issue_files = subprocess.run(
-        ["git", "ls-files", ".github/ISSUES"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-    ).stdout.splitlines()
+    tracked_issue_files = [
+        path
+        for path in subprocess.run(
+            ["git", "ls-files", ".github/ISSUES"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        ).stdout.splitlines()
+        # Inventory is doc-like only; publisher scripts under _*_bodies/ are excluded.
+        if _is_doc_like(path)
+    ]
 
     issue_rows = [path for path in rows if path.startswith(".github/ISSUES/")]
     assert len(issue_rows) == len(tracked_issue_files)

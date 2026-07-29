@@ -15,7 +15,7 @@ from bioetl.infrastructure.adapters.uniprot.query_builder import (
 from bioetl.infrastructure.adapters.uniprot.response_parser import (
     parse_uniprot_protein_response,
 )
-from bioetl.typing_support import as_mixin_host
+from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator

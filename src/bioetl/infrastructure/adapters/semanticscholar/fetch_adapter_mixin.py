@@ -17,7 +17,7 @@ from bioetl.infrastructure.adapters.filterable_mixin import (
 from bioetl.infrastructure.adapters.semanticscholar._search_fetch_flow import (
     _SemanticScholarSearchFetchMixin,
 )
-from bioetl.typing_support import as_mixin_host
+from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator

@@ -1,0 +1,114 @@
+"""DUX6 residual readability contracts (post-DUX5 re-audit)."""
+
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parents[2]
+DASH = ROOT / "grafana" / "dashboards"
+DOCS = ROOT / "docs" / "03-guides" / "dashboards"
+
+pytestmark = pytest.mark.integration
+
+
+def _walk(panels: list | None):
+    for panel in panels or []:
+        yield panel
+        yield from _walk(panel.get("panels"))
+
+
+def test_dux6_docs_exist() -> None:
+    assert (DOCS / "dux6-residual-readability.md").is_file()
+    assert "dux6-residual-readability.md" in (
+        DOCS / "dux5-copy-dictionary.md"
+    ).read_text(encoding="utf-8")
+
+
+def test_no_developer_tokens_or_endpoints_in_text_bodies() -> None:
+    endpoint_re = re.compile(r"GET\s+/ops/", re.I)
+    for path in sorted(DASH.glob("*.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for panel in _walk(data.get("panels")):
+            if panel.get("type") != "text" or panel.get("id") == 1000:
+                continue
+            content = (panel.get("options") or {}).get("content") or ""
+            if not isinstance(content, str):
+                continue
+            assert "VALID_EMPTY" not in content, path.name
+            assert not endpoint_re.search(content), path.name
+            assert "### " not in content and not content.lstrip().startswith("###")
+
+
+def test_run_explorer_orientation_is_compact_html() -> None:
+    data = json.loads((DASH / "bioetl-run-explorer-v1.json").read_text(encoding="utf-8"))
+    for panel in _walk(data.get("panels")):
+        title = panel.get("title") or ""
+        if title == "Run Scope" or title.startswith("Next actions"):
+            opts = panel.get("options") or {}
+            content = opts.get("content") or ""
+            assert opts.get("mode") == "html"
+            assert len(content) < 450
+            assert "overflow:hidden" in content or "font-size:12px" in content
+
+
+def test_browse_hides_raw_path_columns() -> None:
+    data = json.loads((DASH / "bioetl-run-explorer-v1.json").read_text(encoding="utf-8"))
+    browse = next(
+        p
+        for p in _walk(data.get("panels"))
+        if "Recent pipeline runs" in (p.get("title") or "")
+    )
+    transforms = browse.get("transformations") or []
+    organize = next(t for t in transforms if t.get("id") == "organize")
+    exclude = (organize.get("options") or {}).get("excludeByName") or {}
+    assert exclude.get("json_path") is True
+    assert exclude.get("markdown_path") is True
+
+
+def test_percent_scores_integer_precision() -> None:
+    for path in sorted(DASH.glob("*.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for panel in _walk(data.get("panels")):
+            defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
+            if defaults.get("unit") in {"percent", "percentunit"}:
+                dec = defaults.get("decimals")
+                if dec is not None:
+                    assert int(dec) == 0, f"{path.name}:{panel.get('title')}"
+
+
+def test_primary_status_documents_unknown_class() -> None:
+    for path in (
+        DASH / "bioetl-control-plane-v1.json",
+        DASH / "bioetl-dq-v2.json",
+        DASH / "bioetl-overview-v2.json",
+    ):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        status = next(
+            p
+            for p in _walk(data.get("panels"))
+            if p.get("title") == "Status" or p.get("id") in {9401, 214}
+        )
+        if status.get("title") != "Status" and status.get("id") not in {9401, 214}:
+            continue
+        if status.get("title") != "Status":
+            # find true Status
+            status = next(p for p in _walk(data.get("panels")) if p.get("title") == "Status")
+        desc = (status.get("description") or "").lower()
+        assert "unknown" in desc
+        assert "evidence incomplete" in desc or "missing" in desc
+
+
+def test_run_context_collapsed_outside_explorer() -> None:
+    for path in sorted(DASH.glob("*.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if data.get("uid") == "bioetl-run-explorer-v1":
+            continue
+        for panel in _walk(data.get("panels")):
+            if panel.get("type") == "row" and "run context" in (
+                panel.get("title") or ""
+            ).lower():
+                assert panel.get("collapsed") is True
