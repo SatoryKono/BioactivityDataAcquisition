@@ -1697,7 +1697,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "red",
+          "color": "gray",
           "value": null
         },
         {
@@ -1774,7 +1774,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "red",
+          "color": "gray",
           "value": null
         },
         {
@@ -2500,7 +2500,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
         },
         {
@@ -3243,7 +3243,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
         }
       ],
@@ -3268,7 +3268,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
         }
       ],
@@ -5126,7 +5126,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
         },
         {
@@ -5188,7 +5188,7 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
         },
         {
