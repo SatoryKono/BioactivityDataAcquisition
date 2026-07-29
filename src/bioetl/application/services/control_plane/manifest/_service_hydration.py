@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Hydration helpers for typed control-plane objects from manifest payloads."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, Any
 
 from bioetl.application.services.control_plane.manifest._reference_hydration import (
     hydrate_input_snapshots,
@@ -39,8 +38,8 @@ def _optional_payload_string(
 class RunManifestHydrationMixin:
     """Hydrate typed control-plane objects from normalized manifest payloads."""
 
-    _manifest_id_factory: Callable[[], str]
-    schema_version: str
+    _manifest_id_factory: Callable[[], str] = cast(Any, None)  # Any: host attr default (PD6)
+    schema_version: str = cast(Any, None)  # Any: host attr default (PD6)
 
     def _hydrate_code_provenance(
         self,

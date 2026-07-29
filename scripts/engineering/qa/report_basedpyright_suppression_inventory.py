@@ -27,7 +27,8 @@ DEFAULT_OUTPUT = (
 )
 
 _DIRECTIVE_RE = re.compile(
-    r"^#\s*pyright:\s*(?P<body>.+)$",
+    # Bounded body (S8786: avoid open .+ backtracking on long lines).
+    r"^#[ \t]*pyright:[ \t]*(?P<body>\S.*)$",
 )
 _RULE_RE = re.compile(r"(report\w+)\s*=\s*false")
 

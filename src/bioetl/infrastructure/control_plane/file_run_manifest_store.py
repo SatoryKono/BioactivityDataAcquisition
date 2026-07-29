@@ -7,7 +7,7 @@ from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 from time import perf_counter
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports import RunManifestPort
@@ -115,6 +115,7 @@ class FileRunManifestStore(RunManifestPort):
                 "Run manifest persistence failed: latest-scope catalog is not materialized"
             )
 
+    @override
     def save(self, manifest: RunManifest) -> None:
         """Persist manifest JSON and run-id index."""
         persist_manifest(
@@ -124,6 +125,7 @@ class FileRunManifestStore(RunManifestPort):
             scope_index_writer=write_latest_scope_index,
         )
 
+    @override
     def get(self, manifest_id: str) -> RunManifest | None:
         """Load a manifest by identifier if present."""
         started_at = perf_counter()
@@ -146,6 +148,7 @@ class FileRunManifestStore(RunManifestPort):
                 duration_seconds=perf_counter() - started_at,
             )
 
+    @override
     def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
         """Resolve run-id index to manifest identifier."""
         started_at = perf_counter()
@@ -180,6 +183,7 @@ class FileRunManifestStore(RunManifestPort):
                 duration_seconds=perf_counter() - started_at,
             )
 
+    @override
     def get_latest_for_scope(
         self,
         pipeline_name: str,
@@ -223,6 +227,7 @@ class FileRunManifestStore(RunManifestPort):
                 duration_seconds=perf_counter() - started_at,
             )
 
+    @override
     def list_all(self) -> tuple[RunManifest, ...]:
         """Enumerate every persisted manifest in deterministic order."""
         started_at = perf_counter()

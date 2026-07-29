@@ -1,10 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition (PD2 W1).
 """Shared event emission helpers for pipeline observer."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import bioetl.application.observability.observer_contract as observer_contract
 
@@ -15,18 +14,18 @@ if TYPE_CHECKING:
 class _ObserverEventMixin:
     """Encapsulates contract-aware log and metric emission."""
 
-    _logger: LoggerPort
-    _metrics: MetricsPort
-    provider_name: str
-    pipeline_name: str
-    run_id: str
-    manifest_id: str | None
-    entity: str | None
-    run_type: str | None
-    effective_config_hash: str | None
-    contract_ref: str | None
-    contract_version: str | None
-    composite_run_id: str | None
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
+    _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD6)
+    provider_name: str = cast(Any, None)  # Any: host attr default (PD6)
+    pipeline_name: str = cast(Any, None)  # Any: host attr default (PD6)
+    run_id: str = cast(Any, None)  # Any: host attr default (PD6)
+    manifest_id: str | None = cast(Any, None)  # Any: host attr default (PD6)
+    entity: str | None = cast(Any, None)  # Any: host attr default (PD6)
+    run_type: str | None = cast(Any, None)  # Any: host attr default (PD6)
+    effective_config_hash: str | None = cast(Any, None)  # Any: host attr default (PD6)
+    contract_ref: str | None = cast(Any, None)  # Any: host attr default (PD6)
+    contract_version: str | None = cast(Any, None)  # Any: host attr default (PD6)
+    composite_run_id: str | None = cast(Any, None)  # Any: host attr default (PD6)
 
     @staticmethod
     def _normalize_severity(level: str) -> str:

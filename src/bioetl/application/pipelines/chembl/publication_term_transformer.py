@@ -15,7 +15,7 @@ from __future__ import annotations
 
 __all__ = ["PublicationTermTransformer"]
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, override
 
 from bioetl.application.core.entity_id import compute_publication_term_entity_id
 from bioetl.application.core.pre_silver_record import PreSilverRecord
@@ -89,6 +89,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
             return None
         return business_data
 
+    @override
     def _extract_business_data(
         self,
         record: BronzeRecord,

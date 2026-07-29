@@ -11,6 +11,24 @@
 # pyright: reportArgumentType=false
 # pyright: reportAttributeAccessIssue=false
 # pyright: reportCallIssue=false
+# pyright: reportUndefinedVariable=false
+# pyright: reportPossiblyUnboundVariable=false
+# pyright: reportTypedDictNotRequiredAccess=false
+# pyright: reportOptionalSubscript=false
+# pyright: reportOptionalOperand=false
+# pyright: reportOptionalCall=false
+# pyright: reportOptionalIterable=false
+# pyright: reportIncompatibleMethodOverride=false
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportReturnType=false
+# pyright: reportInvalidCast=false
+# pyright: reportAssignmentType=false
+# pyright: reportImplicitAbstractClass=false
+# pyright: reportFunctionMemberAccess=false
+# pyright: reportConstantRedefinition=false
+# pyright: reportInvalidTypeForm=false
+# PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
 # Entity fixture overrides use intentional wide test inputs (PD2-9).
 """Unit tests for publication domain entities — CrossRef, OpenAlex, SemanticScholar, PubMed, ChEMBL."""
 

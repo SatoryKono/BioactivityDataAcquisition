@@ -99,7 +99,8 @@ class ADRRegistryGenerator:
             return {}
 
         pattern = re.compile(
-            r"\|\s*\[ADR-(\d+)\]\([^)]+\)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|"
+            # Non-greedy cells replaced with negated classes (S8786).
+            r"\|\s*\[ADR-(\d+)\]\([^)]+\)\s*\|\s*([^|]*)\s*\|\s*([^|]*)\s*\|\s*([^|]*)\s*\|\s*([^|]*)\s*\|"
         )
         metadata_by_number: dict[str, dict[str, str]] = {}
         for line in self.adr_index_file.read_text(encoding="utf-8").splitlines():

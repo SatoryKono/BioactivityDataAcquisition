@@ -10,7 +10,7 @@ __all__ = ["ActivityTransformer"]
 
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, ClassVar, cast
+from typing import TYPE_CHECKING, ClassVar, cast, override
 
 from bioetl.application.core.base_transformer import TransformationError
 from bioetl.application.core.dict_transformers import flatten_nested_dict
@@ -52,6 +52,7 @@ class ActivityTransformer(BaseChemblTransformer):
         "activity"
     )
 
+    @override
     def _prepare_record(
         self,
         record: BronzeRecord,
@@ -140,6 +141,7 @@ class ActivityTransformer(BaseChemblTransformer):
             return relation
         return business_data.get("standard_relation")
 
+    @override
     def _extract_business_data(
         self,
         record: BronzeRecord,
@@ -206,6 +208,7 @@ class ActivityTransformer(BaseChemblTransformer):
         ) or record.get("publication_id")
         return business_data
 
+    @override
     def _postprocess_pre_silver_record(
         self,
         silver_record: GoldRecord,
@@ -234,6 +237,7 @@ class ActivityTransformer(BaseChemblTransformer):
         silver_record.pop("value", None)
         return silver_record
 
+    @override
     def transform_for_gold(
         self,
         context: PipelineContext,

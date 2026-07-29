@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID
 
 from bioetl.domain.types import DebugExportResult, RunID
@@ -195,27 +195,29 @@ class DebugExportAdapter:
 
     @staticmethod
     def _lineage_rows_for_fragment(fragment: object) -> list[dict[str, object]]:
+        # Lineage fragment is duck-typed from control-plane store (avoid hard import cycles).
+        frag = cast(Any, fragment)
         rows: list[dict[str, object]] = []
-        for node in fragment.nodes:  # type: ignore[attr-defined]
+        for node in frag.nodes:
             rows.append(
                 {
-                    "fragment_id": fragment.fragment_id,  # type: ignore[attr-defined]
-                    "stored_fragment_id": fragment.stored_fragment_id,  # type: ignore[attr-defined]
-                    "manifest_id": fragment.manifest_id,  # type: ignore[attr-defined]
-                    "run_id": fragment.run_id,  # type: ignore[attr-defined]
+                    "fragment_id": frag.fragment_id,
+                    "stored_fragment_id": frag.stored_fragment_id,
+                    "manifest_id": frag.manifest_id,
+                    "run_id": frag.run_id,
                     "node_id": node.node_id,
                     "edge_type": "",
                     "related_node_id": "",
                     "node_type": node.node_type,
                 }
             )
-        for edge in fragment.edges:  # type: ignore[attr-defined]
+        for edge in frag.edges:
             rows.append(
                 {
-                    "fragment_id": fragment.fragment_id,  # type: ignore[attr-defined]
-                    "stored_fragment_id": fragment.stored_fragment_id,  # type: ignore[attr-defined]
-                    "manifest_id": fragment.manifest_id,  # type: ignore[attr-defined]
-                    "run_id": fragment.run_id,  # type: ignore[attr-defined]
+                    "fragment_id": frag.fragment_id,
+                    "stored_fragment_id": frag.stored_fragment_id,
+                    "manifest_id": frag.manifest_id,
+                    "run_id": frag.run_id,
                     "node_id": edge.source.node_id,
                     "edge_type": edge.edge_type,
                     "related_node_id": edge.target.node_id,

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import override
+
 import json
 from contextlib import suppress
 from dataclasses import dataclass
@@ -27,6 +29,7 @@ class FileWorkflowManifestStore(WorkflowManifestPort):
     base_path: Path
     metrics: MetricsPort | None = None
 
+    @override
     def save(self, manifest: WorkflowManifest) -> None:
         """Persist one workflow manifest and its run-id index."""
         manifest_path = self.base_path / f"{manifest.manifest_id}.json"
@@ -65,6 +68,7 @@ class FileWorkflowManifestStore(WorkflowManifestPort):
                 run_id=str(manifest.workflow_run_id),
             ) from error
 
+    @override
     def get(self, manifest_id: str) -> WorkflowManifest | None:
         """Load a workflow manifest by identifier."""
         started_at = perf_counter()
@@ -86,6 +90,7 @@ class FileWorkflowManifestStore(WorkflowManifestPort):
                 duration_seconds=perf_counter() - started_at,
             )
 
+    @override
     def get_by_run_id(self, workflow_run_id: RunID) -> WorkflowManifest | None:
         """Resolve one workflow manifest through the run-id index."""
         started_at = perf_counter()
@@ -114,6 +119,7 @@ class FileWorkflowManifestStore(WorkflowManifestPort):
                 duration_seconds=perf_counter() - started_at,
             )
 
+    @override
     def list_all(self) -> tuple[WorkflowManifest, ...]:
         """List all workflow manifests in deterministic creation order."""
         started_at = perf_counter()

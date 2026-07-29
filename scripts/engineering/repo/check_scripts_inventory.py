@@ -124,7 +124,8 @@ MODULE_STRING_REF_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"[\"']((?:scripts|src\.tools)(?:\.\w+)+)[\"']"
 )
 RELATIVE_IMPORT_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
-    r"^\s*from\s+\.+[A-Za-z0-9_.]*\s+import\s+",
+    # Bounded dots + identifier (S8786: avoid open nested quantifiers).
+    r"^[ \t]*from[ \t]+\.{1,32}[A-Za-z0-9_.]{0,256}[ \t]+import[ \t]+",
     re.MULTILINE,
 )
 SCRIPT_PATH_ALIASES: Final[dict[str, tuple[str, ...]]] = {

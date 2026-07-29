@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import override
+
 from collections import defaultdict
 
 from bioetl.domain.ports import StageAccountingPort
@@ -47,28 +49,34 @@ class StageAccountingAccumulator(StageAccountingSnapshotsMixin, StageAccountingP
         self._touched_instrumented = False
 
     @property
+    @override
     def reason_catalog_version(self) -> str:
         return self._catalog.version
 
     @property
+    @override
     def unmapped_reason_count(self) -> int:
         return self._unmapped_reasons
 
+    @override
     def mark_instrumented(self, stage: str) -> None:
         bucket = self._stages[stage]
         bucket.instrumented = True
         self._touched_instrumented = True
 
+    @override
     def record_in(self, stage: str, count: int) -> None:
         if count <= 0:
             return
         self._stages[stage].records_in += int(count)
 
+    @override
     def record_out(self, stage: str, count: int) -> None:
         if count <= 0:
             return
         self._stages[stage].records_out += int(count)
 
+    @override
     def record_removal(
         self,
         stage: str,
@@ -159,5 +167,6 @@ class StageAccountingAccumulator(StageAccountingSnapshotsMixin, StageAccountingP
             count for (out, _code), count in bucket.removals.items() if out == outcome
         )
 
+    @override
     def _sum_outcome(self, stage: str, outcome: str) -> int:
         return self.sum_outcome(stage, outcome)

@@ -16,7 +16,7 @@ Uses DefaultDataNormalizer for text normalization (DI pattern).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, override
 
 from bioetl.application.pipelines.common.base_publication_transformer import (
     BasePublicationTransformer,
@@ -103,6 +103,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """Validate publication year and return integer value."""
         return self._validate_publication_year_value(raw)
 
+    @override
     def _get_primary_id_field(self) -> str:
         """Return the primary ID field name for CrossRef publications.
 
@@ -112,6 +113,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """
         return "doi"
 
+    @override
     def _get_entity_class(self) -> type[CrossRefPublicationEntity]:
         """Return the domain entity class for CrossRef publications.
 
@@ -121,6 +123,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """
         return CrossRefPublicationEntity
 
+    @override
     def _pre_extract_validation(
         self,
         context: PipelineContext,
@@ -175,6 +178,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """Compatibility seam for date-selection tests and legacy callers."""
         return compute_publication_date(published_print, published_online)
 
+    @override
     def _should_log_fallback_lookup(self) -> bool:
         """Enable fallback lookup logging for CrossRef.
 
@@ -192,6 +196,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
         # Any: generic domain entity; type varies by pipeline
 
+    @override
     def entity_to_silver_record(
         self,
         entity: Any,  # Any: domain entity dataclass; concrete type varies by pipeline subclass

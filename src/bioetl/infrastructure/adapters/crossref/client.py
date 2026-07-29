@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass, field
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BronzeRecord, HealthStatus
@@ -232,10 +232,12 @@ class CrossRefAdapter(
             health_errors=CROSSREF_HEALTH_ERRORS,
         )
 
+    @override
     def _fallback_health_status(self) -> HealthStatus:
         """Return the safe default status when health probing fails."""
         return HealthStatus.UNHEALTHY
 
+    @override
     def _get_health_endpoint(self) -> str:
         """Return the endpoint path used for CrossRef health checks."""
         return "/works"

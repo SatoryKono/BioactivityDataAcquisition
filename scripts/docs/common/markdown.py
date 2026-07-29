@@ -10,7 +10,8 @@ MD_LINK_RE = re.compile(r"\[([^\]]*)\]\((?!https?://|mailto:)([^)#]+)")
 INLINE_CODE_RE = re.compile(r"`[^`]*`")
 PYTHON_FENCE_START_RE = re.compile(r"^\s*```(?:python|py|python3)\b", re.IGNORECASE)
 FENCE_END_RE = re.compile(r"^\s*```")
-MD_HEADING_RE = re.compile(r"^\s*#{1,6}\s+(.+)$")
+# Explicit heading parser preferred over nested quantifiers (S8786).
+MD_HEADING_RE = re.compile(r"^[ \t]{0,3}#{1,6}[ \t]+(\S.*)$")
 
 
 def extract_md_heading(line: str) -> str | None:

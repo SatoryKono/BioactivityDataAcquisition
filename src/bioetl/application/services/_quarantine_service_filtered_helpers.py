@@ -6,7 +6,9 @@ application mixin layer under the file-size policy while preserving behavior.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime
+from typing import Any, cast
 from uuid import UUID
 
 from bioetl.domain.control_plane.run_ledger import (
@@ -217,8 +219,9 @@ def _resolve_bronze_for_run(
 ) -> int | None:
     if callable(list_entries_by_run_id):
         try:
+            list_entries = cast(Callable[..., Any], list_entries_by_run_id)
             resolved = _resolve_bronze_records_from_entries(
-                list_entries_by_run_id(_lookup_run_id(candidate_run_id))
+                list_entries(_lookup_run_id(candidate_run_id))
             )
         except (TypeError, ValueError):
             resolved = None
@@ -229,7 +232,8 @@ def _resolve_bronze_for_run(
     if not callable(show_manifest):
         return None
     try:
-        inspection = show_manifest(candidate_run_id)
+        show = cast(Callable[..., Any], show_manifest)
+        inspection = show(candidate_run_id)
     except ValueError:
         return None
     return _resolve_bronze_records_from_inspection(inspection)

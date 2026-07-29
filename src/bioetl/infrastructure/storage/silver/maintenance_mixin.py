@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Maintenance and export helpers for SilverWriter."""
 
@@ -9,7 +8,7 @@ __all__ = ["SilverWriterMaintenanceMixin"]
 from collections.abc import Awaitable, Callable
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable
@@ -24,11 +23,11 @@ from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 class SilverWriterMaintenanceMixin:
     """Mixin with CSV export, vacuum, optimize, and table read helpers."""
 
-    logger: LoggerPort
-    csv_exporter: CsvExporterProtocol | None
-    _retention_manager: RetentionPolicy
-    get_table_path: Callable[[str], Path]
-    read_table: Callable[..., Awaitable[list[BronzeRecord]]]
+    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
+    csv_exporter: CsvExporterProtocol | None = cast(Any, None)  # Any: host attr default (PD6)
+    _retention_manager: RetentionPolicy = cast(Any, None)  # Any: host attr default (PD6)
+    get_table_path: Callable[[str], Path] = cast(Any, None)  # Any: host attr default (PD6)
+    read_table: Callable[..., Awaitable[list[BronzeRecord]]] = cast(Any, None)  # Any: host attr default (PD6)
 
     async def _maybe_export_csv(
         self,

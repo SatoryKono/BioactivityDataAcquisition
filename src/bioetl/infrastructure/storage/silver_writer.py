@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Literal
+from typing import Literal, override
 
 from deltalake import DeltaTable, write_deltalake
 
@@ -58,6 +58,7 @@ class SilverWriter(
     _contract_rollout_policy: ContractRolloutPolicy | None
     _host: object | None
 
+    @override
     def __setattr__(self, name: str, value: object) -> None:
         """Keep validation service host wiring in sync for direct test assignment."""
         object.__setattr__(self, name, value)
@@ -96,6 +97,7 @@ class SilverWriter(
         self._transform_steps = transform_steps or ()
         self._host = self
 
+    @override
     def _should_dual_write(self) -> bool:
         """Return True when rollout policy requires Silver shadow writes."""
         if self._contract_rollout_policy is None:
@@ -107,9 +109,11 @@ class SilverWriter(
 
     # Keep legacy validation method names on the root adapter for architecture
     # guards and direct patch coverage, while runtime services own the work.
+    @override
     def _enforce_write_policy(self, mode: SilverWriteMode, table_name: str) -> None:
         super()._enforce_write_policy(mode, table_name)
 
+    @override
     def _validate_silver_pandera(
         self,
         records: list[BronzeRecord],

@@ -18,7 +18,7 @@ __all__ = ["EMAIL_PATTERN", "AuthorExtractor", "RawAuthor", "StructuredAffiliati
 
 
 import re
-from typing import TypedDict, cast
+from typing import TypedDict, cast, override
 from xml.etree.ElementTree import Element  # nosec B405
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
@@ -72,6 +72,7 @@ class AuthorExtractor(BaseFieldExtractor):
     - Empty author lists
     """
 
+    @override
     def extract(self, element: Element | None) -> list[RawAuthor] | None:
         """Extract raw author data from XML.
 
@@ -199,6 +200,7 @@ class AuthorExtractor(BaseFieldExtractor):
         match = EMAIL_PATTERN.search(text)
         return match.group(0) if match else None
 
+    @override
     def normalize(self, raw_value: object) -> list[str]:
         """Normalize author list into 'LastName, Initials' format.
 
@@ -233,6 +235,7 @@ class AuthorExtractor(BaseFieldExtractor):
 
         return authors
 
+    @override
     def process(self, element: Element | None) -> list[str]:
         """Template method: extract → normalize.
 

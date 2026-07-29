@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
@@ -68,6 +68,7 @@ class TargetProteinClassificationTransformer(BaseChemblTransformer):
             resolve_entity_id=_target_classification_entity_id,
         )
 
+    @override
     def _extract_business_data(
         self,
         record: BronzeRecord,

@@ -33,15 +33,15 @@ PHASE1_GARBAGE_BRANCHES: Final[tuple[str, ...]] = (
 )
 
 STALE_DRAFT_BRANCH_PATTERNS: Final[tuple[re.Pattern[str], ...]] = (
-    re.compile(r"^bolt(/|-)"),
-    re.compile(r"^perf(/|-)"),
+    re.compile(r"^bolt[/-]"),
+    re.compile(r"^perf[/-]"),
     re.compile(r"^performance-"),
-    re.compile(r"^(test-swarm|py-test-swarm|py-review|swarm-)"),
-    re.compile(r"^add-(py-test-swarm|py-review|review-reports)-"),
-    re.compile(r"^(ai-code-review|ai-hierarchical-code-review)-"),
-    re.compile(r"^(feat|feature)/(py-test-swarm|py-review|review)"),
-    re.compile(r"^chore/(test-swarm|update-review-reports|generate-hierarchical)"),
-    re.compile(r"^review/(hierarchical-code-review|orchestrator)"),
+    re.compile(r"^(?:test-swarm|py-test-swarm|py-review|swarm-)"),
+    re.compile(r"^add-(?:py-test-swarm|py-review|review-reports)-"),
+    re.compile(r"^(?:ai-code-review|ai-hierarchical-code-review)-"),
+    re.compile(r"^(?:feat|feature)/(?:py-test-swarm|py-review|review)"),
+    re.compile(r"^chore/(?:test-swarm|update-review-reports|generate-hierarchical)"),
+    re.compile(r"^review/(?:hierarchical-code-review|orchestrator)"),
     re.compile(r"^docs-code-review-"),
     re.compile(r"^docs/arch-review-"),
 )

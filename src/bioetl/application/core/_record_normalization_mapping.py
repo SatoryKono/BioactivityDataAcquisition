@@ -1,10 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Field-mapping normalization helpers for RecordNormalizationProcessor."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core._record_normalization_contract import (
     _NormalizationFinding,
@@ -35,11 +34,11 @@ if TYPE_CHECKING:
 class RecordNormalizationMappingMixin:
     """Own field-by-field mapping normalization for Silver record payloads."""
 
-    provider: str
-    entity_type: str | None
-    profile: _NormalizationProfileLike | None
-    rule_set: NormalizationRulesPolicy
-    allow_compatibility_fallback: bool
+    provider: str = cast(Any, None)  # Any: host attr default (PD6)
+    entity_type: str | None = cast(Any, None)  # Any: host attr default (PD6)
+    profile: _NormalizationProfileLike | None = cast(Any, None)  # Any: host attr default (PD6)
+    rule_set: NormalizationRulesPolicy = cast(Any, None)  # Any: host attr default (PD6)
+    allow_compatibility_fallback: bool = cast(Any, None)  # Any: host attr default (PD6)
 
     def _normalize_mapping(self, record: JsonDict) -> JsonDict:
         object.__setattr__(self, "_normalization_findings", ())

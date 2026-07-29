@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import dataclass
 from typing import Any
 
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
@@ -14,6 +15,21 @@ from bioetl.domain.run_reports.models import (
     TrackingCoverage,
 )
 from bioetl.domain.run_reports.reason_catalog import default_reason_catalog
+
+
+@dataclass(frozen=True, slots=True)
+class PipelineRunReportOptionalBlocks:
+    """Optional operator-facing report blocks packed for S107 headroom."""
+
+    failure: Mapping[str, Any] | None = None
+    io: Mapping[str, Any] | None = None
+    quarantine: Mapping[str, Any] | None = None
+    dq_summary: Mapping[str, Any] | None = None
+    contract_summary: Mapping[str, Any] | None = None
+    schema_versions: Mapping[str, Any] | None = None
+    stage_timings: Mapping[str, Any] | None = None
+    http_summary: Mapping[str, Any] | None = None
+    performance: Mapping[str, Any] | None = None
 
 
 def _optional_mapping(
@@ -55,21 +71,15 @@ def build_pipeline_run_report(
         dict[str, Any], ...  # Any: dynamic artifact payload
     ] = (),  # Any: report/json payload shape is dynamic
     reason_catalog_version: str | None = None,
-    failure: Mapping[str, Any] | None = None,  # Any: optional failure block
-    io: Mapping[str, Any] | None = None,  # Any: optional IO summary
-    quarantine: Mapping[str, Any] | None = None,  # Any: optional quarantine
-    dq_summary: Mapping[str, Any] | None = None,  # Any: optional DQ
-    contract_summary: Mapping[str, Any] | None = None,  # Any: optional contract
-    schema_versions: Mapping[str, Any] | None = None,  # Any: optional fingerprints
-    stage_timings: Mapping[str, Any] | None = None,  # Any: optional timings
-    http_summary: Mapping[str, Any] | None = None,  # Any: optional HTTP
-    performance: Mapping[str, Any] | None = None,  # Any: optional throughput
+    optional_blocks: PipelineRunReportOptionalBlocks | None = None,
 ) -> PipelineRunReport:
     """Project a deterministic pipeline run report.
 
     When ``accounting`` is None, report is built from coarse metrics only
     (tracking_coverage=partial, reason maps empty unless metrics encode totals).
+    Optional summary blocks are packed into ``optional_blocks`` (python:S107).
     """
+    blocks = optional_blocks or PipelineRunReportOptionalBlocks()
     acc = accounting or StageAccountingAccumulator()
     metrics_map = {str(key): int(value) for key, value in metrics.items()}
     acc.apply_layer_totals(
@@ -81,12 +91,14 @@ def build_pipeline_run_report(
     layers = acc.snapshot_layers_from_metrics(metrics_map)
     funnel = acc.snapshot_funnel(layers)
     reasons = _resolve_top_reasons(acc, layers)
-    resolved_contract = _resolve_contract_summary(contract_summary, reasons, layers)
+    resolved_contract = _resolve_contract_summary(
+        blocks.contract_summary, reasons, layers
+    )
     resolved_performance = _resolve_performance(
-        performance=performance,
+        performance=blocks.performance,
         identity=identity,
         metrics_map=metrics_map,
-        stage_timings=stage_timings,
+        stage_timings=blocks.stage_timings,
     )
     return PipelineRunReport(
         identity=dict(identity),
@@ -101,14 +113,14 @@ def build_pipeline_run_report(
             reason_catalog_version,
         ),
         artifacts=artifacts,
-        failure=_optional_mapping(failure),
-        io=_optional_mapping(io),
-        quarantine=_optional_mapping(quarantine),
-        dq_summary=_optional_mapping(dq_summary),
+        failure=_optional_mapping(blocks.failure),
+        io=_optional_mapping(blocks.io),
+        quarantine=_optional_mapping(blocks.quarantine),
+        dq_summary=_optional_mapping(blocks.dq_summary),
         contract_summary=resolved_contract,
-        schema_versions=_optional_mapping(schema_versions),
-        stage_timings=_optional_mapping(stage_timings),
-        http_summary=_optional_mapping(http_summary),
+        schema_versions=_optional_mapping(blocks.schema_versions),
+        stage_timings=_optional_mapping(blocks.stage_timings),
+        http_summary=_optional_mapping(blocks.http_summary),
         performance=resolved_performance,
     )
 

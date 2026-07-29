@@ -6,7 +6,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from datetime import datetime
 from time import perf_counter
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.workflow_runner_models import (
     WorkflowRunExecutionResult,
@@ -166,6 +166,23 @@ async def _execute_pipeline_step(
     )
 
 
+@dataclass(frozen=True, slots=True)
+class _TransformStepRuntimeOptions:
+    """Packed transform-step runtime options (python:S107)."""
+
+    completed_transform_fingerprints: dict[str, str] | None
+    step_started_callback: Callable[..., None] | None
+    transform_commit_callback: (
+        Callable[[WorkflowTransformDestructiveCommit], None] | None
+    )
+    dry_run: bool
+    workflow_run_id: str | None
+    manifest_id: str | None
+    debug_export_enabled: bool
+    debug_export_dir: str | None
+    created_at_factory: Callable[[], datetime] | None
+
+
 async def _execute_transform_step(
     *,
     transform_service: WorkflowTransformService,
@@ -174,41 +191,36 @@ async def _execute_transform_step(
     step: TransformStepConfig,
     step_outputs: dict[str, object],
     workflow_context_labels: Mapping[str, str],
-    completed_transform_fingerprints: dict[str, str] | None,
-    step_started_callback: Callable[..., None] | None,
-    transform_commit_callback: (
-        Callable[[WorkflowTransformDestructiveCommit], None] | None
-    ),
-    dry_run: bool,
-    workflow_run_id: str | None,
-    manifest_id: str | None,
-    debug_export_enabled: bool,
-    debug_export_dir: str | None,
-    created_at_factory: Callable[[], datetime] | None,
+    options: _TransformStepRuntimeOptions,
 ) -> WorkflowStepExecutionResult:
     """Run one transform step through the workflow transform service."""
     spec = WorkflowTransformSpec.from_step(step)
-    if step_started_callback is not None:
-        step_started_callback(step, fingerprint=spec.fingerprint)
+    if options.step_started_callback is not None:
+        options.step_started_callback(step, fingerprint=spec.fingerprint)
     upstream_outputs = {
         dependency: step_outputs[dependency]
         for dependency in step.depends_on
         if dependency in step_outputs
     }
+    created_at = (
+        options.created_at_factory()
+        if options.created_at_factory is not None
+        else None
+    )
     result = await transform_service.run_step(
         workflow_name=workflow_name,
         step=step,
         upstream_outputs=upstream_outputs,
         context_labels=workflow_context_labels,
-        completed_fingerprints=completed_transform_fingerprints,
-        dry_run=dry_run,
-        workflow_run_id=workflow_run_id,
-        manifest_id=manifest_id,
-        debug_export_enabled=debug_export_enabled,
-        debug_export_dir=debug_export_dir,
+        completed_fingerprints=options.completed_transform_fingerprints,
+        dry_run=options.dry_run,
+        workflow_run_id=options.workflow_run_id,
+        manifest_id=options.manifest_id,
+        debug_export_enabled=options.debug_export_enabled,
+        debug_export_dir=options.debug_export_dir,
         artifact_sink=artifact_sink,
-        created_at=created_at_factory() if created_at_factory is not None else None,
-        destructive_commit_callback=transform_commit_callback,
+        created_at=created_at,
+        destructive_commit_callback=options.transform_commit_callback,
     )
     return step_result_from_transform_result(result)
 
@@ -282,10 +294,13 @@ class WorkflowRunnerService:
             context_labels=workflow_context_labels,
         )
         result = workflow_result_from_state(config.name, state)
-        result = replace(
-            result,
-            workflow_run_id=workflow_run_id,
-            manifest_id=manifest_id,
+        result = cast(
+            WorkflowRunExecutionResult,
+            replace(
+                result,
+                workflow_run_id=workflow_run_id,
+                manifest_id=manifest_id,
+            ),
         )
         return attach_workflow_run_report(config=config, result=result)
 
@@ -399,13 +414,15 @@ class WorkflowRunnerService:
             step=step,
             step_outputs=step_outputs,
             workflow_context_labels=workflow_context_labels,
-            completed_transform_fingerprints=completed_transform_fingerprints,
-            step_started_callback=step_started_callback,
-            transform_commit_callback=transform_commit_callback,
-            dry_run=dry_run,
-            workflow_run_id=workflow_run_id,
-            manifest_id=manifest_id,
-            debug_export_enabled=debug_export_enabled,
-            debug_export_dir=debug_export_dir,
-            created_at_factory=created_at_factory,
+            options=_TransformStepRuntimeOptions(
+                completed_transform_fingerprints=completed_transform_fingerprints,
+                step_started_callback=step_started_callback,
+                transform_commit_callback=transform_commit_callback,
+                dry_run=dry_run,
+                workflow_run_id=workflow_run_id,
+                manifest_id=manifest_id,
+                debug_export_enabled=debug_export_enabled,
+                debug_export_dir=debug_export_dir,
+                created_at_factory=created_at_factory,
+            ),
         )

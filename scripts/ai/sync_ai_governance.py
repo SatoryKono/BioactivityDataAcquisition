@@ -41,11 +41,12 @@ SKILL_FILE_NAME = "SKILL.md"
 SKILLS_MIRROR_CONTRACT_PATH = Path("scripts/ai/codex/skills-mirror-contract.json")
 
 MIRROR_HEADER_PATTERN = re.compile(
-    r"^> Mirror status:.*?^_{10,}\s*\n",
-    re.MULTILINE | re.DOTALL,
+    # Possessive-style linearization: single-line mirror header to underline (S6019/S8786).
+    r"^> Mirror status:[^\n]*(?:\n(?!_{10,})[^\n]*)*\n_{10,}\s*\n",
+    re.MULTILINE,
 )
 CANONICAL_SOURCES_PATTERN = re.compile(
-    r"^## Canonical Sources\s*\n(?:.*?\n)*?(?=^(?:## |name:|# |\Z))",
+    r"^## Canonical Sources\s*\n(?:(?!^(?:## |name:|# |\Z)).*\n)*",
     re.MULTILINE,
 )
 CODEX_AGENT_ROLE_MEMORY_LINES = {

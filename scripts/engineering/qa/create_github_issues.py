@@ -28,7 +28,8 @@ def parse_issues():
         content = f.read()
 
     # Split by issue headers
-    issue_pattern = r"## Issue #\d+: (.+?)\n\n([\s\S]*?)(?=## Issue #\d+:|$)"
+    # Linear issue-body split without reluctant nested quantifiers (S6019/S8786).
+    issue_pattern = r"## Issue #\d+: ([^\n]+)\n\n((?:(?!## Issue #\d+:).*(?:\n|$))*)"
     matches = re.findall(issue_pattern, content)
 
     issues = []

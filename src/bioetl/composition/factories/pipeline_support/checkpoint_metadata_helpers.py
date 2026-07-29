@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.pipeline_support.checkpoint_metadata_resolution import (
+    ExecutionIdentityNormalizationRequest,
     _coerce_optional_str,
     _normalize_execution_identity_payload,
     _resolve_checkpoint_snapshot_identity,
@@ -126,31 +127,33 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         or resolve_silver_filter_compatibility_mode()
     )
     identity_payload = _normalize_execution_identity_payload(
-        pipeline_name=pipeline_name,
-        run_type=run_type_value,
-        pipeline_version=run_context_metadata["pipeline_version"],
-        git_commit=run_context_metadata["git_commit"],
-        dependency_lock_hash=run_context_metadata["dependency_lock_hash"],
-        effective_config_hash=run_context_metadata["effective_config_hash"],
-        dq_contract_compatibility_hash=run_context_metadata[
-            "dq_contract_compatibility_hash"
-        ],
-        manifest_id=run_context_metadata["manifest_id"],
-        contract=(
-            run_context_metadata["contract_ref"],
-            run_context_metadata["contract_version"],
-        ),
-        normalization_profile=(
-            run_context_metadata["normalization_profile_ref"],
-            run_context_metadata["normalization_profile_version"],
-            run_context_metadata["normalization_profile_hash"],
-        ),
-        effective_config_artifact_id=run_context_metadata[
-            "effective_config_artifact_id"
-        ],
-        exact_replay=exact_replay,
-        input_snapshot_fingerprint=input_snapshot_fingerprint,
-        silver_filter_compatibility_mode=silver_filter_compatibility_mode,
+        ExecutionIdentityNormalizationRequest(
+            pipeline_name=pipeline_name,
+            run_type=run_type_value,
+            pipeline_version=run_context_metadata["pipeline_version"],
+            git_commit=run_context_metadata["git_commit"],
+            dependency_lock_hash=run_context_metadata["dependency_lock_hash"],
+            effective_config_hash=run_context_metadata["effective_config_hash"],
+            dq_contract_compatibility_hash=run_context_metadata[
+                "dq_contract_compatibility_hash"
+            ],
+            manifest_id=run_context_metadata["manifest_id"],
+            contract=(
+                run_context_metadata["contract_ref"],
+                run_context_metadata["contract_version"],
+            ),
+            normalization_profile=(
+                run_context_metadata["normalization_profile_ref"],
+                run_context_metadata["normalization_profile_version"],
+                run_context_metadata["normalization_profile_hash"],
+            ),
+            effective_config_artifact_id=run_context_metadata[
+                "effective_config_artifact_id"
+            ],
+            exact_replay=exact_replay,
+            input_snapshot_fingerprint=input_snapshot_fingerprint,
+            silver_filter_compatibility_mode=silver_filter_compatibility_mode,
+        )
     )
     execution_fingerprint = run_context_metadata["execution_fingerprint"] or (
         compute_execution_identity_fingerprint(identity_payload)

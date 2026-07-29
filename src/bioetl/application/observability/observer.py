@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Pipeline Observer Context Manager.
 
@@ -21,7 +20,7 @@ __all__ = ["LifecyclePhase", "PipelineObserver", "PipelineObserverIdentity"]
 import time
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.observability.observer_context_mixin import (
     _ObserverContextManagerMixin,
@@ -74,9 +73,9 @@ PROBE_MODE_FALLBACK_COUNTER = "bioetl_probe_mode_fallback_total"
 class PipelineObserverIdentity:
     """Identity bag for :class:`PipelineObserver` (ARCH-CONT-04 / #6760)."""
 
-    pipeline_name: str
-    run_id: RunID
-    run_type: RunType
+    pipeline_name: str = cast(Any, None)  # Any: host attr default (PD6)
+    run_id: RunID = cast(Any, None)  # Any: host attr default (PD6)
+    run_type: RunType = cast(Any, None)  # Any: host attr default (PD6)
     manifest_id: str | None = None
     entity: str | None = None
     effective_config_hash: str | None = None
@@ -94,10 +93,10 @@ class _ObserverLifecycleEmissionMixin(
 
     CANONICAL_LIFECYCLE_EMITTER = CANONICAL_LIFECYCLE_EMITTER
     CANONICAL_DOMAIN_EVENT_EMITTER = CANONICAL_DOMAIN_EVENT_EMITTER
-    span: Span | None
-    pipeline_name: str
-    _metrics: MetricsPort
-    _completed_stage_count: int
+    span: Span | None = cast(Any, None)  # Any: host attr default (PD6)
+    pipeline_name: str = cast(Any, None)  # Any: host attr default (PD6)
+    _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD6)
+    _completed_stage_count: int = cast(Any, None)  # Any: host attr default (PD6)
 
     @staticmethod
     def _resolve_domain_event_phase(

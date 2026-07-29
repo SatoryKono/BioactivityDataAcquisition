@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Retry/backoff flow for UnifiedHTTPClient."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
@@ -46,14 +45,14 @@ from bioetl.infrastructure.adapters.http.client_retry_observability import (
 class HTTPClientRetryMixin:
     """Retry policy orchestration extracted from UnifiedHTTPClient."""
 
-    retry_config: RetryConfig
-    _metrics: MetricsPort | None
-    provider: str
-    logger: LoggerPort | None
-    rate_limiter: RateLimiterPort
-    circuit_breaker: CircuitBreakerPort
-    _tracer: TracingPort | None
-    run_id: RunID | None
+    retry_config: RetryConfig = cast(Any, None)  # Any: host attr default (PD6)
+    _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD6)
+    provider: str = cast(Any, None)  # Any: host attr default (PD6)
+    logger: LoggerPort | None = cast(Any, None)  # Any: host attr default (PD6)
+    rate_limiter: RateLimiterPort = cast(Any, None)  # Any: host attr default (PD6)
+    circuit_breaker: CircuitBreakerPort = cast(Any, None)  # Any: host attr default (PD6)
+    _tracer: TracingPort | None = cast(Any, None)  # Any: host attr default (PD6)
+    run_id: RunID | None = cast(Any, None)  # Any: host attr default (PD6)
 
     def _observability_run_id(self) -> str:
         """Return a stable run identifier for retry logs and spans."""

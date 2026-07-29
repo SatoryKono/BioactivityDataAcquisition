@@ -11,7 +11,7 @@ from bioetl.domain.types import JsonDict
 __all__ = ["ProteinClassTransformer"]
 
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from bioetl.application.core.field_specs import (
     FieldGroup,
@@ -97,6 +97,7 @@ class ProteinClassTransformer(BaseChemblTransformer):
             return None
         return await super()._transform_impl(context, record, index)
 
+    @override
     def _extract_business_data(
         self,
         record: BronzeRecord,

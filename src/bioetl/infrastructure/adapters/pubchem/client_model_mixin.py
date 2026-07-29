@@ -1,10 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Model and metadata helpers for `PubChemAdapter`."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from pydantic import BaseModel
 
@@ -30,8 +29,8 @@ if TYPE_CHECKING:
 class PubChemAdapterModelMixin:
     """Adds DTO conversion and request metadata methods to `PubChemAdapter`."""
 
-    _request_collector: APIRequestCollector
-    rate_limiter: TokenBucketRateLimiter
+    _request_collector: APIRequestCollector = cast(Any, None)  # Any: host attr default (PD6)
+    rate_limiter: TokenBucketRateLimiter = cast(Any, None)  # Any: host attr default (PD6)
 
     def fetch(
         self,

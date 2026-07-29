@@ -7,7 +7,7 @@ from copy import deepcopy
 from dataclasses import asdict, is_dataclass
 from datetime import UTC, datetime
 from enum import Enum
-from typing import NoReturn, cast
+from typing import NoReturn, cast, override
 from uuid import UUID
 
 from bioetl.domain.normalization.control_plane import (
@@ -33,24 +33,31 @@ class _FrozenManifestMapping(dict[object, object]):
     def _raise_immutable() -> NoReturn:
         _raise_immutable_mapping()
 
+    @override
     def __setitem__(self, key: object, value: object) -> None:
         self._raise_immutable()
 
+    @override
     def __delitem__(self, key: object) -> None:
         self._raise_immutable()
 
+    @override
     def clear(self) -> None:
         self._raise_immutable()
 
+    @override
     def pop(self, _key: object, _default: object = None) -> object:
         self._raise_immutable()
 
+    @override
     def popitem(self) -> tuple[object, object]:
         self._raise_immutable()
 
+    @override
     def setdefault(self, _key: object, _default: object = None) -> object:
         self._raise_immutable()
 
+    @override
     def update(self, *_args: object, **_kwargs: object) -> None:
         _raise_immutable_mapping()
 

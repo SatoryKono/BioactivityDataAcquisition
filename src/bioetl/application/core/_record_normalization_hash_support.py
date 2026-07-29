@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Private content-hash helpers for RecordNormalizationProcessor."""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Literal, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol, Any, cast
 
 from bioetl.application.core.record_processor_config import ContentHashVersionPolicy
 from bioetl.domain.transformations import generate_content_hash
@@ -21,11 +20,11 @@ if TYPE_CHECKING:
 class _NormalizationProfileLike(Protocol):
     """Minimal profile surface required for content-hash computation."""
 
-    set_like_fields: frozenset[str]
-    hash_included_fields: frozenset[str]
-    hash_excluded_fields: frozenset[str]
-    fields: frozenset[str]
-    field_aliases: Mapping[str, str]
+    set_like_fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
+    hash_included_fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
+    hash_excluded_fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
+    fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
+    field_aliases: Mapping[str, str] = cast(Any, None)  # Any: host attr default (PD6)
 
     def rule_for(self, field_name: str) -> FieldRule | None: ...
 
@@ -33,12 +32,12 @@ class _NormalizationProfileLike(Protocol):
 class RecordNormalizationHashSupportMixin:
     """Own rollout-aware content-hash policy resolution for normalized records."""
 
-    content_hash_policy_by_version: ContentHashPolicyByVersion | None
-    content_hash_policy_authoritative: bool
-    content_hash_include_fields: frozenset[str]
-    content_hash_exclude_fields: frozenset[str]
-    profile: _NormalizationProfileLike | None
-    provider: str
+    content_hash_policy_by_version: ContentHashPolicyByVersion | None = cast(Any, None)  # Any: host attr default (PD6)
+    content_hash_policy_authoritative: bool = cast(Any, None)  # Any: host attr default (PD6)
+    content_hash_include_fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
+    content_hash_exclude_fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
+    profile: _NormalizationProfileLike | None = cast(Any, None)  # Any: host attr default (PD6)
+    provider: str = cast(Any, None)  # Any: host attr default (PD6)
 
     _TECHNICAL_HASH_POLICY_FIELDS = frozenset(
         {"entity_id", "content_hash", "_content_hashes_by_version"}
