@@ -40,6 +40,7 @@ from bioetl.application.services.medallion.medallion_lifecycle import (
     MedallionLifecycleService,
 )
 from bioetl.application.services.medallion.medallion_types import ClearResult
+from bioetl.domain.exceptions import StorageError
 from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
 
 
@@ -706,12 +707,14 @@ class TestMedallionLifecycleServiceFinalizeRun:
         runtime_config_vacuum_enabled,
     ):
         """finalize_run handles vacuum errors gracefully."""
-        mock_storage_with_vacuum.vacuum.side_effect = RuntimeError("Vacuum failed")
+        # Storage failures surface as StorageError (not bare RuntimeError);
+        # ARCH-CR2-02 keeps RuntimeError as a programming-bug signal.
+        mock_storage_with_vacuum.vacuum.side_effect = StorageError("Vacuum failed")
         service = MedallionLifecycleService(
             storage=mock_storage_with_vacuum, logger=mock_logger
         )
 
-        with pytest.raises(RuntimeError, match="Vacuum failed"):
+        with pytest.raises(StorageError, match="Vacuum failed"):
             await service.finalize_run(
                 config=pipeline_config, runtime=runtime_config_vacuum_enabled
             )

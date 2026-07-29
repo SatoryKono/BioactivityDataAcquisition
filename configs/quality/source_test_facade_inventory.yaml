@@ -33,7 +33,7 @@ modules:
       provider contract and request-metadata tests.
     owner_tests:
       - tests/unit/infrastructure/adapters/test_provider_fetch_contracts.py
-      - tests/unit/infrastructure/adapters/pubmed/test_request_metadata.py
+      - tests/unit/infrastructure/adapters/pubmed/test_pubmed_request_metadata.py
 
   - source: src/bioetl/infrastructure/adapters/semanticscholar/__init__.py
     ownership: facade_contract
@@ -60,7 +60,7 @@ modules:
       package-root entrypoint and request-metadata tests.
     owner_tests:
       - tests/unit/infrastructure/adapters/test_provider_entrypoints.py
-      - tests/unit/infrastructure/adapters/crossref/test_request_metadata.py
+      - tests/unit/infrastructure/adapters/crossref/test_crossref_request_metadata.py
 
   - source: src/bioetl/infrastructure/adapters/crossref/client.py
     ownership: facade_contract
@@ -86,7 +86,7 @@ modules:
       metadata-focused package-root tests.
     owner_tests:
       - tests/unit/infrastructure/test_adapters.py
-      - tests/unit/infrastructure/adapters/chembl/test_request_metadata.py
+      - tests/unit/infrastructure/adapters/chembl/test_chembl_request_metadata.py
 
   - source: src/bioetl/infrastructure/adapters/pubchem/__init__.py
     ownership: facade_contract

@@ -168,7 +168,14 @@ test_lanes:
 
     unit-parallel-safe:
       suite_name: unit-parallel-safe
-      description: "Deterministic canonical pure-unit lane routed through the maintained shard inventory; excludes repo-backed, slow, serial, benchmark, and memory tests."
+      description: >
+        Deterministic pure-unit lane routed through the maintained shard inventory
+        with opt-in xdist per shard (see pytest_shards workers_override). Membership
+        rules: (1) only tests/unit paths in S1-S4/S6 shards; (2) exclude markers
+        repo_backed, slow, serial, benchmark, memory; (3) pytest.mark.repo_backed
+        MUST live under tests/unit/repo_backed/ only; (4) no VCR, no architecture,
+        no integration paths; (5) forbid_global_xdist_addopts remains true — parallel
+        is shard-scoped only.
       runner_backend: run_pytest_sharded
       runner: scripts/engineering/dev/run_pytest_sharded.sh
       runner_options:
@@ -686,13 +693,13 @@ provider_regression_suites:
   metadata_request_capability:
     description: "Canonical provider suites for request-metadata snapshot, clear, and count paths."
     providers:
-      chembl: tests/unit/infrastructure/adapters/chembl/test_request_metadata.py
-      crossref: tests/unit/infrastructure/adapters/crossref/test_request_metadata.py
-      openalex: tests/unit/infrastructure/adapters/openalex/test_request_metadata.py
-      pubchem: tests/unit/infrastructure/adapters/pubchem/test_request_metadata.py
-      pubmed: tests/unit/infrastructure/adapters/pubmed/test_request_metadata.py
-      semanticscholar: tests/unit/infrastructure/adapters/semanticscholar/test_request_metadata.py
-      uniprot: tests/unit/infrastructure/adapters/uniprot/test_request_metadata.py
+      chembl: tests/unit/infrastructure/adapters/chembl/test_chembl_request_metadata.py
+      crossref: tests/unit/infrastructure/adapters/crossref/test_crossref_request_metadata.py
+      openalex: tests/unit/infrastructure/adapters/openalex/test_openalex_request_metadata.py
+      pubchem: tests/unit/infrastructure/adapters/pubchem/test_pubchem_request_metadata.py
+      pubmed: tests/unit/infrastructure/adapters/pubmed/test_pubmed_request_metadata.py
+      semanticscholar: tests/unit/infrastructure/adapters/semanticscholar/test_semanticscholar_request_metadata.py
+      uniprot: tests/unit/infrastructure/adapters/uniprot/test_uniprot_request_metadata.py
 
   slow_health_probe_policy:
     description: "Canonical provider suites for shared slow-health degradation policy."
