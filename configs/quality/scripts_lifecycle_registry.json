@@ -796,13 +796,13 @@
     },
     "scripts/engineering/qa/report_basedpyright_error_snapshot.py": {
       "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
+      "decision": "temporary_diagnostic",
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded basedpyright error-snapshot utility while the typing debt campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
     },
     "scripts/engineering/qa/report_basedpyright_suppression_inventory.py": {
       "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
+      "decision": "temporary_diagnostic",
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded basedpyright suppression-inventory utility while suppression governance needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
     },
@@ -1288,13 +1288,13 @@
     },
     "scripts/ops/_build_arch_review_report.py": {
       "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
+      "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the bounded formatter for ad-hoc CodeRabbit architecture-review evidence; remove it when that review campaign is complete or fold it into a canonical review-report command if the workflow becomes recurring."
     },
     "scripts/ops/_run_cr_arch_review_remaining.sh": {
       "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
+      "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the bounded resume helper for the current CodeRabbit architecture-review campaign; remove it after the remaining-layer review is complete rather than treating it as a public active script."
     },
