@@ -3,6 +3,10 @@
 This package is the canonical implementation home for the BioETL project memory
 subsystem.
 
+Architecture, ownership, security boundaries, and evidence gaps are documented
+in
+[`MEMORY_ARCHITECTURE.md`](../../docs/00-project/ai/memory/MEMORY_ARCHITECTURE.md).
+
 The subsystem is intentionally **source-first**:
 
 - canonical project truth stays in `src/bioetl/`, `docs/`, `configs/`,
@@ -11,6 +15,17 @@ The subsystem is intentionally **source-first**:
   retrieval/layout logic, and future derived memory artifacts;
 - memory artifacts must never outrank code, configs, accepted ADRs, or active
   operational documentation.
+
+## Architecture contracts
+
+Repository-owned contracts include the surface registry
+(`catalog/memory_registry.yaml`), common record and repository identity
+(`records.py`, `scope.py`), persistence modes (`persistence.py`), atomic
+storage (`storage.py`), security checks (`security.py`), immutable evidence and
+decisions (`evidence.py`), bounded handoff (`handoff.py`), and consent-gated
+user memory (`user_memory.py`).
+
+External vendor conversation state and retention remain **NOT_PROVEN**.
 
 ## Initial scope
 
@@ -48,6 +63,19 @@ The validator checks:
 - storage policy covers every retained artifact class and keeps memory paths under
   `src/memory/`
 - optional working-tree hygiene mode flags Python cache files under `src/memory/`
+- the memory registry and its ownership/canonicality invariants
+
+## Persistent-memory modes
+
+`BIOETL_AI_MEMORY_MODE` accepts `off`, `read-only`, or `read-write`. `off`
+denies persistent reads and writes; `read-only` permits retrieval but denies
+writes; `read-write` enables both. Unknown values fail closed. External MCP and
+vendor services require separate verification.
+
+Evidence events are append-only and content-addressed. Decisions cite exact
+evidence digests and change through supersession. Subagent handoffs are
+byte-bounded and allowlisted; do not pass full conversations or unrelated user
+context.
 
 ## Graph entrypoints
 

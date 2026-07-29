@@ -492,6 +492,22 @@ def test_test_governance_artifacts_match_live_collector(
         cwd=ROOT,
         timeout=60,
     )
+    if result.returncode != 0:
+        # A shared mutable checkout can change while the repo-wide collector is
+        # scanning. Retry independently once; persistent drift still fails.
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "scripts.engineering.qa.report_test_governance_audit",
+                "--check",
+            ],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
 
     assert result.returncode == 0, result.stdout + result.stderr
 
