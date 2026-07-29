@@ -50,6 +50,7 @@ _PROCESSED_RECORDS_DASHBOARDS = (
     "bioetl-dq-v2.json",
     "bioetl-overview-v2.json",
     "bioetl-provider-health-v2.json",
+    "bioetl-run-explorer-v1.json",
     "bioetl-runtime.json",
 )
 
@@ -1783,7 +1784,13 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         for panel in get_dashboard_panels(dashboard)
         if panel.get("title")
     }
+    identity = panels["ID"]
     processed = panels["Processed Records"]
+    assert identity.get("gridPos", {}).get("h") == 6
+    assert processed.get("gridPos", {}).get("h") == 6
+    assert identity.get("options", {}).get("cellHeight") == "sm"
+    assert processed.get("options", {}).get("cellHeight") == "sm"
+
     targets = processed.get("targets", [])
     assert processed.get("datasource") == "BioETL Ops HTTP"
     assert len(targets) == 1
@@ -1844,7 +1851,10 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert organize_options.get("indexByName", {}).get("value") == 1
     assert organize_options.get("indexByName", {}).get("percentage") == 2
     assert organize_options.get("indexByName", {}).get("row_status") == 3
-    assert not organize_options.get("excludeByName", {}).get("row_status", False)
+    excluded_fields = organize_options.get("excludeByName", {})
+    assert excluded_fields.get("row_status") is True
+    assert excluded_fields.get("percintage") is True
+    assert excluded_fields.get("percentage") is not True
 
     parameter_overrides = [
         override

@@ -25,6 +25,16 @@ jobs:
         with:
           uv-extras: "dev"
 
+      - name: Regenerate and validate all executable passports
+        run: |
+          uv run --frozen --no-build python -m scripts.docs passports generate \
+            --output-root /tmp/bioetl-passports \
+            --manual-root docs/04-reference/passports/manual \
+            --source-revision "$(git rev-parse HEAD)"
+          uv run --frozen --no-build pytest \
+            tests/unit/scripts/docs/passports \
+            tests/architecture/test_passport_documentation_projections.py
+
       - name: Regenerate architecture dependency map
         run: uv run --frozen --no-build python -m scripts.engineering.qa.generate_architecture_dependency_map --update
 

@@ -4404,7 +4404,10 @@
             {
               "id": "organize",
               "options": {
-                "excludeByName": {},
+                "excludeByName": {
+                  "percintage": true,
+                  "row_status": true
+                },
                 "indexByName": {
                   "parameter": 0,
                   "value": 1,

@@ -38,6 +38,14 @@ jobs:
       - name: Check version consistency
         run: python -m scripts.engineering.repo check-versions
 
+      - name: Setup uv for governed documentation checks
+        uses: astral-sh/setup-uv@e92bafb6253dcd438e0484186d7669ea7a8ca1cc # v6
+
+      - name: Require clean, current passport projection
+        run: |
+          uv run --frozen --no-build python -m scripts.docs passports check \
+            --require-clean-source
+
       - name: Install build dependencies
         run: |
           python -m pip install --only-binary=:all: --upgrade "pip==25.0.1"

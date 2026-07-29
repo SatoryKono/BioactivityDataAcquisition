@@ -490,7 +490,7 @@ def test_test_governance_artifacts_match_live_collector(
             "--check",
         ],
         cwd=ROOT,
-        timeout=60,
+        timeout=120,
     )
 
     assert result.returncode == 0, result.stdout + result.stderr

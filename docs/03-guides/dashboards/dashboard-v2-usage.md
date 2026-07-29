@@ -178,16 +178,15 @@ exact-run RunLedger evidence when `$run_id` is selected, otherwise over
 `bioetl_stage_records_total` outcomes. It intentionally omits reconciliation
 status, accounted subtotal, and delta rows; missing aggregate accounting series
 are diagnostic no-data/instrumentation gaps, not green zero. The table shows
-`value` and formatted `percintage`: Bronze is always `100%`; `silver [valid]`
+`value` and canonical formatted `percentage`: Bronze is always `100%`; `silver [valid]`
 and `gold [valid]` render one decimal (`91.0%`, `90.1%`); secondary Silver and
 Gold outcomes render up to three decimals with trailing zeroes trimmed
 (`8.51%`, `0.47%`). Zero-valued outcome rows remain visible in the compact
 table. Silver and Gold outcome percentages use Bronze total as denominator. It
 formats `value` with a space as the thousands separator, left-pads shorter
 values to the displayed `bronze [total]` width, and right-aligns the `value`
-column. If Silver accounted rows sum below `bronze [total]`, visible Silver
-rows get a red row background; if Gold accounted rows sum below `silver [valid]`,
-visible Gold rows get a red row background. It does not replace the
+column. The internal `row_status` field and deprecated `percintage`
+compatibility alias are hidden. It does not replace the
 dashboard-specific `Status` or `First Action` route.
 If this table is empty, distinguish backend unavailable, no selected run/scope,
 and true zero accounting rows before acting: the card links the Quarantine

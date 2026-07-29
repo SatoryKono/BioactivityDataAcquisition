@@ -27,9 +27,18 @@
         "entity": {"type": "string"},
         "pipeline_type": {"enum": ["provider_entity", "composite"]},
         "status": {"const": "active"},
-        "aliases": {"type": "array", "items": {"type": "string"}}
+        "aliases": {"type": "array", "items": {"type": "string"}},
+        "derived_source_identity": {
+          "type": "object",
+          "properties": {
+            "provider": {"type": ["string", "null"]},
+            "entity": {"type": ["string", "null"]},
+            "data_source_provider": {"type": ["string", "null"]}
+          },
+          "additionalProperties": false
+        }
       },
-      "additionalProperties": true
+      "additionalProperties": false
     },
     "provenance": {"$ref": "#/$defs/provenance"},
     "source_references": {"$ref": "#/$defs/sourceReferences"},
@@ -80,7 +89,7 @@
         },
         "correlation_fields": {"type": "array"}
       },
-      "additionalProperties": true
+      "additionalProperties": false
     }
   }
 }

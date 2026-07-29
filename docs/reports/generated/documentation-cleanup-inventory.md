@@ -7,26 +7,26 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2298 |
-| Tracked doc-like files | 2244 |
+| Doc-like files | 2423 |
+| Tracked doc-like files | 2369 |
 | Ignored local docs/reports files | 54 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
-| Generated routes | 67 |
+| Generated routes | 69 |
 
 ## Tracking State
 
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 54 |
-| tracked | 2244 |
+| tracked | 2369 |
 
 ## Lifecycle Counts
 
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_draft | 249 |
+| active_draft | 253 |
 | active_quality_baseline | 24 |
 | closeout_evidence | 39 |
 | docs_reports_curated_entrypoint | 2 |
@@ -38,7 +38,7 @@
 | generated_test_run_evidence | 4 |
 | guide | 4 |
 | index | 4 |
-| issue_pack | 46 |
+| issue_pack | 47 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
@@ -48,40 +48,40 @@
 
 | Lifecycle | Count |
 | --- | --- |
-| active_draft | 249 |
+| active_draft | 253 |
 | guide | 4 |
 | index | 4 |
-| issue_pack | 46 |
+| issue_pack | 47 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
 
 | Status | Count |
 | --- | --- |
-| Active | 866 |
+| Active | 873 |
 | Archived | 130 |
-| Canonical | 71 |
-| Generated | 764 |
-| Working | 467 |
+| Canonical | 73 |
+| Generated | 875 |
+| Working | 472 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 866 |
+| active | 873 |
 | archive | 130 |
-| canonical | 71 |
-| generated | 764 |
-| working | 467 |
+| canonical | 73 |
+| generated | 875 |
+| working | 472 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 295 |
+| archive-after-github-state-check | 300 |
 | archive-after-migration | 105 |
-| generate-automatically | 764 |
-| keep | 1130 |
+| generate-automatically | 875 |
+| keep | 1139 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -374,6 +374,7 @@
 | dashboard-dux7-live-residual-protocol-generated-doc | `scripts/ops/observability/grafana/apply_dux7_live_residual.py` | tracked_curated_generated_doc |
 | dashboard-navigation-contract-generated-doc | `scripts/ops/observability/grafana/render_nav_bus.py` | tracked_curated_generated_doc |
 | dashboard-panel-title-inventory-generated-doc | `scripts/engineering/qa/report_panel_title_inventory.py` | tracked_curated_generated_doc |
+| dashboard-scenes-parity-ledger | `scripts/engineering/qa/report_dashboard_scenes_parity.py` | tracked_quality_evidence |
 | dead-code-inventory-quality-baseline | `scripts/engineering/qa/report_dead_code_inventory.py` | tracked_quality_baseline |
 | debt-governance-gates-quality-baseline | `scripts/engineering/qa/report_debt_governance_gates.py` | tracked_quality_baseline |
 | docker-stability-runbooks-generated-docs | `manual closeout plus architecture QA verification` | tracked_curated_generated_doc |
@@ -385,6 +386,7 @@
 | dq-contracts-generated-doc | `scripts/check_dq_dsl_parity.py` | tracked_curated_generated_doc |
 | duplication-baseline-quality-report | `scripts/engineering/qa/report_duplication_baseline.py` | working_output |
 | engineering-closeout-curated-docs | `manual closeout plus architecture QA verification` | tracked_curated_generated_doc |
+| executable-unit-passport-projections | `scripts/docs/passports/cli.py` | tracked_curated_generated_doc |
 | field-level-diagnostics-quality-report | `scripts/schema/generate_field_level_diagnostics.py` | working_output |
 | file-merger-working-reports | `src/tools/file_merger.py` | working_output |
 | flaky-test-burndown-review-quality-baseline | `scripts/engineering/qa/report_flaky_test_burndown_review.py` | tracked_quality_baseline |

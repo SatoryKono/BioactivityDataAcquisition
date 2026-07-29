@@ -235,7 +235,7 @@ dashboards `0. Control Plane`, `2. Runtime`, `3. Provider Health`,
 | `Provenance` | `9400` | Question banner | Visible text contains only the primary dashboard question; workflow, pipeline, run_type, run_id, and selected-time context stay in the panel tooltip/description. |
 | `Status` | `9401` | Compact dashboard verdict | Prometheus status for the dashboard role; no `$run_id` Prometheus filtering. `5. Workflow` is selected-range evidence and must say so. |
 | `ID` | `9402` | Local control-plane identity | HTTP/Infinity `Quarantine Explorer` table from `/ops/control-plane/identity-table`; exact `run_id` is preserved HTTP identity context across primary dashboards. The two visible columns are `parameter` and `value`; rows cover run/manifest IDs, Provider.Entity version, contract schema, execution flags, replay capability/mode, checkpoint anchors, optional composite run, and identity health. |
-| `Processed Records` | `9403` | Current stage/outcome accounting evidence | HTTP/Infinity table from `/ops/observability/processed-records`, backed by compact `bioetl_processed_records_*` recording rules and canonical `bioetl_stage_records_total` outcomes. It shows non-zero Bronze, Silver outcome, and Gold outcome rows only, with `value` plus formatted `percintage` columns. `value` uses a space as the thousands separator, is left-padded to the displayed `bronze [total]` width, and is right-aligned in the table. Bronze is `100%`; `silver [valid]` and `gold [valid]` use one decimal; secondary outcomes use up to three decimals with trailing zeroes trimmed. Silver and Gold percentages use Bronze total. Visible Silver rows get a red row background when Silver accounted records sum below Bronze total; visible Gold rows get a red row background when Gold accounted records sum below `silver [valid]`. Status, accounted subtotal, and delta rows stay out of the compact table. Missing accounting series are no-data/instrumentation gaps, not OK. |
+| `Processed Records` | `9403` | Current stage/outcome accounting evidence | HTTP/Infinity table from `/ops/observability/processed-records`, backed by compact `bioetl_processed_records_*` recording rules and canonical `bioetl_stage_records_total` outcomes. It shows non-zero Bronze, Silver outcome, and Gold outcome rows only, with `value` plus canonical formatted `percentage` columns. Internal `row_status` and deprecated `percintage` are hidden. `value` uses a space as the thousands separator, is left-padded to the displayed `bronze [total]` width, and is right-aligned in the table. Bronze is `100%`; `silver [valid]` and `gold [valid]` use one decimal; secondary outcomes use up to three decimals with trailing zeroes trimmed. Silver and Gold percentages use Bronze total. Status, accounted subtotal, and delta rows stay out of the compact table. Missing accounting series are no-data/instrumentation gaps, not OK. |
 
 Normative rules:
 - `run_id` MUST NOT be added to Prometheus label filters.
@@ -252,18 +252,12 @@ Normative rules:
   Bronze renders `100%`, and all Silver and Gold outcome rows divide by
   `bronze [total]`. Zero-valued rows are omitted from the compact table, but
   missing accounting series remain no-data, not zero. The visible `value` and
-  `percintage` fields are display-token strings formatted by the local HTTP
+  `percentage` fields are display-token strings formatted by the local HTTP
   helper so Grafana can render row-consistent text color while showing compact
   values such as `10 000`, `   851`, `91.0%`, `90.1%`, `8.51%`, and `0.47%`.
-- `Processed Records` row-background evidence MUST stay accounting-explicit:
-  if `silver_valid_records + silver_quarantined_records + silver_skipped_records
-  + silver_filtered_out_records + silver_deduplicated_records` is below
-  `bronze_records`, visible Silver rows use a red row background. If
-  `gold_written_records + gold_quarantined_records
-  + gold_excluded_by_contract_records + gold_skipped_records
-  + gold_deduplicated_records` is below `silver_valid_records`, visible Gold
-  rows use a red row background. Non-deficit rows MUST map the empty
-  `row_status` value to a transparent background, not to OK/green; missing
+- `Processed Records` MUST hide the internal `row_status` field and the
+  deprecated `percintage` compatibility alias. Accounting deficits remain
+  available through the dashboard-specific status and action panels; missing
   accounting series do not count as zero.
 - `Processed Records` current reconciliation MUST NOT use `$__range`,
   `or vector(0)`, or `run_id`/manifest/raw payload labels in Prometheus.
