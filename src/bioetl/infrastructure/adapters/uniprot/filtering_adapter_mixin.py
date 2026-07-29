@@ -1,5 +1,4 @@
 # mypy: disable-error-code=attr-defined
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Filtered/fallback fetch methods for UniProtAdapter.
 
@@ -7,6 +6,8 @@ Contains FilterableDataSourcePort-compatible filtering methods.
 """
 
 from __future__ import annotations
+
+from typing import Any, Protocol
 
 from collections.abc import AsyncIterator, Callable
 
@@ -21,6 +22,7 @@ from bioetl.infrastructure.adapters.uniprot.fallback_resolver import (
     iter_uniprot_fallback_records,
     resolve_uniprot_missing_ids,
 )
+from bioetl.typing_support import as_mixin_host
 
 _FetchStrategy = Callable[..., AsyncIterator[BronzeRecord]]
 
@@ -80,21 +82,21 @@ class UniProtFilteringAdapterMixin:
         if not filter_ids:
             return
 
-        strategy = self._fetch_strategies.get(entity_type)
+        strategy = as_mixin_host(self)._fetch_strategies.get(entity_type)  # Any: mixin host surface (self attrs/methods)
         if not strategy:
             raise ValueError(
                 f"Unsupported entity type: {entity_type}. "
-                f"Supported: {', '.join(self._fetch_strategies.keys())}"
+                f"Supported: {', '.join(as_mixin_host(self)._fetch_strategies.keys())}"  # Any: mixin host surface (self attrs/methods)
             )
 
         if entity_type != "protein":
-            async for record in self._fetch_non_protein_filtered(
+            async for record in as_mixin_host(self)._fetch_non_protein_filtered(  # Any: mixin host surface (self attrs/methods)
                 strategy, filter_ids, limit
             ):
                 yield record
             return
 
-        async for record in self._fetch_proteins_batched(
+        async for record in as_mixin_host(self)._fetch_proteins_batched(  # Any: mixin host surface (self attrs/methods)
             strategy, filter_ids, filter_field, limit
         ):
             yield record
@@ -109,11 +111,11 @@ class UniProtFilteringAdapterMixin:
         if not filters:
             return
 
-        strategy = self._fetch_strategies.get(entity_type)
+        strategy = as_mixin_host(self)._fetch_strategies.get(entity_type)  # Any: mixin host surface (self attrs/methods)
         if not strategy:
             raise ValueError(
                 f"Unsupported entity type: {entity_type}. "
-                f"Supported: {', '.join(self._fetch_strategies.keys())}"
+                f"Supported: {', '.join(as_mixin_host(self)._fetch_strategies.keys())}"  # Any: mixin host surface (self attrs/methods)
             )
 
         and_parts: list[str] = []
@@ -138,7 +140,7 @@ class UniProtFilteringAdapterMixin:
         already_fetched: int,
     ) -> AsyncIterator[BronzeRecord]:
         """Search unresolved IDs using fallback mapping."""
-        strategy = self._fetch_strategies.get(entity_type)
+        strategy = as_mixin_host(self)._fetch_strategies.get(entity_type)  # Any: mixin host surface (self attrs/methods)
         if not strategy:
             return
 
@@ -159,7 +161,7 @@ class UniProtFilteringAdapterMixin:
         limit: int | None,
     ) -> AsyncIterator[tuple[BronzeRecord, str | None]]:
         """Perform primary fetch and yield records with accession."""
-        async for record in self.fetch_filtered(
+        async for record in as_mixin_host(self).fetch_filtered(  # Any: mixin host surface (self attrs/methods)
             entity_type=entity_type,
             filter_ids=filter_ids,
             filter_field=filter_field,
@@ -199,14 +201,14 @@ class UniProtFilteringAdapterMixin:
         requested_ids = deduplicate_preserving_order(filter_ids)
         fallback_handler = UniProtFallbackPolicy(
             entity_type=entity_type,
-            resolve_missing_ids=self._should_do_fallback,
-            search_fallback=self._do_fallback_search,
+            resolve_missing_ids=as_mixin_host(self)._should_do_fallback,  # Any: mixin host surface (self attrs/methods)
+            search_fallback=as_mixin_host(self)._do_fallback_search,  # Any: mixin host surface (self attrs/methods)
         )
 
         async def _primary_records(
             primary_ids: list[str], request_limit: int | None
         ) -> AsyncIterator[BronzeRecord]:
-            async for record, _ in self._do_primary_fetch(
+            async for record, _ in as_mixin_host(self)._do_primary_fetch(  # Any: mixin host surface (self attrs/methods)
                 entity_type,
                 primary_ids,
                 filter_field,
@@ -221,7 +223,7 @@ class UniProtFilteringAdapterMixin:
             normalized = accession.strip()
             return normalized if normalized else None
 
-        async for record in self._fallback_decorator.execute(
+        async for record in as_mixin_host(self)._fallback_decorator.execute(  # Any: mixin host surface (self attrs/methods)
             filter_ids=requested_ids,
             fallback_mapping=fallback_mapping,
             primary_record_fetcher=_primary_records,

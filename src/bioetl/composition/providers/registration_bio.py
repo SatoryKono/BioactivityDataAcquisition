@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Data source creators for bio providers: ChEMBL, PubChem, UniProt, IDMapping."""
 
@@ -122,10 +121,10 @@ def _create_chembl_data_source(
     if pipeline_config.entity_type == "publication_term":
         base_adapter = PublicationTermDataSource(base_adapter)
     if pipeline_config.entity_type == "subcellular_fraction":
-        base_adapter = SubcellularFractionDataSource(base_adapter)
+        base_adapter = SubcellularFractionDataSource(base_adapter)  # pyright: ignore[reportArgumentType]
 
     return _wrap_with_filter(
-        base_adapter, filter_config, logger, metrics, pipeline_name
+        base_adapter, filter_config, logger, metrics, pipeline_name  # pyright: ignore[reportArgumentType]
     )
 
 

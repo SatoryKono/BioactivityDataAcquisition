@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """State-transition helpers for BatchExecutor orchestration."""
 
@@ -125,7 +124,7 @@ async def process_explicit_batch(
     await process_stateful_batch(host, records, start_index)
     return host._execution_state_service.build_batch_result(
         state=host,
-        batch_result_type=cast(
+        batch_result_type=cast(  # pyright: ignore[reportInvalidCast]
             "BatchResultBuilderProtocol[BatchResult]",
             host._batch_result_type,
         ),

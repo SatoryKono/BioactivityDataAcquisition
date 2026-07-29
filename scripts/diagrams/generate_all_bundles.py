@@ -24,7 +24,7 @@ except ImportError:  # pragma: no cover - direct script execution
     REPO_ROOT = Path(__file__).resolve().parents[2]
     if str(REPO_ROOT) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT))
-    from diagram_paths import DIAGRAM_ROOT, bundle_markdown_path
+    from scripts.diagrams.diagram_paths import DIAGRAM_ROOT, bundle_markdown_path
 
 
 MMD_BASE = DIAGRAM_ROOT

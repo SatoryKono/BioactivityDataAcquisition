@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """PreSilver finalization flow mixin."""
 
@@ -99,7 +98,7 @@ class _PreSilverFinalizationFlowMixin:
         index: int,
         business_data: JsonDict,
     ) -> JsonDict:
-        identity_host = cast(PreSilverIdentityHost, self)
+        identity_host = cast(PreSilverIdentityHost, self)  # pyright: ignore[reportInvalidCast]
         entity_id = identity_host.compute_entity_id(source_id, identity_record)
         return self._finalize_staged_business_data(
             context=context,

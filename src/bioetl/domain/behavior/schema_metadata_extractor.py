@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """Shared schema metadata extraction for Gold metadata sidecars.
 
@@ -9,7 +8,7 @@ infrastructure metadata builders.
 from __future__ import annotations
 
 import inspect
-from typing import Literal
+from typing import Literal, cast, Any
 
 from bioetl.domain.models.metadata import SchemaColumnMetadata, SchemaMetadata
 
@@ -66,8 +65,9 @@ def _extract_schema_version(
 ) -> str:
     """Extract schema version from inner Config class."""
     version = "1.0"
+    host = cast(Any, gold_schema)  # Any: duck-type Config nested on schema class
     if hasattr(gold_schema, "Config"):
-        config = gold_schema.Config
+        config = host.Config
         version = getattr(config, "version", "1.0")
         if not isinstance(version, str):
             version = str(version)
@@ -79,8 +79,9 @@ def _extract_validation_mode(
 ) -> Literal["strict", "lenient"]:
     """Extract strict/lenient validation mode from inner Config class."""
     validation: Literal["strict", "lenient"] = "strict"
+    host = cast(Any, gold_schema)  # Any: duck-type Config nested on schema class
     if hasattr(gold_schema, "Config"):
-        config = gold_schema.Config
+        config = host.Config
         is_strict = getattr(config, "strict", True)
         validation = "strict" if is_strict else "lenient"
     return validation

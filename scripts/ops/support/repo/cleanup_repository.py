@@ -208,6 +208,28 @@ class ReportsWorkspaceEvidence:
         return self.path.as_posix()
 
 
+
+def _coerce_int(value: object, default: int = 0) -> int:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return _coerce_int(value)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return _coerce_int(value)
+    if isinstance(value, str):
+        try:
+            return _coerce_int(value)
+        except ValueError:
+            return default
+    return default
+
+def _as_list(value: object) -> list[object]:
+    if isinstance(value, list):
+        return value
+    return []
+
 def _discover_repo_root(start: Path) -> Path:
     current = start.resolve()
     search_root = current if current.is_dir() else current.parent

@@ -1,5 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Input loading mixin for MergeService."""
 
@@ -38,12 +36,12 @@ class _MergeInputLoaderMixin:
     """Mixin providing input loading methods for MergeService."""
 
     # Host-class attributes (set by MergeService.__init__)
-    _logger: LoggerPort
-    _storage: MergedStoragePort
-    _delta_reader: DeltaReaderPort | None
-    _silver_reader: SilverStoragePort | None
-    _renamer: Any  # Any: Host MergeService injects runtime collaborator without importing infra implementation here.
-    _config: Any  # Any: Host MergeService provides config object with richer surface than this mixin needs to declare.
+    _logger: LoggerPort  # pyright: ignore[reportUninitializedInstanceVariable]
+    _storage: MergedStoragePort  # pyright: ignore[reportUninitializedInstanceVariable]
+    _delta_reader: DeltaReaderPort | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _silver_reader: SilverStoragePort | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _renamer: Any  # Any: Host MergeService injects runtime collaborator without importing infra implementation here.  # pyright: ignore[reportUninitializedInstanceVariable]
+    _config: Any  # Any: Host MergeService provides config object with richer surface than this mixin needs to declare.  # pyright: ignore[reportUninitializedInstanceVariable]
 
     async def _read_optional_merge_input(
         self,
@@ -171,7 +169,7 @@ class _MergeInputLoaderMixin:
             raise RuntimeError(
                 f"Reading Silver table {table} requires delta_reader or silver_reader"
             )
-        records = await silver_reader.read_silver(storage_table)
+        records = await silver_reader.read_silver(storage_table)  # pyright: ignore[reportAttributeAccessIssue]
         if not records:
             return pl.DataFrame()
         return pl.from_dicts(records)

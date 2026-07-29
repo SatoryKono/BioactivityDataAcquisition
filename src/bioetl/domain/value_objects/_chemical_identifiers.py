@@ -1,5 +1,3 @@
-# pyright: reportMissingSuperCall=false
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Chemical structure identifier Value Objects.
 
@@ -17,7 +15,7 @@ if TYPE_CHECKING:
     class _ValueObjectBase[ValueT]:
         """Typing-only stand-in for ValueObject under skipped imports."""
 
-        _value: ValueT
+        _value: ValueT  # pyright: ignore[reportUninitializedInstanceVariable]
 
         def __init__(self, value: ValueT) -> None: ...
 
@@ -160,9 +158,9 @@ class SMILES(_ValueObjectBase[str]):
 
     __slots__ = ("_is_canonical",)
     _value: str
-    _is_canonical: bool
+    _is_canonical: bool  # pyright: ignore[reportUninitializedInstanceVariable]
 
-    def __init__(self, value: str, *, is_canonical: bool = False) -> None:
+    def __init__(self, value: str, *, is_canonical: bool = False) -> None:  # pyright: ignore[reportMissingSuperCall]
         """Create SMILES with validated value.
 
         Args:

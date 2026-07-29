@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # mypy: disable-error-code=attr-defined
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Context-manager helpers for UnifiedHTTPClient."""
@@ -18,16 +17,16 @@ class HTTPClientContextMixin:
 
     # Annotation-only host surface. Do not seed numeric counters with class-level
     # None: getattr(self, name, 0) still returns None when the class attr is None.
-    _client: httpx.AsyncClient | None
-    _client_enter_depth: int
-    user_agent: str
-    contact_email: str | None
-    run_id: object | None
-    timeout: float
-    read_timeout_multiplier: float
-    max_connections: int
-    max_keepalive_connections: int
-    trust_env: bool
+    _client: httpx.AsyncClient | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _client_enter_depth: int  # pyright: ignore[reportUninitializedInstanceVariable]
+    user_agent: str  # pyright: ignore[reportUninitializedInstanceVariable]
+    contact_email: str | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    run_id: object | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    timeout: float  # pyright: ignore[reportUninitializedInstanceVariable]
+    read_timeout_multiplier: float  # pyright: ignore[reportUninitializedInstanceVariable]
+    max_connections: int  # pyright: ignore[reportUninitializedInstanceVariable]
+    max_keepalive_connections: int  # pyright: ignore[reportUninitializedInstanceVariable]
+    trust_env: bool  # pyright: ignore[reportUninitializedInstanceVariable]
 
     def _enter_depth(self) -> int:
         """Return nested enter depth, treating unset/None as zero."""

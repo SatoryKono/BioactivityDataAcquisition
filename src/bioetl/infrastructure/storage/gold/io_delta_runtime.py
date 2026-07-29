@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Prepared payloads and retry helpers for Gold Delta IO mixins."""
 
@@ -241,7 +240,7 @@ async def _execute_prepared_scd2_gold_write(
 ) -> None:
     """Run retry-wrapped SCD2 Gold write for one prepared request."""
     await _run_gold_write_with_retry(
-        cast(_GoldWriteRetryModuleProtocol, module),
+        cast(_GoldWriteRetryModuleProtocol, module),  # pyright: ignore[reportInvalidCast]
         lambda: _write_scd2_once(
             host,
             module=module,

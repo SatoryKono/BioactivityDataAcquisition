@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleMethodOverride=false
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Silver layer writer (Delta Lake with merge/upsert)."""
 
@@ -47,15 +45,15 @@ __all__ = ["SilverWriteMode", "SilverWriter", "_SilverWriteExecutionContext"]
 _DELTA_LAKE_REQUIREMENTS = (DeltaTable, write_deltalake)
 
 
-class SilverWriter(
+class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
     SilverWriterRuntimeFacade,
     BaseDeltaWriter,
     SilverWriterMaintenanceMixin,
 ):
     """Writer for Silver layer (normalized data in Delta Lake)."""
 
-    _tracing: TracingPort | None
-    _contract_rollout_policy: ContractRolloutPolicy | None
+    _tracing: TracingPort | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _contract_rollout_policy: ContractRolloutPolicy | None  # pyright: ignore[reportUninitializedInstanceVariable]
     _host: object | None
 
     @override

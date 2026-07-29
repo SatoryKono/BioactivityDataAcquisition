@@ -90,3 +90,7 @@ next_action=`Inspect: Telemetry Missing` then runbook checkpoint debug.
 
 `GLOBAL matrix=CRIT`, `selected Status=OK` is **not** a contradiction if selected
 provider is healthy while fleet peers fail. Copy must say **fleet vs selected**.
+
+## DUX5 expansion
+
+Operator-facing empty-state and applicability classes (None observed / Not started / Not available / Selection required / Telemetry missing) are listed in [dux5-copy-dictionary.md](dux5-copy-dictionary.md). L0 Status enum tokens remain OK/WARN/CRIT/UNKNOWN/INCOMPLETE.

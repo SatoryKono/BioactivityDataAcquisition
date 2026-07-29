@@ -1,5 +1,4 @@
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Canonical SilverWriter runtime method facade.
 
@@ -103,7 +102,7 @@ class SilverWriterRuntimeFacade(
     ) -> SilverWriteResult | None:
         """Execute all configured Silver contract-version write targets."""
         return await _write_dual_targets(
-            cast(_SilverWriterDispatchHost, self), invocation=invocation
+            cast(_SilverWriterDispatchHost, self), invocation=invocation  # pyright: ignore[reportInvalidCast]
         )
 
     async def _dispatch_write_with_domain_errors(

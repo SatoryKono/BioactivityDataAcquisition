@@ -26,8 +26,12 @@ from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-import typer
 import yaml
+
+try:
+    import typer  # pyright: ignore[reportMissingImports]
+except ImportError as exc:  # pragma: no cover
+    raise SystemExit("typer is required for cleanup_consolidate CLI") from exc
 
 app = typer.Typer(add_completion=False)
 

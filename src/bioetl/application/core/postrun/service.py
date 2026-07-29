@@ -1,4 +1,3 @@
-# pyright: reportIncompatibleMethodOverride=false
 # MRO/override residual on mixin or client hierarchies.
 """Postrun Service for post-execution operations."""
 
@@ -126,7 +125,7 @@ class PostrunService(PostrunServiceSupportMixin):
         self._tracer = tracer
 
     @contextmanager
-    def _postrun_span(self, span_name: str) -> Generator[Span, None, None]:
+    def _postrun_span(self, span_name: str) -> Generator[Span, None, None]:  # pyright: ignore[reportIncompatibleMethodOverride]
         """Context manager for OTel span lifecycle."""
         with start_current_span(
             tracing=self._tracer,

@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Retained bootstrap convenience seam for provider loading.
 
@@ -36,7 +35,7 @@ __all__ = [
 
 def _get_loader_registry() -> ProviderRegistrarProtocol:
     """Resolve the canonical default provider registry for loader entrypoints."""
-    return cast(ProviderRegistrarProtocol, resolve_provider_registry())
+    return cast(ProviderRegistrarProtocol, resolve_provider_registry())  # pyright: ignore[reportInvalidCast]
 
 
 def load_providers(force: bool = False) -> None:

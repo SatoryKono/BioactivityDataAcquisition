@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# pyright: reportUnsafeMultipleInheritance=false
 # MRO/override residual on mixin or client hierarchies.
 """Semantic Scholar adapter implementation for publication data extraction.
 
@@ -94,7 +92,7 @@ def _create_default_semanticscholar_title_fallback_handler(
 
 
 @dataclass
-class SemanticScholarAdapter(
+class SemanticScholarAdapter(  # pyright: ignore[reportUnsafeMultipleInheritance]
     _SemanticScholarFallbackPolicyMixin,
     FallbackPolicyMixin,
     SemanticScholarHealthMetadataMixin,
@@ -104,7 +102,7 @@ class SemanticScholarAdapter(
 ):
     """Semantic Scholar adapter facade with decomposed fetch/health internals."""
 
-    http_client: UnifiedHTTPClient
+    http_client: UnifiedHTTPClient  # pyright: ignore[reportIncompatibleVariableOverride]
     logger: LoggerPort
     api_key: str = ""
     batch_size: int = 100

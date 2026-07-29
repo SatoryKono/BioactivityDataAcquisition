@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Private orchestration helpers for runtime runner builder leaf module."""
 
@@ -105,7 +104,7 @@ def create_runner(
             cached_bronze=inputs.cached_bronze,
         ),
     )
-    return cast("PipelineRunnerProtocol", factory.create_runner(request))
+    return cast("PipelineRunnerProtocol", factory.create_runner(request))  # pyright: ignore[reportInvalidCast]
 
 
 def attach_runner_control_plane_collaborators(

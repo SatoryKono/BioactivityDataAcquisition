@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host _append provided by concrete ledger service mixins.
 """Helpers for bounded rich run-ledger event payloads."""
 
 from __future__ import annotations

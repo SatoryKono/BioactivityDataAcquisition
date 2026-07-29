@@ -1,5 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition (PD2 W1).
 """DQ context and accumulation helpers for BatchExecutor."""
 
@@ -48,19 +46,19 @@ class _BatchExecutorDQMixin:
     same input corpus.
     """
 
-    _services: PipelineExecutionServicesProtocol
-    _context: PipelineContext
-    _config: RecordProcessorConfig
-    _logger: LoggerPort
-    _bronze_records_for_dq: list[bytes]
-    _silver_records_for_dq: list[BronzeRecord]
-    _gold_records_for_dq: list[GoldRecord]
-    _source_batch_ids: list[str]
-    _last_bronze_path: str | None
-    _dq_total_seen: int
-    _dq_reservoir_ranks: dict[int, list[str]]
-    records_fetched: int
-    records_quarantined: int
+    _services: PipelineExecutionServicesProtocol  # pyright: ignore[reportUninitializedInstanceVariable]
+    _context: PipelineContext  # pyright: ignore[reportUninitializedInstanceVariable]
+    _config: RecordProcessorConfig  # pyright: ignore[reportUninitializedInstanceVariable]
+    _logger: LoggerPort  # pyright: ignore[reportUninitializedInstanceVariable]
+    _bronze_records_for_dq: list[bytes]  # pyright: ignore[reportUninitializedInstanceVariable]
+    _silver_records_for_dq: list[BronzeRecord]  # pyright: ignore[reportUninitializedInstanceVariable]
+    _gold_records_for_dq: list[GoldRecord]  # pyright: ignore[reportUninitializedInstanceVariable]
+    _source_batch_ids: list[str]  # pyright: ignore[reportUninitializedInstanceVariable]
+    _last_bronze_path: str | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _dq_total_seen: int  # pyright: ignore[reportUninitializedInstanceVariable]
+    _dq_reservoir_ranks: dict[int, list[str]]  # pyright: ignore[reportUninitializedInstanceVariable]
+    records_fetched: int  # pyright: ignore[reportUninitializedInstanceVariable]
+    records_quarantined: int  # pyright: ignore[reportUninitializedInstanceVariable]
 
     def _should_collect_dq_data(self) -> bool:
         """Return True when DQ report service is configured."""
@@ -95,7 +93,7 @@ class _BatchExecutorDQMixin:
             self._reservoir_add(self._bronze_records_for_dq, encoded)
 
         if bronze_result is not None and hasattr(bronze_result, "path"):
-            self._last_bronze_path = str(bronze_result.path)
+            self._last_bronze_path = str(bronze_result.path)  # pyright: ignore[reportAttributeAccessIssue]
 
         for rec in silver_records:
             self._reservoir_add(self._silver_records_for_dq, rec)

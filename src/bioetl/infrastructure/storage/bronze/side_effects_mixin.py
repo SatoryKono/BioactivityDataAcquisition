@@ -1,5 +1,4 @@
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Post-write side effects for Bronze writer."""
 
@@ -65,7 +64,7 @@ class BronzeWriterSideEffectsMixin:
         provider: str,
         entity: str,
     ) -> None:
-        host = cast("_BronzeWriterSideEffectsHost", self)
+        host = cast("_BronzeWriterSideEffectsHost", self)  # pyright: ignore[reportInvalidCast]
         if not host._audit:
             return
 
@@ -101,7 +100,7 @@ class BronzeWriterSideEffectsMixin:
         source_metadata: SourceMetadata | None,
     ) -> None:
         """Create and persist Bronze metadata through the canonical coordinator path."""
-        host = cast("_BronzeWriterSideEffectsHost", self)
+        host = cast("_BronzeWriterSideEffectsHost", self)  # pyright: ignore[reportInvalidCast]
         prepared = prepare_bronze_metadata_write(
             host,
             BronzeMetadataWriteRequest(
@@ -153,7 +152,7 @@ class BronzeWriterSideEffectsMixin:
         span: Any,  # Any: OpenTelemetry span interface is runtime-dependent
     ) -> BronzeWriteResult:
         """Build write result payload and include checksum."""
-        host = cast("_BronzeWriterSideEffectsHost", self)
+        host = cast("_BronzeWriterSideEffectsHost", self)  # pyright: ignore[reportInvalidCast]
         span.set_attribute("record_count", record_count)
         span.set_attribute("compressed_size", compressed_size)
         checksum = await host._calculate_checksum(prepared.full_path)

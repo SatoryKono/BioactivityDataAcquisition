@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """Decorators for provider registration.
 
@@ -7,7 +6,7 @@ Provides a declarative API for registering provider adapters.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from bioetl.composition.providers._models import (
     AdapterCreatorProtocol,
@@ -78,7 +77,7 @@ def _register_provider_class[T: "DataSourcePort"](
     # Decorators remain the sanctioned import-time compatibility seam for
     # populating the lazy default registry.
     register_default_provider_config(name, config)
-    cls.__provider_name__ = name  # type: ignore[attr-defined]
+    cast(Any, cls).__provider_name__ = name  # Any: dynamic provider class attribute
 
 
 def register_provider(

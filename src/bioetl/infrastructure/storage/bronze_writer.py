@@ -1,5 +1,3 @@
-# pyright: reportArgumentType=false
-# pyright: reportIncompatibleMethodOverride=false
 # MRO/override residual on mixin or client hierarchies.
 """Bronze layer writer (local storage with JSONL + zstd compression)."""
 
@@ -57,7 +55,7 @@ __all__ = ["BRONZE_WRITE_ERRORS", "BronzeWriter"]
 BRONZE_ATOMIC_WRITE_CONTRACT = "atomic_write_bytes via bronze.write_execution"
 
 
-class BronzeWriter(
+class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
     BronzeWriterValidationMixin,
     BronzeWriterMetadataMixin,
     BronzeWriterSideEffectsMixin,
@@ -115,12 +113,12 @@ class BronzeWriter(
 
             metadata_writer = NoOpMetadataWriter()
         services = runtime_services or BronzeWriterRuntimeServices(
-            tracing=tracing,  # type: ignore[arg-type]
-            audit=audit,  # type: ignore[arg-type]
-            metadata_writer=metadata_writer,  # type: ignore[arg-type]
+            tracing=tracing,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+            audit=audit,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+            metadata_writer=metadata_writer,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             save_metadata=bool(save_metadata),
-            metadata_coordinator=metadata_coordinator,  # type: ignore[arg-type]
-            lineage_store=lineage_store,  # type: ignore[arg-type]
+            metadata_coordinator=metadata_coordinator,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+            lineage_store=lineage_store,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
         )
 
         save_json, json_path = json_export
@@ -259,11 +257,11 @@ class BronzeWriter(
         context: BronzeWritePostwriteContext,
     ) -> None:
         """Emit metrics, optional JSON copy, audit log, and metadata sidecar."""
-        await run_bronze_post_write_actions(self, context)
+        await run_bronze_post_write_actions(self, context)  # pyright: ignore[reportArgumentType]
 
     async def _write_bronze_data_and_sidecar(
         self,
         prepared: BronzeWritePrepared,
     ) -> BronzeWriteArtifacts:
         """Write compressed JSONL data and metadata sidecar to disk."""
-        return await write_bronze_data_and_sidecar(self, prepared)
+        return await write_bronze_data_and_sidecar(self, prepared)  # pyright: ignore[reportArgumentType]

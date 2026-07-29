@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Support helpers for resolving runtime builder inputs."""
 
@@ -65,7 +64,7 @@ def apply_tracing_override(
     namespace_observability = SimpleNamespace(**vars(observability))
     namespace_observability.tracing_enabled = enabled
     namespace_settings.observability = namespace_observability
-    return cast("Settings", namespace_settings)
+    return cast("Settings", namespace_settings)  # pyright: ignore[reportInvalidCast]
 
 
 def assemble_vacuum_settings_impl(

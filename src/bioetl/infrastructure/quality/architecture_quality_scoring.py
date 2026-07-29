@@ -1,5 +1,3 @@
-# pyright: reportArgumentType=false
-# pyright: reportGeneralTypeIssues=false
 # Boundary object/payload typing residual at this module.
 """Scoring policy for the deterministic architecture quality scorecard."""
 
@@ -251,9 +249,9 @@ def _score_category(category_id: str, metrics: dict[str, object]) -> float:
 def _build_categories(metrics: dict[str, object]) -> list[dict[str, object]]:
     categories: list[dict[str, object]] = []
     for item in _CATEGORY_BASELINES:
-        weight = float(item["weight"])  # type: ignore[arg-type]
+        weight = float(item["weight"])  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
         score = _score_category(str(item["id"]), metrics)
-        metric_keys = tuple(str(key) for key in item["metric_keys"])  # type: ignore[attr-defined]
+        metric_keys = tuple(str(key) for key in item["metric_keys"])  # type: ignore[attr-defined]  # pyright: ignore[reportGeneralTypeIssues]
         categories.append(
             {
                 "id": item["id"],

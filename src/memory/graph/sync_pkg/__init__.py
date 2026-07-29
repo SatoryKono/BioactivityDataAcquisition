@@ -1,3 +1,4 @@
+# pyright: reportImportCycles=false
 """Responsibility-focused import surface for graph sync."""
 
 from __future__ import annotations

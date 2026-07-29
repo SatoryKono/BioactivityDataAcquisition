@@ -45,7 +45,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Actual Prometheus alert-state triage for firing and pending BioETL rules. This panel reads the Prometheus `ALERTS` series and does not duplicate alert business logic in dashboard queries; inactive/no-alert state is rendered as an explicit zero row. Critical/page severity is red, warning is amber, and inactive aggregate evidence is neutral. Open 2. Runtime for alert-condition and blocker scope (Alerts & SLO dashboard retired).",
+          "description": "DUX5: Value columns labelled as Severity (no bare Value # headers). Actual Prometheus alert-state triage for firing and pending BioETL rules. This panel reads the Prometheus `ALERTS` series and does not duplicate alert business logic in dashboard queries; inactive/no-alert state is rendered as an explicit zero row. Critical/page severity is red, warning is amber, and inactive aggregate evidence is neutral. Open 2. Runtime for alert-condition and blocker scope (Alerts & SLO dashboard retired).",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -140,6 +140,18 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Severity"
+                  }
+                ]
               }
             ]
           },
@@ -189,7 +201,10 @@
                   "alertname": "Alert",
                   "alertstate": "State",
                   "severity": "Severity",
-                  "Value": "Active Alerts"
+                  "Value": "Active Alerts",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
@@ -207,10 +222,10 @@
       "id": 1000,
       "options": {
         "mode": "html",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" \n\n_(DUX4-22: truncated; full text in panel description/docs.)_"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><span aria-current=\"page\" title=\"1. Overview (Overview)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">1. Overview</span><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
       },
       "title": "Navigation",
-      "description": "DUX4-22: Full prose shortened on-canvas to remove internal scroll; details in description/docs. Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is disabled (aria-current). Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is disabled (aria-current). Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
       "type": "text",
       "links": [
         {
@@ -290,10 +305,10 @@
       },
       "id": 99,
       "options": {
-        "content": "### Scope — what is broken or degraded right now?\nworkflow=`$workflow` · pipeline=`$pipeline` · run_type=`$run_type` · run_id=`$run_id` (HTTP only)\n\nRead order: **Status → First Action → Inputs** (where should the operator drill down first).\nNav bus is the portfolio switcher.\n",
+        "content": "<div style=\"padding:2px 6px;border-left:3px solid #64748b;background:rgba(100,116,139,0.10);line-height:1.2;font-size:12px;overflow:hidden;white-space:normal\"><strong>What is broken or degraded right now</strong>, and <strong>where should the operator drill down first</strong>? Status → First Action → Inputs · <code>$workflow</code>/<code>$pipeline</code>/<code>$run_type</code>/run <code>$run_id</code><br>UNKNOWN = evidence incomplete. Prefer First Action over raw numbers.</div>",
         "mode": "html"
       },
-      "description": "DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW=current, RANGE=selected window, RUN=exact run_id HTTP, WORKFLOW/GLOBAL=blast radius/fleet. L0 v3 scope/provenance banner. Primary question: what is broken now and where should the operator drill down first? Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Provenance: shipped Prometheus current-status recording rules plus selected-range evidence. Verdict grammar: state x confidence x basis x next_action. Known limitation: first-screen PromQL remains pipeline/run_type-scoped; workflow is context/evidence-first, and run_id is resolved from persisted control-plane manifests.",
+      "description": "DUX5: status-card shell (reason/action beside Status; no internal scroll). DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW=current, RANGE=selected window, RUN=exact run_id HTTP, WORKFLOW/GLOBAL=blast radius/fleet. L0 v3 scope/provenance banner. Primary question: what is broken now and where should the operator drill down first? Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Provenance: shipped Prometheus current-status recording rules plus selected-range evidence. Verdict grammar: state x confidence x basis x next_action. Known limitation: first-screen PromQL remains pipeline/run_type-scoped; workflow is context/evidence-first, and run_id is resolved from persisted control-plane manifests. run_id is local control-plane identity context only.",
       "title": "Provenance",
       "type": "text"
     },
@@ -425,7 +440,7 @@
       ],
       "title": "Status",
       "type": "stat",
-      "description": "DUX4-16: First strip = health + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: Composite NOW health. Pair with Inputs + First Action; domain matrix stays collapsed. Composite fleet verdict (state x confidence x basis). Current L0 fleet status (bioetl_l0_status). 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Confidence is low when series is absent (UNKNOWN). Evidence age follows the recording/refresh window, not range history. Primary action is First Action; deeper proof is on domain boards. Empty Inputs with Status=OK is VALID_EMPTY fleet. null Status is TELEMETRY_ABSENT_OR_STALE/UNKNOWN, not OK. Domain tables are collapsed matrix detail, not peer first-screen badges."
+      "description": "DUX5: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error); pair with Provenance reason + action. Not a healthy OK. DUX4-16: First strip = health + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: Composite NOW health. Pair with Inputs + First Action; domain matrix stays collapsed. Composite fleet verdict (state x confidence x basis). Current L0 fleet status (bioetl_l0_status). 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Confidence is low when series is absent (UNKNOWN). Evidence age follows the recording/refresh window, not range history. Primary action is First Action; deeper proof is on domain boards. Empty Inputs with Status=OK is VALID_EMPTY fleet. null Status is TELEMETRY_ABSENT_OR_STALE/UNKNOWN, not OK. Domain tables are collapsed matrix detail, not peer first-screen badges."
     },
     {
       "id": 215,
@@ -660,6 +675,18 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Count"
+              }
+            ]
           }
         ]
       },
@@ -729,12 +756,16 @@
               "pipeline": 2
             },
             "renameByName": {
-              "pipeline": "Pipeline"
+              "pipeline": "Pipeline",
+              "Value": "Count",
+              "Value #A": "Series A",
+              "Value #B": "Series B",
+              "Value #C": "Series C"
             }
           }
         }
       ],
-      "description": "DUX4-16: First strip = health + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: ≤4 actionable CTAs with time/vars preserved. Ranked next-best-action (<=4). Prefer domain handoff with scope preserved. Not a multi-paragraph runbook. Open Incident when multi-domain; domain board for localization."
+      "description": "DUX5: Value columns labelled as Count (no bare Value # headers). DUX4-16: First strip = health + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: ≤4 actionable CTAs with time/vars preserved. Ranked next-best-action (<=4). Prefer domain handoff with scope preserved. Not a multi-paragraph runbook. Open Incident when multi-domain; domain board for localization."
     },
     {
       "id": 9002,
@@ -870,7 +901,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-background",
-                  "applyToRow": true
+                  "mode": "basic"
                 }
               }
             ]
@@ -889,8 +920,20 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-background",
-                  "applyToRow": true
+                  "mode": "basic"
                 }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Count"
               }
             ]
           }
@@ -940,7 +983,8 @@
             "targetBlank": false,
             "includeVars": false
           }
-        ]
+        ],
+        "cellHeight": "sm"
       },
       "transformations": [
         {
@@ -971,12 +1015,15 @@
             "renameByName": {
               "input": "Input",
               "Value": "Status",
-              "bioetl_l0_input_status_selected": "Status"
+              "bioetl_l0_input_status_selected": "Status",
+              "Value #A": "Series A",
+              "Value #B": "Series B",
+              "Value #C": "Series C"
             }
           }
         }
       ],
-      "description": "DUX4-16: First strip = health + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: Domain input evidence / freshness proxies for first-screen confidence. Compact L0 input summary for the selected pipeline/run_type scope. Rows are shown in the canonical operator order: Control Plane, Runtime, Provider, Data Quality, Data Validation, Workflow. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Use the panel links to open the matching drilldown; Workflow resets scope on handoff. This is the deviation-first first-level matrix; the six repeated subsystem cards are available only in the collapsed Diagnostics & Docs row. Phase-2: status cells use color-background thresholds (OK/WARN/CRIT). Not peer-comparable to Range evidence elsewhere."
+      "description": "DUX5: Value columns labelled as Count (no bare Value # headers). DUX4-16: First strip = health + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: Domain input evidence / freshness proxies for first-screen confidence. Compact L0 input summary for the selected pipeline/run_type scope. Rows are shown in the canonical operator order: Control Plane, Runtime, Provider, Data Quality, Data Validation, Workflow. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Use the panel links to open the matching drilldown; Workflow resets scope on handoff. This is the deviation-first first-level matrix; the six repeated subsystem cards are available only in the collapsed Diagnostics & Docs row. Phase-2: status cells use color-background thresholds (OK/WARN/CRIT). Not peer-comparable to Range evidence elsewhere."
     },
     {
       "id": 9014,
@@ -1311,7 +1358,20 @@
               },
               "unit": "none"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -1347,12 +1407,15 @@
                 "renameByName": {
                   "pipeline": "Pipeline",
                   "run_type": "Run Type",
-                  "Value": "Failures"
+                  "Value": "Failures",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "description": "Selected-range historical failure evidence only. Keeps pipeline and run_type labels from the active Grafana window and remains below the current verdict path; it does not determine L0 Status or First Action. Zero matching rows means no failed-run samples in the selected range, not proof that the current scope is OK. Open Runtime for failed-run and blocker localization."
+          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Selected-range historical failure evidence only. Keeps pipeline and run_type labels from the active Grafana window and remains below the current verdict path; it does not determine L0 Status or First Action. Zero matching rows means no failed-run samples in the selected range, not proof that the current scope is OK. Open Runtime for failed-run and blocker localization."
         },
         {
           "id": 9011,
@@ -1382,7 +1445,20 @@
               },
               "unit": "none"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
@@ -1424,12 +1500,15 @@
                 "renameByName": {
                   "pipeline": "Pipeline",
                   "status": "Terminal Status",
-                  "Value": "Runs"
+                  "Value": "Runs",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "description": "Selected-range terminal-run evidence only. Shows non-success terminal statuses grouped by pipeline so the evidence table stays readable without scroll while preserving the active Grafana time window. This panel is below the current verdict path and does not determine L0 Status or First Action; no terminal rows is not proof that the current scope is OK. Open Control Plane for manifest/terminal-run proof or Runtime for execution localization."
+          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Selected-range terminal-run evidence only. Shows non-success terminal statuses grouped by pipeline so the evidence table stays readable without scroll while preserving the active Grafana time window. This panel is below the current verdict path and does not determine L0 Status or First Action; no terminal rows is not proof that the current scope is OK. Open Control Plane for manifest/terminal-run proof or Runtime for execution localization."
         },
         {
           "id": 9015,
@@ -1450,7 +1529,7 @@
               "color": {
                 "mode": "thresholds"
               },
-              "decimals": 2,
+              "decimals": 0,
               "mappings": [
                 {
                   "type": "special",
@@ -1548,7 +1627,7 @@
             },
             "textMode": "auto"
           },
-          "description": "Range silver rejects evidence — NOT a peer fleet health KPI. Handoff: Data Quality accounting + Run Explorer for exact-run counts."
+          "description": "DUX5: zero means none observed or Not started/Not available — never bare success; red only on validated failure. Range silver rejects evidence — NOT a peer fleet health KPI. Handoff: Data Quality accounting + Run Explorer for exact-run counts."
         }
       ]
     },
@@ -1711,6 +1790,18 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
@@ -1752,12 +1843,15 @@
                 "renameByName": {
                   "pipeline": "Pipeline",
                   "Value": "Status",
-                  "bioetl_l1_control_plane_current_status": "Status"
+                  "bioetl_l1_control_plane_current_status": "Status",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "description": "Compact current control-plane summary for manifest, ledger, checkpoint, and lineage guardrails. Each row keeps the worst current status per pipeline across the selected run_type scope. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Control Plane for the exact failing contract."
+          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Compact current control-plane summary for manifest, ledger, checkpoint, and lineage guardrails. Each row keeps the worst current status per pipeline across the selected run_type scope. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Control Plane for the exact failing contract."
         },
         {
           "id": 9003,
@@ -1887,6 +1981,18 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
@@ -1928,12 +2034,15 @@
                 "renameByName": {
                   "pipeline": "Pipeline",
                   "Value": "Status",
-                  "bioetl_l1_runtime_blocker_status": "Status"
+                  "bioetl_l1_runtime_blocker_status": "Status",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "description": "Compact current runtime summary. Each row keeps the worst current status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Runtime for exact blocker condition rows."
+          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Compact current runtime summary. Each row keeps the worst current status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Runtime for exact blocker condition rows."
         },
         {
           "id": 9004,
@@ -2063,6 +2172,18 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
@@ -2104,12 +2225,15 @@
                 "renameByName": {
                   "pipeline": "Pipeline",
                   "Value": "Status",
-                  "bioetl_l1_dq_status": "Status"
+                  "bioetl_l1_dq_status": "Status",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "description": "Compact current data-quality summary. Each row keeps the worst current status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
+          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Compact current data-quality summary. Each row keeps the worst current status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
         },
         {
           "id": 9007,
@@ -2239,6 +2363,18 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
@@ -2280,12 +2416,15 @@
                 "renameByName": {
                   "provider": "Provider",
                   "Value": "Status",
-                  "bioetl_l1_provider_global_status": "Status"
+                  "bioetl_l1_provider_global_status": "Status",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "description": "GLOBAL provider scope across pipelines. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). This panel intentionally ignores selected pipeline/run_type filters. Open Provider Health fail-closes to provider=unknown and preserves pipeline_context for return navigation."
+          "description": "DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). GLOBAL provider scope across pipelines. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). This panel intentionally ignores selected pipeline/run_type filters. Open Provider Health fail-closes to provider=unknown and preserves pipeline_context for return navigation."
         },
         {
           "id": 9005,
@@ -2415,6 +2554,18 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
@@ -2456,12 +2607,15 @@
                 "renameByName": {
                   "pipeline": "Pipeline",
                   "Value": "Status",
-                  "bioetl_l1_gold_lifecycle_status": "Status"
+                  "bioetl_l1_gold_lifecycle_status": "Status",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "description": "Compact current data-validation summary. Each row keeps the worst lifecycle status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Runtime for the exact lifecycle-state breakdown."
+          "description": "DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Compact current data-validation summary. Each row keeps the worst lifecycle status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Runtime for the exact lifecycle-state breakdown."
         },
         {
           "id": 9013,
@@ -2591,6 +2745,18 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
@@ -2632,12 +2798,15 @@
                 "renameByName": {
                   "pipeline": "Pipeline",
                   "Value": "Status",
-                  "bioetl_l1_workflow_global_status": "Status"
+                  "bioetl_l1_workflow_global_status": "Status",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
           ],
-          "description": "Compact selected workflow/pipeline scope retained in the collapsed subsystem detail row, excluding the synthetic `test_pipe` surface. Each row keeps the worst current workflow status per matching pipeline without unrelated pipeline leakage. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Current workflow status is driven by the latest bounded terminal workflow signal, not by cumulative workflow-run counters. `run_type` and `run_id` remain handoff context only for this card."
+          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Compact selected workflow/pipeline scope retained in the collapsed subsystem detail row, excluding the synthetic `test_pipe` surface. Each row keeps the worst current workflow status per matching pipeline without unrelated pipeline leakage. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Current workflow status is driven by the latest bounded terminal workflow signal, not by cumulative workflow-run counters. `run_type` and `run_id` remain handoff context only for this card."
         }
       ]
     },
@@ -2663,7 +2832,7 @@
             "x": 0,
             "y": 0
           },
-          "description": "Thin shell only. Canonical hub: bioetl-run-explorer-v1. Do not treat as first-screen fleet KPI. Valid empty: no matching identity for the selected run. The backend may be unavailable; check /health/live.",
+          "description": "DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Thin shell only. Canonical hub: bioetl-run-explorer-v1. Do not treat as first-screen fleet KPI. Valid empty: no matching identity for the selected run. The backend may be unavailable; check /health/live.",
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
             "defaults": {
@@ -2731,6 +2900,18 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
@@ -2772,7 +2953,11 @@
                 },
                 "renameByName": {
                   "parameter": "parameter",
-                  "value": "value"
+                  "value": "value",
+                  "Value": "Count",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
@@ -2788,7 +2973,7 @@
             "x": 12,
             "y": 0
           },
-          "description": "Thin shell only. Canonical hub: bioetl-run-explorer-v1. Do not treat as first-screen fleet KPI. Valid empty: no matching processed-record rows for the selected run. The backend may be unavailable; check /health/live.",
+          "description": "DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Thin shell only. Canonical hub: bioetl-run-explorer-v1. Do not treat as first-screen fleet KPI. Valid empty: no matching processed-record rows for the selected run. The backend may be unavailable; check /health/live.",
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
             "defaults": {
@@ -3186,6 +3371,18 @@
                     ]
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
@@ -3233,7 +3430,11 @@
                   "parameter": "parameter",
                   "value": "value",
                   "percintage": "percintage",
-                  "row_status": ""
+                  "row_status": "",
+                  "Value": "Count",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }

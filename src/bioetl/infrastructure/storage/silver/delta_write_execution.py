@@ -253,11 +253,16 @@ def _run_plain_delta_write_inline(
     kwargs: dict[str, Any],  # Any: Delta Lake write kwargs are heterogeneous
     timeout_seconds: float,
 ) -> None:
-    """Execute a local plain Delta write without thread offload."""
-    started_at = asyncio.get_running_loop().time()
+    """Execute a local plain Delta write without thread offload.
+
+    Inline writes run in-process and cannot be cancelled mid-call (native
+    delta-rs). Do **not** convert a completed write into ``TimeoutError`` based
+    on elapsed wall time: that fails the pipeline after durable data is already
+    committed (common on slow/network filesystems such as Google Drive mounts).
+    Hard cancellation remains available on the thread/process offload paths.
+    """
+    del timeout_seconds  # budget applies only to cancellable offload paths
     module.write_deltalake(**kwargs)
-    if asyncio.get_running_loop().time() - started_at > timeout_seconds:
-        raise TimeoutError
 
 
 async def _write_plain_delta_request(

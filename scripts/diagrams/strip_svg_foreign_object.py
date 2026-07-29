@@ -23,7 +23,7 @@ if str(SCRIPT_DIR) not in sys.path:
 try:
     from .diagram_paths import SOURCE_FAMILIES, render_dir
 except ImportError:  # pragma: no cover - direct script execution
-    from diagram_paths import SOURCE_FAMILIES, render_dir
+    from scripts.diagrams.diagram_paths import SOURCE_FAMILIES, render_dir
 
 SVG_NS = "http://www.w3.org/2000/svg"
 ET.register_namespace("", SVG_NS)

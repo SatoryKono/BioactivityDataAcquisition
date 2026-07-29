@@ -33,17 +33,27 @@ def _pytest_filterwarnings() -> list[str]:
 
 
 def _iter_deprecation_warning_ignores() -> list[str]:
+    """Scan test modules for silent DeprecationWarning suppression.
+
+    Uses binary read + substring checks to stay fast under concurrent CI load
+    and Windows antivirus I/O (full UTF-8 decode of 2k+ files can time out).
+    """
     offenders: list[str] = []
-    for path in sorted((ROOT / "tests").rglob("test_*.py")):
+    needles = (
+        b"ignore::DeprecationWarning",
+        b'filterwarnings("ignore", category=DeprecationWarning',
+        b"filterwarnings('ignore', category=DeprecationWarning",
+    )
+    self_rel = "tests/architecture/test_deprecation_warnings.py"
+    for path in (ROOT / "tests").rglob("test_*.py"):
         rel = path.relative_to(ROOT).as_posix()
-        if rel == "tests/architecture/test_deprecation_warnings.py":
+        if rel == self_rel:
             continue
-        text = path.read_text(encoding="utf-8")
-        if "ignore::DeprecationWarning" in text:
-            offenders.append(rel)
-        if 'filterwarnings("ignore", category=DeprecationWarning' in text:
-            offenders.append(rel)
-        if "filterwarnings('ignore', category=DeprecationWarning" in text:
+        try:
+            data = path.read_bytes()
+        except OSError:
+            continue
+        if any(needle in data for needle in needles):
             offenders.append(rel)
     return offenders
 

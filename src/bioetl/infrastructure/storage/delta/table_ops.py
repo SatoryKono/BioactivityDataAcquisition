@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """Reusable Delta table helper operations."""
 
@@ -7,7 +6,7 @@ from __future__ import annotations
 import shutil
 import sys
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 from urllib.parse import unquote, urlparse
 
 import pyarrow as pa
@@ -80,11 +79,10 @@ def read_delta_records(
     to_dataset = getattr(table, "to_pyarrow_dataset", None)
     if _can_use_pyarrow_dataset_scanner() and callable(to_dataset):
         dataset = to_dataset()
-        scanner = dataset.scanner(columns=columns)
+        scanner = cast(Any, dataset).scanner(columns=columns)  # Any: pyarrow dataset duck-type
         to_reader = getattr(scanner, "to_reader", None)
         if callable(to_reader):
             from collections.abc import Iterable
-            from typing import Any, cast
 
             records: list[BronzeRecord] = []
             batches = cast(

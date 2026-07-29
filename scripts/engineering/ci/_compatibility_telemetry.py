@@ -20,7 +20,7 @@ from scripts.engineering.qa.report_test_governance_audit import (
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from _compatibility_registry import (  # type: ignore[import-not-found]
+    from scripts.engineering.ci._compatibility_registry import (  # type: ignore[import-not-found]
         DEFAULT_REGISTRY_PATH,
         load_compatibility_registry,
     )

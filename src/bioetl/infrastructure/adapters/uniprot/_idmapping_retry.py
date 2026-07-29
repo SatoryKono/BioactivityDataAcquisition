@@ -1,5 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Polling/retry logic for UniProt ID mapping jobs."""
 
@@ -43,12 +41,12 @@ class IDMappingRetryMixin:
         Returns:
             IDMappingRetryDependencies cast of the current client instance.
         """
-        return cast("IDMappingRetryDependencies", self)
+        return cast("IDMappingRetryDependencies", self)  # pyright: ignore[reportInvalidCast]
 
     @staticmethod
     def _check_redirect_to_results(response: object) -> str | None:
         """Return results URL if response redirected to a results endpoint."""
-        response_url = str(response.url) if hasattr(response, "url") else ""
+        response_url = str(response.url) if hasattr(response, "url") else ""  # pyright: ignore[reportAttributeAccessIssue]
         if "/results/" in response_url or "/uniprotkb/results/" in response_url:
             return response_url
         return None

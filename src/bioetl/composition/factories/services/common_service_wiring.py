@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Internal wiring helpers for common pipeline service ports."""
 
@@ -209,7 +208,7 @@ def assemble_pipeline_service(
     metadata_writer = MetadataWriter(logger=logger)
     return PipelineService(
         data_source=data_source,
-        storage=cast("PipelineStorageProtocol", common_ports.storage_ctx.adapter),
+        storage=cast("PipelineStorageProtocol", common_ports.storage_ctx.adapter),  # pyright: ignore[reportInvalidCast]
         lock=common_ports.lock,
         checkpoint=common_ports.checkpoint,
         quarantine=common_ports.quarantine,

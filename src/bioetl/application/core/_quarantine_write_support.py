@@ -1,11 +1,10 @@
-# pyright: reportTypedDictNotRequiredAccess=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Low-level quarantine write and event emission helpers."""
 
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.aggregates.events import RecordQuarantined
 from bioetl.domain.aggregates.quarantine_entry import QuarantineEntry
@@ -69,7 +68,7 @@ async def write_quarantine_request_with_events(
         batch_id=batch_id,
         run_id=run_id,
         ingestion_ts=ingestion_ts,
-        metadata=request["metadata"],
+        metadata=cast(JsonDict | None, request.get("metadata")),
     )
 
 
@@ -102,7 +101,7 @@ async def write_quarantine_requests_with_events(
             batch_id=batch_id,
             run_id=run_id,
             ingestion_ts=ingestion_ts,
-            metadata=request["metadata"],
+            metadata=cast(JsonDict | None, request.get("metadata")),
         )
 
 

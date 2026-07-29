@@ -22,7 +22,7 @@ if str(SCRIPT_DIR) not in sys.path:
 try:
     from .diagram_paths import VISUAL_SMOKE_MANIFEST
 except ImportError:  # pragma: no cover - direct script execution
-    from diagram_paths import VISUAL_SMOKE_MANIFEST
+    from scripts.diagrams.diagram_paths import VISUAL_SMOKE_MANIFEST
 
 
 DEFAULT_MANIFEST = VISUAL_SMOKE_MANIFEST

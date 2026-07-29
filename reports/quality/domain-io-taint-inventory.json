@@ -262,6 +262,13 @@
     },
     {
       "kind": "import:pandas",
+      "line": 6,
+      "path": "src/bioetl/domain/schemas/chembl/activity.py",
+      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
+      "symbol": "<module>"
+    },
+    {
+      "kind": "import:pandera",
       "line": 7,
       "path": "src/bioetl/domain/schemas/chembl/activity.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
@@ -270,13 +277,6 @@
     {
       "kind": "import:pandera",
       "line": 8,
-      "path": "src/bioetl/domain/schemas/chembl/activity.py",
-      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
-      "symbol": "<module>"
-    },
-    {
-      "kind": "import:pandera",
-      "line": 9,
       "path": "src/bioetl/domain/schemas/chembl/activity.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
@@ -815,6 +815,13 @@
     },
     {
       "kind": "import:pandas",
+      "line": 21,
+      "path": "src/bioetl/domain/schemas/validators.py",
+      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
+      "symbol": "<module>"
+    },
+    {
+      "kind": "import:pandera",
       "line": 22,
       "path": "src/bioetl/domain/schemas/validators.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
@@ -823,13 +830,6 @@
     {
       "kind": "import:pandera",
       "line": 23,
-      "path": "src/bioetl/domain/schemas/validators.py",
-      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
-      "symbol": "<module>"
-    },
-    {
-      "kind": "import:pandera",
-      "line": 24,
       "path": "src/bioetl/domain/schemas/validators.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"

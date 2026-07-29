@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Typed private attribute contract shared by Batch aggregate mixins."""
 
@@ -31,16 +30,16 @@ class _BatchAttrs:
         "_status",
     )
 
-    _batch_id: BatchID
-    _run_id: RunID
-    _status: BatchStatus
-    _records: list[BatchRecord]
-    _quarantined: list[BatchRecord]
-    _start_index: int
-    _created_at: datetime
-    _sealed_at: datetime | None
-    _events: list[DomainEvent]
-    _metadata: MetaDict
+    _batch_id: BatchID  # pyright: ignore[reportUninitializedInstanceVariable]
+    _run_id: RunID  # pyright: ignore[reportUninitializedInstanceVariable]
+    _status: BatchStatus  # pyright: ignore[reportUninitializedInstanceVariable]
+    _records: list[BatchRecord]  # pyright: ignore[reportUninitializedInstanceVariable]
+    _quarantined: list[BatchRecord]  # pyright: ignore[reportUninitializedInstanceVariable]
+    _start_index: int  # pyright: ignore[reportUninitializedInstanceVariable]
+    _created_at: datetime  # pyright: ignore[reportUninitializedInstanceVariable]
+    _sealed_at: datetime | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _events: list[DomainEvent]  # pyright: ignore[reportUninitializedInstanceVariable]
+    _metadata: MetaDict  # pyright: ignore[reportUninitializedInstanceVariable]
 
 
 __all__ = ["_BatchAttrs"]

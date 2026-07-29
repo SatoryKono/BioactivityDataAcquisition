@@ -474,8 +474,8 @@ def _build_composite_auto_specs(
 
 
 def _build_campaign_services(
-    settings: object,
-) -> tuple[object, object, object, object, Path, dict[str, object]]:
+    settings: Any,
+) -> tuple[Any, Any, Any, Any, Path, dict[str, object]]:
     metrics = create_metrics(settings)
     output_root = Path(settings.data_dir) / "output" / "control"  # type: ignore[attr-defined]
     manifest_store = FileRunManifestStore(
@@ -509,14 +509,14 @@ def _build_campaign_services(
 
 def _maybe_auto_certify(
     *,
-    args: object,
-    inventory: object,
-    corpus_service: object,
-    manifest_store: object,
-    ledger_store: object,
+    args: Any,
+    inventory: Any,
+    corpus_service: Any,
+    manifest_store: Any,
+    ledger_store: Any,
     bronze_root: Path,
     bronze_meta_index: dict[str, object],
-) -> tuple[object | None, object | None, object]:
+) -> tuple[Any | None, Any | None, Any]:
     source_certification_result = None
     composite_certification_result = None
     if getattr(args, "auto_certify_sources", False):

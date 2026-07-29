@@ -1,5 +1,4 @@
 # mypy: disable-error-code=attr-defined
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Feature and sequence fetch methods for UniProtAdapter."""
 
@@ -7,10 +6,11 @@ from __future__ import annotations
 
 import contextlib
 import time
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, Any, Protocol
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser
+from bioetl.typing_support import as_mixin_host
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -29,14 +29,14 @@ class UniProtFeatureSequenceAdapterMixin:
         """
         try:
             start_time = time.perf_counter()
-            with self._adapter_metrics.measure_request("/uniprotkb/features"):
-                response = await self._http_client.get(
-                    f"{self.base_url}/uniprotkb/{query}.json"
+            with as_mixin_host(self)._adapter_metrics.measure_request("/uniprotkb/features"):  # Any: mixin host surface (self attrs/methods)
+                response = await as_mixin_host(self)._http_client.get(  # Any: mixin host surface (self attrs/methods)
+                    f"{as_mixin_host(self).base_url}/uniprotkb/{query}.json"  # Any: mixin host surface (self attrs/methods)
                 )
             typed_response = cast("object", response)
             duration_ms = (time.perf_counter() - start_time) * 1000
             with contextlib.suppress(Exception):
-                self._request_collector.record_from_response(
+                as_mixin_host(self)._request_collector.record_from_response(  # Any: mixin host surface (self attrs/methods)
                     typed_response, duration_ms
                 )
             if getattr(typed_response, "status_code", None) == 200:
@@ -48,7 +48,7 @@ class UniProtFeatureSequenceAdapterMixin:
                         return [item for item in raw_features if isinstance(item, dict)]
             return []
         except _UNIPROT_FEATURE_SEQUENCE_ERRORS as error:
-            self._handle_fetch_error("feature", query, error=error)
+            as_mixin_host(self)._handle_fetch_error("feature", query, error=error)  # Any: mixin host surface (self attrs/methods)
             return []
 
     async def _fetch_features(
@@ -60,11 +60,11 @@ class UniProtFeatureSequenceAdapterMixin:
         if not query:
             raise ValueError("Query is required for feature search")
 
-        features = await self._get_features_json(query)
+        features = await as_mixin_host(self)._get_features_json(query)  # Any: mixin host surface (self attrs/methods)
         for index, feature in enumerate(features):
             if limit and index >= limit:
                 break
-            yield self._format_feature(query, feature)
+            yield as_mixin_host(self)._format_feature(query, feature)  # Any: mixin host surface (self attrs/methods)
 
     def _format_feature(self, query: str, feature: BronzeRecord) -> BronzeRecord:
         """Normalize feature payload to record contract.
@@ -90,15 +90,15 @@ class UniProtFeatureSequenceAdapterMixin:
         """
         try:
             start_time = time.perf_counter()
-            with self._adapter_metrics.measure_request("/uniprotkb/stream"):
-                response = await self._http_client.get(
-                    f"{self.base_url}/uniprotkb/stream",
+            with as_mixin_host(self)._adapter_metrics.measure_request("/uniprotkb/stream"):  # Any: mixin host surface (self attrs/methods)
+                response = await as_mixin_host(self)._http_client.get(  # Any: mixin host surface (self attrs/methods)
+                    f"{as_mixin_host(self).base_url}/uniprotkb/stream",  # Any: mixin host surface (self attrs/methods)
                     params={"query": query, "format": "fasta"},
                 )
             typed_response = cast("object", response)
             duration_ms = (time.perf_counter() - start_time) * 1000
             with contextlib.suppress(Exception):
-                self._request_collector.record_from_response(
+                as_mixin_host(self)._request_collector.record_from_response(  # Any: mixin host surface (self attrs/methods)
                     typed_response, duration_ms
                 )
             if getattr(typed_response, "status_code", None) == 200:
@@ -106,7 +106,7 @@ class UniProtFeatureSequenceAdapterMixin:
                 return text if isinstance(text, str) else None
             return None
         except _UNIPROT_FEATURE_SEQUENCE_ERRORS as error:
-            self._handle_fetch_error("sequence", query, error=error)
+            as_mixin_host(self)._handle_fetch_error("sequence", query, error=error)  # Any: mixin host surface (self attrs/methods)
             return None
 
     async def _get_parsed_sequences(
@@ -114,7 +114,7 @@ class UniProtFeatureSequenceAdapterMixin:
         query: str,
     ) -> AsyncIterator[BronzeRecord]:
         """Parse FASTA into sequence records."""
-        fasta_text = await self._get_sequence_fasta(query)
+        fasta_text = await as_mixin_host(self)._get_sequence_fasta(query)  # Any: mixin host surface (self attrs/methods)
         if fasta_text:
             records = FastaParser.parse(fasta_text)
             for record in records:
@@ -130,7 +130,7 @@ class UniProtFeatureSequenceAdapterMixin:
             raise ValueError("Query is required for sequence fetch")
 
         fetched = 0
-        async for seq_record in self._get_parsed_sequences(query):
+        async for seq_record in as_mixin_host(self)._get_parsed_sequences(query):  # Any: mixin host surface (self attrs/methods)
             if limit and fetched >= limit:
                 break
             yield seq_record

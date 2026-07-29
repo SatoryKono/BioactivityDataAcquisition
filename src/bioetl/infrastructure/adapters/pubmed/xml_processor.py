@@ -1,5 +1,4 @@
 # mypy: disable-error-code="import-untyped"
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """PubMed XML processing utilities.
 
@@ -8,6 +7,8 @@ Extracted from the PubMed adapter module for better separation of concerns.
 """
 
 from __future__ import annotations
+
+from typing import Any, cast
 
 __all__ = ["PubMedXmlProcessor"]
 
@@ -35,7 +36,7 @@ class PubMedXmlProcessor:
         try:
             parsed_root: ET.Element = defused_ET.fromstring(xml_text)
             return parsed_root
-        except (ET.ParseError, defused_ET.EntitiesForbidden):
+        except (ET.ParseError, cast(type[BaseException], getattr(defused_ET, "EntitiesForbidden", Exception))):
             return None
 
     @staticmethod

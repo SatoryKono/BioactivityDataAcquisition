@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Shared types for Control Plane identity evidence.
 
@@ -170,11 +169,11 @@ def _resolve_anchor_spec_values(
         "copy": _coalesce(fields.get("copy"), fields.get("is_identifier")),
         "drilldown": _coalesce(fields.get("drilldown"), fields.get("usage_locations")),
         "missing_severity": _resolve_missing_severity(
-            fields.get("missing_severity")  # type: ignore[arg-type]
+            fields.get("missing_severity")  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             if fields.get("missing_severity") is None
             or isinstance(fields.get("missing_severity"), str)
             else None,
-            fields.get("implementation_status")  # type: ignore[arg-type]
+            fields.get("implementation_status")  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             if fields.get("implementation_status") is None
             or isinstance(fields.get("implementation_status"), str)
             else None,

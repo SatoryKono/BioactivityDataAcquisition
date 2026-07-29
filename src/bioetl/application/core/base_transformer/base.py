@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import replace
-from typing import TYPE_CHECKING, ClassVar, cast
+from typing import Any, TYPE_CHECKING, ClassVar, cast
 
 from bioetl.application.core.base_transformer.types import (
     T,
@@ -135,12 +135,16 @@ class BaseTransformer(
         self._silver_filters = silver_filters
         self._gold_filters = gold_filters
 
+        from typing import cast
+
+        from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+
         resolved_dependencies = _resolve_transformer_dependencies(
             dependencies=dependencies,
-            tracer=tracer,  # type: ignore[arg-type]
-            metrics=metrics,  # type: ignore[arg-type]
-            identity_service=identity_service,  # type: ignore[arg-type]
-            pii_hasher=pii_hasher,  # type: ignore[arg-type]
+            tracer=cast(TracingPort | None, tracer),
+            metrics=cast(MetricsPort | None, metrics),
+            identity_service=cast(Any, identity_service),  # Any: structural boundary cast
+            pii_hasher=cast(PiiHasherPort | None, pii_hasher),
         )
 
         self._tracer = resolved_dependencies.tracer

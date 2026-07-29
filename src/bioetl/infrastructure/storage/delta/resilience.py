@@ -187,7 +187,9 @@ def build_default_silver_merge_policy() -> SilverMergeResiliencePolicy:
     """Build default Silver merge policy aligned with PipelineSettings defaults.
 
     Returns:
-        SilverMergeResiliencePolicy with 45s execution timeout, commit retry, and timeout retry.
+        SilverMergeResiliencePolicy with 45s execution timeout (matches
+        ``PipelineSettings.silver_merge_timeout.execution_timeout_seconds``),
+        commit retry, and timeout retry.
     """
     return SilverMergeResiliencePolicy(
         execution_timeout_seconds=45.0,

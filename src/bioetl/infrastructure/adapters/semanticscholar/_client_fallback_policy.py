@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Internal fallback-policy hook mixin for the Semantic Scholar adapter."""
 
@@ -50,7 +49,7 @@ class _SemanticScholarFallbackPolicyMixin:
 
     def _get_normalize_id_hook(self) -> NormalizeIdProtocol:
         """Return DOI normalization hook."""
-        host = cast(_SupportsNormalizeDoi, self)
+        host = cast(_SupportsNormalizeDoi, self)  # pyright: ignore[reportInvalidCast]
         return host._normalize_doi
 
     def _get_extract_record_id_hook(self) -> ExtractRecordIdProtocol:

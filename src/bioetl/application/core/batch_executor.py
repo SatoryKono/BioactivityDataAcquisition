@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# pyright: reportArgumentType=false
 # pyright: reportImportCycles=false
 # Import cycle residual tracked in allowlist (product burn-down).
 # RuntimeState properties own dual-declared DQ fields (PD2-7).
@@ -83,7 +81,7 @@ class BatchResult:
     gold_count: int
     quarantined_count: int
 
-class BatchExecutor(BatchExecutorRuntimeStateMixin, _BatchExecutorDQMixin):
+class BatchExecutor(BatchExecutorRuntimeStateMixin, _BatchExecutorDQMixin):  # pyright: ignore[reportIncompatibleVariableOverride]
     """Unified executor for ETL batches: fetch -> transform -> write with tracing."""
 
     DEFAULT_BATCH_SIZE = 1000
@@ -148,7 +146,7 @@ class BatchExecutor(BatchExecutorRuntimeStateMixin, _BatchExecutorDQMixin):
     ) -> None:
         """Execute the pipeline for the provided limit/query/offset inputs."""
         await execute_batch_run(
-            self,
+            self,  # pyright: ignore[reportArgumentType]
             limit=limit,
             query=query,
             offset=offset,
@@ -159,7 +157,7 @@ class BatchExecutor(BatchExecutorRuntimeStateMixin, _BatchExecutorDQMixin):
     ) -> BatchExecutionContext:
         """Persist execution-scoped inputs and return the explicit loop context."""
         return prepare_batch_execution_context(
-            self,
+            self,  # pyright: ignore[reportArgumentType]
             limit=limit,
             query=query,
             offset=offset,
@@ -178,7 +176,7 @@ class BatchExecutor(BatchExecutorRuntimeStateMixin, _BatchExecutorDQMixin):
             execution_context,
             batch_size=self.batch_size,
             process_batch=self._process_batch_and_update_state,
-            progress_state=self,
+            progress_state=self,  # pyright: ignore[reportArgumentType]
         )
 
         res_done = self._fsm.advance(
@@ -192,7 +190,7 @@ class BatchExecutor(BatchExecutorRuntimeStateMixin, _BatchExecutorDQMixin):
         start_index: int = 0,
     ) -> BatchResult:
         """Public API for processing one explicit batch."""
-        return await process_explicit_batch(self, records, start_index)
+        return await process_explicit_batch(self, records, start_index)  # pyright: ignore[reportArgumentType]
 
     async def _process_batch_and_update_state(
         self,
@@ -200,7 +198,7 @@ class BatchExecutor(BatchExecutorRuntimeStateMixin, _BatchExecutorDQMixin):
         start_index: int,
     ) -> None:
         """Process one batch and apply results to executor-level counters/state."""
-        await process_stateful_batch(self, records, start_index)
+        await process_stateful_batch(self, records, start_index)  # pyright: ignore[reportArgumentType]
 
     def get_run_statistics(self) -> dict[str, int | list[str]]:
         """Get aggregated statistics for the entire pipeline run."""

@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Read-model mixins for PipelineRun aggregate."""
 
@@ -32,16 +31,16 @@ class _PipelineRunAttrs:
         "_status",
     )
 
-    _run_id: RunID
-    _run_type: RunType
-    _pipeline_name: str
-    _status: PipelineRunState
-    _stages: list[StageResult]
-    _started_at: datetime | None
-    _ended_at: datetime | None
-    _events: list[DomainEvent]
-    _manifest_id: str | None
-    _metadata: JsonDict
+    _run_id: RunID  # pyright: ignore[reportUninitializedInstanceVariable]
+    _run_type: RunType  # pyright: ignore[reportUninitializedInstanceVariable]
+    _pipeline_name: str  # pyright: ignore[reportUninitializedInstanceVariable]
+    _status: PipelineRunState  # pyright: ignore[reportUninitializedInstanceVariable]
+    _stages: list[StageResult]  # pyright: ignore[reportUninitializedInstanceVariable]
+    _started_at: datetime | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _ended_at: datetime | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _events: list[DomainEvent]  # pyright: ignore[reportUninitializedInstanceVariable]
+    _manifest_id: str | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _metadata: JsonDict  # pyright: ignore[reportUninitializedInstanceVariable]
 
 
 class _PipelineRunReadModelMixin(_PipelineRunAttrs):

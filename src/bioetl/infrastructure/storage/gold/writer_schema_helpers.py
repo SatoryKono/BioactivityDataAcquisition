@@ -1,11 +1,10 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """Schema projection and resolution helpers for Gold writer."""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import cast
+from typing import cast, Any
 
 from bioetl.domain.types import GoldRecord, GoldSchemaPolicyByVersion
 from bioetl.infrastructure.storage.gold.writer_protocols import (
@@ -29,7 +28,7 @@ def _schema_column_names(schema: object) -> tuple[str, ...]:
         except (AttributeError, RuntimeError, TypeError, ValueError):
             pass
     if hasattr(schema, "columns"):
-        columns = schema.columns
+        columns = cast(Any, schema).columns  # Any: schema columns duck-type
         if isinstance(columns, Mapping):
             return tuple(str(column) for column in columns)
     return ()

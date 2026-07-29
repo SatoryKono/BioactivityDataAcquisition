@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-29T07:26:28.581387+00:00",
+  "generated_at": "2026-07-29T09:22:35.034161+00:00",
   "summary": {
-    "total_scripts": 546,
+    "total_scripts": 549,
     "status_counts": {
       "active": 341,
-      "supporting": 199,
-      "temporary_diagnostic": 5,
-      "unknown": 1
+      "orphan": 1,
+      "supporting": 202,
+      "temporary_diagnostic": 5
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 12,
       "ci": 64,
-      "docs": 216,
+      "docs": 217,
       "other": 74,
-      "scripts": 418,
+      "scripts": 419,
       "skills": 17,
       "tests": 253
     }
@@ -15450,6 +15450,14 @@
       "next_step": "Retain only as a one-off DSA residual migration helper for auditability; do not promote it to an active operator workflow."
     },
     {
+      "path": "scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ops/observability/grafana/apply_dux2_residual.py",
       "type": "py",
       "status": "supporting",
@@ -15477,7 +15485,7 @@
     {
       "path": "scripts/ops/observability/grafana/apply_dux4_enforcement.py",
       "type": "py",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -15487,7 +15495,23 @@
           "source_group": "docs",
           "text": "- Apply script: `scripts/ops/observability/grafana/apply_dux4_enforcement.py`"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DUX4 dashboard enforcement helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DUX5 residual dashboard migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
     },
     {
       "path": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",
@@ -15602,6 +15626,18 @@
       "next_step": "Retain only as a bounded DUX4 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
     },
     {
+      "path": "scripts/ops/observability/grafana/generate_dux5_issue_pack.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded DUX5 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
+    },
+    {
       "path": "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1",
       "type": "ps1",
       "status": "supporting",
@@ -15627,7 +15663,7 @@
       "agent_usage": [
         "grafana-dashboard-extension"
       ],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-extension/SKILL.md",
@@ -17899,8 +17935,15 @@
       "type": "py",
       "status": "temporary_diagnostic",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/00-project/ai/agents/guides/BASEDPRIGHT_PROJECT_DIAGNOSTICS.md",
+          "line": 71,
+          "source_group": "docs",
+          "text": "Optional rewrite generator: `scripts/schema/generate_typed_arrow_schema_sources.py`."
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "temporary_diagnostic",
       "review_by": "2026-09-30",

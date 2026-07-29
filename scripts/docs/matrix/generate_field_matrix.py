@@ -13,7 +13,7 @@ from typing import Any
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from _bootstrap import ensure_repo_imports
+    from scripts.docs.matrix._bootstrap import ensure_repo_imports
 else:
     from scripts.docs.matrix._bootstrap import ensure_repo_imports
 
@@ -190,7 +190,7 @@ def build_artifacts() -> dict[str, str]:
 
 def _write_optional_docx(path: Path, markdown_payload: str) -> str | None:
     try:
-        from docx import Document  # type: ignore[import-not-found]
+        from docx import Document  # type: ignore[import-not-found]  # pyright: ignore[reportMissingImports]
     except ImportError:
         return "python-docx not installed; skipped DOCX export"
     document = Document()
@@ -202,8 +202,8 @@ def _write_optional_docx(path: Path, markdown_payload: str) -> str | None:
 
 def _write_optional_pdf(path: Path, markdown_payload: str) -> str | None:
     try:
-        from reportlab.lib.pagesizes import A4  # type: ignore[import-untyped]
-        from reportlab.pdfgen import canvas  # type: ignore[import-untyped]
+        from reportlab.lib.pagesizes import A4  # type: ignore[import-untyped]  # pyright: ignore[reportMissingModuleSource, reportMissingImports]
+        from reportlab.pdfgen import canvas  # type: ignore[import-untyped]  # pyright: ignore[reportMissingModuleSource, reportMissingImports]
     except ImportError:
         return "reportlab not installed; skipped PDF export"
     pdf = canvas.Canvas(str(path), pagesize=A4)
