@@ -85,11 +85,12 @@ class HealthCheckMixin:
 
     """
 
-    # Type hints for attributes provided by the implementing class
-    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
-    metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD6)
-    provider_name: str = cast(Any, None)  # Any: host attr default (PD6)
-    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
+    # Annotation-only host surface. Do NOT assign None defaults: dataclass
+    # subclasses inherit those as field defaults (e.g. CrossRef mailto after logger).
+    logger: LoggerPort
+    metrics: MetricsPort | None
+    provider_name: str
+    _logger: LoggerPort
 
     def _get_metrics(self) -> MetricsPort | None:
         """Get metrics port for best-effort health-check telemetry.

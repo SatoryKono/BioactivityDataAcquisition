@@ -82,10 +82,8 @@ class CrossRefAdapter(
     """CrossRef adapter with thin-facade delegation to flow components."""
 
     http_client: UnifiedHTTPClient
-    # mailto must precede logger: HealthCheckMixin sets logger=None as a class
-    # attr, so dataclasses treats logger as a defaulted field (Python 3.13).
+    logger: LoggerPort
     mailto: str
-    logger: LoggerPort = field()
     batch_size: int = 50
     metrics: MetricsPort | None = None
     dependency_context: HttpAdapterDependencyContext | None = None
