@@ -1399,15 +1399,15 @@ def _assert_current_dashboard_disabled_in_visual_bus(
         ),
         re.compile(
             rf'<a[^>]*aria-current="page"[^>]*aria-disabled="true"[^>]*>\s*'
-            rf'{re.escape(current_title)}'
+            rf"{re.escape(current_title)}"
         ),
         re.compile(
             rf'<a[^>]*aria-disabled="true"[^>]*aria-current="page"[^>]*>\s*'
-            rf'{re.escape(current_title)}'
+            rf"{re.escape(current_title)}"
         ),
         re.compile(
             rf'<a[^>]*class="[^"]*bioetl-nav-current[^"]*"[^>]*>\s*'
-            rf'{re.escape(current_title)}'
+            rf"{re.escape(current_title)}"
         ),
     )
     assert any(p.search(content) for p in disabled_patterns), (

@@ -299,6 +299,7 @@ class ActivitySchema(ETLRecordSchema):
 
     class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
+
         strict = True
         ordered = False
         coerce = True

@@ -36,9 +36,15 @@ if TYPE_CHECKING:
 
     class _BronzeWriterSideEffectsHost:
         _audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)
-        _metadata_writer: MetadataWriterPort = cast(Any, None)  # Any: host default (PD4)
-        _metadata_coordinator: MetadataCoordinatorPort | None = cast(Any, None)  # Any: host default (PD4)
-        _lineage_store: LineageStorePort | None = cast(Any, None)  # Any: host default (PD4)
+        _metadata_writer: MetadataWriterPort = cast(
+            Any, None
+        )  # Any: host default (PD4)
+        _metadata_coordinator: MetadataCoordinatorPort | None = cast(
+            Any, None
+        )  # Any: host default (PD4)
+        _lineage_store: LineageStorePort | None = cast(
+            Any, None
+        )  # Any: host default (PD4)
         _flat_structure: bool = cast(Any, None)  # Any: host default (PD4)
         _metrics: MetricsPort = cast(Any, None)  # Any: host default (PD4)
         base_path: Path = cast(Any, None)  # Any: host default (PD4)

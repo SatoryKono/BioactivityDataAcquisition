@@ -77,8 +77,12 @@ class ChemblHealthMixin:
     provider_name: str = cast(Any, None)  # Any: host attr default (PD6)
     _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
     _page_size: int = cast(Any, None)  # Any: host attr default (PD6)
-    _adapter_metrics: AdapterMetricsRecorder = cast(Any, None)  # Any: host attr default (PD6)
-    _last_probe_health_status: HealthStatus | None = cast(Any, None)  # Any: host attr default (PD6)
+    _adapter_metrics: AdapterMetricsRecorder = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    _last_probe_health_status: HealthStatus | None = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
 
     @staticmethod
     def _max_health_status(

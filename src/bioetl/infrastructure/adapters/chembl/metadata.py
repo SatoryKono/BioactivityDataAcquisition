@@ -26,8 +26,12 @@ if TYPE_CHECKING:
 class ChemblMetadataMixin:
     """Mixin for metadata-related logic in ChEMBL adapter."""
 
-    _request_collector: APIRequestCollector = cast(Any, None)  # Any: host attr default (PD3)
-    _extraction_params: ExtractionParams = cast(Any, None)  # Any: host attr default (PD3)
+    _request_collector: APIRequestCollector = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
+    _extraction_params: ExtractionParams = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
         """Get API request metadata and clear collector.

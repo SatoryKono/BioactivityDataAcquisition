@@ -19,8 +19,10 @@ if TYPE_CHECKING:
         MetricsPort,
     )
 
+
 class _FilteredDataSourceState(Protocol):
     """Structural state contract for FilteredDataSource support helpers."""
+
     _data_source: DataSourcePort
     _filter_reader: InputFilterPort | None
     _filter_config: InputFilterConfig
@@ -34,8 +36,10 @@ class _FilteredDataSourceState(Protocol):
     _filter_fields: tuple[str, ...] | None
     _fallback_mapping: dict[str, str] | None
 
+
 CSV_SINGLE_COLUMN_SOURCE_KIND = "csv_single_column"
 CSV_MULTI_COLUMN_SOURCE_KIND = "csv_multi_column"
+
 
 async def enter_filtered_data_source(state: _FilteredDataSourceState) -> None:
     """Enter the wrapped adapter and preload any configured filters."""
@@ -50,6 +54,7 @@ async def enter_filtered_data_source(state: _FilteredDataSourceState) -> None:
         return
     await load_csv_filter_ids(state)
 
+
 def log_filter_file_not_found(
     state: _FilteredDataSourceState,
     source_path: str,
@@ -62,6 +67,7 @@ def log_filter_file_not_found(
             pipeline=state._pipeline_name,
             message="Filter file not found, proceeding without filtering",
         )
+
 
 def load_direct_multi_filter_ids(state: _FilteredDataSourceState) -> None:
     """Load direct multi-field filter IDs from configuration."""
@@ -81,6 +87,7 @@ def load_direct_multi_filter_ids(state: _FilteredDataSourceState) -> None:
             pipeline=state._pipeline_name,
         )
 
+
 def load_direct_filter_ids(state: _FilteredDataSourceState) -> None:
     """Load direct filter IDs from configuration."""
     loaded_filter_ids = list(state._filter_config.direct_filter_ids or [])
@@ -97,6 +104,7 @@ def load_direct_filter_ids(state: _FilteredDataSourceState) -> None:
             pipeline=state._pipeline_name,
         )
 
+
 async def load_csv_filter_ids(state: _FilteredDataSourceState) -> None:
     """Load filter IDs from CSV file when a reader and source path exist."""
     if not state._filter_reader:
@@ -112,6 +120,7 @@ async def load_csv_filter_ids(state: _FilteredDataSourceState) -> None:
             await _load_single_column_filter(state, source_path)
     except FileNotFoundError:
         log_filter_file_not_found(state, source_path)
+
 
 async def _load_multi_column_filter(
     state: _FilteredDataSourceState,
@@ -131,6 +140,7 @@ async def _load_multi_column_filter(
     state._valid_combinations = result.valid_combinations
     state._filter_fields = result.filter_fields
     _record_multi_filter_metrics(state)
+
 
 async def _load_single_column_filter(
     state: _FilteredDataSourceState,
@@ -157,6 +167,7 @@ async def _load_single_column_filter(
     state._filter_ids = list(state._filter_result.ids)
     _record_filter_metrics(state)
 
+
 def _record_filter_metrics(state: _FilteredDataSourceState) -> None:
     """Record single-column filter loading metrics."""
     if not state._metrics or not state._filter_result:
@@ -178,6 +189,7 @@ def _record_filter_metrics(state: _FilteredDataSourceState) -> None:
                 "source_kind": CSV_SINGLE_COLUMN_SOURCE_KIND,
             },
         )
+
 
 def _record_multi_filter_metrics(state: _FilteredDataSourceState) -> None:
     """Record multi-column filter loading metrics."""

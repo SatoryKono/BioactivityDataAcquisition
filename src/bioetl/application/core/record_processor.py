@@ -39,6 +39,7 @@ if TYPE_CHECKING:
 
 class RecordProcessor:
     """Orchestrates batch transformation and writing across all layers."""
+
     def __init__(
         self,
         context: PipelineContext,
@@ -68,6 +69,7 @@ class RecordProcessor:
         self._batch_metrics = batch_metrics
         self._transformer = transformer
         self._writer = writer
+
     async def process_batch(
         # Any: record vals vary
         self,
@@ -121,6 +123,7 @@ class RecordProcessor:
             gold_count=len(result.gold_records),
             quarantined_count=result.quarantined_count,
         )
+
     def _track_transform_metrics(self, result: TransformResult) -> None:
         self._batch_metrics.track_processed_records(
             "quarantined", result.quarantined_count
@@ -129,11 +132,13 @@ class RecordProcessor:
             "silver", len(result.silver_records)
         )
         self._batch_metrics.track_processed_records("gold", len(result.gold_records))
+
     def _build_bronze_refs(
         self, bronze_result: object
     ) -> list[BronzeWriteResult] | None:
         typed_bronze_result = cast("BronzeWriteResult | None", bronze_result)
         return [typed_bronze_result] if typed_bronze_result else None
+
     async def _write_silver_if_present(
         self,
         *,
@@ -159,6 +164,7 @@ class RecordProcessor:
             ),
         )
         return cast("SilverWriteResult | None", silver_result)
+
     async def _write_gold_if_present(
         self,
         *,

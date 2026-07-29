@@ -289,9 +289,7 @@ class ADRRegistryGenerator:
             if current_section and line.strip():
                 sections[current_section] += line + "\n"
 
-        return {
-            name: self._truncate_section(body) for name, body in sections.items()
-        }
+        return {name: self._truncate_section(body) for name, body in sections.items()}
 
     def extract_adr_relationships(self, content: str) -> dict[str, list[str]]:
         """Extract relationships (supersedes, related) from ADR content."""

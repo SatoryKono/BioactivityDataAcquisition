@@ -23,7 +23,9 @@ class QuarantineEntryTransitionsMixin:
     _entry_id: str = cast(Any, None)  # Any: host attr default (PD3)
     _run_id: RunID = cast(Any, None)  # Any: host attr default (PD3)
     _status: QuarantineStatus = cast(Any, None)  # Any: host attr default (PD3)
-    _resolution_info: ResolutionInfo | None = cast(Any, None)  # Any: host attr default (PD3)
+    _resolution_info: ResolutionInfo | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     _metadata: MetaDict = cast(Any, None)  # Any: host attr default (PD3)
     _events: list[DomainEvent] = cast(Any, None)  # Any: host attr default (PD3)
 

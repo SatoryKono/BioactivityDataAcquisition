@@ -30,7 +30,9 @@ if TYPE_CHECKING:
 
 class BatchMemoryManagerService:
     """Manages adaptive batch sizing based on memory pressure."""
+
     _MAX_DECISION_TRACE_ENTRIES = 128
+
     def __init__(
         self,
         initial_batch_size: int,
@@ -54,19 +56,23 @@ class BatchMemoryManagerService:
         self.min_batch_size_used = initial_batch_size
         self._decision_index = 0
         self._decision_trace: list[MemoryDecisionTraceEntry] = []
+
     @property
     def decision_trace(self) -> tuple[MemoryDecisionTraceEntry, ...]:
         """Return bounded adaptive-memory decisions for replay diagnostics."""
         return tuple(self._decision_trace)
+
     def decision_trace_dicts(self) -> tuple[JsonDict, ...]:
         """Return JSON-serializable adaptive-memory decisions."""
         return tuple(entry.to_dict() for entry in self._decision_trace)
+
     def get_check_interval(self) -> int:
         """Get interval for memory pressure checks."""
         if self._memory_config:
             check_interval: int = self._memory_config.check_interval_records
             return check_interval
         return 100
+
     def check_pressure(
         self, current_size: int, check_interval: int, records_fetched: int
     ) -> int:
@@ -85,6 +91,7 @@ class BatchMemoryManagerService:
         if records_fetched % check_interval != 0:
             return current_size
         return self._adjust(current_size, record_index=records_fetched)
+
     def maybe_recover(self, current_size: int) -> int:
         """Try to recover batch size after processing."""
         if not self.enabled:
@@ -99,6 +106,7 @@ class BatchMemoryManagerService:
             )
             return current_size
         return self._try_recover(current_size, record_index=None)
+
     def _adjust(self, current_size: int, *, record_index: int | None) -> int:
         """Adjust batch size based on memory pressure."""
         if self._memory_monitor:
@@ -138,8 +146,10 @@ class BatchMemoryManagerService:
             reason=reason,
         )
         return adjusted_size
+
     def _estimate_from_config(self, current_size: int) -> int:
         return estimate_from_config(self._memory_config, current_size)
+
     def _try_recover(self, current_size: int, *, record_index: int | None) -> int:
         """Try to recover batch size after pressure is relieved."""
         if self._memory_monitor:
@@ -184,6 +194,7 @@ class BatchMemoryManagerService:
             reason="already_at_initial_batch_size",
         )
         return current_size
+
     def _record_decision(
         self,
         *,

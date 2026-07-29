@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 class _FilteredFetchState(Protocol):
     """Structural contract for FilteredDataSource fetch helpers."""
+
     _data_source: DataSourcePort
     _filter_config: InputFilterConfig
     _filter_ids: list[str] | None
@@ -25,6 +26,7 @@ class _FilteredFetchState(Protocol):
     _valid_combinations: frozenset[tuple[str, ...]] | None
     _filter_fields: tuple[str, ...] | None
     _fallback_mapping: dict[str, str] | None
+
     def _ensure_filterable_adapter(self, mode: str) -> None:
         """Check adapter supports the requested filtering mode."""
         ...

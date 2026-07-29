@@ -175,9 +175,7 @@ def _collect_alert_fixture_coverage(
     return tested_alerts, firing_alerts, non_firing_alerts
 
 
-def _records_mentioned_in_expr(
-    expr: str, record_definitions: set[str]
-) -> set[str]:
+def _records_mentioned_in_expr(expr: str, record_definitions: set[str]) -> set[str]:
     import re
 
     return {

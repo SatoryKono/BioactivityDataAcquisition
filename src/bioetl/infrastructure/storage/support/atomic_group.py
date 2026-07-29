@@ -63,7 +63,8 @@ class AtomicWriteGroup:
         except (OSError, ValueError, TypeError, RuntimeError) as e:
             self._cleanup_uncommitted(committed)
             raise AtomicWriteError(
-                target, f"Commit failed after {len(committed)} files: {e}"  # pyright: ignore[reportPossiblyUnboundVariable]
+                target,
+                f"Commit failed after {len(committed)} files: {e}",  # pyright: ignore[reportPossiblyUnboundVariable]
             ) from e
         finally:
             self._pending.clear()

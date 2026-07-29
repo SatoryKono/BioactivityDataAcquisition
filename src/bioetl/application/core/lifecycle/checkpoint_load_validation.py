@@ -29,11 +29,13 @@ OperationErrors = type[BaseException] | tuple[type[BaseException], ...]
 
 class CheckpointValidationProtocol(Protocol):
     """Internal service attributes required by checkpoint validation helpers."""
+
     _logger: LoggerPort
     _pipeline_name: str
     _compatibility_policy: CheckpointCompatibilityPolicy
     _compatibility_service: CheckpointCompatibilityService | None
     _current_metadata: CheckpointMetadata | None
+
     @property
     def _operation_errors(self) -> OperationErrors: ...
     def _emit_checkpoint_load_status(self, status: str) -> None: ...

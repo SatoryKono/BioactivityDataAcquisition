@@ -104,6 +104,7 @@ def _apply_runtime_dq_outcomes(
         select_highest_priority_disposition,
     )
     from bioetl.domain.types.dq_contracts import DQDisposition
+
     outcomes = evaluate_dq_rules_for_record(silver_record, dq_config)
     if not outcomes:
         return silver_record

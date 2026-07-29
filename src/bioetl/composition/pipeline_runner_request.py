@@ -113,9 +113,7 @@ def build_pipeline_create_runner_request_from_kwargs(
                 kwargs.get("control_plane"),
             ),
             manifest_id=cast(str | None, kwargs.get("manifest_id")),
-            execution_fingerprint=cast(
-                str | None, kwargs.get("execution_fingerprint")
-            ),
+            execution_fingerprint=cast(str | None, kwargs.get("execution_fingerprint")),
             config_hashes=cast(
                 "tuple[str | None, str | None, str | None]",
                 kwargs.get(
@@ -149,9 +147,7 @@ def build_pipeline_create_runner_request_from_kwargs(
                 str | None,
                 kwargs.get("input_snapshot_fingerprint"),
             ),
-            filter_config=cast(
-                "InputFilterConfig | None", kwargs.get("filter_config")
-            ),
+            filter_config=cast("InputFilterConfig | None", kwargs.get("filter_config")),
             config=cast("PipelineYamlConfig | None", kwargs.get("config")),
             cached_bronze=cast(
                 "CachedBronzeContext | None",

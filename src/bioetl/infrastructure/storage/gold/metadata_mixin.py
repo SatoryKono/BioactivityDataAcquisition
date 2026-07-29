@@ -41,15 +41,21 @@ class GoldWriterMetadataMixin:
 
     logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
     _audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)
-    _metadata_coordinator: MetadataCoordinatorPort | None = cast(Any, None)  # Any: host default (PD4)
+    _metadata_coordinator: MetadataCoordinatorPort | None = cast(
+        Any, None
+    )  # Any: host default (PD4)
     _lineage_store: LineageStorePort | None = cast(Any, None)  # Any: host default (PD4)
     _metadata_writer: MetadataWriterPort = cast(Any, None)  # Any: host default (PD4)
     _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
     _flat_structure: bool = cast(Any, None)  # Any: host default (PD4)
     _transform_version: str | None = cast(Any, None)  # Any: host default (PD4)
     _transform_steps: tuple[str, ...] = cast(Any, None)  # Any: host default (PD4)
-    _load_gold_writer_module: Callable[[], ModuleType] = cast(Any, None)  # Any: host default (PD4)
-    _run_in_executor: Callable[..., Awaitable[object]] = cast(Any, None)  # Any: host default (PD4)
+    _load_gold_writer_module: Callable[[], ModuleType] = cast(
+        Any, None
+    )  # Any: host default (PD4)
+    _run_in_executor: Callable[..., Awaitable[object]] = cast(
+        Any, None
+    )  # Any: host default (PD4)
 
     async def _log_gold_audit(
         self,

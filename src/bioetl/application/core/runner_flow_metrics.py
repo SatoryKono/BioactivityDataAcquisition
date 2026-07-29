@@ -20,6 +20,7 @@ def record_output_ready(host: _PipelineRunnerFlowHostProtocol) -> None:
     from bioetl.application.observability.pipeline_metrics import (
         PipelineMetricsRecorder,
     )
+
     output_count = max(
         0,
         host.execution_metrics.get("records_gold", 0),
@@ -48,6 +49,7 @@ def record_flow_invariants(
     from bioetl.application.observability.pipeline_metrics import (
         PipelineMetricsRecorder,
     )
+
     pipeline_metrics = PipelineMetricsRecorder(
         host._services.metrics,
         host._config.pipeline_name,

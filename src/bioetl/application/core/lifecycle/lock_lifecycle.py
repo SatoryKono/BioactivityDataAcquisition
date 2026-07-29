@@ -30,6 +30,7 @@ class _LockRuntimeHostProtocol(Protocol):
     _heartbeat: HeartbeatTask | None
     _acquired_at: float | None
     _fencing_token: FencingToken | None
+
     def get_context(self) -> LockContext | None: ...
 
 

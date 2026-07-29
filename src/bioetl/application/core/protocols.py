@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 
 class TransformCallback(Protocol):
     """Bronze to Silver transformation callback."""
+
     def __call__(
         self,
         context: PipelineContext,
@@ -40,6 +41,7 @@ class TransformCallback(Protocol):
 
 class GoldFilterCallback(Protocol):
     """Filter callback to determine if Silver record should go to Gold."""
+
     def __call__(
         self,
         context: PipelineContext,
@@ -53,6 +55,7 @@ class GoldTransformCallback(Protocol):
     """Silver to Gold transformation callback.
     Removes JSON string fields and prepares record for Gold layer.
     """
+
     def __call__(
         self,
         context: PipelineContext,
@@ -75,6 +78,7 @@ class TransformerProtocol(Protocol):
         ...         # Transform logic here
         ...         return silver_record
     """
+
     async def transform(
         self,
         context: PipelineContext,

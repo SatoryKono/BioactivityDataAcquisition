@@ -62,6 +62,12 @@ def build_processed_records_table_payload(
             {
                 "parameter": spec.parameter,
                 "value": _support.display_token(spec.parameter, value_text),
+                # Canonical field name is ``percentage`` (historical typo
+                # ``percintage`` retained as a deprecated alias for one release).
+                "percentage": _support.display_token(
+                    spec.parameter,
+                    percentage_text,
+                ),
                 "percintage": _support.display_token(
                     spec.parameter,
                     percentage_text,

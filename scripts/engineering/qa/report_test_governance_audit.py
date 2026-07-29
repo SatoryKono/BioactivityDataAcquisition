@@ -1253,9 +1253,7 @@ def _assemble_test_governance_payload(
         "compatibility_examples": snapshot.compatibility_files[:25],
         "uuid4_call_sites": snapshot.uuid4_call_sites,
         "date_today_call_sites": snapshot.date_today_call_sites,
-        "critical_behavior_envelope_count": len(
-            snapshot.critical_behavior_envelopes
-        ),
+        "critical_behavior_envelope_count": len(snapshot.critical_behavior_envelopes),
         "critical_behavior_envelope_assertion_gap_count": assertion_gap_count,
         "critical_behavior_envelopes": snapshot.critical_behavior_envelopes,
         "assertion_branch_reachability": {
@@ -1268,9 +1266,7 @@ def _assemble_test_governance_payload(
         },
         "unreviewed_assertion_bypass_count": unreviewed_assertion_bypass_count,
         "assertion_branch_reachability_percent": branch_reachability_percent,
-        "fixture_asset_duplication": _collect_fixture_asset_duplication(
-            snapshot.root
-        ),
+        "fixture_asset_duplication": _collect_fixture_asset_duplication(snapshot.root),
         "parse_errors": snapshot.parse_errors,
     }
     return {

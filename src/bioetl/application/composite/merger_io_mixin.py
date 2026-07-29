@@ -40,8 +40,12 @@ class MergeIOMixin(MergeMetricsRecorderMixin, MergeOutputWriterMixin):
     # -- Host-class attributes (set by MergeService.__init__) --
     _config: MergeConfig = cast(Any, None)  # Any: host default (PD4)
     _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
-    _field_group_registry: FieldGroupRegistry | None = cast(Any, None)  # Any: host default (PD4)
-    _cross_validator: EnrichmentCrossValidator | None = cast(Any, None)  # Any: host default (PD4)
+    _field_group_registry: FieldGroupRegistry | None = cast(
+        Any, None
+    )  # Any: host default (PD4)
+    _cross_validator: EnrichmentCrossValidator | None = cast(
+        Any, None
+    )  # Any: host default (PD4)
     _gold_schema: Any | None = cast(Any, None)  # Any: host default (PD4)
     _join_planner: JoinPlannerService = cast(Any, None)  # Any: host default (PD4)
 

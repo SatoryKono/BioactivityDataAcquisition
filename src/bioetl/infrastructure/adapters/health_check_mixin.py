@@ -30,7 +30,7 @@ __all__ = [
 import asyncio
 import time
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters._health_check_observability import (

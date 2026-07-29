@@ -24,6 +24,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class PipelineMetadataServicesProtocol(Protocol):
     """Optional metadata collaborators used after persistence stages."""
+
     metadata_coordinator: MetadataCoordinatorPort | None
     metadata_writer: MetadataWriterPort | None
 
@@ -31,6 +32,7 @@ class PipelineMetadataServicesProtocol(Protocol):
 @runtime_checkable
 class PipelineDQServicesProtocol(Protocol):
     """Optional DQ/reporting collaborators exposed by the aggregate service bag."""
+
     dq_monitor: DQMonitorPort | None
     bronze_dq_analyzer: BronzeDQAnalyzerPort | None
     silver_dq_analyzer: SilverDQAnalyzerPort | None
@@ -55,6 +57,7 @@ class PipelinePostrunServicesProtocol(
     Protocol,
 ):
     """Services surface required by postrun collaborator resolution."""
+
     storage: StorageMaintenancePort
 
 

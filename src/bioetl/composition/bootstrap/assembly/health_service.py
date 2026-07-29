@@ -3,15 +3,22 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.health_service import HealthService
 from bioetl.composition.bootstrap.assembly.health_server import (
     HealthServerDependencies,
     create_health_server_dependencies,
 )
+from bioetl.composition.composite_api import load_pipeline_config
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceFactory,
+)
+from bioetl.composition.providers.provider_registry import (
+    resolve_provider_registry,
+)
+from bioetl.composition.providers._registry_protocols import (
+    ProviderDataSourceAccessProtocol,
 )
 from bioetl.composition.providers.registration import (
     resolve_provider_assembly_support,
@@ -29,6 +36,10 @@ __all__ = [
     "create_health_service",
 ]
 
+# Providers whose registry adapter_class is a composite DataSourcePort that must
+# be built through data_source_creator (not raw adapter_class(**kwargs)).
+_DATA_SOURCE_CREATOR_HEALTH_PROVIDERS = frozenset({"uniprot_idmapping"})
+
 
 @dataclass(frozen=True, slots=True)
 class _HealthCheckDataSourceFactory:
@@ -43,6 +54,9 @@ class _HealthCheckDataSourceFactory:
         return DataSourceFactory.list_providers()
 
     def create(self, provider: str) -> DataSourcePort:
+        if provider in _DATA_SOURCE_CREATOR_HEALTH_PROVIDERS:
+            return self._create_via_data_source_creator(provider)
+
         support = resolve_provider_assembly_support(None)
         http_client = support.create_http_client(
             provider,
@@ -55,6 +69,22 @@ class _HealthCheckDataSourceFactory:
             logger=self.logger,
             settings=self.settings,
             metrics=self.metrics,
+        )
+
+    def _create_via_data_source_creator(self, provider: str) -> DataSourcePort:
+        """Build composite providers (e.g. ID mapping) for health probes."""
+        registry = cast(
+            ProviderDataSourceAccessProtocol,
+            resolve_provider_registry(None, ensure_ready=True),
+        )
+        pipeline_config = load_pipeline_config(provider)
+        return registry.create_data_source(
+            provider,
+            settings=self.settings,
+            pipeline_config=pipeline_config,
+            logger=self.logger,
+            metrics=self.metrics,
+            pipeline_name=f"health_{provider}",
         )
 
 

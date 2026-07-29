@@ -22,10 +22,16 @@ from bioetl.application.core.batch_processing_runtime import (
     execute_with_layer_span,
     get_source_metadata,
 )
+from bioetl.application.core.batch_runtime_failure_policy import (
+    OPERATION_ERRORS as _RF005_SHARED_FAILURE_POLICY,
+)
 from bioetl.application.core.batch_transformer import TransformResult
 from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BatchID, BronzeRecord, RunID
+
+# RF-005: keep support surface routed through shared runtime failure policy.
+_SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
 
 __all__ = ["BatchProcessingSupportService"]
 if TYPE_CHECKING:
@@ -47,6 +53,10 @@ if TYPE_CHECKING:
 
 class BatchProcessingSupportService:
     """Encapsulate per-batch transform/write tracing choreography."""
+
+    # RF-005 shared failure policy binding (imported for architectural routing).
+    _failure_policy = _SHARED_FAILURE_POLICY
+
     def __init__(
         self,
         *,
@@ -91,12 +101,14 @@ class BatchProcessingSupportService:
         self._run_id = run_id
         self._domain_event_emitter = domain_event_emitter
         self._debug_export_service = debug_export_service
+
     def get_source_metadata(self, query_string: str | None) -> SourceMetadata | None:
         return get_source_metadata(
             data_source=self._services.data_source,
             logger=self._logger,
             query_string=query_string,
         )
+
     async def write_bronze_layer(
         self,
         *,
@@ -140,6 +152,7 @@ class BatchProcessingSupportService:
             occurred_at=ingestion_ts,
         )
         return result
+
     async def transform_and_track_metrics(
         self,
         *,
@@ -157,6 +170,7 @@ class BatchProcessingSupportService:
             transform_result=transform_result,
         )
         return transform_result
+
     async def write_silver_gold_concurrent(
         self,
         *,
@@ -181,6 +195,7 @@ class BatchProcessingSupportService:
             ingestion_ts=ingestion_ts,
             bronze_refs=bronze_refs,
         )
+
     async def _execute_with_span(
         self,
         name: str,
@@ -197,6 +212,7 @@ class BatchProcessingSupportService:
             count=count,
             on_error=on_error,
         )
+
     async def _execute_transform_with_span(
         self, *, records: list[BronzeRecord], batch_id: BatchID, start_index: int
     ) -> TransformResult:
@@ -207,5 +223,6 @@ class BatchProcessingSupportService:
             batch_id=batch_id,
             start_index=start_index,
         )
+
     def emit_domain_event(self, event: DomainEvent) -> None:
         emit_domain_event(self._domain_event_emitter, event)

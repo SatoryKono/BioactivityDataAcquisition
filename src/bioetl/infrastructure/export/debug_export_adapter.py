@@ -76,9 +76,7 @@ class DebugExportAdapter:
             except ModuleNotFoundError as exc:
                 if exc.name != "openpyxl":
                     raise
-                xlsx_skip_reason = (
-                    "openpyxl is not installed; CSV artifacts remain the source of truth"
-                )
+                xlsx_skip_reason = "openpyxl is not installed; CSV artifacts remain the source of truth"
             else:
                 workbook_path = candidate_path
                 file_paths.append(str(workbook_path))

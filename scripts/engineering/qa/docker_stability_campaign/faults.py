@@ -400,9 +400,7 @@ marker.unlink(missing_ok=True)
                 min(30.0, remaining),
                 contract=self.contract,
             )
-            ready = int(last.get("returncode", 1)) == 0 and last.get(
-                "summary_ok", True
-            )
+            ready = int(last.get("returncode", 1)) == 0 and last.get("summary_ok", True)
             if ready:
                 last["wait_healthy"] = True
                 last["polls"] = sequence

@@ -24,7 +24,9 @@ class UniProtAdapterMetadataMixin:
     # Host-class attributes (provided by UniProtAdapter.__init__)
     api_key: str | None = cast(Any, None)  # Any: host attr default (PD6)
     base_url: str = cast(Any, None)  # Any: host attr default (PD6)
-    _request_collector: APIRequestCollector = cast(Any, None)  # Any: host attr default (PD6)
+    _request_collector: APIRequestCollector = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
 
     def _get_health_endpoint(self) -> str:
         """Return health check endpoint.

@@ -17,6 +17,7 @@ FieldCoercionPolicy = Literal["default", "no_string_coercion"]
 @dataclass(frozen=True, slots=True, kw_only=True)
 class FieldPolicySpec:
     """Shared resolved field-policy contract surface."""
+
     optional: bool
     optional_sources: tuple[OptionalitySource, ...]
     empty_as_missing: bool | None = None
@@ -33,8 +34,10 @@ class ResolvedFieldPolicy(FieldPolicySpec):
 @dataclass(frozen=True, slots=True)
 class FieldPolicyResolver:
     """Resolve explicit field-level structural policy with config fallback."""
+
     optionality_resolver: ConfigSurfaceOptionalityResolver
     explicit_field_policy: dict[str, object]
+
     @classmethod
     def from_domain_config(cls, domain_config: object) -> FieldPolicyResolver:
         """Build resolver from the pipeline domain config."""
@@ -44,6 +47,7 @@ class FieldPolicyResolver:
             ),
             explicit_field_policy=_collect_explicit_field_policy(domain_config),
         )
+
     def resolve(self, field_name: str) -> ResolvedFieldPolicy:
         """Resolve the effective structural policy for one business field."""
         explicit_policy = self.explicit_field_policy.get(field_name)

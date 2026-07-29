@@ -21,13 +21,25 @@ _WRITE_SPAN_ERRORS = (Exception,)
 
 class BatchWriterTracingMixin:
     """Operational cross-cutting concerns for BatchWriter."""
-    _lock_validator: Any = cast(Any, None)  # Any: concrete host injects an optional async validator
+
+    _lock_validator: Any = cast(
+        Any, None
+    )  # Any: concrete host injects an optional async validator
     _provider: str = ""
     _entity_type: str = ""
-    _context: Any = cast(Any, None)  # Any: concrete BatchWriter supplies the host context
-    _tracer: Any = cast(Any, None)  # Any: tracing port returns an OTel-compatible runtime object
-    _error_classifier: Any = cast(Any, None)  # Any: concrete host supplies the classifier
-    _batch_metrics: Any = cast(Any, None)  # Any: concrete host supplies the metrics recorder
+    _context: Any = cast(
+        Any, None
+    )  # Any: concrete BatchWriter supplies the host context
+    _tracer: Any = cast(
+        Any, None
+    )  # Any: tracing port returns an OTel-compatible runtime object
+    _error_classifier: Any = cast(
+        Any, None
+    )  # Any: concrete host supplies the classifier
+    _batch_metrics: Any = cast(
+        Any, None
+    )  # Any: concrete host supplies the metrics recorder
+
     async def _validate_lock(self, operation: str) -> None:
         """Validate lock ownership before write operation."""
         lock_validator = self._lock_validator
@@ -42,6 +54,7 @@ class BatchWriterTracingMixin:
                 run_id=str(self._context.run_id),
             )
             raise LockNotHeldError(operation, f"lock:{table_name}")
+
     def _start_span(
         self, name: str, layer: str, record_count: int, batch_id: BatchID | None = None
     ) -> SpanType | None:
@@ -61,9 +74,11 @@ class BatchWriterTracingMixin:
         )
         span.__enter__()
         return span
+
     def _end_span(self, span: SpanType | None, error: Exception | None = None) -> None:
         """Close tracing span with optional exception metadata."""
         close_span(span, error)
+
     def log_and_track_write_error(
         self,
         layer: str,

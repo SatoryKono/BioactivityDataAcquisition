@@ -5,8 +5,6 @@ This lock is process-local and only coordinates tasks within one process.
 
 from __future__ import annotations
 
-from typing import override
-
 __all__ = ["MemoryLock"]
 
 

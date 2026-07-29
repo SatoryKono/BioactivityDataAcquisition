@@ -35,18 +35,21 @@ class PipelineStorageProtocol(
 @runtime_checkable
 class PipelineDataSourceServicesProtocol(Protocol):
     """Services surface required by extraction and source-metadata helpers."""
+
     data_source: DataSourcePort
 
 
 @runtime_checkable
 class PipelineHealthServicesProtocol(PipelineDataSourceServicesProtocol, Protocol):
     """Infrastructure services required by preflight health checks."""
+
     storage: PipelineStorageProtocol
 
 
 @runtime_checkable
 class PipelineRuntimeControlServicesProtocol(Protocol):
     """Runtime lifecycle services required to coordinate one managed run."""
+
     lock: LockPort
     checkpoint: CheckpointPort
     quarantine: QuarantinePort
@@ -59,6 +62,7 @@ class PipelineManagedRuntimeServicesProtocol(
     Protocol,
 ):
     """Managed run services that participate in async startup/shutdown."""
+
     async def __aenter__(self) -> Self: ...
     async def __aexit__(
         self,

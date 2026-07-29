@@ -37,7 +37,9 @@ class OpenAlexAdapterHelpersMixin:
     # Host-class attributes (provided by OpenAlexAdapter.__post_init__)
     mailto: str | None = cast(Any, None)  # Any: host attr default (PD6)
     api_key: str | None = cast(Any, None)  # Any: host attr default (PD6)
-    _request_collector: APIRequestCollector = cast(Any, None)  # Any: host attr default (PD6)
+    _request_collector: APIRequestCollector = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
 
     def _build_headers(self) -> dict[str, str]:
         """Build request headers for OpenAlex API.

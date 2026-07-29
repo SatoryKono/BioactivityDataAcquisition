@@ -35,20 +35,25 @@ FRAMEWORK_MANAGED_FIELDS = frozenset(
     }
 )
 
+
 @dataclass(frozen=True, slots=True)
 class ResolvedOptionalityResult:
     """Resolved optionality and its source tags for one field."""
+
     optional: bool
     sources: tuple[OptionalitySource, ...]
+
 
 @dataclass(frozen=True, slots=True)
 class ConfigSurfaceOptionalityResolver:
     """Resolve field optionality from current config and DQ semantics."""
+
     explicit_optional_overrides: dict[str, bool]
     silver_required_fields: frozenset[str]
     dq_required_fields: frozenset[str]
     dq_not_null_fields: frozenset[str]
     dq_key_nonnullable_fields: frozenset[str]
+
     @classmethod
     def from_domain_config(
         cls, domain_config: object
@@ -69,6 +74,7 @@ class ConfigSurfaceOptionalityResolver:
             ),
             dq_key_nonnullable_fields=_collect_nonnullable_key_fields(domain_config),
         )
+
     def resolve(self, field_name: str) -> ResolvedOptionalityResult:
         """Resolve effective optionality for one business field."""
         explicit_override = self.explicit_optional_overrides.get(field_name)
@@ -95,8 +101,10 @@ class ConfigSurfaceOptionalityResolver:
             return ResolvedOptionalityResult(optional=False, sources=tuple(sources))
         return ResolvedOptionalityResult(optional=True, sources=("default_optional",))
 
+
 # Backward-compatible alias retained for existing imports/tests.
 ResolvedOptionality = ResolvedOptionalityResult
+
 
 def _collect_explicit_optional_overrides(domain_config: object) -> dict[str, bool]:
     """Collect field-level optionality overrides from domain config."""
@@ -112,6 +120,7 @@ def _collect_explicit_optional_overrides(domain_config: object) -> dict[str, boo
             overrides[field_name] = optional
     return overrides
 
+
 def _collect_silver_required_fields(domain_config: object) -> frozenset[str]:
     """Collect required fields explicitly declared in silver filters."""
     silver_filters = getattr(domain_config, "silver_filters", None)
@@ -119,12 +128,14 @@ def _collect_silver_required_fields(domain_config: object) -> frozenset[str]:
         return frozenset()
     return frozenset(getattr(silver_filters, "required_fields", ()))
 
+
 def _iter_dq_field_validations(domain_config: object) -> tuple[object, ...]:
     """Return DQ field validations as a stable iterable."""
     dq_config = getattr(domain_config, "dq", None)
     if dq_config is None:
         return ()
     return tuple(getattr(dq_config, "field_validations", ()))
+
 
 def _collect_dq_fields(
     domain_config: object,
@@ -141,6 +152,7 @@ def _collect_dq_fields(
             fields.add(field_name)
     return frozenset(fields)
 
+
 def _collect_nonnullable_key_fields(domain_config: object) -> frozenset[str]:
     """Collect DQ key fields explicitly marked as non-nullable."""
     dq_config = getattr(domain_config, "dq", None)
@@ -155,9 +167,11 @@ def _collect_nonnullable_key_fields(domain_config: object) -> frozenset[str]:
             fields.add(field_name)
     return frozenset(fields)
 
+
 def is_framework_managed_field(field_name: str) -> bool:
     """Return True for framework/system-managed Silver columns."""
     return field_name in FRAMEWORK_MANAGED_FIELDS
+
 
 __all__ = [
     "FRAMEWORK_MANAGED_FIELDS",

@@ -71,10 +71,7 @@ def write_debug_csv(
         writer.writeheader()
         for row in rows:
             writer.writerow(
-                {
-                    header: normalize_csv_value(row.get(header))
-                    for header in headers
-                }
+                {header: normalize_csv_value(row.get(header)) for header in headers}
             )
 
 

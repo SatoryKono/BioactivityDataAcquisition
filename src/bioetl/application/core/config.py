@@ -36,12 +36,14 @@ class LockConfig:
         wait_timeout: Maximum time to wait for lock in seconds.
         heartbeat_interval: Interval for sending heartbeats in seconds.
     """
+
     lock_key: str
     exclusive: bool = False
     lock_ttl: int = 90
     wait_for_lock: bool = True
     wait_timeout: int = 300
     heartbeat_interval: int = 30
+
     @classmethod
     def for_pipeline(
         cls,
@@ -74,6 +76,7 @@ class LockConfig:
             Configured LockConfig instance.
         """
         from bioetl.domain.types import RunType
+
         exclusive = run_type in (RunType.BACKFILL, RunType.REBUILD)
         lock_key = f"lock:{provider}_{entity_type}"
         if exclusive:

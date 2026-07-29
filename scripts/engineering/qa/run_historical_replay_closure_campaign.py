@@ -548,6 +548,7 @@ def _maybe_auto_certify(
 def main() -> int:
     args = _parse_args()
     settings = get_settings()
+    output_root = Path(settings.data_dir) / "output" / "control"  # type: ignore[attr-defined]
     (
         manifest_store,
         ledger_store,

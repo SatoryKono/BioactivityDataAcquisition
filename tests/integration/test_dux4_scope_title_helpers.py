@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from tests.integration._grafana_test_support import (
     SCOPE_TITLE_PREFIX_RE,
     index_panels_by_base_title,
@@ -10,14 +12,12 @@ from tests.integration._grafana_test_support import (
     strip_scope_title_prefix,
 )
 
+pytestmark = pytest.mark.integration
+
 
 def test_strip_scope_title_prefix_removes_ascii_markers() -> None:
-    assert (
-        strip_scope_title_prefix("[NOW/HEALTH] Status") == "Status"
-    )
-    assert (
-        strip_scope_title_prefix("[RANGE/EVIDENCE] Monitor Foo") == "Monitor Foo"
-    )
+    assert strip_scope_title_prefix("[NOW/HEALTH] Status") == "Status"
+    assert strip_scope_title_prefix("[RANGE/EVIDENCE] Monitor Foo") == "Monitor Foo"
     assert strip_scope_title_prefix("Status") == "Status"
 
 

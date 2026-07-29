@@ -6,8 +6,9 @@ from __future__ import annotations
 
 import contextlib
 import time
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, cast
 
+from bioetl.domain.mixin_host import as_mixin_host
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.common.doi_helpers import (
     strip_doi_transport_prefix,
@@ -18,7 +19,6 @@ from bioetl.infrastructure.adapters.common.response_shapes import (
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
-from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -41,7 +41,9 @@ class SemanticScholarBatchRequestMixin:
         """
         if not dois:
             return
-        results = await as_mixin_host(self)._fetch_batch_with_nulls(dois)  # Any: mixin host surface (self attrs/methods)
+        results = await as_mixin_host(self)._fetch_batch_with_nulls(
+            dois
+        )  # Any: mixin host
         for record in results:
             if record is not None:
                 yield record
@@ -61,8 +63,13 @@ class SemanticScholarBatchRequestMixin:
         if not dois:
             return []
 
-        formatted_ids = [f"DOI:{as_mixin_host(self)._normalize_doi(doi)}" for doi in dois if doi]  # Any: mixin host surface (self attrs/methods)
-        return await as_mixin_host(self)._fetch_batch_raw(formatted_ids)  # Any: mixin host surface (self attrs/methods)
+        formatted_ids = [
+            f"DOI:{as_mixin_host(self)._normalize_doi(doi)}" for doi in dois if doi
+        ]  # Any: mixin host
+        return cast(
+            "list[BronzeRecord | None]",
+            await as_mixin_host(self)._fetch_batch_raw(formatted_ids),
+        )  # Any: mixin host
 
     async def _fetch_batch_raw(
         self,
@@ -76,23 +83,27 @@ class SemanticScholarBatchRequestMixin:
         Returns:
             List of BronzeRecord or None values from the batch API response array.
         """
-        as_mixin_host(self)._logger.debug(  # Any: mixin host surface (self attrs/methods)
+        as_mixin_host(self)._logger.debug(  # Any: mixin host
             "semanticscholar_batch_request",
             paper_count=len(paper_ids),
         )
-        url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/batch?fields={as_mixin_host(self).fields}"  # Any: mixin host surface (self attrs/methods)
+        url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/batch?fields={as_mixin_host(self).fields}"  # Any: mixin host
         json_body = {"ids": paper_ids}
 
         start_time = time.perf_counter()
-        with as_mixin_host(self)._adapter_metrics.measure_request("/paper/batch"):  # Any: mixin host surface (self attrs/methods)
-            response = await as_mixin_host(self)._http_client.post(  # Any: mixin host surface (self attrs/methods)
+        with as_mixin_host(self)._adapter_metrics.measure_request(
+            "/paper/batch"
+        ):  # Any: mixin host
+            response = await as_mixin_host(self)._http_client.post(  # Any: mixin host
                 url,
                 json=json_body,
-                headers=as_mixin_host(self)._build_headers(),  # Any: mixin host surface (self attrs/methods)
+                headers=as_mixin_host(self)._build_headers(),  # Any: mixin host
             )
         duration_ms = (time.perf_counter() - start_time) * 1000
         with contextlib.suppress(Exception):
-            as_mixin_host(self)._request_collector.record_from_response(response, duration_ms)  # Any: mixin host surface (self attrs/methods)
+            as_mixin_host(self)._request_collector.record_from_response(
+                response, duration_ms
+            )  # Any: mixin host
 
         return [
             record if isinstance(record, dict) else None

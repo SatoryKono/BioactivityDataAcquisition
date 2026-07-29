@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 class _IDMappingFetchState(Protocol):
     """Structural contract for IDMappingDataSource fetch helpers."""
+
     _client: IDMappingPort
     _id_source_reader: IDMappingSourceReaderPort
     _input_path: str

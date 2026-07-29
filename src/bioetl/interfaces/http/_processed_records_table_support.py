@@ -278,7 +278,15 @@ def padded_count_text(value: float | None, width: int) -> str:
 
 
 def display_token(parameter: str, display_text: str) -> str:
-    return f"{parameter}|{display_text}"
+    """Return the operator-facing cell text for Processed Records.
+
+    Historically this returned ``f"{parameter}|{display_text}"`` for a single
+    concatenated column. Grafana now renders separate ``parameter`` / ``value`` /
+    ``percentage`` columns, so the parameter prefix is redundant and looks like a
+    fill bug in the UI. ``parameter`` is kept for call-site compatibility.
+    """
+    _ = parameter
+    return display_text
 
 
 def row_status(

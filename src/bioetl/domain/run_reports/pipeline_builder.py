@@ -25,8 +25,12 @@ class PipelineRunReportOptionalBlocks:
     io: Mapping[str, Any] | None = None  # Any: dynamic operator report block
     quarantine: Mapping[str, Any] | None = None  # Any: dynamic operator report block
     dq_summary: Mapping[str, Any] | None = None  # Any: dynamic operator report block
-    contract_summary: Mapping[str, Any] | None = None  # Any: dynamic operator report block
-    schema_versions: Mapping[str, Any] | None = None  # Any: dynamic operator report block
+    contract_summary: Mapping[str, Any] | None = (
+        None  # Any: dynamic operator report block
+    )
+    schema_versions: Mapping[str, Any] | None = (
+        None  # Any: dynamic operator report block
+    )
     stage_timings: Mapping[str, Any] | None = None  # Any: dynamic operator report block
     http_summary: Mapping[str, Any] | None = None  # Any: dynamic operator report block
     performance: Mapping[str, Any] | None = None  # Any: dynamic operator report block

@@ -8,13 +8,13 @@ __all__ = ["_SemanticScholarSearchFetchMixin"]
 
 import contextlib
 import time
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING
 
+from bioetl.domain.mixin_host import as_mixin_host
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
-from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -34,7 +34,9 @@ class _SemanticScholarSearchFetchMixin:
         page_size = min(100, limit or 100)
         fetched = 0
         while True:
-            records, next_offset = await as_mixin_host(self)._fetch_search_page(  # Any: mixin host surface (self attrs/methods)
+            records, next_offset = await as_mixin_host(
+                self
+            )._fetch_search_page(  # Any: mixin host
                 query=query,
                 page_size=page_size,
                 current_offset=current_offset,
@@ -68,18 +70,26 @@ class _SemanticScholarSearchFetchMixin:
         """Fetch one search page and emit request telemetry."""
         params: JsonDict = {
             "query": query or "*",
-            "fields": as_mixin_host(self).fields,  # Any: mixin host surface (self attrs/methods)
+            "fields": as_mixin_host(self).fields,  # Any: mixin host
             "offset": current_offset,
             "limit": page_size,
         }
         url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/search"
         start_time = time.perf_counter()
-        with as_mixin_host(self)._adapter_metrics.measure_request("/paper/search"):  # Any: mixin host surface (self attrs/methods)
-            response = await as_mixin_host(self)._http_client.get_once(  # Any: mixin host surface (self attrs/methods)
-                url, params=params, headers=as_mixin_host(self)._build_headers()  # Any: mixin host surface (self attrs/methods)
+        with as_mixin_host(self)._adapter_metrics.measure_request(
+            "/paper/search"
+        ):  # Any: mixin host
+            response = await as_mixin_host(
+                self
+            )._http_client.get_once(  # Any: mixin host
+                url,
+                params=params,
+                headers=as_mixin_host(self)._build_headers(),  # Any: mixin host
             )
         duration_ms = (time.perf_counter() - start_time) * 1000
         with contextlib.suppress(Exception):
-            as_mixin_host(self)._request_collector.record_from_response(response, duration_ms)  # Any: mixin host surface (self attrs/methods)
+            as_mixin_host(self)._request_collector.record_from_response(
+                response, duration_ms
+            )  # Any: mixin host
         data = response.json()
         return list(data.get("data", [])), data.get("next")

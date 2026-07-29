@@ -14,8 +14,8 @@ from bioetl.domain.types import JsonDict
 class HTTPClientRequestMethodsMixin:
     """Thin request verb wrappers around retry-orchestrated request flow."""
 
-    rate_limiter: Any  # Any: mixed-in concrete type provides async acquire()  # pyright: ignore[reportUninitializedInstanceVariable]
-    circuit_breaker: Any  # Any: mixed-in concrete type provides async call()  # pyright: ignore[reportUninitializedInstanceVariable]
+    rate_limiter: Any  # Any: host provides async acquire()
+    circuit_breaker: Any  # Any: host provides async call()
 
     async def _request_with_retry(
         self,

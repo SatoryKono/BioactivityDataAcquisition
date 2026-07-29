@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True, slots=True)
 class PostrunFailurePolicySpec:
     """Structured log policy for one postrun failure category."""
+
     event: str
     strict_reason: str
     strict_reason_code: str
@@ -89,8 +90,10 @@ def apply_postrun_failure_policy_or_raise(
 
 class PostrunStrictValidationMixin:
     """Compatibility mixin for postrun collaborators exposing strict mode check."""
+
     if TYPE_CHECKING:
         _runtime: object = cast(Any, None)  # Any: host default (PD4)
+
     def _is_strict_validation_enabled(self) -> bool:
         """Compatibility wrapper around shared strict-mode evaluation."""
         return is_strict_validation_enabled(self._runtime)
@@ -98,9 +101,13 @@ class PostrunStrictValidationMixin:
 
 class PostrunFailureHandlingMixin(PostrunStrictValidationMixin):
     """Shared allowlisted failure handling for postrun collaborators."""
+
     if TYPE_CHECKING:
         _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
-        _FAILURE_POLICY: PostrunFailurePolicySpec = cast(Any, None)  # Any: host default (PD4)
+        _FAILURE_POLICY: PostrunFailurePolicySpec = cast(
+            Any, None
+        )  # Any: host default (PD4)
+
     def _handle_allowlisted_failure(
         self,
         error: BaseException,

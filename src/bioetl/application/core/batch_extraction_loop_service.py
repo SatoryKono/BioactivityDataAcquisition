@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 
 class BatchProcessingServiceProtocol(Protocol):
     """Minimal extraction contract required by loop orchestration."""
+
     def extract_records(
         self,
         *,
@@ -41,6 +42,7 @@ class BatchProcessingServiceProtocol(Protocol):
 
 class _BatchStateUpdater(Protocol):
     """Async batch processing callback used by the extraction loop."""
+
     def __call__(
         self,
         records: list[BronzeRecord],
@@ -50,6 +52,7 @@ class _BatchStateUpdater(Protocol):
 
 class _BatchProgressState(Protocol):
     """Mutable progress state consumed by loop helpers."""
+
     records_fetched: int
     records_bronze: int
     records_silver: int
@@ -58,6 +61,7 @@ class _BatchProgressState(Protocol):
 
 class BatchExtractionLoopService:
     """Runs the canonical extraction loop for batch execution."""
+
     def __init__(
         self,
         *,
@@ -83,6 +87,7 @@ class BatchExtractionLoopService:
         self._progress_service = progress_service
         self._checkpoint_recovery_service = checkpoint_recovery_service
         self._checkpoint_interval = checkpoint_interval
+
     async def run(
         self,
         execution_context: BatchExecutionContext,
@@ -126,6 +131,7 @@ class BatchExtractionLoopService:
             if callable(aclose):
                 from collections.abc import Awaitable, Callable
                 from typing import cast
+
                 aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
                 await aclose_fn()
         await flush_remaining_batch(

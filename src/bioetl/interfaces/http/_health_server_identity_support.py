@@ -151,7 +151,16 @@ def _provider_entity_version(
     requested_pipeline: str,
     values: dict[str, object | None],
 ) -> str | None:
-    scope = _text(values.get("provider_entity")) or requested_pipeline
+    """Return provider.entity [version] when known.
+
+    Do **not** fall back to the pipeline selector: that made ID panels show
+    ``Provider.Entity [Version] = chembl_activity`` when the manifest was
+    unresolved, which reads as a fill bug rather than "not available".
+    """
+    _ = requested_pipeline
+    scope = _text(values.get("provider_entity"))
+    if not scope:
+        return None
     version = _text(values.get("pipeline_version"))
     return f"{scope} [{version}]" if version else scope
 

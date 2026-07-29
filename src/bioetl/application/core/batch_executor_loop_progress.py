@@ -22,6 +22,7 @@ from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 
 class _BatchProgressReporterProtocol(Protocol):
     """Minimal progress reporting contract required by extraction loop helpers."""
+
     def report_progress(
         self,
         *,
@@ -31,15 +32,19 @@ class _BatchProgressReporterProtocol(Protocol):
         records_filtered_out: int,
     ) -> None: ...
 
+
 class _BatchProgressSnapshot(Protocol):
     """Minimal counter snapshot used for progress reporting."""
+
     records_fetched: int
     records_bronze: int
     records_silver: int
     records_filtered_out: int
 
+
 class _BatchCheckpointRecoveryProtocol(Protocol):
     """Minimal checkpoint contract required by extraction loop helpers."""
+
     def save_checkpoint_now(
         self,
         *,
@@ -53,6 +58,7 @@ class _BatchCheckpointRecoveryProtocol(Protocol):
         resume_offset: int,
         checkpoint_interval: int,
     ) -> Awaitable[None]: ...
+
 
 def build_batch_progress_payload(
     *,
@@ -69,6 +75,7 @@ def build_batch_progress_payload(
         "records_filtered_out": records_filtered_out,
     }
 
+
 def report_batch_progress(
     *,
     progress_service: _BatchProgressReporterProtocol,
@@ -84,6 +91,7 @@ def report_batch_progress(
         )
     )
 
+
 def build_shutdown_checkpoint_payload(
     *,
     records_fetched: int,
@@ -94,6 +102,7 @@ def build_shutdown_checkpoint_payload(
         "records_fetched": records_fetched,
         "resume_offset": resume_offset,
     }
+
 
 async def ensure_extraction_not_shutdown(
     *,
@@ -113,6 +122,7 @@ async def ensure_extraction_not_shutdown(
     )
     raise PipelineShutdownError("Shutdown during extraction")
 
+
 def build_periodic_checkpoint_payload(
     *,
     records_fetched: int,
@@ -125,6 +135,7 @@ def build_periodic_checkpoint_payload(
         "resume_offset": resume_offset,
         "checkpoint_interval": checkpoint_interval,
     }
+
 
 async def save_periodic_checkpoint_for_loop(
     *,

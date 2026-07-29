@@ -18,6 +18,7 @@ __all__ = ["PreSilverFinalizerProtocol", "finalize_pre_silver_record"]
 
 class PreSilverFinalizerProtocol(Protocol):
     """Normalization surface required to finalize a staged Silver payload."""
+
     @property
     def content_hash_policy_by_version(
         self,
@@ -25,12 +26,15 @@ class PreSilverFinalizerProtocol(Protocol):
     def normalize_business_data(self, business_data: JsonDict) -> JsonDict:
         """Normalize extracted business data before Silver finalization."""
         ...
+
     def compute_content_hashes_by_version(self, record: JsonDict) -> dict[str, str]:
         """Compute rollout-aware content hashes for normalized business data."""
         ...
+
     def compute_content_hash(self, record: JsonDict) -> str:
         """Compute the active content hash for normalized business data."""
         ...
+
     def project_normalization_findings(
         self,
         record: JsonDict,
@@ -40,6 +44,7 @@ class PreSilverFinalizerProtocol(Protocol):
     ) -> JsonDict:
         """Project transient normalization findings into a Silver record."""
         ...
+
     def _should_project_hashes_by_version(self) -> bool:
         """Return whether versioned hash payload should be projected."""
         ...

@@ -40,10 +40,18 @@ class DQReportGenerationMixin:
 
     _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
     _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
-    _bronze_analyzer: BronzeDQAnalyzerPort | None = cast(Any, None)  # Any: host default (PD4)
-    _silver_analyzer: SilverDQAnalyzerPort | None = cast(Any, None)  # Any: host default (PD4)
-    _gold_analyzer: GoldDQAnalyzerPort | None = cast(Any, None)  # Any: host default (PD4)
-    _report_writer: DQReportWriterPort | None = cast(Any, None)  # Any: host default (PD4)
+    _bronze_analyzer: BronzeDQAnalyzerPort | None = cast(
+        Any, None
+    )  # Any: host default (PD4)
+    _silver_analyzer: SilverDQAnalyzerPort | None = cast(
+        Any, None
+    )  # Any: host default (PD4)
+    _gold_analyzer: GoldDQAnalyzerPort | None = cast(
+        Any, None
+    )  # Any: host default (PD4)
+    _report_writer: DQReportWriterPort | None = cast(
+        Any, None
+    )  # Any: host default (PD4)
 
     @staticmethod
     def _path_to_str(path: Path | None) -> str | None:

@@ -75,6 +75,7 @@ class PipelineService:
         ...     logger=logger,
         ... )
     """
+
     data_source: DataSourcePort
     storage: PipelineStorageProtocol
     lock: LockPort
@@ -93,10 +94,12 @@ class PipelineService:
     gold_dq_analyzer: GoldDQAnalyzerPort | None = None
     dq_report_writer: DQReportWriterPort | None = None
     dq_report_service: DQReportService | None = None
+
     def __post_init__(self) -> None:
         """Validate that all services are provided."""
         # Validation is implicit - dataclass requires all non-default fields
         # Runtime checks happen via Protocol structural typing
+
     async def __aenter__(self) -> Self:
         """Enter the async context manager, initializing services.
         Returns:
@@ -104,6 +107,7 @@ class PipelineService:
         """
         await self.data_source.__aenter__()
         return self
+
     async def __aexit__(
         self,
         exc_type: type[BaseException] | None,
@@ -117,6 +121,7 @@ class PipelineService:
             exc_tb: Traceback if an error occurred, otherwise None.
         """
         await self.aclose()
+
     async def aclose(self) -> None:
         """Gracefully close async I/O resources.
         Observability is intentionally closed later by ``PipelineRunner`` after the

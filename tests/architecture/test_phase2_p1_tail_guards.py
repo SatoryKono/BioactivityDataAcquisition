@@ -30,6 +30,8 @@ ALLOWED_BROAD_EXCEPTION_POLICIES: dict[str, frozenset[str]] = {
     "src/bioetl/infrastructure/storage/delta_reader.py": frozenset(),
     "src/bioetl/infrastructure/storage/silver/support.py": frozenset(),
     "src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py": frozenset(),
+    # Thread-boundary deltalake runner must capture all call failures for await.
+    "src/bioetl/infrastructure/storage/silver/delta_write_execution.py": frozenset(),
     # HTTP server network boundary handlers need broad exception handling to return
     # 500 responses instead of crashing the server on unexpected errors.
     "src/bioetl/interfaces/http/health_server_http_mixin.py": frozenset(),

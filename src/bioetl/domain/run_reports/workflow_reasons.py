@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any, SupportsIndex, SupportsInt, TypeGuard, cast
+from typing import Any, SupportsIndex, SupportsInt, TypeGuard
 
 from bioetl.domain.run_reports.models import WorkflowExecutionRow
 
@@ -14,9 +14,7 @@ def normalize_top_reasons(
     """Normalize and bound child pipeline reason payloads."""
     if not _is_reason_sequence(raw):
         return ()
-    # Explicit cast after TypeGuard for analyzers that ignore TypeGuard (S5864).
-    sequence = cast(Sequence[object], raw)
-    items = (_normalize_reason(entry) for entry in sequence)
+    items = (_normalize_reason(entry) for entry in raw)
     return tuple(item for item in items if item is not None)[:3]
 
 

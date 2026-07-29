@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import cast, Any
+from typing import Any, cast
 
 from bioetl.domain.types import GoldRecord, GoldSchemaPolicyByVersion
 from bioetl.infrastructure.storage.gold.writer_protocols import (

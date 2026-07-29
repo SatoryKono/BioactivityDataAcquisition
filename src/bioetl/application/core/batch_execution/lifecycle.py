@@ -25,6 +25,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True, slots=True)
 class BatchExecutionContext:
     """Execution-scoped inputs shared across the batch executor loop."""
+
     limit: int | None
     query: str | None
     offset: int | None
@@ -34,6 +35,7 @@ class BatchExecutionContext:
 @dataclass(frozen=True, slots=True)
 class BatchExecutionLifecycleContext:
     """Top-level execution state shared across success and failure handlers."""
+
     execution_context: BatchExecutionContext
     root_span: Span | None
 
@@ -41,6 +43,7 @@ class BatchExecutionLifecycleContext:
 @dataclass(frozen=True, slots=True)
 class BatchExecutionFinalizationContext:
     """Execution snapshot used by success, shutdown, and error finalization."""
+
     root_span: Span | None
     resume_offset: int
     total_fetched: int
@@ -55,11 +58,13 @@ class BatchExecutionFinalizationContext:
 
 class _BatchProgressInitializerProtocol(Protocol):
     """Minimal progress initialization contract for executor lifecycle."""
+
     async def initialize_tracking(self, limit: int | None) -> None: ...
 
 
 class _BatchCheckpointRecoveryLifecycleProtocol(Protocol):
     """Checkpoint finalization contract used by executor lifecycle."""
+
     async def save_checkpoint_on_exception(
         self,
         *,
@@ -77,6 +82,7 @@ class _BatchCheckpointRecoveryLifecycleProtocol(Protocol):
 
 class _BatchTracingLifecycleProtocol(Protocol):
     """Tracing contract used by executor lifecycle orchestration."""
+
     def start_execution_span(self) -> Span | None: ...
     def set_execution_stats(
         self,
@@ -112,6 +118,7 @@ def prepare_execution_context(
 
 class BatchExecutionLifecycleService:
     """Coordinates executor start and finalize flows."""
+
     def __init__(
         self,
         *,
@@ -123,6 +130,7 @@ class BatchExecutionLifecycleService:
         self._progress_service = progress_service
         self._tracing_manager = tracing_manager
         self._checkpoint_recovery_service = checkpoint_recovery_service
+
     async def start_execution(
         self,
         execution_context: BatchExecutionContext,
@@ -133,6 +141,7 @@ class BatchExecutionLifecycleService:
             execution_context=execution_context,
             root_span=self._tracing_manager.start_execution_span(),
         )
+
     async def finalize_execution(
         self,
         execution_state: BatchExecutionCountersSnapshot,
@@ -179,6 +188,7 @@ class BatchExecutionLifecycleService:
             memory_decision_trace=finalization_context.memory_decision_trace,
         )
         self._tracing_manager.end_span(finalization_context.root_span)
+
     @staticmethod
     def _build_finalization_context(
         *,

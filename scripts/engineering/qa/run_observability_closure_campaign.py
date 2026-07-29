@@ -1441,11 +1441,7 @@ def _collect_attempt_evidence(inputs: _AttemptEvidenceInputs) -> AttemptEvidence
     terminal_rows = _terminal_rows_for_runs(ledger_rows, run_ids)
     metrics, details, _terminal_signature = _terminal_payload(terminal_rows)
     ledger_paths = tuple(
-        inputs.data_root
-        / "output"
-        / "control"
-        / "run_ledger"
-        / f"{manifest_id}.jsonl"
+        inputs.data_root / "output" / "control" / "run_ledger" / f"{manifest_id}.jsonl"
         for manifest_id in manifest_ids
     )
     checkpoint_paths, output_paths = _attempt_output_partitions(
@@ -1481,9 +1477,7 @@ def _collect_attempt_evidence(inputs: _AttemptEvidenceInputs) -> AttemptEvidence
         terminal_ledger_events=terminal_events,
         manifest_artifacts=_file_artifacts(manifest_paths, root=inputs.data_root),
         ledger_artifacts=_file_artifacts(ledger_paths, root=inputs.data_root),
-        checkpoint_artifacts=_file_artifacts(
-            checkpoint_paths, root=inputs.data_root
-        ),
+        checkpoint_artifacts=_file_artifacts(checkpoint_paths, root=inputs.data_root),
         checkpoint_disposition=checkpoint_disposition,
         checkpoint_interval=checkpoint_interval,
         output_artifacts=output_artifacts,
@@ -2865,7 +2859,9 @@ def _load_finalize_report(
     source_provenance: dict[str, object],
 ) -> dict[str, object]:
     """Load and validate the awaiting-evidence campaign report for finalization."""
-    expected_report_path = (audit_root / OBSERVABILITY_CLOSURE_CAMPAIGN_REPORT).resolve()
+    expected_report_path = (
+        audit_root / OBSERVABILITY_CLOSURE_CAMPAIGN_REPORT
+    ).resolve()
     if report_path != expected_report_path or not report_path.is_file():
         raise ValueError(
             "--finalize-report must name AUDIT_ROOT/"
@@ -3218,9 +3214,7 @@ def _build_execute_report(inputs: _ExecuteReportInputs) -> dict[str, object]:
             "attempt": asdict(inputs.online_attempt),
         },
         "workflow_phase_gate": {
-            "satisfied": all(
-                phase.satisfies_closure for phase in inputs.phases
-            ),
+            "satisfied": all(phase.satisfies_closure for phase in inputs.phases),
             "phases": [asdict(phase) for phase in inputs.phases],
         },
         "standalone_fixture_evidence": inputs.standalone_fixture_evidence,

@@ -163,7 +163,7 @@ def bind_manifest_logger_context(
     if not isinstance(rebound_observability, ObservabilityBundle):
         return inputs
     try:
-        return cast("RunnerInputs", replace(inputs, observability=rebound_observability))
+        return replace(inputs, observability=rebound_observability)
     except (TypeError, AttributeError):
         return inputs
 

@@ -31,15 +31,16 @@ DEFAULT_REPO: Final[str] = "BioactivityDataAcquisition"
 ISSUES_DIR: Final[Path] = REPO_ROOT / ".github" / "ISSUES"
 ISSUE_PACK: Final[Path] = ISSUES_DIR / "TEST-SYS-2026-07-29-ISSUE-PACK.md"
 PUBLISH_JSON: Final[Path] = (
-    REPO_ROOT / "reports" / "quality" / "test-system-audit-2026-07-29-issue-publish.json"
+    REPO_ROOT
+    / "reports"
+    / "quality"
+    / "test-system-audit-2026-07-29-issue-publish.json"
 )
 AUDIT_REPORT: Final[str] = (
     "reports/grok/review_test_system_architecture_audit_20260729_FULL.md"
 )
 
-CODE_ORDER: Final[tuple[str, ...]] = tuple(
-    f"TEST-SYS-{i:02d}" for i in range(0, 11)
-)
+CODE_ORDER: Final[tuple[str, ...]] = tuple(f"TEST-SYS-{i:02d}" for i in range(0, 11))
 
 
 @dataclass(frozen=True)
@@ -176,14 +177,8 @@ def _load_drafts() -> list[IssueDraft]:
 def _search_existing(*, token: str, code: str) -> IssueRecord | None:
     import urllib.parse
 
-    query = (
-        f"repo:{DEFAULT_OWNER}/{DEFAULT_REPO} "
-        f'"{code}" in:title type:issue'
-    )
-    url = (
-        f"{API_BASE}/search/issues?"
-        f"q={urllib.parse.quote(query)}&per_page=5"
-    )
+    query = f'repo:{DEFAULT_OWNER}/{DEFAULT_REPO} "{code}" in:title type:issue'
+    url = f"{API_BASE}/search/issues?q={urllib.parse.quote(query)}&per_page=5"
     payload = _github_request(method="GET", url=url, token=token)
     items = payload.get("items") or []
     for item in items:
@@ -257,9 +252,7 @@ def _is_pack_table_separator(line: str) -> bool:
     return line.startswith("|------") or line.startswith("| ---")
 
 
-def _update_pack_table_lines(
-    text: str, by_code: dict[str, IssueRecord]
-) -> list[str]:
+def _update_pack_table_lines(text: str, by_code: dict[str, IssueRecord]) -> list[str]:
     lines: list[str] = []
     in_table = False
     for line in text.splitlines():
@@ -295,7 +288,9 @@ _ASSIGNEES_LINE_RE = re.compile(r"^(assignees:\s*\S.*)$", flags=re.MULTILINE)
 def _stamp_one_issue_frontmatter(path: Path, rec: IssueRecord) -> None:
     content = path.read_text(encoding="utf-8")
     if _GITHUB_ISSUE_LINE_RE.search(content):
-        content = _GITHUB_ISSUE_LINE_RE.sub(f"github_issue: {rec.number}", content, count=1)
+        content = _GITHUB_ISSUE_LINE_RE.sub(
+            f"github_issue: {rec.number}", content, count=1
+        )
     else:
         content = _ASSIGNEES_LINE_RE.sub(
             rf"\1\ngithub_issue: {rec.number}",

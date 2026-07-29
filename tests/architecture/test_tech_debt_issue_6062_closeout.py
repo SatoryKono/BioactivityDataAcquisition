@@ -26,7 +26,9 @@ GOLD_WRITER = ROOT / "src/bioetl/infrastructure/storage/gold_writer.py"
 CLOSEOUT = ROOT / "reports/quality/tech-debt-issue-6062-closeout.json"
 
 _EXPECTED_RETAINED_IMPORTS = {
-    "DeltaTable: from deltalake import DeltaTable as _DeltaTable",
+    # Function-scoped lazy loader renamed to PEP8 snake_case (scope id only;
+    # import statement and monkeypatch surface write_deltalake unchanged).
+    "delta_table: from deltalake import DeltaTable as _DeltaTable",
     "write_deltalake: from deltalake import write_deltalake as _write_deltalake",
 }
 

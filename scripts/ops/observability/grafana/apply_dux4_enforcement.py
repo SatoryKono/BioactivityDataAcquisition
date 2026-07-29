@@ -50,9 +50,10 @@ def prepend_description(panel: dict, sentence: str) -> bool:
 
 def find_row(panels: list | None, substr: str) -> dict | None:
     for panel, _ in walk(panels):
-        if panel.get("type") == "row" and substr.lower() in (
-            panel.get("title") or ""
-        ).lower():
+        if (
+            panel.get("type") == "row"
+            and substr.lower() in (panel.get("title") or "").lower()
+        ):
             return panel
     return None
 
@@ -122,9 +123,7 @@ def write_v0_artifacts() -> None:
     print("override inventory", inv["panel_count"], risk_counts)
 
     matrix_rows: list[dict] = []
-    risk_index = {
-        (row["file"], row["panel_id"]): row["risks"] for row in override_rows
-    }
+    risk_index = {(row["file"], row["panel_id"]): row["risks"] for row in override_rows}
     for path in sorted(DASH.glob("*.json")):
         data = load(path)
         for panel, collapsed in walk(data.get("panels") or []):
@@ -568,7 +567,7 @@ See also `contracts/selector-contracts.yaml` and `navigation-links.yaml`.
     (DOCS / "dux4-visual-enforcement-closeout.md").write_text(
         """# DUX4 visual enforcement closeout
 
-**Epic:** #7088  
+**Epic:** #7088
 **Date:** 2026-07-29
 
 ## Delivered

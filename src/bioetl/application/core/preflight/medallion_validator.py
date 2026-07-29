@@ -25,6 +25,7 @@ _GOLD_SEMANTIC_WRITE_MODES_EXPECTED = "one of: append, overwrite, scd2"
 
 class MedallionConfigValidator:
     """Validates Medallion architecture invariants and write-mode policies."""
+
     def __init__(
         self,
         config: PipelineConfig,
@@ -34,6 +35,7 @@ class MedallionConfigValidator:
         self._config = config
         self._logger = logger
         self._write_mode_policy = write_mode_policy
+
     def validate_medallion_config(
         self,
         runtime: RuntimeConfig,
@@ -85,6 +87,7 @@ class MedallionConfigValidator:
         )
         self._log_medallion_validation_result(errors, runtime)
         return errors
+
     def validate_write_modes(self) -> list[ConfigValidationError]:
         """Validate that configured write modes are allowed by policy.
         Returns:
@@ -115,6 +118,7 @@ class MedallionConfigValidator:
             errors, silver_mode_value, gold_mode_value
         )
         return errors
+
     def _validate_gold_semantic_write_mode(
         self, gold_mode_value: str
     ) -> list[ConfigValidationError]:
@@ -128,6 +132,7 @@ class MedallionConfigValidator:
                 rule="RULES §2.1: Gold layer allowed modes",
             )
         ]
+
     def _log_write_mode_validation_result(
         self,
         errors: list[ConfigValidationError],
@@ -146,6 +151,7 @@ class MedallionConfigValidator:
             silver_mode=silver_mode_value,
             gold_mode=gold_mode_value,
         )
+
     def _log_medallion_validation_result(
         self, errors: list[ConfigValidationError], runtime: RuntimeConfig
     ) -> None:

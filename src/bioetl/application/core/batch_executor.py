@@ -58,6 +58,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort
 
+
 @dataclass(frozen=True, slots=True)
 class BatchExecutorDependencies:
     """Grouped collaborators required by BatchExecutor."""
@@ -72,6 +73,7 @@ class BatchExecutorDependencies:
         BatchExecutorRuntimeState
     )
 
+
 @dataclass(frozen=True, slots=True)
 class BatchResult:
     """Result of processing a batch of records."""
@@ -80,6 +82,7 @@ class BatchResult:
     silver_count: int
     gold_count: int
     quarantined_count: int
+
 
 class BatchExecutor(BatchExecutorRuntimeStateMixin, _BatchExecutorDQMixin):  # pyright: ignore[reportIncompatibleVariableOverride]
     """Unified executor for ETL batches: fetch -> transform -> write with tracing."""

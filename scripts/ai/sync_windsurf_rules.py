@@ -164,9 +164,7 @@ def _render_cursor_rules(
     return rendered, issues
 
 
-def _check_rendered_targets(
-    rendered: dict[Path, str], *, root: Path
-) -> list[str]:
+def _check_rendered_targets(rendered: dict[Path, str], *, root: Path) -> list[str]:
     issues: list[str] = []
     for target, content in rendered.items():
         if not target.exists():

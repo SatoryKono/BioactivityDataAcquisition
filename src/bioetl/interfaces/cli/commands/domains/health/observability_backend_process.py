@@ -195,7 +195,9 @@ def _build_detached_backend_popen_kwargs(
             sw_hide = int(getattr(subprocess_module, "SW_HIDE", 0))
             if startf_use_show_window:
                 existing_dw_flags = (
-                    int(cast(Any, startupinfo).dwFlags)  # Any: Windows STARTUPINFO duck-type
+                    int(
+                        cast(Any, startupinfo).dwFlags
+                    )  # Any: Windows STARTUPINFO duck-type
                     if hasattr(startupinfo, "dwFlags")
                     else 0
                 )
@@ -203,7 +205,9 @@ def _build_detached_backend_popen_kwargs(
                     existing_dw_flags | startf_use_show_window
                 )
             if has_sw_hide:
-                cast(Any, startupinfo).wShowWindow = (  # Any: Windows STARTUPINFO duck-type
+                cast(
+                    Any, startupinfo
+                ).wShowWindow = (  # Any: Windows STARTUPINFO duck-type
                     sw_hide
                 )
             kwargs["startupinfo"] = startupinfo

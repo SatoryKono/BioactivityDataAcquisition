@@ -33,6 +33,8 @@ def left_strip_block(text: str) -> str:
         else:
             out.append(line)
     return "\n".join(out)
+
+
 ISSUES = ROOT / ".github" / "ISSUES"
 BODIES = ISSUES / "_dux5_bodies"
 PACK = ISSUES / "DUX5-2026-07-29-DASHBOARD-TYPOGRAPHY-READING-ORDER-ISSUE-PACK.md"
@@ -98,12 +100,10 @@ OVERLAP = {
         "endpoints (Provider/Overview/Trust/Run Explorer)."
     ),
     "DUX5-05": (
-        "New residual: Value #* headers + clipping "
-        "(Incident/Pipeline/Run/Trust)."
+        "New residual: Value #* headers + clipping (Incident/Pipeline/Run/Trust)."
     ),
     "DUX5-06": (
-        "Related to DUX4-25/30 density; adds short-ID + Copy without Prom "
-        "cardinality."
+        "Related to DUX4-25/30 density; adds short-ID + Copy without Prom cardinality."
     ),
     "DUX5-10": (
         "Related to DUX4-40 token contract; typography floors + no auto-shrink "
@@ -116,8 +116,7 @@ OVERLAP = {
     "DUX5-12": "Title/copy normalization after DUX4-01 title harness.",
     "DUX5-13": "Nav/selector redesign residual after DUX4-22 nav bus restore.",
     "DUX5-14": (
-        "Enforces DUX4-23: compact identity strip; Run Explorer owns forensic "
-        "detail."
+        "Enforces DUX4-23: compact identity strip; Run Explorer owns forensic detail."
     ),
     "DUX5-20": "Copy rewrite pass once status cards exist.",
     "DUX5-21": "Table projection residual after DUX4-25.",
@@ -365,9 +364,7 @@ def write_pack(
     for it in items:
         dux = CODE_MAP[it["code"]]
         pri, wave = meta[dux]
-        matrix_rows.append(
-            f"| {dux} | _TBD_ | {pri} | {wave} | {titles[dux]} |"
-        )
+        matrix_rows.append(f"| {dux} | _TBD_ | {pri} | {wave} | {titles[dux]} |")
     matrix = "\n".join(matrix_rows)
     return left_strip_block(
         f"""\

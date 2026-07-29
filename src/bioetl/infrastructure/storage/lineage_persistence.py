@@ -6,7 +6,7 @@ from __future__ import annotations
 import asyncio
 from collections import Counter
 from collections.abc import Callable, Mapping, Sequence
-from typing import TYPE_CHECKING, TypeVar, cast, Any
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from bioetl.domain.behavior.composite_metadata_helpers import (
     parse_composite_field_sources,

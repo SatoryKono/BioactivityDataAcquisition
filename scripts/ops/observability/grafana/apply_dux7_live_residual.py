@@ -112,8 +112,8 @@ def write_docs() -> None:
     path.write_text(
         """# DUX7 live residual protocol (a11y / contrast / theme / copy / screenshots)
 
-**Status:** active  
-**Wave:** DUX7  
+**Status:** active
+**Wave:** DUX7
 **Predecessor residual:** DUX6 live-only items in `dux6-residual-readability.md`
 
 ## Scope
@@ -159,8 +159,7 @@ python scripts/ops/observability/grafana/run_dux7_live_residual.py --output-dir 
     text = residual.read_text(encoding="utf-8")
     if "dux7-live-residual-protocol.md" not in text:
         residual.write_text(
-            text.rstrip()
-            + "\n\n## DUX7 live residual\n\n"
+            text.rstrip() + "\n\n## DUX7 live residual\n\n"
             "Live residual closeout protocol: "
             "[dux7-live-residual-protocol.md](dux7-live-residual-protocol.md).\n",
             encoding="utf-8",

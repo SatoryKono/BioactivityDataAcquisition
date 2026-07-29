@@ -18,7 +18,7 @@ __all__ = [
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import cast, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.ports import (
@@ -207,7 +207,8 @@ class HealthService:
         try:
             adapter = self._factory.create(provider)
 
-            # Use runtime checkable protocol to verify adapter implements HealthCheckPort
+            # Prefer HealthCheckPort.check_health(); fall back to health_check()
+            # used by composite data sources (e.g. IDMappingDataSource).
             if isinstance(adapter, HealthCheckPort):
                 result: HealthCheckResult = await self._run_adapter_health_check(
                     adapter
@@ -221,7 +222,16 @@ class HealthService:
                     checked_at=result.checked_at or self.clock.now(),
                 )
 
-            # Adapter doesn't implement HealthCheckPort
+            health_check = getattr(adapter, "health_check", None)
+            if callable(health_check):
+                status = await self._run_simple_health_check(adapter, health_check)
+                return HealthResult(
+                    provider=provider,
+                    status=str(getattr(status, "value", status)).lower(),
+                    checked_at=self.clock.now(),
+                )
+
+            # Adapter doesn't implement a recognized health probe
             self.logger.warning(
                 "Adapter does not implement HealthCheckPort",
                 provider=provider,
@@ -256,17 +266,41 @@ class HealthService:
         entered async client lifecycle. Adapters do not always own that entry
         point for one-shot diagnostics checks.
         """
+        async with self._health_probe_context(adapter):
+            return await adapter.check_health()
+
+    async def _run_simple_health_check(
+        self,
+        adapter: object,
+        health_check: Any,  # Any: duck-typed health_check coroutine callable
+    ) -> object:
+        """Run composite ``health_check()`` probes with lifecycle context."""
+        async with self._health_probe_context(adapter):
+            return await health_check()
+
+    def _health_probe_context(self, adapter: object) -> Any:  # Any: async context mgr
+        """Return async context that opens adapter/client for health probes."""
+        # Prefer full adapter lifecycle (opens nested HTTP clients).
+        if callable(getattr(adapter, "__aenter__", None)) and callable(
+            getattr(adapter, "__aexit__", None)
+        ):
+            return cast(Any, adapter)  # Any: duck-typed async context manager
+
         http_client = getattr(adapter, "http_client", None)
         if http_client is None:
             http_client = getattr(adapter, "_http_client", None)
-        enter = getattr(http_client, "__aenter__", None)
-        exit_ = getattr(http_client, "__aexit__", None)
-        if http_client is not None and callable(enter) and callable(exit_):
-            # Narrowed non-None client; cast for static OptionalContextManager.
-            client = cast(Any, http_client)  # Any: duck-typed async HTTP client context
-            async with client:
-                return await adapter.check_health()
-        return await adapter.check_health()
+        if http_client is None:
+            nested = getattr(adapter, "_client", None)
+            if nested is not None:
+                http_client = getattr(nested, "http_client", None)
+        if (
+            http_client is not None
+            and callable(getattr(http_client, "__aenter__", None))
+            and callable(getattr(http_client, "__aexit__", None))
+        ):
+            return cast(Any, http_client)  # Any: duck-typed async HTTP client context
+
+        return _NullAsyncContext()
 
     def list_available_providers(self) -> list[str]:
         """List all available providers that can be health checked.
@@ -277,3 +311,18 @@ class HealthService:
         providers: list[str] = self._factory.list_providers()
         self.logger.debug("Listed available providers", count=len(providers))
         return providers
+
+
+class _NullAsyncContext:
+    """No-op async context for probes that manage their own transport."""
+
+    async def __aenter__(self) -> _NullAsyncContext:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: object,
+    ) -> None:
+        del exc_type, exc, tb

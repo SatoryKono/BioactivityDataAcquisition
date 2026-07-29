@@ -22,45 +22,45 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 _WRITE_SPAN_ERRORS = SHARED_OPERATION_ERRORS
+
+
 class BatchWriterIOMixin:
     """Layer write orchestration extracted from BatchWriter."""
-    # Host attributes initialized by BatchWriter.__init__ (PD3 structural host).
-    _context: Any = cast(Any, None)  # Any: concrete BatchWriter supplies the host context
-    _storage: Any = cast(Any, None)  # Any: concrete BatchWriter supplies its write port
-    _config: Any = cast(Any, None)  # Any: concrete BatchWriter supplies processor configuration
+
+    # Host attributes from BatchWriter + sibling mixins (PD3 structural host; Any:
+    # concrete MRO supplies runtime types without NotImplementedError stubs).
+    _context: Any = cast(Any, None)
+    _storage: Any = cast(Any, None)
+    _config: Any = cast(Any, None)
     _provider: str = ""
     _entity_type: str = ""
-    _silver_schema: Any = cast(Any, None)  # Any: storage accepts multiple schema implementations
-    _gold_schema: Any = cast(Any, None)  # Any: validation accepts multiple schema implementations
-    _gold_schema_policy_by_version: Any = cast(Any, None)  # Any: versioned schemas are runtime-defined
-    _gold_validator: Any = cast(Any, None)  # Any: concrete host supplies the validator port
+    _silver_schema: Any = cast(Any, None)
+    _gold_schema: Any = cast(Any, None)
+    _gold_schema_policy_by_version: Any = cast(Any, None)
+    _gold_validator: Any = cast(Any, None)
     _silver_table_name: str = ""
     _gold_table_name: str = ""
-    _table_config: Any = cast(Any, None)  # Any: concrete host supplies validated table configuration
-    _silver_mode: Any = cast(Any, None)  # Any: concrete host narrows the configured literal
-    _gold_mode: Any = cast(Any, None)  # Any: concrete host narrows the configured literal
-    # Cross-mixin collaborators provided by BatchWriterTracingMixin /
-    # BatchWriterColumnsMixin on the composed BatchWriter MRO. Declared as Any
-    # host callables so basedpyright sees them on this mixin without installing
-    # NotImplementedError stubs that would shadow real methods at runtime.
-    _validate_lock: Any = cast(Any, None)  # Any: sibling mixin supplies the method
-    _start_span: Any = cast(Any, None)  # Any: sibling mixin owns the OTel span API
-    _end_span: Any = cast(Any, None)  # Any: sibling mixin owns the OTel span API
-    _collect_record_columns: Any = cast(Any, None)  # Any: sibling mixin supplies the method
-    _resolve_layer_columns: Any = cast(Any, None)  # Any: sibling mixin supplies the method
-    _project_schema_for_layer: Any = cast(Any, None)  # Any: sibling mixin bridges schema APIs
-    _apply_renames_to_records: Any = cast(Any, None)  # Any: sibling mixin supplies the method
-    _get_schema_columns: Any = cast(Any, None)  # Any: sibling mixin bridges schema APIs
+    _table_config: Any = cast(Any, None)
+    _silver_mode: Any = cast(Any, None)
+    _gold_mode: Any = cast(Any, None)
+    _validate_lock: Any = cast(Any, None)
+    _start_span: Any = cast(Any, None)
+    _end_span: Any = cast(Any, None)
+    _collect_record_columns: Any = cast(Any, None)
+    _resolve_layer_columns: Any = cast(Any, None)
+    _project_schema_for_layer: Any = cast(Any, None)
+    _apply_renames_to_records: Any = cast(Any, None)
+    _get_schema_columns: Any = cast(Any, None)
+
     def _resolve_gold_ingestion_ts(self) -> datetime:
         """Return the deterministic timestamp anchor for Gold write side effects."""
         replay_timestamp_anchor = getattr(
             self._context, "replay_timestamp_anchor", None
         )
-        return (  # type: ignore[no-any-return]
-            replay_timestamp_anchor
-            if replay_timestamp_anchor is not None
-            else self._context.started_at
-        )
+        if replay_timestamp_anchor is not None:
+            return cast(datetime, replay_timestamp_anchor)
+        return cast(datetime, self._context.started_at)
+
     async def write_bronze(
         self,
         records: list[BronzeRecord],

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from datetime import datetime
-from typing import Literal, cast, Any
+from typing import Any, Literal, cast
 
 import pyarrow as pa
 
@@ -163,7 +163,9 @@ async def _write_merged_metadata_via_operations(
     """Write merged Silver metadata through the canonical metadata operation path."""
     if getattr(writer, "_metadata", None) is None:
         raise RuntimeError("Silver metadata operations are required")
-    if cast(Any, writer)._should_skip_silver_metadata_write(  # Any: host method duck-type
+    if cast(
+        Any, writer
+    )._should_skip_silver_metadata_write(  # Any: host method duck-type
         records=records
     ):  # type: ignore[attr-defined]
         return

@@ -95,7 +95,9 @@ class NotSupportedMultiFilterMixin:
         ...     # fetch_multi_filtered is now provided by mixin
     """
 
-    provider_name: str = cast(Any, None)  # Any: host attr default (PD3) Must be defined by the adapter class
+    provider_name: str = cast(
+        Any, None
+    )  # Any: host attr default (PD3) Must be defined by the adapter class
     unsupported_multi_filter_message: ClassVar[str | None] = None
 
     def fetch_multi_filtered(

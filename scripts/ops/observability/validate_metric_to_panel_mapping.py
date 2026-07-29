@@ -261,9 +261,7 @@ def _panel_query_execution_result(
         "$" in target.get("expr", "") for target in panel.get("targets", [])
     )
     datasource = panel.get("datasource", {})
-    datasource_type = (
-        datasource.get("type", "") if isinstance(datasource, dict) else ""
-    )
+    datasource_type = datasource.get("type", "") if isinstance(datasource, dict) else ""
     is_loki_query = datasource_type.lower() == "loki"
     if is_loki_query:
         return MetricPanelValidationResult(

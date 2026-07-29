@@ -24,11 +24,19 @@ from bioetl.interfaces.http._health_server_identity_support import (
 if TYPE_CHECKING:
     from bioetl.interfaces.http._health_server_routing_support import _HealthRoutingHost
 
-# Identity-table is the shared Grafana "ID" panel path. Bound heavy I/O so Infinity
-# panels never hang forever on large control-plane trees / slow bind mounts.
+# Identity-table is the shared Grafana "ID" panel path. Bound *heavy* I/O so
+# Infinity panels never hang forever on large control-plane trees / slow mounts.
+# Scope resolve must stay aligned with identity-evidence (no aggressive 2s cut):
+# a short resolve timeout produced ``scope_resolve_timeout`` placeholders while
+# evidence still resolved the same scope via latest_manifest_for_scope.
 _IDENTITY_CHECKPOINT_LOAD_TIMEOUT_SECONDS = 1.5
-_IDENTITY_SCOPE_RESOLVE_TIMEOUT_SECONDS = 2.0
+_IDENTITY_SCOPE_RESOLVE_TIMEOUT_SECONDS = 12.0
 _IDENTITY_EVIDENCE_BUILD_TIMEOUT_SECONDS = 1.5
+_IDENTITY_UNAVAILABLE_VALUES = {
+    "not available for current scope",
+    "not available in selected manifest",
+    "select one concrete pipeline or exact run_id",
+}
 
 
 async def handle_control_plane_identity_table(
@@ -41,6 +49,10 @@ async def handle_control_plane_identity_table(
     Lightweight path: resolve scope + optional bounded checkpoint metadata and a
     compact evidence *summary* only. Full evidence payload remains on the
     dedicated ``identity-evidence`` route.
+
+    Scope resolution uses the same ``resolve_control_plane_identity_scope`` as
+    identity-evidence, with a generous budget so Grafana ID panels do not show
+    false ``not available for current scope`` rows on warm control-plane trees.
     """
     assert host._run_manifest_port is not None
     try:
@@ -181,14 +193,31 @@ async def _build_identity_evidence_summary(
         return None
 
 
+def _identity_row_needs_timeout_value(
+    row: dict[object, object],
+    *,
+    pipeline: str,
+) -> bool:
+    """Return whether a generic identity row should expose the timeout marker."""
+    parameter = str(row.get("parameter") or "")
+    value = str(row.get("value") or "")
+    return (
+        parameter == "Provider.Entity [Version]" and value == pipeline
+    ) or value in _IDENTITY_UNAVAILABLE_VALUES
+
+
 def _timeout_identity_payload(query: dict[str, str]) -> dict[str, object]:
-    """Fail-open identity payload when scope resolution exceeds SLA."""
+    """Fail-open identity payload when scope resolution exceeds SLA.
+
+    Uses an explicit timeout marker so operators can distinguish slow control-plane
+    I/O from a true empty scope (no runs / wrong selector).
+    """
     pipeline = query.get("pipeline") or "unknown"
     run_type_raw = query.get("run_type") or ""
     run_types = (
         tuple(part.strip() for part in run_type_raw.split(",") if part.strip()) or ()
     )
-    return build_control_plane_identity_payload(
+    payload = build_control_plane_identity_payload(
         requested_pipeline=pipeline,
         resolved_manifest=None,
         selected_pipelines=(pipeline,),
@@ -198,3 +227,21 @@ def _timeout_identity_payload(query: dict[str, str]) -> dict[str, object]:
         checkpoint_metadata=None,
         identity_evidence_summary=None,
     )
+    # Rewrite generic unavailability copy on timeout so Grafana does not look like
+    # "no data for this pipeline" when the store was simply slow.
+    rows = payload.get("rows")
+    if isinstance(rows, list):
+        timeout_msg = (
+            "scope resolve timed out — retry or select exact run_id "
+            "(control-plane store slow)"
+        )
+        rewritten: list[object] = []
+        for row in rows:
+            if not isinstance(row, dict):
+                rewritten.append(row)
+                continue
+            if _identity_row_needs_timeout_value(row, pipeline=pipeline):
+                row = {**row, "value": timeout_msg}
+            rewritten.append(row)
+        payload["rows"] = rewritten
+    return payload

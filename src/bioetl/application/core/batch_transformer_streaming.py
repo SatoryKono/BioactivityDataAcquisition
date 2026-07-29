@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 class _StreamingTransformer(Protocol):
     """Structural transform contract required by the streaming helper."""
+
     async def transform_stream(
         self,
         records: list[BronzeRecord],
@@ -23,6 +24,7 @@ class _StreamingTransformer(Protocol):
 
 class StreamingBatchProcessor:
     """Memory-efficient streaming processor for large batches."""
+
     def __init__(
         self,
         transformer: _StreamingTransformer,
@@ -31,6 +33,7 @@ class StreamingBatchProcessor:
         """Initialize streaming processor."""
         self._transformer = transformer
         self._memory_monitor = memory_monitor
+
     async def process_in_chunks(
         self,
         records: list[BronzeRecord],
@@ -59,6 +62,7 @@ class StreamingBatchProcessor:
             )
             yield result
             i += len(batch_slice)
+
     def iter_records(self, records: list[BronzeRecord]) -> Iterator[BronzeRecord]:
         """Iterate over records without loading all into memory.
         Args:

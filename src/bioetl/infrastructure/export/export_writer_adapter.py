@@ -29,7 +29,9 @@ class ExportWriterAdapter(ExportWriterPort):
         output_dir_obj = Path(output_dir)
         output_dir_obj.mkdir(parents=True, exist_ok=True)
         safe_name = f"{layer}_{table_name.replace('.', '_')}"
-        arrow_table = cast(Any, table)  # Any: export writer accepts Arrow table duck-type
+        arrow_table = cast(
+            Any, table
+        )  # Any: export writer accepts Arrow table duck-type
         if fmt == "csv":
             return str(
                 _write_delimited_file(

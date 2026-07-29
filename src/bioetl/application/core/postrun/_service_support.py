@@ -65,17 +65,35 @@ class PostrunServiceSupportMixin:
     _runtime: RuntimeConfig = cast(Any, None)  # Any: host attr default (PD6)
     _context: PipelineContext = cast(Any, None)  # Any: host attr default (PD6)
     _dq_service: DataQualityService = cast(Any, None)  # Any: host attr default (PD6)
-    _lifecycle_service: MedallionLifecycleService = cast(Any, None)  # Any: host attr default (PD6)
-    _compact_orchestrator: PostrunCompactService = cast(Any, None)  # Any: host attr default (PD6)
-    _cleanup_orchestrator: PostrunCleanupService = cast(Any, None)  # Any: host attr default (PD6)
-    _dq_report_orchestrator: PostrunDQReportService = cast(Any, None)  # Any: host attr default (PD6)
-    _metadata_write_orchestrator: PostrunMetadataWriteService = cast(Any, None)  # Any: host attr default (PD6)
+    _lifecycle_service: MedallionLifecycleService = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    _compact_orchestrator: PostrunCompactService = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    _cleanup_orchestrator: PostrunCleanupService = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    _dq_report_orchestrator: PostrunDQReportService = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    _metadata_write_orchestrator: PostrunMetadataWriteService = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
     _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
     _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD6)
-    _postrun_span: Callable[[str], AbstractContextManager[Span]] = cast(Any, None)  # Any: host attr default (PD6)
-    OPERATION_ERRORS: tuple[type[BaseException], ...] = cast(Any, None)  # Any: host attr default (PD6)
-    METRIC_POSTRUN_PHASE_EVENTS_TOTAL: str = cast(Any, None)  # Any: host attr default (PD6)
-    METRIC_POSTRUN_PHASE_DURATION_SECONDS: str = cast(Any, None)  # Any: host attr default (PD6)
+    _postrun_span: Callable[[str], AbstractContextManager[Span]] = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    OPERATION_ERRORS: tuple[type[BaseException], ...] = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    METRIC_POSTRUN_PHASE_EVENTS_TOTAL: str = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    METRIC_POSTRUN_PHASE_DURATION_SECONDS: str = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
 
     def _emit_postrun_phase_observability(
         self,

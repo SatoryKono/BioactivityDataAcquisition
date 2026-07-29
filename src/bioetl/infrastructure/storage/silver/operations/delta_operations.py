@@ -41,7 +41,9 @@ class _SilverDeltaOperationFacade:
 
     logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
     _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
-    _merge_resilience_policy: SilverMergeResiliencePolicy = cast(Any, None)  # Any: host attr default (PD3)
+    _merge_resilience_policy: SilverMergeResiliencePolicy = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     @property
     def _logger(self) -> LoggerPort:

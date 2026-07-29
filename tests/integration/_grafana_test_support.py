@@ -71,10 +71,11 @@ def panel_base_title(panel: dict[str, Any]) -> str:
     return strip_scope_title_prefix(str(panel.get("title") or ""))
 
 
-def index_panels_by_base_title(panels: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+def index_panels_by_base_title(
+    panels: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
     """Map base titles to panels (last wins on duplicates)."""
     return {panel_base_title(panel): panel for panel in panels if panel.get("title")}
-
 
 
 def _add_metric_name_suffixes(

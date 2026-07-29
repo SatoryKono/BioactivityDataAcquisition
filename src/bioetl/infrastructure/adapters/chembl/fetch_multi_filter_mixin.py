@@ -8,13 +8,13 @@ __all__ = ["ChemblFetchMultiFilterMixin"]
 
 
 import itertools
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING
 
+from bioetl.domain.mixin_host import as_mixin_host
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.common.deduplication import (
     iter_deduplicated_records,
 )
-from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -39,15 +39,21 @@ class ChemblFetchMultiFilterMixin:
         Returns:
             Maximum batch size that keeps the URL within the 1000-character limit.
         """
-        batch_size: int = as_mixin_host(self)._filter_batch_size  # Any: mixin host surface (self attrs/methods)
+        batch_size: int = as_mixin_host(self)._filter_batch_size  # Any: mixin host
         while batch_size > 1:
             test_filters = {k: v[:batch_size] for k, v in filters.items()}
-            test_params = as_mixin_host(self)._build_params(0, entity_type)  # Any: mixin host surface (self attrs/methods)
-            test_params.update(as_mixin_host(self)._build_filter_in_params(test_filters))  # Any: mixin host surface (self attrs/methods)
-            if as_mixin_host(self)._get_projected_url_length(url, test_params) <= 1000:  # Any: mixin host surface (self attrs/methods)
+            test_params = as_mixin_host(self)._build_params(
+                0, entity_type
+            )  # Any: mixin host
+            test_params.update(
+                as_mixin_host(self)._build_filter_in_params(test_filters)
+            )  # Any: mixin host
+            if (
+                as_mixin_host(self)._get_projected_url_length(url, test_params) <= 1000
+            ):  # Any: mixin host
                 break
             batch_size //= 2
-            as_mixin_host(self)._logger.info(  # Any: mixin host surface (self attrs/methods)
+            as_mixin_host(self)._logger.info(  # Any: mixin host
                 "reducing_multi_filter_batch_size",
                 entity_type=entity_type,
                 new_batch_size=batch_size,
@@ -68,9 +74,13 @@ class ChemblFetchMultiFilterMixin:
         logger = getattr(self, "_logger", None)
         metrics = getattr(self, "_adapter_metrics", None)
         while True:
-            params = as_mixin_host(self)._build_params(offset, entity_type)  # Any: mixin host surface (self attrs/methods)
+            params = as_mixin_host(self)._build_params(
+                offset, entity_type
+            )  # Any: mixin host
             params.update(filter_params)
-            records, has_next = await as_mixin_host(self)._fetch_page(url, params, entity_type)  # Any: mixin host surface (self attrs/methods)
+            records, has_next = await as_mixin_host(self)._fetch_page(
+                url, params, entity_type
+            )  # Any: mixin host
             if not records:
                 break
             for record in iter_deduplicated_records(
@@ -105,22 +115,32 @@ class ChemblFetchMultiFilterMixin:
         """
         if not filters:
             return
-        url = as_mixin_host(self)._mapper.get_resource_url(entity_type)  # Any: mixin host surface (self attrs/methods)
-        pk_field = as_mixin_host(self)._get_api_pk_field(entity_type)  # Any: mixin host surface (self attrs/methods)
-        batch_size = as_mixin_host(self)._determine_multi_filter_batch_size(url, filters, entity_type)  # Any: mixin host surface (self attrs/methods)
+        url = as_mixin_host(self)._mapper.get_resource_url(
+            entity_type
+        )  # Any: mixin host
+        pk_field = as_mixin_host(self)._get_api_pk_field(entity_type)  # Any: mixin host
+        batch_size = as_mixin_host(self)._determine_multi_filter_batch_size(
+            url, filters, entity_type
+        )  # Any: mixin host
         filter_keys = list(filters.keys())
         api_filter_keys = [
-            as_mixin_host(self)._normalize_filter_field(entity_type, k) for k in filter_keys  # Any: mixin host surface (self attrs/methods)
+            as_mixin_host(self)._normalize_filter_field(entity_type, k)
+            for k in filter_keys  # Any: mixin host
         ]
         filter_batches = [
-            list(as_mixin_host(self)._batch_ids(filters[k], batch_size)) for k in filter_keys  # Any: mixin host surface (self attrs/methods)
+            list(as_mixin_host(self)._batch_ids(filters[k], batch_size))
+            for k in filter_keys  # Any: mixin host
         ]
         total_fetched = 0
         seen_ids: set[str] = set()
         for batch_combination in itertools.product(*filter_batches):
             current_filters = dict(zip(api_filter_keys, batch_combination, strict=True))
-            filter_params = as_mixin_host(self)._build_filter_in_params(current_filters)  # Any: mixin host surface (self attrs/methods)
-            async for record in as_mixin_host(self)._fetch_multi_filter_page_loop(  # Any: mixin host surface (self attrs/methods)
+            filter_params = as_mixin_host(self)._build_filter_in_params(
+                current_filters
+            )  # Any: mixin host
+            async for record in as_mixin_host(
+                self
+            )._fetch_multi_filter_page_loop(  # Any: mixin host
                 url,
                 filter_params,
                 entity_type,

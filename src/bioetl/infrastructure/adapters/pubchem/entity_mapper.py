@@ -159,7 +159,9 @@ class PubChemEntityMapper:
             "sid": substance.sid,
             "source_name": substance.source_name,
             "source_id": substance.source_id,
-            "cids": cast(Any, substance).standardized_cids,  # Any: optional substance field
+            "cids": cast(
+                Any, substance
+            ).standardized_cids,  # Any: optional substance field
             "synonyms": substance.synonyms,
         }
 

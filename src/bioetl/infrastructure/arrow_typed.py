@@ -82,7 +82,9 @@ def struct(fields: list[pa.Field]) -> pa.DataType:
     return cast(pa.DataType, pa.struct(fields))
 
 
-def schema(fields: list[pa.Field], *, metadata: dict[str, str] | None = None) -> pa.Schema:
+def schema(
+    fields: list[pa.Field], *, metadata: dict[str, str] | None = None
+) -> pa.Schema:
     if metadata is None:
         return cast(pa.Schema, pa.schema(fields))
     return cast(pa.Schema, pa.schema(fields, metadata=metadata))

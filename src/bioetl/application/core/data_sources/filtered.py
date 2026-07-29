@@ -39,6 +39,7 @@ class FilteredDataSource(
     adapters that support it, delegates all other operations to wrapped adapter.
     Multi-column filtering uses hybrid approach (server + client-side filtering).
     """
+
     def __init__(
         self,
         data_source: DataSourcePort,
@@ -61,15 +62,18 @@ class FilteredDataSource(
         self._valid_combinations: frozenset[tuple[str, ...]] | None = None
         self._filter_fields: tuple[str, ...] | None = None
         self._fallback_mapping: dict[str, str] | None = None
+
     @property
     def provider_name(self) -> str:
         """Provider name from the wrapped data source."""
         provider_name: str = self._data_source.provider_name
         return provider_name
+
     @property
     def filter_result(self) -> FilterLoadResult | None:
         """Access to filter load result with duplicate statistics."""
         return self._filter_result
+
     def _ensure_filterable_adapter(self, mode: str) -> None:
         """Check that adapter implements FilterableDataSourcePort."""
         if not isinstance(self._data_source, FilterableDataSourcePort):

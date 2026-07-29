@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Literal, Protocol, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
 
 from bioetl.application.core.record_processor_config import ContentHashVersionPolicy
 from bioetl.domain.transformations import generate_content_hash
@@ -21,8 +21,12 @@ class _NormalizationProfileLike(Protocol):
     """Minimal profile surface required for content-hash computation."""
 
     set_like_fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
-    hash_included_fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
-    hash_excluded_fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
+    hash_included_fields: frozenset[str] = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    hash_excluded_fields: frozenset[str] = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
     fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
     field_aliases: Mapping[str, str] = cast(Any, None)  # Any: host attr default (PD6)
 
@@ -32,11 +36,21 @@ class _NormalizationProfileLike(Protocol):
 class RecordNormalizationHashSupportMixin:
     """Own rollout-aware content-hash policy resolution for normalized records."""
 
-    content_hash_policy_by_version: ContentHashPolicyByVersion | None = cast(Any, None)  # Any: host attr default (PD6)
-    content_hash_policy_authoritative: bool = cast(Any, None)  # Any: host attr default (PD6)
-    content_hash_include_fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
-    content_hash_exclude_fields: frozenset[str] = cast(Any, None)  # Any: host attr default (PD6)
-    profile: _NormalizationProfileLike | None = cast(Any, None)  # Any: host attr default (PD6)
+    content_hash_policy_by_version: ContentHashPolicyByVersion | None = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    content_hash_policy_authoritative: bool = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    content_hash_include_fields: frozenset[str] = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    content_hash_exclude_fields: frozenset[str] = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    profile: _NormalizationProfileLike | None = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
     provider: str = cast(Any, None)  # Any: host attr default (PD6)
 
     _TECHNICAL_HASH_POLICY_FIELDS = frozenset(

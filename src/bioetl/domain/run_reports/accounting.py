@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typing import override
-
 from collections import defaultdict
+from typing import override
 
 from bioetl.domain.ports import StageAccountingPort
 from bioetl.domain.run_reports._stage_bucket import _StageBucket

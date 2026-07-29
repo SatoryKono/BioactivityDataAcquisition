@@ -30,7 +30,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import click
 import pytest
@@ -39,6 +39,8 @@ from bioetl.interfaces.cli.commands.domains.maintenance import command_group as 
 from bioetl.interfaces.cli.commands.domains.health import (
     server_integration_lifecycle as lifecycle,
 )
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
@@ -69,9 +71,7 @@ async def test_run_health_server_resolves_quarantine_before_build(
     async def close_resources(**kwargs):  # type: ignore[no-untyped-def]
         order.append("close")
 
-    monkeypatch.setattr(
-        lifecycle._deps, "get_health_server_dependencies", get_deps
-    )
+    monkeypatch.setattr(lifecycle._deps, "get_health_server_dependencies", get_deps)
     monkeypatch.setattr(
         lifecycle._deps,
         "_get_optional_health_server_quarantine_service",

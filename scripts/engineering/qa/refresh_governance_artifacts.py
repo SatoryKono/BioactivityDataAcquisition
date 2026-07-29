@@ -43,7 +43,9 @@ _HOTSPOT_METRIC_NAMES = (
 )
 
 
-def _baseline_families_by_name(baseline: dict[str, object]) -> dict[str, dict[str, object]]:
+def _baseline_families_by_name(
+    baseline: dict[str, object],
+) -> dict[str, dict[str, object]]:
     return {
         row["name"]: row
         for row in baseline.get("families", [])

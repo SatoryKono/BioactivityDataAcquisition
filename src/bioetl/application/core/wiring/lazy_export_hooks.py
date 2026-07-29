@@ -51,6 +51,7 @@ def install_lazy_export_facade(
     """Install lazy export hooks for one wiring facade module."""
     export_names = list(public_exports)
     namespace["__all__"] = export_names
+
     def _module_getattr(name: str) -> object:  # pragma: no cover
         if TYPE_CHECKING:
             raise AttributeError
@@ -60,10 +61,12 @@ def install_lazy_export_facade(
             name=name,
             namespace=namespace,
         )
+
     def _module_dir() -> list[str]:  # pragma: no cover
         if TYPE_CHECKING:
             raise AttributeError
         return lazy_export_dir(namespace, export_names)
+
     namespace["__getattr__"] = _module_getattr
     namespace["__dir__"] = _module_dir
 

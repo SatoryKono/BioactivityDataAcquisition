@@ -32,7 +32,9 @@ class _PubChemSearchFetchMixin:
     """Query-based PubChem fetch strategies for compounds, substances, and assays."""
 
     _fetch_flow: PubChemFetchFlow = cast(Any, None)  # Any: host attr default (PD3)
-    _response_mapper: PubChemResponseMapper = cast(Any, None)  # Any: host attr default (PD3)
+    _response_mapper: PubChemResponseMapper = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     async def fetch_by_query(
         self,

@@ -6,14 +6,12 @@ import hashlib
 import json
 from collections.abc import Iterator
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, runtime_checkable, cast, Any
+from typing import TYPE_CHECKING, Any, Protocol, cast, runtime_checkable
 
 from bioetl.application.services.export_manifests import write_export_sidecar_manifests
 from bioetl.application.services.export_models import ExportOptions, ExportResult
 
 if TYPE_CHECKING:
-    import pyarrow as pa
-
     from bioetl.domain.ports import (
         DeltaReaderPort,
         ExportWriterPort,
@@ -101,7 +99,9 @@ async def export_existing_table(
     )
     output_path = Path(
         writer.write_export(
-            table=cast(Any, export_table),  # Any: export port accepts Arrow/table duck-type
+            table=cast(
+                Any, export_table
+            ),  # Any: export port accepts Arrow/table duck-type
             table_name=table_name,
             layer=layer,
             fmt=options.format,

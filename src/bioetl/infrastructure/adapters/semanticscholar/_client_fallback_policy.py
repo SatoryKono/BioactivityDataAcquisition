@@ -41,7 +41,9 @@ _SEMANTICSCHOLAR_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
 class _SemanticScholarFallbackPolicyMixin:
     """Provider-specific hookpoints consumed by ``FallbackPolicyMixin``."""
 
-    _fallback_handler: SemanticScholarTitleFallbackHandler = cast(Any, None)  # Any: host attr default (PD3)
+    _fallback_handler: SemanticScholarTitleFallbackHandler = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     def _get_default_fallback_config(self) -> FallbackDecoratorConfig:
         """Return Semantic Scholar-specific default fallback config."""

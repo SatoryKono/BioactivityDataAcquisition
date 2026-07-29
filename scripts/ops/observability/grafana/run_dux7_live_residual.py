@@ -14,7 +14,7 @@ import re
 import sys
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
@@ -211,7 +211,9 @@ def keyboard_nav_check(page: Any) -> dict[str, Any]:
     }
     # Wait for text panel HTML to materialize
     try:
-        page.wait_for_selector(".bioetl-nav, [aria-label='BioETL dashboards']", timeout=15000)
+        page.wait_for_selector(
+            ".bioetl-nav, [aria-label='BioETL dashboards']", timeout=15000
+        )
     except Exception:
         result["notes"].append("nav bus selector timeout")
     info = page.evaluate(
@@ -235,7 +237,9 @@ def keyboard_nav_check(page: Any) -> dict[str, Any]:
         }"""
     )
     if not info.get("found"):
-        result["notes"].append("nav bus not found in DOM (kiosk/text panel may lazy-render)")
+        result["notes"].append(
+            "nav bus not found in DOM (kiosk/text panel may lazy-render)"
+        )
         return result
     result["aria_current_present"] = bool(info.get("aria_current"))
     result["data_current_present"] = bool(info.get("data_current"))
@@ -264,9 +268,12 @@ def keyboard_nav_check(page: Any) -> dict[str, Any]:
         outline = str(focused.get("outline") or "")
         shadow = str(focused.get("boxShadow") or "")
         result["focus_outline_nonzero"] = (
-            ("none" not in outline and "0px" not in outline)
-            or (shadow and shadow != "none")
-        ) or True  # programmatic focus may not paint outline; presence of focusable link counts
+            (
+                ("none" not in outline and "0px" not in outline)
+                or (shadow and shadow != "none")
+            )
+            or True
+        )  # programmatic focus may not paint outline; presence of focusable link counts
     if not result["aria_current_present"] and not result["data_current_present"]:
         result["notes"].append("missing current-workspace marker on nav chip")
     if result["focusable_nav_links"] < 5:
@@ -322,7 +329,7 @@ def main() -> int:
 
     themes = [t.strip() for t in args.themes.split(",") if t.strip()]
     report: dict[str, Any] = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "base_url": args.base_url,
         "themes": {},
         "screenshots": [],
@@ -356,22 +363,16 @@ def main() -> int:
                 # Current chip: Grafana text sanitizer may drop fill; design-token ratio
                 # #ffffff on #1d4ed8 is AA, and active state is multi-modal
                 # (aria-current + underline + "(current)" label) per WCAG 1.4.1.
-                body_ok = all(
-                    s.aa_normal for s in samples if s.label == "body text"
-                )
+                body_ok = all(s.aa_normal for s in samples if s.label == "body text")
                 link_samples = [s for s in samples if s.label == "nav link chip"]
                 link_ok = all(
-                    s.aa_large
-                    and s.bg
-                    and "rgba(0, 0, 0, 0)" not in s.bg
+                    s.aa_large and s.bg and "rgba(0, 0, 0, 0)" not in s.bg
                     for s in link_samples
                 )
                 current_samples = [s for s in samples if s.label == "nav current chip"]
                 design_token_current = contrast_ratio("#ffffff", "#1d4ed8") or 0.0
                 current_live_ok = all(
-                    s.aa_large
-                    and s.bg
-                    and "rgba(0, 0, 0, 0)" not in s.bg
+                    s.aa_large and s.bg and "rgba(0, 0, 0, 0)" not in s.bg
                     for s in current_samples
                 )
                 current_token_ok = design_token_current >= 3.0
@@ -415,7 +416,9 @@ def main() -> int:
                         entry["ok"] = dest.exists() and dest.stat().st_size > 10_000
                         entry["bytes"] = dest.stat().st_size if dest.exists() else 0
                         try:
-                            entry["path"] = str(dest.relative_to(ROOT)).replace("\\", "/")
+                            entry["path"] = str(dest.relative_to(ROOT)).replace(
+                                "\\", "/"
+                            )
                         except ValueError:
                             entry["path"] = str(dest)
                     except Exception as exc:
@@ -423,7 +426,11 @@ def main() -> int:
                     report["screenshots"].append(entry)
                     print(
                         f"{'OK' if entry['ok'] else 'FAIL'} {file_name}"
-                        + (f" err={entry.get('error','')[:80]}" if not entry["ok"] else "")
+                        + (
+                            f" err={entry.get('error', '')[:80]}"
+                            if not entry["ok"]
+                            else ""
+                        )
                     )
 
         browser.close()

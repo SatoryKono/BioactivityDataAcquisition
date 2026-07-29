@@ -29,8 +29,12 @@ if TYPE_CHECKING:
 class PubChemAdapterModelMixin:
     """Adds DTO conversion and request metadata methods to `PubChemAdapter`."""
 
-    _request_collector: APIRequestCollector = cast(Any, None)  # Any: host attr default (PD6)
-    rate_limiter: TokenBucketRateLimiter = cast(Any, None)  # Any: host attr default (PD6)
+    _request_collector: APIRequestCollector = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    rate_limiter: TokenBucketRateLimiter = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
 
     def fetch(
         self,

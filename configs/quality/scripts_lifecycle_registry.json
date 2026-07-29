@@ -1220,6 +1220,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as a one-off DUX6 residual dashboard migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
     },
+    "scripts/ops/observability/grafana/apply_dux7_live_residual.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DUX7 live residual dashboard migration helper for auditability; retire it after the live review protocol is complete and the generated evidence becomes the durable record."
+    },
     "scripts/ops/observability/grafana/generate_dux4_issue_pack.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -1237,6 +1243,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded DUX6 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
+    },
+    "scripts/ops/observability/grafana/run_dux7_live_residual.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the bounded DUX7 live residual review runner for auditability; retire it after the review protocol is complete and the generated evidence becomes the durable record."
     },
     "src/tools/apply_elk_layout.py": {
       "owner": "@bioetl-platform",

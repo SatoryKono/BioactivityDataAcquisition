@@ -60,7 +60,10 @@ def _evolve_projection(
     projection: RunLedgerReplayProjection,
     **changes: object,
 ) -> RunLedgerReplayProjection:
-    evolved = replace(projection, **changes)
+    evolved = replace(
+        projection,
+        **changes,  # type: ignore[arg-type]  # Dynamic projector updates use dataclass field names.
+    )
     # Reconstruct so the return type is the concrete dataclass (python:S5886).
     return RunLedgerReplayProjection(
         **{member.name: getattr(evolved, member.name) for member in fields(evolved)}

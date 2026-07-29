@@ -29,7 +29,9 @@ class QuarantineEntryPropertiesMixin:
     _status: QuarantineStatus = cast(Any, None)  # Any: host attr default (PD3)
     _created_at: datetime = cast(Any, None)  # Any: host attr default (PD3)
     _metadata: MetaDict = cast(Any, None)  # Any: host attr default (PD3)
-    _resolution_info: ResolutionInfo | None = cast(Any, None)  # Any: host attr default (PD3)
+    _resolution_info: ResolutionInfo | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     @property
     def entry_id(self) -> str:

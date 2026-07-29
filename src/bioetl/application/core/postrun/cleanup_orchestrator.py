@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 class PostrunCleanupService:
     """Handles shutdown-time cleanup without masking failures."""
+
     def __init__(
         self,
         *,
@@ -19,6 +20,7 @@ class PostrunCleanupService:
     ) -> None:
         self._logger = logger
         self._warning_allowlist = warning_allowlist
+
     async def cleanup_tracer(self, tracer: TracingPort | None) -> None:
         """Close tracing resources with warning-mode fallback.
         Args:

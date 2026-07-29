@@ -79,7 +79,9 @@ def read_delta_records(
     to_dataset = getattr(table, "to_pyarrow_dataset", None)
     if _can_use_pyarrow_dataset_scanner() and callable(to_dataset):
         dataset = to_dataset()
-        scanner = cast(Any, dataset).scanner(columns=columns)  # Any: pyarrow dataset duck-type
+        scanner = cast(Any, dataset).scanner(
+            columns=columns
+        )  # Any: pyarrow dataset duck-type
         to_reader = getattr(scanner, "to_reader", None)
         if callable(to_reader):
             from collections.abc import Iterable

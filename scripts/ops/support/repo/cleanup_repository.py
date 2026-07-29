@@ -208,7 +208,6 @@ class ReportsWorkspaceEvidence:
         return self.path.as_posix()
 
 
-
 def _coerce_int(value: object, default: int = 0) -> int:
     if value is None:
         return default
@@ -225,10 +224,12 @@ def _coerce_int(value: object, default: int = 0) -> int:
             return default
     return default
 
+
 def _as_list(value: object) -> list[object]:
     if isinstance(value, list):
         return value
     return []
+
 
 def _discover_repo_root(start: Path) -> Path:
     current = start.resolve()
@@ -2003,9 +2004,7 @@ def _log_root_and_reports_evidence(
 ) -> None:
     detail_limit = max(args.detail_limit, 0)
     if args.root:
-        _log_root_policy_mismatches(
-            root_policy_mismatches, detail_limit=detail_limit
-        )
+        _log_root_policy_mismatches(root_policy_mismatches, detail_limit=detail_limit)
         _log_review_lane_evidence(review_evidence, detail_limit=detail_limit)
     _log_reports_workspace_evidence(reports_evidence, detail_limit=detail_limit)
 

@@ -23,8 +23,12 @@ if TYPE_CHECKING:
 class JoinPlannerDelegationMixin:
     """Keep the planner facade thin by delegating focused operations."""
 
-    _join_key_resolver: JoinKeyResolverProtocol = cast(Any, None)  # Any: host default (PD4)
-    _dependency_joiner: DependencyJoinerProtocol = cast(Any, None)  # Any: host default (PD4)
+    _join_key_resolver: JoinKeyResolverProtocol = cast(
+        Any, None
+    )  # Any: host default (PD4)
+    _dependency_joiner: DependencyJoinerProtocol = cast(
+        Any, None
+    )  # Any: host default (PD4)
     _join_executor: JoinExecutorProtocol = cast(Any, None)  # Any: host default (PD4)
 
     def find_join_key_column(

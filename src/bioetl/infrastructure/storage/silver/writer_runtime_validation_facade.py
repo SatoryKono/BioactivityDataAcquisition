@@ -32,7 +32,9 @@ _SILVER_VALIDATION_OPERATIONS_REQUIRED = "Silver validation operations are requi
 class _SilverWriterRuntimeValidationFacade:
     """Validation-service delegation methods for the runtime facade."""
 
-    _validation: SilverValidationOperations | None = cast(Any, None)  # Any: host attr default (PD3)
+    _validation: SilverValidationOperations | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     def _enforce_write_policy(self, mode: SilverWriteMode, table_name: str) -> None:
         """Delegate Silver write-mode enforcement to the validation service."""

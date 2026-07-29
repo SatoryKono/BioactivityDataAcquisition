@@ -24,7 +24,12 @@ from typing import TypedDict
 
 ROOT = Path(__file__).resolve().parents[3]
 BODIES = Path(__file__).resolve().parent
-PACK = ROOT / ".github" / "ISSUES" / "DUX4-2026-07-29-DASHBOARD-VISUAL-ENFORCEMENT-ISSUE-PACK.md"
+PACK = (
+    ROOT
+    / ".github"
+    / "ISSUES"
+    / "DUX4-2026-07-29-DASHBOARD-VISUAL-ENFORCEMENT-ISSUE-PACK.md"
+)
 PUBLISH = ROOT / "reports" / "quality" / "dux4-2026-07-29-issue-publish.json"
 TITLES_PATH = BODIES / "TITLES.md"
 
@@ -36,6 +41,7 @@ class PublishedIssue(TypedDict):
     wave: str
     url: str
     title: str
+
 
 # code -> (priority, wave)
 META: dict[str, tuple[str, str]] = {
@@ -164,7 +170,9 @@ def update_pack(created: list[PublishedIssue]) -> None:
             "\n\n## Publish artifact\n\n"
             "- `reports/quality/dux4-2026-07-29-issue-publish.json`\n"
         )
-    PACK.write_text(text + ("\n" if not text.endswith("\n") else ""), encoding="utf-8", newline="\n")
+    PACK.write_text(
+        text + ("\n" if not text.endswith("\n") else ""), encoding="utf-8", newline="\n"
+    )
 
 
 def main() -> int:

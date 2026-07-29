@@ -680,11 +680,7 @@ def _collect_changed_paths(
 def _string_paths_from(values: object) -> set[str]:
     if not isinstance(values, list):
         return set()
-    return {
-        str(path)
-        for path in values
-        if isinstance(path, str) and path.strip()
-    }
+    return {str(path) for path in values if isinstance(path, str) and path.strip()}
 
 
 def _paths_from_emitter_lists(field_mapping: object) -> set[str]:

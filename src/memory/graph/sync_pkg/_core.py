@@ -46,7 +46,6 @@ T = TypeVar("T")
 BIOETL_METRIC_PATTERN = re.compile(r"\bbioetl_[a-zA-Z0-9_:]+")
 
 
-
 def _as_mapping(value: object) -> dict[str, object]:
     if isinstance(value, dict):
         return {str(k): v for k, v in value.items()}
@@ -61,6 +60,7 @@ def _as_iterable(value: object) -> list[object]:
     if isinstance(value, set):
         return list(value)
     return []
+
 
 def _coerce_int(value: object, default: int = 0) -> int:
     """Coerce mapping/JSON payload values to int for static checkers and runtime."""
@@ -78,6 +78,7 @@ def _coerce_int(value: object, default: int = 0) -> int:
         except ValueError:
             return default
     return default
+
 
 SRC_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_ROOT = Path(__file__).resolve().parents[4]
@@ -2425,7 +2426,9 @@ def _retirement_analysis_config(
     return RetirementAnalysisConfig(
         enabled=bool(payload.get("enabled", True)),
         family_names=family_names,
-        current_cycle_age_days=_coerce_int(payload.get("current_cycle_age_days", 45), 45),
+        current_cycle_age_days=_coerce_int(
+            payload.get("current_cycle_age_days", 45), 45
+        ),
         stale_age_days=_coerce_int(payload.get("stale_age_days", 180), 180),
         dead_score_threshold=_coerce_int(payload.get("dead_score_threshold", 6), 6),
         wip_markers=_casefolded_markers(
@@ -2462,7 +2465,9 @@ def _complexity_analysis_config(
         complexity_score_threshold=int(
             payload.get("complexity_score_threshold", 4) or 4
         ),
-        removable_score_threshold=_coerce_int(payload.get("removable_score_threshold", 7), 7),
+        removable_score_threshold=_coerce_int(
+            payload.get("removable_score_threshold", 7), 7
+        ),
         indirection_markers=_casefolded_markers(
             payload,
             "indirection_markers",
@@ -4111,8 +4116,7 @@ def _add_package_topology_decisions_and_risks(
     today: str,
 ) -> None:
     summary_path = (
-        root
-        / "docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md"
+        root / "docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md"
     )
     if not summary_path.is_file():
         return
@@ -11802,7 +11806,9 @@ def _extract_code_duplication_surfaces(
 
 
 def _duplication_cluster_thresholds(config: dict[str, object]) -> tuple[int, int]:
-    return _coerce_int(config.get("min_cluster_size", 2), 2), _coerce_int(config.get("min_ast_nodes", 12), 12)
+    return _coerce_int(config.get("min_cluster_size", 2), 2), _coerce_int(
+        config.get("min_ast_nodes", 12), 12
+    )
 
 
 def _add_retirement_analysis_surfaces(
@@ -13330,9 +13336,13 @@ def _accumulate_field_matrix_evidence(
         )
         source = str(row.get("normalization_source", "")).strip()
         if source == "profile":
-            payload["profile_field_count"] = _coerce_int(payload["profile_field_count"]) + 1
+            payload["profile_field_count"] = (
+                _coerce_int(payload["profile_field_count"]) + 1
+            )
             continue
-        payload["fallback_field_count"] = _coerce_int(payload["fallback_field_count"]) + 1
+        payload["fallback_field_count"] = (
+            _coerce_int(payload["fallback_field_count"]) + 1
+        )
         if source == fallback_business:
             payload["fallback_business_field_count"] = (
                 _coerce_int(payload["fallback_business_field_count"]) + 1
@@ -13423,8 +13433,12 @@ def _normalization_evidence_update_payload(
         ),
         "profile_field_count": _coerce_int(evidence.get("profile_field_count", 0), 0),
         "fallback_field_count": _coerce_int(evidence.get("fallback_field_count", 0), 0),
-        "fallback_business_field_count": _coerce_int(evidence.get("fallback_business_field_count", 0), 0),
-        "fallback_technical_passthrough_field_count": _coerce_int(evidence.get("fallback_technical_passthrough_field_count", 0), 0),
+        "fallback_business_field_count": _coerce_int(
+            evidence.get("fallback_business_field_count", 0), 0
+        ),
+        "fallback_technical_passthrough_field_count": _coerce_int(
+            evidence.get("fallback_technical_passthrough_field_count", 0), 0
+        ),
     }
 
 
@@ -13517,8 +13531,12 @@ def _normalization_statement_params(
         "normalization_profile_module_path": normalized_module_path,
         "profile_field_count": _coerce_int(evidence.get("profile_field_count", 0), 0),
         "fallback_field_count": _coerce_int(evidence.get("fallback_field_count", 0), 0),
-        "fallback_business_field_count": _coerce_int(evidence.get("fallback_business_field_count", 0), 0),
-        "fallback_technical_passthrough_field_count": _coerce_int(evidence.get("fallback_technical_passthrough_field_count", 0), 0),
+        "fallback_business_field_count": _coerce_int(
+            evidence.get("fallback_business_field_count", 0), 0
+        ),
+        "fallback_technical_passthrough_field_count": _coerce_int(
+            evidence.get("fallback_technical_passthrough_field_count", 0), 0
+        ),
         "module_path": normalized_module_path,
     }
 
@@ -17679,7 +17697,9 @@ def _live_scalar(
 
 
 def _row_int_total(rows: list[dict[str, JsonValue]], key: str) -> int:
-    return sum(_coerce_int(row[key]) for row in rows if isinstance(row.get(key), (int, float)))
+    return sum(
+        _coerce_int(row[key]) for row in rows if isinstance(row.get(key), (int, float))
+    )
 
 
 def _managed_label_counts_from_rows(
@@ -17954,7 +17974,9 @@ def _active_critical_names(
     raw_counts = snapshot_stats.get(key)
     if not isinstance(raw_counts, dict):
         return ()
-    return tuple(name for name in critical_names if _coerce_int(raw_counts.get(name, 0)) > 0)
+    return tuple(
+        name for name in critical_names if _coerce_int(raw_counts.get(name, 0)) > 0
+    )
 
 
 def _fast_audit_snapshot_payload(

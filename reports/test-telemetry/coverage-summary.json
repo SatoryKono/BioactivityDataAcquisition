@@ -1,14 +1,14 @@
 {
   "source_branch": "main",
-  "source_commit": "667c3020ce74f87c319f77612c765a5aaf30e6ad",
-  "source_run_id": "local-duration-rebuild-2026-07-23",
-  "source_tree_sha256": "68cbe9e1ef48def308def56922cbbf1aae526981210c4e3829e7584de08bad3c",
-  "refreshed_at_utc": "2026-07-27T18:08:35.600453+00:00",
+  "source_commit": null,
+  "source_run_id": null,
+  "source_tree_sha256": "723c194a1fca1e0eb5a3d89c731560f200f48f910ae877620c271969a52a09f1",
+  "refreshed_at_utc": "2026-07-29T12:03:59.632345+00:00",
   "refresh_status": "captured",
-  "coverage_percent": 96.49,
+  "coverage_percent": 95.38,
   "coverage": {
     "threshold_percent": 85.0,
-    "actual_percent": 96.49,
+    "actual_percent": 95.38,
     "threshold_satisfied": true
   }
 }

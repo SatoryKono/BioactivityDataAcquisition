@@ -22,6 +22,7 @@ from .batch_metrics import BatchMetricsRecorderService
 
 class DQQuarantineEntry(NamedTuple):
     """A record that failed data-quality checks."""
+
     record: BronzeRecord
     error_type: ErrorType
     error_details: str
@@ -29,6 +30,7 @@ class DQQuarantineEntry(NamedTuple):
 
 class FilteredQuarantineEntry(NamedTuple):
     """A record excluded by Silver filters."""
+
     record: BronzeRecord
     reason: str
     details: JsonDict | None = None
@@ -39,6 +41,7 @@ class QuarantineRuntimeService(QuarantineManagerSupportMixin):
     Admin/operator inspection and purge workflows live in
     ``application.services.quarantine_service.QuarantineService``.
     """
+
     def __init__(
         self,
         quarantine_port: QuarantinePort,

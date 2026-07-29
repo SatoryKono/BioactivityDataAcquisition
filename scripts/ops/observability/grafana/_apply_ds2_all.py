@@ -196,7 +196,9 @@ def _incident_value_override() -> dict[str, object]:
     }
 
 
-def _fix_incident_table(panel: dict[str, object], *, value_override: dict[str, object]) -> None:
+def _fix_incident_table(
+    panel: dict[str, object], *, value_override: dict[str, object]
+) -> None:
     fc = panel.setdefault("fieldConfig", {})
     defaults = fc.setdefault("defaults", {})
     custom = defaults.setdefault("custom", {})
@@ -436,7 +438,9 @@ def _layout_incident_core_panels(
         impact["gridPos"] = {"h": 4, "w": 24, "x": 0, "y": 23}
 
 
-def _incident_detail_row(by_id: dict[str, object], *, value_override: dict[str, object]) -> dict[str, object]:
+def _incident_detail_row(
+    by_id: dict[str, object], *, value_override: dict[str, object]
+) -> dict[str, object]:
     detail_row = {
         "id": 2099,
         "type": "row",
@@ -651,7 +655,9 @@ _RUN_EXPLORER_GUIDE_CONTENT = (
 )
 
 
-def _shift_run_explorer_panels(run_explorer: dict[str, object], *, delta_y: int = 3) -> None:
+def _shift_run_explorer_panels(
+    run_explorer: dict[str, object], *, delta_y: int = 3
+) -> None:
     for panel in run_explorer.get("panels") or []:
         grid_pos = panel.get("gridPos") or {}
         if "y" in grid_pos:

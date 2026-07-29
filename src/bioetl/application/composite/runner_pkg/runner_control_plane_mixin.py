@@ -44,7 +44,9 @@ __all__ = ["CompositeRunnerControlPlaneMixin"]
 class _CompositeRunnerLedgerLifecycleMixin:
     """Ledger lifecycle helpers shared by composite runner control-plane flows."""
 
-    _run_ledger_service: RunLedgerService | None = cast(Any, None)  # Any: host attr default (PD3)
+    _run_ledger_service: RunLedgerService | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     _manifest_id: str | None = cast(Any, None)  # Any: host attr default (PD3)
 
     @property

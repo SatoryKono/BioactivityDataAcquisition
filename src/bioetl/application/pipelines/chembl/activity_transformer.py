@@ -205,6 +205,7 @@ class ActivityTransformer(BaseChemblTransformer):
             "publication_id"
         ) or record.get("publication_id")
         return business_data
+
     @override
     def _postprocess_pre_silver_record(
         self,

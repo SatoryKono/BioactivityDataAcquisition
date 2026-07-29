@@ -27,7 +27,12 @@ try:
         source_dir,
     )
 except ImportError:  # pragma: no cover - direct script execution
-    from scripts.diagrams.diagram_paths import DIAGRAM_ROOT, QUALITY_GATE_MANIFEST, REPO_ROOT, source_dir
+    from scripts.diagrams.diagram_paths import (
+        DIAGRAM_ROOT,
+        QUALITY_GATE_MANIFEST,
+        REPO_ROOT,
+        source_dir,
+    )
 
 
 DEFAULT_TARGET = DIAGRAM_ROOT

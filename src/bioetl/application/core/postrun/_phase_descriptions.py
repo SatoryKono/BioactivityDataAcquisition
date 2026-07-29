@@ -31,6 +31,7 @@ PostrunLogLevel = Literal["info", "warning", "error"]
 @dataclass(frozen=True, slots=True)
 class PostrunPhaseCompletion:
     """Success metadata for one postrun phase."""
+
     status: str
     span_attributes: dict[str, object]
     observability_fields: dict[str, object]

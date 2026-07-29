@@ -29,9 +29,11 @@ _BatchResultT = TypeVar("_BatchResultT", covariant=True)
 
 class BatchExecutionStateService:
     """Pure service applying processed batch outcomes to executor state."""
+
     def __init__(self) -> None:
         """Initialize state service."""
         pass
+
     def commit_successful_batch(
         self,
         *,
@@ -47,6 +49,7 @@ class BatchExecutionStateService:
                 output=outcome,
             ),
         )
+
     def build_batch_result(
         self,
         *,
@@ -63,6 +66,7 @@ class BatchExecutionStateService:
             records_quarantined=typed_state.records_quarantined,
         )
         return batch_result
+
     def build_run_statistics(
         self,
         *,

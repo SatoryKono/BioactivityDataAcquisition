@@ -45,6 +45,7 @@ class BasePipeline(ABC):  # noqa: B024
     Transformers MUST be injected via DI from GenericPipelineFactory.
     BasePipeline does NOT create transformers internally.
     """
+
     @classmethod
     def create(
         cls,
@@ -84,6 +85,7 @@ class BasePipeline(ABC):  # noqa: B024
             clock=clock,
             transformer=transformer,
         )
+
     def __init__(
         self,
         config: PipelineConfig,
@@ -133,63 +135,78 @@ class BasePipeline(ABC):  # noqa: B024
             workflow_id=runtime.workflow_id,
         )
         self._shutdown_signal = shutdown_signal
+
     @property
     def config(self) -> PipelineConfig:
         """Access pipeline configuration."""
         return self._config
+
     @property
     def runtime(self) -> RuntimeConfig:
         """Access runtime configuration."""
         return self._runtime
+
     @property
     def services(self) -> PipelineServicesProtocol:
         """Access injected services."""
         return self._services
+
     @property
     def run_id(self) -> RunID:
         """Access run ID."""
         return self._run_id
+
     @property
     def context(self) -> PipelineContext:
         """Access pipeline context."""
         return self._context
+
     @property
     def logger(self) -> LoggerPort:
         """Access bound logger."""
         return self._logger
+
     @property
     def shutdown_signal(self) -> ShutdownSignal:
         """Access shutdown signal."""
         return self._shutdown_signal
+
     # --- Convenience properties (delegate to config) ---
     @property
     def pipeline_name(self) -> str:
         """Pipeline name (from config)."""
         return self._config.pipeline_name
+
     @property
     def provider(self) -> str:
         """Provider name (from config)."""
         return self._config.provider
+
     @property
     def entity_type(self) -> str:
         """Entity type (from config)."""
         return self._config.entity_type
+
     @property
     def run_type(self) -> RunType:
         """Run type (from runtime)."""
         return self._runtime.run_type
+
     @property
     def resume(self) -> bool:
         """Resume flag (from runtime)."""
         return self._runtime.resume
+
     @property
     def limit(self) -> int | None:
         """Record limit (from runtime)."""
         return self._runtime.limit
+
     @property
     def transformer(self) -> BaseTransformer | None:
         """Access the injected transformer."""
         return self._transformer
+
     # --- Logic Methods (to be used by Executor) ---
     async def transform_bronze_to_silver(
         self, context: PipelineContext, record: BronzeRecord, index: int = 0

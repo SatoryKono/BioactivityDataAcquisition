@@ -80,7 +80,9 @@ def _load_composite_entry_parts(
     yaml_path: Path, payload_dict: dict[str, object]
 ) -> tuple[str, Path, str, list[object]]:
     rel = yaml_path.relative_to(COMPOSITES_DIR)
-    groups = _column_groups_from_mapping(payload_dict, "composite", "schema", "column_groups")
+    groups = _column_groups_from_mapping(
+        payload_dict, "composite", "schema", "column_groups"
+    )
     if not groups:
         groups = _column_groups_from_mapping(
             payload_dict, "composite", "merge", "column_groups"

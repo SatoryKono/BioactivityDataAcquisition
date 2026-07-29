@@ -9,6 +9,8 @@ from bioetl.composition.runtime_builders._run_manifest_data_roots import (
     _resolve_data_root,
 )
 
+__all__ = ["_resolve_data_root", "control_plane_root"]
+
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
 

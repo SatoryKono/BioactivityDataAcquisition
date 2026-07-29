@@ -1466,7 +1466,8 @@ class TestHealthServerControlPlaneSelector:
         assert data["run_type"] == []
         assert data["selected_run_id"] is None
         assert rows["Manifest ID [Control Plane]"] == "not available for current scope"
-        assert rows["Provider.Entity [Version]"] == "unknown"
+        # PFILL-03: do not echo pipeline selector as Provider.Entity when unresolved.
+        assert rows["Provider.Entity [Version]"] == "not available for current scope"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_treats_run_id_dash_as_unselected(
@@ -1611,7 +1612,8 @@ class TestHealthServerControlPlaneSelector:
         assert rows["Run ID [Pipeline]"] == (
             "select one concrete pipeline or exact run_id"
         )
-        assert rows["Provider.Entity [Version]"] == "$__all"
+        # PFILL-03: aggregate pipeline selector must not masquerade as provider.entity.
+        assert rows["Provider.Entity [Version]"] == "not available for current scope"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_treats_brace_expanded_pipeline_scope_as_aggregate(
@@ -1641,10 +1643,8 @@ class TestHealthServerControlPlaneSelector:
         assert rows["Run ID [Pipeline]"] == (
             "select one concrete pipeline or exact run_id"
         )
-        assert (
-            rows["Provider.Entity [Version]"]
-            == "{chembl_activity,chembl_assay,chembl_publication,chembl_target,test_pipe}"
-        )
+        # PFILL-03: brace-expanded pipeline set is not a provider.entity value.
+        assert rows["Provider.Entity [Version]"] == "not available for current scope"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_requires_pipeline_scope(

@@ -131,7 +131,9 @@ def ensure_value_display_name(panel: dict[str, Any], display: str = "Count") -> 
     found = False
     for ov in overrides:
         matcher = ov.get("matcher") or {}
-        if matcher.get("id") == "byRegexp" and "Value" in str(matcher.get("options") or ""):
+        if matcher.get("id") == "byRegexp" and "Value" in str(
+            matcher.get("options") or ""
+        ):
             found = True
             props = list(ov.get("properties") or [])
             if not any(p.get("id") == "displayName" for p in props):
@@ -155,7 +157,9 @@ def ensure_value_display_name(panel: dict[str, Any], display: str = "Count") -> 
         rename = dict(opts.get("renameByName") or {})
         for key in ("Value", "Value #A", "Value #B", "Value #C", "Value #J"):
             if key in rename or key == "Value":
-                target = display if key == "Value" else key.replace("Value #", "Series ")
+                target = (
+                    display if key == "Value" else key.replace("Value #", "Series ")
+                )
                 if rename.get(key) != target and (
                     not rename.get(key) or str(rename.get(key)).startswith("Value")
                 ):
@@ -317,7 +321,13 @@ def annotate_zero_applicability(panel: dict[str, Any]) -> bool:
 
 
 def annotate_empty_chart(panel: dict[str, Any]) -> bool:
-    if panel.get("type") not in {"timeseries", "bargauge", "histogram", "heatmap", "piechart"}:
+    if panel.get("type") not in {
+        "timeseries",
+        "bargauge",
+        "histogram",
+        "heatmap",
+        "piechart",
+    }:
         return False
     return prepend_description(
         panel,
@@ -413,7 +423,9 @@ def apply_board(path: Path) -> list[str]:
             content = opts.get("content")
             if isinstance(content, str):
                 new = content
-                new = re.sub(r"VALID_EMPTY\s*[—\-–]?\s*", "No active items — ", new, flags=re.I)
+                new = re.sub(
+                    r"VALID_EMPTY\s*[—\-–]?\s*", "No active items — ", new, flags=re.I
+                )
                 new = re.sub(r"###\s*", "", new)
                 new = re.sub(
                     r"`?GET\s+/ops/observability/[^\s`)]+`?",
@@ -480,8 +492,8 @@ def write_docs() -> list[str]:
     residual.write_text(
         """# DUX6 residual readability (post-DUX5 re-audit)
 
-**Status:** active  
-**Epic:** #7139  
+**Status:** active
+**Epic:** #7139
 **Predecessor:** DUX5 #7116 (closed)
 
 ## Intent
@@ -535,8 +547,7 @@ Operator expansion lives in Provenance + descriptions.
     text = copy_dict.read_text(encoding="utf-8")
     if "dux6-residual-readability.md" not in text:
         copy_dict.write_text(
-            text.rstrip()
-            + "\n\n## DUX6 residual\n\n"
+            text.rstrip() + "\n\n## DUX6 residual\n\n"
             "Pixel residual after re-audit: "
             "[dux6-residual-readability.md](dux6-residual-readability.md).\n",
             encoding="utf-8",
@@ -548,8 +559,7 @@ Operator expansion lives in Provenance + descriptions.
     ptext = protocol.read_text(encoding="utf-8")
     if "DUX6" not in ptext:
         protocol.write_text(
-            ptext.rstrip()
-            + "\n\n## DUX6 residual matrix\n\n"
+            ptext.rstrip() + "\n\n## DUX6 residual matrix\n\n"
             "After DUX6 apply, re-capture SG-01..SG-07 at 1366×768 dark and assert:\n"
             "1. No internal scroll on Provenance / Primary recovery / Next Best Actions / Run Scope\n"
             "2. No bare VALID_EMPTY / GET /ops in bodies\n"

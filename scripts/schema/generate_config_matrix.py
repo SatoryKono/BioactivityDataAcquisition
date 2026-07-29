@@ -513,9 +513,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def _family_partial_breakdowns(
     family_configs: dict[str, dict[str, dict[str, Any]]],
 ) -> list[tuple[str, dict[str, dict[str, Any]], list[str], list[str]]]:
-    breakdowns: list[
-        tuple[str, dict[str, dict[str, Any]], list[str], list[str]]
-    ] = []
+    breakdowns: list[tuple[str, dict[str, dict[str, Any]], list[str], list[str]]] = []
     for family_name, family_payload in family_configs.items():
         family_partial = _partial_keys(family_payload)
         actionable_partial, sanctioned_partial = _partition_partial_keys(family_partial)
@@ -555,9 +553,12 @@ def _append_partial_parameter_sections(
     if not count:
         report_lines.append(empty_message)
         return
-    for family_name, family_payload, actionable_partial, sanctioned_partial in (
-        family_breakdowns
-    ):
+    for (
+        family_name,
+        family_payload,
+        actionable_partial,
+        sanctioned_partial,
+    ) in family_breakdowns:
         keys = actionable_partial if partial_index == 2 else sanctioned_partial
         if not keys:
             continue

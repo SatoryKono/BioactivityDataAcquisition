@@ -8,9 +8,8 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-from typing import cast, Any
-
 from collections.abc import Mapping, Sequence
+from typing import Any, cast
 
 import polars as pl
 

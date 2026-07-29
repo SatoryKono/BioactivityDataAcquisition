@@ -105,9 +105,7 @@ def _collect_violations(source_content_cache: dict[Path, str]) -> list[str]:
             # statement window so unrelated nearby comments cannot exempt it.
             full_line = raw_lines[lineno - 1]
             statement_window = "\n".join(raw_lines[lineno - 1 : lineno + 2])
-            if any(
-                marker in statement_window for marker in _JUSTIFICATION_MARKERS
-            ):
+            if any(marker in statement_window for marker in _JUSTIFICATION_MARKERS):
                 continue
             # Skip if a globally-justified alias is on this line.
             if _GLOBALLY_JUSTIFIED.search(code):

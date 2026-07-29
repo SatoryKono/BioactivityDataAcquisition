@@ -63,9 +63,7 @@ def _append_agent_finding(
     current: str | None,
 ) -> None:
     file_name = str(obj.get("fileName") or "?")
-    fpath, loc, body = parse_body(
-        str(obj.get("codegenInstructions") or ""), file_name
-    )
+    fpath, loc, body = parse_body(str(obj.get("codegenInstructions") or ""), file_name)
     findings.append(
         {
             "layer": layer_of(current),
@@ -99,7 +97,9 @@ def _ingest_agent_events(
     return findings, completes
 
 
-def _layer_status_cell(layer: str, by_layer: collections.Counter, complete_map: dict) -> str:
+def _layer_status_cell(
+    layer: str, by_layer: collections.Counter, complete_map: dict
+) -> str:
     n = by_layer.get(layer, 0)
     if layer in complete_map:
         return "yes"

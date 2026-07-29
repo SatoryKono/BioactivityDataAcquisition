@@ -21,7 +21,9 @@ if TYPE_CHECKING:
 
 class BatchCheckpointRecoveryService:
     """Owns checkpoint save semantics for runtime, shutdown, and recovery."""
+
     _CHECKPOINT_TRACER_NAME = "bioetl.checkpoint"
+
     def __init__(
         self,
         *,
@@ -39,6 +41,7 @@ class BatchCheckpointRecoveryService:
         self._pipeline_name = pipeline_name
         self._memory_manager = memory_manager
         self._checkpoint_save_errors = checkpoint_manager._operation_errors
+
     async def save_periodic_checkpoint(
         self,
         *,
@@ -51,6 +54,7 @@ class BatchCheckpointRecoveryService:
             return
         total = self._total_processed(records_fetched, resume_offset)
         await self._save_checkpoint(total, operation="periodic")
+
     async def save_checkpoint_on_exception(
         self,
         *,
@@ -81,6 +85,7 @@ class BatchCheckpointRecoveryService:
                 error_type=type(checkpoint_error).__name__,
                 reason="checkpoint_save_failed_on_pipeline_exception",
             )
+
     async def save_checkpoint_on_shutdown(
         self,
         *,
@@ -98,6 +103,7 @@ class BatchCheckpointRecoveryService:
                 error_type=type(checkpoint_error).__name__,
                 reason="checkpoint_save_failed_on_shutdown",
             )
+
     async def save_checkpoint_now(
         self,
         *,
@@ -107,10 +113,12 @@ class BatchCheckpointRecoveryService:
         """Persist a checkpoint immediately without recovery wrappers."""
         total = self._total_processed(records_fetched, resume_offset)
         await self._save_checkpoint(total, operation="manual")
+
     @staticmethod
     def _total_processed(records_fetched: int, resume_offset: int) -> int:
         """Calculate total processed records including the resume offset."""
         return resume_offset + records_fetched
+
     def _emit_checkpoint_save_event(self, *, operation: str, status: str) -> None:
         if self._metrics is None:
             return
@@ -123,6 +131,7 @@ class BatchCheckpointRecoveryService:
                 "status": status,
             },
         )
+
     def _observe_checkpoint_save_duration(
         self,
         *,
@@ -141,6 +150,7 @@ class BatchCheckpointRecoveryService:
                 "status": status,
             },
         )
+
     def _start_checkpoint_save_span(
         self,
         *,
@@ -163,6 +173,7 @@ class BatchCheckpointRecoveryService:
         )
         span.__enter__()
         return span
+
     def _close_checkpoint_save_span(
         self,
         span: Span | None,
@@ -181,6 +192,7 @@ class BatchCheckpointRecoveryService:
         span.__exit__(None, None, None)
         if self._tracer is not None:
             self._tracer.flush()
+
     async def _save_checkpoint(self, total: int, *, operation: str) -> None:
         started_at = time.monotonic()
         span = self._start_checkpoint_save_span(
@@ -222,6 +234,7 @@ class BatchCheckpointRecoveryService:
             span,
             status="succeeded",
         )
+
     def _checkpoint_payload(self, total: int) -> CheckpointMetadata | int:
         """Build checkpoint payload, including memory trace when available."""
         if self._memory_manager is None:

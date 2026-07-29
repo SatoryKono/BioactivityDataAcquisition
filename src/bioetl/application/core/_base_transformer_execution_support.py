@@ -20,12 +20,14 @@ if TYPE_CHECKING:
 
 class TransformerExecutionOwner(Protocol):
     """Structural contract for execution helpers delegated from BaseTransformer."""
+
     provider: str
     entity_type: str
     _tracer: TracingPort
     _metrics: MetricsPort
     _silver_filters: SilverFilterConfig | None
     _structural_policy: StructuralPolicyProtocol
+
     async def _transform_impl(
         self,
         context: PipelineContext,

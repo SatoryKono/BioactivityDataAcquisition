@@ -25,6 +25,7 @@ __all__ = [
 
 class _CurrentSpanStarter(Protocol):
     """Minimal tracer contract for starting current spans."""
+
     def start_as_current_span(
         self,
         name: str,
@@ -35,11 +36,13 @@ class _CurrentSpanStarter(Protocol):
 
 class _TracingProvider(Protocol):
     """Minimal tracing-provider contract used by internal helpers."""
+
     def get_tracer(self, name: str) -> _CurrentSpanStarter: ...
 
 
 class _ClosableSpan(Protocol):
     """Minimal tracing span contract used by internal helpers."""
+
     def set_attribute(self, key: str, value: object) -> None: ...
     def record_exception(self, error: BaseException) -> None: ...
     def __enter__(self) -> _ClosableSpan: ...

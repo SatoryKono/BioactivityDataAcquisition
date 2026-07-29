@@ -53,6 +53,7 @@ _RUN_FAILURE_EXCEPTIONS = (
 
 class PipelineRunner(PipelineRunnerSupportMixin):
     """Run the pipeline lifecycle while preserving stage and observer seams."""
+
     def __init__(
         self,
         config: PipelineConfig,
@@ -87,24 +88,31 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         self._lifecycle_service = dependencies.lifecycle_service
         self._observer = dependencies.observer
         self._run_ledger_service: RunLedgerService | None = None
+
     @property
     def logger(self) -> LoggerPort:
         return self._logger
+
     @property
     def shutdown_signal(self) -> ShutdownSignal:
         return self._shutdown_signal
+
     @property
     def run_id(self) -> str:
         return str(self._context.run_id)
+
     @property
     def manifest_id(self) -> str | None:
         manifest_id = getattr(self._context, "manifest_id", None)
         return None if manifest_id is None else str(manifest_id)
+
     @property
     def services(self) -> PipelineRunnerServicesProtocol:
         return self._services
+
     def attach_run_ledger_service(self, service: RunLedgerService) -> None:
         self._run_ledger_service = service
+
     @property
     def execution_metrics(self) -> dict[str, int]:
         gold_excluded = getattr(self._executor, "records_gold_excluded_by_contract", 0)
@@ -119,21 +127,26 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             "records_quarantined": int(self._executor.records_quarantined),
             "records_filtered_out": int(self._executor.records_filtered_out),
         }
+
     def _debug_export_result(self) -> DebugExportResult | None:
         result = getattr(self._executor, "debug_export_result", None)
         return result if isinstance(result, DebugExportResult) else None
+
     @property
     def debug_export_uri(self) -> str | None:
         result = self._debug_export_result()
         return None if result is None else result.root_path
+
     @property
     def debug_export_hash(self) -> str | None:
         result = self._debug_export_result()
         return None if result is None else result.debug_export_hash
+
     @property
     def execution_diagnostics(self) -> JsonDict:
         diagnostics = getattr(self._executor, "execution_diagnostics", {})
         return diagnostics if isinstance(diagnostics, dict) else {}
+
     @contextmanager
     def _pipeline_span(self) -> Generator[Span, None, None]:
         with start_current_span(
@@ -147,6 +160,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             ),
         ) as span:
             yield span
+
     async def run(self) -> None:
         """Execute the pipeline and always finalize shutdown/telemetry cleanup."""
         record_run_started(self)
@@ -169,6 +183,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         finally:
             await self._finalize_debug_export(debug_export_status)
             await self._cleanup_after_run()
+
     async def _run_pipeline_lifecycle(self) -> bool:
         shutdown_recorded = False
         with self._pipeline_span(), self._observer:
@@ -182,12 +197,14 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             finally:
                 self._observer.capture_execution_metrics(self.execution_metrics)
         return shutdown_recorded
+
     async def _finalize_debug_export(self, status: str) -> None:
         finalize = getattr(self._executor, "finalize_debug_export", None)
         if not callable(finalize):
             return
         try:
             from collections.abc import Awaitable, Callable
+
             finalize_fn = cast(Callable[..., Awaitable[object]], finalize)
             result = await finalize_fn(status=status, manifest_id=self.manifest_id)
         except _RUN_FAILURE_EXCEPTIONS as error:

@@ -2,23 +2,24 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-07-27T18:08:35.600453+00:00'
+refreshed_at_utc: '2026-07-29T12:03:59.632345+00:00'
 refresh_status: captured
-source_commit: 667c3020ce74f87c319f77612c765a5aaf30e6ad
-source_run_id: local-duration-rebuild-2026-07-23
-source_tree_sha256: e226fefe00f4fba24326ce789f36ceb2115cd9e5e52d36ac334fbd01513975ec
+source_commit: null
+source_run_id: null
+source_tree_sha256: 723c194a1fca1e0eb5a3d89c731560f200f48f910ae877620c271969a52a09f1
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
-  coverage_xml: reports/coverage/coverage.xml
-  coverage_log: null
+  coverage_xml: E:\g-drive\05_AI\github\BioactivityDataAcquisition2\reports\quality\coverage.xml
+  coverage_log: E:\g-drive\05_AI\github\BioactivityDataAcquisition2
   coverage_percent_fallback: null
-  slowest_tests_json: reports/test-telemetry/slowest-tests.json
-  junit_inputs: []
+  slowest_tests_json: E:\g-drive\05_AI\github\BioactivityDataAcquisition2\reports\test-telemetry\slowest-tests.json
+  junit_inputs:
+  - E:\g-drive\05_AI\github\BioactivityDataAcquisition2\reports\quality\full_suite_junit.xml
 coverage:
   threshold_percent: 85.0
-  actual_percent: 96.49
+  actual_percent: 95.38
   threshold_satisfied: true
 duration_telemetry:
   total_cases: 23360
@@ -154,7 +155,7 @@ duration_telemetry:
     - S5-infra-adapters.xml
     - S6-crosscutting-unit.xml
     - S7-crosscutting-architecture-a.xml
-    - S7-crosscutting-architecture-a.xml
+    - S7-crosscutting-architecture-a2.xml
     - S7-crosscutting-architecture-a3.xml
     - S7-crosscutting-architecture-b.xml
     - S7-crosscutting-architecture-c.xml
@@ -175,7 +176,8 @@ duration_telemetry:
       S4-app-services.xml: 33.052
       S5-infra-adapters.xml: 136.002
       S6-crosscutting-unit.xml: 30.191
-      S7-crosscutting-architecture-a.xml: 685.19
+      S7-crosscutting-architecture-a.xml: 265.502
+      S7-crosscutting-architecture-a2.xml: 419.688
       S7-crosscutting-architecture-a3.xml: 553.6
       S7-crosscutting-architecture-b.xml: 199.806
       S7-crosscutting-architecture-c.xml: 1261.941
@@ -189,7 +191,8 @@ duration_telemetry:
     - lane: manual-e2e
       reason: operator-triggered external-runtime lane
     - lane: deleted-or-renamed-nodes-filtered
-      reason: dropped 248 timed cases whose owning test modules no longer exist on current HEAD
+      reason: dropped 248 timed cases whose owning test modules no longer exist on
+        current HEAD
     ranking_filter:
       dropped_deleted_module_cases: 248
       retained_for_ranking: 23112
@@ -212,8 +215,8 @@ slow_governance_cache_probe:
     entrypoints:
     - tests.architecture.conftest.cached_subprocess_run
     - tests.architecture.conftest._run_cached_subprocess
-    note: Disk-backed subprocess reuse now backs repo-wide scanner calls for detect-secrets, ruff, and mypy-style architecture
-      governance checks.
+    note: Disk-backed subprocess reuse now backs repo-wide scanner calls for detect-secrets,
+      ruff, and mypy-style architecture governance checks.
     ci_persistence:
       action: .github/actions/architecture-governance-cache
       cache_path: .cache/bioetl-architecture-governance

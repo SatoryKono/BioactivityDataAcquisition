@@ -20,6 +20,7 @@ class PostrunMetadataVersionResolver(PostrunFailureHandlingMixin):
     implementation, keeping the application layer free of infrastructure
     dependencies (ARCH-001).
     """
+
     _FAILURE_POLICY = PostrunFailurePolicySpec(
         event="delta_version_resolution_failed",
         strict_reason="delta_version_resolution_failed_strict_mode",
@@ -27,6 +28,7 @@ class PostrunMetadataVersionResolver(PostrunFailureHandlingMixin):
         warning_reason="delta_version_resolution_failed_warning_mode",
         warning_reason_code="POSTRUN_DELTA_VERSION_RESOLUTION_FAILED_WARNING",
     )
+
     def __init__(
         self,
         *,
@@ -39,6 +41,7 @@ class PostrunMetadataVersionResolver(PostrunFailureHandlingMixin):
         self._runtime = runtime
         self._storage = storage
         self._warning_allowlist = warning_allowlist
+
     def resolve_delta_version(
         self, table_path: str, *, layer: Literal["silver", "gold"]
     ) -> int | None:

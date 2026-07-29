@@ -25,10 +25,10 @@ from typing import TYPE_CHECKING, Any
 
 # Import domain value objects
 from bioetl.domain.config import MemoryConfig
+from bioetl.domain.mixin_host import as_mixin_host
 
 # Re-export MemoryStats from domain for backward compatibility
 from bioetl.domain.ports import MemoryStats
-from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -102,7 +102,9 @@ class MemoryMonitor:
         vm = psutil.virtual_memory()
         if self._cached_process is None:
             object.__setattr__(self, "_cached_process", psutil.Process())
-        process_memory = as_mixin_host(self)._cached_process.memory_info()  # Any: mixin host surface (self attrs/methods)
+        process_memory = as_mixin_host(
+            self
+        )._cached_process.memory_info()  # Any: mixin host
 
         return MemoryStats(
             used_mb=vm.used / (1024 * 1024),
