@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -86,3 +87,30 @@ def test_tampered_backup_is_rejected_before_recovery(tmp_path: Path) -> None:
         recover_backup(result.bundle_path, target, apply=True)
 
     assert not target.exists()
+
+
+def test_failed_recovery_restores_original_target(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    result = create_backup(_source(tmp_path), tmp_path / "backups")
+    target = tmp_path / "target"
+    target.mkdir()
+    original = target / "original.txt"
+    original.write_text("preserve me", encoding="utf-8")
+    real_replace = os.replace
+    calls = 0
+
+    def fail_publish(source: Path, destination: Path) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise OSError("synthetic publish failure")
+        real_replace(source, destination)
+
+    monkeypatch.setattr("memory.backup.os.replace", fail_publish)
+
+    with pytest.raises(OSError, match="synthetic publish failure"):
+        recover_backup(result.bundle_path, target, apply=True)
+
+    assert original.read_text(encoding="utf-8") == "preserve me"

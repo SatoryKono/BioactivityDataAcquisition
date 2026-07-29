@@ -65,10 +65,15 @@ class RepositoryScope:
 
     def namespace_path(self, storage_root: Path) -> Path:
         """Resolve the task namespace under a caller-owned storage root."""
+        identity = "\0".join(
+            (self.repo_id, self.worktree_id, self.branch, self.task_id)
+        ).encode("utf-8")
+        identity_digest = hashlib.sha256(identity).hexdigest()[:16]
         return (
             storage_root
             / safe_component(self.repo_id)
             / safe_component(self.worktree_id)
             / safe_component(self.branch)
+            / identity_digest
             / safe_component(self.task_id)
         )

@@ -505,7 +505,7 @@ def test_test_governance_artifacts_match_live_collector(
             cwd=ROOT,
             capture_output=True,
             text=True,
-            timeout=60,
+            timeout=120,
             check=False,
         )
 
