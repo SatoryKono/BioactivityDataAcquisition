@@ -741,6 +741,14 @@ def _write_configs(
 
 def _gemini_server_config(server: dict[str, Any]) -> dict[str, Any]:
     rendered = deepcopy(server)
+    startup_timeout_sec = rendered.pop("startup_timeout_sec", None)
+    if startup_timeout_sec is not None:
+        rendered["timeout"] = int(startup_timeout_sec) * 1000
+    env_http_headers = rendered.pop("env_http_headers", None)
+    if env_http_headers is not None:
+        rendered["headers"] = {
+            header: f"${env_name}" for header, env_name in env_http_headers.items()
+        }
     if rendered.get("type") == "http" and "url" in rendered:
         rendered["httpUrl"] = rendered.pop("url")
         rendered.pop("type", None)

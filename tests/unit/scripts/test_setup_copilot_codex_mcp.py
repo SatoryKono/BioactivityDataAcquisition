@@ -420,6 +420,17 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     assert zed_payload["mcpServers"] == servers
     assert not removed_servers.intersection(servers)
     assert not removed_servers.intersection(gemini_settings["mcpServers"])
+    for server_name, gemini_server in gemini_settings["mcpServers"].items():
+        assert "startup_timeout_sec" not in gemini_server
+        startup_timeout = servers[server_name].get("startup_timeout_sec")
+        if startup_timeout is None:
+            assert "timeout" not in gemini_server
+        else:
+            assert gemini_server["timeout"] == startup_timeout * 1000
+    assert gemini_settings["mcpServers"]["ref"]["headers"] == {
+        "x-ref-api-key": "$REF_TOOL_API_KEY"
+    }
+    assert "env_http_headers" not in gemini_settings["mcpServers"]["ref"]
     assert servers["filesystem"]["args"][0] == (
         f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
     )

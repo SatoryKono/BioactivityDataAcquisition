@@ -80,6 +80,7 @@ check_workspace_settings() {
 import json
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 path = Path(sys.argv[1])
 repo_root = sys.argv[2]
@@ -88,11 +89,28 @@ servers = payload.get("mcpServers")
 if not isinstance(servers, dict):
     raise SystemExit("mcpServers is missing or is not an object")
 for name in ("memory", "filesystem"):
-    if name not in servers:
+    server = servers.get(name)
+    if not isinstance(server, dict):
         raise SystemExit(f"required MCP server is missing: {name}")
-rendered = json.dumps(servers, sort_keys=True)
-if repo_root not in rendered:
-    raise SystemExit("mcpServers does not reference current repository root")
+    endpoint = server.get("httpUrl") or server.get("url")
+    if endpoint:
+        hostname = urlparse(endpoint).hostname
+        if hostname not in {"127.0.0.1", "localhost", "::1"}:
+            raise SystemExit(f"required MCP server is not local: {name}")
+    elif repo_root not in json.dumps(server, sort_keys=True):
+        raise SystemExit(
+            f"stdio MCP server does not reference current repository root: {name}"
+        )
+for name, server in servers.items():
+    if not isinstance(server, dict):
+        raise SystemExit(f"MCP server config is not an object: {name}")
+    if "startup_timeout_sec" in server:
+        raise SystemExit(f"unsupported Gemini MCP key startup_timeout_sec: {name}")
+    timeout = server.get("timeout")
+    if timeout is not None and (
+        isinstance(timeout, bool) or not isinstance(timeout, int) or timeout <= 0
+    ):
+        raise SystemExit(f"invalid Gemini MCP timeout: {name}")
 PY
     return 0
 }
