@@ -68,6 +68,24 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
     },
+    "scripts/docs/passports/inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal passport inventory collector behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
+    "scripts/docs/passports/manual_sidecar.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal manual-sidecar helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
+    "scripts/docs/passports/projector.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal passport projection helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
     "scripts/ai/codex/helper/check-env.ps1": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

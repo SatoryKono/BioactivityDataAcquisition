@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:chembl_baseline`
 - Schema: `1.0.0`
-- Source revision: `b502aa73ed561cd30b5317e5531677a073694912`
+- Source revision: `ec0f2a1d64cc5d30ee263677982ba2f60cfc1172`
 
 ## Evidence
 
@@ -174,6 +174,15 @@
         "step_id": "reconcile_publication_assay_orphans",
         "transform_name": "reconcile_foreign_keys"
       }
+    ],
+    "topological_order": [
+      "run_chembl_assay",
+      "run_chembl_target",
+      "reconcile_assay_target_orphans",
+      "run_chembl_publication",
+      "reconcile_assay_publication_orphans",
+      "reconcile_target_assay_orphans",
+      "reconcile_publication_assay_orphans"
     ]
   },
   "diagnostics": [],
@@ -303,7 +312,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:0c4b8bf263380d40361ca35749e64226a7862c11313569d72a65ef08728b0ab6",
-    "source_revision": "b502aa73ed561cd30b5317e5531677a073694912"
+    "source_revision": "ec0f2a1d64cc5d30ee263677982ba2f60cfc1172"
   },
   "source_references": [
     {

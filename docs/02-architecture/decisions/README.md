@@ -72,6 +72,8 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-051](ADR-051-quarantine-entry-aggregate-surface.md) | QuarantineEntry Wide Constructor as Intentional Aggregate Surface | Accepted | Architecture | 2026-07-27 |
 | [ADR-052](ADR-052-infrastructure-config-package-root-public-api.md) | Infrastructure Config Package Root as Permanent Public API | Accepted | Architecture | 2026-07-28 |
 | [ADR-053](ADR-053-optional-grafana-scenes-app-shell.md) | Optional Grafana Scenes App Shell as Presentation Adapter | Accepted | Observability | 2026-07-28 |
+| [ADR-054](ADR-054-passport-documentation-projections.md) | Evidence-Backed Passport Documentation Projections | Accepted | Documentation | 2026-07-29 |
+| [ADR-055](ADR-055-workflow-reconciliation-data-step-ownership.md) | Workflow Reconciliation Data-Step Ownership | Accepted | Architecture | 2026-07-29 |
 
 ## ADRs by Category
 

@@ -55,11 +55,18 @@ def _sha(value: object) -> str:
 
 
 def _source_revision() -> str:
+    """Resolve the latest revision touching canonical runtime/config inputs.
+
+    Using the containing commit would make tracked generated output
+    self-referential: committing the output changes HEAD again. Restricting the
+    revision to canonical fact owners keeps `--check` reproducible while still
+    identifying the source snapshot.
+    """
     override = os.environ.get("BIOETL_PASSPORT_SOURCE_REVISION")
     if override:
         return override
     result = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
+        ["git", "log", "-1", "--format=%H", "--", "configs", "src/bioetl"],
         cwd=PROJECT_ROOT,
         check=True,
         capture_output=True,
@@ -237,6 +244,42 @@ def _classify_transform(name: str) -> list[str]:
     return ["unknown"]
 
 
+def _topological_order(steps: list[JsonObject]) -> list[str]:
+    step_ids = [str(step.get("step_id")) for step in steps]
+    if len(step_ids) != len(set(step_ids)):
+        raise ValueError("Workflow contains duplicate step IDs")
+    dependencies = {
+        str(step.get("step_id")): {
+            str(value)
+            for value in step.get("depends_on", [])
+            if isinstance(value, str)
+        }
+        for step in steps
+    }
+    unknown = sorted(
+        dependency
+        for values in dependencies.values()
+        for dependency in values
+        if dependency not in dependencies
+    )
+    if unknown:
+        raise ValueError(f"Workflow contains unknown dependencies: {unknown}")
+    ordered: list[str] = []
+    remaining = dict(dependencies)
+    while remaining:
+        ready = sorted(
+            step_id
+            for step_id, values in remaining.items()
+            if values.issubset(ordered)
+        )
+        if not ready:
+            raise ValueError("Workflow dependency cycle detected")
+        for step_id in ready:
+            ordered.append(step_id)
+            del remaining[step_id]
+    return ordered
+
+
 def _workflow_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
     payload = _load_yaml(unit.config_path)
     workflow = payload["workflow"]
@@ -295,6 +338,7 @@ def _workflow_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
         "dag": {
             "step_count": len(steps),
             "edge_count": len(edges),
+            "topological_order": _topological_order(steps),
             "steps": steps,
             "edges": [{"from": source, "to": target} for source, target in edges],
         },
@@ -438,6 +482,14 @@ def build_all_outputs(
         "# Pipeline and workflow passports",
         "",
         "Generated, evidence-backed documentation projections.",
+        "",
+        "## Governance",
+        "",
+        "- [ADR-054: passport documentation projections](../../02-architecture/decisions/ADR-054-passport-documentation-projections.md)",
+        "- [ADR-055: workflow reconciliation ownership](../../02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md)",
+        "- [Pipeline passport schema](schemas/pipeline-passport.schema.json)",
+        "- [Workflow passport schema](schemas/workflow-passport.schema.json)",
+        "- [Manual metadata schema](schemas/manual-passport-metadata.schema.json)",
         "",
         "## Pipelines",
         "",

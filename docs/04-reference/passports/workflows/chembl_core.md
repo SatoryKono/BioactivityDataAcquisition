@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:chembl_core`
 - Schema: `1.0.0`
-- Source revision: `b502aa73ed561cd30b5317e5531677a073694912`
+- Source revision: `ec0f2a1d64cc5d30ee263677982ba2f60cfc1172`
 
 ## Evidence
 
@@ -107,6 +107,13 @@
         "step_id": "summarize_core_extracts",
         "transform_name": "summarize_upstream_outputs"
       }
+    ],
+    "topological_order": [
+      "chembl_activity_ingest",
+      "chembl_assay_ingest",
+      "chembl_target_ingest",
+      "reconcile_assay_target_orphans",
+      "summarize_core_extracts"
     ]
   },
   "diagnostics": [],
@@ -174,7 +181,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:70660158eba16dccd689e75213e6619edf5777b8b5b03cee61b91e657576cf2c",
-    "source_revision": "b502aa73ed561cd30b5317e5531677a073694912"
+    "source_revision": "ec0f2a1d64cc5d30ee263677982ba2f60cfc1172"
   },
   "source_references": [
     {
