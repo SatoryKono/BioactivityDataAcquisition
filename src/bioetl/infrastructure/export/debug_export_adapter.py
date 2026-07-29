@@ -196,7 +196,7 @@ class DebugExportAdapter:
     @staticmethod
     def _lineage_rows_for_fragment(fragment: object) -> list[dict[str, object]]:
         # Lineage fragment is duck-typed from control-plane store (avoid hard import cycles).
-        frag = cast(Any, fragment)
+        frag = cast(Any, fragment)  # Any: duck-typed lineage fragment without CP import
         rows: list[dict[str, object]] = []
         for node in frag.nodes:
             rows.append(

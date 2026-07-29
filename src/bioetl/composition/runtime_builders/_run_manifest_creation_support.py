@@ -127,7 +127,10 @@ def emit_replay_reconstructability_metric(
     if not callable(increment_counter_obj):
         return
     # Cast after callable() narrows for Sonar S5864 (object-not-callable).
-    increment_counter = cast(Callable[..., Any], increment_counter_obj)
+    increment_counter = cast(
+        Callable[..., Any],  # Any: MetricsPort method bound as object
+        increment_counter_obj,
+    )
     set_gauge_obj = _read_attr(metrics, "set_gauge", None)
     launch_context = request.launch_context
     strict_replay_requested = bool(
@@ -177,7 +180,10 @@ def emit_replay_reconstructability_metric(
         "replay_capability": request.replay_capability.value,
     }
     if callable(set_gauge_obj):
-        cast(Callable[..., Any], set_gauge_obj)(
+        cast(
+            Callable[..., Any],  # Any: MetricsPort method bound as object
+            set_gauge_obj,
+        )(
             "bioetl_replay_lag_seconds",
             value=0.0,
             labels={**replay_labels, "status": lag_status},
