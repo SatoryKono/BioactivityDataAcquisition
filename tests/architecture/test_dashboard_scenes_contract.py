@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PLUGIN = ROOT / "grafana/plugins/bioetl-scenes-app"
 ROUTES = PLUGIN / "src/routes/routes.json"
 PARITY = ROOT / "reports/observability/scenes-parity-ledger.json"
+RENDER_ROOT = ROOT / "reports/observability/scenes-baseline"
 
 
 def _json(path: Path) -> dict[str, object]:
@@ -75,3 +76,38 @@ def test_committed_scenes_parity_ledger_matches_live_dashboards() -> None:
     assert summary["run_id_prometheus_violations"] == []  # type: ignore[index]
     assert summary["hidden_datasources"] == []  # type: ignore[index]
     assert summary["write_actions"] == []  # type: ignore[index]
+
+
+@pytest.mark.parametrize(
+    ("group", "theme", "width", "height"),
+    [
+        ("1024-dark", "dark", 1024, 768),
+        ("1024-light", "light", 1024, 768),
+        ("1600-dark", "dark", 1600, 900),
+        ("1600-light", "light", 1600, 900),
+    ],
+)
+def test_json_fallback_render_evidence_is_terminal_and_responsive(
+    group: str,
+    theme: str,
+    width: int,
+    height: int,
+) -> None:
+    manifest = _json(RENDER_ROOT / group / "render-manifest.json")
+    requested = manifest["requested"]
+    terminal = manifest["terminal_state_validation"]
+    dashboards = manifest["dashboards"]
+
+    assert requested["theme"] == theme  # type: ignore[index]
+    assert requested["viewport"] == {  # type: ignore[index]
+        "width": width,
+        "height": height,
+    }
+    assert requested["capture_surface"] == "full"  # type: ignore[index]
+    assert manifest["expand_collapsed_rows"] is True
+    assert terminal["status"] == "ok"  # type: ignore[index]
+    assert len(dashboards) == 7  # type: ignore[arg-type]
+    assert all(  # type: ignore[union-attr]
+        value == "ok"
+        for value in terminal["dashboards"].values()  # type: ignore[index]
+    )
