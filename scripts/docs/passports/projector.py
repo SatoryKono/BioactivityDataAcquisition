@@ -107,7 +107,15 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
     contract_path = _contract_path(provider, entity)
     contract = _load_yaml(contract_path) if contract_path.is_file() else {}
     source_refs = [
-        {"role": "effective_entity_config", "path": _repo_path(unit.config_path)}
+        {"role": "effective_entity_config", "path": _repo_path(unit.config_path)},
+        {
+            "role": "gold_validation_contract",
+            "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
+        },
+        {
+            "role": "observability_contract",
+            "path": "src/bioetl/domain/_observability_contract_primitives.py",
+        },
     ]
     if contract:
         source_refs.append(
@@ -141,7 +149,13 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
                 "method": {"status": "runtime_resolved"},
                 "endpoint_template": {"status": "runtime_resolved"},
             },
-            "supported_source_modes": ["api", "cached_bronze"],
+            "source_modes": {
+                "declared": ["runtime_resolved"],
+                "cached_bronze": {
+                    "identity_kind": "execution_mode",
+                    "availability": "runtime_resolved",
+                },
+            },
         },
         "bronze": {
             "capability": "append_only_snapshot",
@@ -164,7 +178,7 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
             "contract_ref": contract.get("contract_ref"),
             "contract_version": contract.get("contract_version"),
             "contract_validation": {
-                "status": "resolved_by_runtime_contract",
+                "status": "resolved_by_adr_018",
                 "strict": True,
             },
             "write": sink.get("gold", {}) if isinstance(sink, dict) else {},
