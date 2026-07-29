@@ -11,6 +11,7 @@ from collections.abc import Iterator
 from typing import Any
 
 class DataType:
+    def __iter__(self) -> Iterator[Any]: ...
     def __getattr__(self, name: str) -> Any: ...
 
 class Field:

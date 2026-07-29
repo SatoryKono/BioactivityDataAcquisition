@@ -58,6 +58,7 @@ class UnifiedHTTPClient(
     logger: LoggerPort | None = None
 
     _client: httpx.AsyncClient | None = field(init=False, default=None)
+    _client_enter_depth: int = field(init=False, default=0)
     _tracer: TracingPort | None = field(init=False)
     _metrics: MetricsPort | None = field(init=False)
 
@@ -67,3 +68,4 @@ class UnifiedHTTPClient(
             tracer=self.tracer,
             metrics=self.metrics,
         )
+

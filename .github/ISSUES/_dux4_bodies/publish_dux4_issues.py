@@ -20,12 +20,22 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import TypedDict
 
 ROOT = Path(__file__).resolve().parents[3]
 BODIES = Path(__file__).resolve().parent
 PACK = ROOT / ".github" / "ISSUES" / "DUX4-2026-07-29-DASHBOARD-VISUAL-ENFORCEMENT-ISSUE-PACK.md"
 PUBLISH = ROOT / "reports" / "quality" / "dux4-2026-07-29-issue-publish.json"
 TITLES_PATH = BODIES / "TITLES.md"
+
+
+class PublishedIssue(TypedDict):
+    code: str
+    number: int
+    priority: str
+    wave: str
+    url: str
+    title: str
 
 # code -> (priority, wave)
 META: dict[str, tuple[str, str]] = {
@@ -136,12 +146,12 @@ def patch_parent(body: str, epic: int) -> str:
     return body.replace("_TBD_ (DUX4-00)", f"#{epic} (DUX4-00)")
 
 
-def update_pack(created: list[dict[str, object]]) -> None:
+def update_pack(created: list[PublishedIssue]) -> None:
     text = PACK.read_text(encoding="utf-8")
     for row in created:
-        code = str(row["code"])
-        number = int(row["number"])
-        url = str(row["url"])
+        code = row["code"]
+        number = row["number"]
+        url = row["url"]
         # Replace matrix cell: | DUX4-XX | _TBD_ |  -> | DUX4-XX | [#N](url) |
         pattern = rf"(\| {re.escape(code)} \| )_TBD_( \|)"
         repl = rf"\g<1>[#{number}]({url})\g<2>"
@@ -180,7 +190,7 @@ def main() -> int:
     for lab in labels:
         label_args.extend(["--label", lab])
 
-    created: list[dict[str, object]] = []
+    created: list[PublishedIssue] = []
 
     epic_url = run_gh(
         gh,
@@ -197,14 +207,14 @@ def main() -> int:
     )
     epic = 0 if args.dry_run else issue_number_from_url(epic_url)
     created.append(
-        {
-            "code": "DUX4-00",
-            "number": epic,
-            "priority": "meta",
-            "wave": "epic",
-            "url": epic_url,
-            "title": titles["DUX4-00"],
-        }
+        PublishedIssue(
+            code="DUX4-00",
+            number=epic,
+            priority="meta",
+            wave="epic",
+            url=epic_url,
+            title=titles["DUX4-00"],
+        )
     )
     print(f"created epic #{epic}: {epic_url}")
 
@@ -235,21 +245,20 @@ def main() -> int:
         number = 0 if args.dry_run else issue_number_from_url(url)
         pri, wave = META[code]
         created.append(
-            {
-                "code": code,
-                "number": number,
-                "priority": pri,
-                "wave": wave,
-                "url": url,
-                "title": titles[code],
-            }
+            PublishedIssue(
+                code=code,
+                number=number,
+                priority=pri,
+                wave=wave,
+                url=url,
+                title=titles[code],
+            )
         )
         print(f"created {code} #{number}: {url}")
-
     if not args.dry_run:
         # Link children in epic body comment
         child_lines = "\n".join(
-            f"- #{int(row['number'])} — `{row['code']}` {row['title']}"
+            f"- #{row['number']} — `{row['code']}` {row['title']}"
             for row in created
             if row["code"] != "DUX4-00"
         )

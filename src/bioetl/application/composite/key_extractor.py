@@ -8,6 +8,8 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
+from typing import cast, Any
+
 from collections.abc import Mapping, Sequence
 
 import polars as pl
@@ -75,7 +77,7 @@ class KeyExtractorService:
         import polars as pl
 
         pa_table = await self._delta_reader.read_table(path)
-        result = pl.from_arrow(pa_table)
+        result = pl.from_arrow(cast(Any, pa_table))
         # from_arrow may return Series for single-column tables
         if isinstance(result, pl.Series):
             return result.to_frame()

@@ -6,7 +6,7 @@ import hashlib
 import json
 from collections.abc import Iterator
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable, cast, Any
 
 from bioetl.application.services.export_manifests import write_export_sidecar_manifests
 from bioetl.application.services.export_models import ExportOptions, ExportResult
@@ -101,7 +101,7 @@ async def export_existing_table(
     )
     output_path = Path(
         writer.write_export(
-            table=export_table,
+            table=cast(Any, export_table),
             table_name=table_name,
             layer=layer,
             fmt=options.format,
@@ -110,7 +110,7 @@ async def export_existing_table(
     )
     manifest_paths = write_export_manifests_if_enabled(
         writer=writer,
-        table=export_table,
+        table=cast(Any, export_table),
         table_name=table_name,
         layer=layer,
         options=options,

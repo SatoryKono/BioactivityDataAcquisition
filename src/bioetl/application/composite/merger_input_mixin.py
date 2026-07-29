@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import polars as pl
 
@@ -148,7 +148,7 @@ class _MergeInputLoaderMixin:
         if self._delta_reader is not None:
             # Read using Delta Lake
             arrow_table = await self._delta_reader.read_table(table)
-            frame = pl.from_arrow(arrow_table)
+            frame = pl.from_arrow(cast(Any, arrow_table))
             return frame.to_frame() if isinstance(frame, pl.Series) else frame
 
         # Check if storage fallback is disabled (for test compatibility)

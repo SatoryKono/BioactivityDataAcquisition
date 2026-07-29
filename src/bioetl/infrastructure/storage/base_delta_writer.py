@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from deltalake import DeltaTable as DeltaTableType
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
@@ -65,7 +65,7 @@ def _get_string_fields(schema: object) -> set[str]:
         get_string_fields as _get_string_fields_impl,
     )
 
-    return _get_string_fields_impl(schema)
+    return _get_string_fields_impl(cast(Any, schema))
 
 
 def _read_delta_records(
@@ -103,7 +103,7 @@ def _resolve_delta_table_path(
     )
 
 
-def _get_delta_table_arrow_schema(table: DeltaTableType) -> object:
+def _get_delta_table_arrow_schema(table: DeltaTableType) -> pa.Schema:
     """Extract the PyArrow schema from an opened Delta table."""
     from bioetl.infrastructure.storage.delta.table_ops import (
         get_delta_table_arrow_schema as _get_delta_table_arrow_schema_impl,
@@ -136,7 +136,7 @@ def coerce_null_types_for_delta(table: object) -> object:
         coerce_null_types_for_delta as _coerce_null_types_for_delta_impl,
     )
 
-    return _coerce_null_types_for_delta_impl(table)
+    return _coerce_null_types_for_delta_impl(cast(Any, table))
 
 
 class BaseDeltaWriter(BaseDeltaWriterTableAccessMixin):
@@ -188,7 +188,7 @@ class BaseDeltaWriter(BaseDeltaWriterTableAccessMixin):
         """Prepare Arrow table from records with schema filtering and sorting."""
         return self._arrow_converter.convert_records_to_arrow_with_schema(
             records,
-            schema,
+            cast(Any, schema),
             primary_keys=primary_keys,
         )
 
@@ -204,7 +204,7 @@ class BaseDeltaWriter(BaseDeltaWriterTableAccessMixin):
         )
 
         return _sort_by_primary_keys_impl(
-            table,
+            cast(Any, table),
             primary_keys,
             schema_names=schema_names,
             logger=self.logger,
