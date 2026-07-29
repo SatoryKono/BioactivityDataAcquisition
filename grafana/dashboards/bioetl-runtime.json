@@ -132,7 +132,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "DUX5: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error); pair with Provenance reason + action. Not a healthy OK. DUX4-11: NOW HEALTH only. SCRAPING/telemetry chips are EVIDENCE, not success. DUX3-10: Execution/health verdict (NOW). Not telemetry collection state. Peer SCRAPING/gap chips are EVIDENCE confidence only. Primary compact Runtime verdict for the selected pipeline/run_type scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. This verdict is trust-gated by Runtime Telemetry Gap: a non-zero scrape/rule gap forces Status to INCOMPLETE before selected-range zero counters are trusted. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Runtime Status below is an expanded first-screen mirror of this same trust-gated current-status recording rule, not an independent second verdict. Required scrape/rule evidence therefore owns the headline: green OK is impossible during a trust gap. Sole first-screen status (dual twin removed #6572). UNKNOWN — status series absent (not OK). DSA-05: state x confidence x basis x next_action; handoff data-path to DQ/Run Explorer.",
+      "description": "DUX6: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error/selection). Pair with Provenance reason + action; never read as OK. DUX5: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error); pair with Provenance reason + action. Not a healthy OK. DUX4-11: NOW HEALTH only. SCRAPING/telemetry chips are EVIDENCE, not success. DUX3-10: Execution/health verdict (NOW). Not telemetry collection state. Peer SCRAPING/gap chips are EVIDENCE confidence only. Primary compact Runtime verdict for the selected pipeline/run_type scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. This verdict is trust-gated by Runtime Telemetry Gap: a non-zero scrape/rule gap forces Status to INCOMPLETE before selected-range zero counters are trusted. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Runtime Status below is an expanded first-screen mirror of this same trust-gated current-status recording rule, not an independent second verdict. Required scrape/rule evidence therefore owns the headline: green OK is impossible during a trust gap. Sole first-screen status (dual twin removed #6572). UNKNOWN — status series absent (not OK). DSA-05: state x confidence x basis x next_action; handoff data-path to DQ/Run Explorer.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -328,7 +328,7 @@
             ]
           },
           "unit": "short",
-          "noValue": "VALID EMPTY — no active blockers (Status=OK path)",
+          "noValue": "None observed",
           "links": [
             {
               "title": "Open Run Explorer",
@@ -536,7 +536,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range runtime stage backlog trend by stage for the selected pipeline/run_type scope. This is pipeline metric evidence and intentionally does not filter by run_id.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range runtime stage backlog trend by stage for the selected pipeline/run_type scope. This is pipeline metric evidence and intentionally does not filter by run_id.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -610,7 +610,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range processed records by stage over the selected interval for the selected pipeline/run_type scope. This is stage throughput evidence and intentionally does not filter by run_id.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range processed records by stage over the selected interval for the selected pipeline/run_type scope. This is stage throughput evidence and intentionally does not filter by run_id.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -856,7 +856,7 @@
           "id": 9105,
           "type": "timeseries",
           "title": "Monitor Aggregate Stage Lag",
-          "description": "Continuous stage lag seconds by stage for the selected pipeline and run type (Prom low-cardinality). Timeseries frame for localization; not a discrete state timeline. No run_id Prom labels.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Continuous stage lag seconds by stage for the selected pipeline and run type (Prom low-cardinality). Timeseries frame for localization; not a discrete state timeline. No run_id Prom labels.",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -1144,7 +1144,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Phase latency distribution across p50, p95, and p99 for the selected pipeline. \"No phase duration samples in range\" means no phase duration histogram buckets were emitted in the selected range. Possible causes: run still active, metric not emitted, or label mismatch. bioetl_phase_duration_seconds has no run_type label, so unlike pipeline duration below this panel intentionally filters by pipeline only; use run_type-scoped stage duration panels or Control Plane identity when backfill and incremental runs must not be mixed.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Phase latency distribution across p50, p95, and p99 for the selected pipeline. \"No phase duration samples in range\" means no phase duration histogram buckets were emitted in the selected range. Possible causes: run still active, metric not emitted, or label mismatch. bioetl_phase_duration_seconds has no run_type label, so unlike pipeline duration below this panel intentionally filters by pipeline only; use run_type-scoped stage duration panels or Control Plane identity when backfill and incremental runs must not be mixed.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1228,7 +1228,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Pipeline duration percentiles by stage. \"No terminal pipeline duration samples\" means no completed pipeline runs emitted duration histogram buckets in the selected range. Possible causes: run still active, terminal metric not emitted, query label mismatch.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Pipeline duration percentiles by stage. \"No terminal pipeline duration samples\" means no completed pipeline runs emitted duration histogram buckets in the selected range. Possible causes: run still active, terminal metric not emitted, query label mismatch.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1404,7 +1404,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Processed-record totals over the active range, grouped by stage and run_type. Empty bargauge means no processed-record samples in range.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Processed-record totals over the active range, grouped by stage and run_type. Empty bargauge means no processed-record samples in range.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1484,11 +1484,11 @@
             "y": 32
           },
           "options": {
-            "mode": "markdown",
-            "content": "Review Runtime-owned escalation\n"
+            "mode": "html",
+            "content": "<div style=\"padding:2px 8px;font-size:12px;line-height:1.25;overflow:hidden\"><strong>Runtime escalation</strong> — blockers + phase evidence first; then Incident for multi-domain blast radius; Run Explorer for exact-run proof.</div>"
           },
           "transparent": true,
-          "description": "DUX5: triage copy shortened; caveats in description; no raw endpoints."
+          "description": "DUX6: handoff copy compacted; full runbook in description/docs. DUX5: triage copy shortened; caveats in description; no raw endpoints."
         },
         {
           "datasource": {
@@ -1582,7 +1582,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "No-records runs detected over the last 30m for selected pipeline/run_type. This is a runtime blocker candidate when runs occurred but no records were processed. 0 is valid only when the selected runtime pipeline/run_type universe exists; telemetry gaps are inconclusive. Next action: inspect checkpoint/resume and stage expectedness. Open 0. Control Plane from the navigation bus when checkpoint/resume investigation is needed.",
+          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). No-records runs detected over the last 30m for selected pipeline/run_type. This is a runtime blocker candidate when runs occurred but no records were processed. 0 is valid only when the selected runtime pipeline/run_type universe exists; telemetry gaps are inconclusive. Next action: inspect checkpoint/resume and stage expectedness. Open 0. Control Plane from the navigation bus when checkpoint/resume investigation is needed.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1773,11 +1773,11 @@
             "y": 49
           },
           "options": {
-            "mode": "markdown",
-            "content": "Review Cross-domain handoffs\n"
+            "mode": "html",
+            "content": "<div style=\"padding:2px 8px;font-size:12px;line-height:1.25;overflow:hidden\"><strong>Cross-domain handoffs</strong> — Provider (deps) · DQ (rejects) · Trust (replay) · Incident (ranked triage). Preserve scope variables.</div>"
           },
           "transparent": true,
-          "description": "DUX5: triage copy shortened; caveats in description; no raw endpoints."
+          "description": "DUX6: handoff copy compacted; full runbook in description/docs. DUX5: triage copy shortened; caveats in description; no raw endpoints."
         },
         {
           "datasource": {
@@ -2221,18 +2221,18 @@
             "y": 76
           },
           "options": {
-            "mode": "markdown",
-            "content": "Review Process-level signals (GLOBAL)\n"
+            "mode": "html",
+            "content": "<div style=\"padding:2px 8px;font-size:12px;line-height:1.25;overflow:hidden\"><strong>Process-level (GLOBAL)</strong> — memory/error process signals are fleet evidence, not selected-run health. Pair with pipeline Status.</div>"
           },
           "transparent": true,
-          "description": "DUX5: triage copy shortened; caveats in description; no raw endpoints."
+          "description": "DUX6: handoff copy compacted; full runbook in description/docs. DUX5: triage copy shortened; caveats in description; no raw endpoints."
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "GLOBAL graceful-shutdown initiation events over the active Grafana interval, grouped by reason and not filtered by $pipeline/$run_type because the source metric has only reason. Use this as process-level shutdown context, not pipeline-scoped runtime evidence.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. GLOBAL graceful-shutdown initiation events over the active Grafana interval, grouped by reason and not filtered by $pipeline/$run_type because the source metric has only reason. Use this as process-level shutdown context, not pipeline-scoped runtime evidence.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2311,7 +2311,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "GLOBAL graceful-shutdown completion events over the active Grafana interval, grouped by reason and not filtered by $pipeline/$run_type because the source metric has only reason. Compare with initiated events for process-level shutdown completion context.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. GLOBAL graceful-shutdown completion events over the active Grafana interval, grouped by reason and not filtered by $pipeline/$run_type because the source metric has only reason. Compare with initiated events for process-level shutdown completion context.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2666,7 +2666,7 @@
             "y": 0
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
+          "description": "DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2807,7 +2807,7 @@
             "y": 0
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Current stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
+          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Current stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
           "fieldConfig": {
             "defaults": {
               "custom": {

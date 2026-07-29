@@ -44,3 +44,11 @@ Store before/after under operator-local evidence; do not commit secrets.
 - [ ] Dark theme verified at 1366 baseline
 - [ ] Light theme verified **or** explicitly unsupported in this file
 - [ ] Linked from DUX5 pack closeout
+
+## DUX6 residual matrix
+
+After DUX6 apply, re-capture SG-01..SG-07 at 1366×768 dark and assert:
+1. No internal scroll on Provenance / Primary recovery / Next Best Actions / Run Scope
+2. No bare VALID_EMPTY / GET /ops in bodies
+3. Browse tables do not dominate with full paths
+4. Status still paired with Provenance reason class

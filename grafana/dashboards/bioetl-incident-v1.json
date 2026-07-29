@@ -113,7 +113,7 @@
       "id": 9401,
       "type": "stat",
       "title": "Status",
-      "description": "DUX5: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error); pair with Provenance reason + action. Not a healthy OK. DUX3-14: Incident status is read-only. Ranked suspects may be WORKFLOW/GLOBAL blast radius — check scope labels on tables. Incident header status (labelled only). Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace.",
+      "description": "DUX6: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error/selection). Pair with Provenance reason + action; never read as OK. DUX5: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error); pair with Provenance reason + action. Not a healthy OK. DUX3-14: Incident status is read-only. Ranked suspects may be WORKFLOW/GLOBAL blast radius — check scope labels on tables. Incident header status (labelled only). Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace.",
       "gridPos": {
         "h": 3,
         "w": 8,
@@ -290,7 +290,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "VALID_EMPTY — no active suspects across domains",
+          "noValue": "None observed",
           "custom": {
             "align": "left",
             "cellOptions": {
@@ -416,7 +416,7 @@
       "id": 2005,
       "type": "table",
       "title": "Evidence timeline · Current Alerts (now)",
-      "description": "DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Severity (no bare Value # headers). DUX4-17: Firing/pending must not use success-green series colors. Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none.",
+      "description": "DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Severity (no bare Value # headers). DUX4-17: Firing/pending must not use success-green series colors. Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none.",
       "gridPos": {
         "h": 6,
         "w": 12,
@@ -437,7 +437,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "VALID_EMPTY — no firing/pending alerts now",
+          "noValue": "None observed",
           "custom": {
             "align": "left",
             "cellOptions": {
@@ -547,7 +547,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "VALID_EMPTY — no alert state samples in selected range",
+          "noValue": "None observed",
           "custom": {
             "fillOpacity": 70,
             "lineWidth": 0
@@ -624,7 +624,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "VALID_EMPTY — no active suspects in this domain",
+              "noValue": "None observed",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -720,7 +720,7 @@
           "id": 2003,
           "type": "table",
           "title": "Active Suspects · Provider",
-          "description": "DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Signal (no bare Value # headers). DUX4-15: WORKFLOW blast radius — show selected vs affected pipeline; not a silent filter bug. DUX3-14: WORKFLOW/GLOBAL impact table unless explicitly filtered to selected pipeline. Selected pipeline may differ from row pipeline (blast radius). Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: Provider Health.",
+          "description": "DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Signal (no bare Value # headers). DUX4-15: WORKFLOW blast radius — show selected vs affected pipeline; not a silent filter bug. DUX3-14: WORKFLOW/GLOBAL impact table unless explicitly filtered to selected pipeline. Selected pipeline may differ from row pipeline (blast radius). Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: Provider Health.",
           "gridPos": {
             "h": 7,
             "w": 8,
@@ -741,7 +741,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "VALID_EMPTY — no active suspects in this domain",
+              "noValue": "None observed",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -858,7 +858,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "VALID_EMPTY — no active suspects in this domain",
+              "noValue": "None observed",
               "custom": {
                 "align": "left",
                 "cellOptions": {

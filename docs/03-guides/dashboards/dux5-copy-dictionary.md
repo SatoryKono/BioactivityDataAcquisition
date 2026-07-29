@@ -66,3 +66,7 @@ No auto-shrink below floors; reflow/wrap/shorten instead.
 | Cross-domain routing | Overview |
 | Replay confidence | Trust |
 | Domain decision | Runtime / Provider / DQ |
+
+## DUX6 residual
+
+Pixel residual after re-audit: [dux6-residual-readability.md](dux6-residual-readability.md).

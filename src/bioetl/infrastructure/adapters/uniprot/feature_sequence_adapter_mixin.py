@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, cast, Any, Protocol
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser
-from bioetl.typing_support import as_mixin_host
+from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator

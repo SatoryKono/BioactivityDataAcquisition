@@ -18,7 +18,7 @@ from bioetl.infrastructure.adapters.common.response_shapes import (
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
-from bioetl.typing_support import as_mixin_host
+from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator

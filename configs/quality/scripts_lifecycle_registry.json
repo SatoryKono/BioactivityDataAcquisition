@@ -1190,6 +1190,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as a one-off DSA residual migration helper for auditability; do not promote it to an active operator workflow."
     },
+    "scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off dashboard no-scroll migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
+    },
     "scripts/ops/observability/grafana/apply_dux2_residual.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -1208,6 +1214,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as a one-off DUX5 residual dashboard migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
     },
+    "scripts/ops/observability/grafana/apply_dux6_residual.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DUX6 residual dashboard migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
+    },
     "scripts/ops/observability/grafana/generate_dux4_issue_pack.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -1219,6 +1231,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded DUX5 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
+    },
+    "scripts/ops/observability/grafana/generate_dux6_issue_pack.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded DUX6 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
     },
     "src/tools/apply_elk_layout.py": {
       "owner": "@bioetl-platform",

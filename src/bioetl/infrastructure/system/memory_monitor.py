@@ -28,7 +28,7 @@ from bioetl.domain.config import MemoryConfig
 
 # Re-export MemoryStats from domain for backward compatibility
 from bioetl.domain.ports import MemoryStats
-from bioetl.typing_support import as_mixin_host
+from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
