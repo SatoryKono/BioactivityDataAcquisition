@@ -121,7 +121,7 @@
     {
       "id": 9401,
       "type": "stat",
-      "title": "Status",
+      "title": "[NOW·HEALTH] Status",
       "gridPos": {
         "h": 3,
         "w": 8,
@@ -132,7 +132,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Primary compact Runtime verdict for the selected pipeline/run_type scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. This verdict is trust-gated by Runtime Telemetry Gap: a non-zero scrape/rule gap forces Status to INCOMPLETE before selected-range zero counters are trusted. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Runtime Status below is an expanded first-screen mirror of this same trust-gated current-status recording rule, not an independent second verdict. Required scrape/rule evidence therefore owns the headline: green OK is impossible during a trust gap. Sole first-screen status (dual twin removed #6572). UNKNOWN — status series absent (not OK). DSA-05: state x confidence x basis x next_action; handoff data-path to DQ/Run Explorer.",
+      "description": "DUX3-10: Execution/health verdict (NOW). Not telemetry collection state. Peer SCRAPING/gap chips are EVIDENCE confidence only. Primary compact Runtime verdict for the selected pipeline/run_type scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. This verdict is trust-gated by Runtime Telemetry Gap: a non-zero scrape/rule gap forces Status to INCOMPLETE before selected-range zero counters are trusted. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Runtime Status below is an expanded first-screen mirror of this same trust-gated current-status recording rule, not an independent second verdict. Required scrape/rule evidence therefore owns the headline: green OK is impossible during a trust gap. Sole first-screen status (dual twin removed #6572). UNKNOWN — status series absent (not OK). DSA-05: state x confidence x basis x next_action; handoff data-path to DQ/Run Explorer.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -406,7 +406,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Runtime Telemetry Gap (scrape/rule trust). 0=SCRAPING (metrics + recording rules healthy), 1=SCRAPE/RULE GAP, >=2=SCRAPE+RULE GAP, null=UNKNOWN. Not a pipeline error. When elevated, Status cannot be green OK — treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code. Time scope: current monitoring health, not selected-range runtime evidence. UNKNOWN — metrics trust series absent (TELEMETRY_ABSENT_OR_STALE). DSA-05: telemetry confidence chip, not peer pipeline health. Treat zero count panels as inconclusive when Metrics Evidence is non-zero/UNKNOWN.",
+      "description": "DUX3-10: Telemetry/scrape confidence (EVIDENCE). Not pipeline HEALTH. Do not read as run success/failure. Runtime Telemetry Gap (scrape/rule trust). 0=SCRAPING (metrics + recording rules healthy), 1=SCRAPE/RULE GAP, >=2=SCRAPE+RULE GAP, null=UNKNOWN. Not a pipeline error. When elevated, Status cannot be green OK — treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code. Time scope: current monitoring health, not selected-range runtime evidence. UNKNOWN — metrics trust series absent (TELEMETRY_ABSENT_OR_STALE). DSA-05: telemetry confidence chip, not peer pipeline health. Treat zero count panels as inconclusive when Metrics Evidence is non-zero/UNKNOWN.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -497,7 +497,7 @@
           "refId": "A"
         }
       ],
-      "title": "Metrics Evidence",
+      "title": "[NOW·EVIDENCE] Metrics Evidence",
       "type": "stat"
     },
     {
@@ -2410,7 +2410,7 @@
               "refId": "A"
             }
           ],
-          "title": "Worst Stage Lag",
+          "title": "[RANGE·EXEC] Worst Stage Lag",
           "type": "stat"
         },
         {
@@ -2496,7 +2496,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor Runtime Blockers",
+          "title": "[RANGE·EXEC] Monitor Runtime Blockers",
           "type": "stat"
         },
         {
@@ -2577,7 +2577,7 @@
               "refId": "A"
             }
           ],
-          "title": "Failed Runs",
+          "title": "[RANGE·EXEC] Failed Runs",
           "type": "stat"
         }
       ]
@@ -2599,7 +2599,7 @@
           "type": "table",
           "title": "ID",
           "gridPos": {
-            "h": 10,
+            "h": 6,
             "w": 12,
             "x": 0,
             "y": 0
@@ -2724,7 +2724,7 @@
           "type": "table",
           "title": "Processed Records",
           "gridPos": {
-            "h": 10,
+            "h": 6,
             "w": 12,
             "x": 12,
             "y": 0
@@ -3180,7 +3180,8 @@
             }
           ]
         }
-      ]
+      ],
+      "description": "DUX3-26: Collapsed thin shell only. Canonical ID/Processed Records hub is Run Explorer."
     },
     {
       "type": "row",
