@@ -24,4 +24,11 @@ def is_generated_docs_artifact(path: Path, docs_root: Path = DOCS_DIR) -> bool:
         return True
     if GENERATED_EXPORT_MERGED_RE.match(rel_path):
         return True
+    if rel_path.startswith(
+        (
+            "04-reference/passports/pipelines/",
+            "04-reference/passports/workflows/",
+        )
+    ):
+        return True
     return bool(GENERATED_DOCS_EXPORT_REPORT_RE.match(rel_path))

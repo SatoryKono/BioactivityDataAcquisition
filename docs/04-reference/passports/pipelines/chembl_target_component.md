@@ -5,7 +5,7 @@
 - Kind: `pipeline`
 - Typed identity: `pipeline:chembl_target_component`
 - Schema: `1.0.0`
-- Source revision: `ec0f2a1d64cc5d30ee263677982ba2f60cfc1172`
+- Source revision: `41a1d6eab5a5c32c6b7754f6c3156ff87394912f`
 
 ## Evidence
 
@@ -102,7 +102,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:17100346b0118a3bf82b36588bd6854607b640cf02283886857a7551876f320a",
-    "source_revision": "ec0f2a1d64cc5d30ee263677982ba2f60cfc1172"
+    "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
   },
   "silver": {
     "column_projection": {

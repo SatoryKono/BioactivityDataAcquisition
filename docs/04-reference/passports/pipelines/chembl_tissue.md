@@ -5,7 +5,7 @@
 - Kind: `pipeline`
 - Typed identity: `pipeline:chembl_tissue`
 - Schema: `1.0.0`
-- Source revision: `ec0f2a1d64cc5d30ee263677982ba2f60cfc1172`
+- Source revision: `41a1d6eab5a5c32c6b7754f6c3156ff87394912f`
 
 ## Evidence
 
@@ -94,7 +94,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:12c20e767133e9b044676700ca3fa77ddc2375c5cc3e2af401de19b3faf01e35",
-    "source_revision": "ec0f2a1d64cc5d30ee263677982ba2f60cfc1172"
+    "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
   },
   "silver": {
     "column_projection": {

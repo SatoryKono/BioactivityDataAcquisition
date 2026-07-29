@@ -139,6 +139,5 @@ contracts remain stable. Provenance strips carry the operator-facing legend.
 - Harness: [dux4-title-scope-harness.md](dux4-title-scope-harness.md)
 - Override inventory: [dux4-field-override-inventory.json](dux4-field-override-inventory.json)
 - Panel matrix: [dux4-panel-redesign-matrix.json](dux4-panel-redesign-matrix.json)
-- Variable rules: [dux4-variable-rules.md](dux4-variable-rules.md)
-- Closeout: [dux4-visual-enforcement-closeout.md](dux4-visual-enforcement-closeout.md)
+- Variable rules and closeout evidence: GitHub epic `#7088`
 - Apply script: `scripts/ops/observability/grafana/apply_dux4_enforcement.py`
