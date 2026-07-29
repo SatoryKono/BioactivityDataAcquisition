@@ -11,12 +11,13 @@
 
 .EXAMPLE
   .\scripts\ops\runtime\docker\apply-docker-stable-mcp.ps1
-  .\scripts\ops\runtime\docker\apply-docker-stable-mcp.ps1 -Profile core -WithNeo4j
+  .\scripts\ops\runtime\docker\apply-docker-stable-mcp.ps1 -McpProfile core -WithNeo4j
 #>
 [CmdletBinding()]
 param(
     [ValidateSet('stable', 'shared', 'core', 'ops', 'graph', 'full')]
-    [string]$Profile = 'stable',
+    [Alias('Profile')]
+    [string]$McpProfile = 'stable',
     [ValidateSet('stdio', 'shared', 'hybrid')]
     [string]$TransportMode = 'stdio',
     [switch]$WithSharedMcp,
@@ -34,10 +35,10 @@ Set-Location $Root
 
 if ($WithSharedMcp -and $TransportMode -eq 'stdio') {
     $TransportMode = 'shared'
-    if ($Profile -eq 'stable') { $Profile = 'shared' }
+    if ($McpProfile -eq 'stable') { $McpProfile = 'shared' }
 }
 
-Write-Host "=== apply-docker-stable-mcp profile=$Profile transport=$TransportMode ==="
+Write-Host "=== apply-docker-stable-mcp profile=$McpProfile transport=$TransportMode ==="
 
 if ($WithSharedMcp) {
     $startShared = Join-Path $Root 'scripts\ops\runtime\mcp\start-shared.ps1'
@@ -52,7 +53,7 @@ if ($WithSharedMcp) {
 if (-not $SkipSetupMcp) {
     $setup = Join-Path $Root 'scripts\ai\codex\setup_mcp.py'
     if (Test-Path $setup) {
-        Write-Host "Materializing local MCP projections with --profile $Profile --transport-mode $TransportMode ..."
+        Write-Host "Materializing local MCP projections with --profile $McpProfile --transport-mode $TransportMode ..."
         # Tracked portable inventory remains full; only local IDE projections filter.
         $prevPy = $env:PYTHONPATH
         if ($prevPy) {
@@ -61,7 +62,7 @@ if (-not $SkipSetupMcp) {
             $env:PYTHONPATH = $Root
         }
         try {
-            & python $setup --profile $Profile --transport-mode $TransportMode --skip-codex-validation 2>&1 | ForEach-Object { Write-Host $_ }
+            & python $setup --profile $McpProfile --transport-mode $TransportMode --skip-codex-validation 2>&1 | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0) {
                 Write-Warning "setup_mcp.py exited $LASTEXITCODE (local projections may be partial)"
             }
@@ -102,7 +103,7 @@ if (-not $SkipEnsureStable) {
 Write-Host @"
 
 Done. Docker-stable MCP posture:
-  - Local IDE MCP profile=$Profile transport=$TransportMode
+  - Local IDE MCP profile=$McpProfile transport=$TransportMode
   - Shared plane: $(if ($WithSharedMcp) { 'start-shared invoked' } else { 'not requested (-WithSharedMcp)' })
   - Orphan mcp/* containers removed (bioetl-* / bioetl.mcp.shared protected)
   - BioETL stacks: ensure-stable (unless -SkipEnsureStable)

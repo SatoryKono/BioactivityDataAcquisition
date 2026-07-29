@@ -300,11 +300,14 @@ function dashboardDir() {
 }
 
 function grafanaSlugify(title) {
+  // Character-class + fixed quantifiers avoid super-linear backtracking (S8786).
   return String(title || "")
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-/, "")
+    .replace(/-$/, "");
 }
 
 
@@ -339,7 +342,7 @@ function isMateriallyBlankPng(buffer) {
     // Decode/sample failures are treated as non-blank so the outer PNG gate
     // (signature/size) remains the hard fail path rather than false blank.
     console.warn(
-      `isMateriallyBlankPng: blank-detector failed (${err && err.message ? err.message : err}); treating as non-blank`,
+      `isMateriallyBlankPng: blank-detector failed (${err?.message ?? err}); treating as non-blank`,
     );
     return false;
   }
@@ -972,15 +975,23 @@ async function setDashboardScrollPosition(page, position) {
 async function dashboardCaptureMetrics(page) {
   return page.evaluate(
     ({ panelSelectors, panelContainerSelectors, scrollSelectors }) => {
-      const resolveContainer = (marker, containerSelectors) => {
-        for (const containerSelector of containerSelectors) {
-          const container = marker.closest(containerSelector);
-          if (container) {
-            return container;
+      const resolveContainer = (marker, containerSelectors) =>
+        containerSelectors
+          .map((selector) => marker.closest(selector))
+          .find(Boolean) || marker;
+
+      const visibleBottom = (elements, project) => {
+        let bottom = 0;
+        for (const element of elements) {
+          const rect = element.getBoundingClientRect();
+          if (rect.width <= 0 || rect.height <= 0) {
+            continue;
           }
+          bottom = Math.max(bottom, project(element, rect));
         }
-        return marker;
+        return bottom;
       };
+
       const candidateElements = new Set();
       for (const selector of panelSelectors) {
         for (const marker of document.querySelectorAll(selector)) {
@@ -988,26 +999,23 @@ async function dashboardCaptureMetrics(page) {
         }
       }
 
-      let panelBottom = 0;
-      for (const element of candidateElements) {
-        const rect = element.getBoundingClientRect();
-        if (rect.width > 0 && rect.height > 0) {
-          panelBottom = Math.max(panelBottom, rect.bottom + window.scrollY);
-        }
-      }
-
-      let scrollBottom = Math.max(
-        document.body ? document.body.scrollHeight : 0,
-        document.documentElement ? document.documentElement.scrollHeight : 0,
+      const panelBottom = visibleBottom(
+        candidateElements,
+        (_element, rect) => rect.bottom + window.scrollY,
       );
+
+      const scrollElements = [];
       for (const selector of scrollSelectors) {
-        for (const element of document.querySelectorAll(selector)) {
-          const rect = element.getBoundingClientRect();
-          if (rect.width > 0 && rect.height > 0) {
-            scrollBottom = Math.max(scrollBottom, rect.top + element.scrollHeight);
-          }
-        }
+        scrollElements.push(...document.querySelectorAll(selector));
       }
+      const scrollBottom = Math.max(
+        document.body?.scrollHeight || 0,
+        document.documentElement?.scrollHeight || 0,
+        visibleBottom(
+          scrollElements,
+          (element, rect) => rect.top + element.scrollHeight,
+        ),
+      );
 
       return {
         panelBottom,

@@ -239,6 +239,80 @@ def _persist_trial_outcome(
     index_and_save(state, state_path, evidence_dir)
 
 
+def _run_one_recovery_trial(
+    *,
+    state: dict[str, Any],
+    state_path: Path,
+    evidence_dir: Path,
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+    number: int,
+) -> bool:
+    trial_dir = evidence_dir / "recovery" / f"trial-{number:03d}"
+    before = bundle_volume_ids(runtime_origin, bundle)
+    setup_result = _setup_trial_baselines(
+        state=state,
+        state_path=state_path,
+        evidence_dir=evidence_dir,
+        runtime_origin=runtime_origin,
+        contract=contract,
+        bundle=bundle,
+        trial_dir=trial_dir,
+        number=number,
+    )
+    if setup_result is None:
+        return False
+    baselines, pinned_ids, setup = setup_result
+    started = time.monotonic()
+    deadline = started + 180.0
+    clean, steps, after, capacity = _execute_recovery_steps(
+        state=state,
+        runtime_origin=runtime_origin,
+        contract=contract,
+        bundle=bundle,
+        trial_dir=trial_dir,
+        baselines=baselines,
+        pinned_ids=pinned_ids,
+        deadline=deadline,
+    )
+    duration = time.monotonic() - started
+    clean = clean and duration <= 180.0 and before == after
+    incident_id = None if clean else f"engine-recovery-{number:03d}"
+    post_trial_restore: list[dict[str, Any]] = []
+    resolved = clean
+    if incident_id:
+        state.setdefault("incident_ids", []).append(incident_id)
+        resolved, post_trial_restore, after = _post_trial_restore(
+            state=state,
+            runtime_origin=runtime_origin,
+            contract=contract,
+            bundle=bundle,
+            trial_dir=trial_dir,
+            baselines=baselines,
+            before=before,
+            after=after,
+        )
+    _persist_trial_outcome(
+        state=state,
+        state_path=state_path,
+        evidence_dir=evidence_dir,
+        trial_dir=trial_dir,
+        number=number,
+        clean=clean,
+        incident_id=incident_id,
+        duration=duration,
+        setup=setup,
+        steps=steps,
+        post_trial_restore=post_trial_restore,
+        resolved=resolved,
+        capacity=capacity,
+        before=before,
+        after=after,
+    )
+    return resolved
+
+
 def run_recovery_trials(
     state: dict[str, Any],
     state_path: Path,
@@ -253,68 +327,15 @@ def run_recovery_trials(
     )
     while int(state["engine_recovery_trials"]) < required:
         number = int(state["engine_recovery_trials"]) + 1
-        trial_dir = evidence_dir / "recovery" / f"trial-{number:03d}"
-        before = bundle_volume_ids(runtime_origin, bundle)
-        setup_result = _setup_trial_baselines(
+        if not _run_one_recovery_trial(
             state=state,
             state_path=state_path,
             evidence_dir=evidence_dir,
             runtime_origin=runtime_origin,
             contract=contract,
             bundle=bundle,
-            trial_dir=trial_dir,
             number=number,
-        )
-        if setup_result is None:
-            return False
-        baselines, pinned_ids, setup = setup_result
-        started = time.monotonic()
-        deadline = started + 180.0
-        clean, steps, after, capacity = _execute_recovery_steps(
-            state=state,
-            runtime_origin=runtime_origin,
-            contract=contract,
-            bundle=bundle,
-            trial_dir=trial_dir,
-            baselines=baselines,
-            pinned_ids=pinned_ids,
-            deadline=deadline,
-        )
-        duration = time.monotonic() - started
-        clean = clean and duration <= 180.0 and before == after
-        incident_id = None if clean else f"engine-recovery-{number:03d}"
-        post_trial_restore: list[dict[str, Any]] = []
-        resolved = clean
-        if incident_id:
-            state.setdefault("incident_ids", []).append(incident_id)
-            resolved, post_trial_restore, after = _post_trial_restore(
-                state=state,
-                runtime_origin=runtime_origin,
-                contract=contract,
-                bundle=bundle,
-                trial_dir=trial_dir,
-                baselines=baselines,
-                before=before,
-                after=after,
-            )
-        _persist_trial_outcome(
-            state=state,
-            state_path=state_path,
-            evidence_dir=evidence_dir,
-            trial_dir=trial_dir,
-            number=number,
-            clean=clean,
-            incident_id=incident_id,
-            duration=duration,
-            setup=setup,
-            steps=steps,
-            post_trial_restore=post_trial_restore,
-            resolved=resolved,
-            capacity=capacity,
-            before=before,
-            after=after,
-        )
-        if not resolved:
+        ):
             return False
     return True
 

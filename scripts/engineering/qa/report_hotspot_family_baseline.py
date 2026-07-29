@@ -313,10 +313,11 @@ def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
     direct_error = _try_direct_write(path, payload)
     if direct_error is None:
         return
-    # Do not use `raise ... from` with a union-typed cause (python:S5707).
+    # S5707: cause must be Exception (or None), not a BaseException alias.
+    assert isinstance(direct_error, OSError)
     raise OSError(
-        f"Unable to write {path} after atomic and direct retries: {direct_error!r}"
-    )
+        f"Unable to write {path} after atomic and direct retries: {direct_error}"
+    ) from direct_error
 
 
 def _check_file_sync(path: Path, expected: str, *, root: Path | None = None) -> bool:

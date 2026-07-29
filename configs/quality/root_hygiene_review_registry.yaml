@@ -1,22 +1,25 @@
 version: 1.0.0
 status: active
 owner: Engineering / Architecture
-last_verified: "2026-07-28"
+last_verified: "2026-07-29"
 
 current_live_root_baseline:
   tracked_root_audit_status: pass
   strict_untracked_root_audit_status: pass
+  tracked_root_file_count: 37
+  allowlist_entry_count: 37
   verification_command: >-
     .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py
     --strict-untracked
   note: >-
-    2026-07-28 RH epic #6874: RH-01 removed unexpected tracked _a.txt
-    (37≡allowlist restored); RH-05 retain .secrets.baseline (detect-secrets
-    architecture gate) and .aiignore (AI-client exact-root ignore); RH-02
-    local-vs-CI guidance in root-local-clutter-cleanup.md; RH-03 CONTRIBUTING
-    already thin-stub→.github/CONTRIBUTING.md; RH-04 Docker adjunct rehome
-    remains owner-gated (not_planned without new owner record; see #6797);
-    RH-07 further shrink deferred. Prior RH4 (#6812–#6816) / RH3 / RH2 intact.
+    2026-07-29 RH5 epic #7015: verified tracked root ≡ allowlist (37≡37).
+    Transient unauthorized root scripts (_cr_one_scope.py, _cr_write_final.py,
+    _publish_arch_cr2_issues.py) are absent from the index; gitignore hardened
+    for /_cr_*.py and /_publish_*.py (RH5-01/#7016, RH5-02/#7017). Registry
+    resync RH5-03/#7018. skills-lock.json retained at exact root (RH5-06/#7023
+    REVIEW: installer contract). Docker adjunct rehome remains owner-gated
+    (#6881/#6797). Further shrink deferred (RH5-05/#7021). Prior RH #6874 /
+    RH4 #6812 / RH3 / RH2 guidance intact.
 
 review_lanes:
   - lane_id: root_env_security

@@ -3514,15 +3514,20 @@ def _validate_allowlist_review_date(
 
 
 def _load_drift_allowlist(path: Path) -> dict[str, set[str]]:
-    if not path.exists():
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe = resolve_output_path(path, root=REPO_ROOT)
+    if not safe.exists():
         return {}
     try:
         import yaml
     except ImportError:
         return {}
+    # Resolve again immediately before the read sink (pythonsecurity:S8707).
+    safe = resolve_output_path(safe, root=REPO_ROOT)
     payload = yaml.safe_load(
-        path.read_text(encoding="utf-8")
-    )  # NOSONAR - path confined
+        safe.read_text(encoding="utf-8")  # NOSONAR - path confined
+    )
     if not isinstance(payload, dict):
         return {}
     raw_allowed = payload.get("allowed", payload)

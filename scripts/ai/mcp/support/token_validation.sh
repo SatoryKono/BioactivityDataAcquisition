@@ -2,6 +2,7 @@
 
 mcp_warn() {
   printf 'warning: %s\n' "$*" >&2
+  return 0
 }
 
 mcp_fail() {
@@ -39,6 +40,7 @@ mcp_validate_required_token() {
       mcp_warn "${name} for ${purpose} has a non-standard prefix; verify token source and scopes."
     fi
   fi
+  return 0
 }
 
 mcp_validate_optional_token() {
@@ -70,6 +72,7 @@ mcp_validate_optional_token() {
       mcp_warn "${name} for ${purpose} has a non-standard prefix; verify token source and scopes."
     fi
   fi
+  return 0
 }
 
 mcp_validate_neo4j_credentials() {
@@ -85,6 +88,7 @@ mcp_validate_neo4j_credentials() {
   elif [[ "${NEO4J_PASSWORD}" == *_secure_password ]]; then
     mcp_warn "NEO4J_PASSWORD for ${purpose} matches a legacy placeholder pattern; rotate it."
   fi
+  return 0
 }
 
 mcp_exit_if_validate_only() {
@@ -93,4 +97,5 @@ mcp_exit_if_validate_only() {
     printf '[OK] %s MCP wrapper validation completed\n' "${server_name}"
     exit 0
   fi
+  return 0
 }

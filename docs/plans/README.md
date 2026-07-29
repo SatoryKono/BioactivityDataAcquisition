@@ -24,7 +24,7 @@ Plans must not override:
 
 - Repo-only (MkDocs `exclude_docs: plans/**`)
 - Cataloged in `configs/quality/repo_structure_catalog.yaml`
-- Only one tracked plan may hold lifecycle `active_backlog`
+- Only one tracked plan file may hold lifecycle `active_backlog`.
 - Historical/completed plans → `docs/99-archive/plans/`
 
 ## Freshness Triggers

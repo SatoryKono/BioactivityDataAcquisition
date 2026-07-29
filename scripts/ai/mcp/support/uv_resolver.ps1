@@ -240,49 +240,71 @@ function Test-BioetlWindowsRuntime {
     return ($env:OS -like "*Windows*")
 }
 
-function Get-BioetlUvxInstallCandidates {
-    $candidates = @()
-    if (Test-BioetlWindowsRuntime) {
-        $localAppData = [Environment]::GetFolderPath("LocalApplicationData")
-        $userProfile = $env:USERPROFILE
-        if (-not [string]::IsNullOrWhiteSpace($localAppData)) {
-            foreach ($py in @("Python313", "Python312", "Python311")) {
-                try {
-                    $candidates += [System.IO.Path]::Combine(
-                        $localAppData,
-                        "Programs",
-                        "Python",
-                        $py,
-                        "Scripts",
-                        "uvx.exe"
-                    )
-                } catch {
-                    Write-Verbose "Skipping LocalAppData uvx candidate for ${py}: $($_.Exception.Message)"
-                }
-            }
+function Add-BioetlPathCandidates {
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Collections.IList]$Candidates,
+        [Parameter(Mandatory = $true)]
+        [string]$BasePath,
+        [Parameter(Mandatory = $true)]
+        [string[]]$RelativePaths,
+        [Parameter(Mandatory = $true)]
+        [string]$SkipLabel
+    )
+    if ([string]::IsNullOrWhiteSpace($BasePath)) {
+        return
+    }
+    foreach ($rel in $RelativePaths) {
+        try {
+            $Candidates.Add([System.IO.Path]::Combine($BasePath, $rel)) | Out-Null
+        } catch {
+            Write-Verbose "Skipping ${SkipLabel} uvx candidate '${rel}': $($_.Exception.Message)"
         }
-        if (-not [string]::IsNullOrWhiteSpace($userProfile)) {
-            foreach ($rel in @(".local\bin\uvx.exe", ".cargo\bin\uvx.exe")) {
-                try {
-                    $candidates += [System.IO.Path]::Combine($userProfile, $rel)
-                } catch {
-                    Write-Verbose "Skipping user-profile uvx candidate '${rel}': $($_.Exception.Message)"
-                }
-            }
-        }
-    } else {
-        $homeDir = $env:HOME
-        if (-not [string]::IsNullOrWhiteSpace($homeDir)) {
-            foreach ($rel in @(".local/bin/uvx", ".cargo/bin/uvx")) {
-                try {
-                    $candidates += [System.IO.Path]::Combine($homeDir, $rel)
-                } catch {
-                    Write-Verbose "Skipping home uvx candidate '${rel}': $($_.Exception.Message)"
-                }
+    }
+}
+
+function Get-BioetlWindowsUvxInstallCandidates {
+    $candidates = [System.Collections.Generic.List[string]]::new()
+    $localAppData = [Environment]::GetFolderPath("LocalApplicationData")
+    if (-not [string]::IsNullOrWhiteSpace($localAppData)) {
+        foreach ($py in @("Python313", "Python312", "Python311")) {
+            try {
+                $candidates.Add([System.IO.Path]::Combine(
+                    $localAppData,
+                    "Programs",
+                    "Python",
+                    $py,
+                    "Scripts",
+                    "uvx.exe"
+                )) | Out-Null
+            } catch {
+                Write-Verbose "Skipping LocalAppData uvx candidate for ${py}: $($_.Exception.Message)"
             }
         }
     }
-    return ,$candidates
+    Add-BioetlPathCandidates `
+        -Candidates $candidates `
+        -BasePath ($env:USERPROFILE) `
+        -RelativePaths @(".local\bin\uvx.exe", ".cargo\bin\uvx.exe") `
+        -SkipLabel "user-profile"
+    return ,@($candidates)
+}
+
+function Get-BioetlUnixUvxInstallCandidates {
+    $candidates = [System.Collections.Generic.List[string]]::new()
+    Add-BioetlPathCandidates `
+        -Candidates $candidates `
+        -BasePath ($env:HOME) `
+        -RelativePaths @(".local/bin/uvx", ".cargo/bin/uvx") `
+        -SkipLabel "home"
+    return ,@($candidates)
+}
+
+function Get-BioetlUvxInstallCandidates {
+    if (Test-BioetlWindowsRuntime) {
+        return ,(Get-BioetlWindowsUvxInstallCandidates)
+    }
+    return ,(Get-BioetlUnixUvxInstallCandidates)
 }
 
 function Test-BioetlUvxAvailable {

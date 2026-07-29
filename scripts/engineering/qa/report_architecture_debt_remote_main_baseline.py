@@ -274,13 +274,16 @@ def _write_artifacts(
     md_out = resolve_output_path(md_out, root=base)
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(  # NOSONAR - path confined by resolve_output_path
+    # Re-resolve immediately before each sink (pythonsecurity:S8707).
+    safe_json = resolve_output_path(json_out, root=base)
+    safe_json.write_text(  # NOSONAR - path confined
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    md_out.write_text(
+    safe_md = resolve_output_path(md_out, root=base)
+    safe_md.write_text(  # NOSONAR - path confined
         render_markdown(payload), encoding="utf-8"
-    )  # NOSONAR - path confined by resolve_output_path
+    )
 
 
 def _json_artifact_matches(

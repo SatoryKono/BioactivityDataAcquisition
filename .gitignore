@@ -500,6 +500,8 @@ _local_only_mcp/
 
 # Local agent temp scratch (never commit)
 _tmp_*.py
+/_cr_*.py
+/_publish_*.py
 tmp_sub_*.txt
 # Accidental single-letter root scratch dumps (RH-01 / #6876)
 _a.txt
@@ -508,6 +510,8 @@ _a.txt
 /_unit_results.xml
 /_arch_results.xml
 _fail_batch1.txt
+_fail_*.txt
+/bash.exe.stackdump
 
 !/docs/reports/evidence/technical-debt/
 /docs/reports/evidence/technical-debt/*

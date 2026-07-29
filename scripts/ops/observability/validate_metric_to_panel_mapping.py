@@ -211,6 +211,31 @@ def validate_metric_exists(
         return False, f"Metric {metric_name} query failed: {e}"
 
 
+def _evaluate_promql_query(
+    expr: str, prometheus_url: str, timeout: float
+) -> tuple[bool, str]:
+    """Execute one PromQL expression and classify the response."""
+    try:
+        encoded_expr = quote(expr)
+        query_url = f"{prometheus_url}/api/v1/query?query={encoded_expr}"
+        data = _fetch_json(query_url, timeout)
+        if data.get("status") != "success":
+            return False, f"Query failed: {data.get('error', 'Unknown error')}"
+        result_data = data.get("data", {})
+        result_type = result_data.get("resultType", "unknown")
+        results = result_data.get("result", [])
+        if results:
+            return (
+                True,
+                f"Query returned {len(results)} results (resultType: {result_type})",
+            )
+        return False, f"Query returned no results (resultType: {result_type})"
+    except KeyError as e:
+        return False, f"Query execution failed: missing key in response ({e})"
+    except Exception as e:
+        return False, f"Query execution failed: {e}"
+
+
 def validate_panel_query(
     panel: dict[str, Any], prometheus_url: str, timeout: float
 ) -> tuple[bool, str]:
@@ -219,34 +244,7 @@ def validate_panel_query(
         expr = target.get("expr", "")
         if not expr:
             continue
-
-        try:
-            # URL-encode the query expression
-            encoded_expr = quote(expr)
-            # Try to execute the query
-            query_url = f"{prometheus_url}/api/v1/query?query={encoded_expr}"
-            data = _fetch_json(query_url, timeout)
-
-            if data.get("status") == "success":
-                result_data = data.get("data", {})
-                result_type = result_data.get("resultType", "unknown")
-                results = result_data.get("result", [])
-
-                if results:
-                    return (
-                        True,
-                        f"Query returned {len(results)} results (resultType: {result_type})",
-                    )
-                return (
-                    False,
-                    f"Query returned no results (resultType: {result_type})",
-                )
-            return False, f"Query failed: {data.get('error', 'Unknown error')}"
-        except KeyError as e:
-            return False, f"Query execution failed: missing key in response ({e})"
-        except Exception as e:
-            return False, f"Query execution failed: {e}"
-
+        return _evaluate_promql_query(expr, prometheus_url, timeout)
     return False, "No valid queries found in panel"
 
 

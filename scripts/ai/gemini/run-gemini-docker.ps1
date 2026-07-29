@@ -19,7 +19,7 @@ $CanCreateEnvFile = $env:BIOETL_CREATE_LOCAL_ENV_FILES -eq "1"
 # Colors
 function Write-Success { param([string]$msg); Write-Host "[OK] $msg" -ForegroundColor Green }
 function Write-Warn { param([string]$msg); Write-Host "[!] $msg" -ForegroundColor Yellow }
-function Write-Error { param([string]$msg); Write-Host "[X] $msg" -ForegroundColor Red }
+function Write-ErrorMessage { param([string]$msg); Write-Host "[X] $msg" -ForegroundColor Red }
 function Write-Info { param([string]$msg); Write-Host "[i] $msg" -ForegroundColor Cyan }
 
 Write-Host ""
@@ -34,7 +34,7 @@ try {
     $null = docker --version 2>&1
     Write-Success "Docker is available"
 } catch {
-    Write-Error "Docker not found. Please install Docker Desktop."
+    Write-ErrorMessage "Docker not found. Please install Docker Desktop."
     exit 1
 }
 
@@ -42,7 +42,7 @@ try {
 try {
     $null = docker ps 2>&1
 } catch {
-    Write-Error "Docker is not running. Please start Docker Desktop."
+    Write-ErrorMessage "Docker is not running. Please start Docker Desktop."
     exit 1
 }
 
@@ -50,7 +50,7 @@ try {
 Write-Info "Checking API key..."
 if (-not (Test-Path $EnvFile)) {
     if (-not $CanCreateEnvFile) {
-        Write-Error ".env.gemini not found. Create it manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to generate a local template."
+        Write-ErrorMessage ".env.gemini not found. Create it manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to generate a local template."
         exit 1
     }
 
@@ -62,7 +62,7 @@ if (-not (Test-Path $EnvFile)) {
         "# Optional model override",
         "# GEMINI_MODEL=gemini-2.5-flash"
     ) | Out-File -FilePath $EnvFile -Encoding UTF8
-    Write-Error "Please edit $EnvFile and add your Gemini API key"
+    Write-ErrorMessage "Please edit $EnvFile and add your Gemini API key"
     exit 1
 }
 
@@ -71,13 +71,13 @@ $envContent = Get-Content $EnvFile | Where-Object { $_ -match '^GEMINI_API_KEY='
 if ($envContent -match 'GEMINI_API_KEY=(.+)') {
     $apiKey = $matches[1].Trim()
     if ($apiKey -eq "your-api-key-here" -or [string]::IsNullOrWhiteSpace($apiKey)) {
-        Write-Error "Please set GEMINI_API_KEY in $EnvFile"
+        Write-ErrorMessage "Please set GEMINI_API_KEY in $EnvFile"
         exit 1
     }
     $env:GEMINI_API_KEY = $apiKey
     Write-Success "API key loaded"
 } else {
-    Write-Error "GEMINI_API_KEY not found in $EnvFile"
+    Write-ErrorMessage "GEMINI_API_KEY not found in $EnvFile"
     exit 1
 }
 
@@ -92,7 +92,7 @@ if ([string]::IsNullOrWhiteSpace($imageExists)) {
     try {
         docker-compose -f $ComposeFile build
         if ($LASTEXITCODE -ne 0) {
-            Write-Error "Docker build failed"
+            Write-ErrorMessage "Docker build failed"
             exit 1
         }
         Write-Success "Docker image built successfully"
@@ -131,7 +131,7 @@ try {
         }
         "exec" {
             if ($Prompt.Count -eq 0) {
-                Write-Error "exec mode requires a prompt"
+                Write-ErrorMessage "exec mode requires a prompt"
                 exit 1
             }
             $promptText = $Prompt -join " "

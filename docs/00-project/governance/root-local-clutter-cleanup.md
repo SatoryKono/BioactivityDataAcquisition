@@ -1,17 +1,18 @@
 # Root local clutter cleanup (operator guidance)
 
 **Status:** active
-**Linked issues:** #6703 (RH), #6766 (RH2-01), #6798/#6799 (RH3), #6813/#6814/#6816 (RH4), #6876/#6877 (RH 2026-07-28); epics #6700, #6765, #6795, #6812, #6874
-**Last verified:** 2026-07-28
+**Linked issues:** #6703 (RH), #6766 (RH2-01), #6798/#6799 (RH3), #6813/#6814/#6816 (RH4), #6876/#6877 (RH 2026-07-28), #7015–#7023 (RH5 2026-07-29); epics #6700, #6765, #6795, #6812, #6874, #7015
+**Last verified:** 2026-07-29
 
 This note documents **local-only** cleanup for the repository root. It does not
 redefine runtime behavior. Canonical policy remains
 `docs/00-project/governance/03-file-policy.md` §0 and
 `.github/root-allowlist.txt`.
 
-Tracked root is allowlist-minimal (**37 ≡ allowlist** after RH-01 / #6876). Most
-live root noise is **recreated by normal tooling** (coverage, logs, test dumps).
-Use the recurring checklist below instead of inventing new allowlist entries.
+Tracked root is allowlist-minimal (**37 ≡ allowlist** after RH-01 / #6876;
+re-verified RH5 / #7016). Most live root noise is **recreated by normal tooling**
+(coverage, logs, test dumps). Use the recurring checklist below instead of
+inventing new allowlist entries.
 
 ### Local vs CI (RH-02 / #6877)
 
@@ -36,7 +37,9 @@ Use the recurring checklist below instead of inventing new allowlist entries.
    ```
 3. Safe local purge (untracked only), when present:
    - `.coverage`, root `logs/`, `tmp/`, `test-output/`, `caddy/`, `.tmp_fix/`
-   - `_tmp_*.py`, `_a.txt`, `temp_closeout.json`, `.tmp_test_run.log`, `mcp-shell.log`
+   - `_tmp_*.py`, `/_cr_*.py`, `/_publish_*.py`, `_fail_*.txt`, `_a.txt`
+   - `temp_closeout.json`, `.tmp_*`, `.tmp_test_run.log`, `mcp-shell.log`
+   - `bash.exe.stackdump`, `nul` / `NUL` (Windows pseudo-file)
    - `arch_fail_report.txt` / other root `*report*.txt`
    - `.gitignore~`
 4. Optional / expensive: tool caches and venvs
@@ -51,20 +54,25 @@ Use the recurring checklist below instead of inventing new allowlist entries.
 
 Long-lived retained logs belong under `reports/logs/`, not root `logs/`.
 
-## Agent / scratch placement (RH4-03)
+## Agent / scratch placement (RH4-03 / RH5-04)
 
-**Do not** create agent or closeout scratch Python at the exact repository root
-(`_tmp_*.py`, ad-hoc `temp_*.py`, one-off verification helpers). Root
-`_tmp_*.py` is gitignored but still fails
-`check-cleanliness --strict-untracked` and re-clutters live root after purge.
+**Do not** create agent or closeout scratch Python at the exact repository root:
+
+| Banned root pattern | Notes |
+| --- | --- |
+| `_tmp_*.py` | gitignored; still fails `--strict-untracked` |
+| `/_cr_*.py` | e.g. CodeRabbit one-offs; gitignored (RH5) |
+| `/_publish_*.py` | one-off issue publishers; rehome under `scripts/**` if needed |
+| ad-hoc `temp_*.py`, `test_*.py` at root | never allowlist |
 
 Preferred placement for disposable scripts and dumps:
 
+- under `scripts/engineering/repo/**` or `scripts/ops/**` when reusable, or
 - under `reports/` (generated/local; many paths already gitignored), or
 - under an existing ignored tool cache tree, or
 - OS temp **outside** the repository
 
-Root `_tmp_*.py` remains **safe to delete** and **must not be recreated**.
+Root scratch files remain **safe to delete** and **must not be recreated**.
 Do not weaken `--strict-untracked` to allow root scratch Python. Do not expand
 the root allowlist for temps.
 
@@ -83,7 +91,8 @@ when no active process depends on them:
 |---|---|
 | `uchunk*.xml`, `final_chunk*.xml` | Accidental JUnit / pytest XML dumps |
 | `pytest_*.log`, `mcp-shell.log`, `*.log` at root | Local test/agent logs (also `*.log` gitignored) |
-| `tmp_sub_*.txt`, `temp_closeout.json`, `.tmp_test_run.log`, `_tmp_*.py`, `_a.txt` | Agent / accidental scratch files |
+| `tmp_sub_*.txt`, `temp_closeout.json`, `.tmp_*`, `_tmp_*.py`, `/_cr_*.py`, `/_publish_*.py`, `_fail_*.txt`, `_a.txt` | Agent / accidental scratch files |
+| `bash.exe.stackdump` | MSYS/Cygwin crash dump |
 | `arch_fail_report.txt`, `*report*.txt` at root | Local architecture/test report dumps |
 | `.gitignore~` | Editor backup; `.gitignore` is the tracked source of truth |
 | `.coverage`, `.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`, `.hypothesis/` | Tool caches |

@@ -59,6 +59,177 @@ def set_text_content(panel: dict[str, Any] | None, content: str) -> None:
     opts.setdefault("mode", "markdown")
 
 
+def _partition_run_explorer_children(
+    children: list[dict[str, Any]],
+    re: dict[str, Any],
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None, list[dict[str, Any]]]:
+    recent: dict[str, Any] | None = None
+    next_actions: dict[str, Any] | None = None
+    rest: list[dict[str, Any]] = []
+    for child in children:
+        cid = child.get("id")
+        if cid == 3010:
+            recent = child
+        elif cid == 3001:
+            next_actions = child
+        else:
+            rest.append(child)
+    if recent is None:
+        recent = by_id(re, 3010)
+    if next_actions is None:
+        next_actions = by_id(re, 3001)
+    return recent, next_actions, rest
+
+
+def _layout_run_explorer_scope(re: dict[str, Any]) -> None:
+    set_text_content(
+        by_id(re, 1),
+        "**Run Explorer — empty vs selected narrative**\n\n"
+        "| Mode | First screen |\n"
+        "| --- | --- |\n"
+        "| **No `run_id`** | Use **Recent pipeline runs** to pick a run; "
+        "ID/Processed stay empty until selection |\n"
+        "| **Selected `run_id`** | Read **ID** -> **Processed Records** -> expand "
+        "**Selected run detail** (funnel/reasons/artifacts) |\n\n"
+        "`run_id` is Ops HTTP identity only — never a Prometheus label. "
+        "Long IDs: copy from table fields.\n",
+    )
+    set_desc(
+        by_id(re, 1),
+        "DSA-08: empty = browse recent runs; selected = identity -> accounting -> detail.",
+    )
+
+
+def _layout_run_explorer_hubs(
+    *,
+    recent: dict[str, Any] | None,
+    re: dict[str, Any],
+) -> None:
+    if recent is not None:
+        recent["gridPos"] = {"h": 7, "w": 24, "x": 0, "y": 6}
+        set_title(recent, "Browse · Recent pipeline runs (no selection)")
+        set_desc(
+            recent,
+            "No-selection utility. Pick a run to set run_id. Ops HTTP index — not Prometheus.",
+        )
+    id_p = by_id(re, 9402)
+    pr_p = by_id(re, 9403)
+    if id_p is not None:
+        id_p["gridPos"] = {"h": 6, "w": 12, "x": 0, "y": 13}
+        set_desc(
+            id_p,
+            "Exact-run identity hub (Ops HTTP). Canonical portfolio hub for ID panels.",
+        )
+    if pr_p is not None:
+        pr_p["gridPos"] = {"h": 6, "w": 12, "x": 12, "y": 13}
+        set_desc(
+            pr_p,
+            "Bronze/Silver/Gold accounting hub (Ops HTTP). "
+            "Canonical portfolio hub for Processed Records.",
+        )
+
+
+def _layout_run_explorer_detail_row(
+    row: dict[str, Any] | None,
+    rest: list[dict[str, Any]],
+) -> None:
+    if row is None:
+        return
+    row["title"] = "Selected run detail (Ops HTTP; expand after selection)"
+    row["collapsed"] = True
+    row["gridPos"] = {"h": 1, "w": 24, "x": 0, "y": 19}
+    y = 0
+    for child in rest:
+        gp = child.setdefault("gridPos", {"h": 5, "w": 24, "x": 0, "y": 0})
+        gp["y"] = y
+        gp["x"] = 0
+        gp["w"] = 24
+        y += int(gp.get("h") or 5)
+    row["panels"] = rest
+
+
+def _layout_run_explorer_next_actions(
+    next_actions: dict[str, Any] | None,
+) -> None:
+    if next_actions is None:
+        return
+    next_actions["gridPos"] = {"h": 4, "w": 24, "x": 0, "y": 20}
+    set_text_content(
+        next_actions,
+        "**Next actions (<=4)**\n"
+        "1. No selection -> pick from **Recent pipeline runs**.\n"
+        "2. Selected -> verify **ID** + **Processed Records** accounting invariant.\n"
+        "3. Expand **Selected run detail** for funnel/reasons/artifacts.\n"
+        "4. Resume/replay safety -> Trust **Primary recovery** (not this board).\n",
+    )
+    set_desc(
+        next_actions,
+        "DSA-08 decision rail for empty/selected modes.",
+    )
+
+
+def _append_panels_by_ids(
+    ordered: list[dict[str, Any]],
+    by_pid: dict[Any, dict[str, Any]],
+    pids: tuple[int, ...],
+) -> None:
+    for pid in pids:
+        panel = by_pid.get(pid)
+        if panel is not None:
+            ordered.append(panel)
+
+
+def _order_run_explorer_panels(
+    *,
+    panels: list[dict[str, Any]],
+    recent: dict[str, Any] | None,
+    row: dict[str, Any] | None,
+    next_actions: dict[str, Any] | None,
+    rest: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    by_pid = {p.get("id"): p for p in panels}
+    ordered: list[dict[str, Any]] = []
+    _append_panels_by_ids(ordered, by_pid, (1000, 1))
+    if recent is not None:
+        ordered.append(recent)
+    _append_panels_by_ids(ordered, by_pid, (9402, 9403))
+    if row is not None:
+        ordered.append(row)
+    if next_actions is not None:
+        ordered.append(next_actions)
+
+    seen = {p.get("id") for p in ordered}
+    nested_ids = {c.get("id") for c in rest}
+    for panel in panels:
+        pid = panel.get("id")
+        if pid in seen or pid in {3010, 3001, 3099}:
+            continue
+        if panel.get("type") != "row" and pid in nested_ids:
+            continue
+        ordered.append(panel)
+    return ordered
+
+
+def _print_run_explorer_summary(re: dict[str, Any]) -> None:
+    count = len(list(walk(re.get("panels") or [])))
+    print(f"run explorer ok panel_count={count}")
+    for panel in re["panels"]:
+        collapsed = ""
+        if panel.get("type") == "row":
+            collapsed = "collapsed=" + str(panel.get("collapsed"))
+        print(
+            " ",
+            panel.get("id"),
+            panel.get("type"),
+            panel.get("title"),
+            panel.get("gridPos"),
+            collapsed,
+        )
+        if panel.get("type") == "row":
+            for child in panel.get("panels") or []:
+                print("    child", child.get("id"), child.get("title"))
+
+
 def apply_overview() -> None:
     ov = load("bioetl-overview-v2.json")
     set_desc(
@@ -211,11 +382,11 @@ def apply_provider() -> None:
         )
     rc = by_id(ph, 9405)
     if rc is not None:
-        rc["title"] = "Run context (thin) -> Run Explorer hub"
+        rc["title"] = RUN_CONTEXT_THIN_TITLE
     for pid in (9402, 9403):
         set_desc(
             by_id(ph, pid),
-            "Thin shell only. Canonical exact-run hub: Run Explorer.",
+            THIN_SHELL_EXACT_RUN_HUB,
         )
     save("bioetl-provider-health-v2.json", ph)
     print("provider ok")
@@ -288,124 +459,18 @@ def apply_run_explorer() -> None:
     panels = list(re.get("panels") or [])
     row = by_id(re, 3099)
     children = list(row.get("panels") or []) if row is not None else []
-
-    recent: dict[str, Any] | None = None
-    next_actions: dict[str, Any] | None = None
-    rest: list[dict[str, Any]] = []
-    for child in children:
-        cid = child.get("id")
-        if cid == 3010:
-            recent = child
-        elif cid == 3001:
-            next_actions = child
-        else:
-            rest.append(child)
-
-    if recent is None:
-        recent = by_id(re, 3010)
-    if next_actions is None:
-        next_actions = by_id(re, 3001)
-
-    set_text_content(
-        by_id(re, 1),
-        "**Run Explorer — empty vs selected narrative**\n\n"
-        "| Mode | First screen |\n"
-        "| --- | --- |\n"
-        "| **No `run_id`** | Use **Recent pipeline runs** to pick a run; "
-        "ID/Processed stay empty until selection |\n"
-        "| **Selected `run_id`** | Read **ID** -> **Processed Records** -> expand "
-        "**Selected run detail** (funnel/reasons/artifacts) |\n\n"
-        "`run_id` is Ops HTTP identity only — never a Prometheus label. "
-        "Long IDs: copy from table fields.\n",
+    recent, next_actions, rest = _partition_run_explorer_children(children, re)
+    _layout_run_explorer_scope(re)
+    _layout_run_explorer_hubs(recent=recent, re=re)
+    _layout_run_explorer_detail_row(row, rest)
+    _layout_run_explorer_next_actions(next_actions)
+    re["panels"] = _order_run_explorer_panels(
+        panels=panels,
+        recent=recent,
+        row=row,
+        next_actions=next_actions,
+        rest=rest,
     )
-    set_desc(
-        by_id(re, 1),
-        "DSA-08: empty = browse recent runs; selected = identity -> accounting -> detail.",
-    )
-
-    if recent is not None:
-        recent["gridPos"] = {"h": 7, "w": 24, "x": 0, "y": 6}
-        set_title(recent, "Browse · Recent pipeline runs (no selection)")
-        set_desc(
-            recent,
-            "No-selection utility. Pick a run to set run_id. Ops HTTP index — not Prometheus.",
-        )
-
-    id_p = by_id(re, 9402)
-    pr_p = by_id(re, 9403)
-    if id_p is not None:
-        id_p["gridPos"] = {"h": 6, "w": 12, "x": 0, "y": 13}
-        set_desc(
-            id_p,
-            "Exact-run identity hub (Ops HTTP). Canonical portfolio hub for ID panels.",
-        )
-    if pr_p is not None:
-        pr_p["gridPos"] = {"h": 6, "w": 12, "x": 12, "y": 13}
-        set_desc(
-            pr_p,
-            "Bronze/Silver/Gold accounting hub (Ops HTTP). "
-            "Canonical portfolio hub for Processed Records.",
-        )
-
-    if row is not None:
-        row["title"] = "Selected run detail (Ops HTTP; expand after selection)"
-        row["collapsed"] = True
-        row["gridPos"] = {"h": 1, "w": 24, "x": 0, "y": 19}
-        y = 0
-        for child in rest:
-            gp = child.setdefault("gridPos", {"h": 5, "w": 24, "x": 0, "y": 0})
-            gp["y"] = y
-            gp["x"] = 0
-            gp["w"] = 24
-            y += int(gp.get("h") or 5)
-        row["panels"] = rest
-
-    if next_actions is not None:
-        next_actions["gridPos"] = {"h": 4, "w": 24, "x": 0, "y": 20}
-        set_text_content(
-            next_actions,
-            "**Next actions (<=4)**\n"
-            "1. No selection -> pick from **Recent pipeline runs**.\n"
-            "2. Selected -> verify **ID** + **Processed Records** accounting invariant.\n"
-            "3. Expand **Selected run detail** for funnel/reasons/artifacts.\n"
-            "4. Resume/replay safety -> Trust **Primary recovery** (not this board).\n",
-        )
-        set_desc(
-            next_actions,
-            "DSA-08 decision rail for empty/selected modes.",
-        )
-
-    # Rebuild top-level order: nav, scope, recent, id, processed, selected-row, next.
-    by_pid = {p.get("id"): p for p in panels}
-    ordered: list[dict[str, Any]] = []
-    for pid in (1000, 1):
-        panel = by_pid.get(pid)
-        if panel is not None:
-            ordered.append(panel)
-    if recent is not None:
-        ordered.append(recent)
-    for pid in (9402, 9403):
-        panel = by_pid.get(pid)
-        if panel is not None:
-            ordered.append(panel)
-    if row is not None:
-        ordered.append(row)
-    if next_actions is not None:
-        ordered.append(next_actions)
-
-    seen = {p.get("id") for p in ordered}
-    for panel in panels:
-        pid = panel.get("id")
-        if pid in seen or pid in {3010, 3001, 3099}:
-            continue
-        # skip nested-only panels that leaked
-        if panel.get("type") != "row" and pid in {
-            c.get("id") for c in rest
-        }:
-            continue
-        ordered.append(panel)
-
-    re["panels"] = ordered
     re["description"] = (
         "Run Explorer 2.0 narrative. Exact completed run via Ops HTTP "
         "pipeline_run_report_v1. run_id never a Prometheus label. First screen: "
@@ -413,22 +478,7 @@ def apply_run_explorer() -> None:
         "collapsed until expanded."
     )
     save("bioetl-run-explorer-v1.json", re)
-    count = len(list(walk(re.get("panels") or [])))
-    print(f"run explorer ok panel_count={count}")
-    for panel in re["panels"]:
-        print(
-            " ",
-            panel.get("id"),
-            panel.get("type"),
-            panel.get("title"),
-            panel.get("gridPos"),
-            "collapsed=" + str(panel.get("collapsed"))
-            if panel.get("type") == "row"
-            else "",
-        )
-        if panel.get("type") == "row":
-            for child in panel.get("panels") or []:
-                print("    child", child.get("id"), child.get("title"))
+    _print_run_explorer_summary(re)
 
 
 def apply_trust_dq() -> None:
@@ -441,11 +491,11 @@ def apply_trust_dq() -> None:
     )
     rc = by_id(cp, 9412)
     if rc is not None:
-        rc["title"] = "Run context (thin) -> Run Explorer hub"
+        rc["title"] = RUN_CONTEXT_THIN_TITLE
     for pid in (9402, 9403):
         set_desc(
             by_id(cp, pid),
-            "Thin shell only. Canonical exact-run hub: Run Explorer. "
+            f"{THIN_SHELL_EXACT_RUN_HUB} "
             "Trust keeps collapsed copy for resume forensics.",
         )
     save("bioetl-control-plane-v1.json", cp)
@@ -468,11 +518,11 @@ def apply_trust_dq() -> None:
     )
     rc = by_id(dq, 9405)
     if rc is not None:
-        rc["title"] = "Run context (thin) -> Run Explorer hub"
+        rc["title"] = RUN_CONTEXT_THIN_TITLE
     for pid in (9402, 9403):
         set_desc(
             by_id(dq, pid),
-            "Thin shell only. Canonical exact-run hub: Run Explorer.",
+            THIN_SHELL_EXACT_RUN_HUB,
         )
     save("bioetl-dq-v2.json", dq)
     print("trust+dq ok")

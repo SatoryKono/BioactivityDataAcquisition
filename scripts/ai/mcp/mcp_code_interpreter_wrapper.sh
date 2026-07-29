@@ -15,10 +15,9 @@ source "${SCRIPT_DIR}/support/uv_resolver.sh"
 mcp_exit_if_validate_only "mcp-code-interpreter"
 
 # 1) Local Python module if installed (no Deno required)
-if command -v python3 >/dev/null 2>&1; then
-  if python3 -c "import importlib.util; raise SystemExit(0 if importlib.util.find_spec('mcp_server_code_interpreter') else 1)"; then
-    exec python3 -m mcp_server_code_interpreter "$@"
-  fi
+if command -v python3 >/dev/null 2>&1 \
+  && python3 -c "import importlib.util; raise SystemExit(0 if importlib.util.find_spec('mcp_server_code_interpreter') else 1)"; then
+  exec python3 -m mcp_server_code_interpreter "$@"
 fi
 
 # 2) Canonical: PyPI mcp-run-python (sandboxed Python code execution MCP)

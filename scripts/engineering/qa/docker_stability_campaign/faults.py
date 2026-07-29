@@ -322,6 +322,99 @@ finally:
             timeout,
         )
 
+    def _execute_clear_pressure(
+        self, operation: FaultOperation, *, timeout: float
+    ) -> dict[str, Any]:
+        spec = self._spec(operation)
+        program = """import os
+from pathlib import Path
+import signal
+import time
+
+marker = Path('/tmp/bioetl-fault-pressure.pids')
+pids = [int(value) for value in marker.read_text(encoding='ascii').split()] if marker.exists() else []
+for pid in reversed(pids):
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+deadline = time.monotonic() + 5
+while time.monotonic() < deadline:
+    alive = []
+    for pid in pids:
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            continue
+        alive.append(pid)
+    if not alive:
+        break
+    time.sleep(0.1)
+else:
+    raise SystemExit('pressure workload did not terminate')
+marker.unlink(missing_ok=True)
+"""
+        return compose_command(
+            self.runtime_origin,
+            spec,
+            (
+                "exec",
+                "-T",
+                str(operation.service),
+                "python",
+                "-c",
+                program,
+            ),
+            timeout,
+        )
+
+    def _execute_wait_healthy(
+        self,
+        operation: FaultOperation,
+        *,
+        timeout: float,
+        evidence: Path,
+        ordinal: int,
+    ) -> dict[str, Any]:
+        # Bounded poll after unpause/restart without force-recreate churn.
+        # Use module-level probe_command import — a local import here would
+        # shadow it for the whole execute() and break observe:probe.
+        spec = self._spec(operation)
+        started = time.monotonic()
+        deadline_local = started + timeout
+        last: dict[str, Any] = {
+            "returncode": 1,
+            "primary_cause": "readiness_timeout",
+        }
+        sequence = 0
+        while time.monotonic() < deadline_local:
+            sequence += 1
+            remaining = max(1.0, deadline_local - time.monotonic())
+            output = evidence / f"wait-healthy-{ordinal:02d}-{sequence:02d}.json"
+            # No bootstrap baseline: after pause/unpause restart deltas are
+            # expected; we only require live readiness to return to green.
+            last = probe_command(
+                self.runtime_origin,
+                spec,
+                output,
+                min(30.0, remaining),
+                contract=self.contract,
+            )
+            ready = int(last.get("returncode", 1)) == 0 and last.get(
+                "summary_ok", True
+            )
+            if ready:
+                last["wait_healthy"] = True
+                last["polls"] = sequence
+                last["duration_seconds"] = round(time.monotonic() - started, 3)
+                return last
+            time.sleep(min(3.0, max(0.1, deadline_local - time.monotonic())))
+        last["wait_healthy"] = False
+        last["polls"] = sequence
+        last["duration_seconds"] = round(time.monotonic() - started, 3)
+        last["returncode"] = int(last.get("returncode", 1)) or 1
+        return last
+
     def execute(
         self,
         operation: FaultOperation,
@@ -358,84 +451,14 @@ finally:
         if operation.kind == "bounded_pressure":
             return self._execute_bounded_pressure(operation, timeout=timeout)
         if operation.kind == "clear_pressure":
-            spec = self._spec(operation)
-            program = """import os
-from pathlib import Path
-import signal
-import time
-
-marker = Path('/tmp/bioetl-fault-pressure.pids')
-pids = [int(value) for value in marker.read_text(encoding='ascii').split()] if marker.exists() else []
-for pid in reversed(pids):
-    try:
-        os.kill(pid, signal.SIGTERM)
-    except ProcessLookupError:
-        pass
-deadline = time.monotonic() + 5
-while time.monotonic() < deadline:
-    alive = []
-    for pid in pids:
-        try:
-            os.kill(pid, 0)
-        except ProcessLookupError:
-            continue
-        alive.append(pid)
-    if not alive:
-        break
-    time.sleep(0.1)
-else:
-    raise SystemExit('pressure workload did not terminate')
-marker.unlink(missing_ok=True)
-"""
-            return compose_command(
-                self.runtime_origin,
-                spec,
-                (
-                    "exec",
-                    "-T",
-                    str(operation.service),
-                    "python",
-                    "-c",
-                    program,
-                ),
-                timeout,
-            )
+            return self._execute_clear_pressure(operation, timeout=timeout)
         if operation.kind == "wait_healthy":
-            # Bounded poll after unpause/restart without force-recreate churn.
-            # Use module-level probe_command import — a local import here would
-            # shadow it for the whole execute() and break observe:probe.
-            spec = self._spec(operation)
-            started = time.monotonic()
-            deadline_local = started + timeout
-            last: dict[str, Any] = {
-                "returncode": 1,
-                "primary_cause": "readiness_timeout",
-            }
-            sequence = 0
-            while time.monotonic() < deadline_local:
-                sequence += 1
-                remaining = max(1.0, deadline_local - time.monotonic())
-                output = evidence / f"wait-healthy-{ordinal:02d}-{sequence:02d}.json"
-                # No bootstrap baseline: after pause/unpause restart deltas are
-                # expected; we only require live readiness to return to green.
-                last = probe_command(
-                    self.runtime_origin,
-                    spec,
-                    output,
-                    min(30.0, remaining),
-                    contract=self.contract,
-                )
-                if int(last.get("returncode", 1)) == 0 and last.get("summary_ok", True):
-                    last["wait_healthy"] = True
-                    last["polls"] = sequence
-                    last["duration_seconds"] = round(time.monotonic() - started, 3)
-                    return last
-                time.sleep(min(3.0, max(0.1, deadline_local - time.monotonic())))
-            last["wait_healthy"] = False
-            last["polls"] = sequence
-            last["duration_seconds"] = round(time.monotonic() - started, 3)
-            last["returncode"] = int(last.get("returncode", 1)) or 1
-            return last
+            return self._execute_wait_healthy(
+                operation,
+                timeout=timeout,
+                evidence=evidence,
+                ordinal=ordinal,
+            )
         if operation.kind == "desktop_restart":
             # WSL `docker desktop restart` fails without /opt/docker-desktop backend.
             # Route through the Windows host CLI (same lane as RF-006 recovery).

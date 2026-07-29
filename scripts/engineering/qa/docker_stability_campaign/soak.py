@@ -179,6 +179,114 @@ def _record_soak_sample(
     return True
 
 
+def _maybe_reset_soak_window(
+    state: dict[str, Any],
+    *,
+    now: float,
+    sample_seconds: float,
+) -> float:
+    allowed_gap = max(120.0, sample_seconds * 2.0)
+    last = state.get("soak_last_sample_at")
+    gap_exceeded = last is not None and now - float(last) > allowed_gap
+    if state.get("soak_started_at") is None or gap_exceeded:
+        reset_soak_window(state, now)
+    return allowed_gap
+
+
+def _handle_soak_gap_interrupt(
+    *,
+    state: dict[str, Any],
+    state_path: Path,
+    evidence_dir: Path,
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+    sample_seconds: float,
+    sampled_at: float,
+    previous: object,
+    allowed_gap: float,
+) -> bool | None:
+    """Return recursive result when gap interrupts; None when sampling should continue."""
+    if previous is None or sampled_at - float(previous) <= allowed_gap:
+        return None
+    state["soak_window_interrupted"] = True
+    index_and_save(state, state_path, evidence_dir)
+    reset_soak_window(state, sampled_at)
+    save_state(state_path, state)
+    return run_soak(
+        state,
+        state_path,
+        evidence_dir,
+        runtime_origin,
+        contract,
+        bundle,
+        sample_seconds,
+    )
+
+
+def _run_soak_sample_loop(
+    *,
+    state: dict[str, Any],
+    state_path: Path,
+    evidence_dir: Path,
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+    sample_seconds: float,
+    soak_dir: Path,
+    baselines: dict[str, Path],
+    pinned_ids: dict[str, dict[str, str]],
+    required: float,
+    allowed_gap: float,
+) -> bool:
+    sequence = int(state.get("soak_samples_current_window", 0))
+    while float(state["soak_observed_seconds"]) < required:
+        sampled_at = time.time()
+        previous = state.get("soak_last_sample_at")
+        interrupted = _handle_soak_gap_interrupt(
+            state=state,
+            state_path=state_path,
+            evidence_dir=evidence_dir,
+            runtime_origin=runtime_origin,
+            contract=contract,
+            bundle=bundle,
+            sample_seconds=sample_seconds,
+            sampled_at=sampled_at,
+            previous=previous,
+            allowed_gap=allowed_gap,
+        )
+        if interrupted is not None:
+            return interrupted
+        sequence += 1
+        clean, sample_steps, capacity = _collect_soak_sample(
+            state=state,
+            runtime_origin=runtime_origin,
+            contract=contract,
+            bundle=bundle,
+            soak_dir=soak_dir,
+            baselines=baselines,
+            pinned_ids=pinned_ids,
+            sequence=sequence,
+        )
+        if not _record_soak_sample(
+            state=state,
+            state_path=state_path,
+            evidence_dir=evidence_dir,
+            soak_dir=soak_dir,
+            sequence=sequence,
+            sampled_at=sampled_at,
+            previous=previous,
+            clean=clean,
+            capacity=capacity,
+            sample_steps=sample_steps,
+        ):
+            return False
+        remaining = required - float(state["soak_observed_seconds"])
+        if remaining > 0:
+            time.sleep(min(sample_seconds, remaining))
+    return True
+
+
 def run_soak(
     state: dict[str, Any],
     state_path: Path,
@@ -192,12 +300,9 @@ def run_soak(
     if float(state.get("soak_observed_seconds", 0.0)) >= required:
         return True
     now = time.time()
-    allowed_gap = max(120.0, sample_seconds * 2.0)
-    last = state.get("soak_last_sample_at")
-    if state.get("soak_started_at") is None or (
-        last is not None and now - float(last) > allowed_gap
-    ):
-        reset_soak_window(state, now)
+    allowed_gap = _maybe_reset_soak_window(
+        state, now=now, sample_seconds=sample_seconds
+    )
     generation = int(state["soak_generation"])
     soak_dir = evidence_dir / "soak" / f"window-{generation:03d}"
     if not _start_soak_stacks(
@@ -223,50 +328,17 @@ def run_soak(
         return False
     baselines, pinned_ids = prepared
     index_and_save(state, state_path, evidence_dir)
-    sequence = int(state.get("soak_samples_current_window", 0))
-    while float(state["soak_observed_seconds"]) < required:
-        sampled_at = time.time()
-        previous = state.get("soak_last_sample_at")
-        if previous is not None and sampled_at - float(previous) > allowed_gap:
-            state["soak_window_interrupted"] = True
-            index_and_save(state, state_path, evidence_dir)
-            reset_soak_window(state, sampled_at)
-            save_state(state_path, state)
-            return run_soak(
-                state,
-                state_path,
-                evidence_dir,
-                runtime_origin,
-                contract,
-                bundle,
-                sample_seconds,
-            )
-        sequence += 1
-        clean, sample_steps, capacity = _collect_soak_sample(
-            state=state,
-            runtime_origin=runtime_origin,
-            contract=contract,
-            bundle=bundle,
-            soak_dir=soak_dir,
-            baselines=baselines,
-            pinned_ids=pinned_ids,
-            sequence=sequence,
-        )
-        if not _record_soak_sample(
-            state=state,
-            state_path=state_path,
-            evidence_dir=evidence_dir,
-            soak_dir=soak_dir,
-            sequence=sequence,
-            sampled_at=sampled_at,
-            previous=previous,
-            clean=clean,
-            capacity=capacity,
-            sample_steps=sample_steps,
-        ):
-            return False
-        if float(state["soak_observed_seconds"]) < required:
-            time.sleep(
-                min(sample_seconds, required - float(state["soak_observed_seconds"]))
-            )
-    return True
+    return _run_soak_sample_loop(
+        state=state,
+        state_path=state_path,
+        evidence_dir=evidence_dir,
+        runtime_origin=runtime_origin,
+        contract=contract,
+        bundle=bundle,
+        sample_seconds=sample_seconds,
+        soak_dir=soak_dir,
+        baselines=baselines,
+        pinned_ids=pinned_ids,
+        required=required,
+        allowed_gap=allowed_gap,
+    )

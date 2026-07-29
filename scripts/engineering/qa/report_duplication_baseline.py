@@ -890,11 +890,12 @@ def _trend_markdown_section(trend_summary: dict[str, object] | None) -> list[str
 def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-    path = resolve_output_path(path, root=root if root is not None else REPO_ROOT)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        content, encoding="utf-8"
-    )  # NOSONAR - path confined by resolve_output_path
+    base = root if root is not None else REPO_ROOT
+    safe = resolve_output_path(path, root=base)
+    safe.parent.mkdir(parents=True, exist_ok=True)
+    # Re-resolve immediately before the write sink (pythonsecurity:S8707).
+    safe = resolve_output_path(safe, root=base)
+    safe.write_text(content, encoding="utf-8")  # NOSONAR - path confined
 
 
 def _append_history_jsonl(

@@ -62,6 +62,10 @@ Minimum expectation:
 
 ## Guardrails
 
+- **Root scratch ban (RH5):** do not create root-level `_tmp_*.py`, `/_cr_*.py`,
+  `/_publish_*.py`, or ad-hoc `test_*.py`. Prefer `scripts/**` or `reports/**`.
+  Tracked root must stay ≡ `.github/root-allowlist.txt` (37 files). See
+  `docs/00-project/governance/root-local-clutter-cleanup.md`.
 - BioETL remains local-only by default; do not introduce Docker, Redis, or
   external orchestration requirements unless the task explicitly requires them.
 - `.codex/**` is the canonical Codex runtime source.

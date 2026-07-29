@@ -3,9 +3,10 @@
 
 set -e
 
-echo "========================================"
+BANNER_LINE='========================================'
+echo "${BANNER_LINE}"
 echo "WSL DNS Setup for Codex Device Auth"
-echo "========================================"
+echo "${BANNER_LINE}"
 echo ""
 
 # Check if running in WSL
@@ -56,9 +57,9 @@ else
 fi
 echo ""
 
-echo "========================================"
+echo "${BANNER_LINE}"
 echo "DNS Setup Complete"
-echo "========================================"
+echo "${BANNER_LINE}"
 echo ""
 echo "Next steps:"
 echo "1. Restart WSL from PowerShell: wsl --shutdown"
