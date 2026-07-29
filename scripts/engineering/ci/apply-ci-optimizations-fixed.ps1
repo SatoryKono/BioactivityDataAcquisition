@@ -68,10 +68,10 @@ Get-ChildItem -Path $workflowsDir -Filter *.yml -File | ForEach-Object {
      for ($i=0; $i -lt $lines.Length; $i++) {
         if ($lines[$i] -match '^\s*name\s*:') { $insertIndex = $i+1; break }
      }
-     if ($insertIndex -eq $null) {
+     if ($null -eq $insertIndex) {
         for ($i=0; $i -lt $lines.Length; $i++) { if ($lines[$i] -match '^\s*on\s*:') { $insertIndex = $i; break } }
      }
-     if ($insertIndex -eq $null) { $insertIndex = 0 }
+     if ($null -eq $insertIndex) { $insertIndex = 0 }
 
      $concLines = @(
        'concurrency:',

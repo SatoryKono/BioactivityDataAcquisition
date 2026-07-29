@@ -43,10 +43,9 @@ EOF
   esac
 done
 
-if [[ -z "${GITHUB_TOKEN:-}" && -z "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" && -z "${GH_TOKEN:-}" ]]; then
-  if command -v gh >/dev/null 2>&1; then
-    export GITHUB_TOKEN="$(gh auth token)"
-  fi
+if [[ -z "${GITHUB_TOKEN:-}" && -z "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" && -z "${GH_TOKEN:-}" ]] \
+  && command -v gh >/dev/null 2>&1; then
+  export GITHUB_TOKEN="$(gh auth token)"
 fi
 
 echo "== Branch cleanup phases 0-2 =="

@@ -45,9 +45,11 @@ proxy-on() {
   }
   export http_proxy="$url" https_proxy="$url" HTTP_PROXY="$url" HTTPS_PROXY="$url"
   echo "proxy ON via ${host}:3128 (local WSL host CONNECT proxy)"
+  return 0
 }
 
 proxy-off() {
   unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
   echo "proxy OFF"
+  return 0
 }

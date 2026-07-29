@@ -34,7 +34,7 @@ function Write-Success {
     Write-Host "[OK] $Message" -ForegroundColor Green
 }
 
-function Write-Warning {
+function Write-SetupWarning {
     param([string]$Message)
     Write-Host "[WARNING] $Message" -ForegroundColor Yellow
 }
@@ -67,7 +67,7 @@ try {
     Write-Host $wslStatus
 }
 catch {
-    Write-Warning "WSL is not installed. Starting installation..."
+    Write-SetupWarning "WSL is not installed. Starting installation..."
     try {
         wsl --install
         Write-Success "WSL has been installed successfully. A computer RESTART is required."
@@ -94,7 +94,7 @@ if (-not (Test-Path $envCodexPath)) {
         exit 1
     }
 
-    Write-Warning "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.codex from example..."
+    Write-SetupWarning "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.codex from example..."
     if (Test-Path $envExamplePath) {
         Copy-Item -Path $envExamplePath -Destination $envCodexPath
     }
@@ -107,7 +107,7 @@ if (-not (Test-Path $envCodexPath)) {
 $envContent = Get-Content $envCodexPath -Raw
 # Check for modern (sk-proj-) or legacy (sk-) key formats.
 if ($envContent -notmatch "OPENAI_API_KEY=sk-(proj-)?[a-zA-Z0-9]+") {
-    Write-Warning "OPENAI_API_KEY not found or is invalid in .env.codex."
+    Write-SetupWarning "OPENAI_API_KEY not found or is invalid in .env.codex."
     if (-not $CanCreateEnvFile) {
         Write-Error-Message ".env.codex is not modified without BIOETL_CREATE_LOCAL_ENV_FILES=1. Edit it manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to update it interactively."
         exit 1

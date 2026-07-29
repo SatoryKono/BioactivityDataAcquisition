@@ -13,7 +13,9 @@ GEMINI_CLI_HOME="${GEMINI_CLI_HOME:-${GEMINI_TOOL_HOME_DEFAULT}/home}"
 GEMINI_BIN="${GEMINI_NPM_PREFIX}/bin/gemini"
 GEMINI_NODE_BIN="${GEMINI_NPM_PREFIX}/bin/node"
 
-MODE="ensure"
+MODE_ENSURE="ensure"
+MODE_UPDATE="update"
+MODE="${MODE_ENSURE}"
 PRINT_BIN=0
 PRINT_PREFIX=0
 ALLOW_INSTALL=1
@@ -22,10 +24,10 @@ HEALTHCHECK_TIMEOUT="${GEMINI_HEALTHCHECK_TIMEOUT:-15}"
 for arg in "$@"; do
     case "$arg" in
         --ensure)
-            MODE="ensure"
+            MODE="${MODE_ENSURE}"
             ;;
         --update)
-            MODE="update"
+            MODE="${MODE_UPDATE}"
             ;;
         --print-bin)
             PRINT_BIN=1
@@ -66,12 +68,12 @@ export npm_config_cache="${GEMINI_NPM_CACHE}"
 export PATH="${GEMINI_NPM_PREFIX}/bin:${PATH}"
 
 need_install=0
-if [[ "${MODE}" == "update" || ! -x "${GEMINI_BIN}" || ! -x "${GEMINI_NODE_BIN}" ]]; then
+if [[ "${MODE}" == "${MODE_UPDATE}" || ! -x "${GEMINI_BIN}" || ! -x "${GEMINI_NODE_BIN}" ]]; then
     need_install=1
 fi
 
 if [[ "${need_install}" -eq 1 && "${ALLOW_INSTALL}" -eq 1 ]]; then
-    if [[ "${MODE}" == "update" ]]; then
+    if [[ "${MODE}" == "${MODE_UPDATE}" ]]; then
         echo "[ensure-gemini] Updating Gemini CLI in ${GEMINI_NPM_PREFIX}..." >&2
     else
         echo "[ensure-gemini] Installing Gemini CLI in ${GEMINI_NPM_PREFIX}..." >&2
@@ -92,12 +94,11 @@ if [[ ! -x "${GEMINI_NODE_BIN}" ]]; then
 fi
 
 # Discovery callers only need the managed path and should not block on CLI startup.
-if [[ "${ALLOW_INSTALL}" -eq 1 || "${PRINT_BIN}" -eq 0 && "${PRINT_PREFIX}" -eq 0 || "${MODE}" == "update" ]]; then
-    if ! GEMINI_CLI_HOME="${GEMINI_CLI_HOME}" PATH="${GEMINI_NPM_PREFIX}/bin:${PATH}" \
+if [[ "${ALLOW_INSTALL}" -eq 1 || "${PRINT_BIN}" -eq 0 && "${PRINT_PREFIX}" -eq 0 || "${MODE}" == "${MODE_UPDATE}" ]] \
+    && ! GEMINI_CLI_HOME="${GEMINI_CLI_HOME}" PATH="${GEMINI_NPM_PREFIX}/bin:${PATH}" \
         timeout "${HEALTHCHECK_TIMEOUT}" "${GEMINI_BIN}" --version >/dev/null 2>&1; then
-        echo "[ensure-gemini] ERROR: Gemini CLI failed to start within ${HEALTHCHECK_TIMEOUT}s from managed prefix: ${GEMINI_BIN}" >&2
-        exit 1
-    fi
+    echo "[ensure-gemini] ERROR: Gemini CLI failed to start within ${HEALTHCHECK_TIMEOUT}s from managed prefix: ${GEMINI_BIN}" >&2
+    exit 1
 fi
 
 if [[ "${PRINT_PREFIX}" -eq 1 ]]; then

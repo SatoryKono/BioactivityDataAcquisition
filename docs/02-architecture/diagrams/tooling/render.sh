@@ -606,15 +606,14 @@ render_one() {
           ;;
       esac
       # Optimize SVG with svgo if available
-      if [[ $HAS_SVGO -eq 1 ]]; then
-        if ! svgo --quiet --config "$SCRIPT_DIR/svgo.config.js" "$svg_tmp" -o "$svg_tmp" 2>/dev/null; then
-          if [[ "$REQUIRE_SVGO" == "1" ]]; then
-            log_err "svgo optimization failed for $base"
-            rm -rf "$svg_tmp_dir"
-            return 1
-          fi
-          log_warn "svgo optimization failed for $base; continuing without optimization"
+      if [[ $HAS_SVGO -eq 1 ]] \
+        && ! svgo --quiet --config "$SCRIPT_DIR/svgo.config.js" "$svg_tmp" -o "$svg_tmp" 2>/dev/null; then
+        if [[ "$REQUIRE_SVGO" == "1" ]]; then
+          log_err "svgo optimization failed for $base"
+          rm -rf "$svg_tmp_dir"
+          return 1
         fi
+        log_warn "svgo optimization failed for $base; continuing without optimization"
       fi
       # Inject CSS overrides for edge label readability
       if [[ -n "$PYTHON_BIN" ]]; then

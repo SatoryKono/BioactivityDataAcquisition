@@ -16,20 +16,25 @@ TESTS_FAILED=0
 
 # Test helpers
 test_passed() {
-  echo "✓ $1"
+  local message="$1"
+  echo "✓ ${message}"
   ((TESTS_PASSED++))
   ((TESTS_RUN++))
+  return 0
 }
 
 test_failed() {
-  echo "✗ $1"
+  local message="$1"
+  echo "✗ ${message}"
   ((TESTS_FAILED++))
   ((TESTS_RUN++))
+  return 0
 }
 
 # Mock functions for testing
 command() {
-  if [[ "$1" == "uvx" ]]; then
+  local cmd="$1"
+  if [[ "${cmd}" == "uvx" ]]; then
     return 0
   fi
   return 1

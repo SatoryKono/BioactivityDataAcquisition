@@ -1,9 +1,10 @@
 # Root hygiene residual issue pack (post deep audit 2026-07-29)
 
-**Status:** published  
+**Status:** closed (2026-07-29)  
 **Wave code:** RH5  
 **Date:** 2026-07-29  
 **Baseline SHA:** `0d39eda063` (local checkout at pack authoring)  
+**Closeout:** tracked root 37≡allowlist; local clutter purged; registry/docs/guidance updated; RH5-05/06 deferred tracking.  
 **Implementation epic:** [#7015](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7015)
 
 **Predecessors (closed):**

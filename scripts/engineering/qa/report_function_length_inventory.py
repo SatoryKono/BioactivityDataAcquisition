@@ -144,11 +144,11 @@ def _write_text(path: Path, content: str) -> None:
     """Write UTF-8 text, creating parent directories as needed."""
     from scripts.engineering.common.repo_paths import resolve_output_path
 
-    safe_path = resolve_output_path(path)
-    safe_path.parent.mkdir(parents=True, exist_ok=True)
-    safe_path.write_text(  # NOSONAR - path confined by resolve_output_path
-        content, encoding="utf-8"
-    )
+    safe = resolve_output_path(path)
+    safe.parent.mkdir(parents=True, exist_ok=True)
+    # Re-resolve immediately before the write sink (pythonsecurity:S8707).
+    safe = resolve_output_path(safe)
+    safe.write_text(content, encoding="utf-8")  # NOSONAR - path confined
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
