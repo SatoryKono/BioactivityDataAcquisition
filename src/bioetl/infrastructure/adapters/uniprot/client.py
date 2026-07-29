@@ -1,5 +1,3 @@
-# pyright: reportArgumentType=false
-# pyright: reportIncompatibleVariableOverride=false
 # MRO/override residual on mixin or client hierarchies.
 """UniProt API adapter facade."""
 
@@ -84,7 +82,7 @@ class UniProtAdapter(
     """UniProt DataSource adapter facade with decomposed internals."""
 
     provider_name: str = "uniprot"
-    http_client: UnifiedHTTPClient
+    http_client: UnifiedHTTPClient  # pyright: ignore[reportIncompatibleVariableOverride]
 
     def __init__(
         self,
@@ -115,11 +113,11 @@ class UniProtAdapter(
         super().__init__(
             http_client,
             logger,
-            metrics=metrics,  # type: ignore[arg-type]
+            metrics=metrics,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             dependency_context=dependency_context,
-            error_handler=error_handler,  # type: ignore[arg-type]
-            adapter_metrics=adapter_metrics,  # type: ignore[arg-type]
-            request_collector=request_collector,  # type: ignore[arg-type]
+            error_handler=error_handler,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+            adapter_metrics=adapter_metrics,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+            request_collector=request_collector,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
         )
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key

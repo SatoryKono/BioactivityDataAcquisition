@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2162 |
-| Tracked doc-like files | 2108 |
+| Doc-like files | 2267 |
+| Tracked doc-like files | 2213 |
 | Ignored local docs/reports files | 54 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -19,16 +19,16 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 54 |
-| tracked | 2108 |
+| tracked | 2213 |
 
 ## Lifecycle Counts
 
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_draft | 139 |
-| active_quality_baseline | 22 |
-| closeout_evidence | 38 |
+| active_draft | 222 |
+| active_quality_baseline | 24 |
+| closeout_evidence | 39 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 39 |
 | docs_reports_generated_or_route_owned | 23 |
@@ -36,52 +36,52 @@
 | generated_skill_license_mirror | 5 |
 | generated_skill_reference_mirror | 12 |
 | generated_test_run_evidence | 4 |
-| guide | 2 |
+| guide | 3 |
 | index | 4 |
-| issue_pack | 39 |
+| issue_pack | 45 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
-| working_report | 68 |
+| working_report | 70 |
 
 ## GitHub Issue Drafts And Packs
 
 | Lifecycle | Count |
 | --- | --- |
-| active_draft | 139 |
-| guide | 2 |
+| active_draft | 222 |
+| guide | 3 |
 | index | 4 |
-| issue_pack | 39 |
+| issue_pack | 45 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
 
 | Status | Count |
 | --- | --- |
-| Active | 853 |
+| Active | 864 |
 | Archived | 130 |
 | Canonical | 71 |
 | Generated | 763 |
-| Working | 345 |
+| Working | 439 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 853 |
+| active | 864 |
 | archive | 130 |
 | canonical | 71 |
 | generated | 763 |
-| working | 345 |
+| working | 439 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 178 |
-| archive-after-migration | 103 |
+| archive-after-github-state-check | 267 |
+| archive-after-migration | 105 |
 | generate-automatically | 763 |
-| keep | 1114 |
+| keep | 1128 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates

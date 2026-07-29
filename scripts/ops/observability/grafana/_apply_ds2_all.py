@@ -24,13 +24,13 @@ def walk(panels):
         yield from walk(p.get("panels"))
 
 
-def load_dash(name: str) -> dict:
+def load_dash(name: str) -> dict[str, object]:
     path = DASH / name
     data = json.loads(path.read_text(encoding="utf-8"))
     return data
 
 
-def save_dash(name: str, data: dict) -> None:
+def save_dash(name: str, data: dict[str, object]) -> None:
     path = DASH / name
     path.write_text(
         json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
@@ -136,7 +136,7 @@ def fix_runtime() -> None:
     print("runtime 9105 OK", p9105["type"], p9105["title"])
 
 
-def _incident_status_mappings() -> list[dict]:
+def _incident_status_mappings() -> list[dict[str, object]]:
     return [
         {
             "type": "value",
@@ -157,7 +157,7 @@ def _incident_status_mappings() -> list[dict]:
     ]
 
 
-def _incident_status_thresholds() -> dict:
+def _incident_status_thresholds() -> dict[str, object]:
     return {
         "mode": "absolute",
         "steps": [
@@ -169,7 +169,7 @@ def _incident_status_thresholds() -> dict:
     }
 
 
-def _incident_value_override() -> dict:
+def _incident_value_override() -> dict[str, object]:
     return {
         "matcher": {
             "id": "byRegexp",
@@ -196,7 +196,7 @@ def _incident_value_override() -> dict:
     }
 
 
-def _fix_incident_table(panel: dict, *, value_override: dict) -> None:
+def _fix_incident_table(panel: dict[str, object], *, value_override: dict[str, object]) -> None:
     fc = panel.setdefault("fieldConfig", {})
     defaults = fc.setdefault("defaults", {})
     custom = defaults.setdefault("custom", {})
@@ -207,7 +207,7 @@ def _fix_incident_table(panel: dict, *, value_override: dict) -> None:
     fc["overrides"] = [deepcopy(value_override)]
 
 
-def _apply_incident_status_panel(panel: dict) -> None:
+def _apply_incident_status_panel(panel: dict[str, object]) -> None:
     defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
     defaults["mappings"] = _incident_status_mappings()
     defaults["thresholds"] = _incident_status_thresholds()
@@ -242,7 +242,7 @@ def _incident_handoff_urls() -> dict[int, str]:
     }
 
 
-def _apply_incident_handoffs(by_id: dict) -> None:
+def _apply_incident_handoffs(by_id: dict[str, object]) -> None:
     for pid, url in _incident_handoff_urls().items():
         if pid not in by_id:
             continue
@@ -252,7 +252,7 @@ def _apply_incident_handoffs(by_id: dict) -> None:
         ]
 
 
-def _incident_domain_links() -> list[dict]:
+def _incident_domain_links() -> list[dict[str, object]]:
     return [
         {
             "title": "Open Pipeline Diagnostics",
@@ -296,7 +296,7 @@ def _incident_domain_links() -> list[dict]:
     ]
 
 
-def _ranked_suspects_panel(*, value_override: dict) -> dict:
+def _ranked_suspects_panel(*, value_override: dict[str, object]) -> dict[str, object]:
     return {
         "id": 2010,
         "type": "table",
@@ -398,9 +398,9 @@ def _ranked_suspects_panel(*, value_override: dict) -> dict:
 
 
 def _layout_incident_core_panels(
-    by_id: dict,
+    by_id: dict[str, object],
     *,
-    value_override: dict,
+    value_override: dict[str, object],
 ) -> None:
     """Apply grid positions and NBA content for core incident panels."""
     nav = by_id.get(1000)
@@ -436,7 +436,7 @@ def _layout_incident_core_panels(
         impact["gridPos"] = {"h": 4, "w": 24, "x": 0, "y": 23}
 
 
-def _incident_detail_row(by_id: dict, *, value_override: dict) -> dict:
+def _incident_detail_row(by_id: dict[str, object], *, value_override: dict[str, object]) -> dict[str, object]:
     detail_row = {
         "id": 2099,
         "type": "row",
@@ -465,7 +465,7 @@ def _verify_incident_dashboard() -> None:
         if mapping.get("type") != "value":
             continue
         for key, value in (mapping.get("options") or {}).items():
-            if isinstance(value, dict):
+            if isinstance(value, dict[str, object]):
                 flat[str(key)] = value.get("text")
     assert flat.get("3") == "UNKNOWN", flat
     t2002 = next(p for p in walk(inc2.get("panels")) if p.get("id") == 2002)
@@ -563,14 +563,14 @@ def fix_trust() -> None:
     print("trust OK")
 
 
-def _append_desc_note(panel: dict, *, marker: str, note: str) -> None:
+def _append_desc_note(panel: dict[str, object], *, marker: str, note: str) -> None:
     """Append a description note when the marker is not already present."""
     desc = panel.get("description") or ""
     if marker not in desc:
         panel["description"] = (desc + note).strip()
 
 
-def _fix_dq_panels(dq: dict) -> None:
+def _fix_dq_panels(dq: dict[str, object]) -> None:
     for panel in walk(dq.get("panels")):
         if panel.get("title") == "Status" and panel.get("type") == "stat":
             _append_desc_note(
@@ -595,7 +595,7 @@ def _fix_dq_panels(dq: dict) -> None:
             )
 
 
-def _is_fleet_matrix_panel(panel: dict) -> bool:
+def _is_fleet_matrix_panel(panel: dict[str, object]) -> bool:
     title = panel.get("title") or ""
     if panel.get("type") not in {"table", "bargauge"}:
         return False
@@ -605,7 +605,7 @@ def _is_fleet_matrix_panel(panel: dict) -> bool:
     return y <= 25
 
 
-def _provider_context_link() -> dict:
+def _provider_context_link() -> dict[str, object]:
     return {
         "title": "Open selected provider context",
         "url": (
@@ -618,7 +618,7 @@ def _provider_context_link() -> dict:
     }
 
 
-def _fix_provider_health_panels(ph: dict) -> None:
+def _fix_provider_health_panels(ph: dict[str, object]) -> None:
     for panel in walk(ph.get("panels")):
         if not _is_fleet_matrix_panel(panel):
             continue
@@ -651,14 +651,14 @@ _RUN_EXPLORER_GUIDE_CONTENT = (
 )
 
 
-def _shift_run_explorer_panels(run_explorer: dict, *, delta_y: int = 3) -> None:
+def _shift_run_explorer_panels(run_explorer: dict[str, object], *, delta_y: int = 3) -> None:
     for panel in run_explorer.get("panels") or []:
         grid_pos = panel.get("gridPos") or {}
         if "y" in grid_pos:
             grid_pos["y"] = int(grid_pos["y"]) + delta_y
 
 
-def _fix_run_explorer_panels(run_explorer: dict) -> None:
+def _fix_run_explorer_panels(run_explorer: dict[str, object]) -> None:
     for panel in run_explorer.get("panels") or []:
         if panel.get("id") == 1 and panel.get("type") == "text":
             panel.setdefault("options", {})["mode"] = "markdown"

@@ -21,7 +21,7 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - direct script execution fallback
     try:
         # Try relative import for direct script execution
-        from hotspot_family_metrics import (  # type: ignore[no-redef]
+        from scripts.engineering.qa.hotspot_family_metrics import (  # type: ignore[no-redef]
             PROJECT_ROOT,
             SCORECARD_PATH,
             collect_hotspot_family_metrics,
@@ -34,7 +34,7 @@ except ModuleNotFoundError:  # pragma: no cover - direct script execution fallba
         from pathlib import Path
 
         sys.path.insert(0, str(Path(__file__).parent))
-        from hotspot_family_metrics import (  # type: ignore[no-redef]
+        from scripts.engineering.qa.hotspot_family_metrics import (  # type: ignore[no-redef]
             PROJECT_ROOT,
             SCORECARD_PATH,
             collect_hotspot_family_metrics,

@@ -1,11 +1,10 @@
 # mypy: disable-error-code="arg-type,attr-defined,unused-ignore"
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Private hook and helper methods for BasePublicationTransformer."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
 from bioetl.application.pipelines.common.publication_transformer_records import (
     classification_payload,
@@ -14,6 +13,7 @@ from bioetl.application.pipelines.common.publication_vocab_observability import 
     emit_unknown_publication_vocab_metrics,
 )
 from bioetl.domain.value_objects import PublicationYear
+from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -46,7 +46,7 @@ class PublicationTransformerHooksMixin:
             return result
 
         raise NotImplementedError(
-            f"{self.__class__.__name__} must implement extraction_blocks property "
+            f"{as_mixin_host(self).__class__.__name__} must implement extraction_blocks property "  # Any: mixin host surface (self attrs/methods)
             "or override _extract_business_data() method."
         )
 
@@ -77,7 +77,7 @@ class PublicationTransformerHooksMixin:
         index: int,
     ) -> tuple[str, PrimaryId] | None:
         """Validate primary ID presence."""
-        primary_id_field = self._get_primary_id_field()
+        primary_id_field = as_mixin_host(self)._get_primary_id_field()  # Any: mixin host surface (self attrs/methods)
         primary_id = business_data.get(primary_id_field)
         if not primary_id:
             context.logger.warning(
@@ -90,7 +90,7 @@ class PublicationTransformerHooksMixin:
 
     def _validate_publication_year_value(self, raw: object) -> int | None:
         """Validate publication year and return the canonical integer value."""
-        value = self.validate_value_object(
+        value = as_mixin_host(self).validate_value_object(  # Any: mixin host surface (self attrs/methods)
             PublicationYear,
             raw,
             as_string=False,
@@ -104,10 +104,10 @@ class PublicationTransformerHooksMixin:
         ],  # Any: transformer record has heterogeneous values
     ) -> JsonDict:  # Any: transformer record has heterogeneous values
         """Apply uniform text cleanup to configured content fields."""
-        for field in self._CONTENT_FIELDS:
+        for field in as_mixin_host(self)._CONTENT_FIELDS:  # Any: mixin host surface (self attrs/methods)
             raw = business_data.get(field)
             if raw is not None:
-                business_data[field] = self._data_normalizer.strip_html_tags(raw)
+                business_data[field] = as_mixin_host(self)._data_normalizer.strip_html_tags(raw)  # Any: mixin host surface (self attrs/methods)
         return business_data
 
     def _log_fallback_if_needed(
@@ -118,7 +118,7 @@ class PublicationTransformerHooksMixin:
         primary_id: PrimaryId,
     ) -> None:
         """Log fallback lookup usage when applicable."""
-        if self._metadata_strategy.should_log_fallback_lookup():
+        if as_mixin_host(self)._metadata_strategy.should_log_fallback_lookup():  # Any: mixin host surface (self attrs/methods)
             lookup_method = business_data.get("_lookup_method", "unknown")
             if lookup_method in ("title_fallback", "title_only"):
                 context.logger.info(
@@ -134,11 +134,11 @@ class PublicationTransformerHooksMixin:
         normalized_business_data: JsonDict,
     ) -> None:
         """Publish bounded counters for unknown raw publication vocabulary drift."""
-        pipeline_name = context.pipeline_name or f"{self.provider}_{self.entity_type}"
+        pipeline_name = context.pipeline_name or f"{as_mixin_host(self).provider}_{as_mixin_host(self).entity_type}"  # Any: mixin host surface (self attrs/methods)
         emit_unknown_publication_vocab_metrics(
-            metrics=self._metrics,
+            metrics=as_mixin_host(self)._metrics,  # Any: mixin host surface (self attrs/methods)
             pipeline_name=pipeline_name,
-            provider=self.provider,
+            provider=as_mixin_host(self).provider,  # Any: mixin host surface (self attrs/methods)
             normalized_business_data=normalized_business_data,
         )
 

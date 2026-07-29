@@ -1,6 +1,4 @@
 # mypy: disable-error-code=attr-defined
-# pyright: reportUninitializedInstanceVariable=false
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Pagination helpers for ChEMBL fetch flows."""
 
@@ -41,13 +39,13 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
     CHEMBL_ADAPTER_ERRORS = _CHEMBL_ADAPTER_ERRORS
 
     # Host-class attributes (provided by ChemblAdapter.__init__)
-    logger: LoggerPort
-    provider_name: str
-    _mapper: ChemblEntityMapper
-    _adapter_metrics: AdapterMetricsRecorder
-    http_client: UnifiedHTTPClient
-    _request_collector: APIRequestCollector
-    _compute_composite_key: Callable[[BronzeRecord, tuple[str, ...]], str]
+    logger: LoggerPort  # pyright: ignore[reportUninitializedInstanceVariable]
+    provider_name: str  # pyright: ignore[reportUninitializedInstanceVariable]
+    _mapper: ChemblEntityMapper  # pyright: ignore[reportUninitializedInstanceVariable]
+    _adapter_metrics: AdapterMetricsRecorder  # pyright: ignore[reportUninitializedInstanceVariable]
+    http_client: UnifiedHTTPClient  # pyright: ignore[reportUninitializedInstanceVariable]
+    _request_collector: APIRequestCollector  # pyright: ignore[reportUninitializedInstanceVariable]
+    _compute_composite_key: Callable[[BronzeRecord, tuple[str, ...]], str]  # pyright: ignore[reportUninitializedInstanceVariable]
 
     async def _fetch_page(
         self,
@@ -75,11 +73,11 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
             with contextlib.suppress(Exception):
                 self._request_collector.record_from_response(response, duration_ms)
 
-            records, has_next = self._process_response(response, entity_type)
-            self._clear_probe_degraded_state_on_success()
+            records, has_next = self._process_response(response, entity_type)  # pyright: ignore[reportAttributeAccessIssue]
+            self._clear_probe_degraded_state_on_success()  # pyright: ignore[reportAttributeAccessIssue]
             return records, has_next
         except CHEMBL_ADAPTER_ERRORS as error:
-            handle_error = cast("Callable[[Exception], NoReturn]", self._handle_error)
+            handle_error = cast("Callable[[Exception], NoReturn]", self._handle_error)  # pyright: ignore[reportAttributeAccessIssue]
             handle_error(error)
 
     def _calculate_page_limit(
@@ -125,7 +123,7 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
         records_yielded = 0
 
         while True:
-            params = self._build_params(offset, entity_type)
+            params = self._build_params(offset, entity_type)  # pyright: ignore[reportAttributeAccessIssue]
 
             page_limit = self._calculate_page_limit(params, limit, records_yielded)
             if page_limit is None:

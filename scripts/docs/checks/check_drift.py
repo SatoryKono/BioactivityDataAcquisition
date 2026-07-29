@@ -45,7 +45,7 @@ import yaml
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from _bootstrap import DOCS_DIR, PROJECT_ROOT
+    from scripts.docs.checks._bootstrap import DOCS_DIR, PROJECT_ROOT
 else:
     from scripts.docs.checks._bootstrap import DOCS_DIR, PROJECT_ROOT
 

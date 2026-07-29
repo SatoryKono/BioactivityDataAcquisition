@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Canonical hashing helpers for effective-config source references."""
 
@@ -30,7 +29,7 @@ def _construct_unique_mapping(
     deep: bool = False,
 ) -> object:
     if not isinstance(node, yaml.MappingNode):
-        return loader.construct_mapping(node, deep=deep)
+        return loader.construct_mapping(node, deep=deep)  # pyright: ignore[reportArgumentType]
 
     seen: set[object] = set()
     for key_node, _ in node.value:

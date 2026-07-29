@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """PubChem Molecule Transformer.
 
@@ -67,7 +66,7 @@ class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
         try:
             prepared = self._build_compound_business_data(context, record, index)
             cid, business_data = prepared
-            return cast(
+            return cast(  # pyright: ignore[reportInvalidCast]
                 "SilverRecord",
                 self._finalize_prepared_business_data(
                     context=context,

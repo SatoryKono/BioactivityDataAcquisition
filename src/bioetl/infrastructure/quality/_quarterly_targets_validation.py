@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Quarterly targets section validator."""
 
@@ -68,7 +67,7 @@ def _validate_quarter_target(
 
     if max_total is None or not isinstance(min_score, (int, float)):
         return None
-    return quarter_tuple, cast(QuarterTarget, target)
+    return quarter_tuple, cast(QuarterTarget, target)  # pyright: ignore[reportInvalidCast]
 
 
 def _validate_quarterly_targets_section(

@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Private support helpers for schema-aware structural policy."""
 
@@ -47,7 +46,7 @@ class SchemaAwareStructuralPolicy:
                 return outcome
 
         return StructuralPolicyOutcome(
-            record=cast("SilverRecord", working_record),
+            record=cast("SilverRecord", working_record),  # pyright: ignore[reportInvalidCast]
             events=tuple(events),
         )
 

@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Shared snapshot-to-mapping serialization helpers for runtime builders."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, is_dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID
 
 if TYPE_CHECKING:
@@ -36,10 +35,11 @@ def normalize_snapshot(value: object) -> object:
 
 def to_serializable_mapping(value: object) -> dict[str, object]:
     """Return a normalized mapping for manifest payload serialization."""
+    host = cast(Any, value)  # Any: duck-type model_dump/dict on object
     if hasattr(value, "model_dump"):
-        payload = value.model_dump(mode="json", exclude_none=True)
+        payload = host.model_dump(mode="json", exclude_none=True)
     elif hasattr(value, "dict"):
-        payload = value.dict(exclude_none=True)
+        payload = host.dict(exclude_none=True)
     elif hasattr(value, "__dict__"):
         payload = {
             key: item for key, item in vars(value).items() if not key.startswith("_")

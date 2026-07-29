@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Response mapping helpers for PubChem adapter fetch strategies."""
 
@@ -27,11 +26,11 @@ class PubChemResponseMapper:
 
     def map_compounds(self, compounds: list[object]) -> list[BronzeRecord]:
         """Map normalized compound results."""
-        return [self._mapper.compound_to_dict(compound) for compound in compounds]
+        return [self._mapper.compound_to_dict(compound) for compound in compounds]  # pyright: ignore[reportArgumentType]
 
     def map_substances(self, substances: list[object]) -> list[BronzeRecord]:
         """Map normalized substance results."""
-        return [self._mapper.substance_to_dict(substance) for substance in substances]
+        return [self._mapper.substance_to_dict(substance) for substance in substances]  # pyright: ignore[reportArgumentType]
 
     def map_assays(self, assays: list[object]) -> list[BronzeRecord]:
         """Map normalized assay results."""

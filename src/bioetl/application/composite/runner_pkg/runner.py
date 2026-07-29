@@ -1,7 +1,4 @@
-# pyright: reportUninitializedInstanceVariable=false
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Composite pipeline runner facade.
 
@@ -82,9 +79,9 @@ class CompositePipelineRunner(
 ):
     """Facade/orchestrator for composite pipeline lifecycle."""
 
-    _lock: LockPort
+    _lock: LockPort  # pyright: ignore[reportUninitializedInstanceVariable]
     _clock: ClockPort | None
-    _key_extractor: KeyExtractorService
+    _key_extractor: KeyExtractorService  # pyright: ignore[reportUninitializedInstanceVariable]
     _observer: CompositeLifecycleObserverService
     _tracing: TracingPort | None
 
@@ -119,8 +116,8 @@ class CompositePipelineRunner(
 
     def _mark_finished(self, final_state: CompositePipelineState) -> None:
         """Persist terminal runner state for re-entry guards and diagnostics."""
-        self._finished = True
-        self._final_state = final_state
+        self._finished = True  # pyright: ignore[reportUninitializedInstanceVariable]
+        self._final_state = final_state  # pyright: ignore[reportUninitializedInstanceVariable]
 
     @property
     def config(self) -> CompositeConfig:
@@ -173,7 +170,7 @@ class CompositePipelineRunner(
 
     def _start_run_lifecycle(self) -> None:
         """Validate and log the start of one composite runner execution."""
-        self._validate_config_consistency()
+        self._validate_config_consistency()  # pyright: ignore[reportAttributeAccessIssue]
         self._run_preflight_validation()
         self._started_at, self._start_time = capture_runtime_timing_anchor(
             clock=self._clock
@@ -268,7 +265,7 @@ class CompositePipelineRunner(
     ) -> tuple[CompositeCheckpointState, CompositeExecutionContext]:
         """Execute composite phases in the canonical lock-held order."""
         locked_phase_result = await execute_locked_run_phases(
-            self,
+            self,  # pyright: ignore[reportArgumentType]
             CompositeLockedExecutionContext(state=state),
         )
         return locked_phase_result.state, locked_phase_result.execution_context
@@ -279,10 +276,10 @@ class CompositePipelineRunner(
         execution_context: CompositeExecutionContext,
     ) -> CompositeResult:
         """Finalize state and emit canonical terminal success artifacts."""
-        await self._finalize_pipeline(state)
-        completion_context = self._prepare_composite_result_context(execution_context)
-        self._log_composite_completion(completion_context)
-        result = self._finalize_composite_result(completion_context)
+        await self._finalize_pipeline(state)  # pyright: ignore[reportAttributeAccessIssue]
+        completion_context = self._prepare_composite_result_context(execution_context)  # pyright: ignore[reportAttributeAccessIssue]
+        self._log_composite_completion(completion_context)  # pyright: ignore[reportAttributeAccessIssue]
+        result = self._finalize_composite_result(completion_context)  # pyright: ignore[reportAttributeAccessIssue]
         self._record_run_finished(execution_context)
         return result
 

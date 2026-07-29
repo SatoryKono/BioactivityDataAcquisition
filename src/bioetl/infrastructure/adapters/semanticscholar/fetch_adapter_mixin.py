@@ -1,5 +1,4 @@
 # mypy: disable-error-code=attr-defined
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Fetch and fallback entrypoints for SemanticScholarAdapter.
 
@@ -8,7 +7,7 @@ Contains FilterableDataSourcePort-compatible filtering methods.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, Any, Protocol
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.filterable_mixin import (
@@ -18,6 +17,7 @@ from bioetl.infrastructure.adapters.filterable_mixin import (
 from bioetl.infrastructure.adapters.semanticscholar._search_fetch_flow import (
     _SemanticScholarSearchFetchMixin,
 )
+from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -60,7 +60,7 @@ class SemanticScholarFetchAdapterMixin(
         """
         del offset
         if filter_ids:
-            async for record in self._fetch_from_filter_ids(
+            async for record in as_mixin_host(self)._fetch_from_filter_ids(  # Any: mixin host surface (self attrs/methods)
                 entity_type=entity_type,
                 filter_ids=filter_ids,
                 filter_field=filter_field,
@@ -69,8 +69,8 @@ class SemanticScholarFetchAdapterMixin(
                 yield record
             return
 
-        self._validate_entity_type(entity_type)
-        async for record in self._paginate_search(query=query, limit=limit):
+        as_mixin_host(self)._validate_entity_type(entity_type)  # Any: mixin host surface (self attrs/methods)
+        async for record in as_mixin_host(self)._paginate_search(query=query, limit=limit):  # Any: mixin host surface (self attrs/methods)
             yield record
 
     async def _fetch_from_filter_ids(
@@ -122,7 +122,7 @@ class SemanticScholarFetchAdapterMixin(
         """
         del entity_type
         if filter_field != "doi":
-            self._logger.warning(
+            as_mixin_host(self)._logger.warning(  # Any: mixin host surface (self attrs/methods)
                 "unsupported_filter_field",
                 field=filter_field,
                 expected="doi",
@@ -130,9 +130,9 @@ class SemanticScholarFetchAdapterMixin(
 
         dois = filter_ids[:limit] if limit else filter_ids
         fetched = 0
-        for idx in range(0, len(dois), self.batch_size):
-            batch = dois[idx : idx + self.batch_size]
-            async for record in self._fetch_by_dois(batch):
+        for idx in range(0, len(dois), as_mixin_host(self).batch_size):  # Any: mixin host surface (self attrs/methods)
+            batch = dois[idx : idx + as_mixin_host(self).batch_size]  # Any: mixin host surface (self attrs/methods)
+            async for record in as_mixin_host(self)._fetch_by_dois(batch):  # Any: mixin host surface (self attrs/methods)
                 record["_lookup_method"] = "doi"
                 yield record
                 fetched += 1
@@ -158,12 +158,12 @@ class SemanticScholarFetchAdapterMixin(
             BronzeRecord entries from resolved DOIs with lookup metadata.
         """
         count = start_count
-        for idx in range(0, len(valid_dois), self.batch_size):
+        for idx in range(0, len(valid_dois), as_mixin_host(self).batch_size):  # Any: mixin host surface (self attrs/methods)
             if limit and count >= limit:
                 return
 
-            batch = valid_dois[idx : idx + self.batch_size]
-            batch_results = await self._fetch_batch_with_nulls(batch)
+            batch = valid_dois[idx : idx + as_mixin_host(self).batch_size]  # Any: mixin host surface (self attrs/methods)
+            batch_results = await as_mixin_host(self)._fetch_batch_with_nulls(batch)  # Any: mixin host surface (self attrs/methods)
             for doi, record in zip(batch, batch_results, strict=True):
                 if record is None:
                     continue
@@ -201,15 +201,15 @@ class SemanticScholarFetchAdapterMixin(
         def _primary_records(
             primary_ids: list[str], request_limit: int | None
         ) -> AsyncIterator[BronzeRecord]:
-            return self._batch_doi_phase(primary_ids, resolved_dois, request_limit, 0)
+            return as_mixin_host(self)._batch_doi_phase(primary_ids, resolved_dois, request_limit, 0)  # Any: mixin host surface (self attrs/methods)
 
         def _extract_record_doi(record: BronzeRecord) -> str | None:
             resolved = record.pop("_resolved_doi", None)
             if isinstance(resolved, str) and resolved.strip():
-                return cast("str | None", self._normalize_doi(resolved))
+                return cast("str | None", as_mixin_host(self)._normalize_doi(resolved))  # Any: mixin host surface (self attrs/methods)
             return None
 
-        async for record in self._fallback_decorator.execute(
+        async for record in as_mixin_host(self)._fallback_decorator.execute(  # Any: mixin host surface (self attrs/methods)
             filter_ids=filter_ids,
             fallback_mapping=fallback_mapping,
             primary_record_fetcher=_primary_records,

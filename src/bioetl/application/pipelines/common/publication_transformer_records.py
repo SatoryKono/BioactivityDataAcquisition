@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Record assembly helpers for the base publication transformer."""
 
@@ -114,7 +113,7 @@ def build_pre_silver_publication_record(
             "JsonDict | None",
             transformer._apply_structural_policy(
                 context,
-                cast("SilverRecord", record),
+                cast("SilverRecord", record),  # pyright: ignore[reportInvalidCast]
                 index,
             ),
         )
@@ -126,7 +125,7 @@ def build_pre_silver_publication_record(
     ) -> None:
         transformer._apply_silver_filter(
             context,
-            cast("SilverRecord", record),
+            cast("SilverRecord", record),  # pyright: ignore[reportInvalidCast]
             index,
         )
 
@@ -162,7 +161,7 @@ def assemble_publication_silver_record(
         index,
         normalized_business_data,
     )
-    return cast(
+    return cast(  # pyright: ignore[reportInvalidCast]
         "SilverRecord",
         transformer._record_normalizer.project_normalization_findings(
             silver_record,

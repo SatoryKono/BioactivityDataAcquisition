@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Pure helper functions for BaseTransformer record handling."""
 
@@ -169,7 +168,7 @@ def create_entity[T: "BaseEntity"](
     business_data: dict[str, object],
 ) -> T:
     """Create a domain entity with lineage metadata."""
-    entity_factory = cast("EntityConstructor[T]", entity_class)
+    entity_factory = cast("EntityConstructor[T]", entity_class)  # pyright: ignore[reportInvalidCast]
     return entity_factory(
         entity_id=EntityID(entity_id),
         content_hash=ContentHash(content_hash),

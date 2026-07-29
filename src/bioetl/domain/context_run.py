@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Launch-time pipeline run context value object."""
 
@@ -57,15 +56,15 @@ def _build_pipeline_run_context_kwargs(
     started_at = payload.pop("started_at", None)
     clock = payload.pop("clock", None)
     payload["started_at"] = resolve_context_started_at(
-        started_at=started_at,  # type: ignore[arg-type]
-        clock=clock,  # type: ignore[arg-type]
+        started_at=started_at,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        clock=clock,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
     )
-    payload["vacuum"] = _resolve_vacuum_settings(payload.get("vacuum"))  # type: ignore[arg-type]
+    payload["vacuum"] = _resolve_vacuum_settings(payload.get("vacuum"))  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
     payload["input_filter"] = _resolve_input_filter_context(
-        payload.get("input_filter")  # type: ignore[arg-type]
+        payload.get("input_filter")  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
     )
     payload["cached_bronze"] = _resolve_cached_bronze_context(
-        payload.get("cached_bronze")  # type: ignore[arg-type]
+        payload.get("cached_bronze")  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
     )
     return payload
 

@@ -1,5 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Internal pipeline creation wiring extracted from service bundle facade."""
 
@@ -270,7 +268,7 @@ def _create_pipeline_with_services_impl(
     return inputs.pipeline_class.create(
         run_id=request.run_id,
         runtime=request.runtime,
-        services=cast(PipelineServicesProtocol, services),
+        services=cast(PipelineServicesProtocol, services),  # pyright: ignore[reportInvalidCast]
         config=domain_config,
         shutdown_signal=ShutdownSignal(),
         started_at=request.started_at,

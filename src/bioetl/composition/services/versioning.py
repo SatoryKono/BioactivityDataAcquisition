@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """Versioning and reproducibility utilities for pipeline metadata.
 
@@ -21,7 +20,7 @@ from functools import lru_cache
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as pkg_version
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast, Any
 
 from bioetl.domain.normalization import serialize_json_canonical
 
@@ -264,13 +263,14 @@ def compute_config_hash(
         >>> hash_value  # '3a7bd3e2...'
     """
     # Convert Pydantic model to dict if needed
+    host = cast(Any, config)  # Any: duck-type model_dump on config object
     if hasattr(config, "model_dump"):
-        config_dict = config.model_dump(mode="json", exclude_none=True)
+        config_dict = host.model_dump(mode="json", exclude_none=True)
     elif hasattr(config, "dict"):
         # Legacy Pydantic v1 support
-        config_dict = config.dict(exclude_none=True)
+        config_dict = host.dict(exclude_none=True)
     else:
-        config_dict = dict(config)
+        config_dict = dict(cast(dict[str, object], config))
 
     # Normalize for deterministic serialization
     normalized = _normalize_for_hash(config_dict)
@@ -306,9 +306,10 @@ def get_pipeline_version(
     """
     # Try to get version from config
     if config is not None:
+        host = cast(Any, config)  # Any: duck-type version attr on config object
         # Handle Pydantic model
-        if hasattr(config, "version") and config.version:
-            return str(config.version)
+        if hasattr(config, "version") and host.version:
+            return str(host.version)
         # Handle dict
         if isinstance(config, dict) and config.get("version"):
             return str(config["version"])

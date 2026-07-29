@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Postrun assembly helpers for pipeline factory."""
 
@@ -178,6 +177,6 @@ def build_postrun_service(
         dq_service=dq_service,
         lifecycle_service=lifecycle_service,
         dependencies=dependencies,
-        services=cast(PipelinePostrunServicesProtocol | None, pipeline.services),
+        services=cast(PipelinePostrunServicesProtocol | None, pipeline.services),  # pyright: ignore[reportInvalidCast]
         tracer=resolved_tracer,
     )

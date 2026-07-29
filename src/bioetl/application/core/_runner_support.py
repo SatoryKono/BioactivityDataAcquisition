@@ -1,5 +1,4 @@
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Private support mixin for PipelineRunner delegated lifecycle helpers."""
 
@@ -119,7 +118,7 @@ class PipelineRunnerSupportMixin:
     ) -> None:
         await prepare_medallion_layers(self)
     def _check_data_quality(self: _PipelineRunnerCleanupHostProtocol) -> None:
-        self._postrun_service.run_dq_checks(self._executor)
+        self._postrun_service.run_dq_checks(self._executor)  # pyright: ignore[reportArgumentType]
     def _close_metrics(self: _PipelineRunnerCleanupHostProtocol) -> None:
         try:
             self._services.metrics.close()

@@ -1,4 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
 # Schema field override residual (PD3).
 """Pandera schema for ChEMBL Activity entity aligned with RULES.md v5.24 and ChEMBL 34 schema."""
 
@@ -30,7 +29,7 @@ HTTP_IRI_PATTERN = r"^https?://[^\s]+$"
 class ActivitySchema(ETLRecordSchema):
     """Activity validation schema for the Silver layer."""
 
-    source_batch_id: Series[str] = pa.Field(
+    source_batch_id: Series[str] = pa.Field(  # pyright: ignore[reportIncompatibleVariableOverride]
         alias="_source_batch_id",
         nullable=False,
         description="Batch context ID from the source.",

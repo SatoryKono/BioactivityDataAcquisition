@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual: Self@mixin vs dependency owner Protocol (PD4).
 """Dependency-backed helpers shared by BaseTransformer."""
 
@@ -38,13 +37,13 @@ class _BaseTransformerDependencyHelpersMixin:
 
     def hash_pii_value(self, value: str | None) -> str | None:
         """Hash a single PII value."""
-        owner = cast(_TransformerDependencyOwner, self)
+        owner = cast(_TransformerDependencyOwner, self)  # pyright: ignore[reportInvalidCast]
         hashed_value: str | None = owner._pii_hasher.hash_value(value)
         return hashed_value
 
     def hash_pii_list(self, values: list[str] | None) -> list[str] | None:
         """Hash a list of PII values."""
-        owner = cast(_TransformerDependencyOwner, self)
+        owner = cast(_TransformerDependencyOwner, self)  # pyright: ignore[reportInvalidCast]
         hashed_values: list[str] | None = owner._pii_hasher.hash_list(values)
         return hashed_values
 
@@ -84,7 +83,7 @@ class _BaseTransformerDependencyHelpersMixin:
         silver_record: GoldRecord,
     ) -> GoldRecord:
         """Transform Silver record for Gold layer."""
-        owner = cast(_TransformerDependencyOwner, self)
+        owner = cast(_TransformerDependencyOwner, self)  # pyright: ignore[reportInvalidCast]
         exclude_fields = owner.GOLD_EXCLUDE_FIELDS
         return {k: v for k, v in silver_record.items() if k not in exclude_fields}
 
@@ -95,7 +94,7 @@ class _BaseTransformerDependencyHelpersMixin:
         exclude_none: bool = True,
     ) -> ContentHash:
         """Generate canonical content hash for record versioning."""
-        owner = cast(_TransformerDependencyOwner, self)
+        owner = cast(_TransformerDependencyOwner, self)  # pyright: ignore[reportInvalidCast]
         hash_input = self._apply_hash_policy(
             owner._identity,
             owner._contract_policy,
@@ -113,7 +112,7 @@ class _BaseTransformerDependencyHelpersMixin:
         record: GoldRecord,
     ) -> EntityID:
         """Generate stable entity identifier."""
-        owner = cast(_TransformerDependencyOwner, self)
+        owner = cast(_TransformerDependencyOwner, self)  # pyright: ignore[reportInvalidCast]
         return owner._identity.compute_entity_id(
             provider=owner.provider,
             entity_type=owner.entity_type,
@@ -126,7 +125,7 @@ class _BaseTransformerDependencyHelpersMixin:
         entity: object,
     ) -> GoldRecord:
         """Convert Domain Entity to SilverRecord format using policy rename map."""
-        owner = cast(_TransformerDependencyOwner, self)
+        owner = cast(_TransformerDependencyOwner, self)  # pyright: ignore[reportInvalidCast]
         if not dataclasses.is_dataclass(entity) or isinstance(entity, type):
             raise TypeError(f"Expected dataclass entity, got {type(entity).__name__}")
 

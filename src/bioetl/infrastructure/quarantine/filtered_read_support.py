@@ -1,4 +1,3 @@
-# pyright: reportPossiblyUnboundVariable=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Pure helper functions for quarantine filtered-row normalization and filtering."""
 
@@ -166,7 +165,7 @@ def _normalize_filtered_row(
             payload = {"value": payload}
         normalized["payload_preview"] = _build_payload_preview(payload)
     if include_payload:
-        normalized["payload"] = payload
+        normalized["payload"] = payload  # pyright: ignore[reportPossiblyUnboundVariable]
     return normalized
 
 

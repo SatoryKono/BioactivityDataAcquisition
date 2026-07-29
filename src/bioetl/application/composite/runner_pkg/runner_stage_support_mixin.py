@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Support helpers for composite runner stage orchestration."""
 
@@ -44,18 +43,18 @@ from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
 class _CompositeRunnerStageSupportMixin:
     """Shared helper calls and small guards for stage orchestration."""
 
-    _config: CompositeConfig
-    _runtime: CompositeRuntimeConfig
-    _logger: LoggerPort
-    _run_id_str: str
-    _fsm: FSMStateHelperService
-    _checkpoint_manager: CompositeCheckpointService
-    _dependency_coordinator: DependencyCoordinatorService | None
-    _dependencies_runner_factory: (
+    _config: CompositeConfig  # pyright: ignore[reportUninitializedInstanceVariable]
+    _runtime: CompositeRuntimeConfig  # pyright: ignore[reportUninitializedInstanceVariable]
+    _logger: LoggerPort  # pyright: ignore[reportUninitializedInstanceVariable]
+    _run_id_str: str  # pyright: ignore[reportUninitializedInstanceVariable]
+    _fsm: FSMStateHelperService  # pyright: ignore[reportUninitializedInstanceVariable]
+    _checkpoint_manager: CompositeCheckpointService  # pyright: ignore[reportUninitializedInstanceVariable]
+    _dependency_coordinator: DependencyCoordinatorService | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _dependencies_runner_factory: (  # pyright: ignore[reportUninitializedInstanceVariable]
         Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort] | None
     )
-    _coordinator: EnrichmentCoordinatorService
-    _enricher_runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]
+    _coordinator: EnrichmentCoordinatorService  # pyright: ignore[reportUninitializedInstanceVariable]
+    _enricher_runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]  # pyright: ignore[reportUninitializedInstanceVariable]
 
     async def _save_checkpoint_safe(
         self: _CompositeRunnerStageSupportHostProtocol,

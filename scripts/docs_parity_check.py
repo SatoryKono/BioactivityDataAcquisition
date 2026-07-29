@@ -19,7 +19,7 @@ import yaml
 try:
     import tomllib as toml
 except ModuleNotFoundError:  # pragma: no cover - Python <3.11 fallback
-    import toml  # type: ignore[no-redef]
+    import toml  # type: ignore[no-redef]  # pyright: ignore[reportMissingModuleSource, reportMissingImports]
 
 
 @dataclass

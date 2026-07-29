@@ -1,3 +1,4 @@
+# pyright: reportImportCycles=false
 # Import cycle residual (PD4).
 # Import cycle residual tracked in allowlist (PD3).
 """Family-local runtime helpers for batch-processing support."""

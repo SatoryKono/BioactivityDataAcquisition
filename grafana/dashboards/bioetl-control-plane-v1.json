@@ -30,10 +30,10 @@
       "id": 1000,
       "options": {
         "mode": "html",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><span aria-current=\"page\" title=\"0. Trust (Trust)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cu\n\n_(DUX4-22: truncated; full text in panel description/docs.)_"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><span aria-current=\"page\" title=\"0. Trust (Trust)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">0. Trust</span><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
       },
       "title": "Navigation",
-      "description": "DUX4-22: Full prose shortened on-canvas to remove internal scroll; details in description/docs. Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is disabled (aria-current). Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is disabled (aria-current). Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
       "type": "text",
       "links": [
         {
@@ -114,10 +114,10 @@
         "x": 0,
         "y": 3
       },
-      "description": "DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW/RANGE/RUN/WORKFLOW/GLOBAL. Unified context/provenance banner for 0. Control Plane. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only.",
+      "description": "DUX5: status-card shell (reason/action beside Status; no internal scroll). DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW/RANGE/RUN/WORKFLOW/GLOBAL. Unified context/provenance banner for 0. Control Plane. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only.",
       "options": {
         "mode": "html",
-        "content": "### Trust scope\nSelectors: workflow, pipeline, run_type, run_id (HTTP identity only).\n\nRead order: **Status → four evidence cards → recovery**. UNKNOWN/INCOMPLETE means missing basis, not green OK."
+        "content": "<div style=\"padding:2px 6px;border-left:3px solid #64748b;background:rgba(100,116,139,0.10);line-height:1.2;font-size:12px;overflow:hidden;white-space:normal\"><strong>Replay trust</strong> · Status → Reason → Action · <code>$workflow</code>/<code>$pipeline</code>/<code>$run_type</code>/run <code>$run_id</code><br><strong>UNKNOWN</strong> = evidence incomplete — not OK. Open Primary recovery or Run Explorer.</div>"
       }
     },
     {
@@ -134,7 +134,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "DUX3-13: Overall trust gate. INCOMPLETE owns headline when evidence incomplete — Safety chips are not unconditional OK. Evidence-aware replay/resume verdict. state×confidence×basis: INCOMPLETE means required evidence is missing/stale (never silent green). Cross-check the four trust cards (replay, checkpoint, integrity, telemetry missing). Evidence-aware Control Plane replay/resume verdict. 0=OK only when replay, manifest/ledger, checkpoint freshness, and required telemetry are complete; 1=WARN, 2=CRIT, 3=INCOMPLETE for missing/stale evidence, null=UNKNOWN/query gap. Inspect the four evidence cards and Next Action before replay or resume. DSA-03: Primary recovery next_action; color secondary.",
+      "description": "DUX6: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error/selection). Pair with Provenance reason + action; never read as OK. DUX5: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error); pair with Provenance reason + action. Not a healthy OK. DUX3-13: Overall trust gate. INCOMPLETE owns headline when evidence incomplete — Safety chips are not unconditional OK. Evidence-aware replay/resume verdict. state×confidence×basis: INCOMPLETE means required evidence is missing/stale (never silent green). Cross-check the four trust cards (replay, checkpoint, integrity, telemetry missing). Evidence-aware Control Plane replay/resume verdict. 0=OK only when replay, manifest/ledger, checkpoint freshness, and required telemetry are complete; 1=WARN, 2=CRIT, 3=INCOMPLETE for missing/stale evidence, null=UNKNOWN/query gap. Inspect the four evidence cards and Next Action before replay or resume. DSA-03: Primary recovery next_action; color secondary.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -241,8 +241,8 @@
         "y": 10
       },
       "options": {
-        "content": "**Primary recovery (Safety Gate)** — act only after Status + four evidence cells:\n1. **INCOMPLETE/UNKNOWN** → repair telemetry / checkpoint / integrity before resume.\n2. Non-OK gate cell → open that drilldown (Replay Safety / Checkpoint / Manifest / Telemetry).\n3. Exact run selected → **Run Explorer** for identity proof.\n4. VALID_EMPTY blockers only when Status=OK and cards clean.",
-        "mode": "markdown",
+        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;overflow:hidden\"><strong>Primary recovery</strong>: 1) Status + Replay Safety/Checkpoint · 2) UNKNOWN/INCOMPLETE → verify scrape · 3) Open blockers · 4) Run Explorer identity</div>",
+        "mode": "html",
         "dataLinks": [
           {
             "title": "Open Replay Safety Diagnostics",
@@ -253,7 +253,7 @@
         ]
       },
       "transparent": false,
-      "description": "Compact readiness composition: status + basis cards + recovery. No new metric family."
+      "description": "DUX5: triage copy shortened; caveats in description; no raw endpoints. Compact readiness composition: status + basis cards + recovery. No new metric family."
     },
     {
       "datasource": {
@@ -687,12 +687,12 @@
           },
           "id": 894,
           "options": {
-            "content": "### Known blind spots\n- Replay duplicate/overwrite risk signal is not instrumented yet.\n- Manifest-to-ledger referential integrity ratio is not instrumented yet.",
+            "content": "Known blind spots\n- Replay duplicate/overwrite risk signal is not instrumented yet.\n- Manifest-to-ledger referential integrity ratio is not instrumented yet.",
             "mode": "markdown"
           },
           "title": "Inspect: Known Blind Spots",
           "type": "text",
-          "description": "Compact replay-safety blind-spot summary for the selected pipeline/run_type/time range. This is a limitation note, not a healthy signal: the dashboard cannot prove these invariants from current Prometheus metrics. Checkpoint freshness is no longer a blind spot because the first-screen checkpoint-lag panel is now backed by bounded freshness telemetry. The later Replay-Safety Signal Gaps note is the detailed companion; both rows are visible by default for auditability until physical merge/removal is scheduled.",
+          "description": "DUX5: triage copy shortened; caveats in description; no raw endpoints. Compact replay-safety blind-spot summary for the selected pipeline/run_type/time range. This is a limitation note, not a healthy signal: the dashboard cannot prove these invariants from current Prometheus metrics. Checkpoint freshness is no longer a blind spot because the first-screen checkpoint-lag panel is now backed by bounded freshness telemetry. The later Replay-Safety Signal Gaps note is the detailed companion; both rows are visible by default for auditability until physical merge/removal is scheduled.",
           "fieldConfig": {
             "defaults": {
               "links": [
@@ -1431,7 +1431,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range checkpoint compatibility outcomes grouped by disposition. The metric contract has no run_type label, so the run_type selector does not change this panel.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range checkpoint compatibility outcomes grouped by disposition. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1484,7 +1484,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range replay drift trend by capability, drift type, and status. Alert: BioETLReplayDriftDetected. No data means no replay drift events were observed in range or replay drift telemetry is absent; do not treat an empty chart as proof that replay safety is healthy.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range replay drift trend by capability, drift type, and status. Alert: BioETLReplayDriftDetected. No data means no replay drift events were observed in range or replay drift telemetry is absent; do not treat an empty chart as proof that replay safety is healthy.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1551,7 +1551,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Replay lag trend by replay capability and status.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Replay lag trend by replay capability and status.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1621,7 +1621,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range checkpoint save latency quantiles. No data means no latency samples, not zero latency. Alerts: BioETLCheckpointSaveLatencyHigh. The metric contract has no run_type label, so the run_type selector does not change this panel.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range checkpoint save latency quantiles. No data means no latency samples, not zero latency. Alerts: BioETLCheckpointSaveLatencyHigh. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1703,7 +1703,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range GLOBAL checkpoint operator/admin latency quantiles. Not filtered by $pipeline or $run_type. Expected Empty classification: No data is valid when no checkpoint operator/admin duration samples were emitted in the selected range; it is not a pipeline success signal. If checkpoint freshness or replay safety is degraded while this panel is empty, treat the result as telemetry gap and inspect checkpoint freshness/history. Alerts: BioETLCheckpointOperatorLatencyHigh.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range GLOBAL checkpoint operator/admin latency quantiles. Not filtered by $pipeline or $run_type. Expected Empty classification: No data is valid when no checkpoint operator/admin duration samples were emitted in the selected range; it is not a pipeline success signal. If checkpoint freshness or replay safety is degraded while this panel is empty, treat the result as telemetry gap and inspect checkpoint freshness/history. Alerts: BioETLCheckpointOperatorLatencyHigh.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1800,7 +1800,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range terminal run events grouped by terminal_status for the selected pipeline. This is pipeline-scoped evidence only: the metric contract has no run_type label, so the run_type selector does not change this panel. Use Run Manifest Inspection for exact run_id/manifest_id ordering evidence.",
+          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Selected-range terminal run events grouped by terminal_status for the selected pipeline. This is pipeline-scoped evidence only: the metric contract has no run_type label, so the run_type selector does not change this panel. Use Run Manifest Inspection for exact run_id/manifest_id ordering evidence.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1816,7 +1816,20 @@
               "mappings": [],
               "unit": "short"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 6,
@@ -2033,7 +2046,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range manifest write attempts grouped by status/run_type for the selected pipeline/run_type. This panel uses $__range and shows historical evidence. For current-status information, use Monitor: Manifest / Ledger Integrity on the first screen. Status mapping: success=OK, failed=CRIT, null=UNKNOWN. Use Run Manifest Inspection runbook for detailed manifest analysis.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range manifest write attempts grouped by status/run_type for the selected pipeline/run_type. This panel uses $__range and shows historical evidence. For current-status information, use Monitor: Manifest / Ledger Integrity on the first screen. Status mapping: success=OK, failed=CRIT, null=UNKNOWN. Use Run Manifest Inspection runbook for detailed manifest analysis.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2086,7 +2099,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range run-ledger append attempts grouped by event type and status. This panel uses $__interval historical evidence; use Monitor: Manifest / Ledger Integrity for first-screen current status. The metric contract has no run_type label, so the run_type selector does not change this panel.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range run-ledger append attempts grouped by event type and status. This panel uses $__interval historical evidence; use Monitor: Manifest / Ledger Integrity for first-screen current status. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2517,7 +2530,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range GLOBAL read-path operations by store/operation/status, not filtered by $pipeline or $run_type. This panel shows aggregate read operations across all control-plane stores. Use pipeline-scoped panels for specific pipeline analysis.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range GLOBAL read-path operations by store/operation/status, not filtered by $pipeline or $run_type. This panel shows aggregate read operations across all control-plane stores. Use pipeline-scoped panels for specific pipeline analysis.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2570,7 +2583,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range GLOBAL read-path latency quantiles, not filtered by $pipeline or $run_type. No data means no latency samples, not zero latency. This panel shows aggregate latency across all control-plane stores. Use pipeline-scoped panels for specific pipeline analysis.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range GLOBAL read-path latency quantiles, not filtered by $pipeline or $run_type. No data means no latency samples, not zero latency. This panel shows aggregate latency across all control-plane stores. Use pipeline-scoped panels for specific pipeline analysis.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2849,7 +2862,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range missing lineage refs by layer/ref_type. Use as lineage risk triage only; it does not prove complete artifact identity graph or exact artifact refs. null/no rows can mean no missing refs or missing telemetry depending on lineage fragment activity. The metric contract has no run_type label, so the run_type selector does not change this panel.",
+          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Selected-range missing lineage refs by layer/ref_type. Use as lineage risk triage only; it does not prove complete artifact identity graph or exact artifact refs. null/no rows can mean no missing refs or missing telemetry depending on lineage fragment activity. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2883,7 +2896,20 @@
               "unit": "short",
               "noValue": "No missing-lineage reference samples in range. Empty means no sampled lineage-missing events or absent telemetry, not proof of full lineage closure."
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 6,
@@ -2918,7 +2944,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range GLOBAL audit write outcomes by layer, operation, and status. This panel is not filtered by $pipeline or $run_type because the audit metric family is global. Supporting evidence for replay safety, not answer-row decision.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range GLOBAL audit write outcomes by layer, operation, and status. This panel is not filtered by $pipeline or $run_type because the audit metric family is global. Supporting evidence for replay safety, not answer-row decision.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2971,7 +2997,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range GLOBAL audit query outcomes by layer filter and status. This panel is not filtered by $pipeline or $run_type because the audit metric family is global. Supporting evidence for replay safety, not answer-row decision.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range GLOBAL audit query outcomes by layer filter and status. This panel is not filtered by $pipeline or $run_type because the audit metric family is global. Supporting evidence for replay safety, not answer-row decision.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3024,7 +3050,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range GLOBAL audit write latency quantiles. This panel is not filtered by $pipeline or $run_type because the audit metric family is global. No data means no latency samples, not zero latency.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range GLOBAL audit write latency quantiles. This panel is not filtered by $pipeline or $run_type because the audit metric family is global. No data means no latency samples, not zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3105,7 +3131,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range GLOBAL audit query latency quantiles. This panel is not filtered by $pipeline or $run_type because the audit metric family is global. No data means no latency samples, not zero latency.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range GLOBAL audit query latency quantiles. This panel is not filtered by $pipeline or $run_type because the audit metric family is global. No data means no latency samples, not zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3186,7 +3212,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range lineage fragment persistence outcomes by layer/status. The metric contract has no run_type label, so the run_type selector does not change this panel.",
+          "description": "DUX6: empty chart: distinguish none observed in range vs telemetry missing; do not treat No data as healthy 0 without basis. Selected-range lineage fragment persistence outcomes by layer/status. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3250,7 +3276,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Copy-friendly full-value handoffs for UUID, hash, artifact, lineage, snapshot, and checkpoint refs. Simple enum/status badges intentionally do not appear here. Use the data:text/plain link to open the raw full value without adding it as a Prometheus label. It remains above incident drilldowns so full identity values are one copy action away. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
+          "description": "DUX7: Copy/Open full identity value via data:text/plain link. DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Copy-friendly full-value handoffs for UUID, hash, artifact, lineage, snapshot, and checkpoint refs. Simple enum/status badges intentionally do not appear here. Use the data:text/plain link to open the raw full value without adding it as a Prometheus label. It remains above incident drilldowns so full identity values are one copy action away. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3298,6 +3324,56 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "value"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Copy/Open full value (plain text)",
+                        "url": "data:text/plain,${__value.raw}",
+                        "targetBlank": true,
+                        "includeVars": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy_value"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Copy/Open full value (plain text)",
+                        "url": "data:text/plain,${__value.raw}",
+                        "targetBlank": true,
+                        "includeVars": false
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -3336,7 +3412,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Compact HTTP-backed Control Plane identity overview from /ops/control-plane/identity-evidence. Replay/resume decision summary stays above in the first-screen ID, Replay Safety State, Checkpoint Freshness, Manifest/Ledger, and Telemetry cards; this section is the compact forensic drilldown. Long UUID/hash values are shortened in value_short and remain full in value_full. Status uses OK/WARN/CRIT/UNKNOWN; no run_id, manifest_id, hashes, snapshot IDs, or artifact refs are Prometheus labels. This copyable Selected Run identity strip is intentionally visible in the second semantic block. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
+          "description": "DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Compact HTTP-backed Control Plane identity overview from /ops/control-plane/identity-evidence. Replay/resume decision summary stays above in the first-screen ID, Replay Safety State, Checkpoint Freshness, Manifest/Ledger, and Telemetry cards; this section is the compact forensic drilldown. Long UUID/hash values are shortened in value_short and remain full in value_full. Status uses OK/WARN/CRIT/UNKNOWN; no run_id, manifest_id, hashes, snapshot IDs, or artifact refs are Prometheus labels. This copyable Selected Run identity strip is intentionally visible in the second semantic block. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3374,6 +3450,18 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
                   }
                 ]
               }
@@ -3445,7 +3533,11 @@
                   "source_type": "source type",
                   "ui_status": "status",
                   "value_full": "full value",
-                  "value_short": "short value"
+                  "value_short": "short value",
+                  "Value": "Count",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
@@ -3490,7 +3582,7 @@
           "pluginVersion": "12.0.2",
           "targets": [],
           "type": "text",
-          "description": "DUX3-03: Expected absence — neutral, not CRIT. Visible neutral fallback for processed-record accounting when the selected Control Plane scope returns no rows.",
+          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). DUX3-03: Expected absence — neutral, not CRIT. Visible neutral fallback for processed-record accounting when the selected Control Plane scope returns no rows.",
           "gridPos": {
             "h": 4,
             "w": 12,
@@ -3512,7 +3604,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Compact HTTP-backed identity gap table. Missing run_id or terminal manifest_id is CRIT; missing effective config, contract, input snapshot, replay parent, composite identity, or checkpoint anchors is explicit WARN/CRIT evidence instead of a green health signal. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
+          "description": "DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Compact HTTP-backed identity gap table. Missing run_id or terminal manifest_id is CRIT; missing effective config, contract, input snapshot, replay parent, composite identity, or checkpoint anchors is explicit WARN/CRIT evidence instead of a green health signal. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3550,6 +3642,18 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
                   }
                 ]
               }
@@ -3590,7 +3694,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Compares current runtime anchors with persisted checkpoint anchors from the identity evidence endpoint. Checkpoint status values are OK, MISMATCH, MISSING, PARTIAL, or UNKNOWN; MISMATCH maps to CRIT and missing/partial maps to WARN. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
+          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Compares current runtime anchors with persisted checkpoint anchors from the identity evidence endpoint. Checkpoint status values are OK, MISMATCH, MISSING, PARTIAL, or UNKNOWN; MISMATCH maps to CRIT and missing/partial maps to WARN. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3628,6 +3732,18 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
                   }
                 ]
               }
@@ -3668,7 +3784,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "P1 support anchors from the identity evidence endpoint: source config, DQ policy/rule bundle, input snapshot IDs and content hashes, replay eligibility/blockers, lineage fragments, artifact refs, and ledger watermark. Full values stay in HTTP table data and are not Prometheus labels. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
+          "description": "DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). P1 support anchors from the identity evidence endpoint: source config, DQ policy/rule bundle, input snapshot IDs and content hashes, replay eligibility/blockers, lineage fragments, artifact refs, and ledger watermark. Full values stay in HTTP table data and are not Prometheus labels. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3706,6 +3822,18 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
                   }
                 ]
               }
@@ -3746,7 +3874,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "P2 forensic anchors from the identity evidence endpoint: launch/runtime config hashes, planned and published artifacts, composite component run IDs, checkpoint file, lock owner, DQ reports, cross-validation rules, and Bronze batch IDs. These fields are details-only and must not become Prometheus labels. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
+          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). P2 forensic anchors from the identity evidence endpoint: launch/runtime config hashes, planned and published artifacts, composite component run IDs, checkpoint file, lock owner, DQ reports, cross-validation rules, and Bronze batch IDs. These fields are details-only and must not become Prometheus labels. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3784,6 +3912,18 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
                   }
                 ]
               }
@@ -3831,12 +3971,12 @@
           },
           "id": 139,
           "options": {
-            "content": "### Remaining replay-safety signals\n\nThe ID evidence endpoint now exposes manifest/run identity, execution/config/contract/input anchors, replay parentage, copy-friendly full values, and checkpoint anchor compare without adding high-cardinality Prometheus labels. The first-screen checkpoint freshness lag panel now provides bounded checkpoint-age evidence from Prometheus without exposing raw checkpoint identifiers.\n\nSignals still intentionally outside this dashboard section:\n\n- replay duplicate-record evidence metric\n- occurrence-only vs semantic drift classification beyond bounded replay_drift labels\n\nDo not add PromQL panels for high-cardinality IDs. Use `/ops/control-plane/identity-evidence`, manifest inspection, ledger inspection, checkpoint diagnostics, and artifact/lineage drilldowns for full identity values.",
+            "content": "Remaining replay-safety signals\n\nThe ID evidence endpoint now exposes manifest/run identity, execution/config/contract/input anchors, replay parentage, copy-friendly full values, and checkpoint anchor compare without adding high-cardinality Prometheus labels. The first-screen checkpoint freshness lag panel now provides bounded checkpoint-age evidence from Prometheus without exposing raw checkpoint identifiers.\n\nSignals still intentionally outside this dashboard section:\n\n- replay duplicate-record evidence metric\n- occurrence-only vs semantic drift classification beyond bounded replay_drift labels\n\nDo not add PromQL panels for high-cardinality IDs. Use `/ops/control-plane/identity-evidence`, manifest inspection, ledger inspection, checkpoint diagnostics, and artifact/lineage drilldowns for full identity values.",
             "mode": "markdown"
           },
           "title": "Review: Remaining Replay-Safety Signals",
           "type": "text",
-          "description": "Companion note for replay-safety evidence that remains metric- or runbook-backed after the identity evidence refactor. This text must not list anchors already available through /ops/control-plane/identity-evidence as missing."
+          "description": "DUX5: triage copy shortened; caveats in description; no raw endpoints. Companion note for replay-safety evidence that remains metric- or runbook-backed after the identity evidence refactor. This text must not list anchors already available through /ops/control-plane/identity-evidence as missing."
         }
       ]
     },
@@ -3863,7 +4003,7 @@
             "y": 18
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
+          "description": "DUX7: Copy/Open full identity value via data:text/plain link. DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3876,6 +4016,12 @@
               "unit": "none",
               "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
               "links": [
+                {
+                  "title": "Copy/Open full value (plain text)",
+                  "url": "data:text/plain,${__value.raw}",
+                  "targetBlank": true,
+                  "includeVars": false
+                },
                 {
                   "title": "Check BioETL Ops HTTP health",
                   "url": "http://localhost:8081/health/live",
@@ -3928,6 +4074,29 @@
                       "type": "auto",
                       "wrapText": true
                     }
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Copy/Open full value (plain text)",
+                        "url": "data:text/plain,${__value.raw}",
+                        "targetBlank": true,
+                        "includeVars": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
                   }
                 ]
               }
@@ -3971,7 +4140,11 @@
                 },
                 "renameByName": {
                   "parameter": "parameter",
-                  "value": "value"
+                  "value": "value",
+                  "Value": "Count",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }
@@ -3988,7 +4161,7 @@
             "y": 18
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "DUX4-14/03: Expected empty accounting is VALID_EMPTY/N/A — not red failure. DUX3-13/03: Expected empty/zero accounting must not use red failure semantics (VALID_EMPTY/N/A). Current stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
+          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). DUX4-14/03: Expected empty accounting is VALID_EMPTY/N/A — not red failure. DUX3-13/03: Expected empty/zero accounting must not use red failure semantics (VALID_EMPTY/N/A). Current stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4018,7 +4191,7 @@
                   "type": "value",
                   "options": {
                     "0": {
-                      "text": "VALID EMPTY / 0",
+                      "text": "None observed / 0",
                       "color": "text",
                       "index": 0
                     }
@@ -4397,6 +4570,18 @@
                     ]
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
           },
@@ -4444,7 +4629,11 @@
                   "parameter": "parameter",
                   "value": "value",
                   "percintage": "percintage",
-                  "row_status": ""
+                  "row_status": "",
+                  "Value": "Count",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
                 }
               }
             }

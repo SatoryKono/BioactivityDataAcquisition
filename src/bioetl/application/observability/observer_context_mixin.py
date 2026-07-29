@@ -1,6 +1,4 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition (PD2 W1).
-# pyright: reportOptionalMemberAccess=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Context manager mixin for pipeline observer lifecycle."""
 
@@ -56,23 +54,23 @@ else:
 class _ObserverContextManagerMixin(_ObserverEventMixinBase):
     """Context-manager lifecycle orchestration for pipeline observability."""
 
-    pipeline_name: str
-    provider_name: str
-    run_id: str
-    run_type: str
-    manifest_id: str | None
-    effective_config_hash: str | None
-    contract_ref: str | None
-    contract_version: str | None
-    composite_run_id: str | None
-    start_time: float | None
-    wall_start_time: datetime | None
-    span: Span | None
-    _completed_stage_count: int
-    _terminal_records_processed: int
-    _metrics: MetricsPort
-    _tracer: TracingPort | None
-    _clock: ClockPort
+    pipeline_name: str  # pyright: ignore[reportUninitializedInstanceVariable]
+    provider_name: str  # pyright: ignore[reportUninitializedInstanceVariable]
+    run_id: str  # pyright: ignore[reportUninitializedInstanceVariable]
+    run_type: str  # pyright: ignore[reportUninitializedInstanceVariable]
+    manifest_id: str | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    effective_config_hash: str | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    contract_ref: str | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    contract_version: str | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    composite_run_id: str | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    start_time: float | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    wall_start_time: datetime | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    span: Span | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _completed_stage_count: int  # pyright: ignore[reportUninitializedInstanceVariable]
+    _terminal_records_processed: int  # pyright: ignore[reportUninitializedInstanceVariable]
+    _metrics: MetricsPort  # pyright: ignore[reportUninitializedInstanceVariable]
+    _tracer: TracingPort | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _clock: ClockPort  # pyright: ignore[reportUninitializedInstanceVariable]
 
     def _domain_run_id(self) -> RunID:
         """Coerce the observer's string run id into the domain RunID type."""
@@ -119,7 +117,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixinBase):
             f"pipeline.{self.pipeline_name}",
             attributes=attributes,
         )
-        self.span.__enter__()
+        self.span.__enter__()  # pyright: ignore[reportOptionalMemberAccess]
         self._metrics.increment_counter(
             "bioetl_traced_runs_total",
             1,
