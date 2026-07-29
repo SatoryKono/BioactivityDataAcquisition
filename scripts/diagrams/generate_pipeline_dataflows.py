@@ -20,7 +20,6 @@ DEFAULT_DESCRIPTION_DIR = (
 DEFAULT_ARTIFACT_ROOT = (
     PROJECT_ROOT / "docs/02-architecture/generated/pipeline-dataflows"
 )
-SUPPORTED_PIPELINES = ("chembl_activity",)
 
 
 def _absolute(path: Path) -> Path:
@@ -75,9 +74,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--pipeline",
-        choices=SUPPORTED_PIPELINES,
         default="chembl_activity",
-        help="Registered pipeline to document (default: chembl_activity).",
+        help=(
+            "Registered pipeline to document. Cross-layer passports for every "
+            "pipeline are generated through `python -m scripts.docs passports`."
+        ),
     )
     parser.add_argument(
         "--configs-root",

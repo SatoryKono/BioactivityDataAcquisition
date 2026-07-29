@@ -169,6 +169,16 @@ entries:
   vcr_related: false
   review_date: '2026-07-27'
   rationale: Reviewed skip/importorskip surface tracked for governance.
+- path: tests/integration/test_grafana_workflow_descriptions.py
+  suite: integration
+  category: live_endpoint_unavailability
+  owner: '@bioetl-observability'
+  linked_issue: '#6570'
+  lifecycle: permanent_policy
+  reviewed_skip_calls: 1
+  vcr_related: false
+  review_date: '2026-07-29'
+  rationale: Workflow dashboard description contracts skip when the dashboard is retired from the shipped Grafana surface.
 - path: tests/integration/test_grafana_dashboard_cta_links.py
   suite: integration
   category: optional_local_fixture_absence

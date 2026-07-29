@@ -1,6 +1,6 @@
 {
-  "generated": "2026-07-28T15:08:21.333539",
-  "total_adrs": 53,
+  "generated": "2026-07-29T20:58:03.507660",
+  "total_adrs": 55,
   "adrs": [
     {
       "adr_number": "001",
@@ -1027,16 +1027,52 @@
         "ADR-017"
       ],
       "tags": []
+    },
+    {
+      "adr_number": "054",
+      "title": "Evidence-Backed Passport Documentation Projections",
+      "file_path": "ADR-054-passport-documentation-projections.md",
+      "status": "accepted",
+      "source_status": "Accepted",
+      "category": "Documentation",
+      "owner": "BioETL Team",
+      "decision_date": "2026-07-29",
+      "last_reviewed": null,
+      "context": "BioETL has 22 registered entity pipelines, five composite pipelines, and 27\nADR-047 workflows. Existing reference pages are useful, but only\n`chembl_activity` has a generated dataflow passport, and...",
+      "decision": "BioETL publishes passports as deterministic, read-only documentation\nprojections:\n1. `scripts/docs/passports/` discovers executable units from their canonical\n   registration/config surfaces.\n2. Ge...",
+      "consequences": "- Completeness, orphan, source-reference, and deterministic drift become\n  testable.\n- Existing reference pages can be consolidated without making docs runtime\n  dependencies.\n- Partial knowledge r...",
+      "supersedes": [],
+      "superseded_by": [],
+      "related": [],
+      "tags": []
+    },
+    {
+      "adr_number": "055",
+      "title": "Workflow Reconciliation Data-Step Ownership",
+      "file_path": "ADR-055-workflow-reconciliation-data-step-ownership.md",
+      "status": "accepted",
+      "source_status": "Accepted",
+      "category": "Architecture",
+      "owner": "BioETL Team",
+      "decision_date": "2026-07-29",
+      "last_reviewed": null,
+      "context": "`chembl_core` and `chembl_baseline` execute `reconcile_foreign_keys` against\nGold datasets. The operation is data-plane transformation, DQ validation, and a\ndestructive logical mutation. Moving it ...",
+      "decision": "Retain `reconcile_foreign_keys` as an explicitly governed ADR-047 workflow data\nstep.\n- Workflow passports must classify it as\n  `data_plane_transformation`, `dq_validation`, and `destructive_mutat...",
+      "consequences": "The workflow remains more than orchestration-only, but that fact is explicit,\nversioned, and governed. Passport generation can proceed without inventing a\nnew runtime surface. Review is time-bounde...",
+      "supersedes": [],
+      "superseded_by": [],
+      "related": [],
+      "tags": []
     }
   ],
   "stats": {
     "by_status": {
-      "accepted": 51,
+      "accepted": 53,
       "superseded": 2
     },
     "by_category": {
       "Storage": 3,
-      "Architecture": 11,
+      "Architecture": 12,
       "Locking": 1,
       "Data Modeling": 3,
       "Observability": 6,
@@ -1051,7 +1087,7 @@
       "Configuration": 4,
       "HTTP/Networking": 1,
       "Data Contracts": 1,
-      "Documentation": 2,
+      "Documentation": 3,
       "Testing": 1
     }
   }

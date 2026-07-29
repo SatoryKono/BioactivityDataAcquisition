@@ -8,6 +8,7 @@ import hashlib
 import importlib
 import json
 import re
+import subprocess
 from dataclasses import asdict, dataclass
 from enum import Enum
 from fnmatch import fnmatch
@@ -23,7 +24,6 @@ from scripts.schema.generate_unified_schema_map import build_unified_schema_row
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 IR_SCHEMA_VERSION = "1.0.0"
 GENERATOR_VERSION = "1.0.0"
-GENERATED_DATE = "2026-07-18"
 
 _SYSTEM_PREFIX = (
     "entity_id",
@@ -37,6 +37,26 @@ _SYSTEM_PREFIX = (
 )
 _DQ_SUFFIX = ("_dq_error", "_dq_warn")
 type _JsonObject = dict[str, Any]
+
+
+def _source_date() -> str:
+    """Return the last canonical input change date without wall-clock entropy."""
+    result = subprocess.run(
+        [
+            "git",
+            "log",
+            "-1",
+            "--format=%cs",
+            "--",
+            "configs",
+            "src/bioetl",
+        ],
+        cwd=PROJECT_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()
 
 
 class _ArrowField(Protocol):
@@ -583,7 +603,7 @@ def build_pipeline_dataflow_ir(
     return PipelineDataflowIR(
         schema_version=IR_SCHEMA_VERSION,
         generator_version=GENERATOR_VERSION,
-        generated_date=GENERATED_DATE,
+        generated_date=_source_date(),
         pipeline_name=pipeline_name,
         provider=provider,
         entity=entity,
@@ -636,7 +656,6 @@ def build_pipeline_dataflow_ir(
 
 
 __all__ = [
-    "GENERATED_DATE",
     "GENERATOR_VERSION",
     "IR_SCHEMA_VERSION",
     "CriterionIR",
