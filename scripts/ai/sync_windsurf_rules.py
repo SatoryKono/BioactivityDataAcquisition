@@ -213,7 +213,6 @@ def _workflow_governance_issues(source: Path, content: str) -> list[str]:
 
 def _check_or_deploy_workflow(
     *,
-    source: Path,
     content: str,
     target: Path,
     root: Path,
@@ -248,7 +247,6 @@ def sync_workflows(
         issues.extend(_workflow_governance_issues(source, content))
         issues.extend(
             _check_or_deploy_workflow(
-                source=source,
                 content=content,
                 target=local_dir / source.name,
                 root=root,
