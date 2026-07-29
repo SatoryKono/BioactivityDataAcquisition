@@ -44,6 +44,7 @@
         "to": "run_chembl_publication"
       }
     ],
+    "mermaid": "flowchart TD\n  reconcile_assay_publication_orphans[\"reconcile_foreign_keys\"]\n  reconcile_assay_target_orphans[\"reconcile_foreign_keys\"]\n  reconcile_publication_assay_orphans[\"reconcile_foreign_keys\"]\n  reconcile_target_assay_orphans[\"reconcile_foreign_keys\"]\n  run_chembl_assay[\"chembl_assay\"]\n  run_chembl_publication[\"chembl_publication\"]\n  run_chembl_target[\"chembl_target\"]\n  reconcile_assay_publication_orphans --> reconcile_target_assay_orphans\n  reconcile_assay_target_orphans --> reconcile_assay_publication_orphans\n  reconcile_target_assay_orphans --> reconcile_publication_assay_orphans\n  run_chembl_assay --> reconcile_assay_target_orphans\n  run_chembl_assay --> run_chembl_target\n  run_chembl_publication --> reconcile_assay_publication_orphans\n  run_chembl_target --> reconcile_assay_target_orphans\n  run_chembl_target --> run_chembl_publication\n",
     "step_count": 7,
     "steps": [
       {

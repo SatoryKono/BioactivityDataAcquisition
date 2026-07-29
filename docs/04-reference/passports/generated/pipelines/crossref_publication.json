@@ -13,14 +13,37 @@
       "checkpoints": true,
       "run_ledger": true,
       "run_manifest": true
+    },
+    "effective_config_hash": "sha256:7295e694940e478c961ca98d4bdb96ec147ce482ffece4c8e85b4c58f1fed68d",
+    "projection_profiles": [
+      "batch",
+      "http"
+    ],
+    "resilience": {
+      "resolution_owner": "UnifiedHTTPClient and provider config",
+      "source_refs": [
+        "src/bioetl/infrastructure/adapters/http/client.py",
+        "configs/providers/crossref.yaml"
+      ],
+      "status": "runtime_resolved"
     }
   },
   "extraction": {
     "request": {
       "endpoint_template": {
+        "resolution_inputs": [
+          "provider base_url",
+          "entity resource mapping"
+        ],
+        "resolution_owner": "provider adapter",
         "status": "runtime_resolved"
       },
       "method": {
+        "resolution_inputs": [
+          "effective provider config",
+          "adapter request builder"
+        ],
+        "resolution_owner": "provider adapter",
         "status": "runtime_resolved"
       }
     },
@@ -67,6 +90,11 @@
   },
   "identity": {
     "aliases": [],
+    "derived_source_identity": {
+      "data_source_provider": null,
+      "entity": "publication",
+      "provider": "crossref"
+    },
     "entity": "publication",
     "pipeline_id": "crossref_publication",
     "pipeline_type": "provider_entity",

@@ -72,6 +72,15 @@
         "max_attempts": 3
       }
     },
+    "invariants": {
+      "aggregation_is_explicit": true,
+      "conflict_priorities_are_complete": true,
+      "join_keys_must_exist_in_seed_or_prior_key_source_output": true,
+      "supported_cardinalities": [
+        "one_to_one",
+        "many_to_one"
+      ]
+    },
     "merge": {
       "column_groups": [
         {

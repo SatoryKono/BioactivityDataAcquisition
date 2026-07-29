@@ -57,6 +57,15 @@
         "max_attempts": 3
       }
     },
+    "invariants": {
+      "aggregation_is_explicit": true,
+      "conflict_priorities_are_complete": true,
+      "join_keys_must_exist_in_seed_or_prior_key_source_output": true,
+      "supported_cardinalities": [
+        "one_to_one",
+        "many_to_one"
+      ]
+    },
     "merge": {
       "column_groups": [
         {
@@ -285,3 +294,19 @@
 ## Diagnostics
 
 - No blocking diagnostics.
+
+## Owner-approved context
+
+- Owner: `BioETL Team`
+
+### Purpose
+
+Assemble assay records with optional cell-line and tissue context.
+
+### Rationale
+
+The composite exposes optional joins without weakening the final Gold contract.
+
+### Known limitations
+
+- Source assays do not always provide cell-line or tissue identifiers.

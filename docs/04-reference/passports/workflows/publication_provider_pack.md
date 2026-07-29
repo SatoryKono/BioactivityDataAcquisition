@@ -28,6 +28,7 @@
   "dag": {
     "edge_count": 0,
     "edges": [],
+    "mermaid": "flowchart TD\n  run_crossref_publication[\"crossref_publication\"]\n  run_openalex_publication[\"openalex_publication\"]\n  run_pubmed_publication[\"pubmed_publication\"]\n  run_semanticscholar_publication[\"semanticscholar_publication\"]\n",
     "step_count": 4,
     "steps": [
       {
@@ -110,3 +111,19 @@
 ## Diagnostics
 
 - No blocking diagnostics.
+
+## Owner-approved context
+
+- Owner: `BioETL Team`
+
+### Purpose
+
+Run publication providers as an explicit multi-provider workflow.
+
+### Rationale
+
+Separate pipeline identities are retained while workflow-level ordering and recovery stay visible.
+
+### Known limitations
+
+- Provider coverage and freshness can differ without implying cross-provider equivalence.

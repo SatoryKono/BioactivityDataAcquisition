@@ -13,14 +13,38 @@
       "checkpoints": true,
       "run_ledger": true,
       "run_manifest": true
+    },
+    "effective_config_hash": "sha256:ef614184bf8a2841a55e4b624acc21c7295434f6d74cdd693b5e9e98c6040c29",
+    "projection_profiles": [
+      "async_mapping",
+      "batch",
+      "http"
+    ],
+    "resilience": {
+      "resolution_owner": "UnifiedHTTPClient and provider config",
+      "source_refs": [
+        "src/bioetl/infrastructure/adapters/http/client.py",
+        "configs/providers/uniprot.yaml"
+      ],
+      "status": "runtime_resolved"
     }
   },
   "extraction": {
     "request": {
       "endpoint_template": {
+        "resolution_inputs": [
+          "provider base_url",
+          "entity resource mapping"
+        ],
+        "resolution_owner": "provider adapter",
         "status": "runtime_resolved"
       },
       "method": {
+        "resolution_inputs": [
+          "effective provider config",
+          "adapter request builder"
+        ],
+        "resolution_owner": "provider adapter",
         "status": "runtime_resolved"
       }
     },
@@ -56,7 +80,14 @@
     "write": {}
   },
   "identity": {
-    "aliases": [],
+    "aliases": [
+      "data-source:uniprot_idmapping"
+    ],
+    "derived_source_identity": {
+      "data_source_provider": null,
+      "entity": "idmapping",
+      "provider": "uniprot"
+    },
     "entity": "idmapping",
     "pipeline_id": "uniprot_idmapping",
     "pipeline_type": "provider_entity",

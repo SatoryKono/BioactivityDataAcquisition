@@ -245,6 +245,15 @@
         "max_attempts": 3
       }
     },
+    "invariants": {
+      "aggregation_is_explicit": true,
+      "conflict_priorities_are_complete": true,
+      "join_keys_must_exist_in_seed_or_prior_key_source_output": true,
+      "supported_cardinalities": [
+        "one_to_one",
+        "many_to_one"
+      ]
+    },
     "merge": {
       "column_groups": [
         {
@@ -611,3 +620,19 @@
 ## Diagnostics
 
 - No blocking diagnostics.
+
+## Owner-approved context
+
+- Owner: `BioETL Team`
+
+### Purpose
+
+Build a provider-qualified publication view from the ChEMBL seed and publication enrichers.
+
+### Rationale
+
+Explicit identifier policy and seed-priority rules prevent guessed cross-provider identity.
+
+### Known limitations
+
+- Optional providers may not resolve every DOI or PMID.

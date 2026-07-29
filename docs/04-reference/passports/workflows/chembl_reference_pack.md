@@ -53,6 +53,7 @@
         "to": "run_chembl_target_protein_classification"
       }
     ],
+    "mermaid": "flowchart TD\n  run_chembl_cell_line[\"chembl_cell_line\"]\n  run_chembl_protein_class[\"chembl_protein_class\"]\n  run_chembl_publication[\"chembl_publication\"]\n  run_chembl_publication_similarity[\"chembl_publication_similarity\"]\n  run_chembl_publication_term[\"chembl_publication_term\"]\n  run_chembl_subcellular_fraction[\"chembl_subcellular_fraction\"]\n  run_chembl_target[\"chembl_target\"]\n  run_chembl_target_component[\"chembl_target_component\"]\n  run_chembl_target_protein_classification[\"chembl_target_protein_classification\"]\n  run_chembl_tissue[\"chembl_tissue\"]\n  run_chembl_protein_class --> run_chembl_target_protein_classification\n  run_chembl_publication --> run_chembl_publication_similarity\n  run_chembl_publication --> run_chembl_publication_term\n  run_chembl_target --> run_chembl_target_component\n  run_chembl_target --> run_chembl_target_protein_classification\n  run_chembl_target_component --> run_chembl_target_protein_classification\n",
     "step_count": 10,
     "steps": [
       {
@@ -185,3 +186,19 @@
 ## Diagnostics
 
 - No blocking diagnostics.
+
+## Owner-approved context
+
+- Owner: `BioETL Team`
+
+### Purpose
+
+Execute the ordered ChEMBL reference-data workflow as one recoverable control-plane unit.
+
+### Rationale
+
+The workflow passport makes cross-pipeline handoffs and recovery boundaries visible.
+
+### Known limitations
+
+- Individual provider results remain independently inspectable and may complete at different times.

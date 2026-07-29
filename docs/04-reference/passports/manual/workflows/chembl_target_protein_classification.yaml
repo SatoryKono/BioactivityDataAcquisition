@@ -1,0 +1,6 @@
+owner: BioETL Team
+owner_approved: true
+purpose: Build target and protein-classification inputs before projecting their derived relationship.
+rationale: The explicit DAG prevents publication of a derived classification before its inputs complete.
+known_limitations:
+  - Derived output is bounded by the source snapshot represented in the run evidence.

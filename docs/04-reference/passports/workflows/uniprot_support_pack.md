@@ -28,6 +28,7 @@
   "dag": {
     "edge_count": 0,
     "edges": [],
+    "mermaid": "flowchart TD\n  run_uniprot_idmapping[\"uniprot_idmapping\"]\n  run_uniprot_protein[\"uniprot_protein\"]\n",
     "step_count": 2,
     "steps": [
       {
@@ -98,3 +99,19 @@
 ## Diagnostics
 
 - No blocking diagnostics.
+
+## Owner-approved context
+
+- Owner: `BioETL Team`
+
+### Purpose
+
+Resolve UniProt mappings before fetching dependent protein records.
+
+### Rationale
+
+The workflow preserves the mapping result as the typed handoff between executable pipelines.
+
+### Known limitations
+
+- Unmapped identifiers remain explicit and do not trigger a protein fetch.

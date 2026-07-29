@@ -32,6 +32,7 @@
         "to": "summarize_core_extracts"
       }
     ],
+    "mermaid": "flowchart TD\n  chembl_activity_ingest[\"chembl_activity\"]\n  chembl_assay_ingest[\"chembl_assay\"]\n  chembl_target_ingest[\"chembl_target\"]\n  reconcile_assay_target_orphans[\"reconcile_foreign_keys\"]\n  summarize_core_extracts[\"summarize_upstream_outputs\"]\n  chembl_activity_ingest --> summarize_core_extracts\n  chembl_assay_ingest --> reconcile_assay_target_orphans\n  chembl_assay_ingest --> summarize_core_extracts\n  chembl_target_ingest --> reconcile_assay_target_orphans\n  chembl_target_ingest --> summarize_core_extracts\n",
     "step_count": 5,
     "steps": [
       {

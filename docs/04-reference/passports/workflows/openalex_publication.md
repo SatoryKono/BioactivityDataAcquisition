@@ -28,6 +28,7 @@
   "dag": {
     "edge_count": 0,
     "edges": [],
+    "mermaid": "flowchart TD\n  run_openalex_publication[\"openalex_publication\"]\n",
     "step_count": 1,
     "steps": [
       {

@@ -28,6 +28,7 @@
   "dag": {
     "edge_count": 0,
     "edges": [],
+    "mermaid": "flowchart TD\n  run_chembl_compound_record[\"chembl_compound_record\"]\n",
     "step_count": 1,
     "steps": [
       {

@@ -10,6 +10,12 @@ Generated, evidence-backed documentation projections.
 - [Workflow passport schema](schemas/workflow-passport.schema.json)
 - [Manual metadata schema](schemas/manual-passport-metadata.schema.json)
 
+- Owner: `BioETL Team`; review cadence: each executable/config change and release.
+- Check: `python -m scripts.docs passports check`.
+- Reviewed update: `python -m scripts.docs passports generate`.
+- Generated facts are read-only projections; manual sidecars cannot override them.
+- Diagram dataflow passports are compatibility companions and link back here.
+
 ## Pipelines
 
 - [composite_activity](pipelines/composite_activity.md)

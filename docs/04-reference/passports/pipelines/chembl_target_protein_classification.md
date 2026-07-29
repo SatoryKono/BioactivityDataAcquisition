@@ -32,14 +32,38 @@
       "checkpoints": true,
       "run_ledger": true,
       "run_manifest": true
+    },
+    "effective_config_hash": "sha256:51f9014236c429c5e14226dd3c81eb769b5fd8e59bc84cee8c53051d650f0169",
+    "projection_profiles": [
+      "batch",
+      "derived",
+      "local_snapshot"
+    ],
+    "resilience": {
+      "resolution_owner": "UnifiedHTTPClient and provider config",
+      "source_refs": [
+        "src/bioetl/infrastructure/adapters/http/client.py",
+        "configs/providers/chembl.yaml"
+      ],
+      "status": "runtime_resolved"
     }
   },
   "extraction": {
     "request": {
       "endpoint_template": {
+        "resolution_inputs": [
+          "provider base_url",
+          "entity resource mapping"
+        ],
+        "resolution_owner": "provider adapter",
         "status": "runtime_resolved"
       },
       "method": {
+        "resolution_inputs": [
+          "effective provider config",
+          "adapter request builder"
+        ],
+        "resolution_owner": "provider adapter",
         "status": "runtime_resolved"
       }
     },
@@ -85,6 +109,11 @@
   },
   "identity": {
     "aliases": [],
+    "derived_source_identity": {
+      "data_source_provider": null,
+      "entity": "target_protein_classification",
+      "provider": "chembl"
+    },
     "entity": "target_protein_classification",
     "pipeline_id": "chembl_target_protein_classification",
     "pipeline_type": "provider_entity",

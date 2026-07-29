@@ -28,6 +28,7 @@
   "dag": {
     "edge_count": 0,
     "edges": [],
+    "mermaid": "flowchart TD\n  run_chembl_publication_term[\"chembl_publication_term\"]\n",
     "step_count": 1,
     "steps": [
       {
