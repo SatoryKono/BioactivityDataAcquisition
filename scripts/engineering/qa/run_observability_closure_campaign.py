@@ -1408,46 +1408,54 @@ def _attempt_result_signature(
     ).hexdigest()
 
 
-def _collect_attempt_evidence(
-    *,
-    repo_root: Path,
-    pipeline: str,
-    tracing: bool,
-    limit: int,
-    run_mode: str,
-    command: tuple[str, ...],
-    data_root: Path,
-    stdout_path: Path,
-    stderr_path: Path,
-    started_at: str,
-    finished_at: str,
-    exit_code: int,
-    timed_out: bool,
-    before_manifests: set[Path],
-    before_files: dict[Path, str],
-) -> AttemptEvidence:
+@dataclass(frozen=True, slots=True)
+class _AttemptEvidenceInputs:
+    """Packed inputs for attempt evidence assembly (python:S107)."""
+
+    repo_root: Path
+    pipeline: str
+    tracing: bool
+    limit: int
+    run_mode: str
+    command: tuple[str, ...]
+    data_root: Path
+    stdout_path: Path
+    stderr_path: Path
+    started_at: str
+    finished_at: str
+    exit_code: int
+    timed_out: bool
+    before_manifests: set[Path]
+    before_files: dict[Path, str]
+
+
+def _collect_attempt_evidence(inputs: _AttemptEvidenceInputs) -> AttemptEvidence:
     """Assemble durable attempt evidence from isolated run artifacts."""
-    new_manifests = _manifest_snapshot(data_root) - before_manifests
+    new_manifests = _manifest_snapshot(inputs.data_root) - inputs.before_manifests
     manifest_ids, run_ids, manifest_paths = _read_new_manifest_identity(
         new_manifests,
-        expected_pipeline=pipeline,
+        expected_pipeline=inputs.pipeline,
     )
-    ledger_rows = _read_ledger_rows(data_root)
+    ledger_rows = _read_ledger_rows(inputs.data_root)
     terminal_events = _terminal_events_for_runs(ledger_rows, run_ids)
     terminal_rows = _terminal_rows_for_runs(ledger_rows, run_ids)
     metrics, details, _terminal_signature = _terminal_payload(terminal_rows)
     ledger_paths = tuple(
-        data_root / "output" / "control" / "run_ledger" / f"{manifest_id}.jsonl"
+        inputs.data_root
+        / "output"
+        / "control"
+        / "run_ledger"
+        / f"{manifest_id}.jsonl"
         for manifest_id in manifest_ids
     )
     checkpoint_paths, output_paths = _attempt_output_partitions(
-        data_root=data_root,
-        before_files=before_files,
+        data_root=inputs.data_root,
+        before_files=inputs.before_files,
     )
-    output_artifacts = _file_artifacts(output_paths, root=data_root)
+    output_artifacts = _file_artifacts(output_paths, root=inputs.data_root)
     semantic_output, semantic_output_records = _semantic_output_payload(output_paths)
     checkpoint_disposition, checkpoint_interval = _checkpoint_policy(
-        repo_root, pipeline, limit
+        inputs.repo_root, inputs.pipeline, inputs.limit
     )
     if checkpoint_paths:
         checkpoint_disposition = "retained"
@@ -1459,21 +1467,23 @@ def _collect_attempt_evidence(
         semantic_output_records=semantic_output_records,
     )
     return AttemptEvidence(
-        pipeline=pipeline,
-        tracing=tracing,
-        started_at=started_at,
-        finished_at=finished_at,
-        exit_code=exit_code,
-        timed_out=timed_out,
-        command=command,
-        stdout_path=str(stdout_path),
-        stderr_path=str(stderr_path),
+        pipeline=inputs.pipeline,
+        tracing=inputs.tracing,
+        started_at=inputs.started_at,
+        finished_at=inputs.finished_at,
+        exit_code=inputs.exit_code,
+        timed_out=inputs.timed_out,
+        command=inputs.command,
+        stdout_path=str(inputs.stdout_path),
+        stderr_path=str(inputs.stderr_path),
         manifest_ids=manifest_ids,
         run_ids=run_ids,
         terminal_ledger_events=terminal_events,
-        manifest_artifacts=_file_artifacts(manifest_paths, root=data_root),
-        ledger_artifacts=_file_artifacts(ledger_paths, root=data_root),
-        checkpoint_artifacts=_file_artifacts(checkpoint_paths, root=data_root),
+        manifest_artifacts=_file_artifacts(manifest_paths, root=inputs.data_root),
+        ledger_artifacts=_file_artifacts(ledger_paths, root=inputs.data_root),
+        checkpoint_artifacts=_file_artifacts(
+            checkpoint_paths, root=inputs.data_root
+        ),
         checkpoint_disposition=checkpoint_disposition,
         checkpoint_interval=checkpoint_interval,
         output_artifacts=output_artifacts,
@@ -1481,7 +1491,7 @@ def _collect_attempt_evidence(
         terminal_metrics_snapshot=metrics,
         terminal_details=details,
         result_signature=result_signature,
-        run_mode=run_mode,
+        run_mode=inputs.run_mode,
     )
 
 
@@ -1531,21 +1541,23 @@ def _run_attempt(
     atomic_write_text(stdout_path, str(stdout))
     atomic_write_text(stderr_path, str(stderr))
     return _collect_attempt_evidence(
-        repo_root=repo_root,
-        pipeline=pipeline,
-        tracing=tracing,
-        limit=limit,
-        run_mode=run_mode,
-        command=command,
-        data_root=data_root,
-        stdout_path=stdout_path,
-        stderr_path=stderr_path,
-        started_at=started_at,
-        finished_at=finished_at,
-        exit_code=exit_code,
-        timed_out=timed_out,
-        before_manifests=before_manifests,
-        before_files=before_files,
+        _AttemptEvidenceInputs(
+            repo_root=repo_root,
+            pipeline=pipeline,
+            tracing=tracing,
+            limit=limit,
+            run_mode=run_mode,
+            command=command,
+            data_root=data_root,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+            started_at=started_at,
+            finished_at=finished_at,
+            exit_code=exit_code,
+            timed_out=timed_out,
+            before_manifests=before_manifests,
+            before_files=before_files,
+        )
     )
 
 
@@ -3135,85 +3147,95 @@ def _attempt_gate_satisfied(
     )
 
 
-def _build_execute_report(
-    *,
-    source_revision: str,
-    source_provenance: dict[str, object],
-    parity_ok: bool,
-    pipelines: tuple[str, ...],
-    registered_pipelines: tuple[str, ...],
-    registry_completed: subprocess.CompletedProcess[str],
-    registry_stdout_path: Path,
-    attempts: list[AttemptEvidence],
-    online_attempt: AttemptEvidence,
-    phases: tuple[PhaseEvidence, ...],
-    attempt_gate: bool,
-    tracing_result_parity: bool,
-    tracing_mode: str,
-    tracing_pairs: dict[str, dict[bool, str]],
-    standalone_fixture_evidence: dict[str, object],
-    workflow_fixture_evidence: dict[str, object],
-    canonical_unchanged: bool,
-    before: dict[str, str],
-    after: dict[str, str],
-    binding: dict[str, object],
-    external_gate: dict[str, object],
-    scorecard: dict[str, object],
-    residual_limitations: list[str],
-    finding_ids: list[str],
-    residual_finding_gate: dict[str, object],
-    core_complete: bool,
-) -> dict[str, object]:
+@dataclass(frozen=True, slots=True)
+class _ExecuteReportInputs:
+    """Packed execute-mode campaign report inputs (python:S107)."""
+
+    source_revision: str
+    source_provenance: dict[str, object]
+    parity_ok: bool
+    pipelines: tuple[str, ...]
+    registered_pipelines: tuple[str, ...]
+    registry_completed: subprocess.CompletedProcess[str]
+    registry_stdout_path: Path
+    attempts: list[AttemptEvidence]
+    online_attempt: AttemptEvidence
+    phases: tuple[PhaseEvidence, ...]
+    attempt_gate: bool
+    tracing_result_parity: bool
+    tracing_mode: str
+    tracing_pairs: dict[str, dict[bool, str]]
+    standalone_fixture_evidence: dict[str, object]
+    workflow_fixture_evidence: dict[str, object]
+    canonical_unchanged: bool
+    before: dict[str, str]
+    after: dict[str, str]
+    binding: dict[str, object]
+    external_gate: dict[str, object]
+    scorecard: dict[str, object]
+    residual_limitations: list[str]
+    finding_ids: list[str]
+    residual_finding_gate: dict[str, object]
+    core_complete: bool
+
+
+def _build_execute_report(inputs: _ExecuteReportInputs) -> dict[str, object]:
     """Assemble the execute-mode campaign report payload."""
     return {
         "schema_version": 1,
         "generated_at": _utc_now(),
-        "source_revision": source_revision,
-        "source_provenance": source_provenance,
-        "status": "awaiting_external_evidence" if core_complete else "incomplete",
-        "pipeline_config_parity": parity_ok,
-        "pipelines": list(pipelines),
-        "registered_pipelines": list(registered_pipelines),
+        "source_revision": inputs.source_revision,
+        "source_provenance": inputs.source_provenance,
+        "status": (
+            "awaiting_external_evidence" if inputs.core_complete else "incomplete"
+        ),
+        "pipeline_config_parity": inputs.parity_ok,
+        "pipelines": list(inputs.pipelines),
+        "registered_pipelines": list(inputs.registered_pipelines),
         "registry_command_evidence": {
-            "command": list(registry_completed.args),
-            "stdout_path": str(registry_stdout_path),
-            "stdout_sha256": _sha256_file(registry_stdout_path),
+            "command": list(inputs.registry_completed.args),
+            "stdout_path": str(inputs.registry_stdout_path),
+            "stdout_sha256": _sha256_file(inputs.registry_stdout_path),
         },
         "attempt_gate": {
-            "satisfied": attempt_gate,
-            "attempt_count": len(attempts),
+            "satisfied": inputs.attempt_gate,
+            "attempt_count": len(inputs.attempts),
             "required_tracing_mode": "both",
-            "actual_tracing_mode": tracing_mode,
-            "tracing_result_parity": tracing_result_parity,
-            "representative_tracing_result_parity": tracing_result_parity,
-            "tracing_result_signatures": tracing_pairs,
+            "actual_tracing_mode": inputs.tracing_mode,
+            "tracing_result_parity": inputs.tracing_result_parity,
+            "representative_tracing_result_parity": inputs.tracing_result_parity,
+            "tracing_result_signatures": inputs.tracing_pairs,
             "successful_attempt_count": sum(
-                attempt.exit_code == 0 for attempt in attempts
+                attempt.exit_code == 0 for attempt in inputs.attempts
             ),
-            "failed_attempt_count": sum(attempt.exit_code != 0 for attempt in attempts),
+            "failed_attempt_count": sum(
+                attempt.exit_code != 0 for attempt in inputs.attempts
+            ),
         },
-        "attempts": [asdict(item) for item in attempts],
+        "attempts": [asdict(item) for item in inputs.attempts],
         "online_attempt_gate": {
-            "satisfied": online_attempt.satisfies_closure,
-            "attempt": asdict(online_attempt),
+            "satisfied": inputs.online_attempt.satisfies_closure,
+            "attempt": asdict(inputs.online_attempt),
         },
         "workflow_phase_gate": {
-            "satisfied": all(phase.satisfies_closure for phase in phases),
-            "phases": [asdict(phase) for phase in phases],
+            "satisfied": all(
+                phase.satisfies_closure for phase in inputs.phases
+            ),
+            "phases": [asdict(phase) for phase in inputs.phases],
         },
-        "standalone_fixture_evidence": standalone_fixture_evidence,
-        "workflow_fixture_evidence": workflow_fixture_evidence,
+        "standalone_fixture_evidence": inputs.standalone_fixture_evidence,
+        "workflow_fixture_evidence": inputs.workflow_fixture_evidence,
         "canonical_signature_gate": {
-            "satisfied": canonical_unchanged,
-            "before": before,
-            "after": after,
+            "satisfied": inputs.canonical_unchanged,
+            "before": inputs.before,
+            "after": inputs.after,
         },
-        "campaign_binding": binding,
-        "external_evidence_gate": external_gate,
-        "scorecard": scorecard,
-        "residual_limitations": residual_limitations,
-        "finding_ids": finding_ids,
-        "residual_finding_gate": residual_finding_gate,
+        "campaign_binding": inputs.binding,
+        "external_evidence_gate": inputs.external_gate,
+        "scorecard": inputs.scorecard,
+        "residual_limitations": inputs.residual_limitations,
+        "finding_ids": inputs.finding_ids,
+        "residual_finding_gate": inputs.residual_finding_gate,
     }
 
 
@@ -3360,32 +3382,34 @@ def main(argv: list[str] | None = None) -> int:
         phases=phases,
     )
     report = _build_execute_report(
-        source_revision=source_revision,
-        source_provenance=source_provenance,
-        parity_ok=parity_ok,
-        pipelines=pipelines,
-        registered_pipelines=registered_pipelines,
-        registry_completed=registry_completed,
-        registry_stdout_path=registry_stdout_path,
-        attempts=attempts,
-        online_attempt=online_attempt,
-        phases=phases,
-        attempt_gate=attempt_gate,
-        tracing_result_parity=tracing_parity,
-        tracing_mode=args.tracing_mode,
-        tracing_pairs=tracing_pairs,
-        standalone_fixture_evidence=standalone_fixture_evidence,
-        workflow_fixture_evidence=workflow_fixture_evidence,
-        canonical_unchanged=canonical_unchanged,
-        before=before,
-        after=after,
-        binding=binding,
-        external_gate=external_gate,
-        scorecard=scorecard,
-        residual_limitations=args.residual_limitation,
-        finding_ids=args.finding_id,
-        residual_finding_gate=residual_finding_gate,
-        core_complete=core_complete,
+        _ExecuteReportInputs(
+            source_revision=source_revision,
+            source_provenance=source_provenance,
+            parity_ok=parity_ok,
+            pipelines=pipelines,
+            registered_pipelines=registered_pipelines,
+            registry_completed=registry_completed,
+            registry_stdout_path=registry_stdout_path,
+            attempts=attempts,
+            online_attempt=online_attempt,
+            phases=phases,
+            attempt_gate=attempt_gate,
+            tracing_result_parity=tracing_parity,
+            tracing_mode=args.tracing_mode,
+            tracing_pairs=tracing_pairs,
+            standalone_fixture_evidence=standalone_fixture_evidence,
+            workflow_fixture_evidence=workflow_fixture_evidence,
+            canonical_unchanged=canonical_unchanged,
+            before=before,
+            after=after,
+            binding=binding,
+            external_gate=external_gate,
+            scorecard=scorecard,
+            residual_limitations=args.residual_limitation,
+            finding_ids=args.finding_id,
+            residual_finding_gate=residual_finding_gate,
+            core_complete=core_complete,
+        )
     )
     output_path = audit_root / OBSERVABILITY_CLOSURE_CAMPAIGN_REPORT
     atomic_write_text(

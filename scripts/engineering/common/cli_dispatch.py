@@ -54,13 +54,16 @@ def _run_module_command_in_process(spec: CommandSpec, argv: list[str]) -> int:
 
         result = main(forwarded_argv) if parameter_count else main()
     except SystemExit as exc:
+        # Intentional in-process CLI dispatch: convert SystemExit to a return
+        # code so module runners do not tear down the parent process (S5754).
         code = exc.code
         if code is None:
             return 0
         if isinstance(code, int):
             return code
         print(code, file=sys.stderr)
-        return 1
+        # Non-integer SystemExit payloads are unexpected; re-raise for operators.
+        raise
     finally:
         sys.argv = original_argv
 

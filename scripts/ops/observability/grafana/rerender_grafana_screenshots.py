@@ -998,7 +998,10 @@ def _run_playwright_fallback(config: RenderConfig) -> int:
 
     manifests: list[dict[str, Any]] = []
     for dashboard in dashboards:
-        single_config = replace(config, selected_uids=(dashboard.uid,))
+        single_config = cast(
+            RenderConfig,
+            replace(config, selected_uids=(dashboard.uid,)),
+        )
         result, manifest = _run_playwright_with_retry(single_config)
         if result != 0 or manifest is None:
             return result or 1

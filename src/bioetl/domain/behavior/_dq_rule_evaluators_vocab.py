@@ -44,7 +44,7 @@ TARGET_XREF_SOURCE_DB_VALUES = frozenset(
     }
 )
 # Bounded binomial species token pair without open trailing .* (S8786).
-_TARGET_BINOMIAL_PATTERN = re.compile(r"^[A-Z][a-z]{1,64} [a-z]{1,64}(?:\b.*)?$")
+_TARGET_BINOMIAL_PATTERN = re.compile(r"^[A-Z][a-z]{1,64} [a-z]{1,64}[^\n]{0,256}$")
 
 _ValidationStrategy = Callable[[object, str | None], bool]
 

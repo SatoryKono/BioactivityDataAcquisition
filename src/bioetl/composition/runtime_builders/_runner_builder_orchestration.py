@@ -12,6 +12,8 @@ from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
 from bioetl.composition.pipeline_runner_request import (
+    PipelineCreateRunnerCore,
+    PipelineCreateRunnerExtras,
     build_pipeline_create_runner_request,
 )
 from bioetl.composition.providers import ensure_providers_loaded
@@ -68,11 +70,6 @@ def create_runner(
     inputs: _RunnerInputs,
 ) -> PipelineRunnerProtocol:
     """Create the runtime runner from the registered factory seam."""
-    from bioetl.composition.pipeline_runner_request import (
-        PipelineCreateRunnerCore,
-        PipelineCreateRunnerExtras,
-    )
-
     request = build_pipeline_create_runner_request(
         core=PipelineCreateRunnerCore(
             run_id=ctx.run_id,
