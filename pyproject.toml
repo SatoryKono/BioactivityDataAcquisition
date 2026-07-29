@@ -500,6 +500,50 @@ dict_synonyms = "Struct, NamedStruct"
 # Factories: xenon --max-absolute B --max-modules A --max-average A
 # B = max CC of 10 per function, A = average CC of 5
 
+# ============ BASEDPYRIGHT (Project Diagnostics / IDE) ============
+# Workspace/IDE surface only. Product merge gate remains mypy on src/bioetl.
+# Keep .github and generated/report trees out of Project Diagnostics noise.
+# CLI product checks still pass explicit paths: `basedpyright src/bioetl`.
+[tool.basedpyright]
+stubPath = "typings"
+venvPath = "."
+venv = ".venv-win"
+include = [
+    "src",
+    "tests",
+    "scripts",
+]
+exclude = [
+    "**/.github",
+    "**/reports",
+    "**/docs/reports",
+    "**/docs/site",
+    "**/site",
+    "**/dist",
+    "**/build",
+    "**/htmlcov",
+    "**/output",
+    "**/logs",
+    "**/data",
+    "**/.venv",
+    "**/.venv-win",
+    "**/__pycache__",
+    "**/.pytest_cache",
+    "**/.mypy_cache",
+    "**/.ruff_cache",
+    "**/.tox",
+    "**/.worktrees",
+    "**/.cache",
+    "**/.hypothesis",
+    "**/node_modules",
+    "**/.codex",
+    "**/.claude",
+    "**/.agent-work",
+    "**/.cursor",
+    "**/.grok",
+    "**/.agents",
+]
+
 # ============ BANDIT (Security) ============
 [tool.bandit]
 exclude_dirs = ["tests", "docs", ".venv", "build", "dist"]

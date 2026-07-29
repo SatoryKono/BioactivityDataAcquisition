@@ -148,7 +148,9 @@ class _MergeInputLoaderMixin:
         if self._delta_reader is not None:
             # Read using Delta Lake
             arrow_table = await self._delta_reader.read_table(table)
-            frame = pl.from_arrow(cast(Any, arrow_table))
+            frame = pl.from_arrow(
+                cast(Any, arrow_table)  # Any: pyarrow Table after read boundary
+            )
             return frame.to_frame() if isinstance(frame, pl.Series) else frame
 
         # Check if storage fallback is disabled (for test compatibility)

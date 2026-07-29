@@ -43,7 +43,9 @@ class BaseDeltaWriterTableAccessMixin:
         dt = await self._open_delta_table(table_name)
         if dt is None:
             return None
-        return _base._get_delta_table_arrow_schema(dt)
+        from typing import Any, cast
+
+        return cast(Any, _base._get_delta_table_arrow_schema(dt))  # Any: delta schema boundary
 
     def get_table_path(self, table_name: str) -> Path:
         """Return the filesystem path for a Delta table."""

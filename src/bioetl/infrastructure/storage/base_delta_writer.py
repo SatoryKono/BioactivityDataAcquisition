@@ -6,8 +6,9 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
+import pyarrow as pa
 from deltalake import DeltaTable as DeltaTableType
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
@@ -59,13 +60,13 @@ def _serialize_value(
     return _serialize_value_impl(value, is_string_field)
 
 
-def _get_string_fields(schema: object) -> set[str]:
+def _get_string_fields(schema: pa.Schema) -> set[str]:
     """Compatibility wrapper delegating schema inspection to Arrow converter."""
     from bioetl.infrastructure.storage.delta.arrow_converter import (
         get_string_fields as _get_string_fields_impl,
     )
 
-    return _get_string_fields_impl(cast(Any, schema))
+    return _get_string_fields_impl(schema)
 
 
 def _read_delta_records(
@@ -130,13 +131,13 @@ def _clear_delta_tables(
     )
 
 
-def coerce_null_types_for_delta(table: object) -> object:
+def coerce_null_types_for_delta(table: pa.Table) -> pa.Table:
     """Coerce Delta-incompatible Null-typed columns to concrete types."""
     from bioetl.infrastructure.storage.delta.schema_ops import (
         coerce_null_types_for_delta as _coerce_null_types_for_delta_impl,
     )
 
-    return _coerce_null_types_for_delta_impl(cast(Any, table))
+    return _coerce_null_types_for_delta_impl(table)
 
 
 class BaseDeltaWriter(BaseDeltaWriterTableAccessMixin):
@@ -182,29 +183,29 @@ class BaseDeltaWriter(BaseDeltaWriterTableAccessMixin):
     def _prepare_arrow_data(
         self,
         records: list[BronzeRecord],
-        schema: object,
+        schema: pa.Schema,
         primary_keys: list[str],
-    ) -> object:
+    ) -> pa.Table:
         """Prepare Arrow table from records with schema filtering and sorting."""
         return self._arrow_converter.convert_records_to_arrow_with_schema(
             records,
-            cast(Any, schema),
+            schema,
             primary_keys=primary_keys,
         )
 
     def _sort_by_primary_keys(
         self,
-        table: object,
+        table: pa.Table,
         primary_keys: list[str],
         schema_names: Sequence[str],
-    ) -> object:
+    ) -> pa.Table:
         """Sort Arrow table by primary keys for deterministic writes."""
         from bioetl.infrastructure.storage.delta.arrow_converter import (
             sort_arrow_table_by_primary_keys as _sort_by_primary_keys_impl,
         )
 
         return _sort_by_primary_keys_impl(
-            cast(Any, table),
+            table,
             primary_keys,
             schema_names=schema_names,
             logger=self.logger,
