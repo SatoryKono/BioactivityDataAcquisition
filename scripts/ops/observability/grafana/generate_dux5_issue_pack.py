@@ -123,7 +123,7 @@ OVERLAP = {
     "DUX5-22": "Chart empty-state rationalization residual after DUX4-21/24.",
     "DUX5-23": "Numeric grammar residual after DUX4-12 zero/rate work.",
     "DUX5-30": "Governance after patterns stabilize.",
-    "DUX5-31": "Extends DUX4-41 live screenshot regression with a11y + text floors.",
+    "DUX5-31": "Extends DUX4-41 live render regression with a11y + text floors.",
 }
 
 SCREENSHOT_GROUPS = {
@@ -143,7 +143,7 @@ SCREENSHOT_GROUPS = {
     "DUX5-22": "SG-03, SG-04, SG-05, SG-06, SG-07 empty charts",
     "DUX5-23": "SG-03 DQ 100.00%; all zero/rate cards",
     "DUX5-30": "system / docs",
-    "DUX5-31": "all screenshot groups + viewport matrix",
+    "DUX5-31": "all render groups + viewport matrix",
 }
 
 
@@ -300,7 +300,7 @@ def write_child_body(
 
         {it["scope"]}
 
-        Screenshot groups: {SCREENSHOT_GROUPS[dux]}
+        Render groups: {SCREENSHOT_GROUPS[dux]}
 
         ## Concrete change
 

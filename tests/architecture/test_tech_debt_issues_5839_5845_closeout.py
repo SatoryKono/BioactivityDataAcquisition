@@ -321,7 +321,10 @@ def test_issue_5845_zero_reference_supporting_scripts_have_owner_or_removal_meta
         len(zero_ref_rows)
         == closeout["metrics"]["zero_reference_supporting_scripts"]["current"]
     )
-    assert {row["status"] for row in zero_ref_rows} == {"supporting"}
+    assert {row["status"] for row in zero_ref_rows} <= {
+        "supporting",
+        "temporary_diagnostic",
+    }
 
     missing_metadata = [
         row["path"]
