@@ -29,10 +29,10 @@
       "id": 1000,
       "options": {
         "mode": "html",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><span aria-current=\"page\" title=\"4. Data Quality (Data Quality)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">4. Data Quality</span><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" \n\n_(DUX4-22: truncated; full text in panel description/docs.)_"
       },
       "title": "Navigation",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is disabled (aria-current). Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
+      "description": "DUX4-22: Full prose shortened on-canvas to remove internal scroll; details in description/docs. Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is disabled (aria-current). Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
       "type": "text",
       "links": [
         {
@@ -113,7 +113,7 @@
         "x": 0,
         "y": 3
       },
-      "description": "Unified context/provenance banner for 4. Data Quality. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only. Visible scope badges distinguish CURRENT, SELECTED RUN, and TIME RANGE evidence.",
+      "description": "DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW/RANGE/RUN/WORKFLOW/GLOBAL. Unified context/provenance banner for 4. Data Quality. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only. Visible scope badges distinguish CURRENT, SELECTED RUN, and TIME RANGE evidence.",
       "options": {
         "mode": "html",
         "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;line-height:1.4\"><div style=\"font-size:18px;font-weight:700\">Is data conformant, and what delivery impact needs action?</div><div><b>Scope:</b> CURRENT = Status/reasons · SELECTED RUN = ID/Processed Records · TIME RANGE = score, freshness and impact cards below. Do not compare different badges as peers.</div></div>"
@@ -122,7 +122,7 @@
     {
       "id": 9401,
       "type": "stat",
-      "title": "[NOW·HEALTH] Status",
+      "title": "Status",
       "gridPos": {
         "h": 3,
         "w": 8,
@@ -133,7 +133,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "DUX3-12: NOW DQ health only. Not peer with RANGE scores or RUN accounting. NOW-lane current DQ status only (bioetl_dq_current_status). Not comparable to Range freshness or Run reject tables as a peer badge. Primary compact Data Quality verdict for the selected pipeline scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Monitor DQ Current Status below is an expanded first-screen mirror of this same current-status recording rule, not an independent second verdict. Sole first-screen status (dual twin removed #6572). UNKNOWN — DQ status series absent (not healthy zero). DSA-03: Now/Run/Range not peer badges.",
+      "description": "DUX4-13: Composite first strip owner — pair with evidence freshness + delivery impact. DUX3-12: NOW DQ health only. Not peer with RANGE scores or RUN accounting. NOW-lane current DQ status only (bioetl_dq_current_status). Not comparable to Range freshness or Run reject tables as a peer badge. Primary compact Data Quality verdict for the selected pipeline scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Monitor DQ Current Status below is an expanded first-screen mirror of this same current-status recording rule, not an independent second verdict. Sole first-screen status (dual twin removed #6572). UNKNOWN — DQ status series absent (not healthy zero). DSA-03: Now/Run/Range not peer badges.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -325,7 +325,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 8,
         "x": 0,
         "y": 8
@@ -1726,7 +1726,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "DUX3-12: RANGE evidence score — not a substitute for NOW status. Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Quality score trend over selected time range. Kept separate from operational gating indicators. Score thresholds: <0.80=CRIT, 0.80-0.95=WARN, >=0.95=OK; null=UNKNOWN. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
+          "description": "DUX4-13: RANGE evidence only — not peer NOW health; dual 100% ≠ healthy if Status UNKNOWN. DUX3-12: RANGE evidence score — not a substitute for NOW status. Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Quality score trend over selected time range. Kept separate from operational gating indicators. Score thresholds: <0.80=CRIT, 0.80-0.95=WARN, >=0.95=OK; null=UNKNOWN. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1769,7 +1769,7 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
+            "h": 4,
             "w": 12,
             "x": 12,
             "y": 72
@@ -1799,7 +1799,7 @@
               "refId": "A"
             }
           ],
-          "title": "[RANGE·EVIDENCE] Track: Data Quality Score Trend (Volume-weighted)",
+          "title": "Track: Data Quality Score Trend (Volume-weighted)",
           "type": "timeseries",
           "maxDataPoints": 400,
           "interval": "1m"
@@ -1935,7 +1935,7 @@
           },
           "gridPos": {
             "h": 4,
-            "w": 12,
+            "w": 8,
             "x": 0,
             "y": 0
           },
@@ -1961,9 +1961,9 @@
               "refId": "A"
             }
           ],
-          "title": "[RANGE·EVIDENCE] Monitor: Data Quality Score (Volume-weighted)",
+          "title": "Monitor: Data Quality Score (Volume-weighted)",
           "type": "stat",
-          "description": "DUX3-12: RANGE evidence score — not a substitute for NOW status. Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Latest volume-weighted DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching score and record-count samples exist in that window; absence is never coerced to 0. Review raw sample history in the adjacent trend panel. Scope: selected-range and pipeline scope only."
+          "description": "DUX4-13: RANGE evidence only — not peer NOW health; dual 100% ≠ healthy if Status UNKNOWN. DUX3-12: RANGE evidence score — not a substitute for NOW status. Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Latest volume-weighted DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching score and record-count samples exist in that window; absence is never coerced to 0. Review raw sample history in the adjacent trend panel. Scope: selected-range and pipeline scope only."
         },
         {
           "datasource": {
@@ -2014,7 +2014,7 @@
           },
           "gridPos": {
             "h": 4,
-            "w": 12,
+            "w": 8,
             "x": 12,
             "y": 0
           },
@@ -2047,9 +2047,9 @@
               "refId": "A"
             }
           ],
-          "title": "[RANGE·EVIDENCE] Monitor: Worst-Entity DQ Score",
+          "title": "Monitor: Worst-Entity DQ Score",
           "type": "stat",
-          "description": "DUX3-12: RANGE evidence score — not a substitute for NOW status. Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Latest pipeline-scoped worst-entity DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching validation score sample exists in that window, not a successful run and not a zero score."
+          "description": "DUX4-13: RANGE evidence only — not peer NOW health; dual 100% ≠ healthy if Status UNKNOWN. DUX3-12: RANGE evidence score — not a substitute for NOW status. Do not read dual 100% as “all healthy” when Status is UNKNOWN/INCOMPLETE. Latest pipeline-scoped worst-entity DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching validation score sample exists in that window, not a successful run and not a zero score."
         },
         {
           "datasource": {
@@ -2130,7 +2130,7 @@
               "refId": "A"
             }
           ],
-          "title": "[RANGE·EVIDENCE] Time Range · Worst Freshness Age (hours; SLA 24/72)",
+          "title": "Time Range · Worst Freshness Age (hours; SLA 24/72)",
           "type": "gauge"
         },
         {
@@ -2983,7 +2983,7 @@
           ]
         }
       ],
-      "description": "DUX3-26: Collapsed thin shell; promote RUN accounting via Run Explorer hub."
+      "description": "DUX4-23: Collapsed by default — Run Explorer owns first-class ID/Processed Records. DUX3-26: Collapsed thin shell only. Canonical ID/Processed Records hub is Run Explorer. DUX3-26: Collapsed thin shell; promote RUN accounting via Run Explorer hub."
     }
   ],
   "refresh": "60s",

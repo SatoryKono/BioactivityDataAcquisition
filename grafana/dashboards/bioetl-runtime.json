@@ -28,10 +28,10 @@
       "id": 1000,
       "options": {
         "mode": "html",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><span aria-current=\"page\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">2. Pipeline Diagnostics</span><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" \n\n_(DUX4-22: truncated; full text in panel description/docs.)_"
       },
       "title": "Navigation",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is disabled (aria-current). Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
+      "description": "DUX4-22: Full prose shortened on-canvas to remove internal scroll; details in description/docs. Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is disabled (aria-current). Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
       "type": "text",
       "links": [
         {
@@ -112,7 +112,7 @@
         "x": 0,
         "y": 3
       },
-      "description": "Unified context/provenance banner for 2. Runtime. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only.",
+      "description": "DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW/RANGE/RUN/WORKFLOW/GLOBAL. Unified context/provenance banner for 2. Runtime. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only.",
       "options": {
         "mode": "html",
         "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">What is blocking runtime execution right now?</div></div>"
@@ -121,7 +121,7 @@
     {
       "id": 9401,
       "type": "stat",
-      "title": "[NOW·HEALTH] Status",
+      "title": "Status",
       "gridPos": {
         "h": 3,
         "w": 8,
@@ -132,7 +132,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "DUX3-10: Execution/health verdict (NOW). Not telemetry collection state. Peer SCRAPING/gap chips are EVIDENCE confidence only. Primary compact Runtime verdict for the selected pipeline/run_type scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. This verdict is trust-gated by Runtime Telemetry Gap: a non-zero scrape/rule gap forces Status to INCOMPLETE before selected-range zero counters are trusted. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Runtime Status below is an expanded first-screen mirror of this same trust-gated current-status recording rule, not an independent second verdict. Required scrape/rule evidence therefore owns the headline: green OK is impossible during a trust gap. Sole first-screen status (dual twin removed #6572). UNKNOWN — status series absent (not OK). DSA-05: state x confidence x basis x next_action; handoff data-path to DQ/Run Explorer.",
+      "description": "DUX4-11: NOW HEALTH only. SCRAPING/telemetry chips are EVIDENCE, not success. DUX3-10: Execution/health verdict (NOW). Not telemetry collection state. Peer SCRAPING/gap chips are EVIDENCE confidence only. Primary compact Runtime verdict for the selected pipeline/run_type scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. This verdict is trust-gated by Runtime Telemetry Gap: a non-zero scrape/rule gap forces Status to INCOMPLETE before selected-range zero counters are trusted. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Runtime Status below is an expanded first-screen mirror of this same trust-gated current-status recording rule, not an independent second verdict. Required scrape/rule evidence therefore owns the headline: green OK is impossible during a trust gap. Sole first-screen status (dual twin removed #6572). UNKNOWN — status series absent (not OK). DSA-05: state x confidence x basis x next_action; handoff data-path to DQ/Run Explorer.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -177,7 +177,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "text",
                 "value": null
               },
               {
@@ -406,7 +406,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "DUX3-10: Telemetry/scrape confidence (EVIDENCE). Not pipeline HEALTH. Do not read as run success/failure. Runtime Telemetry Gap (scrape/rule trust). 0=SCRAPING (metrics + recording rules healthy), 1=SCRAPE/RULE GAP, >=2=SCRAPE+RULE GAP, null=UNKNOWN. Not a pipeline error. When elevated, Status cannot be green OK — treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code. Time scope: current monitoring health, not selected-range runtime evidence. UNKNOWN — metrics trust series absent (TELEMETRY_ABSENT_OR_STALE). DSA-05: telemetry confidence chip, not peer pipeline health. Treat zero count panels as inconclusive when Metrics Evidence is non-zero/UNKNOWN.",
+      "description": "DUX4-11: Lifecycle/telemetry EVIDENCE — use neutral phase semantics, not health-green. DUX3-10: Telemetry/scrape confidence (EVIDENCE). Not pipeline HEALTH. Do not read as run success/failure. Runtime Telemetry Gap (scrape/rule trust). 0=SCRAPING (metrics + recording rules healthy), 1=SCRAPE/RULE GAP, >=2=SCRAPE+RULE GAP, null=UNKNOWN. Not a pipeline error. When elevated, Status cannot be green OK — treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code. Time scope: current monitoring health, not selected-range runtime evidence. UNKNOWN — metrics trust series absent (TELEMETRY_ABSENT_OR_STALE). DSA-05: telemetry confidence chip, not peer pipeline health. Treat zero count panels as inconclusive when Metrics Evidence is non-zero/UNKNOWN.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -446,7 +446,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "text",
                 "value": null
               },
               {
@@ -464,7 +464,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 8,
         "x": 16,
         "y": 8
@@ -497,7 +497,7 @@
           "refId": "A"
         }
       ],
-      "title": "[NOW·EVIDENCE] Metrics Evidence",
+      "title": "Metrics Evidence",
       "type": "stat"
     },
     {
@@ -2410,7 +2410,7 @@
               "refId": "A"
             }
           ],
-          "title": "[RANGE·EXEC] Worst Stage Lag",
+          "title": "Worst Stage Lag",
           "type": "stat"
         },
         {
@@ -2496,7 +2496,7 @@
               "refId": "A"
             }
           ],
-          "title": "[RANGE·EXEC] Monitor Runtime Blockers",
+          "title": "Monitor Runtime Blockers",
           "type": "stat"
         },
         {
@@ -2577,7 +2577,7 @@
               "refId": "A"
             }
           ],
-          "title": "[RANGE·EXEC] Failed Runs",
+          "title": "Failed Runs",
           "type": "stat"
         }
       ]
@@ -3181,7 +3181,7 @@
           ]
         }
       ],
-      "description": "DUX3-26: Collapsed thin shell only. Canonical ID/Processed Records hub is Run Explorer."
+      "description": "DUX4-23: Collapsed by default — Run Explorer owns first-class ID/Processed Records. DUX3-26: Collapsed thin shell only. Canonical ID/Processed Records hub is Run Explorer."
     },
     {
       "type": "row",

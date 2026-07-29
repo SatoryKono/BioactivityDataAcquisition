@@ -1,0 +1,3977 @@
+{
+  "schema_version": "dux4-panel-redesign-matrix-v1",
+  "issue": 7091,
+  "panel_count": 193,
+  "defect_counts": {
+    "long_text_scroll_risk": 9,
+    "color_risk": 112
+  },
+  "panels": [
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 1000,
+      "title": "Navigation",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "long_text_scroll_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-22"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9400,
+      "title": "Provenance",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9401,
+      "title": "Status",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "scope_intent": "NOW",
+      "family_intent": "HEALTH",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-10"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 906,
+      "title": "Primary recovery",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 891,
+      "title": "Monitor: Replay Safety State",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 6
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-14"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 892,
+      "title": "Monitor: Checkpoint Freshness Lag (seconds)",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 6
+      },
+      "scope_intent": "NOW",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 893,
+      "title": "Monitor: Manifest / Ledger Integrity",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 6
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-14"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 907,
+      "title": "Inspect: Telemetry Missing",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 6
+      },
+      "scope_intent": "NOW",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 894,
+      "title": "Inspect: Known Blind Spots",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 130,
+      "title": "Track: Replay / Resume Blockers in Range",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 3,
+      "title": "Monitor: Checkpoint Incompatibilities",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 104,
+      "title": "Monitor: Replay Not Reconstructable",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 120,
+      "title": "Monitor: Replay Drift",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 30
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 101,
+      "title": "Monitor: Checkpoint Load Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 30
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 102,
+      "title": "Monitor: Checkpoint Save Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 36
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 103,
+      "title": "Monitor: GLOBAL Checkpoint Operator Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 36
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 121,
+      "title": "Track: Replay Lag Seconds",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 42
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 5,
+      "title": "Track: Checkpoint Compatibility Outcomes",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 42
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 134,
+      "title": "Track: Replay Drift by Type",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 135,
+      "title": "Track: Replay Lag Trend",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 105,
+      "title": "Track: Checkpoint Save Latency p50/p95/p99",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 54
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 106,
+      "title": "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 61
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 908,
+      "title": "Inspect: Terminal Run Events by Status in Range",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 1,
+      "title": "Monitor: Manifest Write Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 2,
+      "title": "Monitor: Ledger Append Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 131,
+      "title": "Track: Manifest Writes by Status",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 7,
+      "title": "Track: Ledger Appends by Event Type / Status",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 132,
+      "title": "Monitor: Manifest Write Failure Ratio",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 40
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 133,
+      "title": "Monitor: Ledger Append Failure Ratio",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 4,
+      "title": "Monitor: GLOBAL Control-Plane Read Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 136,
+      "title": "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 6,
+      "title": "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 111,
+      "title": "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 122,
+      "title": "Monitor: Lineage Refs Missing",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 137,
+      "title": "Monitor: Lineage Fragment Persistence Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 138,
+      "title": "Inspect: Missing Lineage Refs by Layer / Type",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 107,
+      "title": "Track: GLOBAL Audit Write Outcomes",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 108,
+      "title": "Track: GLOBAL Audit Query Outcomes",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 109,
+      "title": "Track: GLOBAL Audit Write Latency p50/p95/p99",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 48
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 110,
+      "title": "Track: GLOBAL Audit Query Latency p50/p95/p99",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 55
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 112,
+      "title": "Track: Lineage Fragment Outcomes",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 62
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9407,
+      "title": "Inspect: Copyable Identity Handoffs",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9404,
+      "title": "Inspect: Overview Identity Anchors",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9410,
+      "title": "ID Empty State",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 47
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9411,
+      "title": "Processed Records Empty State",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 47
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9405,
+      "title": "Inspect: Identity Gaps",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 51
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9406,
+      "title": "Inspect: Checkpoint Anchor Compare",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 51
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9408,
+      "title": "Inspect: P1 Replay and Evidence Anchors",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 55
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9409,
+      "title": "Inspect: P2 Forensic Anchors",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 55
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 139,
+      "title": "Review: Remaining Replay-Safety Signals",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 59
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9402,
+      "title": "ID",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "scope_intent": "RUN",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9403,
+      "title": "Processed Records",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "scope_intent": "RUN",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 1000,
+      "title": "Navigation",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "long_text_scroll_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-22"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9400,
+      "title": "Provenance",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9401,
+      "title": "Status",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "scope_intent": "NOW",
+      "family_intent": "HEALTH",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-10"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9103,
+      "title": "Review: First Action",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9101,
+      "title": "Now · DQ Threshold State",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 8
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9102,
+      "title": "Now · DQ Current Reasons",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 5,
+        "w": 16,
+        "x": 8,
+        "y": 8
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 152,
+      "title": "Monitor: Silver Filter Reject Accounting Mismatch",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 121,
+      "title": "Inspect: Top Silver Reject Reasons (Pareto)",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 41
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 122,
+      "title": "Inspect: Top Silver Reject Fields",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 41
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 118,
+      "title": "Inspect: Silver Filter Rejects by Pipeline",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 47
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 156,
+      "title": "Inspect: Gold Reject Outcomes by Pipeline",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 47
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 1,
+      "title": "Track Range Evidence: Bronze -> Silver -> Gold",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 3,
+      "title": "Track: Source Records in Range (Bronze)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 42
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 4,
+      "title": "Track: Clean Records in Range (Gold)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 7,
+      "title": "Track: Silver Validation Failures in Range",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 101,
+      "title": "Review: Latest Successful Data Timestamp",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 54
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9,
+      "title": "Inspect: Quarantine by Error Type",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 54
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 12,
+      "title": "Monitor: Silver Validation Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 60
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 151,
+      "title": "Monitor: Gold Strict Validation Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 60
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 10,
+      "title": "Track: Anomalies Detected",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 66
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 11,
+      "title": "Track: DQ Check Duration (p95)",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 66
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 155,
+      "title": "Track: DQ Threshold Events in Range Trend",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 72
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 153,
+      "title": "Track: Data Quality Score Trend (Volume-weighted)",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 72
+      },
+      "scope_intent": "RANGE",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-13"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 116,
+      "title": "Review: Lineage Handoff to Control Plane",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 78
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 150,
+      "title": "Review: Aggregate Control-plane Handoff",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 82
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 2,
+      "title": "Monitor: Data Quality Score (Volume-weighted)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "RANGE",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-13"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 5,
+      "title": "Monitor: Worst-Entity DQ Score",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "scope_intent": "RANGE",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-13"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 8,
+      "title": "Time Range · Worst Freshness Age (hours; SLA 24/72)",
+      "type": "gauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 6
+      },
+      "scope_intent": "NOW",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 154,
+      "title": "Track: DQ Blocked Records in Range (Evidence)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 16,
+        "x": 8,
+        "y": 6
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 6,
+      "title": "Range · Records Quarantined",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 117,
+      "title": "Range · Silver Filter Rejects",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9402,
+      "title": "ID",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "RUN",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9403,
+      "title": "Processed Records",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "scope_intent": "RUN",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 1000,
+      "title": "Navigation",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "long_text_scroll_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-22"
+      ]
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 9400,
+      "title": "Provenance",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 9401,
+      "title": "Status",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "scope_intent": "NOW",
+      "family_intent": "HEALTH",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-10"
+      ]
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2001,
+      "title": "Next Best Actions",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2010,
+      "title": "Ranked Active Suspects",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "scope_intent": "WORKFLOW",
+      "family_intent": "IMPACT",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-15"
+      ]
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2005,
+      "title": "Evidence timeline · Current Alerts (now)",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 17
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2006,
+      "title": "Evidence timeline · Alert State History (range)",
+      "type": "state-timeline",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 17
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2007,
+      "title": "Impact / confidence (honest bounds)",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "long_text_scroll_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-22"
+      ]
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2002,
+      "title": "Active Suspects · Runtime",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 28
+      },
+      "scope_intent": "WORKFLOW",
+      "family_intent": "IMPACT",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-15"
+      ]
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2003,
+      "title": "Active Suspects · Provider",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 28
+      },
+      "scope_intent": "WORKFLOW",
+      "family_intent": "IMPACT",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-15"
+      ]
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2004,
+      "title": "Active Suspects · DQ",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 28
+      },
+      "scope_intent": "WORKFLOW",
+      "family_intent": "IMPACT",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-15"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9601,
+      "title": "Triage Alert State",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 1000,
+      "title": "Navigation",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "long_text_scroll_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-22"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 99,
+      "title": "Provenance",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 214,
+      "title": "Status",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "scope_intent": "NOW",
+      "family_intent": "HEALTH",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-10"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 215,
+      "title": "First Action",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 0,
+        "y": 6
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9002,
+      "title": "Inputs",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 14,
+        "x": 10,
+        "y": 6
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9018,
+      "title": "Runtime Blockers Trend",
+      "type": "state-timeline",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 41
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9019,
+      "title": "DQ Status Trend",
+      "type": "state-timeline",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 41
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9020,
+      "title": "Gold Lifecycle Trend",
+      "type": "state-timeline",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 41
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9010,
+      "title": "Historical Failures",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 32
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9011,
+      "title": "Recent Terminal Runs",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 32
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9015,
+      "title": "Silver Rejects + Rate",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 32
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9021,
+      "title": "Diagnostics Navigation",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9006,
+      "title": "Control Plane",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 0,
+        "y": 17
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9003,
+      "title": "Runtime",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 5,
+        "y": 17
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9004,
+      "title": "Data Quality",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 9,
+        "y": 17
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9007,
+      "title": "Provider",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 14,
+        "y": 17
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9005,
+      "title": "Data Validation",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 17
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9013,
+      "title": "Workflow",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9300,
+      "title": "ID",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "RUN",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9301,
+      "title": "Processed Records",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "scope_intent": "RUN",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 1000,
+      "title": "Navigation",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "long_text_scroll_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-22"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9400,
+      "title": "Provenance",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [
+        "long_text_scroll_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-22"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9401,
+      "title": "Status",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "scope_intent": "NOW",
+      "family_intent": "HEALTH",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-10"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9002,
+      "title": "First Action",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9101,
+      "title": "Monitor GLOBAL Provider Severity Matrix",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 8
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9102,
+      "title": "Inspect Critical Providers",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 8,
+        "y": 8
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9103,
+      "title": "Inspect Provider Top Causes",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 14,
+        "y": 8
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9104,
+      "title": "Monitor Provider Telemetry Freshness",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 14
+      },
+      "scope_intent": "NOW",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 106,
+      "title": "Track Failure and Degraded Trend by Provider",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 45
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 107,
+      "title": "Track Provider Failure Share (Selected Range)",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 51
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 108,
+      "title": "Track Retries Exhausted by Provider/Operation",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 57
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 109,
+      "title": "Track Retries Exhausted Trend by Provider/Operation",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 64
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 102,
+      "title": "Inspect Provider Health Check Latency (p95) - $provider",
+      "type": "gauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 71
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 110,
+      "title": "Inspect Adapter Request Latency by Endpoint (p95)",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 71
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 111,
+      "title": "Inspect Rate Limit Errors by Method",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 76
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 115,
+      "title": "Inspect Network Timeout Errors by Method",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 76
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 112,
+      "title": "Track Rate Limiter Wait by Provider (p95)",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 81
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 113,
+      "title": "Monitor Minimum Rate Limiter Tokens Available",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 81
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 31,
+      "title": "Monitor Cross-Scope Adapter Circuit Breaker State (max)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 86
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 32,
+      "title": "Track Cross-Scope Adapter Circuit Breaker Trips",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 86
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 114,
+      "title": "Review Raw Provider Health Enum",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 30
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 1,
+      "title": "Track Health Check Latency by Provider (p95)",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 30
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 2,
+      "title": "Monitor Healthy Checks (Selected Range)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 36
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-12"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 105,
+      "title": "Monitor Degraded Checks (Selected Range)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 36
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 104,
+      "title": "Track Provider Failure Rate (Selected Range)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 42
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": [
+        "DUX4-12"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 7,
+      "title": "Track Health Checks Total (Selected Range)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 47
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-12"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9402,
+      "title": "ID",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "RUN",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9403,
+      "title": "Processed Records",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "scope_intent": "RUN",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 1000,
+      "title": "Navigation",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "long_text_scroll_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-22"
+      ]
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 1,
+      "title": "Run Scope",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3010,
+      "title": "Browse · Recent pipeline runs (no selection)",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 9402,
+      "title": "ID",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "scope_intent": "RUN",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 9403,
+      "title": "Processed Records",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 28
+      },
+      "scope_intent": "RUN",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3011,
+      "title": "Selected run · funnel stages",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3012,
+      "title": "Selected run · top reasons",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3015,
+      "title": "Selected run · reconciliation",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3016,
+      "title": "Selected run · layers (accounting)",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3013,
+      "title": "Selected run · artifacts",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3014,
+      "title": "Selected run · stage timings / failure (optional)",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3001,
+      "title": "Next actions (≤4)",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 1000,
+      "title": "Navigation",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "long_text_scroll_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-22"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9400,
+      "title": "Provenance",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": true,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9401,
+      "title": "Status",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "scope_intent": "NOW",
+      "family_intent": "HEALTH",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-10"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9991,
+      "title": "First Action",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9101,
+      "title": "Runtime Blockers",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 5,
+        "w": 16,
+        "x": 0,
+        "y": 8
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9102,
+      "title": "Metrics Evidence",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 8
+      },
+      "scope_intent": "NOW",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": true,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": [
+        "DUX4-10",
+        "DUX4-11"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 238,
+      "title": "Track Stage Backlog Trend",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 35
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 240,
+      "title": "Track Records by Stage / Interval",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 35
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 242,
+      "title": "Inspect Active Runtime Blocker Detail",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9105,
+      "title": "Monitor Aggregate Stage Lag",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 47
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 243,
+      "title": "Inspect Stage Expectedness",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 52
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 220,
+      "title": "Runtime Error Rate",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 57
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 207,
+      "title": "Track Pipeline Phase Duration p50/p95/p99",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 239,
+      "title": "Track Pipeline Duration p50/p95/p99",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 256,
+      "title": "Inspect Errors by Stage / Error Code / Range",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 241,
+      "title": "Track Records by Stage / Run Type / Range",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 37
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 2541,
+      "title": "Review Runtime-owned escalation",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 230,
+      "title": "Monitor Pipeline Alert Conditions",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 236,
+      "title": "Monitor No-Records Runs",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 39
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 21,
+      "title": "Monitor Memory Pressure Active",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 44
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 2542,
+      "title": "Review Cross-domain handoffs",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 49
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 4,
+      "title": "Inspect DQ Alert Conditions",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 51
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 5,
+      "title": "Inspect Control-plane Alert Conditions",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 56
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 6,
+      "title": "Inspect Provider Alert Conditions",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 61
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 259,
+      "title": "Inspect GLOBAL Provider Alert Conditions",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 66
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 7,
+      "title": "Inspect Freshness Lagged Entities >24h",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 71
+      },
+      "scope_intent": "NOW",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 2543,
+      "title": "Review Process-level signals (GLOBAL)",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 76
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 209,
+      "title": "Track GLOBAL Shutdown Initiated by Reason / Interval",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 78
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 210,
+      "title": "Track GLOBAL Shutdown Completed by Reason / Interval",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 78
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 237,
+      "title": "Worst Stage Lag",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 16,
+      "title": "Monitor Runtime Blockers",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 205,
+      "title": "Failed Runs",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 0,
+        "y": 6
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [
+        "color_risk"
+      ],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9402,
+      "title": "ID",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "scope_intent": "RUN",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9403,
+      "title": "Processed Records",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "scope_intent": "RUN",
+      "family_intent": "EVIDENCE",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9996,
+      "title": "Failed Workflow Runs / Range",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9997,
+      "title": "Failed Pipeline Steps / Range",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "scope_intent": "UNDECLARED",
+      "family_intent": "UNDECLARED",
+      "has_dux3_desc": false,
+      "defects": [],
+      "dux4_targets": []
+    }
+  ]
+}

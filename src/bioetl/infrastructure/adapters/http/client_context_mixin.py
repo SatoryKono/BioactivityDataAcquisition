@@ -1,11 +1,10 @@
+# pyright: reportUninitializedInstanceVariable=false
 # mypy: disable-error-code=attr-defined
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-"""Context-manager helpers for UnifiedHTTPClient."""
-
 from __future__ import annotations
 
 from types import TracebackType
-from typing import Self, Any, cast
+from typing import Self
 
 import httpx
 
@@ -15,22 +14,29 @@ from bioetl.infrastructure.adapters.base import build_json_accept_headers
 class HTTPClientContextMixin:
     """Async context lifecycle and client-access helpers."""
 
-    _client: httpx.AsyncClient | None = cast(Any, None)  # Any: host attr default (PD6)
-    _client_enter_depth: int = cast(Any, None)  # Any: host attr default (PD6)
-    user_agent: str = cast(Any, None)  # Any: host attr default (PD6)
-    contact_email: str | None = cast(Any, None)  # Any: host attr default (PD6)
-    run_id: object | None = cast(Any, None)  # Any: host attr default (PD6)
-    timeout: float = cast(Any, None)  # Any: host attr default (PD6)
-    read_timeout_multiplier: float = cast(Any, None)  # Any: host attr default (PD6)
-    max_connections: int = cast(Any, None)  # Any: host attr default (PD6)
-    max_keepalive_connections: int = cast(Any, None)  # Any: host attr default (PD6)
-    trust_env: bool = cast(Any, None)  # Any: host attr default (PD6)
+    # Annotation-only host surface. Avoid class-level None on numeric counters:
+    # getattr(self, name, 0) still returns None when the class attr is None.
+    _client: httpx.AsyncClient | None
+    _client_enter_depth: int
+    user_agent: str
+    contact_email: str | None
+    run_id: object | None
+    timeout: float
+    read_timeout_multiplier: float
+    max_connections: int
+    max_keepalive_connections: int
+    trust_env: bool
+
+    def _enter_depth(self) -> int:
+        """Return nested enter depth, treating unset/None as zero."""
+        raw = getattr(self, "_client_enter_depth", 0)
+        return 0 if raw is None else int(raw)
 
     async def __aenter__(
         self,
     ) -> Self:
         """Enter async context manager."""
-        current_depth = int(getattr(self, "_client_enter_depth", 0))
+        current_depth = self._enter_depth()
         if self._client is not None and current_depth > 0:
             self._client_enter_depth = current_depth + 1
             return self
@@ -73,7 +79,7 @@ class HTTPClientContextMixin:
     ) -> None:
         """Exit async context manager."""
         del exc_type, exc_val, exc_tb
-        current_depth = int(getattr(self, "_client_enter_depth", 0))
+        current_depth = self._enter_depth()
         if current_depth > 1:
             self._client_enter_depth = current_depth - 1
             return

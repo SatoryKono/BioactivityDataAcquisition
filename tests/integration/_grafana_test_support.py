@@ -27,7 +27,14 @@ _PROMQL_METRIC_SELECTOR_RE = re.compile(r"([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^{}]*)\}
 _PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_]\w*)\s*(=~|=|!=|!~)\s*"')
 _PROMETHEUS_RULE_FILES = tuple(Path("grafana/prometheus-rules").glob("*.yml"))
 
+# DUX4-01 optional Approach A title prefix (ASCII). Titles may omit it today
+# (Approach B); helpers keep contracts prefix-tolerant when prefixes appear.
+SCOPE_TITLE_PREFIX_RE = re.compile(
+    r"^\[(NOW|RANGE|RUN|WORKFLOW|GLOBAL)/(HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY)\]\s+"
+)
+
 __all__ = [
+    "SCOPE_TITLE_PREFIX_RE",
     "_PROMQL_METRIC_SELECTOR_RE",
     "_assert_operator_context_shell_contract",
     "_assert_provider_health_variable_contract",
@@ -46,9 +53,28 @@ __all__ = [
     "get_metric_label_sets",
     "get_panel_expressions",
     "get_row_child_panels",
+    "index_panels_by_base_title",
     "load_dashboard",
+    "panel_base_title",
     "require_dashboard_navigation_links",
+    "strip_scope_title_prefix",
 ]
+
+
+def strip_scope_title_prefix(title: str) -> str:
+    """Remove optional DUX4 ``[SCOPE/FAMILY] `` prefix from a panel title."""
+    return SCOPE_TITLE_PREFIX_RE.sub("", title)
+
+
+def panel_base_title(panel: dict[str, Any]) -> str:
+    """Return panel title without optional scope prefix."""
+    return strip_scope_title_prefix(str(panel.get("title") or ""))
+
+
+def index_panels_by_base_title(panels: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Map base titles to panels (last wins on duplicates)."""
+    return {panel_base_title(panel): panel for panel in panels if panel.get("title")}
+
 
 
 def _add_metric_name_suffixes(

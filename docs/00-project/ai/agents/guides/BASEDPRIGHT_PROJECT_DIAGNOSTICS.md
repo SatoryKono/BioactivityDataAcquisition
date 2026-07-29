@@ -4,7 +4,8 @@ Linked campaigns:
 
 - PD–PD4 (closed): product errors → 0; suppression inventory; Host Protocol partial burn-down
 - **PD5 (closed):** `#6994` … `#7004` — workspace ~10k → ~2.2k (tests unit surface)
-- **PD6 (active/closeout):** `#7042` … `#7052` — ~15k IDE figure = product **warnings**; residual suppressions + tests/memory/scripts advisory
+- **PD6 (closed):** `#7042` … `#7052` — ~15k IDE figure = product **warnings**; residual suppressions + tests/memory/scripts advisory
+- **PD7 (open):** `#7078` … `#7087` — ~15.9k IDE figure = product **warnings** (~15.8k) + suppressions residual — plan `reports/quality/PROJECT_DIAGNOSTICS_15890_AUDIT_AND_PLAN_2026-07-29.md`
 
 ## Gate semantics
 
@@ -22,6 +23,7 @@ Linked campaigns:
 | --- | --- |
 | IDE “~12662 errors” (pre-PD5) | Problems panel composite; not exact CLI total |
 | IDE “~15062 errors” (post-PD5) | **Best match: product warnings ~15.5k–15.8k**; **not** product errors |
+| IDE “~15890 errors” (post-PD6) | **Best match: product warnings ~15774** (±1%); **not** product errors |
 | Live workspace errors (after PD5) | **~2174** (further residual tests burned in PD6) |
 | Product `src/bioetl` **errors** | **0** |
 | Product `src/bioetl` **warnings** | **~15.8k** advisory (Any/Unknown dominant) |
@@ -82,6 +84,8 @@ Avoid bulk silver hand-edits. See `reports/quality/pd6-warnings-pilot-note.md` a
 
 ## Related
 
+- Plan (~15.9k / post-PD6 warnings): `reports/quality/PROJECT_DIAGNOSTICS_15890_AUDIT_AND_PLAN_2026-07-29.md`
+- PD7 pack: `.github/ISSUES/PD7-2026-07-29-PROJECT-DIAGNOSTICS-WARNINGS-RESIDUAL-ISSUE-PACK.md`
 - Plan (~15k / warnings-era): `reports/quality/PROJECT_DIAGNOSTICS_15062_AUDIT_AND_PLAN_2026-07-29.md`
 - Plan (~12k / workspace-era): `reports/quality/PROJECT_DIAGNOSTICS_12662_AUDIT_AND_PLAN_2026-07-28.md`
 - PD6 pack: `.github/ISSUES/PD6-2026-07-29-PROJECT-DIAGNOSTICS-WARNINGS-ISSUE-PACK.md`

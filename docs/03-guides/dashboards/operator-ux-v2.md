@@ -99,3 +99,46 @@ See [usability-baseline-protocol.md](usability-baseline-protocol.md):
 - Status colors use green/orange/red/gray with **text mappings** (OK/WARN/CRIT/UNKNOWN).
 - Nav bus keeps contrast on dark/light themes (theme-safe borders).
 - Do not rely on color alone for severity.
+
+## DUX3 residual enforcement (2026-07-29)
+
+Post-DSA screenshot audit residual. Normative detail:
+[dux3-residual-contracts.md](dux3-residual-contracts.md).
+
+### First-screen scope markers
+
+**Grammar** (documented + panel descriptions; titles stay contract-stable):
+
+`[SCOPE·FAMILY]` where:
+
+- **SCOPE** ∈ `NOW | RANGE | RUN | WORKFLOW | GLOBAL`
+- **FAMILY** ∈ `HEALTH | EXEC | EVIDENCE | IMPACT | APPLICABILITY`
+
+Scope markers are enforced in **panel descriptions** and
+[dux3-residual-contracts.md](dux3-residual-contracts.md) so integration title
+contracts remain stable. Provenance strips carry the operator-facing legend.
+
+### Residual rules
+
+1. Telemetry SCRAPING / scrape-gap chips are **EVIDENCE**, not pipeline HEALTH.
+2. Empty provider selection is **N/A**, not green zero success.
+3. Dual RANGE 100% scores are not peer “all healthy” when NOW Status is UNKNOWN.
+4. Replay Safety is evidence-qualified; overall INCOMPLETE owns the headline when incomplete.
+5. Incident suspects default to **WORKFLOW/GLOBAL** blast radius unless pipeline-filtered.
+6. ID / Processed Records: **Run Explorer hub**; other boards keep **collapsed thin shell** only.
+7. Prefer typed empty states (`VALID_EMPTY`, `MISSING`, `N/A`, `STALE`, …) over bare UNKNOWN.
+
+### Evidence artifacts
+
+- `docs/03-guides/dashboards/dux3-first-screen-inventory.json` (#7054)
+- `docs/03-guides/dashboards/dux3-audit-selection-notes.md` (#7054)
+- Apply script: `scripts/ops/observability/grafana/apply_dux3_residual.py`
+
+### DUX4 visual enforcement (2026-07-29, epic #7088)
+
+- Harness: [dux4-title-scope-harness.md](dux4-title-scope-harness.md)
+- Override inventory: [dux4-field-override-inventory.json](dux4-field-override-inventory.json)
+- Panel matrix: [dux4-panel-redesign-matrix.json](dux4-panel-redesign-matrix.json)
+- Variable rules: [dux4-variable-rules.md](dux4-variable-rules.md)
+- Closeout: [dux4-visual-enforcement-closeout.md](dux4-visual-enforcement-closeout.md)
+- Apply script: `scripts/ops/observability/grafana/apply_dux4_enforcement.py`

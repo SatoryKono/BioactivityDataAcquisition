@@ -25,6 +25,13 @@ monitoring surface reduction 2026-07-23)
 - **Phase-2 residual (active):** epic #6828 — see
   `dashboard-system-2.0-phase2-residual.md` (execution SSOT). Greenfield
   «Unified Plan v2.0» is **not** executable (ADR-010 / ≤7 boards / no invent metrics).
+- **DUX3 residual (2026-07-29, epic #7053):** post-DSA screenshot-audit enforcement —
+  `dux3-residual-contracts.md`, inventory
+  `docs/03-guides/dashboards/dux3-first-screen-inventory.json`.
+- **DUX4 visual enforcement (2026-07-29, epic #7088):**
+  `dux4-title-scope-harness.md`, `dux4-field-override-inventory.json`,
+  `dux4-panel-redesign-matrix.json`, `dux4-variable-rules.md`,
+  `dux4-visual-enforcement-closeout.md`.
 - Residual gap table: `reports/observability/dashboard-ux-residual-gap-2026-07-28.md`.
 - `operator-ux-v2.md` — first-screen zones, prose budget, empty-state taxonomy, link standard, KPI targets.
 - `verdict-ontology.md` — state×confidence×basis×next_action for all workspaces.

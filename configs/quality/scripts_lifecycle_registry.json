@@ -794,6 +794,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded basedpyright test-snapshot utility while the test typing campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
     },
+    "scripts/engineering/qa/report_basedpyright_warning_snapshot.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded basedpyright warning-snapshot utility while the typing debt campaign needs reproducible shrink-only evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
+    },
     "scripts/engineering/qa/report_config_surface_backlog.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -895,6 +901,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded manual TDX-AUDIT issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget."
+    },
+    "scripts/engineering/repo/publish_test_sys_issues.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual TEST-SYS issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget."
     },
     "scripts/engineering/repo/sync_scripts_inventory.py": {
       "owner": "@bioetl-platform",
@@ -1124,6 +1136,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the deterministic protein-class L1 target-type artifact generator consumed by generated-artifact drift tests; promote to an active scripts.schema command only if it becomes a documented public schema generation surface."
     },
+    "scripts/schema/generate_typed_arrow_schema_sources.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only for the bounded PD7-4 typed Arrow schema migration and its check mode; consolidate into the canonical schema command surface or retire it after the migration closes."
+    },
     "scripts/shutdown.ps1": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
@@ -1177,6 +1195,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a one-off DUX2 residual migration helper for auditability; do not promote it to an active operator workflow."
+    },
+    "scripts/ops/observability/grafana/generate_dux4_issue_pack.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded DUX4 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
     },
     "src/tools/apply_elk_layout.py": {
       "owner": "@bioetl-platform",
