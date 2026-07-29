@@ -88,7 +88,7 @@ async def _await_blocking_deltalake_call[BlockingResult](
     def _worker() -> None:
         try:
             result = call()
-        except Exception as exc:  # pragma: no cover - surfaced through await
+        except Exception as exc:  # pragma: no cover - surfaced through await  # NOSONAR python:S5754 - thread boundary must capture all call failures
             with suppress(RuntimeError):
                 loop.call_soon_threadsafe(_publish_exception, exc)
             return

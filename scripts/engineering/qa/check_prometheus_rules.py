@@ -82,6 +82,40 @@ def _run(command: list[str]) -> int:
     return int(completed.returncode)
 
 
+def _iter_rule_entries(payload: object) -> list[object]:
+    if not isinstance(payload, dict):
+        return []
+    entries: list[object] = []
+    for group in payload.get("groups", []) or []:
+        if not isinstance(group, dict):
+            continue
+        for rule in group.get("rules", []) or []:
+            entries.append(rule)
+    return entries
+
+
+def _ingest_rule_entry(
+    rule: object,
+    *,
+    rules_file: Path,
+    alert_definitions: set[str],
+    record_definitions: set[str],
+    control_plane_records: set[str],
+) -> None:
+    if not isinstance(rule, dict):
+        return
+    alert_name = rule.get("alert")
+    if alert_name:
+        alert_definitions.add(str(alert_name))
+    record_name = rule.get("record")
+    if not record_name:
+        return
+    record_name = str(record_name)
+    record_definitions.add(record_name)
+    if rules_file == CONTROL_PLANE_RULES_FILE:
+        control_plane_records.add(record_name)
+
+
 def _collect_rule_definitions(
     rules_files: tuple[Path, ...],
 ) -> tuple[set[str], set[str], set[str]]:
@@ -92,18 +126,34 @@ def _collect_rule_definitions(
     control_plane_records: set[str] = set()
     for rules_file in rules_files:
         payload = yaml.safe_load(rules_file.read_text(encoding="utf-8"))
-        for group in payload.get("groups", []):
-            for rule in group.get("rules", []):
-                if rule.get("alert"):
-                    alert_definitions.add(str(rule["alert"]))
-                record_name = rule.get("record")
-                if not record_name:
-                    continue
-                record_name = str(record_name)
-                record_definitions.add(record_name)
-                if rules_file == CONTROL_PLANE_RULES_FILE:
-                    control_plane_records.add(record_name)
+        for rule in _iter_rule_entries(payload):
+            _ingest_rule_entry(
+                rule,
+                rules_file=rules_file,
+                alert_definitions=alert_definitions,
+                record_definitions=record_definitions,
+                control_plane_records=control_plane_records,
+            )
     return alert_definitions, record_definitions, control_plane_records
+
+
+def _register_alert_assertion(
+    assertion: object,
+    *,
+    tested_alerts: set[str],
+    firing_alerts: set[str],
+    non_firing_alerts: set[str],
+) -> None:
+    if not isinstance(assertion, dict):
+        return
+    alert_name = str(assertion.get("alertname", ""))
+    if not alert_name:
+        return
+    tested_alerts.add(alert_name)
+    if assertion.get("exp_alerts"):
+        firing_alerts.add(alert_name)
+    else:
+        non_firing_alerts.add(alert_name)
 
 
 def _collect_alert_fixture_coverage(
@@ -116,25 +166,31 @@ def _collect_alert_fixture_coverage(
         if not isinstance(test_case, dict):
             continue
         for assertion in test_case.get("alert_rule_test", []):
-            if not isinstance(assertion, dict):
-                continue
-            alert_name = str(assertion.get("alertname", ""))
-            if not alert_name:
-                continue
-            tested_alerts.add(alert_name)
-            if assertion.get("exp_alerts"):
-                firing_alerts.add(alert_name)
-            else:
-                non_firing_alerts.add(alert_name)
+            _register_alert_assertion(
+                assertion,
+                tested_alerts=tested_alerts,
+                firing_alerts=firing_alerts,
+                non_firing_alerts=non_firing_alerts,
+            )
     return tested_alerts, firing_alerts, non_firing_alerts
+
+
+def _records_mentioned_in_expr(
+    expr: str, record_definitions: set[str]
+) -> set[str]:
+    import re
+
+    return {
+        record_name
+        for record_name in record_definitions
+        if re.search(rf"\b{re.escape(record_name)}\b", expr)
+    }
 
 
 def _collect_directly_tested_records(
     test_cases: list[object],
     record_definitions: set[str],
 ) -> set[str]:
-    import re
-
     directly_tested_records: set[str] = set()
     for test_case in test_cases:
         if not isinstance(test_case, dict):
@@ -143,9 +199,9 @@ def _collect_directly_tested_records(
             if not isinstance(assertion, dict) or not assertion.get("exp_samples"):
                 continue
             expr = str(assertion.get("expr", ""))
-            for record_name in record_definitions:
-                if re.search(rf"\b{re.escape(record_name)}\b", expr):
-                    directly_tested_records.add(record_name)
+            directly_tested_records.update(
+                _records_mentioned_in_expr(expr, record_definitions)
+            )
     return directly_tested_records
 
 

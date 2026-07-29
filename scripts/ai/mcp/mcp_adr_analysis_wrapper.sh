@@ -20,7 +20,8 @@ export EXECUTION_MODE="${EXECUTION_MODE:-prompt-only}"
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${TMPDIR:-/tmp}/bioetl-npm-cache}"
 # tree-sitter native modules often fail outside a full node-gyp toolchain;
 # the server supports reduced mode without them.
-export npm_config_ignore_scripts="${npm_config_ignore_scripts:-true}"
+export NPM_CONFIG_IGNORE_SCRIPTS="${NPM_CONFIG_IGNORE_SCRIPTS:-${npm_config_ignore_scripts:-true}}"
+export npm_config_ignore_scripts="${NPM_CONFIG_IGNORE_SCRIPTS}"
 
 mcp_exit_if_validate_only "adr-analysis"
 

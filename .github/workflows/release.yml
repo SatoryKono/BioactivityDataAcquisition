@@ -44,7 +44,7 @@ jobs:
           python -m pip install --only-binary=:all: "build==1.2.2.post1" "twine==6.1.0"
 
       - name: Clean previous builds
-        run: rm -rf dist/ build/ *.egg-info
+        run: rm -rf ./dist/ ./build/ ./*.egg-info
 
       - name: Build distribution packages
         run: python -m build

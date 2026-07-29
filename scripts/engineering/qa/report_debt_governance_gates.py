@@ -687,6 +687,19 @@ def _string_paths_from(values: object) -> set[str]:
     }
 
 
+def _paths_from_emitter_lists(field_mapping: object) -> set[str]:
+    if not isinstance(field_mapping, dict):
+        return set()
+    paths: set[str] = set()
+    for emitters in field_mapping.values():
+        if not isinstance(emitters, list):
+            continue
+        for emitter_path in emitters:
+            if isinstance(emitter_path, str) and emitter_path.strip():
+                paths.add(emitter_path)
+    return paths
+
+
 def _emitter_paths_from_fields(
     runtime_cardinality: dict[str, Any],
     field_names: object,
@@ -697,15 +710,9 @@ def _emitter_paths_from_fields(
     for field_name in field_names:
         if not isinstance(field_name, str):
             continue
-        field_mapping = runtime_cardinality.get(field_name, {})
-        if not isinstance(field_mapping, dict):
-            continue
-        for emitters in field_mapping.values():
-            if not isinstance(emitters, list):
-                continue
-            for emitter_path in emitters:
-                if isinstance(emitter_path, str) and emitter_path.strip():
-                    trigger_paths.add(emitter_path)
+        trigger_paths.update(
+            _paths_from_emitter_lists(runtime_cardinality.get(field_name, {}))
+        )
     return trigger_paths
 
 

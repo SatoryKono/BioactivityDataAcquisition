@@ -25,7 +25,7 @@ from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 __all__ = ["BaseDeltaWriter", "DeltaTableNotFoundError", "coerce_null_types_for_delta"]
 
 
-def DeltaTable(
+def delta_table(
     table_uri: str | Path,
     version: int | None = None,
     storage_options: dict[str, str] | None = None,
@@ -40,6 +40,10 @@ def DeltaTable(
         storage_options=storage_options,
         without_files=without_files,
     )
+
+
+# PascalCase alias retained for historical monkeypatch/test seams (python:S1542).
+DeltaTable = delta_table
 
 
 # Any: arbitrary Python value from heterogeneous record fields; returns same or JSON string
