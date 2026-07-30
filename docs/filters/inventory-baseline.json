@@ -1422,7 +1422,7 @@
       "symbol": "--silver-filter-only",
       "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "occurrence_count": 1,
-      "first_line": 428,
+      "first_line": 434,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1455,7 +1455,7 @@
       "symbol": "--silver-filter-only",
       "path": "docs/05-operations/01-monitoring-guide.md",
       "occurrence_count": 1,
-      "first_line": 251,
+      "first_line": 256,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1499,7 +1499,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "occurrence_count": 1,
-      "first_line": 418,
+      "first_line": 424,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1829,7 +1829,7 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/README.md",
       "occurrence_count": 2,
-      "first_line": 1246,
+      "first_line": 1254,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""
