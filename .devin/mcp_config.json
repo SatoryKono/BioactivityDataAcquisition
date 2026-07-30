@@ -1,10 +1,4 @@
 {
-  "devin": {
-    "org_id": "bioetl"
-  },
-  "shell": {
-    "setup_complete": true
-  },
   "mcpServers": {
     "memory": {
       "type": "http",

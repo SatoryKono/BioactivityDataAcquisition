@@ -15,7 +15,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | Dashboard | Panel ID | Title |
 | --- | ---: | --- |
 | bioetl-control-plane-v1.json | 1000 | Navigation |
-| bioetl-control-plane-v1.json | 9400 | Provenance |
+| bioetl-control-plane-v1.json | 9400 | Inspect Scope & Evidence |
 | bioetl-control-plane-v1.json | 9401 | Status |
 | bioetl-control-plane-v1.json | 906 | Primary recovery |
 | bioetl-control-plane-v1.json | 891 | Monitor: Replay Safety State |
@@ -69,13 +69,62 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9408 | Inspect: P1 Replay and Evidence Anchors |
 | bioetl-control-plane-v1.json | 9409 | Inspect: P2 Forensic Anchors |
 | bioetl-control-plane-v1.json | 139 | Review: Remaining Replay-Safety Signals |
-| bioetl-control-plane-v1.json | 9412 | Run context (thin) → Run Explorer |
+| bioetl-control-plane-v1.json | 9412 | Run context (thin) -> Run Explorer hub |
 | bioetl-control-plane-v1.json | 9402 | ID |
 | bioetl-control-plane-v1.json | 9403 | Processed Records |
+| bioetl-dq-v2.json | 1000 | Navigation |
+| bioetl-dq-v2.json | 9400 | Inspect Scope & Evidence |
+| bioetl-dq-v2.json | 9401 | Status |
+| bioetl-dq-v2.json | 9103 | Review: First Action |
+| bioetl-dq-v2.json | 9101 | Now · DQ Threshold State |
+| bioetl-dq-v2.json | 9102 | Now · DQ Current Reasons |
+| bioetl-dq-v2.json | 220 | Run lane · Silver/Gold rejects |
+| bioetl-dq-v2.json | 152 | Monitor: Silver Filter Reject Accounting Mismatch |
+| bioetl-dq-v2.json | 121 | Inspect: Top Silver Reject Reasons (Pareto) |
+| bioetl-dq-v2.json | 122 | Inspect: Top Silver Reject Fields |
+| bioetl-dq-v2.json | 118 | Inspect: Silver Filter Rejects by Pipeline |
+| bioetl-dq-v2.json | 156 | Inspect: Gold Reject Outcomes by Pipeline |
+| bioetl-dq-v2.json | 221 | Now lane · validation diagnostics |
+| bioetl-dq-v2.json | 1 | Track Range Evidence: Bronze -> Silver -> Gold |
+| bioetl-dq-v2.json | 3 | Track: Source Records in Range (Bronze) |
+| bioetl-dq-v2.json | 4 | Track: Clean Records in Range (Gold) |
+| bioetl-dq-v2.json | 7 | Track: Silver Validation Failures in Range |
+| bioetl-dq-v2.json | 101 | Review: Latest Successful Data Timestamp |
+| bioetl-dq-v2.json | 9 | Inspect: Quarantine by Error Type |
+| bioetl-dq-v2.json | 12 | Monitor: Silver Validation Failures |
+| bioetl-dq-v2.json | 151 | Monitor: Gold Strict Validation Failures |
+| bioetl-dq-v2.json | 10 | Track: Anomalies Detected |
+| bioetl-dq-v2.json | 11 | Track: DQ Check Duration (p95) |
+| bioetl-dq-v2.json | 155 | Track: DQ Threshold Events in Range Trend |
+| bioetl-dq-v2.json | 153 | Track: Data Quality Score Trend (Volume-weighted) |
+| bioetl-dq-v2.json | 116 | Review: Lineage Handoff to Control Plane |
+| bioetl-dq-v2.json | 150 | Review: Aggregate Control-plane Handoff |
+| bioetl-dq-v2.json | 9404 | Range lane · debug evidence |
+| bioetl-dq-v2.json | 2 | Monitor: Data Quality Score (Volume-weighted) |
+| bioetl-dq-v2.json | 5 | Monitor: Worst-Entity DQ Score |
+| bioetl-dq-v2.json | 8 | Time Range · Worst Freshness Age (hours; SLA 24/72) |
+| bioetl-dq-v2.json | 154 | Track: DQ Blocked Records in Range (Evidence) |
+| bioetl-dq-v2.json | 6 | Range · Records Quarantined |
+| bioetl-dq-v2.json | 117 | Range · Silver Filter Rejects |
+| bioetl-dq-v2.json | 9405 | Run context (thin) -> Run Explorer hub |
+| bioetl-dq-v2.json | 9402 | ID |
+| bioetl-dq-v2.json | 9403 | Processed Records |
+| bioetl-incident-v1.json | 1000 | Navigation |
+| bioetl-incident-v1.json | 9400 | Inspect Scope & Evidence |
+| bioetl-incident-v1.json | 9401 | Status |
+| bioetl-incident-v1.json | 2001 | Next Best Actions |
+| bioetl-incident-v1.json | 2010 | Ranked Active Suspects |
+| bioetl-incident-v1.json | 2005 | Evidence timeline · Current Alerts (now) |
+| bioetl-incident-v1.json | 2006 | Evidence timeline · Alert State History (range) |
+| bioetl-incident-v1.json | 2007 | Impact / confidence (honest bounds) |
+| bioetl-incident-v1.json | 2099 | Domain suspect detail (forensics; collapsed) |
+| bioetl-incident-v1.json | 2002 | Active Suspects · Runtime |
+| bioetl-incident-v1.json | 2003 | Active Suspects · Provider |
+| bioetl-incident-v1.json | 2004 | Active Suspects · DQ |
 | bioetl-overview-v2.json | 9600 | Alert/SLO Triage |
 | bioetl-overview-v2.json | 9601 | Triage Alert State |
 | bioetl-overview-v2.json | 1000 | Navigation |
-| bioetl-overview-v2.json | 99 | Provenance |
+| bioetl-overview-v2.json | 99 | Inspect Scope & Evidence |
 | bioetl-overview-v2.json | 214 | Status |
 | bioetl-overview-v2.json | 215 | First Action |
 | bioetl-overview-v2.json | 9002 | Inputs |
@@ -95,11 +144,11 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9007 | Provider |
 | bioetl-overview-v2.json | 9005 | Data Validation |
 | bioetl-overview-v2.json | 9013 | Workflow |
-| bioetl-overview-v2.json | 9602 | Run context (thin) → Run Explorer |
+| bioetl-overview-v2.json | 9602 | Run context (thin) -> Run Explorer hub |
 | bioetl-overview-v2.json | 9300 | ID |
 | bioetl-overview-v2.json | 9301 | Processed Records |
 | bioetl-provider-health-v2.json | 1000 | Navigation |
-| bioetl-provider-health-v2.json | 9400 | Provenance |
+| bioetl-provider-health-v2.json | 9400 | Inspect Scope & Evidence |
 | bioetl-provider-health-v2.json | 9401 | Status |
 | bioetl-provider-health-v2.json | 9002 | First Action |
 | bioetl-provider-health-v2.json | 9101 | Monitor GLOBAL Provider Severity Matrix |
@@ -126,85 +175,35 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 105 | Monitor Degraded Checks (Selected Range) |
 | bioetl-provider-health-v2.json | 104 | Track Provider Failure Rate (Selected Range) |
 | bioetl-provider-health-v2.json | 7 | Track Health Checks Total (Selected Range) |
-| bioetl-provider-health-v2.json | 9405 | Run context (thin) → Run Explorer |
+| bioetl-provider-health-v2.json | 9405 | Run context (thin) -> Run Explorer hub |
 | bioetl-provider-health-v2.json | 9402 | ID |
 | bioetl-provider-health-v2.json | 9403 | Processed Records |
-
-## bioetl-incident-v1.json
-
-
-## bioetl-run-explorer-v1.json
-
-| bioetl-incident-v1.json | 1000 | Navigation |
-| bioetl-incident-v1.json | 9400 | Provenance |
-| bioetl-incident-v1.json | 9401 | Status
-| bioetl-incident-v1.json | 2010 | Ranked Active Suspects |
-| bioetl-incident-v1.json | 2001 | Next Best Actions |
-| bioetl-incident-v1.json | 2002 | Active Suspects · Runtime |
-| bioetl-incident-v1.json | 2003 | Active Suspects · Provider |
-| bioetl-incident-v1.json | 2004 | Active Suspects · DQ |
-| bioetl-incident-v1.json | 2005 | Current Alerts (firing/pending) |
-| bioetl-incident-v1.json | 2006 | Alert State History (range) |
-| bioetl-incident-v1.json | 2007 | Impact / confidence (honest bounds) |
 | bioetl-run-explorer-v1.json | 1000 | Navigation |
-| bioetl-run-explorer-v1.json | 1 | Provenance · Run Scope |
+| bioetl-run-explorer-v1.json | 1 | Inspect Run Selection & Evidence |
+| bioetl-run-explorer-v1.json | 3010 | Browse · Recent pipeline runs (no selection) |
 | bioetl-run-explorer-v1.json | 9402 | ID |
 | bioetl-run-explorer-v1.json | 9403 | Processed Records |
-| bioetl-run-explorer-v1.json | 3001 | Next actions (≤4) |
-| bioetl-run-explorer-v1.json | 3010 | Recent pipeline runs (no selection) |
+| bioetl-run-explorer-v1.json | 3099 | Selected run detail (Ops HTTP; expand after selection) |
 | bioetl-run-explorer-v1.json | 3011 | Selected run · funnel stages |
 | bioetl-run-explorer-v1.json | 3012 | Selected run · top reasons |
+| bioetl-run-explorer-v1.json | 3015 | Selected run · reconciliation |
+| bioetl-run-explorer-v1.json | 3016 | Selected run · layers (accounting) |
 | bioetl-run-explorer-v1.json | 3013 | Selected run · artifacts |
 | bioetl-run-explorer-v1.json | 3014 | Selected run · stage timings / failure (optional) |
-| bioetl-dq-v2.json | 1000 | Navigation |
-| bioetl-dq-v2.json | 9400 | Provenance |
-| bioetl-dq-v2.json | 9401 | Status |
-| bioetl-dq-v2.json | 9103 | Review: First Action |
-| bioetl-dq-v2.json | 9101 | Now · DQ Threshold State |
-| bioetl-dq-v2.json | 9102 | Now · DQ Current Reasons |
-| bioetl-dq-v2.json | 8 | Time Range · Worst Freshness Age (hours; SLA 24/72) |
-| bioetl-dq-v2.json | 154 | Track: DQ Blocked Records in Range (Evidence) |
-| bioetl-dq-v2.json | 220 | Run lane · Silver/Gold rejects |
-| bioetl-dq-v2.json | 152 | Monitor: Silver Filter Reject Accounting Mismatch |
-| bioetl-dq-v2.json | 121 | Inspect: Top Silver Reject Reasons (Pareto) |
-| bioetl-dq-v2.json | 122 | Inspect: Top Silver Reject Fields |
-| bioetl-dq-v2.json | 118 | Inspect: Silver Filter Rejects by Pipeline |
-| bioetl-dq-v2.json | 156 | Inspect: Gold Reject Outcomes by Pipeline |
-| bioetl-dq-v2.json | 221 | Now lane · validation diagnostics |
-| bioetl-dq-v2.json | 1 | Track Range Evidence: Bronze -> Silver -> Gold |
-| bioetl-dq-v2.json | 3 | Track: Source Records in Range (Bronze) |
-| bioetl-dq-v2.json | 4 | Track: Clean Records in Range (Gold) |
-| bioetl-dq-v2.json | 7 | Track: Silver Validation Failures in Range |
-| bioetl-dq-v2.json | 101 | Review: Latest Successful Data Timestamp |
-| bioetl-dq-v2.json | 9 | Inspect: Quarantine by Error Type |
-| bioetl-dq-v2.json | 12 | Monitor: Silver Validation Failures |
-| bioetl-dq-v2.json | 151 | Monitor: Gold Strict Validation Failures |
-| bioetl-dq-v2.json | 10 | Track: Anomalies Detected |
-| bioetl-dq-v2.json | 11 | Track: DQ Check Duration (p95) |
-| bioetl-dq-v2.json | 155 | Track: DQ Threshold Events in Range Trend |
-| bioetl-dq-v2.json | 153 | Track: Data Quality Score Trend (Volume-weighted) |
-| bioetl-dq-v2.json | 116 | Review: Lineage Handoff to Control Plane |
-| bioetl-dq-v2.json | 150 | Review: Aggregate Control-plane Handoff |
-| bioetl-dq-v2.json | 9404 | Range lane · debug evidence |
-| bioetl-dq-v2.json | 2 | Monitor: Data Quality Score (Volume-weighted) |
-| bioetl-dq-v2.json | 5 | Monitor: Worst-Entity DQ Score |
-| bioetl-dq-v2.json | 6 | Range · Records Quarantined |
-| bioetl-dq-v2.json | 117 | Range · Silver Filter Rejects |
-| bioetl-dq-v2.json | 9405 | Run context (thin) → Run Explorer |
-| bioetl-dq-v2.json | 9402 | ID |
-| bioetl-dq-v2.json | 9403 | Processed Records |
+| bioetl-run-explorer-v1.json | 3001 | Next actions (≤4) |
 | bioetl-runtime.json | 1000 | Navigation |
-| bioetl-runtime.json | 9400 | Provenance |
+| bioetl-runtime.json | 9400 | Inspect Scope & Evidence |
 | bioetl-runtime.json | 9401 | Status |
 | bioetl-runtime.json | 9991 | First Action |
 | bioetl-runtime.json | 9101 | Runtime Blockers |
-| bioetl-runtime.json | 220 | Runtime Error Rate |
 | bioetl-runtime.json | 9102 | Metrics Evidence |
 | bioetl-runtime.json | 252 | Detect |
-| bioetl-runtime.json | 243 | Inspect Stage Expectedness |
 | bioetl-runtime.json | 238 | Track Stage Backlog Trend |
 | bioetl-runtime.json | 240 | Track Records by Stage / Interval |
 | bioetl-runtime.json | 242 | Inspect Active Runtime Blocker Detail |
+| bioetl-runtime.json | 9105 | Monitor Aggregate Stage Lag |
+| bioetl-runtime.json | 243 | Inspect Stage Expectedness |
+| bioetl-runtime.json | 220 | Runtime Error Rate |
 | bioetl-runtime.json | 253 | Localize |
 | bioetl-runtime.json | 207 | Track Pipeline Phase Duration p50/p95/p99 |
 | bioetl-runtime.json | 239 | Track Pipeline Duration p50/p95/p99 |
@@ -224,11 +223,11 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 2543 | Review Process-level signals (GLOBAL) |
 | bioetl-runtime.json | 209 | Track GLOBAL Shutdown Initiated by Reason / Interval |
 | bioetl-runtime.json | 210 | Track GLOBAL Shutdown Completed by Reason / Interval |
-| bioetl-runtime.json | 9992 | Runtime secondary KPIs |
+| bioetl-runtime.json | 9992 | Secondary KPIs (collapsed; not peer first-screen cards) |
 | bioetl-runtime.json | 237 | Worst Stage Lag |
 | bioetl-runtime.json | 16 | Monitor Runtime Blockers |
 | bioetl-runtime.json | 205 | Failed Runs |
-| bioetl-runtime.json | 9993 | Run context (thin) → Run Explorer |
+| bioetl-runtime.json | 9993 | Run context (thin) -> Run Explorer hub |
 | bioetl-runtime.json | 9402 | ID |
 | bioetl-runtime.json | 9403 | Processed Records |
 | bioetl-runtime.json | 9994 | Workflow band (merged from bioetl-workflow-overview) |

@@ -96,8 +96,8 @@
     {
       "id": 9400,
       "type": "text",
-      "title": "Provenance",
-      "description": "DUX5: status-card shell (reason/action beside Status; no internal scroll). DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW/RANGE/RUN/WORKFLOW/GLOBAL. Incident scope. Variables are filters; suspects use fleet metrics. role=scope_provenance; scope=pipeline,run_type,provider run_id is local control-plane identity context only. Scope: workflow, pipeline, run_type, run_id.",
+      "title": "Inspect Scope & Evidence",
+      "description": "Explains the incident-triage question and the evidence scopes used on this read-only dashboard. CURRENT ranks suspects from current fleet telemetry using the active filters. SELECTED RUN uses HTTP-backed evidence for one exact run; run_id never filters Prometheus. No suspects means none were found in the current scope and does not prove the fleet is healthy.",
       "gridPos": {
         "h": 4,
         "w": 16,
@@ -106,7 +106,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is the highest-confidence active suspect?</div><div><b>Scope:</b> <b>CURRENT</b> = suspects · <b>SELECTED RUN</b> = exact proof</div><div><b>EMPTY DOMAIN</b> = no suspects, not a healthy-fleet verdict</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is the most likely active cause of the incident?</div><div><b>CURRENT</b> = ranked suspects from current fleet telemetry · <b>SELECTED RUN</b> = evidence for one run</div><div>No suspects means none were found in this scope; it does not prove the fleet is healthy</div></div></div>"
       }
     },
     {

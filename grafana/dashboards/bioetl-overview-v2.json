@@ -305,11 +305,11 @@
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is broken or degraded right now?</div><div><b>Scope:</b> <b>CURRENT</b> = Status/action · <b>SELECTED RUN</b> = exact evidence</div><div><b>TIME RANGE</b> = trends · <b>UNKNOWN</b> = incomplete evidence</div></div></div>",
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is broken or degraded right now?</div><div><b>CURRENT</b> = latest status and recommended action · <b>SELECTED RUN</b> = evidence for one run</div><div><b>TIME RANGE</b> = historical trends · <b>UNKNOWN</b> = evidence is missing or stale</div></div></div>",
         "mode": "html"
       },
-      "description": "DUX5: status-card shell (reason/action beside Status; no internal scroll). DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW=current, RANGE=selected window, RUN=exact run_id HTTP, WORKFLOW/GLOBAL=blast radius/fleet. L0 v3 scope/provenance banner. Primary question: what is broken now and where should the operator drill down first? Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Provenance: shipped Prometheus current-status recording rules plus selected-range evidence. Verdict grammar: state x confidence x basis x next_action. Known limitation: first-screen PromQL remains pipeline/run_type-scoped; workflow is context/evidence-first, and run_id is resolved from persisted control-plane manifests. run_id is local control-plane identity context only.",
-      "title": "Provenance",
+      "description": "Explains the main triage question and the evidence scopes used on this dashboard. CURRENT comes from Prometheus current-status recording rules for the active pipeline and run-type filters. SELECTED RUN uses the HTTP-backed run_id and persisted control-plane evidence; run_id never filters Prometheus. TIME RANGE contains historical evidence. UNKNOWN means evidence is missing or stale, not healthy.",
+      "title": "Inspect Scope & Evidence",
       "type": "text"
     },
     {

@@ -24,7 +24,7 @@ JSON is the source of truth.
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1000 | Navigation | text | Static | Static navigation handoff into related dashboards and incident paths. | shared shell | No thresholds; operator routing only. |
-| 9400 | Provenance | text | Static | Static explanation of selector scope, data sources, and evidence posture. | shared shell | No thresholds; provenance note only. |
+| 9400 | Inspect Scope & Evidence | text | Static | Replay-safety question plus plain-language definitions of current, selected-run, and unknown evidence. | shared shell | No thresholds; interpretive guidance only. |
 | 9401 | Status | stat | Prometheus | Evidence-aware replay/resume verdict from `bioetl_control_plane_current_status_trusted`; gates replay blockers, checkpoint freshness/presence, and required telemetry. | shared shell | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. `INCOMPLETE` blocks replay/resume approval. |
 | 9402 | ID | table | Quarantine Explorer | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | No numeric threshold; forensic handoff table. |
 | 9403 | Processed Records | table | Quarantine Explorer | Current processed-record evidence for the selected run scope. | shared shell | No numeric threshold; read-path evidence table. |

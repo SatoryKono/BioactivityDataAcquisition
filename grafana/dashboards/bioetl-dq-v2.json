@@ -106,17 +106,17 @@
     {
       "id": 9400,
       "type": "text",
-      "title": "Provenance",
+      "title": "Inspect Scope & Evidence",
       "gridPos": {
         "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
       },
-      "description": "DUX5: status-card shell (reason/action beside Status; no internal scroll). DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW/RANGE/RUN/WORKFLOW/GLOBAL. Unified context/provenance banner for 4. Data Quality. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only. Visible scope badges distinguish CURRENT, SELECTED RUN, and TIME RANGE evidence.",
+      "description": "Explains the data-quality question and the evidence scopes used on this dashboard. CURRENT is the latest quality status and failure reasons for the active pipeline filters. SELECTED RUN uses HTTP-backed record counts and processing outcomes for one run; run_id never filters Prometheus. TIME RANGE contains quality score, freshness, and impact evidence. These scopes answer different questions and should not be compared as equivalent status signals.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is data conformant, and what impact needs action?</div><div><b>Scope:</b> <b>CURRENT</b> = Status/reasons · <b>SELECTED RUN</b> = accounting</div><div><b>TIME RANGE</b> = score/freshness/impact; scopes are not peers</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Does the data meet quality rules, and what requires action?</div><div><b>CURRENT</b> = latest quality status and reasons · <b>SELECTED RUN</b> = record counts and outcomes</div><div><b>TIME RANGE</b> = quality score, freshness, and impact; these scopes answer different questions</div></div></div>"
       }
     },
     {

@@ -165,16 +165,16 @@ render evidence. A blank body is never a valid state.
 
 `bioetl-overview-v2` is the canonical frozen Overview v3 baseline. Primary
 dashboards `0..5` reuse its visible context shell and common header panels:
-`Provenance`, `Status`, `ID`, and `Processed Records`. Current status semantics
+`Inspect Scope & Evidence`, `Status`, `ID`, and `Processed Records`. Current status semantics
 still belong to each dashboard role; `workflow` remains evidence context unless
 documented otherwise, and `run_id` affects only the local control-plane `ID`
 panel.
 
-Read Provenance as two levels: the 18px first line is the operator question,
-and the 16px lines below define which evidence belongs to `CURRENT`,
+Read `Inspect Scope & Evidence` as two levels: the 18px first line is the
+operator question, and the 16px lines below define which evidence belongs to `CURRENT`,
 `SELECTED RUN`, `TIME RANGE`, `GLOBAL`, or another explicitly named scope.
 Do not compare badges from different scopes as peer verdicts. Run Explorer
-uses `Provenance · Run Scope` for the same contract.
+uses `Inspect Run Selection & Evidence` for the same contract.
 
 `Processed Records` is no longer a range-only throughput summary. It is the
 shared compact stage/outcome accounting table for Bronze, Silver outcomes, and
@@ -199,7 +199,7 @@ and true zero accounting rows before acting: the card links the Quarantine
 Explorer health probe and monitoring setup docs for that reason.
 
 1. `bioetl-overview-v2`, first screen (no scroll):
-   `Provenance`, `Status`, `First Action`, `ID`, and `Processed Records` answer
+   `Inspect Scope & Evidence`, `Status`, `First Action`, `ID`, and `Processed Records` answer
    the L0 question: what is broken/degraded, what exact control-plane identity
    is selected or resolved, and where to open drilldown first. `OK` requires
    recent activity; missing current evidence remains `UNKNOWN`, not green zero.
@@ -211,7 +211,7 @@ Explorer health probe and monitoring setup docs for that reason.
    shipped Prometheus alert rules. Historical/diagnostic evidence remains
    collapsed.
 1. `bioetl-runtime`, first-screen answer area (без скролла):
-   `Provenance`, `Status`, `ID`, `Processed Records`, then
+   `Inspect Scope & Evidence`, `Status`, `ID`, `Processed Records`, then
    `Runtime Status`, `Runtime Blockers` и
    `First Action` отвечают на L2 current-cause вопрос и next operator move.
    `Status` is the compact shared-shell verdict; `Runtime Status` is an
@@ -238,7 +238,7 @@ Explorer health probe and monitoring setup docs for that reason.
    группу после чтения answer row и selected-range KPI, чтобы сократить шум
    первого экрана.
 1. `bioetl-control-plane-v1`, answer row:
-   `Provenance`, `Status`, `ID`, `Processed Records`, then
+   `Inspect Scope & Evidence`, `Status`, `ID`, `Processed Records`, then
    `Monitor: Replay Safety State`, `Monitor: Checkpoint Freshness Lag (seconds)`,
    `Monitor: Manifest / Ledger Integrity` и `Inspect: Telemetry Missing`
    отвечают на L1/L2 вопрос: можно ли доверять
