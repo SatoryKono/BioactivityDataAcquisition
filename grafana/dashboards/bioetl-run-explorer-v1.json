@@ -95,7 +95,7 @@
     {
       "id": 1,
       "type": "text",
-      "title": "Provenance · Run Scope",
+      "title": "Inspect Run Selection & Evidence",
       "gridPos": {
         "h": 4,
         "w": 24,
@@ -104,9 +104,9 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = recent runs · <b>SELECTED RUN</b> = identity/accounting/actions</div><div><b>FULL PATHS</b> = report artifacts, not triage bodies</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which run do you want to inspect?</div><div><b>BROWSE</b> = choose from recent runs · <b>SELECTED RUN</b> = identity, record counts, outcomes, and actions</div><div>Full filesystem paths point to report artifacts for detailed investigation</div></div></div>"
       },
-      "description": "DUX5: status-card shell (reason/action beside Status; no internal scroll). DUX3-25: Empty vs selected modes. run_id is Ops HTTP only — never a Prometheus label. DSA-08: empty = browse recent runs; selected = identity -> accounting -> detail."
+      "description": "Explains the two Run Explorer modes. BROWSE lists recent runs. SELECTED RUN uses BioETL Ops HTTP to show identity, record counts, processing outcomes, and available actions for one exact run. run_id is never a Prometheus label. Full filesystem paths point to report artifacts intended for detailed investigation."
     },
     {
       "id": 3010,

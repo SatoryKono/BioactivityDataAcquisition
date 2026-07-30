@@ -16,11 +16,17 @@ from bioetl.infrastructure.config.workflow_config_api import load_workflow_confi
 
 from .inventory import ExecutableUnit, discover_units
 from .manual_sidecar import load_manual_sidecar
+from .pipeline_projection import (
+    build_ordinary_projection,
+    composite_mermaid,
+    operator_commands,
+    ordinary_mermaid,
+)
 from .source_facts import load_effective_pipeline_facts
 from .validation import validate_composite_payload, workflow_mermaid
 
 SCHEMA_VERSION = "1.0.0"
-PROJECTOR_VERSION = "1.0.0"
+PROJECTOR_VERSION = "1.1.0"
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CONFIGS_ROOT = PROJECT_ROOT / "configs"
 DEFAULT_OUTPUT_ROOT = PROJECT_ROOT / "docs/04-reference/passports"
@@ -121,6 +127,18 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
     source_refs = [
         {"role": "effective_entity_config", "path": _repo_path(unit.config_path)},
         {
+            "role": "pipeline_registration",
+            "path": "src/bioetl/composition/factories/pipeline/_registry_manifest.py",
+        },
+        {
+            "role": "run_cli",
+            "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+        },
+        {
+            "role": "quarantine_cli",
+            "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+        },
+        {
             "role": "gold_validation_contract",
             "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
         },
@@ -131,6 +149,11 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
     ]
     if contract:
         source_refs.append({"role": "dq_contract", "path": _repo_path(contract_path)})
+    provider_path = DEFAULT_CONFIGS_ROOT / "providers" / f"{provider}.yaml"
+    if provider_path.is_file():
+        source_refs.append(
+            {"role": "provider_config", "path": _repo_path(provider_path)}
+        )
     raw_schema = payload.get("schema")
     schema: JsonObject = raw_schema if isinstance(raw_schema, dict) else {}
     raw_sink = pipeline.get("sink")
@@ -142,7 +165,13 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
         projection_profiles.append("http")
     if unit.unit_id == "uniprot_idmapping":
         projection_profiles.append("async_mapping")
-    return {
+    projection = build_ordinary_projection(
+        payload,
+        configs_root=DEFAULT_CONFIGS_ROOT,
+        provider=provider,
+        entity=entity,
+    )
+    facts = {
         "passport_schema_version": SCHEMA_VERSION,
         "kind": "pipeline",
         "identity": {
@@ -165,34 +194,8 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
             "semantic_content_hash": _sha(payload),
         },
         "source_references": source_refs,
-        "extraction": {
-            "source_type": "runtime_resolved",
-            "request": {
-                "method": {
-                    "status": "runtime_resolved",
-                    "resolution_owner": "provider adapter",
-                    "resolution_inputs": [
-                        "effective provider config",
-                        "adapter request builder",
-                    ],
-                },
-                "endpoint_template": {
-                    "status": "runtime_resolved",
-                    "resolution_owner": "provider adapter",
-                    "resolution_inputs": [
-                        "provider base_url",
-                        "entity resource mapping",
-                    ],
-                },
-            },
-            "source_modes": {
-                "declared": ["runtime_resolved"],
-                "cached_bronze": {
-                    "identity_kind": "execution_mode",
-                    "availability": "runtime_resolved",
-                },
-            },
-        },
+        "summary": projection["summary"],
+        "extraction": projection["extraction"],
         "bronze": {
             "capability": "append_only_snapshot",
             "content_hash": payload.get("schema", {}).get("content_hash", {})
@@ -200,6 +203,7 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
             else {},
         },
         "silver": {
+            "normalization_profile": projection["normalization_profile"],
             "column_projection": schema.get("silver", {}),
             "write": sink.get("silver", {}) if isinstance(sink, dict) else {},
             "dq_execution": {
@@ -237,12 +241,21 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
                 ],
             },
         },
+        "operator_commands": operator_commands(unit.unit_id),
         "observability": {
             "metric_labels": ["provider", "pipeline", "run_type", "status"],
             "correlation_fields": ["run_id", "manifest_id"],
         },
         "diagnostics": [],
     }
+    facts["diagrams"] = [
+        {
+            "diagram_id": "data_flow",
+            "kind": "flowchart",
+            "mermaid": ordinary_mermaid(facts),
+        }
+    ]
+    return facts
 
 
 def _composite_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
@@ -277,7 +290,7 @@ def _composite_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
     )
     provider, entity = unit.unit_id.split("_", 1)
     contract_path = _contract_path(provider, entity)
-    return {
+    facts = {
         "passport_schema_version": SCHEMA_VERSION,
         "kind": "pipeline",
         "identity": {
@@ -297,7 +310,77 @@ def _composite_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
         "source_references": [
             {"role": "composite_config", "path": _repo_path(unit.config_path)},
             {"role": "gold_contract", "path": _repo_path(contract_path)},
+            {
+                "role": "composite_cli",
+                "path": "src/bioetl/interfaces/cli/commands/run_composite.py",
+            },
+            {
+                "role": "quarantine_cli",
+                "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+            },
         ],
+        "summary": {
+            "sentences": [
+                (
+                    f"Composite pipeline `{unit.unit_id}` использует seed "
+                    f"`{seed.get('pipeline')}` и объединяет его с configured "
+                    "dependencies/enrichers."
+                ),
+                (
+                    "Join keys, cardinality и source tables берутся из composite "
+                    "configuration; merge и conflict resolution выполняются общей "
+                    "CompositePipelineRunner."
+                ),
+                (
+                    "После merge применяется configured cross-validation; "
+                    "исключённые значения направляются в quarantine или nullification "
+                    "branch согласно composite policy."
+                ),
+                (
+                    f"Результат проходит строгий Gold-контракт `{provider}.{entity}` "
+                    "и публикует manifest/checkpoint evidence."
+                ),
+            ],
+            "source_description": f"seed={seed.get('pipeline')}",
+            "query_filter_summary": "composite join/filter conditions",
+            "field_selection_summary": "seed outputs plus configured enrichers",
+            "silver_processing_summary": "composite merge",
+            "validation_summary": "cross-validation and strict Gold contract",
+            "excluded_data_summary": "quarantine/nullification per composite policy",
+        },
+        "extraction": {
+            "source_kind": "composite",
+            "source_resource": seed.get("pipeline"),
+            "method": None,
+            "endpoint_template": None,
+            "source_tables": [
+                str(item.get("silver_table"))
+                for item in [
+                    seed,
+                    *[
+                        row
+                        for role in ("dependencies", "enrichers")
+                        for row in composite.get(role, [])
+                        if isinstance(row, dict)
+                    ],
+                ]
+                if item.get("silver_table")
+            ],
+            "source_collections": [],
+            "filters": [
+                {
+                    "name": str(item.get("pipeline")),
+                    "source": "dependency",
+                    "required": bool(item.get("required")),
+                    "description": str(item.get("filter_condition") or "no condition"),
+                }
+                for role in ("dependencies", "enrichers")
+                for item in composite.get(role, [])
+                if isinstance(item, dict)
+            ],
+            "selected_fields": [],
+            "field_groups": [],
+        },
         "composite": {
             "version": composite.get("version"),
             "seed": seed,
@@ -314,12 +397,21 @@ def _composite_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
             },
         },
         "execution": {"control_plane": {"run_manifest": True, "checkpoints": True}},
+        "operator_commands": operator_commands(unit.unit_id, composite=True),
         "observability": {
             "metric_labels": ["pipeline", "run_type", "status"],
             "correlation_fields": ["run_id", "manifest_id"],
         },
         "diagnostics": diagnostics,
     }
+    facts["diagrams"] = [
+        {
+            "diagram_id": "composite_flow",
+            "kind": "flowchart",
+            "mermaid": composite_mermaid(facts),
+        }
+    ]
+    return facts
 
 
 def _classify_transform(name: str) -> list[str]:

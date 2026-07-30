@@ -107,17 +107,17 @@
     {
       "id": 9400,
       "type": "text",
-      "title": "Provenance",
+      "title": "Inspect Scope & Evidence",
       "gridPos": {
         "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
       },
-      "description": "DUX5: status-card shell (reason/action beside Status; no internal scroll). DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW/RANGE/RUN/WORKFLOW/GLOBAL. Unified context/provenance banner for 0. Control Plane. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only.",
+      "description": "Explains the decision question and the evidence scopes used on this dashboard. CURRENT is the latest replay-readiness decision for the active workflow, pipeline, and run-type filters. SELECTED RUN uses the HTTP-backed run_id identity and its persisted control-plane evidence; run_id never filters Prometheus. UNKNOWN means required evidence is missing or stale, not that replay is safe.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div><b>Scope:</b> <b>CURRENT</b> = replay decision · <b>SELECTED RUN</b> = identity</div><div><b>UNKNOWN</b> = incomplete evidence — not OK</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can the selected run be replayed safely?</div><div><b>CURRENT</b> = latest replay-readiness decision for the active filters</div><div><b>SELECTED RUN</b> = identity and evidence for one run · <b>UNKNOWN</b> = required evidence is incomplete</div></div></div>"
       }
     },
     {

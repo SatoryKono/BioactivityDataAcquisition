@@ -310,7 +310,7 @@ Canonical L0 answer-first hub using the frozen `1. Overview v3` layout as the ba
 - Panel `9013` (Workflow) → Open Workflow
 
 ### First-screen структура
-- **Tier 1**: `Provenance`, `Status`, `First Action`, `ID`, `Processed Records`, first-screen `Inputs` matrix и expanded `Alert/SLO Triage`
+- **Tier 1**: `Inspect Scope & Evidence`, `Status`, `First Action`, `ID`, `Processed Records`, first-screen `Inputs` matrix и expanded `Alert/SLO Triage`
 - **Tier 2**: `Control Plane`, `Runtime`, `Data Quality`, `Provider`, `Data Validation`, `Inputs`, `Workflow`
 - **Tier 3**: rows `L1 Historical Trends` и `Range Evidence (Historical / Recent History)` collapsed by default
 - **Tier 4**: row `Diagnostics & Docs (Logs / Traces / Raw Metrics)` collapsed by default

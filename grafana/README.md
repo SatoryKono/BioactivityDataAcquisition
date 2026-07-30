@@ -974,18 +974,18 @@ Common context panels on primary dashboards outside Overview:
 
 | Panel | ID | Contract |
 | --- | ---:| --- |
-| `Provenance` | `9400` | Visible question-only banner; selected context stays in the panel tooltip/description. |
+| `Inspect Scope & Evidence` | `9400` | Visible operator question plus plain-language evidence-scope definitions; selector details stay in the panel tooltip/description. |
 | `Status` | `9401` | Role-specific compact status; no Prometheus `$run_id` filtering. |
 | `ID` | `9402` | BioETL Ops HTTP identity table for `pipeline/run_type/run_id`. |
 | `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`; exact `$run_id` scopes resolve from RunLedger evidence, while aggregate scopes use `bioetl_processed_records_*` recording rules; zero-valued outcome rows remain visible and missing accounting series are UNKNOWN/no-data, not OK. |
 | `ID Empty State` | `9410` | Control Plane-only neutral fallback text shown below the identity table when the selected scope returns no visible rows. |
 | `Processed Records Empty State` | `9411` | Control Plane-only neutral fallback text shown below the accounting table when the selected scope returns no visible rows. |
 
-All seven shipped dashboards enforce one Provenance readability contract based
+All seven shipped dashboards enforce one question/scope/evidence readability contract based
 on `4. Data Quality`: orange `4px` accent, `16px` body (12 pt equivalent),
 `18px` operator question (13.5 pt equivalent), `line-height:1.35`, normal
 wrapping, and a four-grid-row first-screen panel. Run Explorer preserves
-stable panel `id=1` as `Provenance · Run Scope`. Selector values remain in
+stable panel `id=1` as `Inspect Run Selection & Evidence`. Selector values remain in
 Grafana controls and panel descriptions instead of expanding into
 clipping-prone on-canvas strings.
 
@@ -1175,7 +1175,7 @@ ______________________________________________________________________
 
 | ID  | Название                       | Тип        | PromQL                                                                                                                       | Описание                                                                                                                                                                         |
 | --- | ------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 99  | Provenance                     | Text       | n/a                                                                                                                          | Primary question, scope, provenance, known limitations.                                                                                                                         |
+| 99  | Inspect Scope & Evidence       | Text       | n/a                                                                                                                          | Primary question and plain-language definitions for current, selected-run, time-range, and unknown evidence.                                                                    |
 | 214 | Status                         | Stat       | `max(bioetl_l0_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                                                         | `UNKNOWN`/`OK`/`WARN`/`CRIT`; null/no-series remain `UNKNOWN` via explicit null mapping. Panel-level links duplicate the canonical Runtime / Control Plane / Data Quality / Provider Health / Workflow handoff. |
 | 215 | First Action                  | Table      | `topk(1, bioetl_l0_next_action_route{pipeline=~"$pipeline",run_type=~"$run_type"} or label_replace(... vector(0) ...))`     | Shows `pipeline`, `action_target`, `action_reason`, and `action_dashboard_uid`; the Pipeline display column wraps so scoped names stay readable in the first-screen table. Invalid/missing selected scope falls back to `NO_ROUTE`. Routing priority remains Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Runtime / Control Plane / DQ preserve scope; Provider Health fail-closes to `provider=unknown`; Workflow link explicitly resets scope. |
 | 9300 | ID                            | Table      | HTTP `/ops/control-plane/identity-table?...&run_id=${run_id}`                                                                | Compact two-column identity summary: run/manifest IDs, Provider.Entity version, contract schema, execution flags, replay capability/mode, checkpoint anchors, optional composite run, and identity health. Exact selected `run_id` wins; no Prometheus `run_id`. |

@@ -212,13 +212,14 @@ shadow review. The seven JSON UIDs remain authoritative and reachable. See
 scope/provenance/first-action блоки, current-status row, panel descriptions и
 monitoring guide.
 
-Все семь shipped dashboards используют единый readability contract для
-Provenance-панели (в Run Explorer это `Provenance · Run Scope`, стабильный
-`id=1`). Эталон — визуальная семантика `4. Data Quality`: orange accent,
+Все семь shipped dashboards используют единый readability contract для панели
+`Inspect Scope & Evidence` (в Run Explorer это `Inspect Run Selection & Evidence`,
+стабильный `id=1`). Эталон — визуальная семантика `4. Data Quality`: orange accent,
 body `16px` (12 pt equivalent), headline `18px` (13.5 pt equivalent),
 `line-height:1.35`, normal wrapping и явное разделение operator question /
-scope semantics. Значения selectors остаются в Grafana controls и description,
-а не разворачиваются в длинную строку на canvas.
+scope semantics. Видимый текст использует конкретные определения evidence
+вместо внутренних DUX/DSA-кодов; значения selectors остаются в Grafana controls
+и description, а не разворачиваются в длинную строку на canvas.
 
 `bioetl-overview-v2` is the canonical L0 answer-first surface and uses the
 frozen `1. Overview v3` layout as its baseline. It answers one question:

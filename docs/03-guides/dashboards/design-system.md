@@ -196,7 +196,8 @@ Decision matrix:
 
 Normative rules:
 - Primary dashboards `0..5` SHOULD expose the shared operator context shell
-  before dashboard-specific evidence rows: `Provenance`, `Status`, `ID`, and
+  before dashboard-specific evidence rows: `Inspect Scope & Evidence`,
+  `Status`, `ID`, and
   `Processed Records`. These panels standardize context, identity, and
   selected-range throughput evidence, but they do not override the
   role-specific first-action/current-cause panels.
@@ -232,7 +233,7 @@ dashboards `0. Control Plane`, `2. Runtime`, `3. Provider Health`,
 
 | Panel | Canonical ID | Role | Data contract |
 | --- | ---:| --- | --- |
-| `Provenance` | `9400` | Question banner | Visible text contains only the primary dashboard question; workflow, pipeline, run_type, run_id, and selected-time context stay in the panel tooltip/description. |
+| `Inspect Scope & Evidence` | `9400` | Question and evidence-scope banner | Visible text contains the primary dashboard question and short plain-language definitions of the evidence scopes used on the page. Selector values and datasource details stay in the panel tooltip/description. |
 | `Status` | `9401` | Compact dashboard verdict | Prometheus status for the dashboard role; no `$run_id` Prometheus filtering. `5. Workflow` is selected-range evidence and must say so. |
 | `ID` | `9402` | Local control-plane identity | HTTP/Infinity `Quarantine Explorer` table from `/ops/control-plane/identity-table`; exact `run_id` is preserved HTTP identity context across primary dashboards. The two visible columns are `parameter` and `value`; rows cover run/manifest IDs, Provider.Entity version, contract schema, execution flags, replay capability/mode, checkpoint anchors, optional composite run, and identity health. |
 | `Processed Records` | `9403` | Current stage/outcome accounting evidence | HTTP/Infinity table from `/ops/observability/processed-records`, backed by compact `bioetl_processed_records_*` recording rules and canonical `bioetl_stage_records_total` outcomes. It shows non-zero Bronze, Silver outcome, and Gold outcome rows only, with `value` plus canonical formatted `percentage` columns. Internal `row_status` and deprecated `percintage` are hidden. `value` uses a space as the thousands separator, is left-padded to the displayed `bronze [total]` width, and is right-aligned in the table. Bronze is `100%`; `silver [valid]` and `gold [valid]` use one decimal; secondary outcomes use up to three decimals with trailing zeroes trimmed. Silver and Gold percentages use Bronze total. Status, accounted subtotal, and delta rows stay out of the compact table. Missing accounting series are no-data/instrumentation gaps, not OK. |

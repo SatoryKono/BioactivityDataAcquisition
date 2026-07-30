@@ -82,7 +82,7 @@ Grafana dashboards в BioETL.
   hidden `pipeline_context=$pipeline` для обратного перехода и fail-close'ятся
   к `provider=unknown`, если source dashboard не может доказать валидный
   provider value для target contract.
-- Shared `Provenance` / `Status` / `ID` / `Processed Records` panels use ids
+- Shared `Inspect Scope & Evidence` / `Status` / `ID` / `Processed Records` panels use ids
   `9400..9403` on primary dashboards outside Overview. `Status` is
   role-specific; `Processed Records` is current compact Bronze/Silver/Gold
   stage/outcome accounting evidence from `/ops/observability/processed-records`.
