@@ -42,7 +42,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-invariant-audit-rebaseline` | `report_invariant_audit_rebaseline.py`              | Generate/check stale invariant-audit evidence matrix and duplicate-issue gates                    |
 | `report-architecture-debt-remote-main-baseline` | `report_architecture_debt_remote_main_baseline.py` | Generate/check clean remote-main architecture debt baseline artifacts                             |
 | `report-debt-governance-gates`   | `report_debt_governance_gates.py`                     | Generate/check normalized debt-reduction fail-fast gate rollup                                    |
-| `validate-technical-debt-audit`  | `technical_debt_audit_registry.py`                    | Validate and resolve the exact-SHA current technical-debt audit lifecycle                          |
+| `validate-technical-debt-audit`  | `technical_debt_audit_registry.py`                    | Validate exact-SHA lifecycle, evidence hash, and report headline semantics                          |
 | `run-architecture-audit-read-only` | `run_architecture_audit_read_only.py`                | Run check-only architecture evidence diagnostics without pretest sync or artifact writes          |
 | `report-hotspots`                | `generate_hotspot_degradation_report.py`              | Generate performance hotspot degradation report                                                   |
 | `report-duplication-baseline`    | `report_duplication_baseline.py`                      | Generate report-only duplication baseline for `composition`/`application`                         |
@@ -85,7 +85,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-invariant-audit-rebaseline` | When converting architecture/invariant audits into GitHub issues; validates stale paths, current anchors, and duplicate issue evidence        | Audit governance / issue triage gate       |
 | `report-architecture-debt-remote-main-baseline` | Before debt closeout; records clean `origin/main` architecture debt evidence from Git tree blobs                                      | Architecture debt closeout / CI drift check |
 | `report-debt-governance-gates`   | Before debt-reduction closeout; aggregates quality artifacts into normalized pass/fail/warn fail-fast gates                                      | Architecture debt closeout / CI gate       |
-| `validate-technical-debt-audit`  | When consuming or refreshing a technical-debt audit; rejects ambiguous current reports and stale evidence hashes                                 | Audit lifecycle / drift gate               |
+| `validate-technical-debt-audit`  | When consuming or refreshing a technical-debt audit; rejects ambiguous reports, stale evidence hashes, and semantic headline drift                | Audit lifecycle / semantic drift gate      |
 | `run-architecture-audit-read-only` | When collecting architecture audit evidence without allowing dev-wrapper pretest sync or generated-artifact writes                         | Manual, read-only audit                    |
 | `report-hotspots`                | After performance benchmark runs; generates degradation report from JSONL observations                                                           | Manual, on-demand                          |
 | `report-duplication-baseline`    | When reviewing duplication pressure in `composition` or `application`; generates report-only baseline artifacts without creating a blocking gate | Manual, on-demand                          |
@@ -141,6 +141,7 @@ python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline -
 python -m scripts.engineering.qa report-debt-governance-gates --check
 python -m scripts.engineering.qa report-debt-governance-gates --update
 python -m scripts.engineering.qa validate-technical-debt-audit --json
+python -m scripts.engineering.qa validate-technical-debt-audit --print-semantic-summary
 python -m scripts.engineering.qa run-architecture-audit-read-only
 python -m scripts.engineering.qa run-tests --suite unit-fast --skip-preflight -- --no-cov
 python -m scripts.engineering.qa run-tests --suite unit-parallel-safe --skip-preflight -- --no-cov

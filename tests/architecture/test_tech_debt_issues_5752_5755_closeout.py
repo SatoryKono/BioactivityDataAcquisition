@@ -39,10 +39,10 @@ CURRENT_STATE = ROOT / "docs" / "02-architecture" / "current-state-inventory.md"
 REPRO_SUITE = (
     ROOT / "tests" / "integration" / "ci" / "test_reproducibility_contract_suite.py"
 )
-FORENSIC_UNIT_TEST = (
+FORENSIC_INTEGRATION_TEST = (
     ROOT
     / "tests"
-    / "unit"
+    / "integration"
     / "application"
     / "services"
     / "test_forensic_diff_service.py"
@@ -91,7 +91,7 @@ def test_issue_5755_removed_supporting_wrappers_are_absent_and_untracked() -> No
 
 def test_issue_5754_forensic_public_imports_use_canonical_seam() -> None:
     repro_suite = REPRO_SUITE.read_text(encoding="utf-8")
-    forensic_unit = FORENSIC_UNIT_TEST.read_text(encoding="utf-8")
+    forensic_integration = FORENSIC_INTEGRATION_TEST.read_text(encoding="utf-8")
 
     assert (
         "from bioetl.application.services.control_plane.forensic import "
@@ -100,11 +100,11 @@ def test_issue_5754_forensic_public_imports_use_canonical_seam() -> None:
     assert (
         "from bioetl.application.services.control_plane.forensic import "
         "ForensicRunDiffService"
-    ) in forensic_unit
+    ) in forensic_integration
     assert (
         "from bioetl.application.services.control_plane.forensic_diff_service import (\n"
         "    ForensicRunDiffService,"
-    ) not in forensic_unit
+    ) not in forensic_integration
 
 
 def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:

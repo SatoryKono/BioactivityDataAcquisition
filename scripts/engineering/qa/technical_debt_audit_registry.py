@@ -16,6 +16,17 @@ import yaml
 DEFAULT_REGISTRY_PATH = Path("configs/quality/technical_debt_audit_registry.yaml")
 SHA_PATTERN = re.compile(r"^[0-9a-f]{40,64}$")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+SEMANTIC_SUMMARY_START = "<!-- technical-debt-audit-summary-v1"
+SEMANTIC_SUMMARY_END = "-->"
+SEMANTIC_EVIDENCE_PATHS = frozenset(
+    {
+        "configs/quality/constructor_waivers.yaml",
+        "reports/quality/architecture-quality-scorecard.json",
+        "reports/quality/contract-coverage-matrix.json",
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/module-coverage-inventory.json",
+    }
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -146,6 +157,153 @@ def compute_evidence_surface_sha256(
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def _load_mapping(root: Path, relative_path: str) -> dict[str, Any]:
+    path = root / relative_path
+    if path.suffix == ".json":
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    else:
+        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"semantic evidence must be a mapping: {relative_path}")
+    return payload
+
+
+def build_current_audit_semantic_summary(
+    root: Path,
+    current: TechnicalDebtAuditRecord,
+) -> dict[str, Any]:
+    """Build the canonical headline summary from the pinned evidence surface."""
+    missing = sorted(SEMANTIC_EVIDENCE_PATHS.difference(current.evidence_paths))
+    if missing:
+        raise ValueError(
+            "current audit semantic evidence_paths are incomplete: "
+            + ", ".join(missing)
+        )
+
+    modules = _load_mapping(root, "reports/quality/module-coverage-inventory.json").get(
+        "summary"
+    )
+    gates = _load_mapping(root, "reports/quality/debt-governance-gates.json").get(
+        "summary"
+    )
+    scorecard = _load_mapping(
+        root, "reports/quality/architecture-quality-scorecard.json"
+    )
+    contracts = _load_mapping(root, "reports/quality/contract-coverage-matrix.json")
+    waivers = _load_mapping(root, "configs/quality/constructor_waivers.yaml")
+    if not isinstance(modules, dict) or not isinstance(gates, dict):
+        raise ValueError("semantic evidence summaries must be mappings")
+    statuses = modules.get("status_counts")
+    metrics = scorecard.get("metrics")
+    if not isinstance(statuses, dict) or not isinstance(metrics, dict):
+        raise ValueError("semantic evidence status_counts/metrics must be mappings")
+
+    return {
+        "audit_id": current.audit_id,
+        "audited_commit_sha": current.audited_commit_sha,
+        "evidence_surface_sha256": current.evidence_surface_sha256,
+        "metrics": {
+            "architecture_integral_score": scorecard.get("integral_score"),
+            "architecture_interpretation": scorecard.get("interpretation"),
+            "constructor_waiver_count": len(waivers),
+            "contract_coverage_schema": contracts.get("schema_version"),
+            "debt_gate_count": gates.get("gate_count"),
+            "debt_gate_fail_count": gates.get("fail_count"),
+            "debt_gate_pass_count": gates.get("pass_count"),
+            "debt_gate_warn_count": gates.get("warn_count"),
+            "expired_compat_count": metrics.get("expired_compat_count"),
+            "fully_covered_module_count": statuses.get("fully_covered"),
+            "layer_violation_count": metrics.get("layer_violations"),
+            "no_executable_lines_module_count": statuses.get("no_executable_lines"),
+            "partially_covered_module_count": statuses.get("partially_covered"),
+            "source_module_count": modules.get("source_module_count"),
+            "sunset_compat_count": metrics.get("sunset_compat_count"),
+            "transition_compat_count": metrics.get("transition_compat_count"),
+            "twin_pair_count": metrics.get("twin_pair_count"),
+            "uncovered_module_count": statuses.get("uncovered"),
+            "unmeasured_module_count": statuses.get("unmeasured"),
+        },
+        "schema_version": "technical-debt-audit-summary-v1",
+    }
+
+
+def render_current_audit_semantic_summary(summary: dict[str, Any]) -> str:
+    """Render a deterministic machine-readable report block."""
+    payload = json.dumps(summary, indent=2, sort_keys=True)
+    return f"{SEMANTIC_SUMMARY_START}\n{payload}\n{SEMANTIC_SUMMARY_END}"
+
+
+def _parse_report_semantic_summary(report: str) -> dict[str, Any]:
+    start = report.find(SEMANTIC_SUMMARY_START)
+    if start < 0:
+        raise ValueError("current audit is missing semantic summary")
+    payload_start = start + len(SEMANTIC_SUMMARY_START)
+    end = report.find(SEMANTIC_SUMMARY_END, payload_start)
+    if end < 0:
+        raise ValueError("current audit semantic summary is unterminated")
+    try:
+        payload = json.loads(report[payload_start:end])
+    except json.JSONDecodeError as exc:
+        raise ValueError("current audit semantic summary is invalid JSON") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("current audit semantic summary must be a mapping")
+    return payload
+
+
+def _headline_markers(summary: dict[str, Any]) -> tuple[str, ...]:
+    metrics = summary["metrics"]
+    module_total = sum(
+        metrics[key]
+        for key in (
+            "fully_covered_module_count",
+            "partially_covered_module_count",
+            "no_executable_lines_module_count",
+            "uncovered_module_count",
+            "unmeasured_module_count",
+        )
+    )
+    return (
+        f"Debt-governance gates: **{metrics['debt_gate_pass_count']} pass / "
+        f"{metrics['debt_gate_fail_count']} fail**",
+        f"Architecture quality integral score: **{metrics['architecture_integral_score']}** "
+        f"(`{metrics['architecture_interpretation']}`)",
+        f"source_module_count: **{metrics['source_module_count']}**",
+        f"fully_covered: **{metrics['fully_covered_module_count']}**",
+        f"partially_covered: **{metrics['partially_covered_module_count']}**",
+        f"no_executable_lines: **{metrics['no_executable_lines_module_count']}**",
+        f"uncovered: **{metrics['uncovered_module_count']}**",
+        f"unmeasured: **{metrics['unmeasured_module_count']}**",
+        f"= {module_total} == source_module_count",
+        f"Contract coverage matrix schema: **{metrics['contract_coverage_schema']}**",
+        f"Constructor waivers (shrink-only inventory): "
+        f"**{metrics['constructor_waiver_count']}** entries",
+        "Compatibility transition/sunset/expired: "
+        f"**{metrics['transition_compat_count']}/{metrics['sunset_compat_count']}/"
+        f"{metrics['expired_compat_count']}**; twin pairs: "
+        f"**{metrics['twin_pair_count']}**",
+        f"Layer violations: **{metrics['layer_violation_count']}**",
+    )
+
+
+def _validate_current_report_semantics(root: Path, current: Any) -> list[str]:
+    report_path = root / current.report_path
+    if not report_path.is_file():
+        return []
+    try:
+        expected = build_current_audit_semantic_summary(root, current)
+        actual = _parse_report_semantic_summary(report_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as exc:
+        return [str(exc)]
+    issues: list[str] = []
+    if actual != expected:
+        issues.append("current audit semantic summary is stale")
+    report = report_path.read_text(encoding="utf-8")
+    for marker in _headline_markers(expected):
+        if marker not in report:
+            issues.append(f"current audit headline metric is stale: {marker}")
+    return issues
+
+
 def _commit_exists(root: Path, commit_sha: str) -> bool:
     result = subprocess.run(
         ["git", "cat-file", "-e", f"{commit_sha}^{{commit}}"],
@@ -261,6 +419,7 @@ def validate_technical_debt_audit_registry(
     )
     issues.extend(_validate_current_evidence_hash(root, current))
     issues.extend(_validate_current_report_markers(root, current))
+    issues.extend(_validate_current_report_semantics(root, current))
     return issues
 
 
@@ -270,6 +429,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY_PATH)
     parser.add_argument("--print-current", action="store_true")
     parser.add_argument("--print-evidence-hash", action="store_true")
+    parser.add_argument("--print-semantic-summary", action="store_true")
     parser.add_argument("--json", action="store_true")
     return parser
 
@@ -285,6 +445,13 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.print_evidence_hash:
         print(compute_evidence_surface_sha256(root, current.evidence_paths))
+        return 0
+    if args.print_semantic_summary:
+        print(
+            render_current_audit_semantic_summary(
+                build_current_audit_semantic_summary(root, current)
+            )
+        )
         return 0
     issues = validate_technical_debt_audit_registry(root, args.registry)
     if args.json:

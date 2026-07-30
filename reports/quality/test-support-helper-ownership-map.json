@@ -124,7 +124,7 @@
         "tests/unit/application/services/control_plane/test_historical_replay_closure_service.py",
         "tests/unit/application/services/control_plane/test_historical_replay_corpus_service.py",
         "tests/unit/application/services/control_plane/test_historical_replay_universe_service.py",
-        "tests/unit/application/services/test_forensic_diff_service.py",
+        "tests/integration/application/services/test_forensic_diff_service.py",
         "tests/unit/application/services/test_replay_taxonomy_projection.py",
         "tests/unit/application/services/test_run_manifest_diagnostics.py",
         "tests/unit/application/services/test_run_manifest_inspection_service.py",

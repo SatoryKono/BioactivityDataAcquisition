@@ -10,9 +10,39 @@ Audited branch: main
 
 Audited commit SHA: `947902209629f5666170cd49fbf776f4bcb5f3d2`
 
-Evidence surface SHA-256: `d6f714bc0cc28622ff6bbc9721b96eff6e522ed15c55fca12b9a13207ff1080b`
+Evidence surface SHA-256: `53ec6bebcfdfbfbd8aa230938887de9854a56f6534adc32494de89c057662660`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
+
+<!-- technical-debt-audit-summary-v1
+{
+  "audit_id": "total-tech-debt-main-2026-07-27-r1",
+  "audited_commit_sha": "947902209629f5666170cd49fbf776f4bcb5f3d2",
+  "evidence_surface_sha256": "53ec6bebcfdfbfbd8aa230938887de9854a56f6534adc32494de89c057662660",
+  "metrics": {
+    "architecture_integral_score": 9.41,
+    "architecture_interpretation": "good_targeted_improvements",
+    "constructor_waiver_count": 1,
+    "contract_coverage_schema": "contract-coverage-matrix-v3",
+    "debt_gate_count": 45,
+    "debt_gate_fail_count": 0,
+    "debt_gate_pass_count": 45,
+    "debt_gate_warn_count": 0,
+    "expired_compat_count": 0,
+    "fully_covered_module_count": 1476,
+    "layer_violation_count": 0,
+    "no_executable_lines_module_count": 94,
+    "partially_covered_module_count": 744,
+    "source_module_count": 2314,
+    "sunset_compat_count": 0,
+    "transition_compat_count": 0,
+    "twin_pair_count": 0,
+    "uncovered_module_count": 0,
+    "unmeasured_module_count": 0
+  },
+  "schema_version": "technical-debt-audit-summary-v1"
+}
+-->
 
 Refresh reason: CR-03 / #6695 regenerate from one consistent evidence snapshot after CodeRabbit audit remediation (CR-01/CR-02). No debt budget growth.
 
@@ -21,15 +51,15 @@ Refresh reason: CR-03 / #6695 regenerate from one consistent evidence snapshot a
 1. Debt-governance gates: **45 pass / 0 fail** (`45/45` debt-governance gates passing).
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
-   - source_module_count: **2311**
-   - fully_covered: **1406**
-   - partially_covered: **816**
-   - no_executable_lines: **55**
+   - source_module_count: **2314**
+   - fully_covered: **1476**
+   - partially_covered: **744**
+   - no_executable_lines: **94**
    - uncovered: **0**
    - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2277 == source_module_count
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2314 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
-1. Constructor waivers (shrink-only inventory): **5** entries.
+1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.
 1. Layer violations: **0**.
 
