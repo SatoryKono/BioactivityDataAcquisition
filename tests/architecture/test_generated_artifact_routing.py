@@ -65,6 +65,8 @@ def test_generated_artifact_routing_inventory_is_valid() -> None:
     assert payload["schema_version"] == 1
     routes = payload.get("routes")
     assert isinstance(routes, list) and routes, "routes must be a non-empty list"
+    allowed_roots = _allowed_output_roots(payload)
+    assert allowed_roots, "allowed_output_roots must declare reviewed destinations"
     forbidden_roots = tuple(payload.get("forbidden_output_roots") or ())
     assert forbidden_roots, "forbidden_output_roots must be declared"
 
@@ -95,15 +97,32 @@ def test_generated_artifact_routing_inventory_is_valid() -> None:
         assert isinstance(outputs, list) and outputs, f"{route_id}: outputs required"
         for output in outputs:
             assert isinstance(output, str), f"{route_id}: output must be a string"
-            # Temporarily skip path safety check for all outputs due to routing config drift
-            # TODO: Fix allowed_output_roots in generated_artifact_routing.yaml to include all output paths
-            # if output.startswith("docs/00-project/ai/skills/global/"):
-            #     continue
-            # if output == "docs/02-architecture/07-compatibility-facade-snapshot.md":
-            #     continue
-            # assert _is_safe_output_path(output, allowed_roots, forbidden_roots), (
-            #     f"{route_id}: unsafe generated artifact output path: {output}"
-            # )
+            assert _is_safe_output_path(output, allowed_roots, forbidden_roots), (
+                f"{route_id}: unsafe generated artifact output path: {output}"
+            )
+
+
+@pytest.mark.parametrize(
+    "unsafe_path",
+    (
+        "",
+        "../reports/generated.json",
+        "reports/../generated.json",
+        "output/generated.json",
+        "generated.json",
+    ),
+)
+def test_generated_artifact_routing_rejects_unsafe_paths(
+    unsafe_path: str,
+) -> None:
+    """Traversal, forbidden roots, and root-level outputs must fail closed."""
+    payload = _load_routing()
+
+    assert not _is_safe_output_path(
+        unsafe_path,
+        _allowed_output_roots(payload),
+        tuple(payload["forbidden_output_roots"]),
+    )
 
 
 def test_generated_artifact_routing_covers_core_generators() -> None:
