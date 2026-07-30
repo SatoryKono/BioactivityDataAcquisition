@@ -45,6 +45,8 @@ root_tooling_roots:
       role: curated_project_wiki_surface
     - path: .gemini
       role: curated_shared_agent_runtime_surface
+    - path: .junie
+      role: curated_shared_agent_runtime_surface
     - path: .vibe
       role: curated_shared_vendor_runtime_surface
     - path: .vscode
@@ -91,8 +93,6 @@ local_tolerated_root_dirs:
       role: local_mypy_cache_untracked
     - path: .jules
       role: local_vendor_workspace_state_untracked
-    - path: .junie
-      role: local_vendor_editor_state_untracked
     - path: logs
       role: local_runtime_log_workspace_untracked
     - path: node_modules

@@ -7,6 +7,13 @@
     }
   },
   "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "data_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Source[\"semanticscholar:publication\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: semanticscholar.publication + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: semanticscholar.publication (configured)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
+    }
+  ],
   "execution": {
     "cached_bronze_is_mode": true,
     "control_plane": {
@@ -29,34 +36,162 @@
     }
   },
   "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
+    "endpoint_template": "https://api.semanticscholar.org/graph/v1",
+    "field_groups": [
+      {
+        "field_count": 10,
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_source",
+          "_ingestion_ts",
+          "_index",
+          "_lookup_method",
+          "_original_id"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "system"
       },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
+      {
+        "field_count": 5,
+        "fields": [
+          "paper_id",
+          "doi",
+          "pmid",
+          "corpus_id",
+          "dblp_id"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "identifiers"
+      },
+      {
+        "field_count": 1,
+        "fields": [
+          "title"
+        ],
+        "name": "title"
+      },
+      {
+        "field_count": 2,
+        "fields": [
+          "abstract",
+          "tldr"
+        ],
+        "name": "abstract"
+      },
+      {
+        "field_count": 5,
+        "fields": [
+          "author_s2_ids",
+          "author_orcids",
+          "author_h_indices",
+          "author_h_indices_canonical_json",
+          "author_h_indices_raw_json"
+        ],
+        "name": "authors"
+      },
+      {
+        "field_count": 1,
+        "fields": [
+          "affiliation_list"
+        ],
+        "name": "affiliations"
+      },
+      {
+        "field_count": 3,
+        "fields": [
+          "journal",
+          "issn",
+          "issn_list"
+        ],
+        "name": "journal"
+      },
+      {
+        "field_count": 1,
+        "fields": [
+          "publication_year"
+        ],
+        "name": "year"
+      },
+      {
+        "field_count": 1,
+        "fields": [
+          "publication_date"
+        ],
+        "name": "dates"
+      },
+      {
+        "field_count": 5,
+        "fields": [
+          "volume",
+          "issue",
+          "page_first",
+          "page_last",
+          "page_range"
+        ],
+        "name": "pagination"
+      },
+      {
+        "field_count": 6,
+        "fields": [
+          "citations_received",
+          "citations_made",
+          "influential_citation_count",
+          "citation_contexts",
+          "citation_contexts_canonical_json",
+          "citation_contexts_raw_json"
+        ],
+        "name": "citations"
+      },
+      {
+        "field_count": 6,
+        "fields": [
+          "subject_fields",
+          "subject_fields_canonical_json",
+          "subject_fields_raw_json",
+          "publication_types",
+          "publication_types_canonical_json",
+          "publication_types_raw_json"
+        ],
+        "name": "subjects"
+      },
+      {
+        "field_count": 4,
+        "fields": [
+          "publication_type",
+          "publication_type_unified",
+          "publication_subclass",
+          "publication_class"
+        ],
+        "name": "doc_type"
+      },
+      {
+        "field_count": 3,
+        "fields": [
+          "is_oa",
+          "oa_status",
+          "open_access_url"
+        ],
+        "name": "open_access"
       }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
-      },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
+    ],
+    "filters": [
+      {
+        "description": "IDs from data/input/dois.csv column doi; CLI may override the input CSV",
+        "name": "doi",
+        "required": true,
+        "source": "cli"
+      }
+    ],
+    "method": "GET",
+    "selected_fields": [],
+    "source_collections": [
+      "publication"
+    ],
+    "source_kind": "http_api",
+    "source_resource": "semanticscholar:publication",
+    "source_tables": []
   },
   "gold": {
     "column_projection": {
@@ -116,9 +251,53 @@
       "status"
     ]
   },
+  "operator_commands": [
+    {
+      "command": "bioetl run --pipeline semanticscholar_publication",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run --pipeline semanticscholar_publication --limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run --pipeline semanticscholar_publication --run-type backfill --dry-run",
+      "result": "Проверяет backfill/rebuild path без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline semanticscholar_publication --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline semanticscholar_publication --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline semanticscholar_publication",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
   "passport_schema_version": "1.0.0",
   "provenance": {
-    "projector_version": "1.0.0",
+    "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:f51802163632b5793e64e1038b007d92cd613d7d9f42144889cf4e822cc99dc8",
     "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
   },
@@ -149,12 +328,25 @@
       "soft_fail_threshold": 0.05,
       "strict_validation": false
     },
+    "normalization_profile": "semanticscholar.publication",
     "write": {}
   },
   "source_references": [
     {
       "path": "configs/entities/semanticscholar/publication.yaml",
       "role": "effective_entity_config"
+    },
+    {
+      "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
+      "role": "pipeline_registration"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "role": "run_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
     },
     {
       "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
@@ -167,6 +359,24 @@
     {
       "path": "configs/contracts/semanticscholar/publication.yaml",
       "role": "dq_contract"
+    },
+    {
+      "path": "configs/providers/semanticscholar.yaml",
+      "role": "provider_config"
     }
-  ]
+  ],
+  "summary": {
+    "excluded_data_summary": "invalid_record_policy=quarantine",
+    "field_selection_summary": "В business-проекцию входят .",
+    "query_filter_summary": "doi=IDs from data/input/dois.csv column doi; CLI may override the input CSV",
+    "sentences": [
+      "Batch DOI resolution via Semantic Scholar with title fallback. Источник — `semanticscholar:publication` на `https://api.semanticscholar.org/graph/v1`; применяемые extraction/input filters: doi=IDs from data/input/dois.csv column doi; CLI may override the input CSV.",
+      "В business-проекцию входят .",
+      "Silver использует профиль `semanticscholar.publication` и проверяет обязательные поля `paper_id`, `title`; невалидные записи направляются в `quarantine`.",
+      "Перед Gold применяется строгий Pandera-контракт `semanticscholar.publication`; Gold filters/constraints заданы в entity config (6 групп правил)."
+    ],
+    "silver_processing_summary": "Silver использует профиль `semanticscholar.publication` и проверяет обязательные поля `paper_id`, `title`; невалидные записи направляются в `quarantine`.",
+    "source_description": "Batch DOI resolution via Semantic Scholar with title fallback. Источник — `semanticscholar:publication` на `https://api.semanticscholar.org/graph/v1`; применяемые extraction/input filters: doi=IDs from data/input/dois.csv column doi; CLI may override the input CSV.",
+    "validation_summary": "Перед Gold применяется строгий Pandera-контракт `semanticscholar.publication`; Gold filters/constraints заданы в entity config (6 групп правил)."
+  }
 }

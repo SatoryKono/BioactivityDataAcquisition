@@ -111,6 +111,8 @@ bash run-codex.sh check           # Check setup
 bash run-codex.sh setup           # Install missing components
 bash run-codex.sh mcp-check       # Check MCP configuration
 bash run-codex.sh mcp-setup       # Force-refresh MCP configuration
+bash run-codex.sh baseline --runs 3 --output reports/quality/codex-efficiency-baseline.json
+bash run-codex.sh diagnose        # Canonical WSL/Codex diagnostics
 bash run-codex.sh login           # Login with API key
 bash run-codex.sh device-login    # Device auth login
 bash headless.sh exec "prompt"    # Launch without MCP sync
@@ -125,6 +127,18 @@ bash diagnose_wsl.sh              # Run WSL diagnostics
 1. **Launch** - Runs Codex from the repo root with the managed Codex CLI
 
 Codex does not read the workspace `.mcp.json` directly. The launcher keeps `~/.codex/config.toml` synchronized so Codex starts with the repository MCP servers configured.
+
+## Canonical launch modes
+
+| Mode | Command | MCP behavior |
+| --- | --- | --- |
+| Interactive | `bash scripts/ai/codex/run-codex.sh` | verifies and repairs missing/stale MCP state |
+| Fast/headless | `bash scripts/ai/codex/headless.sh exec "<prompt>"` | explicitly skips MCP synchronization |
+| Diagnostics | `bash scripts/ai/codex/run-codex.sh diagnose` | diagnostics only; does not start monitoring |
+| Baseline | `bash scripts/ai/codex/run-codex.sh baseline --runs 3` | measures bounded launcher/MCP overhead |
+
+Do not install shell aliases automatically. Contributors may define local
+aliases for these canonical commands in their own shell configuration.
 
 ## ⚙️ Setup
 

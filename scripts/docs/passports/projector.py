@@ -15,6 +15,7 @@ import yaml
 from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
 
 from .inventory import ExecutableUnit, discover_units
+from .duplicate_audit import audit_markdown_texts
 from .manual_sidecar import load_manual_sidecar
 from .pipeline_projection import (
     build_ordinary_projection,
@@ -23,14 +24,30 @@ from .pipeline_projection import (
     ordinary_mermaid,
 )
 from .source_facts import load_effective_pipeline_facts
-from .validation import validate_composite_payload, workflow_mermaid
+from .validation import (
+    validate_composite_payload,
+    validate_pipeline_publication,
+    workflow_mermaid,
+)
 
 SCHEMA_VERSION = "1.0.0"
-PROJECTOR_VERSION = "1.1.0"
+PROJECTOR_VERSION = "1.0.0"
+PIPELINE_PROJECTOR_VERSION = "1.1.0"
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CONFIGS_ROOT = PROJECT_ROOT / "configs"
 DEFAULT_OUTPUT_ROOT = PROJECT_ROOT / "docs/04-reference/passports"
 JsonObject = dict[str, Any]
+_DUPLICATION_BASELINE = {
+    "passport_count": 27,
+    "total_markdown_lines": 6511,
+    "duplicate_line_groups": 250,
+    "duplicate_paragraph_groups": 4,
+    "duplicate_diagram_groups": 0,
+    "identity_duplicate_count": 0,
+    "empty_section_count": 0,
+    "average_passport_lines": 241.1,
+    "maximum_passport_lines": 665,
+}
 
 
 def _repo_path(path: Path) -> str:
@@ -128,7 +145,7 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
         {"role": "effective_entity_config", "path": _repo_path(unit.config_path)},
         {
             "role": "pipeline_registration",
-            "path": "src/bioetl/composition/factories/pipeline/_registry_manifest.py",
+            "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
         },
         {
             "role": "run_cli",
@@ -190,7 +207,7 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
         },
         "provenance": {
             "source_revision": revision,
-            "projector_version": PROJECTOR_VERSION,
+            "projector_version": PIPELINE_PROJECTOR_VERSION,
             "semantic_content_hash": _sha(payload),
         },
         "source_references": source_refs,
@@ -290,6 +307,19 @@ def _composite_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
     )
     provider, entity = unit.unit_id.split("_", 1)
     contract_path = _contract_path(provider, entity)
+    contract = _load_yaml(contract_path)
+    entity_path = DEFAULT_CONFIGS_ROOT / "entities" / "composite" / f"{entity}.yaml"
+    entity_payload = _load_yaml(entity_path)
+    entity_pipeline = (
+        entity_payload.get("pipeline")
+        if isinstance(entity_payload.get("pipeline"), dict)
+        else {}
+    )
+    entity_sink = (
+        entity_pipeline.get("sink")
+        if isinstance(entity_pipeline.get("sink"), dict)
+        else {}
+    )
     facts = {
         "passport_schema_version": SCHEMA_VERSION,
         "kind": "pipeline",
@@ -304,11 +334,12 @@ def _composite_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
         },
         "provenance": {
             "source_revision": revision,
-            "projector_version": PROJECTOR_VERSION,
+            "projector_version": PIPELINE_PROJECTOR_VERSION,
             "semantic_content_hash": _sha(payload),
         },
         "source_references": [
             {"role": "composite_config", "path": _repo_path(unit.config_path)},
+            {"role": "effective_entity_config", "path": _repo_path(entity_path)},
             {"role": "gold_contract", "path": _repo_path(contract_path)},
             {
                 "role": "composite_cli",
@@ -395,6 +426,22 @@ def _composite_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
                 "aggregation_is_explicit": True,
                 "conflict_priorities_are_complete": True,
             },
+        },
+        "silver": {
+            "normalization_profile": f"composite.{entity}",
+            "write": entity_sink.get("silver", {}),
+            "dq_execution": {
+                "strict_validation": contract.get("strict_dq_validation"),
+                "soft_fail_threshold": contract.get("soft_fail_threshold"),
+                "hard_fail_threshold": contract.get("hard_fail_threshold"),
+                "invalid_record_policy": contract.get("invalid_record_policy"),
+            },
+        },
+        "gold": {
+            "contract_ref": contract.get("contract_ref"),
+            "contract_version": contract.get("contract_version"),
+            "contract_validation": {"status": "resolved_by_adr_018", "strict": True},
+            "write": entity_sink.get("gold", {}),
         },
         "execution": {"control_plane": {"run_manifest": True, "checkpoints": True}},
         "operator_commands": operator_commands(unit.unit_id, composite=True),
@@ -535,6 +582,8 @@ def _render_markdown(facts: JsonObject, manual: dict[str, object]) -> str:
     kind = str(facts["kind"])
     diagnostics = facts.get("diagnostics", [])
     refs = facts.get("source_references", [])
+    if kind == "pipeline":
+        return _render_pipeline_markdown(facts, manual)
     lines = [
         f"# {name} passport",
         "",
@@ -573,6 +622,167 @@ def _render_markdown(facts: JsonObject, manual: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
+def _inline(value: object) -> str:
+    if value is None or value == "" or value == []:
+        return "—"
+    if isinstance(value, list):
+        return ", ".join(f"`{item}`" for item in value)
+    if isinstance(value, dict):
+        return "; ".join(f"{key}={item}" for key, item in sorted(value.items()))
+    return f"`{value}`"
+
+
+def _render_pipeline_markdown(
+    facts: JsonObject, manual: dict[str, object]
+) -> str:
+    """Render the compact human view; complete facts remain in generated JSON."""
+    identity = facts["identity"]
+    summary = facts["summary"]
+    extraction = facts["extraction"]
+    silver = facts.get("silver", {})
+    gold = facts.get("gold", {})
+    diagnostics = facts.get("diagnostics", [])
+    pipeline_id = str(identity["pipeline_id"])
+    pipeline_type = str(identity["pipeline_type"])
+    contract = gold.get("contract_ref") or pipeline_id
+    contract_version = gold.get("contract_version")
+    contract_label = (
+        f"{contract} v{contract_version}" if contract_version else str(contract)
+    )
+    lines = [
+        f"# `{pipeline_id}`",
+        "",
+        "> Generated documentation projection. Do not edit manually.",
+        "",
+        "## Обзор",
+        "",
+        "| Параметр | Значение |",
+        "| --- | --- |",
+        (
+            f"| Typed identity `[type:{pipeline_type}]` | "
+            f"`{identity['typed_id']}` |"
+        ),
+        f"| Status | `{identity['status']}` |",
+        f"| Gold contract | `{contract_label}` |",
+    ]
+    aliases = identity.get("aliases", [])
+    if aliases:
+        lines.append(f"| Aliases | {_inline(aliases)} |")
+    lines.extend(["", "## Назначение и обработка данных", ""])
+    lines.extend(str(sentence) for sentence in summary["sentences"])
+    lines.extend(
+        [
+            "",
+            "## Извлечение данных",
+            "",
+            "| Аспект | Значение |",
+            "| --- | --- |",
+            f"| Source | `{extraction.get('source_kind')}` · `{extraction.get('source_resource')}` |",
+            (
+                "| Method / endpoint | "
+                f"{_inline(extraction.get('method'))} · "
+                f"{_inline(extraction.get('endpoint_template'))} |"
+            ),
+            (
+                "| Resource / tables | "
+                f"{_inline([*extraction.get('source_tables', []), *extraction.get('source_collections', [])])} |"
+            ),
+            (
+                "| Filters | "
+                + (
+                    "; ".join(
+                        f"`{item['name']}`: {item['description']}"
+                        for item in extraction.get("filters", [])
+                    )
+                    or "Нет статических filters; используется effective runtime scope"
+                )
+                + " |"
+            ),
+        ]
+    )
+    groups = extraction.get("field_groups", [])
+    if groups:
+        lines.append(
+            "| Selected fields | "
+            + "; ".join(
+                f"`{item['name']}` ({item['field_count']} fields)"
+                for item in groups
+            )
+            + " |"
+        )
+    lines.extend(["", "## Silver и Data Quality", ""])
+    if silver:
+        dq = silver.get("dq_execution", {})
+        lines.extend(
+            [
+                f"- Normalization profile: `{silver.get('normalization_profile')}`.",
+                f"- Partitioning: {_inline(silver.get('write', {}).get('partition_by'))}.",
+                (
+                    "- DQ thresholds: "
+                    f"soft `{dq.get('soft_fail_threshold')}`, "
+                    f"hard `{dq.get('hard_fail_threshold')}`; "
+                    f"invalid policy `{dq.get('invalid_record_policy')}`."
+                ),
+            ]
+        )
+    else:
+        lines.append("- Composite Silver inputs and merge rules are listed in generated JSON.")
+    lines.extend(["", "## Gold", ""])
+    validation = gold.get("contract_validation", {})
+    write = gold.get("write", {})
+    lines.extend(
+        [
+            f"- Contract: `{contract_label}`; strict validation: `{validation.get('strict', True)}`.",
+            f"- Write mode: `{write.get('mode', 'configured')}`.",
+        ]
+    )
+    if write.get("scd_config"):
+        lines.append(f"- SCD2: {_inline(write['scd_config'])}.")
+    exclusions = gold.get("column_projection", {}).get("exclude_fields", [])
+    if exclusions:
+        lines.append(f"- Technical exclusions: {_inline(exclusions)}.")
+    lines.extend(
+        [
+            "",
+            "## Операторские команды",
+            "",
+            "| Задача | Команда | Результат |",
+            "| --- | --- | --- |",
+        ]
+    )
+    for item in facts["operator_commands"]:
+        lines.append(
+            f"| {item['task']} | `{item['command']}` | {item['result']} |"
+        )
+    lines.extend(["", "## Диаграммы", ""])
+    for diagram in facts["diagrams"]:
+        lines.extend(
+            [
+                f"### {diagram['diagram_id'].replace('_', ' ').title()}",
+                "",
+                "```mermaid",
+                str(diagram["mermaid"]),
+                "```",
+                "",
+            ]
+        )
+    if manual:
+        purpose = manual.get("purpose")
+        if isinstance(purpose, str) and purpose:
+            lines.extend(["## Owner-approved context", "", purpose, ""])
+    lines.extend(["## Evidence", ""])
+    for ref in facts["source_references"]:
+        lines.append(f"- `{ref['role']}`: `{ref['path']}`")
+    if diagnostics:
+        lines.extend(["", "## Diagnostics", ""])
+        for diagnostic in diagnostics:
+            lines.append(
+                f"- `{diagnostic['severity']}` `{diagnostic['code']}`"
+            )
+    lines.append("")
+    return "\n".join(lines)
+
+
 def build_all_outputs(
     *,
     configs_root: Path = DEFAULT_CONFIGS_ROOT,
@@ -597,12 +807,24 @@ def build_all_outputs(
         error_count += len(errors)
         group = "workflows" if unit.kind == "workflow" else "pipelines"
         manual = load_manual_sidecar(sidecar_root / group / f"{unit.unit_id}.yaml")
+        markdown = _render_markdown(facts, manual)
+        if facts["kind"] == "pipeline":
+            publication_errors = validate_pipeline_publication(
+                facts,
+                markdown,
+                project_root=PROJECT_ROOT,
+            )
+            if publication_errors:
+                raise ValueError(
+                    f"Invalid pipeline passport {unit.unit_id}: "
+                    + "; ".join(publication_errors)
+                )
         outputs[output_root / "generated" / group / f"{unit.unit_id}.json"] = (
             _canonical_bytes(facts)
         )
-        outputs[output_root / group / f"{unit.unit_id}.md"] = _render_markdown(
-            facts, manual
-        ).encode("utf-8")
+        outputs[output_root / group / f"{unit.unit_id}.md"] = markdown.encode(
+            "utf-8"
+        )
         registry_rows.append(
             {
                 "typed_id": unit.typed_id,
@@ -630,6 +852,18 @@ def build_all_outputs(
         {"units": registry_rows}
     )
     outputs[output_root / "completeness-report.json"] = _canonical_bytes(report)
+    pipeline_markdown = [
+        content.decode("utf-8")
+        for path, content in outputs.items()
+        if path.parent == output_root / "pipelines" and path.suffix == ".md"
+    ]
+    outputs[output_root / "duplication-report.json"] = _canonical_bytes(
+        {
+            "method": "normalized Markdown lines, paragraphs, diagrams, and identity labels",
+            "before": _DUPLICATION_BASELINE,
+            "after": audit_markdown_texts(pipeline_markdown),
+        }
+    )
     index = [
         "# Pipeline and workflow passports",
         "",
@@ -637,11 +871,13 @@ def build_all_outputs(
         "",
         "## Governance",
         "",
+        "- [Pipeline passport projection guide](pipeline-passport-guide.md)",
         "- [ADR-054: passport documentation projections](../../02-architecture/decisions/ADR-054-passport-documentation-projections.md)",
         "- [ADR-055: workflow reconciliation ownership](../../02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md)",
         "- [Pipeline passport schema](schemas/pipeline-passport.schema.json)",
         "- [Workflow passport schema](schemas/workflow-passport.schema.json)",
         "- [Manual metadata schema](schemas/manual-passport-metadata.schema.json)",
+        "- [Normalized duplication report](duplication-report.json)",
         "",
         "- Owner: `BioETL Team`; review cadence: each executable/config change and release.",
         "- Check: `python -m scripts.docs passports check`.",

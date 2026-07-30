@@ -7,6 +7,13 @@
     }
   },
   "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "data_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Source[\"chembl:subcellular_fraction\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: chembl.subcellular_fraction + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: chembl.subcellular_fraction (configured)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
+    }
+  ],
   "execution": {
     "cached_bronze_is_mode": true,
     "control_plane": {
@@ -29,34 +36,73 @@
     }
   },
   "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
+    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data",
+    "field_groups": [
+      {
+        "field_count": 7,
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_ingestion_ts",
+          "_index"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "system"
       },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
+      {
+        "field_count": 4,
+        "fields": [
+          "subcellular_fraction_raw",
+          "subcellular_fraction",
+          "assay_count",
+          "example_assay_id"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "business"
       }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
+    ],
+    "filters": [
+      {
+        "description": "IDs from data/input/subcellular_fraction.csv column subcellular_fraction; CLI may override the input CSV",
+        "name": "subcellular_fraction",
+        "required": false,
+        "source": "cli"
+      }
+    ],
+    "method": null,
+    "selected_fields": [
+      {
+        "name": "subcellular_fraction_raw",
+        "required": false,
+        "source_object": "subcellular_fraction",
+        "target_group": "business"
       },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
+      {
+        "name": "subcellular_fraction",
+        "required": true,
+        "source_object": "subcellular_fraction",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_count",
+        "required": false,
+        "source_object": "subcellular_fraction",
+        "target_group": "business"
+      },
+      {
+        "name": "example_assay_id",
+        "required": false,
+        "source_object": "subcellular_fraction",
+        "target_group": "business"
+      }
+    ],
+    "source_collections": [
+      "subcellular_fraction"
+    ],
+    "source_kind": "derived",
+    "source_resource": "chembl:subcellular_fraction",
+    "source_tables": []
   },
   "gold": {
     "column_projection": {
@@ -105,9 +151,53 @@
       "status"
     ]
   },
+  "operator_commands": [
+    {
+      "command": "bioetl run --pipeline chembl_subcellular_fraction",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_subcellular_fraction --limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_subcellular_fraction --run-type backfill --dry-run",
+      "result": "Проверяет backfill/rebuild path без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline chembl_subcellular_fraction --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline chembl_subcellular_fraction --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline chembl_subcellular_fraction",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
   "passport_schema_version": "1.0.0",
   "provenance": {
-    "projector_version": "1.0.0",
+    "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:2938415b0228a2d9cc25b6070f0666786c94f34e4f48a34bc08e56ad4fafd735",
     "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
   },
@@ -126,12 +216,25 @@
       "soft_fail_threshold": 0.05,
       "strict_validation": false
     },
+    "normalization_profile": "chembl.subcellular_fraction",
     "write": {}
   },
   "source_references": [
     {
       "path": "configs/entities/chembl/subcellular_fraction.yaml",
       "role": "effective_entity_config"
+    },
+    {
+      "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
+      "role": "pipeline_registration"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "role": "run_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
     },
     {
       "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
@@ -144,6 +247,24 @@
     {
       "path": "configs/contracts/chembl/subcellular_fraction.yaml",
       "role": "dq_contract"
+    },
+    {
+      "path": "configs/providers/chembl.yaml",
+      "role": "provider_config"
     }
-  ]
+  ],
+  "summary": {
+    "excluded_data_summary": "invalid_record_policy=quarantine",
+    "field_selection_summary": "В business-проекцию входят `subcellular_fraction_raw`, `subcellular_fraction`, `assay_count`, `example_assay_id`.",
+    "query_filter_summary": "subcellular_fraction=IDs from data/input/subcellular_fraction.csv column subcellular_fraction; CLI may override the input CSV",
+    "sentences": [
+      "Extract unique subcellular fractions from ChEMBL Assay records. Источник — `chembl:subcellular_fraction` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: subcellular_fraction=IDs from data/input/subcellular_fraction.csv column subcellular_fraction; CLI may override the input CSV.",
+      "В business-проекцию входят `subcellular_fraction_raw`, `subcellular_fraction`, `assay_count`, `example_assay_id`.",
+      "Silver использует профиль `chembl.subcellular_fraction` и проверяет обязательные поля `subcellular_fraction`; невалидные записи направляются в `quarantine`.",
+      "Перед Gold применяется строгий Pandera-контракт `chembl.subcellular_fraction`; Gold filters/constraints заданы в entity config (6 групп правил)."
+    ],
+    "silver_processing_summary": "Silver использует профиль `chembl.subcellular_fraction` и проверяет обязательные поля `subcellular_fraction`; невалидные записи направляются в `quarantine`.",
+    "source_description": "Extract unique subcellular fractions from ChEMBL Assay records. Источник — `chembl:subcellular_fraction` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: subcellular_fraction=IDs from data/input/subcellular_fraction.csv column subcellular_fraction; CLI may override the input CSV.",
+    "validation_summary": "Перед Gold применяется строгий Pandera-контракт `chembl.subcellular_fraction`; Gold filters/constraints заданы в entity config (6 групп правил)."
+  }
 }

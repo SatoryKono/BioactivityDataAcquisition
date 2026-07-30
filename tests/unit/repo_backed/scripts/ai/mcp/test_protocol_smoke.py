@@ -241,6 +241,54 @@ def test_smoke_performs_initialize_and_tools_list(
     ]
 
 
+def test_smoke_resource_enumeration_is_bounded_and_best_effort(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    config = tmp_path / ".mcp.json"
+    config.write_text(
+        json.dumps({"mcpServers": {"example": {"command": "python"}}}),
+        encoding="utf-8",
+    )
+    process = _Process()
+    responses = iter(
+        [
+            {"jsonrpc": "2.0", "id": 1, "result": {"protocolVersion": "1"}},
+            {"jsonrpc": "2.0", "id": 2, "result": {"tools": []}},
+            {"jsonrpc": "2.0", "id": 3, "result": {"resources": [{"uri": "x"}]}},
+            {
+                "jsonrpc": "2.0",
+                "id": 4,
+                "error": {"code": -32601, "message": "Method not found"},
+            },
+        ]
+    )
+    monkeypatch.setattr(subprocess, "Popen", lambda *args, **kwargs: process)
+    monkeypatch.setattr(
+        protocol_smoke,
+        "_readline",
+        lambda stream, timeout: json.dumps(next(responses)),
+    )
+
+    report = protocol_smoke.smoke_server(
+        config,
+        "example",
+        timeout=1,
+        enumerate_resources=True,
+    )
+
+    assert report["ok"] is True
+    assert report["resources_status"] == "ok"
+    assert report["resources_count"] == 1
+    assert report["resource_templates_status"] == "unsupported"
+    assert [message.get("method") for message in process.stdin.messages] == [
+        "initialize",
+        "notifications/initialized",
+        "tools/list",
+        "resources/list",
+        "resources/templates/list",
+    ]
+
+
 def test_smoke_stderr_tail_is_character_bounded_after_shutdown(
     monkeypatch: Any, tmp_path: Path
 ) -> None:

@@ -7,6 +7,13 @@
     }
   },
   "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "data_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Source[\"chembl:target_protein_classification\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: chembl.target_protein_classification + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: chembl.target_protein_classification (scd2)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
+    }
+  ],
   "execution": {
     "cached_bronze_is_mode": true,
     "control_plane": {
@@ -30,34 +37,325 @@
     }
   },
   "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
+    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data",
+    "field_groups": [
+      {
+        "field_count": 7,
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_ingestion_ts",
+          "_index"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "system"
       },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
+      {
+        "field_count": 40,
+        "fields": [
+          "target_id",
+          "component_id",
+          "leaf_id",
+          "path_ids",
+          "path_names",
+          "path_labels",
+          "depth",
+          "root_id",
+          "is_leaf",
+          "l1_id",
+          "l1_name",
+          "l1_desc",
+          "l2_id",
+          "l2_name",
+          "l2_desc",
+          "l3_id",
+          "l3_name",
+          "l3_desc",
+          "l4_id",
+          "l4_name",
+          "l4_desc",
+          "l5_id",
+          "l5_name",
+          "l5_desc",
+          "canonical_l1",
+          "l1_counts_for_target_type",
+          "l1_mapping_version",
+          "target_type_rule_version",
+          "l1_normalization_status",
+          "l1_normalization_notes",
+          "dataset_version",
+          "source_url",
+          "chembl_release",
+          "chembl_api_version",
+          "source_manifest_status",
+          "source_snapshot_fingerprint",
+          "target_snapshot_row_count",
+          "target_component_snapshot_row_count",
+          "protein_class_snapshot_row_count",
+          "classification_status"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "business"
       }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
+    ],
+    "filters": [
+      {
+        "description": "IDs from data/input/target_protein_classification.csv column target_id; CLI may override the input CSV",
+        "name": "target_id",
+        "required": false,
+        "source": "cli"
+      }
+    ],
+    "method": null,
+    "selected_fields": [
+      {
+        "name": "target_id",
+        "required": true,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
       },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
+      {
+        "name": "component_id",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "leaf_id",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "path_ids",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "path_names",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "path_labels",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "depth",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "root_id",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "is_leaf",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l1_id",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l1_name",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l1_desc",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l2_id",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l2_name",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l2_desc",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l3_id",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l3_name",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l3_desc",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l4_id",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l4_name",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l4_desc",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l5_id",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l5_name",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l5_desc",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "canonical_l1",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l1_counts_for_target_type",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l1_mapping_version",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "target_type_rule_version",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l1_normalization_status",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "l1_normalization_notes",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "dataset_version",
+        "required": true,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "source_url",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "chembl_release",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "chembl_api_version",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "source_manifest_status",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "source_snapshot_fingerprint",
+        "required": true,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "target_snapshot_row_count",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "target_component_snapshot_row_count",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "protein_class_snapshot_row_count",
+        "required": false,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      },
+      {
+        "name": "classification_status",
+        "required": true,
+        "source_object": "target_protein_classification",
+        "target_group": "business"
+      }
+    ],
+    "source_collections": [
+      "target_protein_classification"
+    ],
+    "source_kind": "derived",
+    "source_resource": "chembl:target_protein_classification",
+    "source_tables": []
   },
   "gold": {
     "column_projection": {
@@ -115,9 +413,53 @@
       "status"
     ]
   },
+  "operator_commands": [
+    {
+      "command": "bioetl run --pipeline chembl_target_protein_classification",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_target_protein_classification --limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_target_protein_classification --run-type backfill --dry-run",
+      "result": "Проверяет backfill/rebuild path без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline chembl_target_protein_classification --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline chembl_target_protein_classification --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline chembl_target_protein_classification",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
   "passport_schema_version": "1.0.0",
   "provenance": {
-    "projector_version": "1.0.0",
+    "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:bdfb46964f99f30557e8610e238d59225e792749d5b14f93136299342ddf0312",
     "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
   },
@@ -136,6 +478,7 @@
       "soft_fail_threshold": 0.01,
       "strict_validation": true
     },
+    "normalization_profile": "chembl.target_protein_classification",
     "write": {
       "partition_by": [
         "classification_status"
@@ -148,6 +491,18 @@
       "role": "effective_entity_config"
     },
     {
+      "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
+      "role": "pipeline_registration"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "role": "run_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
+    },
+    {
       "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
       "role": "gold_validation_contract"
     },
@@ -158,6 +513,24 @@
     {
       "path": "configs/contracts/chembl/target_protein_classification.yaml",
       "role": "dq_contract"
+    },
+    {
+      "path": "configs/providers/chembl.yaml",
+      "role": "provider_config"
     }
-  ]
+  ],
+  "summary": {
+    "excluded_data_summary": "invalid_record_policy=quarantine",
+    "field_selection_summary": "В business-проекцию входят `target_id`, `component_id`, `leaf_id`, `path_ids`, `path_names`, `path_labels`, `depth`, `root_id` и ещё 32 полей.",
+    "query_filter_summary": "target_id=IDs from data/input/target_protein_classification.csv column target_id; CLI may override the input CSV",
+    "sentences": [
+      "Derived ChEMBL target-to-protein-classification relation rows. Источник — `chembl:target_protein_classification` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: target_id=IDs from data/input/target_protein_classification.csv column target_id; CLI may override the input CSV.",
+      "В business-проекцию входят `target_id`, `component_id`, `leaf_id`, `path_ids`, `path_names`, `path_labels`, `depth`, `root_id` и ещё 32 полей.",
+      "Silver использует профиль `chembl.target_protein_classification` и проверяет обязательные поля `target_id`, `classification_status`, `dataset_version`, `source_snapshot_fingerprint`; невалидные записи направляются в `quarantine`.",
+      "Перед Gold применяется строгий Pandera-контракт `chembl.target_protein_classification`; Gold filters/constraints заданы в entity config (6 групп правил)."
+    ],
+    "silver_processing_summary": "Silver использует профиль `chembl.target_protein_classification` и проверяет обязательные поля `target_id`, `classification_status`, `dataset_version`, `source_snapshot_fingerprint`; невалидные записи направляются в `quarantine`.",
+    "source_description": "Derived ChEMBL target-to-protein-classification relation rows. Источник — `chembl:target_protein_classification` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: target_id=IDs from data/input/target_protein_classification.csv column target_id; CLI may override the input CSV.",
+    "validation_summary": "Перед Gold применяется строгий Pandera-контракт `chembl.target_protein_classification`; Gold filters/constraints заданы в entity config (6 групп правил)."
+  }
 }

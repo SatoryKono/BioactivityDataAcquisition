@@ -259,7 +259,22 @@ log_test.txt
 .devin/config.local.json
 .gemini/
 .jules/
-.junie/
+# .junie/ — JetBrains Junie runtime surface. Tracked as equal-peer runtime to
+# `.codex/**` (see AGENTS.md, .junie/guidelines.md). Selective un-ignore below
+# keeps machine-local state (history/state/cache) out of git while allowing
+# runtime tree (guidelines.md, agents/, skills/) and mirror-check artifacts.
+.junie/*
+!.junie/guidelines.md
+!.junie/agents/
+!.junie/agents/**
+!.junie/skills/
+!.junie/skills/**
+!.junie/plans/
+!.junie/plans/**
+# Machine-local Junie state MUST NOT be tracked.
+.junie/history/
+.junie/state/
+.junie/cache/
 .qodo/*
 !.qodo/
 !.qodo/README.md

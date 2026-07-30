@@ -200,6 +200,74 @@ def test_pre_task_workflow_refreshes_if_manifests_are_missing(
     assert len(payload["retrieval"]["results"]["rag"]) == 1
 
 
+def test_pre_task_read_only_refreshes_only_into_temporary_root(
+    tmp_path: Path, monkeypatch
+) -> None:
+    requested_root = tmp_path / "must-not-be-used"
+    refresh_roots: list[Path] = []
+
+    def _fake_refresh_all(
+        root: Path,
+        output_root: Path,
+        **kwargs: object,
+    ) -> dict[str, object]:
+        refresh_roots.append(output_root)
+        assert output_root != requested_root
+        rag_dir = output_root / "rag" / "manifests"
+        write_test_rag_manifest(
+            rag_dir / "chunks.jsonl",
+            [
+                {
+                    "id": "chunk-read-only",
+                    "title": "Read-only result",
+                    "content": "bounded temporary refresh",
+                    "source_path": "src/memory/DAILY_WORKFLOW.md",
+                    "source_type": "doc",
+                    "domain": "project",
+                    "repo_zone": "canonical_project_docs",
+                    "symbol_kind": "markdown_section",
+                }
+            ],
+        )
+        events_dir = output_root / "timeline" / "events"
+        events_dir.mkdir(parents=True, exist_ok=True)
+        (events_dir / "runs.jsonl").write_text(
+            json.dumps(
+                {
+                    "id": "read-only-run",
+                    "event_type": "run.manifest_registered",
+                    "event_family": "run",
+                    "severity": "info",
+                    "occurred_at": "2026-07-30T00:00:00Z",
+                    "source_refs": ["src/memory/DAILY_WORKFLOW.md"],
+                    "payload": {"pipeline_name": "bounded temporary refresh"},
+                },
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        return {"ok": True, "artifacts": []}
+
+    monkeypatch.setenv("BIOETL_AI_MEMORY_MODE", "read-only")
+    monkeypatch.setattr(workflow, "refresh_all", _fake_refresh_all)
+
+    payload = workflow.pre_task_workflow(
+        task_id="read-only-refresh",
+        title="Read-only refresh",
+        query="bounded temporary refresh",
+        source_refs=[],
+        refresh_output_root=requested_root,
+        limit=5,
+    )
+
+    assert payload["ok"] is True
+    assert payload["session_note"] is None
+    assert refresh_roots
+    assert not requested_root.exists()
+    assert payload["refresh_output_root"] == str(refresh_roots[0])
+
+
 def test_pre_task_workflow_skip_refresh_if_missing_preserves_catalog_results(
     tmp_path: Path,
 ) -> None:

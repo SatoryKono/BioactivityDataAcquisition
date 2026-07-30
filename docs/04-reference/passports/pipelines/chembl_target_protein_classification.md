@@ -1,187 +1,80 @@
-# chembl_target_protein_classification passport
+# `chembl_target_protein_classification`
 
 > Generated documentation projection. Do not edit manually.
 
-- Kind: `pipeline`
-- Typed identity: `pipeline:chembl_target_protein_classification`
-- Schema: `1.0.0`
-- Source revision: `41a1d6eab5a5c32c6b7754f6c3156ff87394912f`
+## Обзор
+
+| Параметр | Значение |
+| --- | --- |
+| Typed identity `[type:provider_entity]` | `pipeline:chembl_target_protein_classification` |
+| Status | `active` |
+| Gold contract | `chembl.target_protein_classification v2.2.0` |
+
+## Назначение и обработка данных
+
+Derived ChEMBL target-to-protein-classification relation rows. Источник — `chembl:target_protein_classification` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: target_id=IDs from data/input/target_protein_classification.csv column target_id; CLI may override the input CSV.
+В business-проекцию входят `target_id`, `component_id`, `leaf_id`, `path_ids`, `path_names`, `path_labels`, `depth`, `root_id` и ещё 32 полей.
+Silver использует профиль `chembl.target_protein_classification` и проверяет обязательные поля `target_id`, `classification_status`, `dataset_version`, `source_snapshot_fingerprint`; невалидные записи направляются в `quarantine`.
+Перед Gold применяется строгий Pandera-контракт `chembl.target_protein_classification`; Gold filters/constraints заданы в entity config (6 групп правил).
+
+## Извлечение данных
+
+| Аспект | Значение |
+| --- | --- |
+| Source | `derived` · `chembl:target_protein_classification` |
+| Resource / tables | `target_protein_classification` |
+| Filters | `target_id`: IDs from data/input/target_protein_classification.csv column target_id; CLI may override the input CSV |
+| Selected fields | `system` (7 fields); `business` (40 fields) |
+
+## Silver и Data Quality
+
+- Normalization profile: `chembl.target_protein_classification`.
+- Partitioning: `classification_status`.
+- DQ thresholds: soft `0.01`, hard `0.05`; invalid policy `quarantine`.
+
+## Gold
+
+- Contract: `chembl.target_protein_classification v2.2.0`; strict validation: `True`.
+- Write mode: `scd2`.
+- SCD2: current_flag_col=_is_current; valid_from_col=_valid_from; valid_to_col=_valid_to; version_col=_version.
+- Technical exclusions: `_dq_*`, `_source_batch_id`, `_index`.
+
+## Операторские команды
+
+| Задача | Команда | Результат |
+| --- | --- | --- |
+| Запуск | `bioetl run --pipeline chembl_target_protein_classification` | Запускает pipeline с effective config. |
+| Ограниченный запуск | `bioetl run --pipeline chembl_target_protein_classification --limit 100` | Ограничивает число обрабатываемых записей. |
+| Безопасная проверка | `bioetl run --pipeline chembl_target_protein_classification --run-type backfill --dry-run` | Проверяет backfill/rebuild path без записи. |
+| Quarantine | `bioetl quarantine inspect --pipeline chembl_target_protein_classification --limit 100` | Показывает quarantined и Silver-filter records; доступны --error-code и --run-id. |
+| Статистика исключений | `bioetl quarantine stats --pipeline chembl_target_protein_classification --group-by reason-code` | Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует. |
+| Checkpoint | `bioetl checkpoint inspect --pipeline chembl_target_protein_classification` | Показывает checkpoint и связанные audit/manifest anchors. |
+| Manifest | `bioetl run-manifest show <run-id-or-manifest-id>` | Показывает immutable manifest и ledger evidence запуска. |
+
+## Диаграммы
+
+### Data Flow
+
+```mermaid
+flowchart LR
+    Source["chembl:target_protein_classification"]
+    Filters["Effective request/input filters"]
+    Bronze["Bronze append-only snapshot"]
+    Silver["Silver profile: chembl.target_protein_classification + DQ"]
+    Quarantine["Quarantine / exclusion evidence"]
+    Gold["Gold: chembl.target_protein_classification (scd2)"]
+    Source --> Filters --> Bronze --> Silver
+    Silver -->|valid| Gold
+    Silver -->|invalid| Quarantine
+```
 
 ## Evidence
 
 - `effective_entity_config`: `configs/entities/chembl/target_protein_classification.yaml`
+- `pipeline_registration`: `src/bioetl/composition/factories/pipeline/registry_manifest.py`
+- `run_cli`: `src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py`
+- `quarantine_cli`: `src/bioetl/interfaces/cli/commands/quarantine.py`
 - `gold_validation_contract`: `docs/02-architecture/decisions/ADR-018-gold-strict-validation.md`
 - `observability_contract`: `src/bioetl/domain/_observability_contract_primitives.py`
 - `dq_contract`: `configs/contracts/chembl/target_protein_classification.yaml`
-
-## Generated facts
-
-```json
-{
-  "bronze": {
-    "capability": "append_only_snapshot",
-    "content_hash": {
-      "exclude": [],
-      "include": []
-    }
-  },
-  "diagnostics": [],
-  "execution": {
-    "cached_bronze_is_mode": true,
-    "control_plane": {
-      "checkpoints": true,
-      "run_ledger": true,
-      "run_manifest": true
-    },
-    "effective_config_hash": "sha256:51f9014236c429c5e14226dd3c81eb769b5fd8e59bc84cee8c53051d650f0169",
-    "projection_profiles": [
-      "batch",
-      "derived",
-      "local_snapshot"
-    ],
-    "resilience": {
-      "resolution_owner": "UnifiedHTTPClient and provider config",
-      "source_refs": [
-        "src/bioetl/infrastructure/adapters/http/client.py",
-        "configs/providers/chembl.yaml"
-      ],
-      "status": "runtime_resolved"
-    }
-  },
-  "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
-      },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
-  },
-  "gold": {
-    "column_projection": {
-      "exclude_fields": [
-        "_dq_*",
-        "_source_batch_id",
-        "_index"
-      ],
-      "include_groups": [
-        "system",
-        "business"
-      ]
-    },
-    "contract_ref": "chembl.target_protein_classification",
-    "contract_validation": {
-      "status": "resolved_by_adr_018",
-      "strict": true
-    },
-    "contract_version": "2.2.0",
-    "write": {
-      "idempotency_contract": "scd2",
-      "mode": "scd2",
-      "scd_config": {
-        "current_flag_col": "_is_current",
-        "valid_from_col": "_valid_from",
-        "valid_to_col": "_valid_to",
-        "version_col": "_version"
-      }
-    }
-  },
-  "identity": {
-    "aliases": [],
-    "derived_source_identity": {
-      "data_source_provider": null,
-      "entity": "target_protein_classification",
-      "provider": "chembl"
-    },
-    "entity": "target_protein_classification",
-    "pipeline_id": "chembl_target_protein_classification",
-    "pipeline_type": "provider_entity",
-    "provider": "chembl",
-    "status": "active",
-    "typed_id": "pipeline:chembl_target_protein_classification"
-  },
-  "kind": "pipeline",
-  "observability": {
-    "correlation_fields": [
-      "run_id",
-      "manifest_id"
-    ],
-    "metric_labels": [
-      "provider",
-      "pipeline",
-      "run_type",
-      "status"
-    ]
-  },
-  "passport_schema_version": "1.0.0",
-  "provenance": {
-    "projector_version": "1.0.0",
-    "semantic_content_hash": "sha256:bdfb46964f99f30557e8610e238d59225e792749d5b14f93136299342ddf0312",
-    "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
-  },
-  "silver": {
-    "column_projection": {
-      "exclude_fields": [],
-      "include_groups": [
-        "system",
-        "business",
-        "dq"
-      ]
-    },
-    "dq_execution": {
-      "hard_fail_threshold": 0.05,
-      "invalid_record_policy": "quarantine",
-      "soft_fail_threshold": 0.01,
-      "strict_validation": true
-    },
-    "write": {
-      "partition_by": [
-        "classification_status"
-      ]
-    }
-  },
-  "source_references": [
-    {
-      "path": "configs/entities/chembl/target_protein_classification.yaml",
-      "role": "effective_entity_config"
-    },
-    {
-      "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
-      "role": "gold_validation_contract"
-    },
-    {
-      "path": "src/bioetl/domain/_observability_contract_primitives.py",
-      "role": "observability_contract"
-    },
-    {
-      "path": "configs/contracts/chembl/target_protein_classification.yaml",
-      "role": "dq_contract"
-    }
-  ]
-}
-```
-
-## Diagnostics
-
-- No blocking diagnostics.
+- `provider_config`: `configs/providers/chembl.yaml`

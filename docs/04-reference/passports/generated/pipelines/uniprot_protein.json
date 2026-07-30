@@ -7,6 +7,13 @@
     }
   },
   "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "data_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Source[\"uniprot:protein\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: uniprot.protein + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: uniprot.protein (scd2)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
+    }
+  ],
   "execution": {
     "cached_bronze_is_mode": true,
     "control_plane": {
@@ -29,34 +36,689 @@
     }
   },
   "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
+    "endpoint_template": "https://rest.uniprot.org",
+    "field_groups": [
+      {
+        "field_count": 7,
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_ingestion_ts",
+          "_index"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "system"
       },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
+      {
+        "field_count": 92,
+        "fields": [
+          "accession",
+          "entry_name",
+          "entry_type",
+          "secondary_accessions",
+          "protein_name",
+          "protein_short_names",
+          "protein_alternative_names",
+          "protein_ec_numbers",
+          "flag",
+          "gene_primary",
+          "gene_synonyms",
+          "gene_orf_names",
+          "organism_scientific",
+          "organism_common",
+          "taxonomy_id",
+          "lineage",
+          "sequence",
+          "sequence_length",
+          "sequence_mass",
+          "sequence_checksum",
+          "sequence_modified",
+          "entry_version",
+          "entry_created",
+          "entry_modified",
+          "reviewed",
+          "protein_existence",
+          "annotation_score",
+          "function_comment",
+          "catalytic_activity",
+          "activity_regulation",
+          "subunit",
+          "pathway",
+          "subcellular_location",
+          "tissue_specificity",
+          "alternative_products",
+          "alternative_products_raw_json",
+          "alternative_products_canonical_json",
+          "disease_involvement",
+          "pharmaceutical_use",
+          "similarity_comment",
+          "caution",
+          "cofactors",
+          "cofactors_raw_json",
+          "cofactors_canonical_json",
+          "biophysicochemical_properties",
+          "biophysicochemical_properties_raw_json",
+          "biophysicochemical_properties_canonical_json",
+          "induction",
+          "go_terms",
+          "drugbank_ids",
+          "chembl_ids",
+          "guidetopharmacology_ids",
+          "pdb_xrefs",
+          "interpro_xrefs",
+          "pfam_xrefs",
+          "reactome_xrefs",
+          "superkingdom",
+          "phylum",
+          "genus",
+          "molecular_function",
+          "cellular_component",
+          "features_canonical_json",
+          "features_json",
+          "features_raw_json",
+          "domains",
+          "binding_sites",
+          "active_sites",
+          "keywords",
+          "topology",
+          "transmembrane",
+          "intramembrane",
+          "signal_peptide",
+          "propeptide",
+          "glycosylation",
+          "lipidation",
+          "disulfide_bond",
+          "modified_residue",
+          "phosphorylation",
+          "acetylation",
+          "ubiquitination",
+          "isoform_names",
+          "isoform_ids",
+          "isoform_synonyms",
+          "reactions",
+          "reactions_raw_json",
+          "reactions_canonical_json",
+          "reaction_ec_numbers",
+          "cross_reference_count",
+          "feature_count",
+          "keyword_count",
+          "publication_count",
+          "isoform_count"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "business"
       }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
+    ],
+    "filters": [
+      {
+        "description": "IDs from data/input/protein.csv column uniprot_id; CLI may override the input CSV",
+        "name": "accession",
+        "required": true,
+        "source": "cli"
+      }
+    ],
+    "method": "GET",
+    "selected_fields": [
+      {
+        "name": "accession",
+        "required": true,
+        "source_object": "protein",
+        "target_group": "business"
       },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
+      {
+        "name": "entry_name",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "entry_type",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "secondary_accessions",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "protein_name",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "protein_short_names",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "protein_alternative_names",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "protein_ec_numbers",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "flag",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "gene_primary",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "gene_synonyms",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "gene_orf_names",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "organism_scientific",
+        "required": true,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "organism_common",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "taxonomy_id",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "lineage",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "sequence",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "sequence_length",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "sequence_mass",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "sequence_checksum",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "sequence_modified",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "entry_version",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "entry_created",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "entry_modified",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "reviewed",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "protein_existence",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "annotation_score",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "function_comment",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "catalytic_activity",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "activity_regulation",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "subunit",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "pathway",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "subcellular_location",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "tissue_specificity",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "alternative_products",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "alternative_products_raw_json",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "alternative_products_canonical_json",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "disease_involvement",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "pharmaceutical_use",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "similarity_comment",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "caution",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "cofactors",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "cofactors_raw_json",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "cofactors_canonical_json",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "biophysicochemical_properties",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "biophysicochemical_properties_raw_json",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "biophysicochemical_properties_canonical_json",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "induction",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "go_terms",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "drugbank_ids",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "chembl_ids",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "guidetopharmacology_ids",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "pdb_xrefs",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "interpro_xrefs",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "pfam_xrefs",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "reactome_xrefs",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "superkingdom",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "phylum",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "genus",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "molecular_function",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "cellular_component",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "features_canonical_json",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "features_json",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "features_raw_json",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "domains",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "binding_sites",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "active_sites",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "keywords",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "topology",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "transmembrane",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "intramembrane",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "signal_peptide",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "propeptide",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "glycosylation",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "lipidation",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "disulfide_bond",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "modified_residue",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "phosphorylation",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "acetylation",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "ubiquitination",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "isoform_names",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "isoform_ids",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "isoform_synonyms",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "reactions",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "reactions_raw_json",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "reactions_canonical_json",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "reaction_ec_numbers",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "cross_reference_count",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "feature_count",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "keyword_count",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "publication_count",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      },
+      {
+        "name": "isoform_count",
+        "required": false,
+        "source_object": "protein",
+        "target_group": "business"
+      }
+    ],
+    "source_collections": [
+      "protein"
+    ],
+    "source_kind": "http_api",
+    "source_resource": "uniprot:protein",
+    "source_tables": []
   },
   "gold": {
     "column_projection": {
@@ -114,9 +776,53 @@
       "status"
     ]
   },
+  "operator_commands": [
+    {
+      "command": "bioetl run --pipeline uniprot_protein",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run --pipeline uniprot_protein --limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run --pipeline uniprot_protein --run-type backfill --dry-run",
+      "result": "Проверяет backfill/rebuild path без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline uniprot_protein --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline uniprot_protein --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline uniprot_protein",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
   "passport_schema_version": "1.0.0",
   "provenance": {
-    "projector_version": "1.0.0",
+    "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:c030e68b2afe348f54066a7db68b21d6877f29f453b3162bdeb12383c0e8b4b8",
     "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
   },
@@ -135,6 +841,7 @@
       "soft_fail_threshold": 0.05,
       "strict_validation": false
     },
+    "normalization_profile": "uniprot.protein",
     "write": {
       "partition_by": [
         "organism_scientific"
@@ -147,6 +854,18 @@
       "role": "effective_entity_config"
     },
     {
+      "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
+      "role": "pipeline_registration"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "role": "run_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
+    },
+    {
       "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
       "role": "gold_validation_contract"
     },
@@ -157,6 +876,24 @@
     {
       "path": "configs/contracts/uniprot/protein.yaml",
       "role": "dq_contract"
+    },
+    {
+      "path": "configs/providers/uniprot.yaml",
+      "role": "provider_config"
     }
-  ]
+  ],
+  "summary": {
+    "excluded_data_summary": "invalid_record_policy=quarantine",
+    "field_selection_summary": "В business-проекцию входят `accession`, `entry_name`, `entry_type`, `secondary_accessions`, `protein_name`, `protein_short_names`, `protein_alternative_names`, `protein_ec_numbers` и ещё 84 полей.",
+    "query_filter_summary": "accession=IDs from data/input/protein.csv column uniprot_id; CLI may override the input CSV",
+    "sentences": [
+      "Pipeline for ingesting UniProt proteins. Источник — `uniprot:protein` на `https://rest.uniprot.org`; применяемые extraction/input filters: accession=IDs from data/input/protein.csv column uniprot_id; CLI may override the input CSV.",
+      "В business-проекцию входят `accession`, `entry_name`, `entry_type`, `secondary_accessions`, `protein_name`, `protein_short_names`, `protein_alternative_names`, `protein_ec_numbers` и ещё 84 полей.",
+      "Silver использует профиль `uniprot.protein` и проверяет обязательные поля `accession`, `organism_scientific`; невалидные записи направляются в `quarantine`.",
+      "Перед Gold применяется строгий Pandera-контракт `uniprot.protein`; Gold filters/constraints заданы в entity config (6 групп правил)."
+    ],
+    "silver_processing_summary": "Silver использует профиль `uniprot.protein` и проверяет обязательные поля `accession`, `organism_scientific`; невалидные записи направляются в `quarantine`.",
+    "source_description": "Pipeline for ingesting UniProt proteins. Источник — `uniprot:protein` на `https://rest.uniprot.org`; применяемые extraction/input filters: accession=IDs from data/input/protein.csv column uniprot_id; CLI may override the input CSV.",
+    "validation_summary": "Перед Gold применяется строгий Pandera-контракт `uniprot.protein`; Gold filters/constraints заданы в entity config (6 групп правил)."
+  }
 }

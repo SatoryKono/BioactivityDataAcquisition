@@ -93,6 +93,8 @@ Commands:
   setup          Setup missing components
   mcp-check      Check Codex MCP configuration
   mcp-setup      Force-refresh Codex MCP configuration
+  baseline       Measure bounded launcher and MCP overhead
+  diagnose       Run canonical WSL/Codex diagnostics
   help           Show this help
 
 Examples:
@@ -122,6 +124,14 @@ case "$COMMAND" in
         ;;
     mcp-setup)
         bash "${HELPER_DIR}/ensure-mcp.sh" --refresh
+        exit $?
+        ;;
+    baseline)
+        python3 "${SCRIPT_DIR}/efficiency_baseline.py" "${@:2}"
+        exit $?
+        ;;
+    diagnose)
+        bash "${SCRIPT_DIR}/diagnose_wsl.sh" "${@:2}"
         exit $?
         ;;
     *)

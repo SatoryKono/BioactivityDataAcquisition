@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-29T19:04:15.514797+00:00",
+  "generated_at": "2026-07-30T06:01:13.899953+00:00",
   "summary": {
-    "total_scripts": 561,
+    "total_scripts": 564,
     "status_counts": {
-      "active": 341,
+      "active": 344,
       "supporting": 215,
       "temporary_diagnostic": 5
     },
@@ -14,9 +14,9 @@
       "ci": 64,
       "docs": 228,
       "other": 76,
-      "scripts": 442,
+      "scripts": 445,
       "skills": 17,
-      "tests": 349
+      "tests": 351
     }
   },
   "scripts": [
@@ -170,7 +170,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 204,
+          "line": 218,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -203,7 +203,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 204,
+          "line": 218,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -226,7 +226,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 10,
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
@@ -236,13 +236,13 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 117,
+          "line": 119,
           "source_group": "scripts",
           "text": "bash diagnose_wsl.sh              # Run WSL diagnostics"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 204,
+          "line": 218,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -259,6 +259,12 @@
           "text": "bash ./scripts/ai/codex/diagnose_wsl.sh"
         },
         {
+          "path": "scripts/ai/codex/run-codex.sh",
+          "line": 134,
+          "source_group": "scripts",
+          "text": "bash \"${SCRIPT_DIR}/diagnose_wsl.sh\" \"${@:2}\""
+        },
+        {
           "path": "scripts/ops/__main__.py",
           "line": 75,
           "source_group": "scripts",
@@ -269,12 +275,27 @@
           "line": 141,
           "source_group": "tests",
           "text": "assert \"../ai/codex/diagnose_wsl.sh\" in ops_router"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/efficiency_baseline.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/codex/run-codex.sh",
+          "line": 130,
+          "source_group": "scripts",
+          "text": "python3 \"${SCRIPT_DIR}/efficiency_baseline.py\" \"${@:2}\""
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 144,
+          "line": 158,
           "source_group": "tests",
-          "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.sh\").exists()"
+          "text": "assert 'python3 \"${SCRIPT_DIR}/efficiency_baseline.py\"' in launcher"
         }
       ]
     },
@@ -305,7 +326,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 203,
+          "line": 217,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         }
@@ -316,7 +337,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
@@ -326,13 +347,19 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 116,
+          "line": 118,
           "source_group": "scripts",
           "text": "bash headless.sh exec \"prompt\"    # Launch without MCP sync"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 203,
+          "line": 136,
+          "source_group": "scripts",
+          "text": "| Fast/headless | `bash scripts/ai/codex/headless.sh exec \"<prompt>\"` | explicitly skips MCP synchronization |"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 217,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         },
@@ -415,13 +442,13 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 223,
+          "line": 237,
           "source_group": "scripts",
           "text": ".\\helper\\diagnose-hang.ps1"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 285,
+          "line": 299,
           "source_group": "scripts",
           "text": "- `diagnose-hang.ps1` - **NEW**: Debug tool for setup hangs"
         },
@@ -588,7 +615,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 286,
+          "line": 300,
           "source_group": "scripts",
           "text": "- `run-codex-impl.sh` - Launch Codex with environment"
         },
@@ -1071,7 +1098,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 54,
+      "reference_count": 60,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -8052,6 +8079,27 @@
       ]
     },
     {
+      "path": "scripts/docs/passports/duplicate_audit.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/docs/passports/projector.py",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "from .duplicate_audit import audit_markdown_texts"
+        },
+        {
+          "path": "tests/unit/scripts/docs/passports/test_passport_projector.py",
+          "line": 20,
+          "source_group": "tests",
+          "text": "from scripts.docs.passports.duplicate_audit import audit_markdown_texts"
+        }
+      ]
+    },
+    {
       "path": "scripts/docs/passports/inventory.py",
       "type": "py",
       "status": "supporting",
@@ -8085,7 +8133,7 @@
       "references": [
         {
           "path": "scripts/docs/passports/projector.py",
-          "line": 18,
+          "line": 19,
           "source_group": "scripts",
           "text": "from .manual_sidecar import load_manual_sidecar"
         },
@@ -8100,6 +8148,21 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as the internal manual-sidecar helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
+    {
+      "path": "scripts/docs/passports/pipeline_projection.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/passports/projector.py",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "from .pipeline_projection import ("
+        }
+      ]
     },
     {
       "path": "scripts/docs/passports/projector.py",
@@ -8122,7 +8185,7 @@
         },
         {
           "path": "tests/unit/scripts/docs/passports/test_passport_projector.py",
-          "line": 20,
+          "line": 21,
           "source_group": "tests",
           "text": "from scripts.docs.passports.projector import ("
         }
@@ -8147,7 +8210,7 @@
         },
         {
           "path": "scripts/docs/passports/projector.py",
-          "line": 19,
+          "line": 26,
           "source_group": "scripts",
           "text": "from .source_facts import load_effective_pipeline_facts"
         }
@@ -9230,7 +9293,7 @@
         },
         {
           "path": "scripts/ai/mcp/protocol_smoke.py",
-          "line": 319,
+          "line": 366,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.repo_paths import ensure_local_http_url"
         }
@@ -15740,7 +15803,7 @@
         },
         {
           "path": "tests/integration/memory/test_workflow_tooling.py",
-          "line": 262,
+          "line": 330,
           "source_group": "tests",
           "text": "\"source_path\": \"src/memory/query.py\","
         },

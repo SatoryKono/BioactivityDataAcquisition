@@ -1,176 +1,80 @@
-# uniprot_idmapping passport
+# `uniprot_idmapping`
 
 > Generated documentation projection. Do not edit manually.
 
-- Kind: `pipeline`
-- Typed identity: `pipeline:uniprot_idmapping`
-- Schema: `1.0.0`
-- Source revision: `41a1d6eab5a5c32c6b7754f6c3156ff87394912f`
+## Обзор
+
+| Параметр | Значение |
+| --- | --- |
+| Typed identity `[type:provider_entity]` | `pipeline:uniprot_idmapping` |
+| Status | `active` |
+| Gold contract | `uniprot.idmapping v1.0.0` |
+| Aliases | `data-source:uniprot_idmapping` |
+
+## Назначение и обработка данных
+
+Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API. Источник — `uniprot:idmapping` на `https://rest.uniprot.org`; применяемые extraction/input filters: target_id=IDs from data/input/target.csv column target_chembl_id; CLI may override the input CSV.
+В business-проекцию входят `target_id`, `uniprot_accession`, `mapping_status`, `uniprot_entry_name`, `organism_scientific`, `organism_common`, `taxonomy_id`, `protein_name` и ещё 6 полей.
+Silver использует профиль `uniprot.idmapping` и проверяет обязательные поля `target_id`, `mapping_status`; невалидные записи направляются в `quarantine`.
+Перед Gold применяется строгий Pandera-контракт `uniprot.idmapping`; Gold filters/constraints заданы в entity config (6 групп правил).
+
+## Извлечение данных
+
+| Аспект | Значение |
+| --- | --- |
+| Source | `http_api` · `uniprot:idmapping` |
+| Resource / tables | `idmapping` |
+| Filters | `target_id`: IDs from data/input/target.csv column target_chembl_id; CLI may override the input CSV |
+| Selected fields | `system` (7 fields); `business` (14 fields) |
+
+## Silver и Data Quality
+
+- Normalization profile: `uniprot.idmapping`.
+- Partitioning: —.
+- DQ thresholds: soft `0.05`, hard `0.5`; invalid policy `quarantine`.
+
+## Gold
+
+- Contract: `uniprot.idmapping v1.0.0`; strict validation: `True`.
+- Write mode: `configured`.
+- Technical exclusions: `_dq_*`, `_source_batch_id`, `_index`.
+
+## Операторские команды
+
+| Задача | Команда | Результат |
+| --- | --- | --- |
+| Запуск | `bioetl run --pipeline uniprot_idmapping` | Запускает pipeline с effective config. |
+| Ограниченный запуск | `bioetl run --pipeline uniprot_idmapping --limit 100` | Ограничивает число обрабатываемых записей. |
+| Безопасная проверка | `bioetl run --pipeline uniprot_idmapping --run-type backfill --dry-run` | Проверяет backfill/rebuild path без записи. |
+| Quarantine | `bioetl quarantine inspect --pipeline uniprot_idmapping --limit 100` | Показывает quarantined и Silver-filter records; доступны --error-code и --run-id. |
+| Статистика исключений | `bioetl quarantine stats --pipeline uniprot_idmapping --group-by reason-code` | Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует. |
+| Checkpoint | `bioetl checkpoint inspect --pipeline uniprot_idmapping` | Показывает checkpoint и связанные audit/manifest anchors. |
+| Manifest | `bioetl run-manifest show <run-id-or-manifest-id>` | Показывает immutable manifest и ledger evidence запуска. |
+
+## Диаграммы
+
+### Data Flow
+
+```mermaid
+flowchart LR
+    Source["uniprot:idmapping"]
+    Filters["Effective request/input filters"]
+    Bronze["Bronze append-only snapshot"]
+    Silver["Silver profile: uniprot.idmapping + DQ"]
+    Quarantine["Quarantine / exclusion evidence"]
+    Gold["Gold: uniprot.idmapping (configured)"]
+    Source --> Filters --> Bronze --> Silver
+    Silver -->|valid| Gold
+    Silver -->|invalid| Quarantine
+```
 
 ## Evidence
 
 - `effective_entity_config`: `configs/entities/uniprot/idmapping.yaml`
+- `pipeline_registration`: `src/bioetl/composition/factories/pipeline/registry_manifest.py`
+- `run_cli`: `src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py`
+- `quarantine_cli`: `src/bioetl/interfaces/cli/commands/quarantine.py`
 - `gold_validation_contract`: `docs/02-architecture/decisions/ADR-018-gold-strict-validation.md`
 - `observability_contract`: `src/bioetl/domain/_observability_contract_primitives.py`
 - `dq_contract`: `configs/contracts/uniprot/idmapping.yaml`
-
-## Generated facts
-
-```json
-{
-  "bronze": {
-    "capability": "append_only_snapshot",
-    "content_hash": {
-      "exclude": [],
-      "include": []
-    }
-  },
-  "diagnostics": [],
-  "execution": {
-    "cached_bronze_is_mode": true,
-    "control_plane": {
-      "checkpoints": true,
-      "run_ledger": true,
-      "run_manifest": true
-    },
-    "effective_config_hash": "sha256:ef614184bf8a2841a55e4b624acc21c7295434f6d74cdd693b5e9e98c6040c29",
-    "projection_profiles": [
-      "async_mapping",
-      "batch",
-      "http"
-    ],
-    "resilience": {
-      "resolution_owner": "UnifiedHTTPClient and provider config",
-      "source_refs": [
-        "src/bioetl/infrastructure/adapters/http/client.py",
-        "configs/providers/uniprot.yaml"
-      ],
-      "status": "runtime_resolved"
-    }
-  },
-  "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
-      },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
-  },
-  "gold": {
-    "column_projection": {
-      "exclude_fields": [
-        "_dq_*",
-        "_source_batch_id",
-        "_index"
-      ],
-      "include_groups": [
-        "system",
-        "business"
-      ]
-    },
-    "contract_ref": "uniprot.idmapping",
-    "contract_validation": {
-      "status": "resolved_by_adr_018",
-      "strict": true
-    },
-    "contract_version": "1.0.0",
-    "write": {}
-  },
-  "identity": {
-    "aliases": [
-      "data-source:uniprot_idmapping"
-    ],
-    "derived_source_identity": {
-      "data_source_provider": null,
-      "entity": "idmapping",
-      "provider": "uniprot"
-    },
-    "entity": "idmapping",
-    "pipeline_id": "uniprot_idmapping",
-    "pipeline_type": "provider_entity",
-    "provider": "uniprot",
-    "status": "active",
-    "typed_id": "pipeline:uniprot_idmapping"
-  },
-  "kind": "pipeline",
-  "observability": {
-    "correlation_fields": [
-      "run_id",
-      "manifest_id"
-    ],
-    "metric_labels": [
-      "provider",
-      "pipeline",
-      "run_type",
-      "status"
-    ]
-  },
-  "passport_schema_version": "1.0.0",
-  "provenance": {
-    "projector_version": "1.0.0",
-    "semantic_content_hash": "sha256:e84ee14b38ed888c4f979f7f36a04afb5be393ad47bdde2772a2241e215cc454",
-    "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
-  },
-  "silver": {
-    "column_projection": {
-      "exclude_fields": [],
-      "include_groups": [
-        "system",
-        "business",
-        "dq"
-      ]
-    },
-    "dq_execution": {
-      "hard_fail_threshold": 0.5,
-      "invalid_record_policy": "quarantine",
-      "soft_fail_threshold": 0.05,
-      "strict_validation": false
-    },
-    "write": {}
-  },
-  "source_references": [
-    {
-      "path": "configs/entities/uniprot/idmapping.yaml",
-      "role": "effective_entity_config"
-    },
-    {
-      "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
-      "role": "gold_validation_contract"
-    },
-    {
-      "path": "src/bioetl/domain/_observability_contract_primitives.py",
-      "role": "observability_contract"
-    },
-    {
-      "path": "configs/contracts/uniprot/idmapping.yaml",
-      "role": "dq_contract"
-    }
-  ]
-}
-```
-
-## Diagnostics
-
-- No blocking diagnostics.
+- `provider_config`: `configs/providers/uniprot.yaml`

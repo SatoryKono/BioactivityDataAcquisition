@@ -1,0 +1,4 @@
+interface:
+  display_name: "Py Doc Bot"
+  short_description: "Run BioETL docs workflow profile"
+  default_prompt: "Use $py-doc-bot to update BioETL documentation, validate claims, and sync runtime mirrors."

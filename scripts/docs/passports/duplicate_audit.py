@@ -57,6 +57,13 @@ def audit_markdown_texts(texts: list[str]) -> DuplicateAudit:
     paragraph_counts = Counter(item for item in paragraphs if len(item) >= 40)
     diagram_counts = Counter(diagrams)
     line_lengths = [len(text.splitlines()) for text in texts]
+    empty_sections = 0
+    for text in texts:
+        matches = list(re.finditer(r"^##(?!#)[^\n]+$", text, re.MULTILINE))
+        for index, match in enumerate(matches):
+            end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+            if not text[match.end() : end].strip():
+                empty_sections += 1
     return {
         "passport_count": len(texts),
         "total_markdown_lines": sum(line_lengths),
@@ -68,10 +75,7 @@ def audit_markdown_texts(texts: list[str]) -> DuplicateAudit:
         "identity_duplicate_count": sum(
             max(0, text.count("Typed identity") - 1) for text in texts
         ),
-        "empty_section_count": sum(
-            len(re.findall(r"^##[^\n]+\n\s*(?=##|\Z)", text, re.MULTILINE))
-            for text in texts
-        ),
+        "empty_section_count": empty_sections,
         "average_passport_lines": (
             round(sum(line_lengths) / len(line_lengths), 1) if line_lengths else 0.0
         ),

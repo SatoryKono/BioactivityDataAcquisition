@@ -3,8 +3,8 @@
   "issue": 7090,
   "panel_count": 193,
   "risk_counts": {
-    "green_at_or_below_zero": 107,
-    "red_at_or_below_zero": 5,
+    "green_at_or_below_zero": 103,
+    "red_at_or_below_zero": 3,
     "alert_related": 8,
     "scraping_related": 2
   },
@@ -13,7 +13,7 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 1000,
-      "title": "Navigation",
+      "title": "Navigate Dashboards",
       "type": "text",
       "collapsed": false,
       "gridPos": {
@@ -32,11 +32,11 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 9400,
-      "title": "Provenance",
+      "title": "Review Scope & Evidence",
       "type": "text",
       "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
@@ -51,11 +51,11 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 9401,
-      "title": "Status",
+      "title": "Monitor Replay Readiness",
       "type": "stat",
       "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 8,
         "x": 16,
         "y": 3
@@ -85,14 +85,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 906,
-      "title": "Primary recovery",
+      "title": "Review First Recovery Action",
       "type": "text",
       "collapsed": false,
       "gridPos": {
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 11
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -104,14 +104,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 891,
-      "title": "Monitor: Replay Safety State",
+      "title": "Monitor Replay Safety",
       "type": "stat",
       "collapsed": false,
       "gridPos": {
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "threshold_steps": [
         {
@@ -138,14 +138,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 892,
-      "title": "Monitor: Checkpoint Freshness Lag (seconds)",
+      "title": "Monitor Checkpoint Age",
       "type": "stat",
       "collapsed": false,
       "gridPos": {
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 6
+        "y": 7
       },
       "threshold_steps": [
         {
@@ -172,14 +172,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 893,
-      "title": "Monitor: Manifest / Ledger Integrity",
+      "title": "Monitor Manifest & Ledger Failures",
       "type": "stat",
       "collapsed": false,
       "gridPos": {
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 6
+        "y": 7
       },
       "threshold_steps": [
         {
@@ -206,14 +206,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 907,
-      "title": "Inspect: Telemetry Missing",
+      "title": "Monitor Telemetry Coverage",
       "type": "stat",
       "collapsed": false,
       "gridPos": {
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 6
+        "y": 7
       },
       "threshold_steps": [
         {
@@ -240,14 +240,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 894,
-      "title": "Inspect: Known Blind Spots",
+      "title": "Review Replay Coverage Limits",
       "type": "text",
       "collapsed": true,
       "gridPos": {
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 14
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -259,14 +259,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 130,
-      "title": "Track: Replay / Resume Blockers in Range",
+      "title": "Track Replay Blockers in Range",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "threshold_steps": [
         {
@@ -293,14 +293,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 3,
-      "title": "Monitor: Checkpoint Incompatibilities",
+      "title": "Track Checkpoint Incompatibilities",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 24
+        "y": 25
       },
       "threshold_steps": [
         {
@@ -327,14 +327,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 104,
-      "title": "Monitor: Replay Not Reconstructable",
+      "title": "Track Unreconstructable Replays",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 24
+        "y": 25
       },
       "threshold_steps": [
         {
@@ -361,14 +361,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 120,
-      "title": "Monitor: Replay Drift",
+      "title": "Track Replay Drift",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 30
+        "y": 31
       },
       "threshold_steps": [
         {
@@ -395,14 +395,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 101,
-      "title": "Monitor: Checkpoint Load Failures",
+      "title": "Track Checkpoint Load Failures",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 30
+        "y": 31
       },
       "threshold_steps": [
         {
@@ -429,14 +429,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 102,
-      "title": "Monitor: Checkpoint Save Failures",
+      "title": "Track Checkpoint Save Failures",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 36
+        "y": 37
       },
       "threshold_steps": [
         {
@@ -463,14 +463,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 103,
-      "title": "Monitor: GLOBAL Checkpoint Operator Failures",
+      "title": "Track Global Checkpoint Admin Failures",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 36
+        "y": 37
       },
       "threshold_steps": [
         {
@@ -497,14 +497,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 121,
-      "title": "Track: Replay Lag Seconds",
+      "title": "Track Peak Replay Lag",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 42
+        "y": 43
       },
       "threshold_steps": [
         {
@@ -531,14 +531,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 5,
-      "title": "Track: Checkpoint Compatibility Outcomes",
+      "title": "Compare Checkpoint Outcomes",
       "type": "timeseries",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 42
+        "y": 43
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -550,14 +550,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 134,
-      "title": "Track: Replay Drift by Type",
+      "title": "Track Replay Drift by Type",
       "type": "timeseries",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 48
+        "y": 49
       },
       "threshold_steps": [
         {
@@ -580,14 +580,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 135,
-      "title": "Track: Replay Lag Trend",
+      "title": "Track Replay Lag",
       "type": "timeseries",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 48
+        "y": 49
       },
       "threshold_steps": [
         {
@@ -614,14 +614,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 105,
-      "title": "Track: Checkpoint Save Latency p50/p95/p99",
+      "title": "Track Checkpoint Save Latency",
       "type": "timeseries",
       "collapsed": true,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 54
+        "y": 55
       },
       "threshold_steps": [
         {
@@ -648,14 +648,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 106,
-      "title": "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
+      "title": "Track Global Checkpoint Admin Latency",
       "type": "timeseries",
       "collapsed": true,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 61
+        "y": 62
       },
       "threshold_steps": [
         {
@@ -682,14 +682,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 908,
-      "title": "Inspect: Terminal Run Events by Status in Range",
+      "title": "Review Terminal Run Outcomes",
       "type": "table",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -701,14 +701,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 1,
-      "title": "Monitor: Manifest Write Failures",
+      "title": "Track Manifest Write Failures",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 20
+        "y": 21
       },
       "threshold_steps": [
         {
@@ -735,14 +735,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 2,
-      "title": "Monitor: Ledger Append Failures",
+      "title": "Track Ledger Append Failures",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "threshold_steps": [
         {
@@ -769,14 +769,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 131,
-      "title": "Track: Manifest Writes by Status",
+      "title": "Compare Manifest Writes by Status",
       "type": "timeseries",
       "collapsed": true,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 27
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -788,14 +788,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 7,
-      "title": "Track: Ledger Appends by Event Type / Status",
+      "title": "Compare Ledger Appends by Type & Status",
       "type": "timeseries",
       "collapsed": true,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 34
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -807,14 +807,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 132,
-      "title": "Monitor: Manifest Write Failure Ratio",
+      "title": "Monitor Manifest Failure Severity [30m]",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 41
       },
       "threshold_steps": [
         {
@@ -841,14 +841,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 133,
-      "title": "Monitor: Ledger Append Failure Ratio",
+      "title": "Monitor Ledger Failure Severity [30m]",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 46
+        "y": 47
       },
       "threshold_steps": [
         {
@@ -875,133 +875,12 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 4,
-      "title": "Monitor: GLOBAL Control-Plane Read Failures",
+      "title": "Track Global Read Failures",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
-        "x": 0,
-        "y": 15
-      },
-      "threshold_steps": [
-        {
-          "color": "green",
-          "value": null
-        },
-        {
-          "color": "orange",
-          "value": 1
-        },
-        {
-          "color": "red",
-          "value": 2
-        }
-      ],
-      "mapping_count": 1,
-      "noValue": "UNKNOWN",
-      "unit": "short",
-      "risks": [
-        "green_at_or_below_zero"
-      ]
-    },
-    {
-      "uid": "bioetl-control-plane-v1",
-      "file": "bioetl-control-plane-v1.json",
-      "panel_id": 136,
-      "title": "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
-      "type": "stat",
-      "collapsed": true,
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 15
-      },
-      "threshold_steps": [
-        {
-          "color": "green",
-          "value": null
-        },
-        {
-          "color": "orange",
-          "value": 1
-        },
-        {
-          "color": "red",
-          "value": 2
-        }
-      ],
-      "mapping_count": 1,
-      "noValue": "UNKNOWN",
-      "unit": "short",
-      "risks": [
-        "green_at_or_below_zero"
-      ]
-    },
-    {
-      "uid": "bioetl-control-plane-v1",
-      "file": "bioetl-control-plane-v1.json",
-      "panel_id": 6,
-      "title": "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
-      "type": "timeseries",
-      "collapsed": true,
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 21
-      },
-      "threshold_steps": [],
-      "mapping_count": 0,
-      "noValue": null,
-      "unit": "short",
-      "risks": []
-    },
-    {
-      "uid": "bioetl-control-plane-v1",
-      "file": "bioetl-control-plane-v1.json",
-      "panel_id": 111,
-      "title": "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
-      "type": "timeseries",
-      "collapsed": true,
-      "gridPos": {
-        "h": 7,
-        "w": 24,
-        "x": 0,
-        "y": 27
-      },
-      "threshold_steps": [
-        {
-          "color": "green",
-          "value": null
-        },
-        {
-          "color": "yellow",
-          "value": 0.5
-        },
-        {
-          "color": "red",
-          "value": 1.0
-        }
-      ],
-      "mapping_count": 0,
-      "noValue": "No optional latency samples in range. Treat this as telemetry absence, not proof of a healthy control-plane path.",
-      "unit": "s",
-      "risks": [
-        "green_at_or_below_zero"
-      ]
-    },
-    {
-      "uid": "bioetl-control-plane-v1",
-      "file": "bioetl-control-plane-v1.json",
-      "panel_id": 122,
-      "title": "Monitor: Lineage Refs Missing",
-      "type": "stat",
-      "collapsed": true,
-      "gridPos": {
-        "h": 6,
-        "w": 24,
         "x": 0,
         "y": 16
       },
@@ -1029,15 +908,136 @@
     {
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
-      "panel_id": 137,
-      "title": "Monitor: Lineage Fragment Persistence Failures",
+      "panel_id": 136,
+      "title": "Monitor Global Read Failure Severity [30m]",
       "type": "stat",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 12,
+        "y": 16
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 6,
+      "title": "Compare Global Reads by Store",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
         "y": 22
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 111,
+      "title": "Track Global Read Latency",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 0.5
+        },
+        {
+          "color": "red",
+          "value": 1.0
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No optional latency samples in range. Treat this as telemetry absence, not proof of a healthy control-plane path.",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 122,
+      "title": "Track Missing Lineage References",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 137,
+      "title": "Track Lineage Persistence Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 23
       },
       "threshold_steps": [
         {
@@ -1064,14 +1064,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 138,
-      "title": "Inspect: Missing Lineage Refs by Layer / Type",
+      "title": "Review Missing Lineage by Layer",
       "type": "table",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 29
       },
       "threshold_steps": [
         {
@@ -1098,14 +1098,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 107,
-      "title": "Track: GLOBAL Audit Write Outcomes",
+      "title": "Compare Global Audit Write Outcomes",
       "type": "timeseries",
       "collapsed": true,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 35
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1117,14 +1117,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 108,
-      "title": "Track: GLOBAL Audit Query Outcomes",
+      "title": "Compare Global Audit Query Outcomes",
       "type": "timeseries",
       "collapsed": true,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 41
+        "y": 42
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1136,14 +1136,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 109,
-      "title": "Track: GLOBAL Audit Write Latency p50/p95/p99",
+      "title": "Track Global Audit Write Latency",
       "type": "timeseries",
       "collapsed": true,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 48
+        "y": 49
       },
       "threshold_steps": [
         {
@@ -1170,14 +1170,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 110,
-      "title": "Track: GLOBAL Audit Query Latency p50/p95/p99",
+      "title": "Track Global Audit Query Latency",
       "type": "timeseries",
       "collapsed": true,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 56
       },
       "threshold_steps": [
         {
@@ -1204,14 +1204,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 112,
-      "title": "Track: Lineage Fragment Outcomes",
+      "title": "Compare Lineage Persistence Outcomes",
       "type": "timeseries",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 62
+        "y": 63
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1223,14 +1223,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 9407,
-      "title": "Inspect: Copyable Identity Handoffs",
+      "title": "Copy Identity Values",
       "type": "table",
       "collapsed": true,
       "gridPos": {
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 22
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1242,14 +1242,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 9404,
-      "title": "Inspect: Overview Identity Anchors",
+      "title": "Review Run Identity",
       "type": "table",
       "collapsed": true,
       "gridPos": {
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1261,14 +1261,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 9410,
-      "title": "ID Empty State",
+      "title": "Identity Data Unavailable",
       "type": "text",
       "collapsed": true,
       "gridPos": {
         "h": 4,
         "w": 12,
         "x": 0,
-        "y": 47
+        "y": 48
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1280,14 +1280,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 9411,
-      "title": "Processed Records Empty State",
+      "title": "Record Counts Unavailable",
       "type": "text",
       "collapsed": true,
       "gridPos": {
         "h": 4,
         "w": 12,
         "x": 12,
-        "y": 47
+        "y": 48
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1299,14 +1299,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 9405,
-      "title": "Inspect: Identity Gaps",
+      "title": "Review Identity Gaps",
       "type": "table",
       "collapsed": true,
       "gridPos": {
         "h": 4,
         "w": 12,
         "x": 0,
-        "y": 51
+        "y": 52
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1318,14 +1318,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 9406,
-      "title": "Inspect: Checkpoint Anchor Compare",
+      "title": "Compare Checkpoint Anchors",
       "type": "table",
       "collapsed": true,
       "gridPos": {
         "h": 4,
         "w": 12,
         "x": 12,
-        "y": 51
+        "y": 52
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1337,14 +1337,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 9408,
-      "title": "Inspect: P1 Replay and Evidence Anchors",
+      "title": "Review Required Replay Anchors",
       "type": "table",
       "collapsed": true,
       "gridPos": {
         "h": 4,
         "w": 12,
         "x": 0,
-        "y": 55
+        "y": 56
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1356,14 +1356,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 9409,
-      "title": "Inspect: P2 Forensic Anchors",
+      "title": "Review Additional Forensic Anchors",
       "type": "table",
       "collapsed": true,
       "gridPos": {
         "h": 4,
         "w": 12,
         "x": 12,
-        "y": 55
+        "y": 56
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1375,14 +1375,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 139,
-      "title": "Review: Remaining Replay-Safety Signals",
+      "title": "Review Uncovered Replay Signals",
       "type": "text",
       "collapsed": true,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
-        "y": 59
+        "y": 60
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1394,14 +1394,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 9402,
-      "title": "ID",
+      "title": "Review Run Identity",
       "type": "table",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1413,14 +1413,14 @@
       "uid": "bioetl-control-plane-v1",
       "file": "bioetl-control-plane-v1.json",
       "panel_id": 9403,
-      "title": "Processed Records",
+      "title": "Review Processed Records",
       "type": "table",
       "collapsed": true,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 19
       },
       "threshold_steps": [],
       "mapping_count": 1,
@@ -1451,11 +1451,11 @@
       "uid": "bioetl-dq-v2",
       "file": "bioetl-dq-v2.json",
       "panel_id": 9400,
-      "title": "Provenance",
+      "title": "Inspect Scope & Evidence",
       "type": "text",
       "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
@@ -1474,7 +1474,7 @@
       "type": "stat",
       "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 8,
         "x": 16,
         "y": 3
@@ -1511,7 +1511,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -1527,10 +1527,10 @@
       "type": "stat",
       "collapsed": false,
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 8,
         "x": 0,
-        "y": 8
+        "y": 9
       },
       "threshold_steps": [
         {
@@ -1564,7 +1564,7 @@
         "h": 5,
         "w": 16,
         "x": 8,
-        "y": 8
+        "y": 9
       },
       "threshold_steps": [
         {
@@ -1573,7 +1573,7 @@
         }
       ],
       "mapping_count": 1,
-      "noValue": "VALID_EMPTY — no current DQ reasons in NOW window",
+      "noValue": "None observed",
       "unit": "short",
       "risks": []
     },
@@ -2083,13 +2083,13 @@
       "collapsed": true,
       "gridPos": {
         "h": 4,
-        "w": 12,
+        "w": 8,
         "x": 0,
         "y": 0
       },
       "threshold_steps": [
         {
-          "color": "red",
+          "color": "gray",
           "value": null
         },
         {
@@ -2104,9 +2104,7 @@
       "mapping_count": 1,
       "noValue": "UNKNOWN",
       "unit": "percentunit",
-      "risks": [
-        "red_at_or_below_zero"
-      ]
+      "risks": []
     },
     {
       "uid": "bioetl-dq-v2",
@@ -2117,13 +2115,13 @@
       "collapsed": true,
       "gridPos": {
         "h": 4,
-        "w": 12,
+        "w": 8,
         "x": 12,
         "y": 0
       },
       "threshold_steps": [
         {
-          "color": "red",
+          "color": "gray",
           "value": null
         },
         {
@@ -2138,9 +2136,7 @@
       "mapping_count": 1,
       "noValue": "UNKNOWN",
       "unit": "percentunit",
-      "risks": [
-        "red_at_or_below_zero"
-      ]
+      "risks": []
     },
     {
       "uid": "bioetl-dq-v2",
@@ -2170,7 +2166,7 @@
         }
       ],
       "mapping_count": 1,
-      "noValue": "UNKNOWN",
+      "noValue": "TELEMETRY MISSING — no bioetl_data_freshness_seconds for scope",
       "unit": "h",
       "risks": [
         "green_at_or_below_zero"
@@ -2309,11 +2305,11 @@
       "uid": "bioetl-incident-v1",
       "file": "bioetl-incident-v1.json",
       "panel_id": 9400,
-      "title": "Provenance",
+      "title": "Inspect Scope & Evidence",
       "type": "text",
       "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
@@ -2332,7 +2328,7 @@
       "type": "stat",
       "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 8,
         "x": 16,
         "y": 3
@@ -2373,7 +2369,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -2392,7 +2388,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 10
       },
       "threshold_steps": [
         {
@@ -2409,7 +2405,7 @@
         }
       ],
       "mapping_count": 0,
-      "noValue": "VALID_EMPTY — no active suspects across domains",
+      "noValue": "None observed",
       "unit": null,
       "risks": [
         "green_at_or_below_zero"
@@ -2426,11 +2422,11 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "threshold_steps": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
         },
         {
@@ -2443,11 +2439,10 @@
         }
       ],
       "mapping_count": 0,
-      "noValue": "VALID_EMPTY — no firing/pending alerts now",
+      "noValue": "None observed",
       "unit": null,
       "risks": [
-        "alert_related",
-        "green_at_or_below_zero"
+        "alert_related"
       ]
     },
     {
@@ -2461,11 +2456,11 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 17
+        "y": 18
       },
       "threshold_steps": [],
       "mapping_count": 0,
-      "noValue": "VALID_EMPTY — no alert state samples in selected range",
+      "noValue": "None observed",
       "unit": null,
       "risks": [
         "alert_related"
@@ -2482,7 +2477,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 24
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -2518,7 +2513,7 @@
         }
       ],
       "mapping_count": 0,
-      "noValue": "VALID_EMPTY — no active suspects in this domain",
+      "noValue": "None observed",
       "unit": null,
       "risks": [
         "green_at_or_below_zero"
@@ -2552,7 +2547,7 @@
         }
       ],
       "mapping_count": 0,
-      "noValue": "VALID_EMPTY — no active suspects in this domain",
+      "noValue": "None observed",
       "unit": null,
       "risks": [
         "green_at_or_below_zero"
@@ -2586,7 +2581,7 @@
         }
       ],
       "mapping_count": 0,
-      "noValue": "VALID_EMPTY — no active suspects in this domain",
+      "noValue": "None observed",
       "unit": null,
       "risks": [
         "green_at_or_below_zero"
@@ -2650,11 +2645,11 @@
       "uid": "bioetl-overview-v2",
       "file": "bioetl-overview-v2.json",
       "panel_id": 99,
-      "title": "Provenance",
+      "title": "Inspect Scope & Evidence",
       "type": "text",
       "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
@@ -2673,7 +2668,7 @@
       "type": "stat",
       "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 8,
         "x": 16,
         "y": 3
@@ -2707,10 +2702,10 @@
       "type": "table",
       "collapsed": false,
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 10,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "threshold_steps": [
         {
@@ -2743,10 +2738,10 @@
       "type": "table",
       "collapsed": false,
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 14,
         "x": 10,
-        "y": 6
+        "y": 7
       },
       "threshold_steps": [
         {
@@ -2951,7 +2946,7 @@
       "type": "text",
       "collapsed": true,
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 24,
         "x": 0,
         "y": 33
@@ -3227,11 +3222,11 @@
       "uid": "bioetl-provider-health-v2",
       "file": "bioetl-provider-health-v2.json",
       "panel_id": 9400,
-      "title": "Provenance",
+      "title": "Inspect Scope & Evidence",
       "type": "text",
       "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
@@ -3250,7 +3245,7 @@
       "type": "stat",
       "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 8,
         "x": 16,
         "y": 3
@@ -3287,7 +3282,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -3306,7 +3301,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 8
+        "y": 9
       },
       "threshold_steps": [
         {
@@ -3340,7 +3335,7 @@
         "h": 6,
         "w": 6,
         "x": 8,
-        "y": 8
+        "y": 9
       },
       "threshold_steps": [
         {
@@ -3374,7 +3369,7 @@
         "h": 6,
         "w": 10,
         "x": 14,
-        "y": 8
+        "y": 9
       },
       "threshold_steps": [
         {
@@ -3391,7 +3386,7 @@
         }
       ],
       "mapping_count": 1,
-      "noValue": "VALID_EMPTY — no current causes (check Status/freshness if non-OK)",
+      "noValue": "None observed",
       "unit": "short",
       "risks": [
         "green_at_or_below_zero"
@@ -3408,7 +3403,7 @@
         "h": 4,
         "w": 8,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "threshold_steps": [
         {
@@ -3902,16 +3897,14 @@
       },
       "threshold_steps": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
         }
       ],
       "mapping_count": 1,
-      "noValue": null,
+      "noValue": "N/A",
       "unit": "short",
-      "risks": [
-        "green_at_or_below_zero"
-      ]
+      "risks": []
     },
     {
       "uid": "bioetl-provider-health-v2",
@@ -3967,7 +3960,7 @@
         }
       ],
       "mapping_count": 1,
-      "noValue": null,
+      "noValue": "N/A",
       "unit": "percentunit",
       "risks": []
     },
@@ -3986,16 +3979,14 @@
       },
       "threshold_steps": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
         }
       ],
       "mapping_count": 1,
-      "noValue": null,
+      "noValue": "N/A",
       "unit": "short",
-      "risks": [
-        "green_at_or_below_zero"
-      ]
+      "risks": []
     },
     {
       "uid": "bioetl-provider-health-v2",
@@ -4058,11 +4049,11 @@
       "uid": "bioetl-run-explorer-v1",
       "file": "bioetl-run-explorer-v1.json",
       "panel_id": 1,
-      "title": "Run Scope",
+      "title": "Inspect Run Selection & Evidence",
       "type": "text",
       "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 3
@@ -4084,11 +4075,11 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "threshold_steps": [],
       "mapping_count": 0,
-      "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id.",
+      "noValue": "No pipeline-run-report artifacts for this pipeline on disk (reports/run-reports/pipeline/<name>/). Not a Prometheus gap — run the pipeline to write reports, or pick a pipeline with reports.",
       "unit": null,
       "risks": []
     },
@@ -4103,11 +4094,11 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 13
+        "y": 14
       },
       "threshold_steps": [],
       "mapping_count": 0,
-      "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id.",
+      "noValue": "Identity not resolved for scope — select exact run_id or wait for control-plane resolve (see resolved_via). Backend down is different from empty scope.",
       "unit": "none",
       "risks": []
     },
@@ -4122,11 +4113,11 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 28
+        "y": 29
       },
       "threshold_steps": [],
       "mapping_count": 0,
-      "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id.",
+      "noValue": "No processed-record rows for scope — check Ops HTTP :8000 and selectors. Zeros mean none observed after successful response, not backend failure.",
       "unit": "none",
       "risks": []
     },
@@ -4255,7 +4246,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -4286,11 +4277,11 @@
       "uid": "bioetl-runtime",
       "file": "bioetl-runtime.json",
       "panel_id": 9400,
-      "title": "Provenance",
+      "title": "Inspect Scope & Evidence",
       "type": "text",
       "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
@@ -4309,14 +4300,14 @@
       "type": "stat",
       "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 8,
         "x": 16,
         "y": 3
       },
       "threshold_steps": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
         },
         {
@@ -4332,7 +4323,6 @@
       "noValue": "UNKNOWN",
       "unit": "none",
       "risks": [
-        "green_at_or_below_zero",
         "scraping_related"
       ]
     },
@@ -4347,7 +4337,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -4366,7 +4356,7 @@
         "h": 5,
         "w": 16,
         "x": 0,
-        "y": 8
+        "y": 9
       },
       "threshold_steps": [
         {
@@ -4383,7 +4373,7 @@
         }
       ],
       "mapping_count": 1,
-      "noValue": "VALID EMPTY — no active blockers (Status=OK path)",
+      "noValue": "None observed",
       "unit": "short",
       "risks": [
         "green_at_or_below_zero"
@@ -4397,10 +4387,10 @@
       "type": "stat",
       "collapsed": false,
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 8,
         "x": 16,
-        "y": 8
+        "y": 9
       },
       "threshold_steps": [
         {
@@ -4714,7 +4704,7 @@
       "type": "text",
       "collapsed": true,
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 32
@@ -4736,7 +4726,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 35
       },
       "threshold_steps": [
         {
@@ -4771,7 +4761,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 39
+        "y": 40
       },
       "threshold_steps": [
         {
@@ -4805,7 +4795,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 44
+        "y": 45
       },
       "threshold_steps": [
         {
@@ -4839,7 +4829,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 50
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -4858,7 +4848,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 51
+        "y": 52
       },
       "threshold_steps": [
         {
@@ -4893,7 +4883,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 57
       },
       "threshold_steps": [
         {
@@ -4928,7 +4918,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 61
+        "y": 62
       },
       "threshold_steps": [
         {
@@ -4963,7 +4953,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 66
+        "y": 67
       },
       "threshold_steps": [
         {
@@ -4998,7 +4988,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 71
+        "y": 72
       },
       "threshold_steps": [
         {
@@ -5032,7 +5022,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 76
+        "y": 77
       },
       "threshold_steps": [],
       "mapping_count": 0,
@@ -5051,7 +5041,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 78
+        "y": 79
       },
       "threshold_steps": [
         {
@@ -5077,7 +5067,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 78
+        "y": 79
       },
       "threshold_steps": [
         {

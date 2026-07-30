@@ -3,8 +3,76 @@
 from __future__ import annotations
 
 from typing import Any
+from pathlib import Path
+import re
 
 JsonObject = dict[str, Any]
+
+
+def validate_pipeline_publication(
+    facts: JsonObject,
+    markdown: str,
+    *,
+    project_root: Path,
+) -> list[str]:
+    """Validate human and machine pipeline projections as one publication unit."""
+    errors: list[str] = []
+    sentences = facts.get("summary", {}).get("sentences", [])
+    if not 2 <= len(sentences) <= 5:
+        errors.append("summary must contain 2-5 sentences")
+    required_sections = (
+        "## Обзор",
+        "## Назначение и обработка данных",
+        "## Извлечение данных",
+        "## Silver и Data Quality",
+        "## Gold",
+        "## Операторские команды",
+        "## Диаграммы",
+        "## Evidence",
+    )
+    errors.extend(
+        f"missing section: {section}"
+        for section in required_sections
+        if section not in markdown
+    )
+    if "## Generated facts" in markdown or "```json" in markdown:
+        errors.append("full JSON dump is forbidden in Markdown")
+    if "- Kind:" in markdown or "- Schema:" in markdown:
+        errors.append("legacy verbose identity projection is forbidden")
+    if not facts.get("operator_commands"):
+        errors.append("operator command projection is empty")
+    for command in facts.get("operator_commands", []):
+        if not str(command.get("command", "")).startswith("bioetl "):
+            errors.append("operator command must use the bioetl CLI")
+        source_ref = project_root / str(command.get("source_ref", ""))
+        if not source_ref.is_file():
+            errors.append(f"missing command source_ref: {command.get('source_ref')}")
+    diagrams = facts.get("diagrams", [])
+    if not diagrams:
+        errors.append("at least one Mermaid diagram is required")
+    for diagram in diagrams:
+        mermaid = str(diagram.get("mermaid", ""))
+        if not mermaid.startswith("flowchart "):
+            errors.append("Mermaid diagram must start with flowchart")
+        if any(token in mermaid for token in ("run_id", "manifest_id", "sha256:")):
+            errors.append("Mermaid contains occurrence/high-cardinality identity")
+        if not re.search(r"\n\s+\w+\\?\\?-", mermaid) and "-->" not in mermaid:
+            errors.append("Mermaid diagram has no edges")
+    for source_ref in facts.get("source_references", []):
+        path = project_root / str(source_ref.get("path", ""))
+        if not path.exists():
+            errors.append(f"missing source reference: {source_ref.get('path')}")
+    section_matches = list(re.finditer(r"^##(?!#)[^\n]+$", markdown, re.MULTILINE))
+    for index, match in enumerate(section_matches):
+        end = (
+            section_matches[index + 1].start()
+            if index + 1 < len(section_matches)
+            else len(markdown)
+        )
+        if not markdown[match.end() : end].strip():
+            errors.append("empty Markdown section")
+            break
+    return errors
 
 _MERGE_STRATEGIES = {"left_outer", "inner", "outer", "right_outer"}
 _CONFLICT_RULES = {"seed_priority", "explicit_rules"}

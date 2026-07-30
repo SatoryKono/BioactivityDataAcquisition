@@ -14,64 +14,64 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 
 | Dashboard | Panel ID | Title |
 | --- | ---: | --- |
-| bioetl-control-plane-v1.json | 1000 | Navigation |
-| bioetl-control-plane-v1.json | 9400 | Inspect Scope & Evidence |
-| bioetl-control-plane-v1.json | 9401 | Status |
-| bioetl-control-plane-v1.json | 906 | Primary recovery |
-| bioetl-control-plane-v1.json | 891 | Monitor: Replay Safety State |
-| bioetl-control-plane-v1.json | 892 | Monitor: Checkpoint Freshness Lag (seconds) |
-| bioetl-control-plane-v1.json | 893 | Monitor: Manifest / Ledger Integrity |
-| bioetl-control-plane-v1.json | 907 | Inspect: Telemetry Missing |
-| bioetl-control-plane-v1.json | 902 | Incident Drilldown: Replay Safety (Checkpoint / Replay) |
-| bioetl-control-plane-v1.json | 894 | Inspect: Known Blind Spots |
-| bioetl-control-plane-v1.json | 130 | Track: Replay / Resume Blockers in Range |
-| bioetl-control-plane-v1.json | 3 | Monitor: Checkpoint Incompatibilities |
-| bioetl-control-plane-v1.json | 104 | Monitor: Replay Not Reconstructable |
-| bioetl-control-plane-v1.json | 120 | Monitor: Replay Drift |
-| bioetl-control-plane-v1.json | 101 | Monitor: Checkpoint Load Failures |
-| bioetl-control-plane-v1.json | 102 | Monitor: Checkpoint Save Failures |
-| bioetl-control-plane-v1.json | 103 | Monitor: GLOBAL Checkpoint Operator Failures |
-| bioetl-control-plane-v1.json | 121 | Track: Replay Lag Seconds |
-| bioetl-control-plane-v1.json | 5 | Track: Checkpoint Compatibility Outcomes |
-| bioetl-control-plane-v1.json | 134 | Track: Replay Drift by Type |
-| bioetl-control-plane-v1.json | 135 | Track: Replay Lag Trend |
-| bioetl-control-plane-v1.json | 105 | Track: Checkpoint Save Latency p50/p95/p99 |
-| bioetl-control-plane-v1.json | 106 | Track: GLOBAL Checkpoint Operator Latency p50/p95/p99 |
-| bioetl-control-plane-v1.json | 901 | Incident Drilldown: Manifest / Ledger Integrity |
-| bioetl-control-plane-v1.json | 908 | Inspect: Terminal Run Events by Status in Range |
-| bioetl-control-plane-v1.json | 1 | Monitor: Manifest Write Failures |
-| bioetl-control-plane-v1.json | 2 | Monitor: Ledger Append Failures |
-| bioetl-control-plane-v1.json | 131 | Track: Manifest Writes by Status |
-| bioetl-control-plane-v1.json | 7 | Track: Ledger Appends by Event Type / Status |
-| bioetl-control-plane-v1.json | 132 | Monitor: Manifest Write Failure Ratio |
-| bioetl-control-plane-v1.json | 133 | Monitor: Ledger Append Failure Ratio |
-| bioetl-control-plane-v1.json | 903 | Incident Drilldown: Global Control-Plane Store Reliability |
-| bioetl-control-plane-v1.json | 4 | Monitor: GLOBAL Control-Plane Read Failures |
-| bioetl-control-plane-v1.json | 136 | Monitor: GLOBAL Control-Plane Read Failure Ratio Severity |
-| bioetl-control-plane-v1.json | 6 | Track: GLOBAL Control-Plane Reads by Store / Operation / Status |
-| bioetl-control-plane-v1.json | 111 | Track: GLOBAL Control-Plane Read Latency p50/p95/p99 |
-| bioetl-control-plane-v1.json | 904 | Incident Drilldown: Audit / Lineage Completeness |
-| bioetl-control-plane-v1.json | 122 | Monitor: Lineage Refs Missing |
-| bioetl-control-plane-v1.json | 137 | Monitor: Lineage Fragment Persistence Failures |
-| bioetl-control-plane-v1.json | 138 | Inspect: Missing Lineage Refs by Layer / Type |
-| bioetl-control-plane-v1.json | 107 | Track: GLOBAL Audit Write Outcomes |
-| bioetl-control-plane-v1.json | 108 | Track: GLOBAL Audit Query Outcomes |
-| bioetl-control-plane-v1.json | 109 | Track: GLOBAL Audit Write Latency p50/p95/p99 |
-| bioetl-control-plane-v1.json | 110 | Track: GLOBAL Audit Query Latency p50/p95/p99 |
-| bioetl-control-plane-v1.json | 112 | Track: Lineage Fragment Outcomes |
-| bioetl-control-plane-v1.json | 905 | Identity evidence and remaining replay-safety signals |
-| bioetl-control-plane-v1.json | 9407 | Inspect: Copyable Identity Handoffs |
-| bioetl-control-plane-v1.json | 9404 | Inspect: Overview Identity Anchors |
-| bioetl-control-plane-v1.json | 9410 | ID Empty State |
-| bioetl-control-plane-v1.json | 9411 | Processed Records Empty State |
-| bioetl-control-plane-v1.json | 9405 | Inspect: Identity Gaps |
-| bioetl-control-plane-v1.json | 9406 | Inspect: Checkpoint Anchor Compare |
-| bioetl-control-plane-v1.json | 9408 | Inspect: P1 Replay and Evidence Anchors |
-| bioetl-control-plane-v1.json | 9409 | Inspect: P2 Forensic Anchors |
-| bioetl-control-plane-v1.json | 139 | Review: Remaining Replay-Safety Signals |
-| bioetl-control-plane-v1.json | 9412 | Run context (thin) -> Run Explorer hub |
-| bioetl-control-plane-v1.json | 9402 | ID |
-| bioetl-control-plane-v1.json | 9403 | Processed Records |
+| bioetl-control-plane-v1.json | 1000 | Navigate Dashboards |
+| bioetl-control-plane-v1.json | 9400 | Review Scope & Evidence |
+| bioetl-control-plane-v1.json | 9401 | Monitor Replay Readiness |
+| bioetl-control-plane-v1.json | 906 | Review First Recovery Action |
+| bioetl-control-plane-v1.json | 891 | Monitor Replay Safety |
+| bioetl-control-plane-v1.json | 892 | Monitor Checkpoint Age |
+| bioetl-control-plane-v1.json | 893 | Monitor Manifest & Ledger Failures |
+| bioetl-control-plane-v1.json | 907 | Monitor Telemetry Coverage |
+| bioetl-control-plane-v1.json | 902 | Inspect Replay & Checkpoint Evidence |
+| bioetl-control-plane-v1.json | 894 | Review Replay Coverage Limits |
+| bioetl-control-plane-v1.json | 130 | Track Replay Blockers in Range |
+| bioetl-control-plane-v1.json | 3 | Track Checkpoint Incompatibilities |
+| bioetl-control-plane-v1.json | 104 | Track Unreconstructable Replays |
+| bioetl-control-plane-v1.json | 120 | Track Replay Drift |
+| bioetl-control-plane-v1.json | 101 | Track Checkpoint Load Failures |
+| bioetl-control-plane-v1.json | 102 | Track Checkpoint Save Failures |
+| bioetl-control-plane-v1.json | 103 | Track Global Checkpoint Admin Failures |
+| bioetl-control-plane-v1.json | 121 | Track Peak Replay Lag |
+| bioetl-control-plane-v1.json | 5 | Compare Checkpoint Outcomes |
+| bioetl-control-plane-v1.json | 134 | Track Replay Drift by Type |
+| bioetl-control-plane-v1.json | 135 | Track Replay Lag |
+| bioetl-control-plane-v1.json | 105 | Track Checkpoint Save Latency |
+| bioetl-control-plane-v1.json | 106 | Track Global Checkpoint Admin Latency |
+| bioetl-control-plane-v1.json | 901 | Inspect Manifest & Ledger Evidence |
+| bioetl-control-plane-v1.json | 908 | Review Terminal Run Outcomes |
+| bioetl-control-plane-v1.json | 1 | Track Manifest Write Failures |
+| bioetl-control-plane-v1.json | 2 | Track Ledger Append Failures |
+| bioetl-control-plane-v1.json | 131 | Compare Manifest Writes by Status |
+| bioetl-control-plane-v1.json | 7 | Compare Ledger Appends by Type & Status |
+| bioetl-control-plane-v1.json | 132 | Monitor Manifest Failure Severity [30m] |
+| bioetl-control-plane-v1.json | 133 | Monitor Ledger Failure Severity [30m] |
+| bioetl-control-plane-v1.json | 903 | Inspect Global Store Reliability |
+| bioetl-control-plane-v1.json | 4 | Track Global Read Failures |
+| bioetl-control-plane-v1.json | 136 | Monitor Global Read Failure Severity [30m] |
+| bioetl-control-plane-v1.json | 6 | Compare Global Reads by Store |
+| bioetl-control-plane-v1.json | 111 | Track Global Read Latency |
+| bioetl-control-plane-v1.json | 904 | Inspect Audit & Lineage Evidence |
+| bioetl-control-plane-v1.json | 122 | Track Missing Lineage References |
+| bioetl-control-plane-v1.json | 137 | Track Lineage Persistence Failures |
+| bioetl-control-plane-v1.json | 138 | Review Missing Lineage by Layer |
+| bioetl-control-plane-v1.json | 107 | Compare Global Audit Write Outcomes |
+| bioetl-control-plane-v1.json | 108 | Compare Global Audit Query Outcomes |
+| bioetl-control-plane-v1.json | 109 | Track Global Audit Write Latency |
+| bioetl-control-plane-v1.json | 110 | Track Global Audit Query Latency |
+| bioetl-control-plane-v1.json | 112 | Compare Lineage Persistence Outcomes |
+| bioetl-control-plane-v1.json | 905 | Inspect Run Identity Evidence |
+| bioetl-control-plane-v1.json | 9407 | Copy Identity Values |
+| bioetl-control-plane-v1.json | 9404 | Review Run Identity |
+| bioetl-control-plane-v1.json | 9410 | Identity Data Unavailable |
+| bioetl-control-plane-v1.json | 9411 | Record Counts Unavailable |
+| bioetl-control-plane-v1.json | 9405 | Review Identity Gaps |
+| bioetl-control-plane-v1.json | 9406 | Compare Checkpoint Anchors |
+| bioetl-control-plane-v1.json | 9408 | Review Required Replay Anchors |
+| bioetl-control-plane-v1.json | 9409 | Review Additional Forensic Anchors |
+| bioetl-control-plane-v1.json | 139 | Review Uncovered Replay Signals |
+| bioetl-control-plane-v1.json | 9412 | Inspect Run Details |
+| bioetl-control-plane-v1.json | 9402 | Review Run Identity |
+| bioetl-control-plane-v1.json | 9403 | Review Processed Records |
 | bioetl-dq-v2.json | 1000 | Navigation |
 | bioetl-dq-v2.json | 9400 | Inspect Scope & Evidence |
 | bioetl-dq-v2.json | 9401 | Status |

@@ -1,173 +1,79 @@
-# chembl_subcellular_fraction passport
+# `chembl_subcellular_fraction`
 
 > Generated documentation projection. Do not edit manually.
 
-- Kind: `pipeline`
-- Typed identity: `pipeline:chembl_subcellular_fraction`
-- Schema: `1.0.0`
-- Source revision: `41a1d6eab5a5c32c6b7754f6c3156ff87394912f`
+## Обзор
+
+| Параметр | Значение |
+| --- | --- |
+| Typed identity `[type:provider_entity]` | `pipeline:chembl_subcellular_fraction` |
+| Status | `active` |
+| Gold contract | `chembl.subcellular_fraction v1.0.0` |
+
+## Назначение и обработка данных
+
+Extract unique subcellular fractions from ChEMBL Assay records. Источник — `chembl:subcellular_fraction` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: subcellular_fraction=IDs from data/input/subcellular_fraction.csv column subcellular_fraction; CLI may override the input CSV.
+В business-проекцию входят `subcellular_fraction_raw`, `subcellular_fraction`, `assay_count`, `example_assay_id`.
+Silver использует профиль `chembl.subcellular_fraction` и проверяет обязательные поля `subcellular_fraction`; невалидные записи направляются в `quarantine`.
+Перед Gold применяется строгий Pandera-контракт `chembl.subcellular_fraction`; Gold filters/constraints заданы в entity config (6 групп правил).
+
+## Извлечение данных
+
+| Аспект | Значение |
+| --- | --- |
+| Source | `derived` · `chembl:subcellular_fraction` |
+| Resource / tables | `subcellular_fraction` |
+| Filters | `subcellular_fraction`: IDs from data/input/subcellular_fraction.csv column subcellular_fraction; CLI may override the input CSV |
+| Selected fields | `system` (7 fields); `business` (4 fields) |
+
+## Silver и Data Quality
+
+- Normalization profile: `chembl.subcellular_fraction`.
+- Partitioning: —.
+- DQ thresholds: soft `0.05`, hard `0.5`; invalid policy `quarantine`.
+
+## Gold
+
+- Contract: `chembl.subcellular_fraction v1.0.0`; strict validation: `True`.
+- Write mode: `configured`.
+- Technical exclusions: `_dq_*`, `_source_batch_id`, `_index`.
+
+## Операторские команды
+
+| Задача | Команда | Результат |
+| --- | --- | --- |
+| Запуск | `bioetl run --pipeline chembl_subcellular_fraction` | Запускает pipeline с effective config. |
+| Ограниченный запуск | `bioetl run --pipeline chembl_subcellular_fraction --limit 100` | Ограничивает число обрабатываемых записей. |
+| Безопасная проверка | `bioetl run --pipeline chembl_subcellular_fraction --run-type backfill --dry-run` | Проверяет backfill/rebuild path без записи. |
+| Quarantine | `bioetl quarantine inspect --pipeline chembl_subcellular_fraction --limit 100` | Показывает quarantined и Silver-filter records; доступны --error-code и --run-id. |
+| Статистика исключений | `bioetl quarantine stats --pipeline chembl_subcellular_fraction --group-by reason-code` | Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует. |
+| Checkpoint | `bioetl checkpoint inspect --pipeline chembl_subcellular_fraction` | Показывает checkpoint и связанные audit/manifest anchors. |
+| Manifest | `bioetl run-manifest show <run-id-or-manifest-id>` | Показывает immutable manifest и ledger evidence запуска. |
+
+## Диаграммы
+
+### Data Flow
+
+```mermaid
+flowchart LR
+    Source["chembl:subcellular_fraction"]
+    Filters["Effective request/input filters"]
+    Bronze["Bronze append-only snapshot"]
+    Silver["Silver profile: chembl.subcellular_fraction + DQ"]
+    Quarantine["Quarantine / exclusion evidence"]
+    Gold["Gold: chembl.subcellular_fraction (configured)"]
+    Source --> Filters --> Bronze --> Silver
+    Silver -->|valid| Gold
+    Silver -->|invalid| Quarantine
+```
 
 ## Evidence
 
 - `effective_entity_config`: `configs/entities/chembl/subcellular_fraction.yaml`
+- `pipeline_registration`: `src/bioetl/composition/factories/pipeline/registry_manifest.py`
+- `run_cli`: `src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py`
+- `quarantine_cli`: `src/bioetl/interfaces/cli/commands/quarantine.py`
 - `gold_validation_contract`: `docs/02-architecture/decisions/ADR-018-gold-strict-validation.md`
 - `observability_contract`: `src/bioetl/domain/_observability_contract_primitives.py`
 - `dq_contract`: `configs/contracts/chembl/subcellular_fraction.yaml`
-
-## Generated facts
-
-```json
-{
-  "bronze": {
-    "capability": "append_only_snapshot",
-    "content_hash": {
-      "exclude": [],
-      "include": []
-    }
-  },
-  "diagnostics": [],
-  "execution": {
-    "cached_bronze_is_mode": true,
-    "control_plane": {
-      "checkpoints": true,
-      "run_ledger": true,
-      "run_manifest": true
-    },
-    "effective_config_hash": "sha256:14852375a156496df52048f7b78454a75f19da84716c047bdad6a3422e51de8b",
-    "projection_profiles": [
-      "batch",
-      "http"
-    ],
-    "resilience": {
-      "resolution_owner": "UnifiedHTTPClient and provider config",
-      "source_refs": [
-        "src/bioetl/infrastructure/adapters/http/client.py",
-        "configs/providers/chembl.yaml"
-      ],
-      "status": "runtime_resolved"
-    }
-  },
-  "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
-      },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
-  },
-  "gold": {
-    "column_projection": {
-      "exclude_fields": [
-        "_dq_*",
-        "_source_batch_id",
-        "_index"
-      ],
-      "include_groups": [
-        "system",
-        "business"
-      ]
-    },
-    "contract_ref": "chembl.subcellular_fraction",
-    "contract_validation": {
-      "status": "resolved_by_adr_018",
-      "strict": true
-    },
-    "contract_version": "1.0.0",
-    "write": {}
-  },
-  "identity": {
-    "aliases": [],
-    "derived_source_identity": {
-      "data_source_provider": null,
-      "entity": "subcellular_fraction",
-      "provider": "chembl"
-    },
-    "entity": "subcellular_fraction",
-    "pipeline_id": "chembl_subcellular_fraction",
-    "pipeline_type": "provider_entity",
-    "provider": "chembl",
-    "status": "active",
-    "typed_id": "pipeline:chembl_subcellular_fraction"
-  },
-  "kind": "pipeline",
-  "observability": {
-    "correlation_fields": [
-      "run_id",
-      "manifest_id"
-    ],
-    "metric_labels": [
-      "provider",
-      "pipeline",
-      "run_type",
-      "status"
-    ]
-  },
-  "passport_schema_version": "1.0.0",
-  "provenance": {
-    "projector_version": "1.0.0",
-    "semantic_content_hash": "sha256:2938415b0228a2d9cc25b6070f0666786c94f34e4f48a34bc08e56ad4fafd735",
-    "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
-  },
-  "silver": {
-    "column_projection": {
-      "exclude_fields": [],
-      "include_groups": [
-        "system",
-        "business",
-        "dq"
-      ]
-    },
-    "dq_execution": {
-      "hard_fail_threshold": 0.5,
-      "invalid_record_policy": "quarantine",
-      "soft_fail_threshold": 0.05,
-      "strict_validation": false
-    },
-    "write": {}
-  },
-  "source_references": [
-    {
-      "path": "configs/entities/chembl/subcellular_fraction.yaml",
-      "role": "effective_entity_config"
-    },
-    {
-      "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
-      "role": "gold_validation_contract"
-    },
-    {
-      "path": "src/bioetl/domain/_observability_contract_primitives.py",
-      "role": "observability_contract"
-    },
-    {
-      "path": "configs/contracts/chembl/subcellular_fraction.yaml",
-      "role": "dq_contract"
-    }
-  ]
-}
-```
-
-## Diagnostics
-
-- No blocking diagnostics.
+- `provider_config`: `configs/providers/chembl.yaml`

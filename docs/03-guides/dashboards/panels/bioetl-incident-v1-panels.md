@@ -16,7 +16,7 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 - **Purpose:** Full portfolio bus 0–6; current disabled.
 - **Data sources:** Static HTML + panel links.
 
-### 2. Provenance
+### 2. Inspect Scope & Evidence
 - **Type:** Text
 - **Purpose:** Incident scope summary (workflow/pipeline/run_type/provider filters).
 - **Data sources:** Dashboard variables and operator copy.

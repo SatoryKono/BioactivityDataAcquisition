@@ -554,10 +554,70 @@
     "version": "1.1.0"
   },
   "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "composite_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Seed[\"Seed: chembl_publication\"]\n    Input1[\"crossref_publication · doi, title\"]\n    Input1 --> Merge\n    Input2[\"openalex_publication · doi, title\"]\n    Input2 --> Merge\n    Input3[\"pubmed_publication · pmid, doi\"]\n    Input3 --> Merge\n    Input4[\"semanticscholar_publication · doi, title\"]\n    Input4 --> Merge\n    Merge[\"Merge: left_outer / seed_priority\"]\n    Validate[\"Cross-validation: True\"]\n    Excluded[\"Quarantine / nullification\"]\n    Gold[\"Gold: composite_publication\"]\n    Seed --> Merge --> Validate\n    Validate -->|valid| Gold\n    Validate -->|excluded| Excluded"
+    }
+  ],
   "execution": {
     "control_plane": {
       "checkpoints": true,
       "run_manifest": true
+    }
+  },
+  "extraction": {
+    "endpoint_template": null,
+    "field_groups": [],
+    "filters": [
+      {
+        "description": "doi IS NOT NULL",
+        "name": "crossref_publication",
+        "required": false,
+        "source": "dependency"
+      },
+      {
+        "description": "doi IS NOT NULL OR pmid IS NOT NULL",
+        "name": "openalex_publication",
+        "required": false,
+        "source": "dependency"
+      },
+      {
+        "description": "pmid IS NOT NULL",
+        "name": "pubmed_publication",
+        "required": false,
+        "source": "dependency"
+      },
+      {
+        "description": "doi IS NOT NULL OR title IS NOT NULL",
+        "name": "semanticscholar_publication",
+        "required": false,
+        "source": "dependency"
+      }
+    ],
+    "method": null,
+    "selected_fields": [],
+    "source_collections": [],
+    "source_kind": "composite",
+    "source_resource": "chembl_publication",
+    "source_tables": [
+      "silver/chembl/publication",
+      "silver/crossref/publication",
+      "silver/openalex/publication",
+      "silver/pubmed/publication",
+      "silver/semanticscholar/publication"
+    ]
+  },
+  "gold": {
+    "contract_ref": "composite.publication",
+    "contract_validation": {
+      "status": "resolved_by_adr_018",
+      "strict": true
+    },
+    "contract_version": "1.0.0",
+    "write": {
+      "enabled": true
     }
   },
   "identity": {
@@ -581,11 +641,68 @@
       "status"
     ]
   },
+  "operator_commands": [
+    {
+      "command": "bioetl run-composite --composite publication",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run-composite --composite publication --seed-limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run-composite --composite publication --use-cached-bronze --dry-run",
+      "result": "Проверяет cached Bronze composite без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline composite_publication --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline composite_publication --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline composite_publication",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
   "passport_schema_version": "1.0.0",
   "provenance": {
-    "projector_version": "1.0.0",
+    "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:d5de91911fd1bc4292fc03d7b12c15b62c9b49ccc9124c96424cd6f457887475",
     "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
+  },
+  "silver": {
+    "dq_execution": {
+      "hard_fail_threshold": 0.5,
+      "invalid_record_policy": "quarantine",
+      "soft_fail_threshold": 0.1,
+      "strict_validation": true
+    },
+    "normalization_profile": "composite.publication",
+    "write": {
+      "idempotency_contract": "merge_upsert",
+      "mode": "merge"
+    }
   },
   "source_references": [
     {
@@ -593,8 +710,34 @@
       "role": "composite_config"
     },
     {
+      "path": "configs/entities/composite/publication.yaml",
+      "role": "effective_entity_config"
+    },
+    {
       "path": "configs/contracts/composite/publication.yaml",
       "role": "gold_contract"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "role": "composite_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
     }
-  ]
+  ],
+  "summary": {
+    "excluded_data_summary": "quarantine/nullification per composite policy",
+    "field_selection_summary": "seed outputs plus configured enrichers",
+    "query_filter_summary": "composite join/filter conditions",
+    "sentences": [
+      "Composite pipeline `composite_publication` использует seed `chembl_publication` и объединяет его с configured dependencies/enrichers.",
+      "Join keys, cardinality и source tables берутся из composite configuration; merge и conflict resolution выполняются общей CompositePipelineRunner.",
+      "После merge применяется configured cross-validation; исключённые значения направляются в quarantine или nullification branch согласно composite policy.",
+      "Результат проходит строгий Gold-контракт `composite.publication` и публикует manifest/checkpoint evidence."
+    ],
+    "silver_processing_summary": "composite merge",
+    "source_description": "seed=chembl_publication",
+    "validation_summary": "cross-validation and strict Gold contract"
+  }
 }

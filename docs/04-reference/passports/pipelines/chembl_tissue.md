@@ -1,174 +1,79 @@
-# chembl_tissue passport
+# `chembl_tissue`
 
 > Generated documentation projection. Do not edit manually.
 
-- Kind: `pipeline`
-- Typed identity: `pipeline:chembl_tissue`
-- Schema: `1.0.0`
-- Source revision: `41a1d6eab5a5c32c6b7754f6c3156ff87394912f`
+## Обзор
+
+| Параметр | Значение |
+| --- | --- |
+| Typed identity `[type:provider_entity]` | `pipeline:chembl_tissue` |
+| Status | `active` |
+| Gold contract | `chembl.tissue v1.0.0` |
+
+## Назначение и обработка данных
+
+Extract tissues from ChEMBL API. Источник — `chembl:tissue` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: tissue_id=IDs from data/input/tissue.csv column tissue_chembl_id; CLI may override the input CSV.
+В business-проекцию входят `pref_name`, `bto_id`, `bto_iri`, `bto_mapping_status`, `bto_ontology_version`, `caloha_id`, `efo_id`, `efo_iri` и ещё 6 полей.
+Silver использует профиль `chembl.tissue` и проверяет обязательные поля `tissue_id`, `pref_name`; невалидные записи направляются в `quarantine`.
+Перед Gold применяется строгий Pandera-контракт `chembl.tissue`; Gold filters/constraints заданы в entity config (6 групп правил).
+
+## Извлечение данных
+
+| Аспект | Значение |
+| --- | --- |
+| Source | `http_api` · `chembl:tissue` |
+| Resource / tables | `tissue` |
+| Filters | `tissue_id`: IDs from data/input/tissue.csv column tissue_chembl_id; CLI may override the input CSV |
+| Selected fields | `system` (6 fields); `identifiers` (1 fields); `business` (14 fields) |
+
+## Silver и Data Quality
+
+- Normalization profile: `chembl.tissue`.
+- Partitioning: —.
+- DQ thresholds: soft `0.05`, hard `0.5`; invalid policy `quarantine`.
+
+## Gold
+
+- Contract: `chembl.tissue v1.0.0`; strict validation: `True`.
+- Write mode: `configured`.
+- Technical exclusions: `_dq_*`, `_source_batch_id`, `_index`.
+
+## Операторские команды
+
+| Задача | Команда | Результат |
+| --- | --- | --- |
+| Запуск | `bioetl run --pipeline chembl_tissue` | Запускает pipeline с effective config. |
+| Ограниченный запуск | `bioetl run --pipeline chembl_tissue --limit 100` | Ограничивает число обрабатываемых записей. |
+| Безопасная проверка | `bioetl run --pipeline chembl_tissue --run-type backfill --dry-run` | Проверяет backfill/rebuild path без записи. |
+| Quarantine | `bioetl quarantine inspect --pipeline chembl_tissue --limit 100` | Показывает quarantined и Silver-filter records; доступны --error-code и --run-id. |
+| Статистика исключений | `bioetl quarantine stats --pipeline chembl_tissue --group-by reason-code` | Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует. |
+| Checkpoint | `bioetl checkpoint inspect --pipeline chembl_tissue` | Показывает checkpoint и связанные audit/manifest anchors. |
+| Manifest | `bioetl run-manifest show <run-id-or-manifest-id>` | Показывает immutable manifest и ledger evidence запуска. |
+
+## Диаграммы
+
+### Data Flow
+
+```mermaid
+flowchart LR
+    Source["chembl:tissue"]
+    Filters["Effective request/input filters"]
+    Bronze["Bronze append-only snapshot"]
+    Silver["Silver profile: chembl.tissue + DQ"]
+    Quarantine["Quarantine / exclusion evidence"]
+    Gold["Gold: chembl.tissue (configured)"]
+    Source --> Filters --> Bronze --> Silver
+    Silver -->|valid| Gold
+    Silver -->|invalid| Quarantine
+```
 
 ## Evidence
 
 - `effective_entity_config`: `configs/entities/chembl/tissue.yaml`
+- `pipeline_registration`: `src/bioetl/composition/factories/pipeline/registry_manifest.py`
+- `run_cli`: `src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py`
+- `quarantine_cli`: `src/bioetl/interfaces/cli/commands/quarantine.py`
 - `gold_validation_contract`: `docs/02-architecture/decisions/ADR-018-gold-strict-validation.md`
 - `observability_contract`: `src/bioetl/domain/_observability_contract_primitives.py`
 - `dq_contract`: `configs/contracts/chembl/tissue.yaml`
-
-## Generated facts
-
-```json
-{
-  "bronze": {
-    "capability": "append_only_snapshot",
-    "content_hash": {
-      "exclude": [],
-      "include": []
-    }
-  },
-  "diagnostics": [],
-  "execution": {
-    "cached_bronze_is_mode": true,
-    "control_plane": {
-      "checkpoints": true,
-      "run_ledger": true,
-      "run_manifest": true
-    },
-    "effective_config_hash": "sha256:97b967fbb3036a8f935a3f83a7baf3e45d0f07cfc16f2a6501f13532a5e9ac7b",
-    "projection_profiles": [
-      "batch",
-      "http"
-    ],
-    "resilience": {
-      "resolution_owner": "UnifiedHTTPClient and provider config",
-      "source_refs": [
-        "src/bioetl/infrastructure/adapters/http/client.py",
-        "configs/providers/chembl.yaml"
-      ],
-      "status": "runtime_resolved"
-    }
-  },
-  "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
-      },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
-  },
-  "gold": {
-    "column_projection": {
-      "exclude_fields": [
-        "_dq_*",
-        "_source_batch_id",
-        "_index"
-      ],
-      "include_groups": [
-        "system",
-        "identifiers",
-        "business"
-      ]
-    },
-    "contract_ref": "chembl.tissue",
-    "contract_validation": {
-      "status": "resolved_by_adr_018",
-      "strict": true
-    },
-    "contract_version": "1.0.0",
-    "write": {}
-  },
-  "identity": {
-    "aliases": [],
-    "derived_source_identity": {
-      "data_source_provider": null,
-      "entity": "tissue",
-      "provider": "chembl"
-    },
-    "entity": "tissue",
-    "pipeline_id": "chembl_tissue",
-    "pipeline_type": "provider_entity",
-    "provider": "chembl",
-    "status": "active",
-    "typed_id": "pipeline:chembl_tissue"
-  },
-  "kind": "pipeline",
-  "observability": {
-    "correlation_fields": [
-      "run_id",
-      "manifest_id"
-    ],
-    "metric_labels": [
-      "provider",
-      "pipeline",
-      "run_type",
-      "status"
-    ]
-  },
-  "passport_schema_version": "1.0.0",
-  "provenance": {
-    "projector_version": "1.0.0",
-    "semantic_content_hash": "sha256:12c20e767133e9b044676700ca3fa77ddc2375c5cc3e2af401de19b3faf01e35",
-    "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
-  },
-  "silver": {
-    "column_projection": {
-      "exclude_fields": [],
-      "include_groups": [
-        "system",
-        "identifiers",
-        "business"
-      ]
-    },
-    "dq_execution": {
-      "hard_fail_threshold": 0.5,
-      "invalid_record_policy": "quarantine",
-      "soft_fail_threshold": 0.05,
-      "strict_validation": false
-    },
-    "write": {}
-  },
-  "source_references": [
-    {
-      "path": "configs/entities/chembl/tissue.yaml",
-      "role": "effective_entity_config"
-    },
-    {
-      "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
-      "role": "gold_validation_contract"
-    },
-    {
-      "path": "src/bioetl/domain/_observability_contract_primitives.py",
-      "role": "observability_contract"
-    },
-    {
-      "path": "configs/contracts/chembl/tissue.yaml",
-      "role": "dq_contract"
-    }
-  ]
-}
-```
-
-## Diagnostics
-
-- No blocking diagnostics.
+- `provider_config`: `configs/providers/chembl.yaml`

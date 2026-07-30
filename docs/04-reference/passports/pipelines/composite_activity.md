@@ -1,429 +1,79 @@
-# composite_activity passport
+# `composite_activity`
 
 > Generated documentation projection. Do not edit manually.
 
-- Kind: `pipeline`
-- Typed identity: `composite:composite_activity`
-- Schema: `1.0.0`
-- Source revision: `41a1d6eab5a5c32c6b7754f6c3156ff87394912f`
+## Обзор
+
+| Параметр | Значение |
+| --- | --- |
+| Typed identity `[type:composite]` | `composite:composite_activity` |
+| Status | `active` |
+| Gold contract | `composite.activity v1.0.0` |
+
+## Назначение и обработка данных
+
+Composite pipeline `composite_activity` использует seed `chembl_activity` и объединяет его с configured dependencies/enrichers.
+Join keys, cardinality и source tables берутся из composite configuration; merge и conflict resolution выполняются общей CompositePipelineRunner.
+После merge применяется configured cross-validation; исключённые значения направляются в quarantine или nullification branch согласно composite policy.
+Результат проходит строгий Gold-контракт `composite.activity` и публикует manifest/checkpoint evidence.
+
+## Извлечение данных
+
+| Аспект | Значение |
+| --- | --- |
+| Source | `composite` · `chembl_activity` |
+| Resource / tables | `silver/chembl/activity`, `silver/chembl/compound_record` |
+| Filters | `chembl_compound_record`: no condition |
+
+## Silver и Data Quality
+
+- Normalization profile: `composite.activity`.
+- Partitioning: —.
+- DQ thresholds: soft `0.1`, hard `0.5`; invalid policy `quarantine`.
+
+## Gold
+
+- Contract: `composite.activity v1.0.0`; strict validation: `True`.
+- Write mode: `configured`.
+
+## Операторские команды
+
+| Задача | Команда | Результат |
+| --- | --- | --- |
+| Запуск | `bioetl run-composite --composite activity` | Запускает pipeline с effective config. |
+| Ограниченный запуск | `bioetl run-composite --composite activity --seed-limit 100` | Ограничивает число обрабатываемых записей. |
+| Безопасная проверка | `bioetl run-composite --composite activity --use-cached-bronze --dry-run` | Проверяет cached Bronze composite без записи. |
+| Quarantine | `bioetl quarantine inspect --pipeline composite_activity --limit 100` | Показывает quarantined и Silver-filter records; доступны --error-code и --run-id. |
+| Статистика исключений | `bioetl quarantine stats --pipeline composite_activity --group-by reason-code` | Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует. |
+| Checkpoint | `bioetl checkpoint inspect --pipeline composite_activity` | Показывает checkpoint и связанные audit/manifest anchors. |
+| Manifest | `bioetl run-manifest show <run-id-or-manifest-id>` | Показывает immutable manifest и ledger evidence запуска. |
+
+## Диаграммы
+
+### Composite Flow
+
+```mermaid
+flowchart LR
+    Seed["Seed: chembl_activity"]
+    Input1["chembl_compound_record · molecule_id, publication_id"]
+    Input1 --> Merge
+    Merge["Merge: left_outer / seed_priority"]
+    Validate["Cross-validation: False"]
+    Excluded["Quarantine / nullification"]
+    Gold["Gold: composite_activity"]
+    Seed --> Merge --> Validate
+    Validate -->|valid| Gold
+    Validate -->|excluded| Excluded
+```
+
+## Owner-approved context
+
+Preserve ChEMBL activity rows while enriching them with source-backed compound-record context.
 
 ## Evidence
 
 - `composite_config`: `configs/composites/activity.yaml`
+- `effective_entity_config`: `configs/entities/composite/activity.yaml`
 - `gold_contract`: `configs/contracts/composite/activity.yaml`
-
-## Generated facts
-
-```json
-{
-  "composite": {
-    "cross_validation": {
-      "enabled": false,
-      "enricher_pairings": [],
-      "error_threshold": 2,
-      "fuzzy_threshold": 0.8,
-      "numeric_tolerance": 0.1,
-      "quarantine_threshold": 2,
-      "warning_threshold": 1
-    },
-    "dependencies": [
-      {
-        "filter_fields": [
-          "molecule_id",
-          "publication_id"
-        ],
-        "join_keys": [
-          "molecule_id",
-          "publication_id"
-        ],
-        "pipeline": "chembl_compound_record",
-        "required": false,
-        "silver_table": "silver/chembl/compound_record",
-        "timeout_seconds": 600
-      }
-    ],
-    "enrichers": [],
-    "execution": {
-      "checkpoint_enabled": true,
-      "max_concurrency": 2,
-      "retry": {
-        "backoff_multiplier": 2.0,
-        "max_attempts": 3
-      }
-    },
-    "invariants": {
-      "aggregation_is_explicit": true,
-      "conflict_priorities_are_complete": true,
-      "join_keys_must_exist_in_seed_or_prior_key_source_output": true,
-      "supported_cardinalities": [
-        "one_to_one",
-        "many_to_one"
-      ]
-    },
-    "merge": {
-      "column_groups": [
-        {
-          "fields": [
-            "entity_id",
-            "content_hash",
-            "_source",
-            "_index",
-            "_lookup_method",
-            "_original_id"
-          ],
-          "name": "system",
-          "pattern": "^_composite_|^_source_providers|^_enrichment_|^_lineage_",
-          "provider_order": [
-            "chembl"
-          ]
-        },
-        {
-          "fields": [
-            "activity_id",
-            "molecule_id",
-            "assay_id",
-            "target_id",
-            "publication_id"
-          ],
-          "name": "identifiers",
-          "provider_order": [
-            "chembl"
-          ]
-        },
-        {
-          "fields": [
-            "standard_type",
-            "standard_relation",
-            "standard_value",
-            "standard_units",
-            "standard_flag",
-            "pchembl_value"
-          ],
-          "name": "activity_values",
-          "provider_order": [
-            "chembl"
-          ]
-        },
-        {
-          "fields": [
-            "activity_type",
-            "activity_relation",
-            "activity_value",
-            "units",
-            "text_value",
-            "standard_text_value",
-            "upper_value",
-            "standard_upper_value"
-          ],
-          "name": "original_values",
-          "provider_order": [
-            "chembl"
-          ]
-        },
-        {
-          "fields": [
-            "ligand_efficiency_bei",
-            "ligand_efficiency_le",
-            "ligand_efficiency_lle",
-            "ligand_efficiency_sei"
-          ],
-          "name": "ligand_efficiency",
-          "provider_order": [
-            "chembl"
-          ]
-        },
-        {
-          "fields": [
-            "record_id",
-            "compound_key",
-            "compound_name",
-            "src_compound_id"
-          ],
-          "name": "compound_record",
-          "provider_order": [
-            "chembl"
-          ]
-        },
-        {
-          "fields": [
-            "canonical_smiles",
-            "molecule_pref_name",
-            "parent_molecule_id"
-          ],
-          "name": "molecule_context",
-          "provider_order": [
-            "chembl"
-          ]
-        },
-        {
-          "fields": [
-            "target_pref_name",
-            "target_organism",
-            "taxonomy_id"
-          ],
-          "name": "target_context",
-          "provider_order": [
-            "chembl"
-          ]
-        },
-        {
-          "fields": [
-            "assay_type",
-            "assay_description",
-            "assay_variant_accession",
-            "assay_variant_mutation",
-            "bao_format",
-            "bao_label",
-            "bao_endpoint"
-          ],
-          "name": "assay_context",
-          "provider_order": [
-            "chembl"
-          ]
-        },
-        {
-          "fields": [
-            "document_journal",
-            "document_year"
-          ],
-          "name": "document_context",
-          "provider_order": [
-            "chembl"
-          ]
-        },
-        {
-          "fields": [
-            "uo_units",
-            "qudt_units"
-          ],
-          "name": "ontology",
-          "provider_order": [
-            "chembl"
-          ]
-        },
-        {
-          "fields": [
-            "data_validity_comment",
-            "data_validity_description",
-            "activity_comment",
-            "potential_duplicate",
-            "manual_curation_flag"
-          ],
-          "name": "quality",
-          "provider_order": [
-            "chembl"
-          ]
-        },
-        {
-          "fields": [
-            "action_type_action_type",
-            "action_type_description",
-            "action_type_parent_type",
-            "activity_properties"
-          ],
-          "name": "action",
-          "provider_order": [
-            "chembl"
-          ]
-        },
-        {
-          "fields": [
-            "src_id",
-            "original_activity_id",
-            "toid"
-          ],
-          "name": "source",
-          "provider_order": [
-            "chembl"
-          ]
-        }
-      ],
-      "conflict_resolution": "seed_priority",
-      "exclude_fields": [],
-      "output": {
-        "gold": "data/output/gold/composite/activity",
-        "silver": "data/output/silver/composite/activity"
-      },
-      "preserve_all_sources": false,
-      "sort_by": {
-        "gold": [
-          "entity_id",
-          "activity_id"
-        ],
-        "pii": [
-          "pubmed"
-        ],
-        "polar_surface_area": [
-          "pubchem",
-          "chembl"
-        ],
-        "pref_name": [
-          "chembl",
-          "pubchem"
-        ],
-        "primary_component_id": [
-          "chembl"
-        ],
-        "primary_topic": [
-          "openalex"
-        ],
-        "publication_class": [
-          "chembl",
-          "pubmed",
-          "openalex",
-          "crossref",
-          "semanticscholar"
-        ],
-        "publication_subclass": [
-          "chembl",
-          "pubmed",
-          "openalex",
-          "crossref",
-          "semanticscholar"
-        ],
-        "publication_type_unified": [
-          "chembl",
-          "pubmed",
-          "openalex",
-          "crossref",
-          "semanticscholar"
-        ],
-        "publisher_id": [
-          "pubmed"
-        ],
-        "qed_weighted": [
-          "chembl"
-        ],
-        "references": [
-          "crossref"
-        ],
-        "rotatable_bond_count": [
-          "pubchem",
-          "chembl"
-        ],
-        "silver": [
-          "entity_id",
-          "activity_id"
-        ],
-        "subject_fields": [
-          "semanticscholar"
-        ],
-        "subject_keywords": [
-          "crossref",
-          "openalex",
-          "pubmed",
-          "semanticscholar"
-        ],
-        "subject_mesh": [
-          "pubmed",
-          "openalex"
-        ],
-        "subject_topics": [
-          "openalex"
-        ],
-        "synonyms": [
-          "chembl",
-          "pubchem"
-        ],
-        "target_id": [
-          "chembl"
-        ],
-        "taxonomy_id": [
-          "chembl"
-        ],
-        "therapeutic_flag": [
-          "chembl"
-        ],
-        "tissue_id": [
-          "chembl.assay"
-        ],
-        "title": [
-          "chembl",
-          "crossref",
-          "openalex"
-        ],
-        "withdrawn_flag": [
-          "chembl"
-        ]
-      },
-      "strategy": "left_outer"
-    },
-    "seed": {
-      "output_keys": [
-        "activity_id",
-        "molecule_id",
-        "assay_id",
-        "target_id",
-        "publication_id"
-      ],
-      "pipeline": "chembl_activity",
-      "silver_table": "silver/chembl/activity"
-    },
-    "version": "1.0.0"
-  },
-  "diagnostics": [],
-  "execution": {
-    "control_plane": {
-      "checkpoints": true,
-      "run_manifest": true
-    }
-  },
-  "identity": {
-    "aliases": [],
-    "entity": "activity",
-    "pipeline_id": "composite_activity",
-    "pipeline_type": "composite",
-    "provider": "composite",
-    "status": "active",
-    "typed_id": "composite:composite_activity"
-  },
-  "kind": "pipeline",
-  "observability": {
-    "correlation_fields": [
-      "run_id",
-      "manifest_id"
-    ],
-    "metric_labels": [
-      "pipeline",
-      "run_type",
-      "status"
-    ]
-  },
-  "passport_schema_version": "1.0.0",
-  "provenance": {
-    "projector_version": "1.0.0",
-    "semantic_content_hash": "sha256:89722f5089d793afd9a25d7ae30c29f64a2d5f2364152ad906e8da78742e935a",
-    "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
-  },
-  "source_references": [
-    {
-      "path": "configs/composites/activity.yaml",
-      "role": "composite_config"
-    },
-    {
-      "path": "configs/contracts/composite/activity.yaml",
-      "role": "gold_contract"
-    }
-  ]
-}
-```
-
-## Diagnostics
-
-- No blocking diagnostics.
-
-## Owner-approved context
-
-- Owner: `BioETL Team`
-
-### Purpose
-
-Preserve ChEMBL activity rows while enriching them with source-backed compound-record context.
-
-### Rationale
-
-ADR-026 keeps the seed identity authoritative and makes optional joins explicit.
-
-### Known limitations
-
-- Optional enrichment can be absent without invalidating the seed activity.
+- `composite_cli`: `src/bioetl/interfaces/cli/commands/run_composite.py`
+- `quarantine_cli`: `src/bioetl/interfaces/cli/commands/quarantine.py`

@@ -10,7 +10,11 @@
     "identity",
     "provenance",
     "source_references",
+    "summary",
+    "extraction",
     "execution",
+    "operator_commands",
+    "diagrams",
     "observability",
     "diagnostics"
   ],
@@ -42,16 +46,109 @@
     },
     "provenance": {"$ref": "#/$defs/provenance"},
     "source_references": {"$ref": "#/$defs/sourceReferences"},
-    "extraction": {"type": "object"},
+    "summary": {
+      "type": "object",
+      "required": ["sentences", "source_description", "query_filter_summary", "field_selection_summary", "silver_processing_summary", "validation_summary", "excluded_data_summary"],
+      "properties": {
+        "sentences": {"type": "array", "minItems": 2, "maxItems": 5, "items": {"type": "string", "minLength": 20}},
+        "source_description": {"type": "string"},
+        "query_filter_summary": {"type": "string"},
+        "field_selection_summary": {"type": "string"},
+        "silver_processing_summary": {"type": "string"},
+        "validation_summary": {"type": "string"},
+        "excluded_data_summary": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "extraction": {
+      "type": "object",
+      "required": ["source_kind", "source_resource", "source_tables", "source_collections", "filters", "selected_fields", "field_groups"],
+      "properties": {
+        "source_kind": {"enum": ["http_api", "database", "cached_bronze", "derived", "composite"]},
+        "source_resource": {"type": ["string", "null"]},
+        "method": {"type": ["string", "null"]},
+        "endpoint_template": {"type": ["string", "null"]},
+        "source_tables": {"type": "array", "items": {"type": "string"}},
+        "source_collections": {"type": "array", "items": {"type": "string"}},
+        "filters": {"type": "array", "items": {"$ref": "#/$defs/filter"}},
+        "selected_fields": {"type": "array", "items": {"$ref": "#/$defs/selectedField"}},
+        "field_groups": {"type": "array", "items": {"$ref": "#/$defs/fieldGroup"}}
+      },
+      "additionalProperties": false
+    },
     "bronze": {"type": "object"},
     "silver": {"type": "object"},
     "gold": {"type": "object"},
     "composite": {"type": "object"},
     "execution": {"type": "object"},
+    "operator_commands": {
+      "type": "array",
+      "minItems": 2,
+      "items": {"$ref": "#/$defs/operatorCommand"}
+    },
+    "diagrams": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/diagram"}
+    },
     "observability": {"$ref": "#/$defs/observability"},
     "diagnostics": {"type": "array", "items": {"type": "object"}}
   },
   "$defs": {
+    "filter": {
+      "type": "object",
+      "required": ["name", "source", "required", "description"],
+      "properties": {
+        "name": {"type": "string"},
+        "source": {"enum": ["config", "cli", "adapter", "dependency"]},
+        "required": {"type": "boolean"},
+        "description": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "selectedField": {
+      "type": "object",
+      "required": ["name", "source_object", "target_group", "required"],
+      "properties": {
+        "name": {"type": "string"},
+        "source_object": {"type": "string"},
+        "target_group": {"enum": ["system", "business", "dq"]},
+        "required": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "fieldGroup": {
+      "type": "object",
+      "required": ["name", "fields", "field_count"],
+      "properties": {
+        "name": {"type": "string"},
+        "fields": {"type": "array", "items": {"type": "string"}},
+        "field_count": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "operatorCommand": {
+      "type": "object",
+      "required": ["task", "command", "result", "source_ref"],
+      "properties": {
+        "task": {"type": "string"},
+        "command": {"type": "string", "pattern": "^bioetl "},
+        "result": {"type": "string"},
+        "source_ref": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "diagram": {
+      "type": "object",
+      "required": ["diagram_id", "kind", "mermaid"],
+      "properties": {
+        "diagram_id": {"type": "string"},
+        "kind": {"const": "flowchart"},
+        "mermaid": {"type": "string", "pattern": "^flowchart "}
+      },
+      "additionalProperties": false
+    },
     "provenance": {
       "type": "object",
       "required": ["source_revision", "projector_version", "semantic_content_hash"],

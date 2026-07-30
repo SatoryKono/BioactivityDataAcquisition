@@ -13,7 +13,7 @@ Dashboard `3. Provider Health` monitors provider current status, health-check la
 - **Purpose:** Explain dashboard navigation and escalation flow.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 2. Provenance
+### 2. Inspect Scope & Evidence
 - **Type:** Text
 - **Purpose:** Show run ID, manifest ID, and replay provenance anchors.
 - **Data sources:** Dashboard variables and operator copy.

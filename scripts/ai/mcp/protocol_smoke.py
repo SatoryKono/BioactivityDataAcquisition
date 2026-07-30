@@ -260,11 +260,41 @@ def _ping_http_endpoint(ping_url: str, *, timeout: float) -> int:
         raise RuntimeError(f"ping failed for {safe_ping}: {exc}") from exc
 
 
+def _http_capability_count(
+    safe_url: str,
+    *,
+    method: str,
+    result_key: str,
+    request_id: int,
+    timeout: float,
+) -> tuple[str, int | None]:
+    """Return a bounded best-effort MCP capability-list status and count."""
+    try:
+        parsed = _http_json_rpc(
+            safe_url,
+            {
+                "jsonrpc": "2.0",
+                "id": request_id,
+                "method": method,
+                "params": {},
+            },
+            timeout=timeout,
+        )
+    except Exception:
+        return "unavailable", None
+    if "error" in parsed:
+        code = parsed.get("error", {}).get("code")
+        return ("unsupported" if code == -32601 else "failed"), None
+    rows = parsed.get("result", {}).get(result_key)
+    return ("ok", len(rows)) if isinstance(rows, list) else ("invalid", None)
+
+
 def _http_initialize_and_tools(
     safe_url: str,
     *,
     timeout: float,
-) -> tuple[bool, str | None, int | None]:
+    enumerate_resources: bool,
+) -> tuple[bool, str | None, int | None, dict[str, Any]]:
     """POST initialize (+ best-effort tools/list). Returns (ok, error, tool_count)."""
     init_payload = {
         "jsonrpc": "2.0",
@@ -281,11 +311,27 @@ def _http_initialize_and_tools(
     except Exception as exc:
         # Ping alone is enough for shared-plane liveness when proxy rejects
         # bare JSON initialize (session/header requirements).
-        return False, str(exc)[:500], None
+        return False, str(exc)[:500], None, {}
     if "error" in parsed or "result" not in parsed:
-        return False, f"initialize failed: {parsed!r}"[:500], None
+        return False, f"initialize failed: {parsed!r}"[:500], None, {}
     tool_count = _http_tools_list_count(safe_url, timeout=timeout)
-    return True, None, tool_count
+    capabilities: dict[str, Any] = {}
+    if enumerate_resources:
+        for method, key, request_id, prefix in (
+            ("resources/list", "resources", 3, "resources"),
+            ("resources/templates/list", "resourceTemplates", 4, "resource_templates"),
+        ):
+            status, count = _http_capability_count(
+                safe_url,
+                method=method,
+                result_key=key,
+                request_id=request_id,
+                timeout=timeout,
+            )
+            capabilities[f"{prefix}_status"] = status
+            if count is not None:
+                capabilities[f"{prefix}_count"] = count
+    return True, None, tool_count, capabilities
 
 
 def _http_tools_list_count(safe_url: str, *, timeout: float) -> int | None:
@@ -310,6 +356,7 @@ def smoke_http_server(
     url: str,
     *,
     timeout: float = 15.0,
+    enumerate_resources: bool = False,
 ) -> dict[str, Any]:
     """Smoke a localhost shared-plane HTTP MCP endpoint (ping + initialize).
 
@@ -329,8 +376,10 @@ def smoke_http_server(
         f"{scheme}://{host}:{port}/ping"
     )  # NOSONAR - loopback-only
     _ping_http_endpoint(ping_url, timeout=timeout)
-    init_ok, init_error, tool_count = _http_initialize_and_tools(
-        safe_url, timeout=timeout
+    init_ok, init_error, tool_count, capabilities = _http_initialize_and_tools(
+        safe_url,
+        timeout=timeout,
+        enumerate_resources=enumerate_resources,
     )
 
     report: dict[str, Any] = {
@@ -347,6 +396,7 @@ def smoke_http_server(
     }
     if tool_count is not None:
         report["tool_count"] = tool_count
+    report.update(capabilities)
     if init_error and not init_ok:
         report["initialize_note"] = init_error
     return report
@@ -416,7 +466,8 @@ def _run_stdio_initialize_tools(
     process: subprocess.Popen[str],
     *,
     timeout: float,
-) -> tuple[int, None] | tuple[None, Exception]:
+    enumerate_resources: bool,
+) -> tuple[tuple[int, dict[str, Any]], None] | tuple[None, Exception]:
     """Exchange initialize + tools/list; returns (tool_count, None) or (None, error)."""
     try:
         initialized = _request(
@@ -448,7 +499,43 @@ def _run_stdio_initialize_tools(
         tool_rows = tools.get("result", {}).get("tools")
         if "error" in tools or not isinstance(tool_rows, list):
             raise RuntimeError(f"MCP tools/list failed: {tools!r}")
-        return len(tool_rows), None
+        capabilities: dict[str, Any] = {}
+        if enumerate_resources:
+            for method, key, request_id, prefix in (
+                ("resources/list", "resources", 3, "resources"),
+                (
+                    "resources/templates/list",
+                    "resourceTemplates",
+                    4,
+                    "resource_templates",
+                ),
+            ):
+                try:
+                    response = _request(
+                        process,
+                        {
+                            "jsonrpc": "2.0",
+                            "id": request_id,
+                            "method": method,
+                            "params": {},
+                        },
+                        timeout=timeout,
+                    )
+                    if "error" in response:
+                        code = response.get("error", {}).get("code")
+                        capabilities[f"{prefix}_status"] = (
+                            "unsupported" if code == -32601 else "failed"
+                        )
+                        continue
+                    rows = response.get("result", {}).get(key)
+                    capabilities[f"{prefix}_status"] = (
+                        "ok" if isinstance(rows, list) else "invalid"
+                    )
+                    if isinstance(rows, list):
+                        capabilities[f"{prefix}_count"] = len(rows)
+                except (OSError, RuntimeError, TimeoutError, ValueError):
+                    capabilities[f"{prefix}_status"] = "unavailable"
+        return (len(tool_rows), capabilities), None
     except Exception as exc:
         return None, exc
 
@@ -467,11 +554,17 @@ def smoke_server(
     server_name: str,
     *,
     timeout: float = 15.0,
+    enumerate_resources: bool = False,
 ) -> dict[str, Any]:
     safe_config = _safe_config_path(config_path)
     server = _load_server(safe_config, server_name)
     if _is_http_server(server):
-        return smoke_http_server(server_name, str(server["url"]), timeout=timeout)
+        return smoke_http_server(
+            server_name,
+            str(server["url"]),
+            timeout=timeout,
+            enumerate_resources=enumerate_resources,
+        )
     command, popen_command, use_shell = _stdio_popen_argv(server)
     environment = os.environ.copy()
     environment.update({str(k): str(v) for k, v in server.get("env", {}).items()})
@@ -506,7 +599,11 @@ def smoke_server(
     stderr_thread = threading.Thread(target=_drain_stderr, daemon=True)
     stderr_thread.start()
     try:
-        tool_count, failure = _run_stdio_initialize_tools(process, timeout=timeout)
+        result, failure = _run_stdio_initialize_tools(
+            process,
+            timeout=timeout,
+            enumerate_resources=enumerate_resources,
+        )
     finally:
         _terminate_process(process)
         stderr_thread.join(timeout=1)
@@ -516,8 +613,9 @@ def smoke_server(
         if tail:
             raise RuntimeError(f"{failure} | stderr_tail={tail!r}") from failure
         raise failure
-    assert tool_count is not None
-    return {
+    assert result is not None
+    tool_count, capabilities = result
+    report = {
         "schema_version": "bioetl-mcp-protocol-smoke-v1",
         "server": server_name,
         "ok": True,
@@ -526,6 +624,8 @@ def smoke_server(
         "command": command,
         "environment_names": sorted(server.get("env", {})),
     }
+    report.update(capabilities)
+    return report
 
 
 def _parse_args() -> argparse.Namespace:
@@ -533,6 +633,14 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--config", type=Path, default=Path(".mcp.json"))
     parser.add_argument("--server", required=True)
     parser.add_argument("--timeout", type=float, default=15.0)
+    parser.add_argument(
+        "--enumerate-resources",
+        action="store_true",
+        help=(
+            "Best-effort bounded resources/list and resources/templates/list "
+            "checks; unsupported methods do not fail server liveness."
+        ),
+    )
     parser.add_argument("--output", type=Path)
     return parser.parse_args()
 
@@ -540,7 +648,12 @@ def _parse_args() -> argparse.Namespace:
 def main() -> int:
     args = _parse_args()
     try:
-        report = smoke_server(args.config.resolve(), args.server, timeout=args.timeout)
+        report = smoke_server(
+            args.config.resolve(),
+            args.server,
+            timeout=args.timeout,
+            enumerate_resources=args.enumerate_resources,
+        )
     except (
         KeyError,
         OSError,

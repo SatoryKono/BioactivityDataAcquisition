@@ -12,6 +12,18 @@
     "business_context": {"type": "string"},
     "known_limitations": {"type": "array", "items": {"type": "string"}},
     "rationale": {"type": "string"},
+    "curated_field_groups": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "operator_notes": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "additional_diagram": {
+      "type": "string",
+      "enum": ["field_lineage", "validation_flow", "nested_projection"]
+    },
     "approved_exceptions": {
       "type": "array",
       "items": {

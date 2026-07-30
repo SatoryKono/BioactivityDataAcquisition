@@ -7,6 +7,13 @@
     }
   },
   "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "data_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Source[\"chembl:publication_similarity\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: chembl.publication_similarity + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: chembl.publication_similarity (overwrite)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
+    }
+  ],
   "execution": {
     "cached_bronze_is_mode": true,
     "control_plane": {
@@ -29,34 +36,108 @@
     }
   },
   "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
+    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data",
+    "field_groups": [
+      {
+        "field_count": 7,
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_ingestion_ts",
+          "_index"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "system"
       },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
+      {
+        "field_count": 9,
+        "fields": [
+          "sim_id",
+          "doc_1",
+          "doc_2",
+          "pubmed_id1",
+          "pubmed_id2",
+          "tid_tani",
+          "mol_tani",
+          "avg_tani",
+          "max_tani"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "business"
       }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
+    ],
+    "filters": [
+      {
+        "description": "IDs from data/input/publication_similarity.csv column sim_id; CLI may override the input CSV",
+        "name": "sim_id",
+        "required": false,
+        "source": "cli"
+      }
+    ],
+    "method": null,
+    "selected_fields": [
+      {
+        "name": "sim_id",
+        "required": true,
+        "source_object": "publication_similarity",
+        "target_group": "business"
       },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
+      {
+        "name": "doc_1",
+        "required": true,
+        "source_object": "publication_similarity",
+        "target_group": "business"
+      },
+      {
+        "name": "doc_2",
+        "required": true,
+        "source_object": "publication_similarity",
+        "target_group": "business"
+      },
+      {
+        "name": "pubmed_id1",
+        "required": false,
+        "source_object": "publication_similarity",
+        "target_group": "business"
+      },
+      {
+        "name": "pubmed_id2",
+        "required": false,
+        "source_object": "publication_similarity",
+        "target_group": "business"
+      },
+      {
+        "name": "tid_tani",
+        "required": false,
+        "source_object": "publication_similarity",
+        "target_group": "business"
+      },
+      {
+        "name": "mol_tani",
+        "required": false,
+        "source_object": "publication_similarity",
+        "target_group": "business"
+      },
+      {
+        "name": "avg_tani",
+        "required": false,
+        "source_object": "publication_similarity",
+        "target_group": "business"
+      },
+      {
+        "name": "max_tani",
+        "required": false,
+        "source_object": "publication_similarity",
+        "target_group": "business"
+      }
+    ],
+    "source_collections": [
+      "publication_similarity"
+    ],
+    "source_kind": "derived",
+    "source_resource": "chembl:publication_similarity",
+    "source_tables": []
   },
   "gold": {
     "column_projection": {
@@ -108,9 +189,53 @@
       "status"
     ]
   },
+  "operator_commands": [
+    {
+      "command": "bioetl run --pipeline chembl_publication_similarity",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_publication_similarity --limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_publication_similarity --run-type backfill --dry-run",
+      "result": "Проверяет backfill/rebuild path без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline chembl_publication_similarity --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline chembl_publication_similarity --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline chembl_publication_similarity",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
   "passport_schema_version": "1.0.0",
   "provenance": {
-    "projector_version": "1.0.0",
+    "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:67563c93b810f81060382cea75c5295b06dea6bbbdae1f46655a25a045073d83",
     "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
   },
@@ -129,6 +254,7 @@
       "soft_fail_threshold": 0.05,
       "strict_validation": false
     },
+    "normalization_profile": "chembl.publication_similarity",
     "write": {
       "partition_by": []
     }
@@ -137,6 +263,18 @@
     {
       "path": "configs/entities/chembl/publication_similarity.yaml",
       "role": "effective_entity_config"
+    },
+    {
+      "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
+      "role": "pipeline_registration"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "role": "run_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
     },
     {
       "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
@@ -149,6 +287,24 @@
     {
       "path": "configs/contracts/chembl/publication_similarity.yaml",
       "role": "dq_contract"
+    },
+    {
+      "path": "configs/providers/chembl.yaml",
+      "role": "provider_config"
     }
-  ]
+  ],
+  "summary": {
+    "excluded_data_summary": "invalid_record_policy=quarantine",
+    "field_selection_summary": "В business-проекцию входят `sim_id`, `doc_1`, `doc_2`, `pubmed_id1`, `pubmed_id2`, `tid_tani`, `mol_tani`, `avg_tani` и ещё 1 полей.",
+    "query_filter_summary": "sim_id=IDs from data/input/publication_similarity.csv column sim_id; CLI may override the input CSV",
+    "sentences": [
+      "Extract publication similarity data (Tanimoto coefficients) from ChEMBL API. Источник — `chembl:publication_similarity` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: sim_id=IDs from data/input/publication_similarity.csv column sim_id; CLI may override the input CSV.",
+      "В business-проекцию входят `sim_id`, `doc_1`, `doc_2`, `pubmed_id1`, `pubmed_id2`, `tid_tani`, `mol_tani`, `avg_tani` и ещё 1 полей.",
+      "Silver использует профиль `chembl.publication_similarity` и проверяет обязательные поля `sim_id`, `doc_1`, `doc_2`; невалидные записи направляются в `quarantine`.",
+      "Перед Gold применяется строгий Pandera-контракт `chembl.publication_similarity`; Gold filters/constraints заданы в entity config (6 групп правил)."
+    ],
+    "silver_processing_summary": "Silver использует профиль `chembl.publication_similarity` и проверяет обязательные поля `sim_id`, `doc_1`, `doc_2`; невалидные записи направляются в `quarantine`.",
+    "source_description": "Extract publication similarity data (Tanimoto coefficients) from ChEMBL API. Источник — `chembl:publication_similarity` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: sim_id=IDs from data/input/publication_similarity.csv column sim_id; CLI may override the input CSV.",
+    "validation_summary": "Перед Gold применяется строгий Pandera-контракт `chembl.publication_similarity`; Gold filters/constraints заданы в entity config (6 групп правил)."
+  }
 }

@@ -7,6 +7,13 @@
     }
   },
   "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "data_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Source[\"pubmed:publication\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: pubmed.publication + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: pubmed.publication (scd2)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
+    }
+  ],
   "execution": {
     "cached_bronze_is_mode": true,
     "control_plane": {
@@ -29,34 +36,189 @@
     }
   },
   "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
+    "endpoint_template": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils",
+    "field_groups": [
+      {
+        "field_count": 10,
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_source",
+          "_ingestion_ts",
+          "_index",
+          "_lookup_method",
+          "_original_id"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "system"
       },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
+      {
+        "field_count": 4,
+        "fields": [
+          "pmid",
+          "pmc_id",
+          "doi",
+          "nlm_unique_id"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "identifiers"
+      },
+      {
+        "field_count": 1,
+        "fields": [
+          "title"
+        ],
+        "name": "title"
+      },
+      {
+        "field_count": 2,
+        "fields": [
+          "abstract",
+          "abstract_structured"
+        ],
+        "name": "abstract"
+      },
+      {
+        "field_count": 5,
+        "fields": [
+          "authors",
+          "author_count",
+          "authors_with_affiliations",
+          "authors_with_affiliations_canonical_json",
+          "authors_with_affiliations_raw_json"
+        ],
+        "name": "authors"
+      },
+      {
+        "field_count": 4,
+        "fields": [
+          "affiliation_list",
+          "affiliation_structured",
+          "affiliation_structured_canonical_json",
+          "affiliation_structured_raw_json"
+        ],
+        "name": "affiliations"
+      },
+      {
+        "field_count": 7,
+        "fields": [
+          "journal",
+          "journal_name",
+          "journal_name_short",
+          "journal_iso_abbrev",
+          "issn",
+          "issn_list",
+          "journal_issn_type"
+        ],
+        "name": "journal"
+      },
+      {
+        "field_count": 1,
+        "fields": [
+          "publication_year"
+        ],
+        "name": "year"
+      },
+      {
+        "field_count": 6,
+        "fields": [
+          "publication_date",
+          "pub_date",
+          "pub_day",
+          "pub_month",
+          "date_completed",
+          "date_revised"
+        ],
+        "name": "dates"
+      },
+      {
+        "field_count": 6,
+        "fields": [
+          "volume",
+          "issue",
+          "page_first",
+          "page_last",
+          "page_range",
+          "medline_pgn"
+        ],
+        "name": "pagination"
+      },
+      {
+        "field_count": 2,
+        "fields": [
+          "citations_made",
+          "citation_subset"
+        ],
+        "name": "citations"
+      },
+      {
+        "field_count": 5,
+        "fields": [
+          "subject_mesh",
+          "mesh_heading_count",
+          "subject_keywords",
+          "keyword_count",
+          "publication_types"
+        ],
+        "name": "subjects"
+      },
+      {
+        "field_count": 1,
+        "fields": [
+          "grant_count"
+        ],
+        "name": "funding"
+      },
+      {
+        "field_count": 1,
+        "fields": [
+          "chemical_count"
+        ],
+        "name": "chemicals"
+      },
+      {
+        "field_count": 4,
+        "fields": [
+          "publication_type",
+          "publication_type_unified",
+          "publication_subclass",
+          "publication_class"
+        ],
+        "name": "doc_type"
+      },
+      {
+        "field_count": 1,
+        "fields": [
+          "language"
+        ],
+        "name": "language"
+      },
+      {
+        "field_count": 2,
+        "fields": [
+          "country",
+          "publication_status"
+        ],
+        "name": "misc"
       }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
-      },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
+    ],
+    "filters": [
+      {
+        "description": "IDs from data/input/pubmed.csv column pubmed_id; CLI may override the input CSV",
+        "name": "pmid",
+        "required": true,
+        "source": "cli"
+      }
+    ],
+    "method": "GET",
+    "selected_fields": [],
+    "source_collections": [
+      "publication"
+    ],
+    "source_kind": "http_api",
+    "source_resource": "pubmed:publication",
+    "source_tables": []
   },
   "gold": {
     "column_projection": {
@@ -123,9 +285,53 @@
       "status"
     ]
   },
+  "operator_commands": [
+    {
+      "command": "bioetl run --pipeline pubmed_publication",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run --pipeline pubmed_publication --limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run --pipeline pubmed_publication --run-type backfill --dry-run",
+      "result": "Проверяет backfill/rebuild path без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline pubmed_publication --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline pubmed_publication --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline pubmed_publication",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
   "passport_schema_version": "1.0.0",
   "provenance": {
-    "projector_version": "1.0.0",
+    "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:790b4f6e533862819e3f7098bb1fd368c0e532f74c3216cc62dbb2ce9861b6ed",
     "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
   },
@@ -159,6 +365,7 @@
       "soft_fail_threshold": 0.05,
       "strict_validation": false
     },
+    "normalization_profile": "pubmed.publication",
     "write": {
       "partition_by": []
     }
@@ -167,6 +374,18 @@
     {
       "path": "configs/entities/pubmed/publication.yaml",
       "role": "effective_entity_config"
+    },
+    {
+      "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
+      "role": "pipeline_registration"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "role": "run_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
     },
     {
       "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
@@ -179,6 +398,24 @@
     {
       "path": "configs/contracts/pubmed/publication.yaml",
       "role": "dq_contract"
+    },
+    {
+      "path": "configs/providers/pubmed.yaml",
+      "role": "provider_config"
     }
-  ]
+  ],
+  "summary": {
+    "excluded_data_summary": "invalid_record_policy=quarantine",
+    "field_selection_summary": "В business-проекцию входят .",
+    "query_filter_summary": "pmid=IDs from data/input/pubmed.csv column pubmed_id; CLI may override the input CSV",
+    "sentences": [
+      "Extract publication metadata from PubMed via Entrez API. Источник — `pubmed:publication` на `https://eutils.ncbi.nlm.nih.gov/entrez/eutils`; применяемые extraction/input filters: pmid=IDs from data/input/pubmed.csv column pubmed_id; CLI may override the input CSV.",
+      "В business-проекцию входят .",
+      "Silver использует профиль `pubmed.publication` и проверяет обязательные поля `pmid`, `title`; невалидные записи направляются в `quarantine`.",
+      "Перед Gold применяется строгий Pandera-контракт `pubmed.publication`; Gold filters/constraints заданы в entity config (6 групп правил)."
+    ],
+    "silver_processing_summary": "Silver использует профиль `pubmed.publication` и проверяет обязательные поля `pmid`, `title`; невалидные записи направляются в `quarantine`.",
+    "source_description": "Extract publication metadata from PubMed via Entrez API. Источник — `pubmed:publication` на `https://eutils.ncbi.nlm.nih.gov/entrez/eutils`; применяемые extraction/input filters: pmid=IDs from data/input/pubmed.csv column pubmed_id; CLI may override the input CSV.",
+    "validation_summary": "Перед Gold применяется строгий Pandera-контракт `pubmed.publication`; Gold filters/constraints заданы в entity config (6 групп правил)."
+  }
 }
