@@ -99,5 +99,5 @@ Use explicit opt-ins for review-only local roots:
 
 - `--include-local-cache-roots` adds `.cache/`, `.coverage-sharded-current-main/`,
   `.import_linter_cache/`, and `.npm-cache/`.
-- `--include-local-vendor` adds `.junie/`, `.qodo/`, `.sonarlint/`, and
+- `--include-local-vendor` adds `.qodo/`, `.sonarlint/`, and
   `.windsurf/`.

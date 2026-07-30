@@ -703,9 +703,11 @@ Only approved top-level entries are allowed.
 - Build/configuration: `pyproject.toml`, `uv.lock`, `Makefile`, `.pre-commit-config.yaml`, `.github/`
 - Operational/project assets: `configs/`, `scripts/`, `assets/`, `data/`, `reports/`, `grafana/`
 - Shared AI/editor tooling surfaces approved by policy:
-  `.codex/`, `.cursor/`, `.gemini/`, `.vibe/`, `.vscode/`
+  `.codex/`, `.cursor/`, `.gemini/`, `.junie/`, `.vibe/`, `.vscode/`
+  (tracked Junie content is limited to its guidelines, agents, skills, and plans;
+  history/state/cache remain machine-local)
 - Local-only tolerated tooling/cache surfaces:
-  `.ai/`, `.aiassistant/`, `ai/`, `.idea/`, `.jules/`, `.junie/`, `.sonarlint/`,
+  `.ai/`, `.aiassistant/`, `ai/`, `.idea/`, `.jules/`, `.sonarlint/`,
   `.windsurf/`, `.agent-work/`, `.agentbridge/`, `.agents/`, `.cache/`,
   `caddy/`
 - Portable PyCharm project templates: `configs/ide/pycharm/`

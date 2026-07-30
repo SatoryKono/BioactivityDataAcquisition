@@ -119,8 +119,9 @@ Root AI/editor/runtime tooling decisions live in
 `configs/quality/root_hygiene_review_registry.yaml`. Canonical runtime roots
 such as `.codex/**` and `.gemini/**` are retained unless a separate runtime
 migration decision changes the source of truth. Local cache/editor/vendor roots
-such as `.agents`, `.ai`, `.cache`, `.npm-cache`, `caddy`, `.junie`,
-`.sonarlint`, and `.windsurf` must remain untracked or be reclassified through
+such as `.agents`, `.ai`, `.cache`, `.npm-cache`, `caddy`, `.junie/history/`,
+`.junie/state/`, `.junie/cache/`, `.sonarlint`, and `.windsurf` must remain
+untracked or be reclassified through
 the registry before any rehome/delete action.
 
 ## 3. Data Retention (Medallion Architecture)

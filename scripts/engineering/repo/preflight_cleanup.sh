@@ -34,7 +34,8 @@ Options:
                                .cache/, .import_linter_cache/, .npm-cache/, and
                                .coverage-sharded-current-main/.
   --include-local-vendor       Also remove reviewed local vendor/editor roots such
-                               as .junie/, .qodo/, .sonarlint/, and .windsurf/.
+                               as .qodo/, .sonarlint/, and .windsurf/ (tracked
+                               .junie/ runtime content is never a target).
 Environment:
   BIOETL_PREFLIGHT_ALLOW_SLOW_FS_DELETE=1
                                Allow large cleanup deletes on WSL /mnt checkouts.
@@ -199,7 +200,6 @@ OPTIONAL_LOCAL_CACHE_ROOTS=(
   .npm-cache
 )
 OPTIONAL_LOCAL_VENDOR_ROOTS=(
-  .junie
   .qodo
   .sonarlint
   .windsurf

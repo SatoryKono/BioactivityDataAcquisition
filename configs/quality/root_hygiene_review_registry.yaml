@@ -477,13 +477,21 @@ review_lanes:
     cleanup_policy: exact_candidate_review_only_no_blind_delete
     verification:
       - git ls-files .junie .qodo .sonarlint .windsurf caddy
-      - git check-ignore -v .junie .qodo .sonarlint .windsurf caddy
+      - git check-ignore -v .junie/history .junie/state .junie/cache .qodo .sonarlint .windsurf caddy
       - rg -n "\\.junie/|\\.qodo/|\\.sonarlint/|\\.windsurf/|caddy/" .gitignore docs scripts .github tests configs
     candidates:
-      - path: .junie
+      - path: .junie/history
         current_live_state: present_local_only_root_surface
         canonical_path: null
-        action_if_reintroduced: keep_untracked_or_move_curated_shared_content_to_an_approved_root_surface
+        action_if_reintroduced: keep_untracked_as_junie_machine_local_history
+      - path: .junie/state
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_as_junie_machine_local_state
+      - path: .junie/cache
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_as_junie_machine_local_cache
       - path: caddy
         current_live_state: present_local_only_root_surface
         canonical_path: null
