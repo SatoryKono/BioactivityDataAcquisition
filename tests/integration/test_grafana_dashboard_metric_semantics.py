@@ -781,7 +781,6 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Monitor Quarantined Records": "round(",
             "Monitor Silver Filter Rejects": "round(",
             "Monitor Silver Validation Failures": "round(",
-            "Monitor Silver Validation Failures": "round(",
         },
         "bioetl-runtime.json": {
             "Monitor Pipeline Alert Conditions": "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
