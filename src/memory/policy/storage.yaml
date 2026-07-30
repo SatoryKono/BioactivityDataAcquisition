@@ -59,6 +59,7 @@ artifact_classes:
     storage_mode: ephemeral
     commit_to_git: true
     default_paths:
+      - "src/memory/episodic/tasks"
       - "src/memory/episodic/sessions"
       - "src/memory/episodic/summaries"
-    notes: "Short-lived task context may be committed temporarily but is subject to pruning."
+    notes: "Task-scoped notes use the branch/worktree namespace under tasks; legacy flat lanes remain validation-only migration inputs."

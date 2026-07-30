@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 from memory.notes import (
@@ -12,7 +13,9 @@ from memory.notes import (
     utc_now_iso,
     write_markdown_note,
 )
+from memory.records import TrustLevel
 from memory.resources import discover_memory_root
+from memory.security import assert_safe_for_persistence
 
 NOTE_KINDS: dict[str, dict[str, str]] = {
     "episodic-session": {
@@ -121,6 +124,14 @@ def create_note(
         )
         body = template.body
 
+    assert_safe_for_persistence(
+        json.dumps(
+            {"metadata": metadata, "body": body},
+            ensure_ascii=True,
+            sort_keys=True,
+        ),
+        trust=TrustLevel.TRUSTED_REPOSITORY,
+    )
     return write_markdown_note(output, metadata, body)
 
 

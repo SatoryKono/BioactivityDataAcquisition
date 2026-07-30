@@ -52,7 +52,7 @@
       "observations": [
         "Path: .codex/agents/ORCHESTRATION.md",
         "Purpose: canonical orchestration map for BioETL multi-agent workflow",
-        "Version: 4.2 (2026-03-26)",
+        "Version: 4.3 (2026-07-24)",
         "Active subagents: 9 (py-audit-bot, py-architecture-debt-bot, py-plan-bot, py-test-bot, py-config-bot, py-debug-bot, py-doc-bot, py-test-swarm, py-review-orchestrator)",
         "Standard workflow: audit(baseline) -> plan -> test(baseline) -> implementation -> test(final) -> doc -> audit(final)",
         "Critical rule: ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА",

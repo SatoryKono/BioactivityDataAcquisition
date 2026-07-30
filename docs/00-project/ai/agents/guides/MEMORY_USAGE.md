@@ -17,6 +17,10 @@ as a replacement for runtime truth.
 ## Required Workflow
 
 1. Select `BIOETL_AI_MEMORY_MODE=off|read-only|read-write` for the task.
+1. Declare actor provenance with non-empty `BIOETL_AI_RUNTIME` and
+   `BIOETL_AI_AGENT`; set `BIOETL_AI_MODEL` only when a stable model identifier
+   is known. Do not allow durable task records to fall back to an unidentified
+   runtime.
 1. Run `python -m memory.tooling.workflow pre-task ...` before substantial work,
    using `--profile` when a task-specific ranking profile applies.
    If rebuild-only artifacts are missing, the workflow refreshes only the
@@ -34,6 +38,8 @@ as a replacement for runtime truth.
 
 - Inventory and ownership: `src/memory/catalog/memory_registry.yaml`.
 - Identity and provenance: `src/memory/records.py` and `src/memory/scope.py`.
+- Runtime actor identity: `BIOETL_AI_RUNTIME`, `BIOETL_AI_AGENT`, and optional
+  `BIOETL_AI_MODEL`, captured by `src/memory/tooling/workflow.py`.
 - Persistence capability: `src/memory/persistence.py`.
 - Evidence and decisions: `src/memory/evidence.py`.
 - Bounded subagent context: `src/memory/handoff.py`.

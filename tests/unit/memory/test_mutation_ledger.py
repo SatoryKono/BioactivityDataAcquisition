@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
@@ -50,3 +51,20 @@ def test_ledger_rejects_duplicate_and_detects_tamper(tmp_path: Path) -> None:
     path.write_text(path.read_text().replace("verified", "altered"), encoding="utf-8")
     with pytest.raises(ValueError, match="digest mismatch"):
         ledger.history("record-1")
+
+
+def test_ledger_duplicate_check_is_atomic_across_writers(tmp_path: Path) -> None:
+    ledger = MutationLedger(tmp_path / "audit.jsonl")
+
+    def append_same_event(_: int) -> bool:
+        try:
+            ledger.append(_event("shared-event"))
+        except ValueError:
+            return False
+        return True
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        outcomes = list(executor.map(append_same_event, range(24)))
+
+    assert outcomes.count(True) == 1
+    assert len(ledger.history("record-1")) == 1

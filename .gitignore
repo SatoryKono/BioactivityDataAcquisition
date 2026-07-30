@@ -19,6 +19,7 @@ ENV/
 MagicMock/
 
 # AI agent temporary files
+.devin/.tmp*
 .codex_tmp/
 .codex_tmp_issue_*.md
 scripts/ai/codex/.env.codex

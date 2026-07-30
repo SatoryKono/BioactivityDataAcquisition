@@ -27,6 +27,23 @@ Map logical BioETL `py-*` profiles onto the Devin CLI runtime roles using custom
 - **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.**
 - This includes scorecard budgets, exemption limits, hotspot thresholds, hotspot family caps, and equivalent budget surfaces.
 
+## Memory Provenance
+
+Before invoking `python -m memory.tooling.workflow pre-task` or `post-task`,
+identify the active runtime explicitly:
+
+```bash
+BIOETL_AI_RUNTIME=devin \
+BIOETL_AI_AGENT=<active-profile-or-devin> \
+BIOETL_AI_MODEL=<model-id-if-known> \
+python -m memory.tooling.workflow <pre-task-or-post-task> ...
+```
+
+`BIOETL_AI_RUNTIME` and `BIOETL_AI_AGENT` MUST be non-empty. Set
+`BIOETL_AI_MODEL` when Devin exposes a stable model identifier; otherwise omit
+it rather than guessing. Generated episodic records bind this actor identity
+to repository, commit, branch, worktree, task, and source references.
+
 ## Devin vs Codex Runtime Differences
 
 | Aspect | Codex Runtime | Devin Runtime |

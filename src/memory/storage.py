@@ -7,7 +7,7 @@ import json
 import os
 import tempfile
 import time
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
@@ -116,7 +116,13 @@ def atomic_write_json(
     return atomic_write_text(target, rendered, expected_digest=expected_digest)
 
 
-def append_jsonl(target: Path, payload: Any) -> str:
+def append_jsonl(
+    target: Path,
+    payload: Any,
+    *,
+    reject_if: Callable[[dict[str, Any]], bool] | None = None,
+    conflict_message: str = "JSONL record already exists",
+) -> str:
     """Append one deterministic JSONL event through an atomic replacement."""
     target.parent.mkdir(parents=True, exist_ok=True)
     line = json.dumps(
@@ -124,6 +130,15 @@ def append_jsonl(target: Path, payload: Any) -> str:
     )
     with exclusive_lock(target):
         existing = target.read_bytes() if target.exists() else b""
+        if reject_if is not None:
+            for raw_line in existing.decode("utf-8").splitlines():
+                if not raw_line.strip():
+                    continue
+                row = json.loads(raw_line)
+                if not isinstance(row, dict):
+                    raise ValueError(f"JSONL record must be an object: {target}")
+                if reject_if(row):
+                    raise StorageConflictError(conflict_message)
         updated = existing + line.encode("utf-8") + b"\n"
         temp_path: Path | None = None
         try:

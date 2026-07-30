@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from memory.evidence import EvidenceStore
+from memory.evidence import EvidenceStore, _same_scope
 
 
 def _digest(payload: dict[str, Any]) -> str:
@@ -70,13 +70,17 @@ def replay_decision(root: Path, decision_digest: str) -> ReplayResult:
     if not isinstance(raw_digests, list) or not raw_digests:
         raise ValueError("decision has no replayable evidence")
     evidence_digests = tuple(str(value) for value in raw_digests)
-    store = EvidenceStore(root)
-    for evidence_digest in evidence_digests:
-        store.resolve_evidence(evidence_digest)
-
     envelope = matched.get("envelope")
     if not isinstance(envelope, dict):
         raise ValueError("decision envelope is missing")
+    store = EvidenceStore(root)
+    for evidence_digest in evidence_digests:
+        evidence = store.resolve_evidence(evidence_digest)
+        evidence_envelope = evidence.get("envelope")
+        if not isinstance(evidence_envelope, dict) or not _same_scope(
+            evidence_envelope, envelope
+        ):
+            raise ValueError("decision evidence scope mismatch")
     return ReplayResult(
         decision_digest=decision_digest,
         decision=str(matched.get("decision") or ""),

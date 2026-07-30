@@ -14,12 +14,16 @@ _COMMIT = "a" * 40
 
 
 def _envelope(
-    record_id: str, record_type: RecordType, *, supersedes: tuple[str, ...] = ()
+    record_id: str,
+    record_type: RecordType,
+    *,
+    supersedes: tuple[str, ...] = (),
+    repo_id: str = "bioetl",
 ) -> RecordEnvelope:
     return RecordEnvelope.create(
         record_id=record_id,
         record_type=record_type,
-        repo_id="bioetl",
+        repo_id=repo_id,
         git_commit=_COMMIT,
         branch="main",
         worktree_id="worktree-a",
@@ -107,3 +111,24 @@ def test_decision_requires_resolvable_evidence_and_known_supersession(
     )
     with pytest.raises(ValueError, match="supersedes unknown"):
         store.append_decision(unknown)
+
+
+def test_decision_rejects_evidence_from_another_repository(tmp_path: Path) -> None:
+    store = EvidenceStore(tmp_path)
+    evidence = EvidenceEvent(
+        envelope=_envelope(
+            "foreign-evidence", RecordType.EVIDENCE, repo_id="other-repository"
+        ),
+        evidence_kind="repository-fact",
+        observation="This observation belongs to another repository.",
+    )
+    digest = store.append_evidence(evidence)
+    decision = DecisionRecord(
+        envelope=_envelope("decision-local", RecordType.DECISION),
+        decision="Do not cross repository boundaries.",
+        rationale="Repository evidence must remain isolated.",
+        evidence_digests=(digest,),
+    )
+
+    with pytest.raises(ValueError, match="outside its repository scope"):
+        store.append_decision(decision)

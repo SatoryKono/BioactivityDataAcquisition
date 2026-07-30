@@ -6,8 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from memory.artifact_readiness import rag_chunks_ready
+from memory.artifact_readiness import rag_chunks_ready, timeline_events_ready
 from memory.rag.indexing import write_rag_manifests
+from memory.timeline._common import write_timeline_manifest
 
 pytestmark = pytest.mark.unit
 
@@ -63,3 +64,28 @@ def test_rag_readiness_rejects_workflow_pair_when_full_is_required(
         )
         is False
     )
+
+
+def test_timeline_readiness_rejects_tampered_projection(tmp_path: Path) -> None:
+    events_dir = tmp_path / "events"
+    events_dir.mkdir()
+    events = events_dir / "ci.jsonl"
+    events.write_text('{"id":"ci::one"}\n', encoding="utf-8")
+    write_timeline_manifest(tmp_path, events_dir)
+
+    assert timeline_events_ready(events_dir) is True
+
+    events.write_text('{"id":"ci::changed"}\n', encoding="utf-8")
+
+    assert timeline_events_ready(events_dir) is False
+
+
+def test_timeline_readiness_requires_manifest_inside_repository(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / ".git").mkdir()
+    events_dir = tmp_path / "src/memory/derived/timeline/events"
+    events_dir.mkdir(parents=True)
+    (events_dir / "ci.jsonl").write_text('{"id":"ci::one"}\n', encoding="utf-8")
+
+    assert timeline_events_ready(events_dir, repo_root=tmp_path) is False
