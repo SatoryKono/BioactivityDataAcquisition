@@ -27,7 +27,7 @@
       "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
       "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
     ],
-    "scanned_test_count": 361,
+    "scanned_test_count": 360,
     "unreviewed_count": 0
   },
   "assertion_branch_reachability_percent": 100.0,
@@ -1132,7 +1132,7 @@
   "critical_behavior_envelope_count": 6,
   "critical_behavior_envelopes": {
     "control_plane_replay": {
-      "assertion_backed_tests": 56,
+      "assertion_backed_tests": 55,
       "assertion_examples": [
         "tests/architecture/test_determinism_identity_policy.py:176",
         "tests/architecture/test_determinism_identity_policy.py:330",
@@ -1153,7 +1153,7 @@
         "tests/architecture/test_determinism_identity_policy.py",
         "tests/architecture/test_replay_time_seam_inventory.py"
       ],
-      "test_count": 56
+      "test_count": 55
     },
     "gold_strict_contracts": {
       "assertion_backed_tests": 16,
@@ -1305,10 +1305,10 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 46,
+    "marked_test_files": 49,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 46,
+    "test_files": 49,
     "unmarked_test_files": []
   },
   "report": {
@@ -1340,7 +1340,7 @@
         "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
-      "scanned_test_count": 361,
+      "scanned_test_count": 360,
       "unreviewed_count": 0
     },
     "assertion_branch_reachability_percent": 100.0,
@@ -2130,7 +2130,7 @@
     "critical_behavior_envelope_count": 6,
     "critical_behavior_envelopes": {
       "control_plane_replay": {
-        "assertion_backed_tests": 56,
+        "assertion_backed_tests": 55,
         "assertion_examples": [
           "tests/architecture/test_determinism_identity_policy.py:176",
           "tests/architecture/test_determinism_identity_policy.py:330",
@@ -2151,7 +2151,7 @@
           "tests/architecture/test_determinism_identity_policy.py",
           "tests/architecture/test_replay_time_seam_inventory.py"
         ],
-        "test_count": 56
+        "test_count": 55
       },
       "gold_strict_contracts": {
         "assertion_backed_tests": 16,
@@ -2302,10 +2302,10 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 46,
+      "marked_test_files": 49,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 46,
+      "test_files": 49,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -2355,12 +2355,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2162,
-    "total_test_functions": 23292,
+    "total_test_functions": 23247,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "388c2cb0a6ad897b000639d93ad3878cfb1225f1229e2b00c6844b80cd9e7a42",
+  "source_tree_sha256": "f5d5a8a4902600948aae36f8b298baa18034841820c7b81ff86d3e937374d196",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 106,
@@ -2421,7 +2421,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2162,
-  "total_test_functions": 23292,
+  "total_test_functions": 23247,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
