@@ -133,7 +133,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current verdict for the selected provider. Mapping: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`. The verdict uses current status and successful provider activity observed in the selected range; it does not prove that a pipeline run succeeded. UNKNOWN means status evidence is missing\u2014check Telemetry Freshness and Raw Health Status. Fleet panels can disagree because they cover all providers.",
+      "description": "Current verdict for the selected provider. Mapping: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`. The verdict uses current status and successful provider activity observed in the selected range; it does not prove that a pipeline run succeeded. TELEMETRY MISSING means status evidence is unavailable\u2014check Telemetry Freshness and Raw Health Status; it is not evidence of a healthy fleet. Fleet panels can disagree because they cover all providers.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -286,7 +286,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Do not put full UUIDs into Prometheus labels. GLOBAL provider severity matrix. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Interpret with freshness: critical -> degraded -> unknown/stale -> healthy. No data + UNKNOWN Status = blind spot, not empty healthy fleet",
+      "description": "Do not put full UUIDs into Prometheus labels. GLOBAL provider severity matrix. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Interpret with freshness: critical -> degraded -> unknown/stale -> healthy. TELEMETRY MISSING or no data with UNKNOWN Status is a blind spot, not evidence of a healthy fleet.",
       "fieldConfig": {
         "defaults": {
           "color": {

@@ -198,24 +198,15 @@ def test_percent_scores_integer_precision() -> None:
 
 
 def test_primary_status_documents_unknown_class() -> None:
-    for path in (
-        DASH / "bioetl-control-plane-v1.json",
-        DASH / "bioetl-dq-v2.json",
-        DASH / "bioetl-overview-v2.json",
+    for path, status_id in (
+        (DASH / "bioetl-control-plane-v1.json", 9401),
+        (DASH / "bioetl-dq-v2.json", 9401),
+        (DASH / "bioetl-overview-v2.json", 214),
     ):
         data = json.loads(path.read_text(encoding="utf-8"))
         status = next(
-            p
-            for p in _walk(data.get("panels"))
-            if p.get("title") == "Status" or p.get("id") in {9401, 214}
+            p for p in _walk(data.get("panels")) if p.get("id") == status_id
         )
-        if status.get("title") != "Status" and status.get("id") not in {9401, 214}:
-            continue
-        if status.get("title") != "Status":
-            # find true Status
-            status = next(
-                p for p in _walk(data.get("panels")) if p.get("title") == "Status"
-            )
         desc = (status.get("description") or "").lower()
         assert "unknown" in desc
         assert "evidence incomplete" in desc or "missing" in desc

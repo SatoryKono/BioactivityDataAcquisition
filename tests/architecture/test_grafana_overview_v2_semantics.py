@@ -69,11 +69,11 @@ def test_overview_v2_semantics_contract():
     for current_title in [
         "Monitor Fleet Health",
         "Review First Action",
-        "Inputs",
-        "Runtime",
-        "Data Quality",
-        "Data Validation",
-        "Control Plane",
+        "Review Control Plane Status",
+        "Review Runtime Status",
+        "Review Data Quality Status",
+        "Review Data Validation Status",
+        "Review Workflow Status",
     ]:
         p = next(x for x in panels if x.get("title") == current_title)
         expr = "\n".join(t.get("expr", "") for t in p.get("targets", []))

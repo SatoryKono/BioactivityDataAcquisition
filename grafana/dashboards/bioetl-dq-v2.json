@@ -1369,14 +1369,6 @@
                   {
                     "color": "gray",
                     "value": null
-                  },
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 1
                   }
                 ]
               },
@@ -2070,7 +2062,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "SLA 24/72 only applies when samples exist. TIME RANGE freshness age in hours. Explicit SLA: WARN at 24h and CRIT at 72h. An ~8h value is green only because it is below the visible 24h SLA; null is UNKNOWN",
+          "description": "SLA 24/72 only applies when samples exist. TIME RANGE freshness age in hours. Explicit SLA: WARN at 24h and CRIT at 72h. An ~8h value is green only because it is below the visible 24h SLA; null is UNKNOWN. TELEMETRY MISSING means freshness evidence is unavailable, not healthy.",
           "fieldConfig": {
             "defaults": {
               "color": {
