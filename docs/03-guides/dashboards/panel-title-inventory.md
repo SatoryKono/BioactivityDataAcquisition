@@ -72,13 +72,13 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9412 | Inspect Run Details |
 | bioetl-control-plane-v1.json | 9402 | Review Run Summary |
 | bioetl-control-plane-v1.json | 9403 | Review Processed Records |
-| bioetl-dq-v2.json | 1000 | Navigation |
-| bioetl-dq-v2.json | 9400 | Provenance |
-| bioetl-dq-v2.json | 9401 | Status |
-| bioetl-dq-v2.json | 9103 | Review: First Action |
-| bioetl-dq-v2.json | 9101 | Now · DQ Threshold State |
-| bioetl-dq-v2.json | 9102 | Now · DQ Current Reasons |
-| bioetl-dq-v2.json | 220 | Run lane · Silver/Gold rejects |
+| bioetl-dq-v2.json | 1000 | Navigate Dashboards |
+| bioetl-dq-v2.json | 9400 | Understand Data Quality Scope |
+| bioetl-dq-v2.json | 9401 | Monitor DQ Status |
+| bioetl-dq-v2.json | 9103 | Start DQ Triage |
+| bioetl-dq-v2.json | 9101 | Monitor DQ Threshold State |
+| bioetl-dq-v2.json | 9102 | Inspect DQ Current Reasons |
+| bioetl-dq-v2.json | 220 | Run Lane · Silver/Gold Rejects |
 | bioetl-dq-v2.json | 152 | Monitor: Silver Filter Reject Accounting Mismatch |
 | bioetl-dq-v2.json | 121 | Inspect: Top Silver Reject Reasons (Pareto) |
 | bioetl-dq-v2.json | 122 | Inspect: Top Silver Reject Fields |
@@ -109,9 +109,9 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9405 | Run context (thin) -> Run Explorer hub |
 | bioetl-dq-v2.json | 9402 | ID |
 | bioetl-dq-v2.json | 9403 | Processed Records |
-| bioetl-incident-v1.json | 1000 | Navigate Dashboards |
-| bioetl-incident-v1.json | 9400 | Understand Incident Scope |
-| bioetl-incident-v1.json | 9401 | Monitor Incident Status |
+| bioetl-incident-v1.json | 1000 | Navigation |
+| bioetl-incident-v1.json | 9400 | Provenance |
+| bioetl-incident-v1.json | 9401 | Status |
 | bioetl-incident-v1.json | 2001 | Next Best Actions |
 | bioetl-incident-v1.json | 2010 | Ranked Active Suspects |
 | bioetl-incident-v1.json | 2005 | Evidence timeline · Current Alerts (now) |
@@ -147,9 +147,9 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9602 | Inspect Run Context |
 | bioetl-overview-v2.json | 9300 | Review Run Identity |
 | bioetl-overview-v2.json | 9301 | Review Processed Records |
-| bioetl-provider-health-v2.json | 1000 | Navigation |
-| bioetl-provider-health-v2.json | 9400 | Provenance |
-| bioetl-provider-health-v2.json | 9401 | Status |
+| bioetl-provider-health-v2.json | 1000 | Navigate Dashboards |
+| bioetl-provider-health-v2.json | 9400 | Understand Provider Scope |
+| bioetl-provider-health-v2.json | 9401 | Monitor Provider Status |
 | bioetl-provider-health-v2.json | 9002 | First Action |
 | bioetl-provider-health-v2.json | 9101 | Monitor GLOBAL Provider Severity Matrix |
 | bioetl-provider-health-v2.json | 9102 | Inspect Critical Providers |
@@ -176,8 +176,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 104 | Track Provider Failure Rate (Selected Range) |
 | bioetl-provider-health-v2.json | 7 | Track Health Checks Total (Selected Range) |
 | bioetl-provider-health-v2.json | 9405 | Run context (thin) -> Run Explorer hub |
-| bioetl-provider-health-v2.json | 9402 | ID |
-| bioetl-provider-health-v2.json | 9403 | Processed Records |
+| bioetl-provider-health-v2.json | 9402 | Inspect Provider Identity |
+| bioetl-provider-health-v2.json | 9403 | Inspect Processed Records |
 | bioetl-run-explorer-v1.json | 1000 | Navigate Dashboards |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
 | bioetl-run-explorer-v1.json | 3010 | Browse Recent Runs |

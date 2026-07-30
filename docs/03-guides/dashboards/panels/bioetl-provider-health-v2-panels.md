@@ -8,30 +8,30 @@ Dashboard `3. Provider Health` monitors provider current status, health-check la
 
 ## Key Panels
 
-### 1. Navigation
+### 1. Navigate Dashboards
 - **Type:** Text
 - **Purpose:** Explain dashboard navigation and escalation flow.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 2. Provenance
+### 2. Understand Provider Scope
 - **Type:** Text
 - **Purpose:** Distinguish provider-global fleet evidence from the selected
   provider scope and explain that missing current status requires a Runtime
   telemetry check.
 - **Data sources:** Dashboard variables and operator copy; no datasource query.
 
-### 3. Status
+### 3. Monitor Provider Status
 - **Type:** Stat
 - **Purpose:** Current provider severity for the selected scope.
 - **Data sources:** `bioetl_provider_current_status`
 
-### 4. ID
+### 4. Inspect Provider Identity
 - **Type:** Table
 - **Purpose:** Show run ID, pipeline, run type, and timestamp.
 - **Data sources:** BioETL Ops HTTP control-plane identity endpoint
   `/ops/control-plane/identity-table`; this is not a Prometheus panel.
 
-### 5. Processed Records
+### 5. Inspect Processed Records
 - **Type:** Table
 - **Purpose:** Show records processed by stage.
 - **Data sources:** BioETL Ops HTTP

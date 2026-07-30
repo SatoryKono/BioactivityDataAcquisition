@@ -5,10 +5,19 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+memory_mode_is_explicit=0
+requested_memory_mode=""
+if [[ -v BIOETL_AI_MEMORY_MODE ]]; then
+  memory_mode_is_explicit=1
+  requested_memory_mode="${BIOETL_AI_MEMORY_MODE}"
+fi
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
 export BIOETL_SKIP_ENV_LOCAL=1
 load_repo_env_if_present
 unset BIOETL_SKIP_ENV_LOCAL
+if [[ "${memory_mode_is_explicit}" == "1" ]]; then
+  export BIOETL_AI_MEMORY_MODE="${requested_memory_mode}"
+fi
 source "${SCRIPT_DIR}/support/token_validation.sh"
 
 mcp_exit_if_validate_only "memory"

@@ -11,7 +11,7 @@
     {
       "id": 1000,
       "type": "text",
-      "title": "Navigation",
+      "title": "Navigate Dashboards",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -90,12 +90,12 @@
           "tags": []
         }
       ],
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light."
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0\u20134: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5\u20136: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light"
     },
     {
       "id": 1,
       "type": "text",
-      "title": "Provenance · Run Scope",
+      "title": "Understand Run Scope",
       "gridPos": {
         "h": 4,
         "w": 24,
@@ -104,15 +104,15 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = recent runs · <b>SELECTED RUN</b> = identity/accounting/actions</div><div><b>FULL PATHS</b> = report artifacts, not triage bodies</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = recent runs \u00b7 <b>SELECTED RUN</b> = identity/accounting/actions</div><div><b>FULL PATHS</b> = report artifacts, not triage bodies</div></div></div>"
       },
-      "description": "Explains the two Run Explorer modes. BROWSE lists recent runs. SELECTED RUN uses BioETL Ops HTTP to show identity, record counts, processing outcomes, and available actions for one exact run. run_id is never a Prometheus label. Full filesystem paths point to report artifacts intended for detailed investigation."
+      "description": "Explains the two Run Explorer modes. BROWSE lists recent runs. SELECTED RUN uses BioETL Ops HTTP to show identity, record counts, processing outcomes, and available actions for one exact run. run_id is never a Prometheus label. Full filesystem paths point to report artifacts intended for detailed investigation"
     },
     {
       "id": 3010,
       "type": "table",
-      "title": "Browse · Recent pipeline runs (no selection)",
-      "description": "PFILL-12: Browse lists disk artifacts only. DUX6: raw paths hidden; use Open/report artifact for full path (short scan). DUX5: Value columns labelled as Count (no bare Value # headers). DUX3-25: Browse mode — pick a run. Selected-run narrative (ID/Processed/detail) is the answer path after selection. No-selection utility. Pick a run to set run_id. Ops HTTP index — not Prometheus. Valid empty: no matching recent runs for the selected pipeline. Backend unavailable is distinct; check /health/live.",
+      "title": "Browse Recent Runs",
+      "description": "Selected-run narrative (ID/Processed/detail) is the answer path after selection. No-selection utility. Pick a run to set run_id. Ops HTTP index \u2014 not Prometheus. Valid empty: no matching recent runs for the selected pipeline. Backend unavailable is distinct; check /health/live",
       "gridPos": {
         "h": 7,
         "w": 24,
@@ -126,7 +126,7 @@
             "align": "left",
             "inspect": true
           },
-          "noValue": "No pipeline-run-report artifacts for this pipeline on disk (reports/run-reports/pipeline/<name>/). Not a Prometheus gap — run the pipeline to write reports, or pick a pipeline with reports."
+          "noValue": "No pipeline-run-report artifacts for this pipeline on disk (reports/run-reports/pipeline/<name>/). Not a Prometheus gap \u2014 run the pipeline to write reports, or pick a pipeline with reports."
         },
         "overrides": [
           {
@@ -192,7 +192,7 @@
     {
       "id": 9402,
       "type": "table",
-      "title": "ID",
+      "title": "Inspect Run Identity",
       "gridPos": {
         "h": 6,
         "w": 12,
@@ -200,7 +200,7 @@
         "y": 14
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "DUX7: Copy/Open full identity value via data:text/plain link. DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). DUX4-23/25: Canonical RUN hub — only board with first-class ID/Processed KPIs. DUX3-25: Canonical RUN identity hub. Empty until run_id selected. Exact-run identity hub (Ops HTTP). Canonical portfolio hub for ID panels. Valid empty: no matching identity for the selected run. Backend unavailable is distinct; check /health/live.",
+      "description": "Do not put full UUIDs into Prometheus labels. DUX4-23/25: Canonical RUN hub \u2014 only board with first-class ID/Processed KPIs. Empty until run_id selected. Exact-run identity hub (Ops HTTP). Canonical portfolio hub for ID panels. Valid empty: no matching identity for the selected run. Backend unavailable is distinct; check /health/live",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -211,7 +211,7 @@
             "inspect": true
           },
           "unit": "none",
-          "noValue": "Identity not resolved for scope — select exact run_id or wait for control-plane resolve (see resolved_via). Backend down is different from empty scope.",
+          "noValue": "Identity not resolved for scope \u2014 select exact run_id or wait for control-plane resolve (see resolved_via). Backend down is different from empty scope.",
           "links": [
             {
               "title": "Copy/Open full value (plain text)",
@@ -350,7 +350,7 @@
     {
       "id": 9403,
       "type": "table",
-      "title": "Processed Records",
+      "title": "Inspect Processed Records",
       "gridPos": {
         "h": 6,
         "w": 12,
@@ -358,7 +358,7 @@
         "y": 29
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). DUX4-23/25: Canonical RUN hub — only board with first-class ID/Processed KPIs. DUX3-25: Canonical RUN accounting hub. Expected empty ≠ red failure (DUX3-03). Bronze/Silver/Gold accounting hub (Ops HTTP). Canonical portfolio hub for Processed Records. Valid empty: no matching accounting rows for the selected run. Backend unavailable is distinct; check /health/live.",
+      "description": "Do not put full UUIDs into Prometheus labels. DUX4-23/25: Canonical RUN hub \u2014 only board with first-class ID/Processed KPIs. Expected empty \u2260 red failure (DUX3-03). Bronze/Silver/Gold accounting hub (Ops HTTP). Canonical portfolio hub for Processed Records. Valid empty: no matching accounting rows for the selected run. Backend unavailable is distinct; check /health/live",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -370,7 +370,7 @@
           },
           "decimals": 0,
           "unit": "none",
-          "noValue": "No processed-record rows for scope — check Ops HTTP :8000 and selectors. Zeros mean none observed after successful response, not backend failure.",
+          "noValue": "No processed-record rows for scope \u2014 check Ops HTTP :8000 and selectors. Zeros mean none observed after successful response, not backend failure.",
           "links": [
             {
               "title": "Check BioETL Ops HTTP health",
@@ -616,7 +616,7 @@
     {
       "id": 3099,
       "type": "row",
-      "title": "Selected run detail (Ops HTTP; expand after selection)",
+      "title": "Selected Run Details",
       "collapsed": true,
       "gridPos": {
         "h": 1,
@@ -628,8 +628,8 @@
         {
           "id": 3011,
           "type": "table",
-          "title": "Selected run · funnel stages",
-          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). DUX3-25: Selected-run narrative — prefer above deep browse when run_id set. Stage funnel from pipeline_run_report_v1. Exact run_id required. An empty funnel is VALID EMPTY when no stage rows exist; an unexpected empty may mean backend unavailable, so verify /health/live. Not a waterfall (no start/end chronology).",
+          "title": "Inspect Stage Funnel",
+          "description": "Stage funnel from pipeline_run_report_v1. Exact run_id required. An empty funnel is VALID EMPTY when no stage rows exist; an unexpected empty may mean backend unavailable, so verify /health/live. Not a waterfall (no start/end chronology)",
           "gridPos": {
             "h": 6,
             "w": 24,
@@ -643,7 +643,7 @@
                 "align": "left",
                 "inspect": false
               },
-              "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
+              "noValue": "NO DATA \u2014 empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
             },
             "overrides": [
               {
@@ -687,8 +687,8 @@
         {
           "id": 3012,
           "type": "table",
-          "title": "Selected run · top reasons",
-          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). DUX3-25: Selected-run narrative — prefer above deep browse when run_id set. Top removal/reason codes from pipeline_run_report_v1. An empty result is VALID EMPTY when no reasons exist; an unexpected empty may mean backend unavailable, so verify /health/live.",
+          "title": "Inspect Top Run Reasons",
+          "description": "Top removal/reason codes from pipeline_run_report_v1. An empty result is VALID EMPTY when no reasons exist; an unexpected empty may mean backend unavailable, so verify /health/live",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -702,7 +702,7 @@
                 "align": "left",
                 "inspect": false
               },
-              "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
+              "noValue": "NO DATA \u2014 empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
             },
             "overrides": [
               {
@@ -746,8 +746,8 @@
         {
           "id": 3015,
           "type": "table",
-          "title": "Selected run · reconciliation",
-          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). DUX3-25: Selected-run narrative — prefer above deep browse when run_id set. Reconciliation block from pipeline_run_report_v1 (object may need backend table shape). An empty result is VALID EMPTY when reconciliation evidence is absent. UNRESOLVED_SCOPE when run_id is not selected; an unexpected empty may mean backend unavailable, so verify /health/live.",
+          "title": "Inspect Reconciliation",
+          "description": "Reconciliation block from pipeline_run_report_v1 (object may need backend table shape). An empty result is VALID EMPTY when reconciliation evidence is absent. UNRESOLVED_SCOPE when run_id is not selected; an unexpected empty may mean backend unavailable, so verify /health/live",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -761,7 +761,7 @@
                 "align": "left",
                 "inspect": false
               },
-              "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
+              "noValue": "NO DATA \u2014 empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
             },
             "overrides": [
               {
@@ -805,8 +805,8 @@
         {
           "id": 3016,
           "type": "text",
-          "title": "Selected run · layers (accounting)",
-          "description": "DUX5: triage copy shortened; caveats in description; no raw endpoints. DUX3-25: Selected-run narrative — prefer above deep browse when run_id set. Layer counts live on pipeline_run_report_v1.layers and Processed Records panel.",
+          "title": "Inspect Layer Accounting",
+          "description": "Layer counts live on pipeline_run_report_v1.layers and Processed Records panel",
           "gridPos": {
             "h": 3,
             "w": 24,
@@ -815,14 +815,14 @@
           },
           "options": {
             "mode": "html",
-            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Layer accounting:</strong> use Processed Records for the compact view and <code>pipeline_run_report_v1.layers</code> for exact counts.<br>Actions: Open JSON · Open Markdown · inspect reconciliation before escalation.</div>"
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Layer accounting:</strong> use Processed Records for the compact view and <code>pipeline_run_report_v1.layers</code> for exact counts.<br>Actions: Open JSON \u00b7 Open Markdown \u00b7 inspect reconciliation before escalation.</div>"
           }
         },
         {
           "id": 3013,
           "type": "table",
-          "title": "Selected run · artifacts",
-          "description": "DUX6: raw paths hidden; use Open/report artifact for full path (short scan). DUX5: Value columns labelled as Count (no bare Value # headers). DUX3-25: Selected-run narrative — prefer above deep browse when run_id set. Artifact refs from pipeline_run_report_v1. An empty result is VALID EMPTY when no artifacts exist; an unexpected empty may mean backend unavailable, so verify /health/live.",
+          "title": "Inspect Run Artifacts",
+          "description": "Artifact refs from pipeline_run_report_v1. An empty result is VALID EMPTY when no artifacts exist; an unexpected empty may mean backend unavailable, so verify /health/live",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -836,7 +836,7 @@
                 "align": "left",
                 "inspect": false
               },
-              "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
+              "noValue": "NO DATA \u2014 empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
             },
             "overrides": [
               {
@@ -902,8 +902,8 @@
         {
           "id": 3014,
           "type": "text",
-          "title": "Selected run · stage timings / failure (optional)",
-          "description": "DUX5: triage copy shortened; caveats in description; no raw endpoints. DUX3-25: Selected-run narrative — prefer above deep browse when run_id set. stage_timings and failure blocks are optional on pipeline_run_report_v1.",
+          "title": "Inspect Timings & Failure",
+          "description": "stage_timings and failure blocks are optional on pipeline_run_report_v1",
           "gridPos": {
             "h": 4,
             "w": 24,
@@ -916,12 +916,12 @@
           }
         }
       ],
-      "description": "DUX3-25: Selected-run narrative — prefer above deep browse when run_id set."
+      "description": ""
     },
     {
       "id": 3001,
       "type": "text",
-      "title": "Next actions (≤4)",
+      "title": "Continue Run Investigation",
       "gridPos": {
         "h": 8,
         "w": 24,
@@ -930,10 +930,10 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;overflow:hidden\"><strong>Next actions (≤4)</strong> — 1) Pick recent run · 2) Verify ID + Processed Records · 3) Expand funnel/reasons/artifacts · 4) Use Trust Review First Recovery Action for resume/replay</div>"
+        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;overflow:hidden\"><strong>Next actions (\u22644)</strong> \u2014 1) Pick recent run \u00b7 2) Verify ID + Processed Records \u00b7 3) Expand funnel/reasons/artifacts \u00b7 4) Use Trust Review First Recovery Action for resume/replay</div>"
       },
       "links": [],
-      "description": "DSA-08 decision rail for empty/selected modes."
+      "description": "DSA-08 decision rail for empty/selected modes"
     }
   ],
   "refresh": "60s",

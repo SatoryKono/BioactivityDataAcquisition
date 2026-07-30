@@ -16,17 +16,17 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 
 ## Key Panels
 
-### 1. Navigation
+### 1. Navigate Dashboards
 - **Type:** Text
 - **Purpose:** Explain dashboard navigation and escalation flow.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 2. Provenance
+### 2. Understand Data Quality Scope
 - **Type:** Text
 - **Purpose:** Show run ID, manifest ID, and replay provenance anchors.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 3. Status
+### 3. Monitor DQ Status
 - **Type:** Stat
 - **Purpose:** Current DQ severity for the selected scope.
 - **Data sources:** `bioetl_dq_current_status`
@@ -48,17 +48,17 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Purpose:** Compare selected-range record flow and invariant status.
 - **Data sources:** `bioetl_records_processed_total`, `bioetl_record_flow_invariants_total`
 
-### 8. Now · DQ Threshold State
+### 8. Monitor DQ Threshold State
 - **Type:** Stat
 - **Purpose:** Show DQ threshold state.
 - **Data sources:** `bioetl_dq_soft_threshold_exceeded`
 
-### 9. Now · DQ Current Reasons
+### 9. Inspect DQ Current Reasons
 - **Type:** Table
 - **Purpose:** Show DQ failure reasons.
 - **Data sources:** `bioetl_dq_current_reason`
 
-### 10. Review: First Action
+### 10. Start DQ Triage
 - **Type:** Text
 - **Purpose:** Guide operator to next triage action.
 - **Data sources:** Dashboard variables and operator copy.
@@ -118,7 +118,7 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Purpose:** Count Silver filter rejects.
 - **Data sources:** `bioetl_silver_filter_rejections_total`
 
-### 21. Run lane · Silver/Gold rejects
+### 21. Run Lane · Silver/Gold Rejects
 - **Type:** Row
 - **Purpose:** Collapsed-by-default reject analysis; expand after current reasons
   or TIME RANGE delivery-impact cards identify a reject path.
@@ -139,12 +139,12 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Purpose:** Show Gold reject outcomes by pipeline.
 - **Data sources:** `bioetl_processed_records_gold_quarantined_current`, `bioetl_processed_records_gold_excluded_by_contract_current`
 
-### 25. Inspect: Top Silver Reject Reasons (Pareto)
+### 25. Inspect Top Silver Reject Reasons
 - **Type:** Bargauge
 - **Purpose:** Show top Silver reject reasons.
 - **Data sources:** `bioetl_silver_filter_reject_reason_total`
 
-### 26. Inspect: Top Silver Reject Fields
+### 26. Inspect Top Silver Reject Fields
 - **Type:** Bargauge
 - **Purpose:** Show top Silver reject fields.
 - **Data sources:** `bioetl_silver_filter_reject_field_total`
