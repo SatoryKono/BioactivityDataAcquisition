@@ -171,7 +171,7 @@ def test_issue_5562_skip_inventory_entries_are_individually_accountable() -> Non
         "#5562": 19,
         "#6570": 1,
         "#6647": 3,
-        "#7249": 5,
+        "#7249": 3,
     }
 
 
