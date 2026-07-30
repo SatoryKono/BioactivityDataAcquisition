@@ -4,13 +4,13 @@
   "authoritative_surface": "grafana/dashboards/*.json",
   "route_contract_sha256": "88b420a39e5db86b1c5ca6df94822b4c4bedf41ac6f34e93956d4cd8fab174a4",
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "df704b82a58be349e2154138418d706afce6f0f4407fb12eab1bcd8aae793603",
-    "bioetl-dq-v2": "e41d2331e359185b25e1850be150400ff1349a591a3af2b7ff354539f9a1da8f",
+    "bioetl-control-plane-v1": "623fdcae77218aa758cf26b4ccd52eef7ffc0210b77e3606ec69f4503082fe52",
+    "bioetl-dq-v2": "8ec6fdc3233046315fd688214e58eb9b220d32c3113674552a8a74871db74628",
     "bioetl-incident-v1": "265a4c6b1d1e197ad312890b887f9c635ce64ad791940903de845441845e3049",
-    "bioetl-overview-v2": "3bd1f29c765e29d3d6eb54f4afd72ecd4e225a4217abf713f02550b1e29d1c1f",
+    "bioetl-overview-v2": "1565683306597e540a54067bc558a7faf44b0c8026a1f46647806c7b33bd5b38",
     "bioetl-provider-health-v2": "2c0db08efd4f8dc0a847ca53c0e17fc337ff3fbda10c598c4a9f550428635120",
     "bioetl-run-explorer-v1": "38f1f96267ff0bd271f88ad9b8c57f059d84432a138012bd85d1353f106bd898",
-    "bioetl-runtime": "c01393c9dc3f8b007f4f6b21bdc8162643a58008370d2c840e779d8ab603b0df"
+    "bioetl-runtime": "0399adde65e3e4da5e7016681e905ff6cac5f7116090e15317b2a52e2c7146fb"
   },
   "summary": {
     "route_count": 6,
@@ -1220,7 +1220,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 156,
-      "panel_title": "Inspect Gold Rejects by Pipeline",
+      "panel_title": "Inspect: Gold Reject Outcomes by Pipeline",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",

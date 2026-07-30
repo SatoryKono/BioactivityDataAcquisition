@@ -25,6 +25,45 @@ from scripts.ai.codex import setup_mcp
 
 pytestmark = pytest.mark.unit
 
+EXPECTED_FULL_PROFILE_SERVERS = {
+    "memory",
+    "filesystem",
+    "fetch",
+    "github",
+    "docker",
+    "context7",
+    "ast-grep",
+    "mcp-code-interpreter",
+    "prometheus",
+    "grafana",
+    "brave-search",
+    "neo4j-cypher",
+    "neo4j-memory",
+    "mermaid",
+    "deja",
+    "adr-analysis",
+    "mutmut",
+    "code-analyzer",
+    "github-actions",
+    "deepwiki",
+    "ref",
+}
+REMOVED_FULL_PROFILE_SERVERS = {
+    "sequential-thinking",
+    "pdf",
+    "needle",
+    "docker-docs",
+    "dockerhub",
+    "paper-search",
+    "openaiDeveloperDocs",
+    "sonarqube",
+    "chembl",
+    "pubchem",
+    "pubmed",
+    "biomoltechDocs",
+    "mintlify",
+}
+
 
 def _to_bash_path(path: Path) -> str:
     value = path.as_posix()
@@ -365,48 +404,9 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     )
     servers = payload["mcpServers"]
     wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
-    expected_servers = {
-        "memory",
-        "filesystem",
-        "fetch",
-        "github",
-        "docker",
-        "context7",
-        "ast-grep",
-        "mcp-code-interpreter",
-        "prometheus",
-        "grafana",
-        "brave-search",
-        "neo4j-cypher",
-        "neo4j-memory",
-        "mermaid",
-        "deja",
-        "adr-analysis",
-        "mutmut",
-        "code-analyzer",
-        "github-actions",
-        "deepwiki",
-        "ref",
-    }
-    removed_servers = {
-        "sequential-thinking",
-        "pdf",
-        "needle",
-        "docker-docs",
-        "dockerhub",
-        "paper-search",
-        "openaiDeveloperDocs",
-        "sonarqube",
-        "chembl",
-        "pubchem",
-        "pubmed",
-        "biomoltechDocs",
-        "mintlify",
-    }
-
     runtime_servers = codex_settings["mcpServers"]
     devin_servers = devin_config["mcpServers"]
-    assert set(servers) == expected_servers
+    assert set(servers) == EXPECTED_FULL_PROFILE_SERVERS
     assert set(devin_servers) == set(servers)
     for server_name, server_config in servers.items():
         if server_name != "ref":
@@ -419,8 +419,10 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     assert devin_servers["ref"] == expected_devin_ref
     assert qodo_payload["mcpServers"] == servers
     assert zed_payload["mcpServers"] == servers
-    assert not removed_servers.intersection(servers)
-    assert not removed_servers.intersection(gemini_settings["mcpServers"])
+    assert not REMOVED_FULL_PROFILE_SERVERS.intersection(servers)
+    assert not REMOVED_FULL_PROFILE_SERVERS.intersection(
+        gemini_settings["mcpServers"]
+    )
     for server_name, gemini_server in gemini_settings["mcpServers"].items():
         assert "startup_timeout_sec" not in gemini_server
         startup_timeout = servers[server_name].get("startup_timeout_sec")

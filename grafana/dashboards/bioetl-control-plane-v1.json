@@ -3279,7 +3279,7 @@
       "panels": [
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Provides full run IDs, hashes, artifact references, lineage references, snapshots, and checkpoint values for copying. These values come from BioETL Ops HTTP and are never Prometheus labels.",
+          "description": "Provides full run IDs, hashes, artifact references, lineage references, snapshots, and checkpoint values for copying. These values come from BioETL Ops HTTP and are never Prometheus labels. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3415,7 +3415,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Summarizes the selected run\u2019s identity and replay anchors. Short values are shown in the table; full values remain available for copying. No rows means either no matching run or an unavailable backend.",
+          "description": "Summarizes the selected run\u2019s identity and replay anchors. Short values are shown in the table; full values remain available for copying. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3607,7 +3607,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Lists missing run, manifest, configuration, contract, snapshot, replay, composite, and checkpoint anchors. No rows means no gaps only when the backend responded successfully.",
+          "description": "Lists missing run, manifest, configuration, contract, snapshot, replay, composite, and checkpoint anchors. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3697,7 +3697,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Compares current runtime anchors with anchors stored in the checkpoint. MISMATCH=CRIT; MISSING or PARTIAL=WARN; no data=UNKNOWN.",
+          "description": "Compares current runtime anchors with anchors stored in the checkpoint. MISMATCH=CRIT; MISSING or PARTIAL=WARN; no data=UNKNOWN. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3787,7 +3787,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Shows the primary evidence required for replay: source configuration, DQ policy, input snapshots, replay blockers, lineage, artifacts, and ledger watermark. No rows does not prove completeness.",
+          "description": "Shows the primary evidence required for replay: source configuration, DQ policy, input snapshots, replay blockers, lineage, artifacts, and ledger watermark. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3877,7 +3877,7 @@
         },
         {
           "datasource": "BioETL Ops HTTP",
-          "description": "Shows additional investigation details such as runtime hashes, artifacts, component runs, checkpoint files, DQ reports, and Bronze batch IDs.",
+          "description": "Shows additional investigation details such as runtime hashes, artifacts, component runs, checkpoint files, DQ reports, and Bronze batch IDs. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4008,7 +4008,7 @@
             "y": 19
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Shows identity details for the selected run. An exact Run ID resolves one run; an aggregate pipeline scope does not guess a manifest. No data can mean unresolved scope or an unavailable BioETL Ops HTTP backend.",
+          "description": "Shows identity details for the selected run. An exact Run ID resolves one run; an aggregate pipeline scope does not guess a manifest. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4166,7 +4166,7 @@
             "y": 19
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Shows Bronze, Silver, and Gold record counts and outcomes for the selected scope. Missing rows mean unavailable or incomplete evidence, not zero successful processing. Use Run Explorer for full run details.",
+          "description": "Shows Bronze, Silver, and Gold record counts and outcomes for the selected scope. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Use Run Explorer for full run details.",
           "fieldConfig": {
             "defaults": {
               "custom": {

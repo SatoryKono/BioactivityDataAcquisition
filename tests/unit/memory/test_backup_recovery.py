@@ -17,6 +17,8 @@ from memory.backup import (
 )
 from memory.records import SecurityClass
 
+pytestmark = pytest.mark.unit
+
 
 def _source(tmp_path: Path) -> Path:
     source = tmp_path / "memory"

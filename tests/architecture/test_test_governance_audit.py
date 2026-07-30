@@ -53,9 +53,6 @@ MOVED_FILE_BACKED_UNIT_TESTS = {
     "tests/unit/grafana/test_workflow_dashboard_json_valid.py": (
         "tests/integration/grafana/test_workflow_dashboard_json_valid.py"
     ),
-    "tests/unit/grafana/test_silver_reject_explorer_copy.py": (
-        "tests/integration/grafana/test_silver_reject_explorer_copy.py"
-    ),
 }
 REPO_BACKED_UNIT_MARKERS = (
     re.compile(

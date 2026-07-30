@@ -27,6 +27,8 @@ from scripts.docs.passports.projector import (
 )
 from scripts.docs.passports.validation import validate_composite_payload
 
+pytestmark = pytest.mark.unit
+
 REVISION = "0123456789abcdef0123456789abcdef01234567"
 
 
@@ -180,7 +182,7 @@ def test_generated_facts_validate_against_published_schemas(tmp_path: Path) -> N
             continue
         facts = json.loads(content)
         schema = workflow_schema if facts["kind"] == "workflow" else pipeline_schema
-        jsonschema.validate(facts, schema)
+        assert jsonschema.validate(facts, schema) is None
 
 
 def test_representative_pipeline_projection_profiles_are_explicit(

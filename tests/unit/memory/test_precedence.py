@@ -12,6 +12,8 @@ from memory.precedence import (
     resolve_precedence,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _candidate(
     candidate_id: str,

@@ -2670,7 +2670,7 @@
             "y": 0
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Shows HTTP-backed identity for an exact Run ID. Aggregate Pipeline scope does not guess a run; no rows can mean no matching run, unresolved scope, or backend failure. Verify /health/live and continue in Run Explorer",
+          "description": "Shows HTTP-backed identity for an exact Run ID. Aggregate Pipeline scope does not guess a run. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live and continue in Run Explorer",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2828,7 +2828,7 @@
             "y": 0
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Shows HTTP-backed Bronze input, Silver accepted/rejected, and Gold output counts and outcomes. Zero is a recorded count; no rows can mean no matching run, no activity, processing not started, unresolved scope, or backend failure. Verify /health/live and use Run Explorer",
+          "description": "Shows HTTP-backed Bronze input, Silver accepted/rejected, and Gold output counts and outcomes. Zero is a recorded count. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live and use Run Explorer",
           "fieldConfig": {
             "defaults": {
               "custom": {

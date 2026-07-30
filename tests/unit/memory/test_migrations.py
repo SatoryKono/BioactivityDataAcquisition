@@ -14,6 +14,8 @@ from memory.migrations import (
     migrate_payload,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_migration_dry_run_does_not_write(tmp_path: Path) -> None:
     path = tmp_path / "record.json"

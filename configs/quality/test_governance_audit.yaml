@@ -569,7 +569,7 @@ test_audit_closeout_2026_07_08:
     test_file_count_definition: tests/**/test_*.py from pyproject python_files
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
-    repo_backed_unit_test_files: 43
+    repo_backed_unit_test_files: 46
     performance_baseline_reports:
     - reports/test-telemetry/slowest-tests.json
     - reports/test-telemetry/slowest-tests.md
@@ -1068,6 +1068,9 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py
     target_lane: repo-backed-unit
     protected_surface: scripts/ops/support/load_repo_env.sh + scripts/ai/mcp/support/load_repo_env.ps1
+  - path: tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ai/mcp/mcp_memory_wrapper.sh
   - path: tests/unit/repo_backed/scripts/test_zed_workspace_config.py
     target_lane: repo-backed-unit
     protected_surface: .zed/{settings.json,tasks.json,mcp.json,snippets/**}
@@ -1121,5 +1124,3 @@ mixed_scope_unit_path_policy:
     new_path: tests/integration/config/test_validate_pipeline_configs.py
   - old_path: tests/unit/grafana/test_workflow_dashboard_json_valid.py
     new_path: tests/integration/grafana/test_workflow_dashboard_json_valid.py
-  - old_path: tests/unit/grafana/test_silver_reject_explorer_copy.py
-    new_path: tests/integration/grafana/test_silver_reject_explorer_copy.py

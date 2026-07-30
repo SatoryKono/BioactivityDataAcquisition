@@ -1298,6 +1298,7 @@
     "bioetl_data_freshness_seconds": [
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
       "docs/02-architecture/observability-layers.md",
+      "docs/03-guides/dashboards/dux4-field-override-inventory.json",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
@@ -1749,8 +1750,7 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
-      "grafana/README.md",
-      "grafana/dashboards/bioetl-runtime.json"
+      "grafana/README.md"
     ],
     "bioetl_pipeline_duration_seconds": [
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
@@ -1912,8 +1912,7 @@
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "docs/03-guides/dashboards/variables-guide.md",
-      "grafana/README.md",
-      "grafana/dashboards/bioetl-provider-health-v2.json"
+      "grafana/README.md"
     ],
     "bioetl_provider_status": [
       "docs/04-reference/observability/metrics-catalog.md"

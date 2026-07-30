@@ -5,7 +5,10 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
+import pytest
 import yaml
+
+pytestmark = pytest.mark.architecture
 
 
 def test_timeline_jsonl_is_untracked_and_policy_declares_rebuildable() -> None:

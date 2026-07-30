@@ -29,12 +29,12 @@ pytestmark = pytest.mark.integration
 _OVERVIEW_PATH = Path("grafana/dashboards/bioetl-overview-v2.json")
 _STATUS_TEXTS = ("UNKNOWN", "OK", "WARN", "CRIT")
 _L1_CARD_TITLES = (
-    "Runtime",
-    "Data Quality",
-    "Control Plane",
-    "Provider",
-    "Data Validation",
-    "Workflow",
+    "Review Runtime Status",
+    "Review Data Quality Status",
+    "Review Control Plane Status",
+    "Review Global Provider Status",
+    "Review Data Validation Status",
+    "Review Workflow Status",
 )
 
 
@@ -70,7 +70,7 @@ def _assert_status_mapping(panel: dict) -> None:
 
 def test_overview_dashboard_identity_and_primary_question() -> None:
     dashboard = _dashboard()
-    provenance = _panels_by_title()["Provenance"]
+    provenance = _panels_by_title()["Inspect Scope & Evidence"]
     content = str(provenance.get("options", {}).get("content", ""))
     description = str(dashboard.get("description", ""))
 
@@ -78,7 +78,7 @@ def test_overview_dashboard_identity_and_primary_question() -> None:
     assert dashboard.get("uid") == "bioetl-overview-v2"
     assert "Hybrid L0 overview" in description
     assert "what is broken or degraded right now" in content.lower()
-    assert "where should the operator drill down first" in content.lower()
+    assert "status + first action" in content.lower()
 
 
 def test_overview_uses_frozen_v3_selector_set() -> None:
@@ -142,25 +142,25 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     """Epic #6570/#6573/DRM-R: Status/First Action/Inputs on first path; shell lazy."""
     panels = _panels_by_title()
     # Stable panel IDs; coordinates are contractual bands (not frozen DUX pixels).
-    assert panels["Provenance"].get("id") == 99
-    assert panels["Status"].get("id") == 214
-    assert panels["First Action"].get("id") == 215
-    assert panels["Inputs"].get("id") == 9002
-    assert panels["Provenance"].get("gridPos", {}).get("y") == 3
-    assert panels["Status"].get("gridPos", {}).get("y") == 3
-    assert panels["First Action"].get("gridPos", {}).get("y") <= 6
-    assert panels["Inputs"].get("gridPos", {}).get("y") == panels["First Action"].get(
+    assert panels["Inspect Scope & Evidence"].get("id") == 99
+    assert panels["Monitor Fleet Health"].get("id") == 214
+    assert panels["Review First Action"].get("id") == 215
+    assert panels["Review Domain Status"].get("id") == 9002
+    assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 3
+    assert panels["Monitor Fleet Health"].get("gridPos", {}).get("y") == 3
+    assert panels["Review First Action"].get("gridPos", {}).get("y") <= 7
+    assert panels["Review Domain Status"].get("gridPos", {}).get("y") == panels["Review First Action"].get(
         "gridPos", {}
     ).get("y")
-    assert panels["First Action"].get("gridPos", {}).get("w", 0) >= 8
-    assert panels["Inputs"].get("gridPos", {}).get("w", 0) >= 10
-    lazy = {"ID": 9300, "Processed Records": 9301}
+    assert panels["Review First Action"].get("gridPos", {}).get("w", 0) >= 8
+    assert panels["Review Domain Status"].get("gridPos", {}).get("w", 0) >= 10
+    lazy = {"Review Run Identity": 9300, "Review Processed Records": 9301}
     for title, panel_id in lazy.items():
         panel = panels[title]
         assert panel.get("id") == panel_id
     assert any(
         panel.get("type") == "row"
-        and "Run context" in str(panel.get("title") or "")
+        and "Run Context" in str(panel.get("title") or "")
         and panel.get("collapsed") is True
         for panel in load_dashboard(
             Path("grafana/dashboards/bioetl-overview-v2.json")
@@ -170,8 +170,8 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
 
 def test_status_and_next_action_preserve_current_status_semantics() -> None:
     panels = _panels_by_title()
-    status = panels["Status"]
-    next_action = panels["First Action"]
+    status = panels["Monitor Fleet Health"]
+    next_action = panels["Review First Action"]
 
     assert status.get("type") == "stat"
     assert "bioetl_l0_status" in _panel_expr(status)
@@ -196,7 +196,7 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
 
 
 def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> None:
-    identity = _panels_by_title()["ID"]
+    identity = _panels_by_title()["Review Run Identity"]
 
     assert identity.get("datasource") == "BioETL Ops HTTP"
     assert identity.get("targets", [{}])[0].get("parser") == "backend"
@@ -213,12 +213,12 @@ def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> N
 
 def test_l1_cards_have_operator_mappings_and_targeted_links() -> None:
     expected_links = {
-        "Runtime": {"Open Runtime"},
-        "Data Quality": {"Open Data Quality"},
-        "Control Plane": {"Open Control Plane"},
-        "Provider": {"Open Provider Health"},
-        "Data Validation": {"Open Runtime"},
-        "Workflow": {"Open Pipeline Diagnostics"},
+        "Review Runtime Status": {"Open Runtime"},
+        "Review Data Quality Status": {"Open Data Quality"},
+        "Review Control Plane Status": {"Open Control Plane"},
+        "Review Global Provider Status": {"Open Provider Health"},
+        "Review Data Validation Status": {"Open Runtime"},
+        "Review Workflow Status": {"Open Pipeline Diagnostics"},
     }
 
     for title in _L1_CARD_TITLES:
@@ -233,7 +233,7 @@ def test_l1_cards_have_operator_mappings_and_targeted_links() -> None:
 
 def test_selected_scope_cards_normalize_workflow_pipeline_aliases() -> None:
     """Epic #6574: first-screen cards use thin pipeline selectors (no mega-expr glue)."""
-    for title in ("Status", "First Action", "Inputs"):
+    for title in ("Monitor Fleet Health", "Review First Action", "Review Domain Status"):
         expr = _panel_expr(_panels_by_title()[title])
         assert 'pipeline=~"$pipeline"' in expr
         assert len(expr) <= 200
@@ -241,13 +241,13 @@ def test_selected_scope_cards_normalize_workflow_pipeline_aliases() -> None:
 
 
 def test_provider_and_workflow_scope_are_explicit() -> None:
-    provider = _panels_by_title()["Provider"]
-    workflow = _panels_by_title()["Workflow"]
+    provider = _panels_by_title()["Review Global Provider Status"]
+    workflow = _panels_by_title()["Review Workflow Status"]
 
     assert _panel_expr(provider).strip() == "bioetl_l1_provider_global_status"
-    assert "intentionally ignores selected pipeline/run_type" in str(
-        provider.get("description", "")
-    )
+    provider_description = str(provider.get("description", "")).lower()
+    assert "across all pipelines" in provider_description
+    assert "filters do not affect this panel" in provider_description
     provider_links = provider.get("options", {}).get("dataLinks", [])
     assert any(
         "var-provider=unknown" in str(link.get("url", "")) for link in provider_links
@@ -264,11 +264,11 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
         _panel_expr(workflow)
     )
     assert (
-        "selected workflow/pipeline scope"
+        "selected workflow and pipeline"
         in str(workflow.get("description", "")).lower()
     )
-    assert "run_type" in str(workflow.get("description", "")).lower()
-    assert "run_id" in str(workflow.get("description", "")).lower()
+    assert "run type" in str(workflow.get("description", "")).lower()
+    assert "run id" in str(workflow.get("description", "")).lower()
     workflow_links = workflow.get("options", {}).get("dataLinks", [])
     assert {link.get("title") for link in workflow_links} == {
         "Open Pipeline Diagnostics"
@@ -278,61 +278,52 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
 def test_range_evidence_and_trend_rows_are_retained() -> None:
     panels = _panels_by_title()
     current_verdict_titles = {
-        "Status",
-        "First Action",
-        "Inputs",
-        "Control Plane",
-        "Runtime",
-        "Data Quality",
-        "Provider",
-        "Data Validation",
-        "Workflow",
+        "Monitor Fleet Health",
+        "Review First Action",
+        "Review Domain Status",
+        *_L1_CARD_TITLES,
     }
     expected_evidence_panels = {
-        "Runtime Blockers Trend": {
+        "Track Runtime Blockers": {
             "id": 9018,
             "links": {"Open Runtime"},
-            "tokens": ("selected-range", "l1 runtime evidence", "does not determine"),
+            "tokens": ("selected range", "does not determine"),
         },
-        "DQ Status Trend": {
+        "Track Data Quality Status": {
             "id": 9019,
             "links": {"Open Data Quality"},
             "tokens": (
-                "selected-range",
-                "l1 data quality evidence",
+                "selected range",
                 "does not determine",
             ),
         },
-        "Gold Lifecycle Trend": {
+        "Track Gold Lifecycle": {
             "id": 9020,
             "links": {"Open Runtime", "Open Control Plane"},
             "tokens": (
-                "selected-range",
-                "l1 data-validation lifecycle evidence",
-                "lifecycle_state",
+                "selected range",
+                "gold lifecycle state",
             ),
         },
-        "Historical Failures": {
+        "Review Failed Runs": {
             "id": 9010,
             "links": {"Open Runtime"},
             "tokens": (
-                "selected-range historical failure evidence only",
-                "does not determine",
+                "selected range",
                 "not proof",
             ),
         },
-        "Recent Terminal Runs": {
+        "Review Recent Terminal Runs": {
             "id": 9011,
             "links": {"Open Control Plane", "Open Runtime"},
             "tokens": (
-                "selected-range terminal-run evidence only",
-                "does not determine",
+                "selected range",
                 "not proof",
             ),
         },
     }
 
-    for title in (*expected_evidence_panels, "Silver Rejects + Rate"):
+    for title in (*expected_evidence_panels, "Track Silver Rejects"):
         assert title in panels
 
     for title, expectation in expected_evidence_panels.items():
@@ -350,12 +341,11 @@ def test_range_evidence_and_trend_rows_are_retained() -> None:
         assert all(link.get("targetBlank") is False for link in data_links)
         for token in expectation["tokens"]:
             assert token in description
-        assert "l0 status" in description
-        assert "first action" in description or "next action" in description
+        assert "current" in description
 
-    assert "[$__range]" in _panel_expr(panels["Historical Failures"])
-    assert "[$__range]" in _panel_expr(panels["Recent Terminal Runs"])
-    assert "[$__range]" in _panel_expr(panels["Silver Rejects + Rate"])
+    assert "[$__range]" in _panel_expr(panels["Review Failed Runs"])
+    assert "[$__range]" in _panel_expr(panels["Review Recent Terminal Runs"])
+    assert "[$__range]" in _panel_expr(panels["Track Silver Rejects"])
 
 
 def test_diagnostics_row_is_not_empty() -> None:
@@ -363,17 +353,17 @@ def test_diagnostics_row_is_not_empty() -> None:
     diagnostics_row = next(
         panel
         for panel in dashboard.get("panels", [])
-        if panel.get("title") == "Diagnostics & Docs (Logs / Traces / Raw Metrics)"
+        if panel.get("title") == "Inspect Domain Diagnostics"
     )
 
     assert diagnostics_row.get("type") == "row"
     child_titles = {
         child.get("title")
         for child in get_row_child_panels(
-            dashboard, "Diagnostics & Docs (Logs / Traces / Raw Metrics)"
+            dashboard, "Inspect Domain Diagnostics"
         )
     }
-    assert "Diagnostics Navigation" in child_titles
+    assert "Navigate Diagnostics" in child_titles
 
 
 def test_overview_queries_are_backed_by_expected_records_and_metrics() -> None:

@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from memory.registry import load_memory_registry, validate_memory_registry
+
+pytestmark = pytest.mark.architecture
 
 
 def test_registry_is_complete_and_memory_runtime_stays_outside_bioetl() -> None:

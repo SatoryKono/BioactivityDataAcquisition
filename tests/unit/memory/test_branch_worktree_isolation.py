@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from memory.scope import RepositoryScope
+
+pytestmark = pytest.mark.unit
 
 
 def _scope(

@@ -16,6 +16,8 @@ from memory.storage import (
     exclusive_lock,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_atomic_write_text_replaces_complete_content(tmp_path: Path) -> None:
     target = tmp_path / "memory.txt"

@@ -783,7 +783,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Gold quarantine and contract/semantic exclusion outcomes by pipeline in the selected range. These are separate from Silver structural rejects. Use this panel when DQ impact is not explained by Silver reject evidence. No data means no Gold reject outcome samples were observed.",
+          "description": "Gold contract quarantine and semantic exclusion outcomes by pipeline in the selected range. These are separate from Silver structural FILTERED_OUT_SILVER rejects. Use this panel when DQ impact is not explained by Silver reject evidence. No data means no Gold reject outcome samples were observed.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -865,7 +865,7 @@
               "refId": "B"
             }
           ],
-          "title": "Inspect Gold Rejects by Pipeline",
+          "title": "Inspect: Gold Reject Outcomes by Pipeline",
           "type": "bargauge"
         }
       ]

@@ -10,6 +10,8 @@ import pytest
 
 WRAPPER = Path("scripts/ai/mcp/mcp_memory_wrapper.sh")
 
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
+
 
 def _run_wrapper(mode: str | None) -> subprocess.CompletedProcess[str]:
     """Set the mode inside Bash so Windows-to-WSL env bridging cannot alter it."""

@@ -136,7 +136,9 @@ def test_rf001_headline_status_is_evidence_aware() -> None:
     )
     assert "bioetl_runtime_trust_gap_active_10m * 3" in runtime_expr
     assert _mapping_text(_panel(runtime, 9401), "3") == "INCOMPLETE"
-    assert "green OK is impossible" in str(_panel(runtime, 9401).get("description"))
+    assert "telemetry gap makes the verdict incomplete" in str(
+        _panel(runtime, 9401).get("description")
+    ).lower()
 
     assert "bioetl_dq_current_status" in str(_panel(dq, 9401).get("targets"))
     provenance = str(_panel(dq, 9400).get("options", {}).get("content", ""))
@@ -276,14 +278,14 @@ def test_rf003_navigation_tokens_meet_wcag_contrast_floors() -> None:
 def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
     overview = _load("bioetl-overview-v2.json")
     first_action = _panel(overview, 215)
-    assert first_action["title"] == "First Action"
+    assert first_action["title"] == "Review First Action"
     # Dashboard 2.0 / DUX-02: compact First Action beside Inputs evidence matrix.
     assert first_action["gridPos"]["h"] >= 4
     assert first_action["gridPos"]["w"] >= 8
     assert len(str(first_action["title"])) <= 24
     assert len(first_action.get("options", {}).get("dataLinks", [])) >= 4
     inputs = _panel(overview, 9002)
-    assert inputs["title"] == "Inputs"
+    assert inputs["title"] == "Review Domain Status"
     assert inputs["gridPos"]["y"] == first_action["gridPos"]["y"]
     assert inputs["gridPos"]["w"] >= 10
 
@@ -331,7 +333,7 @@ def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
 
     dq = _load("bioetl-dq-v2.json")
     freshness = _panel(dq, 8)
-    assert "hours; SLA 24/72" in str(freshness.get("title"))
+    assert "SLA 24/72" in str(freshness.get("description"))
     assert freshness.get("fieldConfig", {}).get("defaults", {}).get("unit") == "h"
     assert [
         step.get("value")
@@ -360,7 +362,7 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
         row = _panel(overview, row_id)
         assert row.get("type") == "row"
         assert row.get("collapsed") is True
-    assert _panel(overview, 215)["title"] == "First Action"
+    assert _panel(overview, 215)["title"] == "Review First Action"
     assert _panel(overview, 9601).get("type") == "table"
 
     runtime = _load("bioetl-runtime.json")
