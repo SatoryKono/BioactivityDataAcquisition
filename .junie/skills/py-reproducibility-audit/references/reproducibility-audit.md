@@ -1,179 +1,311 @@
-# Reproducibility Audit Reference
+# Reproducibility Audit Standards
 
-## Audit Goal
+## Purpose
 
-Determine whether BioETL pipelines are reproducible as exact computational
-acts, not just approximate reruns that usually produce similar outputs.
+This document defines the standards and requirements for reproducibility audits in the BioETL project. Reproducibility is a core invariant - all code changes must maintain deterministic behavior and replay capability.
 
-Base every conclusion on:
+## Core Principles
 
-- current code
-- current configs
-- current tests
-- current architecture docs and rules
-- runtime/control-plane reproducibility artifacts already used by the project
+1. **Determinism**: All operations must produce identical results given identical inputs
+2. **Replay Capability**: Code must be executable in different environments with the same outcome
+3. **Test Coverage**: All code paths must have adequate test coverage
+4. **Schema Validation**: All data must pass schema validation before processing
+5. **Structured Logging**: All logging must use structured formats without secrets
 
-Mandatory artifact surface:
+## Determinism Requirements
 
-- `run_id`
-- `manifest_id`
-- `execution_fingerprint`
-- `config_hash`
-- `effective_config_hash`
-- `git_commit`
-- `contract_ref`
-- `contract_version`
-- `content_hash`
-- checkpoint state
-- lineage / sidecar metadata
+### DataFrame Operations
 
-Treat manifest/ledger identity, execution fingerprint, and immutable
-control-plane objects as the current baseline architecture.
+All DataFrame operations must use stable sorting:
 
-## What To Check
+```python
+# BAD: Non-deterministic
+result = df.head(10)
+result = df.sample(frac=0.1)
 
-### 1. Determinism
+# GOOD: Deterministic
+result = df.sort_values('id').head(10)
+result = df.sort_values('id').sample(frac=0.1, random_state=42)
+```
 
-Verify whether identical input, config, code, runtime parameters, and ordering
-produce identical outputs.
+### Timestamp Handling
 
-Look for:
+All timestamps must be in UTC:
 
-- current-time dependence
-- unstable ordering
-- non-deterministic retries or jitter
-- randomness
-- external state not captured in runtime metadata
-- unstable serialization before hash/fingerprint computation
+```python
+# BAD: Non-deterministic
+timestamp = datetime.now()
+timestamp = datetime.utcnow()
 
-### 2. Idempotency
+# GOOD: Deterministic
+timestamp = datetime.now(timezone.utc)
+```
 
-Verify whether repeat execution avoids duplicates and avoids changing outputs
-without true input/config/code changes.
+### Random Operations
 
-Check:
+All random operations must use seeds:
 
-- merge/upsert semantics
-- business and primary keys
-- `content_hash` policy
-- exclusion of meta/runtime fields from hashes
-- Silver/Gold write semantics
-- replay/backfill/rebuild behavior
-- partial-failure reruns
+```python
+# BAD: Non-deterministic
+value = random.random()
+array = np.random.rand(10)
 
-### 3. Run-Level Control Plane Reproducibility
+# GOOD: Deterministic
+random.seed(42)
+value = random.random()
+np.random.seed(42)
+array = np.random.rand(10)
+```
 
-Verify whether a run can be reconstructed unambiguously:
+### Iteration Stability
 
-- what was planned
-- what config was used
-- what code and contracts were used
-- what artifacts were produced
-- how one run differs from another
+All iterations must be sorted:
 
-Evaluate:
+```python
+# BAD: Non-deterministic
+for key in my_dict.keys():
+    ...
 
-- RunManifest completeness
-- execution fingerprint quality
-- append-only ledger / lifecycle trace
-- `run_id ↔ manifest_id ↔ artifacts` linkage
-- exact replay metadata sufficiency
-- any fail-closed invariant such as `no manifest, no run`
+# GOOD: Deterministic
+for key in sorted(my_dict.keys()):
+    ...
+```
 
-### 4. Checkpoint / Resume / Replay
+### File System Operations
 
-Treat checkpointing as part of reproducibility.
+All file system operations must be sorted:
 
-Verify:
+```python
+# BAD: Non-deterministic
+files = os.listdir('data/')
+files = glob.glob('data/*.csv')
 
-- whether resume is safe after interruption
-- which identity anchors guard checkpoint compatibility
-- whether incompatible config/contract changes are blocked
-- whether checkpoint identity can drift from canonical run identity
+# GOOD: Deterministic
+files = sorted(os.listdir('data/'))
+files = sorted(glob.glob('data/*.csv'))
+```
 
-### 5. Lineage And Sidecar Metadata
+## I/O Requirements
 
-Verify whether Bronze/Silver/Gold metadata and sidecars are sufficient for:
+### Atomic Writes
 
-- traceability
-- forensic reconstruction
-- exact replay
-- diffing two runs
+All writes must be atomic:
 
-Distinguish:
+```python
+# BAD: Non-atomic
+with open('output.json', 'w') as f:
+    json.dump(data, f)
 
-- fields that are actually written
-- fields that are only documented
-- fields that drift across layers
+# GOOD: Atomic
+write_dataset_atomic(data, 'output.json')
+```
 
-## What Counts As A Problem
+### File Operations
 
-Treat the following as findings:
+All file operations must use deterministic ordering:
 
-- missing canonical run identity
-- drift between manifest identity, checkpoint identity, and artifact identity
-- non-deterministic hashes or fingerprints
-- runtime state that affects outputs but is not captured in metadata
-- inability to distinguish exact replay from a logically new run
-- missing code/config provenance
-- incomplete or contradictory lineage metadata
-- only partial idempotency
-- replay implemented as a logically new run
-- layer-boundary violations that scatter reproducibility control across layers
+```python
+# BAD: Non-deterministic
+for file in os.listdir('data/'):
+    process(file)
 
-Mark as **critical** any defect that blocks exact reproducibility.
+# GOOD: Deterministic
+for file in sorted(os.listdir('data/')):
+    process(file)
+```
 
-## Scoring
+## Test Coverage Requirements
 
-Score each category from `0` to `10`:
+### Coverage Thresholds
 
-- `Determinism`
-- `Idempotency`
-- `Run Identity`
-- `Checkpoint Safety`
-- `Lineage Completeness`
-- `Replay Readiness`
-- `Layer Consistency`
+| Component Type | Minimum Coverage | Critical Path |
+| -------------- | ---------------- | ------------- |
+| New functions | 80% | 100% |
+| New classes | 75% | 100% |
+| Error handling | 90% | 100% |
+| Integration | 70% | 100% |
 
-Also provide one integral score.
+### Test Types Required
 
-## Mandatory Output Sections
+- **Unit tests**: For individual functions and methods
+- **Integration tests**: For workflows and pipelines
+- **Edge case tests**: For boundary conditions
+- **Error handling tests**: For exception paths
 
-Use exactly this section order:
+## Schema Validation Requirements
 
-1. `Executive Summary`
-2. `Фактическая модель воспроизводимости в текущем main`
-3. `Что уже реализовано хорошо`
-4. `Основные проблемы`
-5. `Матрица рисков`
-6. `Количественная оценка`
-7. `План исправлений P0 / P1 / P2`
+### Schema Definition
 
-## Remediation Plan Rules
+All data structures must have Pandera schemas:
 
-For each remediation item include:
+```python
+# GOOD: Schema defined
+class ActivitySchema(pa.DataFrameModel):
+    activity_id: Series[str]
+    standard_type: Series[str]
+    standard_value: Series[float]
+```
 
-- problem
-- why it harms reproducibility
-- concrete files / modules / layers
-- proposed fix
-- priority:
-  - `P0` blocks exact reproducibility
-  - `P1` weakens reproducibility systemically
-  - `P2` improves investigation quality
-- `DoD`
+### Schema Validation
 
-## Guardrails
+All data must be validated before processing:
 
-- Do not claim anything without code/doc evidence.
-- Do not replace reproducibility analysis with generic observability analysis.
-- Do not merge replay, resume, rebuild, and incremental semantics into one term.
-- Do not propose infrastructure fixes inside the domain layer.
-- Respect DDD / Hexagonal / Medallion / Composite constraints.
-- `run_id` alone is never proof of reproducibility.
+```python
+# GOOD: Schema validated
+df = schema.validate(df)
+```
 
-## Final Question
+### Schema Evolution
 
-Answer explicitly:
+Schema changes must be documented with:
+- Version bump
+- Migration plan
+- Backward compatibility analysis
+- Consumer impact assessment
 
-`Можно ли по текущему состоянию проекта воспроизвести любой pipeline run как строго определённый вычислительный акт, а не как приблизительное повторение процесса?`
+## Logging Requirements
+
+### Structured Logging
+
+Only `UnifiedLogger` must be used:
+
+```python
+# BAD: Unstructured
+print("Processing data")
+
+# GOOD: Structured
+logger.info("Processing data", context={"stage": "processing"})
+```
+
+### Context Binding
+
+All logs must have context:
+
+```python
+# GOOD: Context bound
+bind_pipeline_context(pipeline_code="chembl_activity", run_id="test-123")
+pipeline_stage("processing")
+```
+
+### Secret Protection
+
+No secrets in logs:
+
+- No API keys
+- No passwords
+- No tokens
+- No PII
+
+## Environment Requirements
+
+### Dependency Pinning
+
+All dependencies must be version-pinned:
+
+```python
+# BAD: Floating range
+pandas>=1.0.0
+
+# GOOD: Pinned
+pandas==1.5.3
+```
+
+### Security
+
+All dependencies must pass security scan:
+- No known vulnerabilities
+- No deprecated packages
+- No malicious packages
+
+### Configuration
+
+Configuration must be via environment variables:
+- `.env` files not committed
+- Secrets in environment variables
+- Configuration documented
+
+## Audit Checklist
+
+### Determinism
+
+- [ ] All DataFrame operations use stable sorting
+- [ ] All timestamps are in UTC
+- [ ] All random operations use seeds
+- [ ] All iterations are sorted
+- [ ] All file system operations are sorted
+
+### I/O
+
+- [ ] All writes are atomic
+- [ ] All file operations use deterministic ordering
+- [ ] Network calls have retry logic
+- [ ] Database operations use transactions
+
+### Test Coverage
+
+- [ ] New functions have ≥80% coverage
+- [ ] New classes have ≥75% coverage
+- [ ] Critical paths have 100% coverage
+- [ ] Error handling is fully covered
+
+### Schema Validation
+
+- [ ] All data structures have schemas
+- [ ] All data is validated before processing
+- [ ] Schema changes are documented
+- [ ] Migration plans are provided
+
+### Logging
+
+- [ ] Only `UnifiedLogger` is used
+- [ ] All logs have context
+- [ ] No secrets in logs
+- [ ] Proper log levels used
+
+### Environment
+
+- [ ] All dependencies are version-pinned
+- [ ] Security scan passed
+- [ ] No deprecated packages
+- [ ] Configuration via environment variables
+
+## Failure Criteria
+
+A change fails reproducibility audit if:
+
+- Any determinism violation is found
+- Test coverage is below threshold
+- Schema validation is missing
+- Unstructured logging is present
+- Secrets are exposed
+- Dependencies are not pinned
+- Breaking changes are not documented
+
+## Approval Criteria
+
+A change passes reproducibility audit if:
+
+- All determinism checks pass
+- Test coverage meets thresholds
+- Schema validation is in place
+- Structured logging is used
+- No secrets are exposed
+- Dependencies are pinned
+- Breaking changes are documented
+
+## Remediation
+
+If a change fails audit:
+
+1. Identify specific violations
+2. Propose remediation steps
+3. Implement fixes
+4. Re-run audit
+5. Document changes
+
+## References
+
+- `docs/00-project/RULES.md` - Project rules
+- `docs/01-requirements/REQUIREMENTS.md` - Project requirements
+- `docs/03-guides/testing.md` - Testing guidelines
+- `docs/02-architecture/decisions/ADR-014-deterministic-writes.md` - Deterministic writes ADR

@@ -84,7 +84,7 @@ Telemetry collection state is a **confidence chip**, not a peer health KPI.
 ## Trust example
 
 `Status=INCOMPLETE`, confidence=`none`, basis=`telemetry missing / checkpoint lag unknown`,
-next_action=`Inspect: Telemetry Missing` then runbook checkpoint debug.
+next_action=`Monitor Telemetry Coverage` then runbook checkpoint debug.
 
 ## Provider example
 

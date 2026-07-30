@@ -58,7 +58,7 @@ python -m scripts.engineering.qa.report_basedpyright_tests_snapshot --source rep
 3. Suppression inventory `--check` (no growth)
 4. Removing `# pyright:` requires structural fix in same PR
 5. Prefer Host Protocols over host-default `cast(Any, None)` for uninit
-6. Schema megatrees: maintain `typings/pyarrow` stubs / generator — no bulk silver hand-edit
+6. Schema megatrees: maintain `configs/typing-stubs/pyarrow` stubs / generator — no bulk silver hand-edit
 7. mypy CI remains green
 
 ### Optional IDE filter
@@ -67,7 +67,8 @@ Locally exclude `tests/**`, `scripts/**`, `src/memory/**` if Problems floods.
 
 ## Schema / pyarrow note (PD7-4)
 
-Local stubs live in `typings/pyarrow/` (`pyrightconfig.json` → `stubPath: typings`).
+Local stubs live in `configs/typing-stubs/pyarrow/`
+(`pyproject.toml` → `[tool.basedpyright].stubPath = "configs/typing-stubs"`).
 Optional rewrite generator: `scripts/schema/generate_typed_arrow_schema_sources.py`.
 See `reports/quality/pd7-schema-generator-implementation.md`.
 

@@ -62,9 +62,7 @@ def replay_decision(root: Path, decision_digest: str) -> ReplayResult:
             break
     if matched is None:
         raise KeyError(decision_digest)
-    content = {
-        key: value for key, value in matched.items() if key != "decision_digest"
-    }
+    content = {key: value for key, value in matched.items() if key != "decision_digest"}
     if _digest(content) != decision_digest:
         raise ValueError("decision digest mismatch")
 

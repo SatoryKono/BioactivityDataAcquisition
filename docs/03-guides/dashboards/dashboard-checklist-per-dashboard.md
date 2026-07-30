@@ -230,9 +230,9 @@
 - [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
 
 ### First-screen структура
-- [ ] Tier 1 включает trusted `Status`, Monitor: Replay Safety State, Monitor: Checkpoint Freshness Lag (seconds), Monitor: Manifest / Ledger Integrity, Inspect: Telemetry Missing
+- [ ] Tier 1 включает trusted `Status`, Monitor Replay Safety, Monitor Checkpoint Age, Monitor Manifest & Ledger Failures, Monitor Telemetry Coverage
 - [ ] `Status` читает `bioetl_control_plane_current_status_trusted` и показывает `3=INCOMPLETE`, если checkpoint evidence missing/stale или telemetry missing
-- [ ] Incident rows `Incident Drilldown: Replay Safety (Checkpoint / Replay)`, `Incident Drilldown: Manifest / Ledger Integrity`, `Incident Drilldown: Global Control-Plane Store Reliability`, `Incident Drilldown: Audit / Lineage Completeness`, `Identity evidence and remaining replay-safety signals` collapsed by default
+- [ ] Incident rows `Inspect Replay & Checkpoint Evidence`, `Inspect Manifest & Ledger Evidence`, `Inspect Global Store Reliability`, `Inspect Audit & Lineage Evidence`, `Inspect Run Identity Evidence` collapsed by default
 - [ ] Tier 3: selected-range evidence ниже
 - [ ] Tier 4 diagnostics раскрываются явно только для deep/full audit
 
@@ -248,8 +248,8 @@
 - [ ] Replay/checkpoint panels route к `checkpoint-debugging.md`
 - [ ] Manifest/ledger evidence panels route к `run-manifest-inspection.md`
 - [ ] Known Blind Spots и terminal-event evidence ниже fold в collapsed incident rows
-- [ ] `Identity evidence and remaining replay-safety signals` exposes P0/P1/P2 anchors through `/ops/control-plane/identity-evidence` without Prometheus ID labels
-- [ ] `Review: Remaining Replay-Safety Signals` lists only evidence still outside the identity endpoint
+- [ ] `Inspect Run Identity Evidence` exposes P0/P1/P2 anchors through `/ops/control-plane/identity-evidence` without Prometheus ID labels
+- [ ] `Review Uncovered Replay Signals` lists only evidence still outside the identity endpoint
 - [ ] Starts с answer-first trust cards
 
 ### Cross-scope markers
@@ -407,7 +407,7 @@
 - [ ] First-screen использует canonical current-status recording rules (`bioetl_dq_current_status`, `bioetl_dq_current_reason`)
 - [ ] Range evidence, raw tables, Silver reject breakdowns, logs, traces ниже first-screen
 - [ ] `Monitor: Data Quality Score (Volume-weighted)` and `Track: Data Quality Score Trend (Volume-weighted)` have distinct time semantics: fixed seven-day (`[7d]`) retained snapshot versus raw selected-range samples; absence remains `UNKNOWN`
-- [ ] `Monitor: Lineage Refs Missing` stays canonical in `bioetl-control-plane-v1`
+- [ ] `Track Missing Lineage References` stays canonical in `bioetl-control-plane-v1`
 - [ ] `bioetl-dq-v2` uses a handoff note/link instead of duplicating the metric
 - [ ] Critical panels имеют actionable CTA
 - [ ] Pipeline-wide 15m snapshot; `$run_type` и stage filters ниже управляют только selected-range evidence

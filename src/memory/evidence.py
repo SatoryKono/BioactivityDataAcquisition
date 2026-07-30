@@ -190,8 +190,7 @@ class EvidenceStore:
         )
         if missing_superseded:
             raise ValueError(
-                "decision supersedes unknown records: "
-                f"{', '.join(missing_superseded)}"
+                f"decision supersedes unknown records: {', '.join(missing_superseded)}"
             )
         append_jsonl(self._decision_path, record.to_dict())
         return record.decision_digest
@@ -201,7 +200,9 @@ class EvidenceStore:
         _validate_digest(digest, field="evidence_digest")
         for row in _read_jsonl(self._evidence_path):
             if row.get("evidence_digest") == digest:
-                content = {key: value for key, value in row.items() if key != "evidence_digest"}
+                content = {
+                    key: value for key, value in row.items() if key != "evidence_digest"
+                }
                 if _canonical_digest(content) != digest:
                     raise ValueError("evidence digest mismatch")
                 return row

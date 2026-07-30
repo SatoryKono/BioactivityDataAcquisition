@@ -14,7 +14,7 @@ TESTS = ROOT / "tests" / "integration"
 DASHBOARD_RUNTIME = "bioetl-runtime.json"
 DASHBOARD_INCIDENT_V1 = "bioetl-incident-v1.json"
 DASHBOARD_CONTROL_PLANE_V1 = "bioetl-control-plane-v1.json"
-PANEL_PRIMARY_RECOVERY = "Primary recovery"
+PANEL_PRIMARY_RECOVERY = "Review First Recovery Action"
 PANEL_NEXT_ACTION_REPLAY_DIAGNOSTICS = "Next Action: Replay Diagnostics"
 
 
@@ -426,7 +426,7 @@ def _layout_incident_core_panels(
             "1. Read labelled **Status** (never bare numbers).\n"
             "2. Open top row in **Ranked Active Suspects** (domain handoff).\n"
             "3. Confirm alerts history for the selected range.\n"
-            "4. Exact identity → Run Explorer; resume → Trust Primary recovery.\n"
+            "4. Exact identity → Run Explorer; resume → Trust Review First Recovery Action.\n"
             "Read-only workspace — no persistent incident record."
         )
     if alerts:
@@ -527,7 +527,7 @@ def fix_trust() -> None:
             p["title"] = PANEL_PRIMARY_RECOVERY
             p.setdefault("options", {})["mode"] = "markdown"
             p["options"]["content"] = (
-                "**Primary recovery (Safety Gate)** — act only after Status + four evidence cells:\n"
+                "**Review First Recovery Action (Safety Gate)** — act only after Status + four evidence cells:\n"
                 "1. **INCOMPLETE/UNKNOWN** → repair telemetry / checkpoint / integrity before resume.\n"
                 "2. Non-OK gate cell → open that drilldown "
                 "(Replay Safety / Checkpoint / Manifest / Telemetry).\n"
@@ -547,15 +547,15 @@ def fix_trust() -> None:
                 }
             ]
         if p.get("title") in {
-            "Monitor: Replay Safety State",
-            "Monitor: Checkpoint Freshness Lag (seconds)",
-            "Monitor: Manifest / Ledger Integrity",
-            "Inspect: Telemetry Missing",
+            "Monitor Replay Safety",
+            "Monitor Checkpoint Age",
+            "Monitor Manifest & Ledger Failures",
+            "Monitor Telemetry Coverage",
         }:
             desc = p.get("description") or ""
             note = (
                 " Safety-gate cell (not an independent KPI); "
-                "pair with Status + Primary recovery."
+                "pair with Status + Review First Recovery Action."
             )
             if "Safety-gate cell" not in desc:
                 p["description"] = (desc + note).strip()
@@ -594,7 +594,7 @@ def _fix_dq_panels(dq: dict[str, object]) -> None:
                 "**Data trust — next actions**\n"
                 "1. Read **NOW Status** + current threshold/reasons (not range zeros).\n"
                 "2. If blocked/quarantine/rejects > 0, use accounting with denominators.\n"
-                "3. Selected run → Run Explorer; resume → Trust Primary recovery.\n"
+                "3. Selected run → Run Explorer; resume → Trust Review First Recovery Action.\n"
                 "4. Range cards are SLA/freshness context only."
             )
 

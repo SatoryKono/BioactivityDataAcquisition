@@ -13,7 +13,9 @@ pytestmark = pytest.mark.unit
 _COMMIT = "a" * 40
 
 
-def _envelope(record_id: str, record_type: RecordType, *, supersedes: tuple[str, ...] = ()) -> RecordEnvelope:
+def _envelope(
+    record_id: str, record_type: RecordType, *, supersedes: tuple[str, ...] = ()
+) -> RecordEnvelope:
     return RecordEnvelope.create(
         record_id=record_id,
         record_type=record_type,

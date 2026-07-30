@@ -22,6 +22,7 @@ Silver использует профиль `chembl.molecule` и проверяе
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `chembl.molecule.curated` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/molecule` |
 | Resource / tables | `molecule` |
 | Filters | `inorganic_flag`: 0; `molecule_type`: Small molecule; `structure_type`: MOL; `molecule_id`: IDs from data/input/molecule.csv column molecule_chembl_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (52 fields) |

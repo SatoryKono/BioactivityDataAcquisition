@@ -40,7 +40,7 @@ NEXT_ACTIONS_HTML = (
     "1) Pick recent run · "
     "2) Verify ID + Processed Records · "
     "3) Expand funnel/reasons/artifacts · "
-    "4) Trust Primary recovery for resume/replay"
+    "4) Trust Review First Recovery Action for resume/replay"
     "</div>"
 )
 
@@ -561,7 +561,7 @@ Operator expansion lives in Provenance + descriptions.
         protocol.write_text(
             ptext.rstrip() + "\n\n## DUX6 residual matrix\n\n"
             "After DUX6 apply, re-capture SG-01..SG-07 at 1366×768 dark and assert:\n"
-            "1. No internal scroll on Provenance / Primary recovery / Next Best Actions / Run Scope\n"
+            "1. No internal scroll on Provenance / Review First Recovery Action / Next Best Actions / Run Scope\n"
             "2. No bare VALID_EMPTY / GET /ops in bodies\n"
             "3. Browse tables do not dominate with full paths\n"
             "4. Status still paired with Provenance reason class\n",

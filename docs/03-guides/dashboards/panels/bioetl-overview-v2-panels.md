@@ -12,7 +12,7 @@ multiple runs; use RunLedger for exact reconciliation.
 
 ## Key Panels
 
-### 1. Navigation
+### 1. Navigate Dashboards
 - **Type:** Text
 - **Purpose:** Explain dashboard navigation and escalation flow.
 - **Data sources:** Dashboard variables and operator copy.
@@ -22,128 +22,128 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Purpose:** Show run ID, manifest ID, and replay provenance anchors.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 3. Status
+### 3. Monitor Fleet Health
 - **Type:** Stat
 - **Purpose:** Current severity for the selected scope.
 - **Data sources:** `bioetl_l0_status` (recording rule with label_replace for workflow pipeline mapping)
 
-### 4. First Action
+### 4. Review First Action
 - **Type:** Table
 - **Purpose:** Guide operator to next triage action based on current state.
 - **Data sources:** `bioetl_l0_next_action_route` (recording rule with label_replace for workflow pipeline mapping)
 
-### 5. Inputs
+### 5. Review Domain Status
 - **Type:** Table
 - **Purpose:** Show the first-screen deviation-first matrix across Control Plane,
   Runtime, Provider, Data Quality, Data Validation, and Workflow.
 - **Data sources:** `bioetl_l0_input_status_selected` (recording rule with label_replace for workflow pipeline mapping)
 
-### 6. Runtime
+### 6. Review Runtime Status
 - **Type:** Table
 - **Purpose:** Show runtime status and blockers.
 - **Data sources:** `bioetl_l1_runtime_blocker_status` (recording rule with label_replace for workflow pipeline mapping)
 
-### 7. Data Quality
+### 7. Review Data Quality Status
 - **Type:** Table
 - **Purpose:** Show DQ status and validation results.
 - **Data sources:** `bioetl_l1_dq_status` (recording rule with label_replace for workflow pipeline mapping)
 
-### 8. Data Validation
+### 8. Review Data Validation Status
 - **Type:** Table
 - **Purpose:** Show data validation outcomes.
 - **Data sources:** Aggregated from DQ recording rules
 
-### 9. Control Plane
+### 9. Review Control Plane Status
 - **Type:** Table
 - **Purpose:** Show control plane status and replay blockers.
 - **Data sources:** `bioetl_l1_control_plane_current_status` (recording rule with label_replace for workflow pipeline mapping)
 
-### 10. Provider
+### 10. Review Global Provider Status
 - **Type:** Table
 - **Purpose:** Show provider health and status.
 - **Data sources:** `bioetl_l1_provider_global_status` (recording rule)
 
-### 11. Workflow
+### 11. Review Workflow Status
 - **Type:** Table
 - **Purpose:** Show workflow execution status.
 - **Data sources:** `bioetl_l1_workflow_global_status` (recording rule with label_replace for workflow pipeline mapping)
 
-### 12. L1 Historical Trends
+### 12. Inspect Historical Trends
 - **Type:** Row
 - **Purpose:** Collapsed row containing repeated subsystem detail and historical
   trends after the compact Inputs matrix.
 - **Data sources:** `bioetl_historical_trends`
 
-### 13. Runtime Blockers Trend
+### 13. Track Runtime Blockers
 - **Type:** Timeseries
 - **Purpose:** Show runtime blockers trend over time.
 - **Data sources:** `bioetl_l1_runtime_blocker_status` (recording rule with label_replace for workflow pipeline mapping)
 
-### 14. DQ Status Trend
+### 14. Track Data Quality Status
 - **Type:** Timeseries
 - **Purpose:** Show DQ status trend over time.
 - **Data sources:** `bioetl_l1_dq_status` (recording rule with label_replace for workflow pipeline mapping)
 
-### 15. Gold Lifecycle Trend
+### 15. Track Gold Lifecycle
 - **Type:** Timeseries
 - **Purpose:** Show Gold lifecycle trend over time.
 - **Data sources:** `bioetl_l1_gold_lifecycle_status` (recording rule with label_replace for workflow pipeline mapping)
 
-### 16. Range Evidence (Historical / Recent History)
+### 16. Inspect Range Evidence
 - **Type:** Row
 - **Purpose:** Row-based range evidence workflow.
 - **Data sources:** `bioetl_range_evidence`
 
-### 17. Historical Failures
+### 17. Review Failed Runs
 - **Type:** Table
 - **Purpose:** Show historical failure evidence.
 - **Data sources:** `bioetl_historical_failures`
 
-### 18. Recent Terminal Runs
+### 18. Review Recent Terminal Runs
 - **Type:** Table
 - **Purpose:** Show recent terminal run evidence.
 - **Data sources:** `bioetl_recent_terminal_runs`
 
-### 19. Silver Rejects + Rate
+### 19. Track Silver Rejects
 - **Type:** Stat
 - **Purpose:** Show Silver reject count and rate.
 - **Data sources:** `bioetl_silver_rejects`, `bioetl_silver_reject_rate`
 
-### 20. Diagnostics & Docs (Logs / Traces / Raw Metrics)
+### 20. Inspect Domain Diagnostics
 - **Type:** Row
 - **Purpose:** Row-based diagnostics workflow.
 - **Data sources:** `bioetl_diagnostics`
 
-### 21. Diagnostics Navigation
+### 21. Navigate Diagnostics
 - **Type:** Text
 - **Purpose:** Explain diagnostics navigation and handoffs.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 22. ID
+### 22. Review Run Identity
 - **Type:** Table
 - **Purpose:** Show run ID, pipeline, run type, and timestamp.
 - **Data sources:** BioETL Ops HTTP control-plane identity endpoint
   `/ops/control-plane/identity-table`; this is not a Prometheus panel.
 
-### 23. Processed Records
+### 23. Review Processed Records
 - **Type:** Table
 - **Purpose:** Show records processed by stage.
 - **Data sources:** BioETL Ops HTTP
   `/ops/observability/processed-records`; this is not a Prometheus panel.
 
-### 24. Alert/SLO Triage
+### 24. Inspect Alerts
 - **Type:** Row
 - **Purpose:** Expanded alert/SLO evidence immediately after the first-level
   matrix. The visible `Status` and `First Action` retain the critical verdict
   and route, while this compact table exposes alert-level impact.
 - **Data sources:** `bioetl_alerts`, `bioetl_slo_pressure`
 
-### 25. Triage Alert State
+### 25. Review Active Alerts
 - **Type:** Table
 - **Purpose:** Show alert state for triage.
 - **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
 
-### 26. Run context (thin) -> Run Explorer hub
+### 26. Inspect Run Context
 - **Type:** Row
 - **Purpose:** Group selected-run identity and processed-record HTTP evidence.
 - **Data sources:** BioETL Ops HTTP.
@@ -189,11 +189,11 @@ Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider
 
 - This dashboard is the primary L1 entry point for incident triage.
 - It uses shared shell/status/ID/provenance contracts across all primary dashboards.
-- Row-based workflows (L1 Historical Trends, Range Evidence, Diagnostics & Docs, Alert/SLO Triage) provide structured triage paths.
+- Row-based workflows (Inspect Historical Trends, Inspect Range Evidence, Inspect Domain Diagnostics, Inspect Alerts) provide structured triage paths.
 - The full-width `Inputs` matrix is the deviation-first subsystem summary.
   Repeated Control Plane, Runtime, Data Quality, Provider, Data Validation, and
-  Workflow mirrors live in the collapsed `Diagnostics & Docs` row.
-- `Alert/SLO Triage` is the intentional expanded decision-row exception. L1
-  Historical Trends, Range Evidence, and Diagnostics & Docs are collapsed
+  Workflow mirrors live in the collapsed `Inspect Domain Diagnostics` row.
+- `Inspect Alerts` is the intentional expanded decision-row exception. L1
+  Historical Trends, Range Evidence, and Domain Diagnostics are collapsed
   progressive disclosure.
 - First Action panel provides operator guidance based on current state.

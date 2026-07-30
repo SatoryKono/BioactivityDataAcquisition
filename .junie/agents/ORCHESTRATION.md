@@ -12,7 +12,7 @@ Read before planning or editing:
 
 # ORCHESTRATION.md — Оркестрация команды subagent-ов BioETL
 
-*Версия: 4.2 | Дата: 2026-03-26 | Supersedes v4.1 | Платформа: Codex CLI*
+*Версия: 4.3 | Дата: 2026-07-24 | Supersedes v4.2 | Платформа: Codex CLI*
 
 ## 1. Обзор
 
@@ -73,16 +73,13 @@ spawn_agent(
 
 ## 1.1 Evidence Calibration
 
-Перед repo-wide structural выводами, hotspot-программами и package-reorg инициативами сверяйся с текущими evidence packs:
+Перед repo-wide structural выводами, hotspot-программами и package-reorg
+инициативами сверяйся только с активными evidence surfaces:
 
-- [Project File Structure Summary](../../../../reports/evidence/project-file-structure/SUMMARY.md)
-- [Project File Structure Decisions](../../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
-- [Project Package Topology Summary](../../../../reports/evidence/project-package-topology/SUMMARY.md)
-- [Project Package Topology Synthesis](../../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
-- [Topology vs Governance Cross-Synthesis](../../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
-- [Project Package Topology Decisions](../../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
-- [Governance Signals Summary](../../../../reports/evidence/governance-signals/SUMMARY.md)
-- [Governance Signals Decisions](../../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md)
+- `docs/reports/evidence/project-package-topology/SUMMARY.md`
+- `docs/02-architecture/current-state-inventory.md`
+- `reports/quality/architecture-quality-scorecard.json`
+- `reports/quality/debt-governance-gates.json`
 
 Operational defaults:
 
@@ -580,6 +577,19 @@ ______________________________________________________________________
 ### v1.0 (2026-02-07)
 
 - Initial release: py-audit-bot, py-plan-bot, py-test-bot, py-debug-bot, py-doc-bot
+
+### v4.3 (2026-07-24)
+
+- **UPDATED**: Memory sheets synchronization — all `memory-py-*.md` updated to v1.0.1-v1.0.3
+- **UPDATED**: MCP memory configuration extended with new entities (agent-memory, memory-usage-policy, daily-workflow, orchestration-map, normative-sources)
+- **UPDATED**: Skill documentation (agent-orchestration) now references memory sheets and daily workflow
+- **UPDATED**: agent-memory.md synchronized to v1.0.17 with ORCHESTRATION.md v4.3
+- **CHANGED**: Memory workflow integration in agent-orchestration skill
+- **CHANGED**: Version references in memory sheets updated to 2026-07-24
+
+### v4.2 (2026-03-26)
+
+- Env file guardrail added (moved to end of changelog in v4.3)
 
 ## Env File Guardrail
 

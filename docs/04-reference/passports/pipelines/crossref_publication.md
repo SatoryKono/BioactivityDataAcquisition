@@ -22,6 +22,7 @@ Silver использует профиль `crossref.publication` и прове�
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `crossref:publication` |
+| Method / endpoint | `GET` · `https://api.crossref.org` |
 | Resource / tables | `publication` |
 | Filters | `doi`: IDs from data/input/dois.csv column doi; CLI may override the input CSV |
 | Selected fields | `system` (10 fields); `identifiers` (2 fields); `title` (1 fields); `authors` (7 fields); `journal` (2 fields); `issn` (4 fields); `year` (1 fields); `dates` (4 fields); `pagination` (4 fields); `citations` (5 fields); `subjects` (1 fields); `language` (1 fields); `publisher` (1 fields); `doc_type` (4 fields); `content_domain` (2 fields); `license` (1 fields) |

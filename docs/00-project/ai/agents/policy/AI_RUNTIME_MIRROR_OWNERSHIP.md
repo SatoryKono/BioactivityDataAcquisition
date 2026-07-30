@@ -23,6 +23,7 @@ ______________________________________________________________________
 | Surface | Primary role | Source-of-truth status | Editable for behavior | Expected content |
 | ----------------------- | --------------------------------- | ---------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `.codex/**` | Codex runtime surface | Canonical for tracked runtime behavior on `main` | Yes | live agent registry (`.codex/agents/*.md` tracked), skills, Codex-specific orchestration, runtime settings |
+| `.junie/**` | JetBrains Junie runtime surface | Canonical for tracked runtime behavior on `main` (equal peer to `.codex/**`) | Yes, keeping parity with `.codex/**` | `.junie/guidelines.md` (root contract), `.junie/agents/**` (JUNIE-RUNTIME + 9 py-* profiles + README/ORCHESTRATION mirrors), `.junie/skills/**` (mirror of `.codex/skills/**`), `.junie/plans/**` |
 | `.gemini/settings.json` | Gemini local config surface | Local-only runtime config; not a tracked behavior tree on `main` | Yes, for machine-local settings only | optional local checkout settings with machine-specific paths |
 | `.gemini/agents/**`, `.gemini/skills/**` | Gemini runtime behavior tree | Not present in the current `main` checkout | No tracked source on `main` today | if a future task adds them, they must be verified and documented in the same change |
 | `docs/00-project/ai/**` | Published/internal mirror surface | Not canonical for runtime behavior | Only for mirror/index/guidance updates | curated mirrors, navigation, contributor guidance, memory entrypoints, prompt and skill indexes |
@@ -35,6 +36,14 @@ ______________________________________________________________________
 ## Source-of-Truth Rules
 
 1. `.codex/**` is the authoritative source for tracked Codex runtime behavior.
+1. `.junie/**` is the authoritative source for tracked JetBrains Junie runtime
+   behavior and is an **equal peer** to `.codex/**`. Parity between the two
+   runtime trees is a governance contract enforced by
+   `scripts/ai/junie/check_junie_mirror.sh` (contract file:
+   `scripts/ai/junie/junie-mirror-contract.json`). Automated sync propagates
+   in one direction (`.codex/** → .junie/**`); the reverse direction is
+   allowed only via a reviewed change that also updates the Codex side in the
+   same commit.
 1. `.gemini/settings.json` and other optional Gemini local config files are
    machine-local config surfaces, not proof of a tracked Gemini behavior tree
    on `main`.
@@ -54,7 +63,9 @@ ______________________________________________________________________
 
 Default precedence for AI behavior and guidance:
 
-1. active runtime source for the current agent or skill in `.codex/**`
+1. active runtime source for the current agent or skill — equal peers
+   `.codex/**` (`.codex/agents/CODEX-RUNTIME.md`) and `.junie/**`
+   (`.junie/agents/JUNIE-RUNTIME.md`, with root contract `.junie/guidelines.md`)
 1. a matching tracked `.gemini/**` surface only when that tree exists in the
    current checkout and has been verified in the same change
 1. `docs/00-project/RULES.md`
@@ -69,9 +80,13 @@ override the active runtime tree.
 
 Default sync direction is:
 
-1. runtime tree changes first (`.codex/**`, and tracked `.gemini/**` only when
-   such a tree actually exists on `main`)
-1. published/internal mirror refresh second (`docs/00-project/ai/**`)
+1. runtime tree changes first (`.codex/**` and `.junie/**` as equal peers;
+   tracked `.gemini/**` only when such a tree actually exists on `main`)
+1. runtime-mirror parity check: `bash scripts/ai/junie/check_junie_mirror.sh
+   --check` (or `--sync` when the mirror side needs regeneration from
+   `.codex/**`) whenever `.codex/agents/**`, `.codex/skills/**`,
+   `.junie/agents/**`, or `.junie/skills/**` were touched
+1. published/internal mirror refresh next (`docs/00-project/ai/**`)
 1. validation third
 1. governance/index refresh fourth, if the mirror contract changed
 
@@ -128,8 +143,10 @@ The following divergence is not acceptable:
 ## Edit Rules
 
 - Change runtime behavior:
-  edit the matching tracked runtime tree first (`.codex/**`; `.gemini/**` only
-  when the tree exists on `main`).
+  edit the matching tracked runtime tree first (`.codex/**` or `.junie/**` —
+  they are equal peers and MUST stay in parity via
+  `scripts/ai/junie/check_junie_mirror.sh`; `.gemini/**` only when the tree
+  exists on `main`).
 - Change published navigation or contributor guidance:
   edit `docs/00-project/ai/**`.
 - Change Gemini local-config classification:
@@ -137,13 +154,41 @@ The following divergence is not acceptable:
 - Change project-wide rules:
   edit governance/RULES/ADR surfaces, not AI mirrors.
 
+## Junie Ownership
+
+- Owner: BioETL Team (same as `.codex/**`).
+- Runtime source of truth: `.junie/guidelines.md` (root contract) +
+  `.junie/agents/JUNIE-RUNTIME.md` (runtime map).
+- Tracked subtrees: `.junie/guidelines.md`, `.junie/agents/**`,
+  `.junie/skills/**`, `.junie/plans/**`. Selective un-ignore is declared in
+  `.gitignore`.
+- Machine-local subtrees (MUST remain untracked): `.junie/history/`,
+  `.junie/state/`, `.junie/cache/`.
+- Mirror contract: `scripts/ai/junie/junie-mirror-contract.json` (parity of
+  py-* agent profiles by filename + SHA-256, byte-identical shared agent docs
+  `README.md`/`ORCHESTRATION.md`, byte-identical `SKILLS-CATALOG.md`, and
+  full byte-identical `.codex/skills/**` ↔ `.junie/skills/**` tree; runtime-
+  only files are declared per side, `py-code-bot` is a documented exclusion).
+- Enforcement: `bash scripts/ai/junie/check_junie_mirror.sh --check` (read-
+  only, exit 1 on drift) and `--sync` (one-way `.codex/** → .junie/**`; never
+  writes into `.codex/**`).
+- Divergence policy: **not tolerated** for content covered by the contract.
+  Any behavior change MUST land in `.codex/**` first, then be propagated via
+  `--sync` (or, for coupled cross-runtime changes, in the same commit).
+  Reverse-direction fixes require a reviewed change that also updates the
+  Codex source in the same commit.
+
 ## Practical Routing
 
 - Agent orchestration behavior for Codex -> `.codex/agents/**`
+- Agent orchestration behavior for Junie -> `.junie/agents/**` (equal peer;
+  parity with `.codex/agents/**` enforced by `check_junie_mirror.sh`)
 - Agent orchestration behavior for Gemini -> only when a tracked
   `.gemini/agents/**` tree exists on `main`; otherwise treat Gemini references
   in docs as mirrors or local-only guidance
 - Skill trigger/runtime behavior for Codex -> `.codex/skills/**`
+- Skill trigger/runtime behavior for Junie -> `.junie/skills/**` (equal peer;
+  parity with `.codex/skills/**` enforced by `check_junie_mirror.sh`)
 - Skill trigger/runtime behavior for Gemini -> only when a tracked
   `.gemini/skills/**` tree exists on `main`
 - Gemini local config classification -> `MCP_LOCAL_RUNTIME_CONFIG.md`

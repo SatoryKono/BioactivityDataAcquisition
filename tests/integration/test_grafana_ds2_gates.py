@@ -14,7 +14,7 @@ Covers:
 - continuous lag panels must not use state-timeline without discrete state frame
 - status stats map bare numeric vocabulary (incl. 3/null)
 - operator tables must not default color-background on all cells
-- Trust next-step rail SSOT title remains Primary recovery
+- Trust next-step rail SSOT title remains Review First Recovery Action
 """
 
 from __future__ import annotations
@@ -74,9 +74,7 @@ def test_overview_status_uses_only_l0_operator_terminology() -> None:
     """Overview headline must use the canonical OK/WARN/CRIT/UNKNOWN vocabulary."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     status = next(
-        panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("id") == 214
+        panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 214
     )
     operator_copy = " ".join(
         (str(status.get("title") or ""), str(status.get("description") or ""))
@@ -87,18 +85,19 @@ def test_overview_status_uses_only_l0_operator_terminology() -> None:
 
     mappings = status["fieldConfig"]["defaults"]["mappings"]
     values = next(mapping for mapping in mappings if mapping["type"] == "value")
-    assert {
-        key: option["text"] for key, option in values["options"].items()
-    } == {"0": "OK", "1": "WARN", "2": "CRIT", "3": "UNKNOWN"}
+    assert {key: option["text"] for key, option in values["options"].items()} == {
+        "0": "OK",
+        "1": "WARN",
+        "2": "CRIT",
+        "3": "UNKNOWN",
+    }
 
 
 def test_runtime_metrics_evidence_uses_standard_threshold_steps() -> None:
     """Evidence chip follows shared severity thresholds; null mapping stays UNKNOWN."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     evidence = next(
-        panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("id") == 9102
+        panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 9102
     )
     defaults = evidence["fieldConfig"]["defaults"]
     assert defaults["thresholds"] == {
@@ -112,8 +111,7 @@ def test_runtime_metrics_evidence_uses_standard_threshold_steps() -> None:
     null_mapping = next(
         mapping
         for mapping in defaults["mappings"]
-        if mapping["type"] == "special"
-        and mapping["options"].get("match") == "null"
+        if mapping["type"] == "special" and mapping["options"].get("match") == "null"
     )
     assert null_mapping["options"]["result"] == {
         "text": "UNKNOWN",
@@ -204,7 +202,7 @@ def test_trust_primary_recovery_ssot_title_and_link() -> None:
     panels = [
         panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") == "Primary recovery"
+        if panel.get("title") == "Review First Recovery Action"
     ]
     assert len(panels) == 1
     assert not any(

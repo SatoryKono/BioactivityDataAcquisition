@@ -36,7 +36,7 @@
     }
   },
   "extraction": {
-    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data",
+    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data/assay",
     "field_groups": [
       {
         "field_count": 7,
@@ -70,7 +70,7 @@
         "source": "cli"
       }
     ],
-    "method": null,
+    "method": "GET",
     "selected_fields": [
       {
         "name": "subcellular_fraction_raw",
@@ -98,7 +98,7 @@
       }
     ],
     "source_collections": [
-      "subcellular_fraction"
+      "assay"
     ],
     "source_kind": "derived",
     "source_resource": "chembl:subcellular_fraction",

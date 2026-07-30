@@ -15,23 +15,23 @@ dashboards:
     panel_count: 58
     key_panels:
       - id: 891
-        title: "Monitor: Replay Safety State"
+        title: "Monitor Replay Safety"
         type: stat
         description: Current replay safety state for selected pipeline
       - id: 130
-        title: "Track: Replay / Resume Blockers in Range"
+        title: "Track Replay Blockers"
         type: stat
         description: Replay and resume blockers in selected time range
       - id: 9402
-        title: ID
+        title: Review Run Summary
         type: table
         description: Shared shell panel for run/manifest identity
       - id: 9403
-        title: Processed Records
+        title: Review Processed Records
         type: table
         description: Shared shell panel for Bronze/Silver/Gold accounting
       - id: 9401
-        title: Status
+        title: Monitor Replay Readiness
         type: stat
         description:
           Evidence-aware replay/resume verdict; required evidence gaps render
@@ -54,15 +54,15 @@ dashboards:
     panel_count: 26
     key_panels:
       - id: 214
-        title: Status
+        title: Monitor Fleet Health
         type: stat
         description: Current system status summary
       - id: 215
-        title: First Action
+        title: Review First Action
         type: table
         description: Recommended first action for current state
       - id: 1000
-        title: Navigation
+        title: Navigate Dashboards
         type: text
         description: Theme-safe wrapping navigation bus (0-4 shipped surface)
     selector_variables:
@@ -83,19 +83,19 @@ dashboards:
     panel_count: 42
     key_panels:
       - id: 9401
-        title: Status
+        title: Monitor Pipeline Health
         type: stat
         description: Trust-gated current runtime health status
       - id: 205
-        title: Failed Runs
+        title: Monitor Failed Runs
         type: stat
         description: Failed runs in the selected range
       - id: 237
-        title: Worst Stage Lag
+        title: Monitor Worst Stage Lag
         type: stat
         description: Worst observed stage lag in the selected range
       - id: 9102
-        title: Metrics Evidence
+        title: Monitor Metrics Coverage
         type: stat
         description: Telemetry confidence chip / scrape-rule trust gate; a gap forces the headline to INCOMPLETE
     selector_variables:

@@ -1004,4 +1004,3 @@ def test_build_pipeline_runner_promoted_replay_ready_requires_ledger(
 
     assert fake_factory.kwargs is None
     assert not (tmp_path / "output" / "control" / "run_manifest").exists()
-

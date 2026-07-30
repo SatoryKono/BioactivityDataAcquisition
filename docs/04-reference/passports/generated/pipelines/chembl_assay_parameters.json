@@ -36,7 +36,7 @@
     }
   },
   "extraction": {
-    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data",
+    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data/assay",
     "field_groups": [
       {
         "field_count": 7,
@@ -88,7 +88,7 @@
         "source": "cli"
       }
     ],
-    "method": null,
+    "method": "GET",
     "selected_fields": [
       {
         "name": "assay_param_id",
@@ -224,7 +224,7 @@
       }
     ],
     "source_collections": [
-      "assay_parameters"
+      "assay"
     ],
     "source_kind": "derived",
     "source_resource": "chembl:assay_parameters",

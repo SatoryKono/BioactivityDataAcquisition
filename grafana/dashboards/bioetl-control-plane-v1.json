@@ -33,7 +33,7 @@
         "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"0. Trust (Trust)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">0. Trust (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
       },
       "title": "Navigate Dashboards",
-      "description": "Links to related BioETL dashboards. The current dashboard is disabled; transitions preserve the selected time range and supported filters.",
+      "description": "Same-tab links to related BioETL dashboards. Links open in the same tab and preserve the current time range and target-supported filters. Cross-scope transitions reset incompatible filters. The current dashboard is disabled.",
       "type": "text",
       "links": [
         {
@@ -107,17 +107,17 @@
     {
       "id": 9400,
       "type": "text",
-      "title": "Review Scope & Evidence",
+      "title": "Inspect Scope & Evidence",
       "gridPos": {
         "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
       },
-      "description": "Explains the question answered by this dashboard. CURRENT uses the latest replay-readiness evidence; SELECTED RUN uses persisted evidence for one run. UNKNOWN means required evidence is missing or stale.",
+      "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN persisted HTTP evidence, TIME RANGE history, and UNKNOWN missing/stale evidence. Pipeline and Run Type affect CURRENT and TIME RANGE evidence; run_id never filters Prometheus. UNKNOWN means missing or stale evidence, never healthy.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can the selected run be replayed safely?</div><div><b>CURRENT</b> = latest replay-readiness decision for the active filters</div><div><b>SELECTED RUN</b> = identity and evidence for one run · <b>UNKNOWN</b> = required evidence is incomplete</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div><b>Scope:</b> <b>CURRENT</b> = replay status/reason/action · <b>SELECTED RUN</b> = identity evidence</div><div><b>UNKNOWN</b> = incomplete evidence — not OK</div></div></div>"
       }
     },
     {
@@ -134,7 +134,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows the overall replay/resume verdict. Status mapping: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. Replay only when the verdict is OK and the replay, checkpoint, manifest/ledger, and telemetry cards are complete.",
+      "description": "Shows the overall replay/resume verdict. Status mapping: 0=OK, 1=WARN, 2=CRIT, 3=INCOMPLETE, null=UNKNOWN. Replay/resume is allowed only when the verdict and required evidence cards are complete and OK. UNKNOWN means required evidence is incomplete or missing.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -233,7 +233,7 @@
     {
       "id": 906,
       "type": "text",
-      "title": "Review First Recovery Action",
+      "title": "Review Recovery Action",
       "gridPos": {
         "h": 2,
         "w": 24,
@@ -241,7 +241,7 @@
         "y": 11
       },
       "options": {
-        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;overflow:hidden\"><strong>Primary recovery</strong>: 1) Status + Replay Safety/Checkpoint · 2) UNKNOWN/INCOMPLETE → verify scrape · 3) Open blockers · 4) Run Explorer identity</div>",
+        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;overflow:hidden\"><strong>First recovery action</strong>: 1) Check readiness and replay/checkpoint evidence · 2) For UNKNOWN or INCOMPLETE, verify the Prometheus scrape · 3) Open blocker details · 4) Confirm identity in Run Explorer</div>",
         "mode": "html",
         "dataLinks": [
           {
@@ -570,7 +570,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows whether required manifest and ledger telemetry is available. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero failure counts when this panel is not OK.",
+      "description": "Shows whether required manifest and ledger telemetry is available. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Do not trust zero blocker cards when this panel is not OK; validate Prometheus scrape/rules.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -690,7 +690,7 @@
             "content": "Known blind spots\n- Replay duplicate/overwrite risk signal is not instrumented yet.\n- Manifest-to-ledger referential integrity ratio is not instrumented yet.",
             "mode": "markdown"
           },
-          "title": "Review Replay Coverage Limits",
+          "title": "Review Coverage Limits",
           "type": "text",
           "description": "Lists replay-safety conditions that this dashboard cannot fully prove. An empty blocker count is trustworthy only within the observed telemetry coverage.",
           "fieldConfig": {
@@ -785,7 +785,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track Replay Blockers in Range",
+          "title": "Track Replay Blockers",
           "type": "stat"
         },
         {
@@ -2235,7 +2235,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor Manifest Failure Severity [30m]",
+          "title": "Monitor Manifest Failures (30m)",
           "type": "stat"
         },
         {
@@ -2326,7 +2326,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor Ledger Failure Severity [30m]",
+          "title": "Monitor Ledger Failures (30m)",
           "type": "stat"
         }
       ],
@@ -2523,7 +2523,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor Global Read Failure Severity [30m]",
+          "title": "Monitor Global Read Failures (30m)",
           "type": "stat"
         },
         {
@@ -3500,7 +3500,7 @@
               }
             }
           ],
-          "title": "Review Run Identity",
+          "title": "Review Identity Anchors",
           "transformations": [
             {
               "id": "organize",
@@ -3573,7 +3573,7 @@
             "content": "<div style=\"font-size:13px;line-height:1.45;color:#c9d1d9\"><b>Identity table guardrail.</b><br/>If no rows are visible, check <code>/health/live</code>, selector scope, and a concrete <code>pipeline/run_id</code> before treating the empty state as expected.</div>",
             "mode": "html"
           },
-          "title": "Identity Data Unavailable",
+          "title": "Explain Missing Identity Data",
           "transparent": true
         },
         {
@@ -3602,7 +3602,7 @@
             "content": "<div style=\"font-size:13px;line-height:1.45;color:#c9d1d9\"><b>Accounting table guardrail.</b><br/>Visible rows are backend accounting evidence; if this table becomes empty, verify backend health and scope before reading it as zero records.</div>",
             "mode": "html"
           },
-          "title": "Record Counts Unavailable",
+          "title": "Explain Missing Record Counts",
           "transparent": true
         },
         {
@@ -3979,7 +3979,7 @@
           },
           "title": "Review Uncovered Replay Signals",
           "type": "text",
-          "description": "Lists replay-safety signals not yet covered by structured identity evidence: duplicate-record detection and semantic drift classification."
+          "description": "Lists replay-safety signals not yet covered by structured manifest/run identity evidence, execution/config/contract/input anchors, or checkpoint freshness lag: duplicate-record detection and semantic drift classification."
         }
       ],
       "description": "Contains persisted identity, checkpoint, replay, artifact, and lineage evidence for the selected run. Exact values remain HTTP-backed and never become Prometheus labels."
@@ -3999,7 +3999,7 @@
         {
           "id": 9402,
           "type": "table",
-          "title": "Review Run Identity",
+          "title": "Review Run Summary",
           "gridPos": {
             "h": 6,
             "w": 12,

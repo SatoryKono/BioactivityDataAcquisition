@@ -238,6 +238,7 @@ routes:
       - docs/04-reference/passports/pipelines/
       - docs/04-reference/passports/workflows/
       - docs/04-reference/passports/index.md
+      - docs/04-reference/passports/pipeline-passport-guide.md
       - docs/04-reference/passports/completeness-report.json
       - docs/04-reference/passports/executable-unit-registry.json
     notes:

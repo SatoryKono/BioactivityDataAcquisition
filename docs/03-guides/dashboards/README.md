@@ -249,7 +249,7 @@ Control Plane keeps the shared compact `ID` shell panel (`9402`) backed by
 run/manifest identity, Provider.Entity version, contract schema, execution
 flags, replay capability and mode, checkpoint anchors, optional composite run
 identity, and identity health. The deeper collapsed
-`Identity evidence and remaining replay-safety signals` row uses
+`Inspect Run Identity Evidence` row uses
 `/ops/control-plane/identity-evidence` for P0/P1/P2 anchors, identity gaps,
 replay parentage, composite identity, checkpoint anchor comparison, and
 copy-friendly full values. The HTTP rows include typed `source_type`,

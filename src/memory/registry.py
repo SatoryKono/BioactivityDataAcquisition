@@ -99,8 +99,10 @@ def _validate_string_list(
     issues: list[RegistryIssue],
 ) -> None:
     value = surface.get(field)
-    if not isinstance(value, list) or not value or not all(
-        isinstance(item, str) and item.strip() for item in value
+    if (
+        not isinstance(value, list)
+        or not value
+        or not all(isinstance(item, str) and item.strip() for item in value)
     ):
         issues.append(
             RegistryIssue(path=path, message=f"{field} must be a non-empty string list")
@@ -116,9 +118,7 @@ def validate_memory_registry(payload: Any) -> list[RegistryIssue]:
         return [RegistryIssue("catalog/memory_registry.yaml", "root must be a mapping")]
     if payload.get("schema_version") != 1:
         issues.append(
-            RegistryIssue(
-                "catalog/memory_registry.yaml", "schema_version must equal 1"
-            )
+            RegistryIssue("catalog/memory_registry.yaml", "schema_version must equal 1")
         )
     surfaces = payload.get("surfaces")
     if not isinstance(surfaces, list) or not surfaces:
@@ -168,9 +168,7 @@ def validate_memory_registry(payload: Any) -> list[RegistryIssue]:
             issues.append(RegistryIssue(path, f"invalid status: {status}"))
         proven = raw_surface.get("runtime_usage_proven")
         if not isinstance(proven, bool):
-            issues.append(
-                RegistryIssue(path, "runtime_usage_proven must be a boolean")
-            )
+            issues.append(RegistryIssue(path, "runtime_usage_proven must be a boolean"))
         if proven is False and status != "NOT_PROVEN":
             issues.append(
                 RegistryIssue(

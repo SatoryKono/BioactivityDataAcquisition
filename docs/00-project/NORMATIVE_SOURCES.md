@@ -37,9 +37,15 @@ BioETL не использует один монолитный файл «все
 
 Канонический порядок разрешения конфликтов для AI runtime живет в
 [AGENTS.md](../../AGENTS.md), секция `Canonical Precedence`. Этот индекс не
-ведет параллельный нумерованный список precedence. Важно: active runtime source
-и matching runtime profiles/skills стоят выше этого normative index; docs
-mirrors в `docs/00-project/ai/**` остаются navigation/guidance surfaces и не
+ведет параллельный нумерованный список precedence. Важно: active runtime
+sources — equal peers `.codex/agents/CODEX-RUNTIME.md` и
+`.junie/agents/JUNIE-RUNTIME.md` (с root-контрактами `AGENTS.md` и
+`.junie/guidelines.md`) — вместе с matching runtime profiles/skills
+(`.codex/agents/py-*.md`, `.codex/skills/**`, `.junie/agents/py-*.md`,
+`.junie/skills/**`) стоят выше этого normative index; parity между
+`.codex/**` и `.junie/**` поддерживается
+`scripts/ai/junie/check_junie_mirror.sh`. Docs mirrors в
+`docs/00-project/ai/**` остаются navigation/guidance surfaces и не
 переопределяют runtime behavior самостоятельно.
 
 ## Что читать по теме
@@ -81,7 +87,7 @@ mirrors в `docs/00-project/ai/**` остаются navigation/guidance surfaces
 | `docs/05-engineering/**` | docs | stub | archive only; no new SSOT |
 | `docs/plans/**` | planning | non-normative | one active backlog; archive rest |
 | `docs/reports/**` | quality/docs | non-normative thin | bulk → `reports/docs-evidence/` |
-| `docs/00-project/ai/**` | AI runtime mirrors | mirror | drift vs `.codex/**`; no behavior SSOT |
+| `docs/00-project/ai/**` | AI runtime mirrors | mirror | drift vs `.codex/**` and `.junie/**`; no behavior SSOT |
 | `docs/99-archive/**` | docs | archive | retain for history |
 | `docs/02-architecture/diagrams/**/*.mmd` | diagram governance | source | ADR-040 lint |
 | Diagram `**/png/**` | diagram governance | render artifact | CI/local only (DOC-GOV-02) |
@@ -93,7 +99,10 @@ New docs PRs SHOULD declare owner + type + retirement criterion (see
 
 ## Related AI surfaces
 
-- [AGENTS.md](../../AGENTS.md) — root AI runtime contract
+- [AGENTS.md](../../AGENTS.md) — root AI runtime contract (Codex/Junie equal peers)
+- `../../.junie/guidelines.md` — JetBrains Junie root contract (equal peer to `AGENTS.md`)
+- `../../.codex/agents/CODEX-RUNTIME.md` and `../../.junie/agents/JUNIE-RUNTIME.md` — active runtime maps
+- `../../scripts/ai/junie/check_junie_mirror.sh` — `.codex/**` ↔ `.junie/**` parity check
 - [MEMORY_USAGE.md](ai/agents/guides/MEMORY_USAGE.md) — memory workflow
 - [POST_CHANGE_VALIDATION.md](ai/agents/policy/POST_CHANGE_VALIDATION.md) — post-change protocol
 - [AI_RUNTIME_MIRROR_OWNERSHIP.md](ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md) — runtime vs mirror ownership
