@@ -5,5 +5,115 @@
   "shell": {
     "setup_complete": true
   },
-  "_comment": "BioETL custom subagent profiles available in .devin/agents/: py-audit-bot, py-architecture-debt-bot, py-plan-bot, py-test-bot, py-config-bot, py-debug-bot, py-doc-bot, py-test-swarm, py-review-orchestrator. See .devin/agents/DEVIN-RUNTIME.md for mapping."
+  "_comment": "BioETL custom subagent profiles available in .devin/agents/: py-audit-bot, py-architecture-debt-bot, py-plan-bot, py-test-bot, py-config-bot, py-debug-bot, py-doc-bot, py-test-swarm, py-review-orchestrator. See .devin/agents/DEVIN-RUNTIME.md for mapping.",
+  "mcpServers": {
+    "memory": {
+      "type": "http",
+      "url": "http://127.0.0.1:8826/mcp",
+      "startup_timeout_sec": 120
+    },
+    "filesystem": {
+      "type": "http",
+      "url": "http://127.0.0.1:8827/mcp",
+      "startup_timeout_sec": 30
+    },
+    "fetch": {
+      "type": "http",
+      "url": "http://127.0.0.1:8821/mcp",
+      "startup_timeout_sec": 300
+    },
+    "github": {
+      "type": "http",
+      "url": "http://127.0.0.1:8820/mcp",
+      "startup_timeout_sec": 180
+    },
+    "docker": {
+      "type": "http",
+      "url": "http://127.0.0.1:8817/mcp",
+      "startup_timeout_sec": 240
+    },
+    "context7": {
+      "type": "http",
+      "url": "http://127.0.0.1:8815/mcp",
+      "startup_timeout_sec": 240
+    },
+    "ast-grep": {
+      "type": "http",
+      "url": "http://127.0.0.1:8816/mcp",
+      "startup_timeout_sec": 120
+    },
+    "mcp-code-interpreter": {
+      "type": "http",
+      "url": "http://127.0.0.1:8829/mcp",
+      "startup_timeout_sec": 240
+    },
+    "prometheus": {
+      "type": "http",
+      "url": "http://127.0.0.1:8822/mcp",
+      "startup_timeout_sec": 240
+    },
+    "grafana": {
+      "type": "http",
+      "url": "http://127.0.0.1:8823/mcp",
+      "startup_timeout_sec": 240
+    },
+    "brave-search": {
+      "type": "http",
+      "url": "http://127.0.0.1:8811/mcp",
+      "startup_timeout_sec": 180
+    },
+    "neo4j-cypher": {
+      "type": "http",
+      "url": "http://127.0.0.1:8824/mcp",
+      "startup_timeout_sec": 120
+    },
+    "neo4j-memory": {
+      "type": "http",
+      "url": "http://127.0.0.1:8825/mcp",
+      "startup_timeout_sec": 120
+    },
+    "mermaid": {
+      "type": "http",
+      "url": "http://127.0.0.1:8818/mcp",
+      "startup_timeout_sec": 300
+    },
+    "deja": {
+      "type": "http",
+      "url": "http://127.0.0.1:8814/mcp",
+      "startup_timeout_sec": 120
+    },
+    "adr-analysis": {
+      "type": "http",
+      "url": "http://127.0.0.1:8813/mcp",
+      "startup_timeout_sec": 120
+    },
+    "mutmut": {
+      "type": "http",
+      "url": "http://127.0.0.1:8830/mcp",
+      "startup_timeout_sec": 120
+    },
+    "code-analyzer": {
+      "type": "http",
+      "url": "http://127.0.0.1:8828/mcp",
+      "startup_timeout_sec": 120
+    },
+    "github-actions": {
+      "type": "http",
+      "url": "http://127.0.0.1:8831/mcp",
+      "startup_timeout_sec": 180
+    },
+    "deepwiki": {
+      "type": "http",
+      "url": "https://mcp.deepwiki.com/mcp",
+      "startup_timeout_sec": 240
+    },
+    "ref": {
+      "type": "http",
+      "url": "https://api.ref.tools/mcp",
+      "startup_timeout_sec": 120,
+      "headers": {
+        "x-ref-api-key": "$REF_TOOL_API_KEY"
+      }
+    }
+  }
 }

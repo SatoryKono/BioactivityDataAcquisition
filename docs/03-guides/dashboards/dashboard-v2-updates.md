@@ -18,6 +18,8 @@ also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; canonical baseline:
   their operator-facing descriptions.
 - DQ freshness and provider status/matrix descriptions use the shared
   `TELEMETRY MISSING` fail-closed language.
+- Navigation descriptions use the shared sanitizer/accessibility and
+  cross-scope handoff contract across all shipped dashboards.
 - Global-scope and telemetry-absence caveats remain explicit.
 - PromQL, layout, navigation, variables, and thresholds are unchanged.
 
