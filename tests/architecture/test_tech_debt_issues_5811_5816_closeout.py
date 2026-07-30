@@ -84,22 +84,22 @@ def test_issue_5811_closeout_artifact_covers_all_child_issues() -> None:
             assert (ROOT / relative_path).exists(), relative_path
 
 
-def test_issue_5812_phased_migration_support_is_retired_compat_shim() -> None:
-    # Compatibility facade restored for deprecation window (#6473 / docs).
-    assert (
+def test_issue_5812_phased_migration_support_stays_retired() -> None:
+    """The retired runtime shim must not bypass the zero compatibility budget."""
+    module_path = (
         ROOT / "src" / "bioetl" / "domain" / "behavior" / "phased_migration_support.py"
-    ).exists()
-
-    from bioetl.domain.behavior import PhasedMigrationCoordinator
-    from bioetl.domain.behavior.phased_migration_support import (
-        PhasedMigrationCoordinator as DirectCoordinator,
     )
 
-    assert PhasedMigrationCoordinator is DirectCoordinator
-    with pytest.warns(DeprecationWarning, match="retired compatibility shim"):
-        coordinator = PhasedMigrationCoordinator()
-    status = coordinator.get_current_migration_status()
-    assert status.current_phase == "retired"
+    assert not module_path.exists()
+
+    import bioetl.domain.behavior as behavior
+
+    assert "PhasedMigrationCoordinator" not in behavior.__all__
+    with pytest.raises(
+        AttributeError,
+        match="PhasedMigrationCoordinator",
+    ):
+        _ = behavior.PhasedMigrationCoordinator
 
 
 def test_issue_5813_staged_enforcement_registry_is_single_and_externalized() -> None:
