@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-30T15:41:06.106382+00:00",
+  "generated_at": "2026-07-30T16:44:45.660245+00:00",
   "summary": {
     "total_scripts": 567,
     "status_counts": {
@@ -11032,7 +11032,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 289,
+      "reference_count": 290,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -13684,7 +13684,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 157,
+          "line": 158,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_duplication_baseline.py"
         },
@@ -14527,7 +14527,7 @@
           "path": "scripts/engineering/qa/README.md",
           "line": 45,
           "source_group": "scripts",
-          "text": "| `validate-technical-debt-audit`  | `technical_debt_audit_registry.py`                    | Validate and resolve the exact-SHA current technical-debt audit lifecycle                          |"
+          "text": "| `validate-technical-debt-audit`  | `technical_debt_audit_registry.py`                    | Validate exact-SHA lifecycle, evidence hash, and report headline semantics                          |"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
