@@ -22,6 +22,10 @@ class BackupVerificationError(RuntimeError):
     """Raised when a backup cannot be trusted for recovery."""
 
 
+class BackupProtectionError(ValueError):
+    """Raised when classified content lacks an approved at-rest protector."""
+
+
 @dataclass(frozen=True, slots=True)
 class BackupResult:
     """Description of an idempotent content-addressed backup."""
@@ -146,6 +150,11 @@ def create_backup(
     retention_days: int = 30,
 ) -> BackupResult:
     """Create or reuse a deterministic content-addressed directory backup."""
+    if security_class in {SecurityClass.CONFIDENTIAL, SecurityClass.SECRET}:
+        raise BackupProtectionError(
+            "confidential or secret memory backup requires an approved "
+            "at-rest protector"
+        )
     source = source.resolve()
     if not source.is_dir():
         raise FileNotFoundError(f"memory source directory not found: {source}")
