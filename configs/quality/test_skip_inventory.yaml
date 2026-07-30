@@ -7,12 +7,14 @@ source_of_truth:
   contract_root: tests/contract/
   integration_root: tests/integration/
 allowed_categories:
+- conditional_environment_guard
 - git_diff_scope_guard
 - live_endpoint_unavailability
 - live_network_opt_in_guard
 - optional_local_fixture_absence
 - replay_fixture_pointer_guard
 - snapshot_refresh_write_mode
+- temporary_known_failure
 entries:
 - path: tests/contract/_gold_schema_snapshot_registry.py
   suite: contract
@@ -138,6 +140,59 @@ entries:
   vcr_related: false
   review_date: '2026-06-02'
   rationale: Config loading checks may skip when optional provider/entity directories are absent in a reduced local checkout.
+- path: tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
+  suite: integration
+  category: conditional_environment_guard
+  owner: '@bioetl-platform'
+  linked_issue: '#7249'
+  lifecycle: temporary_debt
+  expires_on: '2026-09-30'
+  reviewed_skip_calls: 1
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: The reproducibility fixture-control-plane check is temporarily skipped on WSL cloud-mounted checkouts until the platform-specific filesystem limitation is removed.
+- path: tests/integration/determinism/test_reproducibility_determinism_gate.py
+  suite: integration
+  category: conditional_environment_guard
+  owner: '@bioetl-platform'
+  linked_issue: '#7249'
+  lifecycle: temporary_debt
+  expires_on: '2026-09-30'
+  reviewed_skip_calls: 1
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: The deterministic replay gate is temporarily skipped on WSL cloud-mounted checkouts until the platform-specific filesystem limitation is removed.
+- path: tests/integration/idempotency/test_reproducibility_idempotency_gate.py
+  suite: integration
+  category: conditional_environment_guard
+  owner: '@bioetl-platform'
+  linked_issue: '#7249'
+  lifecycle: temporary_debt
+  expires_on: '2026-09-30'
+  reviewed_skip_calls: 1
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: The idempotency replay gate is temporarily skipped on WSL cloud-mounted checkouts until the platform-specific filesystem limitation is removed.
+- path: tests/integration/infrastructure/storage/test_atomic.py
+  suite: integration
+  category: conditional_environment_guard
+  owner: '@bioetl-storage'
+  linked_issue: '#7249'
+  lifecycle: permanent_policy
+  reviewed_skip_calls: 2
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Windows-specific atomic replace and file-lock contracts are selected declaratively and are not applicable on non-Windows hosts.
+- path: tests/integration/test_docker_compose_smoke.py
+  suite: integration
+  category: live_network_opt_in_guard
+  owner: '@bioetl-platform'
+  linked_issue: '#7249'
+  lifecycle: permanent_policy
+  reviewed_skip_calls: 1
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Docker integration remains explicitly opt-in because Docker is an optional BioETL runtime surface.
 - path: tests/integration/test_dashboard_ux_report_freshness.py
   suite: integration
   category: git_diff_scope_guard
@@ -205,11 +260,55 @@ entries:
   owner: '@bioetl-observability'
   linked_issue: '#5562'
   lifecycle: permanent_policy
-  reviewed_skip_calls: 10
+  reviewed_skip_calls: 11
   vcr_related: false
   review_date: '2026-07-23'
   rationale: Silver Reject Explorer config integration tests skip the retired dashboard surface pending full retirement of
     residual fixtures.
+- path: tests/integration/grafana/test_silver_reject_explorer_copy.py
+  suite: integration
+  category: temporary_known_failure
+  owner: '@bioetl-observability'
+  linked_issue: '#7249'
+  lifecycle: temporary_debt
+  expires_on: '2026-08-15'
+  reviewed_skip_calls: 1
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Residual assertions for the removed Silver Reject Explorer remain visible as expiring test debt pending deletion or conversion to negative retirement contracts.
+- path: tests/integration/test_grafana_dashboard_links.py
+  suite: integration
+  category: temporary_known_failure
+  owner: '@bioetl-observability'
+  linked_issue: '#7249'
+  lifecycle: temporary_debt
+  expires_on: '2026-08-15'
+  reviewed_skip_calls: 8
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Retired Loki and Tempo drilldown assertions remain visible as expiring test debt rather than bypassing the suppression census.
+- path: tests/integration/test_grafana_layout_and_metadata.py
+  suite: integration
+  category: temporary_known_failure
+  owner: '@bioetl-observability'
+  linked_issue: '#7249'
+  lifecycle: temporary_debt
+  expires_on: '2026-08-15'
+  reviewed_skip_calls: 2
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Retired Explore-layout assertions remain visible as expiring test debt rather than bypassing the suppression census.
+- path: tests/integration/test_grafana_surface_contracts.py
+  suite: integration
+  category: temporary_known_failure
+  owner: '@bioetl-observability'
+  linked_issue: '#7249'
+  lifecycle: temporary_debt
+  expires_on: '2026-08-15'
+  reviewed_skip_calls: 2
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Retired Loki surface assertions remain visible as expiring test debt rather than bypassing the suppression census.
 - path: tests/integration/test_grafana_variable_reference.py
   suite: integration
   category: live_endpoint_unavailability

@@ -167,7 +167,7 @@ def test_issue_5562_skip_inventory_entries_are_individually_accountable() -> Non
             assert str(entry.get("expires_on", "")).strip()
         assert str(entry["rationale"]).strip()
 
-    assert entries_by_issue == {"#5562": 19, "#6570": 1}
+    assert entries_by_issue == {"#5562": 19, "#6570": 1, "#7249": 9}
 
 
 def test_issue_5563_excluded_non_gold_rows_are_burned_down_to_zero() -> None:
