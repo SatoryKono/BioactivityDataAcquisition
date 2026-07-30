@@ -11,34 +11,34 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 
 ## Key Panels
 
-### 1. Navigation
+### 1. Navigate Dashboards
 - **Type:** Text
 - **Purpose:** Portfolio bus handoffs with preserved time range and vars.
 - **Data sources:** Static HTML + panel links.
 
-### 2. Provenance · Run Scope
+### 2. Understand Run Scope
 - **Type:** Text
 - **Purpose:** Explain browse and selected-run modes, the HTTP-only run_id contract, and where full artifact paths lead.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 3. ID
+### 3. Inspect Run Identity
 - **Type:** Table
 - **Purpose:** Run/manifest identity for selected scope (first paint).
 - **Data sources:** BioETL Ops HTTP `/ops/control-plane/identity-table` (not Prometheus).
 
-### 4. Processed Records
+### 4. Inspect Processed Records
 - **Type:** Table
 - **Purpose:** Bronze/Silver/Gold stage/outcome accounting (first paint).
 - **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).
 
-### 5. Selected run detail (Ops HTTP; expand after selection)
+### 5. Selected Run Details
 - **Type:** Row (collapsed by default)
 - **Purpose:** Progressive disclosure for recent runs, funnel, reasons, reconciliation, artifacts, timings, CTA.
 - **Data sources:** Nested panels below.
 
 Nested titles (must match JSON):
 
-### 6. Browse · Recent pipeline runs (no selection)
+### 6. Browse Recent Runs
 - **Type:** Table (first-screen empty-selection utility)
 - **Purpose:** Index of recent `pipeline_run_report_v1` files to pick `run_id`.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
@@ -49,37 +49,37 @@ Nested titles (must match JSON):
   artifacts exist for that pipeline; `504` with
   `contract=forensic_endpoint_error_v1` means the forensic endpoint timed out.
 
-### 7. Selected run · funnel stages
+### 7. Inspect Stage Funnel
 - **Type:** Table
 - **Purpose:** Stage funnel (records_in/out, balance) for exact run.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `funnel`
 
-### 8. Selected run · top reasons
+### 8. Inspect Top Run Reasons
 - **Type:** Table
 - **Purpose:** Top removal/reason codes for exact run.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `reasons_top_n`
 
-### 9. Selected run · reconciliation
+### 9. Inspect Reconciliation
 - **Type:** Table
 - **Purpose:** Reconciliation block from `pipeline_run_report_v1`.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `reconciliation`
 
-### 10. Selected run · layers (accounting)
+### 10. Inspect Layer Accounting
 - **Type:** Text
 - **Purpose:** Points operators at Processed Records / report `layers` rollup.
 - **Data sources:** Static operator copy + Ops HTTP report shape.
 
-### 11. Selected run · artifacts
+### 11. Inspect Run Artifacts
 - **Type:** Table
 - **Purpose:** Artifact refs (report paths, exports) for exact run.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `artifacts`
 
-### 12. Selected run · stage timings / failure (optional)
+### 12. Inspect Timings & Failure
 - **Type:** Text
 - **Purpose:** Documents optional stage_timings/failure blocks (PARTIAL when absent; not waterfall).
 - **Data sources:** Static operator copy pointing at pipeline-run-report.
 
-### 13. Next actions (≤4)
+### 13. Continue Run Investigation
 - **Type:** Text
 - **Purpose:** Trust / DQ / Incident / CLI forensic hops (dashboard hops via Navigation).
 - **Data sources:** Static operator copy.

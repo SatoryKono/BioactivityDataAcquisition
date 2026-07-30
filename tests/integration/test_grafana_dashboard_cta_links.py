@@ -530,7 +530,7 @@ def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
 
     panel = _find_panel_by_id(dashboard, 9991)
     assert panel is not None, "Runtime First Action panel id=9991 must exist"
-    assert panel.get("title") == "First Action"
+    assert panel.get("title") == "Review First Action"
     links = panel.get("links", [])
     assert isinstance(links, list) and links, (
         "Runtime First Action panel must expose CTA links"
@@ -825,12 +825,10 @@ def test_overview_panels_use_dashboard_handoffs_not_runbook_ctas() -> None:
 
 def test_workflow_range_cards_do_not_ship_panel_level_runbook_links() -> None:
     """Workflow selected-range cards should hand off via First Action instead."""
-    dashboard = load_dashboard(_require_dashboard("bioetl-workflow-overview.json"))
+    dashboard = load_dashboard(_require_dashboard("bioetl-runtime.json"))
     expected_titles = {
         "Track Failed Workflow Runs",
         "Track Failed Workflow Steps",
-        "Failed Transform Steps / Range",
-        "Skipped Step Events / Range",
     }
     panels = {
         panel.get("title"): panel
@@ -853,12 +851,12 @@ def test_workflow_range_cards_do_not_ship_panel_level_runbook_links() -> None:
         (
             panel
             for panel in get_dashboard_panels(dashboard)
-            if panel.get("title") == "First Action"
+                if panel.get("id") == 9991
         ),
         None,
     )
     assert next_panel is not None
-    next_links = _iter_panel_data_links(next_panel)
+    next_links = next_panel.get("links", [])
     assert next_links, "Workflow First Action must keep dashboard handoffs"
     assert all(str(link.get("url", "")).startswith("/d/") for link in next_links), (
         "Workflow First Action must stay dashboard-handoff-only"

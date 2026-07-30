@@ -441,8 +441,8 @@
 - [ ] Panel `9` (First Action) имеет dataLinks: Open 2. Runtime, Open 4. Data Quality, Open 3. Provider Health, Open 0. Control Plane, Open 1. Overview
 
 ### First-screen структура
-- [ ] Tier 1 включает: `Pipeline Status`, Failed Workflow Runs / Range, Failed Pipeline Steps / Range, Failed Transform Steps / Range, Skipped Step Events / Range, Workflow Run Outcomes / Range, First Action
-- [ ] Summary zero counts render neutral, not healthy; `Workflow Run Outcomes / Range` distinguishes `VALID EMPTY`, `NO MATCHING SCOPE`, `TELEMETRY ABSENT`, and `ERROR / UNKNOWN`
+- [ ] Tier 1 включает: `Pipeline Status`, `Track Failed Workflow Runs`, `Track Failed Workflow Steps`, First Action
+- [ ] Summary zero counts render neutral, not healthy
 - [ ] `Pipeline Status` derives only from workflow evidence and has no Runtime fallback
 - [ ] Row `Step Diagnostics` collapsed by default; it contains Step Outcomes by Kind / Step Status / Range and Step Duration p95 by Kind / Step Status / Range
 - [ ] Tier 3: selected-range evidence
@@ -457,6 +457,9 @@
 - [ ] НЕ является current-state runtime triage
 - [ ] НЕ использует visible `pipeline` / `run_type` selectors
 - [ ] Hidden context variables preserve single-pipeline handoff scope
+
+### RETIRED (epic #6570/#6576)
+- [ ] bioetl-workflow-overview.json was retired; workflow evidence now lives on bioetl-runtime (Pipeline Diagnostics)
 - [ ] Multi-pipeline workflows fail-close к `unknown` / `All` для hidden context vars
 - [ ] `First Action` — единственный оправданный panel-level handoff exception
 - [ ] Selected-range evidence counters НЕ требуют panel-level runbook links

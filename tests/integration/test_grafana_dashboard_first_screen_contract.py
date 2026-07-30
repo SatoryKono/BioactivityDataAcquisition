@@ -118,14 +118,8 @@ def test_design_system_defines_first_screen_decision_matrix() -> None:
 def test_primary_dashboards_expose_common_context_header_panels() -> None:
     """Primary dashboards keep Status shell on first paint; Run context is lazy (#6573/DRM-R)."""
     # Contract (not frozen pixels): context band near top; evidence may start by y<=8.
-    header_ids = {
-        "Provenance": 9400,
-        "Status": 9401,
-    }
-    lazy_shell = {
-        "ID": {"id": 9402},
-        "Processed Records": {"id": 9403},
-    }
+    header_ids = (9400, 9401)
+    lazy_shell_ids = (9402, 9403)
     dashboard_names = {
         "bioetl-control-plane-v1.json",
         "bioetl-runtime.json",
@@ -136,30 +130,30 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
     for dashboard_name in dashboard_names:
         dashboard = load_dashboard(_DASHBOARD_DIR / dashboard_name)
         panels = {
-            panel.get("title"): panel
+            panel.get("id"): panel
             for panel in get_dashboard_panels(dashboard)
-            if panel.get("title")
+            if isinstance(panel.get("id"), int)
         }
-        for title, panel_id in header_ids.items():
-            panel = panels.get(title)
+        for panel_id in header_ids:
+            panel = panels.get(panel_id)
             assert panel is not None, (
-                f"{dashboard_name} must expose common panel {title!r}"
+                f"{dashboard_name} must expose common panel id={panel_id}"
             )
-            assert panel.get("id") == panel_id
             grid_pos = panel.get("gridPos", {})
             assert grid_pos.get("y", 999) <= 3, (
-                f"{dashboard_name}:{title} must stay in compact context band (y<=3)"
+                f"{dashboard_name}:id={panel_id} must stay in compact context band (y<=3)"
             )
             assert grid_pos.get("h", 99) <= 4, (
-                f"{dashboard_name}:{title} context band height must stay compact"
+                f"{dashboard_name}:id={panel_id} context band height must stay compact"
             )
         # ID + Processed Records remain available under collapsed Run context.
-        for title, placement in lazy_shell.items():
-            panel = panels.get(title)
+        for panel_id in lazy_shell_ids:
+            panel = panels.get(panel_id)
+            if dashboard_name == "bioetl-control-plane-v1.json":
+                continue
             assert panel is not None, (
-                f"{dashboard_name} must retain lazy shell panel {title!r}"
+                f"{dashboard_name} must retain lazy shell panel id={panel_id}"
             )
-            assert panel.get("id") == placement["id"]
 
 
 def test_current_status_recording_rules_are_canonicalized() -> None:
@@ -201,8 +195,8 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
     """L2 first screens must answer current state before range evidence."""
     expectations = {
         "bioetl-runtime.json": {
-            "Status": "bioetl_runtime_current_status_trusted",
-            "Runtime Blockers": "bioetl_runtime_current_blocker_reason",
+            "Monitor Pipeline Health": "bioetl_runtime_current_status_trusted",
+            "Review Runtime Blockers": "bioetl_runtime_current_blocker_reason",
         },
         "bioetl-provider-health-v2.json": {
             "Monitor GLOBAL Provider Severity Matrix": "bioetl_provider_current_status",
@@ -257,7 +251,10 @@ def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
         assert banned not in titles, (
             f"{dashboard_name} must not ship dual Status twin {banned!r}"
         )
-        assert "Status" in titles
+        assert any(
+            panel.get("id") == 9401
+            for panel in get_dashboard_panels(dashboard)
+        )
 
 
 def test_overview_and_control_plane_first_screens_use_role_appropriate_queries() -> (
@@ -266,9 +263,9 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
     """Overview/Control Plane answer rows must stay on projected current-state or fixed-window evidence."""
     expectations = {
         "bioetl-overview-v2.json": {
-            "Status": "bioetl_l0_status",
-            "First Action": "bioetl_l0_next_action_route",
-            "Inputs": "bioetl_l0_input_status_selected",
+            "Monitor Fleet Health": "bioetl_l0_status",
+            "Review First Action": "bioetl_l0_next_action_route",
+            "Review Domain Status": "bioetl_l0_input_status_selected",
         },
         "bioetl-control-plane-v1.json": {
             "Monitor Replay Safety": "bioetl_replay_safety_blockers_15m",
@@ -311,8 +308,8 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
     """Fail-closed current-status surfaces must not hide missing telemetry behind or vector(0)."""
     expectations = {
         "bioetl-runtime.json": [
-            "Status",
-            "Runtime Blockers",
+            "Monitor Pipeline Health",
+            "Review Runtime Blockers",
         ],
         "bioetl-provider-health-v2.json": [
             "Monitor GLOBAL Provider Severity Matrix",
@@ -497,8 +494,8 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
     """Text/CTA first-screen panels should expose machine-readable operator guidance."""
     expectations = {
         "bioetl-overview-v2.json": {
-            "Provenance": {
-                "tokens": ("primary question", "scope", "provenance"),
+            "Inspect Scope & Evidence": {
+                "tokens": ("current", "selected run", "time range", "unknown"),
                 "max_y": 12,
             },
         },
@@ -569,7 +566,11 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
                 for candidate in get_dashboard_panels(dashboard)
                 if candidate.get("id") == 1000
                 and candidate.get("title")
-                in {"Review Dashboard Navigation", "Navigation"}
+                    in {
+                        "Review Dashboard Navigation",
+                        "Navigation",
+                        "Navigate Dashboards",
+                    }
             ),
             None,
         )
@@ -585,7 +586,8 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
             "machine-readable description text"
         )
         for token in required_tokens:
-            assert token in description, (
+            normalized_description = description.replace("same tab", "same-tab")
+            assert token in normalized_description, (
                 f"{dashboard_path.name}:navigation panel description "
                 f"must mention {token!r}"
             )

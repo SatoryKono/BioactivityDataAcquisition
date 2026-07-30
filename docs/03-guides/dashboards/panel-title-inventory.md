@@ -109,9 +109,9 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9405 | Run context (thin) -> Run Explorer hub |
 | bioetl-dq-v2.json | 9402 | ID |
 | bioetl-dq-v2.json | 9403 | Processed Records |
-| bioetl-incident-v1.json | 1000 | Navigation |
-| bioetl-incident-v1.json | 9400 | Provenance |
-| bioetl-incident-v1.json | 9401 | Status |
+| bioetl-incident-v1.json | 1000 | Navigate Dashboards |
+| bioetl-incident-v1.json | 9400 | Understand Incident Scope |
+| bioetl-incident-v1.json | 9401 | Monitor Incident Status |
 | bioetl-incident-v1.json | 2001 | Next Best Actions |
 | bioetl-incident-v1.json | 2010 | Ranked Active Suspects |
 | bioetl-incident-v1.json | 2005 | Evidence timeline · Current Alerts (now) |
@@ -178,19 +178,19 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9405 | Run context (thin) -> Run Explorer hub |
 | bioetl-provider-health-v2.json | 9402 | ID |
 | bioetl-provider-health-v2.json | 9403 | Processed Records |
-| bioetl-run-explorer-v1.json | 1000 | Navigation |
-| bioetl-run-explorer-v1.json | 1 | Provenance · Run Scope |
-| bioetl-run-explorer-v1.json | 3010 | Browse · Recent pipeline runs (no selection) |
-| bioetl-run-explorer-v1.json | 9402 | ID |
-| bioetl-run-explorer-v1.json | 9403 | Processed Records |
-| bioetl-run-explorer-v1.json | 3099 | Selected run detail (Ops HTTP; expand after selection) |
-| bioetl-run-explorer-v1.json | 3011 | Selected run · funnel stages |
-| bioetl-run-explorer-v1.json | 3012 | Selected run · top reasons |
-| bioetl-run-explorer-v1.json | 3015 | Selected run · reconciliation |
-| bioetl-run-explorer-v1.json | 3016 | Selected run · layers (accounting) |
-| bioetl-run-explorer-v1.json | 3013 | Selected run · artifacts |
-| bioetl-run-explorer-v1.json | 3014 | Selected run · stage timings / failure (optional) |
-| bioetl-run-explorer-v1.json | 3001 | Next actions (≤4) |
+| bioetl-run-explorer-v1.json | 1000 | Navigate Dashboards |
+| bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
+| bioetl-run-explorer-v1.json | 3010 | Browse Recent Runs |
+| bioetl-run-explorer-v1.json | 9402 | Inspect Run Identity |
+| bioetl-run-explorer-v1.json | 9403 | Inspect Processed Records |
+| bioetl-run-explorer-v1.json | 3099 | Selected Run Details |
+| bioetl-run-explorer-v1.json | 3011 | Inspect Stage Funnel |
+| bioetl-run-explorer-v1.json | 3012 | Inspect Top Run Reasons |
+| bioetl-run-explorer-v1.json | 3015 | Inspect Reconciliation |
+| bioetl-run-explorer-v1.json | 3016 | Inspect Layer Accounting |
+| bioetl-run-explorer-v1.json | 3013 | Inspect Run Artifacts |
+| bioetl-run-explorer-v1.json | 3014 | Inspect Timings & Failure |
+| bioetl-run-explorer-v1.json | 3001 | Continue Run Investigation |
 | bioetl-runtime.json | 1000 | Navigate Dashboards |
 | bioetl-runtime.json | 9400 | Inspect Scope & Evidence |
 | bioetl-runtime.json | 9401 | Monitor Pipeline Health |

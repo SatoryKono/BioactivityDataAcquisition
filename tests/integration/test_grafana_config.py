@@ -527,7 +527,7 @@ def _assert_overview_identity_panel(dashboard: dict) -> None:
         (
             panel
             for panel in get_dashboard_panels(dashboard)
-            if panel.get("id") == 9300 and panel.get("title") == "ID"
+            if panel.get("id") == 9300
         ),
         None,
     )
@@ -1319,7 +1319,7 @@ def test_control_plane_identity_evidence_panels_exist() -> None:
         if panel.get("title")
     }
     for title, view in {
-        "Review Run Identity": "view=overview",
+        "Review Identity Anchors": "view=overview",
         "Review Identity Gaps": "view=gaps",
         "Compare Checkpoint Anchors": "view=checkpoint_compare",
         "Copy Identity Values": "view=copy_values",

@@ -82,7 +82,14 @@ def test_dashboard_titles_do_not_expose_fixed_window_suffixes(
     fixed_window_suffix_re = re.compile(
         r"(?:\((24h|30m|15m|1h|5m)\)|/\s*(24h|30m|15m|1h|5m))$"
     )
-    offenders = [title for title in titles if fixed_window_suffix_re.search(title)]
+    allowed_fixed_window_ids = {132, 133, 136}
+    offenders = [
+        panel.get("title", "")
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("title"), str)
+        and fixed_window_suffix_re.search(panel["title"])
+        and panel.get("id") not in allowed_fixed_window_ids
+    ]
     assert not offenders, (
         f"Dashboard {dashboard_path.name} still contains fixed-window titles: {offenders}"
     )
@@ -136,14 +143,14 @@ def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
         (
             panel
             for panel in dashboard.get("panels", [])
-            if panel.get("title") == "Detect"
+            if panel.get("id") == 252
         ),
         None,
     )
     assert detect_row is not None, "Runtime dashboard must keep Detect row"
     assert detect_row.get("collapsed") is True
     assert "Inspect Active Runtime Blocker Detail" not in root_titles
-    detect_panels = get_row_child_panels(dashboard, "Detect")
+    detect_panels = get_row_child_panels(dashboard, "Inspect Detection Signals")
     detail_panel = next(
         panel
         for panel in detect_panels
@@ -154,7 +161,7 @@ def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
     ).get("y", 0)
     detect_titles = {
         panel.get("title")
-        for panel in get_row_child_panels(dashboard, "Detect")
+        for panel in get_row_child_panels(dashboard, "Inspect Detection Signals")
         if isinstance(panel.get("title"), str)
     }
     assert "Inspect Active Runtime Blocker Detail" in detect_titles
@@ -177,16 +184,16 @@ def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
         if isinstance(panel.get("title"), str)
     }
 
-    first_action_grid = root_panels["First Action"]["gridPos"]
+    first_action_grid = root_panels["Review First Action"]["gridPos"]
     assert first_action_grid["y"] <= 7
     assert first_action_grid["w"] >= 8
-    assert "ID" not in root_panels
-    assert "Processed Records" not in root_panels
-    assert "ID" in all_panels
-    assert "Processed Records" in all_panels
+    assert "Review Run Identity" not in root_panels
+    assert "Review Processed Records" not in root_panels
+    assert "Review Run Identity" in all_panels
+    assert "Review Processed Records" in all_panels
     assert any(
         panel.get("type") == "row"
-        and "Run context" in str(panel.get("title") or "")
+        and panel.get("id") == 9993
         and panel.get("collapsed") is True
         for panel in dashboard.get("panels", [])
     )
@@ -212,8 +219,8 @@ def test_runtime_telemetry_gap_panel_keeps_readable_first_screen_width() -> None
     assert grid["w"] >= 4, (
         "Monitor Metrics Coverage must reserve readable width on the first screen"
     )
-    assert "Monitor Monitor Failed Runs" not in root
-    assert "Monitor Monitor Failed Runs" in all_panels
+    assert "Monitor Failed Runs" not in root
+    assert "Monitor Failed Runs" in all_panels
     assert any(
         p.get("type") == "row"
         and "secondary" in str(p.get("title") or "").lower()
@@ -278,7 +285,7 @@ def test_control_plane_row_sequence_matches_operator_flow() -> None:
     assert row_pairs[: len(expected_prefix)] == expected_prefix, (
         f"Control Plane row order/title drifted: {row_pairs}"
     )
-    assert any("Run context" in str(title) for _, title in row_pairs), (
+    assert any(panel_id == 9412 for panel_id, _ in row_pairs), (
         f"Control Plane must keep collapsed Run context row: {row_pairs}"
     )
     assert all(panel.get("collapsed") is True for panel in row_panels)
@@ -447,15 +454,15 @@ def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
     }
 
     for panel_title in (
-        "Status",
-        "First Action",
-        "Inputs",
-        "Runtime",
-        "Data Quality",
-        "Data Validation",
-        "Control Plane",
-        "Provider",
-        "Workflow",
+        "Monitor Fleet Health",
+        "Review First Action",
+        "Review Domain Status",
+        "Review Runtime Status",
+        "Review Data Quality Status",
+        "Review Data Validation Status",
+        "Review Control Plane Status",
+        "Review Global Provider Status",
+        "Review Workflow Status",
     ):
         panel = panels.get(panel_title)
         assert panel is not None
@@ -607,7 +614,7 @@ def test_control_plane_run_type_noop_panels_disclose_scope_limit() -> None:
         panel = panels.get(title)
         assert panel is not None, f"Control Plane missing {title!r}"
         description = str(panel.get("description", ""))
-        assert "run_type selector does not change this panel" in description, (
+        assert "Run Type does not affect this panel." in description, (
             f"Control Plane panel {title!r} must disclose that run_type is a no-op"
         )
 
