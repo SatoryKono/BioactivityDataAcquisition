@@ -33,12 +33,26 @@ allowed_output_roots:
     - docs/02-architecture/diagrams/views/svg/
     - docs/02-architecture/adr-registry.md
     - docs/02-architecture/adr-registry/
+    - docs/02-architecture/07-compatibility-facade-snapshot.md
+    - docs/02-architecture/policies/reproducibility-support-matrix.md
+    - docs/03-guides/dashboards/panel-title-inventory.md
+    - docs/03-guides/dashboards/navigation-contract.md
+    - docs/03-guides/dashboards/dux7-live-residual-protocol.md
+    - docs/03-guides/silver-schema-testing-guide.md
+    - docs/04-reference/api/
     - docs/04-reference/config_comparison_matrix.csv
+    - docs/04-reference/contracts/dq-contracts.md
     - docs/04-reference/passports/
+    - docs/05-engineering/chembl_protein_classification_migration_closeout.md
+    - docs/05-operations/runbooks/docker-compose-project-migration.md
+    - docs/05-operations/runbooks/docker-stability.md
     - docs/filters/inventory-baseline.csv
     - docs/filters/inventory-baseline.json
     - docs/filters/inventory-baseline.md
     - docs/00-project/governance/root-local-clutter-cleanup.md
+  generated_ai_mirrors:
+    - docs/00-project/ai/agents/
+    - docs/00-project/ai/skills/global/
   ignored_docs_exports:
     - docs/exports/
   local_generated_docs_helpers:
