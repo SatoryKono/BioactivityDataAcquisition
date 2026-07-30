@@ -1081,7 +1081,7 @@ def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
             item
             for item in get_dashboard_panels(dashboard)
             if item.get("title")
-            == "Time Range · Worst Freshness Age (hours; SLA 24/72)"
+            == "Monitor Worst Freshness Age"
         ),
         None,
     )
@@ -1121,7 +1121,7 @@ def test_freshness_panels_do_not_compute_age_from_counter_suffix_metrics() -> No
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-dq-v2.json", "Review: Latest Successful Data Timestamp"),
+        ("bioetl-dq-v2.json", "Inspect Latest Successful Data"),
     ],
 )
 def test_latest_timestamp_panels_are_explicitly_success_timestamp_panels(
@@ -1433,12 +1433,12 @@ def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor: Silver Validation Failures"
+            if item.get("title") == "Monitor Silver Validation Failures"
         ),
         None,
     )
     assert panel is not None, (
-        "DQ dashboard missing 'Monitor: Silver Validation Failures' panel"
+        "DQ dashboard missing 'Monitor Silver Validation Failures' panel"
     )
 
     expressions = [
@@ -1447,10 +1447,10 @@ def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
         if isinstance(target.get("expr"), str)
     ]
     assert any('{pipeline=~"$pipeline"}' in expr for expr in expressions), (
-        "Monitor: Silver Validation Failures must filter on the explicit pipeline label"
+        "Monitor Silver Validation Failures must filter on the explicit pipeline label"
     )
     assert all('{table=~"$pipeline"}' not in expr for expr in expressions), (
-        "Monitor: Silver Validation Failures must not rely on the table-to-pipeline naming convention"
+        "Monitor Silver Validation Failures must not rely on the table-to-pipeline naming convention"
     )
 
 
@@ -1473,7 +1473,7 @@ def test_provider_dashboard_surfaces_current_health_status_panel() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Review Raw Provider Health Enum"
+            if item.get("title") == "Inspect Raw Health Status"
         ),
         None,
     )
