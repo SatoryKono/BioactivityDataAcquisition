@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-30T12:39:08.269780+00:00",
+  "generated_at": "2026-07-30T14:15:16.080008+00:00",
   "summary": {
     "total_scripts": 567,
     "status_counts": {
@@ -13,7 +13,7 @@
       "build": 12,
       "ci": 66,
       "docs": 230,
-      "other": 76,
+      "other": 77,
       "scripts": 447,
       "skills": 17,
       "tests": 352
@@ -8838,7 +8838,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 289,
+          "line": 321,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"apply_ci_fixes.py\""
         }
@@ -8985,7 +8985,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 190,
+          "line": 222,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         },
@@ -9093,7 +9093,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 184,
+          "line": 216,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\""
         }
@@ -9147,7 +9147,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 118,
+          "line": 150,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_identity.py\","
         }
@@ -9168,7 +9168,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 119,
+          "line": 151,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_registry.py\","
         },
@@ -9252,7 +9252,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 120,
+          "line": 152,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py\","
         },
@@ -9297,7 +9297,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 121,
+          "line": 153,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_schema_classifier_gate.py\","
         },
@@ -12500,7 +12500,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 373,
+          "line": 405,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         },
@@ -12986,7 +12986,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 376,
+          "line": 408,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         },
@@ -13641,7 +13641,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 122,
+          "line": 154,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_domain_io_taint_inventory.py\","
         }
@@ -13729,7 +13729,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 123,
+          "line": 155,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_flaky_test_burndown_review.py\","
         },
@@ -14155,8 +14155,20 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
+        {
+          "path": ".github/ISSUES/TEST-SYS-13-Refresh-Test-Governance-Source-Hash.md",
+          "line": 20,
+          "source_group": "other",
+          "text": "`scripts/engineering/qa/report_test_governance_audit.py --check` reports drift."
+        },
+        {
+          "path": ".github/ISSUES/TEST-SYS-13-Refresh-Test-Governance-Source-Hash.md",
+          "line": 66,
+          "source_group": "other",
+          "text": "- `python scripts/engineering/qa/report_test_governance_audit.py --check`"
+        },
         {
           "path": "scripts/engineering/ci/_compatibility_telemetry.py",
           "line": 17,
@@ -17595,7 +17607,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 257,
+          "line": 289,
           "source_group": "tests",
           "text": "/ \"audit_live_grafana_panels.py\""
         },
@@ -17898,7 +17910,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 242,
+          "line": 274,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
         },
@@ -20246,7 +20258,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 117,
+          "line": 149,
           "source_group": "tests",
           "text": "\"scripts/schema/generate_schema_artifacts.py\","
         },
@@ -20820,7 +20832,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 116,
+          "line": 148,
           "source_group": "tests",
           "text": "\"src/tools/generate_docs_export.py\","
         }
