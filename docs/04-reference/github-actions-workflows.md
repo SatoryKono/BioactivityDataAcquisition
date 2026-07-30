@@ -57,7 +57,7 @@ Use it when you need to answer:
 | `schema-governance.yml` | `Schema Governance` | `push`, `pull_request` | Generated artifacts, schema parity, schema drift |
 | `security.yml` | `Security Scans` | `push`, `pull_request` | Secrets, dependency, and Bandit scans |
 | `semantic-governance.yml` | `Semantic Pipeline Governance` | `push`, `pull_request` | Semantic pipeline contract/policy governance |
-| `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request` | Local skill mirror consistency |
+| `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request` | Local skill mirrors plus Codex–Junie runtime parity |
 | `tests.yml` | `Tests` | `push`, `pull_request` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
 | `type-checking.yml` | `Type Checking (Strict)` | `push`, `pull_request`, `workflow_dispatch` | Strict mypy lane |
 | `validate-vendored-mermaid-assets.yml` | `Validate vendored Mermaid assets` | `push`, `pull_request` | Vendored Mermaid asset presence check |

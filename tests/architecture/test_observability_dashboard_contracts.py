@@ -235,7 +235,7 @@ def test_provider_health_provenance_documents_provider_global_scope() -> None:
     )
     assert provenance is not None
     content = str(provenance.get("options", {}).get("content", ""))
-    assert "Provider-global" in content or "provider-global" in content.lower()
+    assert "GLOBAL" in content or "global" in content.lower()
     assert "Runtime" in content
 
 

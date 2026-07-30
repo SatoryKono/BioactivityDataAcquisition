@@ -119,7 +119,7 @@ def test_browse_hides_raw_path_columns() -> None:
     browse = next(
         p
         for p in _walk(data.get("panels"))
-        if "Recent pipeline runs" in (p.get("title") or "")
+        if p.get("id") == 3010
     )
     transforms = browse.get("transformations") or []
     organize = next(t for t in transforms if t.get("id") == "organize")

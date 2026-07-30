@@ -57,7 +57,7 @@ the human index.
 | `schema-governance.yml` | Schema Governance | Schema governance checks |
 | `security.yml` | Security Scans | Security scanning |
 | `semantic-governance.yml` | Semantic Pipeline Governance | Semantic pipeline governance |
-| `skills-consistency.yml` | Skills Consistency | AI skill parity / consistency |
+| `skills-consistency.yml` | Skills Consistency | AI skill parity plus Codex–Junie runtime parity |
 | `stale.yml` | Stale | Stale issue/PR automation |
 | `tests.yml` | Tests | Primary unit/integration test matrix |
 | `type-checking.yml` | Type Checking (Strict) | basedpyright / type gates |

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-30T08:51:32.171896+00:00",
+  "generated_at": "2026-07-30T09:33:17.583515+00:00",
   "summary": {
     "total_scripts": 567,
     "status_counts": {
@@ -9,14 +9,14 @@
       "temporary_diagnostic": 5
     },
     "reference_group_coverage": {
-      "agents": 5,
+      "agents": 6,
       "build": 12,
-      "ci": 64,
+      "ci": 66,
       "docs": 229,
       "other": 76,
       "scripts": 459,
       "skills": 17,
-      "tests": 351
+      "tests": 352
     }
   },
   "scripts": [
@@ -137,13 +137,13 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 20,
+          "line": 26,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/check_skills_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 37,
+          "line": 52,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/check_skills_mirror.sh\""
         },
@@ -2204,8 +2204,20 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 28,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 54,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
+        },
         {
           "path": "scripts/ai/junie/check_junie_mirror.sh",
           "line": 43,
@@ -2223,8 +2235,32 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 18,
       "references": [
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 29,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/junie/check_junie_mirror.sh\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 55,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/junie/check_junie_mirror.sh\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 72,
+          "source_group": "ci",
+          "text": "run: bash scripts/ai/junie/check_junie_mirror.sh --check"
+        },
+        {
+          "path": "AGENTS.md",
+          "line": 62,
+          "source_group": "agents",
+          "text": "`bash scripts/ai/junie/check_junie_mirror.sh --check` and report the"
+        },
         {
           "path": "docs/00-project/NORMATIVE_SOURCES.md",
           "line": 47,
@@ -2248,30 +2284,6 @@
           "line": 85,
           "source_group": "docs",
           "text": "1. runtime-mirror parity check: `bash scripts/ai/junie/check_junie_mirror.sh"
-        },
-        {
-          "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
-          "line": 148,
-          "source_group": "docs",
-          "text": "`scripts/ai/junie/check_junie_mirror.sh`; `.gemini/**` only when the tree"
-        },
-        {
-          "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
-          "line": 172,
-          "source_group": "docs",
-          "text": "- Enforcement: `bash scripts/ai/junie/check_junie_mirror.sh --check` (read-"
-        },
-        {
-          "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
-          "line": 185,
-          "source_group": "docs",
-          "text": "parity with `.codex/agents/**` enforced by `check_junie_mirror.sh`)"
-        },
-        {
-          "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
-          "line": 191,
-          "source_group": "docs",
-          "text": "parity with `.codex/skills/**` enforced by `check_junie_mirror.sh`)"
         }
       ]
     },
@@ -4267,13 +4279,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 22,
+          "line": 31,
           "source_group": "ci",
           "text": "- \"scripts/ai/sync_ai_governance.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 39,
+          "line": 57,
           "source_group": "ci",
           "text": "- \"scripts/ai/sync_ai_governance.py\""
         },
@@ -19672,19 +19684,19 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 24,
+          "line": 33,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_ai_skills_layout.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 41,
+          "line": 59,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_ai_skills_layout.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 57,
+          "line": 85,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_ai_skills_layout.sh"
         },
@@ -19709,19 +19721,19 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 23,
+          "line": 32,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_skills_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 40,
+          "line": 58,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_skills_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 54,
+          "line": 82,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_skills_mirror.sh --check"
         },

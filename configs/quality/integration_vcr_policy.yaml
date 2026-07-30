@@ -131,7 +131,6 @@ tracked_suite_inventory:
     - tests/integration/determinism/test_chembl_assay_reproducibility_determinism_gate.py
     - tests/integration/determinism/test_composite_reproducibility_determinism_gate.py
     - tests/integration/determinism/test_tracked_fixture_idempotency_gate.py
-    - tests/integration/grafana/test_silver_reject_explorer_copy.py
     - tests/integration/grafana/test_workflow_dashboard_json_valid.py
     - tests/integration/memory/test_decision_replay.py
     - tests/integration/memory/test_timeline_ingest.py
