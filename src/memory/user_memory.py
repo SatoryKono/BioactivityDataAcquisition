@@ -266,7 +266,8 @@ class UserMemoryStore:
         record_id: str,
     ) -> None:
         """Permanently delete one explicitly scoped repository-owned record."""
-        self._require_consent(owner_id, context.repo_id)
+        # Revocation stops processing but must not make privacy erasure impossible.
+        self._require_consent(owner_id, context.repo_id, require_active=False)
         require_access(
             context,
             action=AccessAction.DELETE,
@@ -278,7 +279,13 @@ class UserMemoryStore:
             raise FileNotFoundError("user-memory record not found")
         path.unlink()
 
-    def _require_consent(self, user_id: str, repo_id: str) -> UserMemoryConsent:
+    def _require_consent(
+        self,
+        user_id: str,
+        repo_id: str,
+        *,
+        require_active: bool = True,
+    ) -> UserMemoryConsent:
         path = self._consent_path(user_id, repo_id)
         if not path.is_file():
             raise UserMemoryConsentError(
@@ -286,7 +293,7 @@ class UserMemoryStore:
             )
         payload = json.loads(path.read_text(encoding="utf-8"))
         consent = UserMemoryConsent(**payload)
-        if not consent.active:
+        if require_active and not consent.active:
             raise UserMemoryConsentError("repository-owned user memory consent revoked")
         return consent
 
