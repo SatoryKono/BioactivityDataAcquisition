@@ -22,6 +22,27 @@ from scripts.engineering.qa import report_vcr_metadata_catalog as module
 pytestmark = pytest.mark.unit
 
 
+def test_legacy_metadata_owner_aliases_reference_live_surfaces() -> None:
+    """Retired cassettes must not leave stale reachability aliases behind."""
+    repo_root = Path(__file__).resolve().parents[3]
+
+    missing = {
+        cassette: [
+            owner.as_posix()
+            for owner in owners
+            if not (repo_root / owner).is_file()
+        ]
+        for cassette, owners in module.LEGACY_METADATA_OWNER_ALIASES.items()
+        if not (repo_root / cassette).is_file()
+        or any(not (repo_root / owner).is_file() for owner in owners)
+    }
+
+    assert missing == {}, (
+        "Legacy VCR owner aliases must reference an existing cassette and owner test; "
+        f"remove retired aliases with their cassette: {missing}"
+    )
+
+
 def test_python_reference_scan_prefers_longest_overlapping_token(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

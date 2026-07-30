@@ -40,9 +40,6 @@ LEGACY_METADATA_OWNER_ALIASES: dict[str, tuple[Path, ...]] = {
     "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_tissue.yaml": (
         _TEST_PIPELINE_MATRIX_E2E,
     ),
-    "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load.yaml": (
-        Path("tests/e2e/test_full_pipeline.py"),
-    ),
     "tests/fixtures/vcr/crossref/test_crossref_batch_fetch.yaml": (_TEST_CROSSREF,),
     "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi.yaml": (_TEST_CROSSREF,),
     "tests/fixtures/vcr/crossref/test_crossref_health_check.yaml": (_TEST_CROSSREF,),
