@@ -304,6 +304,10 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
             assert (
                 "does not determine l0 status or first action" in description
                 or "does not determine current fleet health" in description
+                or "is not proof that current fleet health is ok" in description
+                or "absence is not proof that current fleet health is ok"
+                in description
+                or "not proof that current fleet health is ok" in description
             )
             assert data_links
             assert all(
@@ -434,10 +438,18 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         "accounting" in processed_description
         or ("counts" in processed_description and "outcomes" in processed_description)
     )
-    assert "evidence" in processed_description
-    assert "missing" in processed_description
-    assert "not ok" in processed_description
-    assert "not displayed" in processed_description
+    if dashboard_name == "bioetl-runtime.json":
+        assert "unresolved scope" in processed_description
+        assert "backend failure" in processed_description
+        assert any(
+            next_action in processed_description
+            for next_action in ("/health/live", "run explorer")
+        )
+    else:
+        assert "evidence" in processed_description
+        assert "missing" in processed_description
+        assert "not ok" in processed_description
+        assert "not displayed" in processed_description
     if dashboard_name == "bioetl-provider-health-v2.json":
         assert "does not prove current provider health" in processed_description
         assert "monitor provider telemetry freshness" in processed_description
@@ -492,8 +504,8 @@ def test_control_plane_identity_evidence_documents_short_full_split() -> None:
         if panel.get("title") == "Review Identity Anchors"
     )
     description = str(panel.get("description", "")).lower()
-    assert "shortened in value_short" in description
-    assert "full in value_full" in description
+    assert "short values are shown" in description
+    assert "full values remain available" in description
     transformation_payload = json.dumps(panel.get("transformations", []))
     assert "value_short" in transformation_payload
     assert "value_full" in transformation_payload
