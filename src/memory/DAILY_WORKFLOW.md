@@ -130,6 +130,10 @@ question starts from a concrete file path.
 
 Run the standard post-task workflow after the source change or audit is done:
 
+Set non-empty `BIOETL_AI_RUNTIME` and `BIOETL_AI_AGENT` first. Durable note
+writes fail closed when either value is absent or `unknown`; legacy records
+retain their original provenance and must not be silently relabelled.
+
 ```bash
 python -m memory.tooling.workflow post-task \
   --task-id chembl-memory-audit \

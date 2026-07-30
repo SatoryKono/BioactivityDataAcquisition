@@ -23,6 +23,12 @@ from memory.tooling import workflow
 from tests.helpers.memory_manifests import write_test_rag_manifest
 
 
+@pytest.fixture(autouse=True)
+def _explicit_actor_identity(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("BIOETL_AI_RUNTIME", "test-runtime")
+    monkeypatch.setenv("BIOETL_AI_AGENT", "test-agent")
+
+
 def test_pre_task_off_mode_performs_no_persistent_read_or_write(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -46,6 +52,30 @@ def test_pre_task_off_mode_performs_no_persistent_read_or_write(
 
 
 pytestmark = pytest.mark.integration
+
+
+@pytest.mark.parametrize(
+    "missing_variable",
+    ["BIOETL_AI_RUNTIME", "BIOETL_AI_AGENT"],
+)
+def test_pre_task_rejects_missing_actor_identity_before_durable_write(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    missing_variable: str,
+) -> None:
+    monkeypatch.delenv(missing_variable)
+
+    with pytest.raises(ValueError, match=missing_variable):
+        workflow.pre_task_workflow(
+            task_id="missing-actor",
+            title="Missing actor",
+            query=None,
+            source_refs=["src/memory/README.md"],
+            session_note_path=tmp_path / "session.md",
+            run_refresh_if_missing=False,
+        )
+
+    assert not (tmp_path / "session.md").exists()
 
 
 def test_pre_task_workflow_creates_session_note_and_uses_local_surfaces(
