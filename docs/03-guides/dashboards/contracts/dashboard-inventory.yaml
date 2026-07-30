@@ -83,7 +83,7 @@ dashboards:
     panel_count: 42
     key_panels:
       - id: 9401
-        title: Monitor Pipeline Health
+        title: Monitor Pipeline Status
         type: stat
         description: Trust-gated current runtime health status
       - id: 205
@@ -118,11 +118,11 @@ dashboards:
     panel_count: 31
     key_panels:
       - id: 9101
-        title: Monitor GLOBAL Provider Severity Matrix
+        title: Monitor Fleet Severity
         type: table
         description: Provider health severity matrix
       - id: 9103
-        title: Inspect Provider Top Causes
+        title: Inspect Top Provider Causes
         type: table
         description: Top causes of provider failures
     selector_variables:
@@ -148,19 +148,19 @@ dashboards:
     panel_count: 37
     key_panels:
       - id: 9401
-        title: Status
+        title: Monitor Current DQ Status
         type: stat
         description: Current DQ status summary
       - id: 9101
-        title: "Now · DQ Threshold State"
+        title: Monitor DQ Threshold State
         type: stat
         description: DQ threshold violation state (NOW lane)
       - id: 9102
-        title: "Now · DQ Current Reasons"
+        title: Inspect Current DQ Reasons
         type: table
         description: Current DQ violation reasons breakdown (NOW lane)
       - id: 8
-        title: Time Range · Worst Freshness Age (hours; SLA 24/72)
+        title: Monitor Worst Freshness Age
         type: gauge
         description: TIME RANGE freshness age in hours with WARN 24h and CRIT 72h
     selector_variables:
@@ -184,15 +184,15 @@ dashboards:
     panel_count: 12
     key_panels:
       - id: 2010
-        title: "Ranked Active Suspects"
+        title: "Inspect Ranked Suspects"
         type: table
         description: Cross-domain ranked suspects (primary)
       - id: 2005
-        title: "Evidence timeline · Current Alerts (now)"
+        title: "Monitor Current Alerts"
         type: table
         description: Instant ALERTS snapshot (evidence timeline chain)
       - id: 2006
-        title: "Evidence timeline · Alert State History (range)"
+        title: "Track Alert State History"
         type: state-timeline
         description: Range ALERTS history (same chain; not persistent incident log)
     selector_variables:
@@ -215,19 +215,19 @@ dashboards:
     panel_count: 13
     key_panels:
       - id: 9402
-        title: ID
+        title: Inspect Run Identity
         type: table
         description: HTTP identity hub; run_id never a Prometheus label
       - id: 9403
-        title: Processed Records
+        title: Inspect Processed Records
         type: table
         description: Bronze/Silver/Gold accounting hub via Ops HTTP
       - id: 3010
-        title: "Browse · Recent pipeline runs (no selection)"
+        title: Browse Recent Runs
         type: table
         description: pipeline-run-reports index (empty-selection utility)
       - id: 3011
-        title: Selected run · funnel stages
+        title: Inspect Stage Funnel
         type: table
         description: pipeline-run-report funnel
     selector_variables:

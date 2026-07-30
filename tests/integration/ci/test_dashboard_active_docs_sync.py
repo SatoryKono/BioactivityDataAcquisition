@@ -191,7 +191,13 @@ def test_panel_docs_match_shipped_dashboard_panel_titles() -> None:
         "processed_panel_id",
     ),
     (
-        ("bioetl-dq-v2", "ID", "Processed Records", 9402, 9403),
+        (
+            "bioetl-dq-v2",
+            "Inspect Run Identity",
+            "Inspect Processed Records",
+            9402,
+            9403,
+        ),
         (
             "bioetl-overview-v2",
             "Review Run Identity",
@@ -199,11 +205,17 @@ def test_panel_docs_match_shipped_dashboard_panel_titles() -> None:
             9300,
             9301,
         ),
-        ("bioetl-provider-health-v2", "ID", "Processed Records", 9402, 9403),
+        (
+            "bioetl-provider-health-v2",
+            "Inspect Run Identity",
+            "Inspect Processed Records",
+            9402,
+            9403,
+        ),
         (
             "bioetl-runtime",
-            "Review Run Identity",
-            "Review Processed Records",
+            "Inspect Pipeline Identity",
+            "Inspect Processed Records",
             9402,
             9403,
         ),
