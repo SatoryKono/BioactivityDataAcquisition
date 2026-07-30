@@ -956,6 +956,15 @@ repo_backed_unit_test_exceptions:
     and run in the repo-backed-unit lane, not unit-fast.
   review_date: '2026-09-30'
   entries:
+  - path: tests/unit/repo_backed/application/composite/test_preflight_validator.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/composites/*.yaml preflight field-priority and source-schema contracts
+  - path: tests/unit/repo_backed/application/pipelines/test_chembl_activity.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/entities/chembl/activity.yaml pipeline configuration contract
+  - path: tests/unit/repo_backed/application/services/test_workflow_runner_service.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/workflows/*.yaml declarative workflow execution contracts
   - path: tests/unit/repo_backed/application/pipelines/crossref/test_business_data_builder.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/application/pipelines/crossref/_business_data_builder.py
