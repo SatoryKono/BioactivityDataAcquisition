@@ -130,7 +130,7 @@
     },
     "5705": {
       "direct_reachable_cassette_count": 128,
-      "generated_reachable_cassette_count": 70,
+      "generated_reachable_cassette_count": 69,
       "metadata_review_required_cassette_count": 0,
       "metadata_reviewed_count": 0,
       "unowned_cassette_count": 0

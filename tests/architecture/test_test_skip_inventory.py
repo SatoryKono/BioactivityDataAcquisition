@@ -22,6 +22,18 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "configs" / "quality" / "test_skip_inventory.yaml"
 SCAN_ROOTS = (ROOT / "tests" / "contract", ROOT / "tests" / "integration")
+REPLAY_CRITICAL_GATES = (
+    ROOT
+    / "tests"
+    / "integration"
+    / "determinism"
+    / "test_reproducibility_determinism_gate.py",
+    ROOT
+    / "tests"
+    / "integration"
+    / "idempotency"
+    / "test_reproducibility_idempotency_gate.py",
+)
 
 pytestmark = pytest.mark.architecture
 
@@ -146,3 +158,15 @@ def test_test_skip_inventory_tracks_current_live_skip_surfaces() -> None:
             f"Reviewed skip count drift for {path}: "
             f"expected {live[path]}, got {entry['reviewed_skip_calls']}"
         )
+
+
+@pytest.mark.parametrize("gate_path", REPLAY_CRITICAL_GATES, ids=lambda path: path.stem)
+def test_replay_critical_gates_cannot_be_suppressed(gate_path: Path) -> None:
+    """Keep determinism/idempotency merge evidence mandatory on every OS."""
+    source = gate_path.read_text(encoding="utf-8")
+
+    assert _suppression_count_from_source(source) == 0, (
+        f"{gate_path.relative_to(ROOT)} must run fail-closed on every platform; "
+        "isolate its runtime filesystem instead of adding skip/skipif/xfail"
+    )
+    assert "replay_runtime_root" in source

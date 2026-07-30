@@ -57,6 +57,7 @@ jobs:
 
       - name: Run Contract Tests
         id: contract_tests
+        continue-on-error: true
         env:
           PROVIDERS: ${{ github.event.inputs.providers || 'all' }}
           SKIP_SLOW: ${{ github.event.inputs.skip_slow || 'false' }}
@@ -77,9 +78,15 @@ jobs:
             PYTEST_ARGS="$PYTEST_ARGS -m 'not slow'"
           fi
 
-          # Run tests and capture exit code
+          # Preserve pytest's exact exit code while allowing diagnostics and
+          # failure notification to run before the job fails closed.
           mkdir -p reports/junit
-          uv run --frozen --no-build pytest $PYTEST_ARGS --junit-xml=reports/junit/contract-results.xml || echo "TESTS_FAILED=true" >> "$GITHUB_OUTPUT"
+          set +e
+          uv run --frozen --no-build pytest $PYTEST_ARGS --junit-xml=reports/junit/contract-results.xml
+          pytest_rc=$?
+          set -e
+          echo "pytest_rc=$pytest_rc" >> "$GITHUB_OUTPUT"
+          exit "$pytest_rc"
 
       - name: Upload Test Results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
@@ -90,7 +97,7 @@ jobs:
           retention-days: 30
 
       - name: Create Issue on Failure
-        if: steps.contract_tests.outputs.TESTS_FAILED == 'true'
+        if: always() && steps.contract_tests.outcome == 'failure'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
@@ -141,11 +148,21 @@ jobs:
               });
             }
 
+      - name: Enforce Contract Test Result
+        if: always() && steps.contract_tests.outcome == 'failure'
+        env:
+          PYTEST_RC: ${{ steps.contract_tests.outputs.pytest_rc }}
+        run: |
+          case "$PYTEST_RC" in
+            ''|*[!0-9]*) exit 1 ;;
+            *) exit "$PYTEST_RC" ;;
+          esac
+
   notify-success:
     name: Notify on Success
     runs-on: ubuntu-latest
     needs: contract-tests
-    if: success()
+    if: needs.contract-tests.result == 'success'
     permissions:
       contents: read
 

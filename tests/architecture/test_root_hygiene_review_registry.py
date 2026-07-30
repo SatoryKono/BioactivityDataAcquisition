@@ -18,6 +18,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+from scripts.engineering.repo.audit_root_cleanliness import _run_git
+
 
 pytestmark = pytest.mark.architecture
 
@@ -464,12 +466,23 @@ def test_root_review_contract_entrypoints_have_exact_filename_owners() -> None:
 
 
 def test_no_tracked_repository_root_scripts_remain() -> None:
-    completed = subprocess.run(
-        ["git", "ls-files", "-z", "*.sh", "*.ps1", "*.py", "*.bat"],
-        cwd=ROOT,
-        capture_output=True,
-        check=True,
-    )
+    try:
+        completed = _run_git(
+            ROOT,
+            "ls-files",
+            "-z",
+            "--",
+            "*.sh",
+            "*.ps1",
+            "*.py",
+            "*.bat",
+        )
+    except subprocess.CalledProcessError as exc:
+        stderr = (exc.stderr or b"").decode("utf-8", errors="replace").strip()
+        pytest.fail(
+            f"git ls-files failed with exit code {exc.returncode}: {stderr}",
+            pytrace=False,
+        )
     root_scripts = sorted(
         path
         for path in completed.stdout.decode("utf-8", errors="replace").split("\0")

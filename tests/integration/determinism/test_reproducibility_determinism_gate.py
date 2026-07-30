@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import platform
 from pathlib import Path
 
 import pytest
@@ -32,10 +31,6 @@ pytestmark = [
     pytest.mark.integration,
     pytest.mark.no_api,
     pytest.mark.asyncio,
-    pytest.mark.skipif(
-        "microsoft" in platform.release().lower(),
-        reason="Skipped on WSL due to asyncio teardown on cloud-mounted storage",
-    ),
 ]
 
 
@@ -85,7 +80,7 @@ def _canonical_manifest_fingerprint(payload: dict) -> str:
 
 @pytest.mark.asyncio
 async def test_consolidation_determinism_replay_guard(
-    tmp_path: Path,
+    replay_runtime_root: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     (
@@ -96,7 +91,7 @@ async def test_consolidation_determinism_replay_guard(
         first_run_id,
         second_run_id,
     ) = await run_tracked_fixture_replay_pair(
-        tmp_path=tmp_path, monkeypatch=monkeypatch
+        tmp_path=replay_runtime_root, monkeypatch=monkeypatch
     )
 
     assert first_manifest["run_id"] != second_manifest["run_id"]
@@ -136,7 +131,7 @@ async def test_consolidation_determinism_replay_guard(
     ) == _canonical_manifest_fingerprint(second_manifest)
     assert first_effective["artifact_id"] == second_effective["artifact_id"]
 
-    evidence_dir = tmp_path / "reports" / "reproducibility"
+    evidence_dir = replay_runtime_root / "reports" / "reproducibility"
     evidence_dir.mkdir(parents=True, exist_ok=True)
     evidence_path = evidence_dir / "tracked_fixture_determinism.json"
     evidence_path.write_text(
