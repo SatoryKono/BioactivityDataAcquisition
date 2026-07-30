@@ -63,9 +63,6 @@ if TYPE_CHECKING:
     from bioetl.domain.behavior.organism_classification_service import (
         OrganismClassifier as OrganismClassifier,
     )
-    from bioetl.domain.behavior.phased_migration_support import (
-        PhasedMigrationCoordinator as PhasedMigrationCoordinator,
-    )
     from bioetl.domain.behavior.preflight_governance import (
         PreflightGovernor as PreflightGovernor,
     )
@@ -154,10 +151,6 @@ _PUBLIC_EXPORTS = {
     "OrganismClassifier": (
         "bioetl.domain.behavior.organism_classification_service",
         "OrganismClassifier",
-    ),
-    "PhasedMigrationCoordinator": (
-        "bioetl.domain.behavior.phased_migration_support",
-        "PhasedMigrationCoordinator",
     ),
     "PreflightGovernor": (
         "bioetl.domain.behavior.preflight_governance",

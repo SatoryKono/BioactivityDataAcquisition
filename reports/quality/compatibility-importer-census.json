@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-07-19",
+  "snapshot_date": "2026-07-30",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -155,10 +155,11 @@
       "test_importers": [
         "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/smoke/test_smoke.py",
+        "tests/unit/composition/test_entrypoint_wrapper_coverage.py",
         "tests/unit/composition/test_entrypoints.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 3,
+      "test_importer_count": 4,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -277,10 +278,11 @@
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "src_importers": [],
       "test_importers": [
-        "tests/unit/composition/test_canonical_module_paths.py"
+        "tests/unit/composition/test_canonical_module_paths.py",
+        "tests/unit/composition/test_maintenance_api_wrappers.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 1,
+      "test_importer_count": 2,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing",
@@ -597,10 +599,11 @@
       "test_importers": [
         "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/smoke/test_smoke.py",
+        "tests/unit/composition/test_entrypoint_wrapper_coverage.py",
         "tests/unit/composition/test_entrypoints.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 3,
+      "test_importer_count": 4,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -719,10 +722,11 @@
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "src_importers": [],
       "test_importers": [
-        "tests/unit/composition/test_canonical_module_paths.py"
+        "tests/unit/composition/test_canonical_module_paths.py",
+        "tests/unit/composition/test_maintenance_api_wrappers.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 1,
+      "test_importer_count": 2,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing",
@@ -970,7 +974,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 3
+      "test_importer_count": 4
     },
     {
       "path": "src/bioetl/composition/health_api.py",
@@ -1069,7 +1073,7 @@
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 1
+      "test_importer_count": 2
     },
     {
       "path": "src/bioetl/infrastructure/config/__init__.py",
@@ -1190,7 +1194,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 3
+      "test_importer_count": 4
     },
     {
       "path": "src/bioetl/composition/health_api.py",
@@ -1289,7 +1293,7 @@
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 1
+      "test_importer_count": 2
     },
     {
       "path": "src/bioetl/infrastructure/config/__init__.py",
@@ -1356,20 +1360,17 @@
         "module_name": "bioetl.interfaces.cli.commands.maintenance",
         "owner": "bioetl.interfaces.cli.commands",
         "previous_status": "public-entrypoint",
-        "surface_classification": "first-party-active",
-        "action": "defer_until_first_party_importers_zero",
-        "rationale": "The live importer census reports two reviewed first-party `src/` importers for the top-level maintenance command, so the removal wave is deferred until those importers return to zero.",
+        "surface_classification": "external-public-only",
+        "action": "retain_external_public_reexport",
+        "rationale": "2026-07-28 #6791 burns first-party src importers to zero by wiring CLI discovery to domains.maintenance.command_group. The top-level maintenance.py remains a sanctioned external/public re-export only (no first-party src importers).",
         "migration_prerequisites": [
-          "Keep public CLI discovery and the maintenance owner package lazy while narrowing first-party references to zero before reconsidering removal from debt tracking.",
+          "Keep first-party src importers of top-level maintenance.py at zero.",
           "Keep ordinary runtime maintenance access narrowed to `src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py`.",
           "Treat any future retirement of the public maintenance command itself as a separate external-breaking-change review, not part of this debt ratchet wave."
         ],
-        "src_importers": [
-          "src/bioetl/interfaces/cli/commands/__init__.py",
-          "src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py"
-        ],
+        "src_importers": [],
         "test_importers": [],
-        "src_importer_count": 2,
+        "src_importer_count": 0,
         "test_importer_count": 0
       }
     ]

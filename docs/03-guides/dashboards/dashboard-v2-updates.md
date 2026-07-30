@@ -7,8 +7,16 @@ ______________________________________________________________________
 `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
 
 Latest dashboard UX artifact for current shipped JSON changes:
-`docs/reports/dashboard-ux-checks/2026-07-28-drmr.md`
-(also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; prior: `docs/reports/dashboard-ux-checks/2026-05-19.md`)
+`docs/reports/dashboard-ux-checks/2026-07-30.md`
+(prior: `docs/reports/dashboard-ux-checks/2026-07-28-drmr.md`;
+also: `docs/reports/dashboard-ux-checks/2026-07-28.md`)
+
+## Selected-range description sync (2026-07-30)
+
+- Control-plane panels backed by `$__range` now identify the selected range in
+  their operator-facing descriptions.
+- Global-scope and telemetry-absence caveats remain explicit.
+- PromQL, layout, navigation, variables, and thresholds are unchanged.
 
 ## DRM residual migration (2026-07-28, epic #6844)
 

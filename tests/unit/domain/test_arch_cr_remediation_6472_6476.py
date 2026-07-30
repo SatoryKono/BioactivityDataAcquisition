@@ -34,7 +34,6 @@ import math
 
 import pytest
 
-from bioetl.domain.behavior import PhasedMigrationCoordinator
 from bioetl.domain.behavior._dq_value_coercion import _coerce_numeric_value
 from bioetl.domain.behavior.staged_enforcement import (
     EnforcementStage,
@@ -43,15 +42,6 @@ from bioetl.domain.behavior.staged_enforcement import (
 from bioetl.domain.config.validation_config import ValidationConfig
 
 pytestmark = pytest.mark.unit
-
-
-def test_phased_migration_coordinator_deprecated_facade() -> None:
-    with pytest.warns(DeprecationWarning, match="retired compatibility shim"):
-        coordinator = PhasedMigrationCoordinator()
-    status = coordinator.get_current_migration_status()
-    assert status.current_phase == "retired"
-    report = coordinator.check_backward_compatibility({"x": 1})
-    assert report["retired"] is True
 
 
 def test_staged_enforcement_honors_empty_policy_map() -> None:
