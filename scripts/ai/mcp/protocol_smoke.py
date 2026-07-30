@@ -18,7 +18,7 @@ import time
 import tomllib
 from collections import deque
 from pathlib import Path
-from typing import Any, TextIO
+from typing import Any, TextIO, cast
 
 _STDERR_READ_CHARS = 4096
 _STDERR_RETENTION_CHARS = 200_000
@@ -127,9 +127,11 @@ def _request(
         remaining = deadline - time.monotonic()
         if remaining <= 0:
             raise TimeoutError(f"MCP request {payload.get('id')} timed out")
-        response = json.loads(_readline(process.stdout, remaining))
+        response = json.loads(_readline(cast(TextIO, process.stdout), remaining))
+        if not isinstance(response, dict):
+            raise ValueError("MCP response must be a JSON object")
         if response.get("id") == payload.get("id"):
-            return response
+            return cast(dict[str, Any], response)
 
 
 def _load_server(config_path: Path, server_name: str) -> dict[str, Any]:
@@ -232,7 +234,10 @@ def _http_json_rpc(
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         raw = resp.read().decode("utf-8", errors="replace")
-    return json.loads(_extract_json_rpc_body(raw))
+    parsed = json.loads(_extract_json_rpc_body(raw))
+    if not isinstance(parsed, dict):
+        raise ValueError("MCP HTTP response must be a JSON object")
+    return cast(dict[str, Any], parsed)
 
 
 def _ping_http_endpoint(ping_url: str, *, timeout: float) -> int:

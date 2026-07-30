@@ -44,6 +44,7 @@ def test_pre_task_off_mode_performs_no_persistent_read_or_write(
     assert payload["session_note"] is None
     assert payload["retrieval"]["kind"] == "disabled"
 
+
 pytestmark = pytest.mark.integration
 
 
