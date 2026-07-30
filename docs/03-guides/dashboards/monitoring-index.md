@@ -38,7 +38,7 @@ For the authoritative shipped dashboard mapping
 | DQ/freshness/quarantine signal concern? | `bioetl-dq-v2` | `bioetl diagnostics quarantine --pipeline <pipeline>` | [DQ Failure Investigation](../../05-operations/runbooks/dq-failure-investigation.md) |
 | Need exact Silver structural rejected record evidence? | CLI (Explorer UI removed) | `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only ...` (`FILTERED_OUT_SILVER` legacy alias only); DQ aggregates stay in `bioetl-dq-v2` | [Quarantine Management](../../05-operations/runbooks/quarantine-management.md) |
 | Need Gold contract/semantic reject evidence? | `bioetl-dq-v2` Gold reject panels / processed-records surfaces | Start from `Inspect: Gold Reject Outcomes by Pipeline`; do not use `--silver-filter-only` | [Quarantine Management](../../05-operations/runbooks/quarantine-management.md) |
-| Replay/recovery trust question for run family? | `bioetl-control-plane-v1` | `Track: Replay / Resume Blockers in Range`, `bioetl checkpoint inspect`, `bioetl checkpoint audit-run`, then `bioetl run-manifest show <run-id|manifest-id>` for exact manifest/ledger evidence | [Checkpoint Debugging](../../05-operations/runbooks/checkpoint-debugging.md) |
+| Replay/recovery trust question for run family? | `bioetl-control-plane-v1` | `Track Replay Blockers in Range`, `bioetl checkpoint inspect`, `bioetl checkpoint audit-run`, then `bioetl run-manifest show <run-id|manifest-id>` for exact manifest/ledger evidence | [Checkpoint Debugging](../../05-operations/runbooks/checkpoint-debugging.md) |
 | Declarative workflow step failed or skipped? | `bioetl-runtime (workflow band)` | `bioetl_workflow_*` metrics | [Dashboard v2 Usage](dashboard-v2-usage.md) |
 | Metrics/dashboard vocabulary drift check? | inventory helper | `python -m scripts.engineering.qa report-observability-metric-inventory --json` | [Observability Metrics Contract](../../04-reference/contracts/observability.md) |
 
@@ -74,7 +74,7 @@ be interpreted only after `/health/live` (and control-plane readiness) respond;
 backend-down, invalid scope, and true zero/absent run are distinct operator states.
 
 For `0. Trust`, exact identity graph evidence is available by expanding
-the collapsed-by-default `Identity evidence and remaining replay-safety signals` row. Those
+the collapsed-by-default `Inspect Run Identity Evidence` row. Those
 tables call `/ops/control-plane/identity-evidence` for P0/P1/P2 anchors,
 identity gaps, checkpoint anchor comparison, and copy-friendly full values;
 they are HTTP-backed forensic surfaces, not Prometheus label filters.

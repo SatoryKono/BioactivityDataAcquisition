@@ -22,6 +22,7 @@ Silver использует профиль `openalex.publication` и прове�
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `openalex:publication` |
+| Method / endpoint | `GET` · `https://api.openalex.org` |
 | Resource / tables | `publication` |
 | Filters | `doi`: IDs from data/input/dois.csv column doi; CLI may override the input CSV |
 | Selected fields | `system` (10 fields); `identifiers` (4 fields); `title` (1 fields); `abstract` (1 fields); `authors` (3 fields); `affiliations` (1 fields); `institutions` (3 fields); `journal` (3 fields); `year` (1 fields); `dates` (1 fields); `pagination` (4 fields); `citations` (3 fields); `open_access` (2 fields); `subjects` (6 fields); `publisher` (1 fields); `funding` (3 fields); `doc_type` (5 fields); `quality` (1 fields); `language` (1 fields) |

@@ -17,6 +17,8 @@ manual.
 
 ## Source Of Truth
 
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`

@@ -22,6 +22,7 @@ Silver использует профиль `chembl.target_protein_classification
 | Аспект | Значение |
 | --- | --- |
 | Source | `derived` · `chembl:target_protein_classification` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data` |
 | Resource / tables | `target_protein_classification` |
 | Filters | `target_id`: IDs from data/input/target_protein_classification.csv column target_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (40 fields) |

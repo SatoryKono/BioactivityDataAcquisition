@@ -36,7 +36,7 @@
     }
   },
   "extraction": {
-    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data",
+    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data/protein_classification",
     "field_groups": [
       {
         "field_count": 7,
@@ -140,7 +140,7 @@
       }
     ],
     "source_collections": [
-      "protein_class"
+      "protein_classification"
     ],
     "source_kind": "http_api",
     "source_resource": "chembl:protein_class",

@@ -132,9 +132,7 @@ def collect_baseline(
             "captures_subprocess_output": False,
             "starts_optional_services": False,
         },
-        "probes": {
-            label: _summarize(samples) for label, samples in probes.items()
-        },
+        "probes": {label: _summarize(samples) for label, samples in probes.items()},
     }
 
 

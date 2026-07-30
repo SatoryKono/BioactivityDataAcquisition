@@ -106,7 +106,7 @@
     {
       "id": 9400,
       "type": "text",
-      "title": "Inspect Scope & Evidence",
+      "title": "Provenance",
       "gridPos": {
         "h": 4,
         "w": 16,
@@ -116,7 +116,7 @@
       "description": "Explains the data-quality question and the evidence scopes used on this dashboard. CURRENT is the latest quality status and failure reasons for the active pipeline filters. SELECTED RUN uses HTTP-backed record counts and processing outcomes for one run; run_id never filters Prometheus. TIME RANGE contains quality score, freshness, and impact evidence. These scopes answer different questions and should not be compared as equivalent status signals.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Does the data meet quality rules, and what requires action?</div><div><b>CURRENT</b> = latest quality status and reasons · <b>SELECTED RUN</b> = record counts and outcomes</div><div><b>TIME RANGE</b> = quality score, freshness, and impact; these scopes answer different questions</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is data conformant, and what impact needs action?</div><div><b>Scope:</b> <b>CURRENT</b> = Status/reasons · <b>SELECTED RUN</b> = accounting</div><div><b>TIME RANGE</b> = score/freshness/impact; scopes are not peers</div></div></div>"
       }
     },
     {
@@ -241,7 +241,7 @@
         "y": 7
       },
       "options": {
-        "content": "**Data trust — next actions (<=4)**\n1. Read **Status** + **Now · DQ Threshold/Reasons** (not range zeros).\n2. If blocked/quarantine/rejects > 0, use accounting with denominators (expand Run/Range lanes).\n3. Selected run -> **Run Explorer** hub; resume -> Trust **Primary recovery**.\n4. Range cards are SLA/freshness context only — not peer severity.\n",
+        "content": "**Data trust — next actions (<=4)**\n1. Read **Status** + **Now · DQ Threshold/Reasons** (not range zeros).\n2. If blocked/quarantine/rejects > 0, use accounting with denominators (expand Run/Range lanes).\n3. Selected run -> **Run Explorer** hub; resume -> Trust **Review First Recovery Action**.\n4. Range cards are SLA/freshness context only — not peer severity.\n",
         "mode": "markdown"
       },
       "description": "DUX3-12: Prefer typed reason (VALID_EMPTY/MISSING) + handoff to Run Explorer for RUN accounting. Data Trust Explorer CTA. Three evidence lanes: Now (current rules/state), Run (rejects/quarantine), Range (freshness/impact). These are not peer-comparable severity badges. Operator CTA for first-pass DQ triage. It explains what to do for CRIT versus WARN states, clarifies that the answer row above is pipeline-wide current state while run_type and stage mainly shape selected-range evidence, and explicitly distinguishes reject-path evidence from quarantine/validation blockers when filtered_out remains zero.",

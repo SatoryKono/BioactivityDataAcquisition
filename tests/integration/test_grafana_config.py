@@ -936,7 +936,7 @@ def test_overview_exposes_actual_alert_state_triage_surface() -> None:
     alert_panel = panels.get(9601)
 
     assert alert_panel is not None
-    assert alert_panel["title"] == "Triage Alert State"
+    assert alert_panel["title"] == "Review Active Alerts"
     expressions = [target.get("expr", "") for target in alert_panel.get("targets", [])]
     assert any("ALERTS" in expr for expr in expressions)
     assert any("alertstate" in expr for expr in expressions)
@@ -1158,12 +1158,12 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = get_dashboard_panels(dashboard)
     kpi_titles = {
-        "Monitor: Replay Safety State",
-        "Monitor: Checkpoint Freshness Lag (seconds)",
-        "Monitor: Manifest / Ledger Integrity",
-        "Inspect: Telemetry Missing",
+        "Monitor Replay Safety",
+        "Monitor Checkpoint Age",
+        "Monitor Manifest & Ledger Failures",
+        "Monitor Telemetry Coverage",
     }
-    next_step_title = "Primary recovery"
+    next_step_title = "Review Recovery Action"
     first_screen_titles = {
         panel.get("title") for panel in panels[:13] if panel.get("type") != "row"
     }
@@ -1178,7 +1178,7 @@ def test_control_plane_l1_has_single_next_step_panel_with_expected_target() -> N
     panels = [
         panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") == "Primary recovery"
+        if panel.get("title") == "Review Recovery Action"
     ]
     assert len(panels) == 1
 
@@ -1196,7 +1196,7 @@ def test_control_plane_has_replay_resume_blockers_panel() -> None:
         for panel in get_dashboard_panels(dashboard)
         if panel.get("title")
     }
-    panel = panels.get("Track: Replay / Resume Blockers in Range")
+    panel = panels.get("Track Replay Blockers")
 
     assert panel is not None
     expr = "\n".join(
@@ -1270,7 +1270,7 @@ def test_control_plane_global_panels_are_marked_global() -> None:
             if isinstance(target.get("expr"), str)
         ]
         if any(token in expr for expr in expressions for token in global_metric_tokens):
-            assert "GLOBAL" in str(panel.get("title", ""))
+            assert "GLOBAL" in str(panel.get("title", "")).upper()
 
 
 def test_control_plane_latency_panels_have_p50_p95_p99() -> None:
@@ -1281,11 +1281,11 @@ def test_control_plane_latency_panels_have_p50_p95_p99() -> None:
         if panel.get("title")
     }
     latency_panels = (
-        "Track: Checkpoint Save Latency p50/p95/p99",
-        "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
-        "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
-        "Track: GLOBAL Audit Write Latency p50/p95/p99",
-        "Track: GLOBAL Audit Query Latency p50/p95/p99",
+        "Track Checkpoint Save Latency",
+        "Track Global Checkpoint Admin Latency",
+        "Track Global Read Latency",
+        "Track Global Audit Write Latency",
+        "Track Global Audit Query Latency",
     )
     for panel_title in latency_panels:
         _assert_latency_panel_has_quantiles(panel_title, panels.get(panel_title))
@@ -1301,7 +1301,7 @@ def test_control_plane_no_missing_metric_promql() -> None:
     }
 
     assert "bioetl_replay_duplicate_records_total" not in expressions
-    checkpoint_panel = panels["Monitor: Checkpoint Freshness Lag (seconds)"]
+    checkpoint_panel = panels["Monitor Checkpoint Age"]
     # Epic #6573/#6574: first-paint Ops HTTP = 0; checkpoint lag uses Prometheus rule.
     assert checkpoint_panel.get("datasource") == {
         "type": "prometheus",
@@ -1319,20 +1319,20 @@ def test_control_plane_identity_evidence_panels_exist() -> None:
         if panel.get("title")
     }
     for title, view in {
-        "Inspect: Overview Identity Anchors": "view=overview",
-        "Inspect: Identity Gaps": "view=gaps",
-        "Inspect: Checkpoint Anchor Compare": "view=checkpoint_compare",
-        "Inspect: Copyable Identity Handoffs": "view=copy_values",
-        "Inspect: P1 Replay and Evidence Anchors": "view=anchors",
-        "Inspect: P2 Forensic Anchors": "view=anchors",
+        "Review Run Identity": "view=overview",
+        "Review Identity Gaps": "view=gaps",
+        "Compare Checkpoint Anchors": "view=checkpoint_compare",
+        "Copy Identity Values": "view=copy_values",
+        "Review Required Replay Anchors": "view=anchors",
+        "Review Additional Forensic Anchors": "view=anchors",
     }.items():
         _assert_identity_evidence_panel(panels, title, view)
 
     assert "priority=P1" in str(
-        panels["Inspect: P1 Replay and Evidence Anchors"]["targets"][0]["url"]
+        panels["Review Required Replay Anchors"]["targets"][0]["url"]
     )
     assert "priority=P2" in str(
-        panels["Inspect: P2 Forensic Anchors"]["targets"][0]["url"]
+        panels["Review Additional Forensic Anchors"]["targets"][0]["url"]
     )
 
 
@@ -1342,7 +1342,7 @@ def test_control_plane_remaining_replay_safety_text_is_not_stale() -> None:
         (
             panel
             for panel in get_dashboard_panels(dashboard)
-            if panel.get("title") == "Review: Remaining Replay-Safety Signals"
+            if panel.get("title") == "Review Uncovered Replay Signals"
         ),
         None,
     )
@@ -1551,7 +1551,7 @@ def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_lab
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect GLOBAL Provider Alert Conditions"
+            if item.get("title") == "Inspect Global Provider Alert Conditions"
         ),
         None,
     )
@@ -1563,7 +1563,7 @@ def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_lab
     ]
     assert expressions
     assert all('{pipeline=~"$pipeline"}' not in expr for expr in expressions), (
-        "Inspect GLOBAL Provider Alert Conditions must not filter provider-only recording rules by pipeline."
+        "Inspect Global Provider Alert Conditions must not filter provider-only recording rules by pipeline."
     )
 
 

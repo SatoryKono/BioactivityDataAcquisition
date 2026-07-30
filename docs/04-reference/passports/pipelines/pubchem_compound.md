@@ -22,6 +22,7 @@ Silver использует профиль `pubchem.compound` и проверя�
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `pubchem:compound` |
+| Method / endpoint | `GET` · `https://pubchem.ncbi.nlm.nih.gov/rest/pug` |
 | Resource / tables | `compound` |
 | Filters | `smiles`: IDs from data/input/molecule.csv column canonical_smiles; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (48 fields) |

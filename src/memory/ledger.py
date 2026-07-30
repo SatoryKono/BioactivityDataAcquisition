@@ -95,10 +95,12 @@ class MutationLedger:
             if not isinstance(row, dict):
                 raise ValueError("mutation ledger rows must be objects")
             digest = row.get("event_digest")
-            content = {key: value for key, value in row.items() if key != "event_digest"}
-            encoded = json.dumps(
-                content, separators=(",", ":"), sort_keys=True
-            ).encode("utf-8")
+            content = {
+                key: value for key, value in row.items() if key != "event_digest"
+            }
+            encoded = json.dumps(content, separators=(",", ":"), sort_keys=True).encode(
+                "utf-8"
+            )
             if digest != hashlib.sha256(encoded).hexdigest():
                 raise ValueError("mutation ledger digest mismatch")
             rows.append(row)

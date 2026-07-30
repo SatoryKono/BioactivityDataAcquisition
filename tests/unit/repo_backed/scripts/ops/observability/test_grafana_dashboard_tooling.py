@@ -1015,5 +1015,3 @@ def test_rerender_resolves_node_from_repo_local_bin(
     resolved = rerender_subject._resolve_node_executable()
 
     assert resolved == str(node_path)
-
-

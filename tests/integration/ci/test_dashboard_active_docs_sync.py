@@ -72,6 +72,14 @@ def _dashboard_panel_by_title(
     return next(panel for panel in panels if panel.get("title") == panel_title)
 
 
+def _dashboard_panel_by_id(
+    dashboard_path: Path, panel_id: int
+) -> dict[str, object]:
+    payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+    panels = _iter_dashboard_panels(list(payload.get("panels", [])))
+    return next(panel for panel in panels if panel.get("id") == panel_id)
+
+
 def _documented_panel_section(doc_text: str, panel_title: str) -> str:
     match = re.search(
         rf"^###\s+(?:\d+\.\s+)?{re.escape(panel_title)}[ \t]*\r?\n"
@@ -121,7 +129,7 @@ def test_active_docs_sync_workflow_selector_and_cta_titles() -> None:
     # evidence now ships on bioetl-runtime (see panel-title-inventory).
     assert "bioetl-workflow-overview.json" not in panel_inventory
     assert "| bioetl-runtime.json |" in panel_inventory
-    assert "Failed Workflow Runs / Range" in panel_inventory
+    assert "Track Failed Workflow Runs" in panel_inventory
 
     for token in ("Next Diagnostic Surface", "Workflow Scope"):
         assert token not in panel_inventory
@@ -143,7 +151,7 @@ def test_active_dashboard_changelog_stays_current_to_shipped_surface() -> None:
         "$run_id",
         "bioetl-control-plane-v1",
         "bioetl-workflow-overview",
-        "Metrics Evidence",
+        "Monitor Metrics Coverage",
         "First Action",
     )
     for token in required_tokens:
@@ -175,27 +183,49 @@ def test_panel_docs_match_shipped_dashboard_panel_titles() -> None:
 
 
 @pytest.mark.parametrize(
-    "dashboard_name",
     (
-        "bioetl-dq-v2",
-        "bioetl-overview-v2",
-        "bioetl-provider-health-v2",
-        "bioetl-runtime",
+        "dashboard_name",
+        "identity_title",
+        "processed_title",
+        "identity_panel_id",
+        "processed_panel_id",
+    ),
+    (
+        ("bioetl-dq-v2", "ID", "Processed Records", 9402, 9403),
+        (
+            "bioetl-overview-v2",
+            "Review Run Identity",
+            "Review Processed Records",
+            9300,
+            9301,
+        ),
+        ("bioetl-provider-health-v2", "ID", "Processed Records", 9402, 9403),
+        (
+            "bioetl-runtime",
+            "Review Run Identity",
+            "Review Processed Records",
+            9402,
+            9403,
+        ),
     ),
 )
 def test_http_identity_panel_docs_match_shipped_datasource_contract(
     dashboard_name: str,
+    identity_title: str,
+    processed_title: str,
+    identity_panel_id: int,
+    processed_panel_id: int,
 ) -> None:
     """HTTP-backed identity panels must not drift back to Prometheus docs."""
     dashboard_path = DASHBOARD_DIR / f"{dashboard_name}.json"
     doc_text = (PANEL_DOCS_DIR / f"{dashboard_name}-panels.md").read_text(
         encoding="utf-8"
     )
-    identity_section = _documented_panel_section(doc_text, "ID")
-    processed_section = _documented_panel_section(doc_text, "Processed Records")
+    identity_section = _documented_panel_section(doc_text, identity_title)
+    processed_section = _documented_panel_section(doc_text, processed_title)
 
-    identity_panel = _dashboard_panel_by_title(dashboard_path, "ID")
-    processed_panel = _dashboard_panel_by_title(dashboard_path, "Processed Records")
+    identity_panel = _dashboard_panel_by_id(dashboard_path, identity_panel_id)
+    processed_panel = _dashboard_panel_by_id(dashboard_path, processed_panel_id)
     identity_target = identity_panel["targets"][0]
     processed_target = processed_panel["targets"][0]
 

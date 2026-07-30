@@ -22,6 +22,7 @@ Join keys, cardinality и source tables берутся из composite configurat
 | Аспект | Значение |
 | --- | --- |
 | Source | `composite` · `chembl_activity` |
+| Method / endpoint | — · — |
 | Resource / tables | `silver/chembl/activity`, `silver/chembl/compound_record` |
 | Filters | `chembl_compound_record`: no condition |
 

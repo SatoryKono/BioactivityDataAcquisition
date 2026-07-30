@@ -24,8 +24,9 @@ Verify changes against the current normative stack:
 - configs
 - docs and diagrams
 - prompts
-- runtime AI files in `.codex/**`, any tracked `.gemini/**` tree that exists in
-  the current checkout, and `AGENTS.md`
+- runtime AI files in `.codex/**` and `.junie/**` (equal-peer tracked runtime
+  trees), any tracked `.gemini/**` tree that exists in the current checkout,
+  `AGENTS.md`, and `.junie/guidelines.md`
 
 ## Required Protocol
 
@@ -44,7 +45,14 @@ Verify changes against the current normative stack:
 
 - verify canonical links and stale-path cleanup
 - verify runtime-source-first precedence language remains aligned across
-  `AGENTS.md`, runtime maps, and memory policy
+  `AGENTS.md`, `.junie/guidelines.md`, runtime maps
+  (`.codex/agents/CODEX-RUNTIME.md`, `.junie/agents/JUNIE-RUNTIME.md`), and
+  memory policy
+- **MUST** run `bash scripts/ai/junie/check_junie_mirror.sh --check` after any
+  change under `.codex/agents/**`, `.codex/skills/**`, `.junie/agents/**`, or
+  `.junie/skills/**`; report exit code and, on drift, either resolve via
+  `--sync` (`.codex/** → .junie/**`) or land a coupled Codex-side change in
+  the same commit before submit
 - run `python -m scripts.docs check-drift --runtime-mirrors --freshness`
 - run the AI-surface drift check when available in `scripts.docs check-drift`
 
@@ -98,7 +106,10 @@ The closeout MUST include:
 1. checks run
 1. command outcomes
 1. skipped checks with reason and the exact command to run later
-1. mirror-sync status when AI runtime files or docs mirrors changed
+1. mirror-sync status when AI runtime files or docs mirrors changed,
+   including `scripts/ai/junie/check_junie_mirror.sh --check` exit code for
+   any touched `.codex/agents/**`, `.codex/skills/**`, `.junie/agents/**`, or
+   `.junie/skills/**`
 1. explicit callout if any stale guidance remains for follow-up
 
 ## Env File Guardrail

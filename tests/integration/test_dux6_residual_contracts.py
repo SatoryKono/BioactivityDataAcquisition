@@ -92,7 +92,7 @@ def test_provenance_panels_share_readability_contract() -> None:
 
         assert provenance.get("gridPos", {}).get("h", 0) >= 4, filename
         assert provenance.get("options", {}).get("mode") == "html", filename
-        assert "<div style=\"font-size:18px;font-weight:700\">" in content, filename
+        assert '<div style="font-size:18px;font-weight:700">' in content, filename
         assert all(token in content for token in required_css), filename
         assert "white-space:nowrap" not in content, filename
         assert "font-size:12px" not in content, filename
@@ -133,9 +133,7 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
         (DASH / "bioetl-run-explorer-v1.json").read_text(encoding="utf-8")
     )
     browse = next(
-        panel
-        for panel in _walk(data.get("panels"))
-        if panel.get("id") == 3010
+        panel for panel in _walk(data.get("panels")) if panel.get("id") == 3010
     )
     defaults = (browse.get("fieldConfig") or {}).get("defaults") or {}
     no_value = str(defaults.get("noValue") or "")
@@ -185,9 +183,7 @@ def test_pfill_10_provider_missing_series_has_reason_and_action() -> None:
     freshness_expr = str((freshness.get("targets") or [])[0].get("expr") or "")
     assert "bioetl_provider_current_status" in freshness_expr
     assert "or vector(0)" not in freshness_expr
-    assert "fail-closed unknown" in str(
-        freshness.get("description") or ""
-    ).lower()
+    assert "fail-closed unknown" in str(freshness.get("description") or "").lower()
 
 
 def test_percent_scores_integer_precision() -> None:

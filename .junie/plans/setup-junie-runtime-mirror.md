@@ -299,7 +299,7 @@ JetBrains Junie получает свой корневой контракт и r
 - Локальный smoke-test: запустить `bash scripts/ai/junie/check_junie_mirror.sh --check` → exit 0 после Stage 2–4.
 - Опционально: добавить `tests/governance/test_junie_mirror.py` (pytest subprocess wrapper).
 
-###   Step 6: Stage 6: Обновление precedence chain и Post-Change Validation в canonical docs
+### ✓ Step 6: Stage 6: Обновление precedence chain и Post-Change Validation в canonical docs
 `AGENTS.md`, `NORMATIVE_SOURCES.md`, `AI_RUNTIME_MIRROR_OWNERSHIP.md`, `POST_CHANGE_VALIDATION.md` и `.codex/agents/CODEX-RUNTIME.md` официально признают `.junie/**` equal-peer runtime и обязывают запускать parity-check.
 
 - В `AGENTS.md` §Canonical Precedence добавить `.junie/agents/JUNIE-RUNTIME.md` как active runtime source (пункт 1 расширяется двумя equal peers); §Guardrails обновить формулировку про `.junie/**` (снять «treated as unavailable») и добавить обязательство запускать `scripts/ai/junie/check_junie_mirror.sh --check` при правках любого runtime tree; §Related Files дополнить.

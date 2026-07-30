@@ -96,7 +96,7 @@
     {
       "id": 9400,
       "type": "text",
-      "title": "Inspect Scope & Evidence",
+      "title": "Provenance",
       "description": "Explains the incident-triage question and the evidence scopes used on this read-only dashboard. CURRENT ranks suspects from current fleet telemetry using the active filters. SELECTED RUN uses HTTP-backed evidence for one exact run; run_id never filters Prometheus. No suspects means none were found in the current scope and does not prove the fleet is healthy.",
       "gridPos": {
         "h": 4,
@@ -106,7 +106,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is the most likely active cause of the incident?</div><div><b>CURRENT</b> = ranked suspects from current fleet telemetry · <b>SELECTED RUN</b> = evidence for one run</div><div>No suspects means none were found in this scope; it does not prove the fleet is healthy</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is the highest-confidence active suspect?</div><div><b>Scope:</b> <b>CURRENT</b> = Status/active suspects · <b>SELECTED RUN</b> = exact-run proof</div><div><b>EMPTY DOMAIN</b> = no active suspects, not a healthy-fleet verdict</div></div></div>"
       }
     },
     {

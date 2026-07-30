@@ -19,7 +19,7 @@ def test_mcp_memory_safe_modes_exit_before_server_start(mode: str | None) -> Non
         environment["BIOETL_AI_MEMORY_MODE"] = mode
 
     completed = subprocess.run(
-        ["bash", str(WRAPPER)],
+        ["bash", WRAPPER.as_posix()],
         capture_output=True,
         check=False,
         env=environment,
@@ -35,7 +35,7 @@ def test_mcp_memory_safe_modes_exit_before_server_start(mode: str | None) -> Non
 def test_mcp_memory_rejects_unknown_mode_without_server_start() -> None:
     environment = {**os.environ, "BIOETL_AI_MEMORY_MODE": "unsafe"}
     completed = subprocess.run(
-        ["bash", str(WRAPPER)],
+        ["bash", WRAPPER.as_posix()],
         capture_output=True,
         check=False,
         env=environment,

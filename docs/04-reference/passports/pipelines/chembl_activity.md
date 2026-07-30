@@ -22,6 +22,7 @@ Silver использует профиль `chembl.activity` и проверяе
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `chembl.activity.curated` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/activity` |
 | Resource / tables | `activity` |
 | Filters | `assay_type__in`: B,F; `data_validity_comment__isnull`: true; `pchembl_value__isnull`: false; `potential_duplicate`: 0; `standard_flag`: 1; `standard_relation`: =; `standard_type__in`: IC50,Ki; `standard_units`: nM; `target_tax_id__isnull`: false; `activity_id`: IDs from data/input/activity.csv column activity_id; CLI may override the input CSV |
 | Selected fields | `system` (8 fields); `business` (67 fields) |

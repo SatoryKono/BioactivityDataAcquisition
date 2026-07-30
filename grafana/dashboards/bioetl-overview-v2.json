@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Hybrid L0 overview / Fleet Command Center. First screen: status strip, compact First Action route, and Inputs evidence matrix above fold. Aggregate-first triage; exact run forensics via Run Explorer and Trust. run_id is HTTP identity context only — never a Prometheus label.",
+  "description": "Hybrid L0 overview / Fleet Command Center. First screen: status strip, compact First Action route, and Review Domain Status evidence matrix above fold. Aggregate-first triage; exact run forensics via Run Explorer and Trust. run_id is HTTP identity context only — never a Prometheus label.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -22,7 +22,7 @@
     {
       "id": 9600,
       "type": "row",
-      "title": "Alert/SLO Triage",
+      "title": "Inspect Alerts",
       "collapsed": true,
       "gridPos": {
         "h": 1,
@@ -34,7 +34,7 @@
         {
           "id": 9601,
           "type": "table",
-          "title": "Triage Alert State",
+          "title": "Review Active Alerts",
           "gridPos": {
             "h": 6,
             "w": 24,
@@ -45,7 +45,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "DUX6: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error/selection). Pair with Provenance reason + action; never read as OK. DUX5: Value columns labelled as Severity (no bare Value # headers). Actual Prometheus alert-state triage for firing and pending BioETL rules. This panel reads the Prometheus `ALERTS` series and does not duplicate alert business logic in dashboard queries; inactive/no-alert state is rendered as an explicit zero row. Critical/page severity is red, warning is amber, and inactive aggregate evidence is neutral. Open 2. Runtime for alert-condition and blocker scope (Alerts & SLO dashboard retired).",
+          "description": "Shows firing and pending BioETL alerts from Prometheus for the active time range. An inactive row means no active alert was observed; an empty result or UNKNOWN means alert evidence is unavailable, not OK. Continue in Pipeline Diagnostics for blocker scope.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -210,7 +210,8 @@
             }
           ]
         }
-      ]
+      ],
+      "description": "Contains selected-range alert evidence for triage. It supports investigation but does not determine current Fleet Health; expand it after the first-screen verdict points to an alert condition."
     },
     {
       "gridPos": {
@@ -224,8 +225,8 @@
         "mode": "html",
         "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a class=\"bioetl-nav-current\" href=\"#bioetl-overview-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"1. Overview (Overview)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">1. Overview (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
       },
-      "title": "Navigation",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "title": "Navigate Dashboards",
+      "description": "Links open in the same tab and preserve the current time range and target-supported filters. Cross-scope transitions reset incompatible filters, and the current dashboard is disabled.",
       "type": "text",
       "links": [
         {
@@ -305,10 +306,10 @@
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is broken or degraded right now?</div><div><b>CURRENT</b> = latest status and recommended action · <b>SELECTED RUN</b> = evidence for one run</div><div><b>TIME RANGE</b> = historical trends · <b>UNKNOWN</b> = evidence is missing or stale</div></div></div>",
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is broken or degraded right now?</div><div><b>Scope:</b> <b>CURRENT</b> = Status + First Action · <b>SELECTED RUN</b> = exact-run evidence</div><div><b>TIME RANGE</b> = Review Domain Status and trends</div></div></div>",
         "mode": "html"
       },
-      "description": "Explains the main triage question and the evidence scopes used on this dashboard. CURRENT comes from Prometheus current-status recording rules for the active pipeline and run-type filters. SELECTED RUN uses the HTTP-backed run_id and persisted control-plane evidence; run_id never filters Prometheus. TIME RANGE contains historical evidence. UNKNOWN means evidence is missing or stale, not healthy.",
+      "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN persisted HTTP evidence, and TIME RANGE history. Pipeline and Run Type affect current and historical evidence; Run ID never filters Prometheus. UNKNOWN means missing or stale evidence, never healthy.",
       "title": "Inspect Scope & Evidence",
       "type": "text"
     },
@@ -438,14 +439,14 @@
           "refId": "A"
         }
       ],
-      "title": "Status",
+      "title": "Monitor Fleet Health",
       "type": "stat",
-      "description": "DUX6: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error/selection). Pair with Provenance reason + action; never read as OK. DUX5: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error); pair with Provenance reason + action. UNKNOWN is not OK. DUX4-16: First strip = status + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: Composite NOW status. Pair with Inputs + First Action; domain matrix stays collapsed. Composite fleet verdict (state x confidence x basis). Current L0 fleet status (bioetl_l0_status). 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Confidence is low when series is absent (UNKNOWN). Evidence age follows the recording/refresh window, not range history. Primary action is First Action; deeper proof is on domain boards. Empty Inputs with Status=OK is VALID_EMPTY fleet. null Status is TELEMETRY_ABSENT_OR_STALE/UNKNOWN, not OK. Domain tables are collapsed matrix detail, not peer first-screen badges."
+      "description": "Shows the sole current Fleet Health verdict. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. UNKNOWN means evidence is incomplete or missing; use First Action and Domain Status to continue."
     },
     {
       "id": 215,
       "type": "table",
-      "title": "First Action",
+      "title": "Review First Action",
       "gridPos": {
         "h": 7,
         "w": 10,
@@ -765,12 +766,12 @@
           }
         }
       ],
-      "description": "DUX5: Value columns labelled as Count (no bare Value # headers). DUX4-16: First strip = health + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: ≤4 actionable CTAs with time/vars preserved. Ranked next-best-action (<=4). Prefer domain handoff with scope preserved. Not a multi-paragraph runbook. Open Incident when multi-domain; domain board for localization."
+      "description": "Ranks at most four urgency-ordered actions for the current fleet verdict. Verify missing telemetry first, then open the affected domain, use Incident Workspace for multi-domain impact, or use Run Explorer for exact-run evidence."
     },
     {
       "id": 9002,
       "type": "table",
-      "title": "Inputs",
+      "title": "Review Domain Status",
       "gridPos": {
         "h": 7,
         "w": 14,
@@ -1023,12 +1024,12 @@
           }
         }
       ],
-      "description": "DUX5: Value columns labelled as Count (no bare Value # headers). DUX4-16: First strip = health + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: Domain input evidence / freshness proxies for first-screen confidence. Compact L0 input summary for the selected pipeline/run_type scope. Rows are shown in the canonical operator order: Control Plane, Runtime, Provider, Data Quality, Data Validation, Workflow. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Use the panel links to open the matching drilldown; Workflow resets scope on handoff. This is the deviation-first first-level matrix; the six repeated subsystem cards are available only in the collapsed Diagnostics & Docs row. Phase-2: status cells use color-background thresholds (OK/WARN/CRIT). Not peer-comparable to Range evidence elsewhere."
+      "description": "Summarizes current Control Plane, Runtime, Provider, Data Quality, Data Validation, and Workflow status for the selected scope. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN means incomplete evidence, not OK. Open the affected domain for detail."
     },
     {
       "id": 9014,
       "type": "row",
-      "title": "L1 Historical Trends",
+      "title": "Inspect Historical Trends",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1040,7 +1041,7 @@
         {
           "id": 9018,
           "type": "state-timeline",
-          "title": "Runtime Blockers Trend",
+          "title": "Track Runtime Blockers",
           "gridPos": {
             "h": 6,
             "w": 8,
@@ -1126,12 +1127,12 @@
               "legendFormat": "{{pipeline}}/{{run_type}}"
             }
           ],
-          "description": "Selected-range L1 runtime evidence for the active pipeline/run_type scope. This compact trend is below the current verdict path and does not determine L0 Status or First Action. Shows OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null); missing series or gaps remain diagnostic and must not be treated as OK. Open Runtime for detailed blocker conditions."
+          "description": "Shows Runtime status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Pipeline Diagnostics for current blockers."
         },
         {
           "id": 9019,
           "type": "state-timeline",
-          "title": "DQ Status Trend",
+          "title": "Track Data Quality Status",
           "gridPos": {
             "h": 6,
             "w": 8,
@@ -1217,12 +1218,12 @@
               "legendFormat": "{{pipeline}}/{{run_type}}"
             }
           ],
-          "description": "Selected-range L1 Data Quality evidence for the active pipeline/run_type scope. This compact trend is below the current verdict path and does not determine L0 Status or First Action. Renders discrete OK/WARN/CRIT/UNKNOWN states; numeric values are hidden from the operator view. missing series or gaps remain diagnostic and must not be treated as OK. Open Data Quality for detailed DQ conditions."
+          "description": "Shows Data Quality status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Data Quality for current conditions."
         },
         {
           "id": 9020,
           "type": "state-timeline",
-          "title": "Gold Lifecycle Trend",
+          "title": "Track Gold Lifecycle",
           "gridPos": {
             "h": 6,
             "w": 8,
@@ -1314,14 +1315,15 @@
               "legendFormat": "{{pipeline}}/{{run_type}}/{{lifecycle_state}}"
             }
           ],
-          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). Selected-range L1 data-validation lifecycle evidence for the active pipeline/run_type scope. This compact trend is below the current verdict path and does not determine L0 Status or First Action. Legend includes pipeline/run_type/lifecycle_state; disabled Gold stage returns OK as a valid non-error state. Missing series or gaps remain diagnostic and must not be treated as OK. Open Runtime for lifecycle-state detail or Control Plane for replay/manifest context."
+          "description": "Shows Gold lifecycle state over the selected range for Pipeline and Run Type. A disabled Gold stage is a valid non-error state, while gaps or missing series remain UNKNOWN. This trend does not determine current Fleet Health; continue in Pipeline Diagnostics or Trust."
         }
-      ]
+      ],
+      "description": "Contains selected-range status trends. These panels provide historical evidence and do not determine current Fleet Health; gaps remain UNKNOWN rather than healthy."
     },
     {
       "id": 9009,
       "type": "row",
-      "title": "Range Evidence (Historical / Recent History)",
+      "title": "Inspect Range Evidence",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1333,7 +1335,7 @@
         {
           "id": 9010,
           "type": "table",
-          "title": "Historical Failures",
+          "title": "Review Failed Runs",
           "gridPos": {
             "h": 6,
             "w": 8,
@@ -1415,12 +1417,12 @@
               }
             }
           ],
-          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Selected-range historical failure evidence only. Keeps pipeline and run_type labels from the active Grafana window and remains below the current verdict path; it does not determine L0 Status or First Action. Zero matching rows means no failed-run samples in the selected range, not proof that the current scope is OK. Open Runtime for failed-run and blocker localization."
+          "description": "Lists failed-run samples in the selected range for Pipeline and Run Type. No rows means no matching failures were observed, not proof that current Fleet Health is OK; missing telemetry remains UNKNOWN. Open Pipeline Diagnostics to localize failures."
         },
         {
           "id": 9011,
           "type": "table",
-          "title": "Recent Terminal Runs",
+          "title": "Review Recent Terminal Runs",
           "gridPos": {
             "h": 6,
             "w": 8,
@@ -1518,12 +1520,12 @@
               }
             }
           ],
-          "description": "DUX6: raw paths hidden; use Open/report artifact for full path (short scan). DUX5: Value columns labelled as Count (no bare Value # headers). Selected-range terminal-run evidence only. Shows non-success terminal statuses grouped by pipeline so the evidence table stays readable without scroll while preserving the active Grafana time window. This panel is below the current verdict path and does not determine L0 Status or First Action; no terminal rows is not proof that the current scope is OK. Open Control Plane for manifest/terminal-run proof or Runtime for execution localization."
+          "description": "Lists recent non-success terminal runs in the selected range, grouped by Pipeline. No rows means no matching terminal evidence, not proof that current Fleet Health is OK. Continue in Trust for persisted run evidence or Pipeline Diagnostics for execution detail."
         },
         {
           "id": 9015,
           "type": "stat",
-          "title": "Silver Rejects + Rate",
+          "title": "Track Silver Rejects",
           "gridPos": {
             "h": 6,
             "w": 8,
@@ -1637,14 +1639,15 @@
             },
             "textMode": "auto"
           },
-          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). DUX5: zero means none observed or Not started/Not available — never bare success; red only on validated failure. Range silver rejects evidence — NOT a peer fleet health KPI. Handoff: Data Quality accounting + Run Explorer for exact-run counts."
+          "description": "Shows Silver reject count and rate for the selected range and scope. Zero can mean no rejects only when a run started and matching telemetry is present; no matching scope, a run not started, or missing evidence remains UNKNOWN. This panel does not determine current Fleet Health; use Data Quality or Run Explorer."
         }
-      ]
+      ],
+      "description": "Contains selected-range run, terminal-state, and reject evidence. Empty history is not proof of current health, and these panels do not determine current Fleet Health."
     },
     {
       "id": 9012,
       "type": "row",
-      "title": "Diagnostics & Docs (Logs / Traces / Raw Metrics)",
+      "title": "Inspect Domain Diagnostics",
       "collapsed": true,
       "gridPos": {
         "h": 1,
@@ -1652,13 +1655,13 @@
         "x": 0,
         "y": 17
       },
-      "description": "Domain status matrix detail (Control Plane / Runtime / DQ / Provider / Validation / Workflow) plus diagnostics nav. Collapsed by default — first screen uses Status + Inputs + First Action only (DSA-02).",
+      "description": "Contains current domain summaries and diagnostic routing. It supports the first-screen verdict and stays collapsed until Domain Status or First Action identifies an affected area.",
       "panels": [
         {
-          "description": "Operator note for raw metric starting points and cross-dashboard diagnostics handoffs; no datasource query is expected.",
+          "description": "Routes to the domain dashboard that owns the selected condition while preserving supported scope. Use it after reviewing the domain summaries; missing evidence should be verified before interpreting zero values.",
           "id": 9021,
           "type": "text",
-          "title": "Diagnostics Navigation",
+          "title": "Navigate Diagnostics",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -1675,7 +1678,7 @@
         {
           "id": 9006,
           "type": "table",
-          "title": "Control Plane",
+          "title": "Review Control Plane Status",
           "gridPos": {
             "h": 5,
             "w": 5,
@@ -1861,12 +1864,12 @@
               }
             }
           ],
-          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Compact current control-plane summary for manifest, ledger, checkpoint, and lineage guardrails. Each row keeps the worst current status per pipeline across the selected run_type scope. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Control Plane for the exact failing contract."
+          "description": "Shows current Control Plane status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Trust for the failing manifest, ledger, checkpoint, or lineage contract."
         },
         {
           "id": 9003,
           "type": "table",
-          "title": "Runtime",
+          "title": "Review Runtime Status",
           "gridPos": {
             "h": 5,
             "w": 4,
@@ -2052,12 +2055,12 @@
               }
             }
           ],
-          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Compact current runtime summary. Each row keeps the worst current status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Runtime for exact blocker condition rows."
+          "description": "Shows current Runtime status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Pipeline Diagnostics for blocker detail."
         },
         {
           "id": 9004,
           "type": "table",
-          "title": "Data Quality",
+          "title": "Review Data Quality Status",
           "gridPos": {
             "h": 5,
             "w": 5,
@@ -2243,12 +2246,12 @@
               }
             }
           ],
-          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Compact current data-quality summary. Each row keeps the worst current status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
+          "description": "Shows current Data Quality status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Data Quality for rule and accounting detail."
         },
         {
           "id": 9007,
           "type": "table",
-          "title": "Provider",
+          "title": "Review Global Provider Status",
           "gridPos": {
             "h": 5,
             "w": 4,
@@ -2434,12 +2437,12 @@
               }
             }
           ],
-          "description": "DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). GLOBAL provider scope across pipelines. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). This panel intentionally ignores selected pipeline/run_type filters. Open Provider Health fail-closes to provider=unknown and preserves pipeline_context for return navigation."
+          "description": "Shows current Provider status across all pipelines. Pipeline and Run Type filters do not affect this panel. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; open Provider Health for provider-scoped evidence."
         },
         {
           "id": 9005,
           "type": "table",
-          "title": "Data Validation",
+          "title": "Review Data Validation Status",
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2625,12 +2628,12 @@
               }
             }
           ],
-          "description": "DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Compact current data-validation summary. Each row keeps the worst lifecycle status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Runtime for the exact lifecycle-state breakdown."
+          "description": "Shows current Data Validation lifecycle status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Pipeline Diagnostics for lifecycle detail."
         },
         {
           "id": 9013,
           "type": "table",
-          "title": "Workflow",
+          "title": "Review Workflow Status",
           "gridPos": {
             "h": 8,
             "w": 12,
@@ -2816,13 +2819,13 @@
               }
             }
           ],
-          "description": "DUX5: Value columns labelled as Count (no bare Value # headers). Compact selected workflow/pipeline scope retained in the collapsed subsystem detail row, excluding the synthetic `test_pipe` surface. Each row keeps the worst current workflow status per matching pipeline without unrelated pipeline leakage. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Current workflow status is driven by the latest bounded terminal workflow signal, not by cumulative workflow-run counters. `run_type` and `run_id` remain handoff context only for this card."
+          "description": "Shows current Workflow status for the selected Workflow and Pipeline. Run Type and Run ID are navigation context only and do not affect this panel. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; use workflow evidence in Pipeline Diagnostics."
         }
       ]
     },
     {
       "type": "row",
-      "title": "Run context (thin) -> Run Explorer hub",
+      "title": "Inspect Run Context",
       "collapsed": true,
       "gridPos": {
         "h": 1,
@@ -2835,14 +2838,14 @@
         {
           "id": 9300,
           "type": "table",
-          "title": "ID",
+          "title": "Review Run Identity",
           "gridPos": {
             "h": 6,
             "w": 12,
             "x": 0,
             "y": 0
           },
-          "description": "DUX7: Copy/Open full identity value via data:text/plain link. DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Thin shell only. Canonical hub: bioetl-run-explorer-v1. Do not treat as first-screen fleet KPI. Valid empty: no matching identity for the selected run. The backend may be unavailable; check /health/live.",
+          "description": "Shows HTTP-backed identity for an exact Run ID. An empty table can mean no matching run, unresolved aggregate scope, or backend failure; verify /health/live before treating it as expected. Open Run Explorer for complete run evidence.",
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
             "defaults": {
@@ -2993,14 +2996,14 @@
         {
           "id": 9301,
           "type": "table",
-          "title": "Processed Records",
+          "title": "Review Processed Records",
           "gridPos": {
             "h": 6,
             "w": 12,
             "x": 12,
             "y": 0
           },
-          "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). Thin shell only. Canonical hub: bioetl-run-explorer-v1. Do not treat as first-screen fleet KPI. Valid empty: no matching processed-record rows for the selected run. The backend may be unavailable; check /health/live.",
+          "description": "Shows HTTP-backed Bronze, Silver, and Gold record counts and outcomes. Zero is a recorded count, while no rows can mean no matching run, processing not started, unresolved scope, or backend failure; verify /health/live. Open Run Explorer for complete accounting.",
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
             "defaults": {
@@ -3257,7 +3260,7 @@
           ]
         }
       ],
-      "description": "DUX4-23: Collapsed by default — Run Explorer owns first-class ID/Processed Records. DUX3-26: Collapsed thin shell only. Canonical ID/Processed Records hub is Run Explorer. DSA-04: exact-run ID/Processed Records live on Run Explorer. This shell is collapsed forensic handoff only."
+      "description": "Contains compact HTTP-backed evidence for the selected run. Run Explorer is the primary exact-run investigation surface; aggregate scope does not guess a Run ID, and identifiers never become Prometheus labels."
     }
   ],
   "refresh": "60s",

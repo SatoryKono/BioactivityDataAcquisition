@@ -505,7 +505,7 @@ dict_synonyms = "Struct, NamedStruct"
 # Keep .github and generated/report trees out of Project Diagnostics noise.
 # CLI product checks still pass explicit paths: `basedpyright src/bioetl`.
 [tool.basedpyright]
-stubPath = "typings"
+stubPath = "configs/typing-stubs"
 venvPath = "."
 venv = ".venv-win"
 include = [

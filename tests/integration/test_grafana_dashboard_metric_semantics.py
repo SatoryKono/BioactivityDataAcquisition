@@ -182,8 +182,8 @@ def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
     """Workflow summary cards intentionally render empty selected ranges as zero events."""
     dashboard = load_dashboard(_require_dashboard("bioetl-workflow-overview.json"))
     expected_panels = {
-        "Failed Workflow Runs / Range",
-        "Failed Pipeline Steps / Range",
+        "Track Failed Workflow Runs",
+        "Track Failed Workflow Steps",
         "Failed Transform Steps / Range",
         "Skipped Step Events / Range",
     }
@@ -226,22 +226,22 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
     first_answer_titles = {
         "Status",
         "First Action",
-        "Triage Alert State",
+        "Review Active Alerts",
         "Inputs",
     }
     compact_evidence = {
-        "Runtime Blockers Trend": (9018, "bioetl_l1_runtime_blocker_status"),
+        "Track Runtime Blockers": (9018, "bioetl_l1_runtime_blocker_status"),
         "DQ Status Trend": (9019, "bioetl_l1_dq_status"),
-        "Gold Lifecycle Trend": (9020, "bioetl_l1_gold_lifecycle_status"),
-        "Historical Failures": (9010, "bioetl_pipeline_runs_total"),
-        "Recent Terminal Runs": (9011, "bioetl_pipeline_runs_total"),
+        "Track Gold Lifecycle": (9020, "bioetl_l1_gold_lifecycle_status"),
+        "Review Monitor Failed Runs": (9010, "bioetl_pipeline_runs_total"),
+        "Review Recent Terminal Runs": (9011, "bioetl_pipeline_runs_total"),
     }
     disclosure_by_panel = {
-        "Runtime Blockers Trend": "L1 Historical Trends",
+        "Track Runtime Blockers": "L1 Historical Trends",
         "DQ Status Trend": "L1 Historical Trends",
-        "Gold Lifecycle Trend": "L1 Historical Trends",
-        "Historical Failures": "Range Evidence (Historical / Recent History)",
-        "Recent Terminal Runs": "Range Evidence (Historical / Recent History)",
+        "Track Gold Lifecycle": "L1 Historical Trends",
+        "Review Monitor Failed Runs": "Inspect Range Evidence",
+        "Review Recent Terminal Runs": "Inspect Range Evidence",
     }
 
     for dashboard_path in (Path("grafana/dashboards/bioetl-overview-v2.json"),):
@@ -458,12 +458,12 @@ def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> No
         if panel.get("title")
     }
     identity_panels = [
-        panels["Inspect: Overview Identity Anchors"],
-        panels["Inspect: Identity Gaps"],
-        panels["Inspect: Checkpoint Anchor Compare"],
-        panels["Inspect: Copyable Identity Handoffs"],
-        panels["Inspect: P1 Replay and Evidence Anchors"],
-        panels["Inspect: P2 Forensic Anchors"],
+        panels["Review Run Identity"],
+        panels["Review Identity Gaps"],
+        panels["Compare Checkpoint Anchors"],
+        panels["Copy Identity Values"],
+        panels["Review Required Replay Anchors"],
+        panels["Review Additional Forensic Anchors"],
     ]
 
     for panel in identity_panels:
@@ -491,7 +491,7 @@ def test_control_plane_identity_evidence_documents_short_full_split() -> None:
     panel = next(
         panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") == "Inspect: Overview Identity Anchors"
+        if panel.get("title") == "Review Run Identity"
     )
     description = str(panel.get("description", "")).lower()
     assert "shortened in value_short" in description
@@ -507,7 +507,7 @@ def test_runtime_selected_count_zeroes_are_scope_anchored() -> None:
     """Selected runtime count cards must keep UNKNOWN when selected scope is absent."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_panels = {
-        "Failed Runs": "bioetl_runtime_pipeline_run_type_universe",
+        "Monitor Failed Runs": "bioetl_runtime_pipeline_run_type_universe",
         "Monitor No-Records Runs": "bioetl_runtime_pipeline_run_type_universe",
     }
     panels = {
@@ -547,7 +547,7 @@ def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
             "bioetl_runtime_pipeline_run_type_universe",
             'pipeline=~"$pipeline"',
         ),
-        "Inspect Control-plane Alert Conditions": (
+        "Inspect Control Plane Alert Conditions": (
             "bioetl_runtime_pipeline_run_type_universe",
             'run_type=~"$run_type"',
         ),
@@ -555,7 +555,7 @@ def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
             "bioetl_provider_current_status",
             'provider=~"$provider_hint"',
         ),
-        "Inspect GLOBAL Provider Alert Conditions": (
+        "Inspect Global Provider Alert Conditions": (
             "bioetl_provider_current_status",
             "count(bioetl_provider_current_status)",
         ),
@@ -589,8 +589,8 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
     """Latency p95 panels must not collapse missing samples into zero."""
     expected_latency_panels = {
         "bioetl-runtime.json": {
-            "Track Pipeline Phase Duration p50/p95/p99",
-            "Track Pipeline Duration p50/p95/p99",
+            "Track Phase Duration",
+            "Track Pipeline Duration",
         },
         "bioetl-provider-health-v2.json": {
             "Track Health Check Latency by Provider (p95)",
@@ -600,11 +600,11 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
         },
         "bioetl-dq-v2.json": {"Track: DQ Check Duration (p95)"},
         "bioetl-control-plane-v1.json": {
-            "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
-            "Track: Checkpoint Save Latency p50/p95/p99",
-            "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
-            "Track: GLOBAL Audit Write Latency p50/p95/p99",
-            "Track: GLOBAL Audit Query Latency p50/p95/p99",
+            "Track Global Read Latency",
+            "Track Checkpoint Save Latency",
+            "Track Global Checkpoint Admin Latency",
+            "Track Global Audit Write Latency",
+            "Track Global Audit Query Latency",
         },
     }
 
@@ -642,13 +642,13 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
     [
         (
             "bioetl-control-plane-v1.json",
-            "Track: Replay Drift by Type",
+            "Track Replay Drift by Type",
             "No data means no replay drift events were observed in range or replay drift telemetry is absent",
             "No replay drift samples",
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
+            "Track Global Checkpoint Admin Latency",
             "Expected Empty classification: No data is valid when no checkpoint "
             "operator/admin duration samples were emitted",
             "No GLOBAL checkpoint operator latency samples in range. This is optional "
@@ -656,7 +656,7 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Inspect: Missing Lineage Refs by Layer / Type",
+            "Review Missing Lineage by Layer",
             "Use as lineage risk triage only; it does not prove complete artifact "
             "identity graph or exact artifact refs.",
             "No missing-lineage reference samples in range. Empty means no sampled "
@@ -665,14 +665,14 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Track: GLOBAL Audit Write Latency p50/p95/p99",
+            "Track Global Audit Write Latency",
             "No data means no latency samples, not zero latency.",
             "No GLOBAL audit write latency samples in range. Empty means no audit "
             "writes were timed or audit telemetry is absent, not zero latency.",
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Track: GLOBAL Audit Query Latency p50/p95/p99",
+            "Track Global Audit Query Latency",
             "No data means no latency samples, not zero latency.",
             "No GLOBAL audit query latency samples in range. Empty means no audit "
             "queries were timed or audit telemetry is absent, not zero latency.",
@@ -774,13 +774,13 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
         "bioetl-runtime.json": {
             "Monitor Pipeline Alert Conditions": "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
             "Inspect DQ Alert Conditions": "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
-            "Inspect Control-plane Alert Conditions": "bioetl_runtime_alert_condition_manifest_write_failed_15m",
+            "Inspect Control Plane Alert Conditions": "bioetl_runtime_alert_condition_manifest_write_failed_15m",
             "Inspect Provider Alert Conditions": "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
-            "Inspect GLOBAL Provider Alert Conditions": (
+            "Inspect Global Provider Alert Conditions": (
                 "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m"
             ),
-            "Track GLOBAL Shutdown Initiated by Reason / Interval": "round(",
-            "Track GLOBAL Shutdown Completed by Reason / Interval": "round(",
+            "Track Global Shutdown Starts": "round(",
+            "Track Global Shutdown Completions": "round(",
         },
     }
 
@@ -1040,11 +1040,11 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
     """Runtime diagnostic gauges must not convert missing telemetry to OK."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_panels = {
-        "Status",
-        "Metrics Evidence",
+        "Monitor Pipeline Health",
+        "Monitor Metrics Coverage",
         "Monitor Runtime Blockers",
-        "Runtime Error Rate",
-        "Worst Stage Lag",
+        "Monitor Monitor Runtime Error Rate",
+        "Monitor Monitor Worst Stage Lag",
         "Monitor Memory Pressure Active",
     }
     panels = {
@@ -1073,11 +1073,11 @@ def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Metrics Evidence"
+            if item.get("title") == "Monitor Metrics Coverage"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Metrics Evidence' not found"
+    assert panel is not None, "Panel 'Monitor Metrics Coverage' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert expressions == ["max(bioetl_runtime_trust_gap_status_10m)"]
@@ -1104,12 +1104,12 @@ def test_runtime_domain_thresholds_match_alert_rule_policy() -> None:
     """Runtime domain gauges should use real alert units, not generic 1/2 severity steps."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_steps = {
-        "Runtime Error Rate": [
+        "Monitor Runtime Error Rate": [
             {"color": "green", "value": None},
             {"color": "orange", "value": 0.05},
             {"color": "red", "value": 0.2},
         ],
-        "Worst Stage Lag": [
+        "Monitor Worst Stage Lag": [
             {"color": "green", "value": None},
             {"color": "orange", "value": 300},
             {"color": "red", "value": 900},
@@ -1130,7 +1130,7 @@ def test_runtime_domain_thresholds_match_alert_rule_policy() -> None:
         assert defaults.get("thresholds", {}).get("steps") == steps
 
     error_defaults = (
-        panels["Runtime Error Rate"].get("fieldConfig", {}).get("defaults", {})
+        panels["Monitor Runtime Error Rate"].get("fieldConfig", {}).get("defaults", {})
     )
     assert error_defaults.get("min") == 0
     assert error_defaults.get("max") == 1
@@ -1143,11 +1143,11 @@ def test_runtime_freshness_handoff_preserves_missing_telemetry() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect Freshness Lagged Entities >24h"
+            if item.get("title") == "Inspect Entities Stale Over 24h"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Inspect Freshness Lagged Entities >24h' not found"
+    assert panel is not None, "Panel 'Inspect Entities Stale Over 24h' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert expressions
@@ -1639,12 +1639,12 @@ def test_selected_range_kpis_follow_declared_counter_window_intent() -> None:
     """Selected-range KPI panels must match their declared counter-window intent."""
     panel_expectations = {
         "bioetl-overview-v2.json": {
-            "Historical Failures": {
+            "Review Monitor Failed Runs": {
                 "intent": "event_delta",
                 "required": ("increase(",),
                 "forbidden": ("max_over_time(", "last_over_time("),
             },
-            "Recent Terminal Runs": {
+            "Review Recent Terminal Runs": {
                 "intent": "event_delta",
                 "required": ("increase(",),
                 "forbidden": ("max_over_time(", "last_over_time("),
@@ -1668,22 +1668,22 @@ def test_selected_range_kpis_follow_declared_counter_window_intent() -> None:
             },
         },
         "bioetl-runtime.json": {
-            "Inspect Errors by Stage / Error Code / Range": {
+            "Review Errors by Stage & Code": {
                 "intent": "event_delta",
                 "required": ("increase(",),
                 "forbidden": ("max_over_time(", "last_over_time("),
             },
-            "Track Records by Stage / Run Type / Range": {
+            "Compare Records by Stage & Run Type": {
                 "intent": "event_delta",
                 "required": ("increase(",),
                 "forbidden": ("max_over_time(", "last_over_time("),
             },
-            "Track GLOBAL Shutdown Initiated by Reason / Interval": {
+            "Track Global Shutdown Starts": {
                 "intent": "event_delta",
                 "required": ("increase(",),
                 "forbidden": ("max_over_time(", "last_over_time("),
             },
-            "Track GLOBAL Shutdown Completed by Reason / Interval": {
+            "Track Global Shutdown Completions": {
                 "intent": "event_delta",
                 "required": ("increase(",),
                 "forbidden": ("max_over_time(", "last_over_time("),

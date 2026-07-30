@@ -265,14 +265,14 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=132,
-        title="Monitor: Manifest Write Failure Ratio",
+        title="Monitor Manifest Failure Severity [30m]",
         source_kind="prometheus",
         semantic_kind="derived_status",
     ),
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=133,
-        title="Monitor: Ledger Append Failure Ratio",
+        title="Monitor Ledger Failure Severity [30m]",
         source_kind="prometheus",
         semantic_kind="derived_status",
     ),
@@ -307,7 +307,7 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=892,
-        title="Monitor: Checkpoint Freshness Lag (seconds)",
+        title="Monitor Checkpoint Age",
         source_kind="prometheus",
         semantic_kind="freshness",
         target_ref_id="A",

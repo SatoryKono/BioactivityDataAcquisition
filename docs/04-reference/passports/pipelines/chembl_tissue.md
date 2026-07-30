@@ -22,6 +22,7 @@ Silver использует профиль `chembl.tissue` и проверяет
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `chembl:tissue` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/tissue` |
 | Resource / tables | `tissue` |
 | Filters | `tissue_id`: IDs from data/input/tissue.csv column tissue_chembl_id; CLI may override the input CSV |
 | Selected fields | `system` (6 fields); `identifiers` (1 fields); `business` (14 fields) |

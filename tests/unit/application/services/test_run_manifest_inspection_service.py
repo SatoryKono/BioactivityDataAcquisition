@@ -1418,5 +1418,3 @@ def test_show_distinguishes_partial_artifact_anchor_gaps(
     assert result.diagnostics["missing_artifact_links"] == expected_missing_links
     assert result.diagnostics["alert_signals"]["artifact_linkage_gap"] is False
     assert result.diagnostics["alert_signals"]["lineage_gap"] is expected_lineage_gap
-
-

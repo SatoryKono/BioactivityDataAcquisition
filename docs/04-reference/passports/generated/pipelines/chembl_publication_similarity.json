@@ -36,7 +36,7 @@
     }
   },
   "extraction": {
-    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data",
+    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data/document_similarity",
     "field_groups": [
       {
         "field_count": 7,
@@ -75,7 +75,7 @@
         "source": "cli"
       }
     ],
-    "method": null,
+    "method": "GET",
     "selected_fields": [
       {
         "name": "sim_id",
@@ -133,7 +133,7 @@
       }
     ],
     "source_collections": [
-      "publication_similarity"
+      "document_similarity"
     ],
     "source_kind": "derived",
     "source_resource": "chembl:publication_similarity",

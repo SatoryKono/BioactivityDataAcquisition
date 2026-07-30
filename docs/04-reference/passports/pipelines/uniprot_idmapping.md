@@ -23,6 +23,7 @@ Silver использует профиль `uniprot.idmapping` и проверя
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `uniprot:idmapping` |
+| Method / endpoint | `GET` · `https://rest.uniprot.org` |
 | Resource / tables | `idmapping` |
 | Filters | `target_id`: IDs from data/input/target.csv column target_chembl_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (14 fields) |

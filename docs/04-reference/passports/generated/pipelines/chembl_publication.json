@@ -36,7 +36,7 @@
     }
   },
   "extraction": {
-    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data",
+    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data/document",
     "field_groups": [
       {
         "field_count": 10,
@@ -164,7 +164,7 @@
     "method": "GET",
     "selected_fields": [],
     "source_collections": [
-      "publication"
+      "document"
     ],
     "source_kind": "http_api",
     "source_resource": "chembl.publication.curated",

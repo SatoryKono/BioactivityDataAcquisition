@@ -22,7 +22,8 @@ Silver использует профиль `chembl.protein_class` и прове�
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `chembl:protein_class` |
-| Resource / tables | `protein_class` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/protein_classification` |
+| Resource / tables | `protein_classification` |
 | Filters | `protein_class_id`: IDs from data/input/protein_class.csv column protein_class_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (10 fields) |
 
