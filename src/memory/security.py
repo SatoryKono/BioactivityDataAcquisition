@@ -81,6 +81,11 @@ _RULES: tuple[tuple[FindingKind, str, re.Pattern[str]], ...] = (
         "pii-email-address",
         re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.IGNORECASE),
     ),
+    (
+        FindingKind.PII,
+        "pii-international-phone-number",
+        re.compile(r"(?<!\w)\+(?:[0-9][ -]?){7,14}[0-9](?!\w)"),
+    ),
 )
 
 
