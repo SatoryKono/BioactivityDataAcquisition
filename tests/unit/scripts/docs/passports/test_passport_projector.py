@@ -115,10 +115,12 @@ def test_source_revision_excludes_ephemeral_merge_commits(
         return subprocess.CompletedProcess(command, 0, stdout=f"{REVISION}\n")
 
     monkeypatch.delenv("BIOETL_PASSPORT_SOURCE_REVISION", raising=False)
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
     monkeypatch.setattr(subprocess, "run", _run)
 
     assert _source_revision() == REVISION
     assert captured[:4] == ["git", "log", "--no-merges", "-1"]
+    assert captured[4:6] == ["--format=%H", "HEAD^2"]
 
 
 def test_generation_is_subprocess_environment_invariant(tmp_path: Path) -> None:

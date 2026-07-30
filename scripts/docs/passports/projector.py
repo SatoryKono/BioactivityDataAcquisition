@@ -92,6 +92,9 @@ def _source_revision() -> str:
     override = os.environ.get("BIOETL_PASSPORT_SOURCE_REVISION")
     if override:
         return override
+    start_ref = (
+        "HEAD^2" if os.environ.get("GITHUB_EVENT_NAME") == "pull_request" else "HEAD"
+    )
     result = subprocess.run(
         [
             "git",
@@ -99,6 +102,7 @@ def _source_revision() -> str:
             "--no-merges",
             "-1",
             "--format=%H",
+            start_ref,
             "--",
             "configs/entities",
             "configs/providers",
