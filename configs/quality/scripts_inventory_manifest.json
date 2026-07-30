@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-30T16:44:45.660245+00:00",
+  "generated_at": "2026-07-30T19:24:29.516057+00:00",
   "summary": {
     "total_scripts": 567,
     "status_counts": {
@@ -10882,7 +10882,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 181,
+          "line": 182,
           "source_group": "docs",
           "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
         },
@@ -15950,7 +15950,7 @@
         },
         {
           "path": "tests/integration/memory/test_workflow_tooling.py",
-          "line": 331,
+          "line": 361,
           "source_group": "tests",
           "text": "\"source_path\": \"src/memory/query.py\","
         },
@@ -19743,7 +19743,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/MEMORY_ARCHITECTURE.md",
-          "line": 124,
+          "line": 132,
           "source_group": "docs",
           "text": "bash scripts/ops/support/skills/check_skills_mirror.sh --check"
         }
