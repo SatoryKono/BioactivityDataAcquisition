@@ -148,7 +148,8 @@ def test_required_option_values_reject_missing_empty_or_option_tokens(
     result = _run_launcher(tmp_path, *args)
 
     assert result.returncode == 1
-    assert "[ERROR]" in result.stdout
+    # Script writes errors to stderr, not stdout
+    assert "[ERROR]" in result.stderr or "[ERROR]" in result.stdout
 
 
 def test_long_help_option_exits_without_starting_review(tmp_path: Path) -> None:
