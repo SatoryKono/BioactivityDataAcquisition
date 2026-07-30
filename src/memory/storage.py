@@ -17,6 +17,60 @@ class StorageConflictError(RuntimeError):
     """Raised when an optimistic write or lock acquisition conflicts."""
 
 
+def _process_start_token(pid: int) -> str | None:
+    """Return the Linux process start token when available."""
+    stat_path = Path("/proc") / str(pid) / "stat"
+    try:
+        fields = stat_path.read_text(encoding="utf-8").split()
+    except (OSError, UnicodeError):
+        return None
+    return fields[21] if len(fields) > 21 else None
+
+
+def _lock_owner_is_alive(payload: dict[str, Any]) -> bool:
+    """Return whether lock metadata still identifies the same live process."""
+    pid = payload.get("pid")
+    if not isinstance(pid, int) or pid < 1:
+        return False
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    expected_start = payload.get("process_start")
+    actual_start = _process_start_token(pid)
+    if isinstance(expected_start, str) and actual_start is not None:
+        return expected_start == actual_start
+    return True
+
+
+def _recover_orphaned_lock(lock_path: Path, *, stale_after_seconds: float) -> bool:
+    """Remove a lock only when its owner is dead or malformed metadata is stale."""
+    try:
+        raw = lock_path.read_text(encoding="utf-8")
+        payload = json.loads(raw)
+        stat = lock_path.stat()
+    except FileNotFoundError:
+        return True
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        try:
+            age_seconds = max(time.time() - lock_path.stat().st_mtime, 0.0)
+        except FileNotFoundError:
+            return True
+        if age_seconds < stale_after_seconds:
+            return False
+        lock_path.unlink(missing_ok=True)
+        return True
+    if isinstance(payload, dict) and _lock_owner_is_alive(payload):
+        return False
+    # The path cannot be replaced while it exists because contenders use O_EXCL.
+    # Concurrent recoverers may both unlink, but only one can acquire afterward.
+    if stat.st_ino == lock_path.stat().st_ino:
+        lock_path.unlink(missing_ok=True)
+    return True
+
+
 def content_digest(data: bytes) -> str:
     """Return the stable SHA-256 digest used for optimistic writes."""
     return hashlib.sha256(data).hexdigest()
@@ -28,6 +82,7 @@ def exclusive_lock(
     *,
     timeout_seconds: float = 5.0,
     poll_seconds: float = 0.01,
+    stale_after_seconds: float = 300.0,
 ) -> Iterator[None]:
     """Acquire a portable sidecar lock using exclusive file creation."""
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -38,13 +93,26 @@ def exclusive_lock(
         try:
             lock_fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
         except FileExistsError as exc:
+            if _recover_orphaned_lock(
+                lock_path, stale_after_seconds=stale_after_seconds
+            ):
+                continue
             if time.monotonic() >= deadline:
                 raise StorageConflictError(
                     f"timed out acquiring lock: {target}"
                 ) from exc
             time.sleep(poll_seconds)
     try:
-        os.write(lock_fd, str(os.getpid()).encode("ascii"))
+        payload = {
+            "pid": os.getpid(),
+            "process_start": _process_start_token(os.getpid()),
+            "schema_version": 1,
+        }
+        os.write(
+            lock_fd,
+            (json.dumps(payload, sort_keys=True) + "\n").encode("utf-8"),
+        )
+        os.fsync(lock_fd)
         yield
     finally:
         os.close(lock_fd)
