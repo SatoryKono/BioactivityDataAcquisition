@@ -38,10 +38,12 @@ modules:
       - tests/unit/application/composite/test_coordinator_logging.py
 
   - source: src/bioetl/application/composite/preflight_validator.py
-    ownership: direct_test
-    rationale: "Preflight validation seam already has a dedicated same-path owner suite."
+    ownership: cluster_owner
+    rationale: >
+      Preflight validation is owned by the dedicated repository-backed suite
+      because its config-loading scenarios depend on checked-in repository files.
     owner_tests:
-      - tests/unit/application/composite/test_preflight_validator.py
+      - tests/unit/repo_backed/application/composite/test_preflight_validator.py
 
   - source: src/bioetl/application/composite/protocols.py
     ownership: cluster_owner

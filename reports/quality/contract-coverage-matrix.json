@@ -35,7 +35,6 @@
         "tests/unit/application/composite/test_composite_activity.py",
         "tests/unit/application/pipelines/chembl/test_activity_schema_gap.py",
         "tests/unit/application/pipelines/test_activity_transformer_base.py",
-        "tests/unit/application/pipelines/test_chembl_activity_unit.py",
         "tests/unit/domain/behavior/activity_aggregator/test_aggregator_branch_coverage.py",
         "tests/unit/domain/behavior/activity_aggregator/test_init.py",
         "tests/unit/domain/entities/bioactivity/test_converters.py",
@@ -47,6 +46,7 @@
         "tests/unit/domain/services/test_activity_aggregator.py",
         "tests/unit/domain/value_objects/test_activity.py",
         "tests/unit/repo_backed/application/pipelines/chembl/test_activity_transformer.py",
+        "tests/unit/repo_backed/application/pipelines/test_chembl_activity.py",
         "tests/unit/scripts/test_generate_chembl_activity_field_matrix.py"
       ],
       "contract_yaml_contract_ref": "chembl.activity",
@@ -1304,7 +1304,6 @@
         "tests/unit/application/composite/test_composite_activity.py",
         "tests/unit/application/pipelines/chembl/test_activity_schema_gap.py",
         "tests/unit/application/pipelines/test_activity_transformer_base.py",
-        "tests/unit/application/pipelines/test_chembl_activity_unit.py",
         "tests/unit/domain/behavior/activity_aggregator/test_aggregator_branch_coverage.py",
         "tests/unit/domain/behavior/activity_aggregator/test_init.py",
         "tests/unit/domain/entities/bioactivity/test_converters.py",
@@ -1316,6 +1315,7 @@
         "tests/unit/domain/services/test_activity_aggregator.py",
         "tests/unit/domain/value_objects/test_activity.py",
         "tests/unit/repo_backed/application/pipelines/chembl/test_activity_transformer.py",
+        "tests/unit/repo_backed/application/pipelines/test_chembl_activity.py",
         "tests/unit/scripts/test_generate_chembl_activity_field_matrix.py"
       ],
       "contract_yaml_contract_ref": "composite.activity",
@@ -2561,5 +2561,5 @@
     "gold_enabled": "Effective runtime state of pipeline.sink.gold.enabled after hierarchical config resolution; omitted enabled defaults to true. Never infer this from contract/Pandera availability or from unrelated flags such as filters.input_filter.enabled.",
     "missing_gold_enabled_count": "Runtime-enabled Gold rows whose contract parity_status is not covered."
   },
-  "snapshot_date": "2026-07-28"
+  "snapshot_date": "2026-07-30"
 }

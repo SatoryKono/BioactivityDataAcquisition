@@ -51,7 +51,7 @@ jobs:
             threshold: "60.0"
           - id: application-workflow-runner
             paths_to_mutate: src/bioetl/application/services/workflow_runner_service.py
-            tests_dir: tests/unit/application/services/
+            tests_dir: tests/unit/repo_backed/application/services/test_workflow_runner_service.py
             threshold: "60.0"
 
     steps:
