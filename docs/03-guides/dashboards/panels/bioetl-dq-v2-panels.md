@@ -134,7 +134,7 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Purpose:** Show Silver rejects by pipeline.
 - **Data sources:** `bioetl_silver_filter_rejections_total`
 
-### 24. Inspect Gold Rejects by Pipeline
+### 24. Inspect: Gold Reject Outcomes by Pipeline
 - **Type:** Bargauge
 - **Purpose:** Show Gold reject outcomes by pipeline.
 - **Data sources:** `bioetl_processed_records_gold_quarantined_current`, `bioetl_processed_records_gold_excluded_by_contract_current`

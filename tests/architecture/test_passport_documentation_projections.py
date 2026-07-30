@@ -6,9 +6,11 @@ import ast
 import json
 from pathlib import Path
 
+import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
+pytestmark = pytest.mark.architecture
 
 
 def test_runtime_does_not_import_passport_tooling() -> None:

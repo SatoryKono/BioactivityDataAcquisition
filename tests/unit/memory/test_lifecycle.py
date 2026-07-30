@@ -7,6 +7,8 @@ import pytest
 from memory.lifecycle import IllegalTransitionError, can_transition, transition
 from memory.records import RecordStatus
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.parametrize(
     ("previous", "current"),

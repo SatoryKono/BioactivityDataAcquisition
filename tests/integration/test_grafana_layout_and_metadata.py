@@ -184,13 +184,13 @@ def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
         if isinstance(panel.get("title"), str)
     }
 
-    first_action_grid = root_panels["Review First Action"]["gridPos"]
+    first_action_grid = root_panels["Start Pipeline Triage"]["gridPos"]
     assert first_action_grid["y"] <= 7
     assert first_action_grid["w"] >= 8
-    assert "Review Run Identity" not in root_panels
-    assert "Review Processed Records" not in root_panels
-    assert "Review Run Identity" in all_panels
-    assert "Review Processed Records" in all_panels
+    assert "Inspect Pipeline Identity" not in root_panels
+    assert "Inspect Processed Records" not in root_panels
+    assert "Inspect Pipeline Identity" in all_panels
+    assert "Inspect Processed Records" in all_panels
     assert any(
         panel.get("type") == "row"
         and panel.get("id") == 9993
@@ -780,31 +780,30 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
             panel
             for panel in panels
             if panel.get("type") == "row"
-            and panel.get("title") == "Selected Provider Detail"
+            and panel.get("title") == "Selected Provider Details"
         ),
         None,
     )
     assert detail_row is not None
     assert detail_row.get("collapsed") is True
 
-    child_panels = get_row_child_panels(dashboard, "Selected Provider Detail")
+    child_panels = get_row_child_panels(dashboard, "Selected Provider Details")
     child_titles = {
         panel.get("title")
         for panel in child_panels
         if isinstance(panel.get("title"), str)
     }
-    assert "Inspect Provider Health Check Latency (p95) - $provider" in child_titles
+    assert "Inspect Health-Check Latency p95" in child_titles
     root_titles = {
         panel.get("title")
         for panel in dashboard.get("panels", [])
         if isinstance(panel.get("title"), str)
     }
-    assert "Inspect Provider Health Check Latency (p95) - $provider" not in root_titles
+    assert "Inspect Health-Check Latency p95" not in root_titles
     detail_panel = next(
         panel
         for panel in child_panels
-        if panel.get("title")
-        == "Inspect Provider Health Check Latency (p95) - $provider"
+        if panel.get("title") == "Inspect Health-Check Latency p95"
     )
     assert detail_panel.get("gridPos", {}).get("y", 0) > detail_row.get(
         "gridPos", {}

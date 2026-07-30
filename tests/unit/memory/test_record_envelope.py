@@ -6,8 +6,11 @@ import json
 from pathlib import Path
 
 import jsonschema
+import pytest
 
 from memory.records import ActorIdentity, RecordEnvelope, RecordType, TrustLevel
+
+pytestmark = pytest.mark.unit
 
 
 def _envelope() -> RecordEnvelope:
@@ -37,7 +40,9 @@ def test_record_envelope_is_schema_valid() -> None:
     )
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
 
-    jsonschema.Draft202012Validator(schema).validate(_envelope().to_dict())
+    assert (
+        jsonschema.Draft202012Validator(schema).validate(_envelope().to_dict()) is None
+    )
 
 
 def test_record_envelope_digest_is_deterministic() -> None:

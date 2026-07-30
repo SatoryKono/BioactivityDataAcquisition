@@ -14,7 +14,7 @@ Covers:
 - continuous lag panels must not use state-timeline without discrete state frame
 - status stats map bare numeric vocabulary (incl. 3/null)
 - operator tables must not default color-background on all cells
-- Trust next-step rail SSOT title remains Review First Recovery Action
+- Trust next-step rail SSOT title remains Review Recovery Action
 """
 
 from __future__ import annotations
@@ -202,7 +202,7 @@ def test_trust_primary_recovery_ssot_title_and_link() -> None:
     panels = [
         panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") == "Review First Recovery Action"
+        if panel.get("title") == "Review Recovery Action"
     ]
     assert len(panels) == 1
     assert not any(

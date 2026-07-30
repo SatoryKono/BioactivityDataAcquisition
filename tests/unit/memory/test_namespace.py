@@ -9,6 +9,8 @@ import pytest
 
 from memory.scope import RepositoryScope, safe_component
 
+pytestmark = pytest.mark.unit
+
 
 def test_namespace_path_isolated_by_worktree_and_task(tmp_path: Path) -> None:
     first = RepositoryScope("repo", "a" * 40, "main", "tree-a", "task")

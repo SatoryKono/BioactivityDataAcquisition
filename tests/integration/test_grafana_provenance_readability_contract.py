@@ -15,7 +15,7 @@ pytestmark = pytest.mark.integration
 _SPECS = {
     "bioetl-control-plane-v1.json": (
         9400,
-        "Provenance",
+        "Inspect Scope & Evidence",
         (
             "Can this run be replayed safely?",
             "replay status/reason/action",
@@ -24,7 +24,7 @@ _SPECS = {
     ),
     "bioetl-overview-v2.json": (
         99,
-        "Provenance",
+        "Inspect Scope & Evidence",
         (
             "What is broken or degraded right now?",
             "Status + First Action",
@@ -33,7 +33,7 @@ _SPECS = {
     ),
     "bioetl-runtime.json": (
         9400,
-        "Provenance",
+        "Understand Pipeline Scope",
         (
             "Is the pipeline progressing, and what is blocking delivery?",
             "health/phase/blockers",
@@ -42,7 +42,7 @@ _SPECS = {
     ),
     "bioetl-provider-health-v2.json": (
         9400,
-        "Provenance",
+        "Understand Evidence Scope",
         (
             "Which provider is degraded, and why?",
             "SELECTED PROVIDER",
@@ -51,7 +51,7 @@ _SPECS = {
     ),
     "bioetl-dq-v2.json": (
         9400,
-        "Provenance",
+        "Understand Evidence Scope",
         (
             "Is data conformant, and what impact needs action?",
             "Status/reasons",
@@ -60,7 +60,7 @@ _SPECS = {
     ),
     "bioetl-incident-v1.json": (
         9400,
-        "Provenance",
+        "Understand Incident Scope",
         (
             "What is the highest-confidence active suspect?",
             "EMPTY DOMAIN",
@@ -69,7 +69,7 @@ _SPECS = {
     ),
     "bioetl-run-explorer-v1.json": (
         1,
-        "Provenance · Run Scope",
+        "Understand Run Scope",
         (
             "Which exact run should be inspected?",
             "BROWSE",

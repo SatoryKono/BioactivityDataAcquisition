@@ -24,10 +24,10 @@ def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None
     dashboard = load_dashboard(_require_dashboard("bioetl-runtime.json"))
 
     description = str(dashboard.get("description", "")).lower()
-    assert "selected-range" in description
-    assert "does not provide current run state" in description
-    assert "run_id" in description
-    assert "stage" in description
+    assert "pipeline flow dual layout" in description
+    assert "blockers + taxonomy first" in description
+    assert "empty blockers are valid empty" in description
+    assert "telemetry confidence" in description
 
     panels = {
         panel.get("title"): panel
@@ -35,32 +35,13 @@ def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None
         if panel.get("title")
     }
     expected_tokens = {
-        "Track Failed Workflow Runs": ("selected time range", "0. control plane"),
-        "Track Failed Workflow Steps": ("step_kind=pipeline", "2. runtime"),
-        "Workflow Run Outcomes / Range": (
-            "valid empty",
-            "no matching scope",
-            "telemetry absent",
-            "query/datasource failures",
-            "next action",
-        ),
-        "Step Outcomes by Kind / Step Status / Range": (
-            "step kind",
-            "step status",
-            "2. runtime",
-        ),
-        "Step Duration p95 by Kind / Step Status / Range": (
-            "p95",
-            "selected time range",
-            "2. runtime",
-        ),
-        "First Action": (
-            "selected-range",
-            "runtime",
-            "data quality",
-            "run_id",
-            "dependency",
-            "gold-write",
+        "Track Failed Workflow Runs": ("selected range", "not current workflow"),
+        "Track Failed Workflow Steps": ("selected range", "not stage success"),
+        "Start Pipeline Triage": (
+            "current verdict",
+            "runtime blockers",
+            "dq",
+            "run explorer",
         ),
     }
     for title, tokens in expected_tokens.items():

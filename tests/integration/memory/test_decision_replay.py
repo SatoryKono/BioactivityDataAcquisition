@@ -10,6 +10,8 @@ from memory.evidence import DecisionRecord, EvidenceEvent, EvidenceStore
 from memory.records import ActorIdentity, RecordEnvelope, RecordType, TrustLevel
 from memory.replay import replay_decision
 
+pytestmark = pytest.mark.integration
+
 
 def _envelope(record_id: str, record_type: RecordType) -> RecordEnvelope:
     return RecordEnvelope.create(

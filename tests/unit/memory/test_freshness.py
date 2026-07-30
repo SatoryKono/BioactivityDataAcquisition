@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 from memory.freshness import FreshnessStatus, evaluate_freshness
 from memory.records import ActorIdentity, RecordEnvelope, RecordType
 from memory.scope import RepositoryScope
+
+pytestmark = pytest.mark.unit
 
 
 def _envelope(**overrides: str) -> RecordEnvelope:

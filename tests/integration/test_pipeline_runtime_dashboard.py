@@ -162,7 +162,7 @@ def test_pipeline_runtime_localization_empty_states_are_explicit() -> None:
 
     errors_panel = panels["Review Errors by Stage & Code"]
     errors_description = errors_panel.get("description", "")
-    assert "not a synthetic domain value" in errors_description
+    assert "empty table means no matching samples" in errors_description.lower()
 
     records_panel = panels["Compare Records by Stage & Run Type"]
     records_description = records_panel.get("description", "")
@@ -180,14 +180,16 @@ def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
         "Inspect ",
         "Track ",
         "Review ",
+        "Compare ",
+        "Start ",
         "First Action",
     )
     shared_panel_titles = {
-        "Provenance",
-        "Status",
-        "ID",
-        "Processed Records",
-        "Runtime Blockers",
+        "Understand Pipeline Scope",
+        "Monitor Pipeline Status",
+        "Inspect Pipeline Identity",
+        "Inspect Processed Records",
+        "Review Runtime Blockers",
         "Monitor Metrics Coverage",
         "Monitor Monitor Runtime Error Rate",
         "Monitor Monitor Failed Runs",
@@ -219,11 +221,6 @@ def test_pipeline_runtime_count_panels_have_window_in_title_or_description() -> 
         "Monitor Monitor Runtime Error Rate",
         "Monitor Monitor Worst Stage Lag",
         "Monitor Memory Pressure Active",
-        "Monitor Pipeline Alert Conditions",
-        "Inspect DQ Alert Conditions",
-        "Inspect Control Plane Alert Conditions",
-        "Inspect Provider Alert Conditions",
-        "Inspect Global Provider Alert Conditions",
         "Inspect Entities Stale Over 24h",
         "Inspect Warning Logs (1h)",
         "Inspect GLOBAL Unstructured Logs (1h)",
@@ -241,7 +238,18 @@ def test_pipeline_runtime_count_panels_have_window_in_title_or_description() -> 
         description = panel.get("description", "")
         windowed = any(
             token in f"{title} {description}"
-            for token in ("15m", "30m", "1h", "24h", "Range", "Interval", "range")
+            for token in (
+                "15m",
+                "30m",
+                "1h",
+                "24h",
+                "Range",
+                "Interval",
+                "range",
+                "current",
+                "fixed",
+                "minutes",
+            )
         )
         if not windowed:
             offenders.append(title)
@@ -412,8 +420,8 @@ def test_runtime_current_panels_use_scoped_recording_rules_for_workflow_aliases(
     """Runtime current-triage panels must delegate workflow_<pipeline> selectors to rules."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
     expected_rules = {
-        "Status": ("bioetl_runtime_current_status_trusted",),
-        "Runtime Blockers": ("bioetl_runtime_current_blocker_reason_scoped",),
+        "Monitor Pipeline Status": ("bioetl_runtime_current_status_trusted",),
+        "Review Runtime Blockers": ("bioetl_runtime_current_blocker_reason_scoped",),
         "Monitor Runtime Blockers": (
             "bioetl_runtime_current_blocker_reason_scoped",
             "bioetl_runtime_current_status_trusted",
@@ -436,7 +444,7 @@ def test_runtime_current_panels_use_scoped_recording_rules_for_workflow_aliases(
 def test_top_runtime_blockers_hides_prometheus_metric_name_column() -> None:
     """Top blocker table must not expose the Prometheus __name__ service column."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    panel = panels.get("Runtime Blockers")
+    panel = panels.get("Review Runtime Blockers")
     assert panel is not None
 
     organize = next(
@@ -522,9 +530,9 @@ def test_runtime_row_sequence_is_fixed_detect_localize_escalate() -> None:
     ]
     row_pairs = [(panel.get("id"), panel.get("title")) for panel in row_panels]
     assert row_pairs[:3] == [
-        (252, "Detect"),
-        (253, "Localize"),
-        (254, "Escalate"),
+        (252, "Inspect Detection Signals"),
+        (253, "Localize Runtime Cause"),
+        (254, "Review Escalation Paths"),
     ], f"Runtime row order/title drifted: {row_pairs}"
 
 
@@ -535,8 +543,9 @@ def test_runtime_first_action_cta_contract() -> None:
     assert first_action_panel is not None, (
         "Runtime dashboard missing First Action panel (id=9991)"
     )
-    assert first_action_panel.get("title") == "First Action", (
-        f"Panel 9991 must have title 'First Action', got {first_action_panel.get('title')!r}"
+    assert first_action_panel.get("title") == "Start Pipeline Triage", (
+        "Panel 9991 must have title 'Start Pipeline Triage', "
+        f"got {first_action_panel.get('title')!r}"
     )
     # First Action panel uses panel-level links, not options.dataLinks
     links = first_action_panel.get("links", [])

@@ -2845,7 +2845,7 @@
             "x": 0,
             "y": 0
           },
-          "description": "Shows HTTP-backed identity for an exact Run ID. An empty table can mean no matching run, unresolved aggregate scope, or backend failure; verify /health/live before treating it as expected. Open Run Explorer for complete run evidence.",
+          "description": "Shows HTTP-backed identity for an exact Run ID. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live before treating the result as expected. Open Run Explorer for complete run evidence.",
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
             "defaults": {
@@ -3003,7 +3003,7 @@
             "x": 12,
             "y": 0
           },
-          "description": "Shows HTTP-backed Bronze, Silver, and Gold record counts and outcomes. Zero is a recorded count, while no rows can mean no matching run, processing not started, unresolved scope, or backend failure; verify /health/live. Open Run Explorer for complete accounting.",
+          "description": "Shows HTTP-backed Bronze, Silver, and Gold record counts and outcomes. Zero is a recorded count. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live. Open Run Explorer for complete accounting.",
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
             "defaults": {

@@ -5,7 +5,11 @@ import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from scripts.ai.codex import efficiency_baseline
+
+pytestmark = pytest.mark.unit
 
 
 def test_collect_baseline_is_bounded_and_secret_free(

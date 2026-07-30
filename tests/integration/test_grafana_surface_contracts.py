@@ -311,7 +311,7 @@ def test_dq_dashboard_contains_gold_specific_validation_surface() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor: Gold Strict Validation Failures"
+            if item.get("title") == "Monitor Gold Validation Failures"
         ),
         None,
     )
@@ -334,11 +334,11 @@ def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_ti
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Runtime Error Rate"
+            if item.get("title") == "Monitor Runtime Error Rate"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Runtime Error Rate' not found"
+    assert panel is not None, "Panel 'Monitor Runtime Error Rate' not found"
 
     expressions = [
         target.get("expr", "")
@@ -359,12 +359,12 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect Errors by Stage / Error Code / Range"
+            if item.get("title") == "Review Errors by Stage & Code"
         ),
         None,
     )
     assert panel is not None, (
-        "Panel 'Inspect Errors by Stage / Error Code / Range' not found"
+        "Panel 'Review Errors by Stage & Code' not found"
     )
 
     targets = [
@@ -396,15 +396,15 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
 @pytest.mark.parametrize(
     ("panel_title", "expected_snippet"),
     [
-        ("Monitor Healthy Checks (Selected Range)", "[$__range]"),
-        ("Monitor Degraded Checks (Selected Range)", "[$__range]"),
-        ("Track Provider Failure Rate (Selected Range)", "[$__range]"),
-        ("Track Health Checks Total (Selected Range)", "[$__range]"),
-        ("Inspect Adapter Request Latency by Endpoint (p95)", "[$__interval]"),
-        ("Inspect Rate Limit Errors by Method", "[$__interval]"),
-        ("Inspect Network Timeout Errors by Method", "[$__interval]"),
-        ("Track Rate Limiter Wait by Provider (p95)", "[$__interval]"),
-        ("Monitor Minimum Rate Limiter Tokens Available", "[$__range]"),
+        ("Monitor Healthy Checks", "[$__range]"),
+        ("Monitor Degraded Checks", "[$__range]"),
+        ("Track Failure Rate", "[$__range]"),
+        ("Monitor Health Checks", "[$__range]"),
+        ("Track Request Latency p95", "[$__interval]"),
+        ("Track Rate-Limit Errors", "[$__interval]"),
+        ("Track Network & Timeout Errors", "[$__interval]"),
+        ("Track Rate-Limiter Wait p95", "[$__interval]"),
+        ("Monitor Available Rate-Limit Tokens", "[$__range]"),
     ],
 )
 def test_provider_health_summary_panels_use_selected_time_range(
@@ -441,8 +441,8 @@ def test_provider_circuit_breaker_panels_use_adapter_variable() -> None:
     )
 
     for panel_title in (
-        "Monitor Cross-Scope Adapter Circuit Breaker State (max)",
-        "Track Cross-Scope Adapter Circuit Breaker Trips",
+        "Monitor Circuit-Breaker State",
+        "Track Circuit-Breaker Trips",
     ):
         panel = next(
             (
@@ -472,22 +472,22 @@ def test_provider_circuit_breaker_panels_use_adapter_variable() -> None:
     [
         (
             "bioetl-runtime.json",
-            "Track Pipeline Phase Duration p50/p95/p99",
+            "Track Phase Duration",
             "[$__rate_interval]",
         ),
         (
             "bioetl-runtime.json",
-            "Track Pipeline Duration p50/p95/p99",
+            "Track Pipeline Duration",
             "[$__rate_interval]",
         ),
         (
             "bioetl-runtime.json",
-            "Track GLOBAL Shutdown Initiated by Reason / Interval",
+            "Track Global Shutdown Starts",
             "[$__interval]",
         ),
         (
             "bioetl-runtime.json",
-            "Track GLOBAL Shutdown Completed by Reason / Interval",
+            "Track Global Shutdown Completions",
             "[$__interval]",
         ),
         (
@@ -540,18 +540,18 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-overview-v2.json", "Historical Failures"),
-        ("bioetl-overview-v2.json", "Recent Terminal Runs"),
+        ("bioetl-overview-v2.json", "Review Failed Runs"),
+        ("bioetl-overview-v2.json", "Review Recent Terminal Runs"),
         ("bioetl-control-plane-v1.json", "Track Global Read Failures"),
         (
             "bioetl-control-plane-v1.json",
             "Track Global Read Latency",
         ),
-        ("bioetl-dq-v2.json", "Range · Records Quarantined"),
-        ("bioetl-dq-v2.json", "Track: Silver Validation Failures in Range"),
-        ("bioetl-dq-v2.json", "Inspect: Quarantine by Error Type"),
-        ("bioetl-dq-v2.json", "Monitor: Silver Validation Failures"),
-        ("bioetl-runtime.json", "Track Records by Stage / Run Type / Range"),
+        ("bioetl-dq-v2.json", "Monitor Quarantined Records"),
+        ("bioetl-dq-v2.json", "Monitor Silver Validation Failures"),
+        ("bioetl-dq-v2.json", "Inspect Quarantine Error Types"),
+        ("bioetl-dq-v2.json", "Monitor Silver Validation Failures"),
+        ("bioetl-runtime.json", "Compare Records by Stage & Run Type"),
     ],
 )
 def test_range_aware_summary_panels_use_selected_time_range(
@@ -582,7 +582,7 @@ def test_range_aware_summary_panels_use_selected_time_range(
 @pytest.mark.parametrize(
     ("panel_title", "expected_recording_metrics"),
     [
-        ("Runtime Blockers", ["bioetl_runtime_current_blocker_reason"]),
+        ("Review Runtime Blockers", ["bioetl_runtime_current_blocker_reason"]),
         (
             "Monitor Runtime Blockers",
             [
@@ -639,8 +639,8 @@ def test_runtime_tracing_row_orders_log_hygiene_panels() -> None:
     ("dashboard_file", "panel_title"),
     [
         ("bioetl-control-plane-v1.json", "Compare Lineage Persistence Outcomes"),
-        ("bioetl-dq-v2.json", "Track: DQ Check Duration (p95)"),
-        ("bioetl-dq-v2.json", "Track: Anomalies Detected"),
+        ("bioetl-dq-v2.json", "Track DQ Check Duration p95"),
+        ("bioetl-dq-v2.json", "Track DQ Anomalies"),
         ("bioetl-runtime.json", "Track Records by Stage / Interval"),
     ],
 )

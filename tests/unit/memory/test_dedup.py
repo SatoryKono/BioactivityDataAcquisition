@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from memory.dedup import (
     DedupCandidate,
     DuplicateKind,
     build_dedup_report,
     semantic_key,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def _candidate(

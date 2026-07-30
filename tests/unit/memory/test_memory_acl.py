@@ -21,11 +21,14 @@ def test_access_requires_matching_principal_repository_and_explicit_grant() -> N
         grants=frozenset({AccessAction.EXPORT}),
     )
 
-    require_access(
-        context,
-        action=AccessAction.EXPORT,
-        owner_id="user-a",
-        repo_id="repo-a",
+    assert (
+        require_access(
+            context,
+            action=AccessAction.EXPORT,
+            owner_id="user-a",
+            repo_id="repo-a",
+        )
+        is None
     )
 
 
