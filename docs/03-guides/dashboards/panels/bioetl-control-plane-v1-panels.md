@@ -23,94 +23,94 @@ JSON is the source of truth.
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1000 | Navigation | text | Static | Static navigation handoff into related dashboards and incident paths. | shared shell | No thresholds; operator routing only. |
-| 9400 | Inspect Scope & Evidence | text | Static | Replay-safety question plus plain-language definitions of current, selected-run, and unknown evidence. | shared shell | No thresholds; interpretive guidance only. |
-| 9401 | Status | stat | Prometheus | Evidence-aware replay/resume verdict from `bioetl_control_plane_current_status_trusted`; gates replay blockers, checkpoint freshness/presence, and required telemetry. | shared shell | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. `INCOMPLETE` blocks replay/resume approval. |
-| 9402 | ID | table | Quarantine Explorer | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | No numeric threshold; forensic handoff table. |
-| 9403 | Processed Records | table | Quarantine Explorer | Current processed-record evidence for the selected run scope. | shared shell | No numeric threshold; read-path evidence table. |
-| 9410 | ID Empty State | text | Static | Neutral visible fallback when the Control Plane identity table returns no visible rows. | shared shell | No thresholds; prevents blank first-screen identity space. |
-| 9411 | Processed Records Empty State | text | Static | Neutral visible fallback when the Control Plane accounting table returns no visible rows. | shared shell | No thresholds; distinguishes missing accounting evidence from zero records. |
-| 891 | Monitor: Replay Safety State | stat | Prometheus | Replay-safety blocker state for the selected scope. | shared shell | Severity/value mapping. |
-| 892 | Monitor: Checkpoint Freshness Lag (seconds) | stat | Quarantine Explorer | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
-| 893 | Monitor: Manifest / Ledger Integrity | stat | Prometheus | Current manifest/ledger failure state from `bioetl_manifest_ledger_failures_15m`. | shared shell | Severity/value mapping. |
-| 907 | Inspect: Telemetry Missing | stat | Prometheus | Missing-control-plane-telemetry signal from `bioetl_control_plane_telemetry_missing_5m`. | shared shell | Value mapping distinguishes no-data vs telemetry-missing. |
-| 906 | Primary recovery | text | Static | Static operator next-step guidance for replay/control-plane incidents. | shared shell | Drilldown router into the replay-safety row below. |
+| 1000 | Navigate Dashboards | text | Static | Static navigation handoff into related dashboards and incident paths. | shared shell | No thresholds; operator routing only. |
+| 9400 | Review Scope & Evidence | text | Static | Replay-safety question plus plain-language definitions of current, selected-run, and unknown evidence. | shared shell | No thresholds; interpretive guidance only. |
+| 9401 | Monitor Replay Readiness | stat | Prometheus | Evidence-aware replay/resume verdict from `bioetl_control_plane_current_status_trusted`; gates replay blockers, checkpoint freshness/presence, and required telemetry. | shared shell | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. `INCOMPLETE` blocks replay/resume approval. |
+| 9402 | Review Run Identity | table | Quarantine Explorer | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | No numeric threshold; forensic handoff table. |
+| 9403 | Review Processed Records | table | Quarantine Explorer | Current processed-record evidence for the selected run scope. | shared shell | No numeric threshold; read-path evidence table. |
+| 9410 | Identity Data Unavailable | text | Static | Neutral visible fallback when the Control Plane identity table returns no visible rows. | shared shell | No thresholds; prevents blank first-screen identity space. |
+| 9411 | Record Counts Unavailable | text | Static | Neutral visible fallback when the Control Plane accounting table returns no visible rows. | shared shell | No thresholds; distinguishes missing accounting evidence from zero records. |
+| 891 | Monitor Replay Safety | stat | Prometheus | Replay-safety blocker state for the selected scope. | shared shell | Severity/value mapping. |
+| 892 | Monitor Checkpoint Age | stat | Quarantine Explorer | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
+| 893 | Monitor Manifest & Ledger Failures | stat | Prometheus | Current manifest/ledger failure state from `bioetl_manifest_ledger_failures_15m`. | shared shell | Severity/value mapping. |
+| 907 | Monitor Telemetry Coverage | stat | Prometheus | Missing-control-plane-telemetry signal from `bioetl_control_plane_telemetry_missing_5m`. | shared shell | Value mapping distinguishes no-data vs telemetry-missing. |
+| 906 | Review First Recovery Action | text | Static | Static operator next-step guidance for replay/control-plane incidents. | shared shell | Drilldown router into the replay-safety row below. |
 
 ### Incident Drilldown: Replay Safety (Checkpoint / Replay)
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 902 | Incident Drilldown: Replay Safety (Checkpoint / Replay) | row | Static | Collapsed-by-default incident section for checkpoint/replay safety evidence. | shared shell | Expand only after the first-screen verdict points to replay/checkpoint evidence. |
-| 894 | Inspect: Known Blind Spots | text | Static | Static explanation of expected-empty and backend caveat cases. | shared shell | No thresholds; interpretive guidance only. |
-| 130 | Track: Replay / Resume Blockers in Range | stat | Prometheus | Selected-range blocker rollup across manifest, ledger, replay, and checkpoint failure families. | shared shell | Count panel; no separate threshold mapping documented. |
-| 3 | Monitor: Checkpoint Incompatibilities | stat | Prometheus | Incompatible checkpoint compatibility events from `bioetl_checkpoint_compatibility_events_total`. | shared shell | Count panel. |
-| 104 | Monitor: Replay Not Reconstructable | stat | Prometheus | `bioetl_replay_reconstructability_events_total` with `status="not_reconstructable"`. | shared shell | Count panel. |
-| 120 | Monitor: Replay Drift | stat | Prometheus | Replay drift events from `bioetl_replay_drift_events_total`. | shared shell | Count panel. |
-| 101 | Monitor: Checkpoint Load Failures | stat | Prometheus | Failed checkpoint load events over the selected range. | shared shell | Count panel. |
-| 102 | Monitor: Checkpoint Save Failures | stat | Prometheus | Failed checkpoint save events over the selected range. | shared shell | Count panel. |
-| 103 | Monitor: GLOBAL Checkpoint Operator Failures | stat | Prometheus | Global checkpoint operator failures independent of pipeline scope. | shared shell | Count panel. |
-| 121 | Track: Replay Lag Seconds | stat | Prometheus | Max replay lag for the selected scope from `bioetl_replay_lag_seconds`. | shared shell | Numeric lag panel. |
-| 5 | Track: Checkpoint Compatibility Outcomes | timeseries | Prometheus | Compatibility outcomes by `disposition` over time. | shared shell | Series legend is the primary mapping. |
-| 134 | Track: Replay Drift by Type | timeseries | Prometheus | Replay drift events by `replay_capability`, `drift_type`, and `status`. | shared shell | Series legend is the primary mapping. |
-| 135 | Track: Replay Lag Trend | timeseries | Prometheus | Replay lag trend by replay capability and status. | shared shell | Time trend; no static threshold in doc. |
-| 105 | Track: Checkpoint Save Latency p50/p95/p99 | timeseries | Prometheus | Histogram quantiles for checkpoint save latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
-| 106 | Track: GLOBAL Checkpoint Operator Latency p50/p95/p99 | timeseries | Prometheus | Histogram quantiles for global checkpoint operator latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
+| 902 | Inspect Replay & Checkpoint Evidence | row | Static | Collapsed-by-default incident section for checkpoint/replay safety evidence. | shared shell | Expand only after the first-screen verdict points to replay/checkpoint evidence. |
+| 894 | Review Replay Coverage Limits | text | Static | Static explanation of expected-empty and backend caveat cases. | shared shell | No thresholds; interpretive guidance only. |
+| 130 | Track Replay Blockers in Range | stat | Prometheus | Selected-range blocker rollup across manifest, ledger, replay, and checkpoint failure families. | shared shell | Count panel; no separate threshold mapping documented. |
+| 3 | Track Checkpoint Incompatibilities | stat | Prometheus | Incompatible checkpoint compatibility events from `bioetl_checkpoint_compatibility_events_total`. | shared shell | Count panel. |
+| 104 | Track Unreconstructable Replays | stat | Prometheus | `bioetl_replay_reconstructability_events_total` with `status="not_reconstructable"`. | shared shell | Count panel. |
+| 120 | Track Replay Drift | stat | Prometheus | Replay drift events from `bioetl_replay_drift_events_total`. | shared shell | Count panel. |
+| 101 | Track Checkpoint Load Failures | stat | Prometheus | Failed checkpoint load events over the selected range. | shared shell | Count panel. |
+| 102 | Track Checkpoint Save Failures | stat | Prometheus | Failed checkpoint save events over the selected range. | shared shell | Count panel. |
+| 103 | Track Global Checkpoint Admin Failures | stat | Prometheus | Global checkpoint operator failures independent of pipeline scope. | shared shell | Count panel. |
+| 121 | Track Peak Replay Lag | stat | Prometheus | Max replay lag for the selected scope from `bioetl_replay_lag_seconds`. | shared shell | Numeric lag panel. |
+| 5 | Compare Checkpoint Outcomes | timeseries | Prometheus | Compatibility outcomes by `disposition` over time. | shared shell | Series legend is the primary mapping. |
+| 134 | Track Replay Drift by Type | timeseries | Prometheus | Replay drift events by `replay_capability`, `drift_type`, and `status`. | shared shell | Series legend is the primary mapping. |
+| 135 | Track Replay Lag | timeseries | Prometheus | Replay lag trend by replay capability and status. | shared shell | Time trend; no static threshold in doc. |
+| 105 | Track Checkpoint Save Latency | timeseries | Prometheus | Histogram quantiles for checkpoint save latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
+| 106 | Track Global Checkpoint Admin Latency | timeseries | Prometheus | Histogram quantiles for global checkpoint operator latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
 
 ### Incident Drilldown: Manifest / Ledger Integrity
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 901 | Incident Drilldown: Manifest / Ledger Integrity | row | Static | Collapsed-by-default manifest/ledger incident section. | shared shell | Groups integrity panels; no direct metric. |
-| 908 | Inspect: Terminal Run Events by Status in Range | table | Prometheus | Terminal run-event totals by `terminal_status`. | shared shell | Forensic table; status breakdown is the key mapping. |
-| 1 | Monitor: Manifest Write Failures | stat | Prometheus | Failed manifest writes over the selected range. | shared shell | Count panel. |
-| 2 | Monitor: Ledger Append Failures | stat | Prometheus | Failed ledger appends over the selected range. | shared shell | Count panel. |
-| 131 | Track: Manifest Writes by Status | timeseries | Prometheus | Manifest writes by `status` and `run_type` over time. | shared shell | Series legend maps status/run type. |
-| 7 | Track: Ledger Appends by Event Type / Status | timeseries | Prometheus | Ledger appends by `event_type` and `status`. | shared shell | Series legend maps event/status breakdown. |
-| 132 | Monitor: Manifest Write Failure Ratio | stat | Prometheus | 30-minute manifest write failure ratio severity. | shared shell | Threshold/value mapping encodes ratio severity. |
-| 133 | Monitor: Ledger Append Failure Ratio | stat | Prometheus | 30-minute ledger append failure ratio severity. | shared shell | Threshold/value mapping encodes ratio severity. |
+| 901 | Inspect Manifest & Ledger Evidence | row | Static | Collapsed-by-default manifest/ledger incident section. | shared shell | Groups integrity panels; no direct metric. |
+| 908 | Review Terminal Run Outcomes | table | Prometheus | Terminal run-event totals by `terminal_status`. | shared shell | Forensic table; status breakdown is the key mapping. |
+| 1 | Track Manifest Write Failures | stat | Prometheus | Failed manifest writes over the selected range. | shared shell | Count panel. |
+| 2 | Track Ledger Append Failures | stat | Prometheus | Failed ledger appends over the selected range. | shared shell | Count panel. |
+| 131 | Compare Manifest Writes by Status | timeseries | Prometheus | Manifest writes by `status` and `run_type` over time. | shared shell | Series legend maps status/run type. |
+| 7 | Compare Ledger Appends by Type & Status | timeseries | Prometheus | Ledger appends by `event_type` and `status`. | shared shell | Series legend maps event/status breakdown. |
+| 132 | Monitor Manifest Failure Severity [30m] | stat | Prometheus | 30-minute manifest write failure ratio severity. | shared shell | Threshold/value mapping encodes ratio severity. |
+| 133 | Monitor Ledger Failure Severity [30m] | stat | Prometheus | 30-minute ledger append failure ratio severity. | shared shell | Threshold/value mapping encodes ratio severity. |
 
 ### Incident Drilldown: Global Control-Plane Store Reliability
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 903 | Incident Drilldown: Global Control-Plane Store Reliability | row | Static | Collapsed-by-default global store-read reliability section. | shared shell | Groups global read panels; no direct metric. |
-| 4 | Monitor: GLOBAL Control-Plane Read Failures | stat | Prometheus | Failed control-plane reads across stores/operations. | shared shell | Count panel. |
-| 136 | Monitor: GLOBAL Control-Plane Read Failure Ratio Severity | stat | Prometheus | 30-minute failure-ratio severity for global control-plane reads. | shared shell | Threshold/value mapping encodes severity bands. |
-| 6 | Track: GLOBAL Control-Plane Reads by Store / Operation / Status | timeseries | Prometheus | Read outcomes by `store`, `operation`, and `status`. | shared shell | Series legend is the key mapping. |
-| 111 | Track: GLOBAL Control-Plane Read Latency p50/p95/p99 | timeseries | Prometheus | Histogram quantiles for successful control-plane read latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
+| 903 | Inspect Global Store Reliability | row | Static | Collapsed-by-default global store-read reliability section. | shared shell | Groups global read panels; no direct metric. |
+| 4 | Track Global Read Failures | stat | Prometheus | Failed control-plane reads across stores/operations. | shared shell | Count panel. |
+| 136 | Monitor Global Read Failure Severity [30m] | stat | Prometheus | 30-minute failure-ratio severity for global control-plane reads. | shared shell | Threshold/value mapping encodes severity bands. |
+| 6 | Compare Global Reads by Store | timeseries | Prometheus | Read outcomes by `store`, `operation`, and `status`. | shared shell | Series legend is the key mapping. |
+| 111 | Track Global Read Latency | timeseries | Prometheus | Histogram quantiles for successful control-plane read latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
 
 ### Incident Drilldown: Audit / Lineage Completeness
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 904 | Incident Drilldown: Audit / Lineage Completeness | row | Static | Collapsed-by-default audit/lineage evidence section. | shared shell | Groups lineage and audit panels; no direct metric. |
-| 122 | Monitor: Lineage Refs Missing | stat | Prometheus | Missing lineage reference count over the selected range. | shared shell | Count panel. |
-| 137 | Monitor: Lineage Fragment Persistence Failures | stat | Prometheus | Failed lineage fragment persistence events. | shared shell | Count panel. |
-| 138 | Inspect: Missing Lineage Refs by Layer / Type | table | Prometheus | Missing lineage references grouped by `layer` and `ref_type`. | shared shell | Forensic table; grouped breakdown is the key mapping. |
-| 107 | Track: GLOBAL Audit Write Outcomes | timeseries | Prometheus | Audit write events by `layer`, `operation`, and `status`. | shared shell | Series legend maps layer/operation/status. |
-| 108 | Track: GLOBAL Audit Query Outcomes | timeseries | Prometheus | Audit query events by `layer_filter` and `status`. | shared shell | Series legend maps query outcome families. |
-| 109 | Track: GLOBAL Audit Write Latency p50/p95/p99 | timeseries | Prometheus | Histogram quantiles for audit write latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
-| 110 | Track: GLOBAL Audit Query Latency p50/p95/p99 | timeseries | Prometheus | Histogram quantiles for audit query latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
-| 112 | Track: Lineage Fragment Outcomes | timeseries | Prometheus | Lineage fragment emission outcomes by `layer` and `status`. | shared shell | Series legend maps lineage outcome families. |
+| 904 | Inspect Audit & Lineage Evidence | row | Static | Collapsed-by-default audit/lineage evidence section. | shared shell | Groups lineage and audit panels; no direct metric. |
+| 122 | Track Missing Lineage References | stat | Prometheus | Missing lineage reference count over the selected range. | shared shell | Count panel. |
+| 137 | Track Lineage Persistence Failures | stat | Prometheus | Failed lineage fragment persistence events. | shared shell | Count panel. |
+| 138 | Review Missing Lineage by Layer | table | Prometheus | Missing lineage references grouped by `layer` and `ref_type`. | shared shell | Forensic table; grouped breakdown is the key mapping. |
+| 107 | Compare Global Audit Write Outcomes | timeseries | Prometheus | Audit write events by `layer`, `operation`, and `status`. | shared shell | Series legend maps layer/operation/status. |
+| 108 | Compare Global Audit Query Outcomes | timeseries | Prometheus | Audit query events by `layer_filter` and `status`. | shared shell | Series legend maps query outcome families. |
+| 109 | Track Global Audit Write Latency | timeseries | Prometheus | Histogram quantiles for audit write latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
+| 110 | Track Global Audit Query Latency | timeseries | Prometheus | Histogram quantiles for audit query latency. | shared shell | Quantile series `p50/p95/p99` are the key mapping. |
+| 112 | Compare Lineage Persistence Outcomes | timeseries | Prometheus | Lineage fragment emission outcomes by `layer` and `status`. | shared shell | Series legend maps lineage outcome families. |
 
 ### Identity evidence and remaining replay-safety signals
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 905 | Identity evidence and remaining replay-safety signals | row | Static | Collapsed identity-evidence and handoff section; the copyable identity anchor panels `9404` and `9407` remain above it on the first path. | shared shell | Groups remaining Quarantine Explorer evidence without replacing the first-screen replay/resume summary. |
-| 9404 | Inspect: Overview Identity Anchors | table | Quarantine Explorer | Compact forensic identity anchors for the selected scope; use after ID, Replay Safety, Checkpoint Freshness, Manifest/Ledger, and Telemetry summary cards. | shared shell | Forensic handoff table. |
-| 9405 | Inspect: Identity Gaps | table | Quarantine Explorer | Compact missing identity surface inventory for the selected scope. | shared shell | Gap table; no numeric threshold. |
-| 9406 | Inspect: Checkpoint Anchor Compare | table | Quarantine Explorer | Compact side-by-side checkpoint anchor comparison. | shared shell | Comparison table; operator drilldown surface. |
-| 9407 | Inspect: Copyable Identity Handoffs | table | Quarantine Explorer | Compact copy-ready IDs/anchors for incident handoff. | shared shell | Handoff table only. |
-| 9408 | Inspect: P1 Replay and Evidence Anchors | table | Quarantine Explorer | Compact priority replay/evidence anchors for first-line investigation. | shared shell | Incident handoff table. |
-| 9409 | Inspect: P2 Forensic Anchors | table | Quarantine Explorer | Compact secondary forensic anchors for deeper analysis. | shared shell | Incident handoff table. |
-| 139 | Review: Remaining Replay-Safety Signals | text | Static | Static reminder of residual replay-safety signals to inspect after core blockers. | shared shell | No thresholds; review checklist only. |
+| 905 | Inspect Run Identity Evidence | row | Static | Collapsed identity-evidence and handoff section; the copyable identity anchor panels `9404` and `9407` remain above it on the first path. | shared shell | Groups remaining Quarantine Explorer evidence without replacing the first-screen replay/resume summary. |
+| 9404 | Review Run Identity | table | Quarantine Explorer | Compact forensic identity anchors for the selected scope; use after ID, Replay Safety, Checkpoint Freshness, Manifest/Ledger, and Telemetry summary cards. | shared shell | Forensic handoff table. |
+| 9405 | Review Identity Gaps | table | Quarantine Explorer | Compact missing identity surface inventory for the selected scope. | shared shell | Gap table; no numeric threshold. |
+| 9406 | Compare Checkpoint Anchors | table | Quarantine Explorer | Compact side-by-side checkpoint anchor comparison. | shared shell | Comparison table; operator drilldown surface. |
+| 9407 | Copy Identity Values | table | Quarantine Explorer | Compact copy-ready IDs/anchors for incident handoff. | shared shell | Handoff table only. |
+| 9408 | Review Required Replay Anchors | table | Quarantine Explorer | Compact priority replay/evidence anchors for first-line investigation. | shared shell | Incident handoff table. |
+| 9409 | Review Additional Forensic Anchors | table | Quarantine Explorer | Compact secondary forensic anchors for deeper analysis. | shared shell | Incident handoff table. |
+| 139 | Review Uncovered Replay Signals | text | Static | Static reminder of residual replay-safety signals to inspect after core blockers. | shared shell | No thresholds; review checklist only. |
 
 ### Run context (thin) -> Run Explorer hub
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 9412 | Run context (thin) -> Run Explorer hub | row | Static | Collapsed selected-run identity and processed-record evidence. | shared shell | Groups HTTP-backed evidence; no direct threshold. |
+| 9412 | Inspect Run Details | row | Static | Collapsed selected-run identity and processed-record evidence. | shared shell | Groups HTTP-backed evidence; no direct threshold. |
 
 ## PromQL Formula Anchors
 

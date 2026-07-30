@@ -7,6 +7,13 @@
     }
   },
   "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "data_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Source[\"chembl:assay_parameters\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: chembl.assay_parameters + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: chembl.assay_parameters (scd2)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
+    }
+  ],
   "execution": {
     "cached_bronze_is_mode": true,
     "control_plane": {
@@ -29,34 +36,199 @@
     }
   },
   "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
+    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data",
+    "field_groups": [
+      {
+        "field_count": 7,
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_ingestion_ts",
+          "_index"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "system"
       },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
+      {
+        "field_count": 22,
+        "fields": [
+          "assay_param_id",
+          "assay_id",
+          "type_raw",
+          "parameter_type",
+          "parameter_relation",
+          "parameter_value",
+          "qudt_units",
+          "qudt_unit_iri",
+          "qudt_unit_mapping_status",
+          "qudt_ontology_version",
+          "units",
+          "text_value",
+          "comments",
+          "standard_type",
+          "standard_relation",
+          "standard_value",
+          "standard_units",
+          "standard_text_value",
+          "uo_units",
+          "uo_unit_iri",
+          "uo_unit_mapping_status",
+          "uo_ontology_version"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "business"
       }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
+    ],
+    "filters": [
+      {
+        "description": "IDs from data/input/assay_parameters.csv column assay_param_id; CLI may override the input CSV",
+        "name": "assay_param_id",
+        "required": true,
+        "source": "cli"
+      }
+    ],
+    "method": null,
+    "selected_fields": [
+      {
+        "name": "assay_param_id",
+        "required": true,
+        "source_object": "assay_parameters",
+        "target_group": "business"
       },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
+      {
+        "name": "assay_id",
+        "required": true,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "type_raw",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "parameter_type",
+        "required": true,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "parameter_relation",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "parameter_value",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "qudt_units",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "qudt_unit_iri",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "qudt_unit_mapping_status",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "qudt_ontology_version",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "units",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "text_value",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "comments",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "standard_type",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "standard_relation",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "standard_value",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "standard_units",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "standard_text_value",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "uo_units",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "uo_unit_iri",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "uo_unit_mapping_status",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      },
+      {
+        "name": "uo_ontology_version",
+        "required": false,
+        "source_object": "assay_parameters",
+        "target_group": "business"
+      }
+    ],
+    "source_collections": [
+      "assay_parameters"
+    ],
+    "source_kind": "derived",
+    "source_resource": "chembl:assay_parameters",
+    "source_tables": []
   },
   "gold": {
     "column_projection": {
@@ -114,9 +286,53 @@
       "status"
     ]
   },
+  "operator_commands": [
+    {
+      "command": "bioetl run --pipeline chembl_assay_parameters",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_assay_parameters --limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_assay_parameters --run-type backfill --dry-run",
+      "result": "Проверяет backfill/rebuild path без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline chembl_assay_parameters --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline chembl_assay_parameters --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline chembl_assay_parameters",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
   "passport_schema_version": "1.0.0",
   "provenance": {
-    "projector_version": "1.0.0",
+    "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:a9e3d0e4ab6a4dc7fc305ab0848092cc951fd541ed3ed1084ba06879363b8362",
     "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
   },
@@ -135,6 +351,7 @@
       "soft_fail_threshold": 0.05,
       "strict_validation": false
     },
+    "normalization_profile": "chembl.assay_parameters",
     "write": {
       "partition_by": [
         "parameter_type"
@@ -147,6 +364,18 @@
       "role": "effective_entity_config"
     },
     {
+      "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
+      "role": "pipeline_registration"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "role": "run_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
+    },
+    {
       "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
       "role": "gold_validation_contract"
     },
@@ -157,6 +386,24 @@
     {
       "path": "configs/contracts/chembl/assay_parameters.yaml",
       "role": "dq_contract"
+    },
+    {
+      "path": "configs/providers/chembl.yaml",
+      "role": "provider_config"
     }
-  ]
+  ],
+  "summary": {
+    "excluded_data_summary": "invalid_record_policy=quarantine",
+    "field_selection_summary": "В business-проекцию входят `assay_param_id`, `assay_id`, `type_raw`, `parameter_type`, `parameter_relation`, `parameter_value`, `qudt_units`, `qudt_unit_iri` и ещё 14 полей.",
+    "query_filter_summary": "assay_param_id=IDs from data/input/assay_parameters.csv column assay_param_id; CLI may override the input CSV",
+    "sentences": [
+      "Extract experimental assay parameters from ChEMBL API. Источник — `chembl:assay_parameters` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: assay_param_id=IDs from data/input/assay_parameters.csv column assay_param_id; CLI may override the input CSV.",
+      "В business-проекцию входят `assay_param_id`, `assay_id`, `type_raw`, `parameter_type`, `parameter_relation`, `parameter_value`, `qudt_units`, `qudt_unit_iri` и ещё 14 полей.",
+      "Silver использует профиль `chembl.assay_parameters` и проверяет обязательные поля `assay_id`, `assay_param_id`, `parameter_type`, `type`; невалидные записи направляются в `quarantine`.",
+      "Перед Gold применяется строгий Pandera-контракт `chembl.assay_parameters`; Gold filters/constraints заданы в entity config (6 групп правил)."
+    ],
+    "silver_processing_summary": "Silver использует профиль `chembl.assay_parameters` и проверяет обязательные поля `assay_id`, `assay_param_id`, `parameter_type`, `type`; невалидные записи направляются в `quarantine`.",
+    "source_description": "Extract experimental assay parameters from ChEMBL API. Источник — `chembl:assay_parameters` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: assay_param_id=IDs from data/input/assay_parameters.csv column assay_param_id; CLI may override the input CSV.",
+    "validation_summary": "Перед Gold применяется строгий Pandera-контракт `chembl.assay_parameters`; Gold filters/constraints заданы в entity config (6 групп правил)."
+  }
 }

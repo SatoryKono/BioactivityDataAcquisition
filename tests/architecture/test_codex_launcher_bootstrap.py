@@ -146,6 +146,21 @@ def test_removed_thin_wrappers_are_absent_and_router_uses_canonical_targets() ->
     assert (root / "scripts" / "ai" / "codex" / "diagnose_wsl.bat").exists()
 
 
+def test_canonical_launcher_exposes_diagnostics_and_baseline_modes() -> None:
+    root = _project_root()
+    launcher = (root / "scripts" / "ai" / "codex" / "run-codex.sh").read_text(
+        encoding="utf-8"
+    )
+    readme = (root / "scripts" / "ai" / "codex" / "README.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert 'python3 "${SCRIPT_DIR}/efficiency_baseline.py"' in launcher
+    assert 'bash "${SCRIPT_DIR}/diagnose_wsl.sh"' in launcher
+    assert "## Canonical launch modes" in readme
+    assert "Fast/headless" in readme
+
+
 def test_powershell_codex_launcher_is_thin_transport_to_canonical_wsl_entrypoint() -> (
     None
 ):

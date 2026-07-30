@@ -14,6 +14,9 @@ _ALLOWED = {
     "known_limitations",
     "rationale",
     "approved_exceptions",
+    "curated_field_groups",
+    "operator_notes",
+    "additional_diagram",
 }
 
 

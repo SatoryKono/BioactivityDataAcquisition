@@ -37,6 +37,11 @@ result before persistent surface resolution, retrieval, refresh, or note
 creation. Vendor-hosted conversation and IDE state are **NOT_PROVEN** and are
 not controlled merely by setting this variable.
 
+When `read-only` retrieval needs missing rebuild-only RAG or timeline
+projections, `pre-task` may build them under an isolated temporary directory.
+It ignores a caller-provided refresh output root in this mode, creates no
+session note, and does not mutate repository-owned memory surfaces.
+
 ## Pre-Task
 
 Run the standard pre-task workflow:

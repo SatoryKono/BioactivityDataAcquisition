@@ -1,0 +1,6 @@
+interface:
+  display_name: "Py Code Bot"
+  short_description: "Deprecated code profile marker"
+  default_prompt: "Use $py-code-bot only to interpret historical py-code-bot references and route to active workflows."
+policy:
+  allow_implicit_invocation: false

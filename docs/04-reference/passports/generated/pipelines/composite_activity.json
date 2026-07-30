@@ -345,10 +345,49 @@
     "version": "1.0.0"
   },
   "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "composite_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Seed[\"Seed: chembl_activity\"]\n    Input1[\"chembl_compound_record · molecule_id, publication_id\"]\n    Input1 --> Merge\n    Merge[\"Merge: left_outer / seed_priority\"]\n    Validate[\"Cross-validation: False\"]\n    Excluded[\"Quarantine / nullification\"]\n    Gold[\"Gold: composite_activity\"]\n    Seed --> Merge --> Validate\n    Validate -->|valid| Gold\n    Validate -->|excluded| Excluded"
+    }
+  ],
   "execution": {
     "control_plane": {
       "checkpoints": true,
       "run_manifest": true
+    }
+  },
+  "extraction": {
+    "endpoint_template": null,
+    "field_groups": [],
+    "filters": [
+      {
+        "description": "no condition",
+        "name": "chembl_compound_record",
+        "required": false,
+        "source": "dependency"
+      }
+    ],
+    "method": null,
+    "selected_fields": [],
+    "source_collections": [],
+    "source_kind": "composite",
+    "source_resource": "chembl_activity",
+    "source_tables": [
+      "silver/chembl/activity",
+      "silver/chembl/compound_record"
+    ]
+  },
+  "gold": {
+    "contract_ref": "composite.activity",
+    "contract_validation": {
+      "status": "resolved_by_adr_018",
+      "strict": true
+    },
+    "contract_version": "1.0.0",
+    "write": {
+      "enabled": true
     }
   },
   "identity": {
@@ -372,11 +411,68 @@
       "status"
     ]
   },
+  "operator_commands": [
+    {
+      "command": "bioetl run-composite --composite activity",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run-composite --composite activity --seed-limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run-composite --composite activity --use-cached-bronze --dry-run",
+      "result": "Проверяет cached Bronze composite без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline composite_activity --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline composite_activity --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline composite_activity",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
   "passport_schema_version": "1.0.0",
   "provenance": {
-    "projector_version": "1.0.0",
+    "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:89722f5089d793afd9a25d7ae30c29f64a2d5f2364152ad906e8da78742e935a",
     "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
+  },
+  "silver": {
+    "dq_execution": {
+      "hard_fail_threshold": 0.5,
+      "invalid_record_policy": "quarantine",
+      "soft_fail_threshold": 0.1,
+      "strict_validation": true
+    },
+    "normalization_profile": "composite.activity",
+    "write": {
+      "idempotency_contract": "merge_upsert",
+      "mode": "merge"
+    }
   },
   "source_references": [
     {
@@ -384,8 +480,34 @@
       "role": "composite_config"
     },
     {
+      "path": "configs/entities/composite/activity.yaml",
+      "role": "effective_entity_config"
+    },
+    {
       "path": "configs/contracts/composite/activity.yaml",
       "role": "gold_contract"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "role": "composite_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
     }
-  ]
+  ],
+  "summary": {
+    "excluded_data_summary": "quarantine/nullification per composite policy",
+    "field_selection_summary": "seed outputs plus configured enrichers",
+    "query_filter_summary": "composite join/filter conditions",
+    "sentences": [
+      "Composite pipeline `composite_activity` использует seed `chembl_activity` и объединяет его с configured dependencies/enrichers.",
+      "Join keys, cardinality и source tables берутся из composite configuration; merge и conflict resolution выполняются общей CompositePipelineRunner.",
+      "После merge применяется configured cross-validation; исключённые значения направляются в quarantine или nullification branch согласно composite policy.",
+      "Результат проходит строгий Gold-контракт `composite.activity` и публикует manifest/checkpoint evidence."
+    ],
+    "silver_processing_summary": "composite merge",
+    "source_description": "seed=chembl_activity",
+    "validation_summary": "cross-validation and strict Gold contract"
+  }
 }

@@ -1,178 +1,79 @@
-# chembl_publication_similarity passport
+# `chembl_publication_similarity`
 
 > Generated documentation projection. Do not edit manually.
 
-- Kind: `pipeline`
-- Typed identity: `pipeline:chembl_publication_similarity`
-- Schema: `1.0.0`
-- Source revision: `41a1d6eab5a5c32c6b7754f6c3156ff87394912f`
+## Обзор
+
+| Параметр | Значение |
+| --- | --- |
+| Typed identity `[type:provider_entity]` | `pipeline:chembl_publication_similarity` |
+| Status | `active` |
+| Gold contract | `chembl.publication_similarity v1.0.0` |
+
+## Назначение и обработка данных
+
+Extract publication similarity data (Tanimoto coefficients) from ChEMBL API. Источник — `chembl:publication_similarity` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: sim_id=IDs from data/input/publication_similarity.csv column sim_id; CLI may override the input CSV.
+В business-проекцию входят `sim_id`, `doc_1`, `doc_2`, `pubmed_id1`, `pubmed_id2`, `tid_tani`, `mol_tani`, `avg_tani` и ещё 1 полей.
+Silver использует профиль `chembl.publication_similarity` и проверяет обязательные поля `sim_id`, `doc_1`, `doc_2`; невалидные записи направляются в `quarantine`.
+Перед Gold применяется строгий Pandera-контракт `chembl.publication_similarity`; Gold filters/constraints заданы в entity config (6 групп правил).
+
+## Извлечение данных
+
+| Аспект | Значение |
+| --- | --- |
+| Source | `derived` · `chembl:publication_similarity` |
+| Resource / tables | `publication_similarity` |
+| Filters | `sim_id`: IDs from data/input/publication_similarity.csv column sim_id; CLI may override the input CSV |
+| Selected fields | `system` (7 fields); `business` (9 fields) |
+
+## Silver и Data Quality
+
+- Normalization profile: `chembl.publication_similarity`.
+- Partitioning: —.
+- DQ thresholds: soft `0.05`, hard `0.5`; invalid policy `quarantine`.
+
+## Gold
+
+- Contract: `chembl.publication_similarity v1.0.0`; strict validation: `True`.
+- Write mode: `overwrite`.
+- Technical exclusions: `_dq_*`, `_source_batch_id`, `_index`.
+
+## Операторские команды
+
+| Задача | Команда | Результат |
+| --- | --- | --- |
+| Запуск | `bioetl run --pipeline chembl_publication_similarity` | Запускает pipeline с effective config. |
+| Ограниченный запуск | `bioetl run --pipeline chembl_publication_similarity --limit 100` | Ограничивает число обрабатываемых записей. |
+| Безопасная проверка | `bioetl run --pipeline chembl_publication_similarity --run-type backfill --dry-run` | Проверяет backfill/rebuild path без записи. |
+| Quarantine | `bioetl quarantine inspect --pipeline chembl_publication_similarity --limit 100` | Показывает quarantined и Silver-filter records; доступны --error-code и --run-id. |
+| Статистика исключений | `bioetl quarantine stats --pipeline chembl_publication_similarity --group-by reason-code` | Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует. |
+| Checkpoint | `bioetl checkpoint inspect --pipeline chembl_publication_similarity` | Показывает checkpoint и связанные audit/manifest anchors. |
+| Manifest | `bioetl run-manifest show <run-id-or-manifest-id>` | Показывает immutable manifest и ledger evidence запуска. |
+
+## Диаграммы
+
+### Data Flow
+
+```mermaid
+flowchart LR
+    Source["chembl:publication_similarity"]
+    Filters["Effective request/input filters"]
+    Bronze["Bronze append-only snapshot"]
+    Silver["Silver profile: chembl.publication_similarity + DQ"]
+    Quarantine["Quarantine / exclusion evidence"]
+    Gold["Gold: chembl.publication_similarity (overwrite)"]
+    Source --> Filters --> Bronze --> Silver
+    Silver -->|valid| Gold
+    Silver -->|invalid| Quarantine
+```
 
 ## Evidence
 
 - `effective_entity_config`: `configs/entities/chembl/publication_similarity.yaml`
+- `pipeline_registration`: `src/bioetl/composition/factories/pipeline/registry_manifest.py`
+- `run_cli`: `src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py`
+- `quarantine_cli`: `src/bioetl/interfaces/cli/commands/quarantine.py`
 - `gold_validation_contract`: `docs/02-architecture/decisions/ADR-018-gold-strict-validation.md`
 - `observability_contract`: `src/bioetl/domain/_observability_contract_primitives.py`
 - `dq_contract`: `configs/contracts/chembl/publication_similarity.yaml`
-
-## Generated facts
-
-```json
-{
-  "bronze": {
-    "capability": "append_only_snapshot",
-    "content_hash": {
-      "exclude": [],
-      "include": []
-    }
-  },
-  "diagnostics": [],
-  "execution": {
-    "cached_bronze_is_mode": true,
-    "control_plane": {
-      "checkpoints": true,
-      "run_ledger": true,
-      "run_manifest": true
-    },
-    "effective_config_hash": "sha256:19f26bed96460ae9f397a20088c08622c78c9d461037658a6a6b9d280762fbdd",
-    "projection_profiles": [
-      "batch",
-      "http"
-    ],
-    "resilience": {
-      "resolution_owner": "UnifiedHTTPClient and provider config",
-      "source_refs": [
-        "src/bioetl/infrastructure/adapters/http/client.py",
-        "configs/providers/chembl.yaml"
-      ],
-      "status": "runtime_resolved"
-    }
-  },
-  "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
-      },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
-  },
-  "gold": {
-    "column_projection": {
-      "exclude_fields": [
-        "_dq_*",
-        "_source_batch_id",
-        "_index"
-      ],
-      "include_groups": [
-        "system",
-        "business"
-      ]
-    },
-    "contract_ref": "chembl.publication_similarity",
-    "contract_validation": {
-      "status": "resolved_by_adr_018",
-      "strict": true
-    },
-    "contract_version": "1.0.0",
-    "write": {
-      "idempotency_contract": "overwrite_rebuild",
-      "mode": "overwrite"
-    }
-  },
-  "identity": {
-    "aliases": [],
-    "derived_source_identity": {
-      "data_source_provider": null,
-      "entity": "publication_similarity",
-      "provider": "chembl"
-    },
-    "entity": "publication_similarity",
-    "pipeline_id": "chembl_publication_similarity",
-    "pipeline_type": "provider_entity",
-    "provider": "chembl",
-    "status": "active",
-    "typed_id": "pipeline:chembl_publication_similarity"
-  },
-  "kind": "pipeline",
-  "observability": {
-    "correlation_fields": [
-      "run_id",
-      "manifest_id"
-    ],
-    "metric_labels": [
-      "provider",
-      "pipeline",
-      "run_type",
-      "status"
-    ]
-  },
-  "passport_schema_version": "1.0.0",
-  "provenance": {
-    "projector_version": "1.0.0",
-    "semantic_content_hash": "sha256:67563c93b810f81060382cea75c5295b06dea6bbbdae1f46655a25a045073d83",
-    "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
-  },
-  "silver": {
-    "column_projection": {
-      "exclude_fields": [],
-      "include_groups": [
-        "system",
-        "business",
-        "dq"
-      ]
-    },
-    "dq_execution": {
-      "hard_fail_threshold": 0.5,
-      "invalid_record_policy": "quarantine",
-      "soft_fail_threshold": 0.05,
-      "strict_validation": false
-    },
-    "write": {
-      "partition_by": []
-    }
-  },
-  "source_references": [
-    {
-      "path": "configs/entities/chembl/publication_similarity.yaml",
-      "role": "effective_entity_config"
-    },
-    {
-      "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
-      "role": "gold_validation_contract"
-    },
-    {
-      "path": "src/bioetl/domain/_observability_contract_primitives.py",
-      "role": "observability_contract"
-    },
-    {
-      "path": "configs/contracts/chembl/publication_similarity.yaml",
-      "role": "dq_contract"
-    }
-  ]
-}
-```
-
-## Diagnostics
-
-- No blocking diagnostics.
+- `provider_config`: `configs/providers/chembl.yaml`

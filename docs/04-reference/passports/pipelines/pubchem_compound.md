@@ -1,173 +1,79 @@
-# pubchem_compound passport
+# `pubchem_compound`
 
 > Generated documentation projection. Do not edit manually.
 
-- Kind: `pipeline`
-- Typed identity: `pipeline:pubchem_compound`
-- Schema: `1.0.0`
-- Source revision: `41a1d6eab5a5c32c6b7754f6c3156ff87394912f`
+## Обзор
+
+| Параметр | Значение |
+| --- | --- |
+| Typed identity `[type:provider_entity]` | `pipeline:pubchem_compound` |
+| Status | `active` |
+| Gold contract | `pubchem.compound v1.0.0` |
+
+## Назначение и обработка данных
+
+Pipeline for ingesting PubChem compounds. Источник — `pubchem:compound` на `https://pubchem.ncbi.nlm.nih.gov/rest/pug`; применяемые extraction/input filters: smiles=IDs from data/input/molecule.csv column canonical_smiles; CLI may override the input CSV.
+В business-проекцию входят `molecule_id`, `canonical_smiles`, `isomeric_smiles`, `inchi`, `inchi_key`, `standardized_canonical_smiles`, `standardized_isomeric_smiles`, `standardized_inchi` и ещё 40 полей.
+Silver использует профиль `pubchem.compound` и проверяет обязательные поля `molecule_id`; невалидные записи направляются в `quarantine`.
+Перед Gold применяется строгий Pandera-контракт `pubchem.compound`; Gold filters/constraints заданы в entity config (6 групп правил).
+
+## Извлечение данных
+
+| Аспект | Значение |
+| --- | --- |
+| Source | `http_api` · `pubchem:compound` |
+| Resource / tables | `compound` |
+| Filters | `smiles`: IDs from data/input/molecule.csv column canonical_smiles; CLI may override the input CSV |
+| Selected fields | `system` (7 fields); `business` (48 fields) |
+
+## Silver и Data Quality
+
+- Normalization profile: `pubchem.compound`.
+- Partitioning: —.
+- DQ thresholds: soft `0.05`, hard `0.5`; invalid policy `quarantine`.
+
+## Gold
+
+- Contract: `pubchem.compound v1.0.0`; strict validation: `True`.
+- Write mode: `configured`.
+- Technical exclusions: `_dq_*`, `_source_batch_id`, `_index`.
+
+## Операторские команды
+
+| Задача | Команда | Результат |
+| --- | --- | --- |
+| Запуск | `bioetl run --pipeline pubchem_compound` | Запускает pipeline с effective config. |
+| Ограниченный запуск | `bioetl run --pipeline pubchem_compound --limit 100` | Ограничивает число обрабатываемых записей. |
+| Безопасная проверка | `bioetl run --pipeline pubchem_compound --run-type backfill --dry-run` | Проверяет backfill/rebuild path без записи. |
+| Quarantine | `bioetl quarantine inspect --pipeline pubchem_compound --limit 100` | Показывает quarantined и Silver-filter records; доступны --error-code и --run-id. |
+| Статистика исключений | `bioetl quarantine stats --pipeline pubchem_compound --group-by reason-code` | Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует. |
+| Checkpoint | `bioetl checkpoint inspect --pipeline pubchem_compound` | Показывает checkpoint и связанные audit/manifest anchors. |
+| Manifest | `bioetl run-manifest show <run-id-or-manifest-id>` | Показывает immutable manifest и ledger evidence запуска. |
+
+## Диаграммы
+
+### Data Flow
+
+```mermaid
+flowchart LR
+    Source["pubchem:compound"]
+    Filters["Effective request/input filters"]
+    Bronze["Bronze append-only snapshot"]
+    Silver["Silver profile: pubchem.compound + DQ"]
+    Quarantine["Quarantine / exclusion evidence"]
+    Gold["Gold: pubchem.compound (configured)"]
+    Source --> Filters --> Bronze --> Silver
+    Silver -->|valid| Gold
+    Silver -->|invalid| Quarantine
+```
 
 ## Evidence
 
 - `effective_entity_config`: `configs/entities/pubchem/compound.yaml`
+- `pipeline_registration`: `src/bioetl/composition/factories/pipeline/registry_manifest.py`
+- `run_cli`: `src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py`
+- `quarantine_cli`: `src/bioetl/interfaces/cli/commands/quarantine.py`
 - `gold_validation_contract`: `docs/02-architecture/decisions/ADR-018-gold-strict-validation.md`
 - `observability_contract`: `src/bioetl/domain/_observability_contract_primitives.py`
 - `dq_contract`: `configs/contracts/pubchem/compound.yaml`
-
-## Generated facts
-
-```json
-{
-  "bronze": {
-    "capability": "append_only_snapshot",
-    "content_hash": {
-      "exclude": [],
-      "include": []
-    }
-  },
-  "diagnostics": [],
-  "execution": {
-    "cached_bronze_is_mode": true,
-    "control_plane": {
-      "checkpoints": true,
-      "run_ledger": true,
-      "run_manifest": true
-    },
-    "effective_config_hash": "sha256:b86e43a696cc9c5ddde006fceccf05b430e346a448ff54b6d93983c283ffeba0",
-    "projection_profiles": [
-      "batch",
-      "http"
-    ],
-    "resilience": {
-      "resolution_owner": "UnifiedHTTPClient and provider config",
-      "source_refs": [
-        "src/bioetl/infrastructure/adapters/http/client.py",
-        "configs/providers/pubchem.yaml"
-      ],
-      "status": "runtime_resolved"
-    }
-  },
-  "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
-      },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
-  },
-  "gold": {
-    "column_projection": {
-      "exclude_fields": [
-        "_dq_*",
-        "_source_batch_id",
-        "_index"
-      ],
-      "include_groups": [
-        "system",
-        "business"
-      ]
-    },
-    "contract_ref": "pubchem.compound",
-    "contract_validation": {
-      "status": "resolved_by_adr_018",
-      "strict": true
-    },
-    "contract_version": "1.0.0",
-    "write": {}
-  },
-  "identity": {
-    "aliases": [],
-    "derived_source_identity": {
-      "data_source_provider": null,
-      "entity": "compound",
-      "provider": "pubchem"
-    },
-    "entity": "compound",
-    "pipeline_id": "pubchem_compound",
-    "pipeline_type": "provider_entity",
-    "provider": "pubchem",
-    "status": "active",
-    "typed_id": "pipeline:pubchem_compound"
-  },
-  "kind": "pipeline",
-  "observability": {
-    "correlation_fields": [
-      "run_id",
-      "manifest_id"
-    ],
-    "metric_labels": [
-      "provider",
-      "pipeline",
-      "run_type",
-      "status"
-    ]
-  },
-  "passport_schema_version": "1.0.0",
-  "provenance": {
-    "projector_version": "1.0.0",
-    "semantic_content_hash": "sha256:0db04561947095b76b42ad9f5b274a04be7a1177146df9717c7adc94c7aa002f",
-    "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
-  },
-  "silver": {
-    "column_projection": {
-      "exclude_fields": [],
-      "include_groups": [
-        "system",
-        "business",
-        "dq"
-      ]
-    },
-    "dq_execution": {
-      "hard_fail_threshold": 0.5,
-      "invalid_record_policy": "quarantine",
-      "soft_fail_threshold": 0.05,
-      "strict_validation": false
-    },
-    "write": {}
-  },
-  "source_references": [
-    {
-      "path": "configs/entities/pubchem/compound.yaml",
-      "role": "effective_entity_config"
-    },
-    {
-      "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
-      "role": "gold_validation_contract"
-    },
-    {
-      "path": "src/bioetl/domain/_observability_contract_primitives.py",
-      "role": "observability_contract"
-    },
-    {
-      "path": "configs/contracts/pubchem/compound.yaml",
-      "role": "dq_contract"
-    }
-  ]
-}
-```
-
-## Diagnostics
-
-- No blocking diagnostics.
+- `provider_config`: `configs/providers/pubchem.yaml`

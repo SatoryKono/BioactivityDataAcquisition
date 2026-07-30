@@ -7,6 +7,13 @@
     }
   },
   "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "data_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Source[\"chembl.molecule.curated\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: chembl.molecule + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: chembl.molecule (scd2)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
+    }
+  ],
   "execution": {
     "cached_bronze_is_mode": true,
     "control_plane": {
@@ -29,34 +36,427 @@
     }
   },
   "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
+    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data",
+    "field_groups": [
+      {
+        "field_count": 7,
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_ingestion_ts",
+          "_index"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "system"
       },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
+      {
+        "field_count": 52,
+        "fields": [
+          "molecule_id",
+          "pref_name",
+          "max_phase",
+          "structure_type",
+          "molecule_type",
+          "first_approval",
+          "therapeutic_flag",
+          "oral",
+          "parenteral",
+          "topical",
+          "black_box_warning",
+          "natural_product",
+          "first_in_class",
+          "prodrug",
+          "inorganic_flag",
+          "polymer_flag",
+          "withdrawn_flag",
+          "chirality",
+          "dosed_ingredient",
+          "availability_type",
+          "usan_year",
+          "usan_stem",
+          "usan_substem",
+          "usan_stem_definition",
+          "helm_notation",
+          "molecule_species",
+          "hierarchy_parent_chembl_id",
+          "hierarchy_active_chembl_id",
+          "hierarchy_child_chembl_id",
+          "logp",
+          "logp_method",
+          "mw_freebase",
+          "molecular_weight",
+          "hba_count",
+          "hbd_count",
+          "polar_surface_area",
+          "rotatable_bond_count",
+          "ro5_violation_count",
+          "heavy_atom_count",
+          "aromatic_ring_count",
+          "qed_score",
+          "molecular_formula",
+          "ro3_pass",
+          "canonical_smiles",
+          "standard_inchi",
+          "inchi_key",
+          "molecule_hierarchy",
+          "molecule_properties",
+          "molecule_structures",
+          "molecule_synonyms",
+          "cross_references",
+          "atc_classifications"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "business"
       }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
+    ],
+    "filters": [
+      {
+        "description": "0",
+        "name": "inorganic_flag",
+        "required": false,
+        "source": "config"
       },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
+      {
+        "description": "Small molecule",
+        "name": "molecule_type",
+        "required": false,
+        "source": "config"
+      },
+      {
+        "description": "MOL",
+        "name": "structure_type",
+        "required": false,
+        "source": "config"
+      },
+      {
+        "description": "IDs from data/input/molecule.csv column molecule_chembl_id; CLI may override the input CSV",
+        "name": "molecule_id",
+        "required": false,
+        "source": "cli"
+      }
+    ],
+    "method": "GET",
+    "selected_fields": [
+      {
+        "name": "molecule_id",
+        "required": true,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "pref_name",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "max_phase",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "structure_type",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "molecule_type",
+        "required": true,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "first_approval",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "therapeutic_flag",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "oral",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "parenteral",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "topical",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "black_box_warning",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "natural_product",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "first_in_class",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "prodrug",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "inorganic_flag",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "polymer_flag",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "withdrawn_flag",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "chirality",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "dosed_ingredient",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "availability_type",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "usan_year",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "usan_stem",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "usan_substem",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "usan_stem_definition",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "helm_notation",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "molecule_species",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "hierarchy_parent_chembl_id",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "hierarchy_active_chembl_id",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "hierarchy_child_chembl_id",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "logp",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "logp_method",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "mw_freebase",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "molecular_weight",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "hba_count",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "hbd_count",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "polar_surface_area",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "rotatable_bond_count",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "ro5_violation_count",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "heavy_atom_count",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "aromatic_ring_count",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "qed_score",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "molecular_formula",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "ro3_pass",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "canonical_smiles",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "standard_inchi",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "inchi_key",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "molecule_hierarchy",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "molecule_properties",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "molecule_structures",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "molecule_synonyms",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "cross_references",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      },
+      {
+        "name": "atc_classifications",
+        "required": false,
+        "source_object": "molecule",
+        "target_group": "business"
+      }
+    ],
+    "source_collections": [
+      "molecule"
+    ],
+    "source_kind": "http_api",
+    "source_resource": "chembl.molecule.curated",
+    "source_tables": []
   },
   "gold": {
     "column_projection": {
@@ -114,9 +514,53 @@
       "status"
     ]
   },
+  "operator_commands": [
+    {
+      "command": "bioetl run --pipeline chembl_molecule",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_molecule --limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_molecule --run-type backfill --dry-run",
+      "result": "Проверяет backfill/rebuild path без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline chembl_molecule --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline chembl_molecule --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline chembl_molecule",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
   "passport_schema_version": "1.0.0",
   "provenance": {
-    "projector_version": "1.0.0",
+    "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:795101d6b628d760ccb45e2ca82d13254ae3a3cec2f1dff7199129f801c38aeb",
     "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
   },
@@ -135,6 +579,7 @@
       "soft_fail_threshold": 0.05,
       "strict_validation": false
     },
+    "normalization_profile": "chembl.molecule",
     "write": {
       "partition_by": [
         "molecule_type"
@@ -147,6 +592,18 @@
       "role": "effective_entity_config"
     },
     {
+      "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
+      "role": "pipeline_registration"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "role": "run_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
+    },
+    {
       "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
       "role": "gold_validation_contract"
     },
@@ -157,6 +614,24 @@
     {
       "path": "configs/contracts/chembl/molecule.yaml",
       "role": "dq_contract"
+    },
+    {
+      "path": "configs/providers/chembl.yaml",
+      "role": "provider_config"
     }
-  ]
+  ],
+  "summary": {
+    "excluded_data_summary": "invalid_record_policy=quarantine",
+    "field_selection_summary": "В business-проекцию входят `molecule_id`, `pref_name`, `max_phase`, `structure_type`, `molecule_type`, `first_approval`, `therapeutic_flag`, `oral` и ещё 44 полей.",
+    "query_filter_summary": "inorganic_flag=0; molecule_type=Small molecule; structure_type=MOL; molecule_id=IDs from data/input/molecule.csv column molecule_chembl_id; CLI may override the input CSV",
+    "sentences": [
+      "Extract molecules/compounds from ChEMBL API. Источник — `chembl.molecule.curated` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: inorganic_flag=0; molecule_type=Small molecule; structure_type=MOL; molecule_id=IDs from data/input/molecule.csv column molecule_chembl_id; CLI may override the input CSV.",
+      "В business-проекцию входят `molecule_id`, `pref_name`, `max_phase`, `structure_type`, `molecule_type`, `first_approval`, `therapeutic_flag`, `oral` и ещё 44 полей.",
+      "Silver использует профиль `chembl.molecule` и проверяет обязательные поля `molecule_id`, `molecule_type`; невалидные записи направляются в `quarantine`.",
+      "Перед Gold применяется строгий Pandera-контракт `chembl.molecule`; Gold filters/constraints заданы в entity config (6 групп правил)."
+    ],
+    "silver_processing_summary": "Silver использует профиль `chembl.molecule` и проверяет обязательные поля `molecule_id`, `molecule_type`; невалидные записи направляются в `quarantine`.",
+    "source_description": "Extract molecules/compounds from ChEMBL API. Источник — `chembl.molecule.curated` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: inorganic_flag=0; molecule_type=Small molecule; structure_type=MOL; molecule_id=IDs from data/input/molecule.csv column molecule_chembl_id; CLI may override the input CSV.",
+    "validation_summary": "Перед Gold применяется строгий Pandera-контракт `chembl.molecule`; Gold filters/constraints заданы в entity config (6 групп правил)."
+  }
 }

@@ -581,10 +581,77 @@
     "version": "1.3.0"
   },
   "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "composite_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Seed[\"Seed: chembl_target\"]\n    Input1[\"chembl_target_component · primary_component_id\"]\n    Input1 --> Merge\n    Input2[\"chembl_protein_class · protein_classification_id\"]\n    Input2 --> Merge\n    Input3[\"chembl_target_protein_classification · target_id\"]\n    Input3 --> Merge\n    Input4[\"uniprot_idmapping · target_id\"]\n    Input4 --> Merge\n    Input5[\"uniprot_protein · uniprot_accession\"]\n    Input5 --> Merge\n    Merge[\"Merge: left_outer / seed_priority\"]\n    Validate[\"Cross-validation: False\"]\n    Excluded[\"Quarantine / nullification\"]\n    Gold[\"Gold: composite_target\"]\n    Seed --> Merge --> Validate\n    Validate -->|valid| Gold\n    Validate -->|excluded| Excluded"
+    }
+  ],
   "execution": {
     "control_plane": {
       "checkpoints": true,
       "run_manifest": true
+    }
+  },
+  "extraction": {
+    "endpoint_template": null,
+    "field_groups": [],
+    "filters": [
+      {
+        "description": "no condition",
+        "name": "chembl_target_component",
+        "required": false,
+        "source": "dependency"
+      },
+      {
+        "description": "no condition",
+        "name": "chembl_protein_class",
+        "required": false,
+        "source": "dependency"
+      },
+      {
+        "description": "no condition",
+        "name": "chembl_target_protein_classification",
+        "required": false,
+        "source": "dependency"
+      },
+      {
+        "description": "target_id IS NOT NULL",
+        "name": "uniprot_idmapping",
+        "required": false,
+        "source": "dependency"
+      },
+      {
+        "description": "no condition",
+        "name": "uniprot_protein",
+        "required": false,
+        "source": "dependency"
+      }
+    ],
+    "method": null,
+    "selected_fields": [],
+    "source_collections": [],
+    "source_kind": "composite",
+    "source_resource": "chembl_target",
+    "source_tables": [
+      "silver/chembl/target",
+      "silver/chembl/target_component",
+      "silver/chembl/protein_class",
+      "silver/chembl/target_protein_classification",
+      "silver/uniprot/idmapping",
+      "silver/uniprot/protein"
+    ]
+  },
+  "gold": {
+    "contract_ref": "composite.target",
+    "contract_validation": {
+      "status": "resolved_by_adr_018",
+      "strict": true
+    },
+    "contract_version": "1.0.0",
+    "write": {
+      "enabled": true
     }
   },
   "identity": {
@@ -608,11 +675,68 @@
       "status"
     ]
   },
+  "operator_commands": [
+    {
+      "command": "bioetl run-composite --composite target",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run-composite --composite target --seed-limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run-composite --composite target --use-cached-bronze --dry-run",
+      "result": "Проверяет cached Bronze composite без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline composite_target --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline composite_target --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline composite_target",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
   "passport_schema_version": "1.0.0",
   "provenance": {
-    "projector_version": "1.0.0",
+    "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:9899e26e84e1fb808d5d90c9c18171b0216015c4bc80dfba87ae077cc456c998",
     "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
+  },
+  "silver": {
+    "dq_execution": {
+      "hard_fail_threshold": 0.5,
+      "invalid_record_policy": "quarantine",
+      "soft_fail_threshold": 0.1,
+      "strict_validation": true
+    },
+    "normalization_profile": "composite.target",
+    "write": {
+      "idempotency_contract": "merge_upsert",
+      "mode": "merge"
+    }
   },
   "source_references": [
     {
@@ -620,8 +744,34 @@
       "role": "composite_config"
     },
     {
+      "path": "configs/entities/composite/target.yaml",
+      "role": "effective_entity_config"
+    },
+    {
       "path": "configs/contracts/composite/target.yaml",
       "role": "gold_contract"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "role": "composite_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
     }
-  ]
+  ],
+  "summary": {
+    "excluded_data_summary": "quarantine/nullification per composite policy",
+    "field_selection_summary": "seed outputs plus configured enrichers",
+    "query_filter_summary": "composite join/filter conditions",
+    "sentences": [
+      "Composite pipeline `composite_target` использует seed `chembl_target` и объединяет его с configured dependencies/enrichers.",
+      "Join keys, cardinality и source tables берутся из composite configuration; merge и conflict resolution выполняются общей CompositePipelineRunner.",
+      "После merge применяется configured cross-validation; исключённые значения направляются в quarantine или nullification branch согласно composite policy.",
+      "Результат проходит строгий Gold-контракт `composite.target` и публикует manifest/checkpoint evidence."
+    ],
+    "silver_processing_summary": "composite merge",
+    "source_description": "seed=chembl_target",
+    "validation_summary": "cross-validation and strict Gold contract"
+  }
 }

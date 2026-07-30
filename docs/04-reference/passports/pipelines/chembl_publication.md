@@ -1,221 +1,80 @@
-# chembl_publication passport
+# `chembl_publication`
 
 > Generated documentation projection. Do not edit manually.
 
-- Kind: `pipeline`
-- Typed identity: `pipeline:chembl_publication`
-- Schema: `1.0.0`
-- Source revision: `41a1d6eab5a5c32c6b7754f6c3156ff87394912f`
+## Обзор
+
+| Параметр | Значение |
+| --- | --- |
+| Typed identity `[type:provider_entity]` | `pipeline:chembl_publication` |
+| Status | `active` |
+| Gold contract | `chembl.publication v1.0.0` |
+
+## Назначение и обработка данных
+
+Extract scientific publications from ChEMBL API. Источник — `chembl.publication.curated` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: doc_type=PUBLICATION; year__gte=1950; year__lte=2050.
+В business-проекцию входят .
+Silver использует профиль `chembl.publication` и проверяет обязательные поля `publication_id`, `publication_type`, `title`; невалидные записи направляются в `quarantine`.
+Перед Gold применяется строгий Pandera-контракт `chembl.publication`; Gold filters/constraints заданы в entity config (6 групп правил).
+
+## Извлечение данных
+
+| Аспект | Значение |
+| --- | --- |
+| Source | `http_api` · `chembl.publication.curated` |
+| Resource / tables | `publication` |
+| Filters | `doc_type`: PUBLICATION; `year__gte`: 1950; `year__lte`: 2050 |
+| Selected fields | `system` (10 fields); `identifiers` (7 fields); `title` (1 fields); `abstract` (1 fields); `authors` (1 fields); `journal` (1 fields); `year` (1 fields); `pagination` (4 fields); `doc_type` (5 fields); `open_access` (2 fields); `provider_ids` (3 fields) |
+
+## Silver и Data Quality
+
+- Normalization profile: `chembl.publication`.
+- Partitioning: —.
+- DQ thresholds: soft `0.05`, hard `0.5`; invalid policy `quarantine`.
+
+## Gold
+
+- Contract: `chembl.publication v1.0.0`; strict validation: `True`.
+- Write mode: `scd2`.
+- SCD2: current_flag_col=_is_current; valid_from_col=_valid_from; valid_to_col=_valid_to; version_col=_version.
+- Technical exclusions: `_dq_*`, `_source_batch_id`, `_index`, `_lookup_method`, `_original_id`, `pmc_id`, `publication_type_unified`, `publication_subclass`, `publication_class`, `oa_status`, `affiliation_list`, `author_orcids`, `is_oa`, `issn_list`, `language`, `publication_date`.
+
+## Операторские команды
+
+| Задача | Команда | Результат |
+| --- | --- | --- |
+| Запуск | `bioetl run --pipeline chembl_publication` | Запускает pipeline с effective config. |
+| Ограниченный запуск | `bioetl run --pipeline chembl_publication --limit 100` | Ограничивает число обрабатываемых записей. |
+| Безопасная проверка | `bioetl run --pipeline chembl_publication --run-type backfill --dry-run` | Проверяет backfill/rebuild path без записи. |
+| Quarantine | `bioetl quarantine inspect --pipeline chembl_publication --limit 100` | Показывает quarantined и Silver-filter records; доступны --error-code и --run-id. |
+| Статистика исключений | `bioetl quarantine stats --pipeline chembl_publication --group-by reason-code` | Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует. |
+| Checkpoint | `bioetl checkpoint inspect --pipeline chembl_publication` | Показывает checkpoint и связанные audit/manifest anchors. |
+| Manifest | `bioetl run-manifest show <run-id-or-manifest-id>` | Показывает immutable manifest и ledger evidence запуска. |
+
+## Диаграммы
+
+### Data Flow
+
+```mermaid
+flowchart LR
+    Source["chembl.publication.curated"]
+    Filters["Effective request/input filters"]
+    Bronze["Bronze append-only snapshot"]
+    Silver["Silver profile: chembl.publication + DQ"]
+    Quarantine["Quarantine / exclusion evidence"]
+    Gold["Gold: chembl.publication (scd2)"]
+    Source --> Filters --> Bronze --> Silver
+    Silver -->|valid| Gold
+    Silver -->|invalid| Quarantine
+```
 
 ## Evidence
 
 - `effective_entity_config`: `configs/entities/chembl/publication.yaml`
+- `pipeline_registration`: `src/bioetl/composition/factories/pipeline/registry_manifest.py`
+- `run_cli`: `src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py`
+- `quarantine_cli`: `src/bioetl/interfaces/cli/commands/quarantine.py`
 - `gold_validation_contract`: `docs/02-architecture/decisions/ADR-018-gold-strict-validation.md`
 - `observability_contract`: `src/bioetl/domain/_observability_contract_primitives.py`
 - `dq_contract`: `configs/contracts/chembl/publication.yaml`
-
-## Generated facts
-
-```json
-{
-  "bronze": {
-    "capability": "append_only_snapshot",
-    "content_hash": {
-      "exclude": [],
-      "include": []
-    }
-  },
-  "diagnostics": [],
-  "execution": {
-    "cached_bronze_is_mode": true,
-    "control_plane": {
-      "checkpoints": true,
-      "run_ledger": true,
-      "run_manifest": true
-    },
-    "effective_config_hash": "sha256:fed7539227fc90827d33fb755659a378db56b54d8ed53d374f3f113c5f3e68bf",
-    "projection_profiles": [
-      "batch",
-      "http"
-    ],
-    "resilience": {
-      "resolution_owner": "UnifiedHTTPClient and provider config",
-      "source_refs": [
-        "src/bioetl/infrastructure/adapters/http/client.py",
-        "configs/providers/chembl.yaml"
-      ],
-      "status": "runtime_resolved"
-    }
-  },
-  "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
-        ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
-      }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
-      },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
-  },
-  "gold": {
-    "column_projection": {
-      "exclude_fields": [
-        "_dq_*",
-        "_source_batch_id",
-        "_index",
-        "_lookup_method",
-        "_original_id",
-        "pmc_id",
-        "publication_type_unified",
-        "publication_subclass",
-        "publication_class",
-        "oa_status",
-        "affiliation_list",
-        "author_orcids",
-        "is_oa",
-        "issn_list",
-        "language",
-        "publication_date"
-      ],
-      "include_groups": [
-        "system",
-        "identifiers",
-        "title",
-        "abstract",
-        "authors",
-        "journal",
-        "year",
-        "pagination",
-        "doc_type"
-      ]
-    },
-    "contract_ref": "chembl.publication",
-    "contract_validation": {
-      "status": "resolved_by_adr_018",
-      "strict": true
-    },
-    "contract_version": "1.0.0",
-    "write": {
-      "enabled": true,
-      "idempotency_contract": "scd2",
-      "mode": "scd2",
-      "scd_config": {
-        "current_flag_col": "_is_current",
-        "valid_from_col": "_valid_from",
-        "valid_to_col": "_valid_to",
-        "version_col": "_version"
-      }
-    }
-  },
-  "identity": {
-    "aliases": [],
-    "derived_source_identity": {
-      "data_source_provider": null,
-      "entity": "publication",
-      "provider": "chembl"
-    },
-    "entity": "publication",
-    "pipeline_id": "chembl_publication",
-    "pipeline_type": "provider_entity",
-    "provider": "chembl",
-    "status": "active",
-    "typed_id": "pipeline:chembl_publication"
-  },
-  "kind": "pipeline",
-  "observability": {
-    "correlation_fields": [
-      "run_id",
-      "manifest_id"
-    ],
-    "metric_labels": [
-      "provider",
-      "pipeline",
-      "run_type",
-      "status"
-    ]
-  },
-  "passport_schema_version": "1.0.0",
-  "provenance": {
-    "projector_version": "1.0.0",
-    "semantic_content_hash": "sha256:23dedf7528a08265a8323a17d69f4256d53c31f000dc247cb332495da8472163",
-    "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
-  },
-  "silver": {
-    "column_projection": {
-      "exclude_fields": [
-        "affiliation_list",
-        "author_orcids",
-        "is_oa",
-        "issn_list",
-        "language",
-        "publication_date"
-      ],
-      "include_groups": [
-        "system",
-        "identifiers",
-        "title",
-        "abstract",
-        "authors",
-        "journal",
-        "year",
-        "pagination",
-        "doc_type",
-        "open_access",
-        "provider_ids",
-        "dq"
-      ]
-    },
-    "dq_execution": {
-      "hard_fail_threshold": 0.5,
-      "invalid_record_policy": "quarantine",
-      "soft_fail_threshold": 0.05,
-      "strict_validation": false
-    },
-    "write": {
-      "partition_by": []
-    }
-  },
-  "source_references": [
-    {
-      "path": "configs/entities/chembl/publication.yaml",
-      "role": "effective_entity_config"
-    },
-    {
-      "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
-      "role": "gold_validation_contract"
-    },
-    {
-      "path": "src/bioetl/domain/_observability_contract_primitives.py",
-      "role": "observability_contract"
-    },
-    {
-      "path": "configs/contracts/chembl/publication.yaml",
-      "role": "dq_contract"
-    }
-  ]
-}
-```
-
-## Diagnostics
-
-- No blocking diagnostics.
+- `provider_config`: `configs/providers/chembl.yaml`

@@ -605,7 +605,12 @@ def pre_task_workflow(
 
     persistence = resolve_persistence_policy()
     create_session_note = create_session_note and persistence.can_write
-    run_refresh_if_missing = run_refresh_if_missing and persistence.can_write
+    # Read-only mode forbids persistent memory mutation, but rebuild-only
+    # retrieval artifacts may still be generated in an isolated temporary
+    # directory. Never honor a caller-provided output root without write
+    # capability; this keeps read-only refresh ephemeral by construction.
+    if run_refresh_if_missing and not persistence.can_write:
+        refresh_output_root = None
     retrieval_query = query or title
     if not persistence.can_read:
         return {

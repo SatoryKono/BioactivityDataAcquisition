@@ -7,6 +7,8 @@ from typing import Any
 
 import yaml
 
+from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
+
 JsonObject = dict[str, Any]
 
 
@@ -119,11 +121,9 @@ def build_ordinary_projection(
         for field in business_fields
     ]
     source_profile = _mapping(configured_filters.get("source_profile"))
+    pipeline_source = _mapping(pipeline.get("source"))
     source_resource = str(
-        source_profile.get("profile_id")
-        or pipeline.get("source", {}).get("resource")
-        if isinstance(pipeline.get("source"), dict)
-        else ""
+        source_profile.get("profile_id") or pipeline_source.get("resource") or ""
     )
     if not source_resource:
         source_resource = f"{provider}:{entity}"
@@ -141,6 +141,13 @@ def build_ordinary_projection(
         }
         else "http_api"
     )
+    endpoint_template: str | None = str(base_url) if base_url else None
+    source_collection = entity
+    if provider == "chembl" and entity != "target_protein_classification":
+        mapped_resource = ChemblEntityMapper.get_resource_name(entity)
+        if mapped_resource:
+            source_collection = mapped_resource
+            endpoint_template = ChemblEntityMapper.get_resource_url(entity)
     filter_summary = (
         "; ".join(f"{row['name']}={row['description']}" for row in filters)
         if filters
@@ -203,10 +210,10 @@ def build_ordinary_projection(
         "extraction": {
             "source_kind": source_kind,
             "source_resource": source_resource,
-            "method": "GET" if source_kind == "http_api" else None,
-            "endpoint_template": base_url,
+            "method": "GET" if endpoint_template else None,
+            "endpoint_template": endpoint_template,
             "source_tables": [],
-            "source_collections": [entity],
+            "source_collections": [source_collection],
             "filters": filters,
             "selected_fields": selected_fields,
             "field_groups": groups,
@@ -220,8 +227,12 @@ def operator_commands(pipeline_id: str, *, composite: bool = False) -> list[Json
     if composite:
         entity = pipeline_id.removeprefix("composite_")
         launch = f"bioetl run-composite --composite {entity}"
+        limited = f"{launch} --seed-limit 100"
+        alternate = f"{launch} --use-cached-bronze --dry-run"
     else:
         launch = f"bioetl run --pipeline {pipeline_id}"
+        limited = f"{launch} --limit 100"
+        alternate = f"{launch} --run-type backfill --dry-run"
     return [
         {
             "task": "Запуск",
@@ -235,9 +246,23 @@ def operator_commands(pipeline_id: str, *, composite: bool = False) -> list[Json
         },
         {
             "task": "Ограниченный запуск",
-            "command": f"{launch} --limit 100",
+            "command": limited,
             "result": "Ограничивает число обрабатываемых записей.",
             "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+        },
+        {
+            "task": "Безопасная проверка",
+            "command": alternate,
+            "result": (
+                "Проверяет cached Bronze composite без записи."
+                if composite
+                else "Проверяет backfill/rebuild path без записи."
+            ),
+            "source_ref": (
+                "src/bioetl/interfaces/cli/commands/run_composite.py"
+                if composite
+                else "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py"
+            ),
         },
         {
             "task": "Quarantine",

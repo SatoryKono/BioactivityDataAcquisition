@@ -7,6 +7,13 @@
     }
   },
   "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "data_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Source[\"chembl.assay.curated\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: chembl.assay + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: chembl.assay (scd2)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
+    }
+  ],
   "execution": {
     "cached_bronze_is_mode": true,
     "control_plane": {
@@ -29,34 +36,349 @@
     }
   },
   "extraction": {
-    "request": {
-      "endpoint_template": {
-        "resolution_inputs": [
-          "provider base_url",
-          "entity resource mapping"
+    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data",
+    "field_groups": [
+      {
+        "field_count": 7,
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_ingestion_ts",
+          "_index"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "system"
       },
-      "method": {
-        "resolution_inputs": [
-          "effective provider config",
-          "adapter request builder"
+      {
+        "field_count": 40,
+        "fields": [
+          "assay_id",
+          "assay_description",
+          "assay_type",
+          "assay_type_description",
+          "assay_test_type",
+          "assay_category",
+          "assay_group",
+          "assay_organism",
+          "assay_taxonomy_id",
+          "assay_strain",
+          "assay_tissue",
+          "assay_cell_type",
+          "assay_subcellular_fraction_raw",
+          "assay_subcellular_fraction",
+          "target_id",
+          "relationship_type",
+          "relationship_description",
+          "confidence_score",
+          "confidence_description",
+          "src_id",
+          "src_assay_id",
+          "publication_id",
+          "assay_pref_name",
+          "cell_id",
+          "tissue_id",
+          "bao_format",
+          "bao_format_iri",
+          "bao_format_mapping_status",
+          "bao_label",
+          "bao_ontology_version",
+          "aidx",
+          "variant_accession",
+          "variant_isoform",
+          "variant_mutation",
+          "variant_organism",
+          "variant_sequence",
+          "variant_taxonomy_id",
+          "variant_sequence_json",
+          "assay_classifications",
+          "assay_parameters"
         ],
-        "resolution_owner": "provider adapter",
-        "status": "runtime_resolved"
+        "name": "business"
       }
-    },
-    "source_modes": {
-      "cached_bronze": {
-        "availability": "runtime_resolved",
-        "identity_kind": "execution_mode"
+    ],
+    "filters": [
+      {
+        "description": "B,F",
+        "name": "assay_type__in",
+        "required": false,
+        "source": "config"
       },
-      "declared": [
-        "runtime_resolved"
-      ]
-    },
-    "source_type": "runtime_resolved"
+      {
+        "description": "8",
+        "name": "confidence_score__gte",
+        "required": false,
+        "source": "config"
+      },
+      {
+        "description": "D",
+        "name": "relationship_type",
+        "required": false,
+        "source": "config"
+      },
+      {
+        "description": "false",
+        "name": "target_chembl_id__isnull",
+        "required": false,
+        "source": "config"
+      },
+      {
+        "description": "IDs from data/input/assay.csv column assay_chembl_id; CLI may override the input CSV",
+        "name": "assay_id",
+        "required": false,
+        "source": "cli"
+      }
+    ],
+    "method": "GET",
+    "selected_fields": [
+      {
+        "name": "assay_id",
+        "required": true,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_description",
+        "required": true,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_type",
+        "required": true,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_type_description",
+        "required": true,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_test_type",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_category",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_group",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_organism",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_taxonomy_id",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_strain",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_tissue",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_cell_type",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_subcellular_fraction_raw",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_subcellular_fraction",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "target_id",
+        "required": true,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "relationship_type",
+        "required": true,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "relationship_description",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "confidence_score",
+        "required": true,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "confidence_description",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "src_id",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "src_assay_id",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "publication_id",
+        "required": true,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_pref_name",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "cell_id",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "tissue_id",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "bao_format",
+        "required": true,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "bao_format_iri",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "bao_format_mapping_status",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "bao_label",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "bao_ontology_version",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "aidx",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "variant_accession",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "variant_isoform",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "variant_mutation",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "variant_organism",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "variant_sequence",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "variant_taxonomy_id",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "variant_sequence_json",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_classifications",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      },
+      {
+        "name": "assay_parameters",
+        "required": false,
+        "source_object": "assay",
+        "target_group": "business"
+      }
+    ],
+    "source_collections": [
+      "assay"
+    ],
+    "source_kind": "http_api",
+    "source_resource": "chembl.assay.curated",
+    "source_tables": []
   },
   "gold": {
     "column_projection": {
@@ -115,9 +437,53 @@
       "status"
     ]
   },
+  "operator_commands": [
+    {
+      "command": "bioetl run --pipeline chembl_assay",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_assay --limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_assay --run-type backfill --dry-run",
+      "result": "Проверяет backfill/rebuild path без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline chembl_assay --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline chembl_assay --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline chembl_assay",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
   "passport_schema_version": "1.0.0",
   "provenance": {
-    "projector_version": "1.0.0",
+    "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:336f4830865dcecf0c181380f8779d357a9fbb84090231b288a49ae2912e5afe",
     "source_revision": "41a1d6eab5a5c32c6b7754f6c3156ff87394912f"
   },
@@ -136,6 +502,7 @@
       "soft_fail_threshold": 0.05,
       "strict_validation": false
     },
+    "normalization_profile": "chembl.assay",
     "write": {
       "partition_by": [
         "assay_type"
@@ -148,6 +515,18 @@
       "role": "effective_entity_config"
     },
     {
+      "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
+      "role": "pipeline_registration"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "role": "run_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
+    },
+    {
       "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
       "role": "gold_validation_contract"
     },
@@ -158,6 +537,24 @@
     {
       "path": "configs/contracts/chembl/assay.yaml",
       "role": "dq_contract"
+    },
+    {
+      "path": "configs/providers/chembl.yaml",
+      "role": "provider_config"
     }
-  ]
+  ],
+  "summary": {
+    "excluded_data_summary": "invalid_record_policy=quarantine",
+    "field_selection_summary": "В business-проекцию входят `assay_id`, `assay_description`, `assay_type`, `assay_type_description`, `assay_test_type`, `assay_category`, `assay_group`, `assay_organism` и ещё 32 полей.",
+    "query_filter_summary": "assay_type__in=B,F; confidence_score__gte=8; relationship_type=D; target_chembl_id__isnull=false; assay_id=IDs from data/input/assay.csv column assay_chembl_id; CLI may override the input CSV",
+    "sentences": [
+      "Extract bioassay definitions from ChEMBL API. Источник — `chembl.assay.curated` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: assay_type__in=B,F; confidence_score__gte=8; relationship_type=D; target_chembl_id__isnull=false; assay_id=IDs from data/input/assay.csv column assay_chembl_id; CLI may override the input CSV.",
+      "В business-проекцию входят `assay_id`, `assay_description`, `assay_type`, `assay_type_description`, `assay_test_type`, `assay_category`, `assay_group`, `assay_organism` и ещё 32 полей.",
+      "Silver использует профиль `chembl.assay` и проверяет обязательные поля `assay_id`, `assay_type`, `assay_description`, `target_id`, `publication_id`, `bao_format`; невалидные записи направляются в `quarantine`.",
+      "Перед Gold применяется строгий Pandera-контракт `chembl.assay`; Gold filters/constraints заданы в entity config (6 групп правил)."
+    ],
+    "silver_processing_summary": "Silver использует профиль `chembl.assay` и проверяет обязательные поля `assay_id`, `assay_type`, `assay_description`, `target_id`, `publication_id`, `bao_format`; невалидные записи направляются в `quarantine`.",
+    "source_description": "Extract bioassay definitions from ChEMBL API. Источник — `chembl.assay.curated` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: assay_type__in=B,F; confidence_score__gte=8; relationship_type=D; target_chembl_id__isnull=false; assay_id=IDs from data/input/assay.csv column assay_chembl_id; CLI may override the input CSV.",
+    "validation_summary": "Перед Gold применяется строгий Pandera-контракт `chembl.assay`; Gold filters/constraints заданы в entity config (6 групп правил)."
+  }
 }

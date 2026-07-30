@@ -17,6 +17,7 @@ from bioetl.infrastructure.config.workflow_config_api import load_workflow_confi
 from scripts.docs.passports.cli import main
 from scripts.docs.passports.inventory import discover_units
 from scripts.docs.passports.manual_sidecar import load_manual_sidecar
+from scripts.docs.passports.duplicate_audit import audit_markdown_texts
 from scripts.docs.passports.projector import (
     DEFAULT_CONFIGS_ROOT,
     PROJECT_ROOT,
@@ -96,7 +97,7 @@ def test_generation_is_byte_deterministic(tmp_path: Path) -> None:
     first = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
     second = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
     assert first == second
-    assert len(first) == 111
+    assert len(first) == 112
     write_outputs(first)
     assert check_outputs(second) == []
 
@@ -295,3 +296,61 @@ def test_cli_generate_and_check(tmp_path: Path) -> None:
     assert main(["check", *args]) == 0
     (tmp_path / "index.md").write_text("stale\n", encoding="utf-8")
     assert main(["check", *args]) == 1
+
+
+def test_pipeline_markdown_is_compact_complete_and_not_a_json_dump(
+    tmp_path: Path,
+) -> None:
+    outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
+    path = tmp_path / "pipelines/chembl_assay.md"
+    markdown = outputs[path].decode("utf-8")
+    facts = json.loads(
+        outputs[tmp_path / "generated/pipelines/chembl_assay.json"]
+    )
+    assert 2 <= len(facts["summary"]["sentences"]) <= 5
+    assert facts["extraction"]["filters"]
+    assert facts["extraction"]["selected_fields"]
+    assert facts["operator_commands"][0]["command"] == (
+        "bioetl run --pipeline chembl_assay"
+    )
+    assert facts["diagrams"][0]["mermaid"].startswith("flowchart LR\n")
+    assert "## Назначение и обработка данных" in markdown
+    assert "## Операторские команды" in markdown
+    assert "## Диаграммы" in markdown
+    assert "## Generated facts" not in markdown
+    assert "```json" not in markdown
+    assert "## Diagnostics" not in markdown
+    assert len(markdown.splitlines()) < 120
+
+
+def test_composite_commands_and_diagram_use_real_composite_cli_options(
+    tmp_path: Path,
+) -> None:
+    outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
+    facts = json.loads(
+        outputs[tmp_path / "generated/pipelines/composite_publication.json"]
+    )
+    commands = [item["command"] for item in facts["operator_commands"]]
+    assert "bioetl run-composite --composite publication" in commands
+    assert (
+        "bioetl run-composite --composite publication --seed-limit 100" in commands
+    )
+    diagram = facts["diagrams"][0]["mermaid"]
+    assert "chembl_publication" in diagram
+    assert "crossref_publication · doi, title" in diagram
+    assert "Merge: left_outer / seed_priority" in diagram
+    assert "Quarantine / nullification" in diagram
+
+
+def test_duplicate_audit_reports_compaction(tmp_path: Path) -> None:
+    outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
+    markdown = [
+        content.decode("utf-8")
+        for path, content in outputs.items()
+        if path.parent == tmp_path / "pipelines" and path.suffix == ".md"
+    ]
+    report = audit_markdown_texts(markdown)
+    assert report["passport_count"] == 27
+    assert report["total_markdown_lines"] < 3000
+    assert report["empty_section_count"] == 0
+    assert report["identity_duplicate_count"] == 0

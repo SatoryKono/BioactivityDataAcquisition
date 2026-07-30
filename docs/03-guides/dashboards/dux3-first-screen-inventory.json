@@ -10,12 +10,12 @@
       "audit_shot": "S7",
       "panel_count": 52,
       "first_screen_count": 8,
-      "first_screen_dux3_desc": 3,
+      "first_screen_dux3_desc": 0,
       "first_screen": [
         {
           "id": 1000,
           "type": "text",
-          "title": "Navigation",
+          "title": "Navigate Dashboards",
           "gridPos": {
             "x": 0,
             "y": 0,
@@ -28,7 +28,7 @@
         {
           "id": 9400,
           "type": "text",
-          "title": "Provenance",
+          "title": "Review Scope & Evidence",
           "gridPos": {
             "x": 0,
             "y": 3,
@@ -36,12 +36,12 @@
             "h": 3
           },
           "collapsed": false,
-          "has_dux3_desc": true
+          "has_dux3_desc": false
         },
         {
           "id": 9401,
           "type": "stat",
-          "title": "Status",
+          "title": "Monitor Replay Readiness",
           "gridPos": {
             "x": 16,
             "y": 3,
@@ -49,12 +49,12 @@
             "h": 3
           },
           "collapsed": false,
-          "has_dux3_desc": true
+          "has_dux3_desc": false
         },
         {
           "id": 906,
           "type": "text",
-          "title": "Primary recovery",
+          "title": "Review First Recovery Action",
           "gridPos": {
             "x": 0,
             "y": 10,
@@ -67,7 +67,7 @@
         {
           "id": 891,
           "type": "stat",
-          "title": "Monitor: Replay Safety State",
+          "title": "Monitor Replay Safety",
           "gridPos": {
             "x": 0,
             "y": 6,
@@ -75,12 +75,12 @@
             "h": 4
           },
           "collapsed": false,
-          "has_dux3_desc": true
+          "has_dux3_desc": false
         },
         {
           "id": 892,
           "type": "stat",
-          "title": "Monitor: Checkpoint Freshness Lag (seconds)",
+          "title": "Monitor Checkpoint Age",
           "gridPos": {
             "x": 6,
             "y": 6,
@@ -93,7 +93,7 @@
         {
           "id": 893,
           "type": "stat",
-          "title": "Monitor: Manifest / Ledger Integrity",
+          "title": "Monitor Manifest & Ledger Failures",
           "gridPos": {
             "x": 12,
             "y": 6,
@@ -106,7 +106,7 @@
         {
           "id": 907,
           "type": "stat",
-          "title": "Inspect: Telemetry Missing",
+          "title": "Monitor Telemetry Coverage",
           "gridPos": {
             "x": 18,
             "y": 6,
@@ -124,7 +124,7 @@
       "audit_shot": "S6",
       "panel_count": 21,
       "first_screen_count": 5,
-      "first_screen_dux3_desc": 4,
+      "first_screen_dux3_desc": 3,
       "first_screen": [
         {
           "id": 1000,
@@ -142,7 +142,7 @@
         {
           "id": 99,
           "type": "text",
-          "title": "Provenance",
+          "title": "Inspect Scope & Evidence",
           "gridPos": {
             "x": 0,
             "y": 3,
@@ -150,7 +150,7 @@
             "h": 3
           },
           "collapsed": false,
-          "has_dux3_desc": true
+          "has_dux3_desc": false
         },
         {
           "id": 214,
@@ -199,7 +199,7 @@
       "audit_shot": "S5",
       "panel_count": 36,
       "first_screen_count": 6,
-      "first_screen_dux3_desc": 3,
+      "first_screen_dux3_desc": 2,
       "first_screen": [
         {
           "id": 1000,
@@ -217,7 +217,7 @@
         {
           "id": 9400,
           "type": "text",
-          "title": "Provenance",
+          "title": "Inspect Scope & Evidence",
           "gridPos": {
             "x": 0,
             "y": 3,
@@ -225,7 +225,7 @@
             "h": 3
           },
           "collapsed": false,
-          "has_dux3_desc": true
+          "has_dux3_desc": false
         },
         {
           "id": 9401,
@@ -287,7 +287,7 @@
       "audit_shot": "S4",
       "panel_count": 28,
       "first_screen_count": 7,
-      "first_screen_dux3_desc": 3,
+      "first_screen_dux3_desc": 2,
       "first_screen": [
         {
           "id": 1000,
@@ -305,7 +305,7 @@
         {
           "id": 9400,
           "type": "text",
-          "title": "Provenance",
+          "title": "Inspect Scope & Evidence",
           "gridPos": {
             "x": 0,
             "y": 3,
@@ -313,7 +313,7 @@
             "h": 3
           },
           "collapsed": false,
-          "has_dux3_desc": true
+          "has_dux3_desc": false
         },
         {
           "id": 9401,
@@ -388,7 +388,7 @@
       "audit_shot": "S3",
       "panel_count": 33,
       "first_screen_count": 6,
-      "first_screen_dux3_desc": 3,
+      "first_screen_dux3_desc": 2,
       "first_screen": [
         {
           "id": 1000,
@@ -406,7 +406,7 @@
         {
           "id": 9400,
           "type": "text",
-          "title": "Provenance",
+          "title": "Inspect Scope & Evidence",
           "gridPos": {
             "x": 0,
             "y": 3,
@@ -414,7 +414,7 @@
             "h": 3
           },
           "collapsed": false,
-          "has_dux3_desc": true
+          "has_dux3_desc": false
         },
         {
           "id": 9401,
@@ -476,7 +476,7 @@
       "audit_shot": "S2",
       "panel_count": 11,
       "first_screen_count": 5,
-      "first_screen_dux3_desc": 3,
+      "first_screen_dux3_desc": 2,
       "first_screen": [
         {
           "id": 1000,
@@ -494,7 +494,7 @@
         {
           "id": 9400,
           "type": "text",
-          "title": "Provenance",
+          "title": "Inspect Scope & Evidence",
           "gridPos": {
             "x": 0,
             "y": 3,
@@ -502,7 +502,7 @@
             "h": 3
           },
           "collapsed": false,
-          "has_dux3_desc": true
+          "has_dux3_desc": false
         },
         {
           "id": 9401,
