@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2450 |
-| Tracked doc-like files | 2395 |
+| Doc-like files | 2446 |
+| Tracked doc-like files | 2391 |
 | Ignored local docs/reports files | 55 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 55 |
-| tracked | 2395 |
+| tracked | 2391 |
 
 ## Lifecycle Counts
 
@@ -58,37 +58,36 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 884 |
+| Active | 881 |
 | Archived | 130 |
 | Canonical | 73 |
 | Generated | 878 |
-| Working | 485 |
+| Working | 484 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 884 |
+| active | 881 |
 | archive | 130 |
 | canonical | 73 |
 | generated | 878 |
-| working | 485 |
+| working | 484 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 106 |
+| archive-after-migration | 105 |
 | generate-automatically | 878 |
-| keep | 1150 |
+| keep | 1147 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
-| `docs/00-project/ai/sessions/review-1776233608.md` | Working | 0 | archive-after-migration |
 | `docs/00-project/ai/skills/global/documentation-audit/references/audit-checklist.md` | Working | 0 | archive-after-migration |
 | `docs/00-project/ai/skills/global/documentation-audit/references/report-template.md` | Working | 0 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
@@ -168,6 +167,7 @@
 | `reports/quality/root-hygiene-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
+| `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

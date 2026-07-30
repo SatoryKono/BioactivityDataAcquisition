@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from memory.access import AccessAction, AccessContext, require_access
+from memory.freshness import FreshnessResult, evaluate_freshness
 from memory.records import (
     ActorIdentity,
     RecordEnvelope,
@@ -22,6 +23,7 @@ from memory.records import (
     SecurityClass,
     TrustLevel,
 )
+from memory.scope import RepositoryScope
 from memory.security import assert_safe_for_persistence
 from memory.storage import atomic_write_json
 
@@ -30,6 +32,15 @@ _SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
 
 class UserMemoryConsentError(PermissionError):
     """Raised when user-memory processing lacks explicit active consent."""
+
+
+class UserMemoryFreshnessError(RuntimeError):
+    """Raised when a record is not usable in the active repository scope."""
+
+    def __init__(self, result: FreshnessResult) -> None:
+        self.result = result
+        reasons = ", ".join(result.reasons) or "unknown"
+        super().__init__(f"user-memory record is {result.status.value}: {reasons}")
 
 
 @dataclass(frozen=True, slots=True)
@@ -168,6 +179,9 @@ class UserMemoryStore:
         *,
         owner_id: str,
         record_id: str,
+        scope: RepositoryScope,
+        dirty: bool,
+        historical_mode: bool = False,
     ) -> UserMemoryRecord:
         """Return one scoped record, including its provenance envelope."""
         self._require_consent(owner_id, context.repo_id)
@@ -177,7 +191,16 @@ class UserMemoryStore:
             owner_id=owner_id,
             repo_id=context.repo_id,
         )
-        return self._read_record(owner_id, context.repo_id, record_id)
+        record = self._read_record(owner_id, context.repo_id, record_id)
+        freshness = evaluate_freshness(
+            record.envelope,
+            scope,
+            dirty=dirty,
+            historical_mode=historical_mode,
+        )
+        if not freshness.usable:
+            raise UserMemoryFreshnessError(freshness)
+        return record
 
     def correct(
         self,
@@ -243,7 +266,8 @@ class UserMemoryStore:
         record_id: str,
     ) -> None:
         """Permanently delete one explicitly scoped repository-owned record."""
-        self._require_consent(owner_id, context.repo_id)
+        # Revocation stops processing but must not make privacy erasure impossible.
+        self._require_consent(owner_id, context.repo_id, require_active=False)
         require_access(
             context,
             action=AccessAction.DELETE,
@@ -255,7 +279,13 @@ class UserMemoryStore:
             raise FileNotFoundError("user-memory record not found")
         path.unlink()
 
-    def _require_consent(self, user_id: str, repo_id: str) -> UserMemoryConsent:
+    def _require_consent(
+        self,
+        user_id: str,
+        repo_id: str,
+        *,
+        require_active: bool = True,
+    ) -> UserMemoryConsent:
         path = self._consent_path(user_id, repo_id)
         if not path.is_file():
             raise UserMemoryConsentError(
@@ -263,7 +293,7 @@ class UserMemoryStore:
             )
         payload = json.loads(path.read_text(encoding="utf-8"))
         consent = UserMemoryConsent(**payload)
-        if not consent.active:
+        if require_active and not consent.active:
             raise UserMemoryConsentError("repository-owned user memory consent revoked")
         return consent
 

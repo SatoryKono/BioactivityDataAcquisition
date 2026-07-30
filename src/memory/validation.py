@@ -28,6 +28,7 @@ from memory.resources import (
     load_json_resource,
     load_yaml_resource,
 )
+from memory.security import FindingKind, inspect_memory_content
 
 STORAGE_POLICY_PATH = "policy/storage.yaml"
 CURATED_KIND_BY_DIR = {
@@ -694,6 +695,24 @@ def _validate_note_source_refs(
             )
         )
         return []
+    for source_ref in source_refs:
+        if not isinstance(source_ref, str):
+            continue
+        rule_ids = sorted(
+            finding.rule_id
+            for finding in inspect_memory_content(source_ref)
+            if finding.kind is FindingKind.PII
+        )
+        if rule_ids:
+            issues.append(
+                ValidationIssue(
+                    path=str(path),
+                    message=(
+                        "note source_ref contains machine-local or personal "
+                        f"identity: {', '.join(rule_ids)}"
+                    ),
+                )
+            )
     return source_refs
 
 

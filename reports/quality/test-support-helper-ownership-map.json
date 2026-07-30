@@ -87,7 +87,7 @@
       "mutable_state": "creates in-memory storage and DQ collaborators per test",
       "decision": "retain_domain_helper",
       "consumers": [
-        "tests/unit/application/core/test_record_processor.py"
+        "tests/integration/application/core/test_record_processor.py"
       ]
     },
     {
@@ -107,7 +107,7 @@
       "decision": "retain_local_plugin",
       "consumers": [
         "tests/unit/application/core/test_batch_transformer.py",
-        "tests/unit/application/core/test_record_processor.py",
+        "tests/integration/application/core/test_record_processor.py",
         "tests/unit/application/core/test_streaming_batch.py"
       ]
     },

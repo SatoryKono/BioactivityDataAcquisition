@@ -12,7 +12,7 @@ actor:
   model: null
 created_at: '2026-07-30T05:36:16.540701+00:00'
 source_refs:
-- local:/home/fedor/.bashrc
+- local-shell-profile
 source_hashes: {}
 trust: trusted_repository
 security_class: internal

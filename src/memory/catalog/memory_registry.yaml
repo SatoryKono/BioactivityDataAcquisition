@@ -145,7 +145,7 @@ surfaces:
     cleanup_policy: explicit-prune
     runtime_usage_proven: true
     evidence: [src/memory/tooling/workflow.py, src/memory/tooling/prune.py]
-    status: FAIL
+    status: PASS
   - memory_id: MEM-RAG
     <<: *surface_defaults
     agent_or_runtime: all
