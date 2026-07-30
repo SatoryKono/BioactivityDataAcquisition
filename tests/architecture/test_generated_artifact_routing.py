@@ -49,9 +49,12 @@ def _is_safe_output_path(
     allowed_roots: tuple[str, ...],
     forbidden_roots: tuple[str, ...],
 ) -> bool:
-    if not path or path.startswith("../") or "/../" in path:
+    if not path or ".." in Path(path).parts:
         return False
-    if not any(path.startswith(root) for root in allowed_roots):
+    if not any(
+        path.startswith(root) if root.endswith(("/", "-")) else path == root
+        for root in allowed_roots
+    ):
         return False
     if "/" not in path and path.endswith(FORBIDDEN_ROOT_OUTPUT_SUFFIXES):
         return False
@@ -65,6 +68,8 @@ def test_generated_artifact_routing_inventory_is_valid() -> None:
     assert payload["schema_version"] == 1
     routes = payload.get("routes")
     assert isinstance(routes, list) and routes, "routes must be a non-empty list"
+    allowed_roots = _allowed_output_roots(payload)
+    assert allowed_roots, "allowed_output_roots must declare reviewed destinations"
     forbidden_roots = tuple(payload.get("forbidden_output_roots") or ())
     assert forbidden_roots, "forbidden_output_roots must be declared"
 
@@ -83,27 +88,54 @@ def test_generated_artifact_routing_inventory_is_valid() -> None:
         # Skip generator existence check for fallback routes with non-file generators
         # (e.g., "multiple governed docs and quality generators", "manual closeout",
         # "docs API reference generation workflow", or combined generators with " and ")
-        if (
+        if not (
             "/" not in generator
             or generator.startswith(("multiple", "manual", "docs"))
             or " and " in generator
         ):
-            continue
-        assert (ROOT / generator).exists(), f"{route_id}: generator does not exist"
+            assert (ROOT / generator).exists(), f"{route_id}: generator does not exist"
 
         outputs = route.get("outputs")
         assert isinstance(outputs, list) and outputs, f"{route_id}: outputs required"
         for output in outputs:
             assert isinstance(output, str), f"{route_id}: output must be a string"
-            # Temporarily skip path safety check for all outputs due to routing config drift
-            # TODO: Fix allowed_output_roots in generated_artifact_routing.yaml to include all output paths
-            # if output.startswith("docs/00-project/ai/skills/global/"):
-            #     continue
-            # if output == "docs/02-architecture/07-compatibility-facade-snapshot.md":
-            #     continue
-            # assert _is_safe_output_path(output, allowed_roots, forbidden_roots), (
-            #     f"{route_id}: unsafe generated artifact output path: {output}"
-            # )
+            assert _is_safe_output_path(output, allowed_roots, forbidden_roots), (
+                f"{route_id}: unsafe generated artifact output path: {output}"
+            )
+
+
+@pytest.mark.parametrize(
+    "unsafe_path",
+    (
+        "",
+        "../reports/generated.json",
+        "reports/../generated.json",
+        "reports/..",
+        "output/generated.json",
+        "generated.json",
+        "docs/04-reference/config_comparison_matrix.csv.bak",
+    ),
+)
+def test_generated_artifact_routing_rejects_unsafe_paths(
+    unsafe_path: str,
+) -> None:
+    """Traversal, forbidden roots, and root-level outputs must fail closed."""
+    payload = _load_routing()
+
+    assert not _is_safe_output_path(
+        unsafe_path,
+        _allowed_output_roots(payload),
+        tuple(payload["forbidden_output_roots"]),
+    )
+
+
+def test_generated_artifact_routing_rejects_forbidden_allowed_overlap() -> None:
+    """Forbidden roots take precedence over an overlapping allowed prefix."""
+    assert not _is_safe_output_path(
+        "output/generated.json",
+        ("output/",),
+        ("output/",),
+    )
 
 
 def test_generated_artifact_routing_covers_core_generators() -> None:
