@@ -1,9 +1,9 @@
 {
   "mcpServers": {
     "memory": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_memory_wrapper.sh"
+        "scripts/ai/mcp/mcp_memory_wrapper.ps1"
       ],
       "env": {
         "NPM_CONFIG_CACHE": ".cache/npm-cache",
@@ -12,18 +12,18 @@
       "startup_timeout_sec": 120
     },
     "filesystem": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_filesystem_wrapper.sh"
+        "scripts/ai/mcp/mcp_filesystem_wrapper.ps1"
       ],
       "env": {
         "NPM_CONFIG_CACHE": ".cache/npm-cache"
       }
     },
     "fetch": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_fetch_wrapper.sh"
+        "scripts/ai/mcp/mcp_fetch_wrapper.ps1"
       ],
       "env": {
         "UV_CACHE_DIR": ".cache/uv-cache",
@@ -33,9 +33,9 @@
       "startup_timeout_sec": 300
     },
     "github": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/github-mcp-wrapper.sh"
+        "scripts/ai/mcp/github-mcp-wrapper.ps1"
       ],
       "env": {
         "NPM_CONFIG_CACHE": ".cache/npm-cache"
@@ -43,79 +43,79 @@
       "startup_timeout_sec": 180
     },
     "docker": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_docker_wrapper.sh"
+        "scripts/ai/mcp/mcp_docker_wrapper.ps1"
       ],
       "startup_timeout_sec": 240
     },
     "context7": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_context7_wrapper.sh"
+        "scripts/ai/mcp/mcp_context7_wrapper.ps1"
       ],
       "startup_timeout_sec": 240
     },
     "ast-grep": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_ast_grep_wrapper.sh"
+        "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1"
       ],
       "startup_timeout_sec": 120
     },
     "mcp-code-interpreter": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_code_interpreter_wrapper.sh"
+        "scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1"
       ],
       "startup_timeout_sec": 240
     },
     "prometheus": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_prometheus_wrapper.sh"
+        "scripts/ai/mcp/mcp_prometheus_wrapper.ps1"
       ],
       "startup_timeout_sec": 240
     },
     "grafana": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_grafana_wrapper.sh"
+        "scripts/ai/mcp/mcp_grafana_wrapper.ps1"
       ],
       "startup_timeout_sec": 240
     },
     "brave-search": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_brave_search_wrapper.sh"
+        "scripts/ai/mcp/mcp_brave_search_wrapper.ps1"
       ],
       "startup_timeout_sec": 180
     },
     "neo4j-cypher": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh"
+        "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1"
       ],
       "startup_timeout_sec": 120
     },
     "neo4j-memory": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
+        "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1"
       ],
       "startup_timeout_sec": 120
     },
     "mermaid": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_mermaid_wrapper.sh"
+        "scripts/ai/mcp/mcp_mermaid_wrapper.ps1"
       ],
       "startup_timeout_sec": 300
     },
     "deja": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_deja_wrapper.sh"
+        "scripts/ai/mcp/mcp_deja_wrapper.ps1"
       ],
       "env": {
         "NPM_CONFIG_CACHE": ".cache/npm-cache"
@@ -123,9 +123,9 @@
       "startup_timeout_sec": 120
     },
     "adr-analysis": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh"
+        "scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1"
       ],
       "env": {
         "PROJECT_PATH": ".",
@@ -134,9 +134,9 @@
       "startup_timeout_sec": 120
     },
     "mutmut": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_mutmut_wrapper.sh"
+        "scripts/ai/mcp/mcp_mutmut_wrapper.ps1"
       ],
       "env": {
         "MUTMUT_PROJECT_PATH": "."
@@ -144,9 +144,9 @@
       "startup_timeout_sec": 120
     },
     "code-analyzer": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh"
+        "scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1"
       ],
       "env": {
         "PROJECT_PATH": "."
@@ -154,9 +154,9 @@
       "startup_timeout_sec": 120
     },
     "github-actions": {
-      "command": "bash",
+      "command": "powershell",
       "args": [
-        "scripts/ai/mcp/mcp_github_actions_wrapper.sh"
+        "scripts/ai/mcp/mcp_github_actions_wrapper.ps1"
       ],
       "startup_timeout_sec": 180
     },

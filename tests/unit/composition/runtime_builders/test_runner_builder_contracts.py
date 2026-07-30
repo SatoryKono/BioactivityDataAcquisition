@@ -211,5 +211,3 @@ def test_inputs_resolver_public_surface_is_narrowed_to_reviewed_exports() -> Non
     assert "assemble_runtime_config" not in inputs_resolver.__all__
     assert "assemble_filter_config" not in inputs_resolver.__all__
     assert "adjust_batch_size_for_filter" not in inputs_resolver.__all__
-
-

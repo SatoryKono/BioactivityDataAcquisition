@@ -107,7 +107,7 @@
         "source": "cli"
       }
     ],
-    "method": null,
+    "method": "GET",
     "selected_fields": [
       {
         "name": "target_id",

@@ -340,6 +340,7 @@ nav:
       - "GitHub Actions Workflows": 04-reference/github-actions-workflows.md
       - "Pipeline Catalog": 04-reference/pipeline-catalog.md
       - "Pipeline and Workflow Passports": 04-reference/passports/index.md
+      - "Pipeline Passport Projection Guide": 04-reference/passports/pipeline-passport-guide.md
       - "Composite Pipelines": 04-reference/pipelines/composites.md
       - "ChEMBL Normalization Deep Dive": 04-reference/normalization/chembl-normalization-deep-dive.md
       - "Ontology Governance": 04-reference/normalization/ontology-governance.md
@@ -518,6 +519,7 @@ nav:
           - "AGENT": 00-project/ai/agents/guides/AGENT.md
           - "CLAUDE": 00-project/ai/agents/guides/CLAUDE.md
           - "CODEX": 00-project/ai/agents/guides/CODEX.md
+          - "Codex Task Routing and Validation": 00-project/ai/agents/guides/CODEX_TASK_ROUTING.md
           - "GEMINI": 00-project/ai/agents/guides/GEMINI.md
           - "Test Lane Mental Model": 00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md
           - "Basedpyright Project Diagnostics": 00-project/ai/agents/guides/BASEDPRIGHT_PROJECT_DIAGNOSTICS.md

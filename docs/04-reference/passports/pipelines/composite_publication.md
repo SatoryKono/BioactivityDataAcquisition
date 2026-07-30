@@ -22,6 +22,7 @@ Join keys, cardinality и source tables берутся из composite configurat
 | Аспект | Значение |
 | --- | --- |
 | Source | `composite` · `chembl_publication` |
+| Method / endpoint | — · — |
 | Resource / tables | `silver/chembl/publication`, `silver/crossref/publication`, `silver/openalex/publication`, `silver/pubmed/publication`, `silver/semanticscholar/publication` |
 | Filters | `crossref_publication`: doi IS NOT NULL; `openalex_publication`: doi IS NOT NULL OR pmid IS NOT NULL; `pubmed_publication`: pmid IS NOT NULL; `semanticscholar_publication`: doi IS NOT NULL OR title IS NOT NULL |
 

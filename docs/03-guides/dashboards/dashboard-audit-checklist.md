@@ -336,7 +336,7 @@ Run: `uv run python -m scripts.engineering.qa report-dashboard-query-duplicates`
 - [ ] `bioetl_dq_current_status` intentionally serves the compact `Status` and expanded `Monitor DQ Current Status` panels
 - [ ] `bioetl_runtime_current_status_trusted` intentionally serves the compact `Status` and expanded `Runtime Status` panels
 - [ ] DQ weighted stat and trend have distinct time semantics: fixed seven-day (`[7d]`) retained snapshot versus raw selected-range samples; absence remains `UNKNOWN`
-- [ ] `Monitor: Lineage Refs Missing` remains canonical in `bioetl-control-plane-v1`
+- [ ] `Track Missing Lineage References` remains canonical in `bioetl-control-plane-v1`
 - [ ] `bioetl-dq-v2` uses a handoff note/link instead of duplicating the metric
 - [ ] Justified exact duplicates are present in the query-duplicate allowlist and query-governance integration tests
 

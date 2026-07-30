@@ -492,22 +492,22 @@ def test_provider_circuit_breaker_panels_use_adapter_variable() -> None:
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Track: GLOBAL Audit Write Outcomes",
+            "Compare Global Audit Write Outcomes",
             "[$__interval]",
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Track: GLOBAL Audit Query Outcomes",
+            "Compare Global Audit Query Outcomes",
             "[$__interval]",
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Track: GLOBAL Audit Write Latency p50/p95/p99",
+            "Track Global Audit Write Latency",
             "[$__range]",
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Track: GLOBAL Audit Query Latency p50/p95/p99",
+            "Track Global Audit Query Latency",
             "[$__range]",
         ),
     ],
@@ -542,10 +542,10 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
     [
         ("bioetl-overview-v2.json", "Historical Failures"),
         ("bioetl-overview-v2.json", "Recent Terminal Runs"),
-        ("bioetl-control-plane-v1.json", "Monitor: GLOBAL Control-Plane Read Failures"),
+        ("bioetl-control-plane-v1.json", "Track Global Read Failures"),
         (
             "bioetl-control-plane-v1.json",
-            "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
+            "Track Global Read Latency",
         ),
         ("bioetl-dq-v2.json", "Range · Records Quarantined"),
         ("bioetl-dq-v2.json", "Track: Silver Validation Failures in Range"),
@@ -638,7 +638,7 @@ def test_runtime_tracing_row_orders_log_hygiene_panels() -> None:
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-control-plane-v1.json", "Track: Lineage Fragment Outcomes"),
+        ("bioetl-control-plane-v1.json", "Compare Lineage Persistence Outcomes"),
         ("bioetl-dq-v2.json", "Track: DQ Check Duration (p95)"),
         ("bioetl-dq-v2.json", "Track: Anomalies Detected"),
         ("bioetl-runtime.json", "Track Records by Stage / Interval"),
@@ -667,5 +667,3 @@ def test_adaptive_trend_panels_use_selected_interval(
     assert any("[$__interval]" in expr for expr in expressions), (
         f"Panel '{panel_title}' in {dashboard_file} must use $__interval"
     )
-
-

@@ -22,6 +22,7 @@ Silver использует профиль `pubmed.publication` и провер�
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `pubmed:publication` |
+| Method / endpoint | `GET` · `https://eutils.ncbi.nlm.nih.gov/entrez/eutils` |
 | Resource / tables | `publication` |
 | Filters | `pmid`: IDs from data/input/pubmed.csv column pubmed_id; CLI may override the input CSV |
 | Selected fields | `system` (10 fields); `identifiers` (4 fields); `title` (1 fields); `abstract` (2 fields); `authors` (5 fields); `affiliations` (4 fields); `journal` (7 fields); `year` (1 fields); `dates` (6 fields); `pagination` (6 fields); `citations` (2 fields); `subjects` (5 fields); `funding` (1 fields); `chemicals` (1 fields); `doc_type` (4 fields); `language` (1 fields); `misc` (2 fields) |

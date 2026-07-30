@@ -206,14 +206,14 @@ def test_runtime_telemetry_gap_panel_keeps_readable_first_screen_width() -> None
         if isinstance(panel.get("title"), str)
     }
 
-    panel = root["Metrics Evidence"]
+    panel = root["Monitor Metrics Coverage"]
     grid = panel.get("gridPos", {})
     assert grid["y"] <= 23
     assert grid["w"] >= 4, (
-        "Metrics Evidence must reserve readable width on the first screen"
+        "Monitor Metrics Coverage must reserve readable width on the first screen"
     )
-    assert "Failed Runs" not in root
-    assert "Failed Runs" in all_panels
+    assert "Monitor Monitor Failed Runs" not in root
+    assert "Monitor Monitor Failed Runs" in all_panels
     assert any(
         p.get("type") == "row"
         and "secondary" in str(p.get("title") or "").lower()
@@ -269,11 +269,11 @@ def test_control_plane_row_sequence_matches_operator_flow() -> None:
         )
     ]
     expected_prefix = [
-        (902, "Incident Drilldown: Replay Safety (Checkpoint / Replay)"),
-        (901, "Incident Drilldown: Manifest / Ledger Integrity"),
-        (903, "Incident Drilldown: Global Control-Plane Store Reliability"),
-        (904, "Incident Drilldown: Audit / Lineage Completeness"),
-        (905, "Identity evidence and remaining replay-safety signals"),
+        (902, "Inspect Replay & Checkpoint Evidence"),
+        (901, "Inspect Manifest & Ledger Evidence"),
+        (903, "Inspect Global Store Reliability"),
+        (904, "Inspect Audit & Lineage Evidence"),
+        (905, "Inspect Run Identity Evidence"),
     ]
     assert row_pairs[: len(expected_prefix)] == expected_prefix, (
         f"Control Plane row order/title drifted: {row_pairs}"
@@ -292,9 +292,9 @@ def test_control_plane_first_evidence_panel_stays_close_to_answer_row() -> None:
         for panel in get_dashboard_panels(dashboard)
         if panel.get("title")
     }
-    panel = panels.get("Track: Replay / Resume Blockers in Range")
+    panel = panels.get("Track Replay Blockers")
     assert panel is not None
-    row_panel = panels["Incident Drilldown: Replay Safety (Checkpoint / Replay)"]
+    row_panel = panels["Inspect Replay & Checkpoint Evidence"]
     grid_pos = panel.get("gridPos", {})
     assert grid_pos.get("y") > row_panel.get("gridPos", {}).get("y", 0)
     assert grid_pos.get("w", 0) == 24
@@ -310,9 +310,9 @@ def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
     }
 
     for panel_title in (
-        "Monitor: Manifest / Ledger Integrity",
-        "Inspect: Telemetry Missing",
-        "Primary recovery",
+        "Monitor Manifest & Ledger Failures",
+        "Monitor Telemetry Coverage",
+        "Review Recovery Action",
     ):
         panel = panels.get(panel_title)
         assert panel is not None
@@ -330,7 +330,7 @@ def test_control_plane_terminal_events_table_has_readable_width() -> None:
         for panel in get_dashboard_panels(dashboard)
         if panel.get("title")
     }
-    panel = panels.get("Inspect: Terminal Run Events by Status in Range")
+    panel = panels.get("Review Terminal Run Outcomes")
     assert panel is not None
     grid_pos = panel.get("gridPos", {})
     assert grid_pos.get("w", 0) >= 12
@@ -342,14 +342,12 @@ def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
     row = next(
         panel
         for panel in dashboard.get("panels", [])
-        if panel.get("title") == "Incident Drilldown: Manifest / Ledger Integrity"
+        if panel.get("title") == "Inspect Manifest & Ledger Evidence"
     )
     assert row.get("collapsed") is True
-    child_panels = get_row_child_panels(
-        dashboard, "Incident Drilldown: Manifest / Ledger Integrity"
-    )
+    child_panels = get_row_child_panels(dashboard, "Inspect Manifest & Ledger Evidence")
     panels = {panel.get("title"): panel for panel in child_panels if panel.get("title")}
-    terminal = panels["Inspect: Terminal Run Events by Status in Range"]
+    terminal = panels["Review Terminal Run Outcomes"]
     terminal_grid = terminal.get("gridPos", {})
     assert terminal_grid == {
         "h": 6,
@@ -358,8 +356,8 @@ def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
         "y": row.get("gridPos", {}).get("y", 0) + 1,
     }
     failure_panels = [
-        panels["Monitor: Manifest Write Failures"],
-        panels["Monitor: Ledger Append Failures"],
+        panels["Track Manifest Write Failures"],
+        panels["Track Ledger Append Failures"],
     ]
     assert {panel.get("gridPos", {}).get("x") for panel in failure_panels} == {
         0,
@@ -382,12 +380,11 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
         panel
         for panel in dashboard.get("panels", [])
         if panel.get("type") == "row"
-        and panel.get("title")
-        == "Incident Drilldown: Replay Safety (Checkpoint / Replay)"
+        and panel.get("title") == "Inspect Replay & Checkpoint Evidence"
     )
     assert row_panel.get("collapsed") is True
     child_panels = get_row_child_panels(
-        dashboard, "Incident Drilldown: Replay Safety (Checkpoint / Replay)"
+        dashboard, "Inspect Replay & Checkpoint Evidence"
     )
     panels = {panel.get("id"): panel for panel in child_panels}
 
@@ -427,13 +424,11 @@ def test_control_plane_lineage_top_band_uses_full_row_width() -> None:
         panel
         for panel in dashboard.get("panels", [])
         if panel.get("type") == "row"
-        and panel.get("title") == "Incident Drilldown: Audit / Lineage Completeness"
+        and panel.get("title") == "Inspect Audit & Lineage Evidence"
     )
     panels = {
         panel.get("id"): panel
-        for panel in get_row_child_panels(
-            dashboard, "Incident Drilldown: Audit / Lineage Completeness"
-        )
+        for panel in get_row_child_panels(dashboard, "Inspect Audit & Lineage Evidence")
     }
     panel = panels[122]
     grid_pos = panel.get("gridPos", {})
@@ -477,9 +472,9 @@ def test_runtime_alert_condition_breakdown_panels_exist() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected = {
         "Track Stage Backlog Trend": "bioetl_stage_backlog_records",
-        "Inspect Errors by Stage / Error Code / Range": "bioetl_errors_total",
-        "Track Records by Stage / Run Type / Range": "bioetl_records_processed_total",
-        "Track Pipeline Phase Duration p50/p95/p99": "bioetl_phase_duration_seconds_bucket",
+        "Review Errors by Stage & Code": "bioetl_errors_total",
+        "Compare Records by Stage & Run Type": "bioetl_records_processed_total",
+        "Track Phase Duration": "bioetl_phase_duration_seconds_bucket",
     }
     panels = {
         panel.get("title"): panel
@@ -507,7 +502,7 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
         if panel.get("title")
     }
 
-    reconstruct = panels.get("Monitor: Replay Not Reconstructable")
+    reconstruct = panels.get("Track Unreconstructable Replays")
     assert reconstruct is not None
     reconstruct_expr = "\n".join(
         target.get("expr", "")
@@ -520,7 +515,7 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
 
     drift = panels.get("Replay Drift Events")
     if dashboard_file == "bioetl-control-plane-v1.json":
-        drift = panels.get("Monitor: Replay Drift")
+        drift = panels.get("Track Replay Drift")
     assert drift is not None
     drift_expr = "\n".join(
         target.get("expr", "")
@@ -529,7 +524,7 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
     )
     assert "bioetl_replay_drift_events_total" in drift_expr
 
-    lag = panels.get("Track: Replay Lag Seconds")
+    lag = panels.get("Track Peak Replay Lag")
     assert lag is not None
     lag_expr = "\n".join(
         target.get("expr", "")
@@ -550,8 +545,8 @@ def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
     }
 
     for title in (
-        "Monitor: Replay Safety State",
-        "Monitor: Manifest / Ledger Integrity",
+        "Monitor Replay Safety",
+        "Monitor Manifest & Ledger Failures",
     ):
         panel = panels.get(title)
         assert panel is not None
@@ -588,19 +583,19 @@ def test_control_plane_run_type_noop_panels_disclose_scope_limit() -> None:
     """Panels backed by metric families without run_type must disclose that the selector is a no-op."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     expected_titles = (
-        "Monitor: Checkpoint Incompatibilities",
-        "Monitor: Replay Not Reconstructable",
-        "Monitor: Checkpoint Load Failures",
-        "Monitor: Checkpoint Save Failures",
-        "Track: Checkpoint Compatibility Outcomes",
-        "Track: Checkpoint Save Latency p50/p95/p99",
-        "Monitor: Ledger Append Failures",
-        "Track: Ledger Appends by Event Type / Status",
-        "Monitor: Ledger Append Failure Ratio",
-        "Monitor: Lineage Refs Missing",
-        "Monitor: Lineage Fragment Persistence Failures",
-        "Inspect: Missing Lineage Refs by Layer / Type",
-        "Track: Lineage Fragment Outcomes",
+        "Track Checkpoint Incompatibilities",
+        "Track Unreconstructable Replays",
+        "Track Checkpoint Load Failures",
+        "Track Checkpoint Save Failures",
+        "Compare Checkpoint Outcomes",
+        "Track Checkpoint Save Latency",
+        "Track Ledger Append Failures",
+        "Compare Ledger Appends by Type & Status",
+        "Monitor Ledger Failures (30m)",
+        "Track Missing Lineage References",
+        "Track Lineage Persistence Failures",
+        "Review Missing Lineage by Layer",
+        "Compare Lineage Persistence Outcomes",
     )
     panels = {
         panel.get("title"): panel
@@ -627,10 +622,8 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
     }
 
     expected = {
-        "Inspect: Telemetry Missing": ("bioetl_control_plane_telemetry_missing_5m",),
-        "Inspect: Terminal Run Events by Status in Range": (
-            "bioetl_control_plane_terminal_events_total",
-        ),
+        "Monitor Telemetry Coverage": ("bioetl_control_plane_telemetry_missing_5m",),
+        "Review Terminal Run Outcomes": ("bioetl_control_plane_terminal_events_total",),
     }
     for title, tokens in expected.items():
         panel = panels.get(title)
@@ -643,7 +636,7 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
         for token in tokens:
             assert token in expr
 
-    telemetry = panels["Inspect: Telemetry Missing"]
+    telemetry = panels["Monitor Telemetry Coverage"]
     assert telemetry.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
         "UNKNOWN"
     )
@@ -659,9 +652,9 @@ def test_control_plane_first_screen_normalizes_workflow_pipeline_aliases() -> No
     }
 
     for title in (
-        "Monitor: Replay Safety State",
-        "Monitor: Manifest / Ledger Integrity",
-        "Inspect: Telemetry Missing",
+        "Monitor Replay Safety",
+        "Monitor Manifest & Ledger Failures",
+        "Monitor Telemetry Coverage",
     ):
         panel = panels.get(title)
         assert panel is not None, f"Control Plane dashboard missing {title!r}"
@@ -687,9 +680,9 @@ def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
     }
 
     for title in (
-        "Monitor: Manifest Write Failure Ratio",
-        "Monitor: Ledger Append Failure Ratio",
-        "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
+        "Monitor Manifest Failures (30m)",
+        "Monitor Ledger Failures (30m)",
+        "Monitor Global Read Failures (30m)",
     ):
         panel = panels.get(title)
         assert panel is not None
@@ -698,7 +691,7 @@ def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
             for target in panel.get("targets", [])
             if isinstance(target.get("expr"), str)
         )
-        if title == "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity":
+        if title == "Monitor Global Read Failures (30m)":
             assert "> bool 0.05" in expr
             assert "> bool 0.10" in expr
         else:
@@ -818,7 +811,7 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
 def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
     """Only Runtime/DQ critical panels expose contextual Loki Explore links."""
     dashboard_panels = {
-        "bioetl-runtime.json": "Failed Runs",
+        "bioetl-runtime.json": "Monitor Failed Runs",
         "bioetl-dq-v2.json": "Track Range Evidence: Bronze -> Silver -> Gold",
     }
 

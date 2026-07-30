@@ -253,7 +253,7 @@
 - `bioetl_dq_current_status` intentionally serves the compact `Status` and expanded `Monitor DQ Current Status` panels
 - `bioetl_runtime_current_status_trusted` intentionally serves the compact `Status` and expanded `Runtime Status` panels
 - DQ weighted stat and trend have distinct time semantics: the stat uses a fixed seven-day (`[7d]`) retained snapshot, while the trend uses raw selected-range samples; missing retained samples remain `UNKNOWN`
-- `Monitor: Lineage Refs Missing` canonically belongs to `bioetl-control-plane-v1`
+- `Track Missing Lineage References` canonically belongs to `bioetl-control-plane-v1`
 - `bioetl-dq-v2` uses a textual handoff instead of duplicating the same counter
 
 **Источник:** `design-system.md`, `dashboard-audit-checklist.md`
@@ -355,9 +355,9 @@ L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, globa
 - Нет обязательных panel-level dataLinks в контракте
 
 ### First-screen структура
-- **Tier 1**: trusted `Status`, `Monitor: Replay Safety State`, `Monitor: Checkpoint Freshness Lag (seconds)`, `Monitor: Manifest / Ledger Integrity`, `Inspect: Telemetry Missing`
+- **Tier 1**: trusted `Status`, `Monitor Replay Safety`, `Monitor Checkpoint Age`, `Monitor Manifest & Ledger Failures`, `Monitor Telemetry Coverage`
 - `Status` читает `bioetl_control_plane_current_status_trusted` и показывает `3=INCOMPLETE`, если checkpoint evidence missing/stale или telemetry missing.
-- **Tier 2**: incident rows `Incident Drilldown: Replay Safety (Checkpoint / Replay)`, `Incident Drilldown: Manifest / Ledger Integrity`, `Incident Drilldown: Global Control-Plane Store Reliability`, `Incident Drilldown: Audit / Lineage Completeness`, `Identity evidence and remaining replay-safety signals` collapsed by default
+- **Tier 2**: incident rows `Inspect Replay & Checkpoint Evidence`, `Inspect Manifest & Ledger Evidence`, `Inspect Global Store Reliability`, `Inspect Audit & Lineage Evidence`, `Inspect Run Identity Evidence` collapsed by default
 - **Tier 3**: selected-range evidence ниже
 - **Tier 4**: diagnostics раскрываются явно только для deep/full audit
 
@@ -372,7 +372,7 @@ L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, globa
 - Replay/checkpoint panels route к `checkpoint-debugging.md`
 - Manifest/ledger evidence panels route к `run-manifest-inspection.md`
 - Known Blind Spots и terminal-event evidence ниже fold в collapsed incident rows, не в first-screen trust block
-- `Identity evidence and remaining replay-safety signals` ниже fold использует `/ops/control-plane/identity-evidence` для overview/P1/P2 anchors, typed source/drilldown metadata, identity gaps, checkpoint compare и copy-friendly full values; remaining replay-safety note перечисляет только сигналы вне этого endpoint.
+- `Inspect Run Identity Evidence` ниже fold использует `/ops/control-plane/identity-evidence` для overview/P1/P2 anchors, typed source/drilldown metadata, identity gaps, checkpoint compare и copy-friendly full values; remaining replay-safety note перечисляет только сигналы вне этого endpoint.
 - Starts с answer-first trust cards: replay safety state, checkpoint freshness gap, ledger/manifest consistency, telemetry presence
 
 ### Cross-scope marker contract
@@ -526,7 +526,7 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 - First-screen использует canonical current-status recording rules (`bioetl_dq_current_status`, `bioetl_dq_current_reason`)
 - Range evidence, raw tables, Silver reject breakdowns, logs, traces ниже first-screen
 - `Monitor: Data Quality Score (Volume-weighted)` and `Track: Data Quality Score Trend (Volume-weighted)` have distinct time semantics: fixed seven-day (`[7d]`) retained snapshot versus raw selected-range samples; absence remains `UNKNOWN`
-- `Monitor: Lineage Refs Missing` canonically belongs to `bioetl-control-plane-v1`
+- `Track Missing Lineage References` canonically belongs to `bioetl-control-plane-v1`
 - `bioetl-dq-v2` uses a textual handoff instead of duplicating the same counter
 - Critical panels SHOULD иметь actionable CTA
 - Pipeline-wide 15m snapshot; `$run_type` и stage filters ниже управляют только selected-range evidence

@@ -22,7 +22,8 @@ Silver использует профиль `chembl.publication_term` и пров
 | Аспект | Значение |
 | --- | --- |
 | Source | `derived` · `chembl.publication_term.curated` |
-| Resource / tables | `publication_term` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/document` |
+| Resource / tables | `document` |
 | Filters | `doc_type`: PUBLICATION; `year__gte`: 1950; `year__lte`: 2050; `publication_id`: IDs from data/input/publication.csv column publication_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (5 fields) |
 

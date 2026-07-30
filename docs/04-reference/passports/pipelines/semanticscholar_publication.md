@@ -22,6 +22,7 @@ Silver использует профиль `semanticscholar.publication` и пр
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `semanticscholar:publication` |
+| Method / endpoint | `GET` · `https://api.semanticscholar.org/graph/v1` |
 | Resource / tables | `publication` |
 | Filters | `doi`: IDs from data/input/dois.csv column doi; CLI may override the input CSV |
 | Selected fields | `system` (10 fields); `identifiers` (5 fields); `title` (1 fields); `abstract` (2 fields); `authors` (5 fields); `affiliations` (1 fields); `journal` (3 fields); `year` (1 fields); `dates` (1 fields); `pagination` (5 fields); `citations` (6 fields); `subjects` (6 fields); `doc_type` (4 fields); `open_access` (3 fields) |

@@ -22,7 +22,8 @@ Silver использует профиль `chembl.assay_parameters` и пров
 | Аспект | Значение |
 | --- | --- |
 | Source | `derived` · `chembl:assay_parameters` |
-| Resource / tables | `assay_parameters` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/assay` |
+| Resource / tables | `assay` |
 | Filters | `assay_param_id`: IDs from data/input/assay_parameters.csv column assay_param_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (22 fields) |
 

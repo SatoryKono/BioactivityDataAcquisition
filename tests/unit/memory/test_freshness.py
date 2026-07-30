@@ -45,12 +45,8 @@ def test_current_clean_record_is_usable() -> None:
 
 
 def test_commit_branch_and_dirty_checkout_are_stale() -> None:
-    commit = evaluate_freshness(
-        _envelope(), _scope(git_commit="b" * 40), dirty=False
-    )
-    branch = evaluate_freshness(
-        _envelope(), _scope(branch="feature"), dirty=False
-    )
+    commit = evaluate_freshness(_envelope(), _scope(git_commit="b" * 40), dirty=False)
+    branch = evaluate_freshness(_envelope(), _scope(branch="feature"), dirty=False)
     dirty = evaluate_freshness(_envelope(), _scope(), dirty=True)
     assert commit.reasons == ("commit-mismatch",)
     assert branch.reasons == ("branch-mismatch",)
@@ -60,9 +56,7 @@ def test_commit_branch_and_dirty_checkout_are_stale() -> None:
 
 def test_wrong_repository_or_worktree_is_rejected() -> None:
     repo = evaluate_freshness(_envelope(), _scope(repo_id="fork"), dirty=False)
-    tree = evaluate_freshness(
-        _envelope(), _scope(worktree_id="tree-b"), dirty=False
-    )
+    tree = evaluate_freshness(_envelope(), _scope(worktree_id="tree-b"), dirty=False)
     assert repo.status is FreshnessStatus.REJECTED
     assert tree.status is FreshnessStatus.REJECTED
 

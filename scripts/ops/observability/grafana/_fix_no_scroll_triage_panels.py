@@ -36,14 +36,14 @@ TRUST_PROVENANCE = (
     "<code>$workflow</code>/<code>$pipeline</code>/<code>$run_type</code>/"
     "run <code>$run_id</code><br>"
     "<strong>UNKNOWN</strong> = evidence incomplete — not OK. "
-    "Open Primary recovery or Run Explorer."
+    "Open Review First Recovery Action or Run Explorer."
     "</div>"
 )
 
-# Single line for h=2 Primary recovery (title + one content line).
+# Single line for h=2 Review First Recovery Action (title + one content line).
 TRUST_PRIMARY = (
     '<div style="padding:2px 8px;line-height:1.25;font-size:12px;overflow:hidden">'
-    "<strong>Primary recovery</strong>: "
+    "<strong>Review First Recovery Action</strong>: "
     "1) Status + Replay Safety/Checkpoint · "
     "2) UNKNOWN/INCOMPLETE → verify scrape · "
     "3) Open blockers · "
@@ -79,7 +79,7 @@ def fix_trust() -> None:
             panel["options"] = opts
             # Do not change gridPos
             print("Trust Provenance compact, h=", (panel.get("gridPos") or {}).get("h"))
-        if title == "Primary recovery":
+        if title == "Review First Recovery Action":
             opts = dict(panel.get("options") or {})
             links = opts.get("dataLinks")
             opts["mode"] = "html"
@@ -88,7 +88,7 @@ def fix_trust() -> None:
                 opts["dataLinks"] = links
             panel["options"] = opts
             print(
-                "Trust Primary recovery compact, h=",
+                "Trust Review First Recovery Action compact, h=",
                 (panel.get("gridPos") or {}).get("h"),
                 "links",
                 len(links or []),

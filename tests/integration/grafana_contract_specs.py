@@ -14,21 +14,21 @@ from __future__ import annotations
 
 CONTROL_PLANE_GLOBAL_SCOPE_EXPECTATIONS = {
     "bioetl-control-plane-v1.json": (
-        "Monitor: GLOBAL Control-Plane Read Failures",
-        "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
-        "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
-        "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
-        "Monitor: GLOBAL Checkpoint Operator Failures",
-        "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
+        "Track Global Read Failures",
+        "Monitor Global Read Failure Severity [30m]",
+        "Track Global Read Latency",
+        "Compare Global Reads by Store",
+        "Track Global Checkpoint Admin Failures",
+        "Track Global Checkpoint Admin Latency",
     ),
 }
 
 CONTROL_PLANE_GLOBAL_READ_PANEL_TITLES = {
     "bioetl-control-plane-v1.json": (
-        "Monitor: GLOBAL Control-Plane Read Failures",
-        "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
-        "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
-        "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
+        "Track Global Read Failures",
+        "Monitor Global Read Failure Severity [30m]",
+        "Track Global Read Latency",
+        "Compare Global Reads by Store",
     ),
 }
 
@@ -59,21 +59,21 @@ SUMMARY_ZERO_FALLBACK_EXPECTATIONS = {
         "Monitor: Gold Strict Validation Failures": "or vector(0)",
     },
     "bioetl-control-plane-v1.json": {
-        "Monitor: Manifest Write Failures": "or vector(0)",
-        "Monitor: Ledger Append Failures": "or vector(0)",
-        "Monitor: Checkpoint Incompatibilities": "or vector(0)",
-        "Monitor: GLOBAL Control-Plane Read Failures": "or vector(0)",
-        "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity": "or vector(0)",
-        "Monitor: Checkpoint Load Failures": "or vector(0)",
-        "Monitor: Checkpoint Save Failures": "or vector(0)",
-        "Monitor: GLOBAL Checkpoint Operator Failures": "or vector(0)",
-        "Monitor: Replay Not Reconstructable": "or vector(0)",
-        "Monitor: Replay Drift": "or vector(0)",
-        "Track: Replay / Resume Blockers in Range": "or vector(0)",
-        "Track: GLOBAL Audit Write Outcomes": "or vector(0)",
-        "Track: GLOBAL Audit Query Outcomes": "or vector(0)",
-        "Monitor: Lineage Fragment Persistence Failures": "or vector(0)",
-        "Monitor: Lineage Refs Missing": "or vector(0)",
+        "Track Manifest Write Failures": "or vector(0)",
+        "Track Ledger Append Failures": "or vector(0)",
+        "Track Checkpoint Incompatibilities": "or vector(0)",
+        "Track Global Read Failures": "or vector(0)",
+        "Monitor Global Read Failure Severity [30m]": "or vector(0)",
+        "Track Checkpoint Load Failures": "or vector(0)",
+        "Track Checkpoint Save Failures": "or vector(0)",
+        "Track Global Checkpoint Admin Failures": "or vector(0)",
+        "Track Unreconstructable Replays": "or vector(0)",
+        "Track Replay Drift": "or vector(0)",
+        "Track Replay Blockers in Range": "or vector(0)",
+        "Compare Global Audit Write Outcomes": "or vector(0)",
+        "Compare Global Audit Query Outcomes": "or vector(0)",
+        "Track Lineage Persistence Failures": "or vector(0)",
+        "Track Missing Lineage References": "or vector(0)",
     },
     # retired
     "bioetl-workflow-overview.json_RETIRED": {

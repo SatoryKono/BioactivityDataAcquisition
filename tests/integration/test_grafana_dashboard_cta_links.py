@@ -52,7 +52,7 @@ def test_runtime_incident_panels_do_not_duplicate_control_plane_dashboard_link()
     """Runtime incident panels must not duplicate the top-level Control Plane link."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     panel_titles = {
-        "Inspect Control-plane Alert Conditions",
+        "Inspect Control Plane Alert Conditions",
         "Monitor No-Records Runs",
     }
 
@@ -150,7 +150,7 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
             "Open DQ Failure Runbook",
             "docs/05-operations/runbooks/dq-failure-investigation.md",
         ),
-        "Inspect Control-plane Alert Conditions": (
+        "Inspect Control Plane Alert Conditions": (
             "Open Run Manifest Runbook",
             "docs/05-operations/runbooks/run-manifest-inspection.md",
         ),
@@ -158,11 +158,11 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
             "Open Provider Incident Runbook",
             "docs/05-operations/runbooks/incident-response.md",
         ),
-        "Inspect GLOBAL Provider Alert Conditions": (
+        "Inspect Global Provider Alert Conditions": (
             "Open Provider Incident Runbook",
             "docs/05-operations/runbooks/incident-response.md",
         ),
-        "Inspect Freshness Lagged Entities >24h": (
+        "Inspect Entities Stale Over 24h": (
             "Open DQ Freshness Runbook",
             "docs/05-operations/runbooks/dq-failure-investigation.md",
         ),
@@ -216,11 +216,11 @@ def test_runtime_alert_condition_panels_expose_dashboard_handoffs() -> None:
             "Open 3. Provider Health",
             "bioetl-provider-health-v2",
         ),
-        "Inspect GLOBAL Provider Alert Conditions": (
+        "Inspect Global Provider Alert Conditions": (
             "Open 3. Provider Health",
             "bioetl-provider-health-v2",
         ),
-        "Inspect Freshness Lagged Entities >24h": (
+        "Inspect Entities Stale Over 24h": (
             "Open 4. Data Quality",
             "bioetl-dq-v2",
         ),
@@ -345,35 +345,35 @@ def test_control_plane_replay_and_manifest_panels_route_to_expected_runbooks() -
     """Control Plane replay-family and manifest-family panels must use stable runbook routing."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     expectations = {
-        "Monitor: Replay Safety State": (
+        "Monitor Replay Safety": (
             "Open Checkpoint Debugging Runbook",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
-        "Monitor: Manifest / Ledger Integrity": (
+        "Monitor Manifest & Ledger Failures": (
             "Open Run Manifest Inspection",
             "docs/05-operations/runbooks/run-manifest-inspection.md",
         ),
-        "Track: Replay / Resume Blockers in Range": (
+        "Track Replay Blockers": (
             "Open Checkpoint Debugging Runbook",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
-        "Monitor: Replay Not Reconstructable": (
+        "Track Unreconstructable Replays": (
             "Open Checkpoint Debugging",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
-        "Monitor: Replay Drift": (
+        "Track Replay Drift": (
             "Open Checkpoint Debugging",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
-        "Track: Replay Lag Seconds": (
+        "Track Peak Replay Lag": (
             "Open Checkpoint Debugging",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
-        "Track: Replay Drift by Type": (
+        "Track Replay Drift by Type": (
             "Checkpoint Debugging",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
-        "Track: Replay Lag Trend": (
+        "Track Replay Lag": (
             "Checkpoint Debugging",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
@@ -472,8 +472,8 @@ def test_control_plane_first_screen_stat_panels_do_not_duplicate_runbook_ctas() 
     """First-screen trust KPI panels should expose one clear runbook CTA each."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     expected_titles = {
-        "Monitor: Replay Safety State",
-        "Monitor: Manifest / Ledger Integrity",
+        "Monitor Replay Safety",
+        "Monitor Manifest & Ledger Failures",
     }
 
     for panel_title in expected_titles:
@@ -827,8 +827,8 @@ def test_workflow_range_cards_do_not_ship_panel_level_runbook_links() -> None:
     """Workflow selected-range cards should hand off via First Action instead."""
     dashboard = load_dashboard(_require_dashboard("bioetl-workflow-overview.json"))
     expected_titles = {
-        "Failed Workflow Runs / Range",
-        "Failed Pipeline Steps / Range",
+        "Track Failed Workflow Runs",
+        "Track Failed Workflow Steps",
         "Failed Transform Steps / Range",
         "Skipped Step Events / Range",
     }

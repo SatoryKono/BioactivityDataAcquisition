@@ -482,9 +482,7 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
         "screenshots",
     ]
     assert all(check.status in {"ok", "not_applicable"} for check in checks)
-    quarantine = next(
-        check for check in checks if check.name == "quarantine-explorer"
-    )
+    quarantine = next(check for check in checks if check.name == "quarantine-explorer")
     assert quarantine.status == "not_applicable"
 
 

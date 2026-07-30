@@ -80,6 +80,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the internal manual-sidecar helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
     },
+    "scripts/docs/passports/markdown_renderer.py": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-09-30",
+      "next_step": "Either integrate this extracted renderer behind the canonical passport projector or remove it if the projector remains the rendering source of truth; do not expose it as another standalone script surface."
+    },
     "scripts/docs/passports/projector.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

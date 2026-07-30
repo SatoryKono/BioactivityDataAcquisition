@@ -22,6 +22,7 @@ Silver использует профиль `chembl.cell_line` и проверя�
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `chembl:cell_line` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/cell_line` |
 | Resource / tables | `cell_line` |
 | Filters | `cell_chembl_id`: IDs from data/input/cell.csv column cell_chembl_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (17 fields) |

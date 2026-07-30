@@ -146,8 +146,7 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
         REPO_STRUCTURE_CATALOG.read_text(encoding="utf-8")
     )
     approved_tooling_roots = {
-        row["path"]
-        for row in structure_catalog["root_tooling_roots"]["approved_roots"]
+        row["path"] for row in structure_catalog["root_tooling_roots"]["approved_roots"]
     }
 
     assert len(root_files) <= payload["outcomes"]["5847"]["tracked_root_files_after"]

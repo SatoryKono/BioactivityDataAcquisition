@@ -160,7 +160,7 @@ def _layout_run_explorer_next_actions(
         "1. No selection -> pick from **Recent pipeline runs**.\n"
         "2. Selected -> verify **ID** + **Processed Records** accounting invariant.\n"
         "3. Expand **Selected run detail** for funnel/reasons/artifacts.\n"
-        "4. Resume/replay safety -> Trust **Primary recovery** (not this board).\n",
+        "4. Resume/replay safety -> Trust **Review First Recovery Action** (not this board).\n",
     )
     set_desc(
         next_actions,
@@ -407,7 +407,7 @@ def apply_incident() -> None:
         "2. Open top row in **Ranked Active Suspects** (domain handoff).\n"
         "3. Confirm **Evidence timeline**: Current Alerts + Alert State History "
         "(same chain).\n"
-        "4. Exact identity -> **Run Explorer**; resume -> Trust **Primary recovery**.\n"
+        "4. Exact identity -> **Run Explorer**; resume -> Trust **Review First Recovery Action**.\n"
         "No persistent incident write-path in this workspace.\n",
     )
     set_desc(by_id(inc, 2001), "DSA-07 decision rail. Read-only.")
@@ -487,7 +487,7 @@ def apply_trust_dq() -> None:
         by_id(cp, 9401),
         "Replay/resume verdict (state x confidence x basis x next_action). "
         "INCOMPLETE when required evidence missing (telemetry/checkpoint). "
-        "next_action: Primary recovery rail. Color is secondary to labels.",
+        "next_action: Review First Recovery Action rail. Color is secondary to labels.",
     )
     rc = by_id(cp, 9412)
     if rc is not None:
@@ -513,7 +513,7 @@ def apply_trust_dq() -> None:
         "1. Read **Status** + **Now · DQ Threshold/Reasons** (not range zeros).\n"
         "2. If blocked/quarantine/rejects > 0, use accounting with denominators "
         "(expand Run/Range lanes).\n"
-        "3. Selected run -> **Run Explorer** hub; resume -> Trust **Primary recovery**.\n"
+        "3. Selected run -> **Run Explorer** hub; resume -> Trust **Review First Recovery Action**.\n"
         "4. Range cards are SLA/freshness context only — not peer severity.\n",
     )
     rc = by_id(dq, 9405)

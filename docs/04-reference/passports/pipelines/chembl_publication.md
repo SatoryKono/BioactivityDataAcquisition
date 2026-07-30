@@ -22,7 +22,8 @@ Silver использует профиль `chembl.publication` и провер�
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `chembl.publication.curated` |
-| Resource / tables | `publication` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/document` |
+| Resource / tables | `document` |
 | Filters | `doc_type`: PUBLICATION; `year__gte`: 1950; `year__lte`: 2050 |
 | Selected fields | `system` (10 fields); `identifiers` (7 fields); `title` (1 fields); `abstract` (1 fields); `authors` (1 fields); `journal` (1 fields); `year` (1 fields); `pagination` (4 fields); `doc_type` (5 fields); `open_access` (2 fields); `provider_ids` (3 fields) |
 

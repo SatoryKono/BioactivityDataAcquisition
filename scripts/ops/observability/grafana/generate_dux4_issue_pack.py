@@ -467,7 +467,7 @@ Replay Safety / Integrity can show OK while overall INCOMPLETE and blind spots l
 - [ ] Coverage-gated mappings: OK only WITHIN OBSERVED COVERAGE; else PARTIAL
 - [ ] Blind spots force reduced confidence on Safety chips
 - [ ] Red-zero purge on expected empty accounting
-- [ ] Keep Primary recovery CTA contract
+- [ ] Keep Review First Recovery Action CTA contract
 
 ## Depends on
 

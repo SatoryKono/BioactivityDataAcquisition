@@ -22,6 +22,7 @@ Join keys, cardinality и source tables берутся из composite configurat
 | Аспект | Значение |
 | --- | --- |
 | Source | `composite` · `chembl_molecule` |
+| Method / endpoint | — · — |
 | Resource / tables | `silver/chembl/molecule`, `silver/pubchem/compound` |
 | Filters | `pubchem_compound`: inchi_key IS NOT NULL |
 

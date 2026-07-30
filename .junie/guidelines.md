@@ -1,0 +1,141 @@
+# BioETL AI Runtime Entry Point — JetBrains Junie
+
+This file is the JetBrains Junie root operating contract for the BioETL
+repository. It is the Junie-native equivalent of `AGENTS.md` and MUST stay in
+lock-step with it. `.junie/**` and `.codex/**` are **equal-peer** tracked AI
+runtime trees; runtime behavior changes MUST be synchronized in both
+directions.
+
+## Canonical Precedence
+
+For AI runtime behavior and workflow conflicts, use this priority:
+
+1. active runtime source for the current agent or skill — equal peers:
+   - `.codex/agents/CODEX-RUNTIME.md`
+   - `.junie/agents/JUNIE-RUNTIME.md`
+   - a matching tracked `.gemini/**` runtime surface only when that tree exists
+     in the current checkout and is verified in the same change
+1. runtime profiles and skills in the matching runtime tree
+   (`.codex/agents/py-*.md`, `.codex/skills/**`, `.junie/agents/py-*.md`,
+   `.junie/skills/**`)
+1. `docs/00-project/NORMATIVE_SOURCES.md` (normative stack index)
+1. `docs/00-project/RULES.md`
+1. `docs/01-requirements/REQUIREMENTS.md`
+1. accepted ADRs in `docs/02-architecture/decisions/`
+1. docs mirrors and helper AI docs in `docs/00-project/ai/**` for navigation
+   and guidance only
+
+Docs mirrors MUST NOT redefine runtime behavior on their own.
+
+`AGENTS.md` remains the repository-wide entry point. `.junie/guidelines.md`
+does not diverge from it; any change to Canonical Precedence, Required AI
+Context, Post-Change Validation, or Guardrails MUST be applied to both files.
+
+## Required AI Context
+
+Before planning, auditing, or editing:
+
+1. Read `docs/00-project/NORMATIVE_SOURCES.md`.
+1. Read `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`.
+1. Read `docs/00-project/ai/memory/agent-memory.md`.
+1. Read the relevant `docs/00-project/ai/memory/memory-py-*.md` file when a
+   role-specific memory sheet exists.
+1. Use the canonical memory workflow from `src/memory/DAILY_WORKFLOW.md`
+   through `python -m memory.tooling.workflow pre-task ...` and
+   `python -m memory.tooling.workflow post-task ...`.
+
+## Response Language
+
+- By default, answer the user in Russian when the user writes in Russian.
+- Keep code, commands, file paths, identifiers, API field names, and other
+  technical literals in their valid original form.
+- Switch away from Russian only when the user explicitly requests another
+  language.
+
+## Post-Change Validation
+
+For any write-capable task, follow
+`docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`.
+
+Minimum expectation:
+
+1. Re-scan impacted code/config/doc/runtime surfaces before finalizing.
+1. Use repo search plus memory/evidence anchors to find related tests, docs,
+   contracts, configs, and workflows.
+1. Edit runtime source first, then sync docs mirrors when behavior or
+   contributor guidance changed.
+1. **Runtime mirror parity:** after changes under `.codex/agents/**`,
+   `.codex/skills/**`, `.junie/agents/**`, or `.junie/skills/**`, run
+   `bash scripts/ai/junie/check_junie_mirror.sh --check` and report the
+   result. Divergences MUST be resolved before submit (typically via
+   `--sync` from Codex-side changes).
+1. After changes under `src/bioetl/**/*.py`, refresh
+   `reports/quality/module-coverage-inventory.json` field `source_tree_sha256`
+   via `python _refresh_module_coverage_inventory.py` and run the architecture
+   hash guard when feasible.
+1. Report checks run, skipped checks, and mirror-sync status explicitly.
+
+## Guardrails
+
+- **Root scratch ban (RH5):** do not create root-level `_tmp_*.py`, `/_cr_*.py`,
+  `/_publish_*.py`, or ad-hoc `test_*.py`. Prefer `scripts/**` or `reports/**`.
+  Tracked root must stay ≡ `.github/root-allowlist.txt` (37 files). See
+  `docs/00-project/governance/root-local-clutter-cleanup.md`.
+- BioETL remains local-only by default; do not introduce Docker, Redis, or
+  external orchestration requirements unless the task explicitly requires them.
+- `.codex/**` is the canonical Codex runtime source.
+- `.junie/**` is the canonical JetBrains Junie runtime source (equal peer to
+  `.codex/**`). Tracked subtrees: `.junie/guidelines.md`, `.junie/agents/**`,
+  `.junie/skills/**`, `.junie/plans/**`. Machine-local subtrees
+  (`.junie/history/`, `.junie/state/`, `.junie/cache/`) MUST remain untracked.
+- `.gemini/settings.json` may exist as a machine-local Gemini config surface,
+  but the current `main` checkout does not contain a tracked Gemini
+  `agents/` or `skills/` runtime tree.
+- Treat `docs/00-project/ai/**` Gemini references as mirrors or historical
+  guidance unless a future task adds and verifies tracked `.gemini/agents/**`
+  or `.gemini/skills/**` surfaces on `main`.
+- `.claude/**` is not an active runtime source for Codex/Junie/Gemini behavior
+  in this change program and is treated as unavailable until a local checkout
+  proves otherwise.
+- `docs/00-project/ai/memory/mcp-memory.json` and
+  `docs/00-project/ai/memory/gemini-memory.json` are machine-readable memory
+  artifacts, not human source of truth.
+- **УВЕЛИЧИВАТЬ бюджеты тех. долга ЗАПРЕЩЕНО** — технический долг может только
+  уменьшаться или оставаться неизменным, увеличение бюджетов запрещено.
+
+## Dashboard Skill Routing
+
+- Monitoring/Grafana is **optional** (ADR-010). Do **not** start
+  `docker-compose.monitoring.yml` unless the user explicitly requests
+  dashboard/render work. Default Docker surface is **main only** (health on
+  `:8000`). Loki, Tempo, and Quarantine Explorer UI were removed.
+- For BioETL Grafana screenshot refresh, render preflight, live reviewed panel
+  audit, or render-blocker diagnosis work, agents **SHOULD** use the local
+  skill `.junie/skills/grafana-dashboard-render/` (mirror of
+  `.codex/skills/grafana-dashboard-render/`).
+- For edits to shipped dashboard JSON, queries, variables, navigation, or
+  operator-facing dashboard UX, agents **SHOULD** use the local skill
+  `.junie/skills/grafana-dashboard-extension/` (mirror of
+  `.codex/skills/grafana-dashboard-extension/`).
+
+## Related Files
+
+- `AGENTS.md` (repository-wide equal-peer entry point)
+- `.junie/agents/JUNIE-RUNTIME.md`
+- `.codex/agents/CODEX-RUNTIME.md`
+- `docs/00-project/NORMATIVE_SOURCES.md`
+- `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+- `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`
+- `scripts/ai/junie/check_junie_mirror.sh`
+- `scripts/ai/junie/junie-mirror-contract.json`
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или
+  machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite,
+  or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и
+  сначала запросить явное разрешение пользователя.

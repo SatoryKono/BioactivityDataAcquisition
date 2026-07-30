@@ -70,10 +70,7 @@ class HandoffRecord:
             "objective": self.objective,
             "constraints": list(self.constraints),
             "evidence_digests": list(self.evidence_digests),
-            "context": {
-                key: list(self.context[key])
-                for key in sorted(self.context)
-            },
+            "context": {key: list(self.context[key]) for key in sorted(self.context)},
         }
 
     def to_bounded_json(self, *, max_bytes: int = DEFAULT_MAX_HANDOFF_BYTES) -> str:

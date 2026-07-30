@@ -18,7 +18,7 @@ pytestmark = pytest.mark.integration
     [
         (
             "bioetl-control-plane-v1.json",
-            "Track: Checkpoint Compatibility Outcomes",
+            "Compare Checkpoint Outcomes",
             'label_replace(vector(0), "disposition", "no_events", "", "")',
         ),
     ],
