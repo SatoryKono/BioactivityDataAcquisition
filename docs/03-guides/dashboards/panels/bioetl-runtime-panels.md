@@ -17,25 +17,25 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 - **Purpose:** Explain the dashboard navigation and escalation flow.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 2. Inspect Scope & Evidence
+### 2. Understand Pipeline Scope
 - **Type:** Text
 - **Purpose:** Show run ID, manifest ID, and replay provenance anchors.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 3. Monitor Pipeline Health
+### 3. Monitor Pipeline Status
 - **Type:** Stat
 - **Purpose:** Evidence-aware runtime severity: `0=OK`, `1=WARN`, `2=CRIT`,
   `3=INCOMPLETE`, `null=UNKNOWN`. A scrape/rule trust gap forces
   `INCOMPLETE` before zero counters may be trusted.
 - **Data sources:** `bioetl_runtime_current_status_trusted`
 
-### 4. Review Run Identity
+### 4. Inspect Pipeline Identity
 - **Type:** Table
 - **Purpose:** Show run ID, pipeline, run type, and timestamp for selected scope.
 - **Data sources:** BioETL Ops HTTP control-plane identity endpoint
   `/ops/control-plane/identity-table`; this is not a Prometheus panel.
 
-### 5. Review Processed Records
+### 5. Inspect Processed Records
 - **Type:** Table
 - **Purpose:** Show records processed by stage for selected runs.
 - **Data sources:** BioETL Ops HTTP
@@ -79,7 +79,7 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 - **Purpose:** Identify the selected-range stage with worst lag; `0s` is neutral range evidence, not an override of telemetry trust.
 - **Data sources:** `bioetl_stage_lag_seconds`
 
-### 13. Review First Action
+### 13. Start Pipeline Triage
 - **Type:** Text
 - **Purpose:** Guide operator to next triage action.
 - **Data sources:** Dashboard variables and operator copy.
