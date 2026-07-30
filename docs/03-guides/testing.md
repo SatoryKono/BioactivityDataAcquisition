@@ -212,6 +212,15 @@ VCR-backed integration/e2e runs. It reports exact unresolved cassette paths,
 flags replay-critical Git LFS pointers before pytest setup, performs cheap VCR
 metadata-catalog and sanitizer checks, and uses `git lfs pull` as the local
 remediation path.
+Refresh the committed test-governance artifacts after changing test sources:
+
+```bash
+python -m scripts.engineering.qa.refresh_test_governance_baseline
+```
+
+The entry point is
+`scripts/engineering/qa/refresh_test_governance_baseline.py`.
+
 `report_test_governance_audit --check` enforces the current ratcheting
 budgets for assert-less candidates, duplicate test names, compatibility/legacy
 surface, marker/path drift, and deterministic-time/UUID call sites tracked in
