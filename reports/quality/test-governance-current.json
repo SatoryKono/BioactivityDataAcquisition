@@ -1288,9 +1288,9 @@
     "scope_file_counts": {
       "fixture": 25,
       "golden": 30,
-      "vcr": 396
+      "vcr": 394
     },
-    "total_files": 451,
+    "total_files": 449,
     "tracked_extensions": [
       ".json",
       ".yaml",
@@ -2286,9 +2286,9 @@
       "scope_file_counts": {
         "fixture": 25,
         "golden": 30,
-        "vcr": 396
+        "vcr": 394
       },
-      "total_files": 451,
+      "total_files": 449,
       "tracked_extensions": [
         ".json",
         ".yaml",
@@ -2334,7 +2334,6 @@
         "tests/unit/"
       ],
       "top_level_directories_including_pycache": [
-        "tests/__pycache__/",
         "tests/architecture/",
         "tests/benchmarks/",
         "tests/contract/",
@@ -2352,16 +2351,16 @@
         "tests/unit/"
       ],
       "top_level_directory_count": 15,
-      "top_level_directory_count_including_pycache": 16
+      "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2162,
-    "total_test_functions": 23290,
+    "total_test_functions": 23292,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "b360c5b78fc6dfa87eeccde54760f8eb5d799c85fbf1ea8e034e840ff1b52800",
+  "source_tree_sha256": "388c2cb0a6ad897b000639d93ad3878cfb1225f1229e2b00c6844b80cd9e7a42",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 106,
@@ -2401,7 +2400,6 @@
       "tests/unit/"
     ],
     "top_level_directories_including_pycache": [
-      "tests/__pycache__/",
       "tests/architecture/",
       "tests/benchmarks/",
       "tests/contract/",
@@ -2419,11 +2417,11 @@
       "tests/unit/"
     ],
     "top_level_directory_count": 15,
-    "top_level_directory_count_including_pycache": 16
+    "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2162,
-  "total_test_functions": 23290,
+  "total_test_functions": 23292,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

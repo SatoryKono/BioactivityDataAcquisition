@@ -26,9 +26,6 @@ policy:
       owner_tests:
         - tests/e2e/test_full_pipeline_chain_e2e.py
       removal_condition: Re-record target→activity chain under 10 MiB
-    - path: tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load.yaml
-      owner_tests: []
-      removal_condition: Orphan or re-record under integration matrix; no test hits at audit time
     - path: tests/fixtures/vcr/chembl/TestChemblTargetComponentPipeline.test_chembl_target_component_happy_path.yaml
       owner_tests:
         - tests/e2e/test_pipeline_matrix_e2e.py

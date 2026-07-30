@@ -4946,6 +4946,90 @@
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
+      "lifecycle": "active_draft",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": ".github/ISSUES/TEST-SYS-11-Nightly-Replay-Checksum-Path-Normalization.md",
+      "recommended_action": "archive-after-github-state-check",
+      "root_doc_kind": null,
+      "section": ".github",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "active_draft",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": ".github/ISSUES/TEST-SYS-12-Cache-CLI-Integration-Registry-Bootstrap.md",
+      "recommended_action": "archive-after-github-state-check",
+      "root_doc_kind": null,
+      "section": ".github",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "active_draft",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": ".github/ISSUES/TEST-SYS-13-Refresh-Test-Governance-Source-Hash.md",
+      "recommended_action": "archive-after-github-state-check",
+      "root_doc_kind": null,
+      "section": ".github",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
       "lifecycle": "issue_pack",
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -69277,7 +69361,7 @@
   "summary": {
     "by_lifecycle": {
       "active_backlog": 1,
-      "active_draft": 261,
+      "active_draft": 264,
       "active_quality_baseline": 24,
       "closeout_evidence": 39,
       "docs_reports_curated_entrypoint": 2,
@@ -69296,14 +69380,14 @@
       "working_report": 72
     },
     "by_recommended_action": {
-      "archive-after-github-state-check": 309,
+      "archive-after-github-state-check": 312,
       "archive-after-migration": 106,
       "generate-automatically": 878,
       "keep": 1150,
       "reconcile-with-github-state": 4
     },
     "by_section": {
-      ".github": 321,
+      ".github": 324,
       "00-project": 294,
       "01-requirements": 3,
       "02-architecture": 903,
@@ -69342,18 +69426,18 @@
       "Archived": 130,
       "Canonical": 73,
       "Generated": 878,
-      "Working": 482
+      "Working": 485
     },
     "by_surface_family": {
       "active": 884,
       "archive": 130,
       "canonical": 73,
       "generated": 878,
-      "working": 482
+      "working": 485
     },
     "by_tracking_state": {
       "ignored_local": 55,
-      "tracked": 2392
+      "tracked": 2395
     },
     "docs_reports_local_count": 86,
     "duplicate_group_count": 2,
@@ -69361,7 +69445,7 @@
     "generated_without_route_count": 217,
     "generated_without_route_or_exception_count": 0,
     "github_issue_lifecycle_counts": {
-      "active_draft": 261,
+      "active_draft": 264,
       "guide": 4,
       "index": 4,
       "issue_pack": 48,
@@ -69369,8 +69453,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 2447,
+    "total_doc_like": 2450,
     "total_doc_like_ignored_local": 55,
-    "total_doc_like_tracked": 2392
+    "total_doc_like_tracked": 2395
   }
 }

@@ -3,12 +3,12 @@
   "catalog_kind": "vcr_metadata_catalog",
   "vcr_root": "tests/fixtures/vcr",
   "totals": {
-    "cassette_count": 198,
-    "metadata_sidecar_count": 198,
+    "cassette_count": 197,
+    "metadata_sidecar_count": 197,
     "provider_count": 8,
     "duplicate_scenario_stem_count": 0,
     "direct_reachable_cassette_count": 128,
-    "generated_reachable_cassette_count": 70,
+    "generated_reachable_cassette_count": 69,
     "metadata_review_required_cassette_count": 0,
     "unowned_cassette_count": 0
   },
@@ -20,8 +20,8 @@
   },
   "providers": {
     "chembl": {
-      "cassette_count": 52,
-      "metadata_sidecar_count": 52,
+      "cassette_count": 51,
+      "metadata_sidecar_count": 51,
       "without_metadata_count": 0,
       "metadata_coverage_percent": 100.0
     },
@@ -679,19 +679,6 @@
       "reachability_owner_paths": [
         "tests/e2e/test_pipeline_matrix_e2e.py",
         "tests/integration/pipelines/test_chembl_compound_record.py"
-      ]
-    },
-    {
-      "provider": "chembl",
-      "scenario_stem": "TestChEMBLIntegration.test_chembl_extract_transform_load",
-      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "generated_reference",
-      "reachability_owner_paths": [
-        "tests/e2e/test_full_pipeline.py"
       ]
     },
     {
@@ -2085,6 +2072,7 @@
         "tests/unit/application/core/test_idmapping_data_source.py",
         "tests/unit/composition/factories/storage/test_health_mixin.py",
         "tests/unit/composition/test_observability_contract.py",
+        "tests/unit/domain/ports/test_health_check_result_branches.py",
         "tests/unit/domain/test_events.py",
         "tests/unit/infrastructure/adapters/chembl/test_chembl_client.py",
         "tests/unit/infrastructure/adapters/crossref/test_crossref_client.py",
