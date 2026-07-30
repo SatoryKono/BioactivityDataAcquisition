@@ -5,8 +5,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -260,15 +262,18 @@ def build_current_audit_semantic_summary(
         "bioetl.domain.composite.config",
         "bioetl.application.composite.merger",
     }
-    retained_entrypoints = [
-        {
-            "module": row["module_name"],
-            "src_importers": row["src_importer_count"],
-            "test_importers": row["test_importer_count"],
-        }
-        for row in compatibility.get("retained_entrypoints", [])
-        if row.get("module_name") in highlighted_modules
-    ]
+    retained_entrypoints = []
+    for row in compatibility.get("retained_entrypoints", []):
+        if not isinstance(row, dict):
+            raise ValueError("semantic audit retained_entrypoints items must be mappings")
+        if row.get("module_name") in highlighted_modules:
+            retained_entrypoints.append(
+                {
+                    "module": row["module_name"],
+                    "src_importers": row["src_importer_count"],
+                    "test_importers": row["test_importer_count"],
+                }
+            )
     return {
         "audit_id": current.audit_id,
         "audited_commit_sha": current.audited_commit_sha,
@@ -354,7 +359,9 @@ def render_current_technical_debt_audit(
         f"**{compatibility['twin_pairs']}**.\n"
         f"1. Layer violations: **{summary['layer_violations']}**.\n\n"
         "## Evidence anchors\n\n"
-        + "".join(f"- `{path}`\n" for path in current.evidence_paths)
+        + "".join(
+            f"- `{path}`\n" for path in sorted(set(current.evidence_paths))
+        )
         + "\n## Reproducibility\n\n"
         "```bash\n"
         "python -m scripts.engineering.qa validate-technical-debt-audit --json\n"
@@ -378,7 +385,14 @@ def _validate_current_semantics(root: Path, current: Any) -> list[str]:
     try:
         actual = json.loads(match.group("payload"))
         expected = build_current_audit_semantic_summary(root, current)
-    except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+    except (
+        AttributeError,
+        KeyError,
+        OSError,
+        TypeError,
+        ValueError,
+        json.JSONDecodeError,
+    ) as exc:
         return [f"current audit semantic summary is invalid: {exc}"]
     if actual != expected:
         return ["current audit semantic summary is stale"]
@@ -450,10 +464,23 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.update_current:
         report_path = root / current.report_path
-        report_path.write_text(
-            render_current_technical_debt_audit(root, current),
-            encoding="utf-8",
-        )
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary_path: str | None = None
+        try:
+            file_descriptor, temporary_path = tempfile.mkstemp(
+                dir=report_path.parent,
+                prefix=f".{report_path.name}.",
+                text=True,
+            )
+            with os.fdopen(file_descriptor, "w", encoding="utf-8") as temporary_file:
+                temporary_file.write(render_current_technical_debt_audit(root, current))
+                temporary_file.flush()
+                os.fsync(temporary_file.fileno())
+            os.replace(temporary_path, report_path)
+            temporary_path = None
+        finally:
+            if temporary_path is not None:
+                os.unlink(temporary_path)
         print(f"Updated technical-debt audit: {current.report_path}")
         return 0
     issues = validate_technical_debt_audit_registry(root, args.registry)
