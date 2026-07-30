@@ -39,6 +39,7 @@ PROGRESSIVE_DISCLOSURE_ROWS = {
         "bioetl-control-plane-v1.json",
         "Inspect Replay & Checkpoint Evidence",
     ),
+    ("bioetl-control-plane-v1.json", "Inspect Run Details"),
     ("bioetl-control-plane-v1.json", "Inspect Run Context"),
     ("bioetl-dq-v2.json", "Range lane · debug evidence"),
     ("bioetl-dq-v2.json", "Inspect Run Context"),
@@ -72,6 +73,7 @@ PROGRESSIVE_DISCLOSURE_ROWS = {
         "bioetl-run-explorer-v1.json",
         "Selected run detail (Ops HTTP; expand after selection)",
     ),
+    ("bioetl-run-explorer-v1.json", "Selected Run Details"),
 }
 
 
