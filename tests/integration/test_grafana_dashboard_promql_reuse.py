@@ -127,9 +127,7 @@ def _assert_lineage_control_plane_ownership_handoff() -> None:
         for link in dq_links
     )
     assert control_plane_lineage.get("options", {}).get("graphMode") == "area"
-    lineage_description = str(
-        control_plane_lineage.get("description", "")
-    ).lower()
+    lineage_description = str(control_plane_lineage.get("description", "")).lower()
     assert "missing upstream lineage references" in lineage_description
     assert "replay evidence incomplete" in lineage_description
 

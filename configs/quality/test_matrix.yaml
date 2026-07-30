@@ -51,6 +51,7 @@ test_lanes:
     serial_or_bounded_lanes:
       - smoke
       - unit-fast
+      - unit-filesystem-contracts
       - repo-backed-unit
       - unit-scripts-tooling
       - integration-replay
@@ -107,20 +108,72 @@ test_lanes:
       suite_name: unit-fast
       description: >-
         Fast unit lane over pure-ish unit paths under tests/unit. Excludes slow,
-        benchmark, repo-backed, Neo4j/MCP memory tests, and scripts tooling
+        benchmark, filesystem-contract, repo-backed, Neo4j/MCP memory tests, and scripts tooling
         (see unit-scripts-tooling). scripts/ is still importable path-wise but
         documented as non-domain tooling (T-12).
       runner_backend: run_pytest
       runner: scripts/engineering/dev/run_pytest.sh
       paths:
         - tests/unit/
-      marker_expression: "not repo_backed and not subprocess_backed and not slow and not benchmark and not memory"
+      marker_expression: "not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory"
       pytest_args:
         - tests/unit/
         - --ignore=tests/unit/scripts
         - --ignore=tests/unit/repo_backed
         - -m
-        - not repo_backed and not subprocess_backed and not slow and not benchmark and not memory
+        - not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    unit-filesystem-contracts:
+      suite_name: unit-filesystem-contracts
+      description: >-
+        Bounded, serial local-filesystem adapter contracts. Membership is
+        explicit and collection-time marked from classified_modules so these
+        tests cannot leak into unit-fast or unit-parallel-safe.
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/unit/
+      marker_expression: "fs_contract and not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/unit/
+        - -m
+        - fs_contract and not slow and not benchmark and not memory
+      classified_modules:
+        - tests/unit/infrastructure/control_plane/test_artifact_byte_comparison.py
+        - tests/unit/infrastructure/control_plane/test_control_plane_observability_metrics.py
+        - tests/unit/infrastructure/control_plane/test_file_artifact_lifecycle_store.py
+        - tests/unit/infrastructure/control_plane/test_file_contract_registry_store.py
+        - tests/unit/infrastructure/control_plane/test_file_effective_config_artifact_store.py
+        - tests/unit/infrastructure/control_plane/test_file_historical_replay_closure_store.py
+        - tests/unit/infrastructure/control_plane/test_file_historical_replay_universe_store.py
+        - tests/unit/infrastructure/control_plane/test_file_lineage_store.py
+        - tests/unit/infrastructure/control_plane/test_file_run_ledger_store.py
+        - tests/unit/infrastructure/control_plane/test_file_run_manifest_scope_index.py
+        - tests/unit/infrastructure/control_plane/test_file_run_manifest_store.py
+        - tests/unit/infrastructure/control_plane/test_file_workflow_ledger_store.py
+        - tests/unit/infrastructure/control_plane/test_workflow_auxiliary_stores.py
+        - tests/unit/infrastructure/control_plane/test_workflow_transform_artifact_store.py
+        - tests/unit/infrastructure/storage/silver/test_delta_write_execution.py
+        - tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py
+        - tests/unit/infrastructure/storage/silver_writer/test_silver_writer_retry.py
+        - tests/unit/infrastructure/storage/support/test_checkpoint_writer.py
+        - tests/unit/infrastructure/storage/test_arch_cr2_bronze_async_offload.py
+        - tests/unit/infrastructure/storage/test_atomic_write_group.py
+        - tests/unit/infrastructure/storage/test_base_delta_writer.py
+        - tests/unit/infrastructure/storage/test_bronze_writer_metadata_paths.py
+        - tests/unit/infrastructure/storage/test_medallion_regression_envelope.py
+        - tests/unit/infrastructure/storage/test_metadata_writer_boost.py
+        - tests/unit/infrastructure/storage/test_silver_metadata_operations_service.py
+        - tests/unit/infrastructure/storage/test_silver_writer_maintenance_boost.py
+        - tests/unit/infrastructure/storage/test_storage_exceptions.py
+        - tests/unit/infrastructure/storage/test_strict_metadata_lineage_publication.py
+        - tests/unit/infrastructure/test_storage.py
+        - tests/unit/infrastructure/test_storage_factory.py
       replay_mode: not_applicable
       coverage_gate: none
       expected_artifacts:
@@ -193,11 +246,11 @@ test_lanes:
         - S6-crosscutting-unit
       paths:
         - tests/unit/
-      marker_expression: "not repo_backed and not slow and not serial and not benchmark and not memory"
+      marker_expression: "not fs_contract and not repo_backed and not slow and not serial and not benchmark and not memory"
       pytest_args:
         - tests/unit/
         - -m
-        - not repo_backed and not slow and not serial and not benchmark and not memory
+        - not fs_contract and not repo_backed and not slow and not serial and not benchmark and not memory
       replay_mode: not_applicable
       coverage_gate: none
       expected_artifacts:

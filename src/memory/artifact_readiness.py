@@ -77,9 +77,7 @@ def rag_chunks_ready(
     return report.ok
 
 
-def timeline_events_ready(
-    events_dir: Path, *, repo_root: Path | None = None
-) -> bool:
+def timeline_events_ready(events_dir: Path, *, repo_root: Path | None = None) -> bool:
     """Return whether timeline projections are intact and version-compatible."""
     if not events_dir.is_dir():
         return False
@@ -87,11 +85,15 @@ def timeline_events_ready(
     if not event_files:
         return False
     manifest = _load_catalog(events_dir / TIMELINE_MANIFEST_NAME)
-    resolved_root = repo_root.resolve() if repo_root is not None else _discover_repo_root(
-        events_dir
+    resolved_root = (
+        repo_root.resolve()
+        if repo_root is not None
+        else _discover_repo_root(events_dir)
     )
     if manifest is None:
-        return resolved_root is None and all(_valid_timeline_jsonl(path) for path in event_files)
+        return resolved_root is None and all(
+            _valid_timeline_jsonl(path) for path in event_files
+        )
     entries = manifest.get("files")
     if manifest.get("schema_version") != 1 or not isinstance(entries, list):
         return False

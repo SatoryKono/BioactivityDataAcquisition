@@ -149,9 +149,9 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 3
     assert panels["Monitor Fleet Health"].get("gridPos", {}).get("y") == 3
     assert panels["Review First Action"].get("gridPos", {}).get("y") <= 7
-    assert panels["Review Domain Status"].get("gridPos", {}).get("y") == panels["Review First Action"].get(
-        "gridPos", {}
-    ).get("y")
+    assert panels["Review Domain Status"].get("gridPos", {}).get("y") == panels[
+        "Review First Action"
+    ].get("gridPos", {}).get("y")
     assert panels["Review First Action"].get("gridPos", {}).get("w", 0) >= 8
     assert panels["Review Domain Status"].get("gridPos", {}).get("w", 0) >= 10
     lazy = {"Review Run Identity": 9300, "Review Processed Records": 9301}
@@ -233,7 +233,11 @@ def test_l1_cards_have_operator_mappings_and_targeted_links() -> None:
 
 def test_selected_scope_cards_normalize_workflow_pipeline_aliases() -> None:
     """Epic #6574: first-screen cards use thin pipeline selectors (no mega-expr glue)."""
-    for title in ("Monitor Fleet Health", "Review First Action", "Review Domain Status"):
+    for title in (
+        "Monitor Fleet Health",
+        "Review First Action",
+        "Review Domain Status",
+    ):
         expr = _panel_expr(_panels_by_title()[title])
         assert 'pipeline=~"$pipeline"' in expr
         assert len(expr) <= 200
@@ -264,8 +268,7 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
         _panel_expr(workflow)
     )
     assert (
-        "selected workflow and pipeline"
-        in str(workflow.get("description", "")).lower()
+        "selected workflow and pipeline" in str(workflow.get("description", "")).lower()
     )
     assert "run type" in str(workflow.get("description", "")).lower()
     assert "run id" in str(workflow.get("description", "")).lower()
@@ -359,9 +362,7 @@ def test_diagnostics_row_is_not_empty() -> None:
     assert diagnostics_row.get("type") == "row"
     child_titles = {
         child.get("title")
-        for child in get_row_child_panels(
-            dashboard, "Inspect Domain Diagnostics"
-        )
+        for child in get_row_child_panels(dashboard, "Inspect Domain Diagnostics")
     }
     assert "Navigate Diagnostics" in child_titles
 

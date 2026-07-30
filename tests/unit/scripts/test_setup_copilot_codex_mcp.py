@@ -420,9 +420,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     assert qodo_payload["mcpServers"] == servers
     assert zed_payload["mcpServers"] == servers
     assert not REMOVED_FULL_PROFILE_SERVERS.intersection(servers)
-    assert not REMOVED_FULL_PROFILE_SERVERS.intersection(
-        gemini_settings["mcpServers"]
-    )
+    assert not REMOVED_FULL_PROFILE_SERVERS.intersection(gemini_settings["mcpServers"])
     for server_name, gemini_server in gemini_settings["mcpServers"].items():
         assert "startup_timeout_sec" not in gemini_server
         startup_timeout = servers[server_name].get("startup_timeout_sec")

@@ -363,9 +363,7 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
         ),
         None,
     )
-    assert panel is not None, (
-        "Panel 'Review Errors by Stage & Code' not found"
-    )
+    assert panel is not None, "Panel 'Review Errors by Stage & Code' not found"
 
     targets = [
         target for target in panel.get("targets", []) if isinstance(target, dict)

@@ -524,11 +524,7 @@ def _assert_overview_run_id_variable(run_id_var: dict) -> None:
 
 def _assert_overview_identity_panel(dashboard: dict) -> None:
     identity_panel = next(
-        (
-            panel
-            for panel in get_dashboard_panels(dashboard)
-            if panel.get("id") == 9300
-        ),
+        (panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 9300),
         None,
     )
     assert identity_panel is not None
@@ -1080,8 +1076,7 @@ def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title")
-            == "Monitor Worst Freshness Age"
+            if item.get("title") == "Monitor Worst Freshness Age"
         ),
         None,
     )

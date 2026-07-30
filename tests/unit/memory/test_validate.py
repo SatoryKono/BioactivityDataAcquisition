@@ -106,10 +106,7 @@ def test_memory_scaffold_validation_discovers_task_scoped_notes(
 ) -> None:
     memory_root = tmp_path / "memory"
     _copy_minimal_memory_scaffold(memory_root)
-    malformed = (
-        memory_root
-        / "episodic/tasks/repo/worktree/branch/task/session.md"
-    )
+    malformed = memory_root / "episodic/tasks/repo/worktree/branch/task/session.md"
     malformed.parent.mkdir(parents=True)
     malformed.write_text("missing frontmatter\n", encoding="utf-8")
 

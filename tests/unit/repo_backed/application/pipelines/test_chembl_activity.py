@@ -46,7 +46,7 @@ from bioetl.domain.ports.noop import NoOpMetrics
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 
 @pytest.fixture

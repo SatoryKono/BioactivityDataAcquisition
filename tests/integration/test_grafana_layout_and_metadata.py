@@ -140,11 +140,7 @@ def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
     assert "Review Diagnostic Scope Note" not in root_titles
     assert "Review Incident Summary" not in root_titles
     detect_row = next(
-        (
-            panel
-            for panel in dashboard.get("panels", [])
-            if panel.get("id") == 252
-        ),
+        (panel for panel in dashboard.get("panels", []) if panel.get("id") == 252),
         None,
     )
     assert detect_row is not None, "Runtime dashboard must keep Detect row"

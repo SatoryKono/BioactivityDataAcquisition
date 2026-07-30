@@ -848,11 +848,7 @@ def test_workflow_range_cards_do_not_ship_panel_level_runbook_links() -> None:
     )
 
     next_panel = next(
-        (
-            panel
-            for panel in get_dashboard_panels(dashboard)
-                if panel.get("id") == 9991
-        ),
+        (panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 9991),
         None,
     )
     assert next_panel is not None

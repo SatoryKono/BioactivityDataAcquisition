@@ -100,6 +100,7 @@ class TestCanonicalTestLanes:
     EXPECTED_LANES = {
         "smoke",
         "unit-fast",
+        "unit-filesystem-contracts",
         "repo-backed-unit",
         "unit-parallel-safe",
         "unit-scripts-tooling",
@@ -285,8 +286,11 @@ class TestCanonicalTestLanes:
         assert lanes["smoke"]["marker_expression"] == "not benchmark and not memory"
         unit_fast_marker = lanes["unit-fast"]["marker_expression"]
         assert unit_fast_marker == (
-            "not repo_backed and not subprocess_backed and not slow "
+            "not fs_contract and not repo_backed and not subprocess_backed and not slow "
             "and not benchmark and not memory"
+        )
+        assert lanes["unit-filesystem-contracts"]["marker_expression"] == (
+            "fs_contract and not slow and not benchmark and not memory"
         )
         assert (
             lanes["repo-backed-unit"]["marker_expression"]
@@ -304,7 +308,7 @@ class TestCanonicalTestLanes:
         assert lanes["unit-parallel-safe"]["runner_backend"] == "run_pytest_sharded"
         assert (
             lanes["unit-parallel-safe"]["marker_expression"]
-            == "not repo_backed and not slow and not serial and not benchmark and not memory"
+            == "not fs_contract and not repo_backed and not slow and not serial and not benchmark and not memory"
         )
         assert lanes["unit-parallel-safe"]["paths"] == ["tests/unit/"]
         assert "S1-domain-core" in lanes["unit-parallel-safe"]["runner_options"]

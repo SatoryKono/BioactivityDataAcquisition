@@ -17,6 +17,7 @@ from types import ModuleType
 from typing import Any, cast
 
 import pytest
+import yaml
 from tests.helpers.vcr_config import (
     build_cassette_dir,
     build_base_vcr_config,
@@ -46,6 +47,19 @@ _RUNTIME_BOOTSTRAP_PIPELINE_PATH = (
     / "runtime"
     / "pipeline.py"
 )
+_TEST_MATRIX_PATH = (
+    Path(__file__).resolve().parents[1] / "configs/quality/test_matrix.yaml"
+)
+
+
+@cache
+def _filesystem_contract_modules() -> frozenset[str]:
+    """Load explicitly reviewed filesystem-contract module ownership."""
+    payload = yaml.safe_load(_TEST_MATRIX_PATH.read_text(encoding="utf-8"))
+    modules = payload["test_lanes"]["lanes"]["unit-filesystem-contracts"][
+        "classified_modules"
+    ]
+    return frozenset(str(module).replace("\\", "/") for module in modules)
 
 
 def _disable_unused_geopandas_backend_on_windows() -> None:
@@ -60,7 +74,17 @@ _disable_unused_geopandas_backend_on_windows()
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
-    """Apply deterministic opt-in order randomization for flaky telemetry runs."""
+    """Apply governed lane markers and optional deterministic randomization."""
+    fs_contract_modules = _filesystem_contract_modules()
+    for item in items:
+        module_path = Path(str(item.path)).resolve()
+        try:
+            relative_path = module_path.relative_to(_TEST_MATRIX_PATH.parents[2])
+        except ValueError:
+            continue
+        if relative_path.as_posix() in fs_contract_modules:
+            item.add_marker(pytest.mark.fs_contract)
+
     raw_seed = os.environ.get("BIOETL_RANDOM_ORDER_SEED")
     if raw_seed is None:
         return

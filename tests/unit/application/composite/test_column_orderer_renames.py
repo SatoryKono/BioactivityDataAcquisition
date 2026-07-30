@@ -28,12 +28,12 @@
 """Unit tests for ColumnOrderService rename functionality."""
 
 import pytest
+from unittest.mock import MagicMock
 
 from bioetl.application.composite.column_service import (
     ColumnOrderService,
 )
 from bioetl.domain.composite.config import ColumnGroupConfig, LayerColumnConfig
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 
 pytestmark = pytest.mark.unit
@@ -44,7 +44,7 @@ class TestColumnOrderServiceRenames:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.logger = NoOpLogger()
+        self.logger = MagicMock()
 
     def test_apply_renames_basic(self):
         """Apply basic column renames."""

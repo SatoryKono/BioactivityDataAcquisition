@@ -116,11 +116,7 @@ def test_browse_hides_raw_path_columns() -> None:
     data = json.loads(
         (DASH / "bioetl-run-explorer-v1.json").read_text(encoding="utf-8")
     )
-    browse = next(
-        p
-        for p in _walk(data.get("panels"))
-        if p.get("id") == 3010
-    )
+    browse = next(p for p in _walk(data.get("panels")) if p.get("id") == 3010)
     transforms = browse.get("transformations") or []
     organize = next(t for t in transforms if t.get("id") == "organize")
     exclude = (organize.get("options") or {}).get("excludeByName") or {}
@@ -204,9 +200,7 @@ def test_primary_status_documents_unknown_class() -> None:
         (DASH / "bioetl-overview-v2.json", 214),
     ):
         data = json.loads(path.read_text(encoding="utf-8"))
-        status = next(
-            p for p in _walk(data.get("panels")) if p.get("id") == status_id
-        )
+        status = next(p for p in _walk(data.get("panels")) if p.get("id") == status_id)
         desc = (status.get("description") or "").lower()
         assert "unknown" in desc
         assert "evidence incomplete" in desc or "missing" in desc

@@ -57,5 +57,8 @@ def test_mcp_memory_default_store_is_scoped_and_untracked() -> None:
 
     assert ".cache/mcp-memory/" in wrapper
     assert "${memory_worktree_id}/${memory_branch}/${memory_commit}" in wrapper
-    assert 'memory_seed="${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"' in wrapper
+    assert (
+        'memory_seed="${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"'
+        in wrapper
+    )
     assert 'export MEMORY_FILE_PATH="${memory_dir}/memory.json"' in wrapper

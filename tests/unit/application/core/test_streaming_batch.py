@@ -46,7 +46,7 @@ from bioetl.application.core.transformer_runtime import (
 )
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.domain.config import MemoryConfig
-from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
+from bioetl.domain.ports.runtime import MemoryMonitorPort
 from bioetl.domain.exceptions import DataQualityError
 
 pytest_plugins = ("tests.unit.application.core.transformer_test_support",)
@@ -407,7 +407,7 @@ class TestStreamingBatchProcessor:
     @pytest.fixture
     def mock_memory_monitor(self):
         """Create mock memory monitor."""
-        monitor = MagicMock(spec=MemoryMonitor)
+        monitor = MagicMock(spec=MemoryMonitorPort)
         monitor.get_recommended_batch_size = MagicMock(side_effect=lambda x: x)
         return monitor
 
@@ -435,7 +435,7 @@ class TestStreamingBatchProcessor:
         """Test chunk size adapts under memory pressure."""
 
         # Monitor returns constant size to ensure predictable chunking
-        monitor = MagicMock(spec=MemoryMonitor)
+        monitor = MagicMock(spec=MemoryMonitorPort)
         monitor.get_recommended_batch_size = MagicMock(return_value=5)
 
         processor = StreamingBatchProcessor(
