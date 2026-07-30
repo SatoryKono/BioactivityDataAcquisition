@@ -112,6 +112,9 @@ retention policy, and Neo4j recovery contract are not implemented. Until then:
 
 - preserve original records and digests during manual migration;
 - back up only classified stores without silently extending retention;
+- local plaintext backup supports only `public` and `internal` records;
+  `confidential` and `secret` backup fails closed until an approved at-rest
+  protector adapter is supplied;
 - verify restored digests;
 - quarantine corrupt records instead of loading them.
 

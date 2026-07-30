@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from memory.backup import (
+    BackupProtectionError,
     BackupVerificationError,
     create_backup,
     quarantine_backup,
@@ -47,7 +48,7 @@ def test_backup_manifest_has_stable_sorted_paths(tmp_path: Path) -> None:
     result = create_backup(
         _source(tmp_path),
         tmp_path / "backups",
-        security_class=SecurityClass.CONFIDENTIAL,
+        security_class=SecurityClass.INTERNAL,
         retention_days=7,
     )
 
@@ -59,8 +60,28 @@ def test_backup_manifest_has_stable_sorted_paths(tmp_path: Path) -> None:
         "a.json",
         "nested/b.md",
     ]
-    assert manifest["security_class"] == "confidential"
+    assert manifest["security_class"] == "internal"
     assert manifest["retention_days"] == 7
+
+
+@pytest.mark.parametrize(
+    "security_class",
+    [SecurityClass.CONFIDENTIAL, SecurityClass.SECRET],
+)
+def test_classified_backup_fails_closed_without_at_rest_protector(
+    tmp_path: Path,
+    security_class: SecurityClass,
+) -> None:
+    backup_root = tmp_path / "backups"
+
+    with pytest.raises(BackupProtectionError, match="at-rest protector"):
+        create_backup(
+            _source(tmp_path),
+            backup_root,
+            security_class=security_class,
+        )
+
+    assert not backup_root.exists()
 
 
 def test_backup_rejects_symlink_that_escapes_source_boundary(tmp_path: Path) -> None:
