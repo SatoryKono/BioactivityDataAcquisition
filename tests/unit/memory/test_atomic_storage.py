@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import time
 from pathlib import Path
 
 import pytest
@@ -60,3 +62,51 @@ def test_exclusive_lock_times_out_on_conflict(tmp_path: Path) -> None:
         with pytest.raises(StorageConflictError, match="timed out acquiring lock"):
             with exclusive_lock(target, timeout_seconds=0, poll_seconds=0):
                 pytest.fail("conflicting lock must not be acquired")
+
+
+def test_exclusive_lock_recovers_dead_owner(tmp_path: Path) -> None:
+    target = tmp_path / "events.jsonl"
+    lock_path = tmp_path / ".events.jsonl.lock"
+    lock_path.write_text(
+        json.dumps(
+            {"pid": 999_999_999, "process_start": "1", "schema_version": 1}
+        ),
+        encoding="utf-8",
+    )
+
+    with exclusive_lock(target, timeout_seconds=0):
+        assert lock_path.exists()
+
+    assert not lock_path.exists()
+
+
+def test_exclusive_lock_recovers_stale_malformed_metadata(tmp_path: Path) -> None:
+    target = tmp_path / "events.jsonl"
+    lock_path = tmp_path / ".events.jsonl.lock"
+    lock_path.write_text("not-json", encoding="utf-8")
+    old = time.time() - 60
+    os.utime(lock_path, (old, old))
+
+    with exclusive_lock(
+        target,
+        timeout_seconds=0,
+        stale_after_seconds=30,
+    ):
+        assert lock_path.exists()
+
+    assert not lock_path.exists()
+
+
+def test_exclusive_lock_does_not_steal_recent_malformed_lock(tmp_path: Path) -> None:
+    target = tmp_path / "events.jsonl"
+    lock_path = tmp_path / ".events.jsonl.lock"
+    lock_path.write_text("not-json", encoding="utf-8")
+
+    with pytest.raises(StorageConflictError, match="timed out acquiring lock"):
+        with exclusive_lock(
+            target,
+            timeout_seconds=0,
+            poll_seconds=0,
+            stale_after_seconds=30,
+        ):
+            pytest.fail("recent malformed lock must not be stolen")
