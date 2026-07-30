@@ -569,7 +569,7 @@ test_audit_closeout_2026_07_08:
     test_file_count_definition: tests/**/test_*.py from pyproject python_files
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
-    repo_backed_unit_test_files: 46
+    repo_backed_unit_test_files: 49
     performance_baseline_reports:
     - reports/test-telemetry/slowest-tests.json
     - reports/test-telemetry/slowest-tests.md
