@@ -13,7 +13,6 @@
 from __future__ import annotations
 
 import json
-import platform
 from pathlib import Path
 
 import pytest
@@ -25,15 +24,11 @@ from tests.integration._consolidation_suite_support import (
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.no_api,
-    pytest.mark.skipif(
-        "microsoft" in platform.release().lower(),
-        reason="Skipped on WSL due to asyncio teardown on cloud-mounted storage",
-    ),
 ]
 
 
 async def test_consolidation_idempotency_contract_guard(
-    tmp_path: Path,
+    replay_runtime_root: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     (
@@ -44,7 +39,7 @@ async def test_consolidation_idempotency_contract_guard(
         _,
         _,
     ) = await run_tracked_fixture_replay_pair(
-        tmp_path=tmp_path, monkeypatch=monkeypatch
+        tmp_path=replay_runtime_root, monkeypatch=monkeypatch
     )
 
     assert first_manifest["run_id"] != second_manifest["run_id"]
@@ -96,7 +91,10 @@ async def test_consolidation_idempotency_contract_guard(
     )
 
     contract_path = (
-        tmp_path / "reports" / "reproducibility" / "tracked_fixture_idempotency.json"
+        replay_runtime_root
+        / "reports"
+        / "reproducibility"
+        / "tracked_fixture_idempotency.json"
     )
     contract_path.parent.mkdir(parents=True, exist_ok=True)
     contract_path.write_text(

@@ -12,7 +12,11 @@
 
 from __future__ import annotations
 
+import platform
+import shutil
+import tempfile
 from collections.abc import Generator
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
@@ -44,6 +48,35 @@ def _clear_runtime_config_caches() -> None:
     get_pipeline_config.cache_clear()
     load_pipeline_config.cache_clear()
     load_source_config.cache_clear()
+
+
+def _is_wsl() -> bool:
+    """Return whether integration tests run inside Windows Subsystem for Linux."""
+    return "microsoft" in platform.release().lower()
+
+
+@pytest.fixture
+def replay_runtime_root(tmp_path: Path) -> Generator[Path, None, None]:
+    """Provide replay I/O on a native filesystem and clean it deterministically.
+
+    WSL checkouts commonly live below ``/mnt`` on cloud-backed Windows storage.
+    Replay gates perform real control-plane and Delta writes, so their sandbox
+    must live on the native Linux filesystem instead of suppressing the tests.
+    Other platforms retain pytest's normal per-test ``tmp_path`` isolation.
+    """
+    if not _is_wsl():
+        yield tmp_path
+        return
+
+    native_tmp = Path("/tmp")
+    if not native_tmp.is_dir():
+        pytest.fail("WSL replay gates require the native Linux /tmp filesystem")
+    sandbox = Path(tempfile.mkdtemp(prefix="bioetl-replay-", dir=native_tmp))
+    try:
+        yield sandbox
+    finally:
+        _clear_runtime_config_caches()
+        shutil.rmtree(sandbox, ignore_errors=False)
 
 
 @pytest.fixture

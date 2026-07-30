@@ -222,26 +222,6 @@ entries:
   vcr_related: false
   review_date: '2026-07-30'
   rationale: Control-plane replay linkage is skipped on WSL where asyncio teardown on cloud-mounted storage is not reliable.
-- path: tests/integration/determinism/test_reproducibility_determinism_gate.py
-  suite: integration
-  category: conditional_environment_guard
-  owner: '@bioetl-platform'
-  linked_issue: '#7249'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 1
-  vcr_related: false
-  review_date: '2026-07-30'
-  rationale: Determinism replay is skipped on WSL where asyncio teardown on cloud-mounted storage is not reliable.
-- path: tests/integration/idempotency/test_reproducibility_idempotency_gate.py
-  suite: integration
-  category: conditional_environment_guard
-  owner: '@bioetl-platform'
-  linked_issue: '#7249'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 1
-  vcr_related: false
-  review_date: '2026-07-30'
-  rationale: Idempotency replay is skipped on WSL where asyncio teardown on cloud-mounted storage is not reliable.
 - path: tests/integration/infrastructure/storage/test_atomic.py
   suite: integration
   category: conditional_environment_guard

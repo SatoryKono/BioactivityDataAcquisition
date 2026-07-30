@@ -12,7 +12,10 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
+import yaml
 
 from tests.architecture._test_matrix_policy_support import (
     ROOT,
@@ -61,6 +64,49 @@ class TestContractTestingGovernance:
         assert "tests/contract/ -v --tb=short --network" in workflow
         assert "cron: '0 2 1 * *'" in workflow
         assert "Create Issue on Failure" in workflow
+
+    def test_contract_workflow_preserves_pytest_failure_and_fails_job_closed(
+        self,
+    ) -> None:
+        workflow_path = WORKFLOWS_DIR / "contract-tests.yml"
+        workflow_text = workflow_path.read_text(encoding="utf-8")
+        workflow = yaml.safe_load(workflow_text)
+        jobs: dict[str, Any] = workflow["jobs"]
+        contract_job: dict[str, Any] = jobs["contract-tests"]
+        step_names = [step["name"] for step in contract_job["steps"]]
+        steps: dict[str, dict[str, Any]] = {
+            step["name"]: step for step in contract_job["steps"]
+        }
+
+        run_tests = steps["Run Contract Tests"]
+        assert run_tests["continue-on-error"] is True
+        assert 'pytest_rc=$?' in run_tests["run"]
+        assert 'echo "pytest_rc=$pytest_rc" >> "$GITHUB_OUTPUT"' in run_tests["run"]
+        assert 'exit "$pytest_rc"' in run_tests["run"]
+        assert "|| echo" not in run_tests["run"]
+
+        upload_results = steps["Upload Test Results"]
+        assert upload_results["if"] == "always()"
+
+        create_issue = steps["Create Issue on Failure"]
+        failure_condition = (
+            "always() && steps.contract_tests.outcome == 'failure'"
+        )
+        assert create_issue["if"] == failure_condition
+
+        enforce_result = steps["Enforce Contract Test Result"]
+        assert enforce_result["if"] == failure_condition
+        assert step_names.index("Upload Test Results") < step_names.index(
+            "Create Issue on Failure"
+        ) < step_names.index("Enforce Contract Test Result")
+        assert enforce_result["env"]["PYTEST_RC"] == (
+            "${{ steps.contract_tests.outputs.pytest_rc }}"
+        )
+        assert 'exit "$PYTEST_RC"' in enforce_result["run"]
+
+        notify_success = jobs["notify-success"]
+        assert notify_success["needs"] == "contract-tests"
+        assert notify_success["if"] == "needs.contract-tests.result == 'success'"
 
     def test_enforced_live_contract_providers_have_test_modules_and_markers(
         self,
