@@ -75,8 +75,8 @@ BACKGROUND_SEVERITY_STAT_PANELS = {
     (DASHBOARD_CONTROL_PLANE_V1, PANEL_INSPECT_TELEMETRY_MISSING),
 }
 SCALAR_TREND_TIMESERIES_PANELS = {
-    (DASHBOARD_DQ_V2, "Track: Data Quality Score Trend (Volume-weighted)"),
-    (DASHBOARD_DQ_V2, "Track: DQ Threshold Events in Range Trend"),
+    (DASHBOARD_DQ_V2, "Track Volume-Weighted DQ Score"),
+    (DASHBOARD_DQ_V2, "Track DQ Threshold Events"),
     (DASHBOARD_OVERVIEW_V2, "Runtime Blockers Trend"),
     (DASHBOARD_OVERVIEW_V2, "DQ Status Trend"),
     (DASHBOARD_OVERVIEW_V2, "Gold Lifecycle Trend"),
