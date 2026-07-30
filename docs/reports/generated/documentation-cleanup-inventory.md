@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2446 |
+| Doc-like files | 2447 |
 | Tracked doc-like files | 2392 |
-| Ignored local docs/reports files | 54 |
+| Ignored local docs/reports files | 55 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 69 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 54 |
+| ignored_local | 55 |
 | tracked | 2392 |
 
 ## Lifecycle Counts
@@ -30,7 +30,7 @@
 | active_quality_baseline | 24 |
 | closeout_evidence | 39 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 39 |
+| docs_reports_curated_or_historical_report | 40 |
 | docs_reports_generated_or_route_owned | 23 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
@@ -62,7 +62,7 @@
 | Archived | 130 |
 | Canonical | 73 |
 | Generated | 878 |
-| Working | 481 |
+| Working | 482 |
 
 ## Surface Families
 
@@ -72,14 +72,14 @@
 | archive | 130 |
 | canonical | 73 |
 | generated | 878 |
-| working | 481 |
+| working | 482 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 309 |
-| archive-after-migration | 105 |
+| archive-after-migration | 106 |
 | generate-automatically | 878 |
 | keep | 1150 |
 | reconcile-with-github-state | 4 |
@@ -106,6 +106,7 @@
 | `docs/reports/dashboard-ux-checks/2026-07-28-drmr.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28-phase2.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-07-30.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `docs/reports/docs-link-check-report.json` | Working | 0 | archive-after-migration |
 | `docs/reports/docs-parity-report.json` | Working | 0 | archive-after-migration |
@@ -167,7 +168,6 @@
 | `reports/quality/root-hygiene-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
-| `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -317,6 +317,7 @@
 | `docs/reports/dashboard-ux-checks/2026-07-28-drmr.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28-phase2.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-07-30.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/docs-link-check-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/docs-parity-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -342,7 +343,6 @@
 | `docs/reports/evidence/project-package-topology/04-decisions/DECISIONS.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-package-topology/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-test-health/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/project-test-health/metadata.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 

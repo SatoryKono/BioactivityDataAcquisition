@@ -228,23 +228,23 @@ required_discoverable_inbound_paths:
     bioetl-runtime:
     - source_uid: bioetl-overview-v2
       source_panel_id: 215
-      source_panel_title: First Action
-      source_status_row_panel_title_matcher: ^Provenance$
+      source_panel_title: Review First Action
+      source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
     bioetl-control-plane-v1:
     - source_uid: bioetl-overview-v2
       source_panel_id: 215
-      source_panel_title: First Action
-      source_status_row_panel_title_matcher: ^Provenance$
+      source_panel_title: Review First Action
+      source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
     bioetl-provider-health-v2:
     - source_uid: bioetl-overview-v2
       source_panel_id: 215
-      source_panel_title: First Action
-      source_status_row_panel_title_matcher: ^Provenance$
+      source_panel_title: Review First Action
+      source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
     bioetl-dq-v2:
     - source_uid: bioetl-overview-v2
       source_panel_id: 215
-      source_panel_title: First Action
-      source_status_row_panel_title_matcher: ^Provenance$
+      source_panel_title: Review First Action
+      source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
 required_panel_links_by_uid:
   bioetl-overview-v2:
   - panel_id: 214
@@ -475,7 +475,7 @@ navigation_transition_contract:
   first_action_contract:
     bioetl-runtime:
       panel_id: 9991
-      panel_title: First Action
+      panel_title: Start Pipeline Triage
       min_cta: 4
       max_cta: 4
       ctas:
@@ -489,7 +489,7 @@ navigation_transition_contract:
         expected_target_uid: bioetl-runtime
     bioetl-provider-health-v2:
       panel_id: 9002
-      panel_title: First Action
+      panel_title: Start Provider Triage
       min_cta: 3
       max_cta: 3
       ctas:
@@ -501,7 +501,7 @@ navigation_transition_contract:
         expected_target_uid: bioetl-provider-health-v2
     bioetl-dq-v2:
       panel_id: 9103
-      panel_title: 'Review: First Action'
+      panel_title: Start DQ Triage
       min_cta: 2
       max_cta: 2
       ctas:
