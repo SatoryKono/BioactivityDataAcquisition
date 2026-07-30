@@ -1431,7 +1431,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows checkpoint compatibility decisions by outcome during the selected range. The no_events series means no decisions were recorded; confirm telemetry before treating it as healthy.",
+          "description": "Shows checkpoint compatibility decisions by outcome during the selected range. The no_events series means no decisions were recorded; confirm telemetry before treating it as healthy. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1621,7 +1621,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows p50, p95, and p99 checkpoint-save latency for the selected range. No data means no latency samples were recorded, not zero latency.",
+          "description": "Shows p50, p95, and p99 checkpoint-save latency for the selected range. No data means no latency samples were recorded, not zero latency. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2099,7 +2099,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows ledger appends over time by event type and status. This is historical evidence, and Run Type does not affect it.",
+          "description": "Shows ledger appends over time by event type and status. This is historical evidence. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2681,7 +2681,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts missing upstream lineage references during the selected range. Any non-zero value makes replay evidence incomplete. Run Type does not apply.",
+          "description": "Counts missing upstream lineage references during the selected range. Any non-zero value makes replay evidence incomplete. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2864,7 +2864,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows missing lineage references grouped by layer and reference type. No rows can mean either no gaps or missing lineage telemetry; check fragment activity.",
+          "description": "Shows missing lineage references grouped by layer and reference type. No rows can mean either no gaps or missing lineage telemetry; check fragment activity. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
