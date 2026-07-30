@@ -40,8 +40,12 @@ def test_issue_6487_inventory_count_and_docs_workflow_are_source_derived() -> No
         r"inventory of the \*\*(\d+)\*\* live GitHub Actions", inventory
     )
     assert count_match is not None
-    assert live_workflows
-    assert int(count_match.group(1)) == len(live_workflows)
+    published_count = int(count_match.group(1))
+    live_count = len(live_workflows)
+    assert live_count > 0
+    assert published_count == live_count, (
+        f"published workflow count {published_count} != live workflow count {live_count}"
+    )
     assert WORKFLOW_DIR.joinpath("docs.yml") in live_workflows
     assert "| `docs.yml` | `Docs & Diagrams` |" in inventory
 
