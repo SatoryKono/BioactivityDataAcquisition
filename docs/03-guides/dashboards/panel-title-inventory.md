@@ -108,7 +108,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 117 | Monitor Silver Filter Rejects |
 | bioetl-dq-v2.json | 9405 | Run Context |
 | bioetl-dq-v2.json | 9402 | Inspect Run Identity |
-| bioetl-dq-v2.json | 9403 | Processed Records |
+| bioetl-dq-v2.json | 9403 | Inspect Processed Records |
 | bioetl-incident-v1.json | 1000 | Navigate Dashboards |
 | bioetl-incident-v1.json | 9400 | Understand Incident Scope |
 | bioetl-incident-v1.json | 9401 | Monitor Incident Status |
