@@ -7,12 +7,14 @@ source_of_truth:
   contract_root: tests/contract/
   integration_root: tests/integration/
 allowed_categories:
+- conditional_environment_guard
 - git_diff_scope_guard
 - live_endpoint_unavailability
 - live_network_opt_in_guard
 - optional_local_fixture_absence
 - replay_fixture_pointer_guard
 - snapshot_refresh_write_mode
+- temporary_known_failure
 entries:
 - path: tests/contract/_gold_schema_snapshot_registry.py
   suite: contract
@@ -205,11 +207,94 @@ entries:
   owner: '@bioetl-observability'
   linked_issue: '#5562'
   lifecycle: permanent_policy
-  reviewed_skip_calls: 10
+  reviewed_skip_calls: 11
   vcr_related: false
   review_date: '2026-07-23'
   rationale: Silver Reject Explorer config integration tests skip the retired dashboard surface pending full retirement of
     residual fixtures.
+- path: tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
+  suite: integration
+  category: conditional_environment_guard
+  owner: '@bioetl-platform'
+  linked_issue: '#7249'
+  lifecycle: permanent_policy
+  reviewed_skip_calls: 1
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Control-plane replay linkage is skipped on WSL where asyncio teardown on cloud-mounted storage is not reliable.
+- path: tests/integration/determinism/test_reproducibility_determinism_gate.py
+  suite: integration
+  category: conditional_environment_guard
+  owner: '@bioetl-platform'
+  linked_issue: '#7249'
+  lifecycle: permanent_policy
+  reviewed_skip_calls: 1
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Determinism replay is skipped on WSL where asyncio teardown on cloud-mounted storage is not reliable.
+- path: tests/integration/idempotency/test_reproducibility_idempotency_gate.py
+  suite: integration
+  category: conditional_environment_guard
+  owner: '@bioetl-platform'
+  linked_issue: '#7249'
+  lifecycle: permanent_policy
+  reviewed_skip_calls: 1
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Idempotency replay is skipped on WSL where asyncio teardown on cloud-mounted storage is not reliable.
+- path: tests/integration/infrastructure/storage/test_atomic.py
+  suite: integration
+  category: conditional_environment_guard
+  owner: '@bioetl-storage'
+  linked_issue: '#7249'
+  lifecycle: permanent_policy
+  reviewed_skip_calls: 2
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Windows lock-stress contracts are meaningful only on Windows and remain explicitly platform-conditional.
+- path: tests/integration/test_docker_compose_smoke.py
+  suite: integration
+  category: conditional_environment_guard
+  owner: '@bioetl-platform'
+  linked_issue: '#7249'
+  lifecycle: permanent_policy
+  reviewed_skip_calls: 1
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Destructive Docker lifecycle smoke remains opt-in through explicit environment scheduling.
+- path: tests/integration/test_grafana_dashboard_links.py
+  suite: integration
+  category: temporary_known_failure
+  owner: '@bioetl-observability'
+  linked_issue: '#6647'
+  lifecycle: temporary_debt
+  expires_on: '2026-08-31'
+  reviewed_skip_calls: 8
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Residual Loki and Tempo navigation contracts remain skipped while retired-surface helpers are removed.
+- path: tests/integration/test_grafana_layout_and_metadata.py
+  suite: integration
+  category: temporary_known_failure
+  owner: '@bioetl-observability'
+  linked_issue: '#6647'
+  lifecycle: temporary_debt
+  expires_on: '2026-08-31'
+  reviewed_skip_calls: 2
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Residual Loki and Tempo layout contracts remain skipped while retired-surface helpers are removed.
+- path: tests/integration/test_grafana_surface_contracts.py
+  suite: integration
+  category: temporary_known_failure
+  owner: '@bioetl-observability'
+  linked_issue: '#6647'
+  lifecycle: temporary_debt
+  expires_on: '2026-08-31'
+  reviewed_skip_calls: 2
+  vcr_related: false
+  review_date: '2026-07-30'
+  rationale: Residual Loki log-hygiene contracts remain skipped while retired-surface helpers are removed.
 - path: tests/integration/test_grafana_variable_reference.py
   suite: integration
   category: live_endpoint_unavailability

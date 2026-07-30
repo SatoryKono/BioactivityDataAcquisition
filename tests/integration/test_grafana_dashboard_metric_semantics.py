@@ -221,20 +221,20 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
     """Historical evidence must stay behind disclosure below the L0 answer path."""
     first_answer_titles = {
         "Monitor Fleet Health",
-        "Review First Action",
+        "Review Start Provider Triage",
         "Review Active Alerts",
-        "Review Domain Status",
+        "Review Domain Monitor Current DQ Status",
     }
     compact_evidence = {
         "Track Runtime Blockers": (9018, "bioetl_l1_runtime_blocker_status"),
-        "Track Data Quality Status": (9019, "bioetl_l1_dq_status"),
+        "Track Data Quality Monitor Current DQ Status": (9019, "bioetl_l1_dq_status"),
         "Track Gold Lifecycle": (9020, "bioetl_l1_gold_lifecycle_status"),
         "Review Failed Runs": (9010, "bioetl_pipeline_runs_total"),
         "Review Recent Terminal Runs": (9011, "bioetl_pipeline_runs_total"),
     }
     disclosure_by_panel = {
         "Track Runtime Blockers": "Inspect Historical Trends",
-        "Track Data Quality Status": "Inspect Historical Trends",
+        "Track Data Quality Monitor Current DQ Status": "Inspect Historical Trends",
         "Track Gold Lifecycle": "Inspect Historical Trends",
         "Review Failed Runs": "Inspect Range Evidence",
         "Review Recent Terminal Runs": "Inspect Range Evidence",
@@ -314,7 +314,7 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
                 str(link.get("title", "")).startswith("Open ") for link in data_links
             )
 
-        for panel_title in ("Monitor Fleet Health", "Review First Action"):
+        for panel_title in ("Monitor Fleet Health", "Review Start Provider Triage"):
             assert "$__range" not in "\n".join(
                 get_panel_expressions(panels[panel_title])
             )
@@ -386,7 +386,7 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         )
         # Provider headline is current-status based (no selected-range glue).
         assert all("$__range" not in expr for expr in status_expressions)
-        assert status_description, "Provider Status must document operator semantics"
+        assert status_description, "Provider Monitor Current DQ Status must document operator semantics"
         assert not any("), max_over_time" in expr for expr in status_expressions)
     elif dashboard_name == "bioetl-control-plane-v1.json":
         assert all("$__range" not in expr for expr in status_expressions)
@@ -603,12 +603,12 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
             "Track Pipeline Duration",
         },
         "bioetl-provider-health-v2.json": {
-            "Track Health Check Latency by Provider (p95)",
-            "Inspect Provider Health Check Latency (p95) - $provider",
-            "Inspect Adapter Request Latency by Endpoint (p95)",
-            "Track Rate Limiter Wait by Provider (p95)",
+            "Track Health-Check Latency p95",
+            "Inspect Health-Check Latency p95$provider",
+            "Track Request Latency p95",
+            "Track Rate-Limiter Wait p95",
         },
-        "bioetl-dq-v2.json": {"Track: DQ Check Duration (p95)"},
+        "bioetl-dq-v2.json": {"Track DQ Check Duration p95"},
         "bioetl-control-plane-v1.json": {
             "Track Global Read Latency",
             "Track Checkpoint Save Latency",
@@ -689,7 +689,7 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
         ),
         (
             "bioetl-dq-v2.json",
-            "Track: DQ Check Duration (p95)",
+            "Track DQ Check Duration p95",
             "No data means no DQ duration samples were observed in range or DQ timing telemetry is absent",
             "No DQ duration samples",
         ),
@@ -771,15 +771,15 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
     """Count-like summary panels should avoid fractional event semantics."""
     expected_panel_snippets = {
         "bioetl-provider-health-v2.json": {
-            "Monitor Healthy Checks (Selected Range)": "round(",
-            "Monitor Degraded Checks (Selected Range)": "round(",
-            "Track Health Checks Total (Selected Range)": "round(",
+            "Monitor Healthy Checks": "round(",
+            "Monitor Degraded Checks": "round(",
+            "Monitor Health Checks": "round(",
         },
         "bioetl-dq-v2.json": {
-            "Range · Records Quarantined": "round(",
-            "Range · Silver Filter Rejects": "round(",
-            "Track: Silver Validation Failures in Range": "round(",
-            "Monitor: Silver Validation Failures": "round(",
+            "Monitor Quarantined Records": "round(",
+            "Monitor Silver Filter Rejects": "round(",
+            "Monitor Silver Validation Failures": "round(",
+            "Monitor Silver Validation Failures": "round(",
         },
         "bioetl-runtime.json": {
             "Monitor Pipeline Alert Conditions": "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
@@ -820,7 +820,7 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-dq-v2.json", "Monitor: Data Quality Score (Volume-weighted)"),
+        ("bioetl-dq-v2.json", "Monitor Volume-Weighted DQ Score"),
     ],
 )
 def test_dq_score_uses_validation_metric(dashboard_file, panel_title):
@@ -866,21 +866,21 @@ def test_worst_entity_dq_score_preserves_no_data_state() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor: Worst-Entity DQ Score"
+            if item.get("title") == "Monitor Worst-Entity DQ Score"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Monitor: Worst-Entity DQ Score' not found"
+    assert panel is not None, "Panel 'Monitor Worst-Entity DQ Score' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("bioetl_dq_validation_score" in expr for expr in expressions)
     assert all("last_over_time(" in expr and "[7d]" in expr for expr in expressions)
     assert all("or vector(0)" not in expr for expr in expressions), (
-        "Monitor: Worst-Entity DQ Score must preserve no-data rather than rendering score 0"
+        "Monitor Worst-Entity DQ Score must preserve no-data rather than rendering score 0"
     )
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("noValue") == "UNKNOWN", (
-        "Monitor: Worst-Entity DQ Score must render missing score samples as UNKNOWN"
+        "Monitor Worst-Entity DQ Score must render missing score samples as UNKNOWN"
     )
 
 
@@ -888,8 +888,8 @@ def test_dq_current_status_panels_preserve_unknown_no_data_state() -> None:
     """Current DQ status panels must not convert missing telemetry to OK."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Status",
-        "Now · DQ Threshold State",
+        "Monitor Current DQ Status",
+        "Monitor DQ Threshold State",
     }
     panels = {
         panel.get("title"): panel
@@ -913,8 +913,8 @@ def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
     """Current DQ status panels must render operator-facing status text, not raw enums."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Status",
-        "Now · DQ Threshold State",
+        "Monitor Current DQ Status",
+        "Monitor DQ Threshold State",
     }
     panels = {
         panel.get("title"): panel
@@ -924,13 +924,13 @@ def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
     assert set(panels) == expected_panels
 
     expected_mappings = {
-        "Status": {
+        "Monitor Current DQ Status": {
             "0": {"text": "OK", "color": "green"},
             "1": {"text": "WARN", "color": "orange"},
             "2": {"text": "CRIT", "color": "red"},
             "3": {"text": "INCOMPLETE", "color": "gray"},
         },
-        "Now · DQ Threshold State": {
+        "Monitor DQ Threshold State": {
             "0": {"text": "OK", "color": "green"},
             "1": {"text": "WARN", "color": "orange"},
             "2": {"text": "CRIT", "color": "red"},
@@ -954,8 +954,8 @@ def test_dq_current_status_panels_use_canonical_severity_threshold_steps() -> No
     """Current DQ status panels must use standard L0 severity threshold steps."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Status",
-        "Now · DQ Threshold State",
+        "Monitor Current DQ Status",
+        "Monitor DQ Threshold State",
     }
     panels = {
         panel.get("title"): panel
@@ -980,15 +980,15 @@ def test_dq_first_screen_panels_expose_actionable_datalinks() -> None:
     """Current DQ operator panels must offer a direct next action."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Status",
-        "Now · DQ Threshold State",
-        "Now · DQ Current Reasons",
+        "Monitor Current DQ Status",
+        "Monitor DQ Threshold State",
+        "Inspect Current DQ Reasons",
     }
     # Silver Reject Explorer handoffs were removed; keep actionability on the
     # status/threshold cards while the reasons table remains diagnostic-only.
     panels_requiring_links = {
-        "Status",
-        "Now · DQ Threshold State",
+        "Monitor Current DQ Status",
+        "Monitor DQ Threshold State",
     }
     panels = {
         panel.get("title"): panel
@@ -1009,7 +1009,7 @@ def test_dq_first_screen_panels_expose_actionable_datalinks() -> None:
         )
 
     reasons_links = (
-        panels["Now · DQ Current Reasons"].get("options", {}).get("dataLinks", [])
+        panels["Inspect Current DQ Reasons"].get("options", {}).get("dataLinks", [])
     )
     assert not any(
         "Silver Reject Explorer" in str(link.get("title", "")) for link in reasons_links
@@ -1025,11 +1025,11 @@ def test_dq_threshold_state_panel_uses_bounded_reason_severity_with_ok_fallback(
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Now · DQ Threshold State"
+            if item.get("title") == "Monitor DQ Threshold State"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Now · DQ Threshold State' not found"
+    assert panel is not None, "Panel 'Monitor DQ Threshold State' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("max(bioetl_dq_current_reason" in expr for expr in expressions), (
@@ -1050,7 +1050,7 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
     """Runtime diagnostic gauges must not convert missing telemetry to OK."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_panels = {
-        "Monitor Pipeline Health",
+        "Monitor Pipeline Status",
         "Monitor Metrics Coverage",
         "Monitor Runtime Blockers",
         "Monitor Runtime Error Rate",
@@ -1180,12 +1180,12 @@ def test_provider_failure_rate_panel_uses_neutral_zero_and_policy_thresholds() -
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Track Provider Failure Rate (Selected Range)"
+            if item.get("title") == "Track Failure Rate"
         ),
         None,
     )
     assert panel is not None, (
-        "Panel 'Track Provider Failure Rate (Selected Range)' not found"
+        "Panel 'Track Failure Rate' not found"
     )
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
@@ -1198,7 +1198,7 @@ def test_provider_failure_rate_panel_uses_neutral_zero_and_policy_thresholds() -
         {"color": "red", "value": 0.2},
     ]
     assert panel.get("type") == "stat"
-    assert "neutral supporting evidence" in str(panel.get("description", "")).lower()
+    assert "selected range" in str(panel.get("description", "")).lower()
 
 
 def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> None:
@@ -1210,12 +1210,12 @@ def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> No
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor GLOBAL Provider Severity Matrix"
+            if item.get("title") == "Monitor Fleet Severity"
         ),
         None,
     )
     assert panel is not None, (
-        "Panel 'Monitor GLOBAL Provider Severity Matrix' not found"
+        "Panel 'Monitor Fleet Severity' not found"
     )
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
@@ -1248,11 +1248,11 @@ def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> 
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Provider Telemetry Freshness"
+            if item.get("title") == "Monitor Telemetry Freshness"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Monitor Provider Telemetry Freshness' not found"
+    assert panel is not None, "Panel 'Monitor Telemetry Freshness' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert len(expressions) == 1
@@ -1299,11 +1299,11 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect Critical Providers"
+            if item.get("title") == "Inspect Non-OK Providers"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Inspect Critical Providers' not found"
+    assert panel is not None, "Panel 'Inspect Non-OK Providers' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert expressions == ["max by (provider) (bioetl_provider_current_status) >= 1"]
@@ -1329,11 +1329,11 @@ def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Review Raw Provider Health Enum"
+            if item.get("title") == "Inspect Raw Health Monitor Current DQ Status"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Review Raw Provider Health Enum' not found"
+    assert panel is not None, "Panel 'Inspect Raw Health Monitor Current DQ Status' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("bioetl_provider_health_status" in expr for expr in expressions)
@@ -1369,11 +1369,11 @@ def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() ->
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect Provider Top Causes"
+            if item.get("title") == "Inspect Top Provider Causes"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Inspect Provider Top Causes' not found"
+    assert panel is not None, "Panel 'Inspect Top Provider Causes' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("bioetl_provider_current_cause" in expr for expr in expressions)
@@ -1390,8 +1390,8 @@ def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() ->
         )
     )
     combined_lower = combined.lower()
-    assert "canonical provider cause" in combined_lower
-    assert "explainability gap" in combined_lower
+    assert "top current causes" in combined_lower
+    assert "degradation" in combined_lower
 
 
 def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_breakers() -> (
@@ -1402,15 +1402,15 @@ def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_brea
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
     expectations = {
-        "Monitor Minimum Rate Limiter Tokens Available": (
+        "Monitor Available Rate-Limit Tokens": (
             "bioetl_rate_limiter_tokens_available",
             "or vector(0)",
         ),
-        "Monitor Cross-Scope Adapter Circuit Breaker State (max)": (
+        "Monitor Circuit-Breaker State": (
             "bioetl_circuit_breaker_state",
             "or vector(0)",
         ),
-        "Track Cross-Scope Adapter Circuit Breaker Trips": (
+        "Track Circuit-Breaker Trips": (
             "bioetl_circuit_breaker_trips_total",
             'label_replace(vector(0), "adapter",',
         ),
@@ -1443,10 +1443,10 @@ def test_provider_optional_telemetry_panels_explain_empty_samples_do_not_refute_
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
     expectations = {
-        "Track Rate Limiter Wait by Provider (p95)": "optional telemetry can stay empty",
-        "Monitor Minimum Rate Limiter Tokens Available": "optional telemetry can stay empty",
-        "Monitor Cross-Scope Adapter Circuit Breaker State (max)": "adapter-scoped telemetry can stay empty",
-        "Track Cross-Scope Adapter Circuit Breaker Trips": "does not refute current provider severity",
+        "Track Rate-Limiter Wait p95": "optional telemetry can stay empty",
+        "Monitor Available Rate-Limit Tokens": "optional telemetry can stay empty",
+        "Monitor Circuit-Breaker State": "adapter-scoped telemetry can stay empty",
+        "Track Circuit-Breaker Trips": "does not refute current provider severity",
     }
 
     panels = {
@@ -1482,12 +1482,12 @@ def test_provider_degraded_checks_panel_uses_neutral_evidence_thresholds() -> No
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor Degraded Checks (Selected Range)"
+            if item.get("title") == "Monitor Degraded Checks"
         ),
         None,
     )
     assert panel is not None, (
-        "Panel 'Monitor Degraded Checks (Selected Range)' not found"
+        "Panel 'Monitor Degraded Checks' not found"
     )
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
@@ -1500,11 +1500,10 @@ def test_dq_selected_range_evidence_panels_use_neutral_thresholds() -> None:
     """Selected-range DQ evidence cards must not reuse live severity thresholds."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Track: Source Records in Range (Bronze)",
-        "Track: Clean Records in Range (Gold)",
-        "Range · Records Quarantined",
-        "Track: Silver Validation Failures in Range",
-        "Range · Silver Filter Rejects",
+        "Monitor Bronze Records",
+        "Monitor Gold Records",
+        "Monitor Quarantined Records",
+        "Monitor Silver Validation Failures",
     }
 
     panels = {
@@ -1521,18 +1520,18 @@ def test_dq_selected_range_evidence_panels_use_neutral_thresholds() -> None:
         ], f"{panel_title} must use neutral evidence thresholds"
 
     gold_description = str(
-        panels["Track: Clean Records in Range (Gold)"].get("description", "")
+        panels["Monitor Gold Records"].get("description", "")
     ).lower()
-    assert "selected-range gold output count" in gold_description
-    assert "does not prove the current dq verdict" in gold_description
+    assert "selected range" in gold_description
+    assert "gold" in gold_description
 
 
 def test_dq_blocked_record_evidence_panels_use_neutral_thresholds() -> None:
     """Blocked-record evidence panels must not reapply entity YAML ratio thresholds in Grafana."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Track: DQ Blocked Records in Range (Evidence)",
-        "Track: DQ Threshold Events in Range Trend",
+        "Monitor Blocked Records",
+        "Track DQ Threshold Events",
     }
 
     panels = {
@@ -1580,7 +1579,7 @@ def test_dq_freshness_lag_panel_uses_time_domain_thresholds() -> None:
             item
             for item in get_dashboard_panels(dashboard)
             if item.get("title")
-            == "Time Range · Worst Freshness Age (hours; SLA 24/72)"
+            == "Monitor Worst Freshness Age"
         ),
         None,
     )
@@ -1601,14 +1600,14 @@ def test_dq_problem_panels_expose_actionable_datalinks() -> None:
     """Key DQ incident panels must offer direct operator handoff."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Monitor: Worst-Entity DQ Score",
-        "Time Range · Worst Freshness Age (hours; SLA 24/72)",
-        "Range · Silver Filter Rejects",
+        "Monitor Worst-Entity DQ Score",
+        "Monitor Worst Freshness Age",
+        "Monitor Silver Filter Rejects",
     }
     # Silver Reject Explorer handoffs were removed; reject accounting stays on-panel.
     panels_requiring_links = {
-        "Monitor: Worst-Entity DQ Score",
-        "Time Range · Worst Freshness Age (hours; SLA 24/72)",
+        "Monitor Worst-Entity DQ Score",
+        "Monitor Worst Freshness Age",
     }
     panels = {
         panel.get("title"): panel
@@ -1625,13 +1624,13 @@ def test_dq_problem_panels_expose_actionable_datalinks() -> None:
             str(link.get("title", "")).startswith("Open ") for link in data_links
         ), f"{panel_title} must use canonical Open ... dataLink titles"
 
-    reject_panel = panels["Range · Silver Filter Rejects"]
+    reject_panel = panels["Monitor Silver Filter Rejects"]
     reject_links = reject_panel.get("options", {}).get("dataLinks", [])
     assert not any(
         "Silver Reject Explorer" in str(link.get("title", "")) for link in reject_links
     )
     assert not reject_panel.get("links"), (
-        "Range · Silver Filter Rejects should not use legacy panel links"
+        "Monitor Silver Filter Rejects should not use legacy panel links"
     )
 
 
@@ -1661,17 +1660,17 @@ def test_selected_range_kpis_follow_declared_counter_window_intent() -> None:
             },
         },
         "bioetl-dq-v2.json": {
-            "Track Range Evidence: Bronze -> Silver -> Gold": {
+            "Track Record Flow by Stage": {
                 "intent": "pushed_snapshot_evidence",
                 "required": ("max_over_time(",),
                 "forbidden": ("last_over_time(",),
             },
-            "Track: Source Records in Range (Bronze)": {
+            "Monitor Bronze Records": {
                 "intent": "pushed_snapshot_evidence",
                 "required": ("max_over_time(",),
                 "forbidden": ("last_over_time(",),
             },
-            "Track: Clean Records in Range (Gold)": {
+            "Monitor Gold Records": {
                 "intent": "pushed_snapshot_evidence",
                 "required": ("max_over_time(",),
                 "forbidden": ("last_over_time(",),

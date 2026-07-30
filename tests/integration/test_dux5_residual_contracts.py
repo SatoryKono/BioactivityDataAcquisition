@@ -81,7 +81,7 @@ def test_value_columns_have_operator_display_names_on_suspect_tables() -> None:
     suspects = next(
         p
         for p in _walk(incident.get("panels"))
-        if p.get("title") == "Ranked Active Suspects"
+        if p.get("title") == "Inspect Ranked Suspects"
     )
     overrides = (suspects.get("fieldConfig") or {}).get("overrides") or []
     display_names = [
@@ -90,7 +90,7 @@ def test_value_columns_have_operator_display_names_on_suspect_tables() -> None:
         for prop in (ov.get("properties") or [])
         if prop.get("id") == "displayName"
     ]
-    assert display_names, "Ranked Active Suspects must label Value columns"
+    assert display_names, "Inspect Ranked Suspects must label Value columns"
     assert any(
         "Signal" in str(v) or "Count" in str(v) or "Severity" in str(v)
         for v in display_names

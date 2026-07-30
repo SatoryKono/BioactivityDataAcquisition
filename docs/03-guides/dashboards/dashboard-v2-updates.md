@@ -9,7 +9,8 @@ ______________________________________________________________________
 Latest dashboard UX artifact for current shipped JSON changes:
 `docs/reports/dashboard-ux-checks/2026-07-30.md`
 (prior: `docs/reports/dashboard-ux-checks/2026-07-28-drmr.md`;
-also: `docs/reports/dashboard-ux-checks/2026-07-28.md`)
+also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; canonical baseline:
+`docs/reports/dashboard-ux-checks/2026-05-19.md`)
 
 ## Selected-range description sync (2026-07-30)
 
