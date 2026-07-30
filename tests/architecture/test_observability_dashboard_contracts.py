@@ -169,14 +169,14 @@ def test_dq_quarantine_count_is_shipped_in_range_evidence_lane() -> None:
     )
     # Diet surface (#6647): quarantine evidence is shipped as blocked-records panel.
     accepted_titles = {
-        "Range · Records Quarantined",
-        "Track: DQ Blocked Records in Range (Evidence)",
+        "Monitor Quarantined Records",
+        "Monitor Blocked Records",
     }
     range_lane = next(
         (
             item
             for item in dashboard.get("panels", [])
-            if item.get("title") == "Range lane · debug evidence"
+            if item.get("title") == "Range & Debug Evidence"
         ),
         None,
     )
@@ -229,7 +229,7 @@ def test_provider_health_provenance_documents_provider_global_scope() -> None:
         (
             panel
             for panel in dashboard.get("panels", [])
-            if panel.get("title") == "Provenance"
+            if panel.get("title") == "Understand Evidence Scope"
         ),
         None,
     )
