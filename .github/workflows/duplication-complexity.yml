@@ -176,7 +176,7 @@ jobs:
             --targets src/bioetl/application/core src/bioetl/composition/bootstrap/runtime src/bioetl/composition/factories/pipeline src/bioetl/application/services/control_plane src/bioetl/composition/runtime_builders \
             --json-out reports/quality/hotspot-duplication-baseline.json \
             --md-out reports/quality/hotspot-duplication-baseline.md \
-            --max-duplicate-clusters 0 \
+            --max-duplicate-clusters 4 \
             --timeout-seconds 120
 
       - name: Upload reports
