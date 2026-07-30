@@ -21,8 +21,8 @@ exact_duplicates:
         as a deliberate cross-dashboard first-action status hop; keep identical
         semantics so operator drilldown does not diverge by board.
       panel_refs:
-        - "bioetl-overview-v2.json :: Status"
-        - "bioetl-incident-v1.json :: Status"
+        - "bioetl-overview-v2.json :: Monitor Fleet Health"
+        - "bioetl-incident-v1.json :: Monitor Incident Status"
 
 near_duplicates:
   max_count: 5
@@ -37,10 +37,10 @@ near_duplicates:
       recording_rule_decision: rejected_distinct_stage_and_range_semantics
       rationale: Bronze, Gold, and filtered-out views intentionally retain different stage semantics; pre-recording the dashboard range would be invalid.
       panel_refs:
-        - "bioetl-dq-v2.json :: Track: Clean Records in Range (Gold)"
-        - "bioetl-dq-v2.json :: Range · Silver Filter Rejects"
-        - "bioetl-dq-v2.json :: Track: Source Records in Range (Bronze)"
-        - "bioetl-overview-v2.json :: Silver Rejects + Rate"
+        - "bioetl-dq-v2.json :: Monitor Gold Records"
+        - "bioetl-dq-v2.json :: Monitor Silver Filter Rejects"
+        - "bioetl-dq-v2.json :: Monitor Bronze Records"
+        - "bioetl-overview-v2.json :: Track Silver Rejects"
     - id: workflow-step-outcome-range-variants
       disposition: retain_semantic_variants
       recording_rule_decision: rejected_distinct_step_predicates
@@ -54,15 +54,15 @@ near_duplicates:
       recording_rule_decision: rejected_distinct_error_taxonomy
       rationale: Timeout/network and rate-limit regex classes are intentionally distinct operator diagnoses; merging them would erase cause semantics.
       panel_refs:
-        - "bioetl-provider-health-v2.json :: Inspect Network Timeout Errors by Method"
-        - "bioetl-provider-health-v2.json :: Inspect Rate Limit Errors by Method"
+        - "bioetl-provider-health-v2.json :: Track Network & Timeout Errors"
+        - "bioetl-provider-health-v2.json :: Track Rate-Limit Errors"
     - id: runtime-blocker-topk-depth-variants
       disposition: retain_presentation_variants
       recording_rule_decision: rejected_topk_is_consumer_specific
       rationale: Top-3 is the first-screen summary and top-20 is the explicit drilldown; recording either topk would make the other consumer semantically wrong.
       panel_refs:
         - "bioetl-runtime.json :: Inspect Active Runtime Blocker Detail"
-        - "bioetl-runtime.json :: Runtime Blockers"
+        - "bioetl-runtime.json :: Review Runtime Blockers"
     - id: provider-cause-topk-depth-variants
       disposition: retain_presentation_variants
       recording_rule_decision: rejected_topk_is_consumer_specific
@@ -71,5 +71,5 @@ near_duplicates:
         Health keeps topk(5) as the board-first summary; recording either depth
         would make the other consumer semantically wrong.
       panel_refs:
-        - "bioetl-incident-v1.json :: Active Suspects · Provider"
-        - "bioetl-provider-health-v2.json :: Inspect Provider Top Causes"
+        - "bioetl-incident-v1.json :: Inspect Provider Suspects"
+        - "bioetl-provider-health-v2.json :: Inspect Top Provider Causes"

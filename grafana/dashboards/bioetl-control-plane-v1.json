@@ -2584,7 +2584,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows p50, p95, and p99 read latency across all control-plane stores. Filters do not apply. No data means no latency samples were recorded.",
+          "description": "Shows p50, p95, and p99 read latency across all control-plane stores during the selected range. Filters do not apply. No data means no latency samples were recorded in the selected range.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2864,7 +2864,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows missing lineage references grouped by layer and reference type. No rows can mean either no gaps or missing lineage telemetry; check fragment activity. Run Type does not affect this panel.",
+          "description": "Shows missing lineage references recorded during the selected range, grouped by layer and reference type. No rows can mean either no gaps or missing lineage telemetry; check fragment activity. Run Type does not affect this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3052,7 +3052,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows p50, p95, and p99 audit-write latency across all pipelines. No data means no latency samples were recorded.",
+          "description": "Shows p50, p95, and p99 audit-write latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3133,7 +3133,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows p50, p95, and p99 audit-query latency across all pipelines. No data means no latency samples were recorded.",
+          "description": "Shows p50, p95, and p99 audit-query latency across all pipelines during the selected range. No data means no latency samples were recorded in the selected range.",
           "fieldConfig": {
             "defaults": {
               "color": {
