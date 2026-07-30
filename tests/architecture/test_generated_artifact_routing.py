@@ -51,7 +51,15 @@ def _is_safe_output_path(
 ) -> bool:
     if not path or path.startswith("../") or "/../" in path:
         return False
-    if not any(path.startswith(root) for root in allowed_roots):
+    def matches_allowed_root(root: str) -> bool:
+        if Path(root).suffix:
+            return path == root
+        if root.endswith("/"):
+            directory_root = root.rstrip("/")
+            return path == directory_root or path.startswith(root)
+        return path.startswith(root)
+
+    if not any(matches_allowed_root(root) for root in allowed_roots):
         return False
     if "/" not in path and path.endswith(FORBIDDEN_ROOT_OUTPUT_SUFFIXES):
         return False
@@ -109,6 +117,7 @@ def test_generated_artifact_routing_inventory_is_valid() -> None:
         "../reports/generated.json",
         "reports/../generated.json",
         "output/generated.json",
+        "docs/02-architecture/07-compatibility-facade-snapshot.md.bak",
         "generated.json",
     ),
 )
