@@ -136,16 +136,19 @@ def test_provider_health_descriptions_separate_global_and_selected_scope() -> No
     panels = {panel.get("id"): panel for panel in dashboard["panels"]}
 
     status_description = str(panels[9401].get("description", ""))
-    assert "selected-provider scope" in status_description
-    assert "GLOBAL Provider Severity Matrix" in status_description
-    assert "may disagree by design" in status_description
+    assert "selected provider" in status_description
+    assert "Fleet panels" in status_description
+    assert "all providers" in status_description
 
     provenance_content = str(panels[9400].get("options", {}).get("content", ""))
-    assert "GLOBAL severity" in provenance_content
-    # Dashboard copy uses sentence case: "Selected-provider Status…"
-    assert "Selected-provider Status can disagree by design" in provenance_content
+    assert "<b>GLOBAL</b> = fleet severity/freshness" in provenance_content
+    assert "<b>SELECTED PROVIDER</b> = provider status" in provenance_content
 
-    for panel_id in (9101, 9102, 9103):
+    for panel_id in (9101, 9102):
         description = str(panels[panel_id].get("description", ""))
         assert "Scope: GLOBAL provider fleet posture" in description
         assert "intentionally not filtered by run_id" in description
+
+    top_causes_description = str(panels[9103].get("description", ""))
+    assert "Scope: fleet" in top_causes_description
+    assert "not filtered by run ID" in top_causes_description

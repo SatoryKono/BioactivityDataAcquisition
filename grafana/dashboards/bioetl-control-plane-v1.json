@@ -1249,7 +1249,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts failed checkpoint administration operations across all pipelines. Pipeline and Run Type filters do not affect this panel.",
+      "description": "Counts failed checkpoint administration operations across all pipelines during the selected range. Pipeline and Run Type filters do not affect this panel. Zero means no failures were recorded in the selected range; it does not prove telemetry completeness.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1703,7 +1703,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows p50, p95, and p99 administration latency across all pipelines. Filters do not affect this panel. No data is expected when no administration operations occurred.",
+          "description": "Shows p50, p95, and p99 administration latency across all pipelines during the selected range. Filters do not affect this panel. No data is expected when no administration operations occurred in the selected range.",
           "fieldConfig": {
             "defaults": {
               "color": {
