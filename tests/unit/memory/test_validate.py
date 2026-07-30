@@ -101,6 +101,36 @@ def test_memory_scaffold_validation_accepts_valid_note_files(tmp_path: Path) -> 
     assert validate_memory_scaffold(memory_root) == []
 
 
+def test_memory_scaffold_rejects_machine_local_identity_in_source_refs(
+    tmp_path: Path,
+) -> None:
+    memory_root = tmp_path / "memory"
+    _copy_minimal_memory_scaffold(memory_root)
+    write_markdown_note(
+        memory_root / "episodic" / "sessions" / "local-path.md",
+        metadata={
+            "id": "local-path",
+            "title": "Local path",
+            "task_id": "task-a",
+            "created_at": "2026-07-30T00:00:00+00:00",
+            "ttl_days": 14,
+            "confidence": "episodic",
+            "source_refs": ["local:/home/example-user/.bashrc"],
+        },
+        body="# Session\n",
+    )
+
+    messages = {
+        issue.message
+        for issue in validate_memory_scaffold(
+            memory_root,
+            include_all_episodic_notes=True,
+        )
+    }
+
+    assert any("pii-posix-user-home-path" in message for message in messages)
+
+
 def test_memory_scaffold_validation_discovers_task_scoped_notes(
     tmp_path: Path,
 ) -> None:
