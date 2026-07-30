@@ -2,6 +2,12 @@
   "schema_version": "1.0",
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/ai/junie/check_junie_mirror.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Python implementation behind the canonical check_junie_mirror.sh entrypoint; keep direct contributor usage routed through the shell wrapper."
+    },
     "scripts/docs/fixers/fix_links_auto.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -68,6 +74,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
     },
+    "scripts/docs/passports/duplicate_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal duplication-audit helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
     "scripts/docs/passports/inventory.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -86,11 +98,29 @@
       "review_by": "2026-09-30",
       "next_step": "Either integrate this extracted renderer behind the canonical passport projector or remove it if the projector remains the rendering source of truth; do not expose it as another standalone script surface."
     },
+    "scripts/docs/passports/pipeline_projection.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal pipeline-projection helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
     "scripts/docs/passports/projector.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as the internal passport projection helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
+    "scripts/docs/passports/source_facts.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the shared source-fact extraction helper used by passport and diagram tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/passports/validation.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal passport validation helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
     },
     "scripts/ai/codex/helper/check-env.ps1": {
       "owner": "@bioetl-platform",

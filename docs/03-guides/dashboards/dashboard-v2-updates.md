@@ -118,12 +118,10 @@ notes. Если prose ниже расходится с JSON, править ну
 - `bioetl-workflow-overview` removed the old `Workflow Scope` banner and now
   uses `First Action` (`id=9`) as the single justified first-screen
   dashboard-handoff CTA.
-- Workflow selected-range evidence remains on the first screen:
-  `Failed Workflow Runs / Range`, `Failed Pipeline Steps / Range`,
-  `Failed Transform Steps / Range`, `Skipped Step Events / Range`,
-  `Workflow Run Outcomes / Range`, `First Action`. `Workflow Run Outcomes /
-  Range` is a compact neutral `stat` so empty selected-range evidence does not
-  render as large colored `success=0` / `failed=0` bars.
+- Workflow selected-range evidence moved to `bioetl-runtime` workflow band:
+  `Track Failed Workflow Runs`, `Track Failed Workflow Steps`. These panels
+  use zero-valid fallback for empty selected ranges and render neutral evidence
+  instead of colored verdicts when scrape/rule health is degraded.
 - `bioetl-runtime` keeps `Metrics Evidence` as a first-screen datasource
   trust marker and now reserves readable dashboard width for that panel.
   `Status` / `Runtime Status` are trust-gated by this marker, and compact

@@ -21,7 +21,7 @@ def _require_dashboard(name: str) -> Path:
 
 
 def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None:
-    dashboard = load_dashboard(_require_dashboard("bioetl-workflow-overview.json"))
+    dashboard = load_dashboard(_require_dashboard("bioetl-runtime.json"))
 
     description = str(dashboard.get("description", "")).lower()
     assert "selected-range" in description
@@ -35,10 +35,8 @@ def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None
         if panel.get("title")
     }
     expected_tokens = {
-        "Failed Workflow Runs / Range": ("selected time range", "0. control plane"),
-        "Failed Pipeline Steps / Range": ("step_kind=pipeline", "2. runtime"),
-        "Failed Transform Steps / Range": ("transform", "4. data quality"),
-        "Skipped Step Events / Range": ("skipped", "selected time range"),
+        "Track Failed Workflow Runs": ("selected time range", "0. control plane"),
+        "Track Failed Workflow Steps": ("step_kind=pipeline", "2. runtime"),
         "Workflow Run Outcomes / Range": (
             "valid empty",
             "no matching scope",

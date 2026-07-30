@@ -50,9 +50,9 @@ def test_runtime_workflow_band_uses_workflow_metrics() -> None:
     assert dashboard["uid"] == "bioetl-runtime"
     panels = _iter_panels(list(dashboard.get("panels") or []))
     titles = {str(panel.get("title") or "") for panel in panels}
-    assert "Workflow band (merged from bioetl-workflow-overview)" in titles
-    assert "Failed Workflow Runs / Range" in titles
-    assert "Failed Pipeline Steps / Range" in titles
+    assert "Inspect Workflow Evidence" in titles
+    assert "Track Failed Workflow Runs" in titles
+    assert "Track Failed Workflow Steps" in titles
 
     expressions = "\n".join(
         str(target.get("expr", ""))

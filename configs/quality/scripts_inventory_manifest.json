@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-30T08:03:29.408462+00:00",
+  "generated_at": "2026-07-30T08:12:17.663278+00:00",
   "summary": {
     "total_scripts": 567,
     "status_counts": {
-      "active": 346,
-      "supporting": 216,
+      "active": 341,
+      "supporting": 221,
       "temporary_diagnostic": 5
     },
     "reference_group_coverage": {
@@ -2202,7 +2202,7 @@
     {
       "path": "scripts/ai/junie/check_junie_mirror.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -2212,7 +2212,11 @@
           "source_group": "scripts",
           "text": "exec \"$PYTHON_BIN\" \"$SCRIPT_DIR/check_junie_mirror.py\" \"$MODE\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Python implementation behind the canonical check_junie_mirror.sh entrypoint; keep direct contributor usage routed through the shell wrapper."
     },
     {
       "path": "scripts/ai/junie/check_junie_mirror.sh",
@@ -8180,7 +8184,7 @@
     {
       "path": "scripts/docs/passports/duplicate_audit.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -8196,7 +8200,11 @@
           "source_group": "tests",
           "text": "from scripts.docs.passports.duplicate_audit import audit_markdown_texts"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal duplication-audit helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
     },
     {
       "path": "scripts/docs/passports/inventory.py",
@@ -8263,7 +8271,7 @@
     {
       "path": "scripts/docs/passports/pipeline_projection.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -8273,7 +8281,11 @@
           "source_group": "scripts",
           "text": "from .pipeline_projection import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal pipeline-projection helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
     },
     {
       "path": "scripts/docs/passports/projector.py",
@@ -8309,7 +8321,7 @@
     {
       "path": "scripts/docs/passports/source_facts.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -8325,12 +8337,16 @@
           "source_group": "scripts",
           "text": "from .source_facts import load_effective_pipeline_facts"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the shared source-fact extraction helper used by passport and diagram tooling; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
       "path": "scripts/docs/passports/validation.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 11,
       "references": [
@@ -8382,7 +8398,11 @@
           "source_group": "docs",
           "text": "| `quality/validation.py` | Quality | Schema and record validation contracts. |"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal passport validation helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
     },
     {
       "path": "scripts/docs/report_docs_kpi.py",

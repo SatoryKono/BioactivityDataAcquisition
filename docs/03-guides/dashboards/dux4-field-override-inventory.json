@@ -5222,7 +5222,7 @@
       "uid": "bioetl-runtime",
       "file": "bioetl-runtime.json",
       "panel_id": 9996,
-      "title": "Failed Workflow Runs / Range",
+      "title": "Track Failed Workflow Runs",
       "type": "stat",
       "collapsed": true,
       "gridPos": {

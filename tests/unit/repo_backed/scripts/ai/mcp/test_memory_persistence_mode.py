@@ -15,6 +15,8 @@ WRAPPER = Path("scripts/ai/mcp/mcp_memory_wrapper.sh")
 def test_mcp_memory_safe_modes_exit_before_server_start(mode: str | None) -> None:
     environment = dict(os.environ)
     environment.pop("BIOETL_AI_MEMORY_MODE", None)
+    environment["BIOETL_SKIP_ENV_LOCAL"] = "1"
+    environment["BIOETL_REPO_ENV_LOADED"] = "1"
     if mode is not None:
         environment["BIOETL_AI_MEMORY_MODE"] = mode
 
@@ -33,7 +35,12 @@ def test_mcp_memory_safe_modes_exit_before_server_start(mode: str | None) -> Non
 
 
 def test_mcp_memory_rejects_unknown_mode_without_server_start() -> None:
-    environment = {**os.environ, "BIOETL_AI_MEMORY_MODE": "unsafe"}
+    environment = {
+        **os.environ,
+        "BIOETL_AI_MEMORY_MODE": "unsafe",
+        "BIOETL_SKIP_ENV_LOCAL": "1",
+        "BIOETL_REPO_ENV_LOADED": "1",
+    }
     completed = subprocess.run(
         ["bash", WRAPPER.as_posix()],
         capture_output=True,

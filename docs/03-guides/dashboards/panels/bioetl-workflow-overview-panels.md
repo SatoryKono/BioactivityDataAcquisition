@@ -2,16 +2,17 @@
 
 > **REMOVED from shipping surface (2026-07-23 / epic #6647).**  
 > Dashboard JSON is no longer shipped under `grafana/dashboards/`.  
-> Workflow band evidence lives on `bioetl-runtime` (Pipeline Diagnostics).  
+> Workflow band evidence lives on `bioetl-runtime` (Pipeline Diagnostics) with panels:
+> - `Track Failed Workflow Runs` (panel_id: 9996)
+> - `Track Failed Workflow Steps` (panel_id: 9997)
 > This document is retained as historical panel inventory only.
 
 **Dashboard file:** `grafana/dashboards/bioetl-workflow-overview.json` *(absent — retired)*
 
 ## Обзор
 
-Dashboard `5. Workflow` monitors workflow and pipeline verdicts, failed runs,
-step failures, skipped steps, and step duration trends. Shipped dashboard JSON
-is the source of truth.
+Dashboard `5. Workflow` was retired in epic #6647. Workflow evidence now lives on
+`bioetl-runtime` (Pipeline Diagnostics) under the workflow band section.
 
 ## Variable contract
 

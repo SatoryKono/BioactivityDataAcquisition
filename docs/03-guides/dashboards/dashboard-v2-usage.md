@@ -615,20 +615,13 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `1. Overview`, `2. Pipeline Diagnostics`, `3. Provider Health`, `4. Data Quality`;
   cross-dashboard handoffs preserve primary `$run_id` but do not leak
   `$status/$step_status/$step_kind` into non-workflow targets.
-- `bioetl-workflow-overview`: first screen keeps `Failed Workflow Runs / Range`,
-  `Failed Pipeline Steps / Range`, `Failed Transform Steps / Range`,
-  `Skipped Step Events / Range`, `Workflow Run Outcomes / Range`, and
-  `First Action`; zero counters render neutral `0 · valid empty range`, while
-  `Workflow Run Outcomes / Range` distinguishes `VALID EMPTY`, `NO MATCHING
-  SCOPE`, `TELEMETRY ABSENT`, and `ERROR / UNKNOWN`. Deeper step evidence lives
-  under collapsed row `Step Diagnostics` with
-  `Step Outcomes by Kind / Step Status / Range` and
-  `Step Duration p95 by Kind / Step Status / Range`.
-- `bioetl-workflow-overview`: `First Action` is the only justified
-  panel-level handoff exception. Although the header bus already exists, this
-  panel remains the sole first-screen workflow CTA and therefore exposes
-  bounded `Open ...` dataLinks to neighboring dashboards while preserving the
-  time range and resetting unsupported workflow-only state filters.
+- `bioetl-runtime`: workflow band (merged from bioetl-workflow-overview) keeps
+  `Track Failed Workflow Runs`, `Track Failed Workflow Steps`; zero counters
+  render neutral `0 · valid empty range`. Deeper step evidence lives under
+  collapsed row `Workflow band (merged from bioetl-workflow-overview)` with
+  workflow-specific metrics.
+- `bioetl-runtime`: workflow panels use selected-range event-delta evidence
+  with zero-valid fallback for empty selected ranges.
 - `CLI quarantine inspect`: `Review: First Action / No-Data Semantics`
   now also carries bounded CTA row links (`Review total rejects`,
   `Review scoped summary`, `Open Data Quality`) so the first-screen forensic
@@ -641,8 +634,8 @@ Variable handoff policy for dashboard links remains strict and bounded:
   blank/loading and error + `No data` contradictions fail render evidence.
 
   **First 2 clicks (L1):**
-  1. Click #1: открыть `bioetl-workflow-overview`, проверить `Failed Workflow Runs / Range` (`id=2`), `Failed Pipeline Steps / Range` (`id=3`) и `Failed Transform Steps / Range` (`id=6`).
-  2. Click #2: перейти в `2. Pipeline Diagnostics` для incident triage по pipeline impact, в `4. Data Quality` для transform/filtering fallout, или в `0. Trust` для replay/resume trust verification. Workflow Prometheus evidence uses bounded workflow labels and never requires `run_id`/`step_id` labels; shared `$pipeline/$run_type/$run_id` context feeds only context/identity surfaces unless a panel documents otherwise.
+  1. Click #1: открыть `2. Pipeline Diagnostics` (bioetl-runtime), проверить workflow band panels `Track Failed Workflow Runs` и `Track Failed Workflow Steps`.
+  2. Click #2: перейти в `4. Data Quality` для transform/filtering fallout, или в `0. Trust` для replay/resume trust verification. Workflow Prometheus evidence uses bounded workflow labels and never requires `run_id`/`step_id` labels; shared `$pipeline/$run_type/$run_id` context feeds only context/identity surfaces unless a panel documents otherwise.
 - Loki drilldown использует безопасный low-cardinality entrypoint `{job="bioetl"}` без dashboard-variable interpolation внутри encoded Explore payload. Это сознательный baseline: Grafana надёжно не подставляет `$pipeline/$provider` в `left=...`, поэтому дополнительное сужение оператор делает уже в самом Explore. Tempo drilldown открывает trace search в том же временном окне; детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
 - Tempo drilldown теперь тоже открывается contextual: pipeline-scoped
   dashboards предварительно фильтруют TraceQL по `span."bioetl.pipeline"`, а
