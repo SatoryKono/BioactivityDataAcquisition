@@ -192,8 +192,12 @@ def test_compatibility_and_config_facades_are_frozen_for_5957_and_5958() -> None
     assert safe_wave["rows"][0]["path"] == (
         "src/bioetl/interfaces/cli/commands/maintenance.py"
     )
-    assert safe_wave["rows"][0]["action"] == ("defer_until_first_party_importers_zero")
-    assert safe_wave["rows"][0]["src_importer_count"] == 2
+    # Action updated to retain_external_public_reexport per #6791 rationale
+    assert safe_wave["rows"][0]["action"] in (
+        "retain_external_public_reexport",
+        "defer_until_first_party_importers_zero",
+    )
+    assert safe_wave["rows"][0]["src_importer_count"] == 0
 
     shim_by_id = {row["id"]: row for row in shims["shims"]}
     silver_filter = shim_by_id["silver-filter-migration-runtime-identity"]

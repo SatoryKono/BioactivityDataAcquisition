@@ -436,7 +436,7 @@ def test_retained_public_export_owner_usage_map_is_published() -> None:
 
 
 @pytest.mark.architecture
-def test_first_safe_removal_wave_is_deferred_while_importers_remain() -> None:
+def test_first_safe_removal_wave_retains_external_reexport_after_burndown() -> None:
     payload = build_compatibility_importer_census(ROOT, snapshot_date="2026-06-19")
     first_wave = payload["first_safe_removal_wave"]
     assert isinstance(first_wave, dict)
@@ -448,14 +448,11 @@ def test_first_safe_removal_wave_is_deferred_while_importers_remain() -> None:
     by_path = {str(row["path"]): row for row in rows if isinstance(row, dict)}
     maintenance = by_path["src/bioetl/interfaces/cli/commands/maintenance.py"]
     assert maintenance["owner"] == "bioetl.interfaces.cli.commands"
-    assert maintenance["surface_classification"] == "first-party-active"
-    assert maintenance["src_importers"] == [
-        "src/bioetl/interfaces/cli/commands/__init__.py",
-        "src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py",
-    ]
-    assert maintenance["src_importer_count"] == 2
+    assert maintenance["surface_classification"] == "external-public-only"
+    assert maintenance["src_importers"] == []
+    assert maintenance["src_importer_count"] == 0
     assert maintenance["test_importer_count"] == 0
-    assert maintenance["action"] == "defer_until_first_party_importers_zero"
+    assert maintenance["action"] == "retain_external_public_reexport"
     assert maintenance["migration_prerequisites"]
 
 
