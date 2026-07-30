@@ -17,8 +17,10 @@ from memory.records import (
 from memory.user_memory import (
     UserMemoryConsent,
     UserMemoryConsentError,
+    UserMemoryFreshnessError,
     UserMemoryStore,
 )
+from memory.scope import RepositoryScope
 
 pytestmark = pytest.mark.unit
 
@@ -63,6 +65,22 @@ def _consent(store: UserMemoryStore) -> None:
     )
 
 
+def _scope(
+    *,
+    repo_id: str = "repo-a",
+    git_commit: str = "a" * 40,
+    branch: str = "main",
+    worktree_id: str = "wt-a",
+) -> RepositoryScope:
+    return RepositoryScope(
+        repo_id=repo_id,
+        git_commit=git_commit,
+        branch=branch,
+        worktree_id=worktree_id,
+        task_id="task-a",
+    )
+
+
 def test_user_memory_is_disabled_until_explicit_consent(tmp_path: Path) -> None:
     store = UserMemoryStore(tmp_path)
 
@@ -91,6 +109,8 @@ def test_scoped_enumerate_export_correct_tombstone_and_delete(tmp_path: Path) ->
         context,
         owner_id="user-a",
         record_id="preference-1",
+        scope=_scope(),
+        dirty=False,
     ).content == {"language": "ru"}
 
     corrected = store.correct(
@@ -129,6 +149,8 @@ def test_cross_user_and_cross_repository_access_is_denied(tmp_path: Path) -> Non
             _context(user_id="user-b"),
             owner_id="user-a",
             record_id="preference-1",
+            scope=_scope(),
+            dirty=False,
         )
 
     with pytest.raises(UserMemoryConsentError, match="explicit consent"):
@@ -155,6 +177,65 @@ def test_revoked_consent_blocks_subsequent_access_without_deleting(
 
     with pytest.raises(UserMemoryConsentError, match="consent revoked"):
         store.enumerate(context, owner_id="user-a")
+
+
+@pytest.mark.parametrize(
+    ("scope", "dirty", "reason"),
+    [
+        (_scope(git_commit="b" * 40), False, "commit-mismatch"),
+        (_scope(branch="feature"), False, "branch-mismatch"),
+        (_scope(worktree_id="wt-b"), False, "worktree-mismatch"),
+        (_scope(repo_id="repo-b"), False, "repository-mismatch"),
+        (_scope(), True, "dirty-worktree"),
+    ],
+)
+def test_export_rejects_memory_outside_current_checkout(
+    tmp_path: Path,
+    scope: RepositoryScope,
+    dirty: bool,
+    reason: str,
+) -> None:
+    store = UserMemoryStore(tmp_path)
+    _consent(store)
+    context = _context()
+    store.put(
+        context,
+        owner_id="user-a",
+        envelope=_envelope(),
+        content={"language": "ru"},
+    )
+
+    with pytest.raises(UserMemoryFreshnessError, match=reason):
+        store.export(
+            context,
+            owner_id="user-a",
+            record_id="preference-1",
+            scope=scope,
+            dirty=dirty,
+        )
+
+
+def test_export_allows_explicit_clean_historical_mode(tmp_path: Path) -> None:
+    store = UserMemoryStore(tmp_path)
+    _consent(store)
+    context = _context()
+    store.put(
+        context,
+        owner_id="user-a",
+        envelope=_envelope(),
+        content={"language": "ru"},
+    )
+
+    record = store.export(
+        context,
+        owner_id="user-a",
+        record_id="preference-1",
+        scope=_scope(git_commit="b" * 40),
+        dirty=False,
+        historical_mode=True,
+    )
+
+    assert record.content == {"language": "ru"}
 
 
 @pytest.mark.parametrize("identifier", ["../escape", "/absolute", "", "space value"])
