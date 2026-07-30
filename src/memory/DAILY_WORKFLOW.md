@@ -166,7 +166,15 @@ automated by this workflow.
 Use `python -m memory.tooling.prune --json` for the policy-default density
 report or `python -m memory.tooling.prune --max-active <N> --json` for an
 explicit override. The default cadence is a dry-run review every 7 days with a
-target ceiling of 1000 active episodic notes. Use
+target ceiling of 1000 active episodic notes.
+`.github/workflows/memory-retention.yml` is the governed weekly and
+pull-request gate: it runs `python -m memory.tooling.prune --check --json` and
+fails when expired, excess, or metadata-invalid notes require owner review.
+The gate never deletes content. An owner must review the bounded report before
+running `python -m memory.tooling.prune --apply`; destructive retention remains
+explicitly authorized and separate from detection.
+
+Use
 `python -m memory.tooling.validate --include-working-tree-junk` when local
 Python cache files under `src/memory/` should fail validation. Memory tooling
 processes disable Python bytecode writes by default, and dev wrappers should
