@@ -7,11 +7,14 @@ repository.
 
 For AI runtime behavior and workflow conflicts, use this priority:
 
-1. active runtime source for the current agent or skill:
+1. active runtime source for the current agent or skill — equal peers:
    - `.codex/agents/CODEX-RUNTIME.md`
+   - `.junie/agents/JUNIE-RUNTIME.md`
    - a matching tracked `.gemini/**` runtime surface only when that tree exists
      in the current checkout and is verified in the same change
 1. runtime profiles and skills in the matching runtime tree
+   (`.codex/agents/py-*.md`, `.codex/skills/**`, `.junie/agents/py-*.md`,
+   `.junie/skills/**`)
 1. `docs/00-project/NORMATIVE_SOURCES.md` (normative stack index)
 1. `docs/00-project/RULES.md`
 1. `docs/01-requirements/REQUIREMENTS.md`
@@ -54,6 +57,10 @@ Minimum expectation:
    contracts, configs, and workflows.
 1. Edit runtime source first, then sync docs mirrors when behavior or
    contributor guidance changed.
+1. **Runtime mirror parity:** after changes under `.codex/agents/**`,
+   `.codex/skills/**`, `.junie/agents/**`, or `.junie/skills/**`, run
+   `bash scripts/ai/junie/check_junie_mirror.sh --check` and report the
+   result. Divergences MUST be resolved before submit.
 1. After changes under `src/bioetl/**/*.py`, refresh
    `reports/quality/module-coverage-inventory.json` field `source_tree_sha256`
    via `python _refresh_module_coverage_inventory.py` and run the architecture
@@ -69,13 +76,17 @@ Minimum expectation:
 - BioETL remains local-only by default; do not introduce Docker, Redis, or
   external orchestration requirements unless the task explicitly requires them.
 - `.codex/**` is the canonical Codex runtime source.
+- `.junie/**` is the canonical JetBrains Junie runtime source and an equal peer
+  to `.codex/**`. Tracked runtime subtrees MUST remain covered by the
+  Codex–Junie parity contract; machine-local Junie history/state/cache remains
+  untracked.
 - `.gemini/settings.json` may exist as a machine-local Gemini config surface,
   but the current `main` checkout does not contain a tracked Gemini
   `agents/` or `skills/` runtime tree.
 - Treat `docs/00-project/ai/**` Gemini references as mirrors or historical
   guidance unless a future task adds and verifies tracked `.gemini/agents/**`
   or `.gemini/skills/**` surfaces on `main`.
-- `.claude/**` is not an active runtime source for Codex/Gemini behavior in
+- `.claude/**` is not an active runtime source for Codex/Junie/Gemini behavior in
   this change program and is treated as unavailable until a local checkout
   proves otherwise.
 - `docs/00-project/ai/memory/mcp-memory.json` and
