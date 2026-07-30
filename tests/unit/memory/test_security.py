@@ -26,6 +26,8 @@ pytestmark = pytest.mark.unit
         ("Authorization: Bearer abcdefghijklmnopqrstuvwxyz", FindingKind.SECRET),
         ("Contact alice@example.org for the raw export.", FindingKind.PII),
         ("Call +372 5555 1234 for access.", FindingKind.PII),
+        ("Loaded local:/home/example-user/.bashrc", FindingKind.PII),
+        (r"Loaded C:\Users\example-user\settings.json", FindingKind.PII),
     ],
 )
 def test_inspect_memory_content_classifies_unsafe_content(
