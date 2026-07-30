@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-30T08:12:17.663278+00:00",
+  "generated_at": "2026-07-30T08:29:39.720971+00:00",
   "summary": {
     "total_scripts": 567,
     "status_counts": {
@@ -3300,7 +3300,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
-          "line": 11,
+          "line": 10,
           "source_group": "tests",
           "text": "WRAPPER = Path(\"scripts/ai/mcp/mcp_memory_wrapper.sh\")"
         },

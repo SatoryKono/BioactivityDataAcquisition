@@ -109,18 +109,18 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9405 | Run context (thin) -> Run Explorer hub |
 | bioetl-dq-v2.json | 9402 | ID |
 | bioetl-dq-v2.json | 9403 | Processed Records |
-| bioetl-incident-v1.json | 1000 | Navigation |
-| bioetl-incident-v1.json | 9400 | Provenance |
-| bioetl-incident-v1.json | 9401 | Status |
-| bioetl-incident-v1.json | 2001 | Next Best Actions |
-| bioetl-incident-v1.json | 2010 | Ranked Active Suspects |
-| bioetl-incident-v1.json | 2005 | Evidence timeline · Current Alerts (now) |
-| bioetl-incident-v1.json | 2006 | Evidence timeline · Alert State History (range) |
-| bioetl-incident-v1.json | 2007 | Impact / confidence (honest bounds) |
-| bioetl-incident-v1.json | 2099 | Domain suspect detail (forensics; collapsed) |
-| bioetl-incident-v1.json | 2002 | Active Suspects · Runtime |
-| bioetl-incident-v1.json | 2003 | Active Suspects · Provider |
-| bioetl-incident-v1.json | 2004 | Active Suspects · DQ |
+| bioetl-incident-v1.json | 1000 | Navigate Dashboards |
+| bioetl-incident-v1.json | 9400 | Understand Incident Scope |
+| bioetl-incident-v1.json | 9401 | Monitor Incident Status |
+| bioetl-incident-v1.json | 2001 | Start Incident Triage |
+| bioetl-incident-v1.json | 2010 | Inspect Ranked Suspects |
+| bioetl-incident-v1.json | 2005 | Monitor Current Alerts |
+| bioetl-incident-v1.json | 2006 | Track Alert State History |
+| bioetl-incident-v1.json | 2007 | Assess Impact & Confidence |
+| bioetl-incident-v1.json | 2099 | Domain Suspect Details |
+| bioetl-incident-v1.json | 2002 | Inspect Runtime Suspects |
+| bioetl-incident-v1.json | 2003 | Inspect Provider Suspects |
+| bioetl-incident-v1.json | 2004 | Inspect DQ Suspects |
 | bioetl-overview-v2.json | 9600 | Inspect Alerts |
 | bioetl-overview-v2.json | 9601 | Review Active Alerts |
 | bioetl-overview-v2.json | 1000 | Navigate Dashboards |
