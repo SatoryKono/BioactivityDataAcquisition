@@ -2117,9 +2117,12 @@ fields:
 | [ADR-051](../02-architecture/decisions/ADR-051-quarantine-entry-aggregate-surface.md) | Quarantine Entry Aggregate Surface | Accepted | 2026-07-27 |
 | [ADR-052](../02-architecture/decisions/ADR-052-infrastructure-config-package-root-public-api.md) | Infrastructure Config Package-Root as Permanent External Public API | Accepted | 2026-07-28 |
 | [ADR-053](../02-architecture/decisions/ADR-053-optional-grafana-scenes-app-shell.md) | Optional Grafana Scenes App Shell as Presentation Adapter | Accepted | 2026-07-28 |
+| [ADR-054](../02-architecture/decisions/ADR-054-passport-documentation-projections.md) | Evidence-backed Passport Documentation Projections | Accepted | 2026-07-29 |
+| [ADR-055](../02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md) | Retain Foreign-key Reconciliation as a Governed Workflow Data Step | Accepted | 2026-07-29 |
 
 ## История Изменений (Changelog)
 
+- **6.1.7** (2026-07-30): ADR Registry Governance Sync. Приложение F синхронизировано через ADR-055; добавлены ADR-054 (passport documentation projections) и ADR-055 (workflow reconciliation data-step ownership).
 - **6.1.6** (2026-07-28): ADR Registry Governance Sync. Приложение F синхронизировано через ADR-053 (optional Grafana Scenes App Shell as presentation adapter; dual-path with provisioned JSON under ADR-010).
 - **6.1.5** (2026-07-16): Qodo rules reconciliation. 66 unique Qodo rule IDs
   из broad best-effort semantic extraction нормализованы в 18 project gates;
