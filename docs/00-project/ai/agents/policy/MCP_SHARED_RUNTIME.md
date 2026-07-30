@@ -104,7 +104,7 @@ a second endpoint map.
 | Server | Accepted shared-state contract |
 | --- | --- |
 | `filesystem` | One repository-root allowlist shared by every local client; generated client config cannot expand it |
-| `memory` | One server process owns the canonical repository memory JSON, serializing writes inside that process |
+| `memory` | One server process owns a local worktree/branch/commit-scoped JSON under ignored `.cache/mcp-memory/`, serializing writes inside that process. The tracked JSON is a read-only seed, never the mutable runtime store. |
 
 ## Generator contract
 

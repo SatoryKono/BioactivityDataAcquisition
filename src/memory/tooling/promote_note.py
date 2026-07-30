@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 from memory.notes import (
@@ -178,11 +179,6 @@ def promote_note(
         raise ValueError("source episodic note still contains placeholder source_refs")
     if _contains_placeholder(summary):
         raise ValueError("promotion summary must be explicit and non-placeholder")
-    assert_safe_for_persistence(
-        f"{summary}\n{note.body}",
-        trust=TrustLevel.TRUSTED_REPOSITORY,
-    )
-
     duplicates = _detect_duplicates(note_id, title)
     if duplicates and not force_duplicate:
         raise ValueError(f"duplicate curated note detected: {', '.join(duplicates)}")
@@ -201,6 +197,14 @@ def promote_note(
 
     output = output_path or (_curated_targets()[target_kind] / f"{note_id}.md")
     body = _build_curated_body(target_kind, source, note.body)
+    assert_safe_for_persistence(
+        json.dumps(
+            {"metadata": metadata, "body": body},
+            ensure_ascii=True,
+            sort_keys=True,
+        ),
+        trust=TrustLevel.TRUSTED_REPOSITORY,
+    )
     write_markdown_note(output, metadata, body)
 
     if move:

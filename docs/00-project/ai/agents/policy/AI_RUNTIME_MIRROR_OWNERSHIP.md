@@ -24,6 +24,7 @@ ______________________________________________________________________
 | ----------------------- | --------------------------------- | ---------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `.codex/**` | Codex runtime surface | Canonical for tracked runtime behavior on `main` | Yes | live agent registry (`.codex/agents/*.md` tracked), skills, Codex-specific orchestration, runtime settings |
 | `.junie/**` | JetBrains Junie runtime surface | Canonical for tracked runtime behavior on `main` (equal peer to `.codex/**`) | Yes, keeping parity with `.codex/**` | `.junie/guidelines.md` (root contract), `.junie/agents/**` (JUNIE-RUNTIME + 9 py-* profiles + README/ORCHESTRATION mirrors), `.junie/skills/**` (mirror of `.codex/skills/**`), `.junie/plans/**` |
+| `.devin/agents/**`, `.devin/skills/**` | Devin runtime surface | Canonical for tracked Devin-specific runtime behavior | Yes, subject to Codex–Devin skill parity contracts | `DEVIN-RUNTIME`, custom profile entrypoints, orchestration, and Devin skill adaptations |
 | `.gemini/settings.json` | Gemini local config surface | Local-only runtime config; not a tracked behavior tree on `main` | Yes, for machine-local settings only | optional local checkout settings with machine-specific paths |
 | `.gemini/agents/**`, `.gemini/skills/**` | Gemini runtime behavior tree | Not present in the current `main` checkout | No tracked source on `main` today | if a future task adds them, they must be verified and documented in the same change |
 | `docs/00-project/ai/**` | Published/internal mirror surface | Not canonical for runtime behavior | Only for mirror/index/guidance updates | curated mirrors, navigation, contributor guidance, memory entrypoints, prompt and skill indexes |
@@ -44,6 +45,10 @@ ______________________________________________________________________
    in one direction (`.codex/** → .junie/**`); the reverse direction is
    allowed only via a reviewed change that also updates the Codex side in the
    same commit.
+1. `.devin/agents/**` and `.devin/skills/**` are authoritative for tracked
+   Devin-specific runtime behavior. Shared skill structure remains governed by
+   the Codex–Devin mirror contract; Devin-native profile and invocation details
+   remain owned by the Devin runtime tree.
 1. `.gemini/settings.json` and other optional Gemini local config files are
    machine-local config surfaces, not proof of a tracked Gemini behavior tree
    on `main`.
@@ -66,6 +71,8 @@ Default precedence for AI behavior and guidance:
 1. active runtime source for the current agent or skill — equal peers
    `.codex/**` (`.codex/agents/CODEX-RUNTIME.md`) and `.junie/**`
    (`.junie/agents/JUNIE-RUNTIME.md`, with root contract `.junie/guidelines.md`)
+1. `.devin/agents/DEVIN-RUNTIME.md` and the selected
+   `.devin/agents/*/AGENT.md` profile for Devin sessions
 1. a matching tracked `.gemini/**` surface only when that tree exists in the
    current checkout and has been verified in the same change
 1. `docs/00-project/RULES.md`
@@ -192,9 +199,11 @@ The following divergence is not acceptable:
 - Skill trigger/runtime behavior for Gemini -> only when a tracked
   `.gemini/skills/**` tree exists on `main`
 - Gemini local config classification -> `MCP_LOCAL_RUNTIME_CONFIG.md`
-- **Devin orchestration context** -> Devin has skills + workflows, **not** a
-  parallel 9-bot agent registry. Use `.codex/agents/ORCHESTRATION.md` and
-  `.codex/agents/CODEX-RUNTIME.md` as authoritative orchestration docs.
+- **Devin orchestration context** -> use `.devin/agents/DEVIN-RUNTIME.md`,
+  `.devin/agents/ORCHESTRATION.md`, and the selected
+  `.devin/agents/*/AGENT.md` profile. Shared logical behavior and skill
+  references remain parity-checked against Codex; Devin-native invocation and
+  permissions remain owned by the Devin tree.
 - **GitHub Copilot** -> keep path packs thin; do **not** duplicate Codex/Devin
   skills into `.github/prompts` without a measured gap and owner.
 - **Cursor onboarding** -> after clone run `bash scripts/ai/cursor/setup_cursor.sh`

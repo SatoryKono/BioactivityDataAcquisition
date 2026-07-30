@@ -14,6 +14,7 @@ from memory.graph.importers.expanded_json import (
 )
 from memory.rag.indexing import DEFAULT_BUILD_SCOPE, write_rag_manifests
 from memory.resources import MEMORY_ROOT
+from memory.timeline._common import write_timeline_manifest
 from memory.timeline.ingest_ci import write_ci_events
 from memory.timeline.ingest_incidents import write_incident_events
 from memory.timeline.ingest_runs import write_run_events
@@ -142,9 +143,15 @@ def _refresh_timeline_artifact(root: Path, output_root: Path) -> dict[str, Any]:
     run_path = write_run_events(root, timeline_dir / "runs.jsonl")
     ci_path = write_ci_events(root, timeline_dir / "ci.jsonl")
     incident_path = write_incident_events(root, timeline_dir / "incidents.jsonl")
+    manifest_path = write_timeline_manifest(root, timeline_dir)
     return {
         "kind": "timeline",
-        "paths": [str(run_path), str(ci_path), str(incident_path)],
+        "paths": [
+            str(run_path),
+            str(ci_path),
+            str(incident_path),
+            str(manifest_path),
+        ],
     }
 
 

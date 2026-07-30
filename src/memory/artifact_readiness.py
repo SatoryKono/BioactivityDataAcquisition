@@ -9,6 +9,7 @@ from memory.rag.validation import (
     capture_rag_git_identity,
     validate_rag_manifest_files,
 )
+from memory.timeline._common import TIMELINE_MANIFEST_NAME
 
 
 def _discover_repo_root(path: Path) -> Path | None:
@@ -76,10 +77,68 @@ def rag_chunks_ready(
     return report.ok
 
 
-def timeline_events_ready(events_dir: Path) -> bool:
-    """Return whether timeline event projections have been generated."""
+def timeline_events_ready(
+    events_dir: Path, *, repo_root: Path | None = None
+) -> bool:
+    """Return whether timeline projections are intact and version-compatible."""
     if not events_dir.is_dir():
         return False
-    return any(
-        path.is_file() and path.suffix == ".jsonl" for path in events_dir.iterdir()
+    event_files = sorted(events_dir.glob("*.jsonl"), key=lambda path: path.name)
+    if not event_files:
+        return False
+    manifest = _load_catalog(events_dir / TIMELINE_MANIFEST_NAME)
+    resolved_root = repo_root.resolve() if repo_root is not None else _discover_repo_root(
+        events_dir
     )
+    if manifest is None:
+        return resolved_root is None and all(_valid_timeline_jsonl(path) for path in event_files)
+    entries = manifest.get("files")
+    if manifest.get("schema_version") != 1 or not isinstance(entries, list):
+        return False
+    expected_names = {path.name for path in event_files}
+    if {
+        entry.get("path") for entry in entries if isinstance(entry, dict)
+    } != expected_names:
+        return False
+    for entry in entries:
+        if not isinstance(entry, dict):
+            return False
+        path = events_dir / str(entry.get("path", ""))
+        if (
+            not path.is_file()
+            or path.stat().st_size != entry.get("size")
+            or _file_sha256(path) != entry.get("sha256")
+            or not _valid_timeline_jsonl(path)
+        ):
+            return False
+    if resolved_root is None:
+        return True
+    current = capture_rag_git_identity(resolved_root)
+    return (
+        manifest.get("git_head_sha") == current["git_head_sha"]
+        and manifest.get("working_tree_state") == "clean"
+        and current["working_tree_state"] == "clean"
+    )
+
+
+def _file_sha256(path: Path) -> str:
+    import hashlib
+
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _valid_timeline_jsonl(path: Path) -> bool:
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            if not isinstance(row, dict) or not isinstance(row.get("id"), str):
+                return False
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return False
+    return True

@@ -42,6 +42,7 @@ def _copy_minimal_memory_scaffold(memory_root: Path) -> None:
         "curated/domain_knowledge",
         "episodic/sessions",
         "episodic/summaries",
+        "episodic/tasks",
     ):
         (memory_root / relative_dir).mkdir(parents=True, exist_ok=True)
 
@@ -98,6 +99,26 @@ def test_memory_scaffold_validation_accepts_valid_note_files(tmp_path: Path) -> 
     )
 
     assert validate_memory_scaffold(memory_root) == []
+
+
+def test_memory_scaffold_validation_discovers_task_scoped_notes(
+    tmp_path: Path,
+) -> None:
+    memory_root = tmp_path / "memory"
+    _copy_minimal_memory_scaffold(memory_root)
+    malformed = (
+        memory_root
+        / "episodic/tasks/repo/worktree/branch/task/session.md"
+    )
+    malformed.parent.mkdir(parents=True)
+    malformed.write_text("missing frontmatter\n", encoding="utf-8")
+
+    issues = validate_memory_scaffold(
+        memory_root,
+        include_all_episodic_notes=True,
+    )
+
+    assert any(str(malformed) == issue.path for issue in issues)
 
 
 def test_memory_scaffold_validation_skips_episodic_body_reads(

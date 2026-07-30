@@ -14,7 +14,7 @@ from memory.security import (
     assert_safe_for_persistence,
     inspect_memory_content,
 )
-from memory.storage import append_jsonl
+from memory.storage import StorageConflictError, append_jsonl
 
 _SHA256_HEX_LENGTH = 64
 
@@ -152,16 +152,20 @@ class EvidenceStore:
         findings = inspect_memory_content(rendered)
         if findings:
             raise UnsafeMemoryContentError(findings)
-        existing = _read_jsonl(self._evidence_path)
         digest = event.evidence_digest
         record_id = event.envelope.record_id
-        if any(
-            row.get("evidence_digest") == digest
-            or row.get("envelope", {}).get("record_id") == record_id
-            for row in existing
-        ):
-            raise ValueError("evidence record already exists")
-        append_jsonl(self._evidence_path, event.to_dict())
+        try:
+            append_jsonl(
+                self._evidence_path,
+                event.to_dict(),
+                reject_if=lambda row: (
+                    row.get("evidence_digest") == digest
+                    or row.get("envelope", {}).get("record_id") == record_id
+                ),
+                conflict_message="evidence record already exists",
+            )
+        except StorageConflictError as exc:
+            raise ValueError("evidence record already exists") from exc
         return digest
 
     def append_decision(self, record: DecisionRecord) -> str:
@@ -171,13 +175,25 @@ class EvidenceStore:
             trust=record.envelope.trust,
         )
         missing: list[str] = []
+        scope_mismatches: list[str] = []
         for digest in record.evidence_digests:
             try:
-                self.resolve_evidence(digest)
+                evidence = self.resolve_evidence(digest)
             except KeyError:
                 missing.append(digest)
+                continue
+            evidence_envelope = evidence.get("envelope")
+            if not isinstance(evidence_envelope, dict) or not _same_scope(
+                evidence_envelope, record.envelope.to_dict()
+            ):
+                scope_mismatches.append(digest)
         if missing:
             raise ValueError(f"decision cites missing evidence: {', '.join(missing)}")
+        if scope_mismatches:
+            raise ValueError(
+                "decision cites evidence outside its repository scope: "
+                + ", ".join(scope_mismatches)
+            )
         existing = _read_jsonl(self._decision_path)
         known_decision_ids = {
             str(row.get("envelope", {}).get("record_id")) for row in existing
@@ -192,7 +208,26 @@ class EvidenceStore:
             raise ValueError(
                 f"decision supersedes unknown records: {', '.join(missing_superseded)}"
             )
-        append_jsonl(self._decision_path, record.to_dict())
+        superseded_by_id = {
+            str(row.get("envelope", {}).get("record_id")): row for row in existing
+        }
+        for superseded_id in record.envelope.supersedes:
+            prior_envelope = superseded_by_id[superseded_id].get("envelope")
+            if not isinstance(prior_envelope, dict) or not _same_scope(
+                prior_envelope, record.envelope.to_dict()
+            ):
+                raise ValueError("decision supersedes a record outside its scope")
+        try:
+            append_jsonl(
+                self._decision_path,
+                record.to_dict(),
+                reject_if=lambda row: (
+                    row.get("envelope", {}).get("record_id") == record_id
+                ),
+                conflict_message="decision record already exists",
+            )
+        except StorageConflictError as exc:
+            raise ValueError("decision record already exists") from exc
         return record.decision_digest
 
     def resolve_evidence(self, digest: str) -> dict[str, Any]:
@@ -207,3 +242,11 @@ class EvidenceStore:
                     raise ValueError("evidence digest mismatch")
                 return row
         raise KeyError(digest)
+
+
+_SCOPE_FIELDS = ("repo_id", "git_commit", "branch", "worktree_id", "task_id")
+
+
+def _same_scope(left: dict[str, Any], right: dict[str, Any]) -> bool:
+    """Require exact repository-version-task compatibility."""
+    return all(left.get(field) == right.get(field) for field in _SCOPE_FIELDS)

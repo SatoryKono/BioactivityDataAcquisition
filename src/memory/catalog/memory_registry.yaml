@@ -208,20 +208,20 @@ surfaces:
     agent_or_runtime: mcp-clients
     memory_type: shared
     subtype: file-backed-knowledge-graph
-    path_or_backend: docs/00-project/ai/memory/mcp-memory.json
+    path_or_backend: .cache/mcp-memory/<worktree>/<branch>/<commit>/memory.json
     format: json
-    scope: repository-local-clients
+    scope: repository-worktree-branch-commit-local-clients
     owner: mcp-runtime-operator
-    canonicality: derived
+    canonicality: local-only
     source_of_truth: repository-canonical-sources
     readers: [mcp-clients]
     writers: [mcp-memory-server]
     lifetime: durable
-    retention_policy: undefined
-    cleanup_policy: operator-managed
+    retention_policy: commit-scope-lifetime
+    cleanup_policy: safe-delete-and-reseed
     runtime_usage_proven: true
-    evidence: [scripts/ai/mcp/mcp_memory_wrapper.sh]
-    status: FAIL
+    evidence: [scripts/ai/mcp/mcp_memory_wrapper.sh, scripts/ai/mcp/mcp_memory_wrapper.ps1]
+    status: PASS
   - memory_id: MEM-MCP-NEO4J
     <<: *surface_defaults
     agent_or_runtime: mcp-clients

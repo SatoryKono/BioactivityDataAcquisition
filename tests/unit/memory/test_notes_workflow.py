@@ -12,6 +12,7 @@ import pytest
 import memory.notes as notes_module
 import memory.tooling.promote_note as promote_note_module
 from memory.notes import parse_markdown_note, parse_markdown_note_metadata
+from memory.security import UnsafeMemoryContentError
 from memory.tooling.archive_note import archive_note
 from memory.tooling.create_note import create_note
 from memory.tooling.promote_note import promote_note
@@ -51,6 +52,19 @@ def test_create_curated_lesson_note(tmp_path: Path) -> None:
     assert note.metadata["confidence"] == "curated"
     assert "## Observation" in note.body
     assert "## Reuse guidance" in note.body
+
+
+def test_create_note_rejects_secret_in_metadata(tmp_path: Path) -> None:
+    with pytest.raises(UnsafeMemoryContentError):
+        create_note(
+            note_kind="episodic-session",
+            title="Safe title",
+            task_id="task-secret",
+            source_refs=["Bearer " + ("x" * 20)],
+            output_path=tmp_path / "session.md",
+        )
+
+    assert not (tmp_path / "session.md").exists()
 
 
 def test_parse_markdown_note_can_skip_body_loading(tmp_path: Path) -> None:

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from memory.records import ActorIdentity
-from memory.storage import append_jsonl
+from memory.storage import StorageConflictError, append_jsonl
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,12 +71,15 @@ class MutationLedger:
 
     def append(self, event: MutationEvent) -> str:
         """Append an event and reject reused event identities."""
-        if any(row.get("event_id") == event.event_id for row in self._rows()):
-            raise ValueError("mutation event already exists")
-        append_jsonl(
-            self._path,
-            {**event.to_dict(), "event_digest": event.event_digest},
-        )
+        try:
+            append_jsonl(
+                self._path,
+                {**event.to_dict(), "event_digest": event.event_digest},
+                reject_if=lambda row: row.get("event_id") == event.event_id,
+                conflict_message="mutation event already exists",
+            )
+        except StorageConflictError as exc:
+            raise ValueError("mutation event already exists") from exc
         return event.event_digest
 
     def history(self, record_id: str, *, limit: int = 100) -> list[dict[str, Any]]:

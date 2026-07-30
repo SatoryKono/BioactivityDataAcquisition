@@ -22,7 +22,10 @@ below.
 
 ## AI Runtime Notes
 
-- `.codex/**` is the tracked runtime source of truth on `main`.
+- `.codex/**` and `.junie/**` are equal-peer tracked runtime sources on `main`;
+  changes covered by their parity contract must update both surfaces.
+- `.devin/agents/**` and `.devin/skills/**` are the tracked Devin-specific
+  runtime sources.
 - `.gemini/settings.json` may exist as a machine-local config surface, but a
   tracked `.gemini/agents/**` or `.gemini/skills/**` tree is not part of the
   current `main` checkout unless added and verified in the same change.

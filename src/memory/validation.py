@@ -393,6 +393,7 @@ def _note_dirs(root: Path) -> dict[str, list[Path]]:
             root / "curated" / "domain_knowledge",
         ],
         "episodic_note": [
+            root / "episodic" / "tasks",
             root / "episodic" / "sessions",
             root / "episodic" / "summaries",
         ],

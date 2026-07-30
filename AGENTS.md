@@ -10,11 +10,12 @@ For AI runtime behavior and workflow conflicts, use this priority:
 1. active runtime source for the current agent or skill — equal peers:
    - `.codex/agents/CODEX-RUNTIME.md`
    - `.junie/agents/JUNIE-RUNTIME.md`
+   - `.devin/agents/DEVIN-RUNTIME.md` for Devin sessions
    - a matching tracked `.gemini/**` runtime surface only when that tree exists
      in the current checkout and is verified in the same change
 1. runtime profiles and skills in the matching runtime tree
    (`.codex/agents/py-*.md`, `.codex/skills/**`, `.junie/agents/py-*.md`,
-   `.junie/skills/**`)
+   `.junie/skills/**`, `.devin/agents/*/AGENT.md`, `.devin/skills/**`)
 1. `docs/00-project/NORMATIVE_SOURCES.md` (normative stack index)
 1. `docs/00-project/RULES.md`
 1. `docs/01-requirements/REQUIREMENTS.md`
@@ -80,6 +81,10 @@ Minimum expectation:
   to `.codex/**`. Tracked runtime subtrees MUST remain covered by the
   Codex–Junie parity contract; machine-local Junie history/state/cache remains
   untracked.
+- `.devin/agents/**` and `.devin/skills/**` are the canonical tracked Devin
+  runtime sources. Devin-specific behavior starts there and remains subordinate
+  to the repository-wide governance stack; it MUST NOT be silently replaced by
+  a Codex-only profile.
 - `.gemini/settings.json` may exist as a machine-local Gemini config surface,
   but the current `main` checkout does not contain a tracked Gemini
   `agents/` or `skills/` runtime tree.

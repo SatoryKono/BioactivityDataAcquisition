@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
 
+from memory.rag.validation import capture_rag_git_identity
 from memory.resources import MEMORY_ROOT
+from memory.storage import atomic_write_json
 
 DEFAULT_EVENTS_DIR = MEMORY_ROOT / "timeline" / "events"
+TIMELINE_MANIFEST_NAME = "timeline_manifest.json"
 
 
 def dedupe_preserve_order(values: list[str]) -> list[str]:
@@ -50,3 +54,31 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
             continue
         rows.append(json.loads(line))
     return rows
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def write_timeline_manifest(root: Path, events_dir: Path) -> Path:
+    """Bind generated event projections to their repository version and bytes."""
+    event_files = sorted(events_dir.glob("*.jsonl"), key=lambda path: path.name)
+    payload = {
+        "schema_version": 1,
+        **capture_rag_git_identity(root),
+        "files": [
+            {
+                "path": path.name,
+                "sha256": _sha256(path),
+                "size": path.stat().st_size,
+            }
+            for path in event_files
+        ],
+    }
+    manifest_path = events_dir / TIMELINE_MANIFEST_NAME
+    atomic_write_json(manifest_path, payload)
+    return manifest_path

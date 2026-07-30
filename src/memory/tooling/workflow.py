@@ -289,7 +289,15 @@ def _write_note(*, path: Path, metadata: dict[str, Any], body: str) -> None:
     from memory.notes import write_markdown_note
     from memory.security import TrustLevel, assert_safe_for_persistence
 
-    assert_safe_for_persistence(body, trust=TrustLevel.TRUSTED_REPOSITORY)
+    persistent_payload = json.dumps(
+        {"metadata": metadata, "body": body},
+        ensure_ascii=True,
+        sort_keys=True,
+    )
+    assert_safe_for_persistence(
+        persistent_payload,
+        trust=TrustLevel.TRUSTED_REPOSITORY,
+    )
     write_markdown_note(path, metadata=metadata, body=body)
 
 

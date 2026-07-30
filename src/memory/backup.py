@@ -41,18 +41,17 @@ def _file_digest(path: Path) -> str:
 
 
 def _source_files(source: Path) -> tuple[Path, ...]:
-    return tuple(
-        sorted(
-            (
-                path
-                for path in source.rglob("*")
-                if path.is_file()
-                and "__pycache__" not in path.parts
-                and not path.name.endswith((".pyc", ".pyo"))
-            ),
-            key=lambda path: path.relative_to(source).as_posix(),
-        )
-    )
+    files: list[Path] = []
+    for path in source.rglob("*"):
+        if path.is_symlink():
+            raise ValueError(f"backup source must not contain symlinks: {path}")
+        if (
+            path.is_file()
+            and "__pycache__" not in path.parts
+            and not path.name.endswith((".pyc", ".pyo"))
+        ):
+            files.append(path)
+    return tuple(sorted(files, key=lambda path: path.relative_to(source).as_posix()))
 
 
 def _manifest(

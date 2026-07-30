@@ -63,6 +63,18 @@ def test_backup_manifest_has_stable_sorted_paths(tmp_path: Path) -> None:
     assert manifest["retention_days"] == 7
 
 
+def test_backup_rejects_symlink_that_escapes_source_boundary(tmp_path: Path) -> None:
+    source = _source(tmp_path)
+    outside = tmp_path / "outside-secret.txt"
+    outside.write_text("must not be copied", encoding="utf-8")
+    (source / "external-link").symlink_to(outside)
+
+    with pytest.raises(ValueError, match="must not contain symlinks"):
+        create_backup(source, tmp_path / "backups")
+
+    assert not (tmp_path / "backups").exists()
+
+
 def test_recovery_dry_run_does_not_write(tmp_path: Path) -> None:
     result = create_backup(_source(tmp_path), tmp_path / "backups")
     target = tmp_path / "recovered"

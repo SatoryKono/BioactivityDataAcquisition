@@ -50,3 +50,12 @@ def test_mcp_memory_rejects_unknown_mode_without_server_start() -> None:
 
     assert completed.returncode == 64
     assert "Invalid BIOETL_AI_MEMORY_MODE" in completed.stderr
+
+
+def test_mcp_memory_default_store_is_scoped_and_untracked() -> None:
+    wrapper = WRAPPER.read_text(encoding="utf-8")
+
+    assert ".cache/mcp-memory/" in wrapper
+    assert "${memory_worktree_id}/${memory_branch}/${memory_commit}" in wrapper
+    assert 'memory_seed="${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"' in wrapper
+    assert 'export MEMORY_FILE_PATH="${memory_dir}/memory.json"' in wrapper

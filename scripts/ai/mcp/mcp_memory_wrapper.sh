@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# MCP memory server pinned to one repository-owned knowledge graph file.
+# MCP memory server with branch/commit/worktree-scoped local persistence.
 
 set -euo pipefail
 
@@ -40,5 +40,22 @@ esac
 
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 mkdir -p "${NPM_CONFIG_CACHE}"
-export MEMORY_FILE_PATH="${MEMORY_FILE_PATH:-${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json}"
+if [[ -z "${MEMORY_FILE_PATH:-}" ]]; then
+  memory_branch="$(git -C "${REPO_ROOT}" branch --show-current 2>/dev/null || true)"
+  memory_branch="${memory_branch:-detached}"
+  memory_branch="${memory_branch//[^A-Za-z0-9_.-]/-}"
+  memory_commit="$(git -C "${REPO_ROOT}" rev-parse --verify HEAD 2>/dev/null || printf 'unknown')"
+  memory_worktree_id="$(
+    printf '%s' "${REPO_ROOT}" | sha256sum | cut -c1-16
+  )"
+  memory_dir="${REPO_ROOT}/.cache/mcp-memory/${memory_worktree_id}/${memory_branch}/${memory_commit}"
+  mkdir -p "${memory_dir}"
+  export MEMORY_FILE_PATH="${memory_dir}/memory.json"
+  if [[ ! -e "${MEMORY_FILE_PATH}" ]]; then
+    memory_seed="${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
+    memory_tmp="${MEMORY_FILE_PATH}.tmp.$$"
+    cp "${memory_seed}" "${memory_tmp}"
+    mv "${memory_tmp}" "${MEMORY_FILE_PATH}"
+  fi
+fi
 exec npx -y "@modelcontextprotocol/server-memory@2026.1.26" "$@"
