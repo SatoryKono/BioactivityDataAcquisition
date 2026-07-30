@@ -106,14 +106,14 @@
     {
       "id": 9400,
       "type": "text",
-      "title": "Understand Data Quality Scope",
+      "title": "Understand Evidence Scope",
       "gridPos": {
         "h": 4,
         "w": 16,
         "x": 0,
         "y": 3
       },
-      "description": "This dashboard answers data conformance and impact questions across three lanes: Current (latest status and reasons), Selected Run (HTTP-backed accounting for one exact run), and Time Range (score, freshness, and impact). These scopes are not equivalent status signals and should not be compared as peers. Run ID is local control-plane context and does not filter Prometheus",
+      "description": "Current panels show the latest DQ verdict and reasons for the selected pipeline. Selected-run panels use HTTP-backed identity and record accounting; run ID never filters Prometheus. Selected-range panels show scores, freshness, rejects, and delivery impact. These scopes answer different questions and must not be compared as equivalent status signals.",
       "options": {
         "mode": "html",
         "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is data conformant, and what impact needs action?</div><div><b>Scope:</b> <b>CURRENT</b> = Status/reasons \u00b7 <b>SELECTED RUN</b> = accounting</div><div><b>TIME RANGE</b> = score/freshness/impact; scopes are not peers</div></div></div>"
@@ -122,7 +122,7 @@
     {
       "id": 9401,
       "type": "stat",
-      "title": "Monitor DQ Status",
+      "title": "Monitor Current DQ Status",
       "gridPos": {
         "h": 4,
         "w": 8,
@@ -133,7 +133,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current Data Quality status for the selected pipeline. Mapping: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`. UNKNOWN means evidence is missing, stale, unavailable, not started, or incomplete\u2014not healthy. This is the Current-lane verdict only; it is not comparable to Range scores or Run accounting as a peer badge. Workflow is context only; run ID does not filter Prometheus",
+      "description": "Current DQ verdict for the selected pipeline. Mapping: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`. UNKNOWN means current status evidence is missing, stale, unavailable, or not started\u2014not healthy. Run type and stage mainly affect range evidence; run ID does not filter this verdict.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -449,7 +449,7 @@
           "refId": "A"
         }
       ],
-      "title": "Inspect DQ Current Reasons",
+      "title": "Inspect Current DQ Reasons",
       "type": "table"
     },
     {
@@ -461,7 +461,7 @@
         "y": 15
       },
       "id": 220,
-      "title": "Run Lane \u00b7 Silver/Gold Rejects",
+      "title": "Reject Evidence",
       "type": "row",
       "panels": [
         {
@@ -544,7 +544,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor: Silver Filter Reject Accounting Mismatch",
+          "title": "Monitor Silver Reject Mismatch",
           "type": "stat"
         },
         {
@@ -622,7 +622,7 @@
           ],
           "title": "Inspect Top Silver Reject Reasons",
           "type": "bargauge",
-          "description": "Pareto ranking of bounded Silver structural reject reasons across the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/reason_code and then validate representative payload_hash rows. Gold contract/semantic rejects are intentionally excluded. No data means no bounded reject breakdown samples were observed in range; the panel must not invent a synthetic reason bucket"
+          "description": "Silver structural reject reasons ranked by count in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded reason samples were observed; it must not create a synthetic reason. For record-level evidence run `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only` with the relevant run/reason filters."
         },
         {
           "datasource": {
@@ -699,7 +699,7 @@
           ],
           "title": "Inspect Top Silver Reject Fields",
           "type": "bargauge",
-          "description": "Bounded Silver structural schema-field summary for the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/field and then compare top reason signatures inside the explorer. Gold contract/semantic rejects are intentionally excluded. No data means no bounded reject field samples were observed in range; the panel must not invent a synthetic field bucket"
+          "description": "Silver structural rejects grouped by schema field in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded field samples were observed. For record-level evidence use `bioetl quarantine inspect` with the relevant pipeline, run, and field filters."
         },
         {
           "datasource": {
@@ -775,7 +775,7 @@
               "refId": "A"
             }
           ],
-          "title": "Inspect: Silver Filter Rejects by Pipeline",
+          "title": "Inspect Silver Rejects by Pipeline",
           "type": "bargauge"
         },
         {
@@ -783,7 +783,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range Gold reject outcomes by pipeline. This panel separates Gold contract quarantines and semantic/contract exclusions from Silver structural FILTERED_OUT_SILVER rows; use it when DQ pressure is not explained by the Silver Reject Explorer. No data means no Gold reject outcome samples were observed in the active window",
+          "description": "Gold quarantine and contract/semantic exclusion outcomes by pipeline in the selected range. These are separate from Silver structural rejects. Use this panel when DQ impact is not explained by Silver reject evidence. No data means no Gold reject outcome samples were observed.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -865,7 +865,7 @@
               "refId": "B"
             }
           ],
-          "title": "Inspect: Gold Reject Outcomes by Pipeline",
+          "title": "Inspect Gold Rejects by Pipeline",
           "type": "bargauge"
         }
       ]
@@ -879,7 +879,7 @@
         "y": 16
       },
       "id": 221,
-      "title": "Now lane \u00b7 validation diagnostics",
+      "title": "Validation Diagnostics",
       "type": "row",
       "panels": [
         {
@@ -960,7 +960,7 @@
               "refId": "B"
             }
           ],
-          "title": "Track Range Evidence: Bronze -> Silver -> Gold",
+          "title": "Track Record Flow by Stage",
           "type": "timeseries",
           "maxDataPoints": 400,
           "interval": "1m"
@@ -1031,7 +1031,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track: Source Records in Range (Bronze)",
+          "title": "Monitor Bronze Records",
           "type": "stat"
         },
         {
@@ -1100,7 +1100,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track: Clean Records in Range (Gold)",
+          "title": "Monitor Gold Records",
           "type": "stat"
         },
         {
@@ -1181,7 +1181,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track: Silver Validation Failures in Range",
+          "title": "Monitor Silver Validation Failures",
           "type": "stat"
         },
         {
@@ -1270,7 +1270,7 @@
             }
           ],
           "description": "Latest successful data timestamp for the selected pipeline scope. This is current freshness context and compact supporting evidence rather than a first-answer verdict or selected-range proof. UNKNOWN means no freshness proof is available now; next action: inspect DQ Current Reasons and the DQ investigation runbook before treating stale or blank values as healthy",
-          "title": "Review: Latest Successful Data Timestamp",
+          "title": "Inspect Latest Successful Data",
           "type": "stat"
         },
         {
@@ -1278,7 +1278,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range quarantine breakdown by error_type. Use it to determine whether current DQ pressure is dominated by a specific quarantine signature before moving to logs, traces, or downstream validation surfaces. Horizontal bars are intentional here because category comparison matters more than composition percentage. No data means no quarantined records were observed in the active window; the panel must not invent a synthetic error_type bucket",
+          "description": "Quarantined records grouped by error type in the selected range. Use it to identify dominant quarantine signatures. No data means no matching quarantine samples were observed; it must not create a synthetic error type. For row-level evidence use `bioetl quarantine inspect`.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1336,7 +1336,7 @@
               "refId": "A"
             }
           ],
-          "title": "Inspect: Quarantine by Error Type",
+          "title": "Inspect Quarantine Error Types",
           "type": "bargauge"
         },
         {
@@ -1419,7 +1419,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor: Silver Validation Failures",
+          "title": "Monitor Silver Validation Failures",
           "type": "stat"
         },
         {
@@ -1501,7 +1501,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor: Gold Strict Validation Failures",
+          "title": "Monitor Gold Validation Failures",
           "type": "stat"
         },
         {
@@ -1578,7 +1578,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track: Anomalies Detected",
+          "title": "Track DQ Anomalies",
           "type": "timeseries",
           "maxDataPoints": 400,
           "interval": "1m"
@@ -1657,7 +1657,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track: DQ Check Duration (p95)",
+          "title": "Track DQ Check Duration p95",
           "type": "timeseries",
           "maxDataPoints": 400,
           "interval": "1m"
@@ -1730,7 +1730,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track: DQ Threshold Events in Range Trend",
+          "title": "Track DQ Threshold Events",
           "type": "timeseries",
           "maxDataPoints": 400,
           "interval": "1m"
@@ -1813,7 +1813,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track: Data Quality Score Trend (Volume-weighted)",
+          "title": "Track Volume-Weighted DQ Score",
           "type": "timeseries",
           "maxDataPoints": 400,
           "interval": "1m"
@@ -1856,7 +1856,7 @@
             ],
             "mode": "html"
           },
-          "title": "Review: Lineage Handoff to Control Plane",
+          "title": "Inspect Lineage in Control Plane",
           "type": "text"
         },
         {
@@ -1883,14 +1883,14 @@
             "content": "<div style=\"padding:2px 8px;font-size:12px;line-height:1.25;overflow:hidden\"><strong>Aggregate control-plane handoff</strong> \u2014 open Trust for store/manifest failures and fleet-wide control-plane reliability. Use when DQ impact is global.</div>",
             "mode": "html"
           },
-          "title": "Review: Aggregate Control-plane Handoff",
+          "title": "Inspect Aggregate Control-Plane Issues",
           "type": "text"
         }
       ]
     },
     {
       "type": "row",
-      "title": "Range lane \u00b7 debug evidence",
+      "title": "Range & Debug Evidence",
       "collapsed": true,
       "gridPos": {
         "h": 1,
@@ -1975,7 +1975,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor: Data Quality Score (Volume-weighted)",
+          "title": "Monitor Volume-Weighted DQ Score",
           "type": "stat",
           "description": "Do not read dual 100% as \u201call healthy\u201d when Status is UNKNOWN/INCOMPLETE. Latest volume-weighted DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching score and record-count samples exist in that window; absence is never coerced to 0. Review raw sample history in the adjacent trend panel. Scope: selected-range and pipeline scope only"
         },
@@ -2061,7 +2061,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor: Worst-Entity DQ Score",
+          "title": "Monitor Worst-Entity DQ Score",
           "type": "stat",
           "description": "Do not read dual 100% as \u201call healthy\u201d when Status is UNKNOWN/INCOMPLETE. Latest pipeline-scoped worst-entity DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching validation score sample exists in that window, not a successful run and not a zero score"
         },
@@ -2144,7 +2144,7 @@
               "refId": "A"
             }
           ],
-          "title": "Time Range \u00b7 Worst Freshness Age (hours; SLA 24/72)",
+          "title": "Monitor Worst Freshness Age",
           "type": "gauge"
         },
         {
@@ -2230,7 +2230,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track: DQ Blocked Records in Range (Evidence)",
+          "title": "Monitor Blocked Records",
           "type": "stat"
         },
         {
@@ -2314,7 +2314,7 @@
               "refId": "A"
             }
           ],
-          "title": "Range \u00b7 Records Quarantined",
+          "title": "Monitor Quarantined Records",
           "type": "stat"
         },
         {
@@ -2392,7 +2392,7 @@
               "refId": "A"
             }
           ],
-          "title": "Range \u00b7 Silver Filter Rejects",
+          "title": "Monitor Silver Filter Rejects",
           "type": "stat",
           "description": "TIME RANGE delivery impact. Selected-range Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field. TIME RANGE evidence only \u2014 not a peer verdict with Now"
         }
@@ -2400,7 +2400,7 @@
     },
     {
       "type": "row",
-      "title": "Run context (thin) -> Run Explorer hub",
+      "title": "Run Context",
       "collapsed": true,
       "gridPos": {
         "h": 1,
@@ -2413,7 +2413,7 @@
         {
           "id": 9402,
           "type": "table",
-          "title": "ID",
+          "title": "Inspect Run Identity",
           "gridPos": {
             "h": 6,
             "w": 12,
@@ -2571,7 +2571,7 @@
         {
           "id": 9403,
           "type": "table",
-          "title": "Processed Records",
+          "title": "Inspect Processed Records",
           "gridPos": {
             "h": 6,
             "w": 12,

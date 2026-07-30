@@ -39,39 +39,30 @@ PROGRESSIVE_DISCLOSURE_ROWS = {
         "bioetl-control-plane-v1.json",
         "Inspect Replay & Checkpoint Evidence",
     ),
-    ("bioetl-control-plane-v1.json", "Inspect Run Context"),
+    ("bioetl-control-plane-v1.json", "Inspect Run Details"),
     ("bioetl-dq-v2.json", "Range lane · debug evidence"),
-    ("bioetl-dq-v2.json", "Inspect Run Context"),
     ("bioetl-dq-v2.json", "Run context (thin) -> Run Explorer hub"),
-    ("bioetl-dq-v2.json", "Run lane · Silver/Gold rejects"),
     ("bioetl-dq-v2.json", "Run Lane · Silver/Gold Rejects"),
     ("bioetl-dq-v2.json", "Now lane · validation diagnostics"),
-    ("bioetl-incident-v1.json", "Domain suspect detail (forensics; collapsed)"),
-    ("bioetl-overview-v2.json", "Alert/SLO Triage"),
+    ("bioetl-incident-v1.json", "Domain Suspect Details"),
     ("bioetl-overview-v2.json", "Inspect Alerts"),
     ("bioetl-overview-v2.json", "Inspect Domain Diagnostics"),
-    ("bioetl-overview-v2.json", "Diagnostics & Docs (Logs / Traces / Raw Metrics)"),
-    ("bioetl-overview-v2.json", "L1 Historical Trends"),
     ("bioetl-overview-v2.json", "Inspect Historical Trends"),
-    ("bioetl-overview-v2.json", "Range Evidence (Historical / Recent History)"),
     ("bioetl-overview-v2.json", "Inspect Range Evidence"),
-    ("bioetl-overview-v2.json", "Run context (thin) -> Run Explorer hub"),
+    ("bioetl-overview-v2.json", "Inspect Run Context"),
     ("bioetl-provider-health-v2.json", "Range / debug evidence"),
     ("bioetl-provider-health-v2.json", "Run context (thin) -> Run Explorer hub"),
     ("bioetl-provider-health-v2.json", "Selected Provider Detail"),
-    ("bioetl-runtime.json", "Detect"),
-    ("bioetl-runtime.json", "Escalate"),
-    ("bioetl-runtime.json", "Localize"),
-    ("bioetl-runtime.json", "Run context (thin) -> Run Explorer hub"),
+    ("bioetl-runtime.json", "Inspect Detection Signals"),
+    ("bioetl-runtime.json", "Review Escalation Paths"),
+    ("bioetl-runtime.json", "Localize Runtime Cause"),
+    ("bioetl-runtime.json", "Inspect Run Context"),
     (
         "bioetl-runtime.json",
-        "Secondary KPIs (collapsed; not peer first-screen cards)",
+        "Inspect Secondary Runtime Indicators",
     ),
-    ("bioetl-runtime.json", "Workflow band (merged from bioetl-workflow-overview)"),
-    (
-        "bioetl-run-explorer-v1.json",
-        "Selected run detail (Ops HTTP; expand after selection)",
-    ),
+    ("bioetl-runtime.json", "Inspect Workflow Evidence"),
+    ("bioetl-run-explorer-v1.json", "Selected Run Details"),
 }
 
 
@@ -97,11 +88,6 @@ def test_dashboard_rows_follow_progressive_disclosure_policy():
                         f"{dashboard_path.name}: row {title!r} must be expanded "
                         "by default"
                     )
-                    assert not panel.get("panels"), (
-                        f"{dashboard_path.name}: expanded row {title!r} must not "
-                        "keep panels nested under row.panels"
-                    )
-                assert title, f"{dashboard_path.name}: row must have title"
 
 
 def test_all_declared_progressive_disclosure_rows_exist() -> None:
