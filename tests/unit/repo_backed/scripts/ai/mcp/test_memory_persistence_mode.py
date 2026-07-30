@@ -2,31 +2,28 @@
 
 from __future__ import annotations
 
+import shlex
 import subprocess
 from pathlib import Path
 
 import pytest
 
 WRAPPER = Path("scripts/ai/mcp/mcp_memory_wrapper.sh")
-_UNSET_MODE = "__BIOETL_MODE_UNSET__"
 
 
 def _run_wrapper(mode: str | None) -> subprocess.CompletedProcess[str]:
     """Set the mode inside Bash so Windows-to-WSL env bridging cannot alter it."""
+    mode_setup = (
+        "unset BIOETL_AI_MEMORY_MODE"
+        if mode is None
+        else f"export BIOETL_AI_MEMORY_MODE={shlex.quote(mode)}"
+    )
+    wrapper_path = shlex.quote(WRAPPER.resolve().as_posix())
     return subprocess.run(
         [
             "bash",
             "-c",
-            (
-                'if [[ "$1" == "$3" ]]; then '
-                "unset BIOETL_AI_MEMORY_MODE; "
-                "else export BIOETL_AI_MEMORY_MODE=\"$1\"; fi; "
-                'exec "$2"'
-            ),
-            "bash",
-            mode if mode is not None else _UNSET_MODE,
-            WRAPPER.resolve().as_posix(),
-            _UNSET_MODE,
+            f"{mode_setup}; exec {wrapper_path}",
         ],
         capture_output=True,
         check=False,

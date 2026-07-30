@@ -4,13 +4,13 @@
   "authoritative_surface": "grafana/dashboards/*.json",
   "route_contract_sha256": "88b420a39e5db86b1c5ca6df94822b4c4bedf41ac6f34e93956d4cd8fab174a4",
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "48f3ec3b7d748c6f9cc3af609a1ff95fdfbe6af31a8d716289b75e028594f5fa",
-    "bioetl-dq-v2": "a835714fa39cac28b0c3027174dc4470681d8bc00aac51bcb5c30323ef3f3e2f",
-    "bioetl-incident-v1": "c90f2787a3ef244135228571c23bda4e99b0dc1224a5cc3389bfb7c507b8a299",
-    "bioetl-overview-v2": "8ccdda8b5554d9c5f7c63102c11344b61c7a5ae0289a15f24bd00c71cd2eaa59",
-    "bioetl-provider-health-v2": "ccae0f7ad5a2a43a8efb35d8b41604a4b3f67bdd1a2c7703a5d44685d69b41e8",
-    "bioetl-run-explorer-v1": "a95e9b3c3e0255ad3d1043a05444b3f3429f6c202bb91c225b184ab2dbbac722",
-    "bioetl-runtime": "04377f617335156fb288eda1e7e54dfc321e93853a729ca54a001087d6200b4a"
+    "bioetl-control-plane-v1": "4f20583e464575c83886bed940462fad4e0f4601510fd5a4622dc98f6a6400cd",
+    "bioetl-dq-v2": "b707759d4003f0fb2f6bddf46e178f559776987d14c4aea4b7d39adec96e0308",
+    "bioetl-incident-v1": "265a4c6b1d1e197ad312890b887f9c635ce64ad791940903de845441845e3049",
+    "bioetl-overview-v2": "421e4e917072fa764ef9612a1c0a8609b84de89a2c9cf81f4086e5654d98eee8",
+    "bioetl-provider-health-v2": "08c8e9ed258974e787988d06ff489529b048628749e554e66b21200b3c8a248b",
+    "bioetl-run-explorer-v1": "38f1f96267ff0bd271f88ad9b8c57f059d84432a138012bd85d1353f106bd898",
+    "bioetl-runtime": "0ca0967e33d2c06a6f823a4e38f97d880e3a9a71597ccf6aeb158239bfc94c8b"
   },
   "summary": {
     "route_count": 6,
@@ -52,7 +52,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 1000,
-      "panel_title": "Navigation",
+      "panel_title": "Navigate Dashboards",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -69,7 +69,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9400,
-      "panel_title": "Provenance",
+      "panel_title": "Inspect Scope & Evidence",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -86,7 +86,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9401,
-      "panel_title": "Status",
+      "panel_title": "Monitor Replay Readiness",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -105,7 +105,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 906,
-      "panel_title": "Review First Recovery Action",
+      "panel_title": "Review Recovery Action",
       "route": "data-trust-recovery",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -198,7 +198,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 894,
-      "panel_title": "Review Replay Coverage Limits",
+      "panel_title": "Review Coverage Limits",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -215,7 +215,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 130,
-      "panel_title": "Track Replay Blockers in Range",
+      "panel_title": "Track Replay Blockers",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -561,7 +561,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 132,
-      "panel_title": "Monitor Manifest Failure Severity [30m]",
+      "panel_title": "Monitor Manifest Failures (30m)",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -580,7 +580,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 133,
-      "panel_title": "Monitor Ledger Failure Severity [30m]",
+      "panel_title": "Monitor Ledger Failures (30m)",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -618,7 +618,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 136,
-      "panel_title": "Monitor Global Read Failure Severity [30m]",
+      "panel_title": "Monitor Global Read Failures (30m)",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -852,7 +852,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9404,
-      "panel_title": "Review Run Identity",
+      "panel_title": "Review Identity Anchors",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -871,7 +871,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9410,
-      "panel_title": "Identity Data Unavailable",
+      "panel_title": "Explain Missing Identity Data",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -888,7 +888,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9411,
-      "panel_title": "Record Counts Unavailable",
+      "panel_title": "Explain Missing Record Counts",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -998,7 +998,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9402,
-      "panel_title": "ID",
+      "panel_title": "Review Run Summary",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1017,7 +1017,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9403,
-      "panel_title": "Processed Records",
+      "panel_title": "Review Processed Records",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1036,7 +1036,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 1000,
-      "panel_title": "Navigation",
+      "panel_title": "Navigate Dashboards",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -1053,7 +1053,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 9400,
-      "panel_title": "Provenance",
+      "panel_title": "Understand Evidence Scope",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -1070,7 +1070,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 9401,
-      "panel_title": "Status",
+      "panel_title": "Monitor Current DQ Status",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1089,7 +1089,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 9103,
-      "panel_title": "Review: First Action",
+      "panel_title": "Start DQ Triage",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -1106,7 +1106,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 9101,
-      "panel_title": "Now · DQ Threshold State",
+      "panel_title": "Monitor DQ Threshold State",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1125,7 +1125,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 9102,
-      "panel_title": "Now · DQ Current Reasons",
+      "panel_title": "Inspect Current DQ Reasons",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1144,7 +1144,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 152,
-      "panel_title": "Monitor: Silver Filter Reject Accounting Mismatch",
+      "panel_title": "Monitor Silver Reject Mismatch",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1163,7 +1163,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 121,
-      "panel_title": "Inspect: Top Silver Reject Reasons (Pareto)",
+      "panel_title": "Inspect Top Silver Reject Reasons",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1182,7 +1182,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 122,
-      "panel_title": "Inspect: Top Silver Reject Fields",
+      "panel_title": "Inspect Top Silver Reject Fields",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1201,7 +1201,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 118,
-      "panel_title": "Inspect: Silver Filter Rejects by Pipeline",
+      "panel_title": "Inspect Silver Rejects by Pipeline",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1220,7 +1220,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 156,
-      "panel_title": "Inspect: Gold Reject Outcomes by Pipeline",
+      "panel_title": "Inspect Gold Rejects by Pipeline",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1240,7 +1240,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 1,
-      "panel_title": "Track Range Evidence: Bronze -> Silver -> Gold",
+      "panel_title": "Track Record Flow by Stage",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1260,7 +1260,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 3,
-      "panel_title": "Track: Source Records in Range (Bronze)",
+      "panel_title": "Monitor Bronze Records",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1279,7 +1279,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 4,
-      "panel_title": "Track: Clean Records in Range (Gold)",
+      "panel_title": "Monitor Gold Records",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1298,7 +1298,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 7,
-      "panel_title": "Track: Silver Validation Failures in Range",
+      "panel_title": "Monitor Silver Validation Failures",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1317,7 +1317,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 101,
-      "panel_title": "Review: Latest Successful Data Timestamp",
+      "panel_title": "Inspect Latest Successful Data",
       "route": "data-trust-recovery",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -1336,7 +1336,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 9,
-      "panel_title": "Inspect: Quarantine by Error Type",
+      "panel_title": "Inspect Quarantine Error Types",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1355,7 +1355,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 12,
-      "panel_title": "Monitor: Silver Validation Failures",
+      "panel_title": "Monitor Silver Validation Failures",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1374,7 +1374,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 151,
-      "panel_title": "Monitor: Gold Strict Validation Failures",
+      "panel_title": "Monitor Gold Validation Failures",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1393,7 +1393,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 10,
-      "panel_title": "Track: Anomalies Detected",
+      "panel_title": "Track DQ Anomalies",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1412,7 +1412,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 11,
-      "panel_title": "Track: DQ Check Duration (p95)",
+      "panel_title": "Track DQ Check Duration p95",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1431,7 +1431,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 155,
-      "panel_title": "Track: DQ Threshold Events in Range Trend",
+      "panel_title": "Track DQ Threshold Events",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1450,7 +1450,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 153,
-      "panel_title": "Track: Data Quality Score Trend (Volume-weighted)",
+      "panel_title": "Track Volume-Weighted DQ Score",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1469,7 +1469,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 116,
-      "panel_title": "Review: Lineage Handoff to Control Plane",
+      "panel_title": "Inspect Lineage in Control Plane",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -1486,7 +1486,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 150,
-      "panel_title": "Review: Aggregate Control-plane Handoff",
+      "panel_title": "Inspect Aggregate Control-Plane Issues",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -1503,7 +1503,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 2,
-      "panel_title": "Monitor: Data Quality Score (Volume-weighted)",
+      "panel_title": "Monitor Volume-Weighted DQ Score",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1522,7 +1522,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 5,
-      "panel_title": "Monitor: Worst-Entity DQ Score",
+      "panel_title": "Monitor Worst-Entity DQ Score",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1541,7 +1541,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 8,
-      "panel_title": "Time Range · Worst Freshness Age (hours; SLA 24/72)",
+      "panel_title": "Monitor Worst Freshness Age",
       "route": "data-trust-recovery",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -1560,7 +1560,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 154,
-      "panel_title": "Track: DQ Blocked Records in Range (Evidence)",
+      "panel_title": "Monitor Blocked Records",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1579,7 +1579,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 6,
-      "panel_title": "Range · Records Quarantined",
+      "panel_title": "Monitor Quarantined Records",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1598,7 +1598,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 117,
-      "panel_title": "Range · Silver Filter Rejects",
+      "panel_title": "Monitor Silver Filter Rejects",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1617,7 +1617,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 9402,
-      "panel_title": "ID",
+      "panel_title": "Inspect Run Identity",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1636,7 +1636,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 9403,
-      "panel_title": "Processed Records",
+      "panel_title": "Inspect Processed Records",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1655,7 +1655,7 @@
     {
       "dashboard_uid": "bioetl-incident-v1",
       "panel_id": 1000,
-      "panel_title": "Navigation",
+      "panel_title": "Navigate Dashboards",
       "route": "incident-console",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -1672,7 +1672,7 @@
     {
       "dashboard_uid": "bioetl-incident-v1",
       "panel_id": 9400,
-      "panel_title": "Provenance",
+      "panel_title": "Understand Incident Scope",
       "route": "incident-console",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -1689,7 +1689,7 @@
     {
       "dashboard_uid": "bioetl-incident-v1",
       "panel_id": 9401,
-      "panel_title": "Status",
+      "panel_title": "Monitor Incident Status",
       "route": "incident-console",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1708,7 +1708,7 @@
     {
       "dashboard_uid": "bioetl-incident-v1",
       "panel_id": 2001,
-      "panel_title": "Next Best Actions",
+      "panel_title": "Start Incident Triage",
       "route": "incident-console",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -1725,7 +1725,7 @@
     {
       "dashboard_uid": "bioetl-incident-v1",
       "panel_id": 2010,
-      "panel_title": "Ranked Active Suspects",
+      "panel_title": "Inspect Ranked Suspects",
       "route": "incident-console",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -1746,7 +1746,7 @@
     {
       "dashboard_uid": "bioetl-incident-v1",
       "panel_id": 2005,
-      "panel_title": "Evidence timeline · Current Alerts (now)",
+      "panel_title": "Monitor Current Alerts",
       "route": "incident-console",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -1765,7 +1765,7 @@
     {
       "dashboard_uid": "bioetl-incident-v1",
       "panel_id": 2006,
-      "panel_title": "Evidence timeline · Alert State History (range)",
+      "panel_title": "Track Alert State History",
       "route": "incident-console",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -1784,7 +1784,7 @@
     {
       "dashboard_uid": "bioetl-incident-v1",
       "panel_id": 2007,
-      "panel_title": "Impact / confidence (honest bounds)",
+      "panel_title": "Assess Impact & Confidence",
       "route": "incident-console",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -1801,7 +1801,7 @@
     {
       "dashboard_uid": "bioetl-incident-v1",
       "panel_id": 2002,
-      "panel_title": "Active Suspects · Runtime",
+      "panel_title": "Inspect Runtime Suspects",
       "route": "incident-console",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1820,7 +1820,7 @@
     {
       "dashboard_uid": "bioetl-incident-v1",
       "panel_id": 2003,
-      "panel_title": "Active Suspects · Provider",
+      "panel_title": "Inspect Provider Suspects",
       "route": "incident-console",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1839,7 +1839,7 @@
     {
       "dashboard_uid": "bioetl-incident-v1",
       "panel_id": 2004,
-      "panel_title": "Active Suspects · DQ",
+      "panel_title": "Inspect DQ Suspects",
       "route": "incident-console",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1858,7 +1858,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9601,
-      "panel_title": "Triage Alert State",
+      "panel_title": "Review Active Alerts",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1877,7 +1877,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 1000,
-      "panel_title": "Navigation",
+      "panel_title": "Navigate Dashboards",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -1894,7 +1894,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 99,
-      "panel_title": "Provenance",
+      "panel_title": "Inspect Scope & Evidence",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -1911,7 +1911,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 214,
-      "panel_title": "Status",
+      "panel_title": "Monitor Fleet Health",
       "route": "operations-home",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -1930,7 +1930,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 215,
-      "panel_title": "First Action",
+      "panel_title": "Review First Action",
       "route": "operations-home",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -1949,7 +1949,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9002,
-      "panel_title": "Inputs",
+      "panel_title": "Review Domain Status",
       "route": "operations-home",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -1968,7 +1968,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9018,
-      "panel_title": "Runtime Blockers Trend",
+      "panel_title": "Track Runtime Blockers",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1987,7 +1987,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9019,
-      "panel_title": "DQ Status Trend",
+      "panel_title": "Track Data Quality Status",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2006,7 +2006,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9020,
-      "panel_title": "Gold Lifecycle Trend",
+      "panel_title": "Track Gold Lifecycle",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2025,7 +2025,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9010,
-      "panel_title": "Historical Failures",
+      "panel_title": "Review Failed Runs",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2044,7 +2044,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9011,
-      "panel_title": "Recent Terminal Runs",
+      "panel_title": "Review Recent Terminal Runs",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2063,7 +2063,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9015,
-      "panel_title": "Silver Rejects + Rate",
+      "panel_title": "Track Silver Rejects",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2083,7 +2083,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9021,
-      "panel_title": "Diagnostics Navigation",
+      "panel_title": "Navigate Diagnostics",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -2100,7 +2100,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9006,
-      "panel_title": "Control Plane",
+      "panel_title": "Review Control Plane Status",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2119,7 +2119,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9003,
-      "panel_title": "Runtime",
+      "panel_title": "Review Runtime Status",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2138,7 +2138,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9004,
-      "panel_title": "Data Quality",
+      "panel_title": "Review Data Quality Status",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2157,7 +2157,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9007,
-      "panel_title": "Provider",
+      "panel_title": "Review Global Provider Status",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2176,7 +2176,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9005,
-      "panel_title": "Data Validation",
+      "panel_title": "Review Data Validation Status",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2195,7 +2195,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9013,
-      "panel_title": "Workflow",
+      "panel_title": "Review Workflow Status",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2214,7 +2214,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9300,
-      "panel_title": "ID",
+      "panel_title": "Review Run Identity",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2233,7 +2233,7 @@
     {
       "dashboard_uid": "bioetl-overview-v2",
       "panel_id": 9301,
-      "panel_title": "Processed Records",
+      "panel_title": "Review Processed Records",
       "route": "operations-home",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2252,7 +2252,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 1000,
-      "panel_title": "Navigation",
+      "panel_title": "Navigate Dashboards",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -2269,7 +2269,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 9400,
-      "panel_title": "Provenance",
+      "panel_title": "Understand Evidence Scope",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -2286,7 +2286,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 9401,
-      "panel_title": "Status",
+      "panel_title": "Monitor Selected Provider",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2305,7 +2305,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 9002,
-      "panel_title": "First Action",
+      "panel_title": "Start Provider Triage",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -2322,7 +2322,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 9101,
-      "panel_title": "Monitor GLOBAL Provider Severity Matrix",
+      "panel_title": "Monitor Fleet Severity",
       "route": "dependency-health",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -2341,7 +2341,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 9102,
-      "panel_title": "Inspect Critical Providers",
+      "panel_title": "Inspect Non-OK Providers",
       "route": "dependency-health",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -2360,7 +2360,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 9103,
-      "panel_title": "Inspect Provider Top Causes",
+      "panel_title": "Inspect Top Provider Causes",
       "route": "dependency-health",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -2379,7 +2379,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 9104,
-      "panel_title": "Monitor Provider Telemetry Freshness",
+      "panel_title": "Monitor Telemetry Freshness",
       "route": "dependency-health",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -2398,7 +2398,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 106,
-      "panel_title": "Track Failure and Degraded Trend by Provider",
+      "panel_title": "Track Health Failures & Degradation",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2418,7 +2418,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 107,
-      "panel_title": "Track Provider Failure Share (Selected Range)",
+      "panel_title": "Track Failure Share",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2437,7 +2437,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 108,
-      "panel_title": "Track Retries Exhausted by Provider/Operation",
+      "panel_title": "Inspect Exhausted Retries",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2456,7 +2456,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 109,
-      "panel_title": "Track Retries Exhausted Trend by Provider/Operation",
+      "panel_title": "Track Exhausted Retries",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2475,7 +2475,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 102,
-      "panel_title": "Inspect Provider Health Check Latency (p95) - $provider",
+      "panel_title": "Inspect Health-Check Latency p95",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2494,7 +2494,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 110,
-      "panel_title": "Inspect Adapter Request Latency by Endpoint (p95)",
+      "panel_title": "Track Request Latency p95",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2513,7 +2513,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 111,
-      "panel_title": "Inspect Rate Limit Errors by Method",
+      "panel_title": "Track Rate-Limit Errors",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2532,7 +2532,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 115,
-      "panel_title": "Inspect Network Timeout Errors by Method",
+      "panel_title": "Track Network & Timeout Errors",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2551,7 +2551,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 112,
-      "panel_title": "Track Rate Limiter Wait by Provider (p95)",
+      "panel_title": "Track Rate-Limiter Wait p95",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2570,7 +2570,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 113,
-      "panel_title": "Monitor Minimum Rate Limiter Tokens Available",
+      "panel_title": "Monitor Available Rate-Limit Tokens",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2589,7 +2589,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 31,
-      "panel_title": "Monitor Cross-Scope Adapter Circuit Breaker State (max)",
+      "panel_title": "Monitor Circuit-Breaker State",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2608,7 +2608,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 32,
-      "panel_title": "Track Cross-Scope Adapter Circuit Breaker Trips",
+      "panel_title": "Track Circuit-Breaker Trips",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2627,7 +2627,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 114,
-      "panel_title": "Review Raw Provider Health Enum",
+      "panel_title": "Inspect Raw Health Status",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2646,7 +2646,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 1,
-      "panel_title": "Track Health Check Latency by Provider (p95)",
+      "panel_title": "Track Health-Check Latency p95",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2665,7 +2665,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 2,
-      "panel_title": "Monitor Healthy Checks (Selected Range)",
+      "panel_title": "Monitor Healthy Checks",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2684,7 +2684,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 105,
-      "panel_title": "Monitor Degraded Checks (Selected Range)",
+      "panel_title": "Monitor Degraded Checks",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2703,7 +2703,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 104,
-      "panel_title": "Track Provider Failure Rate (Selected Range)",
+      "panel_title": "Track Failure Rate",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2722,7 +2722,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 7,
-      "panel_title": "Track Health Checks Total (Selected Range)",
+      "panel_title": "Monitor Health Checks",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2741,7 +2741,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 9402,
-      "panel_title": "ID",
+      "panel_title": "Inspect Run Identity",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2760,7 +2760,7 @@
     {
       "dashboard_uid": "bioetl-provider-health-v2",
       "panel_id": 9403,
-      "panel_title": "Processed Records",
+      "panel_title": "Inspect Processed Records",
       "route": "dependency-health",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2779,7 +2779,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "panel_id": 1000,
-      "panel_title": "Navigation",
+      "panel_title": "Navigate Dashboards",
       "route": "run-explorer",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -2796,7 +2796,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "panel_id": 1,
-      "panel_title": "Provenance · Run Scope",
+      "panel_title": "Understand Run Scope",
       "route": "run-explorer",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -2813,7 +2813,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "panel_id": 3010,
-      "panel_title": "Browse · Recent pipeline runs (no selection)",
+      "panel_title": "Browse Recent Runs",
       "route": "run-explorer",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -2832,7 +2832,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "panel_id": 9402,
-      "panel_title": "ID",
+      "panel_title": "Inspect Run Identity",
       "route": "run-explorer",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2851,7 +2851,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "panel_id": 9403,
-      "panel_title": "Processed Records",
+      "panel_title": "Inspect Processed Records",
       "route": "run-explorer",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2870,7 +2870,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "panel_id": 3011,
-      "panel_title": "Selected run · funnel stages",
+      "panel_title": "Inspect Stage Funnel",
       "route": "run-explorer",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -2889,7 +2889,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "panel_id": 3012,
-      "panel_title": "Selected run · top reasons",
+      "panel_title": "Inspect Top Run Reasons",
       "route": "run-explorer",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2908,7 +2908,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "panel_id": 3015,
-      "panel_title": "Selected run · reconciliation",
+      "panel_title": "Inspect Reconciliation",
       "route": "run-explorer",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2927,7 +2927,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "panel_id": 3016,
-      "panel_title": "Selected run · layers (accounting)",
+      "panel_title": "Inspect Layer Accounting",
       "route": "run-explorer",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -2944,7 +2944,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "panel_id": 3013,
-      "panel_title": "Selected run · artifacts",
+      "panel_title": "Inspect Run Artifacts",
       "route": "run-explorer",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -2963,7 +2963,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "panel_id": 3014,
-      "panel_title": "Selected run · stage timings / failure (optional)",
+      "panel_title": "Inspect Timings & Failure",
       "route": "run-explorer",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -2980,7 +2980,7 @@
     {
       "dashboard_uid": "bioetl-run-explorer-v1",
       "panel_id": 3001,
-      "panel_title": "Next actions (≤4)",
+      "panel_title": "Continue Run Investigation",
       "route": "run-explorer",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -2997,7 +2997,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 1000,
-      "panel_title": "Navigation",
+      "panel_title": "Navigate Dashboards",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -3014,7 +3014,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 9400,
-      "panel_title": "Provenance",
+      "panel_title": "Understand Pipeline Scope",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -3031,7 +3031,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 9401,
-      "panel_title": "Status",
+      "panel_title": "Monitor Pipeline Status",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3050,7 +3050,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 9991,
-      "panel_title": "First Action",
+      "panel_title": "Start Pipeline Triage",
       "route": "pipeline-flow",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -3067,7 +3067,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 9101,
-      "panel_title": "Runtime Blockers",
+      "panel_title": "Review Runtime Blockers",
       "route": "pipeline-flow",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -3086,7 +3086,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 9102,
-      "panel_title": "Metrics Evidence",
+      "panel_title": "Monitor Metrics Coverage",
       "route": "pipeline-flow",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -3171,7 +3171,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 9105,
-      "panel_title": "Monitor Aggregate Stage Lag",
+      "panel_title": "Track Stage Lag",
       "route": "pipeline-flow",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -3210,7 +3210,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 220,
-      "panel_title": "Runtime Error Rate",
+      "panel_title": "Monitor Runtime Error Rate",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3229,7 +3229,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 207,
-      "panel_title": "Track Pipeline Phase Duration p50/p95/p99",
+      "panel_title": "Track Phase Duration",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3250,7 +3250,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 239,
-      "panel_title": "Track Pipeline Duration p50/p95/p99",
+      "panel_title": "Track Pipeline Duration",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3271,7 +3271,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 256,
-      "panel_title": "Inspect Errors by Stage / Error Code / Range",
+      "panel_title": "Review Errors by Stage & Code",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3290,7 +3290,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 241,
-      "panel_title": "Track Records by Stage / Run Type / Range",
+      "panel_title": "Compare Records by Stage & Run Type",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3309,7 +3309,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 2541,
-      "panel_title": "Review Runtime-owned escalation",
+      "panel_title": "Review Runtime Escalation",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -3383,7 +3383,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 2542,
-      "panel_title": "Review Cross-domain handoffs",
+      "panel_title": "Review Cross-Domain Handoffs",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -3419,7 +3419,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 5,
-      "panel_title": "Inspect Control-plane Alert Conditions",
+      "panel_title": "Inspect Control Plane Alert Conditions",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3457,7 +3457,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 259,
-      "panel_title": "Inspect GLOBAL Provider Alert Conditions",
+      "panel_title": "Inspect Global Provider Alert Conditions",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3476,7 +3476,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 7,
-      "panel_title": "Inspect Freshness Lagged Entities >24h",
+      "panel_title": "Inspect Entities Stale Over 24h",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3495,7 +3495,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 2543,
-      "panel_title": "Review Process-level signals (GLOBAL)",
+      "panel_title": "Review Global Process Signals",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -3512,7 +3512,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 209,
-      "panel_title": "Track GLOBAL Shutdown Initiated by Reason / Interval",
+      "panel_title": "Track Global Shutdown Starts",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3531,7 +3531,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 210,
-      "panel_title": "Track GLOBAL Shutdown Completed by Reason / Interval",
+      "panel_title": "Track Global Shutdown Completions",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3550,7 +3550,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 237,
-      "panel_title": "Worst Stage Lag",
+      "panel_title": "Monitor Worst Stage Lag",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3588,7 +3588,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 205,
-      "panel_title": "Failed Runs",
+      "panel_title": "Monitor Failed Runs",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3607,7 +3607,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 9402,
-      "panel_title": "ID",
+      "panel_title": "Inspect Pipeline Identity",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3626,7 +3626,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 9403,
-      "panel_title": "Processed Records",
+      "panel_title": "Inspect Processed Records",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3645,7 +3645,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 9996,
-      "panel_title": "Failed Workflow Runs / Range",
+      "panel_title": "Track Failed Workflow Runs",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -3664,7 +3664,7 @@
     {
       "dashboard_uid": "bioetl-runtime",
       "panel_id": 9997,
-      "panel_title": "Failed Pipeline Steps / Range",
+      "panel_title": "Track Failed Workflow Steps",
       "route": "pipeline-flow",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
