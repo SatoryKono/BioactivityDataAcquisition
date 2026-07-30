@@ -2,30 +2,42 @@
 
 from __future__ import annotations
 
-import os
 import subprocess
 from pathlib import Path
 
 import pytest
 
 WRAPPER = Path("scripts/ai/mcp/mcp_memory_wrapper.sh")
+_UNSET_MODE = "__BIOETL_MODE_UNSET__"
+
+
+def _run_wrapper(mode: str | None) -> subprocess.CompletedProcess[str]:
+    """Set the mode inside Bash so Windows-to-WSL env bridging cannot alter it."""
+    return subprocess.run(
+        [
+            "bash",
+            "-c",
+            (
+                'if [[ "$1" == "$3" ]]; then '
+                "unset BIOETL_AI_MEMORY_MODE; "
+                "else export BIOETL_AI_MEMORY_MODE=\"$1\"; fi; "
+                'exec "$2"'
+            ),
+            "bash",
+            mode if mode is not None else _UNSET_MODE,
+            WRAPPER.as_posix(),
+            _UNSET_MODE,
+        ],
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=10,
+    )
 
 
 @pytest.mark.parametrize("mode", [None, "off", "read-only"])
 def test_mcp_memory_safe_modes_exit_before_server_start(mode: str | None) -> None:
-    environment = dict(os.environ)
-    environment.pop("BIOETL_AI_MEMORY_MODE", None)
-    if mode is not None:
-        environment["BIOETL_AI_MEMORY_MODE"] = mode
-
-    completed = subprocess.run(
-        ["bash", WRAPPER.as_posix()],
-        capture_output=True,
-        check=False,
-        env=environment,
-        text=True,
-        timeout=10,
-    )
+    completed = _run_wrapper(mode)
 
     assert completed.returncode == 78
     assert "Persistent MCP memory is disabled" in completed.stderr
@@ -33,18 +45,7 @@ def test_mcp_memory_safe_modes_exit_before_server_start(mode: str | None) -> Non
 
 
 def test_mcp_memory_rejects_unknown_mode_without_server_start() -> None:
-    environment = {
-        **os.environ,
-        "BIOETL_AI_MEMORY_MODE": "unsafe",
-    }
-    completed = subprocess.run(
-        ["bash", WRAPPER.as_posix()],
-        capture_output=True,
-        check=False,
-        env=environment,
-        text=True,
-        timeout=10,
-    )
+    completed = _run_wrapper("unsafe")
 
     assert completed.returncode == 64
     assert "Invalid BIOETL_AI_MEMORY_MODE" in completed.stderr

@@ -80,8 +80,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9102 | Inspect DQ Current Reasons |
 | bioetl-dq-v2.json | 220 | Run Lane · Silver/Gold Rejects |
 | bioetl-dq-v2.json | 152 | Monitor: Silver Filter Reject Accounting Mismatch |
-| bioetl-dq-v2.json | 121 | Inspect: Top Silver Reject Reasons (Pareto) |
-| bioetl-dq-v2.json | 122 | Inspect: Top Silver Reject Fields |
+| bioetl-dq-v2.json | 121 | Inspect Top Silver Reject Reasons |
+| bioetl-dq-v2.json | 122 | Inspect Top Silver Reject Fields |
 | bioetl-dq-v2.json | 118 | Inspect: Silver Filter Rejects by Pipeline |
 | bioetl-dq-v2.json | 156 | Inspect: Gold Reject Outcomes by Pipeline |
 | bioetl-dq-v2.json | 221 | Now lane · validation diagnostics |
