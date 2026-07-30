@@ -39,13 +39,8 @@ CURRENT_STATE = ROOT / "docs" / "02-architecture" / "current-state-inventory.md"
 REPRO_SUITE = (
     ROOT / "tests" / "integration" / "ci" / "test_reproducibility_contract_suite.py"
 )
-FORENSIC_INTEGRATION_TEST = (
-    ROOT
-    / "tests"
-    / "integration"
-    / "application"
-    / "services"
-    / "test_forensic_diff_service.py"
+FORENSIC_INTEGRATION_TEST = ROOT / Path(
+    "tests/integration/application/services/test_forensic_diff_service.py"
 )
 
 REMOVED_WRAPPERS = (
