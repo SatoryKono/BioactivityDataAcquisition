@@ -69,6 +69,28 @@ def test_issue_6038_ai_runtime_precedence_delegates_to_agents() -> None:
     assert "`docs/00-project/NORMATIVE_SOURCES.md`" in agents_section
 
 
+def test_active_runtime_precedence_declares_codex_and_junie_equal_peers() -> None:
+    """The root authority must represent every tracked active runtime."""
+    agents_section = _markdown_section(_read("AGENTS.md"), "## Canonical Precedence")
+    normative_section = _markdown_section(
+        _read("docs/00-project/NORMATIVE_SOURCES.md"),
+        "## Precedence",
+    )
+    junie_section = _markdown_section(
+        _read(".junie/guidelines.md"),
+        "## Canonical Precedence",
+    )
+
+    for token in (
+        ".codex/agents/CODEX-RUNTIME.md",
+        ".junie/agents/JUNIE-RUNTIME.md",
+    ):
+        assert token in agents_section
+        assert token in normative_section
+        assert token in junie_section
+    assert "equal peers" in agents_section
+
+
 def test_issue_6038_debt_budget_rule_has_no_adr_escape_hatch() -> None:
     """Active governance docs must not suggest debt-budget increases are allowed."""
     rules_section = _markdown_section(

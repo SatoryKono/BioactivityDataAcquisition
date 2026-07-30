@@ -11,6 +11,12 @@ on:
     branches: [ main ]
     paths:
       - ".codex/skills/**"
+      - ".codex/agents/**"
+      - ".junie/agents/**"
+      - ".junie/skills/**"
+      - "AGENTS.md"
+      - ".junie/guidelines.md"
+      - "docs/00-project/NORMATIVE_SOURCES.md"
       - ".devin/skills/**"
       - "docs/00-project/ai/skills/local/**"
       - "docs/00-project/ai/skills/global/**"
@@ -19,6 +25,9 @@ on:
       - "docs/00-project/ai/skills/SKILLS-CATALOG.md"
       - "scripts/ai/codex/check_skills_mirror.sh"
       - "scripts/ai/codex/skills-mirror-contract.json"
+      - "scripts/ai/junie/check_junie_mirror.py"
+      - "scripts/ai/junie/check_junie_mirror.sh"
+      - "scripts/ai/junie/junie-mirror-contract.json"
       - "scripts/ai/sync_ai_governance.py"
       - "scripts/ops/support/skills/check_skills_mirror.sh"
       - "scripts/ops/support/skills/check_ai_skills_layout.sh"
@@ -28,6 +37,12 @@ on:
     branches: [ main ]
     paths:
       - ".codex/skills/**"
+      - ".codex/agents/**"
+      - ".junie/agents/**"
+      - ".junie/skills/**"
+      - "AGENTS.md"
+      - ".junie/guidelines.md"
+      - "docs/00-project/NORMATIVE_SOURCES.md"
       - ".devin/skills/**"
       - "docs/00-project/ai/skills/local/**"
       - "docs/00-project/ai/skills/global/**"
@@ -36,6 +51,9 @@ on:
       - "docs/00-project/ai/skills/SKILLS-CATALOG.md"
       - "scripts/ai/codex/check_skills_mirror.sh"
       - "scripts/ai/codex/skills-mirror-contract.json"
+      - "scripts/ai/junie/check_junie_mirror.py"
+      - "scripts/ai/junie/check_junie_mirror.sh"
+      - "scripts/ai/junie/junie-mirror-contract.json"
       - "scripts/ai/sync_ai_governance.py"
       - "scripts/ops/support/skills/check_skills_mirror.sh"
       - "scripts/ops/support/skills/check_ai_skills_layout.sh"
@@ -43,6 +61,16 @@ on:
       - ".github/workflows/skills-consistency.yml"
 
 jobs:
+  verify-codex-junie-runtime-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Verify Codex–Junie runtime parity
+        run: bash scripts/ai/junie/check_junie_mirror.sh --check
+
   verify-local-skills-mirror:
     runs-on: ubuntu-latest
     timeout-minutes: 5
