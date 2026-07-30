@@ -16,6 +16,8 @@ also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; canonical baseline:
 
 - Control-plane panels backed by `$__range` now identify the selected range in
   their operator-facing descriptions.
+- DQ freshness and provider status/matrix descriptions use the shared
+  `TELEMETRY MISSING` fail-closed language.
 - Global-scope and telemetry-absence caveats remain explicit.
 - PromQL, layout, navigation, variables, and thresholds are unchanged.
 
