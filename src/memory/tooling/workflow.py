@@ -357,6 +357,16 @@ def _record_envelope_metadata(
 
     repo_root = _discover_repo_root() or Path(__file__).resolve().parents[3]
     scope = RepositoryScope.discover(repo_root, task_id=task_id)
+    runtime = os.environ.get("BIOETL_AI_RUNTIME", "").strip()
+    agent = os.environ.get("BIOETL_AI_AGENT", "").strip()
+    if not runtime or runtime.lower() == "unknown":
+        raise ValueError(
+            "BIOETL_AI_RUNTIME must identify the runtime for durable memory writes"
+        )
+    if not agent or agent.lower() == "unknown":
+        raise ValueError(
+            "BIOETL_AI_AGENT must identify the agent for durable memory writes"
+        )
     envelope = RecordEnvelope.create(
         record_id=record_id,
         record_type=RecordType.WORKING,
@@ -366,8 +376,8 @@ def _record_envelope_metadata(
         worktree_id=scope.worktree_id,
         task_id=task_id,
         actor=ActorIdentity(
-            runtime=os.environ.get("BIOETL_AI_RUNTIME", "unknown"),
-            agent=os.environ.get("BIOETL_AI_AGENT", "memory-workflow"),
+            runtime=runtime,
+            agent=agent,
             model=os.environ.get("BIOETL_AI_MODEL"),
         ),
         source_refs=tuple(source_refs),

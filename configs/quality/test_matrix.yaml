@@ -873,7 +873,7 @@ fixture_governance:
     metadata_catalog_location: reports/quality/vcr-metadata-catalog.json
     stale_age_checker: scripts/engineering/qa/vcr/check_vcr_metadata_age.py
     provider_expected_sidecar_counts:
-      chembl: 52
+      chembl: 51
       crossref: 24
       multi_provider: 1
       openalex: 25
