@@ -179,6 +179,45 @@ def test_revoked_consent_blocks_subsequent_access_without_deleting(
         store.enumerate(context, owner_id="user-a")
 
 
+def test_authorized_erasure_remains_available_after_consent_revocation(
+    tmp_path: Path,
+) -> None:
+    store = UserMemoryStore(tmp_path)
+    _consent(store)
+    context = _context()
+    store.put(
+        context,
+        owner_id="user-a",
+        envelope=_envelope(),
+        content={"language": "ru"},
+    )
+    store.revoke_consent(context, user_id="user-a")
+
+    store.delete(context, owner_id="user-a", record_id="preference-1")
+
+    assert not (tmp_path / "users" / "user-a" / "repo-a" / "records").exists()
+
+
+def test_cross_user_erasure_after_revocation_is_denied(tmp_path: Path) -> None:
+    store = UserMemoryStore(tmp_path)
+    _consent(store)
+    owner_context = _context()
+    store.put(
+        owner_context,
+        owner_id="user-a",
+        envelope=_envelope(),
+        content={"language": "ru"},
+    )
+    store.revoke_consent(owner_context, user_id="user-a")
+
+    with pytest.raises(AccessDeniedError, match="principal scope mismatch"):
+        store.delete(
+            _context(user_id="user-b"),
+            owner_id="user-a",
+            record_id="preference-1",
+        )
+
+
 @pytest.mark.parametrize(
     ("scope", "dirty", "reason"),
     [
