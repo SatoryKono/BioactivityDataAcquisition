@@ -18,7 +18,9 @@ def _run_wrapper(mode: str | None) -> subprocess.CompletedProcess[str]:
         if mode is None
         else f"export BIOETL_AI_MEMORY_MODE={shlex.quote(mode)}"
     )
-    wrapper_path = shlex.quote(WRAPPER.resolve().as_posix())
+    # Keep the path repo-relative: Windows Path.resolve() produces ``E:/...``,
+    # while the configured ``bash`` may be WSL Bash and requires ``/mnt/e/...``.
+    wrapper_path = shlex.quote(WRAPPER.as_posix())
     return subprocess.run(
         [
             "bash",
