@@ -235,7 +235,7 @@
       "status": "pass"
     },
     {
-      "current": 9,
+      "current": 8,
       "limit": 15,
       "metric": "zero_reference_supporting_script_count",
       "name": "supporting_scripts_zero_reference_count",
