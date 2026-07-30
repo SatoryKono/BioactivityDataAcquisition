@@ -91,10 +91,6 @@
 00-project/ai/rules/windsurf/workflows/pre-commit.md
 00-project/ai/rules/windsurf/workflows/qodo-sync.md
 00-project/ai/rules/windsurf/workflows/review.md
-00-project/ai/sessions/custom-1776232397.md
-00-project/ai/sessions/custom-1776232923.md
-00-project/ai/sessions/quick-review-1776233756.md
-00-project/ai/sessions/review-1776233608.md
 00-project/ai/skills/SKILLS-CATALOG.md
 00-project/ai/skills/_references/README.md
 00-project/ai/skills/_references/local/deep-research/references/critique-framework.md
