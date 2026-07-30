@@ -27,6 +27,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Unit tests for Bronze DQ analyzer."""
 
+from dataclasses import dataclass
 from datetime import datetime, UTC
 
 import orjson
@@ -39,10 +40,30 @@ from bioetl.domain.value_objects.dq_report import (
     DQReportStatus,
     MedallionLayer,
 )
-from bioetl.infrastructure.schemas.dq_report_config import BronzeDQReportConfig
 
 
 pytestmark = pytest.mark.unit
+
+
+@dataclass(frozen=True)
+class _BronzeDQConfig:
+    """Port-shaped test input without importing the infrastructure DTO."""
+
+    checks: list[str]
+
+    def get_checks_enums(self) -> list[BronzeDQCheckType]:
+        return [
+            check_type
+            for check in self.checks
+            if (check_type := _as_bronze_check_type(check)) is not None
+        ]
+
+
+def _as_bronze_check_type(value: str) -> BronzeDQCheckType | None:
+    try:
+        return BronzeDQCheckType(value)
+    except ValueError:
+        return None
 
 
 class TestBronzeDQAnalyzer:
@@ -51,8 +72,7 @@ class TestBronzeDQAnalyzer:
     def test_analyze_basic_records(self) -> None:
         """Test analysis of basic JSON records."""
         analyzer = BronzeDQAnalyzer()
-        config = BronzeDQReportConfig(
-            enabled=True,
+        config = _BronzeDQConfig(
             checks=[
                 BronzeDQCheckType.RECORD_COUNT.value,
                 BronzeDQCheckType.FILE_INTEGRITY.value,
@@ -105,8 +125,7 @@ class TestBronzeDQAnalyzer:
     def test_analyze_empty_records(self) -> None:
         """Test analysis with empty records."""
         analyzer = BronzeDQAnalyzer()
-        config = BronzeDQReportConfig(
-            enabled=True,
+        config = _BronzeDQConfig(
             checks=[BronzeDQCheckType.RECORD_COUNT.value],
         )
 
@@ -128,8 +147,7 @@ class TestBronzeDQAnalyzer:
     def test_analyze_encoding_validation(self) -> None:
         """Test encoding validation check."""
         analyzer = BronzeDQAnalyzer()
-        config = BronzeDQReportConfig(
-            enabled=True,
+        config = _BronzeDQConfig(
             checks=[BronzeDQCheckType.ENCODING_VALIDATION.value],
         )
 
@@ -160,8 +178,7 @@ class TestBronzeDQAnalyzer:
     def test_analyze_field_presence(self) -> None:
         """Test field presence check."""
         analyzer = BronzeDQAnalyzer()
-        config = BronzeDQReportConfig(
-            enabled=True,
+        config = _BronzeDQConfig(
             checks=[BronzeDQCheckType.RAW_FIELD_PRESENCE.value],
         )
 

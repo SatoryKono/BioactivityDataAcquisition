@@ -34,6 +34,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import Any
+from unittest.mock import MagicMock
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import json
@@ -45,7 +46,6 @@ from bioetl.application.pipelines.openalex.transformer import (
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 LEGACY_HTTP_DOI = "http" + "://doi.org/10.1038/NATURE12373"
@@ -65,7 +65,7 @@ def pipeline_context() -> PipelineContext:
         run_id=deterministic_run_uuid_from_callsite("test_transformer"),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
-        logger=NoOpLogger(),
+        logger=MagicMock(),
     )
 
 

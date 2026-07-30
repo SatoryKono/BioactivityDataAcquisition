@@ -136,9 +136,10 @@ def test_rf001_headline_status_is_evidence_aware() -> None:
     )
     assert "bioetl_runtime_trust_gap_active_10m * 3" in runtime_expr
     assert _mapping_text(_panel(runtime, 9401), "3") == "INCOMPLETE"
-    assert "telemetry gap makes the verdict incomplete" in str(
-        _panel(runtime, 9401).get("description")
-    ).lower()
+    assert (
+        "telemetry gap makes the verdict incomplete"
+        in str(_panel(runtime, 9401).get("description")).lower()
+    )
 
     assert "bioetl_dq_current_status" in str(_panel(dq, 9401).get("targets"))
     provenance = str(_panel(dq, 9400).get("options", {}).get("content", ""))

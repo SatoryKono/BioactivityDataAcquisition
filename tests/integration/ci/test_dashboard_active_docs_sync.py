@@ -72,9 +72,7 @@ def _dashboard_panel_by_title(
     return next(panel for panel in panels if panel.get("title") == panel_title)
 
 
-def _dashboard_panel_by_id(
-    dashboard_path: Path, panel_id: int
-) -> dict[str, object]:
+def _dashboard_panel_by_id(dashboard_path: Path, panel_id: int) -> dict[str, object]:
     payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
     panels = _iter_dashboard_panels(list(payload.get("panels", [])))
     return next(panel for panel in panels if panel.get("id") == panel_id)

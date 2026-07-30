@@ -36,7 +36,6 @@ from uuid import UUID
 
 import pytest
 
-import bioetl.infrastructure.control_plane.file_run_manifest_store as manifest_store_module
 from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec as RunManifestCreateRequest,
     RunManifestService,
@@ -49,10 +48,8 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
-from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.control_plane import InMemoryRunManifestStore
-from bioetl.infrastructure.control_plane import FileRunManifestStore
 from tests.helpers.clock import FixedClock
 
 
@@ -660,36 +657,6 @@ def test_create_manifest_uses_store_specific_post_save_assertion() -> None:
     manifest = service.create_manifest(_make_request())
 
     assert store.asserted_manifest == manifest
-
-
-def test_create_manifest_aborts_when_atomic_persistence_fails(
-    tmp_path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
-    service = RunManifestService(
-        manifest_port=store,
-        _manifest_id_factory=lambda: "manifest-storage-failure",
-    )
-    original_atomic_write_text = manifest_store_module.atomic_write_text
-    call_count = {"value": 0}
-
-    def _fail_on_index_write(path, text, encoding="utf-8") -> None:
-        call_count["value"] += 1
-        if call_count["value"] == 1:
-            original_atomic_write_text(path, text, encoding=encoding)
-            return
-        raise OSError("run index write failed")
-
-    monkeypatch.setattr(
-        "bioetl.infrastructure.control_plane.file_run_manifest_store.atomic_write_text",
-        _fail_on_index_write,
-    )
-
-    with pytest.raises(StorageError, match="Run manifest save failed"):
-        service.create_manifest(_make_request())
-
-    assert store.get("manifest-storage-failure") is None
 
 
 def test_execution_fingerprint_is_stable_for_equivalent_requests() -> None:

@@ -80,7 +80,7 @@ class TestContractTestingGovernance:
 
         run_tests = steps["Run Contract Tests"]
         assert run_tests["continue-on-error"] is True
-        assert 'pytest_rc=$?' in run_tests["run"]
+        assert "pytest_rc=$?" in run_tests["run"]
         assert 'echo "pytest_rc=$pytest_rc" >> "$GITHUB_OUTPUT"' in run_tests["run"]
         assert 'exit "$pytest_rc"' in run_tests["run"]
         assert "|| echo" not in run_tests["run"]
@@ -89,16 +89,16 @@ class TestContractTestingGovernance:
         assert upload_results["if"] == "always()"
 
         create_issue = steps["Create Issue on Failure"]
-        failure_condition = (
-            "always() && steps.contract_tests.outcome == 'failure'"
-        )
+        failure_condition = "always() && steps.contract_tests.outcome == 'failure'"
         assert create_issue["if"] == failure_condition
 
         enforce_result = steps["Enforce Contract Test Result"]
         assert enforce_result["if"] == failure_condition
-        assert step_names.index("Upload Test Results") < step_names.index(
-            "Create Issue on Failure"
-        ) < step_names.index("Enforce Contract Test Result")
+        assert (
+            step_names.index("Upload Test Results")
+            < step_names.index("Create Issue on Failure")
+            < step_names.index("Enforce Contract Test Result")
+        )
         assert enforce_result["env"]["PYTEST_RC"] == (
             "${{ steps.contract_tests.outputs.pytest_rc }}"
         )

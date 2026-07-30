@@ -251,10 +251,7 @@ def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
         assert banned not in titles, (
             f"{dashboard_name} must not ship dual Status twin {banned!r}"
         )
-        assert any(
-            panel.get("id") == 9401
-            for panel in get_dashboard_panels(dashboard)
-        )
+        assert any(panel.get("id") == 9401 for panel in get_dashboard_panels(dashboard))
 
 
 def test_overview_and_control_plane_first_screens_use_role_appropriate_queries() -> (
@@ -571,11 +568,11 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
                 for candidate in get_dashboard_panels(dashboard)
                 if candidate.get("id") == 1000
                 and candidate.get("title")
-                    in {
-                        "Review Dashboard Navigation",
-                        "Navigation",
-                        "Navigate Dashboards",
-                    }
+                in {
+                    "Review Dashboard Navigation",
+                    "Navigation",
+                    "Navigate Dashboards",
+                }
             ),
             None,
         )

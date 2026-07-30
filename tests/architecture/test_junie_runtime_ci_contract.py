@@ -37,9 +37,5 @@ def test_skills_consistency_executes_canonical_junie_checker() -> None:
     workflow = _workflow()
     jobs = workflow["jobs"]
     job = jobs["verify-codex-junie-runtime-parity"]
-    commands = [
-        step.get("run", "")
-        for step in job["steps"]
-        if isinstance(step, dict)
-    ]
+    commands = [step.get("run", "") for step in job["steps"] if isinstance(step, dict)]
     assert "bash scripts/ai/junie/check_junie_mirror.sh --check" in commands

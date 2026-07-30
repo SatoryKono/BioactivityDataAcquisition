@@ -25,7 +25,7 @@
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Unit tests for RecordProcessor."""
+"""Integration tests for RecordProcessor configuration collaboration."""
 
 from __future__ import annotations
 
@@ -48,6 +48,9 @@ from tests.unit.application.core.record_processor_test_support import (
     _create_record_processor_config,
     _write_temp_pipeline_config,
 )
+
+
+pytestmark = pytest.mark.integration
 
 pytest_plugins = ("tests.unit.application.core.transformer_test_support",)
 

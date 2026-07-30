@@ -24,7 +24,7 @@ _MATRIX = _REPO / "configs/quality/test_matrix.yaml"
 
 
 @pytest.mark.architecture
-def test_unit_fast_lane_excludes_scripts_repo_backed_and_subprocess() -> None:
+def test_unit_fast_lane_excludes_scripts_repo_backed_fs_and_subprocess() -> None:
     """unit-fast marker/path rules must keep pure unit lane free of tooling noise."""
     payload = yaml.safe_load(_MATRIX.read_text(encoding="utf-8"))
     lane = payload["test_lanes"]["lanes"]["unit-fast"]
@@ -32,6 +32,7 @@ def test_unit_fast_lane_excludes_scripts_repo_backed_and_subprocess() -> None:
     args = [str(a) for a in lane["pytest_args"]]
 
     assert "not repo_backed" in marker
+    assert "not fs_contract" in marker
     assert "not subprocess_backed" in marker
     assert "tests/unit/scripts" in " ".join(args) or any(
         a.endswith("tests/unit/scripts")
@@ -56,3 +57,19 @@ def test_unit_scripts_and_repo_backed_lanes_exist() -> None:
     assert "repo-backed-unit" in lanes
     assert lanes["unit-scripts-tooling"]["paths"] == ["tests/unit/scripts/"]
     assert lanes["repo-backed-unit"]["paths"] == ["tests/unit/repo_backed/"]
+
+
+@pytest.mark.architecture
+def test_filesystem_contract_lane_is_bounded_and_excluded_from_fast_lanes() -> None:
+    """Reviewed real-FS modules must have one explicit serial lane owner."""
+    payload = yaml.safe_load(_MATRIX.read_text(encoding="utf-8"))
+    lanes = payload["test_lanes"]["lanes"]
+    fs_lane = lanes["unit-filesystem-contracts"]
+    classified = fs_lane["classified_modules"]
+
+    assert fs_lane["marker_expression"].startswith("fs_contract and ")
+    assert classified == sorted(set(classified))
+    assert "tests/unit/infrastructure/test_storage.py" in classified
+    assert all((_REPO / path).is_file() for path in classified)
+    assert "not fs_contract" in lanes["unit-fast"]["marker_expression"]
+    assert "not fs_contract" in lanes["unit-parallel-safe"]["marker_expression"]

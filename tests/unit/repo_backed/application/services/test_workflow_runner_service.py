@@ -56,7 +56,7 @@ from bioetl.domain.workflow import (
 from tests.helpers.clock import FIXED_TEST_TIME
 
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 
 @dataclass

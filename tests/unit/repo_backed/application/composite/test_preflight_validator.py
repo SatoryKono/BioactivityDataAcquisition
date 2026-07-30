@@ -62,7 +62,7 @@ from bioetl.domain.composite.config import (
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.infrastructure.config.composite_config_api import load_composite_config
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 
 @pytest.fixture
