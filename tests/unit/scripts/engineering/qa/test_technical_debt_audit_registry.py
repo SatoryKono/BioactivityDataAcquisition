@@ -18,6 +18,8 @@ import pytest
 
 from scripts.engineering.qa.technical_debt_audit_registry import (
     compute_evidence_surface_sha256,
+    load_technical_debt_audit_registry,
+    render_current_technical_debt_audit,
     resolve_current_technical_debt_audit,
     validate_technical_debt_audit_registry,
 )
@@ -26,19 +28,32 @@ pytestmark = pytest.mark.unit
 
 
 def _write_registry_fixture(root: Path) -> Path:
-    evidence = root / "reports/quality/evidence.json"
-    evidence.parent.mkdir(parents=True)
-    evidence.write_text('{"value":1}\n', encoding="utf-8")
+    evidence_payloads = {
+        "reports/quality/module-coverage-inventory.json": (
+            '{"summary":{"source_module_count":3,"status_counts":'
+            '{"fully_covered":1,"partially_covered":1,"no_executable_lines":1,'
+            '"uncovered":0,"unmeasured":0}}}\n'
+        ),
+        "reports/quality/architecture-quality-scorecard.json": (
+            '{"integral_score":9.5,"interpretation":"good",'
+            '"metrics":{"transition_compat_count":0,"sunset_compat_count":0,'
+            '"expired_compat_count":0,"layer_violations":0}}\n'
+        ),
+        "reports/quality/debt-governance-gates.json": (
+            '{"summary":{"gate_count":2,"pass_count":2,"fail_count":0}}\n'
+        ),
+        "reports/quality/compatibility-importer-census.json": (
+            '{"summary":{"twin_pair_count":0}}\n'
+        ),
+    }
+    for relative_path, content in evidence_payloads.items():
+        evidence = root / relative_path
+        evidence.parent.mkdir(parents=True, exist_ok=True)
+        evidence.write_text(content, encoding="utf-8")
     current_report = root / "reports/quality/current.md"
     evidence_hash = compute_evidence_surface_sha256(
         root,
-        ["reports/quality/evidence.json"],
-    )
-    current_report.write_text(
-        "Lifecycle status: current\n"
-        "Audited commit SHA: `1111111111111111111111111111111111111111`\n"
-        f"Evidence surface SHA-256: `{evidence_hash}`\n",
-        encoding="utf-8",
+        list(evidence_payloads),
     )
     archived_report = root / "docs/99-archive/reports/quality/old.md"
     archived_report.parent.mkdir(parents=True)
@@ -55,10 +70,15 @@ def _write_registry_fixture(root: Path) -> Path:
         "    audited_commit_sha: '1111111111111111111111111111111111111111'\n"
         f"    evidence_surface_sha256: '{evidence_hash}'\n"
         "    evidence_paths:\n"
-        "      - reports/quality/evidence.json\n"
-        "  - id: audit-old\n"
+        + "".join(f"      - {path}\n" for path in evidence_payloads)
+        + "  - id: audit-old\n"
         "    status: superseded\n"
         "    report_path: docs/99-archive/reports/quality/old.md\n",
+        encoding="utf-8",
+    )
+    _, records = load_technical_debt_audit_registry(root, registry.relative_to(root))
+    current_report.write_text(
+        render_current_technical_debt_audit(root, records[0]),
         encoding="utf-8",
     )
     return registry.relative_to(root)
@@ -80,8 +100,8 @@ def test_registry_resolves_exactly_one_current_audit(tmp_path: Path) -> None:
 
 def test_registry_detects_evidence_content_drift(tmp_path: Path) -> None:
     registry = _write_registry_fixture(tmp_path)
-    (tmp_path / "reports/quality/evidence.json").write_text(
-        '{"value":2}\n',
+    (tmp_path / "reports/quality/debt-governance-gates.json").write_text(
+        '{"summary":{"gate_count":2,"pass_count":1,"fail_count":1}}\n',
         encoding="utf-8",
     )
 
@@ -92,6 +112,26 @@ def test_registry_detects_evidence_content_drift(tmp_path: Path) -> None:
     )
 
     assert "current audit evidence_surface_sha256 is stale" in issues
+
+
+def test_registry_detects_semantic_metric_mutation(tmp_path: Path) -> None:
+    registry = _write_registry_fixture(tmp_path)
+    report = tmp_path / "reports/quality/current.md"
+    report.write_text(
+        report.read_text(encoding="utf-8").replace(
+            '"source_module_count":3',
+            '"source_module_count":4',
+        ),
+        encoding="utf-8",
+    )
+
+    issues = validate_technical_debt_audit_registry(
+        tmp_path,
+        registry,
+        verify_git_commit=False,
+    )
+
+    assert "current audit semantic summary is stale" in issues
 
 
 def test_evidence_hash_is_independent_of_checkout_line_endings(

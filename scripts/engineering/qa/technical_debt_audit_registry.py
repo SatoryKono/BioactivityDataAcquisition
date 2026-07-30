@@ -16,6 +16,9 @@ import yaml
 DEFAULT_REGISTRY_PATH = Path("configs/quality/technical_debt_audit_registry.yaml")
 SHA_PATTERN = re.compile(r"^[0-9a-f]{40,64}$")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+SEMANTIC_SUMMARY_PATTERN = re.compile(
+    r"<!-- technical-debt-audit-summary: (?P<payload>\{.*\}) -->"
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -228,6 +231,163 @@ def _validate_current_report_markers(root: Path, current: Any) -> list[str]:
     return issues
 
 
+def build_current_audit_semantic_summary(
+    root: Path,
+    current: TechnicalDebtAuditRecord,
+) -> dict[str, Any]:
+    """Build the report headline summary from the pinned evidence surface."""
+
+    def load_evidence(relative_path: str) -> dict[str, Any]:
+        if relative_path not in current.evidence_paths:
+            raise ValueError(f"semantic audit evidence is not pinned: {relative_path}")
+        payload = json.loads((root / relative_path).read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError(
+                f"semantic audit evidence must be a mapping: {relative_path}"
+            )
+        return payload
+
+    coverage = load_evidence("reports/quality/module-coverage-inventory.json")
+    scorecard = load_evidence("reports/quality/architecture-quality-scorecard.json")
+    governance = load_evidence("reports/quality/debt-governance-gates.json")
+    compatibility = load_evidence("reports/quality/compatibility-importer-census.json")
+    coverage_summary = coverage["summary"]
+    status_counts = coverage_summary["status_counts"]
+    governance_summary = governance["summary"]
+    scorecard_metrics = scorecard["metrics"]
+    compatibility_summary = compatibility["summary"]
+    highlighted_modules = {
+        "bioetl.domain.composite.config",
+        "bioetl.application.composite.merger",
+    }
+    retained_entrypoints = [
+        {
+            "module": row["module_name"],
+            "src_importers": row["src_importer_count"],
+            "test_importers": row["test_importer_count"],
+        }
+        for row in compatibility.get("retained_entrypoints", [])
+        if row.get("module_name") in highlighted_modules
+    ]
+    return {
+        "audit_id": current.audit_id,
+        "audited_commit_sha": current.audited_commit_sha,
+        "evidence_surface_sha256": current.evidence_surface_sha256,
+        "debt_governance": {
+            "gate_count": governance_summary["gate_count"],
+            "pass_count": governance_summary["pass_count"],
+            "fail_count": governance_summary["fail_count"],
+        },
+        "architecture_quality": {
+            "integral_score": scorecard["integral_score"],
+            "interpretation": scorecard["interpretation"],
+        },
+        "module_inventory": {
+            "source_module_count": coverage_summary["source_module_count"],
+            "fully_covered": status_counts["fully_covered"],
+            "partially_covered": status_counts["partially_covered"],
+            "no_executable_lines": status_counts["no_executable_lines"],
+            "uncovered": status_counts["uncovered"],
+            "unmeasured": status_counts["unmeasured"],
+        },
+        "compatibility": {
+            "transition": scorecard_metrics["transition_compat_count"],
+            "sunset": scorecard_metrics["sunset_compat_count"],
+            "expired": scorecard_metrics["expired_compat_count"],
+            "twin_pairs": compatibility_summary["twin_pair_count"],
+            "retained_entrypoints": retained_entrypoints,
+        },
+        "layer_violations": scorecard_metrics["layer_violations"],
+    }
+
+
+def render_current_technical_debt_audit(
+    root: Path,
+    current: TechnicalDebtAuditRecord,
+) -> str:
+    """Render the current audit deterministically from its pinned evidence."""
+    summary = build_current_audit_semantic_summary(root, current)
+    module = summary["module_inventory"]
+    module_total = sum(
+        module[key]
+        for key in (
+            "fully_covered",
+            "partially_covered",
+            "no_executable_lines",
+            "uncovered",
+            "unmeasured",
+        )
+    )
+    semantic_json = json.dumps(summary, sort_keys=True, separators=(",", ":"))
+    governance = summary["debt_governance"]
+    architecture = summary["architecture_quality"]
+    compatibility = summary["compatibility"]
+    retained_rows = "".join(
+        f"| `{row['module']}` | {row['src_importers']} | {row['test_importers']} |\n"
+        for row in compatibility["retained_entrypoints"]
+    )
+    return (
+        "# Total Technical Debt Audit: GitHub main\n\n"
+        "Lifecycle status: current\n\n"
+        f"Audited commit SHA: `{current.audited_commit_sha}`\n\n"
+        f"Evidence surface SHA-256: `{current.evidence_surface_sha256}`\n\n"
+        f"Registry: {DEFAULT_REGISTRY_PATH.as_posix()}\n\n"
+        f"<!-- technical-debt-audit-summary: {semantic_json} -->\n\n"
+        "## Executive summary\n\n"
+        f"1. Debt-governance gates: **{governance['pass_count']} pass / "
+        f"{governance['fail_count']} fail** (`{governance['pass_count']}/"
+        f"{governance['gate_count']}` debt-governance gates passing).\n"
+        f"1. Architecture quality integral score: **{architecture['integral_score']}** "
+        f"(`{architecture['interpretation']}`). Integral score "
+        f"`{architecture['integral_score']}`.\n"
+        "1. Module inventory:\n"
+        f"   - source_module_count: **{module['source_module_count']}**\n"
+        f"   - fully_covered: **{module['fully_covered']}**\n"
+        f"   - partially_covered: **{module['partially_covered']}**\n"
+        f"   - no_executable_lines: **{module['no_executable_lines']}**\n"
+        f"   - uncovered: **{module['uncovered']}**\n"
+        f"   - unmeasured: **{module['unmeasured']}**\n"
+        f"   - check: status total = {module_total} == source_module_count\n"
+        "1. Compatibility transition/sunset/expired: "
+        f"**{compatibility['transition']}/{compatibility['sunset']}/"
+        f"{compatibility['expired']}**; twin pairs: "
+        f"**{compatibility['twin_pairs']}**.\n"
+        f"1. Layer violations: **{summary['layer_violations']}**.\n\n"
+        "## Evidence anchors\n\n"
+        + "".join(f"- `{path}`\n" for path in current.evidence_paths)
+        + "\n## Reproducibility\n\n"
+        "```bash\n"
+        "python -m scripts.engineering.qa validate-technical-debt-audit --json\n"
+        "python -m scripts.engineering.qa validate-technical-debt-audit "
+        "--update-current\n"
+        "```\n\n"
+        "## Compatibility retained entrypoints (importer census)\n\n"
+        "| module | src importers | test importers |\n"
+        "| --- | ---: | ---: |\n"
+        f"{retained_rows}"
+    )
+
+
+def _validate_current_semantics(root: Path, current: Any) -> list[str]:
+    report_path = root / current.report_path
+    if not report_path.is_file():
+        return []
+    match = SEMANTIC_SUMMARY_PATTERN.search(report_path.read_text(encoding="utf-8"))
+    if match is None:
+        return ["current audit is missing machine-readable semantic summary"]
+    try:
+        actual = json.loads(match.group("payload"))
+        expected = build_current_audit_semantic_summary(root, current)
+    except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        return [f"current audit semantic summary is invalid: {exc}"]
+    if actual != expected:
+        return ["current audit semantic summary is stale"]
+    expected_report = render_current_technical_debt_audit(root, current)
+    if report_path.read_text(encoding="utf-8") != expected_report:
+        return ["current audit Markdown is not the deterministic rendered report"]
+    return []
+
+
 def validate_technical_debt_audit_registry(
     root: Path,
     registry_path: Path | None = None,
@@ -261,6 +421,7 @@ def validate_technical_debt_audit_registry(
     )
     issues.extend(_validate_current_evidence_hash(root, current))
     issues.extend(_validate_current_report_markers(root, current))
+    issues.extend(_validate_current_semantics(root, current))
     return issues
 
 
@@ -270,6 +431,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY_PATH)
     parser.add_argument("--print-current", action="store_true")
     parser.add_argument("--print-evidence-hash", action="store_true")
+    parser.add_argument("--update-current", action="store_true")
     parser.add_argument("--json", action="store_true")
     return parser
 
@@ -285,6 +447,14 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.print_evidence_hash:
         print(compute_evidence_surface_sha256(root, current.evidence_paths))
+        return 0
+    if args.update_current:
+        report_path = root / current.report_path
+        report_path.write_text(
+            render_current_technical_debt_audit(root, current),
+            encoding="utf-8",
+        )
+        print(f"Updated technical-debt audit: {current.report_path}")
         return 0
     issues = validate_technical_debt_audit_registry(root, args.registry)
     if args.json:

@@ -50,6 +50,7 @@ allowed_output_roots:
     - docs/filters/inventory-baseline.json
     - docs/filters/inventory-baseline.md
     - docs/00-project/governance/root-local-clutter-cleanup.md
+    - reports/quality/total-tech-debt-audit-main-current.md
   generated_ai_mirrors:
     - docs/00-project/ai/agents/
     - docs/00-project/ai/skills/global/
@@ -79,6 +80,12 @@ forbidden_output_roots:
   - silver/
 
 routes:
+  - id: current-technical-debt-audit
+    generator: scripts/engineering/qa/technical_debt_audit_registry.py
+    output_kind: working_report
+    commit_policy: reviewed_generated
+    outputs:
+      - reports/quality/total-tech-debt-audit-main-current.md
   - id: file-merger-working-reports
     generator: src/tools/file_merger.py
     output_kind: working_report
