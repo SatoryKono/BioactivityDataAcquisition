@@ -305,8 +305,7 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
                 "does not determine l0 status or first action" in description
                 or "does not determine current fleet health" in description
                 or "is not proof that current fleet health is ok" in description
-                or "absence is not proof that current fleet health is ok"
-                in description
+                or "absence is not proof that current fleet health is ok" in description
                 or "not proof that current fleet health is ok" in description
             )
             assert data_links
@@ -344,20 +343,21 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     provenance_description = str(provenance.get("description", "")).lower()
     provenance_content = str(provenance.get("options", {}).get("content", "")).lower()
     # Check for scope/evidence in description or content
-    assert "scope" in provenance_description or "evidence" in provenance_description or "scope" in provenance_content or "evidence" in provenance_content
+    assert (
+        "scope" in provenance_description
+        or "evidence" in provenance_description
+        or "scope" in provenance_content
+        or "evidence" in provenance_content
+    )
     if dashboard_name in {
         "bioetl-control-plane-v1.json",
         "bioetl-runtime.json",
     }:
         assert "pipeline" in provenance_description
         assert (
-            "run type" in provenance_description
-            or "run_type" in provenance_description
+            "run type" in provenance_description or "run_type" in provenance_description
         )
-        assert (
-            "run id" in provenance_description
-            or "run_id" in provenance_description
-        )
+        assert "run id" in provenance_description or "run_id" in provenance_description
     if dashboard_name == "bioetl-workflow-overview.json":
         assert "run id only fills the local id card" in provenance_content
         assert "selected range workflow scope" in provenance_content
@@ -387,7 +387,9 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         )
         # Provider headline is current-status based (no selected range glue).
         assert all("$__range" not in expr for expr in status_expressions)
-        assert status_description, "Provider Monitor Current DQ Status must document operator semantics"
+        assert status_description, (
+            "Provider Monitor Current DQ Status must document operator semantics"
+        )
         assert not any("), max_over_time" in expr for expr in status_expressions)
     elif dashboard_name == "bioetl-control-plane-v1.json":
         assert all("$__range" not in expr for expr in status_expressions)
@@ -435,9 +437,8 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         "/ops/observability/processed-records?"
         "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
     )
-    assert (
-        "accounting" in processed_description
-        or ("counts" in processed_description and "outcomes" in processed_description)
+    assert "accounting" in processed_description or (
+        "counts" in processed_description and "outcomes" in processed_description
     )
     if dashboard_name == "bioetl-runtime.json":
         assert "unresolved scope" in processed_description
@@ -779,7 +780,6 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
         "bioetl-dq-v2.json": {
             "Monitor Quarantined Records": "round(",
             "Monitor Silver Filter Rejects": "round(",
-            "Monitor Silver Validation Failures": "round(",
             "Monitor Silver Validation Failures": "round(",
         },
         "bioetl-runtime.json": {
@@ -1185,9 +1185,7 @@ def test_provider_failure_rate_panel_uses_neutral_zero_and_policy_thresholds() -
         ),
         None,
     )
-    assert panel is not None, (
-        "Panel 'Track Failure Rate' not found"
-    )
+    assert panel is not None, "Panel 'Track Failure Rate' not found"
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("unit") == "percentunit"
@@ -1215,9 +1213,7 @@ def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> No
         ),
         None,
     )
-    assert panel is not None, (
-        "Panel 'Monitor Fleet Severity' not found"
-    )
+    assert panel is not None, "Panel 'Monitor Fleet Severity' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("bioetl_provider_current_status" in expr for expr in expressions)
@@ -1487,9 +1483,7 @@ def test_provider_degraded_checks_panel_uses_neutral_evidence_thresholds() -> No
         ),
         None,
     )
-    assert panel is not None, (
-        "Panel 'Monitor Degraded Checks' not found"
-    )
+    assert panel is not None, "Panel 'Monitor Degraded Checks' not found"
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("thresholds", {}).get("steps") == [
@@ -1579,8 +1573,7 @@ def test_dq_freshness_lag_panel_uses_time_domain_thresholds() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title")
-            == "Monitor Worst Freshness Age"
+            if item.get("title") == "Monitor Worst Freshness Age"
         ),
         None,
     )
@@ -1795,9 +1788,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         if isinstance(panel.get("id"), int)
     }
     identity_id, processed_id = (
-        (9300, 9301)
-        if dashboard_name == "bioetl-overview-v2.json"
-        else (9402, 9403)
+        (9300, 9301) if dashboard_name == "bioetl-overview-v2.json" else (9402, 9403)
     )
     identity = panels[identity_id]
     processed = panels[processed_id]
