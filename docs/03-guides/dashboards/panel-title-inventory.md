@@ -73,41 +73,41 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9402 | Review Run Summary |
 | bioetl-control-plane-v1.json | 9403 | Review Processed Records |
 | bioetl-dq-v2.json | 1000 | Navigate Dashboards |
-| bioetl-dq-v2.json | 9400 | Understand Data Quality Scope |
-| bioetl-dq-v2.json | 9401 | Monitor DQ Status |
+| bioetl-dq-v2.json | 9400 | Understand Evidence Scope |
+| bioetl-dq-v2.json | 9401 | Monitor Current DQ Status |
 | bioetl-dq-v2.json | 9103 | Start DQ Triage |
 | bioetl-dq-v2.json | 9101 | Monitor DQ Threshold State |
-| bioetl-dq-v2.json | 9102 | Inspect DQ Current Reasons |
-| bioetl-dq-v2.json | 220 | Run Lane · Silver/Gold Rejects |
-| bioetl-dq-v2.json | 152 | Monitor: Silver Filter Reject Accounting Mismatch |
+| bioetl-dq-v2.json | 9102 | Inspect Current DQ Reasons |
+| bioetl-dq-v2.json | 220 | Reject Evidence |
+| bioetl-dq-v2.json | 152 | Monitor Silver Reject Mismatch |
 | bioetl-dq-v2.json | 121 | Inspect Top Silver Reject Reasons |
 | bioetl-dq-v2.json | 122 | Inspect Top Silver Reject Fields |
-| bioetl-dq-v2.json | 118 | Inspect: Silver Filter Rejects by Pipeline |
-| bioetl-dq-v2.json | 156 | Inspect: Gold Reject Outcomes by Pipeline |
-| bioetl-dq-v2.json | 221 | Now lane · validation diagnostics |
-| bioetl-dq-v2.json | 1 | Track Range Evidence: Bronze -> Silver -> Gold |
-| bioetl-dq-v2.json | 3 | Track: Source Records in Range (Bronze) |
-| bioetl-dq-v2.json | 4 | Track: Clean Records in Range (Gold) |
-| bioetl-dq-v2.json | 7 | Track: Silver Validation Failures in Range |
-| bioetl-dq-v2.json | 101 | Review: Latest Successful Data Timestamp |
-| bioetl-dq-v2.json | 9 | Inspect: Quarantine by Error Type |
-| bioetl-dq-v2.json | 12 | Monitor: Silver Validation Failures |
-| bioetl-dq-v2.json | 151 | Monitor: Gold Strict Validation Failures |
-| bioetl-dq-v2.json | 10 | Track: Anomalies Detected |
-| bioetl-dq-v2.json | 11 | Track: DQ Check Duration (p95) |
-| bioetl-dq-v2.json | 155 | Track: DQ Threshold Events in Range Trend |
-| bioetl-dq-v2.json | 153 | Track: Data Quality Score Trend (Volume-weighted) |
-| bioetl-dq-v2.json | 116 | Review: Lineage Handoff to Control Plane |
-| bioetl-dq-v2.json | 150 | Review: Aggregate Control-plane Handoff |
-| bioetl-dq-v2.json | 9404 | Range lane · debug evidence |
-| bioetl-dq-v2.json | 2 | Monitor: Data Quality Score (Volume-weighted) |
-| bioetl-dq-v2.json | 5 | Monitor: Worst-Entity DQ Score |
-| bioetl-dq-v2.json | 8 | Time Range · Worst Freshness Age (hours; SLA 24/72) |
-| bioetl-dq-v2.json | 154 | Track: DQ Blocked Records in Range (Evidence) |
-| bioetl-dq-v2.json | 6 | Range · Records Quarantined |
-| bioetl-dq-v2.json | 117 | Range · Silver Filter Rejects |
-| bioetl-dq-v2.json | 9405 | Run context (thin) -> Run Explorer hub |
-| bioetl-dq-v2.json | 9402 | ID |
+| bioetl-dq-v2.json | 118 | Inspect Silver Rejects by Pipeline |
+| bioetl-dq-v2.json | 156 | Inspect Gold Rejects by Pipeline |
+| bioetl-dq-v2.json | 221 | Validation Diagnostics |
+| bioetl-dq-v2.json | 1 | Track Record Flow by Stage |
+| bioetl-dq-v2.json | 3 | Monitor Bronze Records |
+| bioetl-dq-v2.json | 4 | Monitor Gold Records |
+| bioetl-dq-v2.json | 7 | Monitor Silver Validation Failures |
+| bioetl-dq-v2.json | 101 | Inspect Latest Successful Data |
+| bioetl-dq-v2.json | 9 | Inspect Quarantine Error Types |
+| bioetl-dq-v2.json | 12 | Monitor Silver Validation Failures |
+| bioetl-dq-v2.json | 151 | Monitor Gold Validation Failures |
+| bioetl-dq-v2.json | 10 | Track DQ Anomalies |
+| bioetl-dq-v2.json | 11 | Track DQ Check Duration p95 |
+| bioetl-dq-v2.json | 155 | Track DQ Threshold Events |
+| bioetl-dq-v2.json | 153 | Track Volume-Weighted DQ Score |
+| bioetl-dq-v2.json | 116 | Inspect Lineage in Control Plane |
+| bioetl-dq-v2.json | 150 | Inspect Aggregate Control-Plane Issues |
+| bioetl-dq-v2.json | 9404 | Range & Debug Evidence |
+| bioetl-dq-v2.json | 2 | Monitor Volume-Weighted DQ Score |
+| bioetl-dq-v2.json | 5 | Monitor Worst-Entity DQ Score |
+| bioetl-dq-v2.json | 8 | Monitor Worst Freshness Age |
+| bioetl-dq-v2.json | 154 | Monitor Blocked Records |
+| bioetl-dq-v2.json | 6 | Monitor Quarantined Records |
+| bioetl-dq-v2.json | 117 | Monitor Silver Filter Rejects |
+| bioetl-dq-v2.json | 9405 | Run Context |
+| bioetl-dq-v2.json | 9402 | Inspect Run Identity |
 | bioetl-dq-v2.json | 9403 | Processed Records |
 | bioetl-incident-v1.json | 1000 | Navigate Dashboards |
 | bioetl-incident-v1.json | 9400 | Understand Incident Scope |
@@ -148,35 +148,35 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9300 | Review Run Identity |
 | bioetl-overview-v2.json | 9301 | Review Processed Records |
 | bioetl-provider-health-v2.json | 1000 | Navigate Dashboards |
-| bioetl-provider-health-v2.json | 9400 | Understand Provider Scope |
-| bioetl-provider-health-v2.json | 9401 | Monitor Provider Status |
-| bioetl-provider-health-v2.json | 9002 | First Action |
-| bioetl-provider-health-v2.json | 9101 | Monitor GLOBAL Provider Severity Matrix |
-| bioetl-provider-health-v2.json | 9102 | Inspect Critical Providers |
-| bioetl-provider-health-v2.json | 9103 | Inspect Provider Top Causes |
-| bioetl-provider-health-v2.json | 9104 | Monitor Provider Telemetry Freshness |
-| bioetl-provider-health-v2.json | 91 | Selected Provider Detail |
-| bioetl-provider-health-v2.json | 106 | Track Failure and Degraded Trend by Provider |
-| bioetl-provider-health-v2.json | 107 | Track Provider Failure Share (Selected Range) |
-| bioetl-provider-health-v2.json | 108 | Track Retries Exhausted by Provider/Operation |
-| bioetl-provider-health-v2.json | 109 | Track Retries Exhausted Trend by Provider/Operation |
-| bioetl-provider-health-v2.json | 102 | Inspect Provider Health Check Latency (p95) - $provider |
-| bioetl-provider-health-v2.json | 110 | Inspect Adapter Request Latency by Endpoint (p95) |
-| bioetl-provider-health-v2.json | 111 | Inspect Rate Limit Errors by Method |
-| bioetl-provider-health-v2.json | 115 | Inspect Network Timeout Errors by Method |
-| bioetl-provider-health-v2.json | 112 | Track Rate Limiter Wait by Provider (p95) |
-| bioetl-provider-health-v2.json | 113 | Monitor Minimum Rate Limiter Tokens Available |
-| bioetl-provider-health-v2.json | 31 | Monitor Cross-Scope Adapter Circuit Breaker State (max) |
-| bioetl-provider-health-v2.json | 32 | Track Cross-Scope Adapter Circuit Breaker Trips |
-| bioetl-provider-health-v2.json | 9404 | Range / debug evidence |
-| bioetl-provider-health-v2.json | 114 | Review Raw Provider Health Enum |
-| bioetl-provider-health-v2.json | 1 | Track Health Check Latency by Provider (p95) |
-| bioetl-provider-health-v2.json | 2 | Monitor Healthy Checks (Selected Range) |
-| bioetl-provider-health-v2.json | 105 | Monitor Degraded Checks (Selected Range) |
-| bioetl-provider-health-v2.json | 104 | Track Provider Failure Rate (Selected Range) |
-| bioetl-provider-health-v2.json | 7 | Track Health Checks Total (Selected Range) |
-| bioetl-provider-health-v2.json | 9405 | Run context (thin) -> Run Explorer hub |
-| bioetl-provider-health-v2.json | 9402 | Inspect Provider Identity |
+| bioetl-provider-health-v2.json | 9400 | Understand Evidence Scope |
+| bioetl-provider-health-v2.json | 9401 | Monitor Selected Provider |
+| bioetl-provider-health-v2.json | 9002 | Start Provider Triage |
+| bioetl-provider-health-v2.json | 9101 | Monitor Fleet Severity |
+| bioetl-provider-health-v2.json | 9102 | Inspect Non-OK Providers |
+| bioetl-provider-health-v2.json | 9103 | Inspect Top Provider Causes |
+| bioetl-provider-health-v2.json | 9104 | Monitor Telemetry Freshness |
+| bioetl-provider-health-v2.json | 91 | Selected Provider Details |
+| bioetl-provider-health-v2.json | 106 | Track Health Failures & Degradation |
+| bioetl-provider-health-v2.json | 107 | Track Failure Share |
+| bioetl-provider-health-v2.json | 108 | Inspect Exhausted Retries |
+| bioetl-provider-health-v2.json | 109 | Track Exhausted Retries |
+| bioetl-provider-health-v2.json | 102 | Inspect Health-Check Latency p95 |
+| bioetl-provider-health-v2.json | 110 | Track Request Latency p95 |
+| bioetl-provider-health-v2.json | 111 | Track Rate-Limit Errors |
+| bioetl-provider-health-v2.json | 115 | Track Network & Timeout Errors |
+| bioetl-provider-health-v2.json | 112 | Track Rate-Limiter Wait p95 |
+| bioetl-provider-health-v2.json | 113 | Monitor Available Rate-Limit Tokens |
+| bioetl-provider-health-v2.json | 31 | Monitor Circuit-Breaker State |
+| bioetl-provider-health-v2.json | 32 | Track Circuit-Breaker Trips |
+| bioetl-provider-health-v2.json | 9404 | Range & Debug Evidence |
+| bioetl-provider-health-v2.json | 114 | Inspect Raw Health Status |
+| bioetl-provider-health-v2.json | 1 | Track Health-Check Latency p95 |
+| bioetl-provider-health-v2.json | 2 | Monitor Healthy Checks |
+| bioetl-provider-health-v2.json | 105 | Monitor Degraded Checks |
+| bioetl-provider-health-v2.json | 104 | Track Failure Rate |
+| bioetl-provider-health-v2.json | 7 | Monitor Health Checks |
+| bioetl-provider-health-v2.json | 9405 | Run Context |
+| bioetl-provider-health-v2.json | 9402 | Inspect Run Identity |
 | bioetl-provider-health-v2.json | 9403 | Inspect Processed Records |
 | bioetl-run-explorer-v1.json | 1000 | Navigate Dashboards |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
@@ -192,9 +192,9 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-run-explorer-v1.json | 3014 | Inspect Timings & Failure |
 | bioetl-run-explorer-v1.json | 3001 | Continue Run Investigation |
 | bioetl-runtime.json | 1000 | Navigate Dashboards |
-| bioetl-runtime.json | 9400 | Inspect Scope & Evidence |
-| bioetl-runtime.json | 9401 | Monitor Pipeline Health |
-| bioetl-runtime.json | 9991 | Review First Action |
+| bioetl-runtime.json | 9400 | Understand Pipeline Scope |
+| bioetl-runtime.json | 9401 | Monitor Pipeline Status |
+| bioetl-runtime.json | 9991 | Start Pipeline Triage |
 | bioetl-runtime.json | 9101 | Review Runtime Blockers |
 | bioetl-runtime.json | 9102 | Monitor Metrics Coverage |
 | bioetl-runtime.json | 252 | Inspect Detection Signals |
@@ -228,8 +228,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 16 | Monitor Runtime Blockers |
 | bioetl-runtime.json | 205 | Monitor Failed Runs |
 | bioetl-runtime.json | 9993 | Inspect Run Context |
-| bioetl-runtime.json | 9402 | Review Run Identity |
-| bioetl-runtime.json | 9403 | Review Processed Records |
+| bioetl-runtime.json | 9402 | Inspect Pipeline Identity |
+| bioetl-runtime.json | 9403 | Inspect Processed Records |
 | bioetl-runtime.json | 9994 | Inspect Workflow Evidence |
 | bioetl-runtime.json | 9996 | Track Failed Workflow Runs |
 | bioetl-runtime.json | 9997 | Track Failed Workflow Steps |

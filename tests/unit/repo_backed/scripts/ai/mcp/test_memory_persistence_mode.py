@@ -25,7 +25,7 @@ def _run_wrapper(mode: str | None) -> subprocess.CompletedProcess[str]:
             ),
             "bash",
             mode if mode is not None else _UNSET_MODE,
-            WRAPPER.as_posix(),
+            WRAPPER.resolve().as_posix(),
             _UNSET_MODE,
         ],
         capture_output=True,

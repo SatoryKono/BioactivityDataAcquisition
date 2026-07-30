@@ -13,19 +13,19 @@ Dashboard `3. Provider Health` monitors provider current status, health-check la
 - **Purpose:** Explain dashboard navigation and escalation flow.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 2. Understand Provider Scope
+### 2. Understand Evidence Scope
 - **Type:** Text
 - **Purpose:** Distinguish provider-global fleet evidence from the selected
   provider scope and explain that missing current status requires a Runtime
   telemetry check.
 - **Data sources:** Dashboard variables and operator copy; no datasource query.
 
-### 3. Monitor Provider Status
+### 3. Monitor Selected Provider
 - **Type:** Stat
 - **Purpose:** Current provider severity for the selected scope.
 - **Data sources:** `bioetl_provider_current_status`
 
-### 4. Inspect Provider Identity
+### 4. Inspect Run Identity
 - **Type:** Table
 - **Purpose:** Show run ID, pipeline, run type, and timestamp.
 - **Data sources:** BioETL Ops HTTP control-plane identity endpoint
@@ -37,134 +37,134 @@ Dashboard `3. Provider Health` monitors provider current status, health-check la
 - **Data sources:** BioETL Ops HTTP
   `/ops/observability/processed-records`; this is not a Prometheus panel.
 
-### 6. Monitor GLOBAL Provider Severity Matrix
+### 6. Monitor Fleet Severity
 - **Type:** Table
 - **Purpose:** Show global provider severity matrix.
 - **Data sources:** `bioetl_provider_current_status`
 
-### 7. Inspect Critical Providers
+### 7. Inspect Non-OK Providers
 - **Type:** Table
 - **Purpose:** Show critical providers with issues.
 - **Data sources:** `bioetl_provider_current_status`
 
-### 8. Inspect Provider Top Causes
+### 8. Inspect Top Provider Causes
 - **Type:** Table
 - **Purpose:** Show top provider failure causes.
 - **Data sources:** `bioetl_provider_current_cause`
 
-### 9. Monitor Provider Telemetry Freshness
+### 9. Monitor Telemetry Freshness
 - **Type:** Stat
 - **Purpose:** Show provider telemetry freshness.
 - **Data sources:** `bioetl_provider_range_operational_ok`
 
-### 10. First Action
+### 10. Start Provider Triage
 - **Type:** Text
 - **Purpose:** Guide operator to next triage action.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 11. Track Health Check Latency by Provider (p95)
+### 11. Track Health-Check Latency p95
 - **Type:** Timeseries
 - **Purpose:** Show health check latency p95 by provider.
 - **Data sources:** `bioetl_health_check_latency_seconds_bucket`
 
-### 12. Review Raw Provider Health Enum
+### 12. Inspect Raw Health Status
 - **Type:** Table
 - **Purpose:** Show raw provider health enum values.
 - **Data sources:** `bioetl_health_check_provider_universe_15m`
 
-### 13. Monitor Healthy Checks (Selected Range)
+### 13. Monitor Healthy Checks
 - **Type:** Stat
 - **Purpose:** Count healthy health checks.
 - **Data sources:** `bioetl_health_check_success_total`
 
-### 14. Track Provider Failure Rate (Selected Range)
+### 14. Track Failure Rate
 - **Type:** Stat
 - **Purpose:** Show provider failure rate as neutral selected-range supporting
   evidence at 0%; WARN `>=5%`, CRIT `>=20%`.
 - **Data sources:** `bioetl_health_check_failures_total`
 
-### 15. Track Health Checks Total (Selected Range)
+### 15. Monitor Health Checks
 - **Type:** Stat
 - **Purpose:** Count total health checks.
 - **Data sources:** `bioetl_health_check_success_total`, `bioetl_health_check_degraded_total`, `bioetl_health_check_failures_total`
 
-### 16. Monitor Degraded Checks (Selected Range)
+### 16. Monitor Degraded Checks
 - **Type:** Stat
 - **Purpose:** Count degraded health checks.
 - **Data sources:** `bioetl_health_check_degraded_total`
 
-### 17. Track Failure and Degraded Trend by Provider
+### 17. Track Health Failures & Degradation
 - **Type:** Timeseries
 - **Purpose:** Show failure and degraded trend by provider.
 - **Data sources:** `bioetl_health_check_failures_total`, `bioetl_health_check_degraded_total`
 
-### 18. Track Provider Failure Share (Selected Range)
+### 18. Track Failure Share
 - **Type:** Bargauge
 - **Purpose:** Show provider failure share.
 - **Data sources:** `bioetl_health_check_failures_total`
 
-### 19. Track Retries Exhausted by Provider/Operation
+### 19. Inspect Exhausted Retries
 - **Type:** Table
 - **Purpose:** Show retry exhaustion by provider and operation.
 - **Data sources:** `bioetl_data_source_retry_exhausted_total`
 
-### 20. Track Retries Exhausted Trend by Provider/Operation
+### 20. Track Exhausted Retries
 - **Type:** Timeseries
 - **Purpose:** Show retry exhaustion trend.
 - **Data sources:** `bioetl_data_source_retry_exhausted_total`
 
-### 21. Selected Provider Detail
+### 21. Selected Provider Details
 - **Type:** Row
 - **Purpose:** Collapsed-by-default provider forensics. Expand when current
   severity or a non-zero selected-range failure signal requires localization.
 - **Data sources:** `bioetl_adapter_request_duration_seconds_bucket`, `bioetl_http_request_errors_total`
 
-### 22. Inspect Provider Health Check Latency (p95) - $provider
+### 22. Inspect Health-Check Latency p95
 - **Type:** Gauge
 - **Purpose:** Show health check latency p95 for selected provider.
 - **Data sources:** `bioetl_health_check_latency_seconds_bucket`
 
-### 23. Inspect Adapter Request Latency by Endpoint (p95)
+### 23. Track Request Latency p95
 - **Type:** Timeseries
 - **Purpose:** Show adapter request latency p95 by endpoint.
 - **Data sources:** `bioetl_adapter_request_duration_seconds_bucket`
 
-### 24. Inspect Rate Limit Errors by Method
+### 24. Track Rate-Limit Errors
 - **Type:** Timeseries
 - **Purpose:** Show rate limit errors by method.
 - **Data sources:** `bioetl_http_request_errors_total`
 
-### 25. Inspect Network Timeout Errors by Method
+### 25. Track Network & Timeout Errors
 - **Type:** Timeseries
 - **Purpose:** Show network timeout errors by method.
 - **Data sources:** `bioetl_http_request_errors_total`
 
-### 26. Track Rate Limiter Wait by Provider (p95)
+### 26. Track Rate-Limiter Wait p95
 - **Type:** Timeseries
 - **Purpose:** Show rate limiter wait time p95.
 - **Data sources:** `bioetl_rate_limiter_wait_seconds_bucket`
 
-### 27. Monitor Minimum Rate Limiter Tokens Available
+### 27. Monitor Available Rate-Limit Tokens
 - **Type:** Bargauge
 - **Purpose:** Show minimum rate limiter tokens available.
 - **Data sources:** `bioetl_rate_limiter_tokens_available`
 
-### 28. Monitor Cross-Scope Adapter Circuit Breaker State (max)
+### 28. Monitor Circuit-Breaker State
 - **Type:** Stat
 - **Purpose:** Show cross-scope circuit breaker state.
 - **Data sources:** `bioetl_circuit_breaker_state`
 
-### 29. Track Cross-Scope Adapter Circuit Breaker Trips
+### 29. Track Circuit-Breaker Trips
 - **Type:** Timeseries
 - **Purpose:** Show circuit breaker trips over time.
 - **Data sources:** `bioetl_circuit_breaker_trips_total`
 
-### 30. Range / debug evidence
+### 30. Range & Debug Evidence
 - **Type:** Row
 - **Purpose:** Group selected-range provider health and transport diagnostics.
 - **Data sources:** Prometheus range evidence from the nested panels.
 
-### 31. Run context (thin) -> Run Explorer hub
+### 31. Run Context
 - **Type:** Row
 - **Purpose:** Group selected-run identity and processed-record HTTP evidence.
 - **Data sources:** BioETL Ops HTTP.
