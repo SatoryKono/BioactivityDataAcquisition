@@ -1,6 +1,6 @@
 # Compatibility Importer Census
 
-- snapshot_date: 2026-07-19
+- snapshot_date: 2026-07-30
 - retained_entrypoint_count: 12
 - retained_public_entrypoint_burden: 0
 - removed_compatibility_surface_count: 23
@@ -28,9 +28,9 @@
 | `src/bioetl/interfaces/cli/commands/health.py` | 0 | 0 |
 | `src/bioetl/interfaces/cli/commands/diagnostics.py` | 0 | 2 |
 | `src/bioetl/interfaces/cli/commands/quarantine.py` | 0 | 1 |
-| `src/bioetl/composition/entrypoints.py` | 0 | 3 |
+| `src/bioetl/composition/entrypoints.py` | 0 | 4 |
 | `src/bioetl/composition/health_api.py` | 0 | 2 |
-| `src/bioetl/composition/maintenance_api.py` | 0 | 1 |
+| `src/bioetl/composition/maintenance_api.py` | 0 | 2 |
 | `src/bioetl/infrastructure/config/__init__.py` | 0 | 6 |
 | `src/bioetl/domain/composite/config.py` | 0 | 39 |
 | `src/bioetl/application/composite/merger.py` | 0 | 5 |
@@ -45,9 +45,9 @@
 | `src/bioetl/interfaces/cli/commands/health.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 0 |
 | `src/bioetl/interfaces/cli/commands/diagnostics.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 2 |
 | `src/bioetl/interfaces/cli/commands/quarantine.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 1 |
-| `src/bioetl/composition/entrypoints.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 3 |
+| `src/bioetl/composition/entrypoints.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 4 |
 | `src/bioetl/composition/health_api.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 2 |
-| `src/bioetl/composition/maintenance_api.py` | `bioetl.composition` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 1 |
+| `src/bioetl/composition/maintenance_api.py` | `bioetl.composition` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 2 |
 | `src/bioetl/infrastructure/config/__init__.py` | `bioetl.infrastructure.config` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 6 |
 | `src/bioetl/domain/composite/config.py` | `bioetl.domain.composite` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 39 |
 | `src/bioetl/application/composite/merger.py` | `bioetl.application.composite` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 5 |
@@ -65,9 +65,9 @@
 
 | Path | Owner | Usage classification | Surface classification | src importers | test importers | Public exports |
 | --- | --- | --- | --- | ---: | ---: | ---: |
-| `src/bioetl/composition/entrypoints.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | 0 | 3 | 13 |
+| `src/bioetl/composition/entrypoints.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | 0 | 4 | 13 |
 | `src/bioetl/composition/health_api.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | 0 | 2 | 7 |
-| `src/bioetl/composition/maintenance_api.py` | `bioetl.composition` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | 0 | 1 | 4 |
+| `src/bioetl/composition/maintenance_api.py` | `bioetl.composition` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | 0 | 2 | 4 |
 | `src/bioetl/infrastructure/config/__init__.py` | `bioetl.infrastructure.config` | `stable_public_api_zero_first_party_src` | `external-facing` | 0 | 6 | 18 |
 
 ## First Safe Removal Wave
@@ -77,8 +77,8 @@
 
 | Path | Owner | Previous status | Surface classification | src importers | test importers | Action |
 | --- | --- | --- | --- | ---: | ---: | --- |
-| `src/bioetl/interfaces/cli/commands/maintenance.py` | `bioetl.interfaces.cli.commands` | `public-entrypoint` | `first-party-active` | 2 | 0 | `defer_until_first_party_importers_zero` |
-Migration prerequisites for `src/bioetl/interfaces/cli/commands/maintenance.py`: Keep public CLI discovery and the maintenance owner package lazy while narrowing first-party references to zero before reconsidering removal from debt tracking.; Keep ordinary runtime maintenance access narrowed to `src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py`.; Treat any future retirement of the public maintenance command itself as a separate external-breaking-change review, not part of this debt ratchet wave.
+| `src/bioetl/interfaces/cli/commands/maintenance.py` | `bioetl.interfaces.cli.commands` | `public-entrypoint` | `external-public-only` | 0 | 0 | `retain_external_public_reexport` |
+Migration prerequisites for `src/bioetl/interfaces/cli/commands/maintenance.py`: Keep first-party src importers of top-level maintenance.py at zero.; Keep ordinary runtime maintenance access narrowed to `src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py`.; Treat any future retirement of the public maintenance command itself as a separate external-breaking-change review, not part of this debt ratchet wave.
 
 ## Removed Compatibility Surfaces
 

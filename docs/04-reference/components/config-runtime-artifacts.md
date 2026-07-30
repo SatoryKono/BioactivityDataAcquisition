@@ -661,18 +661,11 @@ print(f"Saved: {saved_hash}")
 git status configs/
 ```
 
-3. **Review Migration Status**:
+3. **Review Compatibility Governance**:
 
-```python
-from bioetl.domain.behavior.phased_migration_support import (
-    PhasedMigrationCoordinator,
-)
-
-service = PhasedMigrationCoordinator()
-status = service.get_current_migration_status()
-print(f"Current phase: {status.current_phase}")
-print(f"Migration warnings: {status.migration_warnings}")
-```
+Check `configs/quality/config_compatibility_registry.yaml` for supported config
+aliases and migration rules. The retired `PhasedMigrationCoordinator` runtime
+must not be used as a fallback.
 
 #### Issue: Serialization Errors
 
@@ -776,7 +769,7 @@ if not artifact.validate():
 ## Related Components
 
 - [DQ Contract System](../contracts/dq-contracts.md)
-- [Phased Migration Support](phased-migration.md)
+- [Retired Phased Migration Runtime](phased-migration.md)
 - [Composite Validation Service](composite-validation-service.md)
 - [Observability Architecture](../../02-architecture/decisions/ADR-017-observability-architecture.md)
 
