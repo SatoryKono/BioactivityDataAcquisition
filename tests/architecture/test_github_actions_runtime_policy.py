@@ -25,6 +25,7 @@ pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "contract-tests.yml"
 CODERABBIT_WORKFLOW = ROOT / ".github" / "workflows" / "coderabbit.yml"
+NIGHTLY_REPLAY_WORKFLOW = ROOT / ".github" / "workflows" / "nightly-replay-parity.yml"
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -123,6 +124,16 @@ def test_contract_tests_workflow_declares_boolean_dispatch_input() -> None:
     inputs = cast(dict[str, dict[str, Any]], dispatch["inputs"])
 
     assert inputs["skip_slow"]["type"] == "boolean"
+
+
+def test_nightly_replay_checksums_use_run_root_relative_paths() -> None:
+    workflow = NIGHTLY_REPLAY_WORKFLOW.read_text(encoding="utf-8")
+
+    assert "cd .artifacts/nightly-replay/determinism/run1" in workflow
+    assert "cd .artifacts/nightly-replay/determinism/run2" in workflow
+    assert workflow.count("find . -type f -print0 | sort -z | xargs -0 sha256sum") == 2
+    assert "find .artifacts/nightly-replay/determinism/run1 -type f" not in workflow
+    assert "find .artifacts/nightly-replay/determinism/run2 -type f" not in workflow
 
 
 def test_coderabbit_installer_guard_ignores_documentation_comments() -> None:

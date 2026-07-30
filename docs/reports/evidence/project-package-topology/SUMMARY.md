@@ -18,8 +18,8 @@ tracked coverage measurements.
 Current-baseline note (2026-07-24): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2315` with
-`source_tree_sha256=0a2c1077a47fad4f12f41468bd12a23ffafb3f5fd3fab29a78556f43ab27f19f`.
+`source_module_count=2314` with
+`source_tree_sha256=e0593364f9c1b8ae5a6dc13a8cfa2de1d882cea0cdfc4bdb03433fa2180f3fc3`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-07-24) followed run-reports domain/application surface

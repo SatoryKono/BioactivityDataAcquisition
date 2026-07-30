@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-30T10:08:19.754856+00:00",
+  "generated_at": "2026-07-30T12:39:08.269780+00:00",
   "summary": {
     "total_scripts": 567,
     "status_counts": {
@@ -12,7 +12,7 @@
       "agents": 6,
       "build": 12,
       "ci": 66,
-      "docs": 229,
+      "docs": 230,
       "other": 76,
       "scripts": 447,
       "skills": 17,
@@ -299,7 +299,7 @@
         },
         {
           "path": "tests/unit/scripts/test_codex_efficiency_baseline.py",
-          "line": 8,
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.ai.codex import efficiency_baseline"
         }
@@ -590,7 +590,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 752,
+          "line": 754,
           "source_group": "tests",
           "text": "ensure_script = _to_bash_path(root / \"scripts/ai/codex/helper/ensure-mcp.sh\")"
         }
@@ -3259,7 +3259,7 @@
       "references": [
         {
           "path": "tests/architecture/test_ai_memory_program_contracts.py",
-          "line": 27,
+          "line": 31,
           "source_group": "tests",
           "text": "powershell_wrapper = Path(\"scripts/ai/mcp/mcp_memory_wrapper.ps1\").read_text("
         },
@@ -3271,7 +3271,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 447,
+          "line": 449,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         }
@@ -3298,7 +3298,7 @@
         },
         {
           "path": "tests/architecture/test_ai_memory_program_contracts.py",
-          "line": 24,
+          "line": 28,
           "source_group": "tests",
           "text": "bash_wrapper = Path(\"scripts/ai/mcp/mcp_memory_wrapper.sh\").read_text("
         },
@@ -3316,7 +3316,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 447,
+          "line": 449,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         }
@@ -10149,31 +10149,31 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 786,
+          "line": 795,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 805,
+          "line": 814,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 896,
+          "line": 905,
           "source_group": "docs",
           "text": "| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | Выполнить ускоренный coverage/sharded прогон |"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 897,
+          "line": 906,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 934,
+          "line": 943,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded"
         }
@@ -11872,7 +11872,7 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 472,
+          "line": 469,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         }
@@ -13018,8 +13018,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 222,
+          "source_group": "docs",
+          "text": "`scripts/engineering/qa/refresh_test_governance_baseline.py`."
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
@@ -14219,7 +14226,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 344,
+          "line": 353,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -14751,7 +14758,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 838,
+          "line": 847,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         }
@@ -14802,7 +14809,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 839,
+          "line": 848,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -14829,13 +14836,13 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 342,
+          "line": 351,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 844,
+          "line": 853,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90`"
         },
@@ -16898,7 +16905,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 299,
+          "line": 308,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
@@ -17094,7 +17101,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 344,
+          "line": 353,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
