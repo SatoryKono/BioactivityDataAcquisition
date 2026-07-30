@@ -608,7 +608,6 @@
         "docs/03-guides/tutorials/monitoring-alerts-setup.md",
         "docs/04-reference/api/domain/ports.md",
         "docs/04-reference/components/config-runtime-artifacts.md",
-        "docs/04-reference/components/phased-migration.md",
         "docs/04-reference/contracts/observability.md",
         "docs/05-operations/01-monitoring-guide.md",
         "docs/05-operations/runbooks/observability-checklist.md",
@@ -1988,8 +1987,7 @@
         "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_dashboard_scenes_contract.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/architecture/test_dashboard_scenes_contract.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -2010,8 +2008,7 @@
         "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_dashboard_scenes_contract.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/architecture/test_dashboard_scenes_contract.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
@@ -2031,6 +2028,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/quality/generated_artifact_routing.yaml",
+        "docs/00-project/RULES.md",
         "docs/04-reference/passports/index.md",
         "scripts/docs/passports/projector.py",
         "tests/architecture/test_adr_registry_governance_sync.py"
@@ -2048,10 +2046,12 @@
       "enforcement_owner_paths": [
         "scripts/docs/passports/projector.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_passport_documentation_projections.py"
+        "tests/architecture/test_passport_documentation_projections.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
+        "docs/00-project/RULES.md",
         "docs/04-reference/passports/index.md",
         "docs/04-reference/passports/manual/workflows/chembl_baseline.yaml",
         "docs/04-reference/passports/manual/workflows/chembl_core.yaml",
@@ -2059,7 +2059,8 @@
         "docs/04-reference/passports/workflows/chembl_core.md",
         "scripts/docs/passports/projector.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_passport_documentation_projections.py"
+        "tests/architecture/test_passport_documentation_projections.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",

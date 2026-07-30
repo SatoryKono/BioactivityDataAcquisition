@@ -361,7 +361,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows the age of the latest persisted checkpoint in seconds. Lower is fresher. No data means checkpoint evidence is unavailable; inspect checkpoint artifacts before replay or resume.",
+          "description": "Shows the age of the latest persisted checkpoint in seconds from selected-range samples for the selected pipeline. Lower is fresher. Run ID does not filter this panel. No data means checkpoint evidence is unavailable; inspect checkpoint artifacts before replay or resume.",
       "fieldConfig": {
         "defaults": {
           "color": {
