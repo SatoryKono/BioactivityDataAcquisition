@@ -1,12 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-30T07:57:35.155241+00:00",
+  "generated_at": "2026-07-30T08:03:29.408462+00:00",
   "summary": {
     "total_scripts": 567,
     "status_counts": {
       "active": 346,
-      "orphan": 1,
-      "supporting": 215,
+      "supporting": 216,
       "temporary_diagnostic": 5
     },
     "reference_group_coverage": {
@@ -8252,10 +8251,14 @@
     {
       "path": "scripts/docs/passports/markdown_renderer.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
-      "references": []
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "internal_helper_orphan",
+      "review_by": "2026-09-30",
+      "next_step": "Either integrate this extracted renderer behind the canonical passport projector or remove it if the projector remains the rendering source of truth; do not expose it as another standalone script surface."
     },
     {
       "path": "scripts/docs/passports/pipeline_projection.py",
