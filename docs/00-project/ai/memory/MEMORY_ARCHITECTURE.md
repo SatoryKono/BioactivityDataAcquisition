@@ -98,6 +98,11 @@ vendor and hosted backends remains **NOT_PROVEN**.
 active repository-scoped consent and explicit operation grants for enumerate,
 export, correct, tombstone, delete, and consent revocation.
 
+Transient repository-owned session/task state is stored only under
+`src/memory/episodic/**`, where TTL and density policy apply.
+`docs/00-project/ai/**` is a guidance mirror and must not contain generated
+session records or raw conversation state.
+
 This controls only repository-owned files. Vendor, IDE, MCP-provider, backup,
 and hosted user-memory lifecycle remains **NOT_PROVEN**.
 
