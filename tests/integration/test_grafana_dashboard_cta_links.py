@@ -530,7 +530,7 @@ def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
 
     panel = _find_panel_by_id(dashboard, 9991)
     assert panel is not None, "Runtime First Action panel id=9991 must exist"
-    assert panel.get("title") == "Review First Action"
+    assert panel.get("title") == "Start Pipeline Triage"
     links = panel.get("links", [])
     assert isinstance(links, list) and links, (
         "Runtime First Action panel must expose CTA links"
