@@ -21,6 +21,7 @@ from scripts.docs.passports.duplicate_audit import audit_markdown_texts
 from scripts.docs.passports.projector import (
     DEFAULT_CONFIGS_ROOT,
     PROJECT_ROOT,
+    _source_revision,
     build_all_outputs,
     check_outputs,
     write_outputs,
@@ -102,6 +103,22 @@ def test_generation_is_byte_deterministic(tmp_path: Path) -> None:
     assert len(first) == 112
     write_outputs(first)
     assert check_outputs(second) == []
+
+
+def test_source_revision_excludes_ephemeral_merge_commits(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: list[str] = []
+
+    def _run(command: list[str], **_: object) -> subprocess.CompletedProcess[str]:
+        captured.extend(command)
+        return subprocess.CompletedProcess(command, 0, stdout=f"{REVISION}\n")
+
+    monkeypatch.delenv("BIOETL_PASSPORT_SOURCE_REVISION", raising=False)
+    monkeypatch.setattr(subprocess, "run", _run)
+
+    assert _source_revision() == REVISION
+    assert captured[:4] == ["git", "log", "--no-merges", "-1"]
 
 
 def test_generation_is_subprocess_environment_invariant(tmp_path: Path) -> None:
@@ -306,9 +323,7 @@ def test_pipeline_markdown_is_compact_complete_and_not_a_json_dump(
     outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
     path = tmp_path / "pipelines/chembl_assay.md"
     markdown = outputs[path].decode("utf-8")
-    facts = json.loads(
-        outputs[tmp_path / "generated/pipelines/chembl_assay.json"]
-    )
+    facts = json.loads(outputs[tmp_path / "generated/pipelines/chembl_assay.json"])
     assert 2 <= len(facts["summary"]["sentences"]) <= 5
     assert facts["extraction"]["filters"]
     assert facts["extraction"]["selected_fields"]
@@ -334,9 +349,7 @@ def test_composite_commands_and_diagram_use_real_composite_cli_options(
     )
     commands = [item["command"] for item in facts["operator_commands"]]
     assert "bioetl run-composite --composite publication" in commands
-    assert (
-        "bioetl run-composite --composite publication --seed-limit 100" in commands
-    )
+    assert "bioetl run-composite --composite publication --seed-limit 100" in commands
     diagram = facts["diagrams"][0]["mermaid"]
     assert "chembl_publication" in diagram
     assert "crossref_publication · doi, title" in diagram
