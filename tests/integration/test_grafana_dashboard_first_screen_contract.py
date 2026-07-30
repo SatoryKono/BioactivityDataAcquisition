@@ -195,16 +195,16 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
     """L2 first screens must answer current state before range evidence."""
     expectations = {
         "bioetl-runtime.json": {
-            "Monitor Pipeline Health": "bioetl_runtime_current_status_trusted",
+            "Monitor Pipeline Status": "bioetl_runtime_current_status_trusted",
             "Review Runtime Blockers": "bioetl_runtime_current_blocker_reason",
         },
         "bioetl-provider-health-v2.json": {
-            "Monitor GLOBAL Provider Severity Matrix": "bioetl_provider_current_status",
-            "Inspect Provider Top Causes": "bioetl_provider_current_cause",
+            "Monitor Fleet Severity": "bioetl_provider_current_status",
+            "Inspect Top Provider Causes": "bioetl_provider_current_cause",
         },
         "bioetl-dq-v2.json": {
-            "Status": "bioetl_dq_current_status",
-            "Now · DQ Current Reasons": "bioetl_dq_current_reason",
+            "Monitor Current DQ Status": "bioetl_dq_current_status",
+            "Inspect Current DQ Reasons": "bioetl_dq_current_reason",
         },
     }
 
@@ -308,17 +308,17 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
     """Fail-closed current-status surfaces must not hide missing telemetry behind or vector(0)."""
     expectations = {
         "bioetl-runtime.json": [
-            "Monitor Pipeline Health",
+            "Monitor Pipeline Status",
             "Review Runtime Blockers",
         ],
         "bioetl-provider-health-v2.json": [
-            "Monitor GLOBAL Provider Severity Matrix",
-            "Inspect Provider Top Causes",
-            "Monitor Provider Telemetry Freshness",
+            "Monitor Fleet Severity",
+            "Inspect Top Provider Causes",
+            "Monitor Telemetry Freshness",
         ],
         "bioetl-dq-v2.json": [
-            "Status",
-            "Now · DQ Current Reasons",
+            "Monitor Current DQ Status",
+            "Inspect Current DQ Reasons",
         ],
     }
 
@@ -500,18 +500,23 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
             },
         },
         "bioetl-dq-v2.json": {
-            "Review: First Action": {
-                "tokens": ("crit", "warn", "selected-range"),
+            "Start DQ Triage": {
+                "tokens": ("current", "selected-run", "range"),
                 "max_y": 22,
             },
-            "Time Range · Worst Freshness Age (hours; SLA 24/72)": {
+            "Monitor Worst Freshness Age": {
                 "tokens": ("time range", "sla", "unknown"),
                 "max_y": 24,
             },
         },
         "bioetl-provider-health-v2.json": {
-            "First Action": {
-                "tokens": ("current", "top causes", "selected-range"),
+            "Start Provider Triage": {
+                "tokens": (
+                    "fleet severity",
+                    "top causes",
+                    "selected-provider",
+                    "range",
+                ),
                 "max_y": 23,
             },
         },

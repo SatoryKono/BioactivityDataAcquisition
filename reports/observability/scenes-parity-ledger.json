@@ -4,7 +4,7 @@
   "authoritative_surface": "grafana/dashboards/*.json",
   "route_contract_sha256": "88b420a39e5db86b1c5ca6df94822b4c4bedf41ac6f34e93956d4cd8fab174a4",
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "60f638d722c992ee696aca22c1092908fe07ca6011b745203182aef3087155c3",
+    "bioetl-control-plane-v1": "a5da7a6e6a290d1b421459e0e77daa24f1b62599eac76d20bd56da2858dba30a",
     "bioetl-dq-v2": "9ac9bea6708724a2c637aadf492df10554a0ea26b5ee3ad73b016c31e7256c73",
     "bioetl-incident-v1": "265a4c6b1d1e197ad312890b887f9c635ce64ad791940903de845441845e3049",
     "bioetl-overview-v2": "421e4e917072fa764ef9612a1c0a8609b84de89a2c9cf81f4086e5654d98eee8",
