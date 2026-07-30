@@ -2828,7 +2828,7 @@
             "y": 0
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Shows HTTP-backed Bronze input, Silver accepted/rejected, and Gold output counts and outcomes. Zero is a recorded count. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live and use Run Explorer",
+          "description": "Shows HTTP-backed Bronze input, Silver accepted/rejected, and Gold output counts and outcomes. Zero is a recorded count. No matching rows can mean a valid empty result, unresolved scope, or backend failure; verify /health/live and use Run Explorer before classifying the result.",
           "fieldConfig": {
             "defaults": {
               "custom": {
