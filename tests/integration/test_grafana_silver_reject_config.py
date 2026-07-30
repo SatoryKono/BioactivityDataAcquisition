@@ -259,7 +259,7 @@ def test_dq_validation_diagnostics_groups_failures_then_runtime_then_trends() ->
         "Track: DQ Check Duration (p95)",
         "Track: DQ Threshold Events in Range Trend",
         "Track: Data Quality Score Trend (Volume-weighted)",
-        "Review: Lineage Handoff to Control Plane",
+        "Inspect Lineage in Control Plane",
         "Review: Aggregate Control-plane Handoff",
     }
     assert set(nested) == expected_titles
@@ -288,7 +288,7 @@ def test_dq_validation_diagnostics_groups_failures_then_runtime_then_trends() ->
         "Track: Data Quality Score Trend (Volume-weighted)",
     }
     handoff_titles = {
-        "Review: Lineage Handoff to Control Plane",
+        "Inspect Lineage in Control Plane",
         "Review: Aggregate Control-plane Handoff",
     }
 

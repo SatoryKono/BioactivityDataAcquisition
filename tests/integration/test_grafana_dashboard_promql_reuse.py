@@ -64,8 +64,8 @@ def _assert_dq_score_time_semantics() -> None:
         for panel in get_dashboard_panels(dq_dashboard)
         if panel.get("title")
     }
-    score_summary = dq_panels["Monitor: Data Quality Score (Volume-weighted)"]
-    score_trend = dq_panels["Track: Data Quality Score Trend (Volume-weighted)"]
+    score_summary = dq_panels["Monitor Volume-Weighted DQ Score"]
+    score_trend = dq_panels["Track Volume-Weighted DQ Score"]
     assert score_summary.get("type") == "stat"
     assert score_summary.get("options", {}).get("colorMode") == "value"
     assert score_summary.get("options", {}).get("graphMode") == "none"
@@ -114,7 +114,7 @@ def _assert_lineage_control_plane_ownership_handoff() -> None:
         for panel in get_dashboard_panels(control_plane_dashboard)
         if panel.get("title")
     }
-    dq_handoff = dq_panels["Review: Lineage Handoff to Control Plane"]
+    dq_handoff = dq_panels["Inspect Lineage in Control Plane"]
     control_plane_lineage = control_plane_panels["Track Missing Lineage References"]
     assert dq_handoff.get("type") == "text"
     dq_content = str(dq_handoff.get("options", {}).get("content", "")).lower()
@@ -127,10 +127,11 @@ def _assert_lineage_control_plane_ownership_handoff() -> None:
         for link in dq_links
     )
     assert control_plane_lineage.get("options", {}).get("graphMode") == "area"
-    assert (
-        "missing lineage can make replay evidence incomplete"
-        in str(control_plane_lineage.get("description", "")).lower()
-    )
+    lineage_description = str(
+        control_plane_lineage.get("description", "")
+    ).lower()
+    assert "missing upstream lineage references" in lineage_description
+    assert "replay evidence incomplete" in lineage_description
 
 
 def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> None:
