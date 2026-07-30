@@ -285,9 +285,7 @@ def test_sharded_runner_list_matches_inventory_order() -> None:
 @_BASH_RUNNER_UNSUPPORTED_ON_WINDOWS
 def test_sharded_runner_dry_run_expands_architecture_alias_from_inventory() -> None:
     inventory = _load_inventory()
-    expected_shards = inventory["aliases"]["S7-crosscutting-architecture"][
-        "expands_to"
-    ]
+    expected_shards = inventory["aliases"]["S7-crosscutting-architecture"]["expands_to"]
     result = subprocess.run(
         [
             "bash",

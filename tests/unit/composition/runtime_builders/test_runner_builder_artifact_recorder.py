@@ -121,9 +121,7 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
     ledger_path = (
         tmp_path / "output" / "control" / "run_ledger" / f"{manifest_id}.jsonl"
     )
-    ledger_payload = json.loads(
-        ledger_path.read_text(encoding="utf-8").splitlines()[1]
-    )
+    ledger_payload = json.loads(ledger_path.read_text(encoding="utf-8").splitlines()[1])
     assert ledger_payload["event_type"] == "artifact_published"
     assert ledger_payload["stage"] == "silver"
     assert (

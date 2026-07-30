@@ -22,6 +22,7 @@ Silver использует профиль `chembl.assay` и проверяет 
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `chembl.assay.curated` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/assay` |
 | Resource / tables | `assay` |
 | Filters | `assay_type__in`: B,F; `confidence_score__gte`: 8; `relationship_type`: D; `target_chembl_id__isnull`: false; `assay_id`: IDs from data/input/assay.csv column assay_chembl_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (40 fields) |

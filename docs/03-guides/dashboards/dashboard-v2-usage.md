@@ -228,7 +228,7 @@ Explorer health probe and monitoring setup docs for that reason.
    cards недоказательными.
    Datasource trust markers are targeted: `Runtime` keeps this explicit
    telemetry-gap panel first-screen, `Control Plane` uses
-   `Inspect: Telemetry Missing`, while `Silver Reject Explorer` relies on
+   `Monitor Telemetry Coverage`, while `Silver Reject Explorer` relies on
    explicit no-data/backend-failure copy instead of a generic datasource-health
    stat tile.
 1. `bioetl-runtime`, row-группы по сценарию:
@@ -239,8 +239,8 @@ Explorer health probe and monitoring setup docs for that reason.
    первого экрана.
 1. `bioetl-control-plane-v1`, answer row:
    `Inspect Scope & Evidence`, `Status`, `ID`, `Processed Records`, then
-   `Monitor: Replay Safety State`, `Monitor: Checkpoint Freshness Lag (seconds)`,
-   `Monitor: Manifest / Ledger Integrity` и `Inspect: Telemetry Missing`
+   `Monitor Replay Safety`, `Monitor Checkpoint Age`,
+   `Monitor Manifest & Ledger Failures` и `Monitor Telemetry Coverage`
    отвечают на L1/L2 вопрос: можно ли доверять
    manifest/ledger/checkpoint/lineage state и безопасно выполнять
    replay/resume прямо сейчас. Headline `Status` reads
@@ -248,8 +248,8 @@ Explorer health probe and monitoring setup docs for that reason.
    checkpoint, manifest/ledger, and telemetry evidence; missing/stale evidence
    is `INCOMPLETE`. Любой non-zero current-signal требует расследования до
    replay/resume; non-zero/UNKNOWN telemetry-missing risk означает, что зелёные
-   нули нельзя считать доказательством безопасности. `Track: Replay / Resume Blockers in Range`
-   и `Inspect: Terminal Run Events by Status in Range` вынесены ниже как
+   нули нельзя считать доказательством безопасности. `Track Replay Blockers in Range`
+   и `Review Terminal Run Outcomes` вынесены ниже как
    selected-range evidence, а не first-screen verdict. Replay/checkpoint
   runbook path здесь canonical через `checkpoint-debugging.md`; compact
   manifest/run identity remains in the shared `ID` panel, while deeper
@@ -538,8 +538,8 @@ Variable handoff policy for dashboard links remains strict and bounded:
   same trust verdict as `chembl_assay`.
 
   **First 2 clicks (L1):**
-  1. Click #1: открыть `bioetl-control-plane-v1`, проверить `Monitor: Replay Safety State` (`id=891`), `Inspect: Telemetry Missing` (`id=907`) и `Primary recovery` (`id=906`).
-  2. Click #2: перейти через top-level bus в `2. Pipeline Diagnostics` (если есть активный blocker) или `4. Data Quality` (если blocker связан с downstream quality symptoms). На первом экране оставлены current-status Trust KPI: `id=891..893`, `id=907`, copyable identity anchors and единый CTA `id=906`; `Track: Replay / Resume Blockers in Range` (`id=130`) живёт внутри первого collapsed replay/checkpoint row, а `Inspect: Terminal Run Events by Status in Range` (`id=908`) остаётся manifest/ledger range evidence.
+  1. Click #1: открыть `bioetl-control-plane-v1`, проверить `Monitor Replay Safety` (`id=891`), `Monitor Telemetry Coverage` (`id=907`) и `Review First Recovery Action` (`id=906`).
+  2. Click #2: перейти через top-level bus в `2. Pipeline Diagnostics` (если есть активный blocker) или `4. Data Quality` (если blocker связан с downstream quality symptoms). На первом экране оставлены current-status Trust KPI: `id=891..893`, `id=907`, copyable identity anchors and единый CTA `id=906`; `Track Replay Blockers in Range` (`id=130`) живёт внутри первого collapsed replay/checkpoint row, а `Review Terminal Run Outcomes` (`id=908`) остаётся manifest/ledger range evidence.
   Все остальные control-plane метрики перенесены в collapsed incident rows.
   Рекомендованный operator path: сначала проверить blocker cards, затем открыть
   ровно один collapsed diagnostic row под конкретный incident-pattern.
@@ -700,8 +700,8 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `3=INCOMPLETE`, `null=UNKNOWN`; it reads
   `bioetl_control_plane_current_status_trusted`, so missing/stale checkpoint or
   required telemetry evidence blocks replay/resume approval.
-- `control-plane.id=907 (Inspect: Telemetry Missing)`: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`; non-zero/UNKNOWN means validate scrape/rules before trusting blocker zeros.
-- `control-plane.id=130 (Track: Replay / Resume Blockers in Range)`: selected-range blocker count across manifest writes, ledger appends, checkpoint compatibility, replay reconstructability, replay drift, and lineage refs. Любой non-zero value означает investigate before replay/resume, но это historical range evidence, а не first-screen current-status verdict.
+- `control-plane.id=907 (Monitor Telemetry Coverage)`: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`; non-zero/UNKNOWN means validate scrape/rules before trusting blocker zeros.
+- `control-plane.id=130 (Track Replay Blockers in Range)`: selected-range blocker count across manifest writes, ledger appends, checkpoint compatibility, replay reconstructability, replay drift, and lineage refs. Любой non-zero value означает investigate before replay/resume, но это historical range evidence, а не first-screen current-status verdict.
 
 - `overview.Status`: `CRIT` при failed runs `>0`, stage backlog `>0`,
   worst lag `>=300s`, DQ hard fail `>0` или control-plane blocker `>0`;
@@ -734,27 +734,27 @@ Variable handoff policy for dashboard links remains strict and bounded:
   shows only non-success terminal statuses grouped by `pipeline/status`; success
   completions are intentionally omitted because they create scroll without
   improving first-click triage.
-- `control-plane.Track: Replay / Resume Blockers in Range`: selected-range blocker
+- `control-plane.Track Replay Blockers in Range`: selected-range blocker
   count. Нулевое значение само по себе не доказывает safety; его нужно читать
-  вместе с current trust cards и `Inspect: Telemetry Missing = 0`.
-- `control-plane.Inspect: Terminal Run Events by Status in Range`: selected-range
+  вместе с current trust cards и `Monitor Telemetry Coverage = 0`.
+- `control-plane.Review Terminal Run Outcomes`: selected-range
   terminal evidence grouped by `terminal_status`. Эта панель pipeline-scoped only:
   metric contract не несёт `run_type`, поэтому `run_type` selector здесь не
   влияет на breakdown.
 - `control-plane.Manifest/Ledger Failure Ratio Severity`: severity projection за
   фиксированное окно `30m`: `0=OK`, `1=WARN` при `>0`, `2=CRIT` при `>0.10`.
-- `control-plane.Monitor: GLOBAL Control-Plane Read Failure Ratio Severity`: severity
+- `control-plane.Monitor Global Read Failure Severity [30m]`: severity
   projection за фиксированное окно `30m`: `0=OK` при `<=5%`, `1=WARN` при `>5%`,
   `2=CRIT` при `>10%`.
 - `control-plane latency p50/p95/p99`: histogram-backed panels сохраняют
   `No data` как diagnostic signal; отсутствие samples не превращается в `0s`.
-- `control-plane.Identity evidence and remaining replay-safety signals` is a
+- `control-plane.Inspect Run Identity Evidence` is a
   collapsed HTTP-backed forensic row. It exposes P0/P1/P2 identity anchors,
   identity gaps, replay parentage, composite identity, checkpoint anchor compare,
   and copy-friendly full values through `/ops/control-plane/identity-evidence`;
   checkpoint age vs RPO, replay duplicate detection, and richer semantic drift
   classification remain limitation notes instead of fake PromQL.
-- `control-plane.Monitor: Checkpoint Freshness Lag (seconds)` is the canonical
+- `control-plane.Monitor Checkpoint Age` is the canonical
   exact-run checkpoint freshness read path through
   `/ops/control-plane/checkpoint-freshness`. For
   `run_id=b51986c6-870b-4457-aa70-baedac2710ad`, the local manifest

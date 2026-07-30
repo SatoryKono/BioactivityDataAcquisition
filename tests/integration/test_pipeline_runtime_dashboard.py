@@ -160,11 +160,11 @@ def test_pipeline_runtime_panels_have_units() -> None:
 def test_pipeline_runtime_localization_empty_states_are_explicit() -> None:
     panels = {panel.get("title"): panel for panel in _runtime_data_panels()}
 
-    errors_panel = panels["Inspect Errors by Stage / Error Code / Range"]
+    errors_panel = panels["Review Errors by Stage & Code"]
     errors_description = errors_panel.get("description", "")
     assert "not a synthetic domain value" in errors_description
 
-    records_panel = panels["Track Records by Stage / Run Type / Range"]
+    records_panel = panels["Compare Records by Stage & Run Type"]
     records_description = records_panel.get("description", "")
     records_defaults = records_panel.get("fieldConfig", {}).get("defaults", {})
     assert records_defaults.get("noValue") == "No processed-record samples"
@@ -188,12 +188,12 @@ def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
         "ID",
         "Processed Records",
         "Runtime Blockers",
-        "Metrics Evidence",
-        "Runtime Error Rate",
-        "Failed Runs",
-        "Worst Stage Lag",
-        "Failed Workflow Runs / Range",
-        "Failed Pipeline Steps / Range",
+        "Monitor Metrics Coverage",
+        "Monitor Monitor Runtime Error Rate",
+        "Monitor Monitor Failed Runs",
+        "Monitor Monitor Worst Stage Lag",
+        "Track Failed Workflow Runs",
+        "Track Failed Workflow Steps",
     }
     offenders = [
         panel.get("title", "<untitled>")
@@ -214,24 +214,24 @@ def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
 def test_pipeline_runtime_count_panels_have_window_in_title_or_description() -> None:
     titles = {
         "Monitor Runtime Blockers",
-        "Failed Runs",
+        "Monitor Monitor Failed Runs",
         "Monitor No-Records Runs",
-        "Runtime Error Rate",
-        "Worst Stage Lag",
+        "Monitor Monitor Runtime Error Rate",
+        "Monitor Monitor Worst Stage Lag",
         "Monitor Memory Pressure Active",
         "Monitor Pipeline Alert Conditions",
         "Inspect DQ Alert Conditions",
-        "Inspect Control-plane Alert Conditions",
+        "Inspect Control Plane Alert Conditions",
         "Inspect Provider Alert Conditions",
-        "Inspect GLOBAL Provider Alert Conditions",
-        "Inspect Freshness Lagged Entities >24h",
+        "Inspect Global Provider Alert Conditions",
+        "Inspect Entities Stale Over 24h",
         "Inspect Warning Logs (1h)",
         "Inspect GLOBAL Unstructured Logs (1h)",
         "Inspect Top Warning Events by Event / Logger / Range",
-        "Inspect Errors by Stage / Error Code / Range",
-        "Track Records by Stage / Run Type / Range",
-        "Track GLOBAL Shutdown Initiated by Reason / Interval",
-        "Track GLOBAL Shutdown Completed by Reason / Interval",
+        "Review Errors by Stage & Code",
+        "Compare Records by Stage & Run Type",
+        "Track Global Shutdown Starts",
+        "Track Global Shutdown Completions",
     }
     offenders = []
     for panel in _runtime_data_panels():
@@ -273,8 +273,8 @@ def test_pipeline_runtime_latency_panels_have_p50_p95_p99() -> None:
         if panel.get("title")
     }
     for title in (
-        "Track Pipeline Phase Duration p50/p95/p99",
-        "Track Pipeline Duration p50/p95/p99",
+        "Track Phase Duration",
+        "Track Pipeline Duration",
     ):
         panel = panels.get(title)
         assert panel is not None, f"Missing latency panel: {title}"
@@ -507,7 +507,7 @@ def test_stage_expectedness_panel_exists() -> None:
 def test_pipeline_duration_has_explicit_no_value_message() -> None:
     """Pipeline Duration panel must show explicit message instead of bare No data."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    panel = panels.get("Track Pipeline Duration p50/p95/p99")
+    panel = panels.get("Track Pipeline Duration")
     assert panel is not None
     no_value = panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
     assert "terminal" in no_value.lower() or "samples" in no_value.lower(), (

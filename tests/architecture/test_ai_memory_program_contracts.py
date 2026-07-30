@@ -27,7 +27,7 @@ def test_shared_mcp_memory_requires_explicit_write_enablement() -> None:
     powershell_wrapper = Path("scripts/ai/mcp/mcp_memory_wrapper.ps1").read_text(
         encoding="utf-8"
     )
-    assert 'BIOETL_AI_MEMORY_MODE:-off' in bash_wrapper
+    assert "BIOETL_AI_MEMORY_MODE:-off" in bash_wrapper
     assert "'off'" in powershell_wrapper
     assert "read-write" in bash_wrapper
     assert "read-write" in powershell_wrapper

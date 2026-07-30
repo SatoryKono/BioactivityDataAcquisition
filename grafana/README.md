@@ -978,8 +978,8 @@ Common context panels on primary dashboards outside Overview:
 | `Status` | `9401` | Role-specific compact status; no Prometheus `$run_id` filtering. |
 | `ID` | `9402` | BioETL Ops HTTP identity table for `pipeline/run_type/run_id`. |
 | `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`; exact `$run_id` scopes resolve from RunLedger evidence, while aggregate scopes use `bioetl_processed_records_*` recording rules; zero-valued outcome rows remain visible and missing accounting series are UNKNOWN/no-data, not OK. |
-| `ID Empty State` | `9410` | Control Plane-only neutral fallback text shown below the identity table when the selected scope returns no visible rows. |
-| `Processed Records Empty State` | `9411` | Control Plane-only neutral fallback text shown below the accounting table when the selected scope returns no visible rows. |
+| `Identity Data Unavailable` | `9410` | Control Plane-only neutral fallback text shown below the identity table when the selected scope returns no visible rows. |
+| `Record Counts Unavailable` | `9411` | Control Plane-only neutral fallback text shown below the accounting table when the selected scope returns no visible rows. |
 
 All seven shipped dashboards enforce one question/scope/evidence readability contract based
 on `4. Data Quality`: orange `4px` accent, `16px` body (12 pt equivalent),
@@ -1055,19 +1055,19 @@ host/WSL setups, prefer an explicit value over assuming `localhost:9090`.
 
 - **`0. Control Plane`** uses the shared context shell and adds
   control-plane-specific trust panels for manifest/ledger/checkpoint/replay/lineage.
-  `Primary recovery` occupies the rightmost shared-shell slot
+  `Review First Recovery Action` occupies the rightmost shared-shell slot
   beside `ID` and `Processed Records`, while the four compact trust cards remain
   directly below the shared context shell.
   Headline `Status` reads `bioetl_control_plane_current_status_trusted`:
   `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. Replay/resume
   approval requires complete replay-safety, checkpoint freshness/presence, and
-  required telemetry evidence; `Inspect: Telemetry Missing` must be `0`.
-  `Inspect: Terminal Run Events by Status in Range`
+  required telemetry evidence; `Monitor Telemetry Coverage` must be `0`.
+  `Review Terminal Run Outcomes`
   stays below fold as selected-range terminal ledger evidence, while exact `run_id` /
   `manifest_id`, config/contract hashes, artifact refs, replay parentage,
   composite identity, and checkpoint anchor compare are surfaced by
   `/ops/control-plane/identity-evidence` plus run-manifest inspection, not
-  Prometheus labels. `Monitor: Checkpoint Freshness Lag (seconds)` is also now
+  Prometheus labels. `Monitor Checkpoint Age` is also now
   HTTP-backed through `/ops/control-plane/checkpoint-freshness`, so it reads
   persisted checkpoint metadata instead of relying on short-lived scrape
   presence. When that endpoint returns `status=UNKNOWN` with `age_seconds=null`,

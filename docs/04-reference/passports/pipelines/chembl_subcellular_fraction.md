@@ -22,7 +22,8 @@ Silver использует профиль `chembl.subcellular_fraction` и пр
 | Аспект | Значение |
 | --- | --- |
 | Source | `derived` · `chembl:subcellular_fraction` |
-| Resource / tables | `subcellular_fraction` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/assay` |
+| Resource / tables | `assay` |
 | Filters | `subcellular_fraction`: IDs from data/input/subcellular_fraction.csv column subcellular_fraction; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (4 fields) |
 

@@ -22,6 +22,7 @@ Silver использует профиль `chembl.compound_record` и пров�
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `chembl:compound_record` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/compound_record` |
 | Resource / tables | `compound_record` |
 | Filters | `molecule_id`: IDs from data/input/molecule.csv column molecule_chembl_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (7 fields) |

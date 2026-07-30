@@ -276,17 +276,19 @@ def visualization_upgrades() -> None:
     _upgrade_runtime_dashboard()
     _upgrade_dq_dashboard()
 
-    # Trust next action polish (SSOT title: Primary recovery — DS2-03)
+    # Trust next action polish (SSOT title: Review First Recovery Action — DS2-03)
     cp = load("bioetl-control-plane-v1.json")
     p = by_title(cp)
-    recovery = p.get("Primary recovery") or p.get("Next Action: Replay Diagnostics")
+    recovery = p.get("Review First Recovery Action") or p.get(
+        "Next Action: Replay Diagnostics"
+    )
     if recovery is not None:
         recovery.setdefault("options", {})["content"] = (
-            "**Primary recovery:** Status + four cards below. "
+            "**Review First Recovery Action:** Status + four cards below. "
             "INCOMPLETE/UNKNOWN → repair evidence before resume. "
             "Exact run → Run Explorer. VALID_EMPTY blockers only when Status=OK and cards clean."
         )
-        recovery["title"] = "Primary recovery"
+        recovery["title"] = "Review First Recovery Action"
         recovery.setdefault("options", {}).setdefault(
             "dataLinks",
             [
@@ -304,9 +306,9 @@ def visualization_upgrades() -> None:
         )
         recovery["options"]["mode"] = recovery["options"].get("mode") or "markdown"
     for title in (
-        "Monitor: Replay Safety State",
-        "Monitor: Manifest / Ledger Integrity",
-        "Inspect: Telemetry Missing",
+        "Monitor Replay Safety",
+        "Monitor Manifest & Ledger Failures",
+        "Monitor Telemetry Coverage",
     ):
         if title in p and p[title].get("type") == "stat":
             append_desc(

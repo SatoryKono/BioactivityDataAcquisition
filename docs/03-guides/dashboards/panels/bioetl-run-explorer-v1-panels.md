@@ -16,7 +16,7 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 - **Purpose:** Portfolio bus handoffs with preserved time range and vars.
 - **Data sources:** Static HTML + panel links.
 
-### 2. Inspect Run Selection & Evidence
+### 2. Provenance · Run Scope
 - **Type:** Text
 - **Purpose:** Explain browse and selected-run modes, the HTTP-only run_id contract, and where full artifact paths lead.
 - **Data sources:** Dashboard variables and operator copy.

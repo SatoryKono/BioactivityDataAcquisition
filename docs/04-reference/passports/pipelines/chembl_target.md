@@ -22,6 +22,7 @@ Silver использует профиль `chembl.target` и проверяет
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `chembl.target.curated` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/target` |
 | Resource / tables | `target` |
 | Filters | `organism__isnull`: false; `target_type`: SINGLE PROTEIN; `tax_id__isnull`: false; `target_id`: IDs from data/input/target.csv column target_chembl_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (27 fields) |

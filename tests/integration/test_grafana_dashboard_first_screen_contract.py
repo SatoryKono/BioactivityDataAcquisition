@@ -271,9 +271,9 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
             "Inputs": "bioetl_l0_input_status_selected",
         },
         "bioetl-control-plane-v1.json": {
-            "Monitor: Replay Safety State": "bioetl_replay_safety_blockers_15m",
-            "Monitor: Manifest / Ledger Integrity": "bioetl_manifest_ledger_failures_15m",
-            "Inspect: Telemetry Missing": "bioetl_control_plane_telemetry_missing_5m",
+            "Monitor Replay Safety": "bioetl_replay_safety_blockers_15m",
+            "Monitor Manifest & Ledger Failures": "bioetl_manifest_ledger_failures_15m",
+            "Monitor Telemetry Coverage": "bioetl_control_plane_telemetry_missing_5m",
         },
     }
 
@@ -354,11 +354,11 @@ def test_required_trust_markers_stay_visible_on_target_dashboards() -> None:
     """Datasource trust surfaces are targeted: Runtime/Control Plane need explicit first-screen markers."""
     expectations = {
         "bioetl-runtime.json": (
-            "Metrics Evidence",
-            ("treat zero count panels as inconclusive", "prometheus targets"),
+            "Monitor Metrics Coverage",
+            ("evidence confidence", "inconclusive"),
         ),
         "bioetl-control-plane-v1.json": (
-            "Inspect: Telemetry Missing",
+            "Monitor Telemetry Coverage",
             ("do not trust zero blocker cards", "prometheus scrape/rules"),
         ),
     }

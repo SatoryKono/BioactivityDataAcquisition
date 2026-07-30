@@ -42,9 +42,7 @@ def test_collect_baseline_is_bounded_and_secret_free(
     assert "GITHUB_TOKEN" not in rendered
 
 
-def test_run_probe_reports_timeout_without_output(
-    monkeypatch, tmp_path: Path
-) -> None:
+def test_run_probe_reports_timeout_without_output(monkeypatch, tmp_path: Path) -> None:
     def fake_run(*args: object, **kwargs: object) -> None:
         raise subprocess.TimeoutExpired(["codex"], timeout=1)
 
@@ -58,4 +56,3 @@ def test_run_probe_reports_timeout_without_output(
 
     assert report["status"] == "timed_out"
     assert report["returncode"] is None
-

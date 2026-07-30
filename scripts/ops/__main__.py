@@ -48,9 +48,7 @@ COMMAND_SPECS = {
     "salt-rotate": "maintenance/security/salt_rotate.py",
     "check-observability-ports": "observability/check_published_observability_endpoints.py",
     "rerender-grafana": "observability/grafana/rerender_grafana_screenshots.py",
-    "render-grafana-matrix": (
-        "observability/grafana/run_grafana_render_matrix.py"
-    ),
+    "render-grafana-matrix": ("observability/grafana/run_grafana_render_matrix.py"),
     "audit-live-grafana": "observability/grafana/audit_live_grafana_panels.py",
     "check-grafana-audit-preflight": (
         "observability/grafana/check_grafana_dashboard_audit_preflight.py"

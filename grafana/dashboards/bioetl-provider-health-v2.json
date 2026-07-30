@@ -106,7 +106,7 @@
     {
       "id": 9400,
       "type": "text",
-      "title": "Inspect Scope & Evidence",
+      "title": "Provenance",
       "gridPos": {
         "h": 4,
         "w": 16,
@@ -116,7 +116,7 @@
       "description": "Explains the provider-health question and the evidence scopes used on this dashboard. FLEET summarizes all providers; SELECTED PROVIDER uses provider-status telemetry for the selected provider. Pipeline, workflow, run type, and run ID are supporting context only. ID and Processed Records are pipeline-context evidence and do not determine provider health. Missing current-status data means telemetry is unknown, not healthy.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which providers need attention, and why?</div><div><b>FLEET</b> = all providers · <b>SELECTED PROVIDER</b> = the provider selected above</div><div>Missing current-status data means telemetry is unknown; check Runtime telemetry before assuming healthy</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which provider is degraded, and why?</div><div><b>Scope:</b> <b>GLOBAL</b> = fleet severity/freshness · <b>SELECTED PROVIDER</b> = provider status</div><div><b>UNKNOWN freshness</b> = missing Runtime telemetry — inspect scrape target</div></div></div>"
       }
     },
     {

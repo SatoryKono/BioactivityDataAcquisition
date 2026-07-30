@@ -22,7 +22,8 @@ Silver использует профиль `chembl.publication_similarity` и п
 | Аспект | Значение |
 | --- | --- |
 | Source | `derived` · `chembl:publication_similarity` |
-| Resource / tables | `publication_similarity` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/document_similarity` |
+| Resource / tables | `document_similarity` |
 | Filters | `sim_id`: IDs from data/input/publication_similarity.csv column sim_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (9 fields) |
 

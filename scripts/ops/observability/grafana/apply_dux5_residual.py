@@ -38,7 +38,7 @@ STATUS_CARD_HTML: dict[str, str] = {
         "<code>$workflow</code>/<code>$pipeline</code>/<code>$run_type</code>/"
         "run <code>$run_id</code><br>"
         "<strong>UNKNOWN</strong> = evidence incomplete — not OK. "
-        "Open Primary recovery or Run Explorer."
+        "Open Review First Recovery Action or Run Explorer."
         "</div>"
     ),
     "bioetl-overview-v2": (
@@ -399,7 +399,7 @@ def apply_text_panel(panel: dict[str, Any], *, uid: str) -> list[str]:
     # Domain-specific short action cards
     if title in {
         "First Action",
-        "Primary recovery",
+        "Review First Recovery Action",
         "Next Best Actions",
         "Next actions (<=4)",
     }:
@@ -447,9 +447,9 @@ def rewrite_action_card(uid: str, title: str, content: str) -> str:
             "3. Read **Top Causes** for selected provider.\n"
             "4. If selector blank → choose provider (Selection required)."
         ),
-        ("bioetl-control-plane-v1", "Primary recovery"): (
+        ("bioetl-control-plane-v1", "Review First Recovery Action"): (
             '<div style="padding:4px 10px;line-height:1.3;font-size:12px;overflow:hidden">'
-            "<strong>Primary recovery (≤4)</strong> — "
+            "<strong>Review First Recovery Action (≤4)</strong> — "
             "1) Read <strong>Status</strong> + Replay Safety / Checkpoint · "
             "2) INCOMPLETE/UNKNOWN → verify checkpoint scrape · "
             "3) Open blockers (reconstructability/drift) · "

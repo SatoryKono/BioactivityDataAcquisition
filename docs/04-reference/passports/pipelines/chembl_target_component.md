@@ -22,6 +22,7 @@ Silver использует профиль `chembl.target_component` и пров
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `chembl:target_component` |
+| Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/target_component` |
 | Resource / tables | `target_component` |
 | Filters | `component_id`: IDs from data/input/target_component.csv column component_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (11 fields) |

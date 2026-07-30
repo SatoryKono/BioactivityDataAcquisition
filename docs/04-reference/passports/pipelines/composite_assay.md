@@ -22,6 +22,7 @@ Join keys, cardinality и source tables берутся из composite configurat
 | Аспект | Значение |
 | --- | --- |
 | Source | `composite` · `chembl_assay` |
+| Method / endpoint | — · — |
 | Resource / tables | `silver/chembl/assay`, `silver/chembl/cell_line`, `silver/chembl/tissue` |
 | Filters | `chembl_cell_line`: cell_id IS NOT NULL; `chembl_tissue`: tissue_id IS NOT NULL |
 

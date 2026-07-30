@@ -22,6 +22,7 @@ Silver использует профиль `uniprot.protein` и проверяе
 | Аспект | Значение |
 | --- | --- |
 | Source | `http_api` · `uniprot:protein` |
+| Method / endpoint | `GET` · `https://rest.uniprot.org` |
 | Resource / tables | `protein` |
 | Filters | `accession`: IDs from data/input/protein.csv column uniprot_id; CLI may override the input CSV |
 | Selected fields | `system` (7 fields); `business` (92 fields) |

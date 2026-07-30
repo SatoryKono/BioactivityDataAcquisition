@@ -15,16 +15,16 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | Dashboard | Panel ID | Title |
 | --- | ---: | --- |
 | bioetl-control-plane-v1.json | 1000 | Navigate Dashboards |
-| bioetl-control-plane-v1.json | 9400 | Review Scope & Evidence |
+| bioetl-control-plane-v1.json | 9400 | Inspect Scope & Evidence |
 | bioetl-control-plane-v1.json | 9401 | Monitor Replay Readiness |
-| bioetl-control-plane-v1.json | 906 | Review First Recovery Action |
+| bioetl-control-plane-v1.json | 906 | Review Recovery Action |
 | bioetl-control-plane-v1.json | 891 | Monitor Replay Safety |
 | bioetl-control-plane-v1.json | 892 | Monitor Checkpoint Age |
 | bioetl-control-plane-v1.json | 893 | Monitor Manifest & Ledger Failures |
 | bioetl-control-plane-v1.json | 907 | Monitor Telemetry Coverage |
 | bioetl-control-plane-v1.json | 902 | Inspect Replay & Checkpoint Evidence |
-| bioetl-control-plane-v1.json | 894 | Review Replay Coverage Limits |
-| bioetl-control-plane-v1.json | 130 | Track Replay Blockers in Range |
+| bioetl-control-plane-v1.json | 894 | Review Coverage Limits |
+| bioetl-control-plane-v1.json | 130 | Track Replay Blockers |
 | bioetl-control-plane-v1.json | 3 | Track Checkpoint Incompatibilities |
 | bioetl-control-plane-v1.json | 104 | Track Unreconstructable Replays |
 | bioetl-control-plane-v1.json | 120 | Track Replay Drift |
@@ -43,11 +43,11 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 2 | Track Ledger Append Failures |
 | bioetl-control-plane-v1.json | 131 | Compare Manifest Writes by Status |
 | bioetl-control-plane-v1.json | 7 | Compare Ledger Appends by Type & Status |
-| bioetl-control-plane-v1.json | 132 | Monitor Manifest Failure Severity [30m] |
-| bioetl-control-plane-v1.json | 133 | Monitor Ledger Failure Severity [30m] |
+| bioetl-control-plane-v1.json | 132 | Monitor Manifest Failures (30m) |
+| bioetl-control-plane-v1.json | 133 | Monitor Ledger Failures (30m) |
 | bioetl-control-plane-v1.json | 903 | Inspect Global Store Reliability |
 | bioetl-control-plane-v1.json | 4 | Track Global Read Failures |
-| bioetl-control-plane-v1.json | 136 | Monitor Global Read Failure Severity [30m] |
+| bioetl-control-plane-v1.json | 136 | Monitor Global Read Failures (30m) |
 | bioetl-control-plane-v1.json | 6 | Compare Global Reads by Store |
 | bioetl-control-plane-v1.json | 111 | Track Global Read Latency |
 | bioetl-control-plane-v1.json | 904 | Inspect Audit & Lineage Evidence |
@@ -61,19 +61,19 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 112 | Compare Lineage Persistence Outcomes |
 | bioetl-control-plane-v1.json | 905 | Inspect Run Identity Evidence |
 | bioetl-control-plane-v1.json | 9407 | Copy Identity Values |
-| bioetl-control-plane-v1.json | 9404 | Review Run Identity |
-| bioetl-control-plane-v1.json | 9410 | Identity Data Unavailable |
-| bioetl-control-plane-v1.json | 9411 | Record Counts Unavailable |
+| bioetl-control-plane-v1.json | 9404 | Review Identity Anchors |
+| bioetl-control-plane-v1.json | 9410 | Explain Missing Identity Data |
+| bioetl-control-plane-v1.json | 9411 | Explain Missing Record Counts |
 | bioetl-control-plane-v1.json | 9405 | Review Identity Gaps |
 | bioetl-control-plane-v1.json | 9406 | Compare Checkpoint Anchors |
 | bioetl-control-plane-v1.json | 9408 | Review Required Replay Anchors |
 | bioetl-control-plane-v1.json | 9409 | Review Additional Forensic Anchors |
 | bioetl-control-plane-v1.json | 139 | Review Uncovered Replay Signals |
 | bioetl-control-plane-v1.json | 9412 | Inspect Run Details |
-| bioetl-control-plane-v1.json | 9402 | Review Run Identity |
+| bioetl-control-plane-v1.json | 9402 | Review Run Summary |
 | bioetl-control-plane-v1.json | 9403 | Review Processed Records |
 | bioetl-dq-v2.json | 1000 | Navigation |
-| bioetl-dq-v2.json | 9400 | Inspect Scope & Evidence |
+| bioetl-dq-v2.json | 9400 | Provenance |
 | bioetl-dq-v2.json | 9401 | Status |
 | bioetl-dq-v2.json | 9103 | Review: First Action |
 | bioetl-dq-v2.json | 9101 | Now · DQ Threshold State |
@@ -110,7 +110,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9402 | ID |
 | bioetl-dq-v2.json | 9403 | Processed Records |
 | bioetl-incident-v1.json | 1000 | Navigation |
-| bioetl-incident-v1.json | 9400 | Inspect Scope & Evidence |
+| bioetl-incident-v1.json | 9400 | Provenance |
 | bioetl-incident-v1.json | 9401 | Status |
 | bioetl-incident-v1.json | 2001 | Next Best Actions |
 | bioetl-incident-v1.json | 2010 | Ranked Active Suspects |
@@ -121,34 +121,34 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 2002 | Active Suspects · Runtime |
 | bioetl-incident-v1.json | 2003 | Active Suspects · Provider |
 | bioetl-incident-v1.json | 2004 | Active Suspects · DQ |
-| bioetl-overview-v2.json | 9600 | Alert/SLO Triage |
-| bioetl-overview-v2.json | 9601 | Triage Alert State |
-| bioetl-overview-v2.json | 1000 | Navigation |
+| bioetl-overview-v2.json | 9600 | Inspect Alerts |
+| bioetl-overview-v2.json | 9601 | Review Active Alerts |
+| bioetl-overview-v2.json | 1000 | Navigate Dashboards |
 | bioetl-overview-v2.json | 99 | Inspect Scope & Evidence |
-| bioetl-overview-v2.json | 214 | Status |
-| bioetl-overview-v2.json | 215 | First Action |
-| bioetl-overview-v2.json | 9002 | Inputs |
-| bioetl-overview-v2.json | 9014 | L1 Historical Trends |
-| bioetl-overview-v2.json | 9018 | Runtime Blockers Trend |
-| bioetl-overview-v2.json | 9019 | DQ Status Trend |
-| bioetl-overview-v2.json | 9020 | Gold Lifecycle Trend |
-| bioetl-overview-v2.json | 9009 | Range Evidence (Historical / Recent History) |
-| bioetl-overview-v2.json | 9010 | Historical Failures |
-| bioetl-overview-v2.json | 9011 | Recent Terminal Runs |
-| bioetl-overview-v2.json | 9015 | Silver Rejects + Rate |
-| bioetl-overview-v2.json | 9012 | Diagnostics & Docs (Logs / Traces / Raw Metrics) |
-| bioetl-overview-v2.json | 9021 | Diagnostics Navigation |
-| bioetl-overview-v2.json | 9006 | Control Plane |
-| bioetl-overview-v2.json | 9003 | Runtime |
-| bioetl-overview-v2.json | 9004 | Data Quality |
-| bioetl-overview-v2.json | 9007 | Provider |
-| bioetl-overview-v2.json | 9005 | Data Validation |
-| bioetl-overview-v2.json | 9013 | Workflow |
-| bioetl-overview-v2.json | 9602 | Run context (thin) -> Run Explorer hub |
-| bioetl-overview-v2.json | 9300 | ID |
-| bioetl-overview-v2.json | 9301 | Processed Records |
+| bioetl-overview-v2.json | 214 | Monitor Fleet Health |
+| bioetl-overview-v2.json | 215 | Review First Action |
+| bioetl-overview-v2.json | 9002 | Review Domain Status |
+| bioetl-overview-v2.json | 9014 | Inspect Historical Trends |
+| bioetl-overview-v2.json | 9018 | Track Runtime Blockers |
+| bioetl-overview-v2.json | 9019 | Track Data Quality Status |
+| bioetl-overview-v2.json | 9020 | Track Gold Lifecycle |
+| bioetl-overview-v2.json | 9009 | Inspect Range Evidence |
+| bioetl-overview-v2.json | 9010 | Review Failed Runs |
+| bioetl-overview-v2.json | 9011 | Review Recent Terminal Runs |
+| bioetl-overview-v2.json | 9015 | Track Silver Rejects |
+| bioetl-overview-v2.json | 9012 | Inspect Domain Diagnostics |
+| bioetl-overview-v2.json | 9021 | Navigate Diagnostics |
+| bioetl-overview-v2.json | 9006 | Review Control Plane Status |
+| bioetl-overview-v2.json | 9003 | Review Runtime Status |
+| bioetl-overview-v2.json | 9004 | Review Data Quality Status |
+| bioetl-overview-v2.json | 9007 | Review Global Provider Status |
+| bioetl-overview-v2.json | 9005 | Review Data Validation Status |
+| bioetl-overview-v2.json | 9013 | Review Workflow Status |
+| bioetl-overview-v2.json | 9602 | Inspect Run Context |
+| bioetl-overview-v2.json | 9300 | Review Run Identity |
+| bioetl-overview-v2.json | 9301 | Review Processed Records |
 | bioetl-provider-health-v2.json | 1000 | Navigation |
-| bioetl-provider-health-v2.json | 9400 | Inspect Scope & Evidence |
+| bioetl-provider-health-v2.json | 9400 | Provenance |
 | bioetl-provider-health-v2.json | 9401 | Status |
 | bioetl-provider-health-v2.json | 9002 | First Action |
 | bioetl-provider-health-v2.json | 9101 | Monitor GLOBAL Provider Severity Matrix |
@@ -179,7 +179,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9402 | ID |
 | bioetl-provider-health-v2.json | 9403 | Processed Records |
 | bioetl-run-explorer-v1.json | 1000 | Navigation |
-| bioetl-run-explorer-v1.json | 1 | Inspect Run Selection & Evidence |
+| bioetl-run-explorer-v1.json | 1 | Provenance · Run Scope |
 | bioetl-run-explorer-v1.json | 3010 | Browse · Recent pipeline runs (no selection) |
 | bioetl-run-explorer-v1.json | 9402 | ID |
 | bioetl-run-explorer-v1.json | 9403 | Processed Records |
@@ -191,45 +191,45 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-run-explorer-v1.json | 3013 | Selected run · artifacts |
 | bioetl-run-explorer-v1.json | 3014 | Selected run · stage timings / failure (optional) |
 | bioetl-run-explorer-v1.json | 3001 | Next actions (≤4) |
-| bioetl-runtime.json | 1000 | Navigation |
+| bioetl-runtime.json | 1000 | Navigate Dashboards |
 | bioetl-runtime.json | 9400 | Inspect Scope & Evidence |
-| bioetl-runtime.json | 9401 | Status |
-| bioetl-runtime.json | 9991 | First Action |
-| bioetl-runtime.json | 9101 | Runtime Blockers |
-| bioetl-runtime.json | 9102 | Metrics Evidence |
-| bioetl-runtime.json | 252 | Detect |
+| bioetl-runtime.json | 9401 | Monitor Pipeline Health |
+| bioetl-runtime.json | 9991 | Review First Action |
+| bioetl-runtime.json | 9101 | Review Runtime Blockers |
+| bioetl-runtime.json | 9102 | Monitor Metrics Coverage |
+| bioetl-runtime.json | 252 | Inspect Detection Signals |
 | bioetl-runtime.json | 238 | Track Stage Backlog Trend |
 | bioetl-runtime.json | 240 | Track Records by Stage / Interval |
 | bioetl-runtime.json | 242 | Inspect Active Runtime Blocker Detail |
-| bioetl-runtime.json | 9105 | Monitor Aggregate Stage Lag |
+| bioetl-runtime.json | 9105 | Track Stage Lag |
 | bioetl-runtime.json | 243 | Inspect Stage Expectedness |
-| bioetl-runtime.json | 220 | Runtime Error Rate |
-| bioetl-runtime.json | 253 | Localize |
-| bioetl-runtime.json | 207 | Track Pipeline Phase Duration p50/p95/p99 |
-| bioetl-runtime.json | 239 | Track Pipeline Duration p50/p95/p99 |
-| bioetl-runtime.json | 256 | Inspect Errors by Stage / Error Code / Range |
-| bioetl-runtime.json | 241 | Track Records by Stage / Run Type / Range |
-| bioetl-runtime.json | 254 | Escalate |
-| bioetl-runtime.json | 2541 | Review Runtime-owned escalation |
+| bioetl-runtime.json | 220 | Monitor Runtime Error Rate |
+| bioetl-runtime.json | 253 | Localize Runtime Cause |
+| bioetl-runtime.json | 207 | Track Phase Duration |
+| bioetl-runtime.json | 239 | Track Pipeline Duration |
+| bioetl-runtime.json | 256 | Review Errors by Stage & Code |
+| bioetl-runtime.json | 241 | Compare Records by Stage & Run Type |
+| bioetl-runtime.json | 254 | Review Escalation Paths |
+| bioetl-runtime.json | 2541 | Review Runtime Escalation |
 | bioetl-runtime.json | 230 | Monitor Pipeline Alert Conditions |
 | bioetl-runtime.json | 236 | Monitor No-Records Runs |
 | bioetl-runtime.json | 21 | Monitor Memory Pressure Active |
-| bioetl-runtime.json | 2542 | Review Cross-domain handoffs |
+| bioetl-runtime.json | 2542 | Review Cross-Domain Handoffs |
 | bioetl-runtime.json | 4 | Inspect DQ Alert Conditions |
-| bioetl-runtime.json | 5 | Inspect Control-plane Alert Conditions |
+| bioetl-runtime.json | 5 | Inspect Control Plane Alert Conditions |
 | bioetl-runtime.json | 6 | Inspect Provider Alert Conditions |
-| bioetl-runtime.json | 259 | Inspect GLOBAL Provider Alert Conditions |
-| bioetl-runtime.json | 7 | Inspect Freshness Lagged Entities >24h |
-| bioetl-runtime.json | 2543 | Review Process-level signals (GLOBAL) |
-| bioetl-runtime.json | 209 | Track GLOBAL Shutdown Initiated by Reason / Interval |
-| bioetl-runtime.json | 210 | Track GLOBAL Shutdown Completed by Reason / Interval |
-| bioetl-runtime.json | 9992 | Secondary KPIs (collapsed; not peer first-screen cards) |
-| bioetl-runtime.json | 237 | Worst Stage Lag |
+| bioetl-runtime.json | 259 | Inspect Global Provider Alert Conditions |
+| bioetl-runtime.json | 7 | Inspect Entities Stale Over 24h |
+| bioetl-runtime.json | 2543 | Review Global Process Signals |
+| bioetl-runtime.json | 209 | Track Global Shutdown Starts |
+| bioetl-runtime.json | 210 | Track Global Shutdown Completions |
+| bioetl-runtime.json | 9992 | Inspect Secondary Runtime Indicators |
+| bioetl-runtime.json | 237 | Monitor Worst Stage Lag |
 | bioetl-runtime.json | 16 | Monitor Runtime Blockers |
-| bioetl-runtime.json | 205 | Failed Runs |
-| bioetl-runtime.json | 9993 | Run context (thin) -> Run Explorer hub |
-| bioetl-runtime.json | 9402 | ID |
-| bioetl-runtime.json | 9403 | Processed Records |
-| bioetl-runtime.json | 9994 | Workflow band (merged from bioetl-workflow-overview) |
-| bioetl-runtime.json | 9996 | Failed Workflow Runs / Range |
-| bioetl-runtime.json | 9997 | Failed Pipeline Steps / Range |
+| bioetl-runtime.json | 205 | Monitor Failed Runs |
+| bioetl-runtime.json | 9993 | Inspect Run Context |
+| bioetl-runtime.json | 9402 | Review Run Identity |
+| bioetl-runtime.json | 9403 | Review Processed Records |
+| bioetl-runtime.json | 9994 | Inspect Workflow Evidence |
+| bioetl-runtime.json | 9996 | Track Failed Workflow Runs |
+| bioetl-runtime.json | 9997 | Track Failed Workflow Steps |

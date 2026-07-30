@@ -1,109 +1,67 @@
 {
   "mcpServers": {
     "memory": {
-      "type": "http",
-      "url": "http://127.0.0.1:8826/mcp",
-      "startup_timeout_sec": 120
+      "url": "http://127.0.0.1:8826/mcp"
     },
     "filesystem": {
-      "type": "http",
-      "url": "http://127.0.0.1:8827/mcp",
-      "startup_timeout_sec": 30
+      "url": "http://127.0.0.1:8827/mcp"
     },
     "fetch": {
-      "type": "http",
-      "url": "http://127.0.0.1:8821/mcp",
-      "startup_timeout_sec": 300
+      "url": "http://127.0.0.1:8821/mcp"
     },
     "github": {
-      "type": "http",
-      "url": "http://127.0.0.1:8820/mcp",
-      "startup_timeout_sec": 180
+      "url": "http://127.0.0.1:8820/mcp"
     },
     "docker": {
-      "type": "http",
-      "url": "http://127.0.0.1:8817/mcp",
-      "startup_timeout_sec": 240
+      "url": "http://127.0.0.1:8817/mcp"
     },
     "context7": {
-      "type": "http",
-      "url": "http://127.0.0.1:8815/mcp",
-      "startup_timeout_sec": 240
+      "url": "http://127.0.0.1:8815/mcp"
     },
     "ast-grep": {
-      "type": "http",
-      "url": "http://127.0.0.1:8816/mcp",
-      "startup_timeout_sec": 120
+      "url": "http://127.0.0.1:8816/mcp"
     },
     "mcp-code-interpreter": {
-      "type": "http",
-      "url": "http://127.0.0.1:8829/mcp",
-      "startup_timeout_sec": 240
+      "url": "http://127.0.0.1:8829/mcp"
     },
     "prometheus": {
-      "type": "http",
-      "url": "http://127.0.0.1:8822/mcp",
-      "startup_timeout_sec": 240
+      "url": "http://127.0.0.1:8822/mcp"
     },
     "grafana": {
-      "type": "http",
-      "url": "http://127.0.0.1:8823/mcp",
-      "startup_timeout_sec": 240
+      "url": "http://127.0.0.1:8823/mcp"
     },
     "brave-search": {
-      "type": "http",
-      "url": "http://127.0.0.1:8811/mcp",
-      "startup_timeout_sec": 180
+      "url": "http://127.0.0.1:8811/mcp"
     },
     "neo4j-cypher": {
-      "type": "http",
-      "url": "http://127.0.0.1:8824/mcp",
-      "startup_timeout_sec": 120
+      "url": "http://127.0.0.1:8824/mcp"
     },
     "neo4j-memory": {
-      "type": "http",
-      "url": "http://127.0.0.1:8825/mcp",
-      "startup_timeout_sec": 120
+      "url": "http://127.0.0.1:8825/mcp"
     },
     "mermaid": {
-      "type": "http",
-      "url": "http://127.0.0.1:8818/mcp",
-      "startup_timeout_sec": 300
+      "url": "http://127.0.0.1:8818/mcp"
     },
     "deja": {
-      "type": "http",
-      "url": "http://127.0.0.1:8814/mcp",
-      "startup_timeout_sec": 120
+      "url": "http://127.0.0.1:8814/mcp"
     },
     "adr-analysis": {
-      "type": "http",
-      "url": "http://127.0.0.1:8813/mcp",
-      "startup_timeout_sec": 120
+      "url": "http://127.0.0.1:8813/mcp"
     },
     "mutmut": {
-      "type": "http",
-      "url": "http://127.0.0.1:8830/mcp",
-      "startup_timeout_sec": 120
+      "url": "http://127.0.0.1:8830/mcp"
     },
     "code-analyzer": {
-      "type": "http",
-      "url": "http://127.0.0.1:8828/mcp",
-      "startup_timeout_sec": 120
+      "url": "http://127.0.0.1:8828/mcp"
     },
     "github-actions": {
-      "type": "http",
-      "url": "http://127.0.0.1:8831/mcp",
-      "startup_timeout_sec": 180
+      "url": "http://127.0.0.1:8831/mcp"
     },
     "deepwiki": {
-      "type": "http",
-      "url": "https://mcp.deepwiki.com/mcp",
-      "startup_timeout_sec": 240
+      "url": "https://mcp.deepwiki.com/mcp"
     },
     "ref": {
-      "type": "http",
       "url": "https://api.ref.tools/mcp",
-      "startup_timeout_sec": 120,
       "headers": {
         "x-ref-api-key": "$REF_TOOL_API_KEY"
       }

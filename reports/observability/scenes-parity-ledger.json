@@ -4,13 +4,13 @@
   "authoritative_surface": "grafana/dashboards/*.json",
   "route_contract_sha256": "88b420a39e5db86b1c5ca6df94822b4c4bedf41ac6f34e93956d4cd8fab174a4",
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "a9182d94e37cdb9d8636cf49be8be2903685c9923af57a01042e5f5527cdfcba",
-    "bioetl-dq-v2": "da7541b458a9329c238346ca412240ad73a77abfecd53fae935d6761529d0684",
-    "bioetl-incident-v1": "27c82a1f086c6a7e1f025a7938f9d35aafdac95758d64e919583887a3f321417",
-    "bioetl-overview-v2": "9da9fa35e1563ceca40b6c61f294269d38a5b3bd5deed3e428bd2522f6c02628",
-    "bioetl-provider-health-v2": "19f5c63ce822b7df8e574a2bc414d10df9d655b6f113e7124f236ac9acb205d3",
-    "bioetl-run-explorer-v1": "d30dc9de0c92e2181d30a52d3f43845c85065eef2a4d96ebb27b47d1a20a8e89",
-    "bioetl-runtime": "c798cbe463fd73f046be796740243014173e3dba6028cf36d0ff36010f2439a9"
+    "bioetl-control-plane-v1": "48f3ec3b7d748c6f9cc3af609a1ff95fdfbe6af31a8d716289b75e028594f5fa",
+    "bioetl-dq-v2": "a835714fa39cac28b0c3027174dc4470681d8bc00aac51bcb5c30323ef3f3e2f",
+    "bioetl-incident-v1": "c90f2787a3ef244135228571c23bda4e99b0dc1224a5cc3389bfb7c507b8a299",
+    "bioetl-overview-v2": "8ccdda8b5554d9c5f7c63102c11344b61c7a5ae0289a15f24bd00c71cd2eaa59",
+    "bioetl-provider-health-v2": "ccae0f7ad5a2a43a8efb35d8b41604a4b3f67bdd1a2c7703a5d44685d69b41e8",
+    "bioetl-run-explorer-v1": "a95e9b3c3e0255ad3d1043a05444b3f3429f6c202bb91c225b184ab2dbbac722",
+    "bioetl-runtime": "04377f617335156fb288eda1e7e54dfc321e93853a729ca54a001087d6200b4a"
   },
   "summary": {
     "route_count": 6,
@@ -105,7 +105,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 906,
-      "panel_title": "Primary recovery",
+      "panel_title": "Review First Recovery Action",
       "route": "data-trust-recovery",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -122,7 +122,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 891,
-      "panel_title": "Monitor: Replay Safety State",
+      "panel_title": "Monitor Replay Safety",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -141,7 +141,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 892,
-      "panel_title": "Monitor: Checkpoint Freshness Lag (seconds)",
+      "panel_title": "Monitor Checkpoint Age",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -160,7 +160,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 893,
-      "panel_title": "Monitor: Manifest / Ledger Integrity",
+      "panel_title": "Monitor Manifest & Ledger Failures",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -179,7 +179,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 907,
-      "panel_title": "Inspect: Telemetry Missing",
+      "panel_title": "Monitor Telemetry Coverage",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -198,7 +198,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 894,
-      "panel_title": "Inspect: Known Blind Spots",
+      "panel_title": "Review Replay Coverage Limits",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -215,7 +215,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 130,
-      "panel_title": "Track: Replay / Resume Blockers in Range",
+      "panel_title": "Track Replay Blockers in Range",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -234,7 +234,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 3,
-      "panel_title": "Monitor: Checkpoint Incompatibilities",
+      "panel_title": "Track Checkpoint Incompatibilities",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -253,7 +253,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 104,
-      "panel_title": "Monitor: Replay Not Reconstructable",
+      "panel_title": "Track Unreconstructable Replays",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -272,7 +272,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 120,
-      "panel_title": "Monitor: Replay Drift",
+      "panel_title": "Track Replay Drift",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -291,7 +291,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 101,
-      "panel_title": "Monitor: Checkpoint Load Failures",
+      "panel_title": "Track Checkpoint Load Failures",
       "route": "data-trust-recovery",
       "component": "Context Bar",
       "disposition": "route-primary",
@@ -310,7 +310,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 102,
-      "panel_title": "Monitor: Checkpoint Save Failures",
+      "panel_title": "Track Checkpoint Save Failures",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -329,7 +329,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 103,
-      "panel_title": "Monitor: GLOBAL Checkpoint Operator Failures",
+      "panel_title": "Track Global Checkpoint Admin Failures",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -348,7 +348,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 121,
-      "panel_title": "Track: Replay Lag Seconds",
+      "panel_title": "Track Peak Replay Lag",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -367,7 +367,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 5,
-      "panel_title": "Track: Checkpoint Compatibility Outcomes",
+      "panel_title": "Compare Checkpoint Outcomes",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -386,7 +386,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 134,
-      "panel_title": "Track: Replay Drift by Type",
+      "panel_title": "Track Replay Drift by Type",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -405,7 +405,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 135,
-      "panel_title": "Track: Replay Lag Trend",
+      "panel_title": "Track Replay Lag",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -424,7 +424,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 105,
-      "panel_title": "Track: Checkpoint Save Latency p50/p95/p99",
+      "panel_title": "Track Checkpoint Save Latency",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -445,7 +445,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 106,
-      "panel_title": "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
+      "panel_title": "Track Global Checkpoint Admin Latency",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -466,7 +466,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 908,
-      "panel_title": "Inspect: Terminal Run Events by Status in Range",
+      "panel_title": "Review Terminal Run Outcomes",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -485,7 +485,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 1,
-      "panel_title": "Monitor: Manifest Write Failures",
+      "panel_title": "Track Manifest Write Failures",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -504,7 +504,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 2,
-      "panel_title": "Monitor: Ledger Append Failures",
+      "panel_title": "Track Ledger Append Failures",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -523,7 +523,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 131,
-      "panel_title": "Track: Manifest Writes by Status",
+      "panel_title": "Compare Manifest Writes by Status",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -542,7 +542,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 7,
-      "panel_title": "Track: Ledger Appends by Event Type / Status",
+      "panel_title": "Compare Ledger Appends by Type & Status",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -561,7 +561,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 132,
-      "panel_title": "Monitor: Manifest Write Failure Ratio",
+      "panel_title": "Monitor Manifest Failure Severity [30m]",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -580,7 +580,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 133,
-      "panel_title": "Monitor: Ledger Append Failure Ratio",
+      "panel_title": "Monitor Ledger Failure Severity [30m]",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -599,7 +599,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 4,
-      "panel_title": "Monitor: GLOBAL Control-Plane Read Failures",
+      "panel_title": "Track Global Read Failures",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -618,7 +618,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 136,
-      "panel_title": "Monitor: GLOBAL Control-Plane Read Failure Ratio Severity",
+      "panel_title": "Monitor Global Read Failure Severity [30m]",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -637,7 +637,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 6,
-      "panel_title": "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
+      "panel_title": "Compare Global Reads by Store",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -656,7 +656,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 111,
-      "panel_title": "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
+      "panel_title": "Track Global Read Latency",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -677,7 +677,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 122,
-      "panel_title": "Monitor: Lineage Refs Missing",
+      "panel_title": "Track Missing Lineage References",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -696,7 +696,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 137,
-      "panel_title": "Monitor: Lineage Fragment Persistence Failures",
+      "panel_title": "Track Lineage Persistence Failures",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -715,7 +715,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 138,
-      "panel_title": "Inspect: Missing Lineage Refs by Layer / Type",
+      "panel_title": "Review Missing Lineage by Layer",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -734,7 +734,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 107,
-      "panel_title": "Track: GLOBAL Audit Write Outcomes",
+      "panel_title": "Compare Global Audit Write Outcomes",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -753,7 +753,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 108,
-      "panel_title": "Track: GLOBAL Audit Query Outcomes",
+      "panel_title": "Compare Global Audit Query Outcomes",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -772,7 +772,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 109,
-      "panel_title": "Track: GLOBAL Audit Write Latency p50/p95/p99",
+      "panel_title": "Track Global Audit Write Latency",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -793,7 +793,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 110,
-      "panel_title": "Track: GLOBAL Audit Query Latency p50/p95/p99",
+      "panel_title": "Track Global Audit Query Latency",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -814,7 +814,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 112,
-      "panel_title": "Track: Lineage Fragment Outcomes",
+      "panel_title": "Compare Lineage Persistence Outcomes",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -833,7 +833,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9407,
-      "panel_title": "Inspect: Copyable Identity Handoffs",
+      "panel_title": "Copy Identity Values",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -852,7 +852,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9404,
-      "panel_title": "Inspect: Overview Identity Anchors",
+      "panel_title": "Review Run Identity",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -871,7 +871,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9410,
-      "panel_title": "ID Empty State",
+      "panel_title": "Identity Data Unavailable",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -888,7 +888,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9411,
-      "panel_title": "Processed Records Empty State",
+      "panel_title": "Record Counts Unavailable",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "fallback-only",
@@ -905,7 +905,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9405,
-      "panel_title": "Inspect: Identity Gaps",
+      "panel_title": "Review Identity Gaps",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -924,7 +924,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9406,
-      "panel_title": "Inspect: Checkpoint Anchor Compare",
+      "panel_title": "Compare Checkpoint Anchors",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -943,7 +943,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9408,
-      "panel_title": "Inspect: P1 Replay and Evidence Anchors",
+      "panel_title": "Review Required Replay Anchors",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -962,7 +962,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 9409,
-      "panel_title": "Inspect: P2 Forensic Anchors",
+      "panel_title": "Review Additional Forensic Anchors",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -981,7 +981,7 @@
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "panel_id": 139,
-      "panel_title": "Review: Remaining Replay-Safety Signals",
+      "panel_title": "Review Uncovered Replay Signals",
       "route": "data-trust-recovery",
       "component": "Context Bar",
       "disposition": "route-primary",
