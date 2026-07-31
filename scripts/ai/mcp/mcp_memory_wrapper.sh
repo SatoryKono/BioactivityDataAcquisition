@@ -41,21 +41,11 @@ esac
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 mkdir -p "${NPM_CONFIG_CACHE}"
 if [[ -z "${MEMORY_FILE_PATH:-}" ]]; then
-  memory_branch="$(git -C "${REPO_ROOT}" branch --show-current 2>/dev/null || true)"
-  memory_branch="${memory_branch:-detached}"
-  memory_branch="${memory_branch//[^A-Za-z0-9_.-]/-}"
-  memory_commit="$(git -C "${REPO_ROOT}" rev-parse --verify HEAD 2>/dev/null || printf 'unknown')"
-  memory_worktree_id="$(
-    printf '%s' "${REPO_ROOT}" | sha256sum | cut -c1-16
+  export PYTHONPATH="${REPO_ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}"
+  export MEMORY_FILE_PATH="$(
+    python -m memory.mcp_scope \
+      --repo-root "${REPO_ROOT}" \
+      --seed "${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
   )"
-  memory_dir="${REPO_ROOT}/.cache/mcp-memory/${memory_worktree_id}/${memory_branch}/${memory_commit}"
-  mkdir -p "${memory_dir}"
-  export MEMORY_FILE_PATH="${memory_dir}/memory.json"
-  if [[ ! -e "${MEMORY_FILE_PATH}" ]]; then
-    memory_seed="${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
-    memory_tmp="${MEMORY_FILE_PATH}.tmp.$$"
-    cp "${memory_seed}" "${memory_tmp}"
-    mv "${memory_tmp}" "${MEMORY_FILE_PATH}"
-  fi
 fi
 exec npx -y "@modelcontextprotocol/server-memory@2026.1.26" "$@"
