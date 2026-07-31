@@ -207,7 +207,7 @@
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
-      "snapshot_date": "2026-07-31"
+      "snapshot_date": "2026-08-01"
     },
     "contract_registry_diagnostics": {
       "path": "reports/quality/contract-registry-diagnostics.json",
@@ -221,7 +221,7 @@
     },
     "dead_code_inventory": {
       "path": "reports/quality/dead-code-inventory.json",
-      "snapshot_date": "2026-07-31"
+      "snapshot_date": "2026-08-01"
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",

@@ -2,23 +2,23 @@
 
 Lifecycle status: current
 
-Audit date: 2026-07-31
+Audit date: 2026-08-01
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `079af7618d51534b9cf84bc2f6e9ada96c35f2a7`
+Audited commit SHA: `c0ab2d041140b36583678c011a585e06578cd6da`
 
-Evidence surface SHA-256: `c8a7192fbdc1692ef78befcf885260fccf365ac0c5442e2cf0397e3d29f4500c`
+Evidence surface SHA-256: `72dff5a6ca212cec5c14742c8aca30d6d0758dc27c22390af78396833e0a91a6`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
-  "audited_commit_sha": "079af7618d51534b9cf84bc2f6e9ada96c35f2a7",
-  "evidence_surface_sha256": "c8a7192fbdc1692ef78befcf885260fccf365ac0c5442e2cf0397e3d29f4500c",
+  "audited_commit_sha": "c0ab2d041140b36583678c011a585e06578cd6da",
+  "evidence_surface_sha256": "72dff5a6ca212cec5c14742c8aca30d6d0758dc27c22390af78396833e0a91a6",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -44,8 +44,9 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: #7038 regenerate the compatibility/debt census from the
-#4862/#7362/#7257/#6239 closeout snapshot. No debt budget growth.
+Refresh reason: #7038 refresh the debt audit, compatibility census, dead-code
+inventory, and registry pin from one consistent evidence snapshot. No debt
+budget growth.
 
 ## Executive summary
 
@@ -76,6 +77,8 @@ Refresh reason: #7038 regenerate the compatibility/debt census from the
 ## Reproducibility
 
 ```bash
+python -m scripts.engineering.qa report-compatibility-importer-census --snapshot-date 2026-08-01
+python -m scripts.engineering.qa report-dead-code-inventory --snapshot-date 2026-08-01
 python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml
 python scripts/engineering/qa/report_architecture_quality_scorecard.py
 python -m scripts.engineering.qa report-contract-coverage-matrix
