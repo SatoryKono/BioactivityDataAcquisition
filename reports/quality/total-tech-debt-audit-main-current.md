@@ -2,23 +2,23 @@
 
 Lifecycle status: current
 
-Audit date: 2026-07-29
+Audit date: 2026-07-31
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `947902209629f5666170cd49fbf776f4bcb5f3d2`
+Audited commit SHA: `5eb10bc8852b685cf955149de153c24766886d9e`
 
-Evidence surface SHA-256: `8d57e76e427ed459b37a6c94130b1d746084aed41fddc8ba22765f263a959998`
+Evidence surface SHA-256: `d6c42c7f9ad7396cac3cdbd744f5c239182622a56a97eebe7c8c18baf18b3743`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
-  "audited_commit_sha": "947902209629f5666170cd49fbf776f4bcb5f3d2",
-  "evidence_surface_sha256": "8d57e76e427ed459b37a6c94130b1d746084aed41fddc8ba22765f263a959998",
+  "audited_commit_sha": "5eb10bc8852b685cf955149de153c24766886d9e",
+  "evidence_surface_sha256": "d6c42c7f9ad7396cac3cdbd744f5c239182622a56a97eebe7c8c18baf18b3743",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
