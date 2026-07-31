@@ -110,6 +110,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the internal passport projection helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
     },
+    "scripts/docs/passports/rename_underscore_to_hyphen.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation behind the canonical `python -m scripts.docs rename-passport-paths` command; keep contributor execution routed through the docs command surface."
+    },
     "scripts/docs/passports/source_facts.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
