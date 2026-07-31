@@ -178,6 +178,9 @@ def pytest_collection_modifyitems(
     pilot_soak_enabled = bool(config.getoption("--pilot-soak")) or _is_truthy_env_var(
         "BIOETL_PILOT_SOAK_TESTS"
     )
+    network_opt_in = bool(config.getoption("--network")) or _is_truthy_env_var(
+        "BIOETL_NETWORK_TESTS"
+    )
 
     for item in items:
         if not _is_contract_test_path(str(item.fspath)):
@@ -188,6 +191,17 @@ def pytest_collection_modifyitems(
         requires_network = "no_api" not in item.keywords
         if requires_network:
             item.add_marker(pytest.mark.network)
+            if not network_opt_in:
+                # Collection-time skip prevents module-scoped async live fixtures
+                # from starting before the function-scoped network guard runs.
+                item.add_marker(
+                    pytest.mark.skip(
+                        reason=(
+                            "Network tests disabled. Enable --network or "
+                            "BIOETL_NETWORK_TESTS=true."
+                        )
+                    )
+                )
 
         if "pilot_soak" in item.keywords and not pilot_soak_enabled:
             item.add_marker(pytest.mark.pilot_soak)
