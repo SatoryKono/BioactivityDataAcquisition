@@ -75,17 +75,8 @@ runtime change.
 | Skill                          | Path                                         | Purpose                                           |
 | ------------------------------ | -------------------------------------------- | ------------------------------------------------- |
 | `capability-discovery`         | `.codex/skills/capability-discovery`         | Discover available agents/skills/quality commands |
-| `collecting-evidence`          | `.codex/skills/collecting-evidence`          | Build traceable evidence objects                  |
-| `deep-research`                | `.codex/skills/deep-research`                | Structured deep research workflow                 |
-| `hierarchical-evidence-orchestration` | `.codex/skills/hierarchical-evidence-orchestration` | Coordinate hierarchical evidence collection |
-| `synthesizing-pillars`         | `.codex/skills/synthesizing-pillars`         | Convert evidence into synthesis insights          |
-| `making-decisions`             | `.codex/skills/making-decisions`             | Turn synthesis into explicit decisions            |
-| `generating-constrained-specs` | `.codex/skills/generating-constrained-specs` | Generate PRD/architecture specs from decisions    |
-| `initializing-ledger`          | `.codex/skills/initializing-ledger`          | Initialize decision/evidence workspace            |
 | `repo-config`                  | `.codex/skills/repo-config`                  | Resolve dynamic repository configuration          |
-| `suggest-users`                | `.codex/skills/suggest-users`                | Suggest reviewers/assignees from repo context     |
-| `create-pr`                    | `.codex/skills/create-pr`                    | PR creation workflow guidance                     |
-| `nci-analysis`                 | `.codex/skills/nci-analysis`                 | Manipulation/disinformation pattern analysis      |
+| `research-workflow`            | `.codex/skills/research-workflow`            | Unified research workflow: evidence → synthesis → decisions → specs |
 
 ### Build and Design Utilities
 
@@ -105,18 +96,13 @@ runtime change.
 - [agent-orchestration](agent-orchestration/SKILL.md)
 - [hierarchical-evidence-orchestration](hierarchical-evidence-orchestration/SKILL.md)
 - [capability-discovery](capability-discovery/SKILL.md)
-- [collecting-evidence](collecting-evidence/SKILL.md)
-- [create-pr](create-pr/SKILL.md)
+- [research-workflow](research-workflow/SKILL.md)
 - [deep-research](deep-research/SKILL.md)
 - [hierarchical-evidence-orchestration](hierarchical-evidence-orchestration/SKILL.md)
 - [documentation-audit](documentation-audit/SKILL.md)
 - [documentation-cascade-audit](documentation-cascade-audit/SKILL.md)
 - [grafana-dashboard-render](grafana-dashboard-render/SKILL.md)
 - [grafana-dashboard-extension](grafana-dashboard-extension/SKILL.md)
-- [generating-constrained-specs](generating-constrained-specs/SKILL.md)
-- [initializing-ledger](initializing-ledger/SKILL.md)
-- [making-decisions](making-decisions/SKILL.md)
-- [nci-analysis](nci-analysis/SKILL.md)
 - [new-pipeline](new-pipeline/SKILL.md)
 - [py-audit-bot](py-audit-bot/SKILL.md)
 - [py-architecture-debt-bot](py-architecture-debt-bot/SKILL.md)
@@ -134,8 +120,6 @@ runtime change.
 - [py-test-bot](py-test-bot/SKILL.md)
 - [py-test-swarm](py-test-swarm/SKILL.md)
 - [repo-config](repo-config/SKILL.md)
-- [suggest-users](suggest-users/SKILL.md)
-- [synthesizing-pillars](synthesizing-pillars/SKILL.md)
 - [technical-designer-mermaid](technical-designer-mermaid/SKILL.md)
 - [vcr-record](vcr-record/SKILL.md)
 - [verify-architecture](verify-architecture/SKILL.md)

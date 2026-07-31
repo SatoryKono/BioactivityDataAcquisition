@@ -274,7 +274,12 @@ def build_rag_manifests(
             for source in corpus_sources
         ]
     )
-    current_source_hash = calculate_source_surface_sha256(root, source_paths)
+    try:
+        current_source_hash = calculate_source_surface_sha256(root, source_paths)
+    except FileNotFoundError as exc:
+        raise _SourceSurfaceChangedError(
+            "RAG sources changed while the manifest snapshot was being built"
+        ) from exc
     if captured_source_hash != current_source_hash:
         raise _SourceSurfaceChangedError(
             "RAG sources changed while the manifest snapshot was being built"

@@ -12,6 +12,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
+import psutil
+
 
 class StorageConflictError(RuntimeError):
     """Raised when an optimistic write or lock acquisition conflicts."""
@@ -33,10 +35,10 @@ def _lock_owner_is_alive(payload: dict[str, Any]) -> bool:
     if not isinstance(pid, int) or pid < 1:
         return False
     try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
-        return False
-    except PermissionError:
+        if not psutil.pid_exists(pid):
+            return False
+    except (OSError, psutil.Error):
+        # An inconclusive probe must not allow a live owner's lock to be stolen.
         return True
     expected_start = payload.get("process_start")
     actual_start = _process_start_token(pid)
@@ -102,6 +104,14 @@ def exclusive_lock(
                     f"timed out acquiring lock: {target}"
                 ) from exc
             time.sleep(poll_seconds)
+        except PermissionError as exc:
+            # On Windows, a contender reading the existing sidecar can make
+            # O_EXCL surface access denied instead of file-exists.
+            if time.monotonic() >= deadline:
+                raise StorageConflictError(
+                    f"timed out acquiring lock: {target}"
+                ) from exc
+            time.sleep(poll_seconds)
     try:
         payload = {
             "pid": os.getpid(),
@@ -116,7 +126,17 @@ def exclusive_lock(
         yield
     finally:
         os.close(lock_fd)
-        lock_path.unlink(missing_ok=True)
+        release_deadline = time.monotonic() + 1.0
+        while True:
+            try:
+                lock_path.unlink(missing_ok=True)
+                break
+            except PermissionError:
+                # Windows denies unlink while a contender briefly has the
+                # sidecar open to inspect owner metadata.
+                if time.monotonic() >= release_deadline:
+                    raise
+                time.sleep(poll_seconds)
 
 
 def atomic_write_bytes(
