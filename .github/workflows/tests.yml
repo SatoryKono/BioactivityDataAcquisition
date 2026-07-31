@@ -454,6 +454,9 @@ jobs:
             -   name: Pre-merge naming/package consistency gate
                 run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming-pkg --check
 
+            -   name: Pre-merge naming convention audit
+                run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming --check
+
             -   name: DQ consistency validation (fail-fast)
                 run: uv run --frozen --no-build python -m scripts.engineering.qa validate-dq-consistency
 
