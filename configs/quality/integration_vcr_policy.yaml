@@ -136,6 +136,7 @@ tracked_suite_inventory:
     - tests/integration/determinism/test_tracked_fixture_idempotency_gate.py
     - tests/integration/grafana/test_workflow_dashboard_json_valid.py
     - tests/integration/memory/test_decision_replay.py
+    - tests/integration/memory/test_mcp_server_isolation.py
     - tests/integration/memory/test_timeline_ingest.py
     - tests/integration/memory/test_workflow_tooling.py
     - tests/integration/normalization/test_chembl_edge_observed_values.py
