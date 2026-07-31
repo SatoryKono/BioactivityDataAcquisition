@@ -253,13 +253,13 @@
       "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "budget_violations",
       "name": "test_governance_budget_violations",
       "remediation": "Fix test governance budget violations before closeout.",
       "source_artifact": "reports/quality/test-governance-current.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -436,20 +436,19 @@
     "remote_main_baseline": true
   },
   "status_counts": {
-    "fail": 2,
-    "pass": 43,
+    "fail": 1,
+    "pass": 44,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 9.41,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 2,
+    "fail_count": 1,
     "failing_gates": [
-      "test_governance_budget_violations",
       "generated_artifact_drift"
     ],
     "gate_count": 45,
-    "pass_count": 43,
+    "pass_count": 44,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
