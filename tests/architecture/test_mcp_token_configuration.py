@@ -132,9 +132,15 @@ def test_deepwiki_uses_env_headers_without_embedding_secrets() -> None:
     setup_mcp = _read("scripts/ai/codex/setup_mcp.py")
 
     assert 'DEEPWIKI_API_KEY_ENV_VAR = "DEEPWIKI_API_KEY"' in setup_mcp
-    assert 'DEEPWIKI_ORGANISATION_ID_ENV_VAR = "DEEPWIKI_ORGANISATION_ID"' in setup_mcp
+    assert (
+        'DEEPWIKI_ORGANISATION_ID_ENV_VAR = "DEEPWIKI_ORGANISATION_ID"'
+        in setup_mcp
+    )
     assert '"x-deepwiki-api-key": DEEPWIKI_API_KEY_ENV_VAR' in setup_mcp
-    assert '"x-deepwiki-organisation-id": DEEPWIKI_ORGANISATION_ID_ENV_VAR' in setup_mcp
+    assert (
+        '"x-deepwiki-organisation-id": DEEPWIKI_ORGANISATION_ID_ENV_VAR'
+        in setup_mcp
+    )
 
 
 def test_env_example_documents_mcp_token_sources_without_real_tokens() -> None:
