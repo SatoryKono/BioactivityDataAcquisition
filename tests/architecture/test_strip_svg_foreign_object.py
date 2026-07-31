@@ -15,6 +15,7 @@ from __future__ import annotations
 import pytest
 
 import importlib.util
+import subprocess
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -120,3 +121,29 @@ def test_strip_foreign_objects_accepts_mermaid_html_entities(tmp_path: Path) -> 
     assert "foreignObject" not in payload
     assert "Activity ID" in payload
     ET.fromstring(payload)
+
+
+def test_direct_script_execution_can_write_the_result(tmp_path: Path) -> None:
+    """The renderer invokes the postprocessor by its canonical file path."""
+    repo_root = Path(__file__).resolve().parents[2]
+    script_path = repo_root / "scripts" / "diagrams" / "strip_svg_foreign_object.py"
+    svg_path = tmp_path / "direct-execution.svg"
+    svg_path.write_text(
+        """
+        <svg xmlns="http://www.w3.org/2000/svg">
+          <text class="fo-fallback">Activity ID</text>
+          <foreignObject><div>Activity&nbsp;ID</div></foreignObject>
+        </svg>
+        """.strip(),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [sys.executable, str(script_path), "--fix", "-f", str(svg_path)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "foreignObject" not in svg_path.read_text(encoding="utf-8")
