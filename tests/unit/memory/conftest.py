@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 import tempfile
 from collections.abc import Generator
@@ -9,6 +10,13 @@ import pytest
 
 
 def _local_temp_root() -> Path:
+    if os.name == "nt":
+        local_app_data = os.environ.get("LOCALAPPDATA")
+        if local_app_data:
+            local_temp = Path(local_app_data) / "Temp"
+            if local_temp.is_dir():
+                return local_temp
+        return Path(tempfile.gettempdir())
     local_tmp = Path("/tmp")
     if local_tmp.exists():
         return local_tmp

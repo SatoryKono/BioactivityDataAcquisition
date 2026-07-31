@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -38,6 +39,35 @@ def _hidden_windows_subprocess_kwargs() -> dict[str, int]:
     return {"creationflags": create_no_window} if create_no_window else {}
 
 
+def _run_git_grep(command: list[str]) -> subprocess.CompletedProcess[str]:
+    """Run Git grep without PIPE reader threads on Windows."""
+    with tempfile.TemporaryDirectory(prefix="mounted_worktree_git_grep_") as temp_dir:
+        stdout_path = Path(temp_dir) / "stdout.txt"
+        stderr_path = Path(temp_dir) / "stderr.txt"
+        with (
+            stdout_path.open("w", encoding="utf-8", errors="replace") as stdout,
+            stderr_path.open("w", encoding="utf-8", errors="replace") as stderr,
+        ):
+            result = subprocess.run(
+                command,
+                cwd=ROOT,
+                env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
+                stdout=stdout,
+                stderr=stderr,
+                check=False,
+                encoding="utf-8",
+                errors="replace",
+                timeout=_GIT_GREP_TIMEOUT_SECONDS,
+                **_hidden_windows_subprocess_kwargs(),
+            )
+        return subprocess.CompletedProcess(
+            args=result.args,
+            returncode=result.returncode,
+            stdout=stdout_path.read_text(encoding="utf-8", errors="replace"),
+            stderr=stderr_path.read_text(encoding="utf-8", errors="replace"),
+        )
+
+
 def test_tests_do_not_reintroduce_hardcoded_network_drive_skips() -> None:
     offenders: list[str] = []
     this_file = Path(__file__).resolve()
@@ -49,9 +79,10 @@ def test_tests_do_not_reintroduce_hardcoded_network_drive_skips() -> None:
     # Search index blobs in one process so cloud-backed worktree files are not
     # opened and hydrated one by one on Windows.
     try:
-        result = subprocess.run(
+        result = _run_git_grep(
             [
                 "git",
+                "--no-optional-locks",
                 "grep",
                 "--cached",
                 "-n",
@@ -63,14 +94,7 @@ def test_tests_do_not_reintroduce_hardcoded_network_drive_skips() -> None:
                 ),
                 "--",
                 ":(glob)tests/**/test_*.py",
-            ],
-            cwd=ROOT,
-            capture_output=True,
-            check=False,
-            encoding="utf-8",
-            errors="replace",
-            timeout=_GIT_GREP_TIMEOUT_SECONDS,
-            **_hidden_windows_subprocess_kwargs(),
+            ]
         )
     except subprocess.TimeoutExpired as exc:
         pytest.fail(

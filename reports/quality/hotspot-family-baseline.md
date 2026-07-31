@@ -12,4 +12,4 @@
 | `composition_bootstrap_runtime` | 51 | 6298 | 0 | 0.325 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 | `composition_factories_pipeline` | 32 | 3942 | 1 | 0.330 | 0 | 2 | `bioetl.composition.factories.pipeline.transformer_builder` | `files_ge_250_loc=2, max_internal_fan_in=3` | `-` | `-` |
 | `application_services_control_plane` | 140 | 15957 | 0 | 0.421 | 0 | 3 | `bioetl.application.services.control_plane.run_manifest_reproducibility_scoring_support` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `at_budget:max_internal_fan_in=3/3` |
-| `composition_runtime_builders` | 56 | 6990 | 0 | 0.359 | 0 | 3 | `bioetl.composition.runtime_builders.run_manifest_support` | `files_ge_250_loc=0, max_internal_fan_in=5` | `-` | `-` |
+| `composition_runtime_builders` | 56 | 6989 | 0 | 0.359 | 0 | 3 | `bioetl.composition.runtime_builders.run_manifest_support` | `files_ge_250_loc=0, max_internal_fan_in=5` | `-` | `-` |

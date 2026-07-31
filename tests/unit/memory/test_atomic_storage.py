@@ -32,6 +32,24 @@ def test_atomic_write_text_replaces_complete_content(tmp_path: Path) -> None:
     assert not list(tmp_path.glob("*.lock"))
 
 
+def test_atomic_write_only_fsyncs_durable_payload(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fsync_calls: list[int] = []
+    original_fsync = os.fsync
+
+    def tracking_fsync(fd: int) -> None:
+        fsync_calls.append(fd)
+        original_fsync(fd)
+
+    monkeypatch.setattr("memory.storage.os.fsync", tracking_fsync)
+
+    atomic_write_text(tmp_path / "memory.txt", "complete\n")
+
+    assert len(fsync_calls) == 1
+
+
 def test_atomic_write_rejects_stale_expected_digest(tmp_path: Path) -> None:
     target = tmp_path / "memory.json"
     original_digest = atomic_write_json(target, {"version": 1})

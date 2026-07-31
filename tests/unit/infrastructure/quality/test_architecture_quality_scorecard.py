@@ -43,8 +43,16 @@ ROOT = Path(__file__).resolve().parents[4]
 pytestmark = pytest.mark.unit
 
 
-def test_architecture_quality_scorecard_has_stable_weighted_shape() -> None:
-    payload = build_architecture_quality_scorecard(repo_root=ROOT)
+@pytest.fixture(scope="module")
+def architecture_quality_scorecard_payload() -> dict[str, object]:
+    """Build the live scorecard once for assertions sharing the same snapshot."""
+    return build_architecture_quality_scorecard(repo_root=ROOT)
+
+
+def test_architecture_quality_scorecard_has_stable_weighted_shape(
+    architecture_quality_scorecard_payload: dict[str, object],
+) -> None:
+    payload = architecture_quality_scorecard_payload
 
     assert payload["schema_version"] == 1
     assert payload["weights_sum"] == 1.0
@@ -57,8 +65,10 @@ def test_architecture_quality_scorecard_has_stable_weighted_shape() -> None:
     assert all(0.0 <= category["score"] <= 10.0 for category in payload["categories"])
 
 
-def test_architecture_quality_scorecard_carries_live_evidence_metrics() -> None:
-    payload = build_architecture_quality_scorecard(repo_root=ROOT)
+def test_architecture_quality_scorecard_carries_live_evidence_metrics(
+    architecture_quality_scorecard_payload: dict[str, object],
+) -> None:
+    payload = architecture_quality_scorecard_payload
     metrics = payload["metrics"]
 
     assert metrics["layer_violations"] == 0

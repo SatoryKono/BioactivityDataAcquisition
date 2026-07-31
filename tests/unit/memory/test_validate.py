@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 
-import shutil
 from pathlib import Path
 from typing import Any
 
@@ -34,7 +33,12 @@ pytestmark = pytest.mark.unit
 def _copy_minimal_memory_scaffold(memory_root: Path) -> None:
     """Copy only contract resources needed by validator unit tests."""
     for directory_name in ("policy", "catalog", "schemas"):
-        shutil.copytree(MEMORY_ROOT / directory_name, memory_root / directory_name)
+        source_dir = MEMORY_ROOT / directory_name
+        target_dir = memory_root / directory_name
+        target_dir.mkdir(parents=True)
+        for source_path in sorted(source_dir.iterdir()):
+            if source_path.is_file():
+                (target_dir / source_path.name).write_bytes(source_path.read_bytes())
     for relative_dir in (
         "curated/decisions",
         "curated/incidents",

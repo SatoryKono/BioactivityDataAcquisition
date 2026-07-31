@@ -210,6 +210,11 @@ make run-local     # Сэмпловый pipeline-run (chembl_activity, limit=10)
 
 Для mixed Windows + WSL checkout предпочитай OS-specific wrappers:
 
+> **Project venv preference:** все Python-команды в этом checkout запускай
+> через соответствующее проектное окружение: `.venv/bin/python` в WSL и
+> `.venv-win/Scripts/python.exe` (или Windows wrapper, который его выбирает)
+> в Windows. Не полагайся на bare `python` из `PATH`.
+
 ```powershell
 .\scripts\engineering\dev\setup_env_windows.ps1
 .\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 1 --lf

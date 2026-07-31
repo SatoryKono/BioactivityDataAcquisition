@@ -122,7 +122,11 @@ def exclusive_lock(
             lock_fd,
             (json.dumps(payload, sort_keys=True) + "\n").encode("utf-8"),
         )
-        os.fsync(lock_fd)
+        # O_CREAT | O_EXCL above provides the mutual-exclusion guarantee. The
+        # sidecar is transient coordination metadata, so forcing it to durable
+        # storage adds no correctness guarantee and can block indefinitely on
+        # Windows cloud-sync/filter drivers. Durable payload writes below keep
+        # their fsync before os.replace().
         yield
     finally:
         os.close(lock_fd)

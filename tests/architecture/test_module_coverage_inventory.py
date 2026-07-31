@@ -25,6 +25,7 @@ from scripts.engineering.qa.report_module_coverage_inventory import (
     compute_source_tree_sha256,
     main as module_coverage_inventory_main,
 )
+from tests.architecture import _module_coverage_inventory_support as inventory_support
 from tests.architecture._module_coverage_inventory_support import (
     skip_if_module_coverage_inventory_is_dirty,
 )
@@ -38,6 +39,53 @@ GATES_PATH = ROOT / "configs" / "quality" / "module_coverage_gates.yaml"
 COVERAGE_TAIL_CLOSEOUT_PATH = (
     ROOT / "reports" / "quality" / "issue-5376-coverage-tail-closeout.json"
 )
+
+
+def test_module_coverage_git_guard_avoids_windows_pipe_reader_threads(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(
+        command: list[str], **kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        calls.append(command)
+        assert "capture_output" not in kwargs
+        assert kwargs["stdout"] != subprocess.PIPE
+        assert kwargs["stderr"] == subprocess.DEVNULL
+        assert kwargs["timeout"] == inventory_support._GIT_STATUS_TIMEOUT_SECONDS
+        assert kwargs["env"]["GIT_OPTIONAL_LOCKS"] == "0"
+        output = kwargs["stdout"]
+        assert hasattr(output, "write")
+        output.write("")
+        return subprocess.CompletedProcess(command, 0)
+
+    monkeypatch.setattr(inventory_support.subprocess, "run", fake_run)
+    inventory_support.skip_if_module_coverage_inventory_is_dirty(
+        root=tmp_path,
+        inventory_path=tmp_path / "module-coverage-inventory.json",
+    )
+
+    assert calls == [
+        [
+            "git",
+            "--no-optional-locks",
+            "diff",
+            "--quiet",
+            "--",
+            "module-coverage-inventory.json",
+        ],
+        [
+            "git",
+            "--no-optional-locks",
+            "diff",
+            "--quiet",
+            "--cached",
+            "--",
+            "module-coverage-inventory.json",
+        ],
+    ]
 
 
 def _expected_hotspot_threshold_status(family_row: dict[str, object]) -> str:

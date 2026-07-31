@@ -45,7 +45,7 @@ _DEPRECATED_COMPOSITE_SYMBOL_BYTES = tuple(
 )
 _SCAN_CHUNK_SIZE = 64 * 1024
 _SCAN_OVERLAP = max(len(symbol) for symbol in _DEPRECATED_COMPOSITE_SYMBOL_BYTES) - 1
-_SYMBOL_SCAN_TIMEOUT_SECONDS = 300.0
+_SYMBOL_SCAN_TIMEOUT_SECONDS = 20.0
 
 
 _TEXT_SUFFIXES = frozenset({".py", ".mmd", ".mermaid", ".md", ".json", ".svg"})
@@ -101,13 +101,14 @@ def _symbol_hits(root: Path, allowlist: frozenset[Path]) -> list[str]:
 
 @cache
 def _doc_symbol_hits() -> list[str]:
-    grep_hits = _repo_symbol_hits_with_git_grep(DOC_ROOTS, skip_legacy=True)
-    if grep_hits is not None:
-        return grep_hits
-
-    rg_hits = _repo_symbol_hits_with_ripgrep(DOC_ROOTS, skip_legacy=True)
-    if rg_hits is not None:
-        return rg_hits
+    scanners = {
+        "git": _repo_symbol_hits_with_git_grep,
+        "rg": _repo_symbol_hits_with_ripgrep,
+    }
+    for scanner_name in _doc_symbol_scan_order():
+        hits = scanners[scanner_name](DOC_ROOTS, skip_legacy=True)
+        if hits is not None:
+            return hits
 
     if os.name == "nt":
         pytest.skip(
@@ -128,6 +129,13 @@ def _doc_symbol_hits() -> list[str]:
                 if _file_contains_symbol(doc_file, symbol_bytes):
                     hits.append(f"{doc_file.relative_to(ROOT)} -> {symbol}")
     return hits
+
+
+def _doc_symbol_scan_order(*, os_name: str = os.name) -> tuple[str, str]:
+    """Return bounded scanner preference for the current filesystem platform."""
+    if os_name == "nt":
+        return ("rg", "git")
+    return ("git", "rg")
 
 
 def _repo_symbol_hits_with_git_grep(
@@ -392,6 +400,17 @@ def test_symbol_scan_subprocess_kwargs_hide_windows_console() -> None:
     assert kwargs["startupinfo"] is startupinfo
     assert startupinfo.dwFlags == 0x00000001
     assert startupinfo.wShowWindow == 0
+
+
+@pytest.mark.architecture
+def test_doc_symbol_scan_prefers_ripgrep_on_windows() -> None:
+    assert _doc_symbol_scan_order(os_name="nt") == ("rg", "git")
+    assert _doc_symbol_scan_order(os_name="posix") == ("git", "rg")
+
+
+@pytest.mark.architecture
+def test_symbol_scan_timeout_fits_inside_default_pytest_budget() -> None:
+    assert 0 < _SYMBOL_SCAN_TIMEOUT_SECONDS < 60
 
 
 @pytest.mark.architecture
