@@ -36,16 +36,37 @@ def build_plan(root: Path) -> tuple[RenamePlan, ...]:
     return tuple(plans)
 
 
-def _tracked_files_with_references(
+def _files_with_references(
     root: Path,
     pairs: tuple[tuple[str, str], ...],
 ) -> tuple[Path, ...]:
     if not pairs:
         return ()
-    command = ["git", "grep", "-Ilz"]
+    command = [
+        "rg",
+        "--files-with-matches",
+        "--null",
+        "--fixed-strings",
+        "--hidden",
+        "--glob",
+        "!.git/**",
+        "--glob",
+        "!docs/reports/generated/documentation-cleanup-inventory.*",
+    ]
     for source, _ in pairs:
         command.extend(("-e", source))
-    command.append("--")
+    candidates = (
+        "docs",
+        ".github",
+        "scripts",
+        "tests",
+        "src",
+        "configs",
+        "mkdocs.yml",
+        "README.md",
+        "CHANGELOG.md",
+    )
+    command.extend(item for item in candidates if (root / item).exists())
     result = subprocess.run(
         command,
         cwd=root,
@@ -65,7 +86,10 @@ def _tracked_files_with_references(
     )
 
 
-def _replacement_pairs(root: Path, plans: tuple[RenamePlan, ...]) -> tuple[tuple[str, str], ...]:
+def _replacement_pairs(
+    root: Path,
+    plans: tuple[RenamePlan, ...],
+) -> tuple[tuple[str, str], ...]:
     pairs: set[tuple[str, str]] = set()
     for plan in plans:
         source = plan.source.relative_to(root).as_posix()
@@ -77,6 +101,20 @@ def _replacement_pairs(root: Path, plans: tuple[RenamePlan, ...]) -> tuple[tuple
                 target.removeprefix(f"{PASSPORT_ROOT.as_posix()}/"),
             )
         )
+    for group in PASSPORT_GROUPS:
+        directory = root / PASSPORT_ROOT / group
+        for target_path in sorted(directory.glob("*-*.md")):
+            target = target_path.relative_to(root).as_posix()
+            source = target_path.with_name(
+                target_path.name.replace("-", "_")
+            ).relative_to(root).as_posix()
+            pairs.add((source, target))
+            pairs.add(
+                (
+                    source.removeprefix(f"{PASSPORT_ROOT.as_posix()}/"),
+                    target.removeprefix(f"{PASSPORT_ROOT.as_posix()}/"),
+                )
+            )
     return tuple(sorted(pairs, key=lambda item: (-len(item[0]), item[0])))
 
 
@@ -87,7 +125,7 @@ def referenced_files(
     """Return tracked UTF-8 files containing paths that the migration updates."""
     pairs = _replacement_pairs(root, plans)
     matches: list[Path] = []
-    for path in _tracked_files_with_references(root, pairs):
+    for path in _files_with_references(root, pairs):
         if not path.is_file() or path in {plan.source for plan in plans}:
             continue
         text = path.read_text(encoding="utf-8")
@@ -140,7 +178,7 @@ def main(argv: list[str] | None = None) -> int:
     root = args.root.resolve()
     plans = build_plan(root)
     references = referenced_files(root, plans)
-    if not plans:
+    if not plans and not references:
         print("Passport Markdown paths already use kebab-case.")
         return 0
     for plan in plans:
@@ -150,7 +188,10 @@ def main(argv: list[str] | None = None) -> int:
     for path in references:
         print(f"update-reference: {path.relative_to(root).as_posix()}")
     if args.check:
-        print(f"Found {len(plans)} non-canonical passport path(s).")
+        print(
+            f"Found {len(plans)} non-canonical passport path(s) and "
+            f"{len(references)} file(s) with stale references."
+        )
         return 1
     if not args.apply:
         print("Dry run only; pass --apply to update the repository.")
