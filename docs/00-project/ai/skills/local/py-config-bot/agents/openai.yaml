@@ -1,0 +1,4 @@
+interface:
+  display_name: "Py Config Bot"
+  short_description: "Run BioETL config profile"
+  default_prompt: "Use $py-config-bot to validate or remediate BioETL configs, schemas, and generated config artifacts."
