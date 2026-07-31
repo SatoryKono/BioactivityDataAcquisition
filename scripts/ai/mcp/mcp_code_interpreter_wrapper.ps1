@@ -46,11 +46,15 @@ if (Test-BioetlUvxAvailable) {
     New-Item -ItemType Directory -Force -Path $env:DENO_DIR | Out-Null
 
     if (-not (Get-Command deno -ErrorAction SilentlyContinue)) {
-        Write-Error @"
-mcp-code-interpreter requires Deno for the mcp-run-python fallback.
-Install deno into %USERPROFILE%\.deno\bin (e.g. download
-deno-x86_64-pc-windows-msvc.zip with curl --ssl-no-revoke).
-"@
+        [Console]::Error.WriteLine(
+            "mcp-code-interpreter requires Deno for the mcp-run-python fallback."
+        )
+        [Console]::Error.WriteLine(
+            "Install deno into %USERPROFILE%\.deno\bin (e.g. download"
+        )
+        [Console]::Error.WriteLine(
+            "deno-x86_64-pc-windows-msvc.zip with curl --ssl-no-revoke)."
+        )
         exit 1
     }
 
@@ -63,9 +67,11 @@ deno-x86_64-pc-windows-msvc.zip with curl --ssl-no-revoke).
     exit $LASTEXITCODE
 }
 
-Write-Error @"
-mcp-code-interpreter could not start.
-Install uv (https://docs.astral.sh/uv/) so uvx is on PATH, then the wrapper
-will run: uvx --from mcp-run-python==0.0.22 mcp-run-python stdio
-"@
+[Console]::Error.WriteLine("mcp-code-interpreter could not start.")
+[Console]::Error.WriteLine(
+    "Install uv (https://docs.astral.sh/uv/) so uvx is on PATH, then the wrapper"
+)
+[Console]::Error.WriteLine(
+    "will run: uvx --from mcp-run-python==0.0.22 mcp-run-python stdio"
+)
 exit 1
