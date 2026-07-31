@@ -104,6 +104,14 @@ def exclusive_lock(
                     f"timed out acquiring lock: {target}"
                 ) from exc
             time.sleep(poll_seconds)
+        except PermissionError as exc:
+            # On Windows, a contender reading the existing sidecar can make
+            # O_EXCL surface access denied instead of file-exists.
+            if time.monotonic() >= deadline:
+                raise StorageConflictError(
+                    f"timed out acquiring lock: {target}"
+                ) from exc
+            time.sleep(poll_seconds)
     try:
         payload = {
             "pid": os.getpid(),
@@ -118,7 +126,17 @@ def exclusive_lock(
         yield
     finally:
         os.close(lock_fd)
-        lock_path.unlink(missing_ok=True)
+        release_deadline = time.monotonic() + 1.0
+        while True:
+            try:
+                lock_path.unlink(missing_ok=True)
+                break
+            except PermissionError:
+                # Windows denies unlink while a contender briefly has the
+                # sidecar open to inspect owner metadata.
+                if time.monotonic() >= release_deadline:
+                    raise
+                time.sleep(poll_seconds)
 
 
 def atomic_write_bytes(
