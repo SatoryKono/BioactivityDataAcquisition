@@ -60,6 +60,13 @@ def _publish_locked_csv_backup(
     _move_csv_payload(source_path, backup_path)
 
 
+def _csv_temp_directory(target_dir: Path) -> Path | None:
+    """Choose a staging directory that cannot hang on Windows cloud drives."""
+    if os.name == "nt":
+        return None
+    return target_dir
+
+
 def atomic_csv_write(
     data: pa.Table,
     target_path: Path,
@@ -71,7 +78,7 @@ def atomic_csv_write(
     fd, temp_path_str = tempfile.mkstemp(
         suffix=".csv.tmp",
         prefix=target_path.stem + "_",
-        dir=target_dir,
+        dir=_csv_temp_directory(target_dir),
     )
     temp_path = Path(temp_path_str)
     try:
@@ -106,7 +113,7 @@ def append_to_csv(
     fd, temp_path_str = tempfile.mkstemp(
         suffix=".csv.tmp",
         prefix=csv_path.stem + "_append_",
-        dir=csv_path.parent,
+        dir=_csv_temp_directory(csv_path.parent),
     )
     temp_path = Path(temp_path_str)
     try:
