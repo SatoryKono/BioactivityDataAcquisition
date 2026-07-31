@@ -229,7 +229,7 @@ registers the active BioETL MCP server set:
 | Server | Transport | Purpose |
 | --- | --- | --- |
 | `memory` | `npx @modelcontextprotocol/server-memory` | Persistent assistant memory file |
-| `filesystem` | `scripts/ai/mcp/mcp_filesystem_wrapper` | Repo-scoped file access (host-native absolute root) |
+| `filesystem` | `scripts/ai/mcp/mcp_filesystem_wrapper.sh` (WSL) / `scripts/ai/mcp/mcp_filesystem_wrapper.ps1` (Windows) | Repo-scoped file access (host-native absolute root) |
 | `fetch` | `uvx --python 3.13 --from mcp-server-fetch==2025.4.7 mcp-server-fetch` | HTTP fetch tooling; CPython 3.13 avoids the known 3.14 stdio startup hang in WSL |
 | `github` | Project wrapper | GitHub API access |
 | `docker` | Project wrapper | Docker MCP gateway access |

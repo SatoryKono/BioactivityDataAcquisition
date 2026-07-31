@@ -207,7 +207,7 @@
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
-      "snapshot_date": "2026-07-30"
+      "snapshot_date": "2026-07-31"
     },
     "contract_registry_diagnostics": {
       "path": "reports/quality/contract-registry-diagnostics.json",
@@ -221,11 +221,11 @@
     },
     "dead_code_inventory": {
       "path": "reports/quality/dead-code-inventory.json",
-      "snapshot_date": "2026-07-23"
+      "snapshot_date": "2026-07-31"
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "80f0c7246cbebcc00ceb14b1f7bd95536aab53eb26993eca65a2c8b822195d84"
+      "source_fingerprint": "c13acc8f67024d43b2a2a8196663408020f52ab9d319da925ee8540aa511a582"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
@@ -240,7 +240,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "fb530e62125256526d43fb0d095621adf2b13e79b827d80b8c96882853368011",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "700e35313167e83f885b8d4383a0619efeedd3509965e6ed982dcb47587d09f9"
+      "source_tree_sha256": "0aacade456a6640f6956aba0320aa150e2ca47f4edff38c2e1b2682c64c804f6"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

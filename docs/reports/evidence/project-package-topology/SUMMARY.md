@@ -15,11 +15,11 @@ module-coverage producer. The inventory retains its `2026-07-13` coverage-data
 snapshot date because no newer canonical coverage run was substituted for the
 tracked coverage measurements.
 
-Current-baseline note (2026-07-24): architectural planning and GitHub issues
+Current-baseline note (2026-07-31): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
 `source_module_count=2314` with
-`source_tree_sha256=700e35313167e83f885b8d4383a0619efeedd3509965e6ed982dcb47587d09f9`.
+`source_tree_sha256=0aacade456a6640f6956aba0320aa150e2ca47f4edff38c2e1b2682c64c804f6`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-07-24) followed run-reports domain/application surface

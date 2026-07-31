@@ -5,7 +5,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.ai import runtime_skill_sync
+
+pytestmark = pytest.mark.unit
 
 
 def _fixture(root: Path) -> None:
