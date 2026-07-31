@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from memory.tooling.check_freshness import check_memory_freshness
+
+pytestmark = pytest.mark.unit
 
 
 def test_current_repository_memory_surfaces_are_fresh() -> None:
