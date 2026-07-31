@@ -38,15 +38,12 @@ runtime change.
 | Skill                      | Path                                     | Purpose                                                    |
 | -------------------------- | ---------------------------------------- | ---------------------------------------------------------- |
 | `py-audit-bot`             | `.codex/skills/py-audit-bot`             | Audit profile workflow                                     |
-| `py-code-bot`              | `.codex/skills/py-code-bot`              | Deprecated compatibility profile for historical references |
 | `py-architecture-debt-bot` | `.codex/skills/py-architecture-debt-bot` | Full architecture-debt reduction workflow                  |
 | `py-config-bot`            | `.codex/skills/py-config-bot`            | Config profile workflow                                    |
 | `py-debug-bot`             | `.codex/skills/py-debug-bot`             | Debug profile workflow                                     |
 | `py-doc-bot`               | `.codex/skills/py-doc-bot`               | Documentation profile workflow                             |
 | `py-plan-bot`              | `.codex/skills/py-plan-bot`              | Planning profile workflow                                  |
 | `py-test-bot`              | `.codex/skills/py-test-bot`              | Test profile workflow                                      |
-
-`py-code-bot` is retained only as a compatibility surface for historical references. In the current Codex workflow, production code is written directly by the orchestrator.
 
 ### Architecture and Quality
 
@@ -123,7 +120,6 @@ runtime change.
 - [new-pipeline](new-pipeline/SKILL.md)
 - [py-audit-bot](py-audit-bot/SKILL.md)
 - [py-architecture-debt-bot](py-architecture-debt-bot/SKILL.md)
-- [py-code-bot](py-code-bot/SKILL.md)
 - [py-config-bot](py-config-bot/SKILL.md)
 - [py-debug-bot](py-debug-bot/SKILL.md)
 - [py-doc-bot](py-doc-bot/SKILL.md)

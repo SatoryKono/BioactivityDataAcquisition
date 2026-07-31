@@ -132,8 +132,15 @@ def calculate_source_surface_sha256(
                 "source_path": normalized,
             }
         )
+    return calculate_source_identities_sha256(identities)
+
+
+def calculate_source_identities_sha256(
+    identities: list[dict[str, str]],
+) -> str:
+    """Hash already-captured source path/content identities."""
     canonical = json.dumps(
-        identities,
+        sorted(identities, key=lambda identity: identity["source_path"]),
         ensure_ascii=True,
         separators=(",", ":"),
         sort_keys=True,

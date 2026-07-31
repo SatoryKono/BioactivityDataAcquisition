@@ -357,7 +357,11 @@ def test_ensure_backend_warns_when_detached_process_does_not_become_ready() -> N
     assert "startup log:" in (result.message or "").lower()
 
 
-def test_ensure_backend_failure_message_includes_exit_code_and_log_tail() -> None:
+def test_ensure_backend_failure_message_includes_exit_code_and_log_tail(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(process_subject.tempfile, "gettempdir", lambda: str(tmp_path))
     port = 18081
     log_path = build_detached_backend_log_path(port)
     log_path.write_text("Traceback line\nRuntimeError: boom\n", encoding="utf-8")
