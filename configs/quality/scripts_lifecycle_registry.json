@@ -626,6 +626,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a top-level docs KPI reporting compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-kpi."
     },
+    "scripts/docs/sync_repo_identity.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level repo-identity compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs sync-repo-identity."
+    },
     "scripts/engineering/ci/_compatibility_registry.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
