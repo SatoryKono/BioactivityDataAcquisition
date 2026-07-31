@@ -68,9 +68,7 @@ def test_exclusive_lock_recovers_dead_owner(tmp_path: Path) -> None:
     target = tmp_path / "events.jsonl"
     lock_path = tmp_path / ".events.jsonl.lock"
     lock_path.write_text(
-        json.dumps(
-            {"pid": 999_999_999, "process_start": "1", "schema_version": 1}
-        ),
+        json.dumps({"pid": 999_999_999, "process_start": "1", "schema_version": 1}),
         encoding="utf-8",
     )
 
