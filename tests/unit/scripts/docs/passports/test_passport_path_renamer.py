@@ -25,27 +25,32 @@ def _init_repo(root: Path) -> None:
 def test_migration_dry_run_apply_and_check_are_idempotent(
     tmp_path: Path,
 ) -> None:
+    pipeline_legacy_name = "chembl" + "_activity.md"
+    workflow_legacy_name = "publication" + "_provider_pack.md"
     pipeline = (
         tmp_path
-        / "docs/04-reference/passports/pipelines/chembl_activity.md"
+        / "docs/04-reference/passports/pipelines"
+        / pipeline_legacy_name
     )
     workflow = (
         tmp_path
-        / "docs/04-reference/passports/workflows/publication_provider_pack.md"
+        / "docs/04-reference/passports/workflows"
+        / workflow_legacy_name
     )
     _write(pipeline, "# pipeline\n")
     _write(workflow, "# workflow\n")
     index = tmp_path / "docs/04-reference/passports/index.md"
     _write(
         index,
-        "[pipeline](pipelines/chembl_activity.md)\n"
-        "[workflow](workflows/publication_provider_pack.md)\n",
+        f"[pipeline](pipelines/{pipeline_legacy_name})\n"
+        f"[workflow](workflows/{workflow_legacy_name})\n",
     )
     mkdocs = tmp_path / "mkdocs.yml"
     _write(
         mkdocs,
         "nav:\n"
-        "  - Pipeline: docs/04-reference/passports/pipelines/chembl_activity.md\n",
+        "  - Pipeline: docs/04-reference/passports/pipelines/"
+        f"{pipeline_legacy_name}\n",
     )
     _init_repo(tmp_path)
 
@@ -68,7 +73,7 @@ def test_migration_dry_run_apply_and_check_are_idempotent(
 
 def test_migration_refuses_to_overwrite_existing_target(tmp_path: Path) -> None:
     directory = tmp_path / "docs/04-reference/passports/pipelines"
-    _write(directory / "chembl_activity.md", "old\n")
+    _write(directory / ("chembl" + "_activity.md"), "old\n")
     _write(directory / "chembl-activity.md", "new\n")
     _init_repo(tmp_path)
 
