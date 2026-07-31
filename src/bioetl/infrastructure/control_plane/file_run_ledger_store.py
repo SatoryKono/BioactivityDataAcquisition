@@ -1,3 +1,5 @@
+"""Persist run-ledger entries in durable per-manifest JSONL files."""
+
 from __future__ import annotations
 
 import json

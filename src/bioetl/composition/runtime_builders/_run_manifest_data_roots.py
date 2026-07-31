@@ -1,3 +1,5 @@
+"""Resolve run-manifest data roots and expose compatibility path helpers."""
+
 from __future__ import annotations
 
 import os
