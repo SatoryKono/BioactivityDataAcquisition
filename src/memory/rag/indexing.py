@@ -364,15 +364,11 @@ def build_rag_manifests(
                 break
             continue
     else:
-        sources = [
-            path for path in sources if path.as_posix() in corpus_by_path
-        ]
+        sources = [path for path in sources if path.as_posix() in corpus_by_path]
 
     ordered_paths = [path.as_posix() for path in sources]
     corpus_sources = [corpus_by_path[path] for path in ordered_paths]
-    chunk_records = [
-        chunk for path in ordered_paths for chunk in chunks_by_path[path]
-    ]
+    chunk_records = [chunk for path in ordered_paths for chunk in chunks_by_path[path]]
     captured_source_hash = calculate_source_identities_sha256(
         [
             {

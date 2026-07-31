@@ -91,7 +91,10 @@ def check_memory_freshness(
     seed_details: list[str] = []
     try:
         payload = json.loads(seed.read_text(encoding="utf-8"))
-        if not isinstance(payload, dict) or not {"entities", "relations"} <= payload.keys():
+        if (
+            not isinstance(payload, dict)
+            or not {"entities", "relations"} <= payload.keys()
+        ):
             seed_details.append("seed must contain entities and relations")
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         seed_details.append(str(exc))

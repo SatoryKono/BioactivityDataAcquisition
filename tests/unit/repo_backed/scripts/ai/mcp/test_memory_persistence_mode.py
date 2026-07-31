@@ -57,8 +57,5 @@ def test_mcp_memory_default_store_is_scoped_and_untracked() -> None:
 
     assert "python -m memory.mcp_scope" in wrapper
     assert '--repo-root "${REPO_ROOT}"' in wrapper
-    assert (
-        '--seed "${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"'
-        in wrapper
-    )
+    assert '--seed "${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"' in wrapper
     assert 'export MEMORY_FILE_PATH="$(' in wrapper

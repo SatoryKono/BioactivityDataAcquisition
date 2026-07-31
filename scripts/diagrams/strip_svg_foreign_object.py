@@ -59,9 +59,7 @@ def _write_text_atomic(path: Path, payload: str) -> None:
 def _strip_foreign_objects_payload(payload: str) -> tuple[str, int]:
     """Remove Mermaid label elements without requiring XML-valid XHTML content."""
     payload, paired_count = FOREIGN_OBJECT_PATTERN.subn("", payload)
-    payload, self_closing_count = SELF_CLOSING_FOREIGN_OBJECT_PATTERN.subn(
-        "", payload
-    )
+    payload, self_closing_count = SELF_CLOSING_FOREIGN_OBJECT_PATTERN.subn("", payload)
     return payload, paired_count + self_closing_count
 
 

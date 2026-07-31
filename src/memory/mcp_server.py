@@ -36,11 +36,7 @@ class GraphStore:
     ) -> Any:
         for _ in range(100):
             raw = self.path.read_bytes() if self.path.exists() else b""
-            graph = (
-                json.loads(raw)
-                if raw
-                else {"entities": [], "relations": []}
-            )
+            graph = json.loads(raw) if raw else {"entities": [], "relations": []}
             result = operation(graph)
             try:
                 atomic_write_json(
@@ -87,14 +83,19 @@ _TOOLS = [
     {
         "name": "create_entities",
         "description": "Create graph entities atomically.",
-        "inputSchema": {"type": "object", "properties": {"entities": {"type": "array"}}},
+        "inputSchema": {
+            "type": "object",
+            "properties": {"entities": {"type": "array"}},
+        },
     },
     {
         "name": "delete_entities",
         "description": "Delete graph entities atomically.",
         "inputSchema": {
             "type": "object",
-            "properties": {"entityNames": {"type": "array", "items": {"type": "string"}}},
+            "properties": {
+                "entityNames": {"type": "array", "items": {"type": "string"}}
+            },
         },
     },
     {
@@ -106,7 +107,9 @@ _TOOLS = [
 
 
 def _reply(identifier: Any, result: Any) -> None:
-    print(json.dumps({"jsonrpc": "2.0", "id": identifier, "result": result}), flush=True)
+    print(
+        json.dumps({"jsonrpc": "2.0", "id": identifier, "result": result}), flush=True
+    )
 
 
 def main() -> int:

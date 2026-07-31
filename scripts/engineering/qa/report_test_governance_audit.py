@@ -268,10 +268,7 @@ def _compute_test_governance_source_tree_sha256(root_str: str) -> str:
 
     def _read_one(path: Path) -> tuple[str, bytes]:
         relative = path.relative_to(root).as_posix()
-        try:
-            return relative, _read_source_tree_bytes(path)
-        except OSError:
-            return relative, b""
+        return relative, _read_source_tree_bytes(path)
 
     workers = _source_tree_hash_workers(len(files))
     if workers == 1:
