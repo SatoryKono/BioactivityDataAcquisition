@@ -113,12 +113,12 @@ def build_preflight_service(context: RunnerAssemblyContext) -> PreflightService:
 
 def build_observer(context: RunnerAssemblyContext) -> PipelineObserver:
     """Build the pipeline observer bound to the current run context."""
-    from bioetl.application.observability.observer import PipelineObserverIdentity
+    from bioetl.application.observability.observer import PipelineObserverParams
 
     pipeline = context.pipeline
     pipeline_context = pipeline.context
     return PipelineObserver(
-        identity=PipelineObserverIdentity(
+        identity=PipelineObserverParams(
             pipeline_name=pipeline.config.pipeline_name,
             run_id=pipeline_context.run_id,
             run_type=pipeline.runtime.run_type,

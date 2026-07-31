@@ -44,7 +44,7 @@ from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 from bioetl.application.observability.observer import (
     LifecyclePhase,
     PipelineObserver as _PipelineObserver,
-    PipelineObserverIdentity,
+    PipelineObserverParams,
 )
 from bioetl.domain.aggregates.events import (
     PipelineCompleted,
@@ -74,7 +74,7 @@ class PipelineObserver(_PipelineObserver):
             FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
         )
         if "identity" not in kwargs and not (
-            args and isinstance(args[0], PipelineObserverIdentity)
+            args and isinstance(args[0], PipelineObserverParams)
         ):
             identity_keys = (
                 "pipeline_name",
@@ -90,7 +90,7 @@ class PipelineObserver(_PipelineObserver):
             identity_kwargs = {
                 key: kwargs.pop(key) for key in identity_keys if key in kwargs
             }
-            kwargs["identity"] = PipelineObserverIdentity(**identity_kwargs)
+            kwargs["identity"] = PipelineObserverParams(**identity_kwargs)
         super().__init__(*args, **kwargs)
 
 

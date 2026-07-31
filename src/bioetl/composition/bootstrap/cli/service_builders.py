@@ -128,13 +128,13 @@ def build_cli_checkpoint_runtime_service(
     ],
 ) -> CheckpointRuntimeService:
     """Build the CLI checkpoint runtime-service graph."""
-    from bioetl.application.core.lifecycle import CheckpointRuntimeIdentity
+    from bioetl.application.core.lifecycle import CheckpointRuntimeParams
 
     logger = logger_factory()
     return CheckpointRuntimeService(
         checkpoint_port_factory(pipeline_name),
         logger,
-        CheckpointRuntimeIdentity(
+        CheckpointRuntimeParams(
             pipeline_name=pipeline_name,
             run_id=run_id,
             resume=False,

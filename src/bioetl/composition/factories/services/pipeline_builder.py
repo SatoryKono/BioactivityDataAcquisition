@@ -97,12 +97,12 @@ def create_checkpoint_manager(
     current_metadata: CheckpointMetadata | None = None,
     compatibility_policy: Literal["observe", "soft_fail", "hard_fail"] = "soft_fail",
 ) -> CheckpointRuntimeService:
-    from bioetl.application.core.lifecycle import CheckpointRuntimeIdentity
+    from bioetl.application.core.lifecycle import CheckpointRuntimeParams
 
     return CheckpointRuntimeService(
         checkpoint_port,
         logger,
-        CheckpointRuntimeIdentity(
+        CheckpointRuntimeParams(
             pipeline_name=pipeline_name,
             run_id=run_id,
             resume=resume,
