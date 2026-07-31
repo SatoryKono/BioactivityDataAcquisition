@@ -1,6 +1,6 @@
 # Сводка evidence: project-package-topology
 
-Дата: 2026-07-24
+Дата: 2026-07-31
 Статус: refreshed
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see
@@ -11,7 +11,7 @@ Refresh note (2026-07-19): the summary was remeasured from the live working
 tree with deterministic Python file and first-order package scans excluding
 `__pycache__`. The summary is reconciled with the source-tree portion of
 `reports/quality/module-coverage-inventory.json` after running the canonical
-module-coverage producer. The inventory retains its `2026-07-13` coverage-data
+module-coverage producer. The inventory retains its `2026-07-28` coverage-data
 snapshot date because no newer canonical coverage run was substituted for the
 tracked coverage measurements.
 
@@ -39,8 +39,8 @@ absent.
 
 1. `EV-project-package-topology-top-level-repo-zones-are-separated`
 1. `EV-project-package-topology-application-layer-has-six-subpackages`
-1. `EV-project-package-topology-composition-layer-has-six-subpackages`
-1. `EV-project-package-topology-domain-layer-has-twenty-three-subpackages`
+1. `EV-project-package-topology-composition-layer-has-five-subpackages`
+1. `EV-project-package-topology-domain-layer-has-twenty-two-subpackages`
 1. `EV-project-package-topology-infrastructure-layer-has-twenty-subpackages`
 1. `EV-project-package-topology-interfaces-layer-has-two-subpackages`
 
@@ -58,11 +58,11 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2268`, including two
+- Current Python file count under `src/bioetl` is `2314`, including two
   top-level package modules outside the five first-order architecture layers.
-- Current layer file counts are: `domain=590`, `application=671`,
-  `infrastructure=585`, `composition=276`, `interfaces=144`.
-- Current first-order package counts are: `domain=23`, `application=6`,
+- Current layer file counts are: `domain=591`, `application=699`,
+  `infrastructure=590`, `composition=282`, `interfaces=150`.
+- Current first-order package counts are: `domain=22`, `application=6`,
   `infrastructure=20`, `composition=5`, `interfaces=2`.
 - `application` and `infrastructure` remain the broadest package surfaces by
   Python file count; `infrastructure` remains the broadest adapter and
