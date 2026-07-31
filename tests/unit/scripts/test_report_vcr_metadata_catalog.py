@@ -28,9 +28,7 @@ def test_legacy_metadata_owner_aliases_reference_live_surfaces() -> None:
 
     missing = {
         cassette: [
-            owner.as_posix()
-            for owner in owners
-            if not (repo_root / owner).is_file()
+            owner.as_posix() for owner in owners if not (repo_root / owner).is_file()
         ]
         for cassette, owners in module.LEGACY_METADATA_OWNER_ALIASES.items()
         if not (repo_root / cassette).is_file()
