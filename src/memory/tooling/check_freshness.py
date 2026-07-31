@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +16,53 @@ from memory.tooling.review_curated import review_curated_notes
 from memory.validation import validate_memory_scaffold
 
 
-def check_memory_freshness(repo_root: Path) -> dict[str, Any]:
+def _graph_source_digest(memory_root: Path) -> str:
+    digest = hashlib.sha256()
+    for name in ("ontology.yaml", "mappings.yaml"):
+        digest.update((memory_root / "graph" / name).read_bytes())
+    return digest.hexdigest()
+
+
+def _check_graph_freshness(
+    memory_root: Path, *, now: datetime
+) -> tuple[bool, dict[str, Any]]:
+    graph_root = memory_root / "graph"
+    source_errors: list[str] = []
+    for name in ("ontology.yaml", "mappings.yaml"):
+        path = graph_root / name
+        try:
+            if not isinstance(yaml.safe_load(path.read_text(encoding="utf-8")), dict):
+                source_errors.append(f"{path}: root must be a mapping")
+        except (OSError, UnicodeError, yaml.YAMLError) as exc:
+            source_errors.append(f"{path}: {exc}")
+    if source_errors:
+        return False, {"errors": source_errors}
+
+    manifest = graph_root / "projections" / "manifest.json"
+    if not manifest.exists():
+        return True, {"status": "rebuildable-not-materialized"}
+    try:
+        payload = json.loads(manifest.read_text(encoding="utf-8"))
+        generated_at = datetime.fromisoformat(
+            str(payload["generated_at"]).replace("Z", "+00:00")
+        ).astimezone(UTC)
+        age_days = max(0, (now - generated_at).days)
+        expected_digest = _graph_source_digest(memory_root)
+        actual_digest = payload["source_sha256"]
+    except (OSError, UnicodeError, ValueError, KeyError, json.JSONDecodeError) as exc:
+        return False, {"errors": [f"{manifest}: {exc}"]}
+    details = {
+        "status": "materialized",
+        "age_days": age_days,
+        "max_age_days": 30,
+        "source_identity_matches": actual_digest == expected_digest,
+    }
+    return age_days <= 30 and actual_digest == expected_digest, details
+
+
+def check_memory_freshness(
+    repo_root: Path, *, now: datetime | None = None
+) -> dict[str, Any]:
     """Return deterministic checks for canonical, curated, graph, and MCP memory."""
     memory_root = repo_root / "src" / "memory"
     scaffold_issues = validate_memory_scaffold()
@@ -32,17 +80,11 @@ def check_memory_freshness(repo_root: Path) -> dict[str, Any]:
         },
     ]
 
-    graph_details: list[str] = []
-    for name in ("ontology.yaml", "mappings.yaml"):
-        path = memory_root / "graph" / name
-        try:
-            payload = yaml.safe_load(path.read_text(encoding="utf-8"))
-            if not isinstance(payload, dict):
-                graph_details.append(f"{path}: root must be a mapping")
-        except (OSError, UnicodeError, yaml.YAMLError) as exc:
-            graph_details.append(f"{path}: {exc}")
+    graph_ok, graph_details = _check_graph_freshness(
+        memory_root, now=now or datetime.now(UTC)
+    )
     checks.append(
-        {"surface": "knowledge-graph", "ok": not graph_details, "details": graph_details}
+        {"surface": "knowledge-graph", "ok": graph_ok, "details": graph_details}
     )
 
     seed = repo_root / "docs/00-project/ai/memory/mcp-memory.json"

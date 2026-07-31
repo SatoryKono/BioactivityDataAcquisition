@@ -48,4 +48,4 @@ if [[ -z "${MEMORY_FILE_PATH:-}" ]]; then
       --seed "${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
   )"
 fi
-exec npx -y "@modelcontextprotocol/server-memory@2026.1.26" "$@"
+exec python -m memory.mcp_server "$@"
