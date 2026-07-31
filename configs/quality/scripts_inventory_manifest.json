@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-31T09:45:52.960923+00:00",
+  "generated_at": "2026-07-31T09:48:13.055065+00:00",
   "summary": {
-    "total_scripts": 567,
+    "total_scripts": 568,
     "status_counts": {
-      "active": 341,
+      "active": 342,
       "supporting": 221,
       "temporary_diagnostic": 5
     },
@@ -14,7 +14,7 @@
       "ci": 66,
       "docs": 230,
       "other": 77,
-      "scripts": 459,
+      "scripts": 460,
       "skills": 17,
       "tests": 352
     }
@@ -6827,7 +6827,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"build-site\": \"scripts.docs.build.mkdocs_build\","
         }
@@ -6848,7 +6848,7 @@
         },
         {
           "path": "scripts/docs/README.md",
-          "line": 146,
+          "line": 147,
           "source_group": "scripts",
           "text": "| `scripts/docs/build_docs_site.sh`  | Shell transport adapter that chooses an appropriate Python runtime and then dispatches to `python -m scripts.docs build-site` |"
         },
@@ -7064,7 +7064,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"check-docstrings\": \"scripts.docs.checks.check_docstrings\","
         },
@@ -7097,7 +7097,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"check-drift\": \"scripts.docs.checks.check_drift\","
         },
@@ -7195,7 +7195,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"generate-cleanup-inventory\": \"scripts.docs.checks.documentation_cleanup_inventory\","
         },
@@ -7234,7 +7234,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"check-kpi\": \"scripts.docs.checks.report_docs_kpi\","
         },
@@ -7267,7 +7267,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"verify\": \"scripts.docs.checks.verify\","
         }
@@ -7548,13 +7548,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 56,
+          "line": 57,
           "source_group": "scripts",
           "text": "| `fix-links-auto`                         | `scripts/docs/fixers/fix_links_auto.py`                         | Auto-fix broken documentation links                                                      "
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 54,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"fix-links-auto\": \"scripts.docs.fixers.fix_links_auto\","
         }
@@ -7573,13 +7573,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
           "text": "| `fix-links-explicit`                     | `scripts/docs/fixers/fix_links_explicit.py`                     | Fix documentation links with explicit rules                                              "
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 55,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"fix-links-explicit\": \"scripts.docs.fixers.fix_links_explicit\","
         }
@@ -7598,13 +7598,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 58,
+          "line": 59,
           "source_group": "scripts",
           "text": "| `fix-link-warnings`                      | `scripts/docs/fixers/link_warnings.py`                          | Fix link warnings in specified files                                                     "
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 56,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"fix-link-warnings\": \"scripts.docs.fixers.link_warnings\","
         }
@@ -7623,13 +7623,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 60,
+          "line": 61,
           "source_group": "scripts",
           "text": "| `sync-repo-identity`                     | `scripts/docs/fixers/repo_identity.py`                          | Normalize active docs and workflow references to the canonical repo identity             "
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 58,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"sync-repo-identity\": \"scripts.docs.fixers.repo_identity\","
         }
@@ -7648,13 +7648,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 59,
+          "line": 60,
           "source_group": "scripts",
           "text": "| `audit-sentence`                         | `scripts/docs/fixers/sentence_audit.py`                         | Sentence-level documentation audit                                                       "
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"audit-sentence\": \"scripts.docs.fixers.sentence_audit\","
         }
@@ -7835,13 +7835,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "| `build-matrix-dicts`                     | `scripts/docs/matrix/build_matrix_dicts.py`                     | Build inventory and dictionary artifacts for the canonical ChEMBL matrix workbook        "
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"build-matrix-dicts\": \"scripts.docs.matrix.build_matrix_dicts\","
         },
@@ -7866,13 +7866,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 52,
+          "line": 53,
           "source_group": "scripts",
           "text": "| `enrich-matrix-normalization-details`    | `scripts/docs/matrix/enrich_normalization_details.py`           | Populate exact per-row normalization details in the canonical ChEMBL matrix workbook     "
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"enrich-matrix-normalization-details\": \"scripts.docs.matrix.enrich_normalization_details\","
         },
@@ -7897,13 +7897,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "| `export-matrix-structural-contract`      | `scripts/docs/matrix/export_structural_contract.py`             | Export the canonical runtime structural contract for ChEMBL workbook sync                "
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"export-matrix-structural-contract\": \"scripts.docs.matrix.export_structural_contract\","
         },
@@ -7928,13 +7928,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 53,
+          "line": 54,
           "source_group": "scripts",
           "text": "| `filter-matrix-rows`                     | `scripts/docs/matrix/filter_rows.py`                            | Remove rows from the canonical ChEMBL matrix workbook by column value                    "
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"filter-matrix-rows\": \"scripts.docs.matrix.filter_rows\","
         },
@@ -7959,13 +7959,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "| `generate-field-matrix`                  | `scripts/docs/matrix/generate_field_matrix.py`                  | Generate deterministic ChemBL Activity field-matrix artifacts directly from code         "
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"generate-field-matrix\": \"scripts.docs.matrix.generate_field_matrix\","
         },
@@ -8047,13 +8047,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 54,
+          "line": 55,
           "source_group": "scripts",
           "text": "| `normalize-matrix-values`                | `scripts/docs/matrix/normalize_values.py`                       | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook           "
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 52,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"normalize-matrix-values\": \"scripts.docs.matrix.normalize_values\","
         },
@@ -8109,13 +8109,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 55,
+          "line": 56,
           "source_group": "scripts",
           "text": "| `sync-matrix-structural-policy`          | `scripts/docs/matrix/sync_structural_policy.py`                 | Reconcile workbook policy columns with the current structural Silver policy semantics    "
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 53,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"sync-matrix-structural-policy\": \"scripts.docs.matrix.sync_structural_policy\","
         },
@@ -8175,7 +8175,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 59,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"passports\": \"scripts.docs.passports.cli\","
         },
@@ -8335,6 +8335,27 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as the internal passport projection helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
+    {
+      "path": "scripts/docs/passports/rename_underscore_to_hyphen.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 48,
+          "source_group": "scripts",
+          "text": "| `rename-passport-paths`                  | `scripts/docs/passports/rename_underscore_to_hyphen.py`         | Preview/apply/check underscore-to-hyphen passport Markdown path migration                "
+        },
+        {
+          "path": "scripts/docs/__main__.py",
+          "line": 62,
+          "source_group": "scripts",
+          "text": "\"scripts.docs.passports.rename_underscore_to_hyphen\""
+        }
+      ]
     },
     {
       "path": "scripts/docs/passports/source_facts.py",
@@ -9351,7 +9372,7 @@
         },
         {
           "path": "scripts/docs/__main__.py",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import dispatch_cli, module_command"
         },

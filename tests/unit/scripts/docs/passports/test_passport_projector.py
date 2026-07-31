@@ -323,9 +323,17 @@ def test_pipeline_markdown_is_compact_complete_and_not_a_json_dump(
     tmp_path: Path,
 ) -> None:
     outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
-    path = tmp_path / "pipelines/chembl_assay.md"
+    path = tmp_path / "pipelines/chembl-assay.md"
     markdown = outputs[path].decode("utf-8")
     facts = json.loads(outputs[tmp_path / "generated/pipelines/chembl_assay.json"])
+    registry = json.loads(outputs[tmp_path / "executable-unit-registry.json"])
+    registry_row = next(
+        row for row in registry["units"] if row["typed_id"] == "pipeline:chembl_assay"
+    )
+    assert registry_row["passport_path"] == "pipelines/chembl-assay.md"
+    assert "[chembl_assay](pipelines/chembl-assay.md)" in outputs[
+        tmp_path / "index.md"
+    ].decode("utf-8")
     assert 2 <= len(facts["summary"]["sentences"]) <= 5
     assert facts["extraction"]["filters"]
     assert facts["extraction"]["selected_fields"]
