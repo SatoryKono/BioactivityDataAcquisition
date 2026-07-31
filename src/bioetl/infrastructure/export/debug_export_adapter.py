@@ -13,6 +13,7 @@ from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.export.debug_export_ops import (
     collect_headers,
     compute_pack_hash,
+    compute_tables_hash,
     fingerprint_artifact,
     normalize_csv_value,
     resolve_debug_export_root,
@@ -81,7 +82,7 @@ class DebugExportAdapter:
                 workbook_path = candidate_path
                 file_paths.append(str(workbook_path))
 
-        debug_export_hash = self._compute_pack_hash(canonical_artifacts)
+        debug_export_hash = compute_tables_hash(tables)
         manifest_path = root_path / "manifest.json"
         manifest_payload = {
             "run_id": pack.run_id,

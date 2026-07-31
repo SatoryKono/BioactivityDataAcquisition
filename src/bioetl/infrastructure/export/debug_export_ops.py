@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
@@ -18,6 +19,7 @@ __all__ = [
     "chunk_table_rows",
     "collect_headers",
     "compute_pack_hash",
+    "compute_tables_hash",
     "fingerprint_artifact",
     "normalize_csv_value",
     "resolve_debug_export_root",
@@ -157,8 +159,9 @@ def write_debug_xlsx(
     from openpyxl import Workbook  # pyright: ignore[reportMissingModuleSource]
 
     workbook = Workbook()
-    workbook.properties.created = None
-    workbook.properties.modified = None
+    deterministic_timestamp = datetime(1980, 1, 1)
+    workbook.properties.created = deterministic_timestamp
+    workbook.properties.modified = deterministic_timestamp
     first_sheet = True
     for table_name, rows in tables.items():
         headers = collect_headers(rows)
@@ -195,4 +198,29 @@ def compute_pack_hash(artifacts: list[dict[str, object]]) -> str:
     payload = json.dumps(artifacts, sort_keys=True, separators=(",", ":")).encode(
         "utf-8"
     )
+    return hashlib.sha256(payload).hexdigest()
+
+
+def compute_tables_hash(
+    tables: dict[str, tuple[dict[str, object], ...]],
+) -> str:
+    """Hash semantic debug-export content without occurrence timestamps."""
+    canonical_tables = {
+        table_name: [
+            {
+                key: normalize_csv_value(value)
+                for key, value in row.items()
+                if key != "created_at"
+            }
+            for row in rows
+        ]
+        for table_name, rows in tables.items()
+    }
+    payload = json.dumps(
+        canonical_tables,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    ).encode("utf-8")
     return hashlib.sha256(payload).hexdigest()

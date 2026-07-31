@@ -58,7 +58,11 @@
       "url": "http://127.0.0.1:8831/mcp"
     },
     "deepwiki": {
-      "url": "https://mcp.deepwiki.com/mcp"
+      "url": "https://mcp.deepwiki.com/mcp",
+      "headers": {
+        "x-deepwiki-api-key": "$DEEPWIKI_API_KEY",
+        "x-deepwiki-organisation-id": "$DEEPWIKI_ORGANISATION_ID"
+      }
     },
     "ref": {
       "url": "https://api.ref.tools/mcp",
