@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 import yaml
 
 _REGISTRY = Path(__file__).parents[3] / "src/memory/catalog/vendor_memory_registry.yaml"
+pytestmark = pytest.mark.unit
 
 
 def test_vendor_registry_is_complete_and_fail_closed() -> None:
