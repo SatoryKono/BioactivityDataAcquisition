@@ -31,6 +31,7 @@ def test_docs_workflow_runs_lightweight_docs_governance_profile() -> None:
     workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
 
     assert "docs-governance:" in workflow
+    assert "fetch-depth: 0" in workflow
     assert "Run docs-governance architecture tests" in workflow
     assert "validate-mkdocs:\n    needs: docs-governance" in workflow
     assert "'grafana/README.md'" in workflow
