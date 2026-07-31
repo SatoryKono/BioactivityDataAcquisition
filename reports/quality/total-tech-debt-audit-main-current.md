@@ -8,17 +8,17 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `d6f45bed76113fb4b28e47e799e84f273f668e7c`
+Audited commit SHA: `079af7618d51534b9cf84bc2f6e9ada96c35f2a7`
 
-Evidence surface SHA-256: `af9cf6b74e2137095078537cef5ce660fd929185d637dfeea02d956b1f2ae2ca`
+Evidence surface SHA-256: `c8a7192fbdc1692ef78befcf885260fccf365ac0c5442e2cf0397e3d29f4500c`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
-  "audited_commit_sha": "d6f45bed76113fb4b28e47e799e84f273f668e7c",
-  "evidence_surface_sha256": "af9cf6b74e2137095078537cef5ce660fd929185d637dfeea02d956b1f2ae2ca",
+  "audited_commit_sha": "079af7618d51534b9cf84bc2f6e9ada96c35f2a7",
+  "evidence_surface_sha256": "c8a7192fbdc1692ef78befcf885260fccf365ac0c5442e2cf0397e3d29f4500c",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -44,7 +44,8 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: CR-03 / #6695 regenerate from one consistent evidence snapshot after CodeRabbit audit remediation (CR-01/CR-02). No debt budget growth.
+Refresh reason: #7038 regenerate the compatibility/debt census from the
+#4862/#7362/#7257/#6239 closeout snapshot. No debt budget growth.
 
 ## Executive summary
 
