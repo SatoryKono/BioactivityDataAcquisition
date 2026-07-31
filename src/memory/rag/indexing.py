@@ -26,7 +26,9 @@ from memory.rag.filters import (
     iter_rag_sources,
 )
 from memory.rag.validation import (
-    capture_rag_source_identity,
+    calculate_source_identities_sha256,
+    calculate_source_surface_sha256,
+    capture_rag_git_identity,
     require_valid_rag_manifest,
     validate_rag_manifest_files,
     validate_rag_manifest_payload,
@@ -37,6 +39,11 @@ DEFAULT_OUTPUT_DIR = MEMORY_ROOT / "derived" / "rag" / "manifests"
 GENERATOR_VERSION = 2
 DEFAULT_BUILD_SCOPE = "full"
 WORKFLOW_BUILD_SCOPE = "workflow"
+SOURCE_STABILITY_MAX_ATTEMPTS = 3
+
+
+class _SourceSurfaceChangedError(RuntimeError):
+    """Raised when sources change while a manifest snapshot is being built."""
 
 
 def _load_owner_specs() -> list[tuple[str, tuple[str, ...]]]:
@@ -257,10 +264,25 @@ def build_rag_manifests(
         corpus_sources.append(corpus_source)
         chunk_records.extend(chunk_rows)
 
-    source_identity = capture_rag_source_identity(
-        root,
-        [source["source_path"] for source in corpus_sources],
+    source_paths = [source["source_path"] for source in corpus_sources]
+    captured_source_hash = calculate_source_identities_sha256(
+        [
+            {
+                "content_hash": source["content_hash"],
+                "source_path": source["source_path"],
+            }
+            for source in corpus_sources
+        ]
     )
+    current_source_hash = calculate_source_surface_sha256(root, source_paths)
+    if captured_source_hash != current_source_hash:
+        raise _SourceSurfaceChangedError(
+            "RAG sources changed while the manifest snapshot was being built"
+        )
+    source_identity = {
+        **capture_rag_git_identity(root),
+        "source_surface_sha256": captured_source_hash,
+    }
     catalog = {
         "generator_version": GENERATOR_VERSION,
         "build_scope": build_scope,
@@ -368,33 +390,44 @@ def write_rag_manifests(
 ) -> tuple[Path, Path]:
     """Build, validate, and transactionally publish deterministic manifests."""
     _guard_workflow_output_scope(root, output_dir, build_scope)
-    catalog, chunks = build_rag_manifests(
-        root,
-        build_scope=build_scope,
-        focus_query=focus_query,
-        max_sources=max_sources,
-    )
     output_dir.parent.mkdir(parents=True, exist_ok=True)
-    staging_dir = Path(
-        tempfile.mkdtemp(prefix=".rag-manifests-", dir=output_dir.parent)
-    )
-    try:
-        staged_catalog = staging_dir / "corpus_catalog.json"
-        staged_chunks = staging_dir / "chunks.jsonl"
-        staged_catalog.write_text(_serialize_catalog(catalog), encoding="utf-8")
-        staged_chunks.write_text(_serialize_chunks(chunks), encoding="utf-8")
-        require_valid_rag_manifest(
-            validate_rag_manifest_files(
+    for attempt in range(1, SOURCE_STABILITY_MAX_ATTEMPTS + 1):
+        try:
+            catalog, chunks = build_rag_manifests(
                 root,
+                build_scope=build_scope,
+                focus_query=focus_query,
+                max_sources=max_sources,
+            )
+        except _SourceSurfaceChangedError:
+            if attempt == SOURCE_STABILITY_MAX_ATTEMPTS:
+                raise
+            continue
+        staging_dir = Path(
+            tempfile.mkdtemp(prefix=".rag-manifests-", dir=output_dir.parent)
+        )
+        try:
+            staged_catalog = staging_dir / "corpus_catalog.json"
+            staged_chunks = staging_dir / "chunks.jsonl"
+            staged_catalog.write_text(_serialize_catalog(catalog), encoding="utf-8")
+            staged_chunks.write_text(_serialize_chunks(chunks), encoding="utf-8")
+            require_valid_rag_manifest(
+                validate_rag_manifest_files(
+                    root,
+                    staged_catalog,
+                    staged_chunks,
+                    require_build_scope=build_scope,
+                    verify_sources=False,
+                )
+            )
+            return _publish_manifest_pair(
                 staged_catalog,
                 staged_chunks,
-                require_build_scope=build_scope,
-                verify_sources=False,  # Skip source verification during catalog update
+                output_dir,
             )
-        )
-        return _publish_manifest_pair(staged_catalog, staged_chunks, output_dir)
-    finally:
-        shutil.rmtree(staging_dir, ignore_errors=True)
+        finally:
+            shutil.rmtree(staging_dir, ignore_errors=True)
+    raise AssertionError("unreachable RAG manifest retry state")
 
 
 def _build_parser() -> argparse.ArgumentParser:
