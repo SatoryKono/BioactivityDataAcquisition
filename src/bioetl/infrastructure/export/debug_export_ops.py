@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
@@ -157,8 +158,9 @@ def write_debug_xlsx(
     from openpyxl import Workbook  # pyright: ignore[reportMissingModuleSource]
 
     workbook = Workbook()
-    workbook.properties.created = None
-    workbook.properties.modified = None
+    deterministic_timestamp = datetime(1980, 1, 1)
+    workbook.properties.created = deterministic_timestamp
+    workbook.properties.modified = deterministic_timestamp
     first_sheet = True
     for table_name, rows in tables.items():
         headers = collect_headers(rows)

@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-02'
+  Last verified: '2026-07-30'
 
 ______________________________________________________________________
 
@@ -41,6 +41,7 @@ and
 | `author_orcids` | canonical identifier array | ORCID values canonicalize through `domain.normalization.reference_ids` |
 | `author_openalex_ids`, `institution_ids`, `ror_ids` | canonical identifier arrays | OpenAlex/ROR families canonicalize through the shared registry |
 | `author_s2_ids` | canonical identifier array | Semantic Scholar IDs canonicalize through the shared registry |
+| `author_keys` | normalized author representation | New field added across all publication pipelines for normalized author representation |
 
 Do not treat publication identifiers or author/source identifier families as
 closed enums. The canonical boundary is syntax and namespace, not a frozen list
@@ -81,6 +82,27 @@ the raw provider labels.
 Exception: `chembl_publication` may preserve provider value `PUBLICATION` in
 `publication_class` before downstream taxonomy reconciliation, so consumers
 must not assume only `EXP|REV|PEER` at every intermediate Silver surface.
+
+## Recent Publication Data Enhancements (2026-07)
+
+### Field Standardization
+- **`citation_count` → `citations_received`**: Renamed for consistency across providers
+- **`author_orcid_list` → `author_orcids`**: Renamed for consistency across providers
+
+### Classification Fields
+Three classification fields are now included in Silver Delta tables for all publication pipelines:
+- `publication_type_unified`
+- `publication_subclass` 
+- `publication_class`
+
+These fields normalize against the shared publication classification taxonomy and should be used for normalized publication semantics instead of raw provider `publication_type` fields.
+
+### Validation Rule Tightening
+- **`MIN_PUBLICATION_YEAR`**: Updated validation constraint for publication year
+- **ORCID format validation**: New validation rules for ORCID format compliance
+
+### Composite Publication Pipeline Cross-Validation
+Enricher data is now cross-validated against seed data before merging in composite publication pipelines, ensuring higher data quality consistency.
 
 ## OA Status
 
