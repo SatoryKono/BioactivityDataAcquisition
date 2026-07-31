@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-31T09:15:38.235891+00:00",
+  "generated_at": "2026-07-31T09:32:19.947187+00:00",
   "summary": {
     "total_scripts": 567,
     "status_counts": {
@@ -20040,7 +20040,7 @@
           "path": "tests/architecture/test_config_discrepancy_report_drift.py",
           "line": 17,
           "source_group": "tests",
-          "text": "from scripts.schema.generate_config_matrix import main"
+          "text": "from scripts.schema.generate_config_matrix import _render_parameter_matrix, main"
         },
         {
           "path": "tests/architecture/test_config_surface_entity_residual_plateau.py",
