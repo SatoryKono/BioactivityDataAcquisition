@@ -85,7 +85,6 @@ runtime change.
 | `repo-config`                  | `.codex/skills/repo-config`                  | Resolve dynamic repository configuration          |
 | `suggest-users`                | `.codex/skills/suggest-users`                | Suggest reviewers/assignees from repo context     |
 | `create-pr`                    | `.codex/skills/create-pr`                    | PR creation workflow guidance                     |
-| `nci-analysis`                 | `.codex/skills/nci-analysis`                 | Manipulation/disinformation pattern analysis      |
 
 ### Build and Design Utilities
 
@@ -116,7 +115,6 @@ runtime change.
 - [generating-constrained-specs](generating-constrained-specs/SKILL.md)
 - [initializing-ledger](initializing-ledger/SKILL.md)
 - [making-decisions](making-decisions/SKILL.md)
-- [nci-analysis](nci-analysis/SKILL.md)
 - [new-pipeline](new-pipeline/SKILL.md)
 - [py-audit-bot](py-audit-bot/SKILL.md)
 - [py-architecture-debt-bot](py-architecture-debt-bot/SKILL.md)
