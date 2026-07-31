@@ -27,7 +27,6 @@ from memory.rag.filters import (
 )
 from memory.rag.validation import (
     calculate_source_identities_sha256,
-    calculate_source_surface_sha256,
     capture_rag_git_identity,
     require_valid_rag_manifest,
     validate_rag_manifest_files,
@@ -39,7 +38,7 @@ DEFAULT_OUTPUT_DIR = MEMORY_ROOT / "derived" / "rag" / "manifests"
 GENERATOR_VERSION = 2
 DEFAULT_BUILD_SCOPE = "full"
 WORKFLOW_BUILD_SCOPE = "workflow"
-SOURCE_STABILITY_MAX_ATTEMPTS = 3
+SOURCE_RECONCILIATION_MAX_ATTEMPTS = 10
 
 
 class _SourceSurfaceChangedError(RuntimeError):
@@ -218,6 +217,34 @@ def _build_standard_source_records(
     return corpus_source, chunk_records
 
 
+def _build_source_records(
+    root: Path,
+    rel_path: Path,
+    *,
+    owner_specs: list[tuple[str, tuple[str, ...]]],
+    zone_specs: list[tuple[str, tuple[str, ...]]],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    rel_path_str = rel_path.as_posix()
+    source_type = infer_source_type(rel_path)
+    owner = _lookup_owner(rel_path_str, owner_specs)
+    repo_zone = _lookup_repo_zone(rel_path_str, zone_specs)
+    if source_type == "devin_wiki":
+        return build_devin_wiki_records(
+            root,
+            rel_path,
+            owner=owner,
+            repo_zone=repo_zone,
+        )
+    return _build_standard_source_records(
+        root,
+        rel_path,
+        source_type=source_type,
+        domain=infer_domain(rel_path),
+        owner=owner,
+        repo_zone=repo_zone,
+    )
+
+
 def build_rag_manifests(
     root: Path,
     *,
@@ -234,37 +261,85 @@ def build_rag_manifests(
     )
     owner_specs = _load_owner_specs()
     zone_specs = _load_repo_zone_specs()
-    corpus_sources: list[dict[str, Any]] = []
-    chunk_records: list[dict[str, Any]] = []
-
+    corpus_by_path: dict[str, dict[str, Any]] = {}
+    chunks_by_path: dict[str, list[dict[str, Any]]] = {}
     for rel_path in sources:
-        rel_path_str = rel_path.as_posix()
-        source_type = infer_source_type(rel_path)
-        domain = infer_domain(rel_path)
-        owner = _lookup_owner(rel_path_str, owner_specs)
-        repo_zone = _lookup_repo_zone(rel_path_str, zone_specs)
-        if source_type == "devin_wiki":
-            corpus_source, chunk_rows = build_devin_wiki_records(
-                root,
-                rel_path,
-                owner=owner,
-                repo_zone=repo_zone,
-            )
-            corpus_sources.append(corpus_source)
-            chunk_records.extend(chunk_rows)
-            continue
-        corpus_source, chunk_rows = _build_standard_source_records(
+        corpus_source, chunk_rows = _build_source_records(
             root,
             rel_path,
-            source_type=source_type,
-            domain=domain,
-            owner=owner,
-            repo_zone=repo_zone,
+            owner_specs=owner_specs,
+            zone_specs=zone_specs,
         )
-        corpus_sources.append(corpus_source)
-        chunk_records.extend(chunk_rows)
+        rel_path_str = rel_path.as_posix()
+        corpus_by_path[rel_path_str] = corpus_source
+        chunks_by_path[rel_path_str] = chunk_rows
 
-    source_paths = [source["source_path"] for source in corpus_sources]
+    for attempt in range(1, SOURCE_RECONCILIATION_MAX_ATTEMPTS + 1):
+        sources = _resolve_rag_sources(
+            root,
+            build_scope=build_scope,
+            focus_query=focus_query,
+            max_sources=max_sources,
+        )
+        source_paths = {path.as_posix() for path in sources}
+        for removed_path in set(corpus_by_path) - source_paths:
+            corpus_by_path.pop(removed_path)
+            chunks_by_path.pop(removed_path)
+
+        rebuild_paths: list[Path] = []
+        current_identities: list[dict[str, str]] = []
+        for rel_path in sources:
+            rel_path_str = rel_path.as_posix()
+            captured = corpus_by_path.get(rel_path_str)
+            try:
+                current_hash = content_hash(
+                    (root / rel_path).read_text(encoding="utf-8")
+                )
+            except FileNotFoundError:
+                rebuild_paths = []
+                break
+            current_identities.append(
+                {
+                    "content_hash": current_hash,
+                    "source_path": rel_path_str,
+                }
+            )
+            if captured is None or captured.get("content_hash") != current_hash:
+                rebuild_paths.append(rel_path)
+        else:
+            try:
+                for rel_path in rebuild_paths:
+                    corpus_source, chunk_rows = _build_source_records(
+                        root,
+                        rel_path,
+                        owner_specs=owner_specs,
+                        zone_specs=zone_specs,
+                    )
+                    rel_path_str = rel_path.as_posix()
+                    corpus_by_path[rel_path_str] = corpus_source
+                    chunks_by_path[rel_path_str] = chunk_rows
+            except FileNotFoundError:
+                continue
+            if not rebuild_paths:
+                current_source_hash = calculate_source_identities_sha256(
+                    current_identities
+                )
+                break
+            continue
+        if attempt == SOURCE_RECONCILIATION_MAX_ATTEMPTS:
+            raise _SourceSurfaceChangedError(
+                "RAG sources kept changing while the manifest snapshot was reconciled"
+            )
+    else:
+        raise _SourceSurfaceChangedError(
+            "RAG sources kept changing while the manifest snapshot was reconciled"
+        )
+
+    ordered_paths = [path.as_posix() for path in sources]
+    corpus_sources = [corpus_by_path[path] for path in ordered_paths]
+    chunk_records = [
+        chunk for path in ordered_paths for chunk in chunks_by_path[path]
+    ]
     captured_source_hash = calculate_source_identities_sha256(
         [
             {
@@ -274,15 +349,9 @@ def build_rag_manifests(
             for source in corpus_sources
         ]
     )
-    try:
-        current_source_hash = calculate_source_surface_sha256(root, source_paths)
-    except FileNotFoundError as exc:
-        raise _SourceSurfaceChangedError(
-            "RAG sources changed while the manifest snapshot was being built"
-        ) from exc
     if captured_source_hash != current_source_hash:
         raise _SourceSurfaceChangedError(
-            "RAG sources changed while the manifest snapshot was being built"
+            "RAG sources changed after the manifest snapshot was reconciled"
         )
     source_identity = {
         **capture_rag_git_identity(root),
@@ -396,43 +465,36 @@ def write_rag_manifests(
     """Build, validate, and transactionally publish deterministic manifests."""
     _guard_workflow_output_scope(root, output_dir, build_scope)
     output_dir.parent.mkdir(parents=True, exist_ok=True)
-    for attempt in range(1, SOURCE_STABILITY_MAX_ATTEMPTS + 1):
-        try:
-            catalog, chunks = build_rag_manifests(
+    catalog, chunks = build_rag_manifests(
+        root,
+        build_scope=build_scope,
+        focus_query=focus_query,
+        max_sources=max_sources,
+    )
+    staging_dir = Path(
+        tempfile.mkdtemp(prefix=".rag-manifests-", dir=output_dir.parent)
+    )
+    try:
+        staged_catalog = staging_dir / "corpus_catalog.json"
+        staged_chunks = staging_dir / "chunks.jsonl"
+        staged_catalog.write_text(_serialize_catalog(catalog), encoding="utf-8")
+        staged_chunks.write_text(_serialize_chunks(chunks), encoding="utf-8")
+        require_valid_rag_manifest(
+            validate_rag_manifest_files(
                 root,
-                build_scope=build_scope,
-                focus_query=focus_query,
-                max_sources=max_sources,
-            )
-        except _SourceSurfaceChangedError:
-            if attempt == SOURCE_STABILITY_MAX_ATTEMPTS:
-                raise
-            continue
-        staging_dir = Path(
-            tempfile.mkdtemp(prefix=".rag-manifests-", dir=output_dir.parent)
-        )
-        try:
-            staged_catalog = staging_dir / "corpus_catalog.json"
-            staged_chunks = staging_dir / "chunks.jsonl"
-            staged_catalog.write_text(_serialize_catalog(catalog), encoding="utf-8")
-            staged_chunks.write_text(_serialize_chunks(chunks), encoding="utf-8")
-            require_valid_rag_manifest(
-                validate_rag_manifest_files(
-                    root,
-                    staged_catalog,
-                    staged_chunks,
-                    require_build_scope=build_scope,
-                    verify_sources=False,
-                )
-            )
-            return _publish_manifest_pair(
                 staged_catalog,
                 staged_chunks,
-                output_dir,
+                require_build_scope=build_scope,
+                verify_sources=False,
             )
-        finally:
-            shutil.rmtree(staging_dir, ignore_errors=True)
-    raise AssertionError("unreachable RAG manifest retry state")
+        )
+        return _publish_manifest_pair(
+            staged_catalog,
+            staged_chunks,
+            output_dir,
+        )
+    finally:
+        shutil.rmtree(staging_dir, ignore_errors=True)
 
 
 def _build_parser() -> argparse.ArgumentParser:
