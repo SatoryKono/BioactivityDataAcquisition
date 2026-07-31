@@ -114,7 +114,7 @@
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
-      "next_step": "Retain as a bounded passport path migration helper for compatibility checks; keep it supporting and remove it once underscore-path migration evidence is no longer required."
+      "next_step": "Retain as the implementation behind the canonical `python -m scripts.docs rename-passport-paths` command; keep contributor execution routed through the docs command surface."
     },
     "scripts/docs/passports/source_facts.py": {
       "owner": "@bioetl-platform",

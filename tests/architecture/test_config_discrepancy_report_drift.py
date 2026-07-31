@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.schema.generate_config_matrix import main
+from scripts.schema.generate_config_matrix import _render_parameter_matrix, main
 
 pytestmark = [pytest.mark.architecture, pytest.mark.timeout(300)]
 
@@ -30,3 +30,15 @@ def test_config_discrepancy_report_matches_deterministic_generator() -> None:
         "Config comparison matrix/discrepancy report drifted from the generator. "
         "Regenerate with: python -m scripts.schema generate-config-matrix --update"
     )
+
+
+def test_config_matrix_uses_repository_canonical_lf_newlines() -> None:
+    """Generated CSV bytes must survive Git's eol=lf normalization unchanged."""
+    matrix = _render_parameter_matrix(
+        active_configs={"example": {"field": "value"}},
+        all_keys=["field"],
+        config_names=["example"],
+    )
+
+    assert "\r" not in matrix
+    assert matrix == "Parameter Path,example\nfield,value\n"

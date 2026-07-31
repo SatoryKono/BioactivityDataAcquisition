@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-31T10:01:17.360852+00:00",
+  "generated_at": "2026-07-31T13:06:33.007595+00:00",
   "summary": {
     "total_scripts": 568,
     "status_counts": {
@@ -4816,11 +4816,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 424,
+          "line": 449,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/data_quality/run_silver_gold_filter_parity.py --check"
         },
@@ -4832,9 +4832,15 @@
         },
         {
           "path": "tests/integration/ci/test_silver_gold_filter_parity.py",
-          "line": 21,
+          "line": 23,
           "source_group": "tests",
           "text": "from scripts.data_quality.run_silver_gold_filter_parity import ("
+        },
+        {
+          "path": "tests/integration/ci/test_silver_gold_filter_parity.py",
+          "line": 109,
+          "source_group": "tests",
+          "text": "str(PROJECT_ROOT / \"scripts/data_quality/run_silver_gold_filter_parity.py\"),"
         }
       ],
       "owner": "@bioetl-platform",
@@ -8356,7 +8362,7 @@
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-09-30",
-      "next_step": "Retain as a bounded passport path migration helper for compatibility checks; keep it supporting and remove it once underscore-path migration evidence is no longer required."
+      "next_step": "Retain as the implementation behind the canonical `python -m scripts.docs rename-passport-paths` command; keep contributor execution routed through the docs command surface."
     },
     {
       "path": "scripts/docs/passports/source_facts.py",
@@ -8670,13 +8676,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 387,
+          "line": 412,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 542,
+          "line": 567,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -9100,7 +9106,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1028,
+          "line": 1053,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -11522,7 +11528,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 430,
+          "line": 455,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -11891,7 +11897,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 371,
+          "line": 391,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict"
         },
@@ -12576,7 +12582,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 591,
+          "line": 616,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -15360,7 +15366,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 368,
+          "line": 387,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -15417,7 +15423,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 360,
+          "line": 379,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \\"
         },
@@ -19877,7 +19883,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 421,
+          "line": 446,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema generate-config-matrix --check"
         }
@@ -20062,7 +20068,7 @@
           "path": "tests/architecture/test_config_discrepancy_report_drift.py",
           "line": 17,
           "source_group": "tests",
-          "text": "from scripts.schema.generate_config_matrix import main"
+          "text": "from scripts.schema.generate_config_matrix import _render_parameter_matrix, main"
         },
         {
           "path": "tests/architecture/test_config_surface_entity_residual_plateau.py",

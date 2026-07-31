@@ -475,6 +475,19 @@ def test_tests_workflow_runs_strict_test_audit_preflight_before_governance_close
 
 
 @pytest.mark.architecture
+def test_governance_preflight_uses_approved_lfs_conditional_contract() -> None:
+    """Governance must mirror the dedicated VCR lane's LFS availability seam."""
+    workflow = (ROOT / ".github" / "workflows" / "tests.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "id: governance_lfs_pull" in workflow
+    assert "if: steps.governance_lfs_pull.outcome == 'success'" in workflow
+    assert "if: steps.governance_lfs_pull.outcome != 'success'" in workflow
+    assert "Non-VCR governance gates remain blocking." in workflow
+
+
+@pytest.mark.architecture
 def test_test_governance_artifacts_match_live_collector(
     cached_subprocess_run,
 ) -> None:
