@@ -931,16 +931,10 @@ nav:
               - "Skills Catalog": 00-project/ai/skills/local/SKILLS-CATALOG.md
               - "Skill": 00-project/ai/skills/local/agent-orchestration/SKILL.md
               - "Capability Discovery": 00-project/ai/skills/local/capability-discovery/SKILL.md
-              - "Create PR": 00-project/ai/skills/local/create-pr/SKILL.md
               - "Deep Research": 00-project/ai/skills/local/deep-research/SKILL.md
               - "Evidence & Decisions":
-                  - "Collecting Evidence": 00-project/ai/skills/local/collecting-evidence/SKILL.md
                   - "Hierarchical Evidence Orchestration": 00-project/ai/skills/local/hierarchical-evidence-orchestration/SKILL.md
-                  - "Synthesizing Pillars": 00-project/ai/skills/local/synthesizing-pillars/SKILL.md
-                  - "Making Decisions": 00-project/ai/skills/local/making-decisions/SKILL.md
-                  - "Generating Constrained Specs": 00-project/ai/skills/local/generating-constrained-specs/SKILL.md
-                  - "Initializing Ledger": 00-project/ai/skills/local/initializing-ledger/SKILL.md
-                  - "NCI Analysis": 00-project/ai/skills/local/nci-analysis/SKILL.md
+                  - "Research Workflow": 00-project/ai/skills/local/research-workflow/SKILL.md
               - "Deep Research Critique Framework": 00-project/ai/skills/local/deep-research/references/critique-framework.md
               - "Deep Research Report Templates": 00-project/ai/skills/local/deep-research/references/report-templates.md
               - "Deep Research Search Patterns": 00-project/ai/skills/local/deep-research/references/search-patterns.md
@@ -960,7 +954,6 @@ nav:
               - "Skill": 00-project/ai/skills/local/py-test-bot/SKILL.md
               - "Skill": 00-project/ai/skills/local/py-test-swarm/SKILL.md
               - "Repo Config": 00-project/ai/skills/local/repo-config/SKILL.md
-              - "Suggest Users": 00-project/ai/skills/local/suggest-users/SKILL.md
               - "L1 Playbook": 00-project/ai/skills/local/py-test-swarm/references/l1-playbook.md
               - "L2 L3 Task Brief": 00-project/ai/skills/local/py-test-swarm/references/l2-l3-task-brief.md
               - "Report Templates": 00-project/ai/skills/local/py-test-swarm/references/report-templates.md

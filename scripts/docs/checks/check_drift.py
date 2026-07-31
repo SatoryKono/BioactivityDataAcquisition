@@ -260,7 +260,6 @@ SKILL_REQUIRED_TOKENS: tuple[str, ...] = (
     POST_CHANGE_TOKEN,
 )
 WRITE_CAPABLE_SKILL_PATHS = (
-    ".codex/skills/create-pr/SKILL.md",
     ".codex/skills/repo-config/SKILL.md",
     ".codex/skills/grafana-dashboard-extension/SKILL.md",
     ".codex/skills/prometheus-alert-rule-editor/SKILL.md",
