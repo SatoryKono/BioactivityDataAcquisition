@@ -1124,14 +1124,7 @@
     }
   },
   "assertless_total_candidates": 106,
-  "budget_violations": [
-    {
-      "actual": 5,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1305,14 +1298,8 @@
     ]
   },
   "intentional_no_exception_contract": 90,
-  "markerless_examples": [
-    "tests/unit/memory/test_check_freshness.py:10",
-    "tests/unit/memory/test_mcp_scope.py:12",
-    "tests/unit/memory/test_mcp_scope.py:28",
-    "tests/unit/memory/test_mcp_scope.py:44",
-    "tests/unit/memory/test_vendor_memory_registry.py:12"
-  ],
-  "markerless_test_functions": 5,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2308,14 +2295,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/memory/test_check_freshness.py:10",
-      "tests/unit/memory/test_mcp_scope.py:12",
-      "tests/unit/memory/test_mcp_scope.py:28",
-      "tests/unit/memory/test_mcp_scope.py:44",
-      "tests/unit/memory/test_vendor_memory_registry.py:12"
-    ],
-    "markerless_test_functions": 5,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2380,7 +2361,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "4925b9d672cbdf608df3ebdb2994ffcaaa26e5bdcd16fc444f8e2bc980cdea11",
+  "source_tree_sha256": "d0df7a12ae4ab16403dadaa731dea2a216724844252e841cf0038b09395784bf",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 106,
@@ -2389,14 +2370,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 90,
-    "markerless_examples": [
-      "tests/unit/memory/test_check_freshness.py:10",
-      "tests/unit/memory/test_mcp_scope.py:12",
-      "tests/unit/memory/test_mcp_scope.py:28",
-      "tests/unit/memory/test_mcp_scope.py:44",
-      "tests/unit/memory/test_vendor_memory_registry.py:12"
-    ],
-    "markerless_test_functions": 5,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
