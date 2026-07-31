@@ -98,6 +98,7 @@ runtime change.
 - [hierarchical-evidence-orchestration](hierarchical-evidence-orchestration/SKILL.md)
 - [capability-discovery](capability-discovery/SKILL.md)
 - [create-pr](create-pr/SKILL.md)
+- [collecting-evidence](collecting-evidence/SKILL.md)
 - [research-workflow](research-workflow/SKILL.md)
 - [deep-research](deep-research/SKILL.md)
 - [hierarchical-evidence-orchestration](hierarchical-evidence-orchestration/SKILL.md)
