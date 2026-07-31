@@ -1,4 +1,0 @@
-interface:
-  display_name: "Initializing Ledger"
-  short_description: "Initialize evidence ledgers"
-  default_prompt: "Use $initializing-ledger to create a traceable evidence and decision ledger workspace from a project brief."
