@@ -524,6 +524,31 @@ class TestCsvExporterInternals:
         assert target.exists()
         assert "id" in target.read_text(encoding="utf-8")
 
+    def test_atomic_csv_write_stages_outside_target_on_windows(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = pa.Table.from_pydict({"id": [1]})
+        target = tmp_path / "table.csv"
+        write_options = pv.WriteOptions(include_header=True, delimiter=",")
+        original_mkstemp = tempfile.mkstemp
+        observed_dirs: list[object] = []
+
+        def _recording_mkstemp(**kwargs: object) -> tuple[int, str]:
+            observed_dirs.append(kwargs.get("dir"))
+            return original_mkstemp(
+                suffix=str(kwargs["suffix"]),
+                prefix=str(kwargs["prefix"]),
+            )
+
+        monkeypatch.setattr(csv_exporter_io_ops.os, "name", "nt")
+        monkeypatch.setattr(tempfile, "mkstemp", _recording_mkstemp)
+
+        exporter._atomic_csv_write(table, target, write_options)
+
+        assert observed_dirs == [None]
+        assert target.exists()
+
     def test_atomic_csv_write_locked_target_uses_copy_backup_on_windows(
         self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
     ) -> None:
