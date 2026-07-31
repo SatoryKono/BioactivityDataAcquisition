@@ -24,7 +24,9 @@ ______________________________________________________________________
 - **Deterministic Writes**: Reproducible outputs and deterministic retries ([ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md)).
 - **Run Control Plane**: Immutable run manifests and append-only ledgers for provenance, replay analysis, and artifact linkage ([ADR-044](docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)).
 - **Observability by Design**: Metrics, tracing, and logging ports ([ADR-017](docs/02-architecture/decisions/ADR-017-observability-architecture.md)).
-- **Operator Dashboards**: Unified L0/L1 Grafana default window `time.from=now-12h` (`time.to=now`, `refresh=30s`) including `bioetl-control-plane-v1`; `bioetl-silver-reject-explorer` is the explicit `time.from=now-24h` forensic exception (see `docs/03-guides/dashboards/variables-guide.md`).
+- **Unified Entity Configuration**: All 21 standard pipeline configs consolidated into single `configs/entities/{provider}/{entity}.yaml` files ([ADR-039](docs/02-architecture/decisions/ADR-039-unified-entity-config-format.md)).
+- **Monitoring Surface Reduction**: Opt-in monitoring stack (Prometheus/Pushgateway/Grafana/renderer) with Loki/Tempo/Quarantine Explorer removed from default shipping (2026-07-23).
+- **Operator Dashboards**: Unified L0/L1 Grafana default window `time.from=now-12h` (`time.to=now`, `refresh=30s`) including `bioetl-control-plane-v1`; record-level quarantine forensics via CLI `bioetl quarantine inspect`.
 - **KPI Ownership Contract**: Canonical/mirror KPI ownership is machine-readable in `docs/03-guides/dashboards/contracts/navigation-links.yaml` (`kpi_ownership`), with integration tests enforcing mirror fallback links `Open canonical KPI view`.
 - **Unified HTTP Client**: Standardized rate limiting, retry, and telemetry ([ADR-032](docs/02-architecture/decisions/ADR-032-unified-http-client.md)).
 - **Strict Governance**: Comprehensive rules for schema evolution, data contracts, and operational procedures.

@@ -88,7 +88,10 @@ def test_backup_rejects_symlink_that_escapes_source_boundary(tmp_path: Path) -> 
     source = _source(tmp_path)
     outside = tmp_path / "outside-secret.txt"
     outside.write_text("must not be copied", encoding="utf-8")
-    (source / "external-link").symlink_to(outside)
+    try:
+        (source / "external-link").symlink_to(outside)
+    except OSError as exc:
+        pytest.skip(f"symlink creation is unavailable in this environment: {exc}")
 
     with pytest.raises(ValueError, match="must not contain symlinks"):
         create_backup(source, tmp_path / "backups")
