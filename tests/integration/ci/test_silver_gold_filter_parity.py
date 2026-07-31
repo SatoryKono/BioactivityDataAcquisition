@@ -15,6 +15,8 @@ from __future__ import annotations
 from copy import deepcopy
 import json
 from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 
@@ -70,6 +72,7 @@ def test_silver_gold_filter_parity_cli_check_round_trip(tmp_path: Path) -> None:
         )
         == 0
     )
+
     assert (
         parity_main(
             [
@@ -97,6 +100,22 @@ def test_silver_gold_filter_parity_cli_check_round_trip(tmp_path: Path) -> None:
         )
         == 1
     )
+
+
+def test_silver_gold_filter_parity_script_path_entry_point() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(PROJECT_ROOT / "scripts/data_quality/run_silver_gold_filter_parity.py"),
+            "--check",
+        ],
+        cwd=PROJECT_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
 
 
 def test_silver_gold_filter_parity_enforces_gold_pk_content_hash_parity() -> None:
