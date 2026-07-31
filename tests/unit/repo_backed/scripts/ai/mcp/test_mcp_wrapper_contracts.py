@@ -142,6 +142,17 @@ def _clean_env(**updates: str | None) -> dict[str, str]:
     return env
 
 
+def _skip_if_wsl_service_is_unavailable(
+    result: subprocess.CompletedProcess[str],
+) -> None:
+    """Skip Windows-only probes when WSL fails before Bash can start."""
+    # A process launched inside WSL returns a POSIX status in the 0..255 range.
+    # Windows reports a launcher/service failure as signed or unsigned DWORD -1;
+    # its localized UTF-16 diagnostic is not stable enough to match reliably.
+    if result.returncode in {-1, 4294967295}:
+        pytest.skip("WSL service is unavailable before the Bash probe can start")
+
+
 def _run_bash(
     script: str, *, env: dict[str, str] | None = None
 ) -> subprocess.CompletedProcess[str]:
@@ -245,13 +256,15 @@ def _run_bash(
                 "--norc",
                 _bash_path(script_path),
             ]
-            return subprocess.run(
+            result = subprocess.run(
                 command,
                 cwd=ROOT,
                 text=True,
                 capture_output=True,
                 check=False,
             )
+            _skip_if_wsl_service_is_unavailable(result)
+            return result
         finally:
             script_path.unlink(missing_ok=True)
     return subprocess.run(
