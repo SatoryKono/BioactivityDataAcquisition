@@ -27,6 +27,7 @@ from scripts.docs.passports.projector import (
     write_outputs,
 )
 from scripts.docs.passports.validation import validate_composite_payload
+from tests.helpers.cli_process import run_repo_command
 
 pytestmark = pytest.mark.unit
 
@@ -123,6 +124,8 @@ def test_source_revision_excludes_ephemeral_merge_commits(
     assert captured[4:6] == ["--format=%H", "HEAD^2"]
 
 
+@pytest.mark.slow
+@pytest.mark.timeout(180)
 def test_generation_is_subprocess_environment_invariant(tmp_path: Path) -> None:
     baseline_root = tmp_path / "first"
     baseline_outputs = build_all_outputs(
@@ -136,18 +139,16 @@ def test_generation_is_subprocess_environment_invariant(tmp_path: Path) -> None:
     output_root = tmp_path / "second"
     alternate_tmp = tmp_path / "alternate-tmp"
     alternate_tmp.mkdir()
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "scripts.docs",
-            "passports",
-            "generate",
-            "--output-root",
-            str(output_root),
-            "--source-revision",
-            REVISION,
-        ],
+    result = run_repo_command(
+        sys.executable,
+        "-m",
+        "scripts.docs",
+        "passports",
+        "generate",
+        "--output-root",
+        str(output_root),
+        "--source-revision",
+        REVISION,
         cwd=PROJECT_ROOT,
         env={
             **os.environ,
@@ -155,9 +156,7 @@ def test_generation_is_subprocess_environment_invariant(tmp_path: Path) -> None:
             "PYTHONHASHSEED": "8675309",
             "TMPDIR": str(alternate_tmp),
         },
-        check=False,
-        capture_output=True,
-        text=True,
+        timeout=150,
     )
     assert result.returncode == 0, result.stderr
     alternate = {

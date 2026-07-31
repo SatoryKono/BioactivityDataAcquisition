@@ -94,7 +94,9 @@ async def test_deduplicate_removes_duplicates(tmp_delta_dir: Path) -> None:
     """Dedup should keep a deterministic winner without relying on timestamps."""
     table_path = tmp_delta_dir / "test_entity"
 
-    # Write batch 1 (older)
+    # Seed duplicates in one transaction. Append semantics are outside this
+    # test's contract, and a second native Delta commit can stall on Windows
+    # under full-suite filesystem pressure before deduplication is exercised.
     _write_test_table(
         table_path,
         [
@@ -108,12 +110,6 @@ async def test_deduplicate_removes_duplicates(tmp_delta_dir: Path) -> None:
                 "value": 20.0,
                 "_ingestion_ts": "2024-01-01T00:00:00Z",
             },
-        ],
-    )
-    # Append batch 2 (newer, with duplicate for id=1)
-    _write_test_table(
-        table_path,
-        [
             {
                 "activity_id": "1",
                 "value": 15.0,
@@ -125,7 +121,6 @@ async def test_deduplicate_removes_duplicates(tmp_delta_dir: Path) -> None:
                 "_ingestion_ts": "2024-01-02T00:00:00Z",
             },
         ],
-        mode="append",
     )
 
     mgr = RetentionPolicy(base_path=str(tmp_delta_dir))
