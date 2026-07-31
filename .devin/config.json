@@ -105,7 +105,7 @@
     "deepwiki": {
       "type": "http",
       "url": "https://mcp.deepwiki.com/mcp",
-      "env_http_headers": {
+      "headers": {
         "x-deepwiki-api-key": "$DEEPWIKI_API_KEY",
         "x-deepwiki-organisation-id": "$DEEPWIKI_ORGANISATION_ID"
       },

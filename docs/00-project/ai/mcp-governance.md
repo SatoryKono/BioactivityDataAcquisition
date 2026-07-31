@@ -55,10 +55,11 @@ docker, neo4j-cypher, neo4j-memory,
 deja, adr-analysis, mutmut, code-analyzer, github-actions,
 deepwiki, ref
 
-`ref` uses the key-free `https://api.ref.tools/mcp` endpoint. Local clients
-authenticate through OAuth or, for Codex, an `env_http_headers` reference to
-`REF_TOOL_API_KEY`. Ref API key values must not be embedded in tracked or
-generated MCP configuration.
+`deepwiki` uses environment-backed header references to `DEEPWIKI_API_KEY` and
+`DEEPWIKI_ORGANISATION_ID`. `ref` uses the key-free
+`https://api.ref.tools/mcp` endpoint and authenticates through OAuth or an
+environment-backed `REF_TOOL_API_KEY` header. Secret values must not be embedded
+in tracked or generated MCP configuration.
 
 ## Remote MCP (untrusted content)
 
