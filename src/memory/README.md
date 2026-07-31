@@ -209,6 +209,7 @@ Run a curated review loop report:
 ```bash
 python -m memory.tooling.review_curated
 python -m memory.tooling.review_curated --json
+python -m memory.tooling.check_freshness --json
 python -m memory.tooling.workflow review-curated
 python -m memory.tooling.workflow review-curated --json
 ```
