@@ -15,7 +15,7 @@ Unified Observability Pattern:
 
 from __future__ import annotations
 
-__all__ = ["LifecyclePhase", "PipelineObserver", "PipelineObserverIdentity"]
+__all__ = ["LifecyclePhase", "PipelineObserver", "PipelineObserverParams"]
 
 import time
 from contextlib import AbstractContextManager
@@ -70,7 +70,7 @@ PROBE_MODE_FALLBACK_COUNTER = "bioetl_probe_mode_fallback_total"
 
 
 @dataclass(frozen=True, slots=True)
-class PipelineObserverIdentity:
+class PipelineObserverParams:
     """Identity bag for :class:`PipelineObserver` (ARCH-CONT-04 / #6760)."""
 
     pipeline_name: str
@@ -258,7 +258,7 @@ class PipelineObserver(
 
     def __init__(
         self,
-        identity: PipelineObserverIdentity,
+        identity: PipelineObserverParams,
         metrics: MetricsPort,
         logger: LoggerPort,
         clock: ClockPort,
@@ -266,7 +266,7 @@ class PipelineObserver(
     ) -> None:
         """Initialize observer from an identity bag and explicit collaborators.
 
-        Composition roots must pass :class:`PipelineObserverIdentity`. Prefer
+        Composition roots must pass :class:`PipelineObserverParams`. Prefer
         :meth:`from_parts` for legacy call sites that still assemble identity
         fields individually (ARCH-CR-06 / #6868).
         """
@@ -311,12 +311,12 @@ class PipelineObserver(
     ) -> PipelineObserver:
         """Compatibility factory for callers that assemble identity fields.
 
-        Prefer constructing :class:`PipelineObserverIdentity` at composition
+        Prefer constructing :class:`PipelineObserverParams` at composition
         roots; this adapter preserves a bag-compat path without expanding the
         primary constructor arity (ARCH-CR-06 / #6868).
         """
         return cls(
-            identity=PipelineObserverIdentity(
+            identity=PipelineObserverParams(
                 pipeline_name=pipeline_name,
                 run_id=run_id,
                 run_type=run_type,

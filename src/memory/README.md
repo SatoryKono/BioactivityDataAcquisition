@@ -25,7 +25,10 @@ storage (`storage.py`), security checks (`security.py`), immutable evidence and
 decisions (`evidence.py`), bounded handoff (`handoff.py`), and consent-gated
 user memory (`user_memory.py`).
 
-External vendor conversation state and retention remain **NOT_PROVEN**.
+External vendor conversation state is governed by
+`catalog/vendor_memory_registry.yaml`. Documented policy is kept separate from
+account-backed runtime verification; unexecuted deletion and isolation tests
+remain explicitly `BLOCKED_EXTERNAL`, never silently promoted to verified.
 
 ## Initial scope
 
@@ -209,6 +212,7 @@ Run a curated review loop report:
 ```bash
 python -m memory.tooling.review_curated
 python -m memory.tooling.review_curated --json
+python -m memory.tooling.check_freshness --json
 python -m memory.tooling.workflow review-curated
 python -m memory.tooling.workflow review-curated --json
 ```

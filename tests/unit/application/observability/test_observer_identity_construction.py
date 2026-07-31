@@ -35,7 +35,7 @@ import pytest
 
 from bioetl.application.observability.observer import (
     PipelineObserver,
-    PipelineObserverIdentity,
+    PipelineObserverParams,
 )
 from bioetl.domain.types import RunID, RunType
 
@@ -51,7 +51,7 @@ def _ports() -> tuple[SimpleNamespace, SimpleNamespace, SimpleNamespace]:
 
 def test_pipeline_observer_from_identity_bag() -> None:
     metrics, logger, clock = _ports()
-    identity = PipelineObserverIdentity(
+    identity = PipelineObserverParams(
         pipeline_name="chembl_activity",
         run_id=RunID("run-1"),
         run_type=RunType.INCREMENTAL,

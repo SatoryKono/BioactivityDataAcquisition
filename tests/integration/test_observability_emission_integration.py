@@ -20,7 +20,7 @@ import pytest
 from bioetl.application.observability.observer import (
     LifecyclePhase,
     PipelineObserver,
-    PipelineObserverIdentity,
+    PipelineObserverParams,
 )
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.ports.noop import NoOpTracing
@@ -168,7 +168,7 @@ def test_pipeline_observer_emits_metrics_and_logs_through_recording_ports() -> N
     metrics = RecordingMetrics()
     logger = RecordingLogger()
     observer = PipelineObserver(
-        identity=PipelineObserverIdentity(
+        identity=PipelineObserverParams(
             pipeline_name="chembl_activity",
             run_id=deterministic_uuid("observability.integration.run"),
             run_type=RunType.INCREMENTAL,
@@ -229,7 +229,7 @@ def test_pipeline_observer_emits_tracing_spans_through_recording_port() -> None:
     logger = RecordingLogger()
     tracer = RecordingTracing()
     observer = PipelineObserver(
-        identity=PipelineObserverIdentity(
+        identity=PipelineObserverParams(
             pipeline_name="chembl_activity",
             run_id=deterministic_uuid("observability.integration.tracing.run"),
             run_type=RunType.BACKFILL,
@@ -282,7 +282,7 @@ def test_pipeline_observer_emits_failure_signals_through_recording_ports() -> No
     logger = RecordingLogger()
     tracer = RecordingTracing()
     observer = PipelineObserver(
-        identity=PipelineObserverIdentity(
+        identity=PipelineObserverParams(
             pipeline_name="chembl_activity",
             run_id=deterministic_uuid("observability.integration.failure.run"),
             run_type=RunType.INCREMENTAL,
@@ -339,7 +339,7 @@ def test_pipeline_observer_records_failure_span_and_error_metrics() -> None:
     logger = RecordingLogger()
     tracer = RecordingTracing()
     observer = PipelineObserver(
-        identity=PipelineObserverIdentity(
+        identity=PipelineObserverParams(
             pipeline_name="chembl_activity",
             run_id=deterministic_uuid("observability.integration.failure.run"),
             run_type=RunType.INCREMENTAL,
@@ -379,7 +379,7 @@ def test_composite_pipeline_observer_emits_composite_provider_labels() -> None:
     metrics = RecordingMetrics()
     logger = RecordingLogger()
     observer = PipelineObserver(
-        identity=PipelineObserverIdentity(
+        identity=PipelineObserverParams(
             pipeline_name="composite_publication",
             run_id=deterministic_uuid("observability.integration.composite.run"),
             run_type=RunType.INCREMENTAL,
@@ -414,7 +414,7 @@ def test_pipeline_observer_emits_checkpoint_finalize_execution_span() -> None:
     logger = RecordingLogger()
     tracer = RecordingTracing()
     observer = PipelineObserver(
-        identity=PipelineObserverIdentity(
+        identity=PipelineObserverParams(
             pipeline_name="chembl_activity",
             run_id=deterministic_uuid("observability.integration.checkpoint.run"),
             run_type=RunType.INCREMENTAL,

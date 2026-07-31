@@ -33,7 +33,7 @@ _OPERATION_ERRORS = SHARED_OPERATION_ERRORS
 
 
 @dataclass(frozen=True, slots=True)
-class CheckpointRuntimeIdentity:
+class CheckpointRuntimeParams:
     """Identity and resume policy bag for :class:`CheckpointRuntimeService`."""
 
     pipeline_name: str
@@ -55,7 +55,7 @@ class CheckpointRuntimeService:
         self,
         checkpoint_port: CheckpointPort,
         logger: LoggerPort,
-        identity: CheckpointRuntimeIdentity,
+        identity: CheckpointRuntimeParams,
         *,
         metrics: MetricsPort | None = None,
         clock: ClockPort | None = None,
@@ -206,6 +206,6 @@ class CheckpointRuntimeService:
 
 
 __all__ = [
-    "CheckpointRuntimeIdentity",
+    "CheckpointRuntimeParams",
     "CheckpointRuntimeService",
 ]

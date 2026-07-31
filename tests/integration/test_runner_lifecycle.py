@@ -37,7 +37,7 @@ from bioetl.application.core._runner_dependency_support import (
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.observability.observer import (
     PipelineObserver,
-    PipelineObserverIdentity,
+    PipelineObserverParams,
 )
 from bioetl.application.services.medallion.medallion_lifecycle import (
     MedallionLifecycleService,
@@ -423,7 +423,7 @@ class TestPipelineRunnerLifecycle:
             logger=mock_logger,
         )
         observer = PipelineObserver(
-            identity=PipelineObserverIdentity(
+            identity=PipelineObserverParams(
                 pipeline_name=config.pipeline_name,
                 run_id=context.run_id,
                 run_type=context.run_type,

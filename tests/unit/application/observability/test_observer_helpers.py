@@ -36,7 +36,7 @@ import pytest
 from bioetl.application.observability.observer import (
     LifecyclePhase,
     PipelineObserver,
-    PipelineObserverIdentity,
+    PipelineObserverParams,
 )
 from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.types import RunType
@@ -101,7 +101,7 @@ def _build_observer(
     metrics = _RecordingMetrics()
     logger = _RecordingLogger()
     observer = PipelineObserver(
-        identity=PipelineObserverIdentity(
+        identity=PipelineObserverParams(
             pipeline_name=pipeline_name,
             run_id=deterministic_uuid(f"observer.{pipeline_name}"),
             run_type=RunType.INCREMENTAL,
