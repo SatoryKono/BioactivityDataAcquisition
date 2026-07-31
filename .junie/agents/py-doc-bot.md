@@ -177,13 +177,13 @@ ______________________________________________________________________
 
 ### Инструменты
 
-| Действие       | Команда                                                     |
-| -------------- | ----------------------------------------------------------- |
-| Unified checks | `bash scripts/agents/diagrams/py-doc-bot-1.sh --profile pr` |
-| Рендер SVG/PNG | `bash docs/02-architecture/diagrams/tooling/render.sh`      |
-| PDF bundles    | `python scripts/agents/diagrams/py-doc-bot-3.py`            |
-| DOCX bundles   | `python scripts/agents/diagrams/py-doc-bot-2.py`            |
-| Full pipeline  | `bash scripts/agents/diagrams/py-doc-bot-4.sh`              |
+| Действие       | Команда                                                               |
+| -------------- | --------------------------------------------------------------------- |
+| Unified checks | `bash scripts/diagrams/run_diagram_checks.sh --profile pr`           |
+| Рендер SVG/PNG | `bash docs/02-architecture/diagrams/tooling/render.sh`                |
+| PDF bundles    | `python -m scripts.diagrams render-pdf-desc`                          |
+| DOCX bundles   | `python -m scripts.diagrams render-docx`                              |
+| Full pipeline  | `bash scripts/diagrams/run_diagram_docs_agent.sh --profile pr`        |
 
 ### Diagram Modes
 
