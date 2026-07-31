@@ -33,27 +33,11 @@ if (-not $env:NPM_CONFIG_CACHE) {
 }
 New-Item -ItemType Directory -Force -Path $env:NPM_CONFIG_CACHE | Out-Null
 if ([string]::IsNullOrWhiteSpace($env:MEMORY_FILE_PATH)) {
-    $branch = (& git -C $repoRoot branch --show-current 2>$null)
-    if ([string]::IsNullOrWhiteSpace($branch)) { $branch = 'detached' }
-    $branch = $branch -replace '[^A-Za-z0-9_.-]', '-'
-    $commit = (& git -C $repoRoot rev-parse --verify HEAD 2>$null)
-    if ([string]::IsNullOrWhiteSpace($commit)) { $commit = 'unknown' }
-    $sha = [Security.Cryptography.SHA256]::Create()
-    try {
-        $bytes = [Text.Encoding]::UTF8.GetBytes($repoRoot)
-        $worktreeId = ([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-', '').ToLowerInvariant().Substring(0, 16)
-    } finally {
-        $sha.Dispose()
-    }
-    $memoryDir = Join-Path $repoRoot ".cache\mcp-memory\$worktreeId\$branch\$commit"
-    New-Item -ItemType Directory -Force -Path $memoryDir | Out-Null
-    $env:MEMORY_FILE_PATH = Join-Path $memoryDir 'memory.json'
-    if (-not (Test-Path -LiteralPath $env:MEMORY_FILE_PATH)) {
-        $seed = Join-Path $repoRoot 'docs\00-project\ai\memory\mcp-memory.json'
-        $temporary = "$($env:MEMORY_FILE_PATH).tmp.$PID"
-        Copy-Item -LiteralPath $seed -Destination $temporary
-        Move-Item -LiteralPath $temporary -Destination $env:MEMORY_FILE_PATH
-    }
+    $env:PYTHONPATH = "$repoRoot\src" + $(if ($env:PYTHONPATH) { ";$env:PYTHONPATH" } else { '' })
+    $env:MEMORY_FILE_PATH = (& python -m memory.mcp_scope `
+        --repo-root $repoRoot `
+        --seed (Join-Path $repoRoot 'docs\00-project\ai\memory\mcp-memory.json')).Trim()
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 & npx -y '@modelcontextprotocol/server-memory@2026.1.26' @args
 exit $LASTEXITCODE
