@@ -1,4 +1,0 @@
-interface:
-  display_name: "Making Decisions"
-  short_description: "Create evidence-backed decisions"
-  default_prompt: "Use $making-decisions to turn synthesis findings into DEC-* decisions with trade-offs and risks."
