@@ -78,6 +78,30 @@ def test_exclusive_lock_recovers_dead_owner(tmp_path: Path) -> None:
     assert not lock_path.exists()
 
 
+def test_exclusive_lock_recovers_windows_invalid_pid(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "events.jsonl"
+    lock_path = tmp_path / ".events.jsonl.lock"
+    lock_path.write_text(
+        json.dumps({"pid": 999_999_999, "process_start": "1", "schema_version": 1}),
+        encoding="utf-8",
+    )
+    invalid_pid = OSError("invalid process identifier")
+    setattr(invalid_pid, "winerror", 87)
+
+    def raise_invalid_pid(_pid: int, _signal: int) -> None:
+        raise invalid_pid
+
+    monkeypatch.setattr("memory.storage.os.kill", raise_invalid_pid)
+
+    with exclusive_lock(target, timeout_seconds=0):
+        assert lock_path.exists()
+
+    assert not lock_path.exists()
+
+
 def test_exclusive_lock_recovers_stale_malformed_metadata(tmp_path: Path) -> None:
     target = tmp_path / "events.jsonl"
     lock_path = tmp_path / ".events.jsonl.lock"

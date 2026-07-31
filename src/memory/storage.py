@@ -38,6 +38,10 @@ def _lock_owner_is_alive(payload: dict[str, Any]) -> bool:
         return False
     except PermissionError:
         return True
+    except OSError as exc:
+        # Windows reports a missing PID as ERROR_INVALID_PARAMETER instead of
+        # ProcessLookupError. Unknown probe failures remain fail-closed.
+        return getattr(exc, "winerror", None) != 87
     expected_start = payload.get("process_start")
     actual_start = _process_start_token(pid)
     if isinstance(expected_start, str) and actual_start is not None:
