@@ -126,7 +126,7 @@ surfaces:
     cleanup_policy: archive-superseded
     runtime_usage_proven: true
     evidence: [src/memory/tooling/promote_note.py, src/memory/tooling/review_curated.py]
-    status: WARN
+    status: PASS
   - memory_id: MEM-EPISODIC
     <<: *surface_defaults
     agent_or_runtime: all
@@ -182,8 +182,12 @@ surfaces:
     retention_policy: src/memory/policy/retention.yaml
     cleanup_policy: delete-and-rebuild
     runtime_usage_proven: true
-    evidence: [src/memory/graph/sync.py, src/memory/graph/query.py]
-    status: WARN
+    evidence:
+      - src/memory/graph/sync.py
+      - src/memory/graph/query.py
+      - src/memory/tooling/check_freshness.py
+      - tests/unit/memory/test_check_freshness.py
+    status: PASS
   - memory_id: MEM-TIMELINE
     <<: *surface_defaults
     agent_or_runtime: all
@@ -230,7 +234,9 @@ surfaces:
       - scripts/ai/mcp/mcp_memory_wrapper.sh
       - scripts/ai/mcp/mcp_memory_wrapper.ps1
       - src/memory/mcp_scope.py
+      - src/memory/mcp_server.py
       - tests/unit/memory/test_mcp_scope.py
+      - tests/integration/memory/test_mcp_server_isolation.py
     status: PASS
   - memory_id: MEM-MCP-NEO4J
     <<: *surface_defaults
