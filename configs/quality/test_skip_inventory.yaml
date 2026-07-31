@@ -54,7 +54,7 @@ entries:
   owner: '@bioetl-contracts'
   linked_issue: '#5562'
   lifecycle: permanent_policy
-  reviewed_skip_calls: 1
+  reviewed_skip_calls: 2
   vcr_related: false
   review_date: '2026-06-02'
   rationale: Network-marked contract tests are intentionally opt-in and must skip when outbound connectivity or explicit enablement
