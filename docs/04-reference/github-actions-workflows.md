@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.1
+Version: 1.0.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-30'
+  Last verified: '2026-07-31'
 
 ______________________________________________________________________
 
@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the **40** live GitHub Actions
+This page is the canonical published inventory of the **41** live GitHub Actions
 workflows shipped under `.github/workflows/`. The count is derived from the
 tracked `*.yml` files; it is not a separately maintained target.
 
@@ -42,6 +42,7 @@ Use it when you need to answer:
 
 | File | Workflow name | Triggers | Primary purpose |
 | --- | --- | --- | --- |
+| `branch-hygiene.yml` | `Branch Hygiene` | `pull_request`, `schedule`, `workflow_dispatch` | Validates PR branch names and generates the periodic branch-cleanup inventory |
 | `chembl-baseline-smoke.yml` | `ChemblBaseline Smoke` | `push`, `pull_request`, `workflow_dispatch` | ChEMBL baseline smoke and reconciliation checks |
 | `commit-lint.yml` | `Commit Lint` | `pull_request` | Conventional-commit policy gate |
 | `compiled-artifacts-block.yml` | `Block Compiled Python Artifacts` | `push`, `pull_request` | Blocks checked-in `.pyc` and similar compiled artifacts |
@@ -108,6 +109,7 @@ Use it when you need to answer:
 | Security scans | `security.yml` |
 | Nightly replay / determinism parity | `nightly-replay-parity.yml` |
 | Episodic-memory retention policy | `memory-retention.yml` |
+| PR branch naming and cleanup inventory | `branch-hygiene.yml` |
 | Stale report-noise draft PR cleanup | `pr-hygiene.yml` |
 | Weekly debt governance | `quality-debt-weekly.yml` |
 | Release build/publish flow | `release.yml` |
