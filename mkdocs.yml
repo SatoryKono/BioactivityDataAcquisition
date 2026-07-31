@@ -950,8 +950,10 @@ nav:
               - "Skills Catalog": 00-project/ai/skills/local/SKILLS-CATALOG.md
               - "Skill": 00-project/ai/skills/local/agent-orchestration/SKILL.md
               - "Capability Discovery": 00-project/ai/skills/local/capability-discovery/SKILL.md
+              - "Create PR": 00-project/ai/skills/local/create-pr/SKILL.md
               - "Deep Research": 00-project/ai/skills/local/deep-research/SKILL.md
               - "Evidence & Decisions":
+                  - "Collecting Evidence": 00-project/ai/skills/local/collecting-evidence/SKILL.md
                   - "Hierarchical Evidence Orchestration": 00-project/ai/skills/local/hierarchical-evidence-orchestration/SKILL.md
                   - "Research Workflow": 00-project/ai/skills/local/research-workflow/SKILL.md
               - "Deep Research Critique Framework": 00-project/ai/skills/local/deep-research/references/critique-framework.md
