@@ -94,6 +94,20 @@ LANES: dict[str, tuple[str, ...]] = {
         "-q",
         _TB_SHORT,
     ),
+    "all": (
+        "tests/",
+        # Coverage gate measures src/bioetl via unit/integration paths.
+        # Architecture/e2e/contract are separate lanes (and spawn git/subprocess
+        # that can hang on cloud-synced Windows worktrees under suite load).
+        "-m",
+        "not memory and not benchmark and not slow",
+        "--cov=src/bioetl",
+        "--cov-report=term-missing",
+        "--cov-report=html:reports/coverage/htmlcov",
+        "--cov-fail-under=85",
+        "-q",
+        _TB_SHORT,
+    ),
 }
 
 
