@@ -443,11 +443,14 @@
   "summary": {
     "architecture_quality_scorecard_integral_score": 9.41,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 2,
+    "failing_gates": [
+      "module_coverage_scorecard_coherence",
+      "test_governance_budget_violations"
+    ],
     "gate_count": 45,
-    "pass_count": 45,
-    "release_gate_status": "passing",
+    "pass_count": 43,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }

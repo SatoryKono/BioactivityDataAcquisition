@@ -60,8 +60,8 @@
     "deepwiki": {
       "url": "https://mcp.deepwiki.com/mcp",
       "headers": {
-        "x-deepwiki-api-key": "$DEEPWIKI_API_KEY",
-        "x-deepwiki-organisation-id": "$DEEPWIKI_ORGANISATION_ID"
+        "x-deepwiki-organisation-id": "$DEEPWIKI_ORGANISATION_ID",
+        "x-deepwiki-api-key": "$DEEPWIKI_API_KEY"
       }
     },
     "ref": {
