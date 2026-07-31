@@ -2334,7 +2334,6 @@
         "tests/unit/"
       ],
       "top_level_directories_including_pycache": [
-        "tests/__pycache__/",
         "tests/architecture/",
         "tests/benchmarks/",
         "tests/contract/",
@@ -2352,16 +2351,16 @@
         "tests/unit/"
       ],
       "top_level_directory_count": 15,
-      "top_level_directory_count_including_pycache": 16
+      "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2171,
-    "total_test_functions": 23292,
+    "total_test_functions": 23293,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "41ef12d60aa1fe9e467407aacc6f65ee42da712518893f1247c6d93f92240664",
+  "source_tree_sha256": "a06dd750beb80e092db9bc7f0e4dfb6b51f9fe8fa1e3d3219e767563b9191cd1",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 106,
@@ -2401,7 +2400,6 @@
       "tests/unit/"
     ],
     "top_level_directories_including_pycache": [
-      "tests/__pycache__/",
       "tests/architecture/",
       "tests/benchmarks/",
       "tests/contract/",
@@ -2419,11 +2417,11 @@
       "tests/unit/"
     ],
     "top_level_directory_count": 15,
-    "top_level_directory_count_including_pycache": 16
+    "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2171,
-  "total_test_functions": 23292,
+  "total_test_functions": 23293,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
