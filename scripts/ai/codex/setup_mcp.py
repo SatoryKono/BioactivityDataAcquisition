@@ -669,8 +669,7 @@ def _write_devin_config(
         env_http_headers = server.pop("env_http_headers", None)
         if isinstance(env_http_headers, dict):
             server["headers"] = {
-                header: f"${env_name}"
-                for header, env_name in env_http_headers.items()
+                header: f"${env_name}" for header, env_name in env_http_headers.items()
             }
     existing["mcpServers"] = servers
     _write_json(settings_path, existing, allowed_root=output_root)
