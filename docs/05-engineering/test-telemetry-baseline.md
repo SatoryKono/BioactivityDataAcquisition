@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-29'
+  Last verified: '2026-07-31'
 
 ______________________________________________________________________
 
@@ -31,12 +31,12 @@ trend evidence only.
 - Source commit: `667c3020ce74f87c319f77612c765a5aaf30e6ad`
 - Source run id: `local-duration-rebuild-2026-07-23`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-07-27T18:08:35.600453+00:00`
+- Refreshed at (UTC): `2026-07-31T13:55:33.002896+00:00`
 
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `96.49%`
+- Actual coverage: `92.44%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry

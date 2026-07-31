@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-31T14:13:33.775683+00:00",
+  "generated_at": "2026-07-31T14:16:19.105895+00:00",
   "summary": {
     "total_scripts": 569,
     "status_counts": {
@@ -16,7 +16,7 @@
       "other": 77,
       "scripts": 449,
       "skills": 18,
-      "tests": 353
+      "tests": 354
     }
   },
   "scripts": [
@@ -4273,7 +4273,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".codex/skills/SKILLS-CATALOG.md",
@@ -4310,6 +4310,12 @@
           "line": 22,
           "source_group": "docs",
           "text": "reconciliation uses `python scripts/ai/runtime_skill_sync.py --mode sync"
+        },
+        {
+          "path": "tests/unit/scripts/test_runtime_skill_sync.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.ai import runtime_skill_sync"
         }
       ]
     },
@@ -8429,7 +8435,7 @@
         },
         {
           "path": "tests/unit/scripts/docs/passports/test_passport_path_renamer.py",
-          "line": 10,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.docs.passports.rename_underscore_to_hyphen import main"
         }

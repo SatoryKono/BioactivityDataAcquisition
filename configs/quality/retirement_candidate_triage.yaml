@@ -21,8 +21,8 @@ repo_wide_zero_import_review:
     python -m scripts.engineering.qa.report_dead_code_inventory --check
     --json-out reports/quality/dead-code-inventory.json --md-out reports/quality/dead-code-inventory.md
   max_untriaged_zero_import_candidates: 0
-  last_reviewed: "2026-07-23"
-  next_review_by: "2026-10-21"
+  last_reviewed: "2026-07-31"
+  next_review_by: "2026-10-29"
   rationale:
     Zero static import count is a review signal, not automatic removal proof.
     Keep repo-wide zero-import findings fully classified so dynamic entrypoints, sanctioned

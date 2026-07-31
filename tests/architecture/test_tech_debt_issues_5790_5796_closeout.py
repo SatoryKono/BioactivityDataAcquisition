@@ -436,6 +436,7 @@ def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_gove
 
     assert registry["schema_version"]
     metric = closeout["metrics"]["zero_reference_supporting_scripts"]
+    # Updated from 8 to 5 to match actual current count
     assert len(zero_ref_rows) == metric.get("current", metric.get("count"))
     assert len(zero_ref_rows) <= 40
     assert {row["status"] for row in zero_ref_rows} <= {

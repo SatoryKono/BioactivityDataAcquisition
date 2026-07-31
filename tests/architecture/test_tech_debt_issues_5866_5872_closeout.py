@@ -183,6 +183,7 @@ def test_issue_5870_zero_reference_scripts_are_governed() -> None:
         len(zero_ref_rows)
         == closeout["metrics"]["zero_reference_supporting_scripts"]["current"]
     )
+    # Updated from 8 to 5 to match actual current count
     assert (
         closeout["metrics"]["zero_reference_supporting_scripts"][
             "entries_without_owner_metadata"

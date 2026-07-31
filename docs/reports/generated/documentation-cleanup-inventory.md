@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2431 |
-| Tracked doc-like files | 2376 |
+| Doc-like files | 2434 |
+| Tracked doc-like files | 2379 |
 | Ignored local docs/reports files | 55 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 55 |
-| tracked | 2376 |
+| tracked | 2379 |
 
 ## Lifecycle Counts
 
@@ -42,7 +42,7 @@
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 33 |
-| working_report | 72 |
+| working_report | 75 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -62,7 +62,7 @@
 | Archived | 130 |
 | Canonical | 73 |
 | Generated | 878 |
-| Working | 484 |
+| Working | 487 |
 
 ## Surface Families
 
@@ -72,14 +72,14 @@
 | archive | 130 |
 | canonical | 73 |
 | generated | 878 |
-| working | 484 |
+| working | 487 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 105 |
+| archive-after-migration | 108 |
 | generate-automatically | 878 |
 | keep | 1132 |
 | reconcile-with-github-state | 4 |
@@ -131,6 +131,8 @@
 | `docs/reports/test-health/skip_marker_analysis.md` | Working | 0 | archive-after-migration |
 | `docs/reports/test-health/vcr_lifecycle_analysis.md` | Working | 0 | archive-after-migration |
 | `docs/reports/testing/phase2_integration_testing_plan.md` | Working | 0 | archive-after-migration |
+| `reports/ai/issue-7340-specialized-subsystem-analysis-20260731.md` | Working | 0 | archive-after-migration |
+| `reports/ai/issue-7348-comprehensive-skills-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/CLOSEOUT.md` | Working | 0 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/grafana-live-snapshot.json` | Working | 0 | archive-after-migration |
@@ -154,6 +156,7 @@
 | `reports/quality/config-surface-backlog.json` | Working | 0 | archive-after-migration |
 | `reports/quality/contract-coverage-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/contract-coverage-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/diagram-freshness-7316-verification.md` | Working | 0 | archive-after-migration |
 | `reports/quality/domain-aggregate-invariant-registry.json` | Working | 0 | archive-after-migration |
 | `reports/quality/domain-composite-config-importer-map.md` | Working | 0 | archive-after-migration |
 | `reports/quality/hotspot-coverage-tail-owner-map.json` | Working | 0 | archive-after-migration |
@@ -165,9 +168,6 @@
 | `reports/quality/port-adapter-factory-coverage.md` | Working | 0 | archive-after-migration |
 | `reports/quality/reports-workspace-review.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
-| `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
-| `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
-| `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
