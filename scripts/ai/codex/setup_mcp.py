@@ -26,6 +26,8 @@ MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 MCP_JSON_FILENAME = "mcp.json"
 CACHE_DIR_NAME = ".cache"
 CODEX_RUNTIME_CACHE_DIR_NAME = "bioetl-mcp"
+DEEPWIKI_API_KEY_ENV_VAR = "DEEPWIKI_API_KEY"
+DEEPWIKI_ORGANISATION_ID_ENV_VAR = "DEEPWIKI_ORGANISATION_ID"
 REF_API_KEY_ENV_VAR = "REF_TOOL_API_KEY"
 REMOVED_MCP_SERVER_NAMES = frozenset(
     {
@@ -467,6 +469,10 @@ def _canonical_servers(
         "deepwiki": _http_server("https://mcp.deepwiki.com/mcp"),
         "ref": _http_server("https://api.ref.tools/mcp"),
     }
+    servers["deepwiki"]["env_http_headers"] = {
+        "x-deepwiki-api-key": DEEPWIKI_API_KEY_ENV_VAR,
+        "x-deepwiki-organisation-id": DEEPWIKI_ORGANISATION_ID_ENV_VAR,
+    }
     servers["ref"]["env_http_headers"] = {
         "x-ref-api-key": REF_API_KEY_ENV_VAR,
     }
@@ -659,12 +665,13 @@ def _write_devin_config(
         ),
         transport_mode=transport_mode,
     )
-    ref_server = servers.get("ref")
-    if isinstance(ref_server, dict):
-        ref_server.pop("env_http_headers", None)
-        ref_server["headers"] = {
-            "x-ref-api-key": f"${REF_API_KEY_ENV_VAR}",
-        }
+    for server in servers.values():
+        env_http_headers = server.pop("env_http_headers", None)
+        if isinstance(env_http_headers, dict):
+            server["headers"] = {
+                header: f"${env_name}"
+                for header, env_name in env_http_headers.items()
+            }
     existing["mcpServers"] = servers
     _write_json(settings_path, existing, allowed_root=output_root)
     return settings_path

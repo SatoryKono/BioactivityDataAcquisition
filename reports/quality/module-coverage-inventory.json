@@ -9423,7 +9423,7 @@
       "missing_lines": 4,
       "module": "bioetl.composition.runtime_builders._run_manifest_data_roots",
       "path": "src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py",
-      "source_lines": 123
+      "source_lines": 125
     },
     {
       "coverage_percent": 100.0,
@@ -18583,7 +18583,7 @@
       "missing_lines": 1,
       "module": "bioetl.infrastructure.control_plane.file_run_ledger_store",
       "path": "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py",
-      "source_lines": 172
+      "source_lines": 174
     },
     {
       "coverage_percent": 94.31,
@@ -32565,7 +32565,7 @@
       "missing_lines": 4,
       "module": "bioetl.composition.runtime_builders._run_manifest_data_roots",
       "path": "src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py",
-      "source_lines": 123
+      "source_lines": 125
     },
     {
       "coverage_percent": 100.0,
@@ -41725,7 +41725,7 @@
       "missing_lines": 1,
       "module": "bioetl.infrastructure.control_plane.file_run_ledger_store",
       "path": "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py",
-      "source_lines": 172
+      "source_lines": 174
     },
     {
       "coverage_percent": 94.31,
@@ -46290,7 +46290,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-28",
-  "source_tree_sha256": "146578f40fdfc30c0552e63994275a5191ed6f7f6ac13bf1a76a617a4b2627b8",
+  "source_tree_sha256": "5a064f7f42b1058797fdf4f8bde26942e955e81f6b576b06132d286a3dfb6847",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

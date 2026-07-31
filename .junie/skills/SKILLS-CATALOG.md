@@ -83,6 +83,7 @@ runtime change.
 | Skill                        | Path                                       | Purpose                              |
 | ---------------------------- | ------------------------------------------ | ------------------------------------ |
 | `new-pipeline`               | `.codex/skills/new-pipeline`               | Provider/entity pipeline scaffolding |
+| `create-pr`                  | `.codex/skills/create-pr`                  | PR creation workflow guidance        |
 | `py-reproducibility-audit`  | `.codex/skills/py-reproducibility-audit`  | Reproducibility and replay audit  |
 ## Current Consolidation Status
 
@@ -96,6 +97,8 @@ runtime change.
 - [agent-orchestration](agent-orchestration/SKILL.md)
 - [hierarchical-evidence-orchestration](hierarchical-evidence-orchestration/SKILL.md)
 - [capability-discovery](capability-discovery/SKILL.md)
+- [create-pr](create-pr/SKILL.md)
+- [collecting-evidence](collecting-evidence/SKILL.md)
 - [research-workflow](research-workflow/SKILL.md)
 - [deep-research](deep-research/SKILL.md)
 - [hierarchical-evidence-orchestration](hierarchical-evidence-orchestration/SKILL.md)
