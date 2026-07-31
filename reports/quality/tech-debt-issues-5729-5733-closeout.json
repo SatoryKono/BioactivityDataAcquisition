@@ -50,9 +50,9 @@
   ],
   "outcomes": {
     "5729": {
-      "coverage_actual_percent": 96.49,
-      "coverage_percent": 96.49,
-      "refreshed_at_utc": "2026-07-27T18:08:35.600453+00:00",
+      "coverage_actual_percent": 92.44,
+      "coverage_percent": 92.44,
+      "refreshed_at_utc": "2026-07-31T13:55:33.002896+00:00",
       "source_commit": "667c3020ce74f87c319f77612c765a5aaf30e6ad",
       "source_run_id": "local-duration-rebuild-2026-07-23"
     },

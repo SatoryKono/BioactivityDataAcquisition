@@ -4,7 +4,7 @@
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
     "budget_warnings": 0,
-    "budget_review_notes": 2
+    "budget_review_notes": 1
   },
   "families": [
     {
@@ -17,20 +17,18 @@
         "src/bioetl/application/core/"
       ],
       "duplication_clusters": 0,
-      "files": 187,
-      "total_loc": 22516,
+      "files": 179,
+      "total_loc": 21622,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.365,
-      "max_internal_fan_in": 8,
+      "helper_function_ratio": 0.36,
+      "max_internal_fan_in": 7,
       "max_internal_fan_in_module": "bioetl.application.core.batch_runtime_failure_policy",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 10
       },
       "budget_warnings": [],
-      "budget_review_notes": [
-        "near_budget:max_internal_fan_in=8/10"
-      ]
+      "budget_review_notes": []
     },
     {
       "name": "composition_bootstrap_runtime",
@@ -42,12 +40,12 @@
         "src/bioetl/composition/bootstrap/runtime/"
       ],
       "duplication_clusters": 0,
-      "files": 51,
-      "total_loc": 6298,
+      "files": 50,
+      "total_loc": 6068,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.325,
+      "helper_function_ratio": 0.327,
       "max_internal_fan_in": 2,
-      "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
+      "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.runner_assembly",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 3
@@ -88,12 +86,12 @@
         "src/bioetl/application/services/control_plane/"
       ],
       "duplication_clusters": 0,
-      "files": 140,
-      "total_loc": 15957,
+      "files": 124,
+      "total_loc": 13854,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.421,
+      "helper_function_ratio": 0.414,
       "max_internal_fan_in": 3,
-      "max_internal_fan_in_module": "bioetl.application.services.control_plane.run_manifest_reproducibility_scoring_support",
+      "max_internal_fan_in_module": "bioetl.application.services.control_plane.replay.historical_identity_models",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 3
@@ -113,10 +111,10 @@
         "src/bioetl/composition/runtime_builders/"
       ],
       "duplication_clusters": 0,
-      "files": 56,
-      "total_loc": 6989,
+      "files": 55,
+      "total_loc": 6961,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.359,
+      "helper_function_ratio": 0.36,
       "max_internal_fan_in": 3,
       "max_internal_fan_in_module": "bioetl.composition.runtime_builders.run_manifest_support",
       "bounded_growth_budgets": {
