@@ -50,6 +50,11 @@ _DUPLICATION_BASELINE = {
 }
 
 
+def passport_markdown_filename(unit_id: str) -> str:
+    """Return the canonical kebab-case Markdown filename for an executable ID."""
+    return f"{unit_id.replace('_', '-')}.md"
+
+
 def _repo_path(path: Path) -> str:
     return path.resolve().relative_to(PROJECT_ROOT.resolve()).as_posix()
 
@@ -819,13 +824,14 @@ def build_all_outputs(
         outputs[output_root / "generated" / group / f"{unit.unit_id}.json"] = (
             _canonical_bytes(facts)
         )
-        outputs[output_root / group / f"{unit.unit_id}.md"] = markdown.encode("utf-8")
+        markdown_filename = passport_markdown_filename(unit.unit_id)
+        outputs[output_root / group / markdown_filename] = markdown.encode("utf-8")
         registry_rows.append(
             {
                 "typed_id": unit.typed_id,
                 "aliases": list(unit.aliases),
                 "config_path": _repo_path(unit.config_path),
-                "passport_path": f"{group}/{unit.unit_id}.md",
+                "passport_path": f"{group}/{markdown_filename}",
             }
         )
     report = {
@@ -886,12 +892,16 @@ def build_all_outputs(
     for row in registry_rows:
         if not row["typed_id"].startswith("workflow:"):
             name = row["typed_id"].split(":", 1)[1]
-            index.append(f"- [{name}](pipelines/{name}.md)")
+            index.append(
+                f"- [{name}](pipelines/{passport_markdown_filename(name)})"
+            )
     index.extend(["", "## Workflows", ""])
     for row in registry_rows:
         if row["typed_id"].startswith("workflow:"):
             name = row["typed_id"].split(":", 1)[1]
-            index.append(f"- [{name}](workflows/{name}.md)")
+            index.append(
+                f"- [{name}](workflows/{passport_markdown_filename(name)})"
+            )
     index.append("")
     outputs[output_root / "index.md"] = "\n".join(index).encode("utf-8")
     return outputs

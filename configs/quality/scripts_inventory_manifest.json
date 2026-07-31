@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-31T09:08:32.937634+00:00",
+  "generated_at": "2026-07-31T09:45:52.960923+00:00",
   "summary": {
     "total_scripts": 567,
     "status_counts": {
@@ -9732,7 +9732,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-          "line": 82,
+          "line": 84,
           "source_group": "docs",
           "text": "`pretest_guardrails.sh --report-json ...` persists only compact"
         },
