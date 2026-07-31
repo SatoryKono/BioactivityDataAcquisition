@@ -15,3 +15,15 @@ def test_consolidation_mypy_matches_canonical_product_scope() -> None:
     assert "--no-incremental" in workflow
     assert "src/bioetl" in workflow
     assert "mypy src tests" not in workflow
+
+
+def test_consolidation_snapshot_lane_runs_executable_contract() -> None:
+    """Snapshot artifacts must be validated by an executable test module."""
+    workflow = CONSOLIDATION_WORKFLOW.read_text(encoding="utf-8")
+
+    assert (
+        "pytest "
+        "tests/unit/infrastructure/schemas/"
+        "test_composite_config_invariants_source_of_truth.py"
+    ) in workflow
+    assert "pytest tests/snapshots" not in workflow
