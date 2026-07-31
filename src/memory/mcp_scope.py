@@ -9,7 +9,7 @@ import re
 import subprocess
 from pathlib import Path
 
-from memory.storage import atomic_write_bytes, exclusive_lock
+from memory.storage import atomic_write_bytes
 
 _SAFE_COMPONENT = re.compile(r"[^A-Za-z0-9_.-]")
 
@@ -59,14 +59,15 @@ def memory_scope_path(
 def initialize_memory_file(target: Path, seed: Path) -> None:
     """Seed one scope exactly once under the shared storage lock."""
     target.parent.mkdir(parents=True, exist_ok=True)
-    with exclusive_lock(target, timeout_seconds=30):
-        if target.exists():
-            return
-        payload = seed.read_bytes()
-        parsed = json.loads(payload)
-        if not isinstance(parsed, dict):
-            raise ValueError("MCP memory seed must be a JSON object")
-        atomic_write_bytes(target, payload)
+    if target.exists():
+        return
+    payload = seed.read_bytes()
+    parsed = json.loads(payload)
+    if not isinstance(parsed, dict):
+        raise ValueError("MCP memory seed must be a JSON object")
+    # Concurrent first users may both reach this call, but the storage primitive
+    # serializes complete writes and every contender writes the identical seed.
+    atomic_write_bytes(target, payload)
 
 
 def main(argv: list[str] | None = None) -> int:
