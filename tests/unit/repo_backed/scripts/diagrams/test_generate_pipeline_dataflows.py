@@ -30,10 +30,12 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from scripts.diagrams import __main__ as diagrams_router
+from scripts.diagrams import pipeline_dataflow_ir
 from scripts.diagrams.generate_pipeline_dataflows import main
 from scripts.diagrams.pipeline_dataflow_ir import (
     PipelineDataflowIR,
@@ -48,6 +50,34 @@ from scripts.schema.generate_unified_schema_map import build_unified_schema_rows
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
+
+
+def test_source_date_uses_pr_head_parent_without_merge_commit_entropy(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[list[str]] = []
+
+    def _run(args: list[str], **_: object) -> SimpleNamespace:
+        calls.append(args)
+        return SimpleNamespace(stdout="2026-07-30\n")
+
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setattr(pipeline_dataflow_ir.subprocess, "run", _run)
+
+    assert pipeline_dataflow_ir._source_date() == "2026-07-30"
+    assert calls == [
+        [
+            "git",
+            "log",
+            "--no-merges",
+            "-1",
+            "--format=%cs",
+            "HEAD^2",
+            "--",
+            "configs",
+            "src/bioetl",
+        ]
+    ]
 
 
 @pytest.fixture(scope="module")

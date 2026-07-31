@@ -126,8 +126,9 @@ def main(argv: list[str] | None = None) -> int:
     rows = _collect_rows()
     # Includes collapsed row headers in shipped JSON. Updated after
     # 2026-07-23 surface reduction (Silver Reject Explorer + Loki/Tempo panels)
-    # and 2026-07-27 5-dashboard diet surface reconciliation (#6687).
-    expected_panel_count = 193
+    # 2026-07-27 seven-dashboard surface reconciliation (#6687), including
+    # the Incident and Run Explorer adjunct dashboards.
+    expected_panel_count = 219
     if args.check and len(rows) != expected_panel_count:
         print(
             f"panel count mismatch: expected {expected_panel_count}, got {len(rows)}",

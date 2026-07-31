@@ -128,7 +128,7 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   `.zed/` MAY оставаться tracked только если они поддерживаются как
   проектные runtime/editor integrations.
 - Editor/vendor/tooling roots such as `.ai/`, `.aiassistant/`, `ai/`,
-  `.jules/`, `.junie/`, `.sonarlint/`, `.windsurf/`, `.agent-work/`,
+  `.jules/`, `.sonarlint/`, `.windsurf/`, `.agent-work/`,
   `.agentbridge/`, `.agents/`, `.benchmarks/`, `.cache/`, `.qodo/`,
   `.mypy_cache/`, `.pytest_cache/`, `.ruff_cache/`, `.hypothesis/`,
   `.import_linter_cache/`, `.venv/`, `node_modules/`, and `test-output/`
