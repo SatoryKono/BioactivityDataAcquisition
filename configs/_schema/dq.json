@@ -406,7 +406,7 @@
       "type": "object"
     },
     "ThresholdsConfig": {
-      "description": "Threshold configuration section.\n\nValidates DQ error thresholds for warning and failure modes.\nEnforces the invariant that soft_fail must be less than hard_fail.\n\nAttributes:\n    soft_fail: Warning threshold (0.0-1.0). Default: 0.05 (5%).\n        When error rate exceeds this threshold, a warning is emitted.\n    hard_fail: Failure threshold (0.0-1.0). Default: 0.20 (20%).\n        When error rate exceeds this threshold, the batch fails.\n\nExample:\n    >>> thresholds = ThresholdsConfig(soft_fail=0.05, hard_fail=0.15)\n    >>> thresholds.soft_fail\n    0.05\n    >>> thresholds.hard_fail\n    0.15",
+      "description": "Threshold configuration section.\n\nValidates DQ error thresholds for warning and failure modes.\nEnforces the invariant that soft_fail must be less than hard_fail.\n\nAttributes:\n    soft_fail: Warning threshold (0.0-1.0). Default: 0.05 (5%).\n        When error rate exceeds this threshold, a warning is emitted.\n    hard_fail: Failure threshold (0.0-1.0). Default: 0.50 (50%).\n        When error rate exceeds this threshold, the batch fails.\n\nExample:\n    >>> thresholds = ThresholdsConfig(soft_fail=0.05, hard_fail=0.15)\n    >>> thresholds.soft_fail\n    0.05\n    >>> thresholds.hard_fail\n    0.15",
       "properties": {
         "soft_fail": {
           "default": 0.05,

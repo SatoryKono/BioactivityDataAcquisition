@@ -107,6 +107,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
+          # Generated provenance uses git log over canonical fact owners.
+          # PR merge checkouts must retain both parents and their history.
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Python + uv

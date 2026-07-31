@@ -92,12 +92,17 @@ def _source_revision() -> str:
     override = os.environ.get("BIOETL_PASSPORT_SOURCE_REVISION")
     if override:
         return override
+    start_ref = (
+        "HEAD^2" if os.environ.get("GITHUB_EVENT_NAME") == "pull_request" else "HEAD"
+    )
     result = subprocess.run(
         [
             "git",
             "log",
+            "--no-merges",
             "-1",
             "--format=%H",
+            start_ref,
             "--",
             "configs/entities",
             "configs/providers",
@@ -632,9 +637,7 @@ def _inline(value: object) -> str:
     return f"`{value}`"
 
 
-def _render_pipeline_markdown(
-    facts: JsonObject, manual: dict[str, object]
-) -> str:
+def _render_pipeline_markdown(facts: JsonObject, manual: dict[str, object]) -> str:
     """Render the compact human view; complete facts remain in generated JSON."""
     identity = facts["identity"]
     summary = facts["summary"]
@@ -658,10 +661,7 @@ def _render_pipeline_markdown(
         "",
         "| Параметр | Значение |",
         "| --- | --- |",
-        (
-            f"| Typed identity `[type:{pipeline_type}]` | "
-            f"`{identity['typed_id']}` |"
-        ),
+        (f"| Typed identity `[type:{pipeline_type}]` | `{identity['typed_id']}` |"),
         f"| Status | `{identity['status']}` |",
         f"| Gold contract | `{contract_label}` |",
     ]
@@ -705,8 +705,7 @@ def _render_pipeline_markdown(
         lines.append(
             "| Selected fields | "
             + "; ".join(
-                f"`{item['name']}` ({item['field_count']} fields)"
-                for item in groups
+                f"`{item['name']}` ({item['field_count']} fields)" for item in groups
             )
             + " |"
         )
@@ -726,7 +725,9 @@ def _render_pipeline_markdown(
             ]
         )
     else:
-        lines.append("- Composite Silver inputs and merge rules are listed in generated JSON.")
+        lines.append(
+            "- Composite Silver inputs and merge rules are listed in generated JSON."
+        )
     lines.extend(["", "## Gold", ""])
     validation = gold.get("contract_validation", {})
     write = gold.get("write", {})
@@ -751,9 +752,7 @@ def _render_pipeline_markdown(
         ]
     )
     for item in facts["operator_commands"]:
-        lines.append(
-            f"| {item['task']} | `{item['command']}` | {item['result']} |"
-        )
+        lines.append(f"| {item['task']} | `{item['command']}` | {item['result']} |")
     lines.extend(["", "## Диаграммы", ""])
     for diagram in facts["diagrams"]:
         lines.extend(
@@ -776,9 +775,7 @@ def _render_pipeline_markdown(
     if diagnostics:
         lines.extend(["", "## Diagnostics", ""])
         for diagnostic in diagnostics:
-            lines.append(
-                f"- `{diagnostic['severity']}` `{diagnostic['code']}`"
-            )
+            lines.append(f"- `{diagnostic['severity']}` `{diagnostic['code']}`")
     lines.append("")
     return "\n".join(lines)
 
@@ -822,9 +819,7 @@ def build_all_outputs(
         outputs[output_root / "generated" / group / f"{unit.unit_id}.json"] = (
             _canonical_bytes(facts)
         )
-        outputs[output_root / group / f"{unit.unit_id}.md"] = markdown.encode(
-            "utf-8"
-        )
+        outputs[output_root / group / f"{unit.unit_id}.md"] = markdown.encode("utf-8")
         registry_rows.append(
             {
                 "typed_id": unit.typed_id,

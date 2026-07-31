@@ -7,6 +7,7 @@ import ast
 import hashlib
 import importlib
 import json
+import os
 import re
 import subprocess
 from dataclasses import asdict, dataclass
@@ -39,12 +40,17 @@ type _JsonObject = dict[str, Any]
 
 def _source_date() -> str:
     """Return the last canonical input change date without wall-clock entropy."""
+    start_ref = (
+        "HEAD^2" if os.environ.get("GITHUB_EVENT_NAME") == "pull_request" else "HEAD"
+    )
     result = subprocess.run(
         [
             "git",
             "log",
+            "--no-merges",
             "-1",
             "--format=%cs",
+            start_ref,
             "--",
             "configs",
             "src/bioetl",

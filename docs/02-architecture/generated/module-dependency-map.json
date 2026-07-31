@@ -1,42 +1,42 @@
 {
   "summary": {
-    "scanned_modules": 2279,
-    "total_internal_imports": 7126,
+    "scanned_modules": 2312,
+    "total_internal_imports": 7231,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 307,
+    "cross_layer_group_edges_total": 310,
     "violations": 0,
-    "source_fingerprint": "92dc1a7311ec4a964d8b304609196a49c8f602f86d5e4f3c92e3bc34b66fb987"
+    "source_fingerprint": "80f0c7246cbebcc00ceb14b1f7bd95536aab53eb26993eca65a2c8b822195d84"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1368,
+      "imports": 1425,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 887,
+      "imports": 911,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 157,
+      "imports": 158,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 692,
+      "imports": 693,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 281,
+      "imports": 280,
       "allowed": true
     },
     {
@@ -54,13 +54,13 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 719,
+      "imports": 728,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1112,
+      "imports": 1114,
       "allowed": true
     },
     {
@@ -84,7 +84,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 353,
+      "imports": 365,
       "allowed": true
     }
   ],
@@ -92,7 +92,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 108
+      "imports": 119
     },
     {
       "source": "infrastructure.adapters",
@@ -107,12 +107,12 @@
     {
       "source": "application.core",
       "target": "domain.types",
-      "imports": 83
+      "imports": 85
     },
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 77
+      "imports": 79
     },
     {
       "source": "infrastructure.storage",
@@ -147,7 +147,7 @@
     {
       "source": "application.services",
       "target": "domain.ports",
-      "imports": 38
+      "imports": 41
     },
     {
       "source": "composition.bootstrap",
@@ -175,13 +175,13 @@
       "imports": 29
     },
     {
-      "source": "composition.bootstrap",
+      "source": "application.core",
       "target": "domain.ports",
       "imports": 28
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "domain.control_plane",
+      "source": "composition.bootstrap",
+      "target": "domain.ports",
       "imports": 28
     },
     {
@@ -190,13 +190,13 @@
       "imports": 27
     },
     {
-      "source": "application.core",
-      "target": "domain.ports",
+      "source": "composition.factories",
+      "target": "infrastructure.adapters",
       "imports": 27
     },
     {
-      "source": "composition.factories",
-      "target": "infrastructure.adapters",
+      "source": "composition.runtime_builders",
+      "target": "domain.control_plane",
       "imports": 27
     },
     {
@@ -315,6 +315,11 @@
       "imports": 15
     },
     {
+      "source": "application.services",
+      "target": "domain.normalization",
+      "imports": 14
+    },
+    {
       "source": "composition.bootstrap",
       "target": "infrastructure.observability",
       "imports": 14
@@ -326,17 +331,12 @@
     },
     {
       "source": "application.services",
-      "target": "domain.normalization",
+      "target": "domain.workflow",
       "imports": 13
     },
     {
       "source": "application.core",
       "target": "domain.exceptions",
-      "imports": 12
-    },
-    {
-      "source": "application.services",
-      "target": "domain.workflow",
       "imports": 12
     },
     {
