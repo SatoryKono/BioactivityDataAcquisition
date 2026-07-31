@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -118,8 +119,31 @@ def test_debug_export_adapter_writes_deterministic_hash_and_split_workbook(
     assert (root_path / "silver_full.csv").exists()
     assert (root_path / "silver_full.schema.json").exists()
     workbook = openpyxl.load_workbook(root_path / "debug_export.xlsx", read_only=True)
+    assert workbook.properties.created == datetime(1980, 1, 1)
     assert "silver_full_0001" in workbook.sheetnames
     assert "silver_full_0002" in workbook.sheetnames
+
+
+def test_debug_export_hash_changes_when_semantic_content_changes(
+    tmp_path: Path,
+) -> None:
+    adapter = DebugExportAdapter()
+    created_at = datetime(2026, 6, 2, 10, 0, 0, tzinfo=UTC)
+    original = _build_pack(root=tmp_path / "original", created_at=created_at)
+    changed_rows = tuple(
+        {**row, "status": "rejected"} if index == 0 else row
+        for index, row in enumerate(original.tables["silver_full"])
+    )
+    changed = replace(
+        original,
+        output_root=str(tmp_path / "changed"),
+        tables={**original.tables, "silver_full": changed_rows},
+    )
+
+    original_result = adapter.write_pack(pack=original)
+    changed_result = adapter.write_pack(pack=changed)
+
+    assert original_result.debug_export_hash != changed_result.debug_export_hash
 
 
 def test_debug_export_adapter_skips_xlsx_when_openpyxl_missing(

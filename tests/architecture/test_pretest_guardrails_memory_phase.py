@@ -29,11 +29,13 @@ def test_pretest_guardrails_script_runs_memory_phase() -> None:
 
     assert "run_memory_checks()" in script
     assert 'local memory_pythonpath="$REPO_ROOT/src:$REPO_ROOT"' in script
-    assert script.count('env PYTHONPATH="$memory_pythonpath"') == 5
+    assert script.count('PYTHONPATH="$memory_pythonpath"') == 5
     assert "memory-validate" in script
     assert '"$PYTHON_BIN" -m memory.tooling.validate' in script
     assert "memory-workflow-smoke" in script
     assert '"$PYTHON_BIN" -m memory.tooling.workflow smoke' in script
+    assert 'BIOETL_AI_RUNTIME="${BIOETL_AI_RUNTIME:-pretest-guardrails}"' in script
+    assert 'BIOETL_AI_AGENT="${BIOETL_AI_AGENT:-memory-workflow-smoke}"' in script
     assert "memory-refresh-smoke" in script
     assert '"$PYTHON_BIN" -m memory.tooling.refresh_all' in script
     assert '--root "$REPO_ROOT"' in script

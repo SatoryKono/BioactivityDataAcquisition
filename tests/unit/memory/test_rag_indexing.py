@@ -338,6 +338,39 @@ def test_write_and_reload_rag_manifests(tmp_path: Path) -> None:
     )
 
 
+def test_write_rag_manifests_retries_when_source_changes_during_build(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = tmp_path / "docs/00-project/overview.md"
+    source.parent.mkdir(parents=True)
+    source.write_text("# Overview\nBefore\n", encoding="utf-8")
+    original_builder = rag_indexing._build_standard_source_records
+    build_calls = 0
+
+    def _build_then_mutate(*args: object, **kwargs: object) -> object:
+        nonlocal build_calls
+        result = original_builder(*args, **kwargs)
+        build_calls += 1
+        if build_calls == 1:
+            source.write_text("# Overview\nAfter\n", encoding="utf-8")
+        return result
+
+    monkeypatch.setattr(
+        rag_indexing,
+        "_build_standard_source_records",
+        _build_then_mutate,
+    )
+
+    catalog_path, _ = write_rag_manifests(tmp_path, tmp_path / "out")
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+
+    assert build_calls == 2
+    assert catalog["sources"][0]["content_hash"] == rag_indexing.content_hash(
+        "# Overview\nAfter\n"
+    )
+
+
 def test_build_rag_manifests_fails_on_missing_tracked_source_paths(
     tmp_path: Path,
     monkeypatch: object,

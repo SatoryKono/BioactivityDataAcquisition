@@ -523,7 +523,10 @@ run_memory_checks() {
         "$PYTHON_BIN" -m memory.tooling.validate
 
     run_step memory-workflow-smoke \
-        env PYTHONPATH="$memory_pythonpath" \
+        env \
+        BIOETL_AI_RUNTIME="${BIOETL_AI_RUNTIME:-pretest-guardrails}" \
+        BIOETL_AI_AGENT="${BIOETL_AI_AGENT:-memory-workflow-smoke}" \
+        PYTHONPATH="$memory_pythonpath" \
         "$PYTHON_BIN" -m memory.tooling.workflow smoke \
         --validation-timeout-seconds 15 \
         --json

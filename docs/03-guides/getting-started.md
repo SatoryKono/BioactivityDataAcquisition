@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.2.2
+Version: 1.2.3
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-30'
+  Last verified: '2026-07-30'
 
 ______________________________________________________________________
 
