@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from tests.architecture import _module_coverage_inventory_support as support
+from tests.architecture import test_mounted_worktree_skip_policy as mounted_policy
 
 
 @pytest.mark.parametrize(
@@ -53,3 +54,25 @@ def test_git_path_is_dirty_rejects_git_errors(
 
     with pytest.raises(OSError, match="exit code 128"):
         support._git_path_is_dirty("reports/inventory.json", root=tmp_path)
+
+
+def test_mounted_worktree_git_grep_avoids_pipe_reader_threads(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def _fake_run(command: list[str], **kwargs: object) -> object:
+        captured.update(kwargs)
+        kwargs["stdout"].write("tests/example.py:1:match\n")  # type: ignore[union-attr]
+        kwargs["stderr"].write("")  # type: ignore[union-attr]
+        return mounted_policy.subprocess.CompletedProcess(command, 0)
+
+    monkeypatch.setattr(mounted_policy.subprocess, "run", _fake_run)
+
+    result = mounted_policy._run_git_grep(["git", "grep", "match"])
+
+    assert result.stdout == "tests/example.py:1:match\n"
+    assert "capture_output" not in captured
+    assert captured["stdout"] is not mounted_policy.subprocess.PIPE
+    assert captured["stderr"] is not mounted_policy.subprocess.PIPE
+    assert captured["env"]["GIT_OPTIONAL_LOCKS"] == "0"  # type: ignore[index]
