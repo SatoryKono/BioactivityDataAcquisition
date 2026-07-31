@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 import builtins
+import csv
 import hashlib
 import json
 import os
@@ -629,8 +630,10 @@ class TestCsvExporterTrueAppend:
             table = pa.Table.from_pydict({"id": [i], "val": [f"v{i}"]})
             await exporter.export("multi", table)
 
-        result = pv.read_csv(tmp_path / "multi.csv")
-        assert result.num_rows == 5
+        with (tmp_path / "multi.csv").open(newline="", encoding="utf-8") as stream:
+            rows = list(csv.DictReader(stream))
+
+        assert rows == [{"id": str(i), "val": f"v{i}"} for i in range(5)]
 
     @pytest.mark.asyncio
     async def test_append_locked_target_writes_backup(
