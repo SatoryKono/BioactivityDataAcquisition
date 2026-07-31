@@ -95,3 +95,28 @@ def test_strip_foreign_objects_is_idempotent(tmp_path: Path) -> None:
 
     assert first_removed == 1
     assert second_removed == 0
+
+
+def test_strip_foreign_objects_accepts_mermaid_html_entities(tmp_path: Path) -> None:
+    """Generated Mermaid XHTML may be valid HTML but not strict XML."""
+    module = _load_module()
+    svg_path = tmp_path / "chembl-generated.svg"
+    svg_path.write_text(
+        """
+        <svg xmlns="http://www.w3.org/2000/svg">
+          <g class="nodeLabel">
+            <text class="fo-fallback">Activity ID</text>
+            <foreignObject width="180" height="40">
+              <div xmlns="http://www.w3.org/1999/xhtml">Activity&nbsp;ID<br>required</div>
+            </foreignObject>
+          </g>
+        </svg>
+        """.strip(),
+        encoding="utf-8",
+    )
+
+    assert module.strip_foreign_objects(svg_path) == 1
+    payload = svg_path.read_text(encoding="utf-8")
+    assert "foreignObject" not in payload
+    assert "Activity ID" in payload
+    ET.fromstring(payload)
