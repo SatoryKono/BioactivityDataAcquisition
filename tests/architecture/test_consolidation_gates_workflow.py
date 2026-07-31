@@ -2,8 +2,11 @@
 
 from pathlib import Path
 
+import pytest
+
 
 CONSOLIDATION_WORKFLOW = Path(".github/workflows/consolidation-gates.yml")
+pytestmark = pytest.mark.architecture
 
 
 def test_consolidation_mypy_matches_canonical_product_scope() -> None:
