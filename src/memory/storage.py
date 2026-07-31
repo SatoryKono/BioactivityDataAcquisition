@@ -12,6 +12,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
+import psutil
+
 
 class StorageConflictError(RuntimeError):
     """Raised when an optimistic write or lock acquisition conflicts."""
@@ -33,15 +35,11 @@ def _lock_owner_is_alive(payload: dict[str, Any]) -> bool:
     if not isinstance(pid, int) or pid < 1:
         return False
     try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
-        return False
-    except PermissionError:
+        if not psutil.pid_exists(pid):
+            return False
+    except (OSError, psutil.Error):
+        # An inconclusive probe must not allow a live owner's lock to be stolen.
         return True
-    except OSError as exc:
-        # Windows reports a missing PID as ERROR_INVALID_PARAMETER instead of
-        # ProcessLookupError. Unknown probe failures remain fail-closed.
-        return getattr(exc, "winerror", None) != 87
     expected_start = payload.get("process_start")
     actual_start = _process_start_token(pid)
     if isinstance(expected_start, str) and actual_start is not None:
