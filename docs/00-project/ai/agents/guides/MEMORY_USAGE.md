@@ -52,9 +52,11 @@ supersession. Handoffs MUST NOT contain full conversations, hidden scratchpads,
 unrelated user context, or secrets.
 
 Repository-owned user memory requires explicit repository-scoped consent and
-operation grants. Vendor-hosted user or conversation memory is outside this
-contract; its retention, deletion, compaction, and cross-session behavior
-remain **NOT_PROVEN**.
+operation grants. Vendor-hosted evidence is recorded in
+`src/memory/catalog/vendor_memory_registry.yaml`. Vendor documentation proves
+policy only: deletion, isolation, compaction, and cross-session behavior remain
+`BLOCKED_EXTERNAL` or `NOT_PROVEN` until dated account-backed tests are attached
+without secrets or conversation content.
 
 General schema migration, backup/restore, and external MCP/Neo4j recovery are
 not complete repository capabilities. Preserve original digests, avoid
