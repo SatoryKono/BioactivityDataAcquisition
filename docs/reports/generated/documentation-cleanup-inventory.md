@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2431 |
+| Doc-like files | 2376 |
 | Tracked doc-like files | 2376 |
-| Ignored local docs/reports files | 55 |
+| Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
 | Generated routes | 69 |
@@ -18,7 +18,6 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 55 |
 | tracked | 2376 |
 
 ## Lifecycle Counts
@@ -30,8 +29,8 @@
 | active_quality_baseline | 24 |
 | closeout_evidence | 39 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 40 |
-| docs_reports_generated_or_route_owned | 23 |
+| docs_reports_curated_or_historical_report | 2 |
+| docs_reports_generated_or_route_owned | 6 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
 | generated_skill_reference_mirror | 12 |
@@ -59,29 +58,29 @@
 | Status | Count |
 | --- | --- |
 | Active | 866 |
-| Archived | 130 |
+| Archived | 129 |
 | Canonical | 73 |
-| Generated | 878 |
-| Working | 484 |
+| Generated | 861 |
+| Working | 447 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
 | active | 866 |
-| archive | 130 |
+| archive | 129 |
 | canonical | 73 |
-| generated | 878 |
-| working | 484 |
+| generated | 861 |
+| working | 447 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 105 |
-| generate-automatically | 878 |
-| keep | 1132 |
+| archive-after-migration | 68 |
+| generate-automatically | 861 |
+| keep | 1131 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -92,45 +91,8 @@
 | `docs/00-project/ai/skills/global/documentation-audit/references/report-template.md` | Working | 0 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
 | `docs/filters/migration-plan.md` | Working | 1 | archive-after-migration |
-| `docs/reports/2026-04-23-documentation-audit-summary.md` | Working | 0 | archive-after-migration |
-| `docs/reports/adr-compliance-verification-2026-07-24.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/compatibility-surface-issue-pack-20260413.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/dashboard-audit-report-2026-05-08.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/documentation-audit-github-issues.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/documentation-remediation-plan.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/grafana-dashboard-audit-github-issues-2026-05-19.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/interoperability-docs-reconciliation-2026-04-28.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/script-inventory-analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/concurrency/async_concurrency_analysis.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28-drmr.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-07-28-phase2.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-07-30.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
-| `docs/reports/docs-link-check-report.json` | Working | 0 | archive-after-migration |
-| `docs/reports/docs-parity-report.json` | Working | 0 | archive-after-migration |
-| `docs/reports/documentation-audit-report-2026-07-24.md` | Working | 0 | archive-after-migration |
-| `docs/reports/documentation/full-documentation-audit-2026-07-23.md` | Working | 0 | archive-after-migration |
-| `docs/reports/documentation/github-issue-drafts-2026-07-23.md` | Working | 0 | archive-after-migration |
-| `docs/reports/documentation/quick_wins_documentation_and_rollback.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dq/gold_foreign_key_dq_fail_closed_enforcement_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/governance/contract_governance_corrections_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/governance_check_report.json` | Working | 0 | archive-after-migration |
-| `docs/reports/grafana_silver_filter_rejections_prompt.md` | Working | 0 | archive-after-migration |
-| `docs/reports/great-expectations-spike-2026-04-01.md` | Working | 0 | archive-after-migration |
-| `docs/reports/knowledge-graphs/bioetl-architecture-graph.json` | Working | 0 | archive-after-migration |
-| `docs/reports/knowledge-graphs/bioetl-runtime-detail-graph.json` | Working | 0 | archive-after-migration |
-| `docs/reports/lifecycle/resume_state_validation_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/lifecycle/workflow_state_lock_acquisition_ordering_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/observability/tracing_span_coverage_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/resource-management/file_io_resource_management_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/scripts-inventory-2026-03-01.md` | Working | 0 | archive-after-migration |
-| `docs/reports/security/dq_report_xss_prevention.md` | Working | 0 | archive-after-migration |
-| `docs/reports/security/security_test_coverage_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/security/structured_exception_recursive_redaction_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/test-health/skip_marker_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/test-health/vcr_lifecycle_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/testing/phase2_integration_testing_plan.md` | Working | 0 | archive-after-migration |
 | `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/CLOSEOUT.md` | Working | 0 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/grafana-live-snapshot.json` | Working | 0 | archive-after-migration |
@@ -168,6 +130,31 @@
 | `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
+| `reports/quality/sonar/live-issues-20260728-manifest.json` | Working | 0 | archive-after-migration |
+| `reports/quality/sonar/live-issues-20260728-postmerge-full.json` | Working | 0 | archive-after-migration |
+| `reports/quality/sonar/live-snapshot-20260728-postmerge-summary.json` | Working | 0 | archive-after-migration |
+| `reports/quality/sonar/live-snapshot-20260728-summary.json` | Working | 0 | archive-after-migration |
+| `reports/quality/test-bootstrap-fixture-scope-profile.json` | Working | 0 | archive-after-migration |
+| `reports/quality/test-support-helper-ownership-map.json` | Working | 0 | archive-after-migration |
+| `reports/quality/test-system-architecture-audit-20260729_FULL.md` | Working | 0 | archive-after-migration |
+| `reports/quality/test-system-audit-2026-07-29-issue-publish.json` | Working | 0 | archive-after-migration |
+| `reports/quality/total-tech-debt-audit-main-current.md` | Working | 0 | archive-after-migration |
+| `reports/review/S1-domain.md` | Working | 0 | archive-after-migration |
+| `reports/review/S1.1-contracts-ports.md` | Working | 0 | archive-after-migration |
+| `reports/review/S1.2-logic-models.md` | Working | 0 | archive-after-migration |
+| `reports/review/S2-application.md` | Working | 0 | archive-after-migration |
+| `reports/review/S2.1-core-composite.md` | Working | 0 | archive-after-migration |
+| `reports/review/S2.2-services-pipelines.md` | Working | 0 | archive-after-migration |
+| `reports/semantic_pipeline_audit/base_config_semantic_coverage_2026-07-01.json` | Working | 0 | archive-after-migration |
+| `reports/semantic_pipeline_audit/critical_inconsistencies_2026-07-01.md` | Working | 0 | archive-after-migration |
+| `reports/semantic_pipeline_audit/recommended_canonical_fields_2026-07-01.csv` | Working | 0 | archive-after-migration |
+| `reports/semantic_pipeline_audit/semantic_cluster_registry_2026-07-01.json` | Working | 0 | archive-after-migration |
+| `reports/semantic_pipeline_audit/semantic_pair_matrix_2026-07-01.csv` | Working | 0 | archive-after-migration |
+| `reports/semantic_pipeline_audit/semantic_pipeline_audit_2026-07-01.md` | Working | 0 | archive-after-migration |
+| `reports/semantic_pipeline_audit/semantic_pipeline_audit_exhaustive_2026-07-01.md` | Working | 0 | archive-after-migration |
+| `reports/semantic_pipeline_audit/semantic_pipeline_audit_manifest_2026-07-01.json` | Working | 0 | archive-after-migration |
+| `reports/semantic_pipeline_audit/semantic_residual_backlog_2026-07-01.json` | Working | 0 | archive-after-migration |
+| `reports/semantic_pipeline_audit/semantic_residual_backlog_2026-07-01.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -303,30 +290,9 @@
 
 | Path | Tracking | Lifecycle | Action |
 | --- | --- | --- | --- |
-| `docs/reports/2026-04-23-documentation-audit-summary.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/README.md` | tracked | docs_reports_curated_entrypoint | keep |
-| `docs/reports/adr-compliance-verification-2026-07-24.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/compatibility-surface-issue-pack-20260413.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/dashboard-audit-report-2026-05-08.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/documentation-audit-github-issues.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/documentation-remediation-plan.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/grafana-dashboard-audit-github-issues-2026-05-19.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/interoperability-docs-reconciliation-2026-04-28.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/script-inventory-analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/concurrency/async_concurrency_analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28-drmr.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-07-28-phase2.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-07-30.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/README.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/docs-link-check-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/docs-parity-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/documentation-audit-report-2026-07-13.md` | ignored_local | docs_reports_curated_or_historical_report | keep |
-| `docs/reports/documentation-audit-report-2026-07-24.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/documentation/full-documentation-audit-2026-07-23.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/documentation/github-issue-drafts-2026-07-23.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/documentation/quick_wins_documentation_and_rollback.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dq/gold_foreign_key_dq_fail_closed_enforcement_analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/evidence/INDEX.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/README.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
@@ -343,6 +309,18 @@
 | `docs/reports/evidence/project-package-topology/04-decisions/DECISIONS.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-package-topology/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-test-health/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/project-test-health/metadata.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/project-test-health/shard_registry.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/technical-debt/03-synthesis/CROSS-SYNTHESIS.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/technical-debt/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/technical-debt/complexity-hotspots/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/generated/chembl_matrix_structural_contract_v1.json` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
+| `docs/reports/generated/documentation-cleanup-inventory.json` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
+| `docs/reports/generated/documentation-cleanup-inventory.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
+| `docs/reports/generated/pipeline_normalization_field_matrix/non_chembl_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
+| `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.csv` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
+| `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
+| `docs/reports/index.md` | tracked | docs_reports_curated_entrypoint | keep |
 
 ## Generated Route Registry
 
