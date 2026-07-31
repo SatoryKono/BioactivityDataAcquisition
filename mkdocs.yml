@@ -952,7 +952,6 @@ nav:
               - "Skill": 00-project/ai/skills/local/new-pipeline/SKILL.md
               - "Architecture Debt Bot": 00-project/ai/skills/local/py-architecture-debt-bot/SKILL.md
               - "Skill": 00-project/ai/skills/local/py-audit-bot/SKILL.md
-              - "Legacy Skill py-code-bot": 00-project/ai/skills/local/py-code-bot/SKILL.md
               - "Skill": 00-project/ai/skills/local/py-config-bot/SKILL.md
               - "Skill": 00-project/ai/skills/local/py-debug-bot/SKILL.md
               - "Skill": 00-project/ai/skills/local/py-doc-bot/SKILL.md
