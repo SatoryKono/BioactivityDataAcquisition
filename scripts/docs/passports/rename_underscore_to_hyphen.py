@@ -36,13 +36,28 @@ def build_plan(root: Path) -> tuple[RenamePlan, ...]:
     return tuple(plans)
 
 
-def _tracked_files(root: Path) -> tuple[Path, ...]:
+def _tracked_files_with_references(
+    root: Path,
+    pairs: tuple[tuple[str, str], ...],
+) -> tuple[Path, ...]:
+    if not pairs:
+        return ()
+    command = ["git", "grep", "-Ilz"]
+    for source, _ in pairs:
+        command.extend(("-e", source))
+    command.append("--")
     result = subprocess.run(
-        ["git", "ls-files", "-z"],
+        command,
         cwd=root,
-        check=True,
         capture_output=True,
     )
+    if result.returncode not in {0, 1}:
+        raise subprocess.CalledProcessError(
+            result.returncode,
+            command,
+            output=result.stdout,
+            stderr=result.stderr,
+        )
     return tuple(
         root / item.decode("utf-8")
         for item in result.stdout.split(b"\0")
@@ -72,13 +87,10 @@ def referenced_files(
     """Return tracked UTF-8 files containing paths that the migration updates."""
     pairs = _replacement_pairs(root, plans)
     matches: list[Path] = []
-    for path in _tracked_files(root):
+    for path in _tracked_files_with_references(root, pairs):
         if not path.is_file() or path in {plan.source for plan in plans}:
             continue
-        try:
-            text = path.read_text(encoding="utf-8")
-        except (UnicodeDecodeError, OSError):
-            continue
+        text = path.read_text(encoding="utf-8")
         if any(source in text for source, _ in pairs):
             matches.append(path)
     return tuple(matches)
