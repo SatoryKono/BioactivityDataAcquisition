@@ -12,17 +12,12 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
-
-import pytest
-
 from pathlib import Path
 
-import json
+import pytest
 import yaml
-from scripts.engineering.ci.update_test_telemetry_baseline import (
-    compute_test_telemetry_source_tree_sha256,
-)
 
 
 pytestmark = pytest.mark.architecture

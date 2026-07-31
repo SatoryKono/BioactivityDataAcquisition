@@ -45,6 +45,7 @@ Before contributing, read these documents:
 For the full local GitHub workflow, including worktrees, sync/rebase, PR creation, and cleanup, see:
 
 - [docs/03-guides/github-local-workflow.md](../docs/03-guides/github-local-workflow.md)
+- [GitHub branch naming and lifecycle policy](../docs/00-project/governance/05-github-policy.md#1-branch-strategy)
 
 ### Governance Metrics Note
 

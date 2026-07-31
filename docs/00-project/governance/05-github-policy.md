@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-26'
+  Last verified: '2026-07-31'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md v6.1.3 and ADR-047 | Last updated: 2026-05-26*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-07-31*
 
 ______________________________________________________________________
 
@@ -46,6 +46,41 @@ ______________________________________________________________________
 - `feat/pubchem_compound-pipeline`
 - `fix/chembl-rate-limit-429`
 - `refactor/storage-clear-contract`
+
+Automation-owned branches MAY use a provider prefix already established by
+the integration (`dependabot/`, `renovate/`, `devin/`, `bolt/`). Human-created
+branches MUST use one of the project types above and a lowercase kebab-case
+description. Opaque names (`a1`, `tmp`, numeric-only names), date-only names,
+and persistent `backup/*` branches are non-compliant.
+
+### Branch Lifecycle
+
+| State | Required action | Retention |
+| --- | --- | --- |
+| Active PR or active worktree | Keep; never delete automatically | Until merged, closed, or explicitly abandoned |
+| Merged branch | Delete after the merge commit is reachable from `main` | Within 7 days |
+| Closed/unmerged branch | Owner review before deletion | Review after 30 days without activity |
+| Release or durable recovery point | Create an annotated tag; do not retain a backup branch | Tags follow release retention |
+
+Before deleting a local or remote branch, the operator MUST verify all of:
+
+1. it is not `main`, a protected branch, an active PR head, or checked out by
+   any worktree;
+1. its tip and merge status were refreshed from GitHub rather than taken from
+   a historical cleanup list;
+1. unmerged branches have an explicit owner decision (`keep`, `tag`, or
+   `delete`);
+1. the cleanup command is reviewed in dry-run form before apply.
+
+Branch-count ceilings MUST NOT be enforced by failing unrelated pull requests.
+CI may reject the current PR head when its name violates this policy. Scheduled
+branch inventory is report-only; deletion remains an explicit maintainer
+operation. Cleanup tooling MUST default to dry-run and MUST NOT infer deletion
+solely from age or a global branch-count target.
+
+Compliant examples: `fix/vcr-lfs-preflight`, `ci/branch-name-policy`,
+`docs/branch-lifecycle`. Non-compliant examples: `master_20260801`,
+`backup-before-merge`, `12345`, `temp-fix`.
 
 ______________________________________________________________________
 

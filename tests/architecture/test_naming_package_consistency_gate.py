@@ -96,6 +96,14 @@ def test_tests_workflow_runs_naming_package_consistency_gate() -> None:
     assert "python -m scripts.engineering.qa check-naming-pkg --check" in workflow
 
 
+def test_tests_workflow_runs_full_naming_audit() -> None:
+    """Required pre-merge CI must enforce the canonical naming audit."""
+    repo_root = Path(__file__).resolve().parents[2]
+    workflow = (repo_root / ".github/workflows/tests.yml").read_text(encoding="utf-8")
+    assert "Pre-merge naming convention audit" in workflow
+    assert "python -m scripts.engineering.qa check-naming --check" in workflow
+
+
 def test_collect_src_tree_uses_git_tracked_inventory(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
