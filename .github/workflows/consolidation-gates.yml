@@ -44,7 +44,12 @@ jobs:
         run: uv run --frozen --no-build ruff format --check .
 
       - name: Mypy
-        run: uv run --frozen --no-build mypy src tests
+        run: >-
+          uv run --frozen --no-build mypy
+          --config-file pyproject.toml
+          --strict
+          --no-incremental
+          src/bioetl
 
       - name: Architecture gate tests
         run: |
