@@ -616,11 +616,19 @@ ______________________________________________________________________
 | LINK-002   | Fragile singleton-index `linkStyle` pattern (many one-by-one index lines) | WARN     |
 | GRAPH-001  | Orphan nodes (defined but not in any edge)                                | WARN     |
 | NBSP-001   | `&nbsp;` padding detected in source                                       | ERROR    |
+| STALE-001  | `%% @date`/`%% Updated:` is older than 150 days                           | ERROR    |
+| STALE-002  | `%% @date`/`%% Updated:` is older than 90 days                            | WARN     |
 
 Node-size exceptions in current lint implementation:
 
 - `*-full.mermaid` reference views are exempt from `SIZE-001`/`SIZE-002`.
 - `00-legend*` files are exempt from `SIZE-001`/`SIZE-002`.
+
+The scheduled `diagram-nightly.yml` run maintains one idempotent
+`[DIAGRAM-FRESHNESS]` GitHub issue for `STALE-001` findings and fails the job
+while any source exceeds 150 days. It closes the issue after recovery. Review
+the diagram against current code, configuration, and accepted ADRs before
+updating its metadata date; timestamp-only refreshes are not valid remediation.
 
 ### Orphan Node Detection (GRAPH-001)
 

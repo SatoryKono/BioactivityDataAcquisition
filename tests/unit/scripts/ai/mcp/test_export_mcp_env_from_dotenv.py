@@ -238,13 +238,13 @@ class TestExportMcpEnvFromDotenv:
             if previous_user_scope:
                 restore_literal = previous_user_scope.replace("'", "''")
                 restore_expr = (
-                    "[Environment]::SetEnvironmentVariable("
-                    f"'{probe_key}', '{restore_literal}', 'User')"
+                    "Set-ItemProperty -Path 'HKCU:\\Environment' "
+                    f"-Name '{probe_key}' -Value '{restore_literal}'"
                 )
             else:
                 restore_expr = (
-                    "[Environment]::SetEnvironmentVariable("
-                    f"'{probe_key}', $null, 'User')"
+                    "Remove-ItemProperty -Path 'HKCU:\\Environment' "
+                    f"-Name '{probe_key}' -ErrorAction SilentlyContinue"
                 )
             subprocess.run(
                 [POWERSHELL, "-NoProfile", "-Command", restore_expr],

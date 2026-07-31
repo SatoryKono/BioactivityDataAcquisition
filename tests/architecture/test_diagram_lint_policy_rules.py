@@ -16,6 +16,7 @@ import pytest
 
 import importlib.util
 import sys
+from datetime import timedelta
 from pathlib import Path
 from types import ModuleType
 
@@ -84,6 +85,33 @@ def test_size_rules_apply_and_reference_full_is_exempt() -> None:
     assert any(issue.rule == "SIZE-002" for issue in warning)
     assert any(issue.rule == "SIZE-001" for issue in error)
     assert full_view_exempt == []
+
+
+@pytest.mark.parametrize(
+    ("age_days", "expected_rule"),
+    [
+        (90, None),
+        (91, "STALE-002"),
+        (150, "STALE-002"),
+        (151, "STALE-001"),
+    ],
+)
+def test_staleness_threshold_boundaries(
+    age_days: int,
+    expected_rule: str | None,
+) -> None:
+    """Freshness policy warns after 90 days and errors after 150 days."""
+    lint = _load_lint_module()
+
+    issues = lint._staleness_issues(
+        fname="docs/02-architecture/diagrams/sample.mmd",
+        age=timedelta(days=age_days),
+        stale_days=lint.DEFAULT_STALE_DAYS,
+    )
+
+    assert [issue.rule for issue in issues] == (
+        [] if expected_rule is None else [expected_rule]
+    )
 
 
 def test_size_hard_limit_downgrades_when_decomposed_siblings_exist(

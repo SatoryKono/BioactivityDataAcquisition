@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-31T13:06:33.007595+00:00",
+  "generated_at": "2026-07-31T13:43:33.664556+00:00",
   "summary": {
-    "total_scripts": 568,
+    "total_scripts": 569,
     "status_counts": {
-      "active": 341,
+      "active": 342,
       "supporting": 222,
       "temporary_diagnostic": 5
     },
     "reference_group_coverage": {
       "agents": 6,
       "build": 12,
-      "ci": 66,
-      "docs": 230,
+      "ci": 67,
+      "docs": 231,
       "other": 77,
       "scripts": 448,
-      "skills": 17,
+      "skills": 18,
       "tests": 353
     }
   },
@@ -137,13 +137,13 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 26,
+          "line": 33,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/check_skills_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 52,
+          "line": 61,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/check_skills_mirror.sh\""
         },
@@ -2208,13 +2208,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 28,
+          "line": 35,
           "source_group": "ci",
           "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 54,
+          "line": 63,
           "source_group": "ci",
           "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
         },
@@ -2239,19 +2239,19 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 29,
+          "line": 36,
           "source_group": "ci",
           "text": "- \"scripts/ai/junie/check_junie_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 55,
+          "line": 64,
           "source_group": "ci",
           "text": "- \"scripts/ai/junie/check_junie_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 72,
+          "line": 130,
           "source_group": "ci",
           "text": "run: bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -4256,6 +4256,51 @@
       ]
     },
     {
+      "path": "scripts/ai/runtime_skill_sync.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": ".codex/skills/SKILLS-CATALOG.md",
+          "line": 22,
+          "source_group": "skills",
+          "text": "reconciliation uses `python scripts/ai/runtime_skill_sync.py --mode sync"
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 39,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/runtime_skill_sync.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 67,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/runtime_skill_sync.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 85,
+          "source_group": "ci",
+          "text": "python scripts/ai/runtime_skill_sync.py"
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 106,
+          "source_group": "ci",
+          "text": "python scripts/ai/runtime_skill_sync.py"
+        },
+        {
+          "path": "docs/00-project/ai/skills/local/SKILLS-CATALOG.md",
+          "line": 22,
+          "source_group": "docs",
+          "text": "reconciliation uses `python scripts/ai/runtime_skill_sync.py --mode sync"
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/sync_ai_governance.py",
       "type": "py",
       "status": "supporting",
@@ -4264,13 +4309,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 31,
+          "line": 38,
           "source_group": "ci",
           "text": "- \"scripts/ai/sync_ai_governance.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 57,
+          "line": 66,
           "source_group": "ci",
           "text": "- \"scripts/ai/sync_ai_governance.py\""
         },
@@ -4853,8 +4898,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 88,
+      "reference_count": 89,
       "references": [
+        {
+          "path": ".github/workflows/diagram-nightly.yml",
+          "line": 108,
+          "source_group": "ci",
+          "text": "python3 -c 'import json,sys; payload=json.load(open(sys.argv[1], encoding=\"utf-8\")); rows=[item for item in payload.get(\"issues\", []) if item.get(\"rule\") == \"STALE-001\"]; print(\"Scheduled diagram fres"
+        },
         {
           "path": ".github/workflows/docs.yml",
           "line": 122,
@@ -4896,12 +4947,6 @@
           "line": 245,
           "source_group": "docs",
           "text": "| `scripts.diagrams`                | `uv run python -m scripts.diagrams`                | Diagram lint, check, fix, render            |"
-        },
-        {
-          "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 272,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.diagrams lint"
         }
       ]
     },
@@ -5016,7 +5061,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 445,
+          "line": 459,
           "source_group": "docs",
           "text": "1. Выполнен `python scripts/diagrams/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`."
         },
@@ -5061,7 +5106,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 41,
+          "line": 44,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
         },
@@ -5079,19 +5124,19 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 430,
+          "line": 444,
           "source_group": "docs",
           "text": "1. **Проверить обязательные SVG-артефакты:** `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 431,
+          "line": 445,
           "source_group": "docs",
           "text": "Для дополнительной compatibility-проверки PNG используйте curated manifest: `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/png-compatibility.txt"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 460,
+          "line": 474,
           "source_group": "docs",
           "text": "| check_diagram_artifacts.py     | `scripts/diagrams/` | DIAG-T010/T012 для обязательных SVG и DIAG-T011/T012 для optional PNG compatibility |"
         },
@@ -5118,7 +5163,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 73,
+          "line": 76,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
@@ -5130,13 +5175,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 433,
+          "line": 447,
           "source_group": "docs",
           "text": "1. **Прогнать quality-gates:** `python scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 462,
+          "line": 476,
           "source_group": "docs",
           "text": "| check_diagram_quality_gates.py | `scripts/diagrams/` | DIAG-T018..T023 (style/classDef/decomposition/legend/labels)                        |"
         },
@@ -5183,19 +5228,19 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 53,
+          "line": 56,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 59,
+          "line": 62,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 66,
+          "line": 69,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
@@ -5219,7 +5264,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 410,
+          "line": 424,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts/diagrams/check_diagram_visual_smoke.py `"
         }
@@ -5267,13 +5312,13 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 47,
+          "line": 50,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 195,
+          "line": 231,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py --manifest \"$manifest_tmp\""
         },
@@ -5291,25 +5336,25 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 339,
+          "line": 353,
           "source_group": "docs",
           "text": "Скрипт `scripts/diagrams/check_svg_text_visibility.py` валидирует smoke-набор SVG на предмет"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 349,
+          "line": 363,
           "source_group": "docs",
           "text": "python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 350,
+          "line": 364,
           "source_group": "docs",
           "text": "python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt --json"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 432,
+          "line": 446,
           "source_group": "docs",
           "text": "1. **Проверить видимость текста в SVG:** `python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         }
@@ -5457,7 +5502,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 94,
+          "line": 130,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/enforce_diagram_quality_budget.py \\"
         },
@@ -5924,7 +5969,7 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 80,
+          "line": 83,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \\"
         },
@@ -6124,25 +6169,25 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 627,
+          "line": 635,
           "source_group": "docs",
           "text": "`scripts/diagrams/prune_orphan_nodes.py` detects nodes defined in a diagram but not"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 635,
+          "line": 643,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 638,
+          "line": 646,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check --json"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 641,
+          "line": 649,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --fix"
         }
@@ -6181,13 +6226,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 403,
+          "line": 417,
           "source_group": "docs",
           "text": "`scripts/diagrams/render.ps1`: wrapper запускает тот же Bash renderer через Git"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 409,
+          "line": 423,
           "source_group": "docs",
           "text": ".\\scripts\\diagrams\\render.ps1 --svg-only"
         },
@@ -6273,13 +6318,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 455,
+          "line": 469,
           "source_group": "docs",
           "text": "| run_diagram_checks.sh          | `scripts/diagrams/` | Единый запуск профилей проверок (`pr`/`nightly`/`quick`)                            |"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 473,
+          "line": 487,
           "source_group": "docs",
           "text": "scripts/diagrams/run_diagram_checks.sh --profile pr"
         }
@@ -6345,19 +6390,19 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 85,
+          "line": 121,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/run_diagram_nightly_suite.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 463,
+          "line": 477,
           "source_group": "docs",
           "text": "| run_diagram_nightly_suite.py   | `scripts/diagrams/` | DIAG-T024..T029 nightly heuristics (interactivity/chaos/growth/theme)               |"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 479,
+          "line": 493,
           "source_group": "docs",
           "text": "1. `nightly` — `pr` + DIAG-T024..T029 (`run_diagram_nightly_suite.py`)."
         },
@@ -6578,7 +6623,7 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 171,
+          "line": 207,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -6614,7 +6659,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 408,
+          "line": 422,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json"
         }
@@ -8354,7 +8399,7 @@
         },
         {
           "path": "tests/unit/scripts/docs/passports/test_passport_path_renamer.py",
-          "line": 10,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.docs.passports.rename_underscore_to_hyphen import main"
         }
@@ -19737,19 +19782,19 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 33,
+          "line": 41,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_ai_skills_layout.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 59,
+          "line": 69,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_ai_skills_layout.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 85,
+          "line": 143,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_ai_skills_layout.sh"
         },
@@ -19774,19 +19819,19 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 32,
+          "line": 40,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_skills_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 58,
+          "line": 68,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_skills_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 82,
+          "line": 140,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_skills_mirror.sh --check"
         },
