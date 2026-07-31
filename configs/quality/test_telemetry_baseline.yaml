@@ -6,7 +6,7 @@ refreshed_at_utc: '2026-07-27T18:08:35.600453+00:00'
 refresh_status: captured
 source_commit: 667c3020ce74f87c319f77612c765a5aaf30e6ad
 source_run_id: local-duration-rebuild-2026-07-23
-source_tree_sha256: 60a397abe7aa4a98c23da2a1e6a9abb73d3b43a31504495b2c2952a5755e1232
+source_tree_sha256: 516e27b7ffc1919c55f955d78065fddc5d4d2e8c579c7f4cc07fe4776d03ac2f
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
