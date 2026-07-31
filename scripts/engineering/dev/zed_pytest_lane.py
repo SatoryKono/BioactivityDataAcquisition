@@ -99,6 +99,9 @@ LANES: dict[str, tuple[str, ...]] = {
         # Coverage gate measures src/bioetl via unit/integration paths.
         # Architecture/e2e/contract are separate lanes (and spawn git/subprocess
         # that can hang on cloud-synced Windows worktrees under suite load).
+        "--ignore=tests/e2e",
+        "--ignore=tests/contract",
+        "--ignore=tests/architecture",
         "-m",
         "not memory and not benchmark and not slow",
         "--cov=src/bioetl",
