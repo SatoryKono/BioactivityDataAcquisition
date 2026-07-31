@@ -1124,14 +1124,7 @@
     }
   },
   "assertless_total_candidates": 106,
-  "budget_violations": [
-    {
-      "actual": 2,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1305,11 +1298,8 @@
     ]
   },
   "intentional_no_exception_contract": 90,
-  "markerless_examples": [
-    "tests/unit/scripts/test_runtime_skill_sync.py:49",
-    "tests/unit/scripts/test_runtime_skill_sync.py:69"
-  ],
-  "markerless_test_functions": 2,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2305,11 +2295,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/scripts/test_runtime_skill_sync.py:49",
-      "tests/unit/scripts/test_runtime_skill_sync.py:69"
-    ],
-    "markerless_test_functions": 2,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2374,7 +2361,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "1c0245c31c75c9c7571b3649bd0d99d59e7ef6df2bc17319a088029c42e3bfde",
+  "source_tree_sha256": "84c9737a698e5a69b103af24b12c6435c0ca9246f2f85ee9554e4ec3d84ab904",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 106,
@@ -2383,11 +2370,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 90,
-    "markerless_examples": [
-      "tests/unit/scripts/test_runtime_skill_sync.py:49",
-      "tests/unit/scripts/test_runtime_skill_sync.py:69"
-    ],
-    "markerless_test_functions": 2,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0

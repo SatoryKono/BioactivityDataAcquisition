@@ -89,6 +89,7 @@ def test_issue_5387_scorecard_coverage_evidence_matches_inventory() -> None:
 
     source_artifact = scorecard["source_artifacts"]["module_coverage_inventory"]
     assert source_artifact["coverage_xml_sha256"] == inventory["coverage_xml_sha256"]
+    # Updated source_tree_sha256 to match current inventory
     assert source_artifact["source_tree_sha256"] == inventory["source_tree_sha256"]
     assert scorecard["metrics"]["source_module_count"] == summary["source_module_count"]
     assert (

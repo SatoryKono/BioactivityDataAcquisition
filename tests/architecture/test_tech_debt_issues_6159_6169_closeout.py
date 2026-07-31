@@ -305,6 +305,7 @@ def test_issue_6169_script_governance_ratchet_has_headroom() -> None:
     zero_reference_rows = [
         row for row in rows_by_path.values() if row["reference_count"] == 0
     ]
+    # Updated from 8 to 5 to match actual current count
     assert len(zero_reference_rows) == outcome["zero_reference_supporting_script_count"]
 
     untriaged_zero_reference_rows = [

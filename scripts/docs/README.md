@@ -20,6 +20,8 @@ Canonical implementations now live under focused package subdirectories:
 - `scripts/docs/common/paths.py`: repo roots, docs roots, generated-artifact filters
 - `scripts/docs/common/markdown.py`: shared markdown/link/nav regex helpers
 - `scripts/docs/common/xlsx.py`: shared low-level XLSX zip/XML helpers for workbook tooling
+- `scripts/docs/passports/markdown_renderer.py`: reviewed internal passport-renderer
+  extraction retained behind the canonical projector pending integration or removal
 
 Top-level `scripts/docs/*.py` files now exist primarily as compatibility shims so
 existing CI jobs, docs, tests, and direct script invocations keep working while
