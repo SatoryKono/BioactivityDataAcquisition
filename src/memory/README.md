@@ -213,6 +213,21 @@ Run a curated review loop report:
 python -m memory.tooling.review_curated
 python -m memory.tooling.review_curated --json
 python -m memory.tooling.check_freshness --json
+
+The scheduled `memory-freshness.yml` gate validates catalog integrity, curated
+review age, graph projection age/source identity, and the MCP seed. A stale
+scheduled curated-memory result creates or updates one deduplicated GitHub
+Issue. Graph projections are rebuild-only: absence is valid, but a materialized
+`graph/projections/manifest.json` must be at most 30 days old and match the
+SHA-256 of `ontology.yaml` plus `mappings.yaml`.
+
+File-backed MCP memory is isolated by resolved worktree, sanitized branch, and
+commit. Clients in the same scope intentionally share one graph. The
+repository-owned stdio server uses optimistic atomic writes, so independent
+server processes can mutate that graph concurrently without corrupting or
+silently dropping a completed update. Different scopes use different files;
+restart reloads the same scope. The integration contract is exercised by
+`tests/integration/memory/test_mcp_server_isolation.py`.
 python -m memory.tooling.workflow review-curated
 python -m memory.tooling.workflow review-curated --json
 ```

@@ -39,5 +39,5 @@ if ([string]::IsNullOrWhiteSpace($env:MEMORY_FILE_PATH)) {
         --seed (Join-Path $repoRoot 'docs\00-project\ai\memory\mcp-memory.json')).Trim()
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
-& npx -y '@modelcontextprotocol/server-memory@2026.1.26' @args
+& python -m memory.mcp_server @args
 exit $LASTEXITCODE
