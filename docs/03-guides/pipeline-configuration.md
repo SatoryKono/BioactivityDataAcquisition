@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 6.1.1
+Version: 6.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-07-30'
 
 ______________________________________________________________________
 
@@ -15,8 +15,8 @@ ______________________________________________________________________
 
 Руководство по настройке конфигурации ETL-пайплайнов в BioETL.
 
-**Версия:** 6.1.0
-**Дата обновления:** 2026-04-29
+**Версия:** 6.2.0
+**Дата обновления:** 2026-07-30
 
 ______________________________________________________________________
 
@@ -26,12 +26,66 @@ BioETL использует **YAML-файлы** для конфигурации 
 
 ### Ключевые особенности
 
+- **Unified Entity Configuration Format (ADR-039):** Все 21 стандартных конфигураций пайплайнов консолидированы в единый файл `configs/entities/{provider}/{entity}.yaml` на сущность
 - **Convention over Configuration (ADR-029):** Пути и ссылки вычисляются автоматически
 - **Иерархическое наследование:** Общие defaults загружаются из `configs/base/pipeline.yaml`
 - **Иерархические DQ/Filter правила (ADR-027/028):** 3-уровневая иерархия с merge
 - **Pydantic валидация:** Схемы проверяются при загрузке
 - **Immutable Domain Objects:** Конфиги преобразуются в frozen dataclasses
 - **Fixture governance (dual model):** tracked fixture manifest + gap registry
+
+### Unified Entity Configuration Format (ADR-039)
+
+Начиная с версии 6.1.0, BioETL использует унифицированный формат конфигурации сущностей. Все стандартные конфигурации пайплайнов консолидированы из 5-6 отдельных файлов в один файл `configs/entities/{provider}/{entity}.yaml` на сущность.
+
+**Структура унифицированного конфига:**
+
+```yaml
+# configs/entities/{provider}/{entity}.yaml
+pipeline:
+  # pipeline-specific settings
+  batch_size: 1000
+  sort_by: ["activity_id"]
+  
+schema:
+  # inline schema definition
+  columns:
+    activity_id:
+      type: string
+      required: true
+      
+quality:
+  # DQ rules
+  rules:
+    - field: activity_id
+      check: not_null
+      
+filters:
+  # filter rules
+  - field: standard_value
+    operator: ">"
+    value: 0
+    
+contracts:
+  # contract definitions
+  hash_policy:
+    include_fields: ["activity_id", "standard_type", "standard_value"]
+    
+hash_policy:
+  # hash policy configuration
+  algorithm: "sha256"
+```
+
+**Канонический путь загрузки:**
+
+Функция `load_pipeline_config()` теперь читает из канонического пути `configs/entities/{provider}/{entity}.yaml`. Обратная совместимость обрабатывается на уровне нормализации payload, а не через fallback пути файлов.
+
+**Список унифицированных конфигураций:**
+
+- **chembl (14 entities):** activity, assay, assay_parameters, cell_line, compound_record, molecule, protein_class, publication, publication_similarity, publication_term, subcellular_fraction, target, target_component, tissue
+- **crossref, openalex, pubmed, semanticscholar (4x publication.yaml)**
+- **pubchem/compound.yaml**
+- **uniprot/protein.yaml, uniprot/idmapping.yaml**
 
 ______________________________________________________________________
 
