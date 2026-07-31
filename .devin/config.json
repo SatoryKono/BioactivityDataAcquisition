@@ -105,11 +105,11 @@
     "deepwiki": {
       "type": "http",
       "url": "https://mcp.deepwiki.com/mcp",
+      "startup_timeout_sec": 240,
       "headers": {
         "x-deepwiki-api-key": "$DEEPWIKI_API_KEY",
         "x-deepwiki-organisation-id": "$DEEPWIKI_ORGANISATION_ID"
-      },
-      "startup_timeout_sec": 240
+      }
     },
     "ref": {
       "type": "http",
