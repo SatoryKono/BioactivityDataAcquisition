@@ -401,9 +401,7 @@ def test_write_rag_manifests_retries_when_source_disappears_during_build(
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
 
     assert build_calls == 2
-    assert catalog["sources"][0]["source_path"] == (
-        "docs/00-project/replacement.md"
-    )
+    assert catalog["sources"][0]["source_path"] == ("docs/00-project/replacement.md")
 
 
 def test_build_rag_manifests_fails_on_missing_tracked_source_paths(
