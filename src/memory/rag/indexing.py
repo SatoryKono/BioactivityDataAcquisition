@@ -38,7 +38,8 @@ DEFAULT_OUTPUT_DIR = MEMORY_ROOT / "derived" / "rag" / "manifests"
 GENERATOR_VERSION = 2
 DEFAULT_BUILD_SCOPE = "full"
 WORKFLOW_BUILD_SCOPE = "workflow"
-SOURCE_RECONCILIATION_MAX_ATTEMPTS = 10
+SOURCE_RECONCILIATION_MAX_ATTEMPTS = 3
+SOURCE_FILE_STABILITY_MAX_ATTEMPTS = 10
 
 
 class _SourceSurfaceChangedError(RuntimeError):
@@ -245,6 +246,35 @@ def _build_source_records(
     )
 
 
+def _source_signature(path: Path) -> tuple[int, int]:
+    stat = path.stat()
+    return stat.st_mtime_ns, stat.st_size
+
+
+def _build_stable_source_records(
+    root: Path,
+    rel_path: Path,
+    *,
+    owner_specs: list[tuple[str, tuple[str, ...]]],
+    zone_specs: list[tuple[str, tuple[str, ...]]],
+) -> tuple[dict[str, Any], list[dict[str, Any]], tuple[int, int]]:
+    source_path = root / rel_path
+    for _ in range(SOURCE_FILE_STABILITY_MAX_ATTEMPTS):
+        before = _source_signature(source_path)
+        corpus_source, chunk_rows = _build_source_records(
+            root,
+            rel_path,
+            owner_specs=owner_specs,
+            zone_specs=zone_specs,
+        )
+        after = _source_signature(source_path)
+        if before == after:
+            return corpus_source, chunk_rows, after
+    raise _SourceSurfaceChangedError(
+        f"RAG source kept changing while it was read: {rel_path.as_posix()}"
+    )
+
+
 def build_rag_manifests(
     root: Path,
     *,
@@ -263,18 +293,25 @@ def build_rag_manifests(
     zone_specs = _load_repo_zone_specs()
     corpus_by_path: dict[str, dict[str, Any]] = {}
     chunks_by_path: dict[str, list[dict[str, Any]]] = {}
+    signatures_by_path: dict[str, tuple[int, int]] = {}
+    missing_sources: dict[str, FileNotFoundError] = {}
     for rel_path in sources:
-        corpus_source, chunk_rows = _build_source_records(
-            root,
-            rel_path,
-            owner_specs=owner_specs,
-            zone_specs=zone_specs,
-        )
+        try:
+            corpus_source, chunk_rows, signature = _build_stable_source_records(
+                root,
+                rel_path,
+                owner_specs=owner_specs,
+                zone_specs=zone_specs,
+            )
+        except FileNotFoundError as exc:
+            missing_sources[rel_path.as_posix()] = exc
+            continue
         rel_path_str = rel_path.as_posix()
         corpus_by_path[rel_path_str] = corpus_source
         chunks_by_path[rel_path_str] = chunk_rows
+        signatures_by_path[rel_path_str] = signature
 
-    for attempt in range(1, SOURCE_RECONCILIATION_MAX_ATTEMPTS + 1):
+    for _ in range(SOURCE_RECONCILIATION_MAX_ATTEMPTS):
         sources = _resolve_rag_sources(
             root,
             build_scope=build_scope,
@@ -282,34 +319,36 @@ def build_rag_manifests(
             max_sources=max_sources,
         )
         source_paths = {path.as_posix() for path in sources}
+        for missing_path, error in tuple(missing_sources.items()):
+            if missing_path not in source_paths:
+                missing_sources.pop(missing_path)
+                continue
+            if not (root / missing_path).is_file():
+                raise error
+            missing_sources.pop(missing_path)
         for removed_path in set(corpus_by_path) - source_paths:
             corpus_by_path.pop(removed_path)
             chunks_by_path.pop(removed_path)
+            signatures_by_path.pop(removed_path)
 
         rebuild_paths: list[Path] = []
-        current_identities: list[dict[str, str]] = []
         for rel_path in sources:
             rel_path_str = rel_path.as_posix()
-            captured = corpus_by_path.get(rel_path_str)
             try:
-                current_hash = content_hash(
-                    (root / rel_path).read_text(encoding="utf-8")
-                )
+                current_signature = _source_signature(root / rel_path)
             except FileNotFoundError:
                 rebuild_paths = []
                 break
-            current_identities.append(
-                {
-                    "content_hash": current_hash,
-                    "source_path": rel_path_str,
-                }
-            )
-            if captured is None or captured.get("content_hash") != current_hash:
+            if signatures_by_path.get(rel_path_str) != current_signature:
                 rebuild_paths.append(rel_path)
         else:
             try:
                 for rel_path in rebuild_paths:
-                    corpus_source, chunk_rows = _build_source_records(
+                    (
+                        corpus_source,
+                        chunk_rows,
+                        signature,
+                    ) = _build_stable_source_records(
                         root,
                         rel_path,
                         owner_specs=owner_specs,
@@ -318,22 +357,16 @@ def build_rag_manifests(
                     rel_path_str = rel_path.as_posix()
                     corpus_by_path[rel_path_str] = corpus_source
                     chunks_by_path[rel_path_str] = chunk_rows
+                    signatures_by_path[rel_path_str] = signature
             except FileNotFoundError:
                 continue
             if not rebuild_paths:
-                current_source_hash = calculate_source_identities_sha256(
-                    current_identities
-                )
                 break
             continue
-        if attempt == SOURCE_RECONCILIATION_MAX_ATTEMPTS:
-            raise _SourceSurfaceChangedError(
-                "RAG sources kept changing while the manifest snapshot was reconciled"
-            )
     else:
-        raise _SourceSurfaceChangedError(
-            "RAG sources kept changing while the manifest snapshot was reconciled"
-        )
+        sources = [
+            path for path in sources if path.as_posix() in corpus_by_path
+        ]
 
     ordered_paths = [path.as_posix() for path in sources]
     corpus_sources = [corpus_by_path[path] for path in ordered_paths]
@@ -349,10 +382,6 @@ def build_rag_manifests(
             for source in corpus_sources
         ]
     )
-    if captured_source_hash != current_source_hash:
-        raise _SourceSurfaceChangedError(
-            "RAG sources changed after the manifest snapshot was reconciled"
-        )
     source_identity = {
         **capture_rag_git_identity(root),
         "source_surface_sha256": captured_source_hash,

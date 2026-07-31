@@ -409,14 +409,14 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     assert set(servers) == EXPECTED_FULL_PROFILE_SERVERS
     assert set(devin_servers) == set(servers)
     for server_name, server_config in servers.items():
-        if server_name != "ref":
-            assert devin_servers[server_name] == server_config
-    expected_devin_ref = dict(servers["ref"])
-    expected_devin_ref.pop("env_http_headers")
-    expected_devin_ref["headers"] = {
-        "x-ref-api-key": "$REF_TOOL_API_KEY",
-    }
-    assert devin_servers["ref"] == expected_devin_ref
+        expected_devin = dict(server_config)
+        env_http_headers = expected_devin.pop("env_http_headers", None)
+        if env_http_headers:
+            expected_devin["headers"] = {
+                header: f"${env_name}"
+                for header, env_name in env_http_headers.items()
+            }
+        assert devin_servers[server_name] == expected_devin
     assert qodo_payload["mcpServers"] == servers
     assert zed_payload["mcpServers"] == servers
     assert not REMOVED_FULL_PROFILE_SERVERS.intersection(servers)
