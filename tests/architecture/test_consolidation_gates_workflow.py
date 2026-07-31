@@ -29,4 +29,4 @@ def test_consolidation_snapshot_lane_runs_executable_contract() -> None:
         "tests/unit/infrastructure/schemas/"
         "test_composite_config_invariants_source_of_truth.py"
     ) in workflow
-    assert "pytest tests/snapshots" not in workflow
+    assert "tests/snapshots" not in workflow
