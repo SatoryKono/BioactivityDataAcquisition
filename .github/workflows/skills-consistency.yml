@@ -7,6 +7,13 @@ permissions:
   contents: read
 
 on:
+  workflow_dispatch:
+    inputs:
+      approve_runtime_sync:
+        description: "Approve one-way Codex to Junie/Devin skill synchronization"
+        required: true
+        default: false
+        type: boolean
   push:
     branches: [ main ]
     paths:
@@ -29,9 +36,11 @@ on:
       - "scripts/ai/junie/check_junie_mirror.sh"
       - "scripts/ai/junie/junie-mirror-contract.json"
       - "scripts/ai/sync_ai_governance.py"
+      - "scripts/ai/runtime_skill_sync.py"
       - "scripts/ops/support/skills/check_skills_mirror.sh"
       - "scripts/ops/support/skills/check_ai_skills_layout.sh"
       - "tests/unit/scripts/test_sync_ai_governance.py"
+      - "tests/unit/scripts/test_runtime_skill_sync.py"
       - ".github/workflows/skills-consistency.yml"
   pull_request:
     branches: [ main ]
@@ -55,12 +64,61 @@ on:
       - "scripts/ai/junie/check_junie_mirror.sh"
       - "scripts/ai/junie/junie-mirror-contract.json"
       - "scripts/ai/sync_ai_governance.py"
+      - "scripts/ai/runtime_skill_sync.py"
       - "scripts/ops/support/skills/check_skills_mirror.sh"
       - "scripts/ops/support/skills/check_ai_skills_layout.sh"
       - "tests/unit/scripts/test_sync_ai_governance.py"
+      - "tests/unit/scripts/test_runtime_skill_sync.py"
       - ".github/workflows/skills-consistency.yml"
 
 jobs:
+  detect-runtime-skill-drift:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Generate runtime skill drift report
+        run: >-
+          python scripts/ai/runtime_skill_sync.py
+          --mode check
+          --report reports/ai/runtime-skill-drift.json
+
+      - name: Upload drift report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: runtime-skill-drift
+          path: reports/ai/runtime-skill-drift.json
+
+  approved-runtime-skill-sync:
+    if: github.event_name == 'workflow_dispatch' && inputs.approve_runtime_sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Run approved one-way runtime skill sync
+        run: >-
+          python scripts/ai/runtime_skill_sync.py
+          --mode sync
+          --approved
+          --report reports/ai/runtime-skill-sync.json
+
+      - name: Capture owner-reviewed sync patch
+        run: git diff --binary > runtime-skill-sync.patch
+
+      - name: Upload sync report and patch
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: runtime-skill-sync
+          path: |
+            reports/ai/runtime-skill-sync.json
+            runtime-skill-sync.patch
+
   verify-codex-junie-runtime-parity:
     runs-on: ubuntu-latest
     timeout-minutes: 5

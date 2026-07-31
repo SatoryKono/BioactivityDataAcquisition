@@ -18,9 +18,10 @@ bash scripts/ai/codex/check_skills_mirror.sh --check
 bash scripts/ai/codex/check_skills_mirror.sh --sync
 ```
 
-`--sync` regenerates only the transformed docs mirror. It never overwrites the
-Devin runtime tree; Codex-Devin parity violations require an owner-reviewed
-runtime change.
+`--sync` regenerates only the transformed docs mirror. Approved cross-runtime
+reconciliation uses `python scripts/ai/runtime_skill_sync.py --mode sync
+--approved --report <path>`; it preserves sanctioned Devin runtime variants and
+emits a machine-readable drift/sync report for owner review.
 
 ## Skill Groups
 

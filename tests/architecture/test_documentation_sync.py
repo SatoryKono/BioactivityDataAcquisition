@@ -29,6 +29,9 @@ GENERATED_EXPORT_MERGED_RE = re.compile(r"^exports/.+\.merged\.md$")
 GENERATED_DOCS_EXPORT_REPORT_RE = re.compile(
     r"^reports/docs-export-report-\d{4}-\d{2}-\d{2}-\d{6}\.md$"
 )
+GENERATED_PASSPORT_MARKDOWN_RE = re.compile(
+    r"^04-reference/passports/(?:index\.md|(?:pipelines|workflows)/.+\.md)$"
+)
 CANONICAL_DOC_ROOTS = (
     DOCS_ROOT / "02-architecture",
     DOCS_ROOT / "03-guides",
@@ -55,6 +58,8 @@ def _is_generated_docs_artifact(path: Path, docs_root: Path = DOCS_ROOT) -> bool
     if bool(rel_parts) and rel_parts[0] == "site":
         return True
     if GENERATED_EXPORT_MERGED_RE.match(rel_path):
+        return True
+    if GENERATED_PASSPORT_MARKDOWN_RE.match(rel_path):
         return True
     return bool(GENERATED_DOCS_EXPORT_REPORT_RE.match(rel_path))
 

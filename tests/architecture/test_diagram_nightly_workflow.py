@@ -54,3 +54,28 @@ def test_nightly_workflow_render_requires_svgo() -> None:
 
     assert "Render diagrams" in workflow
     assert 'REQUIRE_SVGO: "1"' in workflow
+
+
+def test_nightly_workflow_maintains_idempotent_stale_diagram_alert() -> None:
+    """Scheduled freshness failures must update one issue and fail meaningfully."""
+    workflow = Path(".github/workflows/diagram-nightly.yml").read_text(encoding="utf-8")
+
+    assert "issues: write" in workflow
+    assert "github.event_name == 'schedule'" in workflow
+    assert "[DIAGRAM-FRESHNESS] Refresh diagrams older than 150 days" in workflow
+    assert 'gh issue list --state open --search "${ALERT_TITLE} in:title"' in workflow
+    assert 'item.get("title") == title' in workflow
+    assert 'gh issue edit "$existing"' in workflow
+    assert "gh issue create --title" in workflow
+    assert 'gh issue close "$existing"' in workflow
+    assert "exceed the 150-day freshness threshold" in workflow
+    assert "exit 1" in workflow
+
+
+def test_nightly_stale_alert_uses_job_scoped_least_permissions() -> None:
+    """Only the reporting job may write issues; repository contents stay read-only."""
+    workflow = Path(".github/workflows/diagram-nightly.yml").read_text(encoding="utf-8")
+    job_prefix = workflow.split("  mermaid-minor-canary:", maxsplit=1)[0]
+
+    assert "permissions:\n      contents: read\n      issues: write" in job_prefix
+    assert workflow.count("issues: write") == 1

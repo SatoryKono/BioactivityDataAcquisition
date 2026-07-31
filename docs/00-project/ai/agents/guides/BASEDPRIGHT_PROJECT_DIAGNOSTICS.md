@@ -41,6 +41,9 @@ Linked campaigns:
 
 ### Regen
 
+The warning snapshot command is implemented by
+`scripts/engineering/qa/report_basedpyright_warning_snapshot.py`.
+
 ```bash
 basedpyright --outputjson src/bioetl > reports/bp_live.json
 python -m scripts.engineering.qa.report_basedpyright_error_snapshot --source reports/bp_live.json --check

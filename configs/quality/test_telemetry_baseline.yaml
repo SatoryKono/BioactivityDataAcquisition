@@ -2,23 +2,23 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-07-27T18:08:35.600453+00:00'
+refreshed_at_utc: '2026-07-31T13:55:33.002896+00:00'
 refresh_status: captured
 source_commit: 667c3020ce74f87c319f77612c765a5aaf30e6ad
 source_run_id: local-duration-rebuild-2026-07-23
-source_tree_sha256: b128a4bd3c89f09915fa5411e166916a05d56bc9063800196ae1893d559787c5
+source_tree_sha256: a0b3db6dd6ee555d3224a9c43fa9e425e628665c64479eba92cc5abad62a5e03
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
-  coverage_xml: reports/coverage/coverage.xml
-  coverage_log: ''
-  coverage_percent_fallback: 96.49
-  slowest_tests_json: reports/test-telemetry/slowest-tests.json
+  coverage_xml: /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/reports/coverage/coverage.xml
+  coverage_log: /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+  coverage_percent_fallback: null
+  slowest_tests_json: /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
   threshold_percent: 85.0
-  actual_percent: 96.49
+  actual_percent: 92.44
   threshold_satisfied: true
 duration_telemetry:
   total_cases: 23360

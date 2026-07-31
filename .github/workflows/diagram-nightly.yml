@@ -13,6 +13,9 @@ on:
 
 jobs:
   nightly-phase2:
+    permissions:
+      contents: read
+      issues: write
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -79,6 +82,39 @@ jobs:
         run: |
           python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \
             > reports/diagrams/diagram-lint-report-nightly.json || true
+
+      - name: Maintain stale diagram alert issue
+        if: ${{ always() && github.event_name == 'schedule' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ALERT_TITLE: "[DIAGRAM-FRESHNESS] Refresh diagrams older than 150 days"
+        run: |
+          report="reports/diagrams/diagram-lint-report-nightly.json"
+          if [ ! -s "$report" ]; then
+            echo "::error::Diagram lint report is missing; freshness alert cannot be evaluated."
+            exit 1
+          fi
+
+          stale_errors="$(python3 -c 'import json,sys; payload=json.load(open(sys.argv[1], encoding="utf-8")); print(sum(item.get("rule") == "STALE-001" for item in payload.get("issues", [])))' "$report")"
+          existing="$(gh issue list --state open --search "${ALERT_TITLE} in:title" --limit 100 --json number,title | python3 -c 'import json,os,sys; title=os.environ["ALERT_TITLE"]; print(next((str(item["number"]) for item in json.load(sys.stdin) if item.get("title") == title), ""))')"
+
+          if [ "$stale_errors" -eq 0 ]; then
+            if [ -n "$existing" ]; then
+              gh issue close "$existing" --comment "Scheduled diagram freshness check is healthy: no diagrams exceed the 150-day error threshold."
+            fi
+            exit 0
+          fi
+
+          python3 -c 'import json,sys; payload=json.load(open(sys.argv[1], encoding="utf-8")); rows=[item for item in payload.get("issues", []) if item.get("rule") == "STALE-001"]; print("Scheduled diagram freshness monitoring found " + str(len(rows)) + " source(s) beyond the 150-day error threshold.\n\nRun: `python -m scripts.diagrams lint --json`\n\n| Diagram | Finding |\n| --- | --- |\n" + "\n".join("| `" + row["file"] + "` | " + row["message"].replace("|", "\\|") + " |" for row in rows) + "\n\nThis issue is maintained idempotently by `diagram-nightly.yml`.")' "$report" > /tmp/stale-diagram-alert.md
+
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --body-file /tmp/stale-diagram-alert.md
+          else
+            gh issue create --title "$ALERT_TITLE" --label documentation --body-file /tmp/stale-diagram-alert.md
+          fi
+
+          echo "::error::$stale_errors diagram source(s) exceed the 150-day freshness threshold."
+          exit 1
 
       - name: Run Phase 2 nightly suite (DIAG-T024..T029)
         run: |
