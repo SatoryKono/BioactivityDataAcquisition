@@ -1,12 +1,12 @@
 {
-  "snapshot_date": "2026-07-31",
+  "snapshot_date": "2026-08-01",
   "triage_source": "configs/quality/retirement_candidate_triage.yaml",
   "static_inventory_scope": "src/bioetl",
   "review_window": {
     "linked_issue": "#4541",
     "mode": "fail-fast-zero-untriaged",
-    "last_reviewed": "2026-07-31",
-    "next_review_by": "2026-10-29",
+    "last_reviewed": "2026-08-01",
+    "next_review_by": "2026-10-30",
     "review_cycle_days": 90,
     "max_untriaged_zero_import_candidates": 0,
     "snapshot_matches_last_reviewed": true,

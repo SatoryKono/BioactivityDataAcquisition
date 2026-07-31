@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-07-31",
+  "snapshot_date": "2026-08-01",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",

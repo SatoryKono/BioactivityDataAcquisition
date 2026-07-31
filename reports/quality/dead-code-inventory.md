@@ -1,9 +1,9 @@
 # Dead Code Inventory
 
-- snapshot_date: 2026-07-31
+- snapshot_date: 2026-08-01
 - linked_issue: #4541
-- last_reviewed: 2026-07-31
-- next_review_by: 2026-10-29
+- last_reviewed: 2026-08-01
+- next_review_by: 2026-10-30
 - review_cycle_days: 90
 - triaged_entry_count: 18
 - repo_wide_zero_import_candidate_count: 6
