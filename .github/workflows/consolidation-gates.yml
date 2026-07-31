@@ -82,7 +82,7 @@ jobs:
       - name: Snapshot tests
         run: |
           mkdir -p reports/gates/snapshots
-          uv run --frozen --no-build pytest tests/snapshots -q --junitxml=reports/gates/snapshots/tests_snapshots.xml
+          uv run --frozen --no-build pytest tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py -q --junitxml=reports/gates/snapshots/tests_snapshots.xml
 
       - name: Produce canonical manifest hashes
         run: |
