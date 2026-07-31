@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-31T15:25:04.620765+00:00",
+  "generated_at": "2026-07-31T16:05:11.188551+00:00",
   "summary": {
     "total_scripts": 569,
     "status_counts": {
@@ -5123,7 +5123,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -5420,13 +5420,13 @@
         },
         {
           "path": "scripts/diagrams/check_diagram_artifacts.py",
-          "line": 23,
+          "line": 25,
           "source_group": "scripts",
           "text": "from .diagram_paths import VISUAL_SMOKE_MANIFEST"
         },
         {
           "path": "scripts/diagrams/check_diagram_artifacts.py",
-          "line": 25,
+          "line": 27,
           "source_group": "scripts",
           "text": "from scripts.diagrams.diagram_paths import VISUAL_SMOKE_MANIFEST"
         },
@@ -6472,7 +6472,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
@@ -6506,9 +6506,15 @@
         },
         {
           "path": "tests/architecture/test_strip_svg_foreign_object.py",
-          "line": 29,
+          "line": 30,
           "source_group": "tests",
           "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"strip_svg_foreign_object.py\""
+        },
+        {
+          "path": "tests/architecture/test_strip_svg_foreign_object.py",
+          "line": 129,
+          "source_group": "tests",
+          "text": "script_path = repo_root / \"scripts\" / \"diagrams\" / \"strip_svg_foreign_object.py\""
         }
       ]
     },

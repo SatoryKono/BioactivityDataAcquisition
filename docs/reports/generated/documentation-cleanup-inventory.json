@@ -50389,7 +50389,7 @@
       "generator": "scripts/docs/passports/cli.py",
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 2,
+      "inbound_links": 1,
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
