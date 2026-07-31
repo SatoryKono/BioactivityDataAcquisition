@@ -11,10 +11,10 @@ freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
-  coverage_xml: /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/reports/coverage/coverage.xml
-  coverage_log: /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+  coverage_xml: reports/coverage/coverage.xml
+  coverage_log: reports/coverage/coverage.log
   coverage_percent_fallback: null
-  slowest_tests_json: /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/reports/test-telemetry/slowest-tests.json
+  slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
   threshold_percent: 85.0

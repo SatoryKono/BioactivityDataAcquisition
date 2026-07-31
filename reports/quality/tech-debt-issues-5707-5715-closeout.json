@@ -140,7 +140,7 @@
         "name": "collect_test_governance_report",
         "second_duration_s": 0.001
       },
-      "refreshed_at_utc": "2026-07-27T18:08:35.600453+00:00",
+      "refreshed_at_utc": "2026-07-31T13:55:33.002896+00:00",
       "slow_governance_lane": "S7-architecture-slow-governance",
       "telemetry_source_commit": "667c3020ce74f87c319f77612c765a5aaf30e6ad",
       "telemetry_source_run_id": "local-duration-rebuild-2026-07-23"
@@ -178,7 +178,7 @@
       "repo_wide_owner_test_anchored_candidate_count": 6,
       "repo_wide_untriaged_zero_import_candidate_count": 0,
       "repo_wide_zero_import_candidate_count": 6,
-      "review_window_next_review_by": "2026-10-21"
+      "review_window_next_review_by": "2026-10-29"
     },
     "5715": {
       "compatibility_test_file_max": 0,
