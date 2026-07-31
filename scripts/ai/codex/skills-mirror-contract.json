@@ -21,7 +21,8 @@
     ],
     "notes": {
       "references": "Codex and Devin must share the same references/** tree (presence + byte-identical). Platform-specific SKILL.md wording may differ.",
-      "skill_md_variants": "SKILL.md may diverge for platform frontmatter/triggers only; keep semantic core aligned with .codex/skills and do not fork normative rules."
+      "skill_md_variants": "SKILL.md may diverge for platform frontmatter/triggers only; keep semantic core aligned with .codex/skills and do not fork normative rules.",
+      "auto_sync": "Approved auto-sync copies missing required files and required-identical or unsanctioned shared content from Codex to Devin. Existing allowed SKILL.md and agents/openai.yaml variants are preserved; unexpected Devin files require owner review."
     }
   }
 }

@@ -85,7 +85,7 @@ PLACEHOLDER_PATTERNS = {
     for marker in PLACEHOLDER_MARKERS
 }
 DEFAULT_STALE_DAYS = 90
-WARNING_STALE_DAYS = 180
+ERROR_STALE_DAYS = 150
 DISALLOWED_SUBGRAPH_EMOJI = ("🟡", "🟢", "🔵", "🟣", "⚪")
 # Canonical ADR-040 palette values that must not be flagged by COLOUR-001.
 CANONICAL_PALETTE = {
@@ -424,13 +424,13 @@ def _staleness_issues(
     age: timedelta,
     stale_days: int,
 ) -> list[Issue]:
-    if age > timedelta(days=WARNING_STALE_DAYS):
+    if age > timedelta(days=ERROR_STALE_DAYS):
         return [
             Issue(
                 file=fname,
                 severity="ERROR",
                 rule="STALE-001",
-                message=f"Diagram is {age.days} days old (>{WARNING_STALE_DAYS}d threshold)",
+                message=f"Diagram is {age.days} days old (>{ERROR_STALE_DAYS}d threshold)",
             )
         ]
     if age > timedelta(days=stale_days):

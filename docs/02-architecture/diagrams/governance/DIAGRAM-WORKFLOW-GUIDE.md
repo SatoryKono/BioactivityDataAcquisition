@@ -283,7 +283,7 @@ ______________________________________________________________________
 | META-002    | ERROR    | Некорректный формат даты в `%% Updated:`/`%% @date`                      |
 | CONTENT-001 | ERROR    | Содержит placeholder/TODO/FIXME/stub                                     |
 | CONTENT-002 | ERROR    | Менее 3 непустых строк                                                   |
-| STALE-001   | ERROR    | `@date` старше 180 дней                                                  |
+| STALE-001   | ERROR    | `@date` старше 150 дней                                                  |
 | STALE-002   | WARN     | `@date` старше 90 дней                                                   |
 | COLOUR-001  | ERROR    | Deprecated палитра Tailwind в `style`/`classDef`                         |
 | COLOUR-002  | ERROR    | Emoji в subgraph labels                                                  |
@@ -308,7 +308,21 @@ python scripts/diagrams/check_class_method_render_integrity.py \
   --svg-dir docs/02-architecture/diagrams/class-diagrams/svg
 ```
 
-### 6.2. Управление orphan-нодами
+### 6.2. Регулярный контроль свежести
+
+`diagram-nightly.yml` ежедневно запускает lint и использует два порога:
+
+- старше 90 дней — `STALE-002` warning для планового review;
+- старше 150 дней — `STALE-001` error, блокирующий scheduled job.
+
+При `STALE-001` workflow создаёт или обновляет одну открытую issue с точным
+заголовком `[DIAGRAM-FRESHNESS] Refresh diagrams older than 150 days`. Повторный
+запуск не создаёт дубликат. После устранения всех error-level нарушений workflow
+закрывает эту issue автоматически. Дату `%% @date`/`%% Updated:` разрешено
+обновлять только после сверки диаграммы с актуальными code/config/ADR surfaces;
+массовое изменение дат без проверки не считается исправлением freshness drift.
+
+### 6.3. Управление orphan-нодами
 
 Скрипт `scripts/diagrams/prune_orphan_nodes.py` находит ноды, определённые в диаграмме, но не участвующие ни в одном ребре.
 
