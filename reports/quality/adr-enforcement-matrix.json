@@ -1472,6 +1472,7 @@
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/cheatsheets/pipeline-config.md",
         "docs/03-guides/local-storage-layout.md",
+        "docs/03-guides/pipeline-configuration.md",
         "docs/04-reference/contracts/canonical-field-registry.md",
         "docs/04-reference/pipelines/chembl/05-activity-spec.md",
         "tests/architecture/test_config_ci_invariants.py"
