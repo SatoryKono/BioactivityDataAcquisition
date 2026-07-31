@@ -530,7 +530,7 @@ def _render_parameter_matrix(
     config_names: list[str],
 ) -> str:
     matrix_handle = io.StringIO(newline="")
-    writer = csv.writer(matrix_handle)
+    writer = csv.writer(matrix_handle, lineterminator="\n")
     writer.writerow(["Parameter Path", *config_names])
     for key in all_keys:
         row = [key]
