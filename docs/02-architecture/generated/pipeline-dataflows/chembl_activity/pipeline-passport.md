@@ -10,7 +10,7 @@ Effective loader: `scripts.docs.passports.source_facts.load_effective_pipeline_f
 
 This passport is generated from the resolved effective configuration and live schema contracts. It describes the current runtime projection; it does not widen or repair the pipeline contract.
 
-Canonical cross-layer passport: [`chembl_activity`](../../../../04-reference/passports/pipelines/chembl_activity.md). This file remains a diagram companion.
+Canonical cross-layer passport: [`chembl_activity`](../../../../04-reference/passports/pipelines/chembl-activity.md). This file remains a diagram companion.
 
 ## Linked Views
 
