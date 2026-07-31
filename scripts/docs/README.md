@@ -45,6 +45,7 @@ Compatibility wrappers are intentionally kept for:
 | `check-docstrings`                       | `scripts/docs/checks/check_docstrings.py`                       | Check docstring coverage                                                                           |
 | `check-kpi`                              | `scripts/docs/checks/report_docs_kpi.py`                        | Report documentation KPI metrics                                                                   |
 | `generate-cleanup-inventory`             | `scripts/docs/checks/documentation_cleanup_inventory.py`        | Generate/check the per-file documentation cleanup inventory and generated-artifact route matrix     |
+| `rename-passport-paths`                  | `scripts/docs/passports/rename_underscore_to_hyphen.py`         | Preview/apply/check underscore-to-hyphen passport Markdown path migration                            |
 | `export-matrix-structural-contract`      | `scripts/docs/matrix/export_structural_contract.py`             | Export the canonical runtime structural contract for ChEMBL workbook sync                          |
 | `generate-field-matrix`                  | `scripts/docs/matrix/generate_field_matrix.py`                  | Generate deterministic ChemBL Activity field-matrix artifacts directly from code                   |
 | `generate-pipeline-normalization-matrix` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | Generate deterministic normalization field-matrix artifacts for all entity and composite pipelines |

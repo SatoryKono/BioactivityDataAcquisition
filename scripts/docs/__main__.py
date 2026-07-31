@@ -27,6 +27,7 @@ Commands:
     audit-sentence     Sentence-level documentation audit
     sync-repo-identity Sync active docs/workflows to canonical repo identity
     passports          Generate/check pipeline and workflow passports
+    rename-passport-paths Preview/apply/check passport Markdown kebab-case paths
 """
 
 from __future__ import annotations
@@ -57,6 +58,9 @@ COMMANDS = {
     "audit-sentence": "scripts.docs.fixers.sentence_audit",
     "sync-repo-identity": "scripts.docs.fixers.repo_identity",
     "passports": "scripts.docs.passports.cli",
+    "rename-passport-paths": (
+        "scripts.docs.passports.rename_underscore_to_hyphen"
+    ),
 }
 COMMAND_SPECS = {
     name: module_command(module_name) for name, module_name in COMMANDS.items()
