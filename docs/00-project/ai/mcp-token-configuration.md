@@ -109,6 +109,7 @@ bash scripts/ai/mcp/check.sh
 | GitHub MCP says token missing | Set `GITHUB_PERSONAL_ACCESS_TOKEN` or `GITHUB_TOKEN`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |
 | GitHub token prefix warning | Confirm the token came from GitHub and has only the scopes needed by the local MCP task. |
 | Brave MCP exits immediately | Set `BRAVE_API_KEY` or a supported alias; keys shorter than 31 characters are rejected. |
+| DeepWiki MCP requires login | Set `DEEPWIKI_API_KEY` and `DEEPWIKI_ORGANISATION_ID`; tracked projections contain environment references, never credential values. |
 | Ref MCP requires login | Use interactive OAuth, or set `REF_TOOL_API_KEY`; Codex sends it through `env_http_headers` as `x-ref-api-key` without placing the value in config. |
 | Grafana MCP starts but queries fail | Set `GRAFANA_SERVICE_ACCOUNT_TOKEN` or local username/password; confirm `GRAFANA_URL`. |
 | Prometheus MCP cannot query | Confirm `PROMETHEUS_URL`; add token or username/password only if the endpoint is protected. |
@@ -138,14 +139,17 @@ operator validation.
 
 The canonical MCP server inventory is shared with Devin, but HTTP authentication
 must use Devin-supported configuration. The generated `.devin/config.json`
-projects the `ref` credential as:
+projects DeepWiki and Ref credentials as:
 
 ```json
 "headers": {
+  "x-deepwiki-api-key": "$DEEPWIKI_API_KEY",
+  "x-deepwiki-organisation-id": "$DEEPWIKI_ORGANISATION_ID",
   "x-ref-api-key": "$REF_TOOL_API_KEY"
 }
 ```
 
 `env_http_headers` remains a Codex-specific field and MUST NOT be copied into
-Devin configuration. Store `REF_TOOL_API_KEY` in Devin Secrets; never commit the
-secret value.
+Devin configuration. Store `DEEPWIKI_API_KEY`,
+`DEEPWIKI_ORGANISATION_ID`, and `REF_TOOL_API_KEY` in Devin Secrets; never
+commit secret values.

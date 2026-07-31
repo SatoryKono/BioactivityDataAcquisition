@@ -542,6 +542,7 @@ nav:
           - "Architecture Diagrams (Legacy Index)": 02-architecture/diagrams/guide/architecture-reference.md
           - "Diagram Root README": 02-architecture/diagrams/README.md
           - "Historical Diagram Catalog": 02-architecture/diagrams/governance/diagram-catalog.md
+          - "Diagram Render Retention": 02-architecture/diagrams/governance/render-retention.md
           - "Class Diagram Description Overview": 02-architecture/diagrams/descriptions/class-summary.md
           - "ChEMBL Activity Dataflow Passport": 02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-passport.md
           - "Architecture Bundle": 02-architecture/diagrams/bundles/architecture.bundle.md
@@ -553,6 +554,15 @@ nav:
               - "Class Diagram SVG Index": 02-architecture/diagrams/class-diagrams/svg/INDEX.md
               - "Foundation SVG Index": 02-architecture/diagrams/foundation/svg/INDEX.md
               - "Views SVG Index": 02-architecture/diagrams/views/svg/INDEX.md
+          - "ADR Registry Index": 02-architecture/adr-registry/index.md
+          - "ADR Status Dashboard": 02-architecture/adr-registry/status-dashboard.md
+          - "Architecture Governance Audit Evidence": 02-architecture/governance-audit-evidence.md
+          - "Decision Evidence Notes":
+              - "Composite Rebuild-Only Replay Boundary": 02-architecture/decisions/notes/2026-07-27-composite-rebuild-only-replay-boundary.md
+              - "Contract Coverage Matrix v3": 02-architecture/decisions/notes/2026-07-27-contract-coverage-matrix-v3.md
+              - "Infrastructure Config Public API": 02-architecture/decisions/notes/2026-07-27-infrastructure-config-public-api-decision.md
+              - "QuarantineEntry Constructor Intent": 02-architecture/decisions/notes/2026-07-27-quarantine-entry-constructor-intentional.md
+              - "StorageFactory Process Classification": 02-architecture/decisions/notes/2026-07-27-storagefactory-process-class.md
           - "Diagram Views Plan": 02-architecture/diagrams/governance/diagram-views-plan.md
           - "Diagram Prompt Expansion": 02-architecture/diagrams/governance/PROMPT-diagram-expansion.md
           - "Module Consolidation Requirements": 02-architecture/module-consolidation-migration-requirements.md
@@ -561,6 +571,15 @@ nav:
           - "Reproducibility Support Matrix": 02-architecture/policies/reproducibility-support-matrix.md
       - "Guide Extras":
           - "Silver Schema Testing Guide": 03-guides/silver-schema-testing-guide.md
+          - "Dashboard Design System": 03-guides/dashboards/design-system.md
+          - "Dashboard Navigation Contract": 03-guides/dashboards/navigation-contract.md
+          - "Dashboard Variable Reference": 03-guides/dashboards/variable-reference.md
+          - "DUX3 Audit Selection Notes": 03-guides/dashboards/dux3-audit-selection-notes.md
+          - "DUX3 Screenshot Regression Protocol": 03-guides/dashboards/dux3-screenshot-regression-protocol.md
+          - "DUX3 Semantic Fixtures": 03-guides/dashboards/dux3-semantic-fixtures.md
+      - "Data Model Extras":
+          - "JSON Field Typing Inventory": 03-data-model/json-field-typing-inventory.md
+          - "Reference Identifier Families": 03-data-model/reference-identifier-families.md
       - "Reference Extras":
           - "Contracts README": 04-reference/contracts/README.md
           - "Configuration Runtime Artifacts": 04-reference/components/config-runtime-artifacts.md

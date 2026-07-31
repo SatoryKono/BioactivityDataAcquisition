@@ -299,7 +299,13 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
         portable_timeout = portable.get("startup_timeout_sec")
         if isinstance(portable_timeout, int):
             assert server["startup_timeout_sec"] == portable_timeout
-    assert devin_servers["deepwiki"] == expected_servers["deepwiki"]
+    expected_devin_deepwiki = dict(expected_servers["deepwiki"])
+    expected_devin_deepwiki.pop("env_http_headers")
+    expected_devin_deepwiki["headers"] = {
+        "x-deepwiki-api-key": "$DEEPWIKI_API_KEY",
+        "x-deepwiki-organisation-id": "$DEEPWIKI_ORGANISATION_ID",
+    }
+    assert devin_servers["deepwiki"] == expected_devin_deepwiki
     expected_devin_ref = dict(expected_servers["ref"])
     expected_devin_ref.pop("env_http_headers")
     expected_devin_ref["headers"] = {

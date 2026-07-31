@@ -6,7 +6,9 @@ ______________________________________________________________________
 
 ---
 name: research-workflow
-description: Use when conducting structured research projects that require traceable evidence, explicit decisions, and constrained specifications. Covers the full workflow from initialization through evidence collection, synthesis, decision-making, and spec generation. context: fork agent: general-purpose
+description: "Use when conducting structured research projects that require traceable evidence, explicit decisions, and constrained specifications. Covers the full workflow from initialization through evidence collection, synthesis, decision-making, and spec generation."
+context: fork
+agent: general-purpose
 ---
 
 # Research Workflow
