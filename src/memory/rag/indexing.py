@@ -26,6 +26,7 @@ from memory.rag.filters import (
     iter_rag_sources,
 )
 from memory.rag.validation import (
+    RagManifestValidationError,
     capture_rag_source_identity,
     require_valid_rag_manifest,
     validate_rag_manifest_files,
@@ -37,6 +38,15 @@ DEFAULT_OUTPUT_DIR = MEMORY_ROOT / "derived" / "rag" / "manifests"
 GENERATOR_VERSION = 2
 DEFAULT_BUILD_SCOPE = "full"
 WORKFLOW_BUILD_SCOPE = "workflow"
+SOURCE_STABILITY_MAX_ATTEMPTS = 3
+SOURCE_DRIFT_ISSUE_CODES = frozenset(
+    {
+        "missing_source_path",
+        "source_content_mismatch",
+        "source_identity_mismatch",
+        "source_set_mismatch",
+    }
+)
 
 
 def _load_owner_specs() -> list[tuple[str, tuple[str, ...]]]:
@@ -368,33 +378,48 @@ def write_rag_manifests(
 ) -> tuple[Path, Path]:
     """Build, validate, and transactionally publish deterministic manifests."""
     _guard_workflow_output_scope(root, output_dir, build_scope)
-    catalog, chunks = build_rag_manifests(
-        root,
-        build_scope=build_scope,
-        focus_query=focus_query,
-        max_sources=max_sources,
-    )
     output_dir.parent.mkdir(parents=True, exist_ok=True)
-    staging_dir = Path(
-        tempfile.mkdtemp(prefix=".rag-manifests-", dir=output_dir.parent)
-    )
-    try:
-        staged_catalog = staging_dir / "corpus_catalog.json"
-        staged_chunks = staging_dir / "chunks.jsonl"
-        staged_catalog.write_text(_serialize_catalog(catalog), encoding="utf-8")
-        staged_chunks.write_text(_serialize_chunks(chunks), encoding="utf-8")
-        require_valid_rag_manifest(
-            validate_rag_manifest_files(
-                root,
+    for attempt in range(1, SOURCE_STABILITY_MAX_ATTEMPTS + 1):
+        catalog, chunks = build_rag_manifests(
+            root,
+            build_scope=build_scope,
+            focus_query=focus_query,
+            max_sources=max_sources,
+        )
+        staging_dir = Path(
+            tempfile.mkdtemp(prefix=".rag-manifests-", dir=output_dir.parent)
+        )
+        try:
+            staged_catalog = staging_dir / "corpus_catalog.json"
+            staged_chunks = staging_dir / "chunks.jsonl"
+            staged_catalog.write_text(_serialize_catalog(catalog), encoding="utf-8")
+            staged_chunks.write_text(_serialize_chunks(chunks), encoding="utf-8")
+            try:
+                require_valid_rag_manifest(
+                    validate_rag_manifest_files(
+                        root,
+                        staged_catalog,
+                        staged_chunks,
+                        require_build_scope=build_scope,
+                        verify_sources=True,
+                    )
+                )
+            except RagManifestValidationError as exc:
+                issue_codes = {issue.code for issue in exc.report.issues}
+                if (
+                    attempt < SOURCE_STABILITY_MAX_ATTEMPTS
+                    and issue_codes & SOURCE_DRIFT_ISSUE_CODES
+                ):
+                    continue
+                raise
+            return _publish_manifest_pair(
                 staged_catalog,
                 staged_chunks,
-                require_build_scope=build_scope,
-                verify_sources=False,  # Skip source verification during catalog update
+                output_dir,
             )
-        )
-        return _publish_manifest_pair(staged_catalog, staged_chunks, output_dir)
-    finally:
-        shutil.rmtree(staging_dir, ignore_errors=True)
+        finally:
+            shutil.rmtree(staging_dir, ignore_errors=True)
+    raise AssertionError("unreachable RAG manifest retry state")
 
 
 def _build_parser() -> argparse.ArgumentParser:

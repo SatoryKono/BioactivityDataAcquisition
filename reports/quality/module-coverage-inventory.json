@@ -18723,7 +18723,7 @@
       "missing_lines": 26,
       "module": "bioetl.infrastructure.export.debug_export_adapter",
       "path": "src/bioetl/infrastructure/export/debug_export_adapter.py",
-      "source_lines": 230
+      "source_lines": 231
     },
     {
       "coverage_percent": null,
@@ -18733,7 +18733,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.export.debug_export_ops",
       "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
-      "source_lines": 200
+      "source_lines": 226
     },
     {
       "coverage_percent": 100.0,
@@ -41865,7 +41865,7 @@
       "missing_lines": 26,
       "module": "bioetl.infrastructure.export.debug_export_adapter",
       "path": "src/bioetl/infrastructure/export/debug_export_adapter.py",
-      "source_lines": 230
+      "source_lines": 231
     },
     {
       "coverage_percent": null,
@@ -41875,7 +41875,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.export.debug_export_ops",
       "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
-      "source_lines": 200
+      "source_lines": 226
     },
     {
       "coverage_percent": 100.0,
@@ -46290,7 +46290,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-28",
-  "source_tree_sha256": "dd2bfa426e9b066df8df6ea72800d9cb7762f09045b7bf3a367ef4c8be288256",
+  "source_tree_sha256": "146578f40fdfc30c0552e63994275a5191ed6f7f6ac13bf1a76a617a4b2627b8",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

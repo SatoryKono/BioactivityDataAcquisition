@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-31T05:39:08.807324+00:00",
+  "generated_at": "2026-07-31T06:11:08.443978+00:00",
   "summary": {
     "total_scripts": 567,
     "status_counts": {
@@ -12372,7 +12372,7 @@
       "references": [
         {
           "path": "docs/04-reference/normalization/publication-normalization.md",
-          "line": 124,
+          "line": 146,
           "source_group": "docs",
           "text": "and the extractor `scripts/engineering/qa/extract_publication_nested_vocab.py`."
         },

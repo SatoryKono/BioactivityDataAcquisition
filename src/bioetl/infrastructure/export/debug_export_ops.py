@@ -19,6 +19,7 @@ __all__ = [
     "chunk_table_rows",
     "collect_headers",
     "compute_pack_hash",
+    "compute_tables_hash",
     "fingerprint_artifact",
     "normalize_csv_value",
     "resolve_debug_export_root",
@@ -197,4 +198,29 @@ def compute_pack_hash(artifacts: list[dict[str, object]]) -> str:
     payload = json.dumps(artifacts, sort_keys=True, separators=(",", ":")).encode(
         "utf-8"
     )
+    return hashlib.sha256(payload).hexdigest()
+
+
+def compute_tables_hash(
+    tables: dict[str, tuple[dict[str, object], ...]],
+) -> str:
+    """Hash semantic debug-export content without occurrence timestamps."""
+    canonical_tables = {
+        table_name: [
+            {
+                key: normalize_csv_value(value)
+                for key, value in row.items()
+                if key != "created_at"
+            }
+            for row in rows
+        ]
+        for table_name, rows in tables.items()
+    }
+    payload = json.dumps(
+        canonical_tables,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    ).encode("utf-8")
     return hashlib.sha256(payload).hexdigest()

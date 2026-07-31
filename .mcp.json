@@ -163,13 +163,17 @@
     "deepwiki": {
       "type": "http",
       "url": "https://mcp.deepwiki.com/mcp",
+      "env_http_headers": {
+        "x-deepwiki-api-key": "cog_fvy2fbgccpvso2fux2dpno5kc2esxlmjxgfrtw4xwxkqmhkynmrq",
+        "x-deepwiki-organisation-id": "org-5fa73a1fb0e845a0aa91127d0615fc44"
+      },
       "startup_timeout_sec": 240
     },
     "ref": {
       "type": "http",
       "url": "https://api.ref.tools/mcp",
       "env_http_headers": {
-        "x-ref-api-key": "REF_TOOL_API_KEY"
+        "x-ref-api-key": "$REF_TOOL_API_KEY"
       },
       "startup_timeout_sec": 120
     }
