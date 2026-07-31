@@ -1,4 +1,0 @@
-interface:
-  display_name: "Synthesizing Pillars"
-  short_description: "Synthesize evidence pillars"
-  default_prompt: "Use $synthesizing-pillars to turn evidence objects into cited insights, contradictions, and decision candidates."
