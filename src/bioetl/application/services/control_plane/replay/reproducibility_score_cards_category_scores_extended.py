@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
     ScoreCardRecord,
+    build_score_card_record,
 )
 from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring_support import (
-    bounded,
     string_items,
 )
 
@@ -40,12 +40,8 @@ def score_lineage_completeness(summary: JsonDict) -> ScoreCardRecord:
     if not summary.get("lineage_fragment_ids"):
         score -= 1
         evidence.append("no_lineage_fragments_observed")
-    return ScoreCardRecord(
-        "lineage_completeness",
-        bounded(score),
-        tuple(evidence),
-        tuple(blockers),
-        tuple(refs),
+    return build_score_card_record(
+        "lineage_completeness", score, evidence, blockers, refs
     )
 
 
@@ -79,12 +75,12 @@ def score_replay_readiness(summary: JsonDict) -> ScoreCardRecord:
         score -= 2
         evidence.append("artifact_publication_closure_not_closed")
         blocker_items.append("artifact_publication_closure")
-    return ScoreCardRecord(
+    return build_score_card_record(
         "replay_readiness",
-        bounded(score),
-        tuple(evidence),
-        tuple(dict.fromkeys(blocker_items)),
-        tuple(refs),
+        score,
+        evidence,
+        dict.fromkeys(blocker_items),
+        refs,
     )
 
 
@@ -110,13 +106,7 @@ def score_layer_consistency(summary: JsonDict) -> ScoreCardRecord:
         blockers.append("resolved_or_effective_hash_missing")
     if summary.get("occurrence_only_diagnostics"):
         evidence.append("occurrence_only_diagnostics_exposed")
-    return ScoreCardRecord(
-        "layer_consistency",
-        bounded(score),
-        tuple(evidence),
-        tuple(blockers),
-        tuple(refs),
-    )
+    return build_score_card_record("layer_consistency", score, evidence, blockers, refs)
 
 
 __all__ = [

@@ -68,6 +68,21 @@ def _build_replay_projection_context_kwargs(
     }
 
 
+def _build_replay_state_projection_for_context(
+    manifest: RunManifest,
+    input_snapshots: list[dict[str, object]],
+    policy_assessment: ReproducibilityPolicyAssessment,
+    replay_family_context: ReplayFamilyContext,
+) -> dict[str, str]:
+    """Delegate replay-state projection construction to its canonical owner."""
+    return _build_replay_state_projection(
+        manifest=manifest,
+        input_snapshots=input_snapshots,
+        policy_assessment=policy_assessment,
+        replay_family_context=replay_family_context,
+    )
+
+
 def _build_operator_replay_projection_inputs(
     *,
     manifest: RunManifest,
@@ -103,11 +118,8 @@ def _build_operator_replay_projection_inputs(
         policy_assessment=policy_assessment,
         replay_family_context=replay_family_context,
     ).value
-    replay_state_projection = _build_replay_state_projection(
-        manifest=manifest,
-        input_snapshots=input_snapshots,
-        policy_assessment=policy_assessment,
-        replay_family_context=replay_family_context,
+    replay_state_projection = _build_replay_state_projection_for_context(
+        manifest, input_snapshots, policy_assessment, replay_family_context
     )
     return {
         "continuation_mode": continuation_mode,
@@ -194,4 +206,5 @@ __all__ = [
     "_build_operator_replay_projection_inputs",
     "_build_operator_replay_projection_payload",
     "_build_replay_projection_context_kwargs",
+    "_build_replay_state_projection_for_context",
 ]

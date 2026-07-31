@@ -9,6 +9,8 @@ import pytest
 from tests.architecture import _module_coverage_inventory_support as support
 from tests.architecture import test_mounted_worktree_skip_policy as mounted_policy
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.parametrize(
     ("returncodes", "expected"),

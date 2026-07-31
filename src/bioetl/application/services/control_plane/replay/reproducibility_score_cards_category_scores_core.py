@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
     ScoreCardRecord,
+    build_score_card_record,
 )
 from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring_support import (
-    bounded,
     string_items,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -38,12 +38,12 @@ def score_determinism(summary: JsonDict) -> ScoreCardRecord:
         evidence.append("exact_replay_blockers_present")
         blockers.extend(string_items(summary.get("exact_replay_blockers")))
         refs.append("diagnostics.exact_replay_blockers")
-    return ScoreCardRecord(
+    return build_score_card_record(
         "determinism",
-        bounded(score),
-        tuple(evidence),
-        tuple(dict.fromkeys(blockers)),
-        tuple(dict.fromkeys(refs)),
+        score,
+        evidence,
+        dict.fromkeys(blockers),
+        dict.fromkeys(refs),
     )
 
 
@@ -66,13 +66,7 @@ def score_idempotency(summary: JsonDict) -> ScoreCardRecord:
         score -= 2
         evidence.append("missing_artifact_links_present")
         blockers.append("missing_artifact_links_present")
-    return ScoreCardRecord(
-        "idempotency",
-        bounded(score),
-        tuple(evidence),
-        tuple(blockers),
-        tuple(refs),
-    )
+    return build_score_card_record("idempotency", score, evidence, blockers, refs)
 
 
 def score_run_identity(summary: JsonDict) -> ScoreCardRecord:
@@ -99,13 +93,7 @@ def score_run_identity(summary: JsonDict) -> ScoreCardRecord:
             score -= 1
             evidence.append(f"{field_name}_missing")
             blockers.append(f"{field_name}_missing")
-    return ScoreCardRecord(
-        "run_identity",
-        bounded(score),
-        tuple(evidence),
-        tuple(blockers),
-        tuple(refs),
-    )
+    return build_score_card_record("run_identity", score, evidence, blockers, refs)
 
 
 def score_checkpoint_safety(summary: JsonDict) -> ScoreCardRecord:
@@ -135,12 +123,8 @@ def score_checkpoint_safety(summary: JsonDict) -> ScoreCardRecord:
         score -= 1
         evidence.append("resume_contract_missing")
         blockers.append("resume_contract_missing")
-    return ScoreCardRecord(
-        "checkpoint_safety",
-        bounded(score),
-        tuple(evidence),
-        tuple(blockers),
-        tuple(refs),
+    return build_score_card_record(
+        "checkpoint_safety", score, evidence, blockers, refs
     )
 
 

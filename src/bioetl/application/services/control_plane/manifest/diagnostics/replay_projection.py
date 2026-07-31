@@ -9,9 +9,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_proje
     _build_operator_replay_projection_inputs,
     _build_operator_replay_projection_payload,
     _build_replay_projection_context_kwargs,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_state import (
-    _build_replay_state_projection,
+    _build_replay_state_projection_for_context,
 )
 from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
     build_replay_taxonomy_projection,
@@ -116,11 +114,8 @@ def _build_replay_projection_bundle(
         replay_family_contract=replay_family_contract,
         replay_family_contract_payload=replay_family_contract_payload,
     )
-    replay_state_projection = _build_replay_state_projection(
-        manifest=manifest,
-        input_snapshots=input_snapshots,
-        policy_assessment=policy_assessment,
-        replay_family_context=replay_family_context,
+    replay_state_projection = _build_replay_state_projection_for_context(
+        manifest, input_snapshots, policy_assessment, replay_family_context
     )
     return _ReplayProjectionBundle(
         operator_projection=operator_projection,

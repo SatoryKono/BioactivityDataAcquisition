@@ -24,7 +24,7 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
     score_replay_readiness as score_replay_readiness,
 )
 
-__all__ = [
+_CATEGORY_SCORER_EXPORTS = (
     "score_checkpoint_safety",
     "score_determinism",
     "score_idempotency",
@@ -32,4 +32,6 @@ __all__ = [
     "score_lineage_completeness",
     "score_replay_readiness",
     "score_run_identity",
-]
+)
+
+__all__ = [*_CATEGORY_SCORER_EXPORTS]

@@ -25,20 +25,20 @@ from bioetl.application.services.control_plane.run_manifest_reproducibility_clai
 )
 
 JsonDict = dict[str, object]
+_EXPORTED_SCORERS = (
+    score_checkpoint_safety,
+    score_determinism,
+    score_idempotency,
+    score_layer_consistency,
+    score_lineage_completeness,
+    score_replay_readiness,
+    score_run_identity,
+)
 __all__ = [
-    "PROFILE_SCORE_THRESHOLDS",
-    "ScoreCardRecord",
+    "PROFILE_SCORE_THRESHOLDS", "ScoreCardRecord",
     "build_executable_run_contract_claim",
     "build_historical_replay_universe_exact_replay_claim",
-    "build_supported_boundary_verdict",
-    "evaluate_threshold_failures",
-    "overall_blockers",
-    "overall_evidence_refs",
-    "score_checkpoint_safety",
-    "score_determinism",
-    "score_idempotency",
-    "score_layer_consistency",
-    "score_lineage_completeness",
-    "score_replay_readiness",
-    "score_run_identity",
+    "build_supported_boundary_verdict", "evaluate_threshold_failures",
+    "overall_blockers", "overall_evidence_refs",
+    *(scorer.__name__ for scorer in _EXPORTED_SCORERS),
 ]
