@@ -127,7 +127,6 @@
 - [new-pipeline](local/new-pipeline/SKILL.md)
 - [py-architecture-debt-bot](local/py-architecture-debt-bot/SKILL.md)
 - [py-audit-bot](local/py-audit-bot/SKILL.md)
-- [py-code-bot](local/py-code-bot/SKILL.md)
 - [py-config-bot](local/py-config-bot/SKILL.md)
 - [py-debug-bot](local/py-debug-bot/SKILL.md)
 - [py-doc-bot](local/py-doc-bot/SKILL.md)
