@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-31T15:17:17.969001+00:00",
+  "generated_at": "2026-07-31T15:25:04.620765+00:00",
   "summary": {
     "total_scripts": 569,
     "status_counts": {
@@ -8767,7 +8767,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 567,
+          "line": 570,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -9191,7 +9191,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1053,
+          "line": 1056,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -9238,7 +9238,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
@@ -9248,13 +9248,7 @@
         },
         {
           "path": "tests/architecture/test_test_telemetry_governance.py",
-          "line": 23,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci.update_test_telemetry_baseline import ("
-        },
-        {
-          "path": "tests/architecture/test_test_telemetry_governance.py",
-          "line": 72,
+          "line": 67,
           "source_group": "tests",
           "text": "\"python scripts/engineering/ci/update_test_telemetry_baseline.py\""
         },
@@ -11166,7 +11160,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 290,
+      "reference_count": 292,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -12667,7 +12661,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 616,
+          "line": 619,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -15051,7 +15045,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 84,
+      "reference_count": 85,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -15070,6 +15064,12 @@
           "line": 41,
           "source_group": "other",
           "text": "- [ ] `uv run python -m scripts.engineering.repo check-cleanliness` (tracked allowlist check) green"
+        },
+        {
+          "path": ".github/workflows/branch-hygiene.yml",
+          "line": 42,
+          "source_group": "ci",
+          "text": "uv run --frozen --no-build python -m scripts.engineering.repo \\"
         },
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -15094,12 +15094,6 @@
           "line": 29,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-cleanliness --strict-untracked --check-local-forbidden-outputs"
-        },
-        {
-          "path": ".github/workflows/root-hygiene.yml",
-          "line": 32,
-          "source_group": "ci",
-          "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-cleanup-governance"
         }
       ]
     },
@@ -15332,7 +15326,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 258,
+          "line": 293,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
