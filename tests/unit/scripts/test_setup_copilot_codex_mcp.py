@@ -413,8 +413,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(
         env_http_headers = expected_devin.pop("env_http_headers", None)
         if env_http_headers:
             expected_devin["headers"] = {
-                header: f"${env_name}"
-                for header, env_name in env_http_headers.items()
+                header: f"${env_name}" for header, env_name in env_http_headers.items()
             }
         assert devin_servers[server_name] == expected_devin
     assert qodo_payload["mcpServers"] == servers

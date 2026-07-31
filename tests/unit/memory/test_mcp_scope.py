@@ -16,9 +16,7 @@ pytestmark = pytest.mark.unit
 def test_scope_is_bound_to_worktree_branch_and_commit(tmp_path: Path) -> None:
     first = memory_scope_path(tmp_path / "a", branch="main", commit="a" * 40)
     same_scope = memory_scope_path(tmp_path / "a", branch="main", commit="a" * 40)
-    other_worktree = memory_scope_path(
-        tmp_path / "b", branch="main", commit="a" * 40
-    )
+    other_worktree = memory_scope_path(tmp_path / "b", branch="main", commit="a" * 40)
     other_branch = memory_scope_path(
         tmp_path / "a", branch="feature/x", commit="a" * 40
     )

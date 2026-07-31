@@ -15,7 +15,9 @@ import pytest
 pytestmark = pytest.mark.integration
 
 
-def _call(process: subprocess.Popen[str], identifier: int, name: str, args: dict[str, Any]) -> Any:
+def _call(
+    process: subprocess.Popen[str], identifier: int, name: str, args: dict[str, Any]
+) -> Any:
     assert process.stdin is not None
     assert process.stdout is not None
     process.stdin.write(
@@ -45,7 +47,9 @@ def _server(path: Path) -> subprocess.Popen[str]:
     )
 
 
-def test_live_servers_share_scope_persist_and_write_concurrently(tmp_path: Path) -> None:
+def test_live_servers_share_scope_persist_and_write_concurrently(
+    tmp_path: Path,
+) -> None:
     path = tmp_path / "shared.json"
     path.write_text('{"entities":[],"relations":[]}\n', encoding="utf-8")
     first, second = _server(path), _server(path)

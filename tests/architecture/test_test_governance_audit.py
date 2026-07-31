@@ -24,6 +24,7 @@ import pytest
 import yaml
 
 from scripts.engineering.qa import check_test_audit_preflight as preflight
+from scripts.engineering.qa import report_test_governance_audit as governance_audit
 from scripts.engineering.qa.check_test_audit_preflight import (
     STRICT_BLOCKER_IDS,
     collect_test_audit_preflight,
@@ -504,6 +505,26 @@ def test_test_governance_artifacts_match_live_collector(
     )
 
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.architecture
+def test_test_governance_source_hash_fails_closed_on_unreadable_input(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An unreadable source must not be hashed as a synthetic empty file."""
+    test_file = tmp_path / "tests" / "unit" / "test_sample.py"
+    test_file.parent.mkdir(parents=True)
+    test_file.write_text("def test_sample():\n    assert True\n", encoding="utf-8")
+
+    def fail_read(_path: Path) -> bytes:
+        raise OSError("transient cloud-sync read failure")
+
+    monkeypatch.setattr(governance_audit, "_read_source_tree_bytes", fail_read)
+    governance_audit._compute_test_governance_source_tree_sha256.cache_clear()
+
+    with pytest.raises(OSError, match="cloud-sync"):
+        governance_audit._compute_test_governance_source_tree_sha256(str(tmp_path))
 
 
 @pytest.mark.architecture

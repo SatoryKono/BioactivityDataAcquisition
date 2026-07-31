@@ -9,7 +9,10 @@ from pathlib import Path
 
 import pytest
 
-from memory.tooling.check_freshness import _check_graph_freshness, check_memory_freshness
+from memory.tooling.check_freshness import (
+    _check_graph_freshness,
+    check_memory_freshness,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -45,9 +48,7 @@ def test_graph_projection_fails_on_stale_or_mismatched_manifest(tmp_path: Path) 
         encoding="utf-8",
     )
 
-    ok, details = _check_graph_freshness(
-        tmp_path, now=datetime(2026, 3, 1, tzinfo=UTC)
-    )
+    ok, details = _check_graph_freshness(tmp_path, now=datetime(2026, 3, 1, tzinfo=UTC))
     assert not ok
     assert details["age_days"] == 59
 
@@ -59,8 +60,6 @@ def test_graph_projection_fails_on_stale_or_mismatched_manifest(tmp_path: Path) 
     (graph / "projections" / "manifest.json").write_text(
         json.dumps(manifest), encoding="utf-8"
     )
-    ok, details = _check_graph_freshness(
-        tmp_path, now=datetime(2026, 3, 1, tzinfo=UTC)
-    )
+    ok, details = _check_graph_freshness(tmp_path, now=datetime(2026, 3, 1, tzinfo=UTC))
     assert not ok
     assert details["source_identity_matches"] is False
