@@ -201,8 +201,14 @@ surfaces:
     retention_policy: src/memory/policy/retention.yaml
     cleanup_policy: delete-and-rebuild
     runtime_usage_proven: true
-    evidence: [src/memory/timeline/ingest_ci.py, src/memory/policy/storage.yaml]
-    status: FAIL
+    evidence:
+      - src/memory/timeline/ingest_runs.py
+      - src/memory/timeline/ingest_ci.py
+      - src/memory/timeline/ingest_incidents.py
+      - src/memory/artifact_readiness.py
+      - tests/integration/memory/test_timeline_ingest.py
+      - tests/unit/memory/test_query_facade.py
+    status: PASS
   - memory_id: MEM-MCP-FILE
     <<: *surface_defaults
     agent_or_runtime: mcp-clients
@@ -220,7 +226,11 @@ surfaces:
     retention_policy: commit-scope-lifetime
     cleanup_policy: safe-delete-and-reseed
     runtime_usage_proven: true
-    evidence: [scripts/ai/mcp/mcp_memory_wrapper.sh, scripts/ai/mcp/mcp_memory_wrapper.ps1]
+    evidence:
+      - scripts/ai/mcp/mcp_memory_wrapper.sh
+      - scripts/ai/mcp/mcp_memory_wrapper.ps1
+      - src/memory/mcp_scope.py
+      - tests/unit/memory/test_mcp_scope.py
     status: PASS
   - memory_id: MEM-MCP-NEO4J
     <<: *surface_defaults

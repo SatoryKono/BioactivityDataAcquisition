@@ -1,0 +1,84 @@
+"""Deterministic, isolated storage scope for the file-backed MCP memory server."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import subprocess
+from pathlib import Path
+
+from memory.storage import atomic_write_bytes, exclusive_lock
+
+_SAFE_COMPONENT = re.compile(r"[^A-Za-z0-9_.-]")
+
+
+def _git_value(repo_root: Path, *args: str, fallback: str) -> str:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_root), *args],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return fallback
+    return result.stdout.strip() or fallback
+
+
+def memory_scope_path(
+    repo_root: Path,
+    *,
+    branch: str | None = None,
+    commit: str | None = None,
+) -> Path:
+    """Return the worktree/branch/commit-bound MCP memory path."""
+    resolved = repo_root.resolve()
+    worktree_id = hashlib.sha256(str(resolved).encode()).hexdigest()[:16]
+    branch_name = branch or _git_value(
+        resolved, "branch", "--show-current", fallback="detached"
+    )
+    branch_name = _SAFE_COMPONENT.sub("-", branch_name)
+    commit_sha = commit or _git_value(
+        resolved, "rev-parse", "--verify", "HEAD", fallback="unknown"
+    )
+    return (
+        resolved
+        / ".cache"
+        / "mcp-memory"
+        / worktree_id
+        / branch_name
+        / commit_sha
+        / "memory.json"
+    )
+
+
+def initialize_memory_file(target: Path, seed: Path) -> None:
+    """Seed one scope exactly once under the shared storage lock."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with exclusive_lock(target, timeout_seconds=30):
+        if target.exists():
+            return
+        payload = seed.read_bytes()
+        parsed = json.loads(payload)
+        if not isinstance(parsed, dict):
+            raise ValueError("MCP memory seed must be a JSON object")
+        atomic_write_bytes(target, payload)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--repo-root", type=Path, required=True)
+    parser.add_argument("--seed", type=Path, required=True)
+    args = parser.parse_args(argv)
+    target = memory_scope_path(args.repo_root)
+    initialize_memory_file(target, args.seed)
+    print(target)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
