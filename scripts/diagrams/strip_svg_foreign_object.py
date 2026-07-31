@@ -10,10 +10,9 @@ Use-case:
 from __future__ import annotations
 
 import argparse
-import io
+import re
 import sys
 import tempfile
-import xml.etree.ElementTree as ET
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -25,20 +24,17 @@ try:
 except ImportError:  # pragma: no cover - direct script execution
     from scripts.diagrams.diagram_paths import SOURCE_FAMILIES, render_dir
 
-SVG_NS = "http://www.w3.org/2000/svg"
-ET.register_namespace("", SVG_NS)
-
 SVG_DIRS = [render_dir(family, "svg") for family in SOURCE_FAMILIES]
 
-
-def _local_name(tag: str) -> str:
-    return tag.split("}", 1)[1] if "}" in tag else tag
-
-
-def _serialize_svg(tree: ET.ElementTree[ET.Element[str]]) -> str:
-    buffer = io.BytesIO()
-    tree.write(buffer, encoding="utf-8", xml_declaration=False)
-    return buffer.getvalue().decode("utf-8")
+FOREIGN_OBJECT_PATTERN = re.compile(
+    r"<(?:[A-Za-z_][\w.-]*:)?foreignObject\b[^>]*>.*?"
+    r"</(?:[A-Za-z_][\w.-]*:)?foreignObject\s*>",
+    flags=re.IGNORECASE | re.DOTALL,
+)
+SELF_CLOSING_FOREIGN_OBJECT_PATTERN = re.compile(
+    r"<(?:[A-Za-z_][\w.-]*:)?foreignObject\b[^>]*/\s*>",
+    flags=re.IGNORECASE | re.DOTALL,
+)
 
 
 def _write_text_atomic(path: Path, payload: str) -> None:
@@ -58,27 +54,20 @@ def _write_text_atomic(path: Path, payload: str) -> None:
     temp_path.replace(path)
 
 
-def _strip_foreign_objects_tree(
-    path: Path,
-) -> tuple[ET.ElementTree[ET.Element[str]], int]:
-    tree = ET.parse(path)
-    root = tree.getroot()
-    removed = 0
-
-    for parent in root.iter():
-        for child in tuple(parent):
-            if _local_name(child.tag) != "foreignObject":
-                continue
-            parent.remove(child)
-            removed += 1
-
-    return tree, removed
+def _strip_foreign_objects_payload(payload: str) -> tuple[str, int]:
+    """Remove Mermaid label elements without requiring XML-valid XHTML content."""
+    payload, paired_count = FOREIGN_OBJECT_PATTERN.subn("", payload)
+    payload, self_closing_count = SELF_CLOSING_FOREIGN_OBJECT_PATTERN.subn(
+        "", payload
+    )
+    return payload, paired_count + self_closing_count
 
 
 def strip_foreign_objects(path: Path) -> int:
-    tree, removed = _strip_foreign_objects_tree(path)
+    payload = path.read_text(encoding="utf-8")
+    stripped, removed = _strip_foreign_objects_payload(payload)
     if removed > 0:
-        _write_text_atomic(path, _serialize_svg(tree))
+        _write_text_atomic(path, stripped)
     return removed
 
 
@@ -129,7 +118,8 @@ def main() -> int:
 
     changed = 0
     for path in files:
-        tree, removed = _strip_foreign_objects_tree(path)
+        payload = path.read_text(encoding="utf-8")
+        stripped, removed = _strip_foreign_objects_payload(payload)
         if removed == 0:
             continue
         changed += 1
@@ -138,7 +128,7 @@ def main() -> int:
         elif mode == "dry-run":
             print(f"~ {path} (would remove foreignObject -{removed})")
         else:
-            _write_text_atomic(path, _serialize_svg(tree))
+            _write_text_atomic(path, stripped)
             print(f"+ {path} (removed foreignObject -{removed})")
 
     if mode == "check" and changed > 0:
