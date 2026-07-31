@@ -1307,7 +1307,7 @@
   "intentional_no_exception_contract": 90,
   "markerless_examples": [
     "tests/unit/scripts/test_runtime_skill_sync.py:49",
-    "tests/unit/scripts/test_runtime_skill_sync.py:65"
+    "tests/unit/scripts/test_runtime_skill_sync.py:69"
   ],
   "markerless_test_functions": 2,
   "parse_errors": [],
@@ -2307,7 +2307,7 @@
     },
     "markerless_examples": [
       "tests/unit/scripts/test_runtime_skill_sync.py:49",
-      "tests/unit/scripts/test_runtime_skill_sync.py:65"
+      "tests/unit/scripts/test_runtime_skill_sync.py:69"
     ],
     "markerless_test_functions": 2,
     "parse_errors": [],
@@ -2374,7 +2374,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "4ee9a8e8a2f74dbc636f6130bf2dfeac7498e9cb66472c8787388e6716f9a99f",
+  "source_tree_sha256": "1c0245c31c75c9c7571b3649bd0d99d59e7ef6df2bc17319a088029c42e3bfde",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 106,
@@ -2385,7 +2385,7 @@
     "intentional_no_exception_contract": 90,
     "markerless_examples": [
       "tests/unit/scripts/test_runtime_skill_sync.py:49",
-      "tests/unit/scripts/test_runtime_skill_sync.py:65"
+      "tests/unit/scripts/test_runtime_skill_sync.py:69"
     ],
     "markerless_test_functions": 2,
     "refined_assertless_tests": 0,
