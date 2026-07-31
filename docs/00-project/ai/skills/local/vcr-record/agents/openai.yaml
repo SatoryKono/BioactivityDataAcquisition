@@ -1,4 +1,0 @@
-interface:
-  display_name: "VCR Record"
-  short_description: "Manage BioETL VCR cassettes"
-  default_prompt: "Use $vcr-record to record, validate, update, or clean BioETL VCR cassettes safely."

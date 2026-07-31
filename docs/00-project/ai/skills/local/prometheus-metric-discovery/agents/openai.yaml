@@ -1,4 +1,0 @@
-interface:
-  display_name: "Prometheus Metric Discovery"
-  short_description: "Discover real metrics and labels before writing PromQL"
-  default_prompt: "Use $prometheus-metric-discovery to find real Prometheus metrics, labels, and selectors before editing queries, dashboards, or alerts."
