@@ -6,7 +6,11 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+import pytest
+
 from memory.mcp_scope import initialize_memory_file, memory_scope_path
+
+pytestmark = pytest.mark.unit
 
 
 def test_scope_is_bound_to_worktree_branch_and_commit(tmp_path: Path) -> None:
