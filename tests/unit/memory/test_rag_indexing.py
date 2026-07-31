@@ -371,6 +371,44 @@ def test_write_rag_manifests_retries_when_source_changes_during_build(
     )
 
 
+def test_source_reconciliation_rebuilds_only_changed_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    changing = tmp_path / "docs/00-project/changing.md"
+    stable = tmp_path / "docs/00-project/stable.md"
+    changing.parent.mkdir(parents=True)
+    changing.write_text("# Changing\nBefore\n", encoding="utf-8")
+    stable.write_text("# Stable\nContent\n", encoding="utf-8")
+    original_builder = rag_indexing._build_standard_source_records
+    build_calls: dict[str, int] = {}
+
+    def _build_then_mutate(
+        root: Path,
+        rel_path: Path,
+        **kwargs: object,
+    ) -> object:
+        result = original_builder(root, rel_path, **kwargs)
+        rel_path_str = rel_path.as_posix()
+        build_calls[rel_path_str] = build_calls.get(rel_path_str, 0) + 1
+        if rel_path_str.endswith("changing.md") and build_calls[rel_path_str] == 1:
+            changing.write_text("# Changing\nAfter\n", encoding="utf-8")
+        return result
+
+    monkeypatch.setattr(
+        rag_indexing,
+        "_build_standard_source_records",
+        _build_then_mutate,
+    )
+
+    write_rag_manifests(tmp_path, tmp_path / "out")
+
+    assert build_calls == {
+        "docs/00-project/changing.md": 2,
+        "docs/00-project/stable.md": 1,
+    }
+
+
 def test_write_rag_manifests_retries_when_source_disappears_during_build(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
