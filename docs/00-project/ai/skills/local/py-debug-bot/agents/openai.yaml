@@ -1,4 +1,0 @@
-interface:
-  display_name: "Py Debug Bot"
-  short_description: "Run BioETL debug workflow profile"
-  default_prompt: "Use $py-debug-bot to reproduce, isolate, and fix a concrete BioETL failure."
