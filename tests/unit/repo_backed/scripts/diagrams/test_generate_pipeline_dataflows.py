@@ -194,6 +194,9 @@ def test_cli_generation_and_drift_check(tmp_path: Path) -> None:
 
     assert main(args) == 0
     assert main([*args, "--check"]) == 0
+    assert "pipelines/chembl-activity.md" in (
+        artifact_root / "chembl_activity" / "pipeline-passport.md"
+    ).read_text(encoding="utf-8")
 
     stale_path = diagram_dir / DIAGRAM_FILENAMES[0]
     stale_path.write_text("stale\n", encoding="utf-8")
