@@ -1,7 +1,7 @@
 # RF-017 Constructor Waivers
 # ARCH-CONT-04 / #6760: 2 -> 1. Shrink-only.
-# PipelineObserver removed via PipelineObserverIdentity bag.
-# CheckpointRuntimeService removed via CheckpointRuntimeIdentity bag (ARCH-RES-02).
+# PipelineObserver removed via PipelineObserverParams bag.
+# CheckpointRuntimeService removed via CheckpointRuntimeParams bag (ARCH-RES-02).
 
 QuarantineEntry:
   max_args: 9

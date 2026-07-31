@@ -36,7 +36,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.core.lifecycle.checkpoint_manager import (
-    CheckpointRuntimeIdentity,
+    CheckpointRuntimeParams,
     CheckpointRuntimeService,
 )
 from bioetl.application.services.checkpoint_compatibility_service import (
@@ -57,7 +57,7 @@ def _crs(
     resume=None,
     **kwargs,
 ):
-    """Test helper wrapping CheckpointRuntimeIdentity bag (ARCH-RES-02)."""
+    """Test helper wrapping CheckpointRuntimeParams bag (ARCH-RES-02)."""
     identity_keys = {
         "resume_run_id",
         "resume_manifest_id",
@@ -69,7 +69,7 @@ def _crs(
     return CheckpointRuntimeService(
         checkpoint_port,
         logger,
-        CheckpointRuntimeIdentity(
+        CheckpointRuntimeParams(
             pipeline_name=pipeline_name,
             run_id=run_id,
             resume=resume,
