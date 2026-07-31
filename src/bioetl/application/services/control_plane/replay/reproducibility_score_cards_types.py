@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 
 JsonDict = dict[str, object]
@@ -45,8 +46,21 @@ class ScoreCardRecord:
         }
 
 
+def build_score_card_record(
+    category: str,
+    score: int,
+    evidence: Iterable[str],
+    blockers: Iterable[str],
+    evidence_refs: Iterable[str],
+) -> ScoreCardRecord:
+    """Build one bounded score-card record through the canonical constructor."""
+    items = tuple(evidence), tuple(blockers), tuple(evidence_refs)
+    return ScoreCardRecord(category, max(0, min(10, score)), *items)
+
+
 __all__ = [
     "PROFILE_SCORE_THRESHOLDS",
     "JsonDict",
     "ScoreCardRecord",
+    "build_score_card_record",
 ]

@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    _CATEGORY_SCORER_EXPORTS,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
     score_checkpoint_safety as score_checkpoint_safety,
 )
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
@@ -37,11 +40,5 @@ __all__ = [
     "PROFILE_SCORE_THRESHOLDS",
     "JsonDict",
     "ScoreCardRecord",
-    "score_checkpoint_safety",
-    "score_determinism",
-    "score_idempotency",
-    "score_layer_consistency",
-    "score_lineage_completeness",
-    "score_replay_readiness",
-    "score_run_identity",
+    *_CATEGORY_SCORER_EXPORTS,
 ]

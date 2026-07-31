@@ -31,6 +31,8 @@ from tests.architecture._module_coverage_inventory_support import (
 )
 from tests.architecture._test_matrix_policy_support import load_matrix
 
+pytestmark = pytest.mark.architecture
+
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 WORKFLOW_PATH = ROOT / ".github" / "workflows" / "tests.yml"
