@@ -1,0 +1,27 @@
+name: Memory freshness
+
+on:
+  pull_request:
+    paths:
+      - "src/memory/**"
+      - "docs/00-project/ai/memory/**"
+      - ".github/workflows/memory-freshness.yml"
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Check repository memory freshness
+        run: uv run python -m memory.tooling.check_freshness --json
+      - name: Test freshness contracts
+        run: uv run pytest tests/unit/memory/test_check_freshness.py -q
