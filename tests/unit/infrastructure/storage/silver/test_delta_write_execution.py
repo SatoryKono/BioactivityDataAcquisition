@@ -93,22 +93,17 @@ async def test_write_plain_delta_request_times_out_promptly_without_executor_joi
 ):
     """Plain writes should surface timeout without waiting for a stuck native thread."""
     request = _make_request()
-    release_after_seconds = 2.0
     release = threading.Event()
     finished = threading.Event()
 
     def _blocking_write(**_kwargs: object) -> None:
         try:
-            release.wait(timeout=release_after_seconds)
+            release.wait()
         finally:
             finished.set()
 
     module = SimpleNamespace(write_deltalake=_blocking_write)
-    release_timer = threading.Timer(release_after_seconds, release.set)
-    release_timer.daemon = True
-    release_timer.start()
 
-    started = time.perf_counter()
     try:
         with pytest.raises(TimeoutError, match=r"Delta write timed out after 0\.01s"):
             await _write_plain_delta_request(
@@ -117,13 +112,10 @@ async def test_write_plain_delta_request_times_out_promptly_without_executor_joi
                 mode="append",
                 timeout_seconds=0.01,
             )
-        elapsed = time.perf_counter() - started
 
-        assert elapsed < release_after_seconds / 2
         assert not finished.is_set()
     finally:
         release.set()
-        release_timer.cancel()
 
 
 @pytest.mark.asyncio
