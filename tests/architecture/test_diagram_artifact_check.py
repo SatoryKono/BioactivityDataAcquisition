@@ -15,6 +15,7 @@ from __future__ import annotations
 import pytest
 
 import importlib.util
+import subprocess
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -102,6 +103,20 @@ def test_parse_args_supports_optional_png_requirement() -> None:
     args = module.parse_args([])
 
     assert args.require_png is False
+
+
+def test_direct_script_execution_loads_repository_package() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    script_path = repo_root / "scripts" / "diagrams" / "check_diagram_artifacts.py"
+
+    result = subprocess.run(
+        [sys.executable, str(script_path), "--help"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
 
 
 def test_png_compatibility_manifest_is_svg_only_and_curated() -> None:
