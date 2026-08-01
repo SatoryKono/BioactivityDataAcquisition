@@ -98,7 +98,7 @@ class TestQuarantineEntryInvariantProperties:
     @settings(
         deadline=None,
         max_examples=30,
-        suppress_health_check=[HealthCheck.too_slow],
+        suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors],
     )
     @given(payload=_PAYLOAD, metadata_a=_METADATA, metadata_b=_METADATA)
     def test_payload_hash_depends_only_on_payload(
@@ -123,7 +123,7 @@ class TestQuarantineEntryInvariantProperties:
     @settings(
         deadline=None,
         max_examples=30,
-        suppress_health_check=[HealthCheck.too_slow],
+        suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors],
     )
     @given(
         payload=_PAYLOAD,
@@ -166,7 +166,7 @@ class TestQuarantineEntryInvariantProperties:
     @settings(
         deadline=None,
         max_examples=30,
-        suppress_health_check=[HealthCheck.too_slow],
+        suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors],
     )
     @given(payload=_PAYLOAD, metadata=_METADATA)
     def test_payload_and_metadata_accessors_are_defensive(
