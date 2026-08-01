@@ -112,7 +112,9 @@ class TestQuarantineEntryInvariantProperties:
         second = _create_entry(payload, metadata_b)
 
         assert first.payload_hash == second.payload_hash
-        if metadata_a == metadata_b:
+        from bioetl.domain.normalization.json import serialize_json_canonical
+
+        if serialize_json_canonical(metadata_a) == serialize_json_canonical(metadata_b):
             assert first.entry_id == second.entry_id
         else:
             assert first.entry_id != second.entry_id

@@ -15,33 +15,33 @@ ______________________________________________________________________
 
 ## High-Level Architecture
 
-> **Diagram:** See [`01-high-level-hexagonal.mmd`](../architecture/01-high-level-hexagonal.mmd)
+> **Diagram:** See [`01-high-level-hexagonal.mmd`](../architecture_01-high-level-hexagonal.mmd)
 
 ## Medallion Architecture
 
-> **Diagram:** See [`03-medallion-data-flow.mmd`](../architecture/03-medallion-data-flow.mmd)
+> **Diagram:** See [`03-medallion-data-flow.mmd`](../architecture_03-medallion-data-flow.mmd)
 
 ## Class Diagram
 
-> **Diagram:** See [`07-application-core-services.mmd`](../class-diagrams/07-application-core-services.mmd)
+> **Diagram:** See [`07-application-core-services.mmd`](../class-diagrams_07-application-core-services.mmd)
 
 ## Layer Interaction
 
 Shows how BioETL layers communicate following Hexagonal Architecture:
 
-> **Diagram:** See [`02-layer-dependency-matrix.mmd`](../architecture/02-layer-dependency-matrix.mmd)
+> **Diagram:** See [`02-layer-dependency-matrix.mmd`](../architecture_02-layer-dependency-matrix.mmd)
 
 ## Pipeline Execution Sequence
 
 Shows the complete execution flow from CLI to data storage:
 
-> **Diagram:** See [`04-pipeline-execution-flow.mmd`](../architecture/04-pipeline-execution-flow.mmd)
+> **Diagram:** See [`04-pipeline-execution-flow.mmd`](../architecture_04-pipeline-execution-flow.mmd)
 
 ## Medallion Data Flow
 
 Shows data transformation through Bronze → Silver → Gold layers:
 
-> **Diagram:** See [`03-medallion-data-flow.mmd`](../architecture/03-medallion-data-flow.mmd)
+> **Diagram:** See [`03-medallion-data-flow.mmd`](../architecture_03-medallion-data-flow.mmd)
 > *(detailed version with DQ and quarantine)*
 
 ## Domain Layer (DDD)
@@ -83,7 +83,7 @@ flowchart TB
         end
 
         subgraph ports["Ports"]
-            BronzeStoragePort / SilverStoragePort / GoldStoragePort / MergedStoragePort
+            BronzeStoragePort_SilverStoragePort_GoldStoragePort_MergedStoragePort
             LockPort
             CheckpointPort
             DataSourcePort
@@ -100,7 +100,7 @@ flowchart TB
     PipelineRun --> RunID
 ```
 
-See [ADR-021: DDD Aggregates Adoption](../../decisions/ADR-021-ddd-aggregates-adoption.md) for details.
+See [ADR-021: DDD Aggregates Adoption](../../decisions_ADR-021-ddd-aggregates-adoption.md) for details.
 
 ## Batch State Machine
 
