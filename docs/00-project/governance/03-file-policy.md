@@ -277,6 +277,7 @@ Machine-readable каталог для structure hygiene хранится в
 - Текущие ratified zones:
   - `docs/00-project/ai/agents/policy/`
   - `docs/00-project/ai/agents/scripts/`
+  - `.claude`
   - `docs/plugins/link_checker/`
 - Эти зоны считаются repo-only documentation/governance tooling surfaces и не
   дают blanket permission на размещение нового Python-кода в других частях
