@@ -82,7 +82,7 @@ class TestPipelineRunInvariantProperties:
     @settings(
         deadline=None,
         max_examples=30,
-        suppress_health_check=[HealthCheck.too_slow],
+        suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors],
     )
     @given(stage_plan=_SUCCESS_STAGE_PLAN)
     def test_success_only_stage_sequences_can_complete(
@@ -120,7 +120,7 @@ class TestPipelineRunInvariantProperties:
     @settings(
         deadline=None,
         max_examples=30,
-        suppress_health_check=[HealthCheck.too_slow],
+        suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors],
     )
     @given(
         success_prefix=_SUCCESS_STAGE_PLAN,
