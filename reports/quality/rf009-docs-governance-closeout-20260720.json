@@ -1,0 +1,87 @@
+{
+  "contract": "rf009_docs_governance_closeout_v1",
+  "issue": 6300,
+  "generated_at": "2026-07-20T18:25:00Z",
+  "verdict": "complete_for_docs_governance_scope",
+  "debt_outcome": "improved",
+  "scope_boundary": {
+    "in_scope": [
+      "operator docs/runbooks for Docker/WSL recovery and Neo4j readiness",
+      "tracked obsolete surface retirement (Warp/Mintlify/persistent MCP Compose)",
+      "root hygiene / MCP consolidation / documentation cleanup inventories",
+      "governance tests preventing reintroduction of retired surfaces"
+    ],
+    "out_of_scope_program_promotion": [
+      "signed 100-cycle / 72-hour Docker stability campaign (#6299)",
+      "99/100 Desktop recovery host campaign (#6297)",
+      "live workstation cutover observation (#6311 / #6303)"
+    ]
+  },
+  "tasks": {
+    "supported_lifecycle_workflows": "already_done",
+    "remove_persistent_mcp_compose_guidance": "already_done",
+    "remove_fixed_sleep_readiness": "fixed_in_this_closeout",
+    "remove_force_kill_first_recovery_guidance": "already_done",
+    "remove_destructive_prune_routine_guidance": "already_done",
+    "inventories_match_tracked_head": "already_done",
+    "obsolete_tracked_surfaces_absent": "verified_zero_named_warp_mintlify_files",
+    "generated_cleanup_inventory": "check_pass",
+    "adr010_docker_optional": "preserved"
+  },
+  "changes_this_closeout": [
+    {
+      "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+      "change": "Replaced fixed sleep 15 readiness with bounded curl health poll (90s) and reclassified wsl --shutdown as last-resort operator-confirmed action"
+    }
+  ],
+  "reference_scan": {
+    "obsolete_named_files_in_docs_configs_scripts_github_grafana": 0,
+    "retained_compose_files": [
+      "docker-compose.yml",
+      "docker-compose.monitoring.yml",
+      "docker-compose.neo4j.yml",
+      "docker-compose.neo4j-audit.yml"
+    ],
+    "notes": "No tracked warp/mintlify surface files found. Mentions of down -v / force-kill / wsl --shutdown in active Docker docs are prohibition or last-resort only."
+  },
+  "validation": {
+    "passed": [
+      "pytest tests/architecture/test_docker_runtime_contracts.py -q",
+      "pytest tests/architecture/test_root_hygiene_review_registry.py tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py tests/architecture/test_documentation_cleanup_inventory.py -q",
+      "python -m scripts.docs generate-cleanup-inventory --update (already synchronized)"
+    ],
+    "failed_or_skipped": [
+      {
+        "check": "pytest tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py",
+        "status": "failed_host_dependent",
+        "reason": "Docker Desktop CLI restart/start unavailable on host during closeout (desktop hang residual); not a docs/governance regression"
+      },
+      {
+        "check": "python -m scripts.docs check-drift --runtime-mirrors --freshness",
+        "status": "skipped",
+        "reason": "Prior audits timed out on cloud-synced /mnt/e style checkout; rerun from Linux-filesystem checkout if required",
+        "follow_up": "python -m scripts.docs check-drift --runtime-mirrors --freshness"
+      },
+      {
+        "check": "MkDocs nav walk",
+        "status": "skipped",
+        "reason": "Prior full-tree walk timed out on slow filesystem",
+        "follow_up": "pytest tests/architecture -k mkdocs --timeout=600 on Linux FS checkout"
+      }
+    ]
+  },
+  "mirror_sync_status": {
+    "runtime_source_changed": false,
+    "docs_mirrors_regenerated": "cleanup_inventory_check_pass",
+    "hand_edited_generated_mirrors": false
+  },
+  "residual_host_risks": [
+    "Live host may still attach bioetl-main to legacy warp-network; tracked compose uses bioetl-runtime + bioetl-monitoring only. Owned by workstation cutover #6311/#6303.",
+    "Program-level Docker promotion (100 cycles, 72h soak, signed summary) remains #6299.",
+    "Desktop recovery 99/100 host proof remains #6297."
+  ],
+  "env_files_changed": false,
+  "volumes_deleted": false,
+  "debt_budget": "unchanged_or_improved",
+  "dependency_note": "Issue body historically blocked closeout on #6299 program promotion. This closeout completes RF-009 docs/governance/obsolete-surface scope only and does not claim #6299 release gates passed."
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "source_registry_file": "configs/quality/architecture_metric_exemptions.yaml",
+  "generated_at": "2026-06-19T09:36:05.497505+00:00",
+  "defaults": {
+    "behavior_change_allowed": false,
+    "public_interface_change_allowed": false,
+    "docstrings_rule": "Докстринги: не удалять. Разрешено только изменять с соблюдением стандартов докстрингов проекта."
+  },
+  "registry_summary": {
+    "file_size_limits": 0,
+    "function_complexity": 0,
+    "function_length": 0,
+    "class_size": 0,
+    "class_method_count": 0,
+    "god_object": 0,
+    "domain_complexity": 0,
+    "total_tasks": 0
+  },
+  "tasks": []
+}

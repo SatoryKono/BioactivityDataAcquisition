@@ -1,0 +1,1391 @@
+{
+  "capacity": {
+    "available_memory_bytes": null,
+    "cpus": 20,
+    "docker_free_bytes": null,
+    "docker_root_dir": "/var/lib/docker",
+    "docker_total_bytes": null,
+    "required_free_disk_bytes": 53687091200,
+    "thresholds": {
+      "minimum_cpus": 2,
+      "minimum_free_disk_gib": 50,
+      "minimum_free_disk_percent": 20,
+      "minimum_free_memory_gib": 4
+    }
+  },
+  "compose": {
+    "alertmanager": {
+      "bind_mount_sources": [
+        {
+          "service": "alertmanager",
+          "source": "./grafana/alertmanager.yml"
+        }
+      ],
+      "compose_file": "scripts/ops/runtime/docker/compose/alertmanager.yml",
+      "environment_names": [],
+      "images": [
+        "prom/alertmanager:latest@sha256:9e082985f56f4c8c9f724e18f2288c6708f472e56a5286b8863d080434ea065d"
+      ],
+      "project_name": "bioetl-alertmanager",
+      "published_ports": [
+        {
+          "bind": "127.0.0.1",
+          "published": 9093,
+          "service": "alertmanager",
+          "target": 9093
+        }
+      ],
+      "services": [
+        "alertmanager"
+      ]
+    },
+    "main": {
+      "bind_mount_sources": [],
+      "compose_file": "docker-compose.yml",
+      "environment_names": [
+        "BIOETL_PROMETHEUS_URL",
+        "LOG_LEVEL",
+        "NEO4J_PASSWORD",
+        "NEO4J_USERNAME"
+      ],
+      "images": [],
+      "project_name": "bioetl-main",
+      "published_ports": [
+        {
+          "bind": "127.0.0.1",
+          "published": 8081,
+          "service": "bioetl",
+          "target": 8081
+        }
+      ],
+      "services": [
+        "bioetl"
+      ]
+    },
+    "minio": {
+      "bind_mount_sources": [],
+      "compose_file": "scripts/ops/runtime/docker/compose/minio.yml",
+      "environment_names": [
+        "MINIO_PROMETHEUS_AUTH_TYPE",
+        "MINIO_REGION_NAME",
+        "MINIO_ROOT_PASSWORD",
+        "MINIO_ROOT_USER"
+      ],
+      "images": [
+        "minio/minio:latest@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e"
+      ],
+      "project_name": "bioetl-minio",
+      "published_ports": [
+        {
+          "bind": "127.0.0.1",
+          "published": 9000,
+          "service": "minio",
+          "target": 9000
+        },
+        {
+          "bind": "127.0.0.1",
+          "published": 9001,
+          "service": "minio",
+          "target": 9001
+        }
+      ],
+      "services": [
+        "minio"
+      ]
+    },
+    "monitoring": {
+      "bind_mount_sources": [
+        {
+          "service": "prometheus",
+          "source": "./grafana/prometheus.yml"
+        },
+        {
+          "service": "prometheus",
+          "source": "./grafana/prometheus-rules"
+        },
+        {
+          "service": "loki",
+          "source": "./grafana/loki-config.yml"
+        },
+        {
+          "service": "promtail",
+          "source": "./grafana/promtail-config.yml"
+        },
+        {
+          "service": "promtail",
+          "source": "./logs"
+        },
+        {
+          "service": "promtail",
+          "source": "./reports/logs"
+        },
+        {
+          "service": "tempo",
+          "source": "./grafana/tempo.yml"
+        },
+        {
+          "service": "grafana",
+          "source": "./grafana/provisioning/datasources-core"
+        },
+        {
+          "service": "grafana",
+          "source": "./grafana/provisioning/datasources-tracing"
+        },
+        {
+          "service": "grafana",
+          "source": "./grafana/scripts/bootstrap-datasources.sh"
+        },
+        {
+          "service": "grafana",
+          "source": "./grafana/provisioning/dashboards"
+        },
+        {
+          "service": "grafana",
+          "source": "./grafana/dashboards"
+        }
+      ],
+      "compose_file": "docker-compose.monitoring.yml",
+      "environment_names": [
+        "AUTH_TOKEN",
+        "BIOETL_ENABLE_TRACING_DATASOURCES",
+        "BIOETL_QUARANTINE_EXPLORER_URL",
+        "BROWSER_FLAGS",
+        "BROWSER_READINESS_TIMEOUT",
+        "ENABLE_METRICS",
+        "GF_LOG_LEVEL",
+        "GF_METRICS_ENABLED",
+        "GF_PLUGINS_PREINSTALL",
+        "GF_RENDERING_CALLBACK_URL",
+        "GF_RENDERING_RENDERER_TOKEN",
+        "GF_RENDERING_SERVER_URL",
+        "GF_SECURITY_ADMIN_PASSWORD",
+        "GF_SERVER_ROOT_URL",
+        "GF_SERVER_SERVE_FROM_SUB_PATH",
+        "GF_USERS_ALLOW_SIGN_UP",
+        "GOMEMLIMIT",
+        "GRAFANA_IMAGE_RENDERER_GOMEMLIMIT",
+        "GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT",
+        "HTTP_HOST"
+      ],
+      "images": [
+        "grafana/grafana-image-renderer@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b",
+        "grafana/grafana:12.0.0@sha256:263cbefd5d9b179893c47c415daab4da5c1f3d6770154741eca4f45c81119884",
+        "grafana/loki:3.7.0@sha256:c316b7c7589a5eeca843b6926c7446149d18300b79ac8538dc4ae063bc478da2",
+        "grafana/promtail:3.6.8@sha256:6cfa64ec432b24a912d640e2edb940eeae2666f61861a66c121d763dd7241381",
+        "grafana/tempo:2.10.3@sha256:cac9de2ac9f6da8efca5b64b690a7cb8c786a0c49cac7b4517dd1b0089a6c703",
+        "prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893",
+        "prom/pushgateway:v1.11.3@sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48"
+      ],
+      "project_name": "bioetl-monitoring",
+      "published_ports": [
+        {
+          "bind": "127.0.0.1",
+          "published": 9090,
+          "service": "prometheus",
+          "target": 9090
+        },
+        {
+          "bind": "127.0.0.1",
+          "published": 9091,
+          "service": "pushgateway",
+          "target": 9091
+        },
+        {
+          "bind": "127.0.0.1",
+          "published": 3100,
+          "service": "loki",
+          "target": 3100
+        },
+        {
+          "bind": "127.0.0.1",
+          "published": 3200,
+          "service": "tempo",
+          "target": 3200
+        },
+        {
+          "bind": "127.0.0.1",
+          "published": 4317,
+          "service": "tempo",
+          "target": 4317
+        },
+        {
+          "bind": "127.0.0.1",
+          "published": 3000,
+          "service": "grafana",
+          "target": 3000
+        }
+      ],
+      "services": [
+        "grafana",
+        "loki",
+        "prometheus",
+        "promtail",
+        "pushgateway",
+        "renderer",
+        "tempo"
+      ]
+    },
+    "neo4j": {
+      "bind_mount_sources": [],
+      "compose_file": "docker-compose.neo4j.yml",
+      "environment_names": [
+        "BIOETL_NEO4J_PASSWORD",
+        "BIOETL_NEO4J_USERNAME",
+        "NEO4J_ACCEPT_LICENSE_AGREEMENT",
+        "NEO4J_AUTH",
+        "NEO4J_PASSWORD",
+        "NEO4J_USERNAME",
+        "NEO4J_server_jvm_additional",
+        "NEO4J_server_memory_heap_initial__size",
+        "NEO4J_server_memory_heap_max__size",
+        "NEO4J_server_memory_pagecache_size"
+      ],
+      "images": [
+        "neo4j:5.15-community@sha256:d9e2fb1ba398536e50d22ebc3d5d585baa086c1c0cf8e5b96bdc9e11e87e002a"
+      ],
+      "project_name": "bioetl-neo4j",
+      "published_ports": [
+        {
+          "bind": "127.0.0.1",
+          "published": 7474,
+          "service": "neo4j",
+          "target": 7474
+        },
+        {
+          "bind": "127.0.0.1",
+          "published": 7687,
+          "service": "neo4j",
+          "target": 7687
+        }
+      ],
+      "services": [
+        "neo4j"
+      ]
+    },
+    "neo4j-audit": {
+      "bind_mount_sources": [],
+      "compose_file": "docker-compose.neo4j-audit.yml",
+      "environment_names": [
+        "BIOETL_NEO4J_AUDIT_PASSWORD",
+        "BIOETL_NEO4J_AUDIT_USERNAME",
+        "NEO4J_ACCEPT_LICENSE_AGREEMENT",
+        "NEO4J_AUDIT_PASSWORD",
+        "NEO4J_AUDIT_USERNAME",
+        "NEO4J_AUTH",
+        "NEO4J_server_memory_heap_initial__size",
+        "NEO4J_server_memory_heap_max__size",
+        "NEO4J_server_memory_pagecache_size"
+      ],
+      "images": [
+        "neo4j:5.13-community@sha256:6c6003e890c75c9136df06b9061afbbf9a70673711d2d9abc5937ca7f01abb16"
+      ],
+      "project_name": "bioetl-neo4j-audit",
+      "published_ports": [
+        {
+          "bind": "127.0.0.1",
+          "published": 7475,
+          "service": "neo4j-audit",
+          "target": 7474
+        },
+        {
+          "bind": "127.0.0.1",
+          "published": 7688,
+          "service": "neo4j-audit",
+          "target": 7687
+        }
+      ],
+      "services": [
+        "neo4j-audit"
+      ]
+    },
+    "redis": {
+      "bind_mount_sources": [],
+      "compose_file": "scripts/ops/runtime/docker/compose/redis.yml",
+      "environment_names": [
+        "REDIS_ADDR",
+        "REDIS_PASSWORD",
+        "REDIS_REPLICATION_DISKLESS_SYNC",
+        "REDIS_TCP_KEEPALIVE",
+        "REDIS_TIMEOUT"
+      ],
+      "images": [
+        "oliver006/redis_exporter:latest@sha256:2e9795be900db073e9475fdb9c5124db309b07a3e4e75a1770705cb03be1a1c8",
+        "redis:7.2-alpine@sha256:dfa18828cbc07b3ae6a95ec7343f6c214fdee2d836197b4be8e9904420762cd8"
+      ],
+      "project_name": "bioetl-redis",
+      "published_ports": [
+        {
+          "bind": "127.0.0.1",
+          "published": 6379,
+          "service": "redis",
+          "target": 6379
+        },
+        {
+          "bind": "127.0.0.1",
+          "published": 9121,
+          "service": "redis-exporter",
+          "target": 9121
+        }
+      ],
+      "services": [
+        "redis",
+        "redis-exporter"
+      ]
+    },
+    "sonarqube": {
+      "bind_mount_sources": [],
+      "compose_file": "scripts/ops/runtime/docker/compose/sonarqube.yml",
+      "environment_names": [
+        "POSTGRES_DB",
+        "POSTGRES_PASSWORD",
+        "POSTGRES_USER",
+        "SONARQUBE_DB_PASSWORD",
+        "SONARQUBE_SYSTEM_PASSCODE",
+        "SONAR_CE_JAVAOPTS",
+        "SONAR_FORCEAUTHENTICATION",
+        "SONAR_JDBC_PASSWORD",
+        "SONAR_JDBC_URL",
+        "SONAR_JDBC_USERNAME",
+        "SONAR_WEB_JAVAOPTS",
+        "SONAR_WEB_SYSTEMPASSCODE"
+      ],
+      "images": [
+        "postgres:15-alpine@sha256:3d0f7584ed7d04e27fa050d6683a74746608faf21f202be78460d679cc56461f",
+        "sonarqube:10-community@sha256:0842dcd4c8f851ce44f8edaf45ac93f7c9079017d60d99f614663e60cef5efe9"
+      ],
+      "project_name": "bioetl-sonarqube",
+      "published_ports": [
+        {
+          "bind": "127.0.0.1",
+          "published": 9010,
+          "service": "sonarqube",
+          "target": 9000
+        }
+      ],
+      "services": [
+        "postgres-sonarqube",
+        "sonarqube"
+      ]
+    }
+  },
+  "contract": {
+    "canonical_runtime": false,
+    "path": "configs\\quality\\docker_runtime_contracts.yaml",
+    "selected_stack": null,
+    "sha256": "77d4b168dafb47af22b6c48880de3e0ab0a86c5441e67a0fe4fef4ba3ebc3109"
+  },
+  "findings": [
+    {
+      "code": "SECRET_MISSING",
+      "evidence": {
+        "name": "NEO4J_PASSWORD",
+        "stack": "main"
+      },
+      "message": "Required secret environment variable is absent",
+      "severity": "error"
+    },
+    {
+      "code": "SECRET_MISSING",
+      "evidence": {
+        "name": "GF_SECURITY_ADMIN_PASSWORD",
+        "stack": "monitoring"
+      },
+      "message": "Required secret environment variable is absent",
+      "severity": "error"
+    },
+    {
+      "code": "SECRET_MISSING",
+      "evidence": {
+        "name": "GF_RENDERING_RENDERER_TOKEN",
+        "stack": "monitoring"
+      },
+      "message": "Required secret environment variable is absent",
+      "severity": "error"
+    },
+    {
+      "code": "ENVIRONMENT_MISSING",
+      "evidence": {
+        "expected": "neo4j",
+        "name": "NEO4J_USERNAME",
+        "stack": "neo4j"
+      },
+      "message": "Required non-secret environment variable is absent",
+      "severity": "error"
+    },
+    {
+      "code": "SECRET_MISSING",
+      "evidence": {
+        "name": "NEO4J_PASSWORD",
+        "stack": "neo4j"
+      },
+      "message": "Required secret environment variable is absent",
+      "severity": "error"
+    },
+    {
+      "code": "ENVIRONMENT_MISSING",
+      "evidence": {
+        "expected": "neo4j",
+        "name": "NEO4J_AUDIT_USERNAME",
+        "stack": "neo4j-audit"
+      },
+      "message": "Required non-secret environment variable is absent",
+      "severity": "error"
+    },
+    {
+      "code": "SECRET_MISSING",
+      "evidence": {
+        "name": "NEO4J_AUDIT_PASSWORD",
+        "stack": "neo4j-audit"
+      },
+      "message": "Required secret environment variable is absent",
+      "severity": "error"
+    },
+    {
+      "code": "SECRET_MISSING",
+      "evidence": {
+        "name": "REDIS_PASSWORD",
+        "stack": "redis"
+      },
+      "message": "Required secret environment variable is absent",
+      "severity": "error"
+    },
+    {
+      "code": "SECRET_MISSING",
+      "evidence": {
+        "name": "MINIO_ROOT_PASSWORD",
+        "stack": "minio"
+      },
+      "message": "Required secret environment variable is absent",
+      "severity": "error"
+    },
+    {
+      "code": "SECRET_MISSING",
+      "evidence": {
+        "name": "SONARQUBE_DB_PASSWORD",
+        "stack": "sonarqube"
+      },
+      "message": "Required secret environment variable is absent",
+      "severity": "error"
+    },
+    {
+      "code": "SECRET_MISSING",
+      "evidence": {
+        "name": "SONARQUBE_SYSTEM_PASSCODE",
+        "stack": "sonarqube"
+      },
+      "message": "Required secret environment variable is absent",
+      "severity": "error"
+    },
+    {
+      "code": "CAPACITY_DOCKER_ROOT",
+      "evidence": {
+        "docker_root_dir": "/var/lib/docker",
+        "error": "[WinError 3] The system cannot find the path specified"
+      },
+      "message": "Docker data root capacity cannot be measured from this host",
+      "severity": "error"
+    },
+    {
+      "code": "CONTAINER_RESTART",
+      "evidence": {
+        "name": "/bioetl-neo4j",
+        "restart_count": 34
+      },
+      "message": "Container restart count is non-zero",
+      "severity": "warning"
+    },
+    {
+      "code": "PROJECT_ORIGIN",
+      "evidence": {
+        "actual": [
+          "e:\\home\\fedor\\.local\\share\\bioetl-runtime\\bioactivitydataacquisition2\\docker-compose.yml"
+        ],
+        "expected": "e:\\g-drive\\05_ai\\github\\bioactivitydataacquisition2\\docker-compose.yml",
+        "project": "bioetl-main"
+      },
+      "message": "Live Compose project originates from an unexpected config path",
+      "severity": "error"
+    },
+    {
+      "code": "PROJECT_ORIGIN",
+      "evidence": {
+        "actual": [
+          "e:\\home\\fedor\\.local\\share\\bioetl-runtime\\bioactivitydataacquisition2\\docker-compose.monitoring.yml"
+        ],
+        "expected": "e:\\g-drive\\05_ai\\github\\bioactivitydataacquisition2\\docker-compose.monitoring.yml",
+        "project": "bioetl-monitoring"
+      },
+      "message": "Live Compose project originates from an unexpected config path",
+      "severity": "error"
+    },
+    {
+      "code": "PROJECT_ORIGIN",
+      "evidence": {
+        "actual": [
+          "e:\\home\\fedor\\.local\\share\\bioetl-runtime\\bioactivitydataacquisition2\\docker-compose.neo4j.yml"
+        ],
+        "expected": "e:\\g-drive\\05_ai\\github\\bioactivitydataacquisition2\\docker-compose.neo4j.yml",
+        "project": "bioetl-neo4j"
+      },
+      "message": "Live Compose project originates from an unexpected config path",
+      "severity": "error"
+    }
+  ],
+  "generated_at": "2026-07-21T13:17:01.684854+00:00",
+  "host": {
+    "release": "10",
+    "system": "Windows",
+    "wsl": false
+  },
+  "live": {
+    "commands": [
+      {
+        "available": true,
+        "command": [
+          "docker",
+          "--version"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Docker version 29.6.2, build dfc4efb"
+      },
+      {
+        "available": true,
+        "command": [
+          "docker",
+          "compose",
+          "version"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Docker Compose version v5.3.1"
+      },
+      {
+        "available": true,
+        "command": [
+          "docker",
+          "info",
+          "--format",
+          "{{json .}}"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "{\"ID\":\"d4078961-c957-455e-a77e-f930668dd393\",\"Containers\":33,\"ContainersRunning\":32,\"ContainersPaused\":0,\"ContainersStopped\":1,\"Images\":36,\"Driver\":\"overlayfs\",\"DriverStatus\":[[\"driver-type\",\"io.containerd.snapshotter.v1\"]],\"Plugins\":{\"Volume\":[\"local\"],\"Network\":[\"bridge\",\"host\",\"ipvlan\",\"macvlan\",\"null\",\"overlay\"],\"Authorization\":null,\"Log\":[\"awslogs\",\"fluentd\",\"gcplogs\",\"gelf\",\"journald\",\"json-file\",\"local\",\"splunk\",\"syslog\"]},\"MemoryLimit\":true,\"SwapLimit\":true,\"CpuCfsPeriod\":true,\"CpuCfsQuota\":true,\"CPUShares\":true,\"CPUSet\":true,\"PidsLimit\":true,\"IPv4Forwarding\":true,\"Debug\":false,\"NFd\":360,\"OomKillDisable\":false,\"NGoroutines\":507,\"SystemTime\":\"2026-07-21T13:16:58.761492326Z\",\"LoggingDriver\":\"json-file\",\"CgroupDriver\":\"cgroupfs\",\"CgroupVersion\":\"2\",\"NEventsListener\":14,\"KernelVersion\":\"6.6.87.2-microsoft-standard-WSL2\",\"OperatingSystem\":\"Docker Desktop\",\"OSVersion\":\"\",\"OSType\":\"linux\",\"Architecture\":\"x86_64\",\"IndexServerAddress\":\"https://index.docker.io/v1/\",\"RegistryConfig\":{\"InsecureRegistryCIDRs\":[\"::1/128\",\"127.0.0.0/8\"],\"IndexConfigs\":{\"docker.io\":{\"Name\":\"docker.io\",\"Mirrors\":[],\"Secure\":true,\"Official\":true},\"hubproxy.docker.internal:5555\":{\"Name\":\"hubproxy.docker.internal:5555\",\"Mirrors\":[],\"Secure\":false,\"Official\":false}},\"Mirrors\":[]},\"NCPU\":8,\"MemTotal\":16771158016,\"GenericResources\":null,\"DockerRootDir\":\"/var/lib/docker\",\"HttpProxy\":\"http.docker.internal:3128\",\"HttpsProxy\":\"http.docker.internal:3128\",\"NoProxy\":\"hubproxy.docker.internal\",\"Name\":\"docker-desktop\",\"Labels\":[\"com.docker.desktop.address=npipe://\\\\\\\\.\\\\pipe\\\\docker_cli\"],\"ExperimentalBuild\":false,\"ServerVersion\":\"29.6.2\",\"Runtimes\":{\"io.containerd.runc.v2\":{\"path\":\"runc\",\"status\":{\"org.opencontainers.runtime-spec.features\":\"{\\\"ociVersionMin\\\":\\\"1.0.0\\\",\\\"ociVersionMax\\\":\\\"1.2.1\\\",\\\"hooks\\\":[\\\"prestart\\\",\\\"createRuntime\\\",\\\"createContainer\\\",\\\"startContainer\\\",\\\"poststart\\\",\\\"poststop\\\"],\\\"mountOptions\\\":[\\\"async\\\",\\\"atime\\\",\\\"bind\\\",\\\"defaults\\\",\\\"dev\\\",\\\"diratime\\\",\\\"dirsync\\\",\\\"exec\\\",\\\"iversion\\\",\\\"lazytime\\\",\\\"loud\\\",\\\"mand\\\",\\\"noatime\\\",\\\"nodev\\\",\\\"nodiratime\\\",\\\"noexec\\\",\\\"noiversion\\\",\\\"nolazytime\\\",\\\"nomand\\\",\\\"norelatime\\\",\\\"nostrictatime\\\",\\\"nosuid\\\",\\\"nosymfollow\\\",\\\"private\\\",\\\"ratime\\\",\\\"rbind\\\",\\\"rdev\\\",\\\"rdiratime\\\",\\\"relatime\\\",\\\"remount\\\",\\\"rexec\\\",\\\"rnoatime\\\",\\\"rnodev\\\",\\\"rnodiratime\\\",\\\"rnoexec\\\",\\\"rnorelatime\\\",\\\"rnostrictatime\\\",\\\"rnosuid\\\",\\\"rnosymfollow\\\",\\\"ro\\\",\\\"rprivate\\\",\\\"rrelatime\\\",\\\"rro\\\",\\\"rrw\\\",\\\"rshared\\\",\\\"rslave\\\",\\\"rstrictatime\\\",\\\"rsuid\\\",\\\"rsymfollow\\\",\\\"runbindable\\\",\\\"rw\\\",\\\"shared\\\",\\\"silent\\\",\\\"slave\\\",\\\"strictatime\\\",\\\"suid\\\",\\\"symfollow\\\",\\\"sync\\\",\\\"tmpcopyup\\\",\\\"unbindable\\\"],\\\"linux\\\":{\\\"namespaces\\\":[\\\"cgroup\\\",\\\"ipc\\\",\\\"mount\\\",\\\"network\\\",\\\"pid\\\",\\\"time\\\",\\\"user\\\",\\\"uts\\\"],\\\"capabilities\\\":[\\\"CAP_CHOWN\\\",\\\"CAP_DAC_OVERRIDE\\\",\\\"CAP_DAC_READ_SEARCH\\\",\\\"CAP_FOWNER\\\",\\\"CAP_FSETID\\\",\\\"CAP_KILL\\\",\\\"CAP_SETGID\\\",\\\"CAP_SETUID\\\",\\\"CAP_SETPCAP\\\",\\\"CAP_LINUX_IMMUTABLE\\\",\\\"CAP_NET_BIND_SERVICE\\\",\\\"CAP_NET_BROADCAST\\\",\\\"CAP_NET_ADMIN\\\",\\\"CAP_NET_RAW\\\",\\\"CAP_IPC_LOCK\\\",\\\"CAP_IPC_OWNER\\\",\\\"CAP_SYS_MODULE\\\",\\\"CAP_SYS_RAWIO\\\",\\\"CAP_SYS_CHROOT\\\",\\\"CAP_SYS_PTRACE\\\",\\\"CAP_SYS_PACCT\\\",\\\"CAP_SYS_ADMIN\\\",\\\"CAP_SYS_BOOT\\\",\\\"CAP_SYS_NICE\\\",\\\"CAP_SYS_RESOURCE\\\",\\\"CAP_SYS_TIME\\\",\\\"CAP_SYS_TTY_CONFIG\\\",\\\"CAP_MKNOD\\\",\\\"CAP_LEASE\\\",\\\"CAP_AUDIT_WRITE\\\",\\\"CAP_AUDIT_CONTROL\\\",\\\"CAP_SETFCAP\\\",\\\"CAP_MAC_OVERRIDE\\\",\\\"CAP_MAC_ADMIN\\\",\\\"CAP_SYSLOG\\\",\\\"CAP_WAKE_ALARM\\\",\\\"CAP_BLOCK_SUSPEND\\\",\\\"CAP_AUDIT_READ\\\",\\\"CAP_PERFMON\\\",\\\"CAP_BPF\\\",\\\"CAP_CHECKPOINT_RESTORE\\\"],\\\"cgroup\\\":{\\\"v1\\\":true,\\\"v2\\\":true,\\\"systemd\\\":true,\\\"systemdUser\\\":true,\\\"rdma\\\":true},\\\"seccomp\\\":{\\\"enabled\\\":true,\\\"actions\\\":[\\\"SCMP_ACT_ALLOW\\\",\\\"SCMP_ACT_ERRNO\\\",\\\"SCMP_ACT_KILL\\\",\\\"SCMP_ACT_KILL_PROCESS\\\",\\\"SCMP_ACT_KILL_THREAD\\\",\\\"SCMP_ACT_LOG\\\",\\\"SCMP_ACT_NOTIFY\\\",\\\"SCMP_ACT_TRACE\\\",\\\"SCMP_ACT_TRAP\\\"],\\\"operators\\\":[\\\"SCMP_CMP_EQ\\\",\\\"SCMP_CMP_GE\\\",\\\"SCMP_CMP_GT\\\",\\\"SCMP_CMP_LE\\\",\\\"SCMP_CMP_LT\\\",\\\"SCMP_CMP_MASKED_EQ\\\",\\\"SCMP_CMP_NE\\\"],\\\"archs\\\":[\\\"SCMP_ARCH_AARCH64\\\","
+      },
+      {
+        "available": true,
+        "command": [
+          "docker",
+          "compose",
+          "ls",
+          "--all",
+          "--format",
+          "json"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "[{\"Name\":\"bioetl-main\",\"Status\":\"running(1)\",\"ConfigFiles\":\"/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.yml\"},{\"Name\":\"bioetl-monitoring\",\"Status\":\"running(4)\",\"ConfigFiles\":\"/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.monitoring.yml\"},{\"Name\":\"bioetl-neo4j\",\"Status\":\"running(1)\",\"ConfigFiles\":\"/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.neo4j.yml\"}]"
+      },
+      {
+        "available": true,
+        "command": [
+          "docker",
+          "ps",
+          "--all",
+          "--format",
+          "{{json .}}"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "{\"Command\":\"\\\"/app/start.sh\\\"\",\"CreatedAt\":\"2026-07-21 16:05:01 +0300 EEST\",\"HealthStatus\":\"none\",\"ID\":\"ec51ae3f3347\",\"Image\":\"a662cac15c5d\",\"Labels\":\"desktop.docker.io/ports.scheme=v2,docker-mcp-name=jetbrains,docker-mcp-tool-type=mcp,docker-mcp-transport=stdio,docker-mcp=true,org.opencontainers.image.revision=cd2dcb76144c92b8e7b8d32ae354a5bcb672a07f\",\"LocalVolumes\":\"0\",\"Mounts\":\"\",\"Names\":\"suspicious_newton\",\"Networks\":\"bridge\",\"Platform\":{\"architecture\":\"amd64\",\"os\":\"linux\"},\"Ports\":\"\",\"RunningFor\":\"11 minutes ago\",\"Size\":\"8.19kB (virtual 254MB)\",\"State\":\"running\",\"Status\":\"Up 11 minutes\"}\n{\"Command\":\"\\\"docker-entrypoint.s\u2026\\\"\",\"CreatedAt\":\"2026-07-21 16:05:01 +0300 EEST\",\"HealthStatus\":\"none\",\"ID\":\"206201b62904\",\"Image\":\"e8cbb5c3ae86\",\"Labels\":\"desktop.docker.io/ports.scheme=v2,docker-mcp-name=node-code-sandbox,docker-mcp-tool-type=mcp,docker-mcp-transport=stdio,docker-mcp=true,org.opencontainers.image.revision=60f3e52c239f27e1528dbdf508875da574479ba5\",\"LocalVolumes\":\"1\",\"Mounts\":\"c1be973382a1af\u2026\",\"Names\":\"boring_engelbart\",\"Networks\":\"bridge\",\"Platform\":{\"architecture\":\"amd64\",\"os\":\"linux\"},\"Ports\":\"\",\"RunningFor\":\"11 minutes ago\",\"Size\":\"24.6kB (virtual 628MB)\",\"State\":\"running\",\"Status\":\"Up 11 minutes\"}\n{\"Command\":\"\\\"docker-entrypoint.s\u2026\\\"\",\"CreatedAt\":\"2026-07-21 16:04:28 +0300 EEST\",\"HealthStatus\":\"none\",\"ID\":\"43413ebc5ad2\",\"Image\":\"e8cbb5c3ae86\",\"Labels\":\"desktop.docker.io/ports.scheme=v2,docker-mcp-name=node-code-sandbox,docker-mcp-tool-type=mcp,docker-mcp-transport=stdio,docker-mcp=true,org.opencontainers.image.revision=60f3e52c239f27e1528dbdf508875da574479ba5\",\"LocalVolumes\":\"1\",\"Mounts\":\"79b16f708bf09d\u2026\",\"Names\":\"tender_fermi\",\"Networks\":\"bridge\",\"Platform\":{\"architecture\":\"amd64\",\"os\":\"linux\"},\"Ports\":\"\",\"RunningFor\":\"12 minutes ago\",\"Size\":\"24.6kB (virtual 628MB)\",\"State\":\"running\",\"Status\":\"Up 12 minutes\"}\n{\"Command\":\"\\\"/app/start.sh\\\"\",\"CreatedAt\":\"2026-07-21 16:04:27 +0300 EEST\",\"HealthStatus\":\"none\",\"ID\":\"91c67ed2f469\",\"Image\":\"a662cac15c5d\",\"Labels\":\"desktop.docker.io/ports.scheme=v2,docker-mcp-name=jetbrains,docker-mcp-tool-type=mcp,docker-mcp-transport=stdio,docker-mcp=true,org.opencontainers.image.revision=cd2dcb76144c92b8e7b8d32ae354a5bcb672a07f\",\"LocalVolumes\":\"0\",\"Mounts\":\"\",\"Names\":\"boring_rubin\",\"Networks\":\"bridge\",\"Platform\":{\"architecture\":\"amd64\",\"os\":\"linux\"},\"Ports\":\"\",\"RunningFor\":\"12 minutes ago\",\"Size\":\"8.19kB (virtual 254MB)\",\"State\":\"running\",\"Status\":\"Up 12 minutes\"}\n{\"Command\":\"\\\"/app/.venv/bin/prom\u2026\\\"\",\"CreatedAt\":\"2026-07-21 16:04:15 +0300 EEST\",\"HealthStatus\":\"healthy\",\"ID\":\"5fe5851afbe7\",\"Image\":\"ghcr.io/pab1it0/prometheus-mcp-server\",\"Labels\":\"desktop.docker.io/ports.scheme=v2,desktop.docker.io/wsl-distro=Ubuntu,io.modelcontextprotocol.server.name=io.github.pab1it0/prometheus-mcp-server,mcp.server.category=monitoring,mcp.server.name=prometheus-mcp-server,mcp.server.tags=prometheus,monitoring,metrics,observability,mcp.server.transport.http=true,mcp.server.transport.sse=true,mcp.server.transport.stdio=true,org.opencontainers.image.authors=Pavel Shklovsky \\u003cpavel@cloudefined.com\\u003e,org.opencontainers.image.base.name=python:3.12-slim-bookworm,org.opencontainers.image.created=2026-05-01T19:27:58.809Z,org.opencontainers.image.description=A Model Context Protocol (MCP) server that enables AI agents and LLMs to query and analyze Prometheus metrics through standardized interfaces.,org.opencontainers.image.documentation=https://github.com/pab1it0/prometheus-mcp-server/blob/main/docs/,org.opencontainers.image.licenses=MIT,org.opencontainers.image.revision=252daa733fefcfecb684f4fcde20ed8508599233,org.opencontainers.image.source=https://github.com/pab1it0/prometheus-mcp-server,org.opencontainers.image.title=prometheus-mcp-server,org.opencontainers.image.url=https://github.com/pab1it0/prometheus-mcp-server,org.opencontainers.image.vendor=Pavel Shklovsky,org.opencontainers.image.version=1.6.1\",\"LocalVolumes\":\"0\",\"Mounts\":\"\",\"Names\":\"stupefied_brahmagupta\",\"Networks\":\"bridge\",\"Platform\":{\"ar"
+      },
+      {
+        "available": true,
+        "command": [
+          "wsl.exe",
+          "--version"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "W\u0000S\u0000L\u0000 \u0000v\u0000e\u0000r\u0000s\u0000i\u0000o\u0000n\u0000:\u0000 \u00002\u0000.\u00006\u0000.\u00003\u0000.\u00000\u0000\n\u0000\n\u0000K\u0000e\u0000r\u0000n\u0000e\u0000l\u0000 \u0000v\u0000e\u0000r\u0000s\u0000i\u0000o\u0000n\u0000:\u0000 \u00006\u0000.\u00006\u0000.\u00008\u00007\u0000.\u00002\u0000-\u00001\u0000\n\u0000\n\u0000W\u0000S\u0000L\u0000g\u0000 \u0000v\u0000e\u0000r\u0000s\u0000i\u0000o\u0000n\u0000:\u0000 \u00001\u0000.\u00000\u0000.\u00007\u00001\u0000\n\u0000\n\u0000M\u0000S\u0000R\u0000D\u0000C\u0000 \u0000v\u0000e\u0000r\u0000s\u0000i\u0000o\u0000n\u0000:\u0000 \u00001\u0000.\u00002\u0000.\u00006\u00003\u00005\u00003\u0000\n\u0000\n\u0000D\u0000i\u0000r\u0000e\u0000c\u0000t\u00003\u0000D\u0000 \u0000v\u0000e\u0000r\u0000s\u0000i\u0000o\u0000n\u0000:\u0000 \u00001\u0000.\u00006\u00001\u00001\u0000.\u00001\u0000-\u00008\u00001\u00005\u00002\u00008\u00005\u00001\u00001\u0000\n\u0000\n\u0000D\u0000X\u0000C\u0000o\u0000r\u0000e\u0000 \u0000v\u0000e\u0000r\u0000s\u0000i\u0000o\u0000n\u0000:\u0000 \u00001\u00000\u0000.\u00000\u0000.\u00002\u00006\u00001\u00000\u00000\u0000.\u00001\u0000-\u00002\u00004\u00000\u00003\u00003\u00001\u0000-\u00001\u00004\u00003\u00005\u0000.\u0000g\u0000e\u0000-\u0000r\u0000e\u0000l\u0000e\u0000a\u0000s\u0000e\u0000\n\u0000\n\u0000W\u0000i\u0000n\u0000d\u0000o\u0000w\u0000s\u0000 \u0000v\u0000e\u0000r\u0000s\u0000i\u0000o\u0000n\u0000:\u0000 \u00001\u00000\u0000.\u00000\u0000.\u00001\u00009\u00000\u00004\u00005\u0000.\u00005\u00009\u00006\u00005\u0000\n\u0000\n\u0000"
+      },
+      {
+        "available": true,
+        "command": [
+          "wsl.exe",
+          "--status"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "D\u0000e\u0000f\u0000a\u0000u\u0000l\u0000t\u0000 \u0000D\u0000i\u0000s\u0000t\u0000r\u0000i\u0000b\u0000u\u0000t\u0000i\u0000o\u0000n\u0000:\u0000 \u0000U\u0000b\u0000u\u0000n\u0000t\u0000u\u0000\n\u0000\n\u0000D\u0000e\u0000f\u0000a\u0000u\u0000l\u0000t\u0000 \u0000V\u0000e\u0000r\u0000s\u0000i\u0000o\u0000n\u0000:\u0000 \u00002\u0000\n\u0000\n\u0000"
+      }
+    ],
+    "compose_projects": [
+      {
+        "ConfigFiles": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.yml",
+        "Name": "bioetl-main",
+        "Status": "running(1)"
+      },
+      {
+        "ConfigFiles": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.monitoring.yml",
+        "Name": "bioetl-monitoring",
+        "Status": "running(4)"
+      },
+      {
+        "ConfigFiles": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.neo4j.yml",
+        "Name": "bioetl-neo4j",
+        "Status": "running(1)"
+      }
+    ],
+    "containers": [
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/suspicious_newton",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [
+          {
+            "Destination": "/var/run/docker.sock",
+            "Driver": "local",
+            "Mode": "",
+            "Name": "c1be973382a1af435c1dcb119cd5b104e099a0eb45e1e761eb6e9d45780e1381",
+            "Propagation": "",
+            "RW": true,
+            "Source": "/var/lib/docker/volumes/c1be973382a1af435c1dcb119cd5b104e099a0eb45e1e761eb6e9d45780e1381/_data",
+            "Type": "volume"
+          }
+        ],
+        "name": "/boring_engelbart",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [
+          {
+            "Destination": "/var/run/docker.sock",
+            "Driver": "local",
+            "Mode": "",
+            "Name": "79b16f708bf09d9c725e76ce73ebcbd74f9e1a4551350823a8d08f99cdc78158",
+            "Propagation": "",
+            "RW": true,
+            "Source": "/var/lib/docker/volumes/79b16f708bf09d9c725e76ce73ebcbd74f9e1a4551350823a8d08f99cdc78158/_data",
+            "Type": "volume"
+          }
+        ],
+        "name": "/tender_fermi",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/boring_rubin",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "healthy",
+        "mounts": [],
+        "name": "/stupefied_brahmagupta",
+        "oom_killed": false,
+        "ports": {
+          "8080/tcp": null
+        },
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/clever_moore",
+        "oom_killed": false,
+        "ports": {
+          "8000/tcp": null
+        },
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/nervous_gagarin",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [
+          {
+            "Destination": "/var/run/docker.sock",
+            "Driver": "local",
+            "Mode": "",
+            "Name": "1073e7f3aeccf34063b39a535ff243e8104d295429ca0e1b175b46c96d82cac7",
+            "Propagation": "",
+            "RW": true,
+            "Source": "/var/lib/docker/volumes/1073e7f3aeccf34063b39a535ff243e8104d295429ca0e1b175b46c96d82cac7/_data",
+            "Type": "volume"
+          }
+        ],
+        "name": "/romantic_bhaskara",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/eloquent_noether",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "healthy",
+        "mounts": [],
+        "name": "/sleepy_blackburn",
+        "oom_killed": false,
+        "ports": {
+          "8080/tcp": null
+        },
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/laughing_grothendieck",
+        "oom_killed": false,
+        "ports": {
+          "8000/tcp": null
+        },
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/blissful_lamport",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "healthy",
+        "mounts": [],
+        "name": "/agitated_hoover",
+        "oom_killed": false,
+        "ports": {
+          "8080/tcp": null
+        },
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/objective_goldwasser",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/jovial_newton",
+        "oom_killed": false,
+        "ports": {
+          "8000/tcp": null
+        },
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "healthy",
+        "mounts": [],
+        "name": "/nostalgic_germain",
+        "oom_killed": false,
+        "ports": {
+          "8080/tcp": null
+        },
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/trusting_hugle",
+        "oom_killed": false,
+        "ports": {
+          "8000/tcp": null
+        },
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/musing_elbakyan",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "healthy",
+        "mounts": [],
+        "name": "/kind_feynman",
+        "oom_killed": false,
+        "ports": {
+          "8080/tcp": null
+        },
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/interesting_gagarin",
+        "oom_killed": false,
+        "ports": {
+          "8000/tcp": null
+        },
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/focused_kowalevski",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "healthy",
+        "mounts": [],
+        "name": "/flamboyant_carver",
+        "oom_killed": false,
+        "ports": {
+          "8080/tcp": null
+        },
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/boring_goldwasser",
+        "oom_killed": false,
+        "ports": {
+          "8000/tcp": null
+        },
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/happy_chaum",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [
+          {
+            "Destination": "/var/run/docker.sock",
+            "Driver": "local",
+            "Mode": "",
+            "Name": "7e968a19a4ed1413d3d1aaba33ae54071b8caa197b666bd69bc3c9852cd768c0",
+            "Propagation": "",
+            "RW": true,
+            "Source": "/var/lib/docker/volumes/7e968a19a4ed1413d3d1aaba33ae54071b8caa197b666bd69bc3c9852cd768c0/_data",
+            "Type": "volume"
+          }
+        ],
+        "name": "/zen_kalam",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "none",
+        "mounts": [],
+        "name": "/frosty_torvalds",
+        "oom_killed": false,
+        "ports": {},
+        "project": "",
+        "restart_count": 0,
+        "service": "",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "healthy",
+        "mounts": [
+          {
+            "Destination": "/logs",
+            "Driver": "local",
+            "Mode": "rw",
+            "Name": "bioetl-neo4j_neo4j_logs",
+            "Propagation": "",
+            "RW": true,
+            "Source": "/var/lib/docker/volumes/bioetl-neo4j_neo4j_logs/_data",
+            "Type": "volume"
+          },
+          {
+            "Destination": "/data",
+            "Driver": "local",
+            "Mode": "rw",
+            "Name": "bioetl-neo4j_neo4j_data",
+            "Propagation": "",
+            "RW": true,
+            "Source": "/var/lib/docker/volumes/bioetl-neo4j_neo4j_data/_data",
+            "Type": "volume"
+          }
+        ],
+        "name": "/bioetl-neo4j",
+        "oom_killed": false,
+        "ports": {
+          "7474/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "7474"
+            }
+          ],
+          "7687/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "7687"
+            }
+          ]
+        },
+        "project": "bioetl-neo4j",
+        "restart_count": 34,
+        "service": "neo4j",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "healthy",
+        "mounts": [],
+        "name": "/bioetl",
+        "oom_killed": false,
+        "ports": {
+          "8081/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "8081"
+            }
+          ]
+        },
+        "project": "bioetl-main",
+        "restart_count": 0,
+        "service": "bioetl",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "healthy",
+        "mounts": [
+          {
+            "Destination": "/etc/bioetl-grafana/datasources-core",
+            "Mode": "ro",
+            "Propagation": "rprivate",
+            "RW": false,
+            "Source": "/run/desktop/mnt/host/wsl/docker-desktop-bind-mounts/Ubuntu/2a69fc42311db09d4b92e0e1c92ae38a75cbd089c6ee41dd0501360ed53b8af3",
+            "Type": "bind"
+          },
+          {
+            "Destination": "/etc/bioetl-grafana/datasources-tracing",
+            "Mode": "ro",
+            "Propagation": "rprivate",
+            "RW": false,
+            "Source": "/run/desktop/mnt/host/wsl/docker-desktop-bind-mounts/Ubuntu/558ddd58db6080dbbd7c8edaebcc456611c32e12c182a5d28abd99fa282159f9",
+            "Type": "bind"
+          },
+          {
+            "Destination": "/etc/grafana/provisioning/dashboards",
+            "Mode": "ro",
+            "Propagation": "rprivate",
+            "RW": false,
+            "Source": "/run/desktop/mnt/host/wsl/docker-desktop-bind-mounts/Ubuntu/02582e3656479175e176b759389079897c8d86bfb7f14b6dc7dcb3688cfe6d99",
+            "Type": "bind"
+          },
+          {
+            "Destination": "/usr/local/bin/bioetl-bootstrap-grafana.sh",
+            "Mode": "ro",
+            "Propagation": "rprivate",
+            "RW": false,
+            "Source": "/run/desktop/mnt/host/wsl/docker-desktop-bind-mounts/Ubuntu/5ece3c1c2d9ff1e09b8a114725ecefc3abdeaa1bc6d567376346ee6f4e7aa2b5",
+            "Type": "bind"
+          },
+          {
+            "Destination": "/var/lib/grafana",
+            "Driver": "local",
+            "Mode": "rw",
+            "Name": "bioetl-monitoring_grafana-data",
+            "Propagation": "",
+            "RW": true,
+            "Source": "/var/lib/docker/volumes/bioetl-monitoring_grafana-data/_data",
+            "Type": "volume"
+          },
+          {
+            "Destination": "/var/lib/grafana/dashboards",
+            "Mode": "ro",
+            "Propagation": "rprivate",
+            "RW": false,
+            "Source": "/run/desktop/mnt/host/wsl/docker-desktop-bind-mounts/Ubuntu/195eefa27f5b22119f2219587aa51e733b2d381fcb05dacdebe18711d583f7b6",
+            "Type": "bind"
+          }
+        ],
+        "name": "/bioetl-grafana",
+        "oom_killed": false,
+        "ports": {
+          "3000/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "3000"
+            }
+          ]
+        },
+        "project": "bioetl-monitoring",
+        "restart_count": 0,
+        "service": "grafana",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "healthy",
+        "mounts": [
+          {
+            "Destination": "/etc/prometheus/rules",
+            "Mode": "ro",
+            "Propagation": "rprivate",
+            "RW": false,
+            "Source": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/grafana/prometheus-rules",
+            "Type": "bind"
+          },
+          {
+            "Destination": "/prometheus",
+            "Driver": "local",
+            "Mode": "rw",
+            "Name": "bioetl-monitoring_prometheus-data",
+            "Propagation": "",
+            "RW": true,
+            "Source": "/var/lib/docker/volumes/bioetl-monitoring_prometheus-data/_data",
+            "Type": "volume"
+          },
+          {
+            "Destination": "/etc/prometheus/prometheus.yml",
+            "Mode": "ro",
+            "Propagation": "rprivate",
+            "RW": false,
+            "Source": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/grafana/prometheus.yml",
+            "Type": "bind"
+          }
+        ],
+        "name": "/bioetl-prometheus",
+        "oom_killed": false,
+        "ports": {
+          "9090/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "9090"
+            }
+          ]
+        },
+        "project": "bioetl-monitoring",
+        "restart_count": 0,
+        "service": "prometheus",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "healthy",
+        "mounts": [],
+        "name": "/bioetl-pushgateway",
+        "oom_killed": false,
+        "ports": {
+          "9091/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "9091"
+            }
+          ]
+        },
+        "project": "bioetl-monitoring",
+        "restart_count": 0,
+        "service": "pushgateway",
+        "state": "running"
+      },
+      {
+        "exit_code": 0,
+        "health": "healthy",
+        "mounts": [],
+        "name": "/bioetl-monitoring-renderer-1",
+        "oom_killed": false,
+        "ports": {
+          "8081/tcp": null
+        },
+        "project": "bioetl-monitoring",
+        "restart_count": 0,
+        "service": "renderer",
+        "state": "running"
+      }
+    ],
+    "host_ports": [
+      {
+        "listening": false,
+        "port": 3000
+      },
+      {
+        "listening": false,
+        "port": 3100
+      },
+      {
+        "listening": false,
+        "port": 3200
+      },
+      {
+        "listening": false,
+        "port": 4317
+      },
+      {
+        "listening": false,
+        "port": 6379
+      },
+      {
+        "listening": false,
+        "port": 7474
+      },
+      {
+        "listening": false,
+        "port": 7475
+      },
+      {
+        "listening": false,
+        "port": 7687
+      },
+      {
+        "listening": false,
+        "port": 7688
+      },
+      {
+        "listening": false,
+        "port": 8081
+      },
+      {
+        "listening": false,
+        "port": 9000
+      },
+      {
+        "listening": false,
+        "port": 9001
+      },
+      {
+        "listening": false,
+        "port": 9010
+      },
+      {
+        "listening": false,
+        "port": 9090
+      },
+      {
+        "listening": false,
+        "port": 9091
+      },
+      {
+        "listening": false,
+        "port": 9093
+      },
+      {
+        "listening": false,
+        "port": 9121
+      }
+    ],
+    "images": [
+      {
+        "available": true,
+        "image_id": "sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b",
+        "reference": "grafana/grafana-image-renderer@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b"
+      },
+      {
+        "available": true,
+        "image_id": "sha256:263cbefd5d9b179893c47c415daab4da5c1f3d6770154741eca4f45c81119884",
+        "reference": "grafana/grafana:12.0.0@sha256:263cbefd5d9b179893c47c415daab4da5c1f3d6770154741eca4f45c81119884"
+      },
+      {
+        "available": true,
+        "image_id": "sha256:c316b7c7589a5eeca843b6926c7446149d18300b79ac8538dc4ae063bc478da2",
+        "reference": "grafana/loki:3.7.0@sha256:c316b7c7589a5eeca843b6926c7446149d18300b79ac8538dc4ae063bc478da2"
+      },
+      {
+        "available": true,
+        "image_id": "sha256:6cfa64ec432b24a912d640e2edb940eeae2666f61861a66c121d763dd7241381",
+        "reference": "grafana/promtail:3.6.8@sha256:6cfa64ec432b24a912d640e2edb940eeae2666f61861a66c121d763dd7241381"
+      },
+      {
+        "available": true,
+        "image_id": "sha256:cac9de2ac9f6da8efca5b64b690a7cb8c786a0c49cac7b4517dd1b0089a6c703",
+        "reference": "grafana/tempo:2.10.3@sha256:cac9de2ac9f6da8efca5b64b690a7cb8c786a0c49cac7b4517dd1b0089a6c703"
+      },
+      {
+        "available": false,
+        "image_id": "",
+        "reference": "minio/minio:latest@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e"
+      },
+      {
+        "available": false,
+        "image_id": "",
+        "reference": "neo4j:5.13-community@sha256:6c6003e890c75c9136df06b9061afbbf9a70673711d2d9abc5937ca7f01abb16"
+      },
+      {
+        "available": true,
+        "image_id": "sha256:d9e2fb1ba398536e50d22ebc3d5d585baa086c1c0cf8e5b96bdc9e11e87e002a",
+        "reference": "neo4j:5.15-community@sha256:d9e2fb1ba398536e50d22ebc3d5d585baa086c1c0cf8e5b96bdc9e11e87e002a"
+      },
+      {
+        "available": false,
+        "image_id": "",
+        "reference": "oliver006/redis_exporter:latest@sha256:2e9795be900db073e9475fdb9c5124db309b07a3e4e75a1770705cb03be1a1c8"
+      },
+      {
+        "available": false,
+        "image_id": "",
+        "reference": "postgres:15-alpine@sha256:3d0f7584ed7d04e27fa050d6683a74746608faf21f202be78460d679cc56461f"
+      },
+      {
+        "available": false,
+        "image_id": "",
+        "reference": "prom/alertmanager:latest@sha256:9e082985f56f4c8c9f724e18f2288c6708f472e56a5286b8863d080434ea065d"
+      },
+      {
+        "available": true,
+        "image_id": "sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893",
+        "reference": "prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893"
+      },
+      {
+        "available": true,
+        "image_id": "sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48",
+        "reference": "prom/pushgateway:v1.11.3@sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48"
+      },
+      {
+        "available": false,
+        "image_id": "",
+        "reference": "redis:7.2-alpine@sha256:dfa18828cbc07b3ae6a95ec7343f6c214fdee2d836197b4be8e9904420762cd8"
+      },
+      {
+        "available": false,
+        "image_id": "",
+        "reference": "sonarqube:10-community@sha256:0842dcd4c8f851ce44f8edaf45ac93f7c9079017d60d99f614663e60cef5efe9"
+      }
+    ]
+  },
+  "repository": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2",
+  "schema_version": "docker-stability-baseline-v1",
+  "summary": {
+    "errors": 15,
+    "ok": false,
+    "warnings": 1
+  }
+}

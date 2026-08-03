@@ -1,0 +1,175 @@
+{
+  "schema_version": "test-audit-closeout-v2",
+  "reviewed_on": "2026-07-27",
+  "meta_issue": 6629,
+  "supersedes_meta": 6609,
+  "summary": "Closeout evidence mapping for GitHub issues #6629–#6646 from the 2026-07-27 test-system architectural audit. Implementation largely landed in-tree during the same day wave; this artifact remaps evidence to the new issue numbers and records residual verification notes.",
+  "issues": {
+    "6629": {
+      "title": "meta backlog",
+      "status": "closed_when_children_closed",
+      "children": [
+        6630,
+        6631,
+        6632,
+        6633,
+        6634,
+        6635,
+        6636,
+        6637,
+        6638,
+        6639,
+        6640,
+        6641,
+        6642,
+        6643,
+        6644,
+        6645,
+        6646
+      ]
+    },
+    "6630": {
+      "status": "implemented",
+      "evidence": [
+        "tests/unit/application/composite/test_coalesce_policy_support_branches.py",
+        "tests/unit/application/services/test_observability_branch_depth_extra.py",
+        "tests/unit/application/services/test_observability_trace_support.py",
+        "tests/unit/application/services/test_observability_workflow_checkpoint_support.py",
+        "reports/quality/branch-coverage-targeted-closeout-6597.json"
+      ],
+      "notes": "Targeted top-gap modules raised above/near 85% branch locally. Repo-wide ≥86% requires coverage-verify on clean main; no debt budgets increased."
+    },
+    "6631": {
+      "status": "implemented",
+      "evidence": [
+        "tests/unit/application/services/test_observability_trace_support.py",
+        "tests/unit/application/services/test_observability_branch_depth_extra.py",
+        "tests/unit/application/services/test_observability_workflow_checkpoint_support.py"
+      ]
+    },
+    "6633": {
+      "status": "implemented",
+      "evidence": [
+        "tests/unit/application/composite/test_coalesce_policy_support_branches.py",
+        "tests/unit/application/services/test_observability_trace_support.py",
+        "tests/unit/application/services/test_observability_workflow_checkpoint_support.py",
+        "reports/quality/branch-coverage-targeted-closeout-6597.json"
+      ]
+    },
+    "6634": {
+      "status": "implemented",
+      "evidence": [
+        "tests/helpers/architecture_scan_index.py",
+        "tests/architecture/test_architecture_scan_index_policy.py",
+        "tests/architecture/conftest.py",
+        "tests/architecture/test_private_module_imports.py"
+      ]
+    },
+    "6632": {
+      "status": "implemented",
+      "evidence": [
+        "tests/e2e/test_chembl_activity_e2e.py",
+        "tests/e2e/test_pubchem_compound_e2e.py",
+        "tests/e2e/test_uniprot_protein_e2e.py",
+        "tests/helpers/e2e_schema_assertions.py"
+      ]
+    },
+    "6635": {
+      "status": "implemented",
+      "evidence": [
+        "tests/helpers/bootstrap_cache.py",
+        "tests/unit/composition/bootstrap/conftest.py",
+        "tests/unit/composition/bootstrap/test_bootstrap_cache_fixtures.py"
+      ]
+    },
+    "6638": {
+      "status": "implemented",
+      "evidence": [
+        "configs/quality/architecture_closeout_inventory.yaml",
+        "tests/architecture/test_architecture_closeout_inventory.py"
+      ]
+    },
+    "6637": {
+      "status": "implemented",
+      "evidence": [
+        "tests/architecture/test_naming_ambiguity_classifier.py",
+        "tests/architecture/test_provider_registry_decomposition.py",
+        "tests/architecture/test_quality_exemptions_registry.py",
+        "tests/architecture/test_import_graph_invariants.py",
+        "tests/architecture/test_private_module_imports.py",
+        "tests/architecture/test_vcr_metadata_catalog_drift.py"
+      ]
+    },
+    "6636": {
+      "status": "implemented",
+      "evidence": [
+        "configs/quality/e2e_skip_rate_slo.yaml",
+        "tests/architecture/test_e2e_skip_rate_slo_policy.py",
+        "tests/e2e/conftest.py"
+      ]
+    },
+    "6640": {
+      "status": "implemented",
+      "evidence": [
+        "configs/quality/architecture_windows_scan_policy.yaml",
+        "tests/architecture/test_windows_architecture_scan_policy.py",
+        "tests/architecture/conftest.py"
+      ]
+    },
+    "6639": {
+      "status": "implemented",
+      "evidence": [
+        "docs/03-guides/cheatsheets/cli-commands.md"
+      ]
+    },
+    "6641": {
+      "status": "implemented",
+      "evidence": [
+        "configs/quality/test_matrix.yaml"
+      ],
+      "notes": "unit-fast ignores tests/unit/scripts; unit-scripts-tooling lane owns script tests."
+    },
+    "6644": {
+      "status": "implemented",
+      "evidence": [
+        "tests/unit/application/core/test_record_normalization_property.py"
+      ]
+    },
+    "6643": {
+      "status": "implemented",
+      "evidence": [
+        "configs/quality/test_suite_role_matrix.yaml",
+        "tests/architecture/test_test_suite_role_matrix.py"
+      ]
+    },
+    "6642": {
+      "status": "implemented",
+      "evidence": [
+        "tests/helpers/e2e_schema_assertions.py",
+        "tests/e2e/test_chembl_assay_e2e.py",
+        "tests/e2e/test_chembl_molecule_e2e.py"
+      ]
+    },
+    "6646": {
+      "status": "implemented",
+      "evidence": [
+        "configs/quality/unit_assert_density_policy.yaml",
+        "tests/architecture/test_unit_assert_density_policy.py"
+      ]
+    },
+    "6645": {
+      "status": "implemented",
+      "evidence": [
+        "configs/quality/vcr_cassette_freshness_policy.yaml",
+        "tests/architecture/test_vcr_cassette_freshness_policy.py",
+        "tests/helpers/vcr_config.py"
+      ]
+    }
+  },
+  "constraints_honored": [
+    "no technical-debt budget increases",
+    "ports_and_adapters_preserved",
+    "no_flake_healing_via_retries",
+    "domain_purity_guards_intact"
+  ]
+}

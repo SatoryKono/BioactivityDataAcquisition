@@ -1,0 +1,14 @@
+{
+  "schema_version": "root-hygiene-residual-closeout-v1",
+  "linked_epic": "#6700",
+  "date": "2026-07-27",
+  "children": {
+    "#6701": "untracked final_chunk_2.xml / uchunk pattern gitignored",
+    "#6702": "allowlist reconciled; .pr_agent.toml restored; phantoms removed",
+    "#6703": "gitignore polish + docs/00-project/governance/root-local-clutter-cleanup.md",
+    "#6704": "neo4j compose keep-root decision recorded in docker-helper audit",
+    "#6705": "checks green; registry last_verified 2026-07-27; Windows plans.readme path fix"
+  },
+  "tracked_root_file_count": 37,
+  "policy": "no layer violations; agent subsystems remain independent"
+}

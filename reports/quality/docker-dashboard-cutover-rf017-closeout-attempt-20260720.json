@@ -1,0 +1,60 @@
+{
+  "contract": "docker_dashboard_cutover_rf017_closeout_attempt_v1",
+  "generated_at": "2026-07-20T18:10:00Z",
+  "issue": 6311,
+  "parent_issue": 6303,
+  "verdict": "blocked_keep_open",
+  "prior_evidence": {
+    "preflight": "reports/quality/docker-dashboard-cutover-preflight.json",
+    "live_panel_audit": "reports/quality/docker-dashboard-cutover-live-audit.json",
+    "canary": "reports/quality/docker-dashboard-cutover-canary.json",
+    "final": "reports/quality/docker-dashboard-cutover-final.json",
+    "prior_final_status": "observation_pending",
+    "rf016_issue": 6310,
+    "rf016_state": "closed_completed"
+  },
+  "live_blockers": [
+    "bioetl-monitoring mixed compose origins including /tmp and Windows path",
+    "bioetl-main-bioetl-1 attached to legacy warp-network",
+    "bioetl-grafana unhealthy HTTP 503",
+    "preflight recheck ok=false with 17 errors",
+    "docker inspect/compose hung during recreate",
+    "bounded Docker Desktop recovery failed within 180s"
+  ],
+  "attempts": [
+    {
+      "action": "preflight_recheck",
+      "output": "reports/quality/docker-dashboard-cutover-preflight-recheck.json",
+      "ok": false
+    },
+    {
+      "action": "compose_recreate_from_linux_runtime",
+      "helpers": [
+        "scripts/ops/runtime/docker/recreate_cutover_stacks.py",
+        "scripts/ops/runtime/docker/_rf017_recreate_once.py"
+      ],
+      "ok": false,
+      "notes": "compose down hung; inspect of grafana timed out"
+    },
+    {
+      "action": "desktop_recovery",
+      "command": "pwsh scripts/ops/runtime/docker/restart-docker.ps1 -TimeoutSeconds 180 -ReportPath reports/quality/docker-desktop-recovery-rf017.json",
+      "ok": false
+    }
+  ],
+  "safety": {
+    "env_files_changed": false,
+    "volumes_deleted": false,
+    "down_v_used": false,
+    "debt_budget": "unchanged"
+  },
+  "next_steps": [
+    "Recover responsive Docker Desktop",
+    "Recreate bioetl-main + bioetl-monitoring from /home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2 only",
+    "Disconnect warp-network from main",
+    "Preflight 0/0 from runtime origin",
+    "Live audit + optional canary rebaseline",
+    "Start and complete 24h observation with timestamps",
+    "Mark final report complete and close #6311 then #6303"
+  ]
+}

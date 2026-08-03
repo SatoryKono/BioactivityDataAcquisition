@@ -1,0 +1,261 @@
+{
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "generated_by": "codex",
+  "generated_on": "2026-06-30",
+  "issues": [
+    {
+      "evidence": [
+        "reports/quality/observability-export-dashboard-rollout-closeout.json",
+        "tests/architecture/test_observability_export_dashboard_rollout_closeout.py"
+      ],
+      "number": 5716,
+      "status": "closed-ready",
+      "title": "program/observability governed dashboard ledger export rollout"
+    },
+    {
+      "evidence": [
+        "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
+        "docs/02-architecture/decisions/ADR-019-observability-port-enforcement.md"
+      ],
+      "number": 5717,
+      "status": "closed-ready",
+      "title": "baseline discovery and architecture gate"
+    },
+    {
+      "evidence": [
+        "docs/04-reference/contracts/observability-rollout-contracts.md",
+        "src/bioetl/domain/observability_contract.py",
+        "src/bioetl/domain/observability_event_mapping.py",
+        "tests/unit/domain/test_observability_event_mapping.py"
+      ],
+      "number": 5718,
+      "status": "closed-ready",
+      "title": "observability event taxonomy alignment"
+    },
+    {
+      "evidence": [
+        "docs/04-reference/contracts/observability-rollout-contracts.md",
+        "src/bioetl/domain/control_plane/run_ledger.py",
+        "tests/architecture/test_quarantine_immutability.py"
+      ],
+      "number": 5719,
+      "status": "closed-ready",
+      "title": "projection state-machine invariants"
+    },
+    {
+      "evidence": [
+        "configs/contracts/errors/error_catalog.yaml",
+        "src/bioetl/domain/error_classifier.py",
+        "src/bioetl/infrastructure/errors/exception_mapper.py",
+        "tests/architecture/test_observability_export_dashboard_rollout_closeout.py"
+      ],
+      "number": 5720,
+      "status": "closed-ready",
+      "title": "canonical error catalog"
+    },
+    {
+      "evidence": [
+        "docs/04-reference/contracts/observability-rollout-contracts.md",
+        "src/bioetl/domain/control_plane/run_ledger.py",
+        "src/bioetl/application/services/control_plane/ledger/service.py",
+        "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py"
+      ],
+      "number": 5721,
+      "status": "closed-ready",
+      "title": "control-plane projection strategy"
+    },
+    {
+      "evidence": [
+        "configs/quality/observability_metric_governance.yaml",
+        "configs/quality/observability_metric_declarations.yaml",
+        "grafana/prometheus-rules/bioetl_observability.yml",
+        "grafana/prometheus-rules/tests/bioetl_observability.test.yml",
+        "tests/architecture/test_observability_metric_governance.py"
+      ],
+      "number": 5722,
+      "status": "closed-ready",
+      "title": "low-cardinality operational metrics"
+    },
+    {
+      "evidence": [
+        "docs/04-reference/contracts/gold-schemas.md",
+        "docs/04-reference/contracts/observability-rollout-contracts.md",
+        "tests/architecture/test_gold_schema_contracts.py",
+        "tests/integration/test_grafana_dashboard_query_governance.py"
+      ],
+      "number": 5723,
+      "status": "closed-ready",
+      "title": "stable Gold/read-model contracts"
+    },
+    {
+      "evidence": [
+        "src/bioetl/domain/ports/export.py",
+        "src/bioetl/application/services/export_models.py",
+        "src/bioetl/application/services/export_manifests.py",
+        "src/bioetl/application/services/export_service.py",
+        "src/bioetl/interfaces/cli/commands/export.py",
+        "docs/security/export-policy.md",
+        "tests/unit/application/services/test_export_service.py"
+      ],
+      "number": 5724,
+      "status": "closed-ready",
+      "title": "governed export use case"
+    },
+    {
+      "evidence": [
+        ".github/workflows/tests.yml",
+        "tests/integration/test_grafana_config.py",
+        "tests/integration/test_grafana_dashboard_query_governance.py",
+        "tests/integration/test_prometheus_rules_config.py",
+        "tests/architecture/test_gold_schema_contracts.py"
+      ],
+      "number": 5725,
+      "status": "closed-ready",
+      "title": "dashboard/rule/contract drift CI"
+    },
+    {
+      "evidence": [
+        "grafana/dashboards/bioetl-control-plane-v1.json",
+        "grafana/dashboards/bioetl-overview-v2.json",
+        "grafana/dashboards/bioetl-runtime.json",
+        "grafana/dashboards/bioetl-dq-v2.json",
+        "grafana/dashboards/bioetl-provider-health-v2.json",
+        "docs/03-guides/dashboards/README.md",
+        "grafana/README.md"
+      ],
+      "number": 5726,
+      "status": "closed-ready",
+      "title": "Grafana dashboard extension"
+    },
+    {
+      "evidence": [
+        "docs/security/rbac-matrix.md",
+        "docs/security/export-policy.md",
+        "grafana/provisioning/datasources-core/prometheus.yml",
+        "tests/integration/test_grafana_datasource_provisioning.py"
+      ],
+      "number": 5727,
+      "status": "closed-ready",
+      "title": "RBAC and secure export hardening"
+    },
+    {
+      "evidence": [
+        "reports/quality/observability-export-dashboard-rollout-closeout.json",
+        "tests/architecture/test_observability_export_dashboard_rollout_closeout.py",
+        "tests/architecture/test_strict_architecture_contracts.py",
+        "tests/architecture/test_observability_metric_governance.py",
+        "tests/integration/test_grafana_dashboard_query_governance.py"
+      ],
+      "number": 5728,
+      "status": "closed-ready",
+      "title": "rollout sequencing and final architecture verification"
+    }
+  ],
+  "outcomes": {
+    "5716": {
+      "extension_first_policy": true,
+      "program_status": "sequenced_and_gate_backed",
+      "run_ledger_reused": true
+    },
+    "5717": {
+      "production_files_created_by_baseline": 0
+    },
+    "5718": {
+      "domain_io_allowed": false,
+      "event_contract": "docs/04-reference/contracts/observability-rollout-contracts.md"
+    },
+    "5719": {
+      "projection_states_are_read_model_only": true,
+      "quarantine_payload_immutable": true
+    },
+    "5720": {
+      "catalog": "configs/contracts/errors/error_catalog.yaml",
+      "grouping_contract": "canonical_code_only",
+      "severity_changes_require_tests": true
+    },
+    "5721": {
+      "projection_strategy": "reuse_existing_run_ledger",
+      "sql_migrations_added": 0
+    },
+    "5722": {
+      "forbidden_labels": [
+        "run_id",
+        "record_id",
+        "payload_hash",
+        "manifest_id",
+        "execution_fingerprint",
+        "file_path"
+      ]
+    },
+    "5723": {
+      "dashboard_source_contract": "stable_gold_read_model_or_recording_rule",
+      "raw_bronze_silver_dashboard_queries_allowed": false
+    },
+    "5724": {
+      "checksum_manifest_path": true,
+      "expiry_metadata": true,
+      "export_audit_ref": true,
+      "role_sensitive_redaction": true
+    },
+    "5725": {
+      "ci_contract_drift_validation": true,
+      "ci_dashboard_validation": true,
+      "ci_prometheus_rule_validation": true
+    },
+    "5726": {
+      "extension_first": true,
+      "new_top_level_dashboards": 0,
+      "raw_sensitive_datasource_exposure_allowed": false
+    },
+    "5727": {
+      "export_policy": "docs/security/export-policy.md",
+      "rbac_matrix": "docs/security/rbac-matrix.md",
+      "secrets_in_dashboards_allowed": false
+    },
+    "5728": {
+      "final_closeout_gate": "tests/architecture/test_observability_export_dashboard_rollout_closeout.py",
+      "manual_review_surfaces": [
+        "live Grafana render/audit requires local services",
+        "HTTP download adapters must enforce expires_at before serving files"
+      ]
+    }
+  },
+  "program_order": [
+    5717,
+    5718,
+    5719,
+    5720,
+    5721,
+    5722,
+    5723,
+    5724,
+    5725,
+    5726,
+    5727,
+    5728,
+    5716
+  ],
+  "ratchets": {
+    "application_infrastructure_import_violations": {
+      "current": 0,
+      "max": 0
+    },
+    "domain_io_violations": {
+      "current": 0,
+      "max": 0
+    },
+    "forbidden_prometheus_identifier_labels": {
+      "current": 0,
+      "max": 0
+    },
+    "new_sql_event_store_files": {
+      "current": 0,
+      "max": 0
+    },
+    "new_top_level_dashboard_files": {
+      "current": 0,
+      "max": 0
+    }
+  },
+  "schema_version": "observability-export-dashboard-rollout-closeout-v1"
+}

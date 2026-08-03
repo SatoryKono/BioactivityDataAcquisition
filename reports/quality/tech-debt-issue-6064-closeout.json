@@ -1,0 +1,52 @@
+{
+  "schema_version": "tech-debt-issue-6064-closeout-v1",
+  "generated_at": "2026-07-08T06:51:55Z",
+  "issue": {
+    "number": 6064,
+    "rf_id": "RF-008",
+    "title": "Govern supporting scripts cleanup through lifecycle registry",
+    "parent_issue": 6055,
+    "status": "closeable"
+  },
+  "budget_policy": "flat_or_decreasing_only",
+  "debt_outcome": "improved",
+  "summary": {
+    "scripts_total": 445,
+    "active_script_count": 354,
+    "active_script_count_max": 354,
+    "unknown_script_count": 0,
+    "orphan_script_count": 0,
+    "legacy_script_count": 0,
+    "zero_reference_supporting_script_count_before": 41,
+    "zero_reference_supporting_script_count_after": 40,
+    "zero_reference_supporting_script_budget_before": 45,
+    "zero_reference_supporting_script_budget_after": 40,
+    "untriaged_zero_reference_supporting_script_count": 0,
+    "deleted_active_scripts": 0
+  },
+  "evidence": [
+    {
+      "path": "configs/quality/scripts_inventory_manifest.json",
+      "summary": "Canonical inventory refresh moved scripts/engineering/qa/file_discovery.py from reference_count 0 to 1 and kept total_scripts=445, active=354."
+    },
+    {
+      "path": "configs/quality/debt_scorecard.yaml",
+      "summary": "supporting_scripts_governance.zero_reference_supporting_script_count was ratcheted down from 45/45 to 40/40."
+    },
+    {
+      "path": "scripts/engineering/repo/catalog.yaml",
+      "summary": "active_script_count_max remains 354 with fail-fast no-growth policy."
+    },
+    {
+      "path": "reports/quality/debt-governance-gates.json",
+      "summary": "Debt governance rollup reports supporting_scripts_zero_reference_count=40/40 and supporting_scripts_untriaged_zero_reference_count=0/0."
+    }
+  ],
+  "required_closeout_checks": [
+    "./.venv/bin/python scripts/engineering/repo/check_scripts_inventory.py --check",
+    "./.venv/bin/python scripts/engineering/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json",
+    "./.venv/bin/python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml",
+    "./.venv/bin/python -m scripts.engineering.qa report-debt-governance-gates --check",
+    "./.venv/bin/python -m pytest tests/architecture/test_scripts_inventory_zero_reference_ratchet.py tests/architecture/test_scripts_inventory_manifest.py::test_scripts_inventory_manifest_summary_matches_scripts_payload tests/architecture/test_scripts_lifecycle_fast_guard.py tests/architecture/test_scripts_lifecycle_registry.py::test_scripts_lifecycle_registry_check_passes tests/architecture/test_architecture_quality_scorecard.py::test_architecture_quality_scorecard_module_coverage_evidence_is_consistent -q"
+  ]
+}

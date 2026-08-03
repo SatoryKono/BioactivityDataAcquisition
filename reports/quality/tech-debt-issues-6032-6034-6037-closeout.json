@@ -1,0 +1,51 @@
+{
+  "schema_version": "tech-debt-issues-6032-6034-6037-closeout-v1",
+  "generated_on": "2026-07-07",
+  "issues": [
+    {
+      "number": 6032,
+      "status": "closeable-local-evidence",
+      "title": "Reduce application_core fan-in saturation before further runtime growth",
+      "evidence": {
+        "hotspot_family_baseline": "reports/quality/hotspot-family-baseline.json",
+        "family": "application_core",
+        "opening_max_internal_fan_in": 10,
+        "current_max_internal_fan_in": 7,
+        "current_max_internal_fan_in_module": "bioetl.application.core.span_helpers",
+        "legacy_hotspot_module": "bioetl.application.core.batch_runtime_failure_policy",
+        "di_guard": "tests/architecture/test_di_runtime_inline_construction.py::test_application_runtime_inline_dependency_construction_is_zero"
+      },
+      "closeout_rationale": "application_core no longer sits at its reviewed max_internal_fan_in budget; operation-only exception consumers now import the narrower batch_operation_errors owner while RF-005 runtime failure-policy users keep their compatibility facade."
+    },
+    {
+      "number": 6034,
+      "status": "closeable-local-evidence",
+      "title": "Tighten composition runtime builder seams and preserve DI-only responsibilities",
+      "evidence": {
+        "hotspot_family_baseline": "reports/quality/hotspot-family-baseline.json",
+        "composition_bootstrap_runtime_current_max_internal_fan_in": 2,
+        "composition_bootstrap_runtime_budget": 3,
+        "composition_runtime_builders_current_max_internal_fan_in": 4,
+        "composition_runtime_builders_budget": 5,
+        "run_manifest_support_internal_importers": 3,
+        "di_guard": "tests/architecture/test_di_runtime_inline_construction.py::test_application_runtime_inline_dependency_construction_is_zero"
+      },
+      "closeout_rationale": "composition_bootstrap_runtime gained actual fan-in headroom below budget, and the opening run_manifest_support builder hotspot dropped to three direct internal importers without growing composition_runtime_builders overall fan-in."
+    },
+    {
+      "number": 6037,
+      "status": "closeable-local-evidence",
+      "title": "Enforce freshness and burn down reviewed runtime import SCCs",
+      "evidence": {
+        "runtime_scc_test": "tests/architecture/test_runtime_import_scc.py",
+        "reviewed_runtime_scc_budget_max": 4,
+        "accepted_runtime_scc_count": 3,
+        "freshness_floor": "2026-07-01",
+        "refreshed_scc_owner": "interfaces.http.control_plane_identity",
+        "refreshed_scc_review_date": "2026-07-07",
+        "refreshed_scc_linked_issue": "#6037"
+      },
+      "closeout_rationale": "runtime SCC acceptances now parse and enforce a freshness floor; the stale control-plane identity SCC acceptance is refreshed under #6037 and the accepted SCC inventory did not grow."
+    }
+  ]
+}

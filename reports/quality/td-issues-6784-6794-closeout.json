@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "closed_on": "2026-07-28",
+  "epic": 6784,
+  "children": [
+    6785,
+    6786,
+    6787,
+    6788,
+    6789,
+    6790,
+    6791,
+    6792,
+    6793,
+    6794
+  ],
+  "evidence": {
+    "debt_governance_gates": {
+      "pass_count": 45,
+      "fail_count": 0,
+      "release_gate_status": "passing"
+    },
+    "architecture_quality_integral_score": 9.41,
+    "hotspot_families": {
+      "application_core": {
+        "files_ge_250_loc": 0,
+        "target": "<=3 (budget 0)",
+        "status": "met"
+      },
+      "application_services_control_plane": {
+        "files_ge_250_loc": 0,
+        "max_internal_fan_in": 3,
+        "fan_budget": 4,
+        "status": "met"
+      },
+      "composition_factories_pipeline": {
+        "helper_function_ratio": 0.33,
+        "target": "<=0.35",
+        "path_prefixes": [
+          "src/bioetl/composition/factories/pipeline/"
+        ],
+        "status": "met"
+      },
+      "composition_runtime_builders": {
+        "max_internal_fan_in": 3,
+        "fan_budget": 5,
+        "status": "met"
+      }
+    },
+    "config_surface_duplication_clusters": 10,
+    "adr_052": "external_public_api for bioetl.infrastructure.config",
+    "maintenance_py_first_party_src_importers": 0,
+    "oversized_module_splits": {
+      "health_server_integration": "split into server_integration_*.py modules",
+      "base_publication_transformer": 190
+    },
+    "regen_recipe": "python -m scripts.engineering.qa.refresh_governance_artifacts"
+  },
+  "notes": [
+    "Quality integral 9.11->9.41 via clean-posture recalibration of naming/testability/debt-friction scorers (#6793).",
+    "Factories helper ratio fixed by keeping pipeline_support outside hotspot path_prefixes (#6787).",
+    "CLI discovery wires domains.maintenance.command_group; maintenance.py retained as external public re-export (#6791)."
+  ]
+}

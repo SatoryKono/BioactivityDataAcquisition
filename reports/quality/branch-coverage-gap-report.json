@@ -1,0 +1,1989 @@
+{
+  "application_control_plane_gaps": [
+    {
+      "branch_covered": 54,
+      "branch_missing": 18,
+      "branch_rate_percent": 75.0,
+      "branch_total": 72,
+      "missing_branch_lines_sample": [
+        "167",
+        "179",
+        "194",
+        "242",
+        "262",
+        "264",
+        "276",
+        "278",
+        "282",
+        "284",
+        "340",
+        "347",
+        "387",
+        "394",
+        "407",
+        "416"
+      ],
+      "path": "src/bioetl/interfaces/http/_processed_records_table_support.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 16,
+      "branch_missing": 12,
+      "branch_rate_percent": 57.14,
+      "branch_total": 28,
+      "missing_branch_lines_sample": [
+        "82",
+        "89",
+        "96",
+        "102",
+        "113",
+        "118",
+        "144",
+        "147",
+        "234",
+        "245",
+        "258",
+        "272"
+      ],
+      "path": "src/bioetl/application/services/control_plane/replay/_historical_certification_support.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 0,
+      "branch_missing": 12,
+      "branch_rate_percent": 0.0,
+      "branch_total": 12,
+      "missing_branch_lines_sample": [
+        "113",
+        "122",
+        "127",
+        "136",
+        "145",
+        "156"
+      ],
+      "path": "src/bioetl/interfaces/http/health_server.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 65,
+      "branch_missing": 11,
+      "branch_rate_percent": 85.53,
+      "branch_total": 76,
+      "missing_branch_lines_sample": [
+        "92",
+        "94",
+        "110",
+        "126",
+        "130",
+        "134",
+        "156",
+        "160",
+        "165",
+        "181",
+        "185"
+      ],
+      "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/replay_state.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 1,
+      "branch_missing": 11,
+      "branch_rate_percent": 8.33,
+      "branch_total": 12,
+      "missing_branch_lines_sample": [
+        "17",
+        "30",
+        "34",
+        "40",
+        "44",
+        "50"
+      ],
+      "path": "src/bioetl/interfaces/http/_health_server_checkpoint_lookup.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 34,
+      "branch_missing": 10,
+      "branch_rate_percent": 77.27,
+      "branch_total": 44,
+      "missing_branch_lines_sample": [
+        "42",
+        "49",
+        "56",
+        "68",
+        "71",
+        "74",
+        "76",
+        "86",
+        "117",
+        "126"
+      ],
+      "path": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 16,
+      "branch_missing": 10,
+      "branch_rate_percent": 61.54,
+      "branch_total": 26,
+      "missing_branch_lines_sample": [
+        "50",
+        "101",
+        "105",
+        "112",
+        "129",
+        "147",
+        "150",
+        "283",
+        "290",
+        "299"
+      ],
+      "path": "src/bioetl/application/services/control_plane/manifest/inspection_service.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 0,
+      "branch_missing": 10,
+      "branch_rate_percent": 0.0,
+      "branch_total": 10,
+      "missing_branch_lines_sample": [
+        "52",
+        "92",
+        "119",
+        "128",
+        "161"
+      ],
+      "path": "src/bioetl/interfaces/http/processed_records_table.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 0,
+      "branch_missing": 10,
+      "branch_rate_percent": 0.0,
+      "branch_total": 10,
+      "missing_branch_lines_sample": [
+        "16",
+        "19",
+        "22",
+        "24",
+        "32"
+      ],
+      "path": "src/bioetl/interfaces/http/health_server_state_mixin.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 41,
+      "branch_missing": 9,
+      "branch_rate_percent": 82.0,
+      "branch_total": 50,
+      "missing_branch_lines_sample": [
+        "33",
+        "39",
+        "46",
+        "53",
+        "63",
+        "65",
+        "89",
+        "166",
+        "178"
+      ],
+      "path": "src/bioetl/interfaces/http/health_server_routing_mixin.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 5,
+      "branch_missing": 9,
+      "branch_rate_percent": 35.71,
+      "branch_total": 14,
+      "missing_branch_lines_sample": [
+        "20",
+        "27",
+        "39",
+        "42",
+        "46",
+        "59",
+        "80"
+      ],
+      "path": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 34,
+      "branch_missing": 8,
+      "branch_rate_percent": 80.95,
+      "branch_total": 42,
+      "missing_branch_lines_sample": [
+        "140",
+        "181",
+        "191",
+        "193",
+        "195",
+        "203",
+        "205",
+        "210"
+      ],
+      "path": "src/bioetl/application/services/control_plane/manifest/replay_taxonomy.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 0,
+      "branch_missing": 8,
+      "branch_rate_percent": 0.0,
+      "branch_total": 8,
+      "missing_branch_lines_sample": [
+        "112",
+        "115",
+        "117",
+        "119"
+      ],
+      "path": "src/bioetl/interfaces/http/control_plane_selector_context.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 0,
+      "branch_missing": 8,
+      "branch_rate_percent": 0.0,
+      "branch_total": 8,
+      "missing_branch_lines_sample": [
+        "27",
+        "29",
+        "41",
+        "42"
+      ],
+      "path": "src/bioetl/interfaces/http/control_plane_identity/replay_extractors.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 45,
+      "branch_missing": 7,
+      "branch_rate_percent": 86.54,
+      "branch_total": 52,
+      "missing_branch_lines_sample": [
+        "106",
+        "160",
+        "162",
+        "193",
+        "195",
+        "223",
+        "225"
+      ],
+      "path": "src/bioetl/application/services/control_plane/effective_config/support.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 27,
+      "branch_missing": 7,
+      "branch_rate_percent": 79.41,
+      "branch_total": 34,
+      "missing_branch_lines_sample": [
+        "33",
+        "35",
+        "37",
+        "109",
+        "222",
+        "244",
+        "246"
+      ],
+      "path": "src/bioetl/application/services/control_plane/manifest/inspection_verification.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 17,
+      "branch_missing": 7,
+      "branch_rate_percent": 70.83,
+      "branch_total": 24,
+      "missing_branch_lines_sample": [
+        "45",
+        "83",
+        "91",
+        "208",
+        "210"
+      ],
+      "path": "src/bioetl/application/services/control_plane/replay/historical_closure_policy.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 11,
+      "branch_missing": 7,
+      "branch_rate_percent": 61.11,
+      "branch_total": 18,
+      "missing_branch_lines_sample": [
+        "10",
+        "83",
+        "90",
+        "92",
+        "103",
+        "105"
+      ],
+      "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/artifact_support.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 7,
+      "branch_missing": 7,
+      "branch_rate_percent": 50.0,
+      "branch_total": 14,
+      "missing_branch_lines_sample": [
+        "17",
+        "29",
+        "33",
+        "93",
+        "95"
+      ],
+      "path": "src/bioetl/application/services/control_plane/replay/closure_claims.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 20,
+      "branch_missing": 6,
+      "branch_rate_percent": 76.92,
+      "branch_total": 26,
+      "missing_branch_lines_sample": [
+        "161",
+        "164",
+        "336",
+        "342"
+      ],
+      "path": "src/bioetl/interfaces/http/control_plane_identity/payload.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 12,
+      "branch_missing": 6,
+      "branch_rate_percent": 66.67,
+      "branch_total": 18,
+      "missing_branch_lines_sample": [
+        "30",
+        "52",
+        "113",
+        "115",
+        "117",
+        "119"
+      ],
+      "path": "src/bioetl/application/services/control_plane/ledger/core_events.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 45,
+      "branch_missing": 5,
+      "branch_rate_percent": 90.0,
+      "branch_total": 50,
+      "missing_branch_lines_sample": [
+        "157",
+        "159",
+        "162",
+        "198",
+        "242"
+      ],
+      "path": "src/bioetl/application/services/control_plane/replay/reproducibility_score_cards_categories.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 21,
+      "branch_missing": 5,
+      "branch_rate_percent": 80.77,
+      "branch_total": 26,
+      "missing_branch_lines_sample": [
+        "13",
+        "20",
+        "31",
+        "34",
+        "36"
+      ],
+      "path": "src/bioetl/interfaces/http/_health_server_quarantine_routing.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 13,
+      "branch_missing": 5,
+      "branch_rate_percent": 72.22,
+      "branch_total": 18,
+      "missing_branch_lines_sample": [
+        "36",
+        "45",
+        "52",
+        "68",
+        "77"
+      ],
+      "path": "src/bioetl/application/services/control_plane/replay/historical_corpus_policy.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 13,
+      "branch_missing": 5,
+      "branch_rate_percent": 72.22,
+      "branch_total": 18,
+      "missing_branch_lines_sample": [
+        "126",
+        "205",
+        "227",
+        "231"
+      ],
+      "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/__init__.py",
+      "theme": "application_control_plane"
+    }
+  ],
+  "composition_runtime_gaps": [
+    {
+      "branch_covered": 48,
+      "branch_missing": 22,
+      "branch_rate_percent": 68.57,
+      "branch_total": 70,
+      "missing_branch_lines_sample": [
+        "25",
+        "35",
+        "43",
+        "121",
+        "143",
+        "165",
+        "195",
+        "222",
+        "234",
+        "236",
+        "238",
+        "240",
+        "266",
+        "269",
+        "282",
+        "307",
+        "322",
+        "325",
+        "384"
+      ],
+      "path": "src/bioetl/application/composite/_coalesce_policy_support.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 26,
+      "branch_missing": 14,
+      "branch_rate_percent": 65.0,
+      "branch_total": 40,
+      "missing_branch_lines_sample": [
+        "26",
+        "83",
+        "101",
+        "107",
+        "111",
+        "115",
+        "151",
+        "156",
+        "162",
+        "164",
+        "189",
+        "191",
+        "197"
+      ],
+      "path": "src/bioetl/composition/factories/pipeline/registry_validation.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 56,
+      "branch_missing": 12,
+      "branch_rate_percent": 82.35,
+      "branch_total": 68,
+      "missing_branch_lines_sample": [
+        "27",
+        "46",
+        "60",
+        "81",
+        "91",
+        "115",
+        "123",
+        "125",
+        "170",
+        "253",
+        "322"
+      ],
+      "path": "src/bioetl/application/composite/_preflight_orchestration.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 35,
+      "branch_missing": 11,
+      "branch_rate_percent": 76.09,
+      "branch_total": 46,
+      "missing_branch_lines_sample": [
+        "34",
+        "37",
+        "173",
+        "175",
+        "177",
+        "208",
+        "212",
+        "262",
+        "270",
+        "272"
+      ],
+      "path": "src/bioetl/composition/services/effective_config_serializer.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 27,
+      "branch_missing": 11,
+      "branch_rate_percent": 71.05,
+      "branch_total": 38,
+      "missing_branch_lines_sample": [
+        "53",
+        "87",
+        "90",
+        "93",
+        "122",
+        "138",
+        "147",
+        "150",
+        "160",
+        "192",
+        "205"
+      ],
+      "path": "src/bioetl/composition/runtime_builders/ledger_collaborator.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 11,
+      "branch_missing": 11,
+      "branch_rate_percent": 50.0,
+      "branch_total": 22,
+      "missing_branch_lines_sample": [
+        "18",
+        "20",
+        "27",
+        "29",
+        "44",
+        "47",
+        "49",
+        "56",
+        "58",
+        "66",
+        "76"
+      ],
+      "path": "src/bioetl/application/composite/_lifecycle_observer_tracing_types.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 10,
+      "branch_missing": 10,
+      "branch_rate_percent": 50.0,
+      "branch_total": 20,
+      "missing_branch_lines_sample": [
+        "48",
+        "53",
+        "59",
+        "61",
+        "66",
+        "71",
+        "77",
+        "79",
+        "81",
+        "91"
+      ],
+      "path": "src/bioetl/application/composite/runner_pkg/runner_stage_support_types.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 49,
+      "branch_missing": 9,
+      "branch_rate_percent": 84.48,
+      "branch_total": 58,
+      "missing_branch_lines_sample": [
+        "51",
+        "96",
+        "110",
+        "117",
+        "150",
+        "168",
+        "170",
+        "209",
+        "223"
+      ],
+      "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_helpers.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 47,
+      "branch_missing": 9,
+      "branch_rate_percent": 83.93,
+      "branch_total": 56,
+      "missing_branch_lines_sample": [
+        "76",
+        "78",
+        "80",
+        "85",
+        "87",
+        "94",
+        "131",
+        "145",
+        "155"
+      ],
+      "path": "src/bioetl/composition/runtime_builders/_effective_config_graph_support.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 9,
+      "branch_missing": 9,
+      "branch_rate_percent": 50.0,
+      "branch_total": 18,
+      "missing_branch_lines_sample": [
+        "57",
+        "62",
+        "64",
+        "70",
+        "75",
+        "79",
+        "84",
+        "89",
+        "94"
+      ],
+      "path": "src/bioetl/application/composite/runner_pkg/runner_support_types.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 26,
+      "branch_missing": 8,
+      "branch_rate_percent": 76.47,
+      "branch_total": 34,
+      "missing_branch_lines_sample": [
+        "26",
+        "31",
+        "36",
+        "107",
+        "129",
+        "135",
+        "151",
+        "166"
+      ],
+      "path": "src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 8,
+      "branch_missing": 8,
+      "branch_rate_percent": 50.0,
+      "branch_total": 16,
+      "missing_branch_lines_sample": [
+        "26",
+        "33",
+        "48",
+        "53",
+        "55",
+        "99",
+        "106",
+        "108"
+      ],
+      "path": "src/bioetl/composition/providers/_registration_biblio_adapters.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 8,
+      "branch_missing": 8,
+      "branch_rate_percent": 50.0,
+      "branch_total": 16,
+      "missing_branch_lines_sample": [
+        "43",
+        "51",
+        "61",
+        "63",
+        "65",
+        "72",
+        "80",
+        "125"
+      ],
+      "path": "src/bioetl/application/composite/merger_post_join.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 17,
+      "branch_missing": 7,
+      "branch_rate_percent": 70.83,
+      "branch_total": 24,
+      "missing_branch_lines_sample": [
+        "38",
+        "44",
+        "46",
+        "57",
+        "59",
+        "83",
+        "89"
+      ],
+      "path": "src/bioetl/application/composite/coordinator_planning.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 7,
+      "branch_missing": 7,
+      "branch_rate_percent": 50.0,
+      "branch_total": 14,
+      "missing_branch_lines_sample": [
+        "27",
+        "30",
+        "33",
+        "36",
+        "39",
+        "42",
+        "44"
+      ],
+      "path": "src/bioetl/composition/factories/pipeline/assembler_helpers.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 7,
+      "branch_missing": 7,
+      "branch_rate_percent": 50.0,
+      "branch_total": 14,
+      "missing_branch_lines_sample": [
+        "32",
+        "37",
+        "39",
+        "45",
+        "51",
+        "56",
+        "61"
+      ],
+      "path": "src/bioetl/application/composite/runner_pkg/runner_execution_orchestrator.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 34,
+      "branch_missing": 6,
+      "branch_rate_percent": 85.0,
+      "branch_total": 40,
+      "missing_branch_lines_sample": [
+        "25",
+        "33",
+        "39",
+        "62",
+        "85",
+        "100"
+      ],
+      "path": "src/bioetl/composition/runtime_builders/_runner_control_plane_policy_support.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 30,
+      "branch_missing": 6,
+      "branch_rate_percent": 83.33,
+      "branch_total": 36,
+      "missing_branch_lines_sample": [
+        "35",
+        "108",
+        "132",
+        "144",
+        "168",
+        "175"
+      ],
+      "path": "src/bioetl/application/composite/aggregator.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 26,
+      "branch_missing": 6,
+      "branch_rate_percent": 81.25,
+      "branch_total": 32,
+      "missing_branch_lines_sample": [
+        "48",
+        "74",
+        "94",
+        "98",
+        "115",
+        "148"
+      ],
+      "path": "src/bioetl/application/composite/column_priority_orderer.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 24,
+      "branch_missing": 6,
+      "branch_rate_percent": 80.0,
+      "branch_total": 30,
+      "missing_branch_lines_sample": [
+        "76",
+        "131",
+        "177",
+        "221",
+        "238"
+      ],
+      "path": "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 16,
+      "branch_missing": 6,
+      "branch_rate_percent": 72.73,
+      "branch_total": 22,
+      "missing_branch_lines_sample": [
+        "90",
+        "91",
+        "105",
+        "171",
+        "224"
+      ],
+      "path": "src/bioetl/composition/runtime_builders/run_manifest_contract_identity.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 8,
+      "branch_missing": 6,
+      "branch_rate_percent": 57.14,
+      "branch_total": 14,
+      "missing_branch_lines_sample": [
+        "72",
+        "75",
+        "77",
+        "83",
+        "89",
+        "95"
+      ],
+      "path": "src/bioetl/application/composite/merger_orchestration.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 37,
+      "branch_missing": 5,
+      "branch_rate_percent": 88.1,
+      "branch_total": 42,
+      "missing_branch_lines_sample": [
+        "104",
+        "168",
+        "175",
+        "176",
+        "179"
+      ],
+      "path": "src/bioetl/composition/bootstrap/runtime/composite_filter_extraction_service.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 19,
+      "branch_missing": 5,
+      "branch_rate_percent": 79.17,
+      "branch_total": 24,
+      "missing_branch_lines_sample": [
+        "27",
+        "95",
+        "102",
+        "139",
+        "146"
+      ],
+      "path": "src/bioetl/composition/factories/services/_record_processor_policy_support.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 17,
+      "branch_missing": 5,
+      "branch_rate_percent": 77.27,
+      "branch_total": 22,
+      "missing_branch_lines_sample": [
+        "28",
+        "30",
+        "37",
+        "39",
+        "50"
+      ],
+      "path": "src/bioetl/composition/runtime_builders/_snapshot_mapping_support.py",
+      "theme": "composition_runtime"
+    }
+  ],
+  "generated_by": "codex",
+  "linked_issues": [
+    "#5978",
+    "#5980",
+    "#5981",
+    "#5982",
+    "#5983"
+  ],
+  "schema_version": "branch-coverage-gap-report-v1",
+  "snapshot_date": "2026-07-27",
+  "source": {
+    "coverage_data_source": "/tmp/bioetl-coverage-5978-full-r21/.coverage",
+    "coverage_lane": "coverage-verify shard aggregate plus targeted branch-tail owner tests",
+    "coverage_xml": "reports/coverage/coverage.xml",
+    "coverage_xml_sha256": "9a58b23b7c9cc7bb4c2ce0753dbd8999782d201d6cd1e0fd44214833bcdf3791"
+  },
+  "summary": {
+    "branch_covered": 17649,
+    "branch_missing": 2837,
+    "branch_rate_percent": 86.152,
+    "branch_threshold_covered_required": 17414,
+    "branch_threshold_margin": 235,
+    "branch_threshold_percent": 85.0,
+    "branch_total": 20486,
+    "files_below_85_branch_coverage": 552,
+    "files_with_branch_measurement": 1401,
+    "line_covered": 87633,
+    "line_rate_percent": 95.88,
+    "line_total": 91396,
+    "promotion_blocker": null,
+    "promotion_status": "promoted_to_blocking_gate",
+    "refresh_note": "Refreshed summary from reports/coverage/coverage.xml via scripts.engineering.qa.check_branch_coverage on 2026-07-27 for issue #6597 closeout. Detailed top_gaps lists may lag until full gap-report generator is re-run."
+  },
+  "theme_summary": {
+    "application_control_plane": {
+      "files_below_85": 46,
+      "missing_branches": 247
+    },
+    "composition_runtime": {
+      "files_below_85": 102,
+      "missing_branches": 355
+    },
+    "domain": {
+      "files_below_85": 91,
+      "missing_branches": 364
+    },
+    "infrastructure": {
+      "files_below_85": 172,
+      "missing_branches": 785
+    },
+    "other": {
+      "files_below_85": 141,
+      "missing_branches": 648
+    }
+  },
+  "top_gaps": [
+    {
+      "branch_covered": 48,
+      "branch_missing": 22,
+      "branch_rate_percent": 68.57,
+      "branch_total": 70,
+      "missing_branch_lines_sample": [
+        "25",
+        "35",
+        "43",
+        "121",
+        "143",
+        "165",
+        "195",
+        "222",
+        "234",
+        "236",
+        "238",
+        "240",
+        "266",
+        "269",
+        "282",
+        "307",
+        "322",
+        "325",
+        "384"
+      ],
+      "path": "src/bioetl/application/composite/_coalesce_policy_support.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 26,
+      "branch_missing": 22,
+      "branch_rate_percent": 54.17,
+      "branch_total": 48,
+      "missing_branch_lines_sample": [
+        "36",
+        "51",
+        "58",
+        "80",
+        "89",
+        "93",
+        "115",
+        "141",
+        "144",
+        "146",
+        "148",
+        "161",
+        "164",
+        "186",
+        "188",
+        "190",
+        "192",
+        "200",
+        "202"
+      ],
+      "path": "src/bioetl/application/services/_observability_trace_support.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 54,
+      "branch_missing": 18,
+      "branch_rate_percent": 75.0,
+      "branch_total": 72,
+      "missing_branch_lines_sample": [
+        "167",
+        "179",
+        "194",
+        "242",
+        "262",
+        "264",
+        "276",
+        "278",
+        "282",
+        "284",
+        "340",
+        "347",
+        "387",
+        "394",
+        "407",
+        "416"
+      ],
+      "path": "src/bioetl/interfaces/http/_processed_records_table_support.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 28,
+      "branch_missing": 18,
+      "branch_rate_percent": 60.87,
+      "branch_total": 46,
+      "missing_branch_lines_sample": [
+        "57",
+        "198",
+        "226",
+        "242",
+        "245",
+        "270",
+        "272",
+        "274",
+        "298",
+        "309",
+        "367",
+        "371"
+      ],
+      "path": "src/bioetl/application/services/_observability_workflow_checkpoint_support.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 57,
+      "branch_missing": 15,
+      "branch_rate_percent": 79.17,
+      "branch_total": 72,
+      "missing_branch_lines_sample": [
+        "77",
+        "94",
+        "108",
+        "112",
+        "133",
+        "139",
+        "141",
+        "143",
+        "161",
+        "171",
+        "197",
+        "291"
+      ],
+      "path": "src/bioetl/infrastructure/quality/architecture_debt_reduction.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 37,
+      "branch_missing": 15,
+      "branch_rate_percent": 71.15,
+      "branch_total": 52,
+      "missing_branch_lines_sample": [
+        "66",
+        "82",
+        "93",
+        "94",
+        "97",
+        "224",
+        "231",
+        "257",
+        "267",
+        "279",
+        "292"
+      ],
+      "path": "src/bioetl/infrastructure/control_plane/artifact_byte_comparison.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 54,
+      "branch_missing": 14,
+      "branch_rate_percent": 79.41,
+      "branch_total": 68,
+      "missing_branch_lines_sample": [
+        "134",
+        "177",
+        "188",
+        "190",
+        "203",
+        "210",
+        "212",
+        "218",
+        "221",
+        "232",
+        "247",
+        "249",
+        "251",
+        "300"
+      ],
+      "path": "src/bioetl/infrastructure/adapters/chembl/protein_classification_graph.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 38,
+      "branch_missing": 14,
+      "branch_rate_percent": 73.08,
+      "branch_total": 52,
+      "missing_branch_lines_sample": [
+        "51",
+        "58",
+        "66",
+        "74",
+        "76",
+        "78",
+        "80",
+        "190",
+        "222",
+        "312",
+        "329",
+        "356",
+        "381",
+        "404"
+      ],
+      "path": "src/bioetl/interfaces/cli/commands/domains/quarantine/support.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 26,
+      "branch_missing": 14,
+      "branch_rate_percent": 65.0,
+      "branch_total": 40,
+      "missing_branch_lines_sample": [
+        "26",
+        "83",
+        "101",
+        "107",
+        "111",
+        "115",
+        "151",
+        "156",
+        "162",
+        "164",
+        "189",
+        "191",
+        "197"
+      ],
+      "path": "src/bioetl/composition/factories/pipeline/registry_validation.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 20,
+      "branch_missing": 14,
+      "branch_rate_percent": 58.82,
+      "branch_total": 34,
+      "missing_branch_lines_sample": [
+        "69",
+        "106",
+        "153",
+        "160",
+        "170",
+        "191",
+        "220",
+        "223",
+        "240",
+        "251",
+        "253",
+        "260",
+        "270",
+        "281"
+      ],
+      "path": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 53,
+      "branch_missing": 13,
+      "branch_rate_percent": 80.3,
+      "branch_total": 66,
+      "missing_branch_lines_sample": [
+        "36",
+        "38",
+        "40",
+        "86",
+        "136",
+        "144",
+        "149",
+        "243",
+        "255",
+        "265",
+        "274",
+        "284",
+        "310"
+      ],
+      "path": "src/bioetl/interfaces/cli/commands/_run_manifest_output.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 41,
+      "branch_missing": 13,
+      "branch_rate_percent": 75.93,
+      "branch_total": 54,
+      "missing_branch_lines_sample": [
+        "40",
+        "42",
+        "89",
+        "94",
+        "106",
+        "108",
+        "113",
+        "122",
+        "124",
+        "129",
+        "146",
+        "165",
+        "168"
+      ],
+      "path": "src/bioetl/infrastructure/config/pipeline_normalizers.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 37,
+      "branch_missing": 13,
+      "branch_rate_percent": 74.0,
+      "branch_total": 50,
+      "missing_branch_lines_sample": [
+        "57",
+        "59",
+        "65",
+        "152",
+        "154",
+        "165",
+        "178",
+        "196",
+        "272",
+        "273",
+        "276",
+        "278"
+      ],
+      "path": "src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 33,
+      "branch_missing": 13,
+      "branch_rate_percent": 71.74,
+      "branch_total": 46,
+      "missing_branch_lines_sample": [
+        "142",
+        "145",
+        "147",
+        "156",
+        "158",
+        "161",
+        "170",
+        "176",
+        "183",
+        "224",
+        "243",
+        "270",
+        "273"
+      ],
+      "path": "src/bioetl/domain/normalization/rules.py",
+      "theme": "domain"
+    },
+    {
+      "branch_covered": 27,
+      "branch_missing": 13,
+      "branch_rate_percent": 67.5,
+      "branch_total": 40,
+      "missing_branch_lines_sample": [
+        "67",
+        "69",
+        "84",
+        "99",
+        "123",
+        "129",
+        "155",
+        "161",
+        "167",
+        "173",
+        "179",
+        "188",
+        "190"
+      ],
+      "path": "src/bioetl/interfaces/cli/commands/lineage.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 25,
+      "branch_missing": 13,
+      "branch_rate_percent": 65.79,
+      "branch_total": 38,
+      "missing_branch_lines_sample": [
+        "33",
+        "82",
+        "91",
+        "97",
+        "100",
+        "142",
+        "156",
+        "164",
+        "171",
+        "186",
+        "189",
+        "202",
+        "204"
+      ],
+      "path": "src/bioetl/domain/normalization/profiles/_profile_value_normalizers.py",
+      "theme": "domain"
+    },
+    {
+      "branch_covered": 19,
+      "branch_missing": 13,
+      "branch_rate_percent": 59.38,
+      "branch_total": 32,
+      "missing_branch_lines_sample": [
+        "34",
+        "36",
+        "39",
+        "43",
+        "51",
+        "53",
+        "59",
+        "61",
+        "64",
+        "68",
+        "79",
+        "81",
+        "84"
+      ],
+      "path": "src/bioetl/interfaces/cli/commands/domains/maintenance/plan.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 56,
+      "branch_missing": 12,
+      "branch_rate_percent": 82.35,
+      "branch_total": 68,
+      "missing_branch_lines_sample": [
+        "27",
+        "46",
+        "60",
+        "81",
+        "91",
+        "115",
+        "123",
+        "125",
+        "170",
+        "253",
+        "322"
+      ],
+      "path": "src/bioetl/application/composite/_preflight_orchestration.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 50,
+      "branch_missing": 12,
+      "branch_rate_percent": 80.65,
+      "branch_total": 62,
+      "missing_branch_lines_sample": [
+        "60",
+        "87",
+        "89",
+        "109",
+        "122",
+        "126",
+        "134",
+        "138",
+        "154",
+        "158",
+        "162",
+        "177"
+      ],
+      "path": "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_reasons.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 28,
+      "branch_missing": 12,
+      "branch_rate_percent": 70.0,
+      "branch_total": 40,
+      "missing_branch_lines_sample": [
+        "77",
+        "83",
+        "89",
+        "95",
+        "206",
+        "209",
+        "217",
+        "220",
+        "222",
+        "246",
+        "272"
+      ],
+      "path": "src/bioetl/interfaces/cli/commands/_workflow_run_support.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 18,
+      "branch_missing": 12,
+      "branch_rate_percent": 60.0,
+      "branch_total": 30,
+      "missing_branch_lines_sample": [
+        "80",
+        "84",
+        "147",
+        "196",
+        "201",
+        "210",
+        "222",
+        "241",
+        "251",
+        "270",
+        "284"
+      ],
+      "path": "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 16,
+      "branch_missing": 12,
+      "branch_rate_percent": 57.14,
+      "branch_total": 28,
+      "missing_branch_lines_sample": [
+        "82",
+        "89",
+        "96",
+        "102",
+        "113",
+        "118",
+        "144",
+        "147",
+        "234",
+        "245",
+        "258",
+        "272"
+      ],
+      "path": "src/bioetl/application/services/control_plane/replay/_historical_certification_support.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 10,
+      "branch_missing": 12,
+      "branch_rate_percent": 45.45,
+      "branch_total": 22,
+      "missing_branch_lines_sample": [
+        "196",
+        "198",
+        "234",
+        "276",
+        "316",
+        "328",
+        "400",
+        "402",
+        "411",
+        "414"
+      ],
+      "path": "src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 0,
+      "branch_missing": 12,
+      "branch_rate_percent": 0.0,
+      "branch_total": 12,
+      "missing_branch_lines_sample": [
+        "113",
+        "122",
+        "127",
+        "136",
+        "145",
+        "156"
+      ],
+      "path": "src/bioetl/interfaces/http/health_server.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 0,
+      "branch_missing": 12,
+      "branch_rate_percent": 0.0,
+      "branch_total": 12,
+      "missing_branch_lines_sample": [
+        "55",
+        "67",
+        "70",
+        "155",
+        "174",
+        "192"
+      ],
+      "path": "src/bioetl/infrastructure/quarantine/filtered_reads.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 65,
+      "branch_missing": 11,
+      "branch_rate_percent": 85.53,
+      "branch_total": 76,
+      "missing_branch_lines_sample": [
+        "92",
+        "94",
+        "110",
+        "126",
+        "130",
+        "134",
+        "156",
+        "160",
+        "165",
+        "181",
+        "185"
+      ],
+      "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/replay_state.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 37,
+      "branch_missing": 11,
+      "branch_rate_percent": 77.08,
+      "branch_total": 48,
+      "missing_branch_lines_sample": [
+        "23",
+        "34",
+        "40",
+        "48",
+        "58",
+        "60",
+        "67",
+        "74",
+        "81",
+        "186"
+      ],
+      "path": "src/bioetl/infrastructure/adapters/pubmed/_filter_fetch_support.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 35,
+      "branch_missing": 11,
+      "branch_rate_percent": 76.09,
+      "branch_total": 46,
+      "missing_branch_lines_sample": [
+        "34",
+        "37",
+        "173",
+        "175",
+        "177",
+        "208",
+        "212",
+        "262",
+        "270",
+        "272"
+      ],
+      "path": "src/bioetl/composition/services/effective_config_serializer.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 27,
+      "branch_missing": 11,
+      "branch_rate_percent": 71.05,
+      "branch_total": 38,
+      "missing_branch_lines_sample": [
+        "53",
+        "87",
+        "90",
+        "93",
+        "122",
+        "138",
+        "147",
+        "150",
+        "160",
+        "192",
+        "205"
+      ],
+      "path": "src/bioetl/composition/runtime_builders/ledger_collaborator.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 27,
+      "branch_missing": 11,
+      "branch_rate_percent": 71.05,
+      "branch_total": 38,
+      "missing_branch_lines_sample": [
+        "44",
+        "47",
+        "55",
+        "57",
+        "60",
+        "68",
+        "76",
+        "78",
+        "80",
+        "116"
+      ],
+      "path": "src/bioetl/application/services/_observability_workflow_evidence_support.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 23,
+      "branch_missing": 11,
+      "branch_rate_percent": 67.65,
+      "branch_total": 34,
+      "missing_branch_lines_sample": [
+        "31",
+        "55",
+        "57",
+        "69",
+        "72",
+        "106",
+        "117",
+        "134",
+        "146",
+        "163",
+        "184"
+      ],
+      "path": "src/bioetl/domain/lineage/metadata_bundle.py",
+      "theme": "domain"
+    },
+    {
+      "branch_covered": 21,
+      "branch_missing": 11,
+      "branch_rate_percent": 65.62,
+      "branch_total": 32,
+      "missing_branch_lines_sample": [
+        "27",
+        "31",
+        "35",
+        "39",
+        "41",
+        "45",
+        "47",
+        "51",
+        "53",
+        "120",
+        "174"
+      ],
+      "path": "src/bioetl/infrastructure/observability/prometheus_metrics.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 17,
+      "branch_missing": 11,
+      "branch_rate_percent": 60.71,
+      "branch_total": 28,
+      "missing_branch_lines_sample": [
+        "42",
+        "75",
+        "87",
+        "89",
+        "100",
+        "116",
+        "295",
+        "298",
+        "300"
+      ],
+      "path": "src/bioetl/domain/normalization/profiles/base.py",
+      "theme": "domain"
+    },
+    {
+      "branch_covered": 13,
+      "branch_missing": 11,
+      "branch_rate_percent": 54.17,
+      "branch_total": 24,
+      "missing_branch_lines_sample": [
+        "49",
+        "91",
+        "97",
+        "105",
+        "107",
+        "111",
+        "113",
+        "117",
+        "119",
+        "127",
+        "131"
+      ],
+      "path": "src/bioetl/infrastructure/schemas/pipeline_contract_policy.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 13,
+      "branch_missing": 11,
+      "branch_rate_percent": 54.17,
+      "branch_total": 24,
+      "missing_branch_lines_sample": [
+        "30",
+        "33",
+        "36",
+        "51",
+        "53",
+        "55",
+        "71",
+        "74"
+      ],
+      "path": "src/bioetl/application/pipelines/uniprot/extractors/genes.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 11,
+      "branch_missing": 11,
+      "branch_rate_percent": 50.0,
+      "branch_total": 22,
+      "missing_branch_lines_sample": [
+        "30",
+        "33",
+        "36",
+        "38",
+        "40",
+        "45",
+        "50",
+        "55",
+        "66",
+        "76",
+        "80"
+      ],
+      "path": "src/bioetl/infrastructure/storage/silver/operations/delta_operation_protocols.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 11,
+      "branch_missing": 11,
+      "branch_rate_percent": 50.0,
+      "branch_total": 22,
+      "missing_branch_lines_sample": [
+        "18",
+        "20",
+        "27",
+        "29",
+        "44",
+        "47",
+        "49",
+        "56",
+        "58",
+        "66",
+        "76"
+      ],
+      "path": "src/bioetl/application/composite/_lifecycle_observer_tracing_types.py",
+      "theme": "composition_runtime"
+    },
+    {
+      "branch_covered": 9,
+      "branch_missing": 11,
+      "branch_rate_percent": 45.0,
+      "branch_total": 20,
+      "missing_branch_lines_sample": [
+        "42",
+        "45",
+        "52",
+        "54",
+        "63",
+        "72",
+        "75",
+        "78"
+      ],
+      "path": "src/bioetl/domain/normalization/profiles/_profile_governed_value_normalizers.py",
+      "theme": "domain"
+    },
+    {
+      "branch_covered": 3,
+      "branch_missing": 11,
+      "branch_rate_percent": 21.43,
+      "branch_total": 14,
+      "missing_branch_lines_sample": [
+        "33",
+        "35",
+        "39",
+        "46",
+        "48",
+        "55",
+        "62"
+      ],
+      "path": "src/bioetl/domain/workflow/_run_options_support.py",
+      "theme": "domain"
+    },
+    {
+      "branch_covered": 1,
+      "branch_missing": 11,
+      "branch_rate_percent": 8.33,
+      "branch_total": 12,
+      "missing_branch_lines_sample": [
+        "17",
+        "30",
+        "34",
+        "40",
+        "44",
+        "50"
+      ],
+      "path": "src/bioetl/interfaces/http/_health_server_checkpoint_lookup.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 70,
+      "branch_missing": 10,
+      "branch_rate_percent": 87.5,
+      "branch_total": 80,
+      "missing_branch_lines_sample": [
+        "122",
+        "126",
+        "128",
+        "132",
+        "135",
+        "202",
+        "218",
+        "235",
+        "244",
+        "255"
+      ],
+      "path": "src/bioetl/interfaces/cli/commands/domains/diagnostics/contract_checks.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 48,
+      "branch_missing": 10,
+      "branch_rate_percent": 82.76,
+      "branch_total": 58,
+      "missing_branch_lines_sample": [
+        "67",
+        "70",
+        "185",
+        "187",
+        "189",
+        "204",
+        "227",
+        "245",
+        "247",
+        "249"
+      ],
+      "path": "src/bioetl/interfaces/cli/commands/_workflow_support.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 46,
+      "branch_missing": 10,
+      "branch_rate_percent": 82.14,
+      "branch_total": 56,
+      "missing_branch_lines_sample": [
+        "63",
+        "77",
+        "98",
+        "116",
+        "150",
+        "159",
+        "170",
+        "185",
+        "224",
+        "282"
+      ],
+      "path": "src/bioetl/domain/behavior/_author_helpers.py",
+      "theme": "domain"
+    },
+    {
+      "branch_covered": 34,
+      "branch_missing": 10,
+      "branch_rate_percent": 77.27,
+      "branch_total": 44,
+      "missing_branch_lines_sample": [
+        "42",
+        "49",
+        "56",
+        "68",
+        "71",
+        "74",
+        "76",
+        "86",
+        "117",
+        "126"
+      ],
+      "path": "src/bioetl/interfaces/http/_health_server_routing_support.py",
+      "theme": "application_control_plane"
+    },
+    {
+      "branch_covered": 34,
+      "branch_missing": 10,
+      "branch_rate_percent": 77.27,
+      "branch_total": 44,
+      "missing_branch_lines_sample": [
+        "118",
+        "133",
+        "153",
+        "164",
+        "168",
+        "198",
+        "286",
+        "289"
+      ],
+      "path": "src/bioetl/infrastructure/validation/pandera_validator.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 32,
+      "branch_missing": 10,
+      "branch_rate_percent": 76.19,
+      "branch_total": 42,
+      "missing_branch_lines_sample": [
+        "181",
+        "185",
+        "187",
+        "193",
+        "201"
+      ],
+      "path": "src/bioetl/infrastructure/export/debug_export_adapter.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 28,
+      "branch_missing": 10,
+      "branch_rate_percent": 73.68,
+      "branch_total": 38,
+      "missing_branch_lines_sample": [
+        "41",
+        "44",
+        "77",
+        "82",
+        "85",
+        "134",
+        "141",
+        "143",
+        "145"
+      ],
+      "path": "src/bioetl/infrastructure/control_plane/_file_artifact_lifecycle_manifest_protections.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 22,
+      "branch_missing": 10,
+      "branch_rate_percent": 68.75,
+      "branch_total": 32,
+      "missing_branch_lines_sample": [
+        "79",
+        "134",
+        "138",
+        "146",
+        "149",
+        "152",
+        "174",
+        "209",
+        "219",
+        "242"
+      ],
+      "path": "src/bioetl/infrastructure/config/chembl_policy_registry_loader.py",
+      "theme": "infrastructure"
+    },
+    {
+      "branch_covered": 20,
+      "branch_missing": 10,
+      "branch_rate_percent": 66.67,
+      "branch_total": 30,
+      "missing_branch_lines_sample": [
+        "19",
+        "21",
+        "23",
+        "29",
+        "34",
+        "38",
+        "40",
+        "47",
+        "55",
+        "212"
+      ],
+      "path": "src/bioetl/application/services/_checkpoint_service_runtime.py",
+      "theme": "other"
+    },
+    {
+      "branch_covered": 20,
+      "branch_missing": 10,
+      "branch_rate_percent": 66.67,
+      "branch_total": 30,
+      "missing_branch_lines_sample": [
+        "41",
+        "44",
+        "89",
+        "114",
+        "126",
+        "128",
+        "156",
+        "168"
+      ],
+      "path": "src/bioetl/application/core/batch_transformer_attempt_success.py",
+      "theme": "other"
+    }
+  ]
+}

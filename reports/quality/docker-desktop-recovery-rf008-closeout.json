@@ -1,0 +1,349 @@
+﻿{
+    "schema_version":  "bioetl-docker-desktop-recovery-v2",
+    "generated_at":  "2026-07-21T16:43:31.4879799Z",
+    "ok":  true,
+    "primary_cause":  "none",
+    "actions":  [
+                    "already_ready"
+                ],
+    "elapsed_seconds":  27.004,
+    "command_timeout_seconds":  20,
+    "diagnostics":  {
+                        "desktop":  {
+                                        "capabilities":  {
+                                                             "status":  true,
+                                                             "restart":  true,
+                                                             "stop":  true,
+                                                             "start":  true,
+                                                             "logs":  true,
+                                                             "diagnose":  true
+                                                         },
+                                        "status":  "available",
+                                        "status_returncode":  0
+                                    },
+                        "daemon_identity":  {
+                                                "classification":  "observed",
+                                                "active_context":  "desktop-linux",
+                                                "version":  "{\"Client\":{\"Version\":\"29.6.2\",\"ApiVersion\":\"1.55\",\"DefaultAPIVersion\":\"1.55\",\"GitCommit\":\"dfc4efb\",\"GoVersion\":\"go1.26.5\",\"Os\":\"windows\",\"Arch\":\"amd64\",\"BuildTime\":\"Thu Jul 16 16:14:59 2026\",\"Context\":\"desktop-linux\"},\"Server\":{\"Platform\":{\"Name\":\"Docker Desktop 4.83.0 (234302)\"},\"Version\":\"29.6.2\",\"ApiVersion\":\"1.55\",\"MinAPIVersion\":\"1.40\",\"Os\":\"linux\",\"Arch\":\"amd64\",\"Components\":[{\"Name\":\"Engine\",\"Version\":\"29.6.2\",\"Details\":{\"ApiVersion\":\"1.55\",\"Arch\":\"amd64\",\"BuildTime\":\"Thu Jul 16 16:12:20 2026\",\"Experimental\":\"false\",\"GitCommit\":\"3d80467\",\"GoVersion\":\"go1.26.5\",\"KernelVersion\":\"6.6.87.2-microsoft-standard-WSL2\",\"MinAPIVersion\":\"1.40\",\"Module\":\"github.com/moby/moby/v2\",\"ModuleVersion\":\"v2.0.0+unknown\",\"Os\":\"linux\"}},{\"Name\":\"containerd\",\"Version\":\"v2.2.5\",\"Details\":{\"GitCommit\":\"e53c7c1516c3b2bff98eb76f1f4117477e6f4e66\"}},{\"Name\":\"runc\",\"Version\":\"1.3.6\",\"Details\":{\"GitCommit\":\"v1.3.6-0-g491b69ba\"}},{\"Name\":\"docker-init\",\"Version\":\"0.19.0\",\"Details\":{\"GitCommit\":\"de40ad0\"}}],\"GitCommit\":\"3d80467\",\"GoVersion\":\"go1.26.5\",\"KernelVersion\":\"6.6.87.2-microsoft-standard-WSL2\",\"BuildTime\":\"2026-07-16T16:12:20.000000000+00:00\"}}\n\r\n",
+                                                "info":  "{\"ID\":\"d4078961-c957-455e-a77e-f930668dd393\",\"Containers\":3,\"ContainersRunning\":1,\"ContainersPaused\":0,\"ContainersStopped\":2,\"Images\":36,\"Driver\":\"overlayfs\",\"DriverStatus\":[[\"driver-type\",\"io.containerd.snapshotter.v1\"]],\"Plugins\":{\"Volume\":[\"local\"],\"Network\":[\"bridge\",\"host\",\"ipvlan\",\"macvlan\",\"null\",\"overlay\"],\"Authorization\":null,\"Log\":[\"awslogs\",\"fluentd\",\"gcplogs\",\"gelf\",\"journald\",\"json-file\",\"local\",\"splunk\",\"syslog\"]},\"MemoryLimit\":true,\"SwapLimit\":true,\"CpuCfsPeriod\":true,\"CpuCfsQuota\":true,\"CPUShares\":true,\"CPUSet\":true,\"PidsLimit\":true,\"IPv4Forwarding\":true,\"Debug\":false,\"NFd\":54,\"OomKillDisable\":false,\"NGoroutines\":96,\"SystemTime\":\"2026-07-21T16:43:28.613946406Z\",\"LoggingDriver\":\"json-file\",\"CgroupDriver\":\"cgroupfs\",\"CgroupVersion\":\"2\",\"NEventsListener\":14,\"KernelVersion\":\"6.6.87.2-microsoft-standard-WSL2\",\"OperatingSystem\":\"Docker Desktop\",\"OSVersion\":\"\",\"OSType\":\"linux\",\"Architecture\":\"x86_64\",\"IndexServerAddress\":\"https://index.docker.io/v1/\",\"RegistryConfig\":{\"InsecureRegistryCIDRs\":[\"::1/128\",\"127.0.0.0/8\"],\"IndexConfigs\":{\"docker.io\":{\"Name\":\"docker.io\",\"Mirrors\":[],\"Secure\":true,\"Official\":true},\"hubproxy.docker.internal:5555\":{\"Name\":\"hubproxy.docker.internal:5555\",\"Mirrors\":[],\"Secure\":false,\"Official\":false}},\"Mirrors\":[]},\"NCPU\":8,\"MemTotal\":16771153920,\"GenericResources\":null,\"DockerRootDir\":\"/var/lib/docker\",\"HttpProxy\":\"http.docker.internal:3128\",\"HttpsProxy\":\"http.docker.internal:3128\",\"NoProxy\":\"hubproxy.docker.internal\",\"Name\":\"docker-desktop\",\"Labels\":[\"com.docker.desktop.address=npipe://\\\\\\\\.\\\\pipe\\\\docker_cli\"],\"ExperimentalBuild\":false,\"ServerVersion\":\"29.6.2\",\"Runtimes\":{\"io.containerd.runc.v2\":{\"path\":\"runc\",\"status\":{\"org.opencontainers.runtime-spec.features\":\"{\\\"ociVersionMin\\\":\\\"1.0.0\\\",\\\"ociVersionMax\\\":\\\"1.2.1\\\",\\\"hooks\\\":[\\\"prestart\\\",\\\"createRuntime\\\",\\\"createContainer\\\",\\\"startContainer\\\",\\\"poststart\\\",\\\"poststop\\\"],\\\"mountOptions\\\":[\\\"async\\\",\\\"atime\\\",\\\"bind\\\",\\\"defaults\\\",\\\"dev\\\",\\\"diratime\\\",\\\"dirsync\\\",\\\"exec\\\",\\\"iversion\\\",\\\"lazytime\\\",\\\"loud\\\",\\\"mand\\\",\\\"noatime\\\",\\\"nodev\\\",\\\"nodiratime\\\",\\\"noexec\\\",\\\"noiversion\\\",\\\"nolazytime\\\",\\\"nomand\\\",\\\"norelatime\\\",\\\"nostrictatime\\\",\\\"nosuid\\\",\\\"nosymfollow\\\",\\\"private\\\",\\\"ratime\\\",\\\"rbind\\\",\\\"rdev\\\",\\\"rdiratime\\\",\\\"relatime\\\",\\\"remount\\\",\\\"rexec\\\",\\\"rnoatime\\\",\\\"rnodev\\\",\\\"rnodiratime\\\",\\\"rnoexec\\\",\\\"rnorelatime\\\",\\\"rnostrictatime\\\",\\\"rnosuid\\\",\\\"rnosymfollow\\\",\\\"ro\\\",\\\"rprivate\\\",\\\"rrelatime\\\",\\\"rro\\\",\\\"rrw\\\",\\\"rshared\\\",\\\"rslave\\\",\\\"rstrictatime\\\",\\\"rsuid\\\",\\\"rsymfollow\\\",\\\"runbindable\\\",\\\"rw\\\",\\\"shared\\\",\\\"silent\\\",\\\"slave\\\",\\\"strictatime\\\",\\\"suid\\\",\\\"symfollow\\\",\\\"sync\\\",\\\"tmpcopyup\\\",\\\"unbindable\\\"],\\\"linux\\\":{\\\"namespaces\\\":[\\\"cgroup\\\",\\\"ipc\\\",\\\"mount\\\",\\\"network\\\",\\\"pid\\\",\\\"time\\\",\\\"user\\\",\\\"uts\\\"],\\\"capabilities\\\":[\\\"CAP_CHOWN\\\",\\\"CAP_DAC_OVERRIDE\\\",\\\"CAP_DAC_READ_SEARCH\\\",\\\"CAP_FOWNER\\\",\\\"CAP_FSETID\\\",\\\"CAP_KILL\\\",\\\"CAP_SETGID\\\",\\\"CAP_SETUID\\\",\\\"CAP_SETPCAP\\\",\\\"CAP_LINUX_IMMUTABLE\\\",\\\"CAP_NET_BIND_SERVICE\\\",\\\"CAP_NET_BROADCAST\\\",\\\"CAP_NET_ADMIN\\\",\\\"CAP_NET_RAW\\\",\\\"CAP_IPC_LOCK\\\",\\\"CAP_IPC_OWNER\\\",\\\"CAP_SYS_MODULE\\\",\\\"CAP_SYS_RAWIO\\\",\\\"CAP_SYS_CHROOT\\\",\\\"CAP_SYS_PTRACE\\\",\\\"CAP_SYS_PACCT\\\",\\\"CAP_SYS_ADMIN\\\",\\\"CAP_SYS_BOOT\\\",\\\"CAP_SYS_NICE\\\",\\\"CAP_SYS_RESOURCE\\\",\\\"CAP_SYS_TIME\\\",\\\"CAP_SYS_TTY_CONFIG\\\",\\\"CAP_MKNOD\\\",\\\"CAP_LEASE\\\",\\\"CAP_AUDIT_WRITE\\\",\\\"CAP_AUDIT_CONTROL\\\",\\\"CAP_SETFCAP\\\",\\\"CAP_MAC_OVERRIDE\\\",\\\"CAP_MAC_ADMIN\\\",\\\"CAP_SYSLOG\\\",\\\"CAP_WAKE_ALARM\\\",\\\"CAP_BLOCK_SUSPEND\\\",\\\"CAP_AUDIT_READ\\\",\\\"CAP_PERFMON\\\",\\\"CAP_BPF\\\",\\\"CAP_CHECKPOINT_RESTORE\\\"],\\\"cgroup\\\":{\\\"v1\\\":true,\\\"v2\\\":true,\\\"systemd\\\":true,\\\"systemdUser\\\":true,\\\"rdma\\\":true},\\\"seccomp\\\":{\\\"enabled\\\":true,\\\"actions\\\":[\\\"SCMP_ACT_ALLOW\\\",\\\"SCMP_ACT_ERRNO\\\",\\\"SCMP_ACT_KILL\\\",\\\"SCMP_ACT_KILL_PROCESS\\\",\\\"SCMP_ACT_KILL_THREAD\\\",\\\"SCMP_ACT_LOG\\\",\\\"SCMP_ACT_NOTIFY\\\",\\\"SCMP_ACT_TRACE\\\",\\\"SCMP_ACT_TRAP\\\"],\\\"operators\\\":[\\\"SCMP_CMP_EQ\\\",\\\"SCMP_CMP_GE\\\",\\\"SCMP_CMP_GT\\\",\\\"SCMP_CMP_LE\\\",\\\"SCMP_CMP_LT\\\",\\\"SCMP_CMP_MASKED_EQ\\\",\\\"SCMP_CMP_NE\\\"],\\\"archs\\\":[\\\"SCMP_ARCH_AARCH64\\\",\\\"SCMP_ARCH_ARM\\\",\\\"SCMP_ARCH_MIPS\\\",\\\"SCMP_ARCH_MIPS64\\\",\\\"SCMP_ARCH_MIPS64N32\\\",\\\"SCMP_ARCH_MIPSEL\\\",\\\"SCMP_ARCH_MIPSEL64\\\",\\\"SCMP_ARCH_MIPSEL64N32\\\",\\\"SCMP_ARCH_PPC\\\",\\\"SCMP_ARCH_PPC64\\\",\\\"SCMP_ARCH_PPC64LE\\\",\\\"SCMP_ARCH_RISCV64\\\",\\\"SCMP_ARCH_S390\\\",\\\"SCMP_ARCH_S390X\\\",\\\"SCMP_ARCH_X32\\\",\\\"SCMP_ARCH_X86\\\",\\\"SCMP_ARCH_X86_64\\\"],\\\"knownFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"],\\\"supportedFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"]},\\\"apparmor\\\":{\\\"enabled\\\":true},\\\"selinux\\\":{\\\"enabled\\\":true},\\\"intelRdt\\\":{\\\"enabled\\\":true},\\\"mountExtensions\\\":{\\\"idmap\\\":{\\\"enabled\\\":true}}},\\\"annotations\\\":{\\\"io.github.seccomp.libseccomp.version\\\":\\\"2.5.4\\\",\\\"org.opencontainers.runc.checkpoint.enabled\\\":\\\"true\\\",\\\"org.opencontainers.runc.commit\\\":\\\"v1.3.6-0-g491b69ba\\\",\\\"org.opencontainers.runc.version\\\":\\\"1.3.6\\\\n\\\"},\\\"potentiallyUnsafeConfigAnnotations\\\":[\\\"bundle\\\",\\\"org.systemd.property.\\\",\\\"org.criu.config\\\"]}\"}},\"nvidia\":{\"path\":\"nvidia-container-runtime\",\"status\":{\"org.opencontainers.runtime-spec.features\":\"{\\\"ociVersionMin\\\":\\\"1.0.0\\\",\\\"ociVersionMax\\\":\\\"1.2.1\\\",\\\"hooks\\\":[\\\"prestart\\\",\\\"createRuntime\\\",\\\"createContainer\\\",\\\"startContainer\\\",\\\"poststart\\\",\\\"poststop\\\"],\\\"mountOptions\\\":[\\\"async\\\",\\\"atime\\\",\\\"bind\\\",\\\"defaults\\\",\\\"dev\\\",\\\"diratime\\\",\\\"dirsync\\\",\\\"exec\\\",\\\"iversion\\\",\\\"lazytime\\\",\\\"loud\\\",\\\"mand\\\",\\\"noatime\\\",\\\"nodev\\\",\\\"nodiratime\\\",\\\"noexec\\\",\\\"noiversion\\\",\\\"nolazytime\\\",\\\"nomand\\\",\\\"norelatime\\\",\\\"nostrictatime\\\",\\\"nosuid\\\",\\\"nosymfollow\\\",\\\"private\\\",\\\"ratime\\\",\\\"rbind\\\",\\\"rdev\\\",\\\"rdiratime\\\",\\\"relatime\\\",\\\"remount\\\",\\\"rexec\\\",\\\"rnoatime\\\",\\\"rnodev\\\",\\\"rnodiratime\\\",\\\"rnoexec\\\",\\\"rnorelatime\\\",\\\"rnostrictatime\\\",\\\"rnosuid\\\",\\\"rnosymfollow\\\",\\\"ro\\\",\\\"rprivate\\\",\\\"rrelatime\\\",\\\"rro\\\",\\\"rrw\\\",\\\"rshared\\\",\\\"rslave\\\",\\\"rstrictatime\\\",\\\"rsuid\\\",\\\"rsymfollow\\\",\\\"runbindable\\\",\\\"rw\\\",\\\"shared\\\",\\\"silent\\\",\\\"slave\\\",\\\"strictatime\\\",\\\"suid\\\",\\\"symfollow\\\",\\\"sync\\\",\\\"tmpcopyup\\\",\\\"unbindable\\\"],\\\"linux\\\":{\\\"namespaces\\\":[\\\"cgroup\\\",\\\"ipc\\\",\\\"mount\\\",\\\"network\\\",\\\"pid\\\",\\\"time\\\",\\\"user\\\",\\\"uts\\\"],\\\"capabilities\\\":[\\\"CAP_CHOWN\\\",\\\"CAP_DAC_OVERRIDE\\\",\\\"CAP_DAC_READ_SEARCH\\\",\\\"CAP_FOWNER\\\",\\\"CAP_FSETID\\\",\\\"CAP_KILL\\\",\\\"CAP_SETGID\\\",\\\"CAP_SETUID\\\",\\\"CAP_SETPCAP\\\",\\\"CAP_LINUX_IMMUTABLE\\\",\\\"CAP_NET_BIND_SERVICE\\\",\\\"CAP_NET_BROADCAST\\\",\\\"CAP_NET_ADMIN\\\",\\\"CAP_NET_RAW\\\",\\\"CAP_IPC_LOCK\\\",\\\"CAP_IPC_OWNER\\\",\\\"CAP_SYS_MODULE\\\",\\\"CAP_SYS_RAWIO\\\",\\\"CAP_SYS_CHROOT\\\",\\\"CAP_SYS_PTRACE\\\",\\\"CAP_SYS_PACCT\\\",\\\"CAP_SYS_ADMIN\\\",\\\"CAP_SYS_BOOT\\\",\\\"CAP_SYS_NICE\\\",\\\"CAP_SYS_RESOURCE\\\",\\\"CAP_SYS_TIME\\\",\\\"CAP_SYS_TTY_CONFIG\\\",\\\"CAP_MKNOD\\\",\\\"CAP_LEASE\\\",\\\"CAP_AUDIT_WRITE\\\",\\\"CAP_AUDIT_CONTROL\\\",\\\"CAP_SETFCAP\\\",\\\"CAP_MAC_OVERRIDE\\\",\\\"CAP_MAC_ADMIN\\\",\\\"CAP_SYSLOG\\\",\\\"CAP_WAKE_ALARM\\\",\\\"CAP_BLOCK_SUSPEND\\\",\\\"CAP_AUDIT_READ\\\",\\\"CAP_PERFMON\\\",\\\"CAP_BPF\\\",\\\"CAP_CHECKPOINT_RESTORE\\\"],\\\"cgroup\\\":{\\\"v1\\\":true,\\\"v2\\\":true,\\\"systemd\\\":true,\\\"systemdUser\\\":true,\\\"rdma\\\":true},\\\"seccomp\\\":{\\\"enabled\\\":true,\\\"actions\\\":[\\\"SCMP_ACT_ALLOW\\\",\\\"SCMP_ACT_ERRNO\\\",\\\"SCMP_ACT_KILL\\\",\\\"SCMP_ACT_KILL_PROCESS\\\",\\\"SCMP_ACT_KILL_THREAD\\\",\\\"SCMP_ACT_LOG\\\",\\\"SCMP_ACT_NOTIFY\\\",\\\"SCMP_ACT_TRACE\\\",\\\"SCMP_ACT_TRAP\\\"],\\\"operators\\\":[\\\"SCMP_CMP_EQ\\\",\\\"SCMP_CMP_GE\\\",\\\"SCMP_CMP_GT\\\",\\\"SCMP_CMP_LE\\\",\\\"SCMP_CMP_LT\\\",\\\"SCMP_CMP_MASKED_EQ\\\",\\\"SCMP_CMP_NE\\\"],\\\"archs\\\":[\\\"SCMP_ARCH_AARCH64\\\",\\\"SCMP_ARCH_ARM\\\",\\\"SCMP_ARCH_MIPS\\\",\\\"SCMP_ARCH_MIPS64\\\",\\\"SCMP_ARCH_MIPS64N32\\\",\\\"SCMP_ARCH_MIPSEL\\\",\\\"SCMP_ARCH_MIPSEL64\\\",\\\"SCMP_ARCH_MIPSEL64N32\\\",\\\"SCMP_ARCH_PPC\\\",\\\"SCMP_ARCH_PPC64\\\",\\\"SCMP_ARCH_PPC64LE\\\",\\\"SCMP_ARCH_RISCV64\\\",\\\"SCMP_ARCH_S390\\\",\\\"SCMP_ARCH_S390X\\\",\\\"SCMP_ARCH_X32\\\",\\\"SCMP_ARCH_X86\\\",\\\"SCMP_ARCH_X86_64\\\"],\\\"knownFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"],\\\"supportedFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"]},\\\"apparmor\\\":{\\\"enabled\\\":true},\\\"selinux\\\":"
+                                            },
+                        "wsl_integration":  {
+                                                "classification":  "docker_desktop_distribution_not_detected",
+                                                "status":  "D\u0000e\u0000f\u0000a\u0000u\u0000l\u0000t\u0000 \u0000D\u0000i\u0000s\u0000t\u0000r\u0000i\u0000b\u0000u\u0000t\u0000i\u0000o\u0000n\u0000:\u0000 \u0000U\u0000b\u0000u\u0000n\u0000t\u0000u\u0000\r\u0000\n\u0000D\u0000e\u0000f\u0000a\u0000u\u0000l\u0000t\u0000 \u0000V\u0000e\u0000r\u0000s\u0000i\u0000o\u0000n\u0000:\u0000 \u00002\u0000\r\u0000\n\u0000\r\n",
+                                                "distributions":  " \u0000 \u0000N\u0000A\u0000M\u0000E\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000S\u0000T\u0000A\u0000T\u0000E\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000V\u0000E\u0000R\u0000S\u0000I\u0000O\u0000N\u0000\r\u0000\n\u0000*\u0000 \u0000U\u0000b\u0000u\u0000n\u0000t\u0000u\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000R\u0000u\u0000n\u0000n\u0000i\u0000n\u0000g\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u00002\u0000\r\u0000\n\u0000 \u0000 \u0000d\u0000o\u0000c\u0000k\u0000e\u0000r\u0000-\u0000d\u0000e\u0000s\u0000k\u0000t\u0000o\u0000p\u0000 \u0000 \u0000 \u0000 \u0000R\u0000u\u0000n\u0000n\u0000i\u0000n\u0000g\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u00002\u0000\r\u0000\n\u0000\r\n"
+                                            },
+                        "engine_topology":  {
+                                                "classification":  "single_active_engine_observed",
+                                                "cli_origin_classification":  "multiple_cli_origins",
+                                                "cli_origins":  [
+                                                                    "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker",
+                                                                    "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe"
+                                                                ],
+                                                "context_endpoints":  [
+                                                                          "npipe:////./pipe/docker_engine",
+                                                                          "npipe:////./pipe/dockerDesktopLinuxEngine"
+                                                                      ],
+                                                "context_endpoint_note":  "Multiple configured contexts do not by themselves prove duplicate active engines.",
+                                                "desktop_engine_active":  true,
+                                                "local_wsl_engine_active":  false,
+                                                "local_wsl_engine_status":  "not_checked"
+                                            },
+                        "vhd_attachment":  {
+                                               "classification":  "no_attachment_conflict_observed",
+                                               "references":  [
+
+                                                              ],
+                                               "conflict_indicators":  [
+
+                                                                       ]
+                                           },
+                        "project_origins":  {
+                                                "classification":  "linux_origins_observed",
+                                                "origins":  [
+                                                                "/home/\u003cuser\u003e/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.neo4j.yml",
+                                                                "/home/\u003cuser\u003e/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.yml"
+                                                            ]
+                                            },
+                        "port_owners":  {
+                                            "classification":  "unique_or_no_published_ports",
+                                            "owners":  {
+                                                           "8081":  [
+                                                                        "bioetl"
+                                                                    ]
+                                                       },
+                                            "duplicate_ports":  [
+
+                                                                ]
+                                        },
+                        "bind_path_translation":  {
+                                                      "classification":  "unavailable",
+                                                      "mounts":  "\n\r\nerror: no such object: c381573ea266 3b9c4b1094d9\n"
+                                                  },
+                        "data_capacity":  {
+                                              "classification":  "usage_observed_reserve_unverified",
+                                              "available_bytes":  null,
+                                              "minimum_reserve_bytes":  4294967296,
+                                              "docker_data_df":  "Filesystem           1-blocks       Used Available Use% Mounted on\n\r\ndf: /var/lib/docker: can\u0027t find mount point\n",
+                                              "docker_system_df":  "{\"Active\":\"3\",\"Reclaimable\":\"18.34GB (79%)\",\"Size\":\"22.99GB\",\"TotalCount\":\"36\",\"Type\":\"Images\"}\n{\"Active\":\"2\",\"Reclaimable\":\"131.1kB (0%)\",\"Size\":\"123.2MB\",\"TotalCount\":\"3\",\"Type\":\"Containers\"}\n{\"Active\":\"2\",\"Reclaimable\":\"2.951GB (84%)\",\"Size\":\"3.495GB\",\"TotalCount\":\"47\",\"Type\":\"Local Volumes\"}\n{\"Active\":\"0\",\"Reclaimable\":\"0B\",\"Size\":\"0B\",\"TotalCount\":\"0\",\"Type\":\"Build Cache\"}\n\r\n"
+                                          }
+                    },
+    "observations":  [
+                         {
+                             "command":  [
+                                             "docker",
+                                             "info",
+                                             "--format",
+                                             "{{json .ServerVersion}}"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.279,
+                             "output":  "\"29.6.2\"\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "desktop",
+                                             "status",
+                                             "--help"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.124,
+                             "output":  "Usage:  docker desktop status\n\nShow the status of the Docker Desktop engines\n\nOptions:\n      --format string   Format the output. Accepted values are: pretty,\n                        json (default \"pretty\")\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "desktop",
+                                             "restart",
+                                             "--help"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.124,
+                             "output":  "Usage:  docker desktop restart\n\nRestart Docker Desktop\n\nOptions:\n  -d, --detach            Do not synchronously wait for the requested\n                          operation to complete.\n      --timeout seconds   Terminate the running command after the\n                          specified timeout with a non-zero exit code. A\n                          value of zero (the default) or -1 means no timeout.\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "desktop",
+                                             "stop",
+                                             "--help"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.223,
+                             "output":  "Usage:  docker desktop stop\n\nStop Docker Desktop\n\nOptions:\n  -d, --detach            Do not synchronously wait for the requested\n                          operation to complete.\n      --force             Force Docker Desktop to stop\n      --timeout seconds   Terminate the running command after the\n                          specified timeout with a non-zero exit code. A\n                          value of zero (the default) or -1 means no timeout.\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "desktop",
+                                             "start",
+                                             "--help"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.11,
+                             "output":  "Usage:  docker desktop start\n\nStart Docker Desktop\n\nOptions:\n  -d, --detach            Do not synchronously wait for the requested\n                          operation to complete.\n      --timeout seconds   Terminate the running command after the\n                          specified timeout with a non-zero exit code. A\n                          value of zero (the default) or -1 means no timeout.\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "desktop",
+                                             "logs",
+                                             "--help"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.124,
+                             "output":  "Usage:  docker desktop logs\n\nPrint log entries\n\nOptions:\n  -b, --boot int            Show logs from a specified boot. Zero means\n                            the current or boot, one the second last\n                            boot, and so on.\n  -c, --color               Always enable colored output.\n  -m, --color-mode string   Color mode to use. Can be \u0027default\u0027 or\n                            \u0027priority\u0027 (default \"default\")\n  -D, --directory string    Specifies a custom directory to search for\n                            log entries.\n      --no-color            Disable colored output.\n  -p, --priority int        Filter output by log priorities. -1 (default)\n                            is all, 0 is info or above, 1 warnings or\n                            above, 2 errors. (default -1)\n  -S, --since string        Start showing entries on or newer than the\n                            specified date and time. Uses the\n                            systemd.time(7) format.\n  -u, --unit strings        Filter by one or more categories (e.g.\n                            --unit=com.docker.backend.ipc,com.docker.backend.apiproxy)\n  -U, --until string        Start showing entries on or before than the\n                            specified date and time. Uses the\n                            systemd.time(7) format.\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "desktop",
+                                             "diagnose",
+                                             "--help"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.134,
+                             "output":  "Usage:  docker desktop diagnose\n\nDiagnose Docker Desktop\n\nOptions:\n  -u, --upload   Upload diagnostics\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "desktop",
+                                             "status"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.165,
+                             "output":  "Name                Value\nStatus              running\nSessionID           0b2cdb71-d9d1-4cb1-9593-df2528fa3b09\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "desktop",
+                                             "logs"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.447,
+                             "output":  "[2026-07-21T16:42:44.426530000Z][com.docker.backend.exe] running services\n[2026-07-21T16:42:44.427052600Z][com.docker.backend.exe][W] system telemetry disabled, custom otlp endpoint \"https://desktop.observability-stage.docker.com\" will be ignored\n[2026-07-21T16:42:44.428102600Z][com.docker.backend.exe.install_type] installation source \u0027exe\u0027 found in 0.000000s\n[2026-07-21T16:42:44.428626400Z][com.docker.backend.exe.migrations] running migrations\n[2026-07-21T16:42:44.429139400Z][com.docker.backend.exe.install_type] installation source \u0027exe\u0027 found in 0.000000s\n[2026-07-21T16:42:44.430696000Z][com.docker.backend.exe.settingsloader] loading settings from install-settings.json provider\n[2026-07-21T16:42:44.430696000Z][com.docker.backend.exe.settingsstore] overriding settings store values with values from user\n[2026-07-21T16:42:44.431780100Z][com.docker.backend.exe.settingsstore] updated noWindowsContainers: settings._setting[bool]{Value:false, Beta:false, Locked:false, Source:\"\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:false} -\u003e settings._setting[bool]{Value:true, Beta:false, Locked:false, Source:\"user\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:false}\n[2026-07-21T16:42:44.431780100Z][com.docker.backend.exe.settingsstore] updated settings store values (source = \"user\"): [noWindowsContainers]\n[2026-07-21T16:42:44.431780100Z][com.docker.backend.exe.settingsstore] overriding settings store values with values from install-settings.json\n[2026-07-21T16:42:44.431780100Z][com.docker.backend.exe.settingsstore] updated noWindowsContainers: settings._setting[bool]{Value:false, Beta:false, Locked:false, Source:\"defaults\", Description:\"Do not enable Windows containers.\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:false} -\u003e settings._setting[bool]{Value:true, Beta:false, Locked:false, Source:\"install-settings.json\", Description:\"Do not enable Windows containers.\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:false}\n[2026-07-21T16:42:44.432293300Z][com.docker.backend.exe.settingsstore] updated settings store values (source = \"install-settings.json\"): [noWindowsContainers]\n[2026-07-21T16:42:44.432301400Z][com.docker.backend.exe.settingsloader] loading settings from settings-store.json provider\n[2026-07-21T16:42:44.432301400Z][com.docker.backend.exe.migrations] migrating scout background indexing\n[2026-07-21T16:42:44.432301400Z][com.docker.backend.exe.migrations] migrating cli config\n[2026-07-21T16:42:44.432301400Z][com.docker.backend.exe.migrations] migrating extensions enabled\n[2026-07-21T16:42:44.432301400Z][com.docker.backend.exe.migrations] migrations completed\n[2026-07-21T16:42:44.432301400Z][com.docker.backend.exe.settingsstore] overriding settings store values with values from user\n[2026-07-21T16:42:44.432806000Z][com.docker.backend.exe.settingsstore] updated UpdatePreviousVersion: settings._setting[string]{Value:\"\", Beta:false, Locked:false, Source:\"\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:\"\"} -\u003e settings._setting[string]{Value:\"\", Beta:false, Locked:false, Source:\"user\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:\"\"}\n[2026-07-21T16:42:44.432826200Z][com.docker.backend.exe.settingsstore] updated ExtensionsEnabled: settings._setting[bool]{Value:false, Beta:false, Locked:false, Source:\"\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:false} -\u003e settings._setting[bool]{Value:true, Beta:false, Locked:false, Source:\"user\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:false}\n[2026-07-21T16:42:44.432826200Z][com.docker.backend.exe.settingsstore] updated KubernetesMode: settings._setting[string]{Value:\"\", Beta:false, Locked:false, Source:\"\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:\"\"} -\u003e settings._setting[string]{Value:\"kubeadm\", Beta:false, Locked:false, Source:\"user\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:\"\"}\n[2026-07-21T16:42:44.432826200Z][com.docker.backend.exe.settingsstore][W] converting AutoPauseTimeoutSeconds from type float64 to expected int type\n[2026-07-21T16:42:44.433344800Z][com.docker.backend.exe.settingsstore] updated AutoPauseTimeoutSeconds: settings._setting[int]{Value:0, Beta:false, Locked:false, Source:\"\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:0} -\u003e settings._setting[int]{Value:600, Beta:false, Locked:false, Source:\"user\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:0}\n[2026-07-21T16:42:44.433344800Z][com.docker.backend.exe.settingsstore] updated AutoStart: settings._setting[bool]{Value:false, Beta:false, Locked:false, Source:\"\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:false} -\u003e settings._setting[bool]{Value:false, Beta:false, Locked:false, Source:\"user\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:false}\n[2026-07-21T16:42:44.433344800Z][com.docker.backend.exe.settingsstore] updated EnableIntegrationWithDefaultWslDistro: settings._setting[bool]{Value:false, Beta:false, Locked:false, Source:\"\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:false} -\u003e settings._setting[bool]{Value:true, Beta:false, Locked:false, Source:\"user\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:false}\n[2026-07-21T16:42:44.433344800Z][com.docker.backend.exe.settingsstore] updated KubernetesEnabled: settings._setting[bool]{Value:false, Beta:false, Locked:false, Source:\"\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:false} -\u003e settings._setting[bool]{Value:false, Beta:false, Locked:false, Source:\"user\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:false}\n[2026-07-21T16:42:44.433870200Z][com.docker.backend.exe.settingsstore][W] converting LicenseTermsVersion from type float64 to expected int type\n[2026-07-21T16:42:44.433870200Z][com.docker.backend.exe.settingsstore] updated LicenseTermsVersion: settings._setting[int]{Value:0, Beta:false, Locked:false, Source:\"\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:0} -\u003e settings._setting[int]{Value:2, Beta:false, Locked:false, Source:\"user\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:0}\n[2026-07-21T16:42:44.433870200Z][com.docker.backend.exe.settingsstore][W] converting SettingsVersion from type float64 to expected int type\n[2026-07-21T16:42:44.433870200Z][com.docker.backend.exe.settingsstore] updated SettingsVersion: settings._setting[int]{Value:0, Beta:false, Locked:false, Source:\"\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:0} -\u003e settings._setting[int]{Value:45, Beta:false, Locked:false, Source:\"user\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:0}\n[2026-07-21T16:42:44.434390600Z][com.docker.backend.exe.settingsstore] updated ShowKubernetesSystemContainers: settings._setting[bool]{Value:false, Beta:false, Locked:false, Source:\"\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Readonly:false, DefaultValue:false} -\u003e settings._setting[bool]{Value:true, Beta:false, Locked:false, Source:\"user\", Description:\"\", AllowedValues:interface {}(nil), AllowedValuesFilter:\"\", Rea"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "desktop",
+                                             "diagnose"
+                                         ],
+                             "returncode":  124,
+                             "timed_out":  true,
+                             "duration_seconds":  22.012,
+                             "output":  "Command exceeded its deadline and output capture did not complete."
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "version",
+                                             "--format",
+                                             "{{json .}}"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.075,
+                             "output":  "{\"Client\":{\"Version\":\"29.6.2\",\"ApiVersion\":\"1.55\",\"DefaultAPIVersion\":\"1.55\",\"GitCommit\":\"dfc4efb\",\"GoVersion\":\"go1.26.5\",\"Os\":\"windows\",\"Arch\":\"amd64\",\"BuildTime\":\"Thu Jul 16 16:14:59 2026\",\"Context\":\"desktop-linux\"},\"Server\":{\"Platform\":{\"Name\":\"Docker Desktop 4.83.0 (234302)\"},\"Version\":\"29.6.2\",\"ApiVersion\":\"1.55\",\"MinAPIVersion\":\"1.40\",\"Os\":\"linux\",\"Arch\":\"amd64\",\"Components\":[{\"Name\":\"Engine\",\"Version\":\"29.6.2\",\"Details\":{\"ApiVersion\":\"1.55\",\"Arch\":\"amd64\",\"BuildTime\":\"Thu Jul 16 16:12:20 2026\",\"Experimental\":\"false\",\"GitCommit\":\"3d80467\",\"GoVersion\":\"go1.26.5\",\"KernelVersion\":\"6.6.87.2-microsoft-standard-WSL2\",\"MinAPIVersion\":\"1.40\",\"Module\":\"github.com/moby/moby/v2\",\"ModuleVersion\":\"v2.0.0+unknown\",\"Os\":\"linux\"}},{\"Name\":\"containerd\",\"Version\":\"v2.2.5\",\"Details\":{\"GitCommit\":\"e53c7c1516c3b2bff98eb76f1f4117477e6f4e66\"}},{\"Name\":\"runc\",\"Version\":\"1.3.6\",\"Details\":{\"GitCommit\":\"v1.3.6-0-g491b69ba\"}},{\"Name\":\"docker-init\",\"Version\":\"0.19.0\",\"Details\":{\"GitCommit\":\"de40ad0\"}}],\"GitCommit\":\"3d80467\",\"GoVersion\":\"go1.26.5\",\"KernelVersion\":\"6.6.87.2-microsoft-standard-WSL2\",\"BuildTime\":\"2026-07-16T16:12:20.000000000+00:00\"}}\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "info",
+                                             "--format",
+                                             "{{json .}}"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.283,
+                             "output":  "{\"ID\":\"d4078961-c957-455e-a77e-f930668dd393\",\"Containers\":3,\"ContainersRunning\":1,\"ContainersPaused\":0,\"ContainersStopped\":2,\"Images\":36,\"Driver\":\"overlayfs\",\"DriverStatus\":[[\"driver-type\",\"io.containerd.snapshotter.v1\"]],\"Plugins\":{\"Volume\":[\"local\"],\"Network\":[\"bridge\",\"host\",\"ipvlan\",\"macvlan\",\"null\",\"overlay\"],\"Authorization\":null,\"Log\":[\"awslogs\",\"fluentd\",\"gcplogs\",\"gelf\",\"journald\",\"json-file\",\"local\",\"splunk\",\"syslog\"]},\"MemoryLimit\":true,\"SwapLimit\":true,\"CpuCfsPeriod\":true,\"CpuCfsQuota\":true,\"CPUShares\":true,\"CPUSet\":true,\"PidsLimit\":true,\"IPv4Forwarding\":true,\"Debug\":false,\"NFd\":54,\"OomKillDisable\":false,\"NGoroutines\":96,\"SystemTime\":\"2026-07-21T16:43:28.613946406Z\",\"LoggingDriver\":\"json-file\",\"CgroupDriver\":\"cgroupfs\",\"CgroupVersion\":\"2\",\"NEventsListener\":14,\"KernelVersion\":\"6.6.87.2-microsoft-standard-WSL2\",\"OperatingSystem\":\"Docker Desktop\",\"OSVersion\":\"\",\"OSType\":\"linux\",\"Architecture\":\"x86_64\",\"IndexServerAddress\":\"https://index.docker.io/v1/\",\"RegistryConfig\":{\"InsecureRegistryCIDRs\":[\"::1/128\",\"127.0.0.0/8\"],\"IndexConfigs\":{\"docker.io\":{\"Name\":\"docker.io\",\"Mirrors\":[],\"Secure\":true,\"Official\":true},\"hubproxy.docker.internal:5555\":{\"Name\":\"hubproxy.docker.internal:5555\",\"Mirrors\":[],\"Secure\":false,\"Official\":false}},\"Mirrors\":[]},\"NCPU\":8,\"MemTotal\":16771153920,\"GenericResources\":null,\"DockerRootDir\":\"/var/lib/docker\",\"HttpProxy\":\"http.docker.internal:3128\",\"HttpsProxy\":\"http.docker.internal:3128\",\"NoProxy\":\"hubproxy.docker.internal\",\"Name\":\"docker-desktop\",\"Labels\":[\"com.docker.desktop.address=npipe://\\\\\\\\.\\\\pipe\\\\docker_cli\"],\"ExperimentalBuild\":false,\"ServerVersion\":\"29.6.2\",\"Runtimes\":{\"io.containerd.runc.v2\":{\"path\":\"runc\",\"status\":{\"org.opencontainers.runtime-spec.features\":\"{\\\"ociVersionMin\\\":\\\"1.0.0\\\",\\\"ociVersionMax\\\":\\\"1.2.1\\\",\\\"hooks\\\":[\\\"prestart\\\",\\\"createRuntime\\\",\\\"createContainer\\\",\\\"startContainer\\\",\\\"poststart\\\",\\\"poststop\\\"],\\\"mountOptions\\\":[\\\"async\\\",\\\"atime\\\",\\\"bind\\\",\\\"defaults\\\",\\\"dev\\\",\\\"diratime\\\",\\\"dirsync\\\",\\\"exec\\\",\\\"iversion\\\",\\\"lazytime\\\",\\\"loud\\\",\\\"mand\\\",\\\"noatime\\\",\\\"nodev\\\",\\\"nodiratime\\\",\\\"noexec\\\",\\\"noiversion\\\",\\\"nolazytime\\\",\\\"nomand\\\",\\\"norelatime\\\",\\\"nostrictatime\\\",\\\"nosuid\\\",\\\"nosymfollow\\\",\\\"private\\\",\\\"ratime\\\",\\\"rbind\\\",\\\"rdev\\\",\\\"rdiratime\\\",\\\"relatime\\\",\\\"remount\\\",\\\"rexec\\\",\\\"rnoatime\\\",\\\"rnodev\\\",\\\"rnodiratime\\\",\\\"rnoexec\\\",\\\"rnorelatime\\\",\\\"rnostrictatime\\\",\\\"rnosuid\\\",\\\"rnosymfollow\\\",\\\"ro\\\",\\\"rprivate\\\",\\\"rrelatime\\\",\\\"rro\\\",\\\"rrw\\\",\\\"rshared\\\",\\\"rslave\\\",\\\"rstrictatime\\\",\\\"rsuid\\\",\\\"rsymfollow\\\",\\\"runbindable\\\",\\\"rw\\\",\\\"shared\\\",\\\"silent\\\",\\\"slave\\\",\\\"strictatime\\\",\\\"suid\\\",\\\"symfollow\\\",\\\"sync\\\",\\\"tmpcopyup\\\",\\\"unbindable\\\"],\\\"linux\\\":{\\\"namespaces\\\":[\\\"cgroup\\\",\\\"ipc\\\",\\\"mount\\\",\\\"network\\\",\\\"pid\\\",\\\"time\\\",\\\"user\\\",\\\"uts\\\"],\\\"capabilities\\\":[\\\"CAP_CHOWN\\\",\\\"CAP_DAC_OVERRIDE\\\",\\\"CAP_DAC_READ_SEARCH\\\",\\\"CAP_FOWNER\\\",\\\"CAP_FSETID\\\",\\\"CAP_KILL\\\",\\\"CAP_SETGID\\\",\\\"CAP_SETUID\\\",\\\"CAP_SETPCAP\\\",\\\"CAP_LINUX_IMMUTABLE\\\",\\\"CAP_NET_BIND_SERVICE\\\",\\\"CAP_NET_BROADCAST\\\",\\\"CAP_NET_ADMIN\\\",\\\"CAP_NET_RAW\\\",\\\"CAP_IPC_LOCK\\\",\\\"CAP_IPC_OWNER\\\",\\\"CAP_SYS_MODULE\\\",\\\"CAP_SYS_RAWIO\\\",\\\"CAP_SYS_CHROOT\\\",\\\"CAP_SYS_PTRACE\\\",\\\"CAP_SYS_PACCT\\\",\\\"CAP_SYS_ADMIN\\\",\\\"CAP_SYS_BOOT\\\",\\\"CAP_SYS_NICE\\\",\\\"CAP_SYS_RESOURCE\\\",\\\"CAP_SYS_TIME\\\",\\\"CAP_SYS_TTY_CONFIG\\\",\\\"CAP_MKNOD\\\",\\\"CAP_LEASE\\\",\\\"CAP_AUDIT_WRITE\\\",\\\"CAP_AUDIT_CONTROL\\\",\\\"CAP_SETFCAP\\\",\\\"CAP_MAC_OVERRIDE\\\",\\\"CAP_MAC_ADMIN\\\",\\\"CAP_SYSLOG\\\",\\\"CAP_WAKE_ALARM\\\",\\\"CAP_BLOCK_SUSPEND\\\",\\\"CAP_AUDIT_READ\\\",\\\"CAP_PERFMON\\\",\\\"CAP_BPF\\\",\\\"CAP_CHECKPOINT_RESTORE\\\"],\\\"cgroup\\\":{\\\"v1\\\":true,\\\"v2\\\":true,\\\"systemd\\\":true,\\\"systemdUser\\\":true,\\\"rdma\\\":true},\\\"seccomp\\\":{\\\"enabled\\\":true,\\\"actions\\\":[\\\"SCMP_ACT_ALLOW\\\",\\\"SCMP_ACT_ERRNO\\\",\\\"SCMP_ACT_KILL\\\",\\\"SCMP_ACT_KILL_PROCESS\\\",\\\"SCMP_ACT_KILL_THREAD\\\",\\\"SCMP_ACT_LOG\\\",\\\"SCMP_ACT_NOTIFY\\\",\\\"SCMP_ACT_TRACE\\\",\\\"SCMP_ACT_TRAP\\\"],\\\"operators\\\":[\\\"SCMP_CMP_EQ\\\",\\\"SCMP_CMP_GE\\\",\\\"SCMP_CMP_GT\\\",\\\"SCMP_CMP_LE\\\",\\\"SCMP_CMP_LT\\\",\\\"SCMP_CMP_MASKED_EQ\\\",\\\"SCMP_CMP_NE\\\"],\\\"archs\\\":[\\\"SCMP_ARCH_AARCH64\\\",\\\"SCMP_ARCH_ARM\\\",\\\"SCMP_ARCH_MIPS\\\",\\\"SCMP_ARCH_MIPS64\\\",\\\"SCMP_ARCH_MIPS64N32\\\",\\\"SCMP_ARCH_MIPSEL\\\",\\\"SCMP_ARCH_MIPSEL64\\\",\\\"SCMP_ARCH_MIPSEL64N32\\\",\\\"SCMP_ARCH_PPC\\\",\\\"SCMP_ARCH_PPC64\\\",\\\"SCMP_ARCH_PPC64LE\\\",\\\"SCMP_ARCH_RISCV64\\\",\\\"SCMP_ARCH_S390\\\",\\\"SCMP_ARCH_S390X\\\",\\\"SCMP_ARCH_X32\\\",\\\"SCMP_ARCH_X86\\\",\\\"SCMP_ARCH_X86_64\\\"],\\\"knownFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"],\\\"supportedFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"]},\\\"apparmor\\\":{\\\"enabled\\\":true},\\\"selinux\\\":{\\\"enabled\\\":true},\\\"intelRdt\\\":{\\\"enabled\\\":true},\\\"mountExtensions\\\":{\\\"idmap\\\":{\\\"enabled\\\":true}}},\\\"annotations\\\":{\\\"io.github.seccomp.libseccomp.version\\\":\\\"2.5.4\\\",\\\"org.opencontainers.runc.checkpoint.enabled\\\":\\\"true\\\",\\\"org.opencontainers.runc.commit\\\":\\\"v1.3.6-0-g491b69ba\\\",\\\"org.opencontainers.runc.version\\\":\\\"1.3.6\\\\n\\\"},\\\"potentiallyUnsafeConfigAnnotations\\\":[\\\"bundle\\\",\\\"org.systemd.property.\\\",\\\"org.criu.config\\\"]}\"}},\"nvidia\":{\"path\":\"nvidia-container-runtime\",\"status\":{\"org.opencontainers.runtime-spec.features\":\"{\\\"ociVersionMin\\\":\\\"1.0.0\\\",\\\"ociVersionMax\\\":\\\"1.2.1\\\",\\\"hooks\\\":[\\\"prestart\\\",\\\"createRuntime\\\",\\\"createContainer\\\",\\\"startContainer\\\",\\\"poststart\\\",\\\"poststop\\\"],\\\"mountOptions\\\":[\\\"async\\\",\\\"atime\\\",\\\"bind\\\",\\\"defaults\\\",\\\"dev\\\",\\\"diratime\\\",\\\"dirsync\\\",\\\"exec\\\",\\\"iversion\\\",\\\"lazytime\\\",\\\"loud\\\",\\\"mand\\\",\\\"noatime\\\",\\\"nodev\\\",\\\"nodiratime\\\",\\\"noexec\\\",\\\"noiversion\\\",\\\"nolazytime\\\",\\\"nomand\\\",\\\"norelatime\\\",\\\"nostrictatime\\\",\\\"nosuid\\\",\\\"nosymfollow\\\",\\\"private\\\",\\\"ratime\\\",\\\"rbind\\\",\\\"rdev\\\",\\\"rdiratime\\\",\\\"relatime\\\",\\\"remount\\\",\\\"rexec\\\",\\\"rnoatime\\\",\\\"rnodev\\\",\\\"rnodiratime\\\",\\\"rnoexec\\\",\\\"rnorelatime\\\",\\\"rnostrictatime\\\",\\\"rnosuid\\\",\\\"rnosymfollow\\\",\\\"ro\\\",\\\"rprivate\\\",\\\"rrelatime\\\",\\\"rro\\\",\\\"rrw\\\",\\\"rshared\\\",\\\"rslave\\\",\\\"rstrictatime\\\",\\\"rsuid\\\",\\\"rsymfollow\\\",\\\"runbindable\\\",\\\"rw\\\",\\\"shared\\\",\\\"silent\\\",\\\"slave\\\",\\\"strictatime\\\",\\\"suid\\\",\\\"symfollow\\\",\\\"sync\\\",\\\"tmpcopyup\\\",\\\"unbindable\\\"],\\\"linux\\\":{\\\"namespaces\\\":[\\\"cgroup\\\",\\\"ipc\\\",\\\"mount\\\",\\\"network\\\",\\\"pid\\\",\\\"time\\\",\\\"user\\\",\\\"uts\\\"],\\\"capabilities\\\":[\\\"CAP_CHOWN\\\",\\\"CAP_DAC_OVERRIDE\\\",\\\"CAP_DAC_READ_SEARCH\\\",\\\"CAP_FOWNER\\\",\\\"CAP_FSETID\\\",\\\"CAP_KILL\\\",\\\"CAP_SETGID\\\",\\\"CAP_SETUID\\\",\\\"CAP_SETPCAP\\\",\\\"CAP_LINUX_IMMUTABLE\\\",\\\"CAP_NET_BIND_SERVICE\\\",\\\"CAP_NET_BROADCAST\\\",\\\"CAP_NET_ADMIN\\\",\\\"CAP_NET_RAW\\\",\\\"CAP_IPC_LOCK\\\",\\\"CAP_IPC_OWNER\\\",\\\"CAP_SYS_MODULE\\\",\\\"CAP_SYS_RAWIO\\\",\\\"CAP_SYS_CHROOT\\\",\\\"CAP_SYS_PTRACE\\\",\\\"CAP_SYS_PACCT\\\",\\\"CAP_SYS_ADMIN\\\",\\\"CAP_SYS_BOOT\\\",\\\"CAP_SYS_NICE\\\",\\\"CAP_SYS_RESOURCE\\\",\\\"CAP_SYS_TIME\\\",\\\"CAP_SYS_TTY_CONFIG\\\",\\\"CAP_MKNOD\\\",\\\"CAP_LEASE\\\",\\\"CAP_AUDIT_WRITE\\\",\\\"CAP_AUDIT_CONTROL\\\",\\\"CAP_SETFCAP\\\",\\\"CAP_MAC_OVERRIDE\\\",\\\"CAP_MAC_ADMIN\\\",\\\"CAP_SYSLOG\\\",\\\"CAP_WAKE_ALARM\\\",\\\"CAP_BLOCK_SUSPEND\\\",\\\"CAP_AUDIT_READ\\\",\\\"CAP_PERFMON\\\",\\\"CAP_BPF\\\",\\\"CAP_CHECKPOINT_RESTORE\\\"],\\\"cgroup\\\":{\\\"v1\\\":true,\\\"v2\\\":true,\\\"systemd\\\":true,\\\"systemdUser\\\":true,\\\"rdma\\\":true},\\\"seccomp\\\":{\\\"enabled\\\":true,\\\"actions\\\":[\\\"SCMP_ACT_ALLOW\\\",\\\"SCMP_ACT_ERRNO\\\",\\\"SCMP_ACT_KILL\\\",\\\"SCMP_ACT_KILL_PROCESS\\\",\\\"SCMP_ACT_KILL_THREAD\\\",\\\"SCMP_ACT_LOG\\\",\\\"SCMP_ACT_NOTIFY\\\",\\\"SCMP_ACT_TRACE\\\",\\\"SCMP_ACT_TRAP\\\"],\\\"operators\\\":[\\\"SCMP_CMP_EQ\\\",\\\"SCMP_CMP_GE\\\",\\\"SCMP_CMP_GT\\\",\\\"SCMP_CMP_LE\\\",\\\"SCMP_CMP_LT\\\",\\\"SCMP_CMP_MASKED_EQ\\\",\\\"SCMP_CMP_NE\\\"],\\\"archs\\\":[\\\"SCMP_ARCH_AARCH64\\\",\\\"SCMP_ARCH_ARM\\\",\\\"SCMP_ARCH_MIPS\\\",\\\"SCMP_ARCH_MIPS64\\\",\\\"SCMP_ARCH_MIPS64N32\\\",\\\"SCMP_ARCH_MIPSEL\\\",\\\"SCMP_ARCH_MIPSEL64\\\",\\\"SCMP_ARCH_MIPSEL64N32\\\",\\\"SCMP_ARCH_PPC\\\",\\\"SCMP_ARCH_PPC64\\\",\\\"SCMP_ARCH_PPC64LE\\\",\\\"SCMP_ARCH_RISCV64\\\",\\\"SCMP_ARCH_S390\\\",\\\"SCMP_ARCH_S390X\\\",\\\"SCMP_ARCH_X32\\\",\\\"SCMP_ARCH_X86\\\",\\\"SCMP_ARCH_X86_64\\\"],\\\"knownFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"],\\\"supportedFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"]},\\\"apparmor\\\":{\\\"enabled\\\":true},\\\"selinux\\\":"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "context",
+                                             "show"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.077,
+                             "output":  "desktop-linux\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "context",
+                                             "ls",
+                                             "--format",
+                                             "{{json .}}"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.094,
+                             "output":  "{\"Current\":false,\"Description\":\"Current DOCKER_HOST based configuration\",\"DockerEndpoint\":\"npipe:////./pipe/docker_engine\",\"Error\":\"\",\"Name\":\"default\"}\n{\"Current\":true,\"Description\":\"Docker Desktop\",\"DockerEndpoint\":\"npipe:////./pipe/dockerDesktopLinuxEngine\",\"Error\":\"\",\"Name\":\"desktop-linux\"}\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "compose",
+                                             "ls",
+                                             "--all",
+                                             "--format",
+                                             "json"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.186,
+                             "output":  "[{\"Name\":\"bioetl-main\",\"Status\":\"running(1)\",\"ConfigFiles\":\"/home/\u003cuser\u003e/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.yml\"},{\"Name\":\"bioetl-neo4j\",\"Status\":\"restarting(1)\",\"ConfigFiles\":\"/home/\u003cuser\u003e/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.neo4j.yml\"}]\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "ps",
+                                             "--all",
+                                             "--format",
+                                             "{{json .}}"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.136,
+                             "output":  "{\"Command\":\"\\\"bioetl quarantine sΓÇª\\\"\",\"CreatedAt\":\"2026-07-21 19:16:02 +0300 EEST\",\"HealthStatus\":\"healthy\",\"ID\":\"c381573ea266\",\"Image\":\"bioetl-main-bioetl\",\"Labels\":\"com.docker.compose.config-hash=f617911203f32c708e955ab4c090979e1ce81e440169fdcfa90d59736d7507c1,com.docker.compose.container-number=1,com.docker.compose.depends_on=,com.docker.compose.image=sha256:b5fbe16cd9894e1da2d1c904c1fcfcd77a56cd56177470ed370e64f295ee9f9e,com.docker.compose.oneoff=False,com.docker.compose.project.config_files=/home/\u003cuser\u003e/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.yml,com.docker.compose.project.working_dir=/home/\u003cuser\u003e/.local/share/bioetl-runtime/BioactivityDataAcquisition2,com.docker.compose.project=bioetl-main,com.docker.compose.replace=bioetl,com.docker.compose.service=bioetl,com.docker.compose.version=5.3.1,desktop.docker.io/ports.scheme=v2,desktop.docker.io/ports/8081/tcp=127.0.0.1:8081,desktop.docker.io/wsl-distro=Ubuntu\",\"LocalVolumes\":\"0\",\"Mounts\":\"\",\"Names\":\"bioetl\",\"Networks\":\"bioetl-runtime,bioetl-monitoring\",\"Platform\":{\"architecture\":\"amd64\",\"os\":\"linux\"},\"Ports\":\"127.0.0.1:8081-\\u003e8081/tcp\",\"RunningFor\":\"27 minutes ago\",\"Size\":\"20.5kB (virtual 847MB)\",\"State\":\"running\",\"Status\":\"Up 41 seconds (healthy)\"}\n{\"Command\":\"\\\"/startup/docker-entΓÇª\\\"\",\"CreatedAt\":\"2026-07-21 16:29:23 +0300 EEST\",\"HealthStatus\":\"unhealthy\",\"ID\":\"3b9c4b1094d9\",\"Image\":\"neo4j:5.15-community\",\"Labels\":\"com.docker.compose.config-hash=9716def1cec6da8a51944ee98a570fbd8f31a8d1f2bf7993a9c95a82d27b5d8f,com.docker.compose.container-number=1,com.docker.compose.depends_on=,com.docker.compose.image=sha256:d9e2fb1ba398536e50d22ebc3d5d585baa086c1c0cf8e5b96bdc9e11e87e002a,com.docker.compose.oneoff=False,com.docker.compose.project.config_files=/home/\u003cuser\u003e/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.neo4j.yml,com.docker.compose.project.working_dir=/home/\u003cuser\u003e/.local/share/bioetl-runtime/BioactivityDataAcquisition2,com.docker.compose.project=bioetl-neo4j,com.docker.compose.replace=bioetl-neo4j,com.docker.compose.service=neo4j,com.docker.compose.version=5.3.1,desktop.docker.io/ports.scheme=v2,desktop.docker.io/ports/7474/tcp=127.0.0.1:7474,desktop.docker.io/ports/7687/tcp=127.0.0.1:7687,desktop.docker.io/wsl-distro=Ubuntu\",\"LocalVolumes\":\"2\",\"Mounts\":\"bioetl-neo4j_nΓÇª,bioetl-neo4j_nΓÇª\",\"Names\":\"bioetl-neo4j\",\"Networks\":\"bioetl-runtime\",\"Platform\":{\"architecture\":\"amd64\",\"os\":\"linux\"},\"Ports\":\"\",\"RunningFor\":\"3 hours ago\",\"Size\":\"123MB (virtual 630MB)\",\"State\":\"restarting\",\"Status\":\"Restarting (1) 6 seconds ago\"}\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "inspect",
+                                             "--format",
+                                             "{{range .Mounts}}{{printf \"%s|%s|%s\\\\n\" .Type .Source .Destination}}{{end}}",
+                                             "c381573ea266 3b9c4b1094d9"
+                                         ],
+                             "returncode":  1,
+                             "timed_out":  false,
+                             "duration_seconds":  0.103,
+                             "output":  "\n\r\nerror: no such object: c381573ea266 3b9c4b1094d9\n"
+                         },
+                         {
+                             "command":  [
+                                             "docker",
+                                             "system",
+                                             "df",
+                                             "--format",
+                                             "{{json .}}"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  1.769,
+                             "output":  "{\"Active\":\"3\",\"Reclaimable\":\"18.34GB (79%)\",\"Size\":\"22.99GB\",\"TotalCount\":\"36\",\"Type\":\"Images\"}\n{\"Active\":\"2\",\"Reclaimable\":\"131.1kB (0%)\",\"Size\":\"123.2MB\",\"TotalCount\":\"3\",\"Type\":\"Containers\"}\n{\"Active\":\"2\",\"Reclaimable\":\"2.951GB (84%)\",\"Size\":\"3.495GB\",\"TotalCount\":\"47\",\"Type\":\"Local Volumes\"}\n{\"Active\":\"0\",\"Reclaimable\":\"0B\",\"Size\":\"0B\",\"TotalCount\":\"0\",\"Type\":\"Build Cache\"}\n\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "wsl.exe",
+                                             "--status"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.084,
+                             "output":  "D\u0000e\u0000f\u0000a\u0000u\u0000l\u0000t\u0000 \u0000D\u0000i\u0000s\u0000t\u0000r\u0000i\u0000b\u0000u\u0000t\u0000i\u0000o\u0000n\u0000:\u0000 \u0000U\u0000b\u0000u\u0000n\u0000t\u0000u\u0000\r\u0000\n\u0000D\u0000e\u0000f\u0000a\u0000u\u0000l\u0000t\u0000 \u0000V\u0000e\u0000r\u0000s\u0000i\u0000o\u0000n\u0000:\u0000 \u00002\u0000\r\u0000\n\u0000\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "wsl.exe",
+                                             "--list",
+                                             "--verbose"
+                                         ],
+                             "returncode":  0,
+                             "timed_out":  false,
+                             "duration_seconds":  0.068,
+                             "output":  " \u0000 \u0000N\u0000A\u0000M\u0000E\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000S\u0000T\u0000A\u0000T\u0000E\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000V\u0000E\u0000R\u0000S\u0000I\u0000O\u0000N\u0000\r\u0000\n\u0000*\u0000 \u0000U\u0000b\u0000u\u0000n\u0000t\u0000u\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000R\u0000u\u0000n\u0000n\u0000i\u0000n\u0000g\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u00002\u0000\r\u0000\n\u0000 \u0000 \u0000d\u0000o\u0000c\u0000k\u0000e\u0000r\u0000-\u0000d\u0000e\u0000s\u0000k\u0000t\u0000o\u0000p\u0000 \u0000 \u0000 \u0000 \u0000R\u0000u\u0000n\u0000n\u0000i\u0000n\u0000g\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u00002\u0000\r\u0000\n\u0000\r\n"
+                         },
+                         {
+                             "command":  [
+                                             "wsl.exe",
+                                             "-d",
+                                             "docker-desktop",
+                                             "--exec",
+                                             "df",
+                                             "-B1",
+                                             "/var/lib/docker"
+                                         ],
+                             "returncode":  1,
+                             "timed_out":  false,
+                             "duration_seconds":  0.153,
+                             "output":  "Filesystem           1-blocks       Used Available Use% Mounted on\n\r\ndf: /var/lib/docker: can\u0027t find mount point\n"
+                         }
+                     ],
+    "redaction_applied":  true,
+    "last_resort_requested":  false,
+    "last_resort_token_valid":  "\u003credacted\u003e"
+}

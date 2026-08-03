@@ -1,0 +1,28 @@
+{
+  "schema_version": "unit-fs-heavy-classification-v1",
+  "linked_issue": "#6893",
+  "parent_epic": "#6890",
+  "snapshot_date": "2026-07-28",
+  "scan": {
+    "tmp_path_files": 217,
+    "write_text_files": 161,
+    "domain_possible_io_files": 8
+  },
+  "policy": {
+    "domain_unit": "must remain free of network and durable FS side effects",
+    "repo_backed": "filesystem/config-path contracts under tests/unit/repo_backed with pytest.mark.repo_backed",
+    "integration": "Delta/storage/network adapter behavior",
+    "unit_fast_excludes": [
+      "tests/unit/scripts",
+      "tests/unit/repo_backed",
+      "repo_backed",
+      "subprocess_backed",
+      "slow",
+      "benchmark",
+      "memory"
+    ]
+  },
+  "decision": "classify_on_touch_plus_document_lane_model",
+  "rationale": "Mass-moving 200+ files in one wave is high-risk. Close TB-03 with policy + census + lane docs; migrate FS-heavy modules to repo_backed/integration on touch.",
+  "follow_up": "Migrate highest-churn FS-heavy unit modules when next edited; do not enlarge unit-fast."
+}

@@ -1,0 +1,98 @@
+{
+  "schema_version": "refactoring-followups-6097-6100-closeout-v1",
+  "reviewed_on": "2026-07-08",
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "issues": [
+    {
+      "number": 6097,
+      "status": "closed-ready",
+      "title": "RF-005: Freeze and clarify public facade and entrypoint ownership",
+      "evidence": [
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_public_facade_inventory.py",
+        "tests/architecture/test_public_surface_importer_census_governance.py"
+      ],
+      "decision": "retained public entrypoints and export facades remain stable public API seams with explicit owners, call-site policy, migration path, and exit criteria"
+    },
+    {
+      "number": 6098,
+      "status": "closed-ready",
+      "title": "RF-006: Reduce accepted runtime import SCC budget",
+      "evidence": [
+        "src/bioetl/infrastructure/storage/support/_atomic_replace.py",
+        "src/bioetl/infrastructure/storage/support/atomic_group.py",
+        "src/bioetl/infrastructure/storage/support/atomic_ops.py",
+        "tests/architecture/test_runtime_import_scc.py",
+        "configs/quality/test_governance_audit.yaml"
+      ],
+      "decision": "atomic write replace/error primitives were split into a directed support module and the reviewed runtime SCC budget was ratcheted from 3 to 2"
+    },
+    {
+      "number": 6099,
+      "status": "closed-ready",
+      "title": "RF-007: Simplify config contract evolution governance",
+      "evidence": [
+        "scripts/schema/generate_config_matrix.py",
+        "reports/quality/config-discrepancy-baseline.json",
+        "reports/quality/contract-registry-diagnostics.json",
+        "configs/quality/config_compatibility_registry.yaml",
+        "tests/architecture/test_config_discrepancy_metrics_ratchets.py"
+      ],
+      "decision": "generated config parameter taxonomy now publishes group owners and a compatibility-preserving evolution policy tied to the config compatibility registry"
+    },
+    {
+      "number": 6100,
+      "status": "closed-ready",
+      "title": "RF-008: Add VCR and replay preflight reliability gate",
+      "evidence": [
+        "scripts/engineering/qa/vcr/check_replay_preflight.py",
+        "tests/unit/scripts/qa/test_vcr_replay_preflight.py",
+        "scripts/engineering/qa/vcr/__main__.py",
+        "scripts/engineering/qa/__main__.py",
+        "docs/03-guides/testing.md"
+      ],
+      "decision": "replay-heavy lanes have a fast preflight command that reports exact unresolved cassette pointers before pytest setup and documents git lfs pull remediation"
+    }
+  ],
+  "ratchets": {
+    "retained_entrypoint_count": {
+      "current": 12,
+      "max": 12,
+      "source": "reports/quality/compatibility-importer-census.json"
+    },
+    "retained_public_export_facade_count": {
+      "current": 4,
+      "max": 4,
+      "source": "reports/quality/compatibility-importer-census.json"
+    },
+    "reviewed_runtime_scc_budget": {
+      "opening": 3,
+      "current": 2,
+      "max": 2,
+      "source": "tests/architecture/test_runtime_import_scc.py"
+    },
+    "config_inconsistent_parameter_count": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/quality/config-discrepancy-baseline.json"
+    },
+    "contract_registry_blocking_issue_count": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/quality/contract-registry-diagnostics.json"
+    },
+    "vcr_unowned_cassette_count": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/quality/vcr-metadata-catalog.json"
+    }
+  },
+  "validation": [
+    "uv run pytest tests/architecture/test_runtime_import_scc.py",
+    "uv run pytest tests/unit/infrastructure/storage/test_atomic_write_group.py",
+    "uv run pytest tests/unit/scripts/qa/test_vcr_replay_preflight.py",
+    "uv run pytest tests/architecture/test_config_discrepancy_metrics_ratchets.py",
+    "uv run pytest tests/architecture/test_refactoring_followups_6097_6100_closeout.py"
+  ]
+}

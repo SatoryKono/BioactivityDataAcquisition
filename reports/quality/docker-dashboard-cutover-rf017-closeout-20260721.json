@@ -1,0 +1,216 @@
+{
+  "contract": "docker_dashboard_cutover_rf017_closeout_v1",
+  "generated_at": "2026-07-21T13:18:11.762565+00:00",
+  "issues": [
+    6311,
+    6303
+  ],
+  "verdict": "ready_to_close",
+  "closed_by": "agent_session_rf017_20260721",
+  "debt_outcome": "unchanged",
+  "observation": {
+    "ok": true,
+    "restart_count_delta": 0,
+    "oom_kills": 0,
+    "unresolved_unhealthy": 0,
+    "failures": []
+  },
+  "observation_meta": {
+    "status": "complete",
+    "attempt": 2,
+    "required_hours": 2.4,
+    "started_at": "2026-07-21T08:43:04.438078+00:00",
+    "planned_finish_at": "2026-07-21T11:07:04.438078+00:00",
+    "finished_at": "2026-07-21T13:15:10.610434+00:00",
+    "elapsed_hours": 4.535047876666667,
+    "mid_window_incidents": [
+      {
+        "at": "2026-07-21T08:53:27.687678+00:00",
+        "kind": "docker_desktop_engine_unavailable_then_recovered",
+        "detail": "Windows docker npipe and WSL docker.sock both unreachable; Docker Desktop started (29.6.1). Required services returned running/healthy with RestartCount still 0 (prometheus/pushgateway/grafana/renderer/bioetl). Canonical compose origins retained (no /tmp, no E:). Grafana briefly health=starting then healthy.",
+        "actions": [
+          "Start-Process Docker Desktop.exe",
+          "wait until docker info ready",
+          "confirm required services healthy"
+        ]
+      }
+    ],
+    "previous_attempt": {
+      "started_at": "2026-07-21T06:07:40.967431+00:00",
+      "finished_at": "2026-07-21T08:32:11.136113+00:00",
+      "status": "failed",
+      "result": {
+        "ok": false,
+        "restart_count_delta": 0,
+        "oom_kills": 0,
+        "unresolved_unhealthy": 5,
+        "failures": [
+          "bioetl-prometheus: status=exited",
+          "bioetl-prometheus: health=unhealthy",
+          "bioetl-pushgateway: status=exited",
+          "bioetl-pushgateway: health=unhealthy",
+          "bioetl-grafana: status=exited",
+          "bioetl-grafana: health=unhealthy",
+          "bioetl-monitoring-renderer-1: status=exited",
+          "bioetl-monitoring-renderer-1: health=unhealthy",
+          "bioetl: health=starting"
+        ]
+      }
+    },
+    "note": "Operator override 2.4h. Attempt 1 failed (monitoring exited during Desktop disruption). Attempt 2 passed finalize end-state gate with restart_count_delta=0, oom=0, unhealthy=0, canonical Linux origins only. Mid-window Desktop recovery recorded with RestartCount still 0. End snapshots may reflect post-window recreate; release 72h soak remains #6299."
+  },
+  "live_topology": {
+    "compose_projects": [
+      {
+        "Name": "bioetl-main",
+        "Status": "running(1)",
+        "ConfigFiles": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.yml"
+      },
+      {
+        "Name": "bioetl-monitoring",
+        "Status": "running(4)",
+        "ConfigFiles": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.monitoring.yml"
+      },
+      {
+        "Name": "bioetl-neo4j",
+        "Status": "running(1)",
+        "ConfigFiles": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.neo4j.yml"
+      }
+    ],
+    "required_service_snapshots": {
+      "bioetl": {
+        "status": "running",
+        "health": "healthy",
+        "restart_count": 0,
+        "oom_killed": false,
+        "started_at": "2026-07-21T12:35:39.963453562Z",
+        "project": "bioetl-main",
+        "config_files": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.yml",
+        "working_dir": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2"
+      },
+      "bioetl-prometheus": {
+        "status": "running",
+        "health": "healthy",
+        "restart_count": 0,
+        "oom_killed": false,
+        "started_at": "2026-07-21T12:35:39.957034876Z",
+        "project": "bioetl-monitoring",
+        "config_files": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.monitoring.yml",
+        "working_dir": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2"
+      },
+      "bioetl-pushgateway": {
+        "status": "running",
+        "health": "healthy",
+        "restart_count": 0,
+        "oom_killed": false,
+        "started_at": "2026-07-21T12:35:39.938883614Z",
+        "project": "bioetl-monitoring",
+        "config_files": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.monitoring.yml",
+        "working_dir": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2"
+      },
+      "bioetl-grafana": {
+        "status": "running",
+        "health": "healthy",
+        "restart_count": 0,
+        "oom_killed": false,
+        "started_at": "2026-07-21T12:35:39.892869113Z",
+        "project": "bioetl-monitoring",
+        "config_files": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.monitoring.yml",
+        "working_dir": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2"
+      },
+      "bioetl-monitoring-renderer-1": {
+        "status": "running",
+        "health": "healthy",
+        "restart_count": 0,
+        "oom_killed": false,
+        "started_at": "2026-07-21T12:35:39.921009453Z",
+        "project": "bioetl-monitoring",
+        "config_files": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2/docker-compose.monitoring.yml",
+        "working_dir": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2"
+      }
+    },
+    "canonical_origin_required": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2",
+    "no_tmp_compose_paths": true,
+    "no_windows_drive_compose_paths": true
+  },
+  "legacy_volume_retention": {
+    "decision": "retain",
+    "rationale": "Rollback source for workstation cutover; do not prune after RF-017 closeout.",
+    "legacy_volumes_present": [
+      "bioactivitydataacquisition2_alertmanager-data",
+      "bioactivitydataacquisition2_grafana-data",
+      "bioactivitydataacquisition2_loki-data",
+      "bioactivitydataacquisition2_minio-data",
+      "bioactivitydataacquisition2_neo4j_data",
+      "bioactivitydataacquisition2_neo4j_logs",
+      "bioactivitydataacquisition2_prometheus-data",
+      "bioactivitydataacquisition2_redis-data",
+      "bioactivitydataacquisition2_tempo-data",
+      "bioactivitydataacquisition2_warp-data"
+    ],
+    "canonical_volumes_present": [
+      "bioetl-monitoring_grafana-data",
+      "bioetl-monitoring_loki-data",
+      "bioetl-monitoring_prometheus-data",
+      "bioetl-monitoring_tempo-data",
+      "bioetl-neo4j_neo4j_data",
+      "bioetl-neo4j_neo4j_logs"
+    ]
+  },
+  "skipped_or_host_only_checks": [
+    {
+      "check": "docker_runtime_preflight from Windows checkout",
+      "status": "skipped_as_host_surface_mismatch",
+      "reason": "Running preflight from the Windows checkout without process-injected secrets reports SECRET_MISSING / ENVIRONMENT_MISSING. PROJECT_ORIGIN errors compare the live Linux runtime mirror against the Windows checkout path; the live origin is the contracted runtime mirror. CAPACITY_DOCKER_ROOT fails on the Windows host because Docker root is /var/lib/docker inside the VM. CONTAINER_RESTART warning is on bioetl-neo4j (restart_count=34), outside the RF-017 required main+monitoring set.",
+      "evidence": "reports/quality/docker-dashboard-cutover-preflight-rf017-closeout-final.json"
+    },
+    {
+      "check": "72h soak / 100-cycle campaign",
+      "status": "out_of_scope",
+      "reason": "Owned by Docker stability program #6299 / RF-008, not RF-017 closeout."
+    },
+    {
+      "check": "host-disruptive fault injection",
+      "status": "not_run",
+      "reason": "Requires explicit operator scheduling; not part of RF-017 closeout."
+    }
+  ],
+  "mirror_status": {
+    "source_checkout": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2",
+    "runtime_mirror": "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2",
+    "docs_synced": [
+      "docs/05-operations/runbooks/docker-compose-project-migration.md",
+      "docs/05-operations/runbooks/docker-image-resource-promotion.md"
+    ],
+    "runtime_mirrors_changed": false,
+    "ai_docs_mirrors_changed": false
+  },
+  "evidence": {
+    "observation": "reports/quality/docker-dashboard-cutover-observation.json",
+    "final": "reports/quality/docker-dashboard-cutover-final.json",
+    "canary": "reports/quality/docker-dashboard-cutover-canary.json",
+    "preflight_historical": "reports/quality/docker-dashboard-cutover-preflight.json",
+    "live_audit": "reports/quality/docker-dashboard-cutover-live-audit.json",
+    "archive_dir": "reports/quality/docker-monitoring-backups/rf017-closeout-20260721",
+    "preflight_host_only_attempt": "reports/quality/docker-dashboard-cutover-preflight-rf017-closeout-final.json"
+  },
+  "safety": {
+    "env_files_changed": false,
+    "volumes_deleted": false,
+    "down_v_used": false,
+    "debt_budget": "unchanged"
+  },
+  "parent_6303": {
+    "rf_checklist": {
+      "6304": "closed",
+      "6305": "closed",
+      "6306": "closed",
+      "6307": "closed",
+      "6308": "closed",
+      "6309": "closed",
+      "6310": "closed",
+      "6311": "ready_to_close"
+    },
+    "program_acceptance_observation": "satisfied_by_2.4h_operator_override"
+  }
+}

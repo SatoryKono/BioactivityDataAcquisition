@@ -1,0 +1,607 @@
+{
+  "schema_version": 1,
+  "report_kind": "provider_contract_drift",
+  "source_kind": "vcr_replay",
+  "source_posture": "vcr_replay",
+  "totals": {
+    "provider_count": 7,
+    "probe_count": 20,
+    "skipped_probe_count": 0,
+    "benign_count": 20,
+    "warning_count": 0,
+    "breaking_count": 0,
+    "max_severity": "benign"
+  },
+  "providers": {
+    "chembl": {
+      "probe_count": 3,
+      "skipped_probe_count": 0,
+      "benign_count": 3,
+      "warning_count": 0,
+      "breaking_count": 0,
+      "max_severity": "benign"
+    },
+    "crossref": {
+      "probe_count": 3,
+      "skipped_probe_count": 0,
+      "benign_count": 3,
+      "warning_count": 0,
+      "breaking_count": 0,
+      "max_severity": "benign"
+    },
+    "openalex": {
+      "probe_count": 3,
+      "skipped_probe_count": 0,
+      "benign_count": 3,
+      "warning_count": 0,
+      "breaking_count": 0,
+      "max_severity": "benign"
+    },
+    "pubchem": {
+      "probe_count": 3,
+      "skipped_probe_count": 0,
+      "benign_count": 3,
+      "warning_count": 0,
+      "breaking_count": 0,
+      "max_severity": "benign"
+    },
+    "pubmed": {
+      "probe_count": 3,
+      "skipped_probe_count": 0,
+      "benign_count": 3,
+      "warning_count": 0,
+      "breaking_count": 0,
+      "max_severity": "benign"
+    },
+    "semanticscholar": {
+      "probe_count": 2,
+      "skipped_probe_count": 0,
+      "benign_count": 2,
+      "warning_count": 0,
+      "breaking_count": 0,
+      "max_severity": "benign"
+    },
+    "uniprot": {
+      "probe_count": 3,
+      "skipped_probe_count": 0,
+      "benign_count": 3,
+      "warning_count": 0,
+      "breaking_count": 0,
+      "max_severity": "benign"
+    }
+  },
+  "reports": [
+    {
+      "provider": "chembl",
+      "entity": "activity",
+      "probe": "activity_endpoint_schema",
+      "version": 1,
+      "paths_checked": 6,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "activities": "list",
+        "activities[0].activity_id": "int",
+        "activities[0].assay_chembl_id": "str",
+        "page_meta.limit": "int",
+        "page_meta.offset": "int",
+        "page_meta.total_count": "int"
+      },
+      "actual_paths": {
+        "activities": "list",
+        "activities[0].activity_id": "int",
+        "activities[0].assay_chembl_id": "str",
+        "page_meta.limit": "int",
+        "page_meta.offset": "int",
+        "page_meta.total_count": "int"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblAdapter.test_fetch_activities.yaml",
+      "interaction_index": 1
+    },
+    {
+      "provider": "chembl",
+      "entity": "molecule",
+      "probe": "molecule_endpoint_schema",
+      "version": 1,
+      "paths_checked": 6,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "molecules": "list",
+        "molecules[0].molecule_chembl_id": "str",
+        "molecules[0].molecule_type": "str",
+        "page_meta.limit": "int",
+        "page_meta.offset": "int",
+        "page_meta.total_count": "int"
+      },
+      "actual_paths": {
+        "molecules": "list",
+        "molecules[0].molecule_chembl_id": "str",
+        "molecules[0].molecule_type": "str",
+        "page_meta.limit": "int",
+        "page_meta.offset": "int",
+        "page_meta.total_count": "int"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestMoleculeExtractionParams.test_molecule_filtered_api_request.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "chembl",
+      "entity": "target",
+      "probe": "target_endpoint_schema",
+      "version": 1,
+      "paths_checked": 6,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "targets": "list",
+        "targets[0].target_chembl_id": "str",
+        "targets[0].target_type": "str",
+        "page_meta.limit": "int",
+        "page_meta.offset": "int",
+        "page_meta.total_count": "int"
+      },
+      "actual_paths": {
+        "targets": "list",
+        "targets[0].target_chembl_id": "str",
+        "targets[0].target_type": "str",
+        "page_meta.limit": "int",
+        "page_meta.offset": "int",
+        "page_meta.total_count": "int"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestTargetExtractionParams.test_target_filtered_api_request.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "crossref",
+      "entity": "publication",
+      "probe": "work_lookup_by_doi",
+      "version": 1,
+      "paths_checked": 5,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "status": "str",
+        "message": "dict",
+        "message.DOI": "str",
+        "message.title": "list",
+        "message.title[0]": "str"
+      },
+      "actual_paths": {
+        "status": "str",
+        "message": "dict",
+        "message.DOI": "str",
+        "message.title": "list",
+        "message.title[0]": "str"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/works_batch.yaml",
+      "interaction_index": 1
+    },
+    {
+      "provider": "crossref",
+      "entity": "publication",
+      "probe": "works_query_endpoint",
+      "version": 1,
+      "paths_checked": 7,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "status": "str",
+        "message": "dict",
+        "message.items": "list",
+        "message.items[0]": "dict",
+        "message.items[0].DOI": "str",
+        "message.items-per-page": "int",
+        "message.total-results": "int"
+      },
+      "actual_paths": {
+        "status": "str",
+        "message": "dict",
+        "message.items": "list",
+        "message.items[0]": "dict",
+        "message.items[0].DOI": "str",
+        "message.items-per-page": "int",
+        "message.total-results": "int"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_search_by_title.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "crossref",
+      "entity": "publication",
+      "probe": "agency_lookup_for_doi",
+      "version": 1,
+      "paths_checked": 5,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "status": "str",
+        "message": "dict",
+        "message.DOI": "str",
+        "message.agency": "dict",
+        "message.agency.id": "str"
+      },
+      "actual_paths": {
+        "status": "str",
+        "message": "dict",
+        "message.DOI": "str",
+        "message.agency": "dict",
+        "message.agency.id": "str"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/provider_contract_agency_lookup_for_doi.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "openalex",
+      "entity": "publication",
+      "probe": "works_filter_by_doi",
+      "version": 1,
+      "paths_checked": 6,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "results": "list",
+        "results[0]": "dict",
+        "results[0].id": "str",
+        "results[0].doi": "str",
+        "meta": "dict",
+        "meta.count": "int"
+      },
+      "actual_paths": {
+        "results": "list",
+        "results[0]": "dict",
+        "results[0].id": "str",
+        "results[0].doi": "str",
+        "meta": "dict",
+        "meta.count": "int"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_by_doi.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "openalex",
+      "entity": "publication",
+      "probe": "works_search_endpoint",
+      "version": 1,
+      "paths_checked": 5,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "results": "list",
+        "results[0]": "dict",
+        "results[0].id": "str",
+        "meta": "dict",
+        "meta.count": "int"
+      },
+      "actual_paths": {
+        "results": "list",
+        "results[0]": "dict",
+        "results[0].id": "str",
+        "meta": "dict",
+        "meta.count": "int"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_with_query.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "openalex",
+      "entity": "publication",
+      "probe": "health_probe_shape",
+      "version": 1,
+      "paths_checked": 5,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "results": "list",
+        "results[0]": "dict",
+        "results[0].id": "str",
+        "meta": "dict",
+        "meta.count": "int"
+      },
+      "actual_paths": {
+        "results": "list",
+        "results[0]": "dict",
+        "results[0].id": "str",
+        "meta": "dict",
+        "meta.count": "int"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_health_check.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "pubchem",
+      "entity": "compound",
+      "probe": "compound_by_molecule_id",
+      "version": 1,
+      "paths_checked": 4,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "PC_Compounds": "list",
+        "PC_Compounds[0].id": "dict",
+        "PC_Compounds[0].id.id": "dict",
+        "PC_Compounds[0].id.id.cid": "int"
+      },
+      "actual_paths": {
+        "PC_Compounds": "list",
+        "PC_Compounds[0].id": "dict",
+        "PC_Compounds[0].id.id": "dict",
+        "PC_Compounds[0].id.id.cid": "int"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_structural_fields.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "pubchem",
+      "entity": "compound",
+      "probe": "compound_property_endpoint",
+      "version": 1,
+      "paths_checked": 5,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "PropertyTable": "dict",
+        "PropertyTable.Properties": "list",
+        "PropertyTable.Properties[0].CID": "int",
+        "PropertyTable.Properties[0].MolecularFormula": "str",
+        "PropertyTable.Properties[0].MolecularWeight": "str"
+      },
+      "actual_paths": {
+        "PropertyTable": "dict",
+        "PropertyTable.Properties": "list",
+        "PropertyTable.Properties[0].CID": "int",
+        "PropertyTable.Properties[0].MolecularFormula": "str",
+        "PropertyTable.Properties[0].MolecularWeight": "str"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/provider_contract_compound_property_endpoint.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "pubchem",
+      "entity": "compound",
+      "probe": "smiles_search",
+      "version": 1,
+      "paths_checked": 3,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "IdentifierList": "dict",
+        "IdentifierList.CID": "list",
+        "IdentifierList.CID[0]": "int"
+      },
+      "actual_paths": {
+        "IdentifierList": "dict",
+        "IdentifierList.CID": "list",
+        "IdentifierList.CID[0]": "int"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/provider_contract_smiles_search.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "pubmed",
+      "entity": "publication",
+      "probe": "esearch_endpoint",
+      "version": 1,
+      "paths_checked": 4,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "esearchresult": "dict",
+        "esearchresult.count": "str",
+        "esearchresult.idlist": "list",
+        "esearchresult.idlist[0]": "str"
+      },
+      "actual_paths": {
+        "esearchresult": "dict",
+        "esearchresult.count": "str",
+        "esearchresult.idlist": "list",
+        "esearchresult.idlist[0]": "str"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_health_check.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "pubmed",
+      "entity": "publication",
+      "probe": "esummary_endpoint",
+      "version": 1,
+      "paths_checked": 5,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "result": "dict",
+        "result.uids": "list",
+        "result.33408181": "dict",
+        "result.33408181.title": "str",
+        "result.33408181.pubdate": "str"
+      },
+      "actual_paths": {
+        "result": "dict",
+        "result.uids": "list",
+        "result.33408181": "dict",
+        "result.33408181.title": "str",
+        "result.33408181.pubdate": "str"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/provider_contract_esummary_endpoint.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "pubmed",
+      "entity": "publication",
+      "probe": "einfo_database_list",
+      "version": 1,
+      "paths_checked": 3,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "einforesult": "dict",
+        "einforesult.dblist": "list",
+        "einforesult.dblist[0]": "str"
+      },
+      "actual_paths": {
+        "einforesult": "dict",
+        "einforesult.dblist": "list",
+        "einforesult.dblist[0]": "str"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/provider_contract_einfo_database_list.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "semanticscholar",
+      "entity": "publication",
+      "probe": "paper_search_endpoint",
+      "version": 1,
+      "paths_checked": 7,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "data": "list",
+        "data[0]": "dict",
+        "data[0].paperId": "str",
+        "data[0].title": "str",
+        "offset": "int",
+        "next": "int",
+        "total": "int"
+      },
+      "actual_paths": {
+        "data": "list",
+        "data[0]": "dict",
+        "data[0].paperId": "str",
+        "data[0].title": "str",
+        "offset": "int",
+        "next": "int",
+        "total": "int"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_with_query.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "semanticscholar",
+      "entity": "publication",
+      "probe": "paper_batch_lookup_by_doi",
+      "version": 1,
+      "paths_checked": 5,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "[0]": "dict",
+        "[0].paperId": "str",
+        "[0].title": "str",
+        "[0].externalIds": "dict",
+        "[0].year": "int"
+      },
+      "actual_paths": {
+        "[0]": "dict",
+        "[0].paperId": "str",
+        "[0].title": "str",
+        "[0].externalIds": "dict",
+        "[0].year": "int"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_batch_dois.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "uniprot",
+      "entity": "protein",
+      "probe": "uniprotkb_search_endpoint",
+      "version": 1,
+      "paths_checked": 4,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "results": "list",
+        "results[0].entryType": "str",
+        "results[0].primaryAccession": "str",
+        "results[0].uniProtkbId": "str"
+      },
+      "actual_paths": {
+        "results": "list",
+        "results[0].entryType": "str",
+        "results[0].primaryAccession": "str",
+        "results[0].uniProtkbId": "str"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_fetch_proteins.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "uniprot",
+      "entity": "protein",
+      "probe": "specific_protein_lookup",
+      "version": 1,
+      "paths_checked": 3,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "entryType": "str",
+        "primaryAccession": "str",
+        "sequence": "dict"
+      },
+      "actual_paths": {
+        "entryType": "str",
+        "primaryAccession": "str",
+        "sequence": "dict"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/provider_contract_specific_protein_lookup.yaml",
+      "interaction_index": 0
+    },
+    {
+      "provider": "uniprot",
+      "entity": "taxonomy",
+      "probe": "taxonomy_endpoint",
+      "version": 1,
+      "paths_checked": 2,
+      "difference_count": 0,
+      "severity": "benign",
+      "status": "match",
+      "expected_paths": {
+        "scientificName": "str",
+        "taxonId": "int"
+      },
+      "actual_paths": {
+        "scientificName": "str",
+        "taxonId": "int"
+      },
+      "differences": [],
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/provider_contract_taxonomy_endpoint.yaml",
+      "interaction_index": 0
+    }
+  ]
+}

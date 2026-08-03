@@ -1,0 +1,46 @@
+{
+  "schema_version": "tech-debt-issue-6033-closeout-v1",
+  "generated_on": "2026-07-08",
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "issue": {
+    "number": 6033,
+    "status": "closeable-local-evidence",
+    "title": "Split control-plane service hotspot responsibilities and restore fan-in headroom",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6033"
+  },
+  "evidence": {
+    "hotspot_family_baseline": "reports/quality/hotspot-family-baseline.json",
+    "debt_scorecard": "configs/quality/debt_scorecard.yaml",
+    "fan_in_guard": "tests/architecture/test_hotspot_fan_in_family_ratchets.py::test_active_hotspot_family_internal_fan_in_budgets_hold_reviewed_baseline",
+    "closeout_guard": "tests/architecture/test_hotspot_fan_in_family_ratchets.py::test_issue_6033_application_services_control_plane_fan_in_has_headroom",
+    "control_plane_unit_tests": [
+      "tests/unit/application/services/control_plane/manifest/diagnostics/test_replay_invariant_persistence_profile.py",
+      "tests/unit/application/services/control_plane/test_helper_module_coverage.py::test_replay_invariant_nested_mapping_facade_delegates_lookup"
+    ]
+  },
+  "metrics": {
+    "application_services_control_plane_files": {
+      "opening": 120,
+      "current": 123
+    },
+    "application_services_control_plane_total_loc": {
+      "opening": 14787,
+      "current": 15051
+    },
+    "application_services_control_plane_files_ge_250_loc": {
+      "opening": 13,
+      "current": 13,
+      "max": 13
+    },
+    "application_services_control_plane_max_internal_fan_in": {
+      "opening": 4,
+      "current": 3,
+      "budget": 4
+    },
+    "application_services_control_plane_max_internal_fan_in_module": {
+      "opening": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy",
+      "current": "bioetl.application.services.control_plane.workflow.manifest_models"
+    }
+  },
+  "closeout_rationale": "application_services_control_plane now has max_internal_fan_in below the reviewed budget while keeping files_ge_250_loc at the issue opening value. The bounded-growth budgets were not increased."
+}

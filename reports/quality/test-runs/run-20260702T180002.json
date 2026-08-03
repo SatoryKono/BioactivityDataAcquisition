@@ -1,0 +1,45 @@
+{
+  "cases": [
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_baseline_matches_live_generator",
+      "status": "passed"
+    },
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_metrics_within_scorecard_budget",
+      "status": "passed"
+    },
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_family_metrics_within_scorecard_budget",
+      "status": "passed"
+    },
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_parameter_taxonomy_has_owner_and_no_unclassified_parameters",
+      "status": "passed"
+    }
+  ],
+  "ci_job": null,
+  "command": "pytest tests/architecture/test_config_discrepancy_metrics_ratchets.py -q",
+  "counts": {
+    "collected": 4,
+    "errors": 0,
+    "failed": 0,
+    "passed": 4,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  },
+  "duration_seconds": 43.904,
+  "exit_code": 0,
+  "failures": [],
+  "git_sha": "c4ad596a02118163c4c9f45a4ded9aa2e4bd9a0c",
+  "run_id": "run-20260702T180002",
+  "shards": [
+    "5825-config-metrics"
+  ],
+  "started_at": "2026-07-02T12:00:12.460240+00:00",
+  "suite": "coverage-verify"
+}
