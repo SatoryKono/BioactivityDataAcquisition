@@ -52,8 +52,8 @@ else
   exit 69
 fi
 
+export PYTHONPATH="${REPO_ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}"
 if [[ -z "${MEMORY_FILE_PATH:-}" ]]; then
-  export PYTHONPATH="${REPO_ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}"
   export MEMORY_FILE_PATH="$(
     "${MEMORY_PYTHON}" -m memory.mcp_scope \
       --repo-root "${REPO_ROOT}" \

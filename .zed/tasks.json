@@ -1,65 +1,74 @@
 [
   {
-    "label": "Format code",
+    "label": "Environment: verify",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "-m",
-      "ruff",
-      "format",
-      "."
-    ],
+    "args": ["scripts/engineering/dev/zed_env_doctor.py"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",
-    "save": "all"
+    "hide": "on_success",
+    "save": "none",
+    "allow_concurrent_runs": false,
   },
   {
-    "label": "Lint code",
+    "label": "Format: code",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+    "args": ["scripts/engineering/dev/zed_run.py", "-m", "ruff", "format", "."],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always",
+    "hide": "on_success",
+    "save": "all",
+    "allow_concurrent_runs": false,
+  },
+  {
+    "label": "Check: lint",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
+      "scripts/engineering/dev/zed_run.py",
       "-m",
       "ruff",
       "check",
       "src",
       "tests",
-      "scripts"
+      "scripts",
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
-    "save": "all"
+    "reveal": "no_focus",
+    "hide": "on_success",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
-    "label": "Type check",
+    "label": "Check: types",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
+      "scripts/engineering/dev/zed_run.py",
       "-m",
       "mypy",
       "--config-file",
       "pyproject.toml",
-      "src/bioetl"
+      "src/bioetl",
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",
-    "save": "all"
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
     "label": "Test: current file",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_pytest_lane.py",
-      "file",
-      "$ZED_FILE"
-    ],
+    "args": ["scripts/engineering/dev/zed_pytest_lane.py", "file", "$ZED_FILE"],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win",
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "tags": [
-      "python-test"
-    ],
+    "tags": ["python-test"],
     "reveal": "always",
-    "save": "current"
+    "hide": "never",
+    "save": "current",
+    "allow_concurrent_runs": false,
   },
   {
     "label": "Test: nearest symbol",
@@ -68,230 +77,257 @@
       "scripts/engineering/dev/zed_pytest_lane.py",
       "nearest",
       "$ZED_FILE",
-      "$ZED_SYMBOL"
+      "$ZED_SYMBOL",
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win",
     },
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",
-    "save": "current"
+    "hide": "never",
+    "save": "current",
+    "allow_concurrent_runs": false,
   },
   {
     "label": "Test: smoke",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_pytest_lane.py",
-      "smoke"
-    ],
+    "args": ["scripts/engineering/dev/zed_pytest_lane.py", "smoke"],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win",
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
     "label": "Test: unit-fast",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_pytest_lane.py",
-      "unit-fast"
-    ],
+    "args": ["scripts/engineering/dev/zed_pytest_lane.py", "unit-fast"],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win",
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
     "label": "Test: unit",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_pytest_lane.py",
-      "unit"
-    ],
+    "args": ["scripts/engineering/dev/zed_pytest_lane.py", "unit"],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win",
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
-    "label": "Test: architecture",
+    "label": "Test: architecture-fast",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_pytest_lane.py",
-      "architecture"
-    ],
+    "args": ["scripts/engineering/dev/zed_pytest_lane.py", "architecture-fast"],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win",
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
     "label": "Test: integration-replay",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_pytest_lane.py",
-      "integration-replay"
-    ],
+    "args": ["scripts/engineering/dev/zed_pytest_lane.py", "integration-replay"],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win",
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
     "label": "Test: contracts",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_pytest_lane.py",
-      "contracts"
-    ],
+    "args": ["scripts/engineering/dev/zed_pytest_lane.py", "contracts"],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win",
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
     "label": "Test: security",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_pytest_lane.py",
-      "security"
-    ],
+    "args": ["scripts/engineering/dev/zed_pytest_lane.py", "security"],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win",
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
     "label": "Test: e2e-smoke",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_pytest_lane.py",
-      "e2e-smoke"
-    ],
+    "args": ["scripts/engineering/dev/zed_pytest_lane.py", "e2e-smoke"],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win",
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
     "label": "Test: failed last run",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_pytest_lane.py",
-      "failed"
-    ],
+    "args": ["scripts/engineering/dev/zed_pytest_lane.py", "failed"],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win",
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
-    "label": "Test: coverage (gate 85%)",
+    "label": "Coverage: local estimate (85%)",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_pytest_lane.py",
-      "coverage"
-    ],
+    "args": ["scripts/engineering/dev/zed_pytest_lane.py", "coverage-local"],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win",
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
-    "label": "Architecture compliance",
+    "label": "Check: architecture imports",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_lint_imports.py"
-    ],
+    "args": ["scripts/engineering/dev/zed_lint_imports.py"],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
-    "label": "Security scan",
+    "label": "Audit: security",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
+      "scripts/engineering/dev/zed_run.py",
       "-m",
       "bandit",
       "-c",
       "pyproject.toml",
       "-r",
-      "src/bioetl"
+      "src/bioetl",
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
-    "label": "Dependency audit",
+    "label": "Audit: dependencies",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
+      "scripts/engineering/dev/zed_run.py",
       "-m",
       "pip_audit",
       "--skip-editable",
       "--cache-dir",
-      ".cache/pip-audit"
+      ".cache/pip-audit",
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
-    "label": "Dead code detection",
+    "label": "Audit: dead code",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_vulture.py"
-    ],
+    "args": ["scripts/engineering/dev/zed_vulture.py"],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
-    "label": "Complexity check",
+    "label": "Audit: complexity",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
-    "args": [
-      "scripts/engineering/dev/zed_xenon.py"
-    ],
+    "args": ["scripts/engineering/dev/zed_xenon.py"],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
   },
   {
-    "label": "Refresh MCP config",
+    "label": "Check: MCP manifests",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/ai/codex/setup_mcp.py",
+      "--check",
       "--skip-codex",
-      "--skip-gemini-settings"
+      "--skip-gemini-settings",
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always"
-  }
+    "reveal": "no_focus",
+    "hide": "on_success",
+    "save": "all",
+    "allow_concurrent_runs": false,
+  },
+  {
+    "label": "Generate: MCP tracked manifests",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+    "args": ["scripts/ai/codex/setup_mcp.py", "--skip-codex", "--skip-gemini-settings"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always",
+    "hide": "never",
+    "save": "all",
+    "allow_concurrent_runs": false,
+  },
 ]

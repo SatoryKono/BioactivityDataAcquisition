@@ -1,9 +1,8 @@
 # Duplication Baseline Report
 
-- mode: fail-fast
+- mode: report-only
 - targets: 1
 - total_duplicate_clusters: 0
-- max_duplicate_clusters: 0
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
 > around facades, export barrels, and compatibility shims, so use it as

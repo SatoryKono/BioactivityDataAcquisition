@@ -227,8 +227,21 @@ def _wrapper_command(
     workspace_root: Path,
     *,
     portable_workspace_paths: bool,
+    wrapper_platform: str | None = None,
 ) -> dict[str, Any]:
-    is_windows = os.name == "nt"
+    """Build a stdio MCP wrapper invocation.
+
+    ``wrapper_platform``:
+      * ``None`` — host OS (``os.name``)
+      * ``\"posix\"`` — always bash + ``.sh`` (tracked portable SSOT)
+      * ``\"nt\"`` — always PowerShell + ``.ps1``
+    """
+    platform = wrapper_platform or ("nt" if os.name == "nt" else "posix")
+    if platform not in {"nt", "posix"}:
+        raise ValueError(
+            f"Unknown wrapper_platform {wrapper_platform!r}; expected 'nt', 'posix', or None"
+        )
+    is_windows = platform == "nt"
     shell = "powershell" if is_windows else "bash"
     suffix = ".ps1" if is_windows else ".sh"
     wrapper = (workspace_root / "scripts/ai/mcp" / script_name).with_suffix(suffix)
@@ -335,6 +348,7 @@ def _canonical_servers(
     *,
     portable_workspace_paths: bool = False,
     profile: str = "full",
+    wrapper_platform: str | None = None,
 ) -> dict[str, dict[str, Any]]:
     workspace_root_str = _config_path(
         workspace_root,
@@ -373,6 +387,7 @@ def _canonical_servers(
             "mcp_memory_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         # Resolve repo root inside the wrapper so portable configs never pass
         # client-rewritten "." / foreign-OS absolute paths into Node path.resolve.
@@ -380,91 +395,109 @@ def _canonical_servers(
             "mcp_filesystem_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "fetch": _wrapper_command(
             "mcp_fetch_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "github": _wrapper_command(
             "github-mcp-wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "docker": _wrapper_command(
             "mcp_docker_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "context7": _wrapper_command(
             "mcp_context7_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "ast-grep": _wrapper_command(
             "mcp_ast_grep_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "mcp-code-interpreter": _wrapper_command(
             "mcp_code_interpreter_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "prometheus": _wrapper_command(
             "mcp_prometheus_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "grafana": _wrapper_command(
             "mcp_grafana_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "brave-search": _wrapper_command(
             "mcp_brave_search_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "neo4j-cypher": _wrapper_command(
             "mcp_neo4j_cypher_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "neo4j-memory": _wrapper_command(
             "mcp_neo4j_memory_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "mermaid": _wrapper_command(
             "mcp_mermaid_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "deja": _wrapper_command(
             "mcp_deja_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "adr-analysis": _wrapper_command(
             "mcp_adr_analysis_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "mutmut": _wrapper_command(
             "mcp_mutmut_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "code-analyzer": _wrapper_command(
             "mcp_code_analyzer_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "github-actions": _wrapper_command(
             "mcp_github_actions_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
+            wrapper_platform=wrapper_platform,
         ),
         "deepwiki": _http_server("https://mcp.deepwiki.com/mcp"),
         "ref": _http_server("https://api.ref.tools/mcp"),
@@ -678,6 +711,7 @@ def _write_devin_config(
             workspace_root,
             portable_workspace_paths=True,
             profile=DEVIN_TRACKED_PROFILE,
+            wrapper_platform="posix",
         ),
         transport_mode=transport_mode,
     )
@@ -702,12 +736,14 @@ def _write_configs(
 ) -> tuple[
     Path | None, Path | None, Path | None, Path, Path | None, Path | None, Path | None
 ]:
-    # Tracked portable SSOT stays full stdio. Local IDE projections may be
-    # profiled and optionally rewritten to localhost shared HTTP.
+    # Tracked portable SSOT stays full stdio with POSIX wrappers so Windows and
+    # Linux checkouts share one deterministic inventory (bash + .sh).
+    # Local IDE projections may be profiled, host-native wrappers, and HTTP.
     full_servers = _canonical_servers(
         workspace_root,
         portable_workspace_paths=True,
         profile="full",
+        wrapper_platform="posix",
     )
     local_servers = _apply_shared_transport(
         _canonical_servers(
@@ -1063,10 +1099,26 @@ def main(argv: Sequence[str] | None = None) -> int:
             "operator choice. Implicit/default setup calls do not overwrite it."
         ),
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help=(
+            "Read-only parity check for tracked portable MCP projections "
+            "(.mcp.json, scripts/ai/.mcp.json, .zed/mcp.json). Exits 0 when "
+            "they match the canonical portable render; exits non-zero with a "
+            "bounded diff summary otherwise. Performs no writes."
+        ),
+    )
     args = parser.parse_args(list(argv) if argv is not None else None)
     _apply_setup_mcp_flag_shortcuts(args)
     output_root = args.root.absolute()
     workspace_root = args.workspace_root.absolute()
+    if args.check:
+        return _check_tracked_portable_projections(
+            output_root,
+            workspace_root,
+            qodo_only=args.qodo_only,
+        )
     written_paths = _write_configs(
         output_root,
         workspace_root,
@@ -1095,6 +1147,92 @@ def _apply_setup_mcp_flag_shortcuts(args: argparse.Namespace) -> None:
         args.skip_gemini_settings = True
     if args.skip_codex:
         args.skip_codex_config = True
+
+
+def _render_portable_mcp_payload(workspace_root: Path) -> dict[str, Any]:
+    """Canonical tracked portable inventory (full profile, POSIX wrappers)."""
+    full_servers = _canonical_servers(
+        workspace_root,
+        portable_workspace_paths=True,
+        profile="full",
+        wrapper_platform="posix",
+    )
+    return {"mcpServers": deepcopy(full_servers)}
+
+
+def _check_tracked_portable_projections(
+    output_root: Path,
+    workspace_root: Path,
+    *,
+    qodo_only: bool = False,
+) -> int:
+    """Compare tracked portable MCP projections without writing files.
+
+    Returns 0 when all checked projections match the canonical render.
+    """
+    del qodo_only  # tracked portable check is independent of qodo-only mode
+    expected_text = (
+        json.dumps(
+            _render_portable_mcp_payload(workspace_root),
+            indent=2,
+            ensure_ascii=True,
+        )
+        + "\n"
+    )
+    relative_paths = (
+        Path(".mcp.json"),
+        Path("scripts") / "ai" / ".mcp.json",
+        Path(".zed") / MCP_JSON_FILENAME,
+    )
+    mismatches: list[str] = []
+    for relative in relative_paths:
+        path = output_root / relative
+        if not path.is_file():
+            mismatches.append(f"missing: {relative.as_posix()}")
+            continue
+        actual = path.read_text(encoding="utf-8")
+        if actual != expected_text:
+            actual_obj = json.loads(actual) if actual.strip() else {}
+            expected_obj = json.loads(expected_text)
+            actual_names = set((actual_obj.get("mcpServers") or {}))
+            expected_names = set((expected_obj.get("mcpServers") or {}))
+            only_actual = sorted(actual_names - expected_names)
+            only_expected = sorted(expected_names - actual_names)
+            shared_drift = sorted(
+                name
+                for name in (actual_names & expected_names)
+                if (actual_obj.get("mcpServers") or {}).get(name)
+                != (expected_obj.get("mcpServers") or {}).get(name)
+            )
+            detail_parts = [
+                f"stale: {relative.as_posix()}",
+                f"bytes actual={len(actual)} expected={len(expected_text)}",
+            ]
+            if only_actual:
+                detail_parts.append(f"only_in_file={only_actual[:8]}")
+            if only_expected:
+                detail_parts.append(f"only_in_canonical={only_expected[:8]}")
+            if shared_drift:
+                detail_parts.append(f"server_drift={shared_drift[:12]}")
+            mismatches.append("; ".join(detail_parts))
+
+    if not mismatches:
+        print(
+            "[setup_mcp --check] ok: tracked portable MCP projections match "
+            "canonical full/stdio/posix render"
+        )
+        for relative in relative_paths:
+            print(f"  ok {relative.as_posix()}")
+        return 0
+
+    print("[setup_mcp --check] FAIL: tracked portable MCP projections are stale")
+    for item in mismatches:
+        print(f"  - {item}")
+    print(
+        "Recovery: re-run Generate: MCP tracked manifests "
+        "(scripts/ai/codex/setup_mcp.py --skip-codex --skip-gemini-settings)"
+    )
+    return 1
 
 
 def _print_written_mcp_paths(

@@ -477,7 +477,9 @@ def test_main_uses_workspace_root_for_generated_server_paths(
         (output_root / ".zed" / "mcp.json").read_text(encoding="utf-8")
     )
     servers = payload["mcpServers"]
-    wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
+    # Tracked portable inventory is always POSIX (bash + .sh) for cross-OS SSOT.
+    portable_wrapper_suffix = ".sh"
+    host_wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
     runtime_servers = codex_settings["mcpServers"]
     devin_servers = devin_config["mcpServers"]
     assert set(servers) == EXPECTED_FULL_PROFILE_SERVERS
@@ -506,19 +508,19 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     }
     assert "env_http_headers" not in gemini_settings["mcpServers"]["ref"]
     assert servers["filesystem"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+        f"scripts/ai/mcp/mcp_filesystem_wrapper{portable_wrapper_suffix}"
     )
+    assert servers["filesystem"]["command"] == "bash"
     assert devin_servers["filesystem"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+        f"scripts/ai/mcp/mcp_filesystem_wrapper{portable_wrapper_suffix}"
     )
     assert runtime_servers["filesystem"]["args"][0] == str(
         (
-            workspace_root / f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+            workspace_root
+            / f"scripts/ai/mcp/mcp_filesystem_wrapper{host_wrapper_suffix}"
         ).resolve()
     )
-    assert servers["memory"]["args"][0].endswith(
-        ("mcp_memory_wrapper.sh", "mcp_memory_wrapper.ps1")
-    )
+    assert servers["memory"]["args"][0].endswith("mcp_memory_wrapper.sh")
     assert (
         servers["memory"]["env"]["MEMORY_FILE_PATH"]
         == "docs/00-project/ai/memory/mcp-memory.json"
@@ -527,10 +529,13 @@ def test_main_uses_workspace_root_for_generated_server_paths(
         (workspace_root / "docs/00-project/ai/memory/mcp-memory.json").resolve()
     )
     assert servers["fetch"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_fetch_wrapper{wrapper_suffix}"
+        f"scripts/ai/mcp/mcp_fetch_wrapper{portable_wrapper_suffix}"
     )
     assert runtime_servers["fetch"]["args"][0] == str(
-        (workspace_root / f"scripts/ai/mcp/mcp_fetch_wrapper{wrapper_suffix}").resolve()
+        (
+            workspace_root
+            / f"scripts/ai/mcp/mcp_fetch_wrapper{host_wrapper_suffix}"
+        ).resolve()
     )
     assert servers["fetch"]["env"] == {
         "UV_CACHE_DIR": ".cache/uv-cache",
@@ -547,28 +552,30 @@ def test_main_uses_workspace_root_for_generated_server_paths(
         runtime_cache_root / "npm-cache"
     )
     assert servers["github"]["args"][0] == (
-        f"scripts/ai/mcp/github-mcp-wrapper{wrapper_suffix}"
+        f"scripts/ai/mcp/github-mcp-wrapper{portable_wrapper_suffix}"
     )
     assert runtime_servers["github"]["args"][0] == str(
         (
-            workspace_root / f"scripts/ai/mcp/github-mcp-wrapper{wrapper_suffix}"
+            workspace_root
+            / f"scripts/ai/mcp/github-mcp-wrapper{host_wrapper_suffix}"
         ).resolve()
     )
     assert servers["docker"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_docker_wrapper{wrapper_suffix}"
+        f"scripts/ai/mcp/mcp_docker_wrapper{portable_wrapper_suffix}"
     )
     assert servers["context7"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_context7_wrapper{wrapper_suffix}"
+        f"scripts/ai/mcp/mcp_context7_wrapper{portable_wrapper_suffix}"
     )
     assert servers["grafana"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_grafana_wrapper{wrapper_suffix}"
+        f"scripts/ai/mcp/mcp_grafana_wrapper{portable_wrapper_suffix}"
     )
     assert servers["mermaid"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_mermaid_wrapper{wrapper_suffix}"
+        f"scripts/ai/mcp/mcp_mermaid_wrapper{portable_wrapper_suffix}"
     )
     assert runtime_servers["mermaid"]["args"][0] == str(
         (
-            workspace_root / f"scripts/ai/mcp/mcp_mermaid_wrapper{wrapper_suffix}"
+            workspace_root
+            / f"scripts/ai/mcp/mcp_mermaid_wrapper{host_wrapper_suffix}"
         ).resolve()
     )
     for server_name, wrapper_stem in {
@@ -579,11 +586,12 @@ def test_main_uses_workspace_root_for_generated_server_paths(
         "github-actions": "mcp_github_actions_wrapper",
     }.items():
         assert servers[server_name]["args"][0] == (
-            f"scripts/ai/mcp/{wrapper_stem}{wrapper_suffix}"
+            f"scripts/ai/mcp/{wrapper_stem}{portable_wrapper_suffix}"
         )
         assert runtime_servers[server_name]["args"][0] == str(
             (
-                workspace_root / f"scripts/ai/mcp/{wrapper_stem}{wrapper_suffix}"
+                workspace_root
+                / f"scripts/ai/mcp/{wrapper_stem}{host_wrapper_suffix}"
             ).resolve()
         )
     assert servers["deja"]["env"]["NPM_CONFIG_CACHE"] == ".cache/npm-cache"
@@ -791,10 +799,10 @@ def test_setup_mcp_reuses_current_config_and_repairs_drift(
 
     assert setup_mcp.main(shared_args) == 0
     repaired_payload = json.loads(workspace_config.read_text(encoding="utf-8"))
-    wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
     assert repaired_payload["mcpServers"]["filesystem"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+        "scripts/ai/mcp/mcp_filesystem_wrapper.sh"
     )
+    assert repaired_payload["mcpServers"]["filesystem"]["command"] == "bash"
 
 
 @pytest.mark.skipif(
