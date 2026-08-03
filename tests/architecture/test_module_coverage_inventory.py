@@ -43,6 +43,7 @@ COVERAGE_TAIL_CLOSEOUT_PATH = (
 )
 
 
+@pytest.mark.architecture
 def test_module_coverage_git_guard_avoids_windows_pipe_reader_threads(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
