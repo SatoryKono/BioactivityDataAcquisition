@@ -1,6 +1,6 @@
 {
   "decision": "reviewed_inventory_clear",
-  "evidence_scope": "Curated flaky-test inventory bound to the current tracked static test-governance fingerprint. This inventory does not replace repeated-run CI telemetry or claim that static analysis can detect intermittent outcomes.",
+  "evidence_scope": "Curated flaky-test inventory bound to the current tracked static test-governance fingerprint, reconciled against SWARM-001 telemetry (reports/test-swarm/SWARM-001/flakiness-database.json and reports/test-swarm/SWARM-001/telemetry/failure_frequency_summary.md). This inventory does not replace repeated-run CI telemetry or claim that static analysis can detect intermittent outcomes.",
   "generated_by": "scripts.engineering.qa.report_flaky_test_burndown_review",
   "linked_issue": "#5514",
   "linked_issues": [
@@ -26,19 +26,21 @@
   },
   "review_notes": [
     "The curated residual flaky-test inventory is empty at this review point.",
+    "SWARM-001 flakiness-database.json reports total_flaky=0 with empty flaky_tests.",
     "Current suite size and source identity are derived from test-governance-current.json.",
-    "Repeated-run CI telemetry remains the authority for discovering intermittent outcomes."
+    "Repeated-run CI telemetry remains the authority for discovering intermittent outcomes.",
+    "Review owner: BioETL Team (governance closeout for issue #5514)."
   ],
   "reviewed_flaky_tests": [],
-  "reviewed_on": "2026-07-17",
+  "reviewed_on": "2026-08-03",
   "schema_version": "flaky-test-burndown-review-v2",
   "source_artifacts": [
     "configs/quality/flaky_test_inventory.yaml",
     "reports/quality/test-governance-current.json"
   ],
   "source_fingerprints": {
-    "curated_inventory_sha256": "a15f2b7fd6925b5c7307f5b50cb72558135ba665b9e71d28aa4ad6971cae347c",
-    "test_governance_source_tree_sha256": "bc69935fbf3e7f60f00821fa9cdfd27dc6fd4ae78ca2e7da1c0f45fac6c5143e"
+    "curated_inventory_sha256": "fcc0223fda92af30984526c1ed95253c46c20b031234f0240a698b6484e3b651",
+    "test_governance_source_tree_sha256": "2970f9fa09e3fd83c3d724759c3be1964f91a00e341d66e3d0eda0192db3a0bf"
   },
   "summary": {
     "by_alert_level": {
@@ -72,9 +74,9 @@
       "quarantined": 0
     },
     "test_governance_budget_violation_count": 0,
-    "test_governance_source_tree_sha256": "bc69935fbf3e7f60f00821fa9cdfd27dc6fd4ae78ca2e7da1c0f45fac6c5143e",
+    "test_governance_source_tree_sha256": "2970f9fa09e3fd83c3d724759c3be1964f91a00e341d66e3d0eda0192db3a0bf",
     "total_flaky": 0,
-    "total_test_files": 2171,
-    "total_tests_analyzed": 23295
+    "total_test_files": 2172,
+    "total_tests_analyzed": 23306
   }
 }

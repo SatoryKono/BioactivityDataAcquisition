@@ -1,4 +1,4 @@
-# Python
+﻿# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -192,6 +192,7 @@ log_test.txt
 !/reports/quality/contract-registry-dq-diagnostics.json
 !/reports/quality/test-fixture-asset-duplication.json
 !/reports/quality/flaky-test-burndown-review.json
+!/reports/quality/branch-cleanup-7350-closeout-2026-08-03.md
 !/reports/quality/domain-io-taint-inventory.json
 !/reports/quality/config-contract-registry-artifact-duplication.json
 !/reports/quality/config-surface-backlog.json
@@ -260,7 +261,7 @@ log_test.txt
 .devin/config.local.json
 .gemini/
 .jules/
-# .junie/ — JetBrains Junie runtime surface. Tracked as equal-peer runtime to
+# .junie/ â€” JetBrains Junie runtime surface. Tracked as equal-peer runtime to
 # `.codex/**` (see AGENTS.md, .junie/guidelines.md). Selective un-ignore below
 # keeps machine-local state (history/state/cache) out of git while allowing
 # runtime tree (guidelines.md, agents/, skills/) and mirror-check artifacts.
@@ -298,7 +299,7 @@ API_KEY.env
 secrets.json
 credentials.json
 
-# Docker volumes (RULES.md §8.2)
+# Docker volumes (RULES.md Â§8.2)
 docker-data/
 docker/volumes/
 
@@ -510,7 +511,7 @@ data/2026-07-03_20-21-59.gif
 .xml
 /_loop_*
 
-# Grok machine-local runtime (never track root .grok/ — root hygiene + absolute paths)
+# Grok machine-local runtime (never track root .grok/ â€” root hygiene + absolute paths)
 .grok/
 
 # Local-only agent scratch (not CI source)
