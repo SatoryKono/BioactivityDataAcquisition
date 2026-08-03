@@ -1,0 +1,35 @@
+{
+  "cases": [
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_cli_command_import_guards::test_non_cli_source_avoids_interfaces_package_root_convenience_imports",
+      "status": "passed"
+    },
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_cli_command_import_guards::test_non_cli_source_keeps_retained_public_cli_seams_outside_runtime_code",
+      "status": "passed"
+    }
+  ],
+  "ci_job": null,
+  "command": "pytest tests/architecture/test_cli_command_import_guards.py -q",
+  "counts": {
+    "collected": 2,
+    "errors": 0,
+    "failed": 0,
+    "passed": 2,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  },
+  "duration_seconds": 48.535,
+  "exit_code": 0,
+  "failures": [],
+  "git_sha": "c4ad596a02118163c4c9f45a4ded9aa2e4bd9a0c",
+  "run_id": "run-20260702T180004",
+  "shards": [
+    "5825-cli-guards"
+  ],
+  "started_at": "2026-07-02T12:00:12.502159+00:00",
+  "suite": "coverage-verify"
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": "branch-coverage-targeted-closeout-v1",
+  "issue": 6597,
+  "measured_on": "2026-07-27",
+  "command": "pytest targeted unit suites with --cov-branch on coalesce + observability support modules",
+  "modules": {
+    "src/bioetl/application/services/_observability_trace_support.py": {
+      "branch_status": "complete_coverage",
+      "prior_branch_rate_percent": 54.2,
+      "notes": "Fully covered after existing suite + new branch-depth tests"
+    },
+    "src/bioetl/application/services/_observability_workflow_checkpoint_support.py": {
+      "statements": 118,
+      "branch_total_pairs": 46,
+      "cover_percent": 97.56,
+      "prior_branch_rate_percent": 60.9
+    },
+    "src/bioetl/application/composite/_coalesce_policy_support.py": {
+      "statements": 156,
+      "branch_total_pairs": 68,
+      "cover_percent": 85.71,
+      "prior_branch_rate_percent": 68.6
+    }
+  },
+  "repo_wide_gate": {
+    "baseline_report": "reports/quality/branch-coverage-gap-report.json",
+    "baseline_branch_rate_percent": 85.002,
+    "baseline_margin": 0,
+    "refresh_required": "coverage-verify lane on clean main after merge to recompute global margin"
+  },
+  "acceptance": {
+    "targeted_top_gap_modules_tested": true,
+    "observability_support_modules_above_85": true,
+    "coalesce_support_at_or_above_85": true,
+    "no_debt_budget_increase": true
+  }
+}

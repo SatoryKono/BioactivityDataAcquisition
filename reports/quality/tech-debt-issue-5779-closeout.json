@@ -1,0 +1,45 @@
+{
+  "schema_version": "tech-debt-issue-5779-closeout-v1",
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "issue": {
+    "number": 5779,
+    "status": "closed-ready",
+    "summary": "Duplicated adapter barrel exports are consolidated behind a shared lazy-export helper, provider-local package export residue is removed, and the adapter duplication baseline drops without increasing resilience-template debt.",
+    "evidence": [
+      "src/bioetl/infrastructure/adapters/_lazy_exports.py",
+      "src/bioetl/infrastructure/adapters/lazy_exports.py",
+      "src/bioetl/infrastructure/adapters/common/__init__.py",
+      "src/bioetl/infrastructure/adapters/crossref/__init__.py",
+      "reports/quality/full-app-duplication-baseline.json",
+      "tests/architecture/test_tech_debt_issue_5779_closeout.py",
+      "tests/unit/infrastructure/adapters/test_lazy_export_facades.py"
+    ]
+  },
+  "ratchets": {
+    "full_app_duplicate_clusters": {
+      "previous": 65,
+      "current": 64,
+      "direction": "reduced"
+    },
+    "adapter_duplicate_clusters": {
+      "previous": 54,
+      "current": 53,
+      "direction": "reduced"
+    },
+    "adapter_export_facade_duplicate_clusters": {
+      "previous": 47,
+      "current": 46,
+      "direction": "reduced"
+    },
+    "adapter_resilience_template_duplicate_clusters": {
+      "previous": 7,
+      "current": 7,
+      "direction": "unchanged"
+    }
+  },
+  "verification": [
+    "python -m pytest tests/architecture/test_tech_debt_issue_5779_closeout.py",
+    "python -m pytest tests/unit/infrastructure/adapters/test_lazy_export_facades.py",
+    "python -m scripts.engineering.qa report-duplication-baseline --targets src/bioetl/infrastructure/adapters src/bioetl/application/pipelines src/bioetl/composition/bootstrap src/bioetl/interfaces/cli --json-out reports/quality/full-app-duplication-baseline.json --md-out reports/quality/full-app-duplication-baseline.md --timeout-seconds 240"
+  ]
+}

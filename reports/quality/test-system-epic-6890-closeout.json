@@ -1,0 +1,88 @@
+{
+  "schema_version": "test-system-epic-6890-closeout-v1",
+  "epic": 6890,
+  "closed_on": "2026-07-28",
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "children": {
+    "6891": {
+      "key": "TB-01",
+      "status": "closed-ready",
+      "deliverables": [
+        "scripts/engineering/qa/report_live_residual_snapshot.py",
+        "reports/quality/live-residual-snapshot.json",
+        "tests/architecture/test_live_residual_snapshot.py",
+        "tests/architecture/_live_residual.py",
+        "closeout residual thrash asserts converted to non-growth"
+      ]
+    },
+    "6892": {
+      "key": "TB-02",
+      "status": "closed-ready",
+      "deliverables": [
+        "tests/unit/composition/bootstrap/conftest.py session immutable cache (existing)",
+        "tests/unit/composition/bootstrap/test_bootstrap_metadata_cache_isolation.py"
+      ]
+    },
+    "6893": {
+      "key": "TB-03",
+      "status": "closed-ready",
+      "deliverables": [
+        "reports/quality/unit-fs-heavy-classification-2026-07-28.json",
+        "docs/00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md policy"
+      ]
+    },
+    "6894": {
+      "key": "TB-04",
+      "status": "closed-ready",
+      "deliverables": [
+        "configs/quality/test_matrix.yaml architecture-fast-boundary default note",
+        "TEST_LANE_MENTAL_MODEL.md"
+      ]
+    },
+    "6895": {
+      "key": "TB-05",
+      "status": "closed-ready",
+      "deliverables": [
+        "reports/quality/unit-scripts-test-census.json"
+      ]
+    },
+    "6896": {
+      "key": "TB-06",
+      "status": "closed-ready",
+      "deliverables": [
+        "tests/unit/domain/entities/bioactivity/test_converters.py"
+      ]
+    },
+    "6897": {
+      "key": "TB-07",
+      "status": "closed-ready",
+      "deliverables": [
+        "reports/quality/bronze-fixture-representativeness-2026-07-28.json"
+      ]
+    },
+    "6898": {
+      "key": "TB-08",
+      "status": "closed-ready",
+      "deliverables": [
+        "tests/unit/memory/test_notes_workflow.py Event.wait hang probe",
+        "tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py Event.wait"
+      ]
+    },
+    "6899": {
+      "key": "TB-09",
+      "status": "closed-ready",
+      "deliverables": [
+        "scripts/engineering/qa/report_vcr_cassette_census.py",
+        "reports/quality/vcr-cassette-census.json"
+      ]
+    },
+    "6900": {
+      "key": "TB-10",
+      "status": "closed-ready",
+      "deliverables": [
+        "docs/00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md",
+        "Agents.md pointer"
+      ]
+    }
+  }
+}

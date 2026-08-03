@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-26T10:39:22.518087+00:00",
+  "source_tasks_file": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/reports/quality/tasks_architecture_metric_exemptions_2026-06-26-07-02.json",
+  "summary": {
+    "total_tasks": 0,
+    "actionable_tasks": 0,
+    "category_counts": {
+      "STALE_EXEMPTION": 0,
+      "GOD_OBJECT": 0,
+      "COMPLEXITY": 0,
+      "NEAR_LIMIT": 0,
+      "REDUCE_TO_LIMIT": 0,
+      "SAFE_MARGIN": 0,
+      "TARGET_NOT_FOUND": 0
+    }
+  },
+  "execution_order": [
+    "STALE_EXEMPTION",
+    "GOD_OBJECT",
+    "COMPLEXITY",
+    "NEAR_LIMIT",
+    "REDUCE_TO_LIMIT",
+    "SAFE_MARGIN",
+    "TARGET_NOT_FOUND"
+  ],
+  "batches": [],
+  "tasks": []
+}

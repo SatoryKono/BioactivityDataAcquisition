@@ -1,0 +1,21 @@
+{
+  "schema_version": "unit-scripts-test-census-v1",
+  "linked_issue": "#6895",
+  "parent_epic": "#6890",
+  "snapshot_date": "2026-07-28",
+  "scope": "tests/unit/scripts",
+  "summary": {
+    "test_file_count": 104,
+    "lane": "unit-scripts-tooling",
+    "excluded_from_unit_fast": true,
+    "assertless_or_helper_only_files": [
+      "tests/unit/scripts/ops/neo4j_memory_sync/test_audit_runtime_and_transport.py",
+      "tests/unit/scripts/ops/neo4j_memory_sync/test_paths_and_connection.py",
+      "tests/unit/scripts/ops/neo4j_memory_sync/test_snapshot_invariants.py",
+      "tests/unit/scripts/ops/neo4j_memory_sync/test_targeted_apply_and_filters.py"
+    ],
+    "decision": "retain_lane_separate_from_unit_fast",
+    "prune_wave": "deferred_pending_owner_review_of_neo4j_memory_sync_helpers",
+    "rationale": "unit-fast already ignores tests/unit/scripts. Assertless neo4j helper modules are markers of wrapper tests; full prune requires owner confirmation that coverage lives under tests/testing_support."
+  }
+}

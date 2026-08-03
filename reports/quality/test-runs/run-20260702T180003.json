@@ -1,0 +1,30 @@
+{
+  "cases": [
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_config_discrepancy_report_drift::test_config_discrepancy_report_matches_deterministic_generator",
+      "status": "passed"
+    }
+  ],
+  "ci_job": null,
+  "command": "pytest tests/architecture/test_config_discrepancy_report_drift.py -q",
+  "counts": {
+    "collected": 1,
+    "errors": 0,
+    "failed": 0,
+    "passed": 1,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  },
+  "duration_seconds": 22.334,
+  "exit_code": 0,
+  "failures": [],
+  "git_sha": "c4ad596a02118163c4c9f45a4ded9aa2e4bd9a0c",
+  "run_id": "run-20260702T180003",
+  "shards": [
+    "5825-config-report"
+  ],
+  "started_at": "2026-07-02T12:00:12.494539+00:00",
+  "suite": "coverage-verify"
+}

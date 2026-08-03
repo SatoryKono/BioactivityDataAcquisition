@@ -1,0 +1,124 @@
+{
+  "schema_version": "test-audit-closeout-v1",
+  "reviewed_on": "2026-07-27",
+  "meta_issue": 6609,
+  "issues": {
+    "6597": {
+      "id": "T-01",
+      "title": "branch coverage margin",
+      "status": "implemented",
+      "evidence": [
+        "tests/unit/application/composite/test_coalesce_policy_support_branches.py",
+        "tests/unit/application/services/test_observability_branch_depth_extra.py",
+        "reports/quality/branch-coverage-gap-report.json"
+      ],
+      "notes": "Targeted branch-depth tests added for top gap modules (coalesce + observability). Re-run coverage-verify on clean main to refresh branch margin evidence."
+    },
+    "6598": {
+      "id": "T-02",
+      "title": "shared architecture scan index",
+      "status": "implemented",
+      "evidence": [
+        "tests/helpers/architecture_scan_index.py",
+        "tests/architecture/test_architecture_scan_index_policy.py",
+        "tests/architecture/test_private_module_imports.py",
+        "tests/architecture/conftest.py"
+      ]
+    },
+    "6602": {
+      "id": "T-03",
+      "title": "observability branch-depth",
+      "status": "implemented",
+      "evidence": [
+        "tests/unit/application/services/test_observability_branch_depth_extra.py"
+      ]
+    },
+    "6599": {
+      "id": "T-04",
+      "title": "bootstrap_cache adoption",
+      "status": "implemented",
+      "evidence": [
+        "tests/unit/composition/bootstrap/conftest.py",
+        "tests/unit/composition/bootstrap/test_bootstrap_cache_fixtures.py",
+        "tests/helpers/bootstrap_cache.py"
+      ]
+    },
+    "6600": {
+      "id": "T-05",
+      "title": "closeout consolidation",
+      "status": "implemented",
+      "evidence": [
+        "configs/quality/architecture_closeout_inventory.yaml",
+        "tests/architecture/test_architecture_closeout_inventory.py"
+      ]
+    },
+    "6601": {
+      "id": "T-06",
+      "title": "e2e gold asserts",
+      "status": "implemented",
+      "evidence": [
+        "tests/e2e/test_chembl_activity_e2e.py",
+        "tests/e2e/test_pubchem_compound_e2e.py",
+        "tests/e2e/test_uniprot_protein_e2e.py"
+      ]
+    },
+    "6603": {
+      "id": "T-07",
+      "title": "retag slow tests",
+      "status": "implemented",
+      "evidence": [
+        "tests/architecture/test_naming_ambiguity_classifier.py",
+        "tests/architecture/test_provider_registry_decomposition.py",
+        "tests/architecture/test_quality_exemptions_registry.py",
+        "tests/architecture/test_import_graph_invariants.py",
+        "tests/architecture/test_private_module_imports.py",
+        "tests/architecture/test_vcr_metadata_catalog_drift.py"
+      ]
+    },
+    "6604": {
+      "id": "T-08",
+      "title": "e2e skip-rate SLO",
+      "status": "implemented",
+      "evidence": [
+        "configs/quality/e2e_skip_rate_slo.yaml",
+        "tests/architecture/test_e2e_skip_rate_slo_policy.py"
+      ]
+    },
+    "6608": {
+      "id": "T-09",
+      "title": "stronger e2e field asserts",
+      "status": "implemented",
+      "evidence": [
+        "tests/helpers/e2e_schema_assertions.py",
+        "tests/e2e/test_chembl_assay_e2e.py",
+        "tests/e2e/test_chembl_molecule_e2e.py"
+      ]
+    },
+    "6607": {
+      "id": "T-10",
+      "title": "suite role matrix",
+      "status": "implemented",
+      "evidence": [
+        "configs/quality/test_suite_role_matrix.yaml",
+        "tests/architecture/test_test_suite_role_matrix.py"
+      ]
+    },
+    "6606": {
+      "id": "T-11",
+      "title": "hypothesis transformers",
+      "status": "implemented",
+      "evidence": [
+        "tests/unit/application/core/test_record_normalization_property.py"
+      ]
+    },
+    "6605": {
+      "id": "T-12",
+      "title": "unit/scripts taxonomy",
+      "status": "implemented",
+      "evidence": [
+        "configs/quality/test_matrix.yaml"
+      ],
+      "notes": "unit-fast ignores tests/unit/scripts; new unit-scripts-tooling lane owns script tests."
+    }
+  }
+}

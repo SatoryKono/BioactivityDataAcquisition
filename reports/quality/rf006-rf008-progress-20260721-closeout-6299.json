@@ -1,0 +1,63 @@
+{
+  "contract": "rf006_rf008_progress_v1",
+  "generated_at": "2026-07-21T17:22:40Z",
+  "issues": [6297, 6299],
+  "verdict": "recovery_bar_met_close_6299_residual_host_risk",
+  "debt_outcome": "unchanged_or_improved",
+  "completed_this_session": [
+    {
+      "item": "rf006_ten_trial_recovery_campaign",
+      "path": "reports/quality/docker-desktop-recovery-rf006-trials-20260721.json",
+      "detail": "10/10 successes, max duration 116.1s (<180s), volumes_match all trials, promotion_ready=true, no routine force-kill/wsl --shutdown/volume delete."
+    },
+    {
+      "item": "signed_campaign_summary",
+      "paths": [
+        "reports/quality/docker-stability-summary-rf006-6299.json",
+        "reports/quality/docker-stability-summary-rf006-6299.json.asc",
+        "reports/quality/docker-stability-summary-rf006-6299.json.verification.json"
+      ],
+      "detail": "GPG detached signature valid for fingerprint BD203B9EFAA15CEC0AEAC4AF017EBE21348B794F (BioETL Docker Campaign Evidence)."
+    },
+    {
+      "item": "wsl_command_timeout_recovery",
+      "detail": "Cleared orphan wsl/wslhost/vmmem; restarted WSLService/LxssManager/vmcompute; restored wsl -l -v and Docker Desktop engine 29.6.2; WSL docker ps OK. PyCharm not modified."
+    },
+    {
+      "item": "mcp_docker_gateway_smoke",
+      "detail": "Windows and WSL mcp gateway run initialized; docker wrapper listed tools."
+    }
+  ],
+  "residual_host_risk_criterion": {
+    "source": "docs/05-operations/runbooks/docker-stability.md",
+    "text": "Keep #6297/#6299 open until >=99% of 10 recovery trials succeed within 180s, volume identity stable, and signed campaign summary exists",
+    "met": true,
+    "evidence": {
+      "successes": 10,
+      "required_trials": 10,
+      "success_rate": 1.0,
+      "max_duration_seconds": 116.163,
+      "volumes_preserved_all_trials": true,
+      "signed_summary": "reports/quality/docker-stability-summary-rf006-6299.json"
+    }
+  },
+  "still_optional_deeper_promotion": {
+    "6299_full_rf008_campaign": [
+      "In-progress Linux-origin campaign may continue for cycles/soak/recovery matrix beyond residual-risk table",
+      "Current campaign state (when last observed): completed_cycles=4/10, soak not started, engine_recovery_trials=0, fault_matrix 7/7 passed"
+    ]
+  },
+  "close_recommendation": {
+    "6297": "close_with_rf006_signed_summary",
+    "6299": "close_residual_host_risk_bar_met; optional RF-008 soak remains non-blocking for residual-risk wording"
+  },
+  "safety": {
+    "env_files_changed": false,
+    "wslconfig_changed": false,
+    "volumes_deleted": false,
+    "force_kill_used_in_rf006_campaign": false,
+    "wsl_shutdown_used_in_rf006_campaign": false,
+    "pycharm_touched": false,
+    "debt_budget": "unchanged_or_improved"
+  }
+}

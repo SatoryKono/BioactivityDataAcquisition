@@ -1,0 +1,347 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-07-01T06:09:58.342613+00:00",
+  "source_tasks_file": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/reports/quality/tasks_architecture_metric_exemptions_2026-07-01-05-11.json",
+  "summary": {
+    "total_tasks": 5,
+    "actionable_tasks": 5,
+    "category_counts": {
+      "COMPATIBILITY_DEBT": 2,
+      "DUPLICATION": 2,
+      "HOTSPOT_SIZE_COUPLING_DEBT": 0,
+      "DEAD_CODE_REVIEW_DEBT": 1,
+      "STALE_EXEMPTION": 0,
+      "GOD_OBJECT": 0,
+      "COMPLEXITY": 0,
+      "NEAR_LIMIT": 0,
+      "REDUCE_TO_LIMIT": 0,
+      "SAFE_MARGIN": 0,
+      "TARGET_NOT_FOUND": 0
+    }
+  },
+  "execution_order": [
+    "COMPATIBILITY_DEBT",
+    "DUPLICATION",
+    "HOTSPOT_SIZE_COUPLING_DEBT",
+    "DEAD_CODE_REVIEW_DEBT",
+    "STALE_EXEMPTION",
+    "GOD_OBJECT",
+    "COMPLEXITY",
+    "NEAR_LIMIT",
+    "REDUCE_TO_LIMIT",
+    "SAFE_MARGIN",
+    "TARGET_NOT_FOUND"
+  ],
+  "batches": [
+    {
+      "category": "COMPATIBILITY_DEBT",
+      "priority": 1,
+      "task_ids": [
+        "ARD-COMPAT-001",
+        "ARD-COMPAT-002"
+      ],
+      "targets": [],
+      "primary_executor": "py-config-bot",
+      "supporting_agents": [
+        "py-test-bot",
+        "py-doc-bot",
+        "py-audit-bot",
+        "py-review-orchestrator"
+      ]
+    },
+    {
+      "category": "DUPLICATION",
+      "priority": 2,
+      "task_ids": [
+        "ARD-DUP-003",
+        "ARD-DUP-002"
+      ],
+      "targets": [
+        "src/bioetl/application/pipelines",
+        "src/bioetl/infrastructure/adapters"
+      ],
+      "primary_executor": "orchestrator",
+      "supporting_agents": [
+        "py-test-bot",
+        "py-doc-bot",
+        "py-config-bot",
+        "py-audit-bot"
+      ]
+    },
+    {
+      "category": "DEAD_CODE_REVIEW_DEBT",
+      "priority": 4,
+      "task_ids": [
+        "ARD-DEAD-001"
+      ],
+      "targets": [],
+      "primary_executor": "py-audit-bot",
+      "supporting_agents": [
+        "py-test-bot",
+        "py-doc-bot",
+        "py-plan-bot"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "ARD-COMPAT-001",
+      "task_family": "compatibility_surface",
+      "registry": "artifact_governance",
+      "registry_key": "sanctioned_public_entrypoint_governance.public_entrypoint_count",
+      "owner": "@bioetl-architecture",
+      "reason": "Generated from reports/quality/compatibility-importer-census.json",
+      "expires_on": null,
+      "removal_step": "refresh_artifact_and_reduce_live_count",
+      "limit_value": 0,
+      "current_value": 12,
+      "delta_to_limit": 12,
+      "status": "needs_refactor",
+      "target_file": null,
+      "symbol_name": null,
+      "goal": "Свести публичную compatibility/governance burden к минимально необходимому набору санкционированных entrypoint seams.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта"
+      ],
+      "allowed_paths": [
+        "src/bioetl/**",
+        "tests/**"
+      ],
+      "forbidden_paths": [
+        "configs/**",
+        "docs/**",
+        ".github/**"
+      ],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_public_facade_inventory.py",
+        "python -m pytest -q tests/architecture/test_public_surface_importer_census_governance.py",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python -m scripts.engineering.qa check-exemptions --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": [
+        "sanctioned_public_entrypoint_count=12",
+        "Review sanctioned public API inventory before adding or retaining seams."
+      ],
+      "source_artifact": "reports/quality/compatibility-importer-census.json",
+      "category": "COMPATIBILITY_DEBT",
+      "priority": 1,
+      "primary_executor": "py-config-bot",
+      "supporting_agents": [
+        "py-test-bot",
+        "py-doc-bot",
+        "py-audit-bot",
+        "py-review-orchestrator"
+      ],
+      "requires_config_update": true
+    },
+    {
+      "id": "ARD-COMPAT-002",
+      "task_family": "compatibility_surface",
+      "registry": "artifact_governance",
+      "registry_key": "sanctioned_public_entrypoint_governance.public_export_facade_count",
+      "owner": "@bioetl-architecture",
+      "reason": "Generated from reports/quality/compatibility-importer-census.json",
+      "expires_on": null,
+      "removal_step": "refresh_artifact_and_reduce_live_count",
+      "limit_value": 0,
+      "current_value": 4,
+      "delta_to_limit": 4,
+      "status": "needs_refactor",
+      "target_file": null,
+      "symbol_name": null,
+      "goal": "Сократить число публичных lazy/export facade seams или жёстко удерживать их без роста как отдельный governance surface.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта"
+      ],
+      "allowed_paths": [
+        "src/bioetl/**",
+        "tests/**"
+      ],
+      "forbidden_paths": [
+        "configs/**",
+        "docs/**",
+        ".github/**"
+      ],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_public_facade_inventory.py",
+        "python -m pytest -q tests/architecture/test_public_surface_importer_census_governance.py",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python -m scripts.engineering.qa check-exemptions --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": [
+        "sanctioned_public_export_facade_count=4",
+        "Collapse reviewed facade burden before introducing new package-root exports."
+      ],
+      "source_artifact": "reports/quality/compatibility-importer-census.json",
+      "category": "COMPATIBILITY_DEBT",
+      "priority": 1,
+      "primary_executor": "py-config-bot",
+      "supporting_agents": [
+        "py-test-bot",
+        "py-doc-bot",
+        "py-audit-bot",
+        "py-review-orchestrator"
+      ],
+      "requires_config_update": true
+    },
+    {
+      "id": "ARD-DUP-003",
+      "task_family": "duplication_cluster",
+      "registry": "artifact_governance",
+      "registry_key": "src/bioetl/application/pipelines",
+      "owner": "@bioetl-architecture",
+      "reason": "Generated from reports/quality/full-app-duplication-baseline.json",
+      "expires_on": null,
+      "removal_step": "refresh_artifact_and_reduce_live_count",
+      "limit_value": 0,
+      "current_value": 11,
+      "delta_to_limit": 11,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/application/pipelines",
+      "symbol_name": null,
+      "goal": "Снизить duplicate clusters в `src/bioetl/application/pipelines` до нуля или ниже следующего ratchet review.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта"
+      ],
+      "allowed_paths": [
+        "src/bioetl/**",
+        "tests/**"
+      ],
+      "forbidden_paths": [
+        "configs/**",
+        "docs/**",
+        ".github/**"
+      ],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_tech_debt_issues_5626_5637_closeout.py",
+        "python -m scripts.engineering.qa report-duplication-baseline --help",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python -m scripts.engineering.qa check-exemptions --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": [
+        "duplicate_count=11",
+        "actionability_categories=pipeline_transformer_contract_pattern"
+      ],
+      "source_artifact": "reports/quality/full-app-duplication-baseline.json",
+      "category": "DUPLICATION",
+      "priority": 2,
+      "primary_executor": "orchestrator",
+      "supporting_agents": [
+        "py-test-bot",
+        "py-doc-bot",
+        "py-config-bot",
+        "py-audit-bot"
+      ],
+      "requires_config_update": false
+    },
+    {
+      "id": "ARD-DUP-002",
+      "task_family": "duplication_cluster",
+      "registry": "artifact_governance",
+      "registry_key": "src/bioetl/infrastructure/adapters",
+      "owner": "@bioetl-architecture",
+      "reason": "Generated from reports/quality/full-app-duplication-baseline.json",
+      "expires_on": null,
+      "removal_step": "refresh_artifact_and_reduce_live_count",
+      "limit_value": 0,
+      "current_value": 54,
+      "delta_to_limit": 54,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/infrastructure/adapters",
+      "symbol_name": null,
+      "goal": "Снизить duplicate clusters в `src/bioetl/infrastructure/adapters` до нуля или ниже следующего ratchet review.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта"
+      ],
+      "allowed_paths": [
+        "src/bioetl/**",
+        "tests/**"
+      ],
+      "forbidden_paths": [
+        "configs/**",
+        "docs/**",
+        ".github/**"
+      ],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_tech_debt_issues_5626_5637_closeout.py",
+        "python -m scripts.engineering.qa report-duplication-baseline --help",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python -m scripts.engineering.qa check-exemptions --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": [
+        "duplicate_count=54",
+        "actionability_categories=export_facade_or_package_barrel, adapter_resilience_or_contract_template"
+      ],
+      "source_artifact": "reports/quality/full-app-duplication-baseline.json",
+      "category": "DUPLICATION",
+      "priority": 2,
+      "primary_executor": "orchestrator",
+      "supporting_agents": [
+        "py-test-bot",
+        "py-doc-bot",
+        "py-config-bot",
+        "py-audit-bot"
+      ],
+      "requires_config_update": false
+    },
+    {
+      "id": "ARD-DEAD-001",
+      "task_family": "dead_code_review",
+      "registry": "artifact_governance",
+      "registry_key": "repo_wide_zero_import_candidate_count",
+      "owner": "@bioetl-architecture",
+      "reason": "Generated from reports/quality/dead-code-inventory.json",
+      "expires_on": null,
+      "removal_step": "refresh_artifact_and_reduce_live_count",
+      "limit_value": 0,
+      "current_value": 9,
+      "delta_to_limit": 9,
+      "status": "needs_refactor",
+      "target_file": null,
+      "symbol_name": null,
+      "goal": "Продолжить review/removal wave по zero-import candidate surfaces без роста untriaged residual.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта"
+      ],
+      "allowed_paths": [
+        "src/bioetl/**",
+        "tests/**"
+      ],
+      "forbidden_paths": [
+        "configs/**",
+        "docs/**",
+        ".github/**"
+      ],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_tech_debt_issues_5626_5637_closeout.py",
+        "python -m scripts.engineering.qa report-dead-code-inventory --help",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python -m scripts.engineering.qa check-exemptions --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": [
+        "repo_wide_zero_import_candidate_count=9",
+        "review_mode=fail-fast-zero-untriaged"
+      ],
+      "source_artifact": "reports/quality/dead-code-inventory.json",
+      "category": "DEAD_CODE_REVIEW_DEBT",
+      "priority": 4,
+      "primary_executor": "py-audit-bot",
+      "supporting_agents": [
+        "py-test-bot",
+        "py-doc-bot",
+        "py-plan-bot"
+      ],
+      "requires_config_update": false
+    }
+  ]
+}

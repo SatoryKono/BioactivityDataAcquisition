@@ -1,0 +1,107 @@
+{
+  "schema_version": "issue-5292-module-coverage-burndown-closeout-v1",
+  "generated_by": "codex",
+  "snapshot_date": "2026-06-17",
+  "issue": {
+    "number": 5292,
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5292",
+    "parent_epic": 5244
+  },
+  "scope": {
+    "description": "First bounded shard of below-85 module coverage burn-down under #5244.",
+    "selected_module_count": 6,
+    "strategy": "Behavior-focused unit tests for CLI historical replay helpers, CLI service seams, composite merge strategy mapping, Gold debug export rows, quarantine statistics, and structural policy coercion."
+  },
+  "coverage_inventory_delta": {
+    "before_below_85_module_count": 112,
+    "after_below_85_module_count": 106,
+    "below_85_module_count_delta": -6,
+    "after_uncovered_module_count": 0,
+    "after_unmeasured_module_count": 0,
+    "coverage_xml_sha256": "cb6715cb5fd859f2198c255266da650223f05af0fdd3cfd8a381b73c548d8904",
+    "source_tree_sha256": "7ab231bce0d02cca42838b91db80e330cc5426c23e41c2b377fc6440765b8423"
+  },
+  "selected_modules": [
+    {
+      "path": "src/bioetl/interfaces/cli/commands/_run_manifest_historical_support.py",
+      "before_coverage_percent": 36.78,
+      "after_coverage_percent": 98.85,
+      "after_covered_lines": 86,
+      "after_executable_lines": 87,
+      "after_missing_lines": 1
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/_run_manifest_services.py",
+      "before_coverage_percent": 41.18,
+      "after_coverage_percent": 100.0,
+      "after_covered_lines": 17,
+      "after_executable_lines": 17,
+      "after_missing_lines": 0
+    },
+    {
+      "path": "src/bioetl/composition/bootstrap/runtime/composite_merge_service_builder.py",
+      "before_coverage_percent": 52.63,
+      "after_coverage_percent": 100.0,
+      "after_covered_lines": 19,
+      "after_executable_lines": 19,
+      "after_missing_lines": 0
+    },
+    {
+      "path": "src/bioetl/application/services/debug_export_collector_gold_mixin.py",
+      "before_coverage_percent": 41.18,
+      "after_coverage_percent": 97.06,
+      "after_covered_lines": 33,
+      "after_executable_lines": 34,
+      "after_missing_lines": 1
+    },
+    {
+      "path": "src/bioetl/infrastructure/quarantine/_statistics.py",
+      "before_coverage_percent": 60.87,
+      "after_coverage_percent": 100.0,
+      "after_covered_lines": 46,
+      "after_executable_lines": 46,
+      "after_missing_lines": 0
+    },
+    {
+      "path": "src/bioetl/application/core/base_transformer/_structural_policy_coercion.py",
+      "before_coverage_percent": 62.03,
+      "after_coverage_percent": 97.47,
+      "after_covered_lines": 77,
+      "after_executable_lines": 79,
+      "after_missing_lines": 2
+    }
+  ],
+  "artifacts_refreshed": [
+    "reports/coverage/coverage.xml",
+    "reports/quality/module-coverage-inventory.json",
+    "reports/quality/architecture-quality-scorecard.json"
+  ],
+  "coverage_refresh_note": "Targeted coverage run was overlaid onto the existing full coverage-verify XML by only promoting newly covered line hits for the selected modules; the module coverage inventory was then regenerated from reports/coverage/coverage.xml.",
+  "validation": [
+    {
+      "command": "bash scripts/engineering/dev/run_pytest.sh --narrow tests/unit/interfaces/cli/commands/test_run_manifest_historical_support.py tests/unit/interfaces/cli/commands/test_run_manifest_services.py tests/unit/composition/bootstrap/runtime/test_composite_support_services_factory.py tests/unit/application/services/test_debug_export_service.py tests/unit/infrastructure/quarantine/test_statistics.py tests/unit/application/core/test_structural_policy_coercion.py",
+      "result": "pass"
+    },
+    {
+      "command": "./.venv/bin/ruff check tests/unit/interfaces/cli/commands/test_run_manifest_historical_support.py tests/unit/interfaces/cli/commands/test_run_manifest_services.py tests/unit/composition/bootstrap/runtime/test_composite_support_services_factory.py tests/unit/application/services/test_debug_export_service.py tests/unit/infrastructure/quarantine/test_statistics.py tests/unit/application/core/test_structural_policy_coercion.py",
+      "result": "pass"
+    },
+    {
+      "command": "./.venv/bin/python -m scripts.engineering.qa report-module-coverage --check",
+      "result": "pass"
+    },
+    {
+      "command": "bash scripts/engineering/dev/run_pytest.sh --narrow tests/architecture/test_module_coverage_inventory.py tests/architecture/test_architecture_quality_scorecard.py",
+      "result": "pass; 1 WSL filesystem-performance skip in module coverage source-tree hash guard"
+    },
+    {
+      "command": "./.venv/bin/python -m json.tool <artifact>",
+      "result": "pass"
+    }
+  ],
+  "closeout": {
+    "status": "complete",
+    "parent_epic_remains_open": true,
+    "rationale": "The first shard reduced below-85 module count while preserving zero uncovered and zero unmeasured production modules. #5244 remains open because 106 modules are still below 85%."
+  }
+}

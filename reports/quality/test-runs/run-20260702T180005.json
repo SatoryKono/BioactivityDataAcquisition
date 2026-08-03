@@ -1,0 +1,40 @@
+{
+  "cases": [
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_scripts_catalog_governance::test_scripts_catalog_governance_check_passes",
+      "status": "passed"
+    },
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_scripts_catalog_governance::test_scripts_catalog_caps_active_script_surface",
+      "status": "passed"
+    },
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_scripts_catalog_governance::test_scripts_catalog_declares_entrypoint_surfaces",
+      "status": "passed"
+    }
+  ],
+  "ci_job": null,
+  "command": "pytest tests/architecture/test_scripts_catalog_governance.py -q",
+  "counts": {
+    "collected": 3,
+    "errors": 0,
+    "failed": 0,
+    "passed": 3,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  },
+  "duration_seconds": 8.797,
+  "exit_code": 0,
+  "failures": [],
+  "git_sha": "c4ad596a02118163c4c9f45a4ded9aa2e4bd9a0c",
+  "run_id": "run-20260702T180005",
+  "shards": [
+    "5825-scripts-catalog"
+  ],
+  "started_at": "2026-07-02T12:00:12.650128+00:00",
+  "suite": "coverage-verify"
+}

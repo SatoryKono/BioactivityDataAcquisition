@@ -1,0 +1,36 @@
+{
+  "schema_version": "tech-debt-issues-5490-5499-closeout-v1",
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "issues": [
+    {
+      "number": 5490,
+      "status": "closed-ready",
+      "summary": "Infrastructure config package-root facade stays on zero first-party growth with issue-specific inventory linkage."
+    },
+    {
+      "number": 5492,
+      "status": "closed-ready",
+      "summary": "Retained composition public export budgets were reduced while compatibility wrappers stayed explicit."
+    },
+    {
+      "number": 5494,
+      "status": "closed-ready",
+      "summary": "Ranked low-tail coverage targets now promote tier violations to blocking under regression-mode governance."
+    },
+    {
+      "number": 5496,
+      "status": "closed-ready",
+      "summary": "Control-plane root now routes through explicit bounded-context seams including the new forensic seam."
+    },
+    {
+      "number": 5497,
+      "status": "closed-ready",
+      "summary": "Runtime Pandera monkeypatching was retired in favor of fail-fast validation for unsupported Python 3.14+ matrices."
+    },
+    {
+      "number": 5499,
+      "status": "closed-ready",
+      "summary": "First-party imports were migrated from bioetl.domain.composite.config to the narrower package-root surface."
+    }
+  ]
+}

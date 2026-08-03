@@ -1,0 +1,31 @@
+{
+  "schema_version": "tech-debt-residual-closeout-v1",
+  "linked_epic": "#6676",
+  "date": "2026-07-27",
+  "children": {
+    "#6677": "audit re-pin r1",
+    "#6678": "partial-coverage-tranche-6678 + domain unit branch tests",
+    "#6679": "constructor waivers 10\u21925",
+    "#6680": "closeout fold wave2 15/60",
+    "#6681": "hotspot extract + budget ratchet shrink-only",
+    "#6682": "config package-root permanent public API decision",
+    "#6683": "public API freeze test + guide",
+    "#6684": {
+      "schema_version": "supporting-scripts-zero-ref-disposition-v1",
+      "linked_issue": "#6684",
+      "date": "2026-07-27",
+      "before_count": 21,
+      "after_count": 17,
+      "archived": [
+        "scripts/docs/generate_pipeline_normalization_validation_table.py",
+        "scripts/ops/install-codex-cmd.ps1",
+        "scripts/memory/mcp_smoke.py",
+        "scripts/ops/launchers/codex/codex-fast.bat"
+      ],
+      "retained_note": "report_config_surface_backlog.py retained \u2014 imported by report_debt_governance_gates.py",
+      "policy": "shrink-only; untriaged remains 0"
+    },
+    "#6685": "ADR-051 QuarantineEntry intentional_exception"
+  },
+  "policy": "no debt budget growth"
+}

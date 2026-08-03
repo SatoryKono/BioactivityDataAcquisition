@@ -1,0 +1,126 @@
+{
+  "schema_version": "coderabbit-audit-6692-closeout-v1",
+  "epic": 6692,
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "status": "implemented_local_closeable",
+  "issues": [
+    {
+      "number": 6693,
+      "code": "CR-01",
+      "status": "closed-ready",
+      "evidence": [
+        "scripts/engineering/qa/report_contract_coverage_matrix.py",
+        "tests/unit/scripts/qa/test_report_contract_coverage_matrix.py",
+        "tests/architecture/test_contract_coverage_matrix_integrity.py",
+        "reports/quality/contract-coverage-matrix.json"
+      ]
+    },
+    {
+      "number": 6694,
+      "code": "CR-02",
+      "status": "closed-ready",
+      "evidence": [
+        "scripts/engineering/qa/report_contract_coverage_matrix.py",
+        "docs/02-architecture/decisions/notes/2026-07-27-contract-coverage-matrix-v3.md",
+        "reports/quality/contract-coverage-matrix.json",
+        "reports/quality/contract-coverage-matrix.md"
+      ]
+    },
+    {
+      "number": 6695,
+      "code": "CR-03",
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/total-tech-debt-audit-main-current.md",
+        "configs/quality/technical_debt_audit_registry.yaml",
+        "reports/quality/module-coverage-inventory.json",
+        "reports/quality/debt-governance-gates.json"
+      ]
+    },
+    {
+      "number": 6696,
+      "code": "CR-04",
+      "status": "closed-ready",
+      "evidence": [
+        "docs/05-operations/runbooks/publication-validation-runbook.md"
+      ]
+    },
+    {
+      "number": 6697,
+      "code": "CR-05",
+      "status": "closed-ready",
+      "evidence": [
+        "docs/05-operations/runbooks/pipeline-failure-dq.md"
+      ]
+    },
+    {
+      "number": 6698,
+      "code": "CR-06",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/debt_scorecard.yaml"
+      ]
+    },
+    {
+      "number": 6699,
+      "code": "CR-07",
+      "status": "closed-ready",
+      "evidence": [
+        "docs/02-architecture/diagrams/foundation/01-full-system-component.mmd",
+        "docs/02-architecture/diagrams/views/01-full-system-component-full.mermaid",
+        "docs/02-architecture/decisions/notes/2026-07-27-storagefactory-process-class.md"
+      ]
+    },
+    {
+      "number": 6692,
+      "code": "CR-00",
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/coderabbit-audit-6692-closeout.json",
+        "reports/quality/coderabbit/project-audit-2026-07-27.md"
+      ]
+    }
+  ],
+  "outcomes": {
+    "6693": {
+      "status": "closeable",
+      "summary": "gold_contract_available requires gold_strict_validation_declared"
+    },
+    "6694": {
+      "status": "closeable",
+      "summary": "schema bumped to contract-coverage-matrix-v3; MD/JSON parity; migration note"
+    },
+    "6695": {
+      "status": "closeable",
+      "summary": "tech-debt audit regenerated from single evidence snapshot; validator ok"
+    },
+    "6696": {
+      "status": "closeable",
+      "summary": "publication runbook uses bounded Delta scan, not full materialization"
+    },
+    "6697": {
+      "status": "closeable",
+      "summary": "DQ threshold-change evidence gate mandatory in pipeline-failure-dq runbook"
+    },
+    "6698": {
+      "status": "closeable",
+      "summary": "checkpoint_compatibility target_split updated after #5031"
+    },
+    "6699": {
+      "status": "closeable",
+      "summary": "StorageFactory already process-class; verification note recorded"
+    },
+    "6692": {
+      "status": "closeable",
+      "summary": "CodeRabbit audit epic complete"
+    }
+  },
+  "verification": {
+    "debt_gates": "45 pass / 0 fail",
+    "contract_matrix_schema": "contract-coverage-matrix-v3",
+    "gold_contract_available_count": 27,
+    "validate_technical_debt_audit": "ok",
+    "contract_matrix_tests": "pass"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "cases": [
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_architecture_quality_scorecard::test_architecture_quality_scorecard_artifact_matches_live_collector",
+      "status": "passed"
+    },
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_architecture_quality_scorecard::test_architecture_quality_scorecard_blocks_debt_budget_growth_policy",
+      "status": "passed"
+    },
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_architecture_quality_scorecard::test_architecture_quality_scorecard_module_coverage_evidence_is_consistent",
+      "status": "passed"
+    },
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_architecture_quality_scorecard::test_architecture_quality_scorecard_includes_adr_and_observability_gates",
+      "status": "passed"
+    },
+    {
+      "file": "",
+      "nodeid": "tests.architecture.test_architecture_quality_scorecard::test_architecture_quality_scorecard_includes_duplication_hotspot_and_test_governance_evidence",
+      "status": "passed"
+    }
+  ],
+  "ci_job": null,
+  "command": "pytest tests/architecture/test_architecture_quality_scorecard.py -q",
+  "counts": {
+    "collected": 5,
+    "errors": 0,
+    "failed": 0,
+    "passed": 5,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  },
+  "duration_seconds": 19.858,
+  "exit_code": 0,
+  "failures": [],
+  "git_sha": "c4ad596a02118163c4c9f45a4ded9aa2e4bd9a0c",
+  "run_id": "run-20260702T180001",
+  "shards": [
+    "5825-arch-scorecard"
+  ],
+  "started_at": "2026-07-02T12:00:12.434765+00:00",
+  "suite": "coverage-verify"
+}

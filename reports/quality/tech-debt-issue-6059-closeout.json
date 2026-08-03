@@ -1,0 +1,41 @@
+{
+  "schema_version": "tech-debt-issue-6059-closeout-v1",
+  "issue": 6059,
+  "status": "closed",
+  "debt_outcome": "improved",
+  "budget_growth_allowed": false,
+  "closed_on": "2026-07-08",
+  "scope": {
+    "guard": "tests/architecture/test_runtime_import_scc.py",
+    "target_metric": "REVIEWED_RUNTIME_SCC_BUDGET_MAX"
+  },
+  "baseline": {
+    "issue_budget": 4,
+    "issue_required_ratchet_budget": 3,
+    "accepted_runtime_scc_count_at_closeout": 3
+  },
+  "after": {
+    "reviewed_runtime_scc_budget_max": 3,
+    "accepted_runtime_scc_count": 3,
+    "new_accepted_sccs_added": 0
+  },
+  "summary": [
+    "Preserved the reduced accepted runtime SCC inventory at three reviewed components.",
+    "Ratcheted REVIEWED_RUNTIME_SCC_BUDGET_MAX from 4 to 3 after the live accepted SCC count permitted it.",
+    "Changed the SCC inventory guard to require exact budget/count alignment so future burn-down work must ratchet the budget again instead of leaving stale headroom."
+  ],
+  "validation": [
+    "python -m scripts.engineering.qa generate-debt-tasks --output /tmp/bioetl-6059-debt-tasks.json --stdout-summary",
+    "python -m scripts.engineering.qa reduce-architecture-debt --tasks /tmp/bioetl-6059-debt-tasks.json --output /tmp/bioetl-6059-debt-plan.json --stdout-summary",
+    "pytest tests/architecture/test_runtime_import_scc.py -q",
+    "pytest tests/architecture/test_tech_debt_issues_6032_6034_6037_closeout.py -q",
+    "pytest tests/architecture/test_runtime_import_scc.py tests/architecture/test_tech_debt_issues_6032_6034_6037_closeout.py -q",
+    "pytest tests/architecture/test_quality_exemptions_registry.py -q",
+    "python -m scripts.engineering.qa check-exemptions --mode auto --growth-mode auto --trend-report off",
+    "ruff check tests/architecture/test_runtime_import_scc.py",
+    "python -m json.tool reports/quality/tech-debt-issue-6059-closeout.json"
+  ],
+  "not_addressed_in_this_rf": [
+    "pytest tests/architecture/test_quality_debt_scorecard.py -q -x --tb=short --timeout=300 fails in unrelated retirement-governance scorecard sync: live zero-import candidate count is 10 while configs/quality/debt_scorecard.yaml records 9."
+  ]
+}

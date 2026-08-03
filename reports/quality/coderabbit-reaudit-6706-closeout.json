@@ -1,0 +1,138 @@
+{
+  "schema_version": "coderabbit-reaudit-6706-closeout-v1",
+  "epic": 6706,
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "debt_budget_outcome": "unchanged",
+  "status": "implemented_local_closeable",
+  "issues": [
+    {
+      "number": 6707,
+      "code": "CRR-01",
+      "status": "closed-ready",
+      "evidence": [
+        "tests/unit/infrastructure/observability/test_tracing.py"
+      ]
+    },
+    {
+      "number": 6708,
+      "code": "CRR-02",
+      "status": "closed-ready",
+      "evidence": [
+        "docs/00-project/rules-summary.md",
+        "docs/00-project/RULES.md"
+      ]
+    },
+    {
+      "number": 6709,
+      "code": "CRR-03",
+      "status": "closed-ready",
+      "evidence": [
+        "docs/01-requirements/REQUIREMENTS.md"
+      ]
+    },
+    {
+      "number": 6710,
+      "code": "CRR-04",
+      "status": "closed-ready",
+      "evidence": [
+        "docs/00-project/rules-summary.md"
+      ]
+    },
+    {
+      "number": 6711,
+      "code": "CRR-05",
+      "status": "closed-ready",
+      "evidence": [
+        "docs/00-project/ai/memory/memory-py-plan-bot.md"
+      ]
+    },
+    {
+      "number": 6712,
+      "code": "CRR-06",
+      "status": "closed-ready",
+      "evidence": [
+        "docs/00-project/ai/rules/windsurf/workflows/qodo-sync.md"
+      ]
+    },
+    {
+      "number": 6713,
+      "code": "CRR-07",
+      "status": "closed-ready",
+      "evidence": [
+        "docs/00-project/ai/rules/windsurf/rules/03-testing.md"
+      ]
+    },
+    {
+      "number": 6714,
+      "code": "CRR-08",
+      "status": "closed-ready",
+      "evidence": [
+        "docs/00-project/ai/rules/windsurf/rules/05-agent-workflow.md"
+      ]
+    },
+    {
+      "number": 6715,
+      "code": "CRR-09",
+      "status": "closed-ready",
+      "evidence": [
+        "docs/00-project/ai/rules/windsurf/rules/11-schema-evolution.md",
+        "docs/00-project/ai/rules/windsurf/rules/02-code-style.md"
+      ]
+    },
+    {
+      "number": 6706,
+      "code": "CRR-00",
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/coderabbit-reaudit-6706-closeout.json",
+        "reports/quality/coderabbit/project-audit-2026-07-27-reaudit.md"
+      ]
+    }
+  ],
+  "outcomes": {
+    "6707": {
+      "status": "closeable",
+      "summary": "OTLP cache test proves empty→load→reuse without re-import"
+    },
+    "6708": {
+      "status": "closeable",
+      "summary": "rules-summary Architecture enforcement section + RULES.md pointer"
+    },
+    "6709": {
+      "status": "closeable",
+      "summary": "REQ-DATA/DELTA row includes full Silver validation gate"
+    },
+    "6710": {
+      "status": "closeable",
+      "summary": "rules-summary Medallion write validation section for Silver/Gold"
+    },
+    "6711": {
+      "status": "closeable",
+      "summary": "Gold wording already SCD2 or documented overwrite/append (verified)"
+    },
+    "6712": {
+      "status": "closeable",
+      "summary": "qodo-sync checklist already includes audit-documents (verified)"
+    },
+    "6713": {
+      "status": "closeable",
+      "summary": "mock scope already limited to seams/ports (verified)"
+    },
+    "6714": {
+      "status": "closeable",
+      "summary": "secret-valued fields only wording already present (verified)"
+    },
+    "6715": {
+      "status": "closeable",
+      "summary": "critical-mode list includes run_mode and data_layer (verified)"
+    },
+    "6706": {
+      "status": "closeable",
+      "summary": "CodeRabbit re-audit epic complete"
+    }
+  },
+  "verification": {
+    "pytest": "tests/unit/infrastructure/observability/test_tracing.py::TestOTLPAvailability pass",
+    "docs_acceptance_checks": "all CRR-01..09 criteria true"
+  }
+}
