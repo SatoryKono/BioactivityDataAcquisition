@@ -1,8 +1,0 @@
-schema_version: 1
-provider: uniprot
-cassette_rel_path: tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_single_id.yaml
-metadata_status: managed_inventory
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 1038b2911f3465e42be00e49a6b8727e52f7a269fbc4dcde84ae48b042079472
-recorded_at: '2026-07-03'
-staleness_ready: true

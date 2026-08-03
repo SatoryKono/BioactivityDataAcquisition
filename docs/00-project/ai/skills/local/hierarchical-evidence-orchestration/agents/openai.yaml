@@ -1,4 +1,0 @@
-interface:
-  display_name: "Hierarchical Evidence Orchestration"
-  short_description: "Orchestrate complex evidence collection across multiple pillars"
-  default_prompt: "Use $hierarchical-evidence-orchestration to coordinate parallel evidence gathering, manage task delegation, and ensure consistent quality standards across hierarchical research workflows."

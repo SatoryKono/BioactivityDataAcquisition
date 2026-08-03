@@ -1,8 +1,0 @@
-schema_version: 1
-provider: pubchem
-cassette_rel_path: tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_single_page_response.yaml
-metadata_status: managed_inventory
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 61cd6d796f65d081176b2b283c1ea81ca14ebb58513f074212ad0d48d02782d4
-recorded_at: '2026-07-03'
-staleness_ready: true

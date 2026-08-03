@@ -1,2 +1,0 @@
-{"protein_class_id":910001,"pref_name":"Deprecated family","short_name":"Deprecated","protein_class_desc":"deprecated family","definition":"Synthetic edge fixture for downgraded provider-flag governance.","class_level":4,"sort_order":1,"parent_id":100,"replaced_by":910010,"downgraded":1}
-{"protein_class_id":910010,"pref_name":"Replacement family","short_name":"Replacement","protein_class_desc":"replacement family","definition":"Synthetic edge fixture for active provider-flag governance.","class_level":4,"sort_order":2,"parent_id":100,"replaced_by":null,"downgraded":0}

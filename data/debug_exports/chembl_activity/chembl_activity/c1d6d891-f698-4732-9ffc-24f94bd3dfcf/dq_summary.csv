@@ -1,4 +1,0 @@
-"run_id","workflow_id","pipeline_id","stage","status","reason_code","action","record_count"
-"c1d6d891-f698-4732-9ffc-24f94bd3dfcf","chembl_activity","chembl_activity","gold","rejected","SEMANTIC_FILTER_EXCLUDED","filter","14"
-"c1d6d891-f698-4732-9ffc-24f94bd3dfcf","chembl_activity","chembl_activity","silver","quarantined","DQ_HARD_RULE_FAILED","quarantine","1"
-"c1d6d891-f698-4732-9ffc-24f94bd3dfcf","chembl_activity","chembl_activity","silver","quarantined","SCHEMA_REQUIRED_FIELD_MISSING","quarantine","76"

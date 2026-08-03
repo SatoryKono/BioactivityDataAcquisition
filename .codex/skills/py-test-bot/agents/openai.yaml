@@ -1,4 +1,0 @@
-interface:
-  display_name: "Py Test Bot"
-  short_description: "Run BioETL testing profile"
-  default_prompt: "Use $py-test-bot to choose, run, or interpret focused BioETL tests and regression checks."

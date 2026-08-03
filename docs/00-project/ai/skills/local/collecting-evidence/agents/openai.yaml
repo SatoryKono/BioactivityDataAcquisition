@@ -1,4 +1,0 @@
-interface:
-  display_name: "Collecting Evidence"
-  short_description: "Create traceable evidence objects"
-  default_prompt: "Use $collecting-evidence to create traceable evidence objects with source, confidence, and assumptions."
