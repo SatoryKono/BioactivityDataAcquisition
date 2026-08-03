@@ -1,0 +1,412 @@
+schema_version: 1
+policy_scope: public_lazy_facades
+linked_issue: "#6624"
+reviewed_on: "2026-07-27"
+review_by: "2026-10-27"
+owner: "@bioetl-architecture"
+new_surface_policy: fail_fast_unclassified_lazy_public_facade
+row_count: 53
+rationale: >-
+  Lazy public facades are intentional only when the owning package declares the
+  owner, allowed importer class, classification, and exit criteria. New
+  __getattr__, _PUBLIC_EXPORTS, or _PUBLIC_SYMBOL_TARGETS surfaces under
+  src/bioetl must be added here before merge.
+allowed_classifications:
+  - external_public_api
+  - owner_package_root
+  - compatibility_debt
+  - internal_lazy_import_optimization
+row_templates:
+  composition_external: &composition_external
+    classification: external_public_api
+    owner: "@bioetl-composition"
+    allowed_importers: [external_consumers, tests]
+    exit_criteria: "Retain until reviewed public-API migration or breaking-change ADR removes the facade."
+  composition_package: &composition_package
+    classification: owner_package_root
+    owner: "@bioetl-composition"
+    allowed_importers: [owning_package, tests]
+    exit_criteria: "Retain while the package root is the reviewed owner import surface."
+  composition_internal: &composition_internal
+    classification: internal_lazy_import_optimization
+    owner: "@bioetl-composition"
+    allowed_importers: [owning_module_family, tests]
+    exit_criteria: "Retain while it prevents import cycles or expensive eager imports."
+  domain_package: &domain_package
+    classification: owner_package_root
+    owner: "@bioetl-domain"
+    allowed_importers: [owning_package, tests]
+    exit_criteria: "Retain while the package root is the reviewed owner import surface."
+  cli_package: &cli_package
+    classification: owner_package_root
+    owner: "@bioetl-interfaces-cli"
+    allowed_importers: [owning_package, tests]
+    exit_criteria: "Retain while the CLI package root is the reviewed owner import surface."
+  config_compatibility: &config_compatibility
+    classification: external_public_api
+    owner: "@bioetl-config"
+    allowed_importers: [external_consumers, tests]
+    exit_criteria: >-
+      Permanent external public API per ADR-052; first-party src importers remain
+      forbidden (max 0). Removal requires a new ADR. Historical design:
+      docs/02-architecture/compatibility/infrastructure-config-package-root-sunset.md
+      (#6624).
+  infrastructure_package: &infrastructure_package
+    classification: owner_package_root
+    owner: "@bioetl-infrastructure"
+    allowed_importers: [owning_package, tests]
+    exit_criteria: "Retain while the package root is the reviewed owner import surface."
+  observability_package: &observability_package
+    classification: owner_package_root
+    owner: "@bioetl-observability"
+    allowed_importers: [owning_package, tests]
+    exit_criteria: "Retain while the package root is the reviewed owner import surface."
+  storage_internal: &storage_internal
+    classification: internal_lazy_import_optimization
+    owner: "@bioetl-infrastructure-storage"
+    allowed_importers: [owning_module_family, tests]
+    exit_criteria: "Retain while it prevents import cycles or expensive eager imports."
+  adapter_internal: &adapter_internal
+    classification: internal_lazy_import_optimization
+    owner: "@bioetl-infrastructure-adapters"
+    allowed_importers: [owning_module_family, tests]
+    exit_criteria: "Retain while it prevents import cycles or expensive eager imports."
+  application_external: &application_external
+    classification: external_public_api
+    owner: "@bioetl-application"
+    allowed_importers: [external_consumers, tests]
+    exit_criteria: "Retain until reviewed public-API migration or breaking-change ADR removes the facade."
+  application_package: &application_package
+    classification: owner_package_root
+    owner: "@bioetl-application"
+    allowed_importers: [owning_package, tests]
+    exit_criteria: "Retain while the package root is the reviewed owner import surface."
+  application_internal: &application_internal
+    classification: internal_lazy_import_optimization
+    owner: "@bioetl-application"
+    allowed_importers: [owning_module_family, tests]
+    exit_criteria: "Retain while it prevents import cycles or expensive eager imports."
+  control_plane_package: &control_plane_package
+    classification: owner_package_root
+    owner: "@bioetl-application-control-plane"
+    allowed_importers: [owning_package, tests]
+    exit_criteria: "Retain while the package root is the reviewed owner import surface."
+facades:
+  - {
+      path: src/bioetl/composition/control_plane_api.py,
+      module: bioetl.composition.control_plane_api,
+      markers: [_PUBLIC_EXPORTS],
+      <<: *composition_external,
+    }
+  - {
+      path: src/bioetl/composition/entrypoints.py,
+      module: bioetl.composition.entrypoints,
+      markers: [_PUBLIC_SYMBOL_TARGETS],
+      <<: *composition_external,
+    }
+  - {
+      path: src/bioetl/composition/execution_api.py,
+      module: bioetl.composition.execution_api,
+      markers: [_PUBLIC_EXPORTS],
+      <<: *composition_external,
+    }
+  - {
+      path: src/bioetl/composition/health_api.py,
+      module: bioetl.composition.health_api,
+      markers: [_PUBLIC_EXPORTS],
+      <<: *composition_external,
+    }
+  - {
+      path: src/bioetl/composition/maintenance_api.py,
+      module: bioetl.composition.maintenance_api,
+      markers: [_PUBLIC_EXPORTS],
+      <<: *composition_external,
+    }
+  - {
+      path: src/bioetl/composition/registry_api.py,
+      module: bioetl.composition.registry_api,
+      markers: [_PUBLIC_EXPORTS],
+      <<: *composition_external,
+    }
+  - {
+      path: src/bioetl/composition/resources_api.py,
+      module: bioetl.composition.resources_api,
+      markers: [_PUBLIC_EXPORTS],
+      <<: *composition_external,
+    }
+  - {
+      path: src/bioetl/domain/__init__.py,
+      module: bioetl.domain,
+      markers: [__getattr__],
+      <<: *domain_package,
+    }
+  - {
+      path: src/bioetl/interfaces/cli/commands/__init__.py,
+      module: bioetl.interfaces.cli.commands,
+      markers: [__getattr__],
+      <<: *cli_package,
+    }
+  - {
+      path: src/bioetl/interfaces/cli/commands/domains/composite/__init__.py,
+      module: bioetl.interfaces.cli.commands.domains.composite,
+      markers: [__getattr__],
+      <<: *cli_package,
+    }
+  - {
+      path: src/bioetl/interfaces/cli/commands/domains/diagnostics/__init__.py,
+      module: bioetl.interfaces.cli.commands.domains.diagnostics,
+      markers: [__getattr__],
+      <<: *cli_package,
+    }
+  - {
+      path: src/bioetl/interfaces/cli/commands/domains/health/__init__.py,
+      module: bioetl.interfaces.cli.commands.domains.health,
+      markers: [__getattr__],
+      <<: *cli_package,
+    }
+  - {
+      path: src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py,
+      module: bioetl.interfaces.cli.commands.domains.maintenance,
+      markers: [__getattr__],
+      <<: *cli_package,
+    }
+  - {
+      path: src/bioetl/interfaces/cli/commands/domains/quarantine/__init__.py,
+      module: bioetl.interfaces.cli.commands.domains.quarantine,
+      markers: [__getattr__],
+      <<: *cli_package,
+    }
+  - {
+      path: src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py,
+      module: bioetl.interfaces.cli.commands.domains.run_all,
+      markers: [__getattr__],
+      <<: *cli_package,
+    }
+  - {
+      path: src/bioetl/infrastructure/config/__init__.py,
+      module: bioetl.infrastructure.config,
+      markers: [__getattr__],
+      <<: *config_compatibility,
+    }
+  - {
+      path: src/bioetl/infrastructure/control_plane/__init__.py,
+      module: bioetl.infrastructure.control_plane,
+      markers: [__getattr__],
+      <<: *infrastructure_package,
+    }
+  - {
+      path: src/bioetl/infrastructure/export/__init__.py,
+      module: bioetl.infrastructure.export,
+      markers: [__getattr__],
+      <<: *infrastructure_package,
+    }
+  - {
+      path: src/bioetl/infrastructure/observability/__init__.py,
+      module: bioetl.infrastructure.observability,
+      markers: [__getattr__],
+      <<: *observability_package,
+    }
+  - {
+      path: src/bioetl/infrastructure/storage/support/atomic_ops.py,
+      module: bioetl.infrastructure.storage.support.atomic_ops,
+      markers: [__getattr__],
+      <<: *storage_internal,
+    }
+  - {
+      path: src/bioetl/infrastructure/adapters/http/health_monitor.py,
+      module: bioetl.infrastructure.adapters.http.health_monitor,
+      markers: [__getattr__],
+      <<: *adapter_internal,
+    }
+  - {
+      path: src/bioetl/domain/behavior/__init__.py,
+      module: bioetl.domain.behavior,
+      markers: [__getattr__, _PUBLIC_EXPORTS],
+      <<: *domain_package,
+    }
+  - {
+      path: src/bioetl/domain/config/__init__.py,
+      module: bioetl.domain.config,
+      markers: [__getattr__],
+      <<: *domain_package,
+    }
+  - {
+      path: src/bioetl/domain/entities/__init__.py,
+      module: bioetl.domain.entities,
+      markers: [__getattr__],
+      <<: *domain_package,
+    }
+  - {
+      path: src/bioetl/domain/exceptions/__init__.py,
+      module: bioetl.domain.exceptions,
+      markers: [__getattr__],
+      <<: *domain_package,
+    }
+  - {
+      path: src/bioetl/domain/filtering/__init__.py,
+      module: bioetl.domain.filtering,
+      markers: [__getattr__],
+      <<: *domain_package,
+    }
+  - {
+      path: src/bioetl/domain/ports/__init__.py,
+      module: bioetl.domain.ports,
+      markers: [__getattr__],
+      <<: *domain_package,
+    }
+  - {
+      path: src/bioetl/domain/types/__init__.py,
+      module: bioetl.domain.types,
+      markers: [__getattr__],
+      <<: *domain_package,
+    }
+  - {
+      path: src/bioetl/domain/value_objects/__init__.py,
+      module: bioetl.domain.value_objects,
+      markers: [__getattr__],
+      <<: *domain_package,
+    }
+  - {
+      path: src/bioetl/domain/normalization/profiles/__init__.py,
+      module: bioetl.domain.normalization.profiles,
+      markers: [__getattr__],
+      <<: *domain_package,
+    }
+  - {
+      path: src/bioetl/composition/bootstrap/__init__.py,
+      module: bioetl.composition.bootstrap,
+      markers: [__getattr__, _PUBLIC_EXPORTS],
+      <<: *composition_package,
+    }
+  - {
+      path: src/bioetl/composition/factories/__init__.py,
+      module: bioetl.composition.factories,
+      markers: [__getattr__],
+      <<: *composition_package,
+    }
+  - {
+      path: src/bioetl/composition/providers/__init__.py,
+      module: bioetl.composition.providers,
+      markers: [__getattr__, _PUBLIC_EXPORTS],
+      <<: *composition_package,
+    }
+  - {
+      path: src/bioetl/composition/runtime_builders/inputs_resolver.py,
+      module: bioetl.composition.runtime_builders.inputs_resolver,
+      markers: [__getattr__],
+      <<: *composition_external,
+    }
+  - {
+      path: src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py,
+      module: bioetl.composition.runtime_builders._run_manifest_data_roots,
+      markers: [__getattr__],
+      <<: *composition_internal,
+    }
+  - {
+      path: src/bioetl/composition/runtime_builders/_run_manifest_refs.py,
+      module: bioetl.composition.runtime_builders._run_manifest_refs,
+      markers: [__getattr__],
+      <<: *composition_internal,
+    }
+  - {
+      path: src/bioetl/composition/factories/dq/__init__.py,
+      module: bioetl.composition.factories.dq,
+      markers: [__getattr__, _PUBLIC_EXPORTS],
+      <<: *composition_package,
+    }
+  - {
+      path: src/bioetl/composition/factories/pipeline/registry.py,
+      module: bioetl.composition.factories.pipeline.registry,
+      markers: [__getattr__],
+      <<: *composition_internal,
+    }
+  - {
+      path: src/bioetl/composition/factories/pipeline/__init__.py,
+      module: bioetl.composition.factories.pipeline,
+      markers: [__getattr__],
+      <<: *composition_package,
+    }
+  - {
+      path: src/bioetl/composition/factories/services/factory.py,
+      module: bioetl.composition.factories.services.factory,
+      markers: [__getattr__],
+      <<: *composition_internal,
+    }
+  - {
+      path: src/bioetl/composition/factories/services/__init__.py,
+      module: bioetl.composition.factories.services,
+      markers: [__getattr__],
+      <<: *composition_package,
+    }
+  - {
+      path: src/bioetl/composition/bootstrap/cli/__init__.py,
+      module: bioetl.composition.bootstrap.cli,
+      markers: [__getattr__],
+      <<: *composition_package,
+    }
+  - {
+      path: src/bioetl/composition/bootstrap/runtime/composite.py,
+      module: bioetl.composition.bootstrap.runtime.composite,
+      markers: [__getattr__],
+      <<: *composition_internal,
+    }
+  - {
+      path: src/bioetl/composition/bootstrap/runtime/__init__.py,
+      module: bioetl.composition.bootstrap.runtime,
+      markers: [__getattr__, _PUBLIC_EXPORTS],
+      <<: *composition_package,
+    }
+  - {
+      path: src/bioetl/application/services/control_plane/manifest/__init__.py,
+      module: bioetl.application.services.control_plane.manifest,
+      markers: [__getattr__],
+      <<: *control_plane_package,
+    }
+  - {
+      path: src/bioetl/application/services/control_plane/replay/__init__.py,
+      module: bioetl.application.services.control_plane.replay,
+      markers: [__getattr__, _PUBLIC_EXPORTS],
+      <<: *control_plane_package,
+    }
+  - {
+      path: src/bioetl/application/composite/__init__.py,
+      module: bioetl.application.composite,
+      markers: [__getattr__],
+      <<: *application_package,
+    }
+  - {
+      path: src/bioetl/application/pipelines/common/blocks.py,
+      module: bioetl.application.pipelines.common.blocks,
+      markers: [__getattr__],
+      <<: *application_internal,
+    }
+  - {
+      path: src/bioetl/application/pipelines/crossref/__init__.py,
+      module: bioetl.application.pipelines.crossref,
+      markers: [__getattr__],
+      <<: *application_package,
+    }
+  - {
+      path: src/bioetl/application/core/wiring/factory.py,
+      module: bioetl.application.core.wiring.factory,
+      markers: [_PUBLIC_EXPORTS],
+      <<: *application_external,
+    }
+  - {
+      path: src/bioetl/application/core/wiring/registry.py,
+      module: bioetl.application.core.wiring.registry,
+      markers: [_PUBLIC_EXPORTS],
+      <<: *application_external,
+    }
+  - {
+      path: src/bioetl/application/core/wiring/transformer.py,
+      module: bioetl.application.core.wiring.transformer,
+      markers: [_PUBLIC_EXPORTS],
+      <<: *application_external,
+    }
+  - {
+      path: src/bioetl/application/core/wiring/__init__.py,
+      module: bioetl.application.core.wiring,
+      markers: [__getattr__],
+      <<: *application_package,
+    }

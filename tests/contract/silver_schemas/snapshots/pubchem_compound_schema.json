@@ -1,0 +1,712 @@
+{
+  "_dq_error": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality errors.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_dq_warn": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality warnings.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_index": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Sequential index of the record in the pipeline run.",
+    "dtype": "int64",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_ingestion_ts": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)?$"
+      }
+    ],
+    "coerce": false,
+    "description": "Timestamp when the record was ingested (UTC, ISO 8601 format).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Correlation ID for the pipeline run.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Type of pipeline run.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_source_batch_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Batch context ID from the source.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "atom_stereo_count": {
+    "checks": [
+      {
+        "name": "atom_stereo_count_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Total stereocenters",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "bond_stereo_count": {
+    "checks": [
+      {
+        "name": "bond_stereo_count_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Total E/Z bonds",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "canonical_smiles": {
+    "checks": [
+      {
+        "name": "canonical_smiles_length"
+      }
+    ],
+    "coerce": false,
+    "description": "Canonical SMILES string",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "charge": {
+    "checks": [
+      {
+        "name": "charge_range"
+      }
+    ],
+    "coerce": false,
+    "description": "Formal charge",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "chemical_standardization_policy_version": {
+    "checks": [
+      {
+        "name": "chemical_standardization_policy_version"
+      }
+    ],
+    "coerce": false,
+    "description": "Version of the applied chemical standardization policy",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "chemical_standardization_status": {
+    "checks": [
+      {
+        "name": "chemical_standardization_status_enum"
+      }
+    ],
+    "coerce": false,
+    "description": "Bounded chemical standardization status",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "chemical_standardization_warnings": {
+    "checks": [
+      {
+        "name": "chemical_standardization_warnings_length"
+      }
+    ],
+    "coerce": false,
+    "description": "JSON array of standardization warning codes",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "complexity": {
+    "checks": [
+      {
+        "name": "complexity_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Structural complexity score",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "conformer_count_3d": {
+    "checks": [
+      {
+        "name": "conformer_count_3d_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Number of 3D conformers (float for nullable int)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "conformer_rmsd_3d": {
+    "checks": [
+      {
+        "name": "conformer_rmsd_3d_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Conformer model RMSD",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "content_hash": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^[a-f0-9]{64}$"
+      }
+    ],
+    "coerce": false,
+    "description": "SHA256 hash of canonical record representation (64 hex chars).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "covalent_unit_count": {
+    "checks": [
+      {
+        "name": "covalent_unit_count_positive"
+      }
+    ],
+    "coerce": false,
+    "description": "Number of covalent units",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "defined_atom_stereo_count": {
+    "checks": [
+      {
+        "name": "defined_atom_stereo_count_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Defined stereocenters",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "defined_bond_stereo_count": {
+    "checks": [
+      {
+        "name": "defined_bond_stereo_count_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Defined E/Z bonds",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "effective_rotor_count_3d": {
+    "checks": [
+      {
+        "name": "effective_rotor_count_3d_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Effective rotatable bonds (3D)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "entity_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Unique business identifier for the entity.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "exact_mass": {
+    "checks": [
+      {
+        "name": "exact_mass_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Monoisotopic exact mass (Da)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "feature_acceptor_count_3d": {
+    "checks": [
+      {
+        "name": "feature_acceptor_count_3d_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "3D H-bond acceptor features (float for nullable int)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "feature_anion_count_3d": {
+    "checks": [
+      {
+        "name": "feature_anion_count_3d_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "3D anion features (float for nullable int)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "feature_cation_count_3d": {
+    "checks": [
+      {
+        "name": "feature_cation_count_3d_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "3D cation features (float for nullable int)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "feature_count_3d": {
+    "checks": [
+      {
+        "name": "feature_count_3d_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Total count of 3D pharmacophore features (float for nullable int)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "feature_donor_count_3d": {
+    "checks": [
+      {
+        "name": "feature_donor_count_3d_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "3D H-bond donor features (float for nullable int)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "feature_hydrophobe_count_3d": {
+    "checks": [
+      {
+        "name": "feature_hydrophobe_count_3d_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "3D hydrophobic features (float for nullable int)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "feature_ring_count_3d": {
+    "checks": [
+      {
+        "name": "feature_ring_count_3d_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "3D ring features (float for nullable int)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "h_bond_acceptor_count": {
+    "checks": [
+      {
+        "name": "h_bond_acceptor_count_range"
+      }
+    ],
+    "coerce": false,
+    "description": "Hydrogen bond acceptor count",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "h_bond_donor_count": {
+    "checks": [
+      {
+        "name": "h_bond_donor_count_range"
+      }
+    ],
+    "coerce": false,
+    "description": "Hydrogen bond donor count",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "heavy_atom_count": {
+    "checks": [
+      {
+        "name": "heavy_atom_count_range"
+      }
+    ],
+    "coerce": false,
+    "description": "Non-hydrogen atom count",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "inchi": {
+    "checks": [
+      {
+        "name": "inchi_format"
+      }
+    ],
+    "coerce": false,
+    "description": "IUPAC InChI identifier",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "inchi_key": {
+    "checks": [
+      {
+        "name": "inchi_key_format"
+      }
+    ],
+    "coerce": false,
+    "description": "InChI hash key (27 chars)",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "isomeric_smiles": {
+    "checks": [
+      {
+        "name": "isomeric_smiles_length"
+      }
+    ],
+    "coerce": false,
+    "description": "SMILES with stereochemistry",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "isotope_atom_count": {
+    "checks": [
+      {
+        "name": "isotope_atom_count_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Isotopic atom count",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "iupac_name": {
+    "checks": [],
+    "coerce": false,
+    "description": "IUPAC systematic name",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "molecular_formula": {
+    "checks": [],
+    "coerce": false,
+    "description": "Molecular formula (e.g., C6H12O6)",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "molecular_weight": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      },
+      {
+        "name": "less_than_or_equal_to",
+        "type": "le"
+      }
+    ],
+    "coerce": false,
+    "description": "Molecular weight in g/mol",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "molecule_id": {
+    "checks": [
+      {
+        "name": "molecule_id_positive"
+      }
+    ],
+    "coerce": false,
+    "description": "PubChem Compound ID (PK)",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "monoisotopic_mass": {
+    "checks": [
+      {
+        "name": "monoisotopic_mass_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Monoisotopic mass using most abundant isotope (Da)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "rotatable_bond_count": {
+    "checks": [
+      {
+        "name": "rotatable_bond_count_range"
+      }
+    ],
+    "coerce": false,
+    "description": "Rotatable bond count",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "standardized_canonical_smiles": {
+    "checks": [
+      {
+        "name": "standardized_canonical_smiles_length"
+      }
+    ],
+    "coerce": false,
+    "description": "Policy-normalized canonical SMILES string",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "standardized_inchi": {
+    "checks": [
+      {
+        "name": "standardized_inchi_format"
+      }
+    ],
+    "coerce": false,
+    "description": "Policy-normalized IUPAC InChI identifier",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "standardized_inchi_key": {
+    "checks": [
+      {
+        "name": "standardized_inchi_key_format"
+      }
+    ],
+    "coerce": false,
+    "description": "Policy-normalized InChI hash key",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "standardized_isomeric_smiles": {
+    "checks": [
+      {
+        "name": "standardized_isomeric_smiles_length"
+      }
+    ],
+    "coerce": false,
+    "description": "Policy-normalized isomeric SMILES string",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "structure_parent_key": {
+    "checks": [
+      {
+        "name": "structure_parent_key_length"
+      }
+    ],
+    "coerce": false,
+    "description": "Stable parent-structure key from the standardization policy",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "tpsa": {
+    "checks": [
+      {
+        "name": "tpsa_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Topological polar surface area (\u00c5\u00b2)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "undefined_atom_stereo_count": {
+    "checks": [
+      {
+        "name": "undefined_atom_stereo_count_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Undefined stereocenters",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "undefined_bond_stereo_count": {
+    "checks": [
+      {
+        "name": "undefined_bond_stereo_count_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "Undefined E/Z bonds",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "volume_3d": {
+    "checks": [
+      {
+        "name": "volume_3d_non_negative"
+      }
+    ],
+    "coerce": false,
+    "description": "3D molecular volume (\u00c5\u00b3)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "x_steric_quadrupole_3d": {
+    "checks": [],
+    "coerce": false,
+    "description": "X-axis steric quadrupole moment (3D charge distribution)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "xlogp": {
+    "checks": [
+      {
+        "name": "xlogp_range"
+      }
+    ],
+    "coerce": false,
+    "description": "Computed octanol-water partition coefficient",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "y_steric_quadrupole_3d": {
+    "checks": [],
+    "coerce": false,
+    "description": "Y-axis steric quadrupole moment (3D charge distribution)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "z_steric_quadrupole_3d": {
+    "checks": [],
+    "coerce": false,
+    "description": "Z-axis steric quadrupole moment (3D charge distribution)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  }
+}

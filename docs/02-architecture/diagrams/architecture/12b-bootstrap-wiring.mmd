@@ -1,0 +1,106 @@
+%% BioETL — Bootstrap: Runtime, Control-Plane, and Admin Wiring
+%% Covers how current entrypoints/bootstrap seams expose runtime, control-plane, and admin assembly outputs.
+
+%% @version 1.4.0
+%% @date    2026-03-28
+%% @type    flowchart
+%% @level   System / Component
+%% @view    bootstrap-wiring
+%% @parent  12-bootstrap-di-container.mmd
+%% @nodes   23
+%% @uniform width=400 height=56 max_title_len=34 max_desc_lines=2
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+graph TB
+    subgraph Public["Public composition APIs"]
+        ENTRY["composition.entrypoints"]:::size-sm
+        APIS["execution_api / control_plane_api / health_api<br/>maintenance_api / resources_api"]:::size-sm
+        BOOT["composition.bootstrap<br/>lower-level seam"]:::size-sm
+    end
+
+    subgraph Composition["Composition bootstrap"]
+        BPR["bootstrap_pipeline_runner"]:::size-sm
+        BPS["bootstrap_pipeline_runner_service"]:::size-sm
+        BUILDER["build_pipeline_runner"]:::size-sm
+        INPUTS["prepare_runner_inputs"]:::size-sm
+        CTRL["runtime_builders.control_plane"]:::size-sm
+        LCOL["ledger_collaborator"]:::size-sm
+        SUPPORT["bootstrap.cli + bootstrap.assembly"]:::size-sm
+        CH["Composite runtime helpers"]:::size-sm
+    end
+
+    subgraph Infrastructure["Infrastructure collaborators"]
+        ADAPTER["Provider adapter<br/>DataSourcePort"]:::size-sm
+        STORAGE["StorageContext / writers"]:::size-sm
+        OBS["Observability bundle"]:::size-sm
+        STATE["Lock + checkpoint / quarantine ports"]:::size-sm
+    end
+
+    subgraph Application["Created services"]
+        PRUN["PipelineRunner"]:::size-sm
+        PSVC["PipelineRunnerService"]:::size-sm
+        CRUN["CompositePipelineRunner"]:::size-sm
+        ADM["Health / export / checkpoint<br/>lineage / quarantine services"]:::size-sm
+    end
+
+    subgraph Artifacts["Control-plane artifacts"]
+        MAN["Run manifest"]:::size-sm
+        ECFG["Effective-config artifact"]:::size-sm
+        LED["Run-ledger collaborator"]:::size-sm
+    end
+
+    ENTRY --> APIS
+    ENTRY -.->|"retained broad access"| BOOT
+    APIS --> BPR
+    APIS --> BPS
+    APIS --> SUPPORT
+    BOOT -.->|"direct bootstrap"| BPR
+    BOOT -.->|"direct bootstrap"| BPS
+    BOOT -.->|"admin bootstrap"| SUPPORT
+
+    BPR --> BUILDER
+    BUILDER --> INPUTS
+    BUILDER --> CTRL
+    BUILDER --> LCOL
+    BPS --> PSVC
+    SUPPORT --> STORAGE
+    SUPPORT --> STATE
+    SUPPORT --> ADM
+    CH --> CRUN
+
+    INPUTS --> OBS
+    BUILDER --> ADAPTER
+    BUILDER --> STORAGE
+    BUILDER --> PRUN
+    CTRL --> MAN
+    CTRL --> ECFG
+    LCOL --> LED
+
+    ADAPTER --> PRUN
+    STORAGE --> PRUN
+    OBS --> PRUN
+    LED --> PRUN
+    STORAGE --> CRUN
+    STATE --> CRUN
+    OBS --> CRUN
+
+    classDef comp fill:#fff7ed,stroke:#f59e0b
+    classDef infra fill:#fff1f2,stroke:#dc2626
+    classDef app fill:#f0fdf4,stroke:#16a34a
+    classDef artifact fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+
+    class ENTRY,APIS,BOOT comp
+    class BPR,BPS,BUILDER,INPUTS,CTRL,LCOL,SUPPORT,CH comp
+    class ADAPTER,STORAGE,OBS,STATE infra
+    class PRUN,PSVC,CRUN,ADM app
+    class MAN,ECFG,LED artifact

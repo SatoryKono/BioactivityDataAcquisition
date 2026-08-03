@@ -1,0 +1,51 @@
+%% BioETL — Observability: Application Layer
+%% Application-level observability: ports, pipeline observer, batch metrics, adapter metrics.
+
+%% @version 1.1.0
+%% @date    2026-04-12
+%% @type    flowchart
+%% @level   System / Component
+%% @view    observability-app
+%% @parent  09-observability-stack.mmd
+%% @nodes   10
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+graph TB
+    subgraph Ports["Domain Ports"]
+        LP["LoggerPort<br/>(Protocol)"]:::size-sm
+        MP["MetricsPort<br/>(Protocol)"]:::size-sm
+        TP["TracingPort<br/>(Protocol)"]:::size-sm
+        DQMP["DQMonitorPort<br/>(Protocol)"]:::size-sm
+    end
+
+    subgraph AppObserver["Application Observability"]
+        PO["PipelineObserver<br/>canonical lifecycle emitter"]:::size-sm
+        PMR["PipelineMetricsRecorder"]:::size-sm
+        BMR["BatchMetricsRecorderService"]:::size-sm
+        BTM["BatchTracingManagerService"]:::size-sm
+        DQS["DataQualityService"]:::size-sm
+        PRS["PostrunService"]:::size-sm
+    end
+
+    %% Application usage
+    PO --> LP & MP & TP
+    PMR --> MP
+    BMR --> PMR
+    BTM --> TP
+    DQS --> DQMP & MP
+    PRS --> LP & MP & TP
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    class LP,MP,TP,DQMP port
+    class PO,PMR,BMR,BTM,DQS,PRS app

@@ -1,0 +1,81 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# pyright: reportUndefinedVariable=false
+# pyright: reportPossiblyUnboundVariable=false
+# pyright: reportTypedDictNotRequiredAccess=false
+# pyright: reportOptionalSubscript=false
+# pyright: reportOptionalOperand=false
+# pyright: reportOptionalCall=false
+# pyright: reportOptionalIterable=false
+# pyright: reportIncompatibleMethodOverride=false
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportReturnType=false
+# pyright: reportInvalidCast=false
+# pyright: reportAssignmentType=false
+# pyright: reportImplicitAbstractClass=false
+# pyright: reportFunctionMemberAccess=false
+# pyright: reportConstantRedefinition=false
+# pyright: reportInvalidTypeForm=false
+# PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
+"""Unit tests for run-manifest lazy service accessors."""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+
+import pytest
+
+from bioetl.composition import control_plane_service_access
+from bioetl.interfaces.cli.commands import _run_manifest_services as services
+
+pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    ("getter", "composition_getter"),
+    [
+        (
+            services.get_run_manifest_service,
+            "get_run_manifest_service",
+        ),
+        (
+            services.get_forensic_run_diff_service,
+            "get_forensic_run_diff_service",
+        ),
+        (
+            services.get_historical_replay_corpus_service,
+            "get_historical_replay_corpus_service",
+        ),
+        (
+            services.get_historical_replay_closure_service,
+            "get_historical_replay_closure_service",
+        ),
+        (
+            services.get_historical_replay_universe_service,
+            "get_historical_replay_universe_service",
+        ),
+    ],
+)
+def test_lazy_service_getters_delegate_to_control_plane_service_access(
+    monkeypatch: pytest.MonkeyPatch,
+    getter: Callable[[], object],
+    composition_getter: str,
+) -> None:
+    sentinel = object()
+
+    monkeypatch.setattr(
+        control_plane_service_access,
+        composition_getter,
+        lambda: sentinel,
+    )
+
+    assert getter() is sentinel

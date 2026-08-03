@@ -1,0 +1,186 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/diagrams/foundation/05-pipeline-lifecycle-states.mmd
+%% Full reference diagram retained after decomposition.
+%% Title: Pipeline Lifecycle State Machine
+%% Covers: RULES.md §3 (Pipeline Execution), §3.5 (Graceful Shutdown)
+%% Updated: 2026-07-31
+%% Components: PipelineRun, PipelineRunner, PipelineState enum
+
+%% @version 1.0.0
+%% @date    2026-07-31
+%% @type    stateDiagram
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+stateDiagram-v2
+    [*] --> INIT: CLI invokes pipeline
+
+    state INIT {
+        [*] --> LoadingConfig
+        LoadingConfig: Load YAML config
+        LoadingConfig: Validate parameters
+        LoadingConfig --> BootstrapServices
+        BootstrapServices: Create observability
+        BootstrapServices: Bootstrap factories
+    }
+
+    INIT --> LOCK_ACQUIRING: Config valid
+
+    state LOCK_ACQUIRING {
+        [*] --> RequestLock
+        RequestLock: acquire(key, owner_id, ttl=90s)
+        RequestLock --> WaitingForLock: blocked
+        WaitingForLock: wait_timeout=300s
+        RequestLock --> LockAcquired: success
+        WaitingForLock --> LockAcquired: released
+    }
+
+    LOCK_ACQUIRING --> PREFLIGHT: Lock acquired
+    LOCK_ACQUIRING --> FAILED: Timeout / Lock unavailable
+
+    state PREFLIGHT {
+        [*] --> HealthChecks
+        HealthChecks: Check data source health
+        HealthChecks: Validate storage access
+        HealthChecks --> CheckpointLoad
+        CheckpointLoad: Load checkpoint if --resume
+    }
+
+    PREFLIGHT --> EXTRACTING: Preflight passed
+    PREFLIGHT --> ERROR: Health check failed
+
+    state EXTRACTING {
+        [*] --> FetchBatch
+        FetchBatch: Async iterator from DataSource
+        FetchBatch --> WriteBronze
+        WriteBronze: BronzeWriter.write_batch()
+        WriteBronze: JSONL + zstd compression
+        WriteBronze --> FetchBatch: More batches
+        WriteBronze --> [*]: Complete
+    }
+
+    EXTRACTING --> TRANSFORMING: Extract complete
+    EXTRACTING --> ERROR: API error / Circuit open
+
+    state TRANSFORMING {
+        [*] --> NormalizeValues
+        NormalizeValues: NaN → null
+        NormalizeValues: Floats → round(10)
+        NormalizeValues --> AddMetadata
+        AddMetadata: _run_id, _run_type
+        AddMetadata: _ingestion_ts
+        AddMetadata --> ComputeHash
+        ComputeHash: sha256(provider + canonical_json)
+    }
+
+    TRANSFORMING --> VALIDATING: Transform complete
+    TRANSFORMING --> ERROR: Transform exception
+
+    state VALIDATING {
+        [*] --> PanderaCheck
+        PanderaCheck: Schema validation
+        PanderaCheck --> ThresholdCheck
+        ThresholdCheck: Check error rate
+        ThresholdCheck --> PassRecords: < 5% errors
+        ThresholdCheck --> WarnRecords: 5-20% errors
+        ThresholdCheck --> FailBatch: > 20% errors
+        PassRecords --> RouteQuarantine
+        WarnRecords --> RouteQuarantine
+        RouteQuarantine: Failed records → Quarantine
+    }
+
+    VALIDATING --> LOADING: Validation pass/warn
+    VALIDATING --> ERROR: Hard threshold exceeded
+
+    state LOADING {
+        [*] --> ValidateLock
+        ValidateLock: validate_owner() safety guard
+        ValidateLock --> MergeSilver
+        MergeSilver: SilverWriter.merge()
+        MergeSilver: Upsert by content_hash
+        MergeSilver --> WriteGold
+        WriteGold: GoldWriter.write_gold()
+        WriteGold: Pandera strict validation
+        WriteGold --> PostWriteCheck
+        PostWriteCheck: validate_owner() post-check
+    }
+
+    LOADING --> FINALIZING: Load complete
+    LOADING --> ERROR: Lock lost / Write failed
+
+    state FINALIZING {
+        [*] --> DQMetrics
+        DQMetrics: Export dq_check_duration_ms
+        DQMetrics: Check soft threshold
+        DQMetrics --> CleanupCheckpoint
+        CleanupCheckpoint: delete(pipeline_name)
+        CleanupCheckpoint --> ReleaseLock
+        ReleaseLock: release(key, owner_id)
+    }
+
+    FINALIZING --> COMPLETED: Cleanup done
+
+    state COMPLETED {
+        [*] --> Success
+        Success: Exit code 0
+        Success: Metrics published
+    }
+
+    COMPLETED --> [*]
+
+    state ERROR {
+        [*] --> LogError
+        LogError: Structured error log
+        LogError --> SaveCheckpoint
+        SaveCheckpoint: Save state for --resume
+    }
+
+    ERROR --> CLEANUP: Error handled
+
+    state CLEANUP {
+        [*] --> ReleaseResources
+        ReleaseResources: Release lock if held
+        ReleaseResources: Close connections
+    }
+
+    CLEANUP --> FAILED: Cleanup complete
+
+    state FAILED {
+        [*] --> Failure
+        Failure: Exit code 1
+        Failure: Alert triggered
+    }
+
+    FAILED --> [*]
+
+    %% Graceful shutdown path
+    EXTRACTING --> SHUTDOWN_REQUESTED: SIGTERM/SIGINT
+    TRANSFORMING --> SHUTDOWN_REQUESTED: SIGTERM/SIGINT
+    VALIDATING --> SHUTDOWN_REQUESTED: SIGTERM/SIGINT
+    LOADING --> SHUTDOWN_REQUESTED: SIGTERM/SIGINT
+
+    state SHUTDOWN_REQUESTED {
+        [*] --> StopNewWork
+        StopNewWork: Stop fetching new batches
+        StopNewWork --> FinishCurrentBatch
+        FinishCurrentBatch: Complete in-flight writes
+    }
+
+    SHUTDOWN_REQUESTED --> CHECKPOINT_SAVED: Batch complete
+
+    state CHECKPOINT_SAVED {
+        [*] --> SaveState
+        SaveState: checkpoint.save(state)
+        SaveState --> ReleaseForShutdown
+        ReleaseForShutdown: Release lock
+    }
+
+    CHECKPOINT_SAVED --> TERMINATED: State saved
+
+    state TERMINATED {
+        [*] --> GracefulExit
+        GracefulExit: Exit code 0
+        GracefulExit: Resumable
+    }
+
+    TERMINATED ==> [*]

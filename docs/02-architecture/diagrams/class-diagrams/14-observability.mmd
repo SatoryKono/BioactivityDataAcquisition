@@ -1,0 +1,268 @@
+%% BioETL — Class Diagram: Observability Components
+%% Logging, metrics, tracing implementations.
+
+%% @version 1.0.0
+%% @date    2026-07-31
+%% @type    classDiagram
+%% @level   Class / Interface
+%% @nodes   19
+%% @uniform class width=200 height=198 max_title_len=20 max_desc_lines=9
+
+classDiagram
+    direction LR
+    class LoggerPort {
+        <<Protocol>>
+        +bind(**kwargs): LoggerPort
+        +info(msg, **fields): None
+        +error(msg, **fields): None
+
+
+    }
+
+    class UnifiedLogger {
+        -_logger: BoundLogger
+        -_pipeline: str
+        -_run_id: str
+        +bind(**kwargs): LoggerPort
+        +info(msg, **fields): None
+        +error(msg, **fields): None
+    }
+
+    class StructlogLogger {
+        Wraps structlog directly
+
+
+
+
+
+
+
+
+    }
+
+    class NoOpLogger {
+        <<Null Object>>
+        All methods are no-ops
+
+
+
+
+
+
+
+    }
+
+    class MetricsPort {
+        <<Protocol>>
+        +observe_histogram(name, value, labels): None
+        +increment_counter(name, labels): None
+
+
+
+
+    }
+
+    class MetricsCollector {
+        +observe_histogram(name, value, labels): None
+        +increment_counter(name, labels): None
+
+
+
+
+
+    }
+
+    class PrometheusMetrics {
+        Integrates with prometheus_client
+        +observe_histogram(): None
+        +increment_counter(): None
+
+
+
+
+
+    }
+
+    class NoOpMetrics {
+        <<Null Object>>
+
+
+
+
+
+
+
+
+    }
+
+    class MetricsServerAdapter {
+        +start(): None
+        HTTP /metrics endpoint
+
+
+
+
+
+
+    }
+
+    class TracingPort {
+        <<Protocol>>
+        +get_tracer(name): Tracer
+
+
+
+
+
+
+    }
+
+    class OpenTelemetryTracer {
+        Integrates with OpenTelemetry SDK
+        +get_tracer(name): Tracer
+
+
+
+
+
+
+    }
+
+    class NoOpTracing {
+        <<Null Object>>
+        +get_tracer(name): NoOpTracer
+
+
+
+
+
+
+
+    }
+
+    class AnomalyDetector {
+        +detect(metrics): list~Anomaly~
+
+
+
+
+
+
+
+
+    }
+
+    class DetectorStrategy {
+        <<ABC>>
+        +detect(values, baseline): Anomaly | None
+
+
+
+
+
+
+
+    }
+
+    class ZScoreDetector {
+        +z_threshold: float
+        +detect(values, baseline): Anomaly | None
+
+
+
+
+
+
+
+    }
+
+    class Anomaly {
+        <<dataclass>>
+        +type: AnomalyType
+        +severity: AnomalySeverity
+        +metric_name: str
+        +current_value: float
+        +baseline_value: float
+
+
+
+    }
+
+    class AnomalyType {
+        <<Enum>>
+        SPIKE
+        DROP
+        DRIFT
+
+
+
+
+
+    }
+
+    class AnomalySeverity {
+        <<Enum>>
+        LOW
+        MEDIUM
+        HIGH
+        CRITICAL
+
+
+
+
+    }
+
+    class AdapterMetrics {
+        +metrics: MetricsPort
+        +provider: str
+        +measure_request(): ContextManager
+
+
+
+
+
+
+    }
+
+    LoggerPort <|.. UnifiedLogger
+    LoggerPort <|.. StructlogLogger
+    LoggerPort <|.. NoOpLogger
+
+    MetricsPort <|.. MetricsCollector
+    MetricsPort <|.. PrometheusMetrics
+    MetricsPort <|.. NoOpMetrics
+
+    TracingPort <|.. OpenTelemetryTracer
+    TracingPort <|.. NoOpTracing
+
+    PrometheusMetrics --> MetricsServerAdapter
+
+    DetectorStrategy <|-- ZScoreDetector
+    AnomalyDetector --> DetectorStrategy
+    AnomalyDetector --> Anomaly
+    Anomaly --> AnomalyType
+    Anomaly --> AnomalySeverity
+
+    note for LoggerPort "See 14a for extra log methods"
+    note for MetricsPort "See 14a for set_gauge/close"
+    note for TracingPort "See 14a for close lifecycle op"
+
+    style LoggerPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style MetricsPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style TracingPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style UnifiedLogger fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style StructlogLogger fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style NoOpLogger fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5
+    style MetricsCollector fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style PrometheusMetrics fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style NoOpMetrics fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5
+    style MetricsServerAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style OpenTelemetryTracer fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style NoOpTracing fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5
+    style AnomalyDetector fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style DetectorStrategy fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style ZScoreDetector fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style Anomaly fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style AnomalyType fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style AnomalySeverity fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style AdapterMetrics fill:#eff6ff,stroke:#2563eb,stroke-width:2px

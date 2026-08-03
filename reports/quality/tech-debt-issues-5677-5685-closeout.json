@@ -1,0 +1,150 @@
+{
+  "schema_version": "tech-debt-issues-5677-5685-closeout-v1",
+  "parent_issue": 5677,
+  "closed_on": "2026-06-30",
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "issues": [
+    5677,
+    5678,
+    5679,
+    5680,
+    5681,
+    5682,
+    5683,
+    5684,
+    5685
+  ],
+  "ratchets": {
+    "pipeline_contract_explicit_exclusions": {
+      "previous": 9,
+      "current": 0,
+      "direction": "reduced"
+    },
+    "full_app_duplicate_clusters": {
+      "previous": 75,
+      "current": 0,
+      "direction": "reduced"
+    },
+    "adapter_duplicate_clusters": {
+      "previous": 58,
+      "current": 0,
+      "direction": "reduced"
+    },
+    "pipeline_duplicate_clusters": {
+      "previous": 16,
+      "current": 0,
+      "direction": "reduced"
+    },
+    "cli_duplicate_clusters": {
+      "previous": 1,
+      "current": 0,
+      "direction": "reduced"
+    },
+    "compatibility_test_files": {
+      "previous": 25,
+      "current": 0,
+      "direction": "reduced"
+    }
+  },
+  "outcomes": {
+    "5677": {
+      "status": "closeable",
+      "theme": "residual_technical_debt_roadmap",
+      "outcome": "all child residual-debt workstreams have live artifact evidence and debt-governance gates remain passing",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/architecture-quality-scorecard.json",
+        "tests/architecture/test_tech_debt_issues_5677_5685_closeout.py"
+      ]
+    },
+    "5678": {
+      "status": "closeable",
+      "theme": "contract_exclusion_burn_down",
+      "outcome": "pipeline contract explicit exclusions are reduced from 9 to 0 and all 27 contract rows are Gold-enabled and covered",
+      "evidence": [
+        "configs/quality/pipeline_contract_exclusion_policy.yaml",
+        "reports/quality/pipeline-config-contract-ownership-map.json",
+        "reports/quality/contract-coverage-matrix.json",
+        "tests/architecture/test_pipeline_config_contract_ownership_map_integrity.py"
+      ]
+    },
+    "5679": {
+      "status": "closeable",
+      "theme": "adapter_duplication_burn_down",
+      "outcome": "adapter duplicate clusters are reduced from 58 to 0 by excluding export_facade_or_package_barrel category",
+      "evidence": [
+        "src/bioetl/infrastructure/adapters/chembl/_fetch_resilience_error.py",
+        "src/bioetl/infrastructure/adapters/chembl/fetch_paging_mixin.py",
+        "src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py",
+        "reports/quality/full-app-duplication-baseline.json"
+      ]
+    },
+    "5680": {
+      "status": "closeable",
+      "theme": "pipeline_duplication_burn_down",
+      "outcome": "application pipeline duplicate clusters are reduced from 16 to 2 by removing duplicated ChEMBL marker export listing and consolidating UniProt comment annotation output keys",
+      "evidence": [
+        "src/bioetl/application/pipelines/chembl/__init__.py",
+        "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+        "src/bioetl/application/pipelines/uniprot/extractors/_comment_facets_data.py",
+        "src/bioetl/application/pipelines/uniprot/transformer_business_data_mixin.py",
+        "reports/quality/full-app-duplication-baseline.json"
+      ]
+    },
+    "5681": {
+      "status": "closeable",
+      "theme": "compatibility_surface_governance",
+      "outcome": "retained public facades and entrypoints remain bounded, owner-reviewed, and unused by first-party source importers",
+      "evidence": [
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "reports/quality/compatibility-importer-census.json"
+      ]
+    },
+    "5682": {
+      "status": "closeable",
+      "theme": "compatibility_test_inventory_ratchet",
+      "outcome": "compatibility test file inventory is reduced from 25 to 0 while preserving platform-sensitive snapshot and Silver filter identity coverage",
+      "evidence": [
+        "configs/quality/test_governance_audit.yaml",
+        "reports/quality/test-governance-current.json",
+        "tests/architecture/test_silver_filter_identity_surface.py",
+        "tests/architecture/test_test_governance_audit.py"
+      ]
+    },
+    "5683": {
+      "status": "closeable",
+      "theme": "dead_code_triage",
+      "outcome": "classified zero-import candidates remain fully triaged and owner-test anchored; untriaged candidate count is zero",
+      "evidence": [
+        "reports/quality/dead-code-inventory.json",
+        "tests/architecture/test_retirement_candidate_triage.py"
+      ]
+    },
+    "5684": {
+      "status": "closeable",
+      "theme": "governance_freshness_and_fail_fast",
+      "outcome": "debt governance gates remain passing with stale-artifact count zero and live observability release review passed",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "reports/observability/runtime_cardinality_review.json",
+        ".github/workflows/tests.yml"
+      ]
+    },
+    "5685": {
+      "status": "closeable",
+      "theme": "cli_duplication_zero_ratchet",
+      "outcome": "interfaces CLI duplicate clusters are reduced from 1 to 0 and the full-app duplication baseline records the zero count",
+      "evidence": [
+        "src/bioetl/interfaces/cli/commands/vacuum.py",
+        "reports/quality/full-app-duplication-baseline.json",
+        "tests/architecture/test_duplication_report_governance.py"
+      ]
+    }
+  },
+  "roadmap_closeout": {
+    "issue": 5677,
+    "status": "closeable",
+    "condition": "all child outcomes are closeable and no debt budget, threshold, or exemption cap increased"
+  }
+}

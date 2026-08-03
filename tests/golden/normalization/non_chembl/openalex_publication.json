@@ -1,0 +1,12 @@
+{
+  "content_hash": "eacd2c52f1f8188036886310c0b41422325e053a7f627443a8fdaf6616833fa7",
+  "normalized": {
+    "author_openalex_ids": "[\"A10\",\"A2\"]",
+    "doi": "10.1000/oa",
+    "issn": "2049-3630",
+    "oa_status": "gold",
+    "openalex_id": "W123",
+    "pmid": "12345",
+    "publication_type": "article"
+  }
+}

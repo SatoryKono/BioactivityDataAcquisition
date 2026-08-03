@@ -1,0 +1,43 @@
+[
+  {
+    "affected_fields": [
+      "required_field"
+    ],
+    "config_path": "contracts/chembl.activity/dq_rules.yaml",
+    "disposition": "fail",
+    "rule_id": "field.required_field.required"
+  },
+  {
+    "affected_fields": [
+      "component_types"
+    ],
+    "config_path": "contracts/chembl.activity/dq_rules.yaml",
+    "disposition": "fail",
+    "rule_id": "field.component_types.custom"
+  },
+  {
+    "affected_fields": [
+      "standard_value"
+    ],
+    "config_path": "contracts/chembl.activity/dq_rules.yaml",
+    "disposition": "fail",
+    "rule_id": "field.standard_value.range"
+  },
+  {
+    "affected_fields": [
+      "field1",
+      "field2"
+    ],
+    "config_path": "contracts/chembl.activity/dq_rules.yaml",
+    "disposition": "warn",
+    "rule_id": "cross.all_present"
+  },
+  {
+    "affected_fields": [
+      "activity_value"
+    ],
+    "config_path": "contracts/chembl.activity/dq_rules.yaml",
+    "disposition": "fail",
+    "rule_id": "conditional.ic50_positive.activity_value.range"
+  }
+]

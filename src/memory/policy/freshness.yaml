@@ -1,0 +1,23 @@
+version: 1
+classes:
+  - id: live
+    max_age_days: 7
+    description: "Expected to track active repository state closely."
+  - id: warm
+    max_age_days: 30
+    description: "Still expected to be current for normal engineering work."
+  - id: review
+    max_age_days: 90
+    description: "Requires explicit review or regeneration."
+  - id: archival
+    max_age_days: null
+    description: "Historical context retained without freshness guarantees."
+defaults:
+  policy: live
+  catalog: warm
+  schema: live
+  rag_manifest: warm
+  graph_export: warm
+  timeline_event: live
+  curated_note: review
+  episodic_note: live

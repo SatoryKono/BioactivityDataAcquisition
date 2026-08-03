@@ -1,0 +1,45 @@
+# Mode B — OPTIONAL Docker Compose surface for shared MCP (NOT default).
+#
+# Policy: docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md
+# Program: GitHub #6563
+# Hard ban: long-lived **stdio** MCP Compose (#6293 retired).
+#
+# Default multi-client path remains **host** mcp-proxy:
+#   .\scripts\ops\runtime\mcp\start-shared.ps1 -Daily
+#
+# Use Mode B only when:
+#   - image speaks Streamable HTTP natively (or documented HTTP entrypoint)
+#   - bind is 127.0.0.1 only
+#   - container_name is bioetl-mcp-<name>
+#   - labels bioetl.mcp.shared=true
+#   - healthcheck hits /ping or HTTP readiness (not TTY keepalive)
+#
+# This file ships as a **skeleton**. No services are enabled by default
+# (profile mode-b). Do not `compose up` without an explicit HTTP image.
+#
+# Example (disabled until an HTTP image is approved):
+#
+# services:
+#   example-http-mcp:
+#     profiles: ["mode-b"]
+#     image: example/mcp-http:latest
+#     container_name: bioetl-mcp-example
+#     restart: unless-stopped
+#     mem_limit: 512m
+#     ports:
+#       - "127.0.0.1:8899:8080"
+#     labels:
+#       bioetl.mcp.shared: "true"
+#       bioetl.mcp.name: "example"
+#     healthcheck:
+#       test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/ping"]
+#       interval: 15s
+#       timeout: 5s
+#       retries: 3
+#
+# Project name suggestion:
+#   docker compose -p bioetl-mcp-shared -f scripts/ops/runtime/mcp/docker-compose.mcp-shared.yml --profile mode-b up -d
+
+name: bioetl-mcp-shared
+
+services: {}

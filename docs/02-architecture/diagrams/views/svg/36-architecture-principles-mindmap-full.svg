@@ -1,0 +1,494 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" aria-roledescription="mindmap" style="max-width:2133.96px;background-color:white" viewBox="-5 -5 2133.955 991.605"><style>#my-svg{font-size:16px;fill:#212121;}#my-svg .error-icon{fill:#552222;}#my-svg .error-text{fill:#552222;stroke:#552222;}#my-svg .edge-thickness-normal{stroke-width:2px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-size:16px;}#my-svg .edge{stroke-width:3;}#my-svg .section--1 rect,#my-svg .section--1 path,#my-svg .section--1 circle,#my-svg .section--1 polygon,#my-svg .section--1 path{fill:#eff6ff;}#my-svg .section--1 text{fill:#dbeafe;}#my-svg .node-icon--1{font-size:40px;color:#dbeafe;}#my-svg .section-edge--1{stroke:#eff6ff;}#my-svg .edge-depth--1{stroke-width:17;}#my-svg .section--1 line{stroke:#100900;stroke-width:3;}#my-svg .disabled,#my-svg .disabled circle,#my-svg .disabled text{fill:lightgray;}#my-svg .disabled text{fill:#efefef;}#my-svg .section-0 rect,#my-svg .section-0 path,#my-svg .section-0 circle,#my-svg .section-0 polygon,#my-svg .section-0 path{fill:#dbeafe;}#my-svg .section-0 text{fill:#333;}#my-svg .node-icon-0{font-size:40px;color:#333;}#my-svg .section-edge-0{stroke:#dbeafe;}#my-svg .edge-depth-0{stroke-width:14;}#my-svg .section-0 line{stroke:#241501;stroke-width:3;}#my-svg .disabled,#my-svg .disabled circle,#my-svg .disabled text{fill:lightgray;}#my-svg .disabled text{fill:#efefef;}#my-svg .section-1 rect,#my-svg .section-1 path,#my-svg .section-1 circle,#my-svg .section-1 polygon,#my-svg .section-1 path{fill:#bfdbfe;}#my-svg .section-1 text{fill:#dbeafe;}#my-svg .node-icon-1{font-size:40px;color:#dbeafe;}#my-svg .section-edge-1{stroke:#bfdbfe;}#my-svg .edge-depth-1{stroke-width:11;}#my-svg .section-1 line{stroke:#402401;stroke-width:3;}#my-svg .disabled,#my-svg .disabled circle,#my-svg .disabled text{fill:lightgray;}#my-svg .disabled text{fill:#efefef;}#my-svg .section-2 rect,#my-svg .section-2 path,#my-svg .section-2 circle,#my-svg .section-2 polygon,#my-svg .section-2 path{fill:#93c5fd;}#my-svg .section-2 text{fill:#333;}#my-svg .node-icon-2{font-size:40px;color:#333;}#my-svg .section-edge-2{stroke:#93c5fd;}#my-svg .edge-depth-2{stroke-width:8;}#my-svg .section-2 line{stroke:#6c3a02;stroke-width:3;}#my-svg .disabled,#my-svg .disabled circle,#my-svg .disabled text{fill:lightgray;}#my-svg .disabled text{fill:#efefef;}#my-svg .section-3 rect,#my-svg .section-3 path,#my-svg .section-3 circle,#my-svg .section-3 polygon,#my-svg .section-3 path{fill:#60a5fa;}#my-svg .section-3 text{fill:#333;}#my-svg .node-icon-3{font-size:40px;color:#333;}#my-svg .section-edge-3{stroke:#60a5fa;}#my-svg .edge-depth-3{stroke-width:5;}#my-svg .section-3 line{stroke:#9f5a05;stroke-width:3;}#my-svg .disabled,#my-svg .disabled circle,#my-svg .disabled text{fill:lightgray;}#my-svg .disabled text{fill:#efefef;}#my-svg .section-4 rect,#my-svg .section-4 path,#my-svg .section-4 circle,#my-svg .section-4 polygon,#my-svg .section-4 path{fill:#3b82f6;}#my-svg .section-4 text{fill:#333;}#my-svg .node-icon-4{font-size:40px;color:#333;}#my-svg .section-edge-4{stroke:#3b82f6;}#my-svg .edge-depth-4{stroke-width:2;}#my-svg .section-4 line{stroke:#c47d09;stroke-width:3;}#my-svg .disabled,#my-svg .disabled circle,#my-svg .disabled text{fill:lightgray;}#my-svg .disabled text{fill:#efefef;}#my-svg .section-5 rect,#my-svg .section-5 path,#my-svg .section-5 circle,#my-svg .section-5 polygon,#my-svg .section-5 path{fill:#2563eb;}#my-svg .section-5 text{fill:#333;}#my-svg .node-icon-5{font-size:40px;color:#333;}#my-svg .section-edge-5{stroke:#2563eb;}#my-svg .edge-depth-5{stroke-width:-1;}#my-svg .section-5 line{stroke:#da9c14;stroke-width:3;}#my-svg .disabled,#my-svg .disabled circle,#my-svg .disabled text{fill:lightgray;}#my-svg .disabled text{fill:#efefef;}#my-svg .section-6 rect,#my-svg .section-6 path,#my-svg .section-6 circle,#my-svg .section-6 polygon,#my-svg .section-6 path{fill:#1d4ed8;}#my-svg .section-6 text{fill:#333;}#my-svg .node-icon-6{font-size:40px;color:#333;}#my-svg .section-edge-6{stroke:#1d4ed8;}#my-svg .edge-depth-6{stroke-width:-4;}#my-svg .section-6 line{stroke:#e2b127;stroke-width:3;}#my-svg .disabled,#my-svg .disabled circle,#my-svg .disabled text{fill:lightgray;}#my-svg .disabled text{fill:#efefef;}#my-svg .section-7 rect,#my-svg .section-7 path,#my-svg .section-7 circle,#my-svg .section-7 polygon,#my-svg .section-7 path{fill:#DDD;}#my-svg .section-7 text{fill:#333;}#my-svg .node-icon-7{font-size:40px;color:#333;}#my-svg .section-edge-7{stroke:#DDD;}#my-svg .edge-depth-7{stroke-width:-7;}#my-svg .section-7 line{stroke:#222222;stroke-width:3;}#my-svg .disabled,#my-svg .disabled circle,#my-svg .disabled text{fill:lightgray;}#my-svg .disabled text{fill:#efefef;}#my-svg .section-8 rect,#my-svg .section-8 path,#my-svg .section-8 circle,#my-svg .section-8 polygon,#my-svg .section-8 path{fill:#BBB;}#my-svg .section-8 text{fill:#333;}#my-svg .node-icon-8{font-size:40px;color:#333;}#my-svg .section-edge-8{stroke:#BBB;}#my-svg .edge-depth-8{stroke-width:-10;}#my-svg .section-8 line{stroke:#444444;stroke-width:3;}#my-svg .disabled,#my-svg .disabled circle,#my-svg .disabled text{fill:lightgray;}#my-svg .disabled text{fill:#efefef;}#my-svg .section-9 rect,#my-svg .section-9 path,#my-svg .section-9 circle,#my-svg .section-9 polygon,#my-svg .section-9 path{fill:#999;}#my-svg .section-9 text{fill:#333;}#my-svg .node-icon-9{font-size:40px;color:#333;}#my-svg .section-edge-9{stroke:#999;}#my-svg .edge-depth-9{stroke-width:-13;}#my-svg .section-9 line{stroke:#666666;stroke-width:3;}#my-svg .disabled,#my-svg .disabled circle,#my-svg .disabled text{fill:lightgray;}#my-svg .disabled text{fill:#efefef;}#my-svg .section-10 rect,#my-svg .section-10 path,#my-svg .section-10 circle,#my-svg .section-10 polygon,#my-svg .section-10 path{fill:#777;}#my-svg .section-10 text{fill:#333;}#my-svg .node-icon-10{font-size:40px;color:#333;}#my-svg .section-edge-10{stroke:#777;}#my-svg .edge-depth-10{stroke-width:-16;}#my-svg .section-10 line{stroke:#888888;stroke-width:3;}#my-svg .disabled,#my-svg .disabled circle,#my-svg .disabled text{fill:lightgray;}#my-svg .disabled text{fill:#efefef;}#my-svg .section-root rect,#my-svg .section-root path,#my-svg .section-root circle,#my-svg .section-root polygon{fill:hsl(214.2857142857, 94.5945945946%, 67.7450980392%);}#my-svg .section-root text{fill:#333;}#my-svg .icon-container{height:100%;display:flex;justify-content:center;align-items:center;}#my-svg .edge{fill:none;}#my-svg .mindmap-node-label{dy:1em;alignment-baseline:middle;text-anchor:middle;dominant-baseline:middle;text-align:center;}#my-svg :root{--mermaid-font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;}/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px;
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*=&quot;Domain&quot;] &gt; rect,
+[id*=&quot;Domain&quot;] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*=&quot;Domain&quot;] &gt; rect,
+.cluster[id*=&quot;Domain&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Application&quot;] &gt; rect,
+[id*=&quot;Application&quot;] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*=&quot;Application&quot;] &gt; rect,
+.cluster[id*=&quot;Application&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Infrastructure&quot;] &gt; rect,
+[id*=&quot;Infrastructure&quot;] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*=&quot;Infrastructure&quot;] &gt; rect,
+.cluster[id*=&quot;Infrastructure&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Composition&quot;] &gt; rect,
+[id*=&quot;Composition&quot;] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*=&quot;Composition&quot;] &gt; rect,
+.cluster[id*=&quot;Composition&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Interfaces&quot;] &gt; rect,
+[id*=&quot;Interfaces&quot;] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*=&quot;Interfaces&quot;] &gt; rect,
+.cluster[id*=&quot;Interfaces&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;External&quot;] &gt; rect,
+[id*=&quot;External&quot;] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*=&quot;External&quot;] &gt; rect,
+.cluster[id*=&quot;External&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*=&quot;Domain&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Application&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;External&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*=&quot;Domain&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Application&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;External&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*=&quot;Bronze&quot;] &gt; rect,
+[id*=&quot;Bronze&quot;] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*=&quot;Silver&quot;] &gt; rect,
+[id*=&quot;Silver&quot;] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*=&quot;Gold&quot;] &gt; rect,
+[id*=&quot;Gold&quot;] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*=&quot;Quarantine&quot;] &gt; rect,
+[id*=&quot;Quarantine&quot;] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><g class="mindmap-edges"><path d="m1500.234 323.568-38.46-31.049-38.46-31.048M1520.713 320.847l41.116-56.69 41.116-56.692M1526.523 329.622l90.404-20.828 90.403-20.827M1520.323 345.405l27.577 40.675 27.576 40.675M1496.99 331.4l-77.381-8.245-77.381-8.246M1526.783 334.902l86.95 11.177 86.948 11.176" class="edge section-edge-0 edge-depth-2"/><path d="m1386.192 452.337 57.418-54.51 57.417-54.51" class="edge section-edge-0 edge-depth-1"/><path d="m1747.57 489.167 123.863 28.092 123.862 28.093M1719.476 479.242l-79.815-39.166-79.816-39.165M1747.911 484.888l110.234-7.076 110.233-7.077M1746.198 478.83l57.399-30.392 57.398-30.392" class="edge section-edge-0 edge-depth-2"/><path d="m1390.282 463.635 163.846 10.622 163.845 10.622" class="edge section-edge-0 edge-depth-1"/><path d="m1578.567 541.754 105.691 13.257 105.691 13.257M1548.828 541.963l-103.62 14.481-103.619 14.48M1574.994 549.74l38.471 33.517 38.472 33.516" class="edge section-edge-0 edge-depth-2"/><path d="m1389.192 468.354 80.307 32.922 80.306 32.921" class="edge section-edge-0 edge-depth-1"/><path d="m973.8 507.31 193.303-21.494 193.302-21.494" class="edge section-edge-0 edge-depth-0"/><path d="m569.008 246.747-76.002-3.255-76.002-3.255M570.703 240.435l-72.554-37.96-72.554-37.962" class="edge section-edge-1 edge-depth-2"/><path d="m839.048 309.706-120.241-29.378-120.242-29.379" class="edge section-edge-1 edge-depth-1"/><path d="m1065.907 227.974 76.439 7.303 76.439 7.303M1061.558 215.917l28.507-28.635 28.508-28.635M1065.662 223.499l105.207-21.84 105.208-21.84" class="edge section-edge-1 edge-depth-2"/><path d="m867.353 307.232 84.944-37.325 84.945-37.325" class="edge section-edge-1 edge-depth-1"/><path d="m934.318 156.616 64.55-32.707 64.551-32.706M914.494 176.94l-13.339 28.04-13.339 28.04M918.062 148.673l-9.282-47.525-9.283-47.526" class="edge section-edge-1 edge-depth-2"/><path d="m859.766 299.583 27.513-61.252 27.513-61.253" class="edge section-edge-1 edge-depth-1"/><path d="m606.82 321.093-57.502-6.893-57.501-6.893M625.884 337.287l8.106 28.005 8.106 28.004M635.959 327.576l67.407 22.228 67.408 22.228M634.29 314.703l37.163-24.162 37.163-24.161" class="edge section-edge-1 edge-depth-2"/><path d="m838.633 313.887-100.966 4.185-100.967 4.185" class="edge section-edge-1 edge-depth-1"/><path d="m754.268 176.112-8.639-35.05-8.639-35.052M744.301 184.257l-71.6-33.907-71.6-33.907M742.884 189.79l-76.73-4.545-76.73-4.544" class="edge section-edge-1 edge-depth-2"/><path d="m844.386 301.445-38.647-49.474-38.647-49.474" class="edge section-edge-1 edge-depth-1"/><path d="m951.786 495.758-45.53-84.64-45.53-84.642" class="edge section-edge-1 edge-depth-0"/><path d="M925.632 839.135 890.8 884.95l-34.833 45.815M949.577 829.19l58.389 7.838 58.388 7.838M945.98 837.094l40.108 35.234 40.108 35.234" class="edge section-edge-2 edge-depth-2"/><path d="m978.427 718.66-19.056 47.31-19.056 47.31" class="edge section-edge-2 edge-depth-1"/><path d="m806.58 779.654-71.586 26.227-71.584 26.227M817.982 789.252l-6.575 36.192-6.575 36.192M805.756 772.828l-60.052-6.711-60.053-6.712" class="edge section-edge-2 edge-depth-2"/><path d="m970.236 710.636-67.889 28.984-67.888 28.984" class="edge section-edge-2 edge-depth-1"/><path d="m1186.965 806.076 17.637 41.42 17.637 41.418M1196.046 791.148l69.954-5.27 69.955-5.27M1195.541 796.289l86.894 24.132 86.893 24.132" class="edge section-edge-2 edge-depth-2"/><path d="m997.74 710.835 84.82 37.676 84.82 37.675" class="edge section-edge-2 edge-depth-1"/><path d="m960.803 523.846 10.659 83.011 10.659 83.011" class="edge section-edge-2 edge-depth-0"/><path d="m436.669 696.905-93.05 44.644-93.05 44.645M435.194 690.2l-83.857-1.21-83.858-1.209" class="edge section-edge-3 edge-depth-2"/><path d="m661.285 615.437-98.479 34.98-98.478 34.978" class="edge section-edge-3 edge-depth-1"/><path d="M572.829 696.468 527.8 731.547l-45.027 35.078" class="edge section-edge-3 edge-depth-2"/><path d="m663.971 620.109-33.93 28.724-33.931 28.725" class="edge section-edge-3 edge-depth-1"/><path d="m394.556 611.805-122.564-8.982-122.563-8.981" class="edge section-edge-3 edge-depth-2"/><path d="m660.42 610.557-117.952 1.102-117.953 1.102" class="edge section-edge-3 edge-depth-1"/><path d="m944.77 514.022-127.614 45.67-127.613 45.67" class="edge section-edge-3 edge-depth-0"/><path d="m1203.575 642.453 5.509 33.74 5.508 33.74M1215.437 632.246l98.076 31.572 98.077 31.572M1198.956 612.812l-5.86-39.48-5.86-39.481M1186.176 628.365l-103.133 4.924-103.134 4.925M1216.158 627.754l109.677.77 109.676.768" class="edge section-edge-4 edge-depth-1"/><path d="m972.363 515.567 107.662 52.742 107.663 52.741" class="edge section-edge-4 edge-depth-0"/><path d="m1014.961 393.205 145.27 3.506 145.271 3.507M1008.851 380.758l26.197-35.628 26.197-35.629M1013.35 399.614l47.279 23.918 47.279 23.918M1014.622 389.651l81.137-17.67 81.138-17.67" class="edge section-edge-5 edge-depth-1"/><path d="m963.894 494.827 15.535-43.922 15.535-43.92" class="edge section-edge-5 edge-depth-0"/><path d="m581.93 470.413-143.328-11.527-143.327-11.527M584.576 463.039l-49.682-34.625-49.68-34.624M582.007 473.546l-116.236 15.09-116.235 15.088M588.877 484.301l-19.045 30.186-19.046 30.185" class="edge section-edge-6 edge-depth-1"/><path d="m943.972 507.429-166.085-17.137-166.084-17.137" class="edge section-edge-6 edge-depth-0"/><path d="M836.017 572.303 810.6 552.128l-25.415-20.176M862.76 581.244l95.826-2.46 95.827-2.462M837.842 592.878l-34.01 38.554-34.01 38.555M843.875 567.143l-13.377-49.814-13.376-49.814" class="edge section-edge-7 edge-depth-1"/><path d="m946.338 517.177-43.01 28.122-43.009 28.122" class="edge section-edge-7 edge-depth-0"/></g><g class="mindmap-nodes"><g class="mindmap-node section--1 section-root"><g transform="translate(958.892 508.968)"><circle id="node-0" r="68.977" class="node-bkg node-circle"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(958.892 486.268)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">BioETL</tspan></tspan><tspan x="0" y="1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Architecture</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1261.188 438.765)"><path id="node-1" d="M0 42.8V5q0-5 5-5h218.25q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h228.25" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1375.313 448.765)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Hexagonal</tspan><tspan class="text-inner-tspan"> Architecture</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1425.57 309.09)"><path id="node-2" d="M0 42.8V5q0-5 5-5h162.672q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h172.672" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1511.906 319.09)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">24</tspan><tspan class="text-inner-tspan"> Domain</tspan><tspan class="text-inner-tspan"> Ports</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1329.206 228.149)"><path id="node-3" d="M0 42.8V5q0-5 5-5h154.875q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h164.875" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1411.643 238.149)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">DataSourcePort</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1511.357 145.023)"><path id="node-4" d="M0 95.6V5q0-5 5-5h190.79q5 0 5 5v95.6H0Z" class="node-bkg node-no-border"/><path d="M0 100.6h200.789" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1611.751 155.023)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">BronzeStoragePort</tspan><tspan class="text-inner-tspan"> /</tspan></tspan><tspan x="0" y="1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">SilverStoragePort</tspan><tspan class="text-inner-tspan"> /</tspan></tspan><tspan x="0" y="2.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">GoldStoragePort</tspan><tspan class="text-inner-tspan"> /</tspan></tspan><tspan x="0" y="3.2em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">MergedStoragePort</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1667.846 260.7)"><path id="node-5" d="M0 42.8V5q0-5 5-5h98.203q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h108.203" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1721.947 270.7)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">LockPort</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1518.995 415.27)"><path id="node-6" d="M0 42.8V5q0-5 5-5h119.797q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h129.797" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1583.894 425.27)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">MetricsPort</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1263.875 289.42)"><path id="node-7" d="M0 42.8V5q0-5 5-5h116.875q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h126.875" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1327.312 299.42)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">LoggerPort</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1650.527 335.268)"><path id="node-8" d="M0 42.8V5q0-5 5-5h120.063q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h130.063" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1715.558 345.268)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">TracingPort</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1619.747 461.95)"><path id="node-9" d="M0 42.8V5q0-5 5-5h216.39q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h226.391" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1732.942 471.95)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Infrastructure</tspan><tspan class="text-inner-tspan"> Adapters</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1910.892 524.77)"><path id="node-10" d="M0 42.8V5q0-5 5-5h188.063q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h198.063" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(2009.924 534.77)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">7</tspan><tspan class="text-inner-tspan"> Provider</tspan><tspan class="text-inner-tspan"> Adapters</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1463.95 370.403)"><path id="node-11" d="M0 42.8V5q0-5 5-5h154.86q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h164.859" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1546.38 380.403)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Storage</tspan><tspan class="text-inner-tspan"> Writers</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1912.203 445.874)"><path id="node-12" d="M0 42.8V5q0-5 5-5h132.29q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h142.289" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1983.348 455.874)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">MemoryLock</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1777.44 387.127)"><path id="node-13" d="M0 42.8V5q0-5 5-5h183.625q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h193.625" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1874.252 397.127)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">PrometheusMetrics</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1460.996 515.987)"><path id="node-14" d="M0 42.8V5q0-5 5-5h195.375q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h205.375" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1563.684 525.987)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Structural</tspan><tspan class="text-inner-tspan"> Subtyping</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1721.098 546.234)"><path id="node-15" d="M0 42.8V5q0-5 5-5h157.469q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h167.469" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1804.833 556.234)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Protocol</tspan><tspan class="text-inner-tspan"> classes</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1216.733 549.101)"><path id="node-16" d="M0 42.8V5q0-5 5-5h210q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h220" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1326.733 559.101)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">No</tspan><tspan class="text-inner-tspan"> explicit</tspan><tspan class="text-inner-tspan"> inheritance</tspan></tspan></text></g></g><g class="mindmap-node section-0"><g transform="translate(1567.332 602.227)"><path id="node-17" d="M0 43.8V5q0-5 5-5h181.828q5 0 5 5v43.8H0Z" class="node-bkg node-no-border"/><path d="M0 48.8h191.828" class="node-line-0"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1663.246 612.227)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">runtime_checkable</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(741.003 289.366)"><path id="node-18" d="M0 42.8V5q0-5 5-5h215.234q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h225.234" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(853.62 299.366)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Five-Layer</tspan><tspan class="text-inner-tspan"> Architecture</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(524.01 223.489)"><path id="node-19" d="M0 42.8V5q0-5 5-5h109.969q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h119.969" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(583.994 233.489)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Interfaces</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(347.64 215.695)"><path id="node-20" d="M0 42.8V5q0-5 5-5h98.758q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h108.758" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(402.018 225.695)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">CLI</tspan><tspan class="text-inner-tspan"> Click</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(339.59 133.66)"><path id="node-21" d="M0 42.8V5q0-5 5-5h135.43q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h145.43" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(412.304 143.66)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">HealthServer</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(981.014 202.648)"><path id="node-22" d="M0 42.8V5q0-5 5-5h129.922q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h139.922" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1050.975 212.648)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Composition</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(1166.85 220.107)"><path id="node-23" d="M0 42.8V5q0-5 5-5h123.734q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h133.734" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1233.717 230.107)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Factories</tspan><tspan class="text-inner-tspan"> DI</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(1070.163 124.117)"><path id="node-24" d="M0 42.8V5q0-5 5-5h107.984q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h117.984" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1129.156 134.117)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Bootstrap</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(1206.702 152.87)"><path id="node-25" d="M0 42.8V5q0-5 5-5h158.125q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h168.125" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1290.764 162.87)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">PipelineRegistry</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(856.235 139.495)"><path id="node-26" d="M0 42.8V5q0-5 5-5h119.406q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h129.406" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(920.938 149.495)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Application</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(996.66 60.524)"><path id="node-27" d="M0 42.8V5q0-5 5-5h150.281q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h160.281" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1076.8 70.524)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">PipelineRunner</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(802.912 222.665)"><path id="node-28" d="M0 42.8V5q0-5 5-5h146.922q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h156.922" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(881.373 232.665)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">BatchExecutor</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(811.723 15)"><path id="node-29" d="M0 42.8V5q0-5 5-5h159.797q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h169.797" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(896.621 25)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">23</tspan><tspan class="text-inner-tspan"> Transformers</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(570.666 298.979)"><path id="node-30" d="M0 42.8V5q0-5 5-5h92.094q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h102.094" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(621.713 308.979)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Domain</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(436.892 281.621)"><path id="node-31" d="M0 42.8V5q0-5 5-5h70.063q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h80.063" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(476.923 291.621)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Ports</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(596.33 383.805)"><path id="node-32" d="M0 42.8V5q0-5 5-5h89.875q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h99.875" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(646.267 393.805)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Entities</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(719.144 352.83)"><path id="node-33" d="M0 42.8V5q0-5 5-5h121.75q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h131.75" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(785.019 362.83)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Aggregates</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(664.856 234.304)"><path id="node-34" d="M0 42.8V5q0-5 5-5h102.672q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h112.672" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(721.192 244.304)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Schemas</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(683.116 166.776)"><path id="node-35" d="M0 42.8V5q0-5 5-5h139.484q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h149.484" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(757.858 176.776)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Infrastructure</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(654.471 67.546)"><path id="node-36" d="M0 42.8V5q0-5 5-5h147.86q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h157.859" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(733.4 77.546)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">HTTP</tspan><tspan class="text-inner-tspan"> Adapters</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(536.239 86.123)"><path id="node-37" d="M0 42.8V5q0-5 5-5h92.61q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h102.609" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(587.544 96.123)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Storage</tspan></tspan></text></g></g><g class="mindmap-node section-1"><g transform="translate(501.443 155.915)"><path id="node-38" d="M0 42.8V5q0-5 5-5h136.016q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h146.016" class="node-line-1"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(574.45 165.915)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Observability</tspan></tspan></text></g></g><g class="mindmap-node section-2"><g transform="translate(874.07 680.846)"><path id="node-39" d="M0 42.8V5q0-5 5-5h209.922q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h219.922" class="node-line-2"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(984.031 690.846)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Medallion</tspan><tspan class="text-inner-tspan"> Architecture</tspan></tspan></text></g></g><g class="mindmap-node section-2"><g transform="translate(887.023 803.294)"><path id="node-40" d="M0 42.8V5q0-5 5-5h85.375q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h95.375" class="node-line-2"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(934.71 813.294)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Bronze</tspan></tspan></text></g></g><g class="mindmap-node section-2"><g transform="translate(763.997 918.805)"><path id="node-41" d="M0 42.8V5q0-5 5-5h155.781q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h165.781" class="node-line-2"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(846.888 928.805)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">JSONL</tspan><tspan class="text-inner-tspan"> plus</tspan><tspan class="text-inner-tspan"> zstd</tspan></tspan></text></g></g><g class="mindmap-node section-2"><g transform="translate(1011.049 822.962)"><path id="node-42" d="M0 42.8V5q0-5 5-5h130.344q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h140.344" class="node-line-2"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1081.22 832.962)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Append</tspan><tspan class="text-inner-tspan"> only</tspan></tspan></text></g></g><g class="mindmap-node section-2"><g transform="translate(946.825 893.562)"><path id="node-43" d="M0 42.8V5q0-5 5-5h171.281q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h181.281" class="node-line-2"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1037.465 903.562)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">90</tspan><tspan class="text-inner-tspan"> days</tspan><tspan class="text-inner-tspan"> retention</tspan></tspan></text></g></g><g class="mindmap-node section-2"><g transform="translate(777.984 750.594)"><path id="node-44" d="M0 42.8V5q0-5 5-5h75.36q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h85.359" class="node-line-2"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(820.664 760.594)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Silver</tspan></tspan></text></g></g><g class="mindmap-node section-2"><g transform="translate(586.81 813.369)"><path id="node-45" d="M0 42.8V5q0-5 5-5h115.031q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h125.031" class="node-line-2"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(649.325 823.369)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Delta</tspan><tspan class="text-inner-tspan"> Lake</tspan></tspan></text></g></g><g class="mindmap-node section-2"><g transform="translate(728.181 852.495)"><path id="node-46" d="M0 42.8V5q0-5 5-5h137.938q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h147.938" class="node-line-2"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(802.15 862.495)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Merge</tspan><tspan class="text-inner-tspan"> Upsert</tspan></tspan></text></g></g><g class="mindmap-node section-2"><g transform="translate(607.236 733.84)"><path id="node-47" d="M0 42.8V5q0-5 5-5h117.016q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h127.016" class="node-line-2"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(670.744 743.84)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Permanent</tspan></tspan></text></g></g><g class="mindmap-node section-2"><g transform="translate(1142.69 768.375)"><path id="node-48" d="M0 42.8V5q0-5 5-5h66.797q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h76.797" class="node-line-2"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1181.088 778.375)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Gold</tspan></tspan></text></g></g><g class="mindmap-node section-2"><g transform="translate(1153.507 878.815)"><path id="node-49" d="M0 42.8V5q0-5 5-5h139.219q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h149.219" class="node-line-2"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1228.116 888.815)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Delta</tspan><tspan class="text-inner-tspan"> Parquet</tspan></tspan></text></g></g><g class="mindmap-node section-2"><g transform="translate(1285.53 755.581)"><path id="node-50" d="M0 42.8V5q0-5 5-5h120.766q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h130.766" class="node-line-2"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1350.912 765.581)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">SCD</tspan><tspan class="text-inner-tspan"> Type</tspan><tspan class="text-inner-tspan"> 2</tspan></tspan></text></g></g><g class="mindmap-node section-2"><g transform="translate(1300.586 824.666)"><path id="node-51" d="M0 42.8V5q0-5 5-5h156.39q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h166.391" class="node-line-2"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1383.781 834.666)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Strict</tspan><tspan class="text-inner-tspan"> validation</tspan></tspan></text></g></g><g class="mindmap-node section-3"><g transform="translate(588.521 586.517)"><path id="node-52" d="M0 42.8V5q0-5 5-5h163.797q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h173.797" class="node-line-3"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(675.42 596.517)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">DDD</tspan><tspan class="text-inner-tspan"> Aggregates</tspan></tspan></text></g></g><g class="mindmap-node section-3"><g transform="translate(383.544 666.516)"><path id="node-53" d="M0 42.8V5q0-5 5-5h123.297q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h133.297" class="node-line-3"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(450.193 676.516)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">PipelineRun</tspan></tspan></text></g></g><g class="mindmap-node section-3"><g transform="translate(127.35 751.182)"><path id="node-54" d="M0 78V5q0-5 5-5h209.39q5 0 5 5v78H0Z" class="node-bkg node-no-border"/><path d="M0 83h219.391" class="node-line-3"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(237.045 761.182)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">States:</tspan><tspan class="text-inner-tspan"> PENDING</tspan></tspan><tspan x="0" y="1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">RUNNING</tspan><tspan class="text-inner-tspan"> COMPLETED</tspan></tspan><tspan x="0" y="2.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">FAILED</tspan></tspan></text></g></g><g class="mindmap-node section-3"><g transform="translate(171.8 663.665)"><path id="node-55" d="M0 42.8V5q0-5 5-5h151.36q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h161.359" class="node-line-3"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(252.48 673.665)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Domain</tspan><tspan class="text-inner-tspan"> Events</tspan></tspan></text></g></g><g class="mindmap-node section-3"><g transform="translate(541.662 663.35)"><path id="node-56" d="M0 42.8V5q0-5 5-5h76q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h86" class="node-line-3"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(584.662 673.35)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Batch</tspan></tspan></text></g></g><g class="mindmap-node section-3"><g transform="translate(364.245 743.143)"><path id="node-57" d="M0 60.4V5q0-5 5-5h203.39q5 0 5 5v60.4H0Z" class="node-bkg node-no-border"/><path d="M0 65.4h213.391" class="node-line-3"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(470.94 753.143)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">States:</tspan><tspan class="text-inner-tspan"> OPEN</tspan><tspan class="text-inner-tspan"> SEALED</tspan></tspan><tspan x="0" y="1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">WRITING</tspan><tspan class="text-inner-tspan"> COMMITTED</tspan></tspan></text></g></g><g class="mindmap-node section-3"><g transform="translate(323.344 589.001)"><path id="node-58" d="M0 42.8V5q0-5 5-5h162.344q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h172.344" class="node-line-3"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(409.515 599.001)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">QuarantineEntry</tspan></tspan></text></g></g><g class="mindmap-node section-3"><g transform="translate(15 542.446)"><path id="node-59" d="M0 95.6V5q0-5 5-5h228.938q5 0 5 5v95.6H0Z" class="node-bkg node-no-border"/><path d="M0 100.6h238.938" class="node-line-3"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(134.469 552.446)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">States:</tspan><tspan class="text-inner-tspan"> NEW</tspan></tspan><tspan x="0" y="1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">UNDER_REVIEW</tspan></tspan><tspan x="0" y="2.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">IGNORED</tspan><tspan class="text-inner-tspan"> REPROCESSED</tspan></tspan><tspan x="0" y="3.2em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">EXPIRED</tspan></tspan></text></g></g><g class="mindmap-node section-4"><g transform="translate(1110.526 603.75)"><path id="node-60" d="M0 42.8V5q0-5 5-5h171.266q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h181.266" class="node-line-4"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1201.159 613.75)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Composition</tspan><tspan class="text-inner-tspan"> Root</tspan></tspan></text></g></g><g class="mindmap-node section-4"><g transform="translate(1105.454 700.837)"><path id="node-61" d="M0 42.8V5q0-5 5-5h213.11q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h223.109" class="node-line-4"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1217.008 710.837)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">GenericPipelineFactory</tspan></tspan></text></g></g><g class="mindmap-node section-4"><g transform="translate(1348.024 676.086)"><path id="node-62" d="M0 42.8V5q0-5 5-5h145.688q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h155.688" class="node-line-4"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1425.868 686.086)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">RunnerFactory</tspan></tspan></text></g></g><g class="mindmap-node section-4"><g transform="translate(1102.796 495.114)"><path id="node-63" d="M0 42.8V5q0-5 5-5h154.477q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h164.477" class="node-line-4"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1185.035 505.114)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">ServicesBuilder</tspan></tspan></text></g></g><g class="mindmap-node section-4"><g transform="translate(861.145 615.03)"><path id="node-64" d="M0 42.8V5q0-5 5-5h197.563q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h207.563" class="node-line-4"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(964.927 625.03)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Constructor</tspan><tspan class="text-inner-tspan"> Injection</tspan></tspan></text></g></g><g class="mindmap-node section-4"><g transform="translate(1354.933 605.497)"><path id="node-65" d="M0 42.8V5q0-5 5-5h181.156q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h191.156" class="node-line-4"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1450.51 615.497)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">No</tspan><tspan class="text-inner-tspan"> Service</tspan><tspan class="text-inner-tspan"> Locator</tspan></tspan></text></g></g><g class="mindmap-node section-5"><g transform="translate(886.887 368.943)"><path id="node-66" d="M0 42.8V5q0-5 5-5h216.156q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h226.156" class="node-line-5"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(999.965 378.943)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Local</tspan><tspan class="text-inner-tspan"> Only</tspan><tspan class="text-inner-tspan"> Deployment</tspan></tspan></text></g></g><g class="mindmap-node section-5"><g transform="translate(1206.248 376.68)"><path id="node-67" d="M0 42.8V5q0-5 5-5h218.5q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h228.5" class="node-line-5"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1320.498 386.68)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">MemoryLock</tspan><tspan class="text-inner-tspan"> in-process</tspan></tspan></text></g></g><g class="mindmap-node section-5"><g transform="translate(981.092 273.516)"><path id="node-68" d="M0 42.8V5q0-5 5-5h168.078q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h178.078" class="node-line-5"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1070.13 283.516)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Local</tspan><tspan class="text-inner-tspan"> File</tspan><tspan class="text-inner-tspan"> System</tspan></tspan></text></g></g><g class="mindmap-node section-5"><g transform="translate(1028.832 430.32)"><path id="node-69" d="M0 42.8V5q0-5 5-5h174.922q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h184.922" class="node-line-5"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1121.293 440.32)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Local</tspan><tspan class="text-inner-tspan"> Checkpoints</tspan></tspan></text></g></g><g class="mindmap-node section-5"><g transform="translate(1136.53 327.22)"><path id="node-70" d="M0 42.8V5q0-5 5-5h100.047q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h110.047" class="node-line-5"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1191.553 337.22)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">ADR-010</tspan></tspan></text></g></g><g class="mindmap-node section-6"><g transform="translate(501.116 447.715)"><path id="node-71" d="M0 42.8V5q0-5 5-5h181.531q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h191.531" class="node-line-6"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(596.882 457.715)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Resilience</tspan><tspan class="text-inner-tspan"> Patterns</tspan></tspan></text></g></g><g class="mindmap-node section-6"><g transform="translate(161.424 422.257)"><path id="node-72" d="M0 42.8V5q0-5 5-5h227.797q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h237.797" class="node-line-6"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(280.323 432.257)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Circuit</tspan><tspan class="text-inner-tspan"> Breaker</tspan><tspan class="text-inner-tspan"> 5</tspan><tspan class="text-inner-tspan"> failures</tspan></tspan></text></g></g><g class="mindmap-node section-6"><g transform="translate(380.938 352.513)"><path id="node-73" d="M0 60.4V5q0-5 5-5h173.938q5 0 5 5v60.4H0Z" class="node-bkg node-no-border"/><path d="M0 65.4h183.938" class="node-line-6"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(472.907 362.513)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Token</tspan><tspan class="text-inner-tspan"> Bucket</tspan><tspan class="text-inner-tspan"> rate</tspan></tspan><tspan x="0" y="1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">limiting</tspan></tspan></text></g></g><g class="mindmap-node section-6"><g transform="translate(234.774 481.755)"><path id="node-74" d="M0 42.8V5q0-5 5-5h189.773q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h199.773" class="node-line-6"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(334.661 491.755)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Exponential</tspan><tspan class="text-inner-tspan"> Backoff</tspan></tspan></text></g></g><g class="mindmap-node section-6"><g transform="translate(426.953 533.458)"><path id="node-75" d="M0 42.8V5q0-5 5-5h221.656q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h231.656" class="node-line-6"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(542.782 543.458)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Deterministic</tspan><tspan class="text-inner-tspan"> Jitter</tspan><tspan class="text-inner-tspan"> MD5</tspan></tspan></text></g></g><g class="mindmap-node section-7"><g transform="translate(777.53 557.73)"><path id="node-76" d="M0 42.8V5q0-5 5-5h130.469q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h140.469" class="node-line-7"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(847.765 567.73)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Data</tspan><tspan class="text-inner-tspan"> Quality</tspan></tspan></text></g></g><g class="mindmap-node section-7"><g transform="translate(681.93 498.726)"><path id="node-77" d="M0 42.8V5q0-5 5-5h173.016q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h183.016" class="node-line-7"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(773.438 508.726)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Pandera</tspan><tspan class="text-inner-tspan"> Schemas</tspan></tspan></text></g></g><g class="mindmap-node section-7"><g transform="translate(953.486 552.037)"><path id="node-78" d="M0 42.8V5q0-5 5-5h221.844q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h231.844" class="node-line-7"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(1069.408 562.037)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">5</tspan><tspan class="text-inner-tspan"> percent</tspan><tspan class="text-inner-tspan"> soft</tspan><tspan class="text-inner-tspan"> threshold</tspan></tspan></text></g></g><g class="mindmap-node section-7"><g transform="translate(675.79 648.535)"><path id="node-79" d="M0 60.4V5q0-5 5-5h158.219q5 0 5 5v60.4H0Z" class="node-bkg node-no-border"/><path d="M0 65.4h168.219" class="node-line-7"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(759.899 658.535)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">20</tspan><tspan class="text-inner-tspan"> percent</tspan><tspan class="text-inner-tspan"> hard</tspan></tspan><tspan x="0" y="1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">threshold</tspan></tspan></text></g></g><g class="mindmap-node section-7"><g transform="translate(717.216 429.128)"><path id="node-80" d="M0 42.8V5q0-5 5-5h182.031q5 0 5 5v42.8H0Z" class="node-bkg node-no-border"/><path d="M0 47.8h192.031" class="node-line-7"/></g><g dominant-baseline="middle" text-anchor="middle" transform="translate(813.232 439.128)"><rect class="background"/><text y="-10.1"><tspan x="0" y="-.1em" class="text-outer-tspan" dy="1.1em"><tspan class="text-inner-tspan">Quarantine</tspan><tspan class="text-inner-tspan"> routing</tspan></tspan></text></g></g></g></svg>

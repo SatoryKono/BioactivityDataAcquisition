@@ -1,0 +1,89 @@
+"""Normalization profile for the ChEMBL Subcellular Fraction Silver schema."""
+
+from __future__ import annotations
+
+from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
+    chembl_reference_identifier_rules,
+)
+from bioetl.domain.normalization.profiles._standard_profile_builder import (
+    build_standard_profile,
+)
+from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
+    chembl_pseudo_null_fields,
+)
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_governed_vocabulary,
+    normalize_profile_text,
+    normalize_profile_title,
+)
+from bioetl.domain.schemas.chembl.subcellular_fraction import (
+    SubcellularFractionSchema,
+)
+
+from ._chembl_vocab import chembl_enum
+
+__all__ = [
+    "CHEMBL_SUBCELLULAR_FRACTION_PROFILE",
+    "CHEMBL_SUBCELLULAR_FRACTION_SCHEMA_FIELDS",
+]
+
+CHEMBL_SUBCELLULAR_FRACTION_SCHEMA_FIELDS = tuple(
+    SubcellularFractionSchema.to_schema().columns.keys()
+)
+SUBCELLULAR_FRACTIONS = chembl_enum("subcellular_fraction", "subcellular_fraction")
+
+_META_FIELDS = frozenset(
+    {
+        "entity_id",
+        "content_hash",
+        "_run_id",
+        "_run_type",
+        "_source_batch_id",
+        "_ingestion_ts",
+        "_index",
+        "_dq_error",
+        "_dq_warn",
+    }
+)
+_TITLE_FIELDS = frozenset({"subcellular_fraction"})
+_INT_FIELDS = frozenset({"assay_count"})
+_REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("subcellular_fraction")
+
+
+def normalize_chembl_subcellular_fraction(value: object) -> object:
+    """Normalize a ChEMBL subcellular-fraction label with stable identity."""
+    return normalize_profile_governed_vocabulary(
+        normalize_profile_title(value),
+        allowed_values=SUBCELLULAR_FRACTIONS,
+        preserve_unknown=True,
+    )
+
+
+CHEMBL_SUBCELLULAR_FRACTION_PROFILE = build_standard_profile(
+    profile_name="chembl.subcellular_fraction",
+    description="Canonical field-level normalization policy for the ChEMBL Subcellular Fraction Silver schema.",
+    schema_fields=CHEMBL_SUBCELLULAR_FRACTION_SCHEMA_FIELDS,
+    meta_fields=_META_FIELDS,
+    title_fields=_TITLE_FIELDS,
+    int_fields=_INT_FIELDS,
+    special_rules={
+        **_REFERENCE_IDENTIFIER_RULES,
+        "subcellular_fraction_raw": (
+            normalize_profile_text,
+            "Preserve the raw subcellular_fraction provider lexeme as trimmed text "
+            "before canonical controlled-vocabulary normalization.",
+        ),
+        "subcellular_fraction": (
+            normalize_chembl_subcellular_fraction,
+            "Normalize subcellular_fraction against the shared ChEMBL "
+            "subcellular-fraction vocabulary while preserving unknown observed "
+            "lexemes for review; the provider-native lexeme is retained "
+            "separately in subcellular_fraction_raw.",
+        ),
+    },
+    null_fields=chembl_pseudo_null_fields("subcellular_fraction"),
+)
+
+CHEMBL_SUBCELLULAR_FRACTION_PROFILE.assert_covers_schema(
+    CHEMBL_SUBCELLULAR_FRACTION_SCHEMA_FIELDS
+)

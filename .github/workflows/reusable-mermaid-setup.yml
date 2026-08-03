@@ -1,0 +1,64 @@
+name: "[DEPRECATED] Reusable Mermaid setup"
+# DEPRECATED: Use .github/actions/setup-mermaid composite action instead.
+# This workflow_call approach runs in a separate runner, making it unsuitable
+# for setup steps. Kept for backward compatibility; will be removed in a future PR.
+
+on:
+  workflow_call:
+    inputs:
+      mermaid-version:
+        description: "Mermaid CLI version to install"
+        required: false
+        default: "10.6.1"
+        type: string
+      install-librsvg:
+        description: "Install librsvg2-bin and svgo for SVG optimization"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: '20'
+
+      - name: Install Mermaid CLI
+        env:
+          MERMAID_VERSION: ${{ inputs.mermaid-version }}
+          INSTALL_LIBRSVG: ${{ inputs.install-librsvg }}
+        run: |
+          set -euo pipefail
+          # Prefer the maintained composite action lockfile surface (S8543).
+          ACTION_DIR="${GITHUB_WORKSPACE}/.github/actions/setup-mermaid"
+          TOOL_DIR="${RUNNER_TEMP}/mermaid-cli"
+          mkdir -p "${TOOL_DIR}"
+          if [ "${MERMAID_VERSION}" != "10.6.1" ]; then
+            echo "reusable-mermaid-setup pins mermaid-cli@10.6.1 via package-lock.json" >&2
+            echo "requested mermaid-version=${MERMAID_VERSION}; refusing unlocked install" >&2
+            exit 1
+          fi
+          cp "${ACTION_DIR}/package.json" "${ACTION_DIR}/package-lock.json" "${TOOL_DIR}/"
+          cd "${TOOL_DIR}"
+          # Install from action-local package.json + package-lock.json (S8543).
+          npm ci --ignore-scripts --no-fund --no-audit
+          if [ "$INSTALL_LIBRSVG" = "true" ]; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin
+          fi
+          echo "${TOOL_DIR}/node_modules/.bin" >> "$GITHUB_PATH"
+          node node_modules/puppeteer/install.js
+          PUPPETEER_EXECUTABLE="$(
+            node -e 'process.stdout.write(require("puppeteer").executablePath())'
+          )"
+          test -x "${PUPPETEER_EXECUTABLE}"
+
+      - name: Create Puppeteer config
+        run: |
+          cat > /tmp/puppeteer-config.json << 'EOF'
+          {
+            "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+          }
+          EOF

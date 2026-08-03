@@ -1,0 +1,39 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: Composite Preflight Field Priority And Normalization Compatibility Resolution
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    sequenceDiagram
+%% @level   System / Interaction
+%% RULES: RULES.md §2.6, ADR-026, ADR-034, ADR-045
+sequenceDiagram
+    autonumber
+    participant CLI as run_composite command
+    participant Runner as CompositePipelineRunner
+    participant Validator as CompositePreflightValidationService
+    participant Profiles as source_profiles
+    participant Overrides as normalization_compatibility_overrides
+    participant Schema as PreflightSchemaOrchestrationMixin
+    participant Report as PreflightValidationReportingMixin
+
+    CLI->>Runner: validate composite config
+    Runner->>Validator: validate(config)
+    Validator->>Schema: collect schema / profile refs
+    Schema-->>Validator: profile_refs + source_profiles
+    Validator->>Validator: _get_valid_sources(config)
+    Validator->>Validator: _validate_field_priority(...)
+    alt field priority source missing
+        Validator->>Report: add missing-source issue
+    else field missing in source
+        Validator->>Report: add missing-field issue
+    else profile mismatch found
+        Validator->>Overrides: consult reviewed overrides
+        alt override exists
+            Overrides-->>Validator: allow mismatch
+        else no override
+            Validator->>Report: add normalization_profile_mismatch
+        end
+    end
+    Validator-->>Runner: PreflightValidationResult
+    Runner-->>CLI: proceed or fail
+
+    Note over Validator,Overrides: Legacy direct-call tests still work through optional source_profiles / compatibility_overrides arguments.

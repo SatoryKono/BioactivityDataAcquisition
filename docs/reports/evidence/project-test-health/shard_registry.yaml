@@ -1,0 +1,41 @@
+version: 1
+policy_scope: project_test_health_evidence_shards
+owner: "@bioetl-quality"
+last_reviewed: "2026-04-30"
+last_inventory_rebaseline: "2026-07-13"
+inventory_source_ref: c9d639733928a2b699be2cc5031a38c4b3a3707e
+inventory_scope: tracked_test_module_inventory
+summary_path: docs/reports/evidence/project-test-health/SUMMARY.md
+shards:
+  - id: failure-stability
+    status: passed
+    evidence_objects: 8
+  - id: coverage-governance
+    status: passed
+    evidence_objects: 9
+  - id: semanticscholar-pilot-options
+    status: passed
+    evidence_objects: 6
+  - id: semanticscholar-enforced-options
+    status: passed
+    evidence_objects: 6
+  - id: flaky-rate
+    status: passed
+    owner: "@bioetl-quality"
+    evidence_objects: 1
+    summary_path: docs/reports/evidence/project-test-health/flaky-rate/SUMMARY.md
+  - id: uncovered-module-risk-map
+    status: passed
+    owner: "@bioetl-architecture"
+    evidence_objects: 1
+    summary_path: docs/reports/evidence/project-test-health/uncovered-module-risk-map/SUMMARY.md
+  - id: semanticscholar-environment-limited-frequency
+    status: passed
+    owner: "@bioetl-quality"
+    evidence_objects: 1
+    summary_path: docs/reports/evidence/project-test-health/environment-limited-provider-frequency/SUMMARY.md
+  - id: environment-limited-threshold
+    status: passed
+    owner: "@bioetl-quality"
+    evidence_objects: 1
+    summary_path: docs/reports/evidence/project-test-health/environment-limited-threshold/SUMMARY.md

@@ -1,0 +1,57 @@
+name: Architecture governance scan cache
+description: >
+  Restore or persist disk-backed architecture governance subprocess caches keyed
+  to source_tree_sha256 for architecture-slow-governance and test-fast lanes.
+
+inputs:
+  operation:
+    description: "restore or save"
+    required: true
+  cache-path:
+    description: Workspace-relative cache directory
+    required: false
+    default: .cache/bioetl-architecture-governance
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve architecture cache key
+      id: arch-cache-key
+      shell: bash
+      run: |
+        set -euo pipefail
+        inventory="reports/quality/module-coverage-inventory.json"
+        if [ -f "$inventory" ]; then
+          source_hash="$(python3 - <<'PY'
+        import json
+        from pathlib import Path
+        payload = json.loads(Path("reports/quality/module-coverage-inventory.json").read_text(encoding="utf-8"))
+        print(payload["source_tree_sha256"])
+        PY
+        )"
+        else
+          source_hash="${{ hashFiles('src/bioetl/**/*.py', 'tests/architecture/**/*.py', 'pyproject.toml') }}"
+        fi
+        echo "source_tree_sha256=${source_hash}" >> "$GITHUB_OUTPUT"
+        echo "cache_dir=${{ github.workspace }}/${{ inputs.cache-path }}" >> "$GITHUB_OUTPUT"
+
+    - name: Restore architecture governance scan cache
+      if: inputs.operation == 'restore'
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ${{ inputs.cache-path }}
+        key: arch-gov-cache-${{ runner.os }}-${{ steps.arch-cache-key.outputs.source_tree_sha256 }}
+        restore-keys: |
+          arch-gov-cache-${{ runner.os }}-
+
+    - name: Save architecture governance scan cache
+      if: inputs.operation == 'save'
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ${{ inputs.cache-path }}
+        key: arch-gov-cache-${{ runner.os }}-${{ steps.arch-cache-key.outputs.source_tree_sha256 }}
+
+    - name: Export architecture cache directory
+      shell: bash
+      run: |
+        echo "BIOETL_ARCHITECTURE_CACHE_DIR=${{ github.workspace }}/${{ inputs.cache-path }}" >> "$GITHUB_ENV"

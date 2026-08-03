@@ -1,0 +1,42 @@
+%% View: Data-Flow | Parent: 34-batch-processing-flow-full.mermaid
+%% @uniform width=140 height=56 max_title_len=9 max_desc_lines=0
+flowchart LR
+
+    subgraph Application["Application Layer"]
+        direction TB
+        RAW["BronzeRecord batch"]
+        BT["BatchTransformer"]
+        TR["TransformResult"]
+        QM["QuarantineRuntimeService"]
+    end
+
+    subgraph Storage["Storage / Outputs"]
+        direction TB
+        BR["BronzeWriter"]
+        SI["SilverWriter"]
+        GO["GoldWriter"]
+        BZ["Bronze layer"]
+        SV["Silver layer"]
+        GD["Gold layer"]
+    end
+
+    RAW ==> BR
+    BR --> BZ
+    RAW --> BT
+    BT --> TR
+    TR --> QM
+    TR ==> SI
+    SI --> SV
+    TR ==> GO
+    GO --> GD
+
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Storage fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle default stroke:#1E293B,stroke-width:4px

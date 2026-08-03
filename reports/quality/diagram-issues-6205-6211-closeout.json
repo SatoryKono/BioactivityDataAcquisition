@@ -1,0 +1,97 @@
+{
+  "schema_version": "diagram-issues-6205-6211-closeout-v1",
+  "reviewed_on": "2026-07-10",
+  "issues": [
+    6205,
+    6206,
+    6207,
+    6208,
+    6209,
+    6210,
+    6211
+  ],
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "debt_budget_outcome": "unchanged",
+  "outcomes": {
+    "6205": {
+      "status": "closeable",
+      "title": "DIAG-001: Align rendered artifact policy and current diagram ignore/drift contract",
+      "decision": "SVG sibling outputs under docs/02-architecture/diagrams/** are the PR-blocking render baselines required by drift checks and architecture guards. PNG outputs remain a curated compatibility surface checked through docs/02-architecture/diagrams/manifests/png-compatibility.txt in nightly gates.",
+      "evidence": [
+        ".gitignore",
+        "docs/02-architecture/diagrams/README.md",
+        ".github/workflows/docs.yml",
+        "tests/architecture/test_diagram_drift_and_embed_guards.py",
+        "tests/architecture/test_diagram_corpus_regression_guards.py",
+        "configs/quality/generated_artifact_routing.yaml"
+      ]
+    },
+    "6206": {
+      "status": "closeable",
+      "title": "DIAG-002: Enforce local Mermaid CLI version parity with CI",
+      "decision": "MMDC_REQUIRED_VERSION=10.6.1 is enforced in mmdc_wrapper.sh and render.sh with MMDC_ALLOW_VERSION_DRIFT=1 override for diagnostics.",
+      "evidence": [
+        "scripts/diagrams/mmdc_wrapper.sh",
+        "docs/02-architecture/diagrams/tooling/render.sh",
+        "docs/02-architecture/diagrams/README.md",
+        ".github/actions/setup-mermaid/action.yml"
+      ]
+    },
+    "6207": {
+      "status": "closeable",
+      "title": "DIAG-003: Make diagram renderer writes atomic for SVG and PNG outputs",
+      "decision": "render.sh writes SVG/PNG to per-file temp directories and replaces final outputs atomically.",
+      "evidence": [
+        "docs/02-architecture/diagrams/tooling/render.sh",
+        "tests/architecture/test_diagram_corpus_regression_guards.py"
+      ]
+    },
+    "6208": {
+      "status": "closeable",
+      "title": "DIAG-004: Add repo-wide embedded Mermaid validation for active documentation",
+      "decision": "validate_mermaid_syntax.sh --include-embedded validates fenced Mermaid blocks in active docs; docs.yml runs it in CI.",
+      "evidence": [
+        "scripts/diagrams/validate_mermaid_syntax.sh",
+        ".github/workflows/docs.yml",
+        "tests/architecture/test_diagram_drift_and_embed_guards.py",
+        "tests/architecture/test_validate_mermaid_syntax_script.py"
+      ]
+    },
+    "6209": {
+      "status": "closeable",
+      "title": "DIAG-005: Add JSON output to standalone visual smoke regression check",
+      "decision": "check_diagram_visual_smoke.py emits diagram-visual-smoke-report-v1 via --json-out; docs.yml and nightly upload the report.",
+      "evidence": [
+        "scripts/diagrams/check_diagram_visual_smoke.py",
+        ".github/workflows/docs.yml",
+        ".github/workflows/diagram-nightly.yml",
+        "scripts/diagrams/run_diagram_checks.sh",
+        "tests/architecture/test_check_diagram_visual_smoke.py"
+      ]
+    },
+    "6210": {
+      "status": "closeable",
+      "title": "DIAG-006: Document Windows and PowerShell diagram workflow",
+      "decision": "docs/02-architecture/diagrams/README.md documents Git Bash/WSL requirement plus PowerShell launch examples for validation, render, and Python checks.",
+      "evidence": [
+        "docs/02-architecture/diagrams/README.md",
+        "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md"
+      ]
+    },
+    "6211": {
+      "status": "closeable",
+      "title": "DIAG-007: Decide and document MkDocs publication/deploy target",
+      "decision": "MkDocs remains validation-only; docs/site/** is local generated output and there is no GitHub Pages deploy job.",
+      "evidence": [
+        "docs/00-project/governance/06-doc-publication-policy.md",
+        "docs/02-architecture/diagrams/README.md",
+        ".github/workflows/docs.yml",
+        "mkdocs.yml"
+      ]
+    }
+  },
+  "required_closeout_checks": [
+    "python -m pytest tests/architecture/test_diagram_issues_6205_6211_closeout.py -q --tb=short",
+    "python -m pytest tests/architecture/test_diagram_drift_and_embed_guards.py tests/architecture/test_diagram_corpus_regression_guards.py tests/architecture/test_diagram_regression_workflow.py tests/architecture/test_check_diagram_visual_smoke.py tests/architecture/test_validate_mermaid_syntax_script.py -q --tb=short"
+  ]
+}

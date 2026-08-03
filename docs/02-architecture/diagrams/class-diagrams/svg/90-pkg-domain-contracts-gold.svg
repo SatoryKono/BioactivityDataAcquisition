@@ -1,0 +1,495 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" class="classDiagram" style="max-width: 5349.64px; background-color: white;" viewBox="-8 0 5349.640625 806" role="graphics-document document" aria-roledescription="class"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .cluster-label text{fill:#1e40af;}#my-svg .cluster-label span{color:#1e40af;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .cluster rect{fill:#f8fafc;stroke:#94a3b8;stroke-width:1px;}#my-svg .cluster text{fill:#1e40af;}#my-svg .cluster span{color:#1e40af;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .noteLabel .nodeLabel,#my-svg .noteLabel .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .labelBkg{background:#eff6ff;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg [id$="-compositionStart"],#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-compositionEnd"],#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-dependencyStart"],#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-dependencyEnd"],#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-extensionStart"],#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-extensionEnd"],#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-aggregationStart"],#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-aggregationEnd"],#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-lollipopStart"],#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-lollipopEnd"],#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;line-height:initial;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg .edgeLabel[data-look="neo"]{background-color:#ffffff;text-align:center;}#my-svg .edgeLabel[data-look="neo"] p{background-color:#ffffff;}#my-svg .edgeLabel[data-look="neo"] rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg .node .neo-node{stroke:#2563eb;}#my-svg [data-look="neo"].node rect,#my-svg [data-look="neo"].cluster rect,#my-svg [data-look="neo"].node polygon{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node path{stroke:url(#my-svg-gradient);stroke-width:1px;}#my-svg [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node .neo-line path{stroke:#2563eb;filter:none;}#my-svg [data-look="neo"].node circle{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node circle .state-start{fill:#000000;}#my-svg [data-look="neo"].icon-shape .icon{fill:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].icon-shape .icon-neo path{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><g><defs><marker id="my-svg_class-aggregationStart" class="marker aggregation class" refX="18" refY="7" markerWidth="190" markerHeight="240" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-aggregationEnd" class="marker aggregation class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-aggregationStart-margin" class="marker aggregation class" refX="15" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 2;" /></marker></defs><defs><marker id="my-svg_class-aggregationEnd-margin" class="marker aggregation class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 2;" /></marker></defs><defs><marker id="my-svg_class-extensionStart" class="marker extension class" refX="18" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 1,7 L18,13 V 1 Z" /></marker></defs><defs><marker id="my-svg_class-extensionEnd" class="marker extension class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 1,1 V 13 L18,7 Z" /></marker></defs><marker id="my-svg_class-extensionStart-margin" class="marker extension class" refX="18" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 20 14"><polygon points="10,7 18,13 18,1" style="stroke-width: 2; stroke-dasharray: 0;" /></marker><defs><marker id="my-svg_class-extensionEnd-margin" class="marker extension class" refX="9" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 20 14"><polygon points="10,1 10,13 18,7" style="stroke-width: 2; stroke-dasharray: 0;" /></marker></defs><defs><marker id="my-svg_class-compositionStart" class="marker composition class" refX="18" refY="7" markerWidth="190" markerHeight="240" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-compositionEnd" class="marker composition class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-compositionStart-margin" class="marker composition class" refX="15" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><path viewBox="0 0 15 15" d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-compositionEnd-margin" class="marker composition class" refX="3.5" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-dependencyStart" class="marker dependency class" refX="6" refY="7" markerWidth="190" markerHeight="240" orient="auto"><path d="M 5,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-dependencyEnd" class="marker dependency class" refX="13" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L14,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-dependencyStart-margin" class="marker dependency class" refX="4" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><path d="M 5,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-dependencyEnd-margin" class="marker dependency class" refX="16" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L14,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-lollipopStart" class="marker lollipop class" refX="13" refY="7" markerWidth="190" markerHeight="240" orient="auto"><circle fill="transparent" cx="7" cy="7" r="6" /></marker></defs><defs><marker id="my-svg_class-lollipopEnd" class="marker lollipop class" refX="1" refY="7" markerWidth="190" markerHeight="240" orient="auto"><circle fill="transparent" cx="7" cy="7" r="6" /></marker></defs><defs><marker id="my-svg_class-lollipopStart-margin" class="marker lollipop class" refX="13" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><circle fill="transparent" cx="7" cy="7" r="6" stroke-width="2" /></marker></defs><defs><marker id="my-svg_class-lollipopEnd-margin" class="marker lollipop class" refX="1" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><circle fill="transparent" cx="7" cy="7" r="6" stroke-width="2" /></marker></defs><g class="root"><g class="clusters" /><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="root" transform="translate(-8, 0)"><g class="clusters"><g class="cluster undefined" id="my-svg-chembl_reference_publication_schemas" data-look="classic"><rect style="" x="8" y="8" width="414.875" height="790" /><g class="cluster-label" transform="translate(71.4765625, 8)"><text x="143.961" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="143.961">chembl_reference_publication_sch</tspan><tspan x="143.961" dy="16.8">emas</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-ChEMBLCellLineGoldSchema-0" data-look="classic" transform="translate(215.4375, 95)"><g class="basic label-container outer-path"><path d="M-124.171875 -52 L124.171875 -52 L124.171875 52 L-124.171875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-124.171875 -52 C-69.11842588125515 -52, -14.064976762510284 -52, 124.171875 -52 M-124.171875 -52 C-42.455865770961296 -52, 39.26014345807741 -52, 124.171875 -52 M124.171875 -52 C124.171875 -25.24959721333196, 124.171875 1.5008055733360806, 124.171875 52 M124.171875 -52 C124.171875 -21.49148801873154, 124.171875 9.017023962536918, 124.171875 52 M124.171875 52 C26.37289626766524 52, -71.42608246466952 52, -124.171875 52 M124.171875 52 C57.32011908250732 52, -9.531636834985363 52, -124.171875 52 M-124.171875 52 C-124.171875 16.10508519523961, -124.171875 -19.78982960952078, -124.171875 -52 M-124.171875 52 C-124.171875 24.74030830035597, -124.171875 -2.51938339928806, -124.171875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-108.171875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="108.172" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="108.172">ChEMBLCellLineGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-108.171875, 36)" /><g class="methods-group text" transform="translate(-108.171875, 76)" /><g class="divider" style=""><path d="M-124.171875 4 C-57.11372640479317 4.00027002148673, 9.944422190413661 4.000540042973461, 124.171875 4.001 M-124.171875 4 C-46.311941033598146 4.000313516784564, 31.54799293280371 4.000627033569127, 124.171875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-124.171875 28 C-37.750303785988436 28.000347991730067, 48.67126742802313 28.000695983460137, 124.171875 28.001 M-124.171875 28 C-27.085632699200886 28.000390934913003, 70.00060960159823 28.000781869826003, 124.171875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-ChEMBLCompoundRecordGoldSchema-1" data-look="classic" transform="translate(215.4375, 249)"><g class="basic label-container outer-path"><path d="M-160.578125 -52 L160.578125 -52 L160.578125 52 L-160.578125 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-160.578125 -52 C-59.9521953803779 -52, 40.6737342392442 -52, 160.578125 -52 M-160.578125 -52 C-72.80193432733587 -52, 14.974256345328257 -52, 160.578125 -52 M160.578125 -52 C160.578125 -17.51946000822972, 160.578125 16.961079983540557, 160.578125 52 M160.578125 -52 C160.578125 -14.9480972799373, 160.578125 22.1038054401254, 160.578125 52 M160.578125 52 C42.26809351395028 52, -76.04193797209945 52, -160.578125 52 M160.578125 52 C44.02928452541792 52, -72.51955594916416 52, -160.578125 52 M-160.578125 52 C-160.578125 19.977861569279284, -160.578125 -12.044276861441432, -160.578125 -52 M-160.578125 52 C-160.578125 19.903490452439947, -160.578125 -12.193019095120107, -160.578125 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-144.578125, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="144.578" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="144.578">ChEMBLCompoundRecordGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-144.578125, 36)" /><g class="methods-group text" transform="translate(-144.578125, 76)" /><g class="divider" style=""><path d="M-160.578125 4 C-92.2772174963338 4.000212671892587, -23.97630999266761 4.0004253437851744, 160.578125 4.001 M-160.578125 4 C-47.48018231591776 4.000352158622739, 65.61776036816448 4.000704317245479, 160.578125 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-160.578125 28 C-49.28239081206918 28.00034654699757, 62.01334337586164 28.00069309399514, 160.578125 28.001 M-160.578125 28 C-92.88222803929477 28.000210788041525, -25.186331078589546 28.00042157608305, 160.578125 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-ChEMBLPublicationGoldSchema-2" data-look="classic" transform="translate(215.4375, 403)"><g class="basic label-container outer-path"><path d="M-136.4140625 -52 L136.4140625 -52 L136.4140625 52 L-136.4140625 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-136.4140625 -52 C-55.94227365630394 -52, 24.52951518739212 -52, 136.4140625 -52 M-136.4140625 -52 C-59.033646476676836 -52, 18.34676954664633 -52, 136.4140625 -52 M136.4140625 -52 C136.4140625 -28.388602274740258, 136.4140625 -4.7772045494805155, 136.4140625 52 M136.4140625 -52 C136.4140625 -30.07882298498056, 136.4140625 -8.157645969961123, 136.4140625 52 M136.4140625 52 C28.593332608804104 52, -79.22739728239179 52, -136.4140625 52 M136.4140625 52 C37.63513954010354 52, -61.143783419792925 52, -136.4140625 52 M-136.4140625 52 C-136.4140625 13.231576653126531, -136.4140625 -25.536846693746938, -136.4140625 -52 M-136.4140625 52 C-136.4140625 24.389160463083268, -136.4140625 -3.2216790738334637, -136.4140625 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-120.4140625, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="120.414" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="120.414">ChEMBLPublicationGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-120.4140625, 36)" /><g class="methods-group text" transform="translate(-120.4140625, 76)" /><g class="divider" style=""><path d="M-136.4140625 4 C-58.30108589216593 4.000286308373112, 19.81189071566814 4.000572616746223, 136.4140625 4.001 M-136.4140625 4 C-71.9009557588197 4.000236460616885, -7.387849017639411 4.000472921233771, 136.4140625 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-136.4140625 28 C-48.26720768721454 28.00032308565993, 39.879647125570926 28.000646171319858, 136.4140625 28.001 M-136.4140625 28 C-80.12602153778074 28.00020631319063, -23.837980575561488 28.00041262638126, 136.4140625 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-ChEMBLPublicationSimilarityGoldSchema-3" data-look="classic" transform="translate(215.4375, 557)"><g class="basic label-container outer-path"><path d="M-172.4375 -52 L172.4375 -52 L172.4375 52 L-172.4375 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-172.4375 -52 C-84.02284942795593 -52, 4.391801144088134 -52, 172.4375 -52 M-172.4375 -52 C-38.003391283008796 -52, 96.43071743398241 -52, 172.4375 -52 M172.4375 -52 C172.4375 -21.690050910320203, 172.4375 8.619898179359595, 172.4375 52 M172.4375 -52 C172.4375 -29.482039546994958, 172.4375 -6.964079093989916, 172.4375 52 M172.4375 52 C85.08986369784641 52, -2.2577726043071777 52, -172.4375 52 M172.4375 52 C100.22915688793469 52, 28.020813775869385 52, -172.4375 52 M-172.4375 52 C-172.4375 18.859053031204994, -172.4375 -14.281893937590013, -172.4375 -52 M-172.4375 52 C-172.4375 10.737823556036368, -172.4375 -30.524352887927265, -172.4375 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-156.4375, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="156.438" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="156.438">ChEMBLPublicationSimilarityGoldSche</tspan><tspan x="156.438" dy="16.8">ma</tspan></text></g></g><g class="members-group text" transform="translate(-156.4375, 36)" /><g class="methods-group text" transform="translate(-156.4375, 76)" /><g class="divider" style=""><path d="M-172.4375 4 C-63.43275280301481 4.000316070307204, 45.571994393970385 4.0006321406144085, 172.4375 4.001 M-172.4375 4 C-48.28221858873508 4.000360000815981, 75.87306282252985 4.0007200016319615, 172.4375 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-172.4375 28 C-101.9976846455381 28.000204247380513, -31.5578692910762 28.000408494761025, 172.4375 28.001 M-172.4375 28 C-101.10162498323025 28.000206845596278, -29.765749966460504 28.00041369119256, 172.4375 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-ChEMBLPublicationTermGoldSchema-4" data-look="classic" transform="translate(215.4375, 711)"><g class="basic label-container outer-path"><path d="M-155.4609375 -52 L155.4609375 -52 L155.4609375 52 L-155.4609375 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-155.4609375 -52 C-67.52125660546362 -52, 20.41842428907276 -52, 155.4609375 -52 M-155.4609375 -52 C-85.28788357682356 -52, -15.11482965364712 -52, 155.4609375 -52 M155.4609375 -52 C155.4609375 -15.86952614701196, 155.4609375 20.26094770597608, 155.4609375 52 M155.4609375 -52 C155.4609375 -30.458999057087798, 155.4609375 -8.917998114175596, 155.4609375 52 M155.4609375 52 C47.682920764762656 52, -60.09509597047469 52, -155.4609375 52 M155.4609375 52 C53.87699131261422 52, -47.706954874771554 52, -155.4609375 52 M-155.4609375 52 C-155.4609375 14.877690293186348, -155.4609375 -22.244619413627305, -155.4609375 -52 M-155.4609375 52 C-155.4609375 12.615357309738052, -155.4609375 -26.769285380523897, -155.4609375 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-139.4609375, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="139.461" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="139.461">ChEMBLPublicationTermGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-139.4609375, 36)" /><g class="methods-group text" transform="translate(-139.4609375, 76)" /><g class="divider" style=""><path d="M-155.4609375 4 C-50.63739955092316 4.000337137867669, 54.18613839815367 4.000674275735338, 155.4609375 4.001 M-155.4609375 4 C-78.07995970373615 4.000248875952508, -0.6989819074723016 4.000497751905017, 155.4609375 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-155.4609375 28 C-84.3521971341617 28.00022870291891, -13.243456768323398 28.000457405837825, 155.4609375 28.001 M-155.4609375 28 C-87.5336014915136 28.00021847075253, -19.606265483027187 28.000436941505054, 155.4609375 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(456.875, 77)"><g class="clusters"><g class="cluster undefined" id="my-svg-chembl_target_lookup_schemas" data-look="classic"><rect style="" x="8" y="8" width="404.328125" height="636" /><g class="cluster-label" transform="translate(94.1640625, 8)"><text x="116" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="116">chembl_target_lookup_schem</tspan><tspan x="116" dy="16.8">as</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-ChEMBLSubcellularFractionGoldSchema-5" data-look="classic" transform="translate(210.1640625, 95)"><g class="basic label-container outer-path"><path d="M-167.1640625 -52 L167.1640625 -52 L167.1640625 52 L-167.1640625 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-167.1640625 -52 C-41.179985276872685 -52, 84.80409194625463 -52, 167.1640625 -52 M-167.1640625 -52 C-90.02811384746317 -52, -12.89216519492635 -52, 167.1640625 -52 M167.1640625 -52 C167.1640625 -31.196636715435535, 167.1640625 -10.39327343087107, 167.1640625 52 M167.1640625 -52 C167.1640625 -30.737284119612806, 167.1640625 -9.474568239225611, 167.1640625 52 M167.1640625 52 C45.37563757356263 52, -76.41278735287474 52, -167.1640625 52 M167.1640625 52 C82.2564773211342 52, -2.6511078577316027 52, -167.1640625 52 M-167.1640625 52 C-167.1640625 17.880791270881623, -167.1640625 -16.238417458236754, -167.1640625 -52 M-167.1640625 52 C-167.1640625 10.721059560073499, -167.1640625 -30.557880879853002, -167.1640625 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-151.1640625, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="151.164" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="151.164">ChEMBLSubcellularFractionGoldSche</tspan><tspan x="151.164" dy="16.8">ma</tspan></text></g></g><g class="members-group text" transform="translate(-151.1640625, 36)" /><g class="methods-group text" transform="translate(-151.1640625, 76)" /><g class="divider" style=""><path d="M-167.1640625 4 C-94.65255300227398 4.00021688725559, -22.14104350454795 4.00043377451118, 167.1640625 4.001 M-167.1640625 4 C-57.406038997174804 4.000328294317156, 52.35198450565039 4.000656588634311, 167.1640625 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-167.1640625 28 C-87.713519273111 28.0002376424156, -8.262976046222008 28.000475284831193, 167.1640625 28.001 M-167.1640625 28 C-91.02880218049037 28.0002277261607, -14.893541860980747 28.000455452321397, 167.1640625 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-ChEMBLTargetComponentGoldSchema-6" data-look="classic" transform="translate(210.1640625, 249)"><g class="basic label-container outer-path"><path d="M-161.6640625 -52 L161.6640625 -52 L161.6640625 52 L-161.6640625 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-161.6640625 -52 C-68.57489836683003 -52, 24.514265766339946 -52, 161.6640625 -52 M-161.6640625 -52 C-36.38611645886712 -52, 88.89182958226576 -52, 161.6640625 -52 M161.6640625 -52 C161.6640625 -31.090470772279566, 161.6640625 -10.180941544559133, 161.6640625 52 M161.6640625 -52 C161.6640625 -12.33768434378377, 161.6640625 27.32463131243246, 161.6640625 52 M161.6640625 52 C87.39226296109989 52, 13.120463422199776 52, -161.6640625 52 M161.6640625 52 C92.58512573220702 52, 23.506188964414036 52, -161.6640625 52 M-161.6640625 52 C-161.6640625 28.048662594582435, -161.6640625 4.09732518916487, -161.6640625 -52 M-161.6640625 52 C-161.6640625 28.425643214576365, -161.6640625 4.851286429152729, -161.6640625 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-145.6640625, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="145.664" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="145.664">ChEMBLTargetComponentGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-145.6640625, 36)" /><g class="methods-group text" transform="translate(-145.6640625, 76)" /><g class="divider" style=""><path d="M-161.6640625 4 C-51.7042301510908 4.000340087433931, 58.255602197818405 4.0006801748678615, 161.6640625 4.001 M-161.6640625 4 C-60.448373131546035 4.00031304325712, 40.76731623690793 4.00062608651424, 161.6640625 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-161.6640625 28 C-57.79487997076723 28.000321250069195, 46.07430255846555 28.000642500138394, 161.6640625 28.001 M-161.6640625 28 C-63.48806278579255 28.000303642003658, 34.6879369284149 28.00060728400732, 161.6640625 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-ChEMBLTargetGoldSchema-7" data-look="classic" transform="translate(210.1640625, 403)"><g class="basic label-container outer-path"><path d="M-117.890625 -52 L117.890625 -52 L117.890625 52 L-117.890625 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-117.890625 -52 C-61.80526965610132 -52, -5.719914312202647 -52, 117.890625 -52 M-117.890625 -52 C-60.12780307172519 -52, -2.364981143450379 -52, 117.890625 -52 M117.890625 -52 C117.890625 -24.815072606814503, 117.890625 2.3698547863709933, 117.890625 52 M117.890625 -52 C117.890625 -19.81498554708336, 117.890625 12.37002890583328, 117.890625 52 M117.890625 52 C44.756366899297845 52, -28.37789120140431 52, -117.890625 52 M117.890625 52 C51.02841915087939 52, -15.833786698241227 52, -117.890625 52 M-117.890625 52 C-117.890625 29.761421152973572, -117.890625 7.522842305947144, -117.890625 -52 M-117.890625 52 C-117.890625 26.777579812063998, -117.890625 1.5551596241279952, -117.890625 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-101.890625, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="101.891" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="101.891">ChEMBLTargetGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-101.890625, 36)" /><g class="methods-group text" transform="translate(-101.890625, 76)" /><g class="divider" style=""><path d="M-117.890625 4 C-65.10301190147428 4.000223883846144, -12.315398802948536 4.000447767692287, 117.890625 4.001 M-117.890625 4 C-49.99676763651114 4.000287952741634, 17.897089726977725 4.000575905483269, 117.890625 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-117.890625 28 C-48.481894536280166 28.00029437765074, 20.92683592743967 28.000588755301482, 117.890625 28.001 M-117.890625 28 C-55.176431152319125 28.0002659846525, 7.537762695361749 28.000531969305005, 117.890625 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-ChEMBLTissueGoldSchema-8" data-look="classic" transform="translate(210.1640625, 557)"><g class="basic label-container outer-path"><path d="M-117.3671875 -52 L117.3671875 -52 L117.3671875 52 L-117.3671875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-117.3671875 -52 C-67.29844999904338 -52, -17.22971249808677 -52, 117.3671875 -52 M-117.3671875 -52 C-60.15101514526693 -52, -2.934842790533864 -52, 117.3671875 -52 M117.3671875 -52 C117.3671875 -11.068620678274172, 117.3671875 29.862758643451656, 117.3671875 52 M117.3671875 -52 C117.3671875 -16.30590000078412, 117.3671875 19.38819999843176, 117.3671875 52 M117.3671875 52 C41.73965914930545 52, -33.887869201389094 52, -117.3671875 52 M117.3671875 52 C28.833100298267283 52, -59.700986903465434 52, -117.3671875 52 M-117.3671875 52 C-117.3671875 11.479870616793875, -117.3671875 -29.04025876641225, -117.3671875 -52 M-117.3671875 52 C-117.3671875 31.02286175233581, -117.3671875 10.04572350467162, -117.3671875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-101.3671875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="101.367" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="101.367">ChEMBLTissueGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-101.3671875, 36)" /><g class="methods-group text" transform="translate(-101.3671875, 76)" /><g class="divider" style=""><path d="M-117.3671875 4 C-37.7670289617443 4.0003391073784496, 41.833129576511396 4.000678214756899, 117.3671875 4.001 M-117.3671875 4 C-64.07742808844924 4.000227021540461, -10.787668676898491 4.0004540430809215, 117.3671875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-117.3671875 28 C-34.945403104063615 28.000351127884002, 47.47638129187277 28.000702255768, 117.3671875 28.001 M-117.3671875 28 C-42.87264059461212 28.00031735678639, 31.621906310775756 28.000634713572783, 117.3671875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(911.203125, 154)"><g class="clusters"><g class="cluster undefined" id="my-svg-chembl_activity_assay_schemas" data-look="classic"><rect style="" x="8" y="8" width="388.609375" height="482" /><g class="cluster-label" transform="translate(88.6953125, 8)"><text x="113.609" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="113.609">chembl_activity_assay_sch</tspan><tspan x="113.609" dy="16.8">emas</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-ChEMBLActivityGoldSchema-9" data-look="classic" transform="translate(202.3046875, 95)"><g class="basic label-container outer-path"><path d="M-123.5078125 -52 L123.5078125 -52 L123.5078125 52 L-123.5078125 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-123.5078125 -52 C-73.31748707326275 -52, -23.127161646525508 -52, 123.5078125 -52 M-123.5078125 -52 C-59.02648563477406 -52, 5.454841230451876 -52, 123.5078125 -52 M123.5078125 -52 C123.5078125 -10.545252450089862, 123.5078125 30.909495099820276, 123.5078125 52 M123.5078125 -52 C123.5078125 -27.261166167300424, 123.5078125 -2.522332334600847, 123.5078125 52 M123.5078125 52 C72.16655708434685 52, 20.825301668693697 52, -123.5078125 52 M123.5078125 52 C62.89416112327196 52, 2.2805097465439133 52, -123.5078125 52 M-123.5078125 52 C-123.5078125 13.74694184348526, -123.5078125 -24.50611631302948, -123.5078125 -52 M-123.5078125 52 C-123.5078125 24.519479818379182, -123.5078125 -2.9610403632416364, -123.5078125 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-107.5078125, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="107.508" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="107.508">ChEMBLActivityGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-107.5078125, 36)" /><g class="methods-group text" transform="translate(-107.5078125, 76)" /><g class="divider" style=""><path d="M-123.5078125 4 C-27.991566380795064 4.000386680988781, 67.52467973840987 4.000773361977561, 123.5078125 4.001 M-123.5078125 4 C-29.2367882550476 4.000381639923567, 65.0342359899048 4.000763279847135, 123.5078125 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-123.5078125 28 C-42.10447593042268 28.00032954731738, 39.29886063915464 28.00065909463476, 123.5078125 28.001 M-123.5078125 28 C-46.074723405269424 28.00031347445772, 31.358365689461152 28.000626948915436, 123.5078125 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-ChEMBLAssayGoldSchema-10" data-look="classic" transform="translate(202.3046875, 249)"><g class="basic label-container outer-path"><path d="M-115.9609375 -52 L115.9609375 -52 L115.9609375 52 L-115.9609375 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-115.9609375 -52 C-62.99945938905323 -52, -10.037981278106457 -52, 115.9609375 -52 M-115.9609375 -52 C-39.26407428058806 -52, 37.432788938823876 -52, 115.9609375 -52 M115.9609375 -52 C115.9609375 -17.600231272735485, 115.9609375 16.79953745452903, 115.9609375 52 M115.9609375 -52 C115.9609375 -26.762207482876573, 115.9609375 -1.5244149657531452, 115.9609375 52 M115.9609375 52 C64.96128838504774 52, 13.961639270095475 52, -115.9609375 52 M115.9609375 52 C68.16172340695053 52, 20.362509313901043 52, -115.9609375 52 M-115.9609375 52 C-115.9609375 13.634746594780061, -115.9609375 -24.730506810439877, -115.9609375 -52 M-115.9609375 52 C-115.9609375 28.251217282240965, -115.9609375 4.502434564481931, -115.9609375 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-99.9609375, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="99.961" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="99.961">ChEMBLAssayGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-99.9609375, 36)" /><g class="methods-group text" transform="translate(-99.9609375, 76)" /><g class="divider" style=""><path d="M-115.9609375 4 C-29.645719355004204 4.000372173681956, 56.66949878999159 4.000744347363913, 115.9609375 4.001 M-115.9609375 4 C-32.62403141057611 4.000359331805546, 50.71287467884778 4.000718663611093, 115.9609375 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-115.9609375 28 C-55.64998695571139 28.00026004856396, 4.660963588577218 28.000520097127918, 115.9609375 28.001 M-115.9609375 28 C-59.72642539971148 28.000242471789694, -3.4919132994229614 28.000484943579387, 115.9609375 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-ChEMBLAssayParametersGoldSchema-11" data-look="classic" transform="translate(202.3046875, 403)"><g class="basic label-container outer-path"><path d="M-159.3046875 -52 L159.3046875 -52 L159.3046875 52 L-159.3046875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-159.3046875 -52 C-60.03362705394217 -52, 39.23743339211566 -52, 159.3046875 -52 M-159.3046875 -52 C-66.21611227009481 -52, 26.872462959810377 -52, 159.3046875 -52 M159.3046875 -52 C159.3046875 -25.954499468314154, 159.3046875 0.09100106337169223, 159.3046875 52 M159.3046875 -52 C159.3046875 -20.728169417954035, 159.3046875 10.54366116409193, 159.3046875 52 M159.3046875 52 C76.39235654355373 52, -6.519974412892537 52, -159.3046875 52 M159.3046875 52 C79.79982932233959 52, 0.29497114467918095 52, -159.3046875 52 M-159.3046875 52 C-159.3046875 21.64831608835627, -159.3046875 -8.703367823287458, -159.3046875 -52 M-159.3046875 52 C-159.3046875 15.672056920970888, -159.3046875 -20.655886158058223, -159.3046875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-143.3046875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="143.305" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="143.305">ChEMBLAssayParametersGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-143.3046875, 36)" /><g class="methods-group text" transform="translate(-143.3046875, 76)" /><g class="divider" style=""><path d="M-159.3046875 4 C-68.54540352357037 4.000284860682384, 22.213880452859257 4.000569721364768, 159.3046875 4.001 M-159.3046875 4 C-81.08266855693053 4.000245510725926, -2.8606496138610567 4.000491021451852, 159.3046875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-159.3046875 28 C-66.22369025784282 28.000292147703572, 26.857306984314363 28.00058429540714, 159.3046875 28.001 M-159.3046875 28 C-93.21659929983093 28.000207426690444, -27.128511099661864 28.000414853380885, 159.3046875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(1349.8125, 154)"><g class="clusters"><g class="cluster undefined" id="my-svg-composite_bioassay" data-look="classic"><rect style="" x="8" y="8" width="334.359375" height="482" /><g class="cluster-label" transform="translate(103.328125, 8)"><text x="71.852" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="71.852">composite_bioassay</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-CompositeActivityGoldSchema-12" data-look="classic" transform="translate(175.1796875, 95)"><g class="basic label-container outer-path"><path d="M-132.1796875 -52 L132.1796875 -52 L132.1796875 52 L-132.1796875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-132.1796875 -52 C-28.934016525357734 -52, 74.31165444928453 -52, 132.1796875 -52 M-132.1796875 -52 C-35.58912542695644 -52, 61.001436646087114 -52, 132.1796875 -52 M132.1796875 -52 C132.1796875 -26.31381466296042, 132.1796875 -0.627629325920843, 132.1796875 52 M132.1796875 -52 C132.1796875 -21.452877044562587, 132.1796875 9.094245910874825, 132.1796875 52 M132.1796875 52 C30.41505397947742 52, -71.34957954104516 52, -132.1796875 52 M132.1796875 52 C44.12701117579502 52, -43.92566514840996 52, -132.1796875 52 M-132.1796875 52 C-132.1796875 28.923584475669664, -132.1796875 5.847168951339327, -132.1796875 -52 M-132.1796875 52 C-132.1796875 13.807901562413946, -132.1796875 -24.38419687517211, -132.1796875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-116.1796875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="116.18" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="116.18">CompositeActivityGoldSchem</tspan><tspan x="116.18" dy="16.8">a</tspan></text></g></g><g class="members-group text" transform="translate(-116.1796875, 36)" /><g class="methods-group text" transform="translate(-116.1796875, 76)" /><g class="divider" style=""><path d="M-132.1796875 4 C-73.7080662172516 4.000221182325321, -15.236444934503211 4.000442364650641, 132.1796875 4.001 M-132.1796875 4 C-43.76256932210417 4.000334458039092, 44.65454885579166 4.000668916078183, 132.1796875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-132.1796875 28 C-60.69117108592238 28.000270421718216, 10.797345328155245 28.000540843436433, 132.1796875 28.001 M-132.1796875 28 C-58.19830786536882 28.0002798515454, 15.783071769262364 28.0005597030908, 132.1796875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-CompositeAssayGoldSchema-13" data-look="classic" transform="translate(175.1796875, 249)"><g class="basic label-container outer-path"><path d="M-124.6328125 -52 L124.6328125 -52 L124.6328125 52 L-124.6328125 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-124.6328125 -52 C-41.286229077785066 -52, 42.06035434442987 -52, 124.6328125 -52 M-124.6328125 -52 C-40.51420047269359 -52, 43.604411554612824 -52, 124.6328125 -52 M124.6328125 -52 C124.6328125 -18.233801299717342, 124.6328125 15.532397400565316, 124.6328125 52 M124.6328125 -52 C124.6328125 -28.865702168762116, 124.6328125 -5.731404337524232, 124.6328125 52 M124.6328125 52 C63.7163788479892 52, 2.7999451959783954 52, -124.6328125 52 M124.6328125 52 C27.832828450903392 52, -68.96715559819322 52, -124.6328125 52 M-124.6328125 52 C-124.6328125 23.748978396508775, -124.6328125 -4.502043206982449, -124.6328125 -52 M-124.6328125 52 C-124.6328125 26.5241025720246, -124.6328125 1.0482051440491986, -124.6328125 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-108.6328125, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="108.633" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="108.633">CompositeAssayGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-108.6328125, 36)" /><g class="methods-group text" transform="translate(-108.6328125, 76)" /><g class="divider" style=""><path d="M-124.6328125 4 C-30.001210828450482 4.000379641603898, 64.63039084309904 4.000759283207795, 124.6328125 4.001 M-124.6328125 4 C-63.007378981918706 4.000247227966224, -1.3819454638374111 4.000494455932446, 124.6328125 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-124.6328125 28 C-33.816156298264744 28.000364336864347, 57.00049990347051 28.00072867372869, 124.6328125 28.001 M-124.6328125 28 C-74.04400653747066 28.000202951393568, -23.455200574941315 28.000405902787136, 124.6328125 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-CompositeTargetGoldSchema-14" data-look="classic" transform="translate(175.1796875, 403)"><g class="basic label-container outer-path"><path d="M-127.46875 -52 L127.46875 -52 L127.46875 52 L-127.46875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-127.46875 -52 C-59.246876329385486 -52, 8.974997341229027 -52, 127.46875 -52 M-127.46875 -52 C-39.78461165199833 -52, 47.899526696003335 -52, 127.46875 -52 M127.46875 -52 C127.46875 -19.901843342665877, 127.46875 12.196313314668245, 127.46875 52 M127.46875 -52 C127.46875 -20.068935313800086, 127.46875 11.862129372399828, 127.46875 52 M127.46875 52 C46.50154776756574 52, -34.46565446486852 52, -127.46875 52 M127.46875 52 C51.02349710354136 52, -25.42175579291728 52, -127.46875 52 M-127.46875 52 C-127.46875 13.996589433205436, -127.46875 -24.006821133589128, -127.46875 -52 M-127.46875 52 C-127.46875 12.236158456593941, -127.46875 -27.527683086812118, -127.46875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-111.46875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="111.469" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="111.469">CompositeTargetGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-111.46875, 36)" /><g class="methods-group text" transform="translate(-111.46875, 76)" /><g class="divider" style=""><path d="M-127.46875 4 C-57.23445527798279 4.000275496130315, 12.999839444034421 4.000550992260629, 127.46875 4.001 M-127.46875 4 C-60.17012399347712 4.0002639808816145, 7.128502013045761 4.000527961763229, 127.46875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-127.46875 28 C-61.86125837925583 28.000257347356197, 3.7462332414883406 28.000514694712397, 127.46875 28.001 M-127.46875 28 C-26.85115218133717 28.000394675549177, 73.76644563732566 28.00078935109836, 127.46875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(1734.171875, 231)"><g class="clusters"><g class="cluster undefined" id="my-svg-chembl_molecule_protein_schemas" data-look="classic"><rect style="" x="8" y="8" width="352.828125" height="328" /><g class="cluster-label" transform="translate(56.2421875, 8)"><text x="128.172" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="128.172">chembl_molecule_protein_sche</tspan><tspan x="128.172" dy="16.8">mas</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-ChEMBLMoleculeGoldSchema-15" data-look="classic" transform="translate(184.4140625, 95)"><g class="basic label-container outer-path"><path d="M-128.5546875 -52 L128.5546875 -52 L128.5546875 52 L-128.5546875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-128.5546875 -52 C-45.96571595163496 -52, 36.623255596730075 -52, 128.5546875 -52 M-128.5546875 -52 C-38.36294950653401 -52, 51.828788486931984 -52, 128.5546875 -52 M128.5546875 -52 C128.5546875 -24.93937184671449, 128.5546875 2.12125630657102, 128.5546875 52 M128.5546875 -52 C128.5546875 -14.961434622844607, 128.5546875 22.077130754310787, 128.5546875 52 M128.5546875 52 C70.31111565733215 52, 12.067543814664319 52, -128.5546875 52 M128.5546875 52 C58.319063574760165 52, -11.91656035047967 52, -128.5546875 52 M-128.5546875 52 C-128.5546875 11.14791957860902, -128.5546875 -29.70416084278196, -128.5546875 -52 M-128.5546875 52 C-128.5546875 29.19933344561904, -128.5546875 6.398666891238079, -128.5546875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-112.5546875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="112.555" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="112.555">ChEMBLMoleculeGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-112.5546875, 36)" /><g class="methods-group text" transform="translate(-112.5546875, 76)" /><g class="divider" style=""><path d="M-128.5546875 4 C-36.490938415014625 4.000358072314886, 55.57281066997075 4.000716144629771, 128.5546875 4.001 M-128.5546875 4 C-66.13812257739463 4.000242762695536, -3.721557654789237 4.000485525391072, 128.5546875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-128.5546875 28 C-30.33633101258647 28.000382010016118, 67.88202547482706 28.000764020032232, 128.5546875 28.001 M-128.5546875 28 C-67.29559528818342 28.000238260826592, -6.036503076366856 28.000476521653184, 128.5546875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-ChEMBLProteinClassGoldSchema-16" data-look="classic" transform="translate(184.4140625, 249)"><g class="basic label-container outer-path"><path d="M-141.4140625 -52 L141.4140625 -52 L141.4140625 52 L-141.4140625 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-141.4140625 -52 C-34.39200977859501 -52, 72.63004294280998 -52, 141.4140625 -52 M-141.4140625 -52 C-28.88877338869908 -52, 83.63651572260184 -52, 141.4140625 -52 M141.4140625 -52 C141.4140625 -24.305262082593835, 141.4140625 3.3894758348123304, 141.4140625 52 M141.4140625 -52 C141.4140625 -27.0308108922004, 141.4140625 -2.061621784400799, 141.4140625 52 M141.4140625 52 C69.20701789205197 52, -3.0000267158960696 52, -141.4140625 52 M141.4140625 52 C51.92571379016168 52, -37.56263491967664 52, -141.4140625 52 M-141.4140625 52 C-141.4140625 23.011106377856798, -141.4140625 -5.977787244286404, -141.4140625 -52 M-141.4140625 52 C-141.4140625 25.189050924178936, -141.4140625 -1.621898151642128, -141.4140625 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-125.4140625, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="125.414" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="125.414">ChEMBLProteinClassGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-125.4140625, 36)" /><g class="methods-group text" transform="translate(-125.4140625, 76)" /><g class="divider" style=""><path d="M-141.4140625 4 C-49.39657194376761 4.000325347737451, 42.62091861246478 4.000650695474902, 141.4140625 4.001 M-141.4140625 4 C-79.35791613631969 4.000219412925655, -17.30176977263939 4.00043882585131, 141.4140625 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-141.4140625 28 C-33.709071615194716 28.00038081428742, 73.99591926961057 28.000761628574846, 141.4140625 28.001 M-141.4140625 28 C-67.16216793124563 28.00026253363087, 7.089726637508733 28.000525067261744, 141.4140625 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(2137, 231)"><g class="clusters"><g class="cluster undefined" id="my-svg-uniprot" data-look="classic"><rect style="" x="8" y="8" width="335.078125" height="328" /><g class="cluster-label" transform="translate(148.9296875, 8)"><text x="26.609" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="26.609">uniprot</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-UniProtIDMappingGoldSchema-17" data-look="classic" transform="translate(175.5390625, 95)"><g class="basic label-container outer-path"><path d="M-132.5390625 -52 L132.5390625 -52 L132.5390625 52 L-132.5390625 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-132.5390625 -52 C-41.0395079688892 -52, 50.460046562221606 -52, 132.5390625 -52 M-132.5390625 -52 C-37.84878960244447 -52, 56.84148329511106 -52, 132.5390625 -52 M132.5390625 -52 C132.5390625 -11.742893106171671, 132.5390625 28.514213787656658, 132.5390625 52 M132.5390625 -52 C132.5390625 -24.791260256458912, 132.5390625 2.4174794870821756, 132.5390625 52 M132.5390625 52 C50.049720744304864 52, -32.43962101139027 52, -132.5390625 52 M132.5390625 52 C40.0402920427135 52, -52.458478414572994 52, -132.5390625 52 M-132.5390625 52 C-132.5390625 25.401302568484898, -132.5390625 -1.1973948630302047, -132.5390625 -52 M-132.5390625 52 C-132.5390625 23.991634772429176, -132.5390625 -4.016730455141648, -132.5390625 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-116.5390625, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="116.539" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="116.539">UniProtIDMappingGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-116.5390625, 36)" /><g class="methods-group text" transform="translate(-116.5390625, 76)" /><g class="divider" style=""><path d="M-132.5390625 4 C-53.03222082677321 4.000299937392696, 26.474620846453575 4.000599874785392, 132.5390625 4.001 M-132.5390625 4 C-55.62796656062268 4.000290145012681, 21.283129378754637 4.00058029002536, 132.5390625 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-132.5390625 28 C-54.62406613039634 28.000293932199686, 23.290930239207313 28.00058786439937, 132.5390625 28.001 M-132.5390625 28 C-33.91075310045953 28.000372072608403, 64.71755629908094 28.00074414521681, 132.5390625 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-UniProtProteinGoldSchema-18" data-look="classic" transform="translate(175.5390625, 249)"><g class="basic label-container outer-path"><path d="M-119.578125 -52 L119.578125 -52 L119.578125 52 L-119.578125 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-119.578125 -52 C-29.894805331324633 -52, 59.78851433735073 -52, 119.578125 -52 M-119.578125 -52 C-45.976189513101886 -52, 27.625745973796228 -52, 119.578125 -52 M119.578125 -52 C119.578125 -16.194739985176405, 119.578125 19.61052002964719, 119.578125 52 M119.578125 -52 C119.578125 -20.763347860871605, 119.578125 10.47330427825679, 119.578125 52 M119.578125 52 C69.18672772787552 52, 18.795330455751042 52, -119.578125 52 M119.578125 52 C60.14401122231363 52, 0.7098974446272592 52, -119.578125 52 M-119.578125 52 C-119.578125 21.21445739817524, -119.578125 -9.571085203649517, -119.578125 -52 M-119.578125 52 C-119.578125 28.078413604895246, -119.578125 4.156827209790492, -119.578125 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-103.578125, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="103.578" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="103.578">UniProtProteinGoldSchem</tspan><tspan x="103.578" dy="16.8">a</tspan></text></g></g><g class="members-group text" transform="translate(-103.578125, 36)" /><g class="methods-group text" transform="translate(-103.578125, 76)" /><g class="divider" style=""><path d="M-119.578125 4 C-47.20733532525658 4.000302608816098, 25.16345434948684 4.000605217632194, 119.578125 4.001 M-119.578125 4 C-36.65085731522197 4.000346749322607, 46.27641036955606 4.000693498645215, 119.578125 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-119.578125 28 C-31.788736776943864 28.00036707963193, 56.00065144611227 28.000734159263857, 119.578125 28.001 M-119.578125 28 C-52.92884085603062 28.000278685102916, 13.720443287938764 28.00055737020583, 119.578125 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(2522.078125, 308)"><g class="clusters"><g class="cluster undefined" id="my-svg-composite_molecule" data-look="classic"><rect style="" x="8" y="8" width="344.9375" height="174" /><g class="cluster-label" transform="translate(106.0390625, 8)"><text x="74.43" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="74.43">composite_molecule</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-CompositeMoleculeGoldSchema-19" data-look="classic" transform="translate(180.46875, 95)"><g class="basic label-container outer-path"><path d="M-137.46875 -52 L137.46875 -52 L137.46875 52 L-137.46875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-137.46875 -52 C-37.52616957800029 -52, 62.416410843999415 -52, 137.46875 -52 M-137.46875 -52 C-29.779685897045326 -52, 77.90937820590935 -52, 137.46875 -52 M137.46875 -52 C137.46875 -27.106514614211704, 137.46875 -2.2130292284234088, 137.46875 52 M137.46875 -52 C137.46875 -29.321355582636343, 137.46875 -6.6427111652726865, 137.46875 52 M137.46875 52 C59.368086866890266 52, -18.732576266219468 52, -137.46875 52 M137.46875 52 C75.19440402935854 52, 12.92005805871706 52, -137.46875 52 M-137.46875 52 C-137.46875 11.442745430824601, -137.46875 -29.114509138350797, -137.46875 -52 M-137.46875 52 C-137.46875 22.360780902302995, -137.46875 -7.27843819539401, -137.46875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-121.46875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="121.469" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="121.469">CompositeMoleculeGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-121.46875, 36)" /><g class="methods-group text" transform="translate(-121.46875, 76)" /><g class="divider" style=""><path d="M-137.46875 4 C-60.616865677030304 4.00027952492593, 16.23501864593939 4.000559049851861, 137.46875 4.001 M-137.46875 4 C-73.61249813312008 4.000232257338002, -9.756246266240154 4.000464514676004, 137.46875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-137.46875 28 C-65.76376741253917 28.000260804665015, 5.941215174921666 28.00052160933003, 137.46875 28.001 M-137.46875 28 C-56.54987647714522 28.000294317339478, 24.368997045709563 28.00058863467896, 137.46875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(2917.015625, 308)"><g class="clusters"><g class="cluster undefined" id="my-svg-composite_publication" data-look="classic"><rect style="" x="8" y="8" width="360.65625" height="174" /><g class="cluster-label" transform="translate(106.6875, 8)"><text x="81.641" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="81.641">composite_publicat</tspan><tspan x="81.641" dy="16.8">ion</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-CompositePublicationGoldSchema-20" data-look="classic" transform="translate(188.328125, 95)"><g class="basic label-container outer-path"><path d="M-145.328125 -52 L145.328125 -52 L145.328125 52 L-145.328125 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-145.328125 -52 C-48.609016547120646 -52, 48.11009190575871 -52, 145.328125 -52 M-145.328125 -52 C-75.78778759812376 -52, -6.247450196247513 -52, 145.328125 -52 M145.328125 -52 C145.328125 -21.080513768133827, 145.328125 9.838972463732347, 145.328125 52 M145.328125 -52 C145.328125 -11.708751530328435, 145.328125 28.58249693934313, 145.328125 52 M145.328125 52 C66.86088318661618 52, -11.606358626767644 52, -145.328125 52 M145.328125 52 C76.82264073672292 52, 8.317156473445834 52, -145.328125 52 M-145.328125 52 C-145.328125 24.785822505955256, -145.328125 -2.428354988089488, -145.328125 -52 M-145.328125 52 C-145.328125 13.640529348142351, -145.328125 -24.718941303715297, -145.328125 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-129.328125, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="129.328" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="129.328">CompositePublicationGoldSchem</tspan><tspan x="129.328" dy="16.8">a</tspan></text></g></g><g class="members-group text" transform="translate(-129.328125, 36)" /><g class="methods-group text" transform="translate(-129.328125, 76)" /><g class="divider" style=""><path d="M-145.328125 4 C-36.791791711079384 4.000373418198607, 71.74454157784123 4.000746836397215, 145.328125 4.001 M-145.328125 4 C-41.43730882734857 4.0003574353421705, 62.45350734530285 4.000714870684341, 145.328125 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-145.328125 28 C-39.70782603210755 28.0003633856109, 65.9124729357849 28.0007267712218, 145.328125 28.001 M-145.328125 28 C-32.03786069683272 28.000389774052007, 81.25240360633455 28.00077954810401, 145.328125 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(3327.671875, 308)"><g class="clusters"><g class="cluster undefined" id="my-svg-pubchem" data-look="classic"><rect style="" x="8" y="8" width="347.828125" height="174" /><g class="cluster-label" transform="translate(148.375, 8)"><text x="33.539" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="33.539">pubchem</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-PubChemCompoundGoldSchema-21" data-look="classic" transform="translate(181.9140625, 95)"><g class="basic label-container outer-path"><path d="M-138.9140625 -52 L138.9140625 -52 L138.9140625 52 L-138.9140625 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-138.9140625 -52 C-64.06504970593934 -52, 10.783963088121311 -52, 138.9140625 -52 M-138.9140625 -52 C-60.664234349624124 -52, 17.585593800751752 -52, 138.9140625 -52 M138.9140625 -52 C138.9140625 -19.373072565199045, 138.9140625 13.25385486960191, 138.9140625 52 M138.9140625 -52 C138.9140625 -15.092054239798124, 138.9140625 21.815891520403753, 138.9140625 52 M138.9140625 52 C66.16139233459944 52, -6.591277830801118 52, -138.9140625 52 M138.9140625 52 C55.17209376172602 52, -28.569874976547965 52, -138.9140625 52 M-138.9140625 52 C-138.9140625 22.359004991024534, -138.9140625 -7.281990017950932, -138.9140625 -52 M-138.9140625 52 C-138.9140625 15.731459293630778, -138.9140625 -20.537081412738445, -138.9140625 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-122.9140625, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="122.914" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="122.914">PubChemCompoundGoldSchema</tspan></text></g></g><g class="members-group text" transform="translate(-122.9140625, 36)" /><g class="methods-group text" transform="translate(-122.9140625, 76)" /><g class="divider" style=""><path d="M-138.9140625 4 C-81.43195174829768 4.000206898098426, -23.94984099659537 4.000413796196852, 138.9140625 4.001 M-138.9140625 4 C-57.02412641245188 4.000294750346415, 24.865809675096244 4.00058950069283, 138.9140625 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-138.9140625 28 C-58.53105828991421 28.00028932637475, 21.851945920171573 28.000578652749503, 138.9140625 28.001 M-138.9140625 28 C-82.71206666695069 28.00020229051984, -26.51007083390138 28.000404581039685, 138.9140625 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(3725.5, 308)"><g class="clusters"><g class="cluster undefined" id="my-svg-publications_crossref" data-look="classic"><rect style="" x="8" y="8" width="347.484375" height="174" /><g class="cluster-label" transform="translate(105.3671875, 8)"><text x="76.375" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="76.375">publications_cross</tspan><tspan x="76.375" dy="16.8">ref</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-CrossRefPublicationGoldSchema-22" data-look="classic" transform="translate(181.7421875, 95)"><g class="basic label-container outer-path"><path d="M-138.7421875 -52 L138.7421875 -52 L138.7421875 52 L-138.7421875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-138.7421875 -52 C-82.08216429349596 -52, -25.422141086991928 -52, 138.7421875 -52 M-138.7421875 -52 C-66.85852507057733 -52, 5.025137358845342 -52, 138.7421875 -52 M138.7421875 -52 C138.7421875 -13.793135701443987, 138.7421875 24.413728597112026, 138.7421875 52 M138.7421875 -52 C138.7421875 -10.524008368068756, 138.7421875 30.951983263862488, 138.7421875 52 M138.7421875 52 C64.06238062182055 52, -10.617426256358897 52, -138.7421875 52 M138.7421875 52 C27.969000194386112 52, -82.80418711122778 52, -138.7421875 52 M-138.7421875 52 C-138.7421875 18.686152834161867, -138.7421875 -14.627694331676267, -138.7421875 -52 M-138.7421875 52 C-138.7421875 18.26393864552977, -138.7421875 -15.47212270894046, -138.7421875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-122.7421875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="122.742" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="122.742">CrossRefPublicationGoldSche</tspan><tspan x="122.742" dy="16.8">ma</tspan></text></g></g><g class="members-group text" transform="translate(-122.7421875, 36)" /><g class="methods-group text" transform="translate(-122.7421875, 76)" /><g class="divider" style=""><path d="M-138.7421875 4 C-34.03757687389762 4.0003773351585155, 70.66703375220476 4.000754670317031, 138.7421875 4.001 M-138.7421875 4 C-50.78629542464246 4.000316976017389, 37.16959665071508 4.00063395203478, 138.7421875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-138.7421875 28 C-38.50843122775028 28.00036122306444, 61.72532504449944 28.000722446128886, 138.7421875 28.001 M-138.7421875 28 C-32.692463953609945 28.00038218268523, 73.35725959278011 28.000764365370458, 138.7421875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(4122.984375, 308)"><g class="clusters"><g class="cluster undefined" id="my-svg-publications_openalex" data-look="classic"><rect style="" x="8" y="8" width="354.8125" height="174" /><g class="cluster-label" transform="translate(104.8828125, 8)"><text x="80.523" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="80.523">publications_opena</tspan><tspan x="80.523" dy="16.8">lex</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-OpenAlexPublicationGoldSchema-23" data-look="classic" transform="translate(185.40625, 95)"><g class="basic label-container outer-path"><path d="M-142.40625 -52 L142.40625 -52 L142.40625 52 L-142.40625 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-142.40625 -52 C-85.16207964002173 -52, -27.91790928004346 -52, 142.40625 -52 M-142.40625 -52 C-81.18893923508527 -52, -19.971628470170543 -52, 142.40625 -52 M142.40625 -52 C142.40625 -26.21998709016132, 142.40625 -0.43997418032264335, 142.40625 52 M142.40625 -52 C142.40625 -30.426371479687774, 142.40625 -8.852742959375547, 142.40625 52 M142.40625 52 C72.07243470335482 52, 1.7386194067096312 52, -142.40625 52 M142.40625 52 C55.4826049072623 52, -31.4410401854754 52, -142.40625 52 M-142.40625 52 C-142.40625 10.621392918016141, -142.40625 -30.757214163967717, -142.40625 -52 M-142.40625 52 C-142.40625 19.61454652512539, -142.40625 -12.770906949749218, -142.40625 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-126.40625, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="126.406" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="126.406">OpenAlexPublicationGoldSchem</tspan><tspan x="126.406" dy="16.8">a</tspan></text></g></g><g class="members-group text" transform="translate(-126.40625, 36)" /><g class="methods-group text" transform="translate(-126.40625, 76)" /><g class="divider" style=""><path d="M-142.40625 4 C-74.14663918642758 4.000239665080759, -5.887028372855156 4.000479330161517, 142.40625 4.001 M-142.40625 4 C-44.591218935675144 4.000343436580432, 53.22381212864971 4.0006868731608645, 142.40625 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-142.40625 28 C-32.395840972678585 28.000386255550676, 77.61456805464283 28.000772511101356, 142.40625 28.001 M-142.40625 28 C-41.72070366073264 28.000353515194522, 58.96484267853472 28.00070703038904, 142.40625 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(4527.796875, 308)"><g class="clusters"><g class="cluster undefined" id="my-svg-publications_pubmed" data-look="classic"><rect style="" x="8" y="8" width="342.1875" height="174" /><g class="cluster-label" transform="translate(101.6484375, 8)"><text x="77.445" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="77.445">publications_pubme</tspan><tspan x="77.445" dy="16.8">d</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-PubMedPublicationGoldSchema-24" data-look="classic" transform="translate(179.09375, 95)"><g class="basic label-container outer-path"><path d="M-136.09375 -52 L136.09375 -52 L136.09375 52 L-136.09375 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-136.09375 -52 C-36.56720725523043 -52, 62.95933548953914 -52, 136.09375 -52 M-136.09375 -52 C-41.73609345833793 -52, 52.62156308332413 -52, 136.09375 -52 M136.09375 -52 C136.09375 -16.585857914920965, 136.09375 18.82828417015807, 136.09375 52 M136.09375 -52 C136.09375 -10.706649416375761, 136.09375 30.586701167248478, 136.09375 52 M136.09375 52 C64.83954182860244 52, -6.41466634279513 52, -136.09375 52 M136.09375 52 C55.30487196976435 52, -25.4840060604713 52, -136.09375 52 M-136.09375 52 C-136.09375 23.44576546070381, -136.09375 -5.108469078592378, -136.09375 -52 M-136.09375 52 C-136.09375 19.378617055916934, -136.09375 -13.242765888166133, -136.09375 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-120.09375, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="120.094" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="120.094">PubMedPublicationGoldSchem</tspan><tspan x="120.094" dy="16.8">a</tspan></text></g></g><g class="members-group text" transform="translate(-120.09375, 36)" /><g class="methods-group text" transform="translate(-120.09375, 76)" /><g class="divider" style=""><path d="M-136.09375 4 C-27.983907834643006 4.000397188857554, 80.12593433071399 4.000794377715107, 136.09375 4.001 M-136.09375 4 C-79.00526041237701 4.00020973957139, -21.916770824754025 4.00041947914278, 136.09375 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-136.09375 28 C-29.64671785404019 28.000391079796632, 76.80031429191962 28.000782159593268, 136.09375 28.001 M-136.09375 28 C-52.592086512807924 28.00030677993474, 30.90957697438415 28.000613559869482, 136.09375 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(4919.984375, 308)"><g class="clusters"><g class="cluster undefined" id="my-svg-publications_semanticscholar" data-look="classic"><rect style="" x="8" y="8" width="405.65625" height="174" /><g class="cluster-label" transform="translate(105.3359375, 8)"><text x="105.492" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="105.492">publications_semanticsc</tspan><tspan x="105.492" dy="16.8">holar</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-SemanticScholarPublicationGoldSchema-25" data-look="classic" transform="translate(210.828125, 95)"><g class="basic label-container outer-path"><path d="M-167.828125 -52 L167.828125 -52 L167.828125 52 L-167.828125 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-167.828125 -52 C-48.18946698397724 -52, 71.44919103204552 -52, 167.828125 -52 M-167.828125 -52 C-97.94992283576644 -52, -28.071720671532887 -52, 167.828125 -52 M167.828125 -52 C167.828125 -25.227915564056012, 167.828125 1.544168871887976, 167.828125 52 M167.828125 -52 C167.828125 -27.091896311165556, 167.828125 -2.1837926223311115, 167.828125 52 M167.828125 52 C83.42397156433307 52, -0.9801818713338548 52, -167.828125 52 M167.828125 52 C64.05286178409618 52, -39.72240143180764 52, -167.828125 52 M-167.828125 52 C-167.828125 14.95540105856783, -167.828125 -22.08919788286434, -167.828125 -52 M-167.828125 52 C-167.828125 23.503541372659345, -167.828125 -4.992917254681309, -167.828125 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-151.828125, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="151.828" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="151.828">SemanticScholarPublicationGoldSche</tspan><tspan x="151.828" dy="16.8">ma</tspan></text></g></g><g class="members-group text" transform="translate(-151.828125, 36)" /><g class="methods-group text" transform="translate(-151.828125, 76)" /><g class="divider" style=""><path d="M-167.828125 4 C-75.2658079346953 4.000275765212372, 17.296509130609394 4.000551530424745, 167.828125 4.001 M-167.828125 4 C-92.31269637803155 4.000224978467173, -16.797267756063093 4.000449956934346, 167.828125 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-167.828125 28 C-52.78088727217717 28.000342753152154, 62.266350455645664 28.00068550630431, 167.828125 28.001 M-167.828125 28 C-53.94003550356787 28.000339299773195, 59.94805399286426 28.00067859954639, 167.828125 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000" /></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000" /></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#7c3aed" stop-opacity="1" /><stop offset="100%" stop-color="#dc2626" stop-opacity="1" /></linearGradient><style>/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px;
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*="Domain"] &gt; rect,
+[id*="Domain"] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*="Domain"] &gt; rect,
+.cluster[id*="Domain"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Application"] &gt; rect,
+[id*="Application"] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*="Application"] &gt; rect,
+.cluster[id*="Application"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Infrastructure"] &gt; rect,
+[id*="Infrastructure"] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*="Infrastructure"] &gt; rect,
+.cluster[id*="Infrastructure"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Composition"] &gt; rect,
+[id*="Composition"] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*="Composition"] &gt; rect,
+.cluster[id*="Composition"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Interfaces"] &gt; rect,
+[id*="Interfaces"] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*="Interfaces"] &gt; rect,
+.cluster[id*="Interfaces"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="External"] &gt; rect,
+[id*="External"] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*="External"] &gt; rect,
+.cluster[id*="External"] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*="Domain"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Application"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Infrastructure"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Composition"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Interfaces"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="External"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Bronze"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Silver"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Gold"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Quarantine"] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*="Domain"] .cluster-label text.fo-fallback,
+g.cluster[id*="Application"] .cluster-label text.fo-fallback,
+g.cluster[id*="Infrastructure"] .cluster-label text.fo-fallback,
+g.cluster[id*="Composition"] .cluster-label text.fo-fallback,
+g.cluster[id*="Interfaces"] .cluster-label text.fo-fallback,
+g.cluster[id*="External"] .cluster-label text.fo-fallback,
+g.cluster[id*="Bronze"] .cluster-label text.fo-fallback,
+g.cluster[id*="Silver"] .cluster-label text.fo-fallback,
+g.cluster[id*="Gold"] .cluster-label text.fo-fallback,
+g.cluster[id*="Quarantine"] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*="Bronze"] &gt; rect,
+[id*="Bronze"] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*="Silver"] &gt; rect,
+[id*="Silver"] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*="Gold"] &gt; rect,
+[id*="Gold"] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*="Quarantine"] &gt; rect,
+[id*="Quarantine"] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}
+</style></svg>

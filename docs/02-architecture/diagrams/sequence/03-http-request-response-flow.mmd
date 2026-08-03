@@ -1,0 +1,220 @@
+---
+title: HTTP Request/Response Flow
+version: 1.0.0
+status: active
+author: BioETL Team
+last_verified: 2026-07-24
+adr_references:
+  - ADR-032: Unified HTTP Client
+  - ADR-010: Local-Only Deployment
+  - ADR-040: Diagram Governance
+description: |
+  Detailed sequence diagram showing HTTP request/response flow through UnifiedHTTPClient
+  with rate limiting, circuit breaker activation, retry logic, and error handling.
+  Covers ADR-032 UnifiedHTTPClient implementation details.
+---
+
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type sequence
+%% @level system
+sequenceDiagram
+    autonumber
+    participant Client as Pipeline Component
+    participant UHC as UnifiedHTTPClient
+    participant RateLimiter as Rate Limiter
+    participant CircuitBreaker as Circuit Breaker
+    participant RetryPolicy as Retry Policy
+    participant HTTP as HTTP Client
+    participant Server as External API Server
+    participant Metrics as Metrics/Tracing
+    participant Logger as Structured Logger
+
+    Note over Client, Logger: HTTP Request/Response Flow (ADR-032)
+
+    %% Initial Request
+    Client->>UHC: Make HTTP request (method, url, params)
+    UHC->>Metrics: Emit http_request_start metric
+    UHC->>Metrics: Start http_request span
+    UHC->>Logger: Log request details (method, url, headers)
+
+    %% Rate Limiting Check
+    UHC->>RateLimiter: Check rate limit
+    RateLimiter->>RateLimiter: Evaluate request rate
+    alt Rate limit exceeded
+        RateLimiter->>Metrics: Emit rate_limit_exceeded metric
+        RateLimiter->>Logger: Log rate limit warning
+        RateLimiter-->>UHC: Rate limit error
+        UHC->>Metrics: Emit http_request_failed metric
+        UHC-->>Client: RateLimitError
+    else Rate limit OK
+        RateLimiter-->>UHC: Rate limit allowed
+    end
+
+    %% Circuit Breaker Check
+    UHC->>CircuitBreaker: Check circuit state
+    CircuitBreaker->>CircuitBreaker: Evaluate failure rate
+    alt Circuit breaker OPEN
+        CircuitBreaker->>Metrics: Emit circuit_breaker_open metric
+        CircuitBreaker->>Logger: Log circuit breaker open
+        CircuitBreaker-->>UHC: Circuit breaker error
+        UHC->>Metrics: Emit http_request_failed metric
+        UHC-->>Client: CircuitBreakerError
+    else Circuit breaker CLOSED/HALF_OPEN
+        CircuitBreaker-->>UHC: Circuit breaker allowed
+    end
+
+    %% HTTP Request Execution
+    UHC->>HTTP: Execute HTTP request
+    HTTP->>Metrics: Start http_client span
+    HTTP->>Server: Send HTTP request
+
+    %% Server Response Handling
+    alt Server returns success (2xx)
+        Server-->>HTTP: Success response (2xx)
+        HTTP->>Metrics: Emit http_success metric
+        HTTP->>CircuitBreaker: Record success
+        CircuitBreaker->>CircuitBreaker: Decrease failure rate
+        CircuitBreaker->>Metrics: Emit circuit_breaker_success metric
+        HTTP-->>UHC: Success response
+        UHC->>Logger: Log response details (status, headers)
+        UHC->>Metrics: Emit http_request_complete metric
+        UHC-->>Client: Response data
+    else Server returns client error (4xx)
+        Server-->>HTTP: Client error (4xx)
+        HTTP->>Metrics: Emit http_client_error metric
+        HTTP->>CircuitBreaker: Record failure
+        CircuitBreaker->>CircuitBreaker: Increase failure rate
+        CircuitBreaker->>Metrics: Emit circuit_breaker_failure metric
+        HTTP-->>UHC: Client error response
+        
+        %% Retry Logic for Client Errors
+        UHC->>RetryPolicy: Check retry eligibility
+        RetryPolicy->>RetryPolicy: Evaluate error type (429, 408, etc.)
+        alt Retry eligible
+            RetryPolicy->>Metrics: Emit http_retry metric
+            RetryPolicy->>Logger: Log retry attempt
+            RetryPolicy->>RetryPolicy: Calculate backoff delay
+            RetryPolicy->>RetryPolicy: Wait for backoff
+            RetryPolicy-->>UHC: Retry request
+            UHC->>HTTP: Retry HTTP request
+        else No retry
+            RetryPolicy-->>UHC: No retry
+            UHC->>Metrics: Emit http_request_failed metric
+            UHC-->>Client: HTTPClientError
+        end
+    else Server returns server error (5xx)
+        Server-->>HTTP: Server error (5xx)
+        HTTP->>Metrics: Emit http_server_error metric
+        HTTP->>CircuitBreaker: Record failure
+        CircuitBreaker->>CircuitBreaker: Increase failure rate
+        CircuitBreaker->>Metrics: Emit circuit_breaker_failure metric
+        HTTP-->>UHC: Server error response
+        
+        %% Retry Logic for Server Errors
+        UHC->>RetryPolicy: Check retry eligibility
+        RetryPolicy->>RetryPolicy: Evaluate error type (500, 502, 503, etc.)
+        alt Retry eligible
+            RetryPolicy->>Metrics: Emit http_retry metric
+            RetryPolicy->>Logger: Log retry attempt
+            RetryPolicy->>RetryPolicy: Calculate exponential backoff
+            RetryPolicy->>RetryPolicy: Wait for backoff
+            RetryPolicy-->>UHC: Retry request
+            UHC->>HTTP: Retry HTTP request
+        else No retry or max retries exceeded
+            RetryPolicy-->>UHC: No retry
+            UHC->>Metrics: Emit http_request_failed metric
+            UHC-->>Client: HTTPServerError
+        end
+    else Network error
+        HTTP->>Metrics: Emit http_network_error metric
+        HTTP->>CircuitBreaker: Record failure
+        CircuitBreaker->>CircuitBreaker: Increase failure rate
+        CircuitBreaker->>Metrics: Emit circuit_breaker_failure metric
+        HTTP-->>UHC: Network error
+        
+        %% Retry Logic for Network Errors
+        UHC->>RetryPolicy: Check retry eligibility
+        RetryPolicy->>RetryPolicy: Evaluate error type (timeout, connection refused)
+        alt Retry eligible
+            RetryPolicy->>Metrics: Emit http_retry metric
+            RetryPolicy->>Logger: Log retry attempt
+            RetryPolicy->>RetryPolicy: Calculate exponential backoff
+            RetryPolicy->>RetryPolicy: Wait for backoff
+            RetryPolicy-->>UHC: Retry request
+            UHC->>HTTP: Retry HTTP request
+        else No retry or max retries exceeded
+            RetryPolicy-->>UHC: No retry
+            UHC->>Metrics: Emit http_request_failed metric
+            UHC-->>Client: HTTPNetworkError
+        end
+    end
+
+    %% Circuit Breaker State Transition
+    alt Failure rate exceeds threshold
+        CircuitBreaker->>CircuitBreaker: Transition to OPEN state
+        CircuitBreaker->>Metrics: Emit circuit_breaker_opened metric
+        CircuitBreaker->>Logger: Log circuit breaker opened
+    end
+
+    %% Cleanup
+    UHC->>Metrics: Finish http_request span
+    UHC->>Logger: Log request completion details
+
+    Note over Client, Logger: End of HTTP Request/Response Flow
+```
+
+## Key Components
+
+### UnifiedHTTPClient (ADR-032)
+- **UnifiedHTTPClient**: Centralized HTTP client with consistent behavior
+- **Rate Limiter**: Prevents API rate limit violations
+- **Circuit Breaker**: Prevents cascading failures
+- **Retry Policy**: Handles transient failures with exponential backoff
+
+### HTTP Client
+- **HTTP Client**: Underlying HTTP client implementation
+- **External API Server**: Target API endpoint
+
+### Observability
+- **Metrics/Tracing**: Comprehensive HTTP request metrics and distributed tracing
+- **Structured Logger**: Detailed logging for debugging and monitoring
+
+## Error Handling
+
+### Rate Limiting
+- **Rate limit exceeded**: Returns `RateLimitError` immediately
+- **Rate limit OK**: Proceeds with request
+
+### Circuit Breaker
+- **OPEN state**: Returns `CircuitBreakerError` immediately
+- **CLOSED/HALF_OPEN state**: Allows requests with monitoring
+- **Failure rate threshold**: Triggers OPEN state when exceeded
+
+### Retry Logic
+- **Client errors (4xx)**: Retry for specific codes (429, 408)
+- **Server errors (5xx)**: Retry with exponential backoff
+- **Network errors**: Retry with exponential backoff
+- **Max retries**: Prevents infinite retry loops
+
+## ADR References
+
+- **ADR-032**: Unified HTTP Client — centralized HTTP client implementation
+- **ADR-010**: Local-Only Deployment — no external orchestration required
+- **ADR-040**: Diagram Governance — diagram metadata and quality standards
+
+## Metrics Emitted
+
+- `http_request_start` — HTTP request initiated
+- `http_request_complete` — HTTP request completed successfully
+- `http_request_failed` — HTTP request failed
+- `http_success` — Successful HTTP response (2xx)
+- `http_client_error` — Client error response (4xx)
+- `http_server_error` — Server error response (5xx)
+- `http_network_error` — Network error
+- `http_retry` — HTTP retry attempt
+- `rate_limit_exceeded` — Rate limit violation
+- `circuit_breaker_open` — Circuit breaker in OPEN state
+- `circuit_breaker_opened` — Circuit breaker transitioned to OPEN
+- `circuit_breaker_success` — Circuit breaker success recorded
+- `circuit_breaker_failure` — Circuit breaker failure recorded

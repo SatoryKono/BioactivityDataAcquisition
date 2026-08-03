@@ -1,0 +1,85 @@
+%% Title: Fan-Out/Fan-In Pattern — Composite Pipeline Enrichment
+%% Covers: ADR-026 (Composite Pipeline Pattern), application/composite/
+%% Rank: 18 (Score 8.00) — Parallel enrichment via asyncio.gather
+%% Updated: 2026-07-31
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @nodes   18
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=376 height=128 max_title_len=37 max_desc_lines=5
+flowchart TB
+    subgraph Seed["Seed Pipeline Result"]
+        SS[("Seed Silver Table<br/>(e.g., chembl/publication<br/>)<br/><br/>")]
+    end
+
+    subgraph Extract["Key Extraction"]
+        KE["KeyExtractor.extract_keys()<br/>read seed via DeltaReader<br/>join keys: doi/pmid<br/>deduplicate keys"]
+        DOIS["DOI Keys<br/>(~50,000 unique)<br/>"]
+        PMIDS["PMID Keys<br/>(~30,000 unique)<br/>"]
+    end
+
+    subgraph FanOut["Fan-Out (EnrichmentCoordinator)"]
+        EC["run_enrichers()<br/>asyncio.gather(tasks)<br/>return_exceptions=True<br/>per-enricher timeout"]
+        E1["CrossRef Enricher<br/>filter_ids = DOIs<br/>required = true<br/>timeout = 3600s<br/>"]
+        E2["PubMed Enricher<br/>filter_ids = PMIDs<br/>required = true<br/>timeout = 3600s<br/>"]
+        E3["OpenAlex Enricher<br/>filter_ids = DOIs<br/>required = false<br/>timeout = 1800s<br/>"]
+        E4["SemanticScholar Enricher<br/>filter_ids = DOIs<br/>required = false<br/>timeout = 1800s<br/>"]
+    end
+
+    subgraph Results["Enricher Silver Tables"]
+        R1[("crossref/publication/"<br/>)]
+        R2[("pubmed/publication/"<br/>)]
+        R3[("openalex/publication/"<br/>)]
+        R4[("semanticscholar/publication/"<br/>)]
+    end
+
+    subgraph FanIn["Fan-In (MergeService)"]
+        DD["EnricherDeduplicator<br/>• remove duplicates<br/>across enrichers<br/><br/>"]
+        MS["MergeService.merge()<br/>LEFT OUTER JOIN<br/>seed ⟕ enrichers<br/>coalesce first non-null"]
+        CO["ColumnOrderService<br/>• FieldGroup priority<br/>• exclude TRASH group<br/><br/>"]
+    end
+
+    subgraph Output["Gold Output"]
+        GW["GoldWriter.write_gold()<br/>CompositePublicationGoldSchema<br/>"]
+        GT[("gold/composite/publication/"<br/>)]
+    end
+
+    %% Flow
+    SS --> KE
+    KE --> DOIS & PMIDS
+
+    DOIS --> EC
+    PMIDS --> EC
+    EC -->|"parallel"| E1 & E2 & E3 & E4
+
+    E1 --> R1
+    E2 --> R2
+    E3 --> R3
+    E4 --> R4
+
+    R1 & R2 & R3 & R4 --> DD
+    DD --> MS
+    SS -->|"seed data"| MS
+    MS --> CO --> GW --> GT
+
+    %% Error handling
+    E3 -.->|"timeout/fail"| EC
+    E4 -.->|"timeout/fail"| EC
+
+    %% Styling
+    style FanOut fill:#eff6ff,stroke:#2563eb
+    style FanIn fill:#ffe4e6,stroke:#dc2626
+    style Output fill:#fefce8,stroke:#ca8a04,color:#212121

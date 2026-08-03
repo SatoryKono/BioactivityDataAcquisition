@@ -1,0 +1,260 @@
+%% BioETL — Class Diagram: Application Core Services
+%% PipelineRunner, BatchExecutor, and their composition.
+
+%% @version 1.2.0
+%% @date    2026-03-24
+%% @type    classDiagram
+%% @level   Class / Interface
+%% @nodes   18
+%% @uniform-group core    nodes=PipelineRunner,PipelineService,BatchExecutor
+%% @uniform-group batch   nodes=BatchTransformer,BatchWriter
+%% @uniform-group infra   nodes=BatchMemoryManagerService,BatchMetricsRecorderService,BatchTracingManagerService
+%% @uniform-group manager nodes=CheckpointRuntimeService,LockRuntimeService
+%% @uniform-group support nodes=PreflightService,PostrunService,QuarantineRuntimeService,MedallionLifecycleService,PipelineObserver,ShutdownSignal,HeartbeatTask,ErrorClassifier
+
+%% @uniform-width group
+%% @uniform class width=592 groups=5 width_strategy=group
+%% @uniform-stats core         width=376 height=312 max_desc_lines=15
+%% @uniform-stats batch        width=592 height=256 max_desc_lines=12
+%% @uniform-stats infra        width=376 height=168 max_desc_lines=7
+%% @uniform-stats manager      width=256 height=200 max_desc_lines=9
+%% @uniform-stats support      width=552 height=112 max_desc_lines=4
+classDiagram
+    direction LR
+    namespace Runner_Core {
+        class PipelineRunner {
+            -_config
+            -_runtime
+            -_services
+            -_context
+            -_executor
+            -_checkpoint_manager
+            -_lock_manager
+            -_preflight_service
+            -_postrun_service
+            -_lifecycle_service
+            -_observer
+            -_shutdown_signal
+            -_tracer
+            +run()
+            +execution_metrics()
+            +... : lifecycle orchestration
+        }
+
+        class PipelineService {
+            <<frozen dataclass>>
+            +data_source
+            +storage
+            +lock
+            +checkpoint
+            +quarantine
+            +metrics
+            +tracing
+            +logger
+            +dq_monitor
+            +metadata_coordinator
+            +dq_report_service
+            +aclose()
+        }
+
+        class BatchExecutor {
+            -_services
+            -_context
+            -_config
+            -_memory
+            -_execution_run_service
+            -_extraction_loop_service
+            -_execution_state_service
+            -_processing_port
+            +batch_size
+            +checkpoint_interval
+            +records_fetched
+            +records_bronze
+            +records_silver
+            +records_gold
+            +records_quarantined
+            +execute(limit, query, offset)
+            +process(records, start_index)
+            +get_dq_context()
+            +get_run_statistics()
+        }
+    }
+
+    namespace Batch_Processing {
+        class BatchTransformer {
+            -_context
+            -_config
+            -_error_classifier
+            -_quarantine_manager
+            -_batch_metrics
+            +transform_batch(records, batch_id, start_index)
+            +transform_single(raw_record, batch_id, index)
+            +... : internal transform callbacks
+        }
+
+        class BatchWriter {
+            -_storage
+            -_context
+            -_gold_validator
+            -_error_classifier
+            -_silver_mode
+            -_gold_mode
+            -_column_orderer
+            +write_bronze(records, batch_id, ingestion_ts, metadata)
+            +write_silver(records, batch_id, ingestion_ts, bronze_refs)
+            +write_gold(records, silver_refs)
+            +... : validation and lock checks
+        }
+
+        class BatchMemoryManagerService {
+            -_memory_monitor
+            -_memory_config
+            -_initial_batch_size
+            +enabled
+            +batch_size_reductions
+            +check_pressure(current_size, interval, fetched)
+            +maybe_recover(current_size)
+        }
+
+        class BatchMetricsRecorderService {
+            -_metrics
+            -_pipeline_label
+            -_run_type_label
+            +track_batch_size(stage, size)
+            +track_processed_records(stage, count)
+            +track_error(stage, error_type)
+            +track_dq_validation_failure(stage, severity, count)
+            +track_quarantined_records(error_type, count)
+        }
+
+        class BatchTracingManagerService {
+            -_tracer
+            -_context
+            +TRACER_NAME
+            +start_execution_span()
+            +start_batch_span(batch_id, count, start)
+            +start_layer_span(name, batch_id, count)
+            +set_execution_stats(span, ...)
+            +end_span(span, error)
+        }
+    }
+
+    namespace Execution_Managers {
+        class CheckpointRuntimeService {
+            -_checkpoint
+            -_logger
+            -_pipeline_name
+            -_run_id
+            -_resume
+            +load_checkpoint()
+            +save_checkpoint(offset)
+            +delete_checkpoint()
+            +list_all()
+        }
+
+        class LockRuntimeService {
+            -_lock
+            -_run_id
+            -_config
+            -_shutdown_signal
+            -_heartbeat
+            -_fencing_token
+            +acquire()
+            +start_heartbeat()
+            +release()
+            +validate()
+        }
+    }
+
+    namespace Support_Services {
+        class PreflightService {
+            +validate_infrastructure(services)
+            +validate_medallion_config(runtime, bronze, silver, gold)
+            +validate_preflight(services, runtime, bronze, silver, gold)
+        }
+
+        class PostrunService {
+            +run(executor, dq_context)
+            +run_dq_checks(executor)
+            +run_vacuum_if_enabled()
+            +run_silver_compact_if_needed()
+            +cleanup(tracer)
+        }
+
+        class QuarantineRuntimeService {
+            -_quarantine
+            -_pipeline_name
+            +quarantine_record(raw, error_type, batch_id, msg, ts)
+            +quarantine_records(records, batch_id, ts)
+        }
+
+        class MedallionLifecycleService {
+            +prepare_for_run(config, runtime)
+            +finalize_run(config, runtime, metrics)
+            +clear(policy, silver_table, gold_table)
+        }
+
+        class PipelineObserver {
+            +\_\_enter\_\_()
+            +\_\_exit\_\_(exc_type, exc_val, tb)
+        }
+
+        class ShutdownSignal {
+            +is_requested
+            +reason
+            +request(reason)
+            +reset()
+        }
+
+        class HeartbeatTask {
+            Background async task
+            +start()
+            +stop()
+        }
+
+        class ErrorClassifier {
+            +classify(error)
+        }
+    }
+
+    PipelineRunner *-- BatchExecutor
+    PipelineRunner *-- LockRuntimeService
+    PipelineRunner *-- CheckpointRuntimeService
+    PipelineRunner *-- PreflightService
+    PipelineRunner *-- PostrunService
+    PipelineRunner *-- MedallionLifecycleService
+    PipelineRunner *-- PipelineObserver
+    PipelineRunner *-- ShutdownSignal
+    PipelineRunner o-- PipelineService
+
+    BatchExecutor *-- BatchTransformer
+    BatchExecutor *-- BatchWriter
+    BatchExecutor *-- BatchMemoryManagerService
+    BatchExecutor *-- BatchMetricsRecorderService
+    BatchExecutor *-- BatchTracingManagerService
+    BatchExecutor *-- QuarantineRuntimeService
+    BatchExecutor *-- CheckpointRuntimeService
+
+    BatchTransformer --> ErrorClassifier
+    BatchWriter --> ErrorClassifier
+
+    LockRuntimeService *-- HeartbeatTask
+
+    style PipelineRunner fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style PipelineService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BatchExecutor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BatchTransformer fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BatchWriter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style BatchMemoryManagerService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BatchMetricsRecorderService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BatchTracingManagerService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style CheckpointRuntimeService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style LockRuntimeService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style PreflightService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style PostrunService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style QuarantineRuntimeService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style MedallionLifecycleService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style PipelineObserver fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style ShutdownSignal fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style HeartbeatTask fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style ErrorClassifier fill:#eff6ff,stroke:#2563eb,stroke-width:2px

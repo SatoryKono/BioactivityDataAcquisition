@@ -1,0 +1,60 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/diagrams/foundation/32-single-record-journey.mmd
+%% Full reference diagram retained after decomposition.
+%% Title: Record Processing Pipeline — Single Record Journey
+%% Covers: application/core/{batch_processing_service,batch_processing_support,batch_transformer,batch_writer}.py
+%% Rank: 7 (Score 8.56) — Best onboarding diagram: follow one record
+%% Updated: 2026-03-24
+
+%% @version 1.1.0
+%% @date    2026-03-24
+%% @type    flowchart
+%% @level   Component / Class
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%% @uniform width=296 height=108 max_title_len=33 max_desc_lines=3
+flowchart TB
+    subgraph Source["1. Source Record"]
+        API["Provider response<br/>raw BronzeRecord bytes"]
+        FETCH["DataSourcePort.fetch()<br/>yield BronzeRecord"]
+    end
+
+    subgraph Bronze["2. Bronze Capture"]
+        PROCESS["BatchProcessingService.process_batch()<br/>batch_id + source metadata"]
+        BW["write_bronze_layer()<br/>BatchWriter.write_bronze()"]
+        BF[("Bronze file / manifest<br/>bronze/.../batch_*.jsonl.zst")]
+    end
+
+    subgraph Transform["3. Transform Record"]
+        BATCH["BatchTransformer.transform_batch()"]
+        IMPL["BaseTransformer._transform_impl()"]
+        NORM["Normalize values<br/>nulls / strings / dates / floats"]
+        META["Add run metadata<br/>_run_id / _run_type / _source_batch_id"]
+        HASH["Compute _content_hash"]
+    end
+
+    subgraph Route["4. DQ + Route"]
+        DQ["TransformResult<br/>silver_records / gold_records / dq records"]
+        CLEAN["Record stays in Silver/Gold path"]
+        QUAR["flush_filtered_records()<br/>flush_dq_records() -> quarantine_records()"]
+    end
+
+    subgraph Persist["5. Persist Outputs"]
+        CONCUR["write_silver_gold_concurrent()"]
+        SW["BatchWriter.write_silver()"]
+        GW["BatchWriter.write_gold()"]
+        ST[("Silver Delta table")]
+        GT[("Gold Delta table")]
+        QT[("Quarantine storage")]
+    end
+
+    API --> FETCH --> PROCESS --> BW --> BF
+    PROCESS --> BATCH --> IMPL --> NORM --> META --> HASH --> DQ
+    DQ --> CLEAN --> CONCUR
+    DQ --> QUAR --> QT
+    CONCUR --> SW --> ST
+    CONCUR --> GW --> GT
+
+    style Bronze fill:#fff7ed,stroke:#f59e0b,color:#212121
+    style Transform fill:#f0fdf4,stroke:#16a34a,color:#212121
+    style Route fill:#f5f3ff,stroke:#7c3aed,color:#212121
+    style Persist fill:#eff6ff,stroke:#2563eb,color:#212121

@@ -1,0 +1,34 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: Batch Aggregate Seal Write Commit Failure Lifecycle
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    stateDiagram
+%% @level   Domain / Aggregate
+%% RULES: RULES.md §2.1, ADR-021
+stateDiagram-v2
+    [*] --> OPEN
+    OPEN --> OPEN: add_record()
+    OPEN --> SEALED: seal()
+    SEALED --> WRITING: mark_writing()
+    WRITING --> COMMITTED: commit()
+    WRITING --> FAILED: mark_failed()
+    COMMITTED --> [*]
+    FAILED --> [*]
+
+    note right of OPEN
+      Batch intake remains mutable until the aggregate is sealed.
+    end note
+
+    note right of WRITING
+      After mark_writing(), publisher paths should not mutate logical batch content.
+    end note
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget

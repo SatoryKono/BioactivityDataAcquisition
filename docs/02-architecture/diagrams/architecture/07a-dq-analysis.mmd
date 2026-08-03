@@ -1,0 +1,70 @@
+%% BioETL — DQ Analysis Services
+%% Domain ports, application services, analyzers, and anomaly detection for Data Quality.
+
+%% @version 1.0.0
+%% @date    2026-07-31
+%% @type    flowchart
+%% @level   System / Component
+%% @view    dq-analysis
+%% @parent  07-dq-system.mmd
+%% @nodes   12
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+graph TB
+%% keep-orphan: DQRWP
+    subgraph Ports["Domain Ports"]
+        DQM["DQMonitorPort"]:::size-sm
+        BDQAP["BronzeDQAnalyzerPort"]:::size-sm
+        SDQAP["SilverDQAnalyzerPort"]:::size-sm
+        GDQAP["GoldDQAnalyzerPort"]:::size-sm
+        DQRWP["DQReportWriterPort"]:::size-sm
+    end
+
+    subgraph AppServices["Application Services"]
+        DQS["DataQualityService<br/>evaluate(context, executor)"]:::size-sm
+        DQRS["DQReportService<br/>generate_reports(context)"]:::size-sm
+    end
+
+    subgraph Analyzers["DQ Analyzers"]
+        BDA["BronzeDQAnalyzer<br/>analyze(records)"]:::size-sm
+        SDA["SilverDQAnalyzer<br/>analyze(delta_table)"]:::size-sm
+        GDA["GoldDQAnalyzer<br/>analyze(delta_table)"]:::size-sm
+    end
+
+    subgraph Anomaly["Anomaly Detection"]
+        AD["AnomalyDetector"]:::size-sm
+        ZSD["ZScoreDetector<br/>(DetectorStrategy)"]:::size-sm
+    end
+
+    %% Port implementations (DI)
+    BDQAP -.-> BDA
+    SDQAP -.-> SDA
+    GDQAP -.-> GDA
+
+    %% Service composition
+    DQS --> DQM
+    DQRS --> BDA
+    DQRS --> SDA
+    DQRS --> GDA
+
+    %% Anomaly detection
+    DQS --> AD
+    AD --> ZSD
+
+    %% Alignment hint
+    BDA ~~~ SDA ~~~ GDA
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    class DQM,BDQAP,SDQAP,GDQAP,DQRWP port
+    class DQS,DQRS,BDA,SDA,GDA,AD,ZSD app

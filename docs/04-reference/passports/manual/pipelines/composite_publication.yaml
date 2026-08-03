@@ -1,0 +1,6 @@
+owner: BioETL Team
+owner_approved: true
+purpose: Build a provider-qualified publication view from the ChEMBL seed and publication enrichers.
+rationale: Explicit identifier policy and seed-priority rules prevent guessed cross-provider identity.
+known_limitations:
+  - Optional providers may not resolve every DOI or PMID.

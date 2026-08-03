@@ -1,0 +1,382 @@
+version: 1.0.0
+provider: crossref
+entity: publication
+pipeline:
+  pipeline_name: crossref_publication
+  provider: crossref
+  entity_type: publication
+  description: Enrich publication records with CrossRef metadata via DOI resolution
+  loading_strategy: full_scan_only
+  field_policy: {}
+  business_primary_keys:
+  - doi
+
+  batch_size: 1000
+  checkpoint_interval: 1000
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _source
+    - _ingestion_ts
+    - _index
+    - _lookup_method
+    - _original_id
+  - name: identifiers
+    fields:
+    - doi
+    - alternative_id
+  - name: title
+    fields:
+    - title
+  - name: authors
+    fields:
+    - authors
+    - author_keys
+    - author_orcids
+    - author_details
+    - author_details_raw_json
+    - author_details_canonical_json
+    - affiliation_list
+  - name: journal
+    fields:
+    - journal
+    - journal_name_short
+  - name: issn
+    fields:
+    - issn
+    - issn_list
+    - issn_print
+    - issn_electronic
+  - name: year
+    fields:
+    - publication_year
+  - name: dates
+    fields:
+    - publication_date
+    - published
+    - published_online
+    - published_print
+  - name: pagination
+    fields:
+    - volume
+    - issue
+    - page_first
+    - page_last
+  - name: citations
+    fields:
+    - citations_received
+    - citations_made
+    - references
+    - references_raw_json
+    - references_canonical_json
+  - name: subjects
+    fields:
+    - subject_keywords
+  - name: language
+    fields:
+    - language
+  - name: publisher
+    fields:
+    - publisher
+  - name: doc_type
+    fields:
+    - publication_type
+    - publication_type_unified
+    - publication_subclass
+    - publication_class
+  - name: content_domain
+    fields:
+    - content_domain_domains
+    - content_domain_crossmark_restriction
+  - name: license
+    fields:
+    - license_url
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - identifiers
+    - title
+    - authors
+    - journal
+    - issn
+    - year
+    - dates
+    - pagination
+    - citations
+    - subjects
+    - language
+    - publisher
+    - doc_type
+    - content_domain
+    - license
+    - dq
+    exclude_fields: []
+  gold:
+    include_groups:
+    - system
+    - identifiers
+    - title
+    - authors
+    - journal
+    - year
+    - pagination
+    - citations
+    - publisher
+    - doc_type
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+    - _lookup_method
+    - _original_id
+quality:
+  version: 1.0.0
+  provider: crossref
+  entity: publication
+  entity_field_validations:
+  - field: doi
+    type: pattern
+    pattern: ^10\.\d{4,}/\S+$
+    nullable: false
+    error_message: DOI is required and must match format 10.XXXX/suffix (no whitespace)
+  - field: pmid
+    type: pattern
+    pattern: ^[1-9]\d{0,9}$
+    nullable: true
+    error_message: PMID must be a canonical positive numeric string when present
+  - field: pmc_id
+    type: pattern
+    pattern: ^PMC\d+$
+    nullable: true
+    error_message: PMC identifier must match PMC format when present
+  - field: title
+    type: max_length
+    max_length: 2000
+    nullable: false
+    error_message: Title must not exceed 2000 characters
+  - field: title
+    type: not_null
+    nullable: false
+    error_message: Missing title is not allowed for CrossRef publication Gold records
+  - field: title
+    type: pattern
+    pattern: \S
+    nullable: false
+    error_message: Title must not be empty or whitespace-only
+  - field: publication_year
+    type: range
+    min: 1950
+    nullable: true
+    severity: warn
+    error_message: "Publication year before 1950 — will be filtered at Gold stage"
+  - field: publication_type
+    type: pattern
+    pattern: ^\S(?:.*\S)?$
+    nullable: true
+    error_message: Raw Crossref publication_type must be non-empty when present
+  - field: publication_type_unified
+    type: custom
+    validator: validate_publication_type_unified_taxonomy
+    nullable: true
+    error_message: publication_type_unified must match the shared publication taxonomy
+  - field: publication_subclass
+    type: custom
+    validator: validate_publication_subclass_taxonomy
+    nullable: true
+    error_message: publication_subclass must match the shared publication taxonomy
+  - field: publication_class
+    type: custom
+    validator: validate_publication_class_taxonomy
+    nullable: true
+    error_message: publication_class must match the shared publication taxonomy
+  - field: issn_list
+    type: pattern
+    pattern: ^\[(\"[0-9Xx-]+\"(,\"[0-9Xx-]+\")*)?\]$
+    nullable: true
+    severity: warn
+    error_message: issn_list must be a canonical JSON string array of ISSN values
+  - field: author_orcids
+    type: pattern
+    pattern: '^\[("\d{4}-\d{4}-\d{4}-[0-9X]"(,"\d{4}-\d{4}-\d{4}-[0-9X]")*)?\]$'
+    nullable: true
+    severity: warn
+    error_message: author_orcids must be a canonical JSON string array of ORCID identifiers
+  - field: citations_received
+    type: range
+    min: 0
+    nullable: true
+    error_message: Citation count must be non-negative
+  - field: citations_received
+    type: range
+    min: 0
+    max: 10000000
+    nullable: true
+    severity: warn
+    error_message: Unusually high citation count
+  - field: citations_made
+    type: range
+    min: 0
+    nullable: true
+    error_message: Reference count must be non-negative
+  entity_cross_field_validations:
+  - name: publication_identifiable
+    fields:
+    - doi
+    - title
+    condition: all_present
+    error_message: Publication must have DOI and title
+  entity_conditional_validations:
+  - name: article_requires_title
+    condition_field: publication_type_unified
+    condition_value:
+    - Journal Article
+    - Conference Paper
+    condition_operator: in
+    then_validations:
+    - field: title
+      type: not_null
+      nullable: false
+      error_message: Journal and proceedings articles must have a title
+  key_nullability:
+  - field: doi
+    key_type: merge
+    nullable: false
+filters:
+  version: 1.0.0
+  provider: crossref
+  entity: publication
+  input_filter:
+    enabled: true
+    source_path: data/input/dois.csv
+    column_name: doi
+    filter_field: doi
+    batch_size: 50
+    fallback_column: title
+    checkpoint_interval: 1000
+  extraction_params: {}
+  silver_filters:
+    exclude_if_present: []
+    required_fields:
+    - doi
+    - title
+  gold_filters:
+    list_contains: {}
+    list_lengths: {}
+    ranges:
+      publication_year:
+        min: 1950
+        max: 2050
+    required_fields:
+    - doi
+    - title
+    columns: {}
+    exclude_if_present: []
+contracts:
+  primary_key:
+  - doi
+  merge_keys:
+  - doi
+  hash_include: []
+  hash_exclude: []
+  hash_datetime_policy: v2_datetime_utc
+  contract_ref: crossref.publication
+  active_version: 1.0.0
+  rollout:
+    mode: single
+    read_order:
+    - 1.0.0
+    write_versions:
+    - 1.0.0
+    affects_hash: false
+hash_policy:
+  provider: crossref
+  entity: publication
+  contract:
+    version: 1.0.0
+    migration_note: Explicit config-level hash contract aligned with normalization profile crossref.publication.
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - abstract
+    - affiliation_list
+    - alternative_id
+    - author_details
+    - author_details_canonical_json
+    - author_keys
+    - author_orcids
+    - authors
+    - citations_made
+    - citations_received
+    - content_domain_crossmark_restriction
+    - content_domain_domains
+    - doi
+    - is_oa
+    - issn
+    - issn_electronic
+    - issn_list
+    - issn_print
+    - issue
+    - journal
+    - journal_name_short
+    - language
+    - license_url
+    - page_first
+    - page_last
+    - pmc_id
+    - pmid
+    - publication_class
+    - publication_date
+    - publication_doi
+    - publication_pmc_id
+    - publication_pmid
+    - publication_subclass
+    - publication_type
+    - publication_type_unified
+    - publication_year
+    - published
+    - published_online
+    - published_print
+    - publisher
+    - references
+    - references_canonical_json
+    - subject_keywords
+    - title
+    - volume
+    exclude_fields:
+    - _dq_error
+    - _dq_warn
+    - _index
+    - _ingestion_ts
+    - _lookup_method
+    - _original_id
+    - _run_id
+    - _run_type
+    - _source
+    - _source_batch_id
+    - author_details_raw_json
+    - references_raw_json
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

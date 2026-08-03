@@ -1,0 +1,49 @@
+schema_version: "1.0.0"
+workflow:
+  name: chembl_core
+  version: "1.0.0"
+  defaults:
+    run_options:
+      run_type: backfill
+      dry_run: false
+      log_level: INFO
+  steps:
+    - kind: pipeline
+      step_id: chembl_activity_ingest
+      pipeline_name: chembl_activity
+      run_options:
+        limit: 250
+    - kind: pipeline
+      step_id: chembl_assay_ingest
+      pipeline_name: chembl_assay
+      run_options:
+        limit: 250
+    - kind: pipeline
+      step_id: chembl_target_ingest
+      pipeline_name: chembl_target
+      run_options:
+        limit: 250
+    - kind: transform
+      step_id: reconcile_assay_target_orphans
+      transform_name: reconcile_foreign_keys
+      depends_on:
+        - chembl_assay_ingest
+        - chembl_target_ingest
+      config:
+        source_layer: gold
+        reference_layer: gold
+        mutation_layer: gold
+        source_table: chembl.assay
+        reference_table: chembl.target
+        source_key: target_id
+        reference_key: target_id
+        primary_keys:
+          - assay_id
+        action: delete_orphans
+    - kind: transform
+      step_id: summarize_core_extracts
+      transform_name: summarize_upstream_outputs
+      depends_on:
+        - chembl_activity_ingest
+        - chembl_assay_ingest
+        - chembl_target_ingest

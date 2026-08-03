@@ -1,0 +1,61 @@
+{
+  "schema_version": "tech-debt-issue-6058-closeout-v1",
+  "generated_at": "2026-07-08T07:31:53Z",
+  "issue": {
+    "number": 6058,
+    "rf_id": "RF-002",
+    "title": "Repair local import-linter capability gap",
+    "parent_issue": 6055,
+    "status": "closeable"
+  },
+  "budget_policy": "flat_or_decreasing_only",
+  "debt_outcome": "improved",
+  "summary": {
+    "before": {
+      "import_linter_version": "2.11",
+      "grimp_version": "3.14",
+      "lint_imports_status": "failed",
+      "pytest_import_linter_contract_status": "skipped",
+      "failure": "ModuleNotFoundError: No module named 'grimp.application.ports.modulefinder'"
+    },
+    "after": {
+      "import_linter_version": "2.13",
+      "grimp_version": "3.15",
+      "lint_imports_status": "passed",
+      "pytest_import_linter_contract_status": "passed",
+      "contracts_kept": 6,
+      "contracts_broken": 0
+    }
+  },
+  "evidence": [
+    {
+      "path": "pyproject.toml",
+      "summary": "Raised import-linter capability constraints in dev/tests_full extras to import-linter>=2.13 and grimp>=3.15 so local installs avoid the broken grimp 3.14 modulefinder path."
+    },
+    {
+      "path": "uv.lock",
+      "summary": "Locked grimp 3.15 and import-linter 2.13 for reproducible clean development environments."
+    },
+    {
+      "path": "tests/architecture/test_layer_dependencies.py",
+      "summary": "Stopped treating ModuleNotFoundError/ImportError from a runnable lint-imports executable as a local skip; broken import-linter stacks now fail instead of bypassing REQ-ARCH-007."
+    },
+    {
+      "path": ".github/workflows/import-linter.yml",
+      "summary": "Existing CI path remains fail-fast with BIOETL_REQUIRE_TEST_CAPABILITIES=1 and runs lint-imports --config .importlinter directly."
+    }
+  ],
+  "required_closeout_checks": [
+    "./.venv/bin/lint-imports --config .importlinter",
+    "./.venv/bin/python -m pytest tests/architecture/test_layer_dependencies.py::test_import_linter_contracts -o addopts='' -q",
+    "env BIOETL_REQUIRE_TEST_CAPABILITIES=1 ./.venv/bin/python -m pytest tests/architecture/test_layer_dependencies.py::test_import_linter_contracts -o addopts='' -q",
+    "./.venv/bin/python -m pytest tests/architecture/test_layer_dependencies.py -o addopts='' -q",
+    "./.venv/bin/ruff check tests/architecture/test_layer_dependencies.py",
+    "uv lock --check"
+  ],
+  "notes": [
+    "No architecture contracts were weakened.",
+    "No technical-debt budget or ratchet limit was increased.",
+    "No src/bioetl Python files changed, so module-coverage source_tree_sha256 refresh is not required."
+  ]
+}

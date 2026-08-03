@@ -1,0 +1,227 @@
+{
+  "generated_at": "2026-07-27T17:04:45.356590+00:00",
+  "epic": 6735,
+  "issues": [
+    6738,
+    6737,
+    6739,
+    6736
+  ],
+  "health_metrics": {
+    "is_stub": false,
+    "has_scrape_up_text": true,
+    "scrape_up_prom": "1",
+    "head": "# HELP python_gc_objects_collected_total Objects collected during gc\n# TYPE python_gc_objects_collected_total counter\npython_gc_objects_collected_total{generation=\"0\"} 5256.0\npython_gc_objects_collected_total{generation=\"1\"} 427.0\npython_gc_objects_collected_total{generation=\"2\"} 55.0\n# HELP python_gc_objects_uncollectable_total Uncollectable objects found during GC\n# TYPE python_gc_objects_uncollectable_total counter\npython_gc_objects_uncollectable_total{generation=\"0\"} 0.0\npython_gc_objects_uncollectable_total{generation=\"1\"} 0.0\npython_gc_objects_uncollectable_total{generation=\"2\"} 0.0\n# HELP python_gc_collections_total Number of times this generation was collected\n# TYPE python_gc_collections_total counter\npython_gc_collections_total{generation=\"0\"} 1661.0\npython_gc_collections_total{generation=\"1\"} 150.0\npython_gc_collections_total{generation=\"2\"} 9.0\n# HELP python_info Python platform information\n# TYPE python_info gauge\npython_info{implementation=\"CPython\",major=\"3\",minor=\"12\",patchlevel=\"13\",version=\"3.12.13\"} 1.0\n# HELP process_virtual_memory_bytes Virtual memory size in bytes.\n# TYPE process_virtual_memory_bytes gauge"
+  },
+  "population": {
+    "pipeline_runs_sum": "2",
+    "pipeline_runs_count": "2",
+    "series": [
+      {
+        "job": "bioetl",
+        "pipeline": "chembl_assay",
+        "run_type": "incremental",
+        "status": "success",
+        "value": "1"
+      },
+      {
+        "job": "bioetl",
+        "pipeline": "chembl_activity",
+        "run_type": "incremental",
+        "status": "success",
+        "value": "1"
+      }
+    ]
+  },
+  "ops_processed_records": {
+    "pipeline": "chembl_assay",
+    "run_type": "incremental",
+    "rows": [
+      {
+        "parameter": "01 bronze_records",
+        "has_data": true,
+        "value_preview": "01 bronze_records|5"
+      },
+      {
+        "parameter": "02 silver_valid_records",
+        "has_data": true,
+        "value_preview": "02 silver_valid_records|5"
+      },
+      {
+        "parameter": "03 silver_filtered_out_records",
+        "has_data": false,
+        "value_preview": "03 silver_filtered_out_records|No data"
+      },
+      {
+        "parameter": "04 silver_quarantined_records",
+        "has_data": false,
+        "value_preview": "04 silver_quarantined_records|No data"
+      },
+      {
+        "parameter": "05 silver_skipped_records",
+        "has_data": false,
+        "value_preview": "05 silver_skipped_records|No data"
+      },
+      {
+        "parameter": "06 silver_deduplicated_records",
+        "has_data": false,
+        "value_preview": "06 silver_deduplicated_records|No data"
+      },
+      {
+        "parameter": "07 gold_written_records",
+        "has_data": true,
+        "value_preview": "07 gold_written_records|5"
+      },
+      {
+        "parameter": "08 gold_excluded_by_contract_records",
+        "has_data": false,
+        "value_preview": "08 gold_excluded_by_contract_records|No data"
+      },
+      {
+        "parameter": "09 gold_quarantined_records",
+        "has_data": false,
+        "value_preview": "09 gold_quarantined_records|No data"
+      },
+      {
+        "parameter": "10 gold_skipped_records",
+        "has_data": false,
+        "value_preview": "10 gold_skipped_records|No data"
+      },
+      {
+        "parameter": "11 gold_deduplicated_records",
+        "has_data": false,
+        "value_preview": "11 gold_deduplicated_records|No data"
+      }
+    ],
+    "rows_with_data": 3
+  },
+  "grafana": {
+    "auth": "basic_admin_ok",
+    "dashboard_count": 5,
+    "dashboards": [
+      {
+        "uid": "bioetl-control-plane-v1",
+        "title": "0. Trust"
+      },
+      {
+        "uid": "bioetl-overview-v2",
+        "title": "1. Overview"
+      },
+      {
+        "uid": "bioetl-runtime",
+        "title": "2. Pipeline Diagnostics"
+      },
+      {
+        "uid": "bioetl-provider-health-v2",
+        "title": "3. Provider Health"
+      },
+      {
+        "uid": "bioetl-dq-v2",
+        "title": "4. Data Quality"
+      }
+    ],
+    "datasources": [
+      {
+        "name": "BioETL Ops HTTP",
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
+      {
+        "name": "Prometheus",
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      {
+        "name": "Pushgateway",
+        "type": "prometheus",
+        "uid": "pushgateway"
+      }
+    ]
+  },
+  "panel_live_validation_matrix": [
+    {
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "panel_proxy": "Status trusted series",
+      "promql": "count(bioetl_control_plane_current_status_trusted) or vector(0)",
+      "prometheus_value": "3",
+      "grafana_value": "3",
+      "verdict": "PASS"
+    },
+    {
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "panel_proxy": "Telemetry missing",
+      "promql": "sum(bioetl_control_plane_telemetry_missing_5m) or vector(0)",
+      "prometheus_value": "3",
+      "grafana_value": "3",
+      "verdict": "PASS"
+    },
+    {
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "panel_proxy": "scrape_up",
+      "promql": "bioetl_health_server_scrape_up or vector(0)",
+      "prometheus_value": "1",
+      "grafana_value": "1",
+      "verdict": "PASS"
+    },
+    {
+      "dashboard_uid": "bioetl-overview-v2",
+      "panel_proxy": "L0 status series",
+      "promql": "count(bioetl_l0_status) or vector(0)",
+      "prometheus_value": "5",
+      "grafana_value": "5",
+      "verdict": "PASS"
+    },
+    {
+      "dashboard_uid": "bioetl-overview-v2",
+      "panel_proxy": "pipeline_runs_total sum",
+      "promql": "sum(bioetl_pipeline_runs_total) or vector(0)",
+      "prometheus_value": "2",
+      "grafana_value": "2",
+      "verdict": "PASS"
+    },
+    {
+      "dashboard_uid": "bioetl-runtime",
+      "panel_proxy": "pipeline_runs series count",
+      "promql": "count(bioetl_pipeline_runs_total) or vector(0)",
+      "prometheus_value": "2",
+      "grafana_value": "2",
+      "verdict": "PASS"
+    },
+    {
+      "dashboard_uid": "bioetl-runtime",
+      "panel_proxy": "up bioetl",
+      "promql": "up{job=\"bioetl\"}",
+      "prometheus_value": "1",
+      "grafana_value": "1",
+      "verdict": "PASS"
+    },
+    {
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "panel_proxy": "provider current status count",
+      "promql": "count(bioetl_provider_current_status) or vector(0)",
+      "prometheus_value": "0",
+      "grafana_value": "0",
+      "verdict": "EMPTY_EXPECTED"
+    },
+    {
+      "dashboard_uid": "bioetl-dq-v2",
+      "panel_proxy": "dq current status count",
+      "promql": "count(bioetl_dq_current_status) or vector(0)",
+      "prometheus_value": "0",
+      "grafana_value": "0",
+      "verdict": "EMPTY_EXPECTED"
+    },
+    {
+      "dashboard_uid": "bioetl-dq-v2",
+      "panel_proxy": "bronze current chembl_assay",
+      "promql": "bioetl_processed_records_bronze_current{pipeline=\"chembl_assay\",run_type=\"incremental\"} or vector(0)",
+      "prometheus_value": "5",
+      "grafana_value": "5",
+      "verdict": "PASS"
+    }
+  ],
+  "verdict_summary": {
+    "PASS": 8,
+    "EMPTY_EXPECTED": 2
+  }
+}

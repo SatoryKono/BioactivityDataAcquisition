@@ -1,0 +1,64 @@
+%% View: Data-Flow | Parent: 44-cross-provider-enrichment-full.mermaid
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=140 height=56 max_title_len=10 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N12
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N4["pmid"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["CS"]
+        N2["CT"]
+        N3["CA"]
+        N5["ntitle"]
+        N6["authors"]
+        N7["CRS"]
+        N8["CRT"]
+        N9["CRA"]
+        N10["nfunders"]
+        N11["references"]
+        N12["PMS"]
+    end
+
+    N3 ==> N2
+    N2 --> N1
+    N9 --> N8
+    N8 --> N7
+    N1 ==> N4
+    N1 --> N5
+    N1 --> N6
+    N7 --> N10
+    N7 --> N11
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    linkStyle 8 stroke:#1E293B,stroke-width:4px

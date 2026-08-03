@@ -1,0 +1,566 @@
+normative_source:
+  scope: link_vars_time_semantics
+  authority: single_source_of_truth
+  narrative_minimal: 'This YAML is the only normative contract for dashboard link semantics,
+
+    allowed/required/forbidden var-* handoff, and time handoff policy.
+
+    Markdown guides are explanatory mirrors and MUST reference this file
+
+    instead of redefining normative rules.
+
+    Required "top-level" link titles refer to the canonical machine-readable
+
+    navigation bus surface and do not require dashboard root `links[]`
+
+    specifically; shipped dashboards MAY surface the visible bus through panel
+
+    `id=1000` HTML while omitting machine-readable self-links to avoid
+
+    duplicating header-row links next to Grafana variables.
+
+    '
+version: 1
+required_top_level_links_by_uid:
+  bioetl-control-plane-v1:
+  - 1. Overview
+  - 2. Pipeline Diagnostics
+  - 3. Provider Health
+  - 4. Data Quality
+  - 5. Incident Workspace
+  - 6. Run Explorer
+  bioetl-overview-v2:
+  - 0. Trust
+  - 2. Pipeline Diagnostics
+  - 3. Provider Health
+  - 4. Data Quality
+  - 5. Incident Workspace
+  - 6. Run Explorer
+  bioetl-runtime:
+  - 0. Trust
+  - 1. Overview
+  - 3. Provider Health
+  - 4. Data Quality
+  - 5. Incident Workspace
+  - 6. Run Explorer
+  bioetl-provider-health-v2:
+  - 0. Trust
+  - 1. Overview
+  - 2. Pipeline Diagnostics
+  - 4. Data Quality
+  - 5. Incident Workspace
+  - 6. Run Explorer
+  bioetl-dq-v2:
+  - 0. Trust
+  - 1. Overview
+  - 2. Pipeline Diagnostics
+  - 3. Provider Health
+  - 5. Incident Workspace
+  - 6. Run Explorer
+  bioetl-incident-v1:
+  - 0. Trust
+  - 1. Overview
+  - 2. Pipeline Diagnostics
+  - 3. Provider Health
+  - 4. Data Quality
+  - 6. Run Explorer
+  bioetl-run-explorer-v1:
+  - 0. Trust
+  - 1. Overview
+  - 2. Pipeline Diagnostics
+  - 3. Provider Health
+  - 4. Data Quality
+  - 5. Incident Workspace
+top_level_link_priority_by_uid:
+  bioetl-overview-v2:
+  - title: 2. Pipeline Diagnostics
+    target_uid: bioetl-runtime
+    priority: primary
+    semantics: scoped_runtime_handoff
+  - title: 0. Trust
+    target_uid: bioetl-control-plane-v1
+    priority: secondary
+    semantics: scoped_control_plane_handoff
+  - title: 4. Data Quality
+    target_uid: bioetl-dq-v2
+    priority: contextual
+    semantics: scoped_dq_handoff
+  bioetl-provider-health-v2:
+  - title: 2. Pipeline Diagnostics
+    target_uid: bioetl-runtime
+    priority: primary
+    semantics: runtime_cross_scope_all_defaults
+required_link_vars_by_target_uid:
+  bioetl-overview-v2:
+  - workflow
+  - pipeline
+  - run_type
+  bioetl-control-plane-v1:
+  - workflow
+  - pipeline
+  - run_type
+  bioetl-runtime:
+  - workflow
+  - pipeline
+  - run_type
+  bioetl-dq-v2:
+  - workflow
+  - pipeline
+  - run_type
+  bioetl-provider-health-v2:
+  - workflow
+  - pipeline
+  - run_type
+  - provider
+  - pipeline_context
+  bioetl-incident-v1:
+  - workflow
+  - pipeline
+  - run_type
+  bioetl-run-explorer-v1:
+  - workflow
+  - pipeline
+  - run_type
+allowed_dashboard_link_vars:
+  bioetl-overview-v2:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  bioetl-dq-v2:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  - stage
+  bioetl-runtime:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  - stage
+  bioetl-provider-health-v2:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  - provider
+  - pipeline_context
+  - adapter
+  bioetl-control-plane-v1:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  bioetl-incident-v1:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  - provider
+  bioetl-run-explorer-v1:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+forbidden_dashboard_link_vars_by_target_uid:
+  bioetl-overview-v2:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+  bioetl-control-plane-v1:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+  bioetl-runtime:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+  bioetl-dq-v2:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+  bioetl-provider-health-v2:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+  bioetl-incident-v1:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+  bioetl-run-explorer-v1:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+preserved_identity_handoff:
+  selector: run_id
+  required_value: $run_id
+  source_uids:
+  - bioetl-control-plane-v1
+  - bioetl-dq-v2
+  - bioetl-overview-v2
+  - bioetl-provider-health-v2
+  - bioetl-runtime
+  - bioetl-incident-v1
+  - bioetl-run-explorer-v1
+  target_uids:
+  - bioetl-control-plane-v1
+  - bioetl-dq-v2
+  - bioetl-overview-v2
+  - bioetl-provider-health-v2
+  - bioetl-runtime
+  - bioetl-incident-v1
+  - bioetl-run-explorer-v1
+  excluded_source_uids: []
+  excluded_target_uids: []
+  semantics: Preserve exact primary Run ID when both source and target dashboards expose the primary control-plane run_id
+    selector. Alert dashboard does not preserve primary run_id when it does not own the primary identity selector. Record-level
+    quarantine forensics use CLI bioetl quarantine inspect (Silver Reject Explorer dashboard removed 2026-07-23).
+required_discoverable_inbound_paths:
+  L1:
+    bioetl-runtime:
+    - source_uid: bioetl-overview-v2
+      source_panel_id: 215
+      source_panel_title: Review First Action
+      source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
+    bioetl-control-plane-v1:
+    - source_uid: bioetl-overview-v2
+      source_panel_id: 215
+      source_panel_title: Review First Action
+      source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
+    bioetl-provider-health-v2:
+    - source_uid: bioetl-overview-v2
+      source_panel_id: 215
+      source_panel_title: Review First Action
+      source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
+    bioetl-dq-v2:
+    - source_uid: bioetl-overview-v2
+      source_panel_id: 215
+      source_panel_title: Review First Action
+      source_status_row_panel_title_matcher: ^Inspect Scope & Evidence$
+required_panel_links_by_uid:
+  bioetl-overview-v2:
+  - panel_id: 214
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open Runtime
+  - panel_id: 214
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open Control Plane
+  - panel_id: 214
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open Data Quality
+  - panel_id: 214
+    target_uid: bioetl-provider-health-v2
+    link_titles:
+    - Open Provider Health
+  - panel_id: 215
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open Runtime
+  - panel_id: 215
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open Control Plane
+  - panel_id: 215
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open Data Quality
+  - panel_id: 215
+    target_uid: bioetl-provider-health-v2
+    link_titles:
+    - Open Provider Health
+  - panel_id: 9002
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open Runtime
+  - panel_id: 9002
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open Control Plane
+  - panel_id: 9002
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open Data Quality
+  - panel_id: 9002
+    target_uid: bioetl-provider-health-v2
+    link_titles:
+    - Open Provider Health
+  - panel_id: 9003
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open Runtime
+  - panel_id: 9004
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open Data Quality
+  - panel_id: 9005
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open Runtime
+  - panel_id: 9006
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open Control Plane
+  - panel_id: 9007
+    target_uid: bioetl-provider-health-v2
+    link_titles:
+    - Open Provider Health
+  bioetl-dq-v2:
+  - panel_id: 116
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open Control Plane lineage diagnostics
+  bioetl-runtime:
+  - panel_id: 230
+    target_uid: bioetl-runtime
+    link_titles:
+    - Inspect active runtime blocker
+  - panel_id: 4
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open 4. Data Quality
+  - panel_id: 6
+    target_uid: bioetl-provider-health-v2
+    link_titles:
+    - Open 3. Provider Health
+  - panel_id: 7
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open 4. Data Quality
+  - panel_id: 236
+    target_uid: bioetl-runtime
+    link_titles:
+    - Inspect stage expectedness
+  - panel_id: 9101
+    target_uid: bioetl-run-explorer-v1
+    link_titles:
+    - Open Run Explorer
+  bioetl-provider-health-v2:
+  - panel_id: 110
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open 2. Runtime
+  - panel_id: 110
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open 0. Control Plane
+  bioetl-incident-v1:
+  - panel_id: 2010
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open Pipeline Diagnostics
+  - panel_id: 2010
+    target_uid: bioetl-provider-health-v2
+    link_titles:
+    - Open Provider Health
+  - panel_id: 2010
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open Data Quality
+  - panel_id: 2010
+    target_uid: bioetl-run-explorer-v1
+    link_titles:
+    - Open Run Explorer
+default_time_refresh_policy:
+  L0:
+    dashboards:
+    - bioetl-overview-v2
+    time_from: now-12h
+    refresh: 60s
+  L1:
+    dashboards:
+    - bioetl-runtime
+    - bioetl-control-plane-v1
+    - bioetl-provider-health-v2
+    - bioetl-dq-v2
+    - bioetl-incident-v1
+    - bioetl-run-explorer-v1
+    time_from: now-12h
+    refresh: 60s
+  Alerts:
+    dashboards: []
+    time_from: now-24h
+    refresh: 60s
+  L2:
+    dashboards: []
+    time_from: now-24h
+    refresh: 1m
+default_time_refresh_policy_exceptions: {}
+time_handoff_requirements:
+  dashboard_links:
+    required_tokens:
+    - ${__url_time_range}
+  explore_links:
+    required_tokens:
+    - from=${__from}
+    - to=${__to}
+navigation_transition_contract:
+  dashboard_levels:
+    L0:
+      dashboards:
+      - bioetl-overview-v2
+      required_outbound:
+      - bioetl-runtime
+      - bioetl-control-plane-v1
+      - bioetl-dq-v2
+      required_inbound: []
+    L1:
+      dashboards:
+      - bioetl-runtime
+      - bioetl-control-plane-v1
+      - bioetl-dq-v2
+      - bioetl-provider-health-v2
+      - bioetl-incident-v1
+      - bioetl-run-explorer-v1
+      required_outbound:
+      - bioetl-overview-v2
+      required_inbound:
+      - bioetl-overview-v2
+    L2:
+      dashboards: []
+      required_outbound:
+      - bioetl-overview-v2
+      - bioetl-dq-v2
+      required_inbound:
+      - bioetl-dq-v2
+  default_semantics_by_route_class:
+    global_navigation:
+      allowed_default_values:
+      - unknown
+      - All
+    scoped_handoff:
+      allowed_default_values: []
+      inherit_scoped_values: true
+    context_mapping:
+      allowed_default_values:
+      - unknown
+      - All
+      inherit_scoped_values: true
+  route_class_by_transition:
+    bioetl-control-plane-v1->bioetl-overview-v2: scoped_handoff
+    bioetl-control-plane-v1->bioetl-runtime: scoped_handoff
+    bioetl-control-plane-v1->bioetl-provider-health-v2: context_mapping
+    bioetl-control-plane-v1->bioetl-dq-v2: scoped_handoff
+    bioetl-overview-v2->bioetl-control-plane-v1: scoped_handoff
+    bioetl-overview-v2->bioetl-runtime: scoped_handoff
+    bioetl-overview-v2->bioetl-provider-health-v2: context_mapping
+    bioetl-overview-v2->bioetl-dq-v2: scoped_handoff
+    bioetl-runtime->bioetl-control-plane-v1: scoped_handoff
+    bioetl-runtime->bioetl-overview-v2: scoped_handoff
+    bioetl-runtime->bioetl-provider-health-v2: context_mapping
+    bioetl-runtime->bioetl-dq-v2: scoped_handoff
+    bioetl-provider-health-v2->bioetl-control-plane-v1: context_mapping
+    bioetl-provider-health-v2->bioetl-overview-v2: context_mapping
+    bioetl-provider-health-v2->bioetl-runtime: context_mapping
+    bioetl-provider-health-v2->bioetl-dq-v2: context_mapping
+    bioetl-dq-v2->bioetl-control-plane-v1: scoped_handoff
+    bioetl-dq-v2->bioetl-overview-v2: scoped_handoff
+    bioetl-dq-v2->bioetl-runtime: scoped_handoff
+    bioetl-dq-v2->bioetl-provider-health-v2: context_mapping
+  incident_critical_reciprocal_paths:
+  - - bioetl-runtime
+    - bioetl-control-plane-v1
+  - - bioetl-control-plane-v1
+    - bioetl-dq-v2
+  first_action_contract:
+    bioetl-runtime:
+      panel_id: 9991
+      panel_title: Start Pipeline Triage
+      min_cta: 4
+      max_cta: 4
+      ctas:
+      - title: Review current status
+        expected_target_uid: bioetl-runtime
+      - title: Review range evidence
+        expected_target_uid: bioetl-runtime
+      - title: Inspect top blockers
+        expected_target_uid: bioetl-runtime
+      - title: Inspect active blocker
+        expected_target_uid: bioetl-runtime
+    bioetl-provider-health-v2:
+      panel_id: 9002
+      panel_title: Start Provider Triage
+      min_cta: 3
+      max_cta: 3
+      ctas:
+      - title: Review severity matrix
+        expected_target_uid: bioetl-provider-health-v2
+      - title: Inspect critical providers
+        expected_target_uid: bioetl-provider-health-v2
+      - title: Inspect provider top causes
+        expected_target_uid: bioetl-provider-health-v2
+    bioetl-dq-v2:
+      panel_id: 9103
+      panel_title: Start DQ Triage
+      min_cta: 2
+      max_cta: 2
+      ctas:
+      - title: Review current status
+        expected_target_uid: bioetl-dq-v2
+      - title: Inspect current reasons
+        expected_target_uid: bioetl-dq-v2
+  cross_scope_marker_contract:
+    required_markers:
+      context_mapping: Context mapping
+    required_titles_by_transition:
+      bioetl-control-plane-v1->bioetl-provider-health-v2: context_mapping
+      bioetl-provider-health-v2->bioetl-overview-v2: context_mapping
+      bioetl-provider-health-v2->bioetl-runtime: context_mapping
+      bioetl-provider-health-v2->bioetl-control-plane-v1: context_mapping
+      bioetl-provider-health-v2->bioetl-dq-v2: context_mapping
+      bioetl-overview-v2->bioetl-provider-health-v2: context_mapping
+      bioetl-runtime->bioetl-provider-health-v2: context_mapping
+      bioetl-dq-v2->bioetl-provider-health-v2: context_mapping
+  provider_context_mapping_contract:
+    source_dashboards:
+      bioetl-control-plane-v1:
+        provider_value: unknown
+        adapter_value: null
+      bioetl-overview-v2:
+        provider_value: unknown
+        adapter_value: unknown
+      bioetl-runtime:
+        provider_value: unknown
+        adapter_value: unknown
+      bioetl-dq-v2:
+        provider_value: unknown
+        adapter_value: unknown
+    required_tooltip_tokens:
+      context_mapping:
+      - Context mapping
+  kpi_ownership:
+    failed_runs_in_range:
+      canonical_uid: bioetl-overview-v2
+      mirror_panels: []
+    worst_lag_stage:
+      canonical_uid: bioetl-overview-v2
+      mirror_panels: []
+    worst_backlog_stage:
+      canonical_uid: bioetl-overview-v2
+      mirror_panels: []
+visual_bus_titles_ordered:
+- 0. Trust
+- 1. Overview
+- 2. Pipeline Diagnostics
+- 3. Provider Health
+- 4. Data Quality
+- 5. Incident Workspace
+- 6. Run Explorer
+visual_bus_uids_ordered:
+- bioetl-control-plane-v1
+- bioetl-overview-v2
+- bioetl-runtime
+- bioetl-provider-health-v2
+- bioetl-dq-v2
+- bioetl-incident-v1
+- bioetl-run-explorer-v1

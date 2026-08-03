@@ -1,0 +1,81 @@
+schema_version: 1
+description: >
+  Classification registry for direct wall-clock seams in src/bioetl. Replay-critical
+  paths must use ClockPort or explicit timestamp parameters; direct wall-clock
+  reads are only allowed when classified here.
+allowed_categories:
+  operator_time_allowed:
+    description: Operator, debug, or governance tooling time that is outside replay identity.
+  runtime_clock_adapter:
+    description: ClockPort/current-time adapter seam that centralizes system time.
+  replay_time_forbidden:
+    description: Replay-critical time read; no active source call may use this category.
+seams:
+  - path: src/bioetl/application/runtime_clock.py
+    scope: RuntimeClockService.now
+    call: datetime.now
+    category: runtime_clock_adapter
+    replay_critical: false
+    rationale: Application ClockPort implementation used only when runtime wiring injects a clock.
+  - path: src/bioetl/infrastructure/time/system_clock.py
+    scope: SystemClock.now
+    call: time.time
+    category: runtime_clock_adapter
+    replay_critical: false
+    rationale: Infrastructure ClockPort adapter backed by system UTC time.
+  # debug_export_helpers._utc_now and export_manifest_identity.utc_now route
+  # through RuntimeClock (classified above); no direct datetime.now remains.
+  - path: src/bioetl/infrastructure/checkpoint/_local_checkpoint_io.py
+    scope: build_history_entry_path
+    call: time.time_ns
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Checkpoint history filename uniqueness is local storage metadata, not replay identity.
+  - path: src/memory/tooling/prune.py
+    scope: find_prunable_episodic_notes
+    call: datetime.now
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Memory pruning uses injectable current time and defaults only for operator maintenance.
+  - path: src/memory/tooling/review_curated.py
+    scope: review_curated_notes
+    call: datetime.now
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Curated memory review uses injectable current time and defaults only for operator maintenance.
+  - path: src/bioetl/infrastructure/quality/debt_scorecard.py
+    scope: validate_scorecard_registry_sync
+    call: date.today
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Quality-governance CLI default date; callers can inject today for tests.
+  - path: src/bioetl/infrastructure/quality/debt_scorecard.py
+    scope: evaluate_debt_scorecard
+    call: date.today
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Quality-governance CLI default date; callers can inject today for tests.
+  - path: src/bioetl/infrastructure/quality/exemptions_registry_policy.py
+    scope: validate_exemptions_registry
+    call: date.today
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Quality-governance CLI default date; callers can inject today for tests.
+  - path: src/bioetl/infrastructure/quality/_governance_validation.py
+    scope: _validate_warn_until_by_section
+    call: date.today
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Quality-governance rollout validation date; callers can inject today.
+  - path: src/bioetl/infrastructure/quality/inventory.py
+    scope: build_exemption_inventory
+    call: date.today
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Quality-governance inventory date; callers can inject today.
+  - path: src/bioetl/infrastructure/quality/report_formatter.py
+    scope: split_growth_violations_by_severity
+    call: date.today
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Quality-governance report formatting date; callers can inject today.

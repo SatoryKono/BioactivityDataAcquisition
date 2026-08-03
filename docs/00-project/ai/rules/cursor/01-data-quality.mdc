@@ -1,0 +1,105 @@
+---
+description: BioETL Data Quality — Medallion, Delta Lake, Quarantine
+globs: ["configs/**/*.yaml", "src/**/*.py"]
+---
+
+# Medallion Architecture
+
+**Canonical references:** `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
+
+| Layer  | Format | Path / Validation | Retention | Write semantics |
+|--------|--------|-------------------|-----------|-----------------|
+| Bronze | JSONL+zstd | `bronze/{provider}/{entity}/{date}/` (ingestion date) | 90 days hot → archive | Append-only, immutable payload |
+| Silver | Delta Lake (delta-rs) | ACID via `_delta_log/` | Permanent | MERGE / APPEND / DELETE |
+| Gold   | Delta Lake | strict Pandera (`strict=True`) | Permanent | OVERWRITE / APPEND / SCD2 |
+
+## Bronze (MUST)
+
+- Payload as received — no normalization, dedup, field repair, or business filtering
+- Atomic writes; breaking format change → new versioned path + migration (no in-place migration)
+- Replayable source of truth; manifest/ledger/checkpoint do not replace Bronze
+
+## Silver Write Modes
+
+| Mode | Semantics |
+| ---- | --------- |
+| `MERGE` | Upsert by declared primary/business keys + deterministic content identity |
+| `APPEND` | **Only** with explicit machine-readable `idempotency_contract` — append without it is invalid config |
+| `DELETE` | Full rewrite semantics |
+
+**MUST NOT:** raw Parquet without `_delta_log/`; `OVERWRITE` as Silver enum.
+
+**ADR-050:** `filters.silver_filters` is **structural admission only**. Semantic buckets (`columns`, `ranges`, `list_lengths`, `list_contains`) in active Silver config **MUST NOT**.
+
+Pandera validation **MUST** run on the exact DataFrame written — no post-validation transforms without re-validation.
+
+## Gold Write Modes
+
+| Mode | Use |
+| ---- | --- |
+| `OVERWRITE` | Recomputed aggregates |
+| `APPEND` | High-volume fact streams (when configured) |
+| `SCD2` | Reference dicts, slowly evolving records, publication metadata — requires full `scd_config` (valid-from, valid-to, current flag, version column) |
+
+Gold write after failed strict validation **MUST NOT**. `SchemaError` aborts write — catching and continuing forbidden.
+
+## Delta Maintenance
+
+- Engine: `delta-rs` (`deltalake`)
+- **VACUUM** weekly, 7-day retention
+- Forensic retention: default 7 days; up to 30 days for critical tables via config
+
+## NULL Policy (REQ-NULL-*)
+
+- Missing source value → `NULL` (not sentinel)
+- **MUST NOT:** -1, `"N/A"`, 9999, or other business-false substitutes
+- Nullable fields: explicit `nullable=True` in Pandera contract
+
+## JSON Fields (ADR-035)
+
+Silver/Gold JSON-like fields stored as **canonical JSON strings** (`Series[str]`, not `Series[object]`):
+- Canonical JSON helper only; stable key order, compact separators
+- Empty collection → `NULL` unless contract defines otherwise
+- **MUST NOT** mix native list/dict and JSON string for same field
+- Legacy native object/list only as temporary ADR-035 dual-read migration surface
+
+## Lineage (REQ-LINEAGE-*)
+
+- Persisted Silver/Gold rows **MUST NOT** contain occurrence-scoped `_run_id`, `_run_type`, `_source_batch_id`, `_ingestion_ts`
+- Lineage in control-plane artifacts: manifest/ledger/sidecar with batch_id → Bronze mapping
+- Full storage paths in every data row **MUST NOT**
+
+## Partition Guardrails
+
+- Bronze: partition by ingestion date (`YYYY-MM-DD`)
+- Warning: >10,000 partitions or >100 files/partition
+- Fail pipeline: >50,000 partitions
+- **MUST NOT** partition by UUID, hash, or free text; use Z-ORDER for high-cardinality Gold access
+
+## Quarantine (Unified Table)
+
+- Table: `common.quarantine`; retention 30 days
+- Payload max **64 KB** at ingress; immutable after creation (full raw in Bronze)
+- Status: NEW → UNDER_REVIEW → IGNORED | REPROCESSED; EXPIRED via retention
+- Resolution requires full `ResolutionInfo`; replay → new Silver candidate
+- CLI: `bioetl quarantine inspect|replay|purge`
+- Triage surface — not analytical source of truth
+
+## PII / Sensitive Data
+
+- Silver PII: salted hash `sha256(lowercase(value) + SALT)` — unsalted forbidden
+- Gold: PII excluded or aggregated
+- Secrets/Authorization/PII redacted from logs, traces, VCR
+
+## Idempotent Merge & Determinism
+
+- Merge on declared PK/business key only; rerun updates rows, no duplicate semantics
+- Forbidden in writers: `datetime.now()`, `random.*` without context seed
+- Timestamps from `PipelineContext.started_at` (UTC)
+- Atomic artifact writes: `tmp` → `os.replace`
+
+## Content Hash (see also `02-code-style.mdc`)
+
+`sha256(provider + canonical_json(normalized_record)).hexdigest()` — exclude occurrence/meta fields (`_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_dq_*`, `_index`).
+
+Hash collision with different `source_record_id` → log both records with evidence.

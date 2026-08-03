@@ -1,0 +1,57 @@
+%% Title: Package Family: composition/providers
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/providers; modules: _default_registry, _models, _registration_contracts, _registration_biblio_profiles, _creation, _registry_protocols.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   21
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace default_registry {
+        class DefaultRegistryMethod
+        class ProvidersDescriptor
+        class _SupportsDefaultRegistry
+        class _SupportsProviderRegistryStore
+        class _SupportsProviderStore
+    }
+
+    namespace models {
+        class DataSourceCreatorProtocol
+        class HttpConfig
+        class ProviderConfig
+        class ProviderSettingsProtocol
+        class SecretValueProviderProtocol
+    }
+
+    namespace registration_contracts {
+        class ProviderAdapterFactoryProtocol
+        class ProviderAssemblySupport
+        class ProviderHttpClientFactoryProtocol
+        class SupportAwareDataSourceCreatorProtocol
+    }
+
+    namespace registration_biblio_profiles {
+        class MailtoBatchProfile
+        class PubMedRequestProfile
+        class SemanticScholarRequestProfile
+    }
+
+    namespace creation {
+        class ProviderCreator
+    }
+
+    namespace registry_protocols {
+        class ProviderRegistrarProtocol
+    }
+
+    namespace store {
+        class ProviderStore
+    }
+
+    namespace provider_registry {
+        class ProviderRegistry
+    }
+
+    _SupportsDefaultRegistry <|-- _SupportsProviderRegistryStore

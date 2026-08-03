@@ -1,0 +1,157 @@
+{
+  "summary": {
+    "snapshot_date": "2026-07-27",
+    "targets": 5,
+    "total_duplicate_clusters": 0,
+    "total_raw_duplicate_clusters": 7,
+    "total_excluded_duplicate_clusters": 7
+  },
+  "normalization": {
+    "exclude_module_patterns": [],
+    "exclude_actionability_categories": []
+  },
+  "trend": {
+    "status": "compared_to_previous",
+    "snapshot_date": "2026-07-27",
+    "previous_snapshot_date": "2026-07-22",
+    "total_duplicate_cluster_delta": -13,
+    "targets": [
+      {
+        "target": "src/bioetl/application/core",
+        "current_duplicate_count": 0,
+        "previous_duplicate_count": 0,
+        "delta_duplicate_count": 0
+      },
+      {
+        "target": "src/bioetl/composition/bootstrap/runtime",
+        "current_duplicate_count": 0,
+        "previous_duplicate_count": 1,
+        "delta_duplicate_count": -1
+      },
+      {
+        "target": "src/bioetl/composition/factories/pipeline",
+        "current_duplicate_count": 0,
+        "previous_duplicate_count": 1,
+        "delta_duplicate_count": -1
+      },
+      {
+        "target": "src/bioetl/application/services/control_plane",
+        "current_duplicate_count": 0,
+        "previous_duplicate_count": 0,
+        "delta_duplicate_count": 0
+      },
+      {
+        "target": "src/bioetl/composition/runtime_builders",
+        "current_duplicate_count": 0,
+        "previous_duplicate_count": 5,
+        "delta_duplicate_count": -5
+      }
+    ]
+  },
+  "reduction_leverage_ranking": [
+    {
+      "target": "src/bioetl/application/core",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/application/services/control_plane",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/composition/bootstrap/runtime",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/composition/factories/pipeline",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/composition/runtime_builders",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    }
+  ],
+  "first_wave": {
+    "status": "selected",
+    "target": "src/bioetl/application/core",
+    "duplicate_clusters": 0,
+    "dominant_actionability_category": null,
+    "selection_rule": "prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage"
+  },
+  "targets": [
+    {
+      "target": "src/bioetl/application/core",
+      "returncode": 8,
+      "duplicate_count": 0,
+      "raw_duplicate_count": 7,
+      "excluded_duplicate_count": 7,
+      "actionability": [],
+      "top_pairs": [],
+      "clusters": []
+    },
+    {
+      "target": "src/bioetl/composition/bootstrap/runtime",
+      "returncode": 0,
+      "duplicate_count": 0,
+      "raw_duplicate_count": 0,
+      "excluded_duplicate_count": 0,
+      "actionability": [],
+      "top_pairs": [],
+      "clusters": []
+    },
+    {
+      "target": "src/bioetl/composition/factories/pipeline",
+      "returncode": 0,
+      "duplicate_count": 0,
+      "raw_duplicate_count": 0,
+      "excluded_duplicate_count": 0,
+      "actionability": [],
+      "top_pairs": [],
+      "clusters": []
+    },
+    {
+      "target": "src/bioetl/application/services/control_plane",
+      "returncode": 0,
+      "duplicate_count": 0,
+      "raw_duplicate_count": 0,
+      "excluded_duplicate_count": 0,
+      "actionability": [],
+      "top_pairs": [],
+      "clusters": []
+    },
+    {
+      "target": "src/bioetl/composition/runtime_builders",
+      "returncode": 0,
+      "duplicate_count": 0,
+      "raw_duplicate_count": 0,
+      "excluded_duplicate_count": 0,
+      "actionability": [],
+      "top_pairs": [],
+      "clusters": []
+    }
+  ]
+}

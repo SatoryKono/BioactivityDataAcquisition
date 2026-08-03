@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MemoryRecordEnvelope",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_id",
+    "record_type",
+    "repo_id",
+    "git_commit",
+    "branch",
+    "worktree_id",
+    "task_id",
+    "actor",
+    "created_at",
+    "source_refs",
+    "source_hashes",
+    "trust",
+    "security_class",
+    "status",
+    "supersedes"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "record_id": {"type": "string", "minLength": 1},
+    "record_type": {"enum": ["evidence", "working", "knowledge", "decision"]},
+    "repo_id": {"type": "string", "minLength": 1},
+    "git_commit": {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+    "branch": {"type": "string", "minLength": 1},
+    "worktree_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "actor": {
+      "type": "object",
+      "required": ["runtime", "agent", "model"],
+      "properties": {
+        "runtime": {"type": "string", "minLength": 1},
+        "agent": {"type": "string", "minLength": 1},
+        "model": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "source_refs": {"type": "array", "items": {"type": "string"}},
+    "source_hashes": {
+      "type": "object",
+      "additionalProperties": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+    },
+    "trust": {"enum": ["trusted_repository", "reviewed_external", "untrusted"]},
+    "security_class": {"enum": ["public", "internal", "confidential", "secret"]},
+    "status": {"enum": ["active", "stale", "superseded", "archived"]},
+    "supersedes": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

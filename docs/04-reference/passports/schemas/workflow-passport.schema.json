@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bioetl.local/schemas/workflow-passport.schema.json",
+  "title": "BioETL workflow passport",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "passport_schema_version",
+    "kind",
+    "identity",
+    "provenance",
+    "source_references",
+    "dag",
+    "external_data_operations",
+    "control_plane",
+    "observability",
+    "diagnostics"
+  ],
+  "properties": {
+    "passport_schema_version": {"const": "1.0.0"},
+    "kind": {"const": "workflow"},
+    "identity": {
+      "type": "object",
+      "required": ["typed_id", "workflow_id", "status"],
+      "properties": {
+        "typed_id": {"type": "string", "pattern": "^workflow:"},
+        "workflow_id": {"type": "string", "minLength": 1},
+        "version": {"type": ["string", "number"]},
+        "status": {"const": "active"}
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["source_revision", "projector_version", "semantic_content_hash"],
+      "properties": {
+        "source_revision": {"type": "string", "minLength": 7},
+        "projector_version": {"type": "string"},
+        "semantic_content_hash": {"type": "string", "pattern": "^sha256:"}
+      },
+      "additionalProperties": false
+    },
+    "source_references": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["role", "path"],
+        "properties": {
+          "role": {"type": "string"},
+          "path": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "dag": {
+      "type": "object",
+      "required": [
+        "step_count",
+        "edge_count",
+        "topological_order",
+        "steps",
+        "edges",
+        "mermaid"
+      ],
+      "properties": {
+        "step_count": {"type": "integer", "minimum": 1},
+        "edge_count": {"type": "integer", "minimum": 0},
+        "topological_order": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "steps": {"type": "array", "items": {"type": "object"}},
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["from", "to"],
+            "properties": {
+              "from": {"type": "string"},
+              "to": {"type": "string"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "mermaid": {"type": "string", "pattern": "^flowchart TD"}
+      },
+      "additionalProperties": false
+    },
+    "external_data_operations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["step_id", "transform_name", "classification", "config"],
+        "properties": {
+          "step_id": {"type": "string"},
+          "transform_name": {"type": "string"},
+          "classification": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "control_plane_projection",
+                "data_plane_transformation",
+                "dq_validation",
+                "destructive_mutation"
+              ]
+            }
+          },
+          "config": {"type": "object"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "control_plane": {
+      "type": "object",
+      "required": [
+        "workflow_manifest",
+        "run_ledger_links",
+        "resume_last",
+        "repair_steps",
+        "force_steps",
+        "exclusive_lock",
+        "commit_pending_confirmation"
+      ],
+      "properties": {
+        "workflow_manifest": {"const": true},
+        "run_ledger_links": {"const": true},
+        "resume_last": {"const": true},
+        "repair_steps": {"const": true},
+        "force_steps": {"const": true},
+        "exclusive_lock": {"const": true},
+        "commit_pending_confirmation": {"const": true}
+      },
+      "additionalProperties": false
+    },
+    "observability": {
+      "type": "object",
+      "required": [
+        "metric_labels",
+        "prohibited_metric_labels",
+        "correlation_fields"
+      ],
+      "properties": {
+        "metric_labels": {"type": "array", "items": {"type": "string"}},
+        "prohibited_metric_labels": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "correlation_fields": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "diagnostics": {"type": "array", "items": {"type": "object"}}
+  }
+}

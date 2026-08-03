@@ -1,0 +1,61 @@
+%% BioETL — Validation and Data Quality Ports
+%% Ports for ensuring data correctness and quality reporting.
+
+%% @version 1.0.0
+%% @date    2026-07-31
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   20
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+
+%% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
+graph LR
+    subgraph Domain["Domain Ports"]
+        SVP["SilverValidatorPort"]:::size-md
+        GVP["GoldValidatorPort"]:::size-md
+        BDQP["BronzeDQ<br/>AnalyzerPort"]:::size-md
+        SDQP["SilverDQ<br/>AnalyzerPort"]:::size-md
+        GDQP["GoldDQ<br/>AnalyzerPort"]:::size-md
+        DQRWP["DQReportWriterPort"]:::size-md
+        QRP["QuarantinePort"]:::size-md
+    end
+
+    subgraph Infrastructure["Infrastructure"]
+        PSV["PanderaSilverValidator"]:::size-md
+        PGV["PanderaGoldValidator"]:::size-md
+        DQRW_I["DQReportWriter"]:::size-md
+        UQ["UnifiedQuarantine"]:::size-md
+    end
+
+    subgraph Application["Application"]
+        BDA["BronzeDQAnalyzer"]:::size-md
+        SDA["SilverDQAnalyzer"]:::size-md
+        GDA["GoldDQAnalyzer"]:::size-md
+    end
+
+    SVP --- PSV
+    GVP --- PGV
+    BDQP --- BDA
+    SDQP --- SDA
+    GDQP --- GDA
+    DQRWP --- DQRW_I
+    QRP --- UQ
+
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef infra  fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef app    fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    class SVP,GVP,BDQP,SDQP,GDQP,DQRWP,QRP domain
+    class PSV,PGV,DQRW_I,UQ infra
+    class BDA,SDA,GDA app

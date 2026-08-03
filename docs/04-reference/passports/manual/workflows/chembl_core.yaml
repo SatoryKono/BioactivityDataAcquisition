@@ -1,0 +1,6 @@
+owner: BioETL Team
+owner_approved: true
+purpose: Coordinate the core ChEMBL ingest and reconcile current Gold assay references.
+known_limitations:
+  - Foreign-key reconciliation is an explicit data-plane workflow step, not orchestration-only behavior.
+rationale: ADR-055 retains reconciliation inside the ADR-047 governed workflow surface.

@@ -1,0 +1,495 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" class="flowchart" style="max-width: 1480.98px; background-color: white;" viewBox="-4 -4 1480.9765625 1567" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#552222;}#my-svg .error-text{fill:#552222;stroke:#552222;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg .label{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;color:#212121;}#my-svg .cluster-label text{fill:#1e40af;}#my-svg .cluster-label span{color:#1e40af;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .label text,#my-svg span{fill:#212121;color:#212121;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1px;}#my-svg .rough-node .label text,#my-svg .node .label text,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-anchor:middle;}#my-svg .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#my-svg .rough-node .label,#my-svg .node .label,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-align:center;}#my-svg .node.clickable{cursor:pointer;}#my-svg .root .anchor path{fill:#475569!important;stroke-width:0;stroke:#475569;}#my-svg .arrowheadPath{fill:#333333;}#my-svg .edgePath .path{stroke:#475569;stroke-width:1px;}#my-svg .flowchart-link{stroke:#475569;fill:none;}#my-svg .edgeLabel{background-color:#ffffff;text-align:center;}#my-svg .edgeLabel p{background-color:#ffffff;}#my-svg .edgeLabel rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#my-svg .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#my-svg .cluster rect{fill:#f8fafc;stroke:#94a3b8;stroke-width:1px;}#my-svg .cluster text{fill:#1e40af;}#my-svg .cluster span{color:#1e40af;}#my-svg div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:12px;background:#f0fdf4;border:1px solid #707070;border-radius:2px;pointer-events:none;z-index:100;}#my-svg .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg rect.text{fill:none;stroke-width:0;}#my-svg .icon-shape,#my-svg .image-shape{background-color:#ffffff;text-align:center;}#my-svg .icon-shape p,#my-svg .image-shape p{background-color:#ffffff;padding:2px;}#my-svg .icon-shape .label rect,#my-svg .image-shape .label rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg .node .neo-node{stroke:#2563eb;}#my-svg [data-look="neo"].node rect,#my-svg [data-look="neo"].cluster rect,#my-svg [data-look="neo"].node polygon{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node path{stroke:url(#my-svg-gradient);stroke-width:1px;}#my-svg [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node .neo-line path{stroke:#2563eb;filter:none;}#my-svg [data-look="neo"].node circle{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node circle .state-start{fill:#000000;}#my-svg [data-look="neo"].icon-shape .icon{fill:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].icon-shape .icon-neo path{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}#my-svg .port&gt;*{fill:rgb(245, 243, 255)!important;stroke:rgb(124, 58, 237)!important;stroke-width:1px!important;color:rgb(17, 24, 39)!important;}#my-svg .port span{fill:rgb(245, 243, 255)!important;stroke:rgb(124, 58, 237)!important;stroke-width:1px!important;color:rgb(17, 24, 39)!important;}#my-svg .port tspan{fill:rgb(17, 24, 39)!important;}#my-svg .adapter&gt;*{fill:rgb(255, 241, 242)!important;stroke:rgb(220, 38, 38)!important;stroke-width:1px!important;color:rgb(17, 24, 39)!important;}#my-svg .adapter span{fill:rgb(255, 241, 242)!important;stroke:rgb(220, 38, 38)!important;stroke-width:1px!important;color:rgb(17, 24, 39)!important;}#my-svg .adapter tspan{fill:rgb(17, 24, 39)!important;}#my-svg .service&gt;*{fill:rgb(239, 246, 255)!important;stroke:rgb(37, 99, 235)!important;stroke-width:1px!important;color:rgb(17, 24, 39)!important;}#my-svg .service span{fill:rgb(239, 246, 255)!important;stroke:rgb(37, 99, 235)!important;stroke-width:1px!important;color:rgb(17, 24, 39)!important;}#my-svg .service tspan{fill:rgb(17, 24, 39)!important;}#my-svg .process&gt;*{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:1px!important;color:rgb(17, 24, 39)!important;}#my-svg .process span{fill:rgb(240, 253, 244)!important;stroke:rgb(22, 163, 74)!important;stroke-width:1px!important;color:rgb(17, 24, 39)!important;}#my-svg .process tspan{fill:rgb(17, 24, 39)!important;}#my-svg .storage&gt;*{fill:rgb(255, 247, 237)!important;stroke:rgb(245, 158, 11)!important;stroke-width:1px!important;color:rgb(17, 24, 39)!important;}#my-svg .storage span{fill:rgb(255, 247, 237)!important;stroke:rgb(245, 158, 11)!important;stroke-width:1px!important;color:rgb(17, 24, 39)!important;}#my-svg .storage tspan{fill:rgb(17, 24, 39)!important;}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;" /></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;" /></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;" /></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;" /></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;" /></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;" /></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;" /></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;" /></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;" /></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;" /></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;" /></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;" /></marker><marker id="my-svg_flowchart-v2-pointEnd__1E293B" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;" stroke="#1E293B" fill="#1E293B" /></marker><marker id="my-svg_flowchart-v2-pointEnd__EF4444" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;" stroke="#EF4444" fill="#EF4444" /></marker><marker id="my-svg_flowchart-v2-pointEnd__7c3aed" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;" stroke="#7c3aed" fill="#7c3aed" /></marker><marker id="my-svg_flowchart-v2-pointEnd__f59e0b" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;" stroke="#f59e0b" fill="#f59e0b" /></marker></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000" /></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000" /></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3333333333%)" stop-opacity="1" /><stop offset="100%" stop-color="hsl(0, 0%, 88.9215686275%)" stop-opacity="1" /></linearGradient><g class="subgraphs"><g class="subgraph"><g class="cluster" id="[object Object]" data-look="classic"><rect style="fill:#fff1f2 !important;stroke:#dc2626 !important;stroke-width:2px !important" x="947.4609375" y="379.5" width="433.515625" height="225" /><g class="cluster-label" transform="translate(1093.0234375, 379.5)"><text x="71.195" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="71.195">Infrastructure</tspan><tspan x="71.195" dy="16.8">Layer</tspan></text></g></g></g><g class="subgraph"><g class="cluster" id="[object Object]" data-look="classic"><rect style="fill:#f0fdf4 !important;stroke:#16a34a !important;stroke-width:2px !important" x="12" y="79.5" width="895.4609375" height="225" /><g class="cluster-label" transform="translate(397.67578125, 79.5)"><text x="62.055" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="62.055">Application Layer</tspan></text></g></g></g><g class="subgraph"><g class="cluster" id="[object Object]" data-look="classic"><rect style="fill:#f5f3ff !important;stroke:#7c3aed !important;stroke-width:2px !important" x="63.7734375" y="699.5" width="685.234375" height="780" /><g class="cluster-label" transform="translate(357.2265625, 699.5)"><text x="49.164" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="49.164">Domain Layer</tspan></text></g></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-N7-17" data-look="classic" transform="translate(1288.109375, 454.5)"><rect class="basic label-container" style="" x="-80.8671875" y="-36" width="161.734375" height="72" /><g class="label" style="" transform="translate(-32.8671875, -12)"><rect /><text x="32.867" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="32.867">LOCKING</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N11-18" data-look="classic" transform="translate(1068.3515625, 454.5)"><rect class="basic label-container" style="" x="-108.890625" y="-36" width="217.78125" height="72" /><g class="label" style="" transform="translate(-60.890625, -12)"><rect /><text x="60.891" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="60.891">CHECKPOINTING</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N16-19" data-look="classic" transform="translate(1288.109375, 556.5)"><rect class="basic label-container" style="" x="-77.9375" y="-36" width="155.875" height="72" /><g class="label" style="" transform="translate(-29.9375, -12)"><rect /><text x="29.938" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="29.938">LOCKED</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N1-11" data-look="classic" transform="translate(132.1875, 154.5)"><rect class="basic label-container" style="" x="-108.1875" y="-36" width="216.375" height="72" /><g class="label" style="" transform="translate(-60.1875, -12)"><rect /><text x="60.188" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="60.188">TRANSFORMING</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N2-12" data-look="classic" transform="translate(795.6796875, 154.5)"><rect class="basic label-container" style="" x="-98.609375" y="-36" width="197.21875" height="72" /><g class="label" style="" transform="translate(-50.609375, -12)"><rect /><text x="50.609" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="50.609">BATCH_DONE</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N3-13" data-look="classic" transform="translate(357.1015625, 154.5)"><rect class="basic label-container" style="" x="-86.7265625" y="-36" width="173.453125" height="72" /><g class="label" style="" transform="translate(-38.7265625, -12)"><rect /><text x="38.727" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="38.727">BatchLoop</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N9-14" data-look="classic" transform="translate(561.75, 256.5)"><rect class="basic label-container" style="" x="-120.1484375" y="-36" width="240.296875" height="72" /><g class="label" style="" transform="translate(-72.1484375, -12)"><rect /><text x="72.148" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="72.148">PREFLIGHT_PASSED</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N8-15" data-look="classic" transform="translate(561.75, 154.5)"><rect class="basic label-container" style="" x="-87.921875" y="-36" width="175.84375" height="72" /><g class="label" style="" transform="translate(-39.921875, -12)"><rect /><text x="39.922" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="39.922">PREFLIGHT</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N19-16" data-look="classic" transform="translate(795.6796875, 256.5)"><rect class="basic label-container" style="" x="-83.78125" y="-36" width="167.5625" height="72" /><g class="label" style="" transform="translate(-35.78125, -12)"><rect /><text x="35.781" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="35.781">POSTRUN</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N4-0" data-look="classic" transform="translate(287.546875, 978.5)"><rect class="basic label-container" style="" x="-94.8828125" y="-36" width="189.765625" height="72" /><g class="label" style="" transform="translate(-46.8828125, -12)"><rect /><text x="46.883" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="46.883">EXTRACTING</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N5-1" data-look="classic" transform="translate(582.75, 1095.5)"><rect class="basic label-container" style="" x="-73.3828125" y="-36" width="146.765625" height="72" /><g class="label" style="" transform="translate(-25.3828125, -12)"><rect /><text x="25.383" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="25.383">FAILED</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N6-2" data-look="classic" transform="translate(582.75, 978.5)"><rect class="basic label-container" style="" x="-79.9453125" y="-36" width="159.890625" height="72" /><g class="label" style="" transform="translate(-31.9453125, -12)"><rect /><text x="31.945" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="31.945">WRITING</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N10-3" data-look="classic" transform="translate(582.75, 774.5)"><rect class="basic label-container" style="" x="-91.828125" y="-36" width="183.65625" height="72" /><g class="label" style="" transform="translate(-43.828125, -12)"><rect /><text x="43.828" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="43.828">VALIDATING</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N12-4" data-look="classic" transform="translate(176.6640625, 1095.5)"><rect class="basic label-container" style="" x="-84.890625" y="-36" width="169.78125" height="72" /><g class="label" style="" transform="translate(-36.890625, -12)"><rect /><text x="36.891" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="36.891">DRAINING</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N13-5" data-look="classic" transform="translate(385.4609375, 1197.5)"><rect class="basic label-container" style="" x="-88.75" y="-36" width="177.5" height="72" /><g class="label" style="" transform="translate(-40.75, -12)"><rect /><text x="40.75" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="40.75">RELEASING</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N14-6" data-look="classic" transform="translate(385.4609375, 1299.5)"><rect class="basic label-container" style="" x="-51.8046875" y="-36" width="103.609375" height="72" /><g class="label" style="" transform="translate(-3.8046875, -12)"><rect /><text x="3.805" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="3.805">*</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N15-7" data-look="classic" transform="translate(385.4609375, 1401.5)"><rect class="basic label-container" style="" x="-81.703125" y="-36" width="163.40625" height="72" /><g class="label" style="" transform="translate(-33.703125, -12)"><rect /><text x="33.703" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="33.703">PENDING</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N17-8" data-look="classic" transform="translate(287.546875, 876.5)"><rect class="basic label-container" style="" x="-84.84375" y="-36" width="169.6875" height="72" /><g class="label" style="" transform="translate(-36.84375, -12)"><rect /><text x="36.844" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="36.844">CLEARING</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N18-9" data-look="classic" transform="translate(582.75, 876.5)"><rect class="basic label-container" style="" x="-106.2578125" y="-36" width="212.515625" height="72" /><g class="label" style="" transform="translate(-58.2578125, -12)"><rect /><text x="58.258" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="58.258">QUARANTINING</tspan></text></g></g><g class="node default" id="my-svg-flowchart-N20-10" data-look="classic" transform="translate(385.4609375, 1095.5)"><rect class="basic label-container" style="" x="-93.90625" y="-36" width="187.8125" height="72" /><g class="label" style="" transform="translate(-45.90625, -12)"><rect /><text x="45.906" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="45.906">COMPLETED</tspan></text></g></g></g><g class="edges edgePaths"><path d="M385.4609375,1335.5L385.4609375,1361.5" id="my-svg-L_N14_N15_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N14_N15_0" data-points="W3sieCI6Mzg1LjQ2MDkzNzUsInkiOjEzMzUuNX0seyJ4IjozODUuNDYwOTM3NSwieSI6MTM2NS41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M385.4609375,1437.5L385.4609375,1487L385.4609375,1499.9289321881345Q385.4609375,1507 392.5320053118655,1507L1413.9054946881345,1507Q1420.9765625,1507 1420.9765625,1499.9289321881345L1420.9765625,1089.5L1420.9765625,492L1420.9765625,359.0710678118655Q1420.9765625,352 1413.9054946881345,352L1295.1804428118655,352Q1288.109375,352 1288.109375,359.0710678118655L1288.109375,372L1288.109375,414.5" id="my-svg-L_N15_N7_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N15_N7_0" data-points="W3sieCI6Mzg1LjQ2MDkzNzUsInkiOjE0MzcuNX0seyJ4IjozODUuNDYwOTM3NSwieSI6MTQ4N30seyJ4IjozODUuNDYwOTM3NSwieSI6MTUwN30seyJ4IjoxNDIwLjk3NjU2MjUsInkiOjE1MDd9LHsieCI6MTQyMC45NzY1NjI1LCJ5IjoxMDg5LjV9LHsieCI6MTQyMC45NzY1NjI1LCJ5Ijo0OTJ9LHsieCI6MTQyMC45NzY1NjI1LCJ5IjozNTJ9LHsieCI6MTI4OC4xMDkzNzUsInkiOjM1Mn0seyJ4IjoxMjg4LjEwOTM3NSwieSI6MzcyfSx7IngiOjEyODguMTA5Mzc1LCJ5Ijo0MTguNX1d" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M1288.109375,490.5L1288.109375,516.5" id="my-svg-L_N7_N16_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N7_N16_0" data-points="W3sieCI6MTI4OC4xMDkzNzUsInkiOjQ5MC41fSx7IngiOjEyODguMTA5Mzc1LCJ5Ijo1MjAuNX1d" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M1288.109375,490.5L1288.109375,498.4289321881345Q1288.109375,505.5 1281.0383071881345,505.5L1201.2429428118655,505.5Q1194.171875,505.5 1194.171875,512.5710678118655L1194.171875,612L1194.171875,664.9289321881345Q1194.171875,672 1187.1008071881345,672L743.0788803118655,672Q736.0078125,672 736.0078125,679.0710678118655L736.0078125,692L736.0078125,1037.4289321881345Q736.0078125,1044.5 728.9367446881345,1044.5L588.25,1044.5Q582.75,1044.5 582.75,1050L582.75,1055.5" id="my-svg-L_N7_N5_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#EF4444;stroke-width:2px;stroke-dasharray:4;fill:none;;;stroke:#EF4444;stroke-width:2px;stroke-dasharray:4;fill:none" data-edge="true" data-et="edge" data-id="L_N7_N5_0" data-points="W3sieCI6MTI4OC4xMDkzNzUsInkiOjQ5MC41fSx7IngiOjEyODguMTA5Mzc1LCJ5Ijo1MDUuNX0seyJ4IjoxMTk0LjE3MTg3NSwieSI6NTA1LjV9LHsieCI6MTE5NC4xNzE4NzUsInkiOjYxMn0seyJ4IjoxMTk0LjE3MTg3NSwieSI6NjcyfSx7IngiOjczNi4wMDc4MTI1LCJ5Ijo2NzJ9LHsieCI6NzM2LjAwNzgxMjUsInkiOjY5Mn0seyJ4Ijo3MzYuMDA3ODEyNSwieSI6MTA0NC41fSx7IngiOjU4Mi43NSwieSI6MTA0NC41fSx7IngiOjU4Mi43NSwieSI6MTA1OS41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__EF4444)" /><path d="M1288.109375,592.5L1288.109375,612L1288.109375,624.9289321881345Q1288.109375,632 1295.1804428118655,632L1393.9054946881345,632Q1400.9765625,632 1400.9765625,624.9289321881345L1400.9765625,492L1400.9765625,192L1400.9765625,39.071067811865476Q1400.9765625,32 1393.9054946881345,32L568.8210678118655,32Q561.75,32 561.75,39.071067811865476L561.75,72L561.75,114.5" id="my-svg-L_N16_N8_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N16_N8_0" data-points="W3sieCI6MTI4OC4xMDkzNzUsInkiOjU5Mi41fSx7IngiOjEyODguMTA5Mzc1LCJ5Ijo2MTJ9LHsieCI6MTI4OC4xMDkzNzUsInkiOjYzMn0seyJ4IjoxNDAwLjk3NjU2MjUsInkiOjYzMn0seyJ4IjoxNDAwLjk3NjU2MjUsInkiOjQ5Mn0seyJ4IjoxNDAwLjk3NjU2MjUsInkiOjE5Mn0seyJ4IjoxNDAwLjk3NjU2MjUsInkiOjMyfSx7IngiOjU2MS43NSwieSI6MzJ9LHsieCI6NTYxLjc1LCJ5Ijo3Mn0seyJ4Ijo1NjEuNzUsInkiOjExOC41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M561.75,190.5L561.75,216.5" id="my-svg-L_N8_N9_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N8_N9_0" data-points="W3sieCI6NTYxLjc1LCJ5IjoxOTAuNX0seyJ4Ijo1NjEuNzUsInkiOjIyMC41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M561.75,190.5L561.75,198.42893218813452Q561.75,205.5 568.8210678118655,205.5L887.3898696881345,205.5Q894.4609375,205.5 894.4609375,212.57106781186548L894.4609375,312L894.4609375,492L894.4609375,664.9289321881345Q894.4609375,672 887.3898696881345,672L743.0788803118655,672Q736.0078125,672 736.0078125,679.0710678118655L736.0078125,692L736.0078125,1037.4289321881345Q736.0078125,1044.5 728.9367446881345,1044.5L588.25,1044.5Q582.75,1044.5 582.75,1050L582.75,1055.5" id="my-svg-L_N8_N5_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#EF4444;stroke-width:2px;stroke-dasharray:4;fill:none;;;stroke:#EF4444;stroke-width:2px;stroke-dasharray:4;fill:none" data-edge="true" data-et="edge" data-id="L_N8_N5_0" data-points="W3sieCI6NTYxLjc1LCJ5IjoxOTAuNX0seyJ4Ijo1NjEuNzUsInkiOjIwNS41fSx7IngiOjg5NC40NjA5Mzc1LCJ5IjoyMDUuNX0seyJ4Ijo4OTQuNDYwOTM3NSwieSI6MzEyfSx7IngiOjg5NC40NjA5Mzc1LCJ5Ijo0OTJ9LHsieCI6ODk0LjQ2MDkzNzUsInkiOjY3Mn0seyJ4Ijo3MzYuMDA3ODEyNSwieSI6NjcyfSx7IngiOjczNi4wMDc4MTI1LCJ5Ijo2OTJ9LHsieCI6NzM2LjAwNzgxMjUsInkiOjEwNDQuNX0seyJ4Ijo1ODIuNzUsInkiOjEwNDQuNX0seyJ4Ijo1ODIuNzUsInkiOjEwNTkuNX1d" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__EF4444)" /><path d="M561.75,292.5L561.75,312L561.75,492L561.75,624.9289321881345Q561.75,632 554.6789321881345,632L294.6179428118655,632Q287.546875,632 287.546875,639.0710678118655L287.546875,692L287.546875,836.5" id="my-svg-L_N9_N17_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N9_N17_0" data-points="W3sieCI6NTYxLjc1LCJ5IjoyOTIuNX0seyJ4Ijo1NjEuNzUsInkiOjMxMn0seyJ4Ijo1NjEuNzUsInkiOjQ5Mn0seyJ4Ijo1NjEuNzUsInkiOjYzMn0seyJ4IjoyODcuNTQ2ODc1LCJ5Ijo2MzJ9LHsieCI6Mjg3LjU0Njg3NSwieSI6NjkyfSx7IngiOjI4Ny41NDY4NzUsInkiOjg0MC41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M561.75,292.5L561.75,312L561.75,492L561.75,624.9289321881345Q561.75,632 554.6789321881345,632L394.4616928118655,632Q387.390625,632 387.390625,639.0710678118655L387.390625,692L387.390625,920.4289321881345Q387.390625,927.5 380.3195571881345,927.5L293.046875,927.5Q287.546875,927.5 287.546875,933L287.546875,938.5" id="my-svg-L_N9_N4_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N9_N4_0" data-points="W3sieCI6NTYxLjc1LCJ5IjoyOTIuNX0seyJ4Ijo1NjEuNzUsInkiOjMxMn0seyJ4Ijo1NjEuNzUsInkiOjQ5Mn0seyJ4Ijo1NjEuNzUsInkiOjYzMn0seyJ4IjozODcuMzkwNjI1LCJ5Ijo2MzJ9LHsieCI6Mzg3LjM5MDYyNSwieSI6NjkyfSx7IngiOjM4Ny4zOTA2MjUsInkiOjkyNy41fSx7IngiOjI4Ny41NDY4NzUsInkiOjkyNy41fSx7IngiOjI4Ny41NDY4NzUsInkiOjk0Mi41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M287.546875,912.5L287.546875,938.5" id="my-svg-L_N17_N4_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N17_N4_0" data-points="W3sieCI6Mjg3LjU0Njg3NSwieSI6OTEyLjV9LHsieCI6Mjg3LjU0Njg3NSwieSI6OTQyLjV9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M287.546875,1014.5L287.546875,1037.4289321881345Q287.546875,1044.5 280.4758071881345,1044.5L82.84450531186548,1044.5Q75.7734375,1044.5 75.7734375,1051.5710678118655L75.7734375,1487L75.7734375,1539.9289321881345Q75.7734375,1547 82.84450531186548,1547L1453.9054946881345,1547Q1460.9765625,1547 1460.9765625,1539.9289321881345L1460.9765625,1089.5L1460.9765625,492L1460.9765625,192L1460.9765625,19.071067811865476Q1460.9765625,12 1453.9054946881345,12L139.25856781186548,12Q132.1875,12 132.1875,19.071067811865476L132.1875,72L132.1875,114.5" id="my-svg-L_N4_N1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N4_N1_0" data-points="W3sieCI6Mjg3LjU0Njg3NSwieSI6MTAxNC41fSx7IngiOjI4Ny41NDY4NzUsInkiOjEwNDQuNX0seyJ4Ijo3NS43NzM0Mzc1LCJ5IjoxMDQ0LjV9LHsieCI6NzUuNzczNDM3NSwieSI6MTQ4N30seyJ4Ijo3NS43NzM0Mzc1LCJ5IjoxNTQ3fSx7IngiOjE0NjAuOTc2NTYyNSwieSI6MTU0N30seyJ4IjoxNDYwLjk3NjU2MjUsInkiOjEwODkuNX0seyJ4IjoxNDYwLjk3NjU2MjUsInkiOjQ5Mn0seyJ4IjoxNDYwLjk3NjU2MjUsInkiOjE5Mn0seyJ4IjoxNDYwLjk3NjU2MjUsInkiOjEyfSx7IngiOjEzMi4xODc1LCJ5IjoxMn0seyJ4IjoxMzIuMTg3NSwieSI6NzJ9LHsieCI6MTMyLjE4NzUsInkiOjExOC41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M132.1875,190.5L132.1875,312L132.1875,324.9289321881345Q132.1875,332 139.25856781186548,332L575.6789321881345,332Q582.75,332 582.75,339.0710678118655L582.75,492L582.75,692L582.75,734.5" id="my-svg-L_N1_N10_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N1_N10_0" data-points="W3sieCI6MTMyLjE4NzUsInkiOjE5MC41fSx7IngiOjEzMi4xODc1LCJ5IjozMTJ9LHsieCI6MTMyLjE4NzUsInkiOjMzMn0seyJ4Ijo1ODIuNzUsInkiOjMzMn0seyJ4Ijo1ODIuNzUsInkiOjQ5Mn0seyJ4Ijo1ODIuNzUsInkiOjY5Mn0seyJ4Ijo1ODIuNzUsInkiOjczOC41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M582.75,810.5L582.75,818.4289321881345Q582.75,825.5 589.8210678118655,825.5L696.9367446881345,825.5Q704.0078125,825.5 704.0078125,832.5710678118655L704.0078125,920.4289321881345Q704.0078125,927.5 696.9367446881345,927.5L588.25,927.5Q582.75,927.5 582.75,933L582.75,938.5" id="my-svg-L_N10_N6_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N10_N6_0" data-points="W3sieCI6NTgyLjc1LCJ5Ijo4MTAuNX0seyJ4Ijo1ODIuNzUsInkiOjgyNS41fSx7IngiOjcwNC4wMDc4MTI1LCJ5Ijo4MjUuNX0seyJ4Ijo3MDQuMDA3ODEyNSwieSI6OTI3LjV9LHsieCI6NTgyLjc1LCJ5Ijo5MjcuNX0seyJ4Ijo1ODIuNzUsInkiOjk0Mi41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M582.75,810.5L582.75,836.5" id="my-svg-L_N10_N18_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#7c3aed;stroke-width:2px;stroke-dasharray:5;fill:none;;;stroke:#7c3aed;stroke-width:2px;stroke-dasharray:5;fill:none" data-edge="true" data-et="edge" data-id="L_N10_N18_0" data-points="W3sieCI6NTgyLjc1LCJ5Ijo4MTAuNX0seyJ4Ijo1ODIuNzUsInkiOjg0MC41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__7c3aed)" /><path d="M582.75,912.5L582.75,938.5" id="my-svg-L_N18_N6_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#7c3aed;stroke-width:2px;stroke-dasharray:5;fill:none;;;stroke:#7c3aed;stroke-width:2px;stroke-dasharray:5;fill:none" data-edge="true" data-et="edge" data-id="L_N18_N6_0" data-points="W3sieCI6NTgyLjc1LCJ5Ijo5MTIuNX0seyJ4Ijo1ODIuNzUsInkiOjk0Mi41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__7c3aed)" /><path d="M582.75,1014.5L582.75,1037.4289321881345Q582.75,1044.5 575.6789321881345,1044.5L82.84450531186548,1044.5Q75.7734375,1044.5 75.7734375,1051.5710678118655L75.7734375,1445.4289321881345Q75.7734375,1452.5 82.84450531186548,1452.5L83.70236968813452,1452.5Q90.7734375,1452.5 90.7734375,1459.5710678118655L90.7734375,1487L90.7734375,1519.9289321881345Q90.7734375,1527 97.84450531186548,1527L1433.9054946881345,1527Q1440.9765625,1527 1440.9765625,1519.9289321881345L1440.9765625,1089.5L1440.9765625,492L1440.9765625,339.0710678118655Q1440.9765625,332 1433.9054946881345,332L1075.4226303118655,332Q1068.3515625,332 1068.3515625,339.0710678118655L1068.3515625,372L1068.3515625,414.5" id="my-svg-L_N6_N11_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N6_N11_0" data-points="W3sieCI6NTgyLjc1LCJ5IjoxMDE0LjV9LHsieCI6NTgyLjc1LCJ5IjoxMDQ0LjV9LHsieCI6NzUuNzczNDM3NSwieSI6MTA0NC41fSx7IngiOjc1Ljc3MzQzNzUsInkiOjE0NTIuNX0seyJ4Ijo5MC43NzM0Mzc1LCJ5IjoxNDUyLjV9LHsieCI6OTAuNzczNDM3NSwieSI6MTQ4N30seyJ4Ijo5MC43NzM0Mzc1LCJ5IjoxNTI3fSx7IngiOjE0NDAuOTc2NTYyNSwieSI6MTUyN30seyJ4IjoxNDQwLjk3NjU2MjUsInkiOjEwODkuNX0seyJ4IjoxNDQwLjk3NjU2MjUsInkiOjQ5Mn0seyJ4IjoxNDQwLjk3NjU2MjUsInkiOjMzMn0seyJ4IjoxMDY4LjM1MTU2MjUsInkiOjMzMn0seyJ4IjoxMDY4LjM1MTU2MjUsInkiOjM3Mn0seyJ4IjoxMDY4LjM1MTU2MjUsInkiOjQxOC41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M1068.3515625,490.5L1068.3515625,612L1068.3515625,624.9289321881345Q1068.3515625,632 1061.2804946881345,632L394.4616928118655,632Q387.390625,632 387.390625,639.0710678118655L387.390625,692L387.390625,920.4289321881345Q387.390625,927.5 380.3195571881345,927.5L293.046875,927.5Q287.546875,927.5 287.546875,933L287.546875,938.5" id="my-svg-L_N11_N4_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N11_N4_0" data-points="W3sieCI6MTA2OC4zNTE1NjI1LCJ5Ijo0OTAuNX0seyJ4IjoxMDY4LjM1MTU2MjUsInkiOjYxMn0seyJ4IjoxMDY4LjM1MTU2MjUsInkiOjYzMn0seyJ4IjozODcuMzkwNjI1LCJ5Ijo2MzJ9LHsieCI6Mzg3LjM5MDYyNSwieSI6NjkyfSx7IngiOjM4Ny4zOTA2MjUsInkiOjkyNy41fSx7IngiOjI4Ny41NDY4NzUsInkiOjkyNy41fSx7IngiOjI4Ny41NDY4NzUsInkiOjk0Mi41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M1068.3515625,490.5L1068.3515625,612L1068.3515625,624.9289321881345Q1068.3515625,632 1061.2804946881345,632L934.5320053118655,632Q927.4609375,632 927.4609375,624.9289321881345L927.4609375,492L927.4609375,192L927.4609375,59.071067811865476Q927.4609375,52 920.3898696881345,52L802.7507553118655,52Q795.6796875,52 795.6796875,59.071067811865476L795.6796875,72L795.6796875,114.5" id="my-svg-L_N11_N2_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N11_N2_0" data-points="W3sieCI6MTA2OC4zNTE1NjI1LCJ5Ijo0OTAuNX0seyJ4IjoxMDY4LjM1MTU2MjUsInkiOjYxMn0seyJ4IjoxMDY4LjM1MTU2MjUsInkiOjYzMn0seyJ4Ijo5MjcuNDYwOTM3NSwieSI6NjMyfSx7IngiOjkyNy40NjA5Mzc1LCJ5Ijo0OTJ9LHsieCI6OTI3LjQ2MDkzNzUsInkiOjE5Mn0seyJ4Ijo5MjcuNDYwOTM3NSwieSI6NTJ9LHsieCI6Nzk1LjY3OTY4NzUsInkiOjUyfSx7IngiOjc5NS42Nzk2ODc1LCJ5Ijo3Mn0seyJ4Ijo3OTUuNjc5Njg3NSwieSI6MTE4LjV9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M795.6796875,190.5L795.6796875,216.5" id="my-svg-L_N2_N19_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N2_N19_0" data-points="W3sieCI6Nzk1LjY3OTY4NzUsInkiOjE5MC41fSx7IngiOjc5NS42Nzk2ODc1LCJ5IjoyMjAuNX1d" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M795.6796875,292.5L795.6796875,312L795.6796875,492L795.6796875,644.9289321881345Q795.6796875,652 788.6086196881345,652L727.0788803118655,652Q720.0078125,652 720.0078125,659.0710678118655L720.0078125,692L720.0078125,1022.4289321881345Q720.0078125,1029.5 712.9367446881345,1029.5L392.5320053118655,1029.5Q385.4609375,1029.5 385.4609375,1036.5710678118655L385.4609375,1055.5" id="my-svg-L_N19_N20_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N19_N20_0" data-points="W3sieCI6Nzk1LjY3OTY4NzUsInkiOjI5Mi41fSx7IngiOjc5NS42Nzk2ODc1LCJ5IjozMTJ9LHsieCI6Nzk1LjY3OTY4NzUsInkiOjQ5Mn0seyJ4Ijo3OTUuNjc5Njg3NSwieSI6NjUyfSx7IngiOjcyMC4wMDc4MTI1LCJ5Ijo2NTJ9LHsieCI6NzIwLjAwNzgxMjUsInkiOjY5Mn0seyJ4Ijo3MjAuMDA3ODEyNSwieSI6MTAyOS41fSx7IngiOjM4NS40NjA5Mzc1LCJ5IjoxMDI5LjV9LHsieCI6Mzg1LjQ2MDkzNzUsInkiOjEwNTkuNX1d" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M287.546875,1014.5L287.546875,1037.4289321881345Q287.546875,1044.5 280.4758071881345,1044.5L182.1640625,1044.5Q176.6640625,1044.5 176.6640625,1050L176.6640625,1055.5" id="my-svg-L_N4_N12_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#f59e0b;stroke-width:2px;stroke-dasharray:6;fill:none;;;stroke:#f59e0b;stroke-width:2px;stroke-dasharray:6;fill:none" data-edge="true" data-et="edge" data-id="L_N4_N12_0" data-points="W3sieCI6Mjg3LjU0Njg3NSwieSI6MTAxNC41fSx7IngiOjI4Ny41NDY4NzUsInkiOjEwNDQuNX0seyJ4IjoxNzYuNjY0MDYyNSwieSI6MTA0NC41fSx7IngiOjE3Ni42NjQwNjI1LCJ5IjoxMDU5LjV9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__f59e0b)" /><path d="M132.1875,190.5L132.1875,312L132.1875,492L132.1875,624.9289321881345Q132.1875,632 139.25856781186548,632L169.59299468813452,632Q176.6640625,632 176.6640625,639.0710678118655L176.6640625,692L176.6640625,1055.5" id="my-svg-L_N1_N12_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#f59e0b;stroke-width:2px;stroke-dasharray:6;fill:none;;;stroke:#f59e0b;stroke-width:2px;stroke-dasharray:6;fill:none" data-edge="true" data-et="edge" data-id="L_N1_N12_0" data-points="W3sieCI6MTMyLjE4NzUsInkiOjE5MC41fSx7IngiOjEzMi4xODc1LCJ5IjozMTJ9LHsieCI6MTMyLjE4NzUsInkiOjQ5Mn0seyJ4IjoxMzIuMTg3NSwieSI6NjMyfSx7IngiOjE3Ni42NjQwNjI1LCJ5Ijo2MzJ9LHsieCI6MTc2LjY2NDA2MjUsInkiOjY5Mn0seyJ4IjoxNzYuNjY0MDYyNSwieSI6MTA1OS41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__f59e0b)" /><path d="M582.75,1014.5L582.75,1055.5" id="my-svg-L_N6_N5_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#EF4444;stroke-width:2px;stroke-dasharray:4;fill:none;;;stroke:#EF4444;stroke-width:2px;stroke-dasharray:4;fill:none" data-edge="true" data-et="edge" data-id="L_N6_N5_0" data-points="W3sieCI6NTgyLjc1LCJ5IjoxMDE0LjV9LHsieCI6NTgyLjc1LCJ5IjoxMDU5LjV9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__EF4444)" /><path d="M287.546875,1014.5L287.546875,1037.4289321881345Q287.546875,1044.5 294.6179428118655,1044.5L577.25,1044.5Q582.75,1044.5 582.75,1050L582.75,1055.5" id="my-svg-L_N4_N5_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#EF4444;stroke-width:2px;stroke-dasharray:4;fill:none;;;stroke:#EF4444;stroke-width:2px;stroke-dasharray:4;fill:none" data-edge="true" data-et="edge" data-id="L_N4_N5_0" data-points="W3sieCI6Mjg3LjU0Njg3NSwieSI6MTAxNC41fSx7IngiOjI4Ny41NDY4NzUsInkiOjEwNDQuNX0seyJ4Ijo1ODIuNzUsInkiOjEwNDQuNX0seyJ4Ijo1ODIuNzUsInkiOjEwNTkuNX1d" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__EF4444)" /><path d="M385.4609375,1131.5L385.4609375,1157.5" id="my-svg-L_N20_N13_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N20_N13_0" data-points="W3sieCI6Mzg1LjQ2MDkzNzUsInkiOjExMzEuNX0seyJ4IjozODUuNDYwOTM3NSwieSI6MTE2MS41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /><path d="M582.75,1131.5L582.75,1139.4289321881345Q582.75,1146.5 575.6789321881345,1146.5L390.9609375,1146.5Q385.4609375,1146.5 385.4609375,1152L385.4609375,1157.5" id="my-svg-L_N5_N13_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#EF4444;stroke-width:2px;stroke-dasharray:4;fill:none;;;stroke:#EF4444;stroke-width:2px;stroke-dasharray:4;fill:none" data-edge="true" data-et="edge" data-id="L_N5_N13_0" data-points="W3sieCI6NTgyLjc1LCJ5IjoxMTMxLjV9LHsieCI6NTgyLjc1LCJ5IjoxMTQ2LjV9LHsieCI6Mzg1LjQ2MDkzNzUsInkiOjExNDYuNX0seyJ4IjozODUuNDYwOTM3NSwieSI6MTE2MS41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__EF4444)" /><path d="M385.4609375,1233.5L385.4609375,1259.5" id="my-svg-L_N13_N14_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke:#1E293B;stroke-width:3px;fill:none;;;stroke:#1E293B;stroke-width:3px;fill:none" data-edge="true" data-et="edge" data-id="L_N13_N14_0" data-points="W3sieCI6Mzg1LjQ2MDkzNzUsInkiOjEyMzMuNX0seyJ4IjozODUuNDYwOTM3NSwieSI6MTI2My41fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd__1E293B)" /></g><g class="edgeLabels" /><style>/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px;
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*="Domain"] &gt; rect,
+[id*="Domain"] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*="Domain"] &gt; rect,
+.cluster[id*="Domain"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Application"] &gt; rect,
+[id*="Application"] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*="Application"] &gt; rect,
+.cluster[id*="Application"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Infrastructure"] &gt; rect,
+[id*="Infrastructure"] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*="Infrastructure"] &gt; rect,
+.cluster[id*="Infrastructure"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Composition"] &gt; rect,
+[id*="Composition"] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*="Composition"] &gt; rect,
+.cluster[id*="Composition"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Interfaces"] &gt; rect,
+[id*="Interfaces"] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*="Interfaces"] &gt; rect,
+.cluster[id*="Interfaces"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="External"] &gt; rect,
+[id*="External"] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*="External"] &gt; rect,
+.cluster[id*="External"] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*="Domain"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Application"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Infrastructure"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Composition"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Interfaces"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="External"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Bronze"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Silver"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Gold"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Quarantine"] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*="Domain"] .cluster-label text.fo-fallback,
+g.cluster[id*="Application"] .cluster-label text.fo-fallback,
+g.cluster[id*="Infrastructure"] .cluster-label text.fo-fallback,
+g.cluster[id*="Composition"] .cluster-label text.fo-fallback,
+g.cluster[id*="Interfaces"] .cluster-label text.fo-fallback,
+g.cluster[id*="External"] .cluster-label text.fo-fallback,
+g.cluster[id*="Bronze"] .cluster-label text.fo-fallback,
+g.cluster[id*="Silver"] .cluster-label text.fo-fallback,
+g.cluster[id*="Gold"] .cluster-label text.fo-fallback,
+g.cluster[id*="Quarantine"] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*="Bronze"] &gt; rect,
+[id*="Bronze"] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*="Silver"] &gt; rect,
+[id*="Silver"] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*="Gold"] &gt; rect,
+[id*="Gold"] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*="Quarantine"] &gt; rect,
+[id*="Quarantine"] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}
+</style></svg>

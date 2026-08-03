@@ -1,0 +1,36 @@
+name: Stale
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"  # every Monday at 06:00 UTC
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/stale@5bef64f19d7facfb25b37b414482c7164d639639 # v9
+        with:
+          stale-pr-message: >
+            This PR has been inactive for 14 days and is now marked as stale.
+            It will be automatically closed in 7 days unless there is new activity.
+          close-pr-message: "Closed due to inactivity. Feel free to reopen if still relevant."
+          stale-issue-message: >
+            This issue has been inactive for 30 days and is now marked as stale.
+            It will be automatically closed in 14 days unless there is new activity.
+          close-issue-message: "Closed due to inactivity. Feel free to reopen if still relevant."
+          days-before-pr-stale: 14
+          days-before-pr-close: 7
+          days-before-issue-stale: 30
+          days-before-issue-close: 14
+          stale-pr-label: "stale"
+          stale-issue-label: "stale"
+          exempt-pr-labels: "pinned,work-in-progress"
+          exempt-issue-labels: "pinned,work-in-progress"

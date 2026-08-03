@@ -1,0 +1,152 @@
+---
+title: ChEMBL Data Transformation Flow
+version: 1.0.0
+status: active
+author: BioETL Team
+last_verified: 2026-07-24
+adr_references:
+  - ADR-023: Entity Type Patterns
+  - ADR-034: Schema↔Domain Pairs
+  - ADR-040: Diagram Governance
+description: |
+  Data transformation flow diagram for ChEMBL provider showing raw API response
+  processing, field mapping, data normalization, validation, and domain entity creation.
+  Covers ChEMBL-specific data transformation patterns.
+---
+
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type flowchart
+%% @level system
+flowchart TD
+    Start([ChEMBL Data Transformation Start]) --> Raw[Receive Raw API Response]
+    
+    Raw --> Parse[Parse JSON Response]
+    Parse --> ParseValid{Valid JSON?}
+    ParseValid -->|Yes| Extract[Extract Records]
+    ParseValid -->|No| Error[Parse Error]
+    
+    Extract --> ActivityType{Data Type?}
+    ActivityType -->|Activity| Activity[Activity Records]
+    ActivityType -->|Target| Target[Target Records]
+    ActivityType -->|Compound| Compound[Compound Records]
+    
+    Activity --> FieldMap[Field Mapping]
+    Target --> FieldMap
+    Compound --> FieldMap
+    
+    FieldMap --> ActivityMap[Activity Field Mapping]
+    FieldMap --> TargetMap[Target Field Mapping]
+    FieldMap --> CompoundMap[Compound Field Mapping]
+    
+    ActivityMap --> ActivityNorm[Activity Normalization]
+    TargetMap --> TargetNorm[Target Normalization]
+    CompoundMap --> CompoundNorm[Compound Normalization]
+    
+    ActivityNorm --> ActivityStand[Standardize Activity Types]
+    ActivityStand --> ActivityTarget[Map Target Proteins]
+    ActivityStand --> ActivityUnit[Standardize Units]
+    
+    TargetNorm --> TargetClass[Classify Targets]
+    TargetClass --> TargetOrg[Map Organisms]
+    TargetClass --> TargetFamily[Map Protein Families]
+    
+    CompoundNorm --> CompoundStd[Standardize Identifiers]
+    CompoundStd --> CompoundName[Standardize Names]
+    CompoundStd --> CompoundStruct[Parse Structures]
+    
+    ActivityTarget --> Validate[Schema Validation]
+    ActivityUnit --> Validate
+    TargetOrg --> Validate
+    TargetFamily --> Validate
+    CompoundStd --> Validate
+    CompoundName --> Validate
+    CompoundStruct --> Validate
+    
+    Validate --> ValidCheck{Validation Passes?}
+    ValidCheck -->|Yes| Domain[Create Domain Entity]
+    ValidCheck -->|No| Error
+    
+    ActivityTarget --> ActivityEntity[Activity Entity]
+    TargetOrg --> TargetEntity[Target Entity]
+    CompoundStd --> CompoundEntity[Compound Entity]
+    
+    ActivityEntity --> ActivityType[Activity Domain Type]
+    TargetEntity --> TargetType[Target Domain Type]
+    CompoundEntity --> CompoundType[Compound Domain Type]
+    
+    ActivityType --> Complete[Transformation Complete]
+    TargetType --> Complete
+    CompoundType --> Complete
+    
+    Error --> Log[Log Validation Errors]
+    Log --> Metrics[Emit Error Metrics]
+    Metrics --> Fail[Transformation Failed]
+    
+    Complete --> Success[Emit Success Metrics]
+    Success --> End([ChEMBL Data Transformation End])
+
+    style Start fill:#e1f5ff
+    style End fill:#e1f5ff
+    style Complete fill:#c8e6c9
+    style Fail fill:#ffcccc
+    style ParseValid fill:#fff4e6
+    style ActivityType fill:#fff4e6
+    style ValidCheck fill:#fff4e6
+```
+
+## Key Components
+
+### Field Mapping
+- **Activity Field Mapping**: ChEMBL activity fields to domain model
+- **Target Field Mapping**: ChEMBL target fields to domain model
+- **Compound Field Mapping**: ChEMBL compound fields to domain model
+
+### Data Normalization
+- **Activity Normalization**: Standardize activity types and units
+- **Target Normalization**: Classify and map proteins/organisms
+- **Compound Normalization**: Standardize identifiers and structures
+
+### Schema Validation
+- **Schema Validation**: Validate against Pydantic schemas
+- **Domain Entity Creation**: Create domain entities from normalized data
+
+## ChEMBL-Specific Transformations
+
+### Activity Data
+- **Activity Type Standardization**: Convert to standard activity types (IC50, Ki, etc.)
+- **Target Protein Mapping**: Map to UniProt protein identifiers
+- **Unit Standardization**: Convert to standard concentration units
+- **Value Normalization**: Handle different value formats
+
+### Target Data
+- **Protein Classification**: Classify by protein family and function
+- **Organism Mapping**: Map to standard organism taxonomy
+- **Target Type**: Classify as single protein, protein complex, etc.
+
+### Compound Data
+- **Identifier Standardization**: Convert to ChEMBL standard identifiers
+- **Name Standardization**: Apply consistent naming conventions
+- **Structure Parsing**: Parse molecular structures (SMILES, InChI)
+
+## ADR References
+
+- **ADR-023**: Entity Type Patterns — standardized entity naming
+- **ADR-034**: Schema↔Domain Pairs — schema-domain mapping
+- **ADR-040**: Diagram Governance — diagram metadata and quality standards
+
+## Error Handling
+
+- **Parse Errors**: Invalid JSON response format
+- **Validation Errors**: Schema validation failures
+- **Mapping Errors**: Field mapping failures
+- **Normalization Errors**: Data normalization issues
+
+## Metrics Emitted
+
+- `chembl_transformation_start` — ChEMBL transformation initiated
+- `chembl_transformation_complete` — ChEMBL transformation completed
+- `chembl_transformation_failed` — ChEMBL transformation failed
+- `chembl_activity_entity_created` — Activity entity created
+- `chembl_target_entity_created` — Target entity created
+- `chembl_compound_entity_created` — Compound entity created

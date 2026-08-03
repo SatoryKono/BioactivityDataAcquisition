@@ -1,0 +1,50 @@
+version: "1.0.0"
+reviewed_on: "2026-05-19"
+owner: BioETL Team
+
+authorities:
+  - id: medallion_system_metadata_contract
+    owner: BioETL Team
+    rationale: >
+      Composite system fields inherit the canonical Medallion technical metadata
+      contract from shared Silver field blocks rather than from per-pipeline
+      business schemas.
+    evidence_paths:
+      - src/bioetl/infrastructure/schemas/silver_common_field_blocks.py
+    pipelines:
+      - composite_activity
+      - composite_assay
+      - composite_molecule
+      - composite_publication
+      - composite_target
+    field_types:
+      entity_id: string
+      content_hash: string
+      _run_id: string
+      _run_type: string
+      _source_batch_id: string
+      _source: string
+      _ingestion_ts: string
+      _index: int64
+      _lookup_method: string
+      _original_id: string
+      _dq_error: bool
+      _dq_warn: bool
+
+  - id: seed_and_provider_gold_contracts
+    owner: BioETL Team
+    rationale: >
+      Composite activity inherits reviewed typing authority for taxonomy_id from
+      upstream provider Gold contracts and the explicit composite Gold contract
+      surface rather than from a local Silver/domain schema.
+    evidence_paths:
+      - src/bioetl/domain/contracts/gold/composite_bioassay.py
+      - docs/04-reference/contracts/gold/composite_activity_v1.0.json
+      - docs/04-reference/contracts/gold/chembl_target_v3.0.json
+      - docs/04-reference/contracts/gold/chembl_target_component_v1.0.json
+      - docs/04-reference/contracts/gold/uniprot_idmapping_v1.0.json
+      - docs/04-reference/contracts/gold/uniprot_protein_v1.0.json
+    pipelines:
+      - composite_activity
+    field_types:
+      taxonomy_id: int64

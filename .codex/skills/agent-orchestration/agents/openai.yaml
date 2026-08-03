@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Orchestration"
+  short_description: "Help with Agent Orchestration tasks"
+  default_prompt: "Use $agent-orchestration to coordinate a BioETL multi-agent workflow across py-* profiles."

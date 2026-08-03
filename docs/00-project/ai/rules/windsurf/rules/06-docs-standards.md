@@ -1,0 +1,18 @@
+---
+trigger: model_decision
+description: "Documentation standards and governance sync"
+---
+
+# Documentation Standards
+
+**Canonical references:** `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
+
+- Active source of truth is `docs/00-05`; `docs/99-archive` is historical only.
+- Align wording with RFC 2119 where requirements are normative.
+- Reflect code-level contract changes in docs and add migration guidance for breakings.
+- Keep ADR and cross-links consistent when architecture decisions are affected.
+- For schema/column/CLI changes, update docs and `CHANGELOG.md` in the same PR.
+- Avoid ambiguous guidance; prefer explicit, testable statements.
+- Contributor-facing CLI/scripts/bootstrap steps **MUST** stay in sync with `CONTRIBUTING.md` / `docs/contributing/**` (or equivalent) in the same diff.
+- Docs that describe architecture boundaries, required gates, or sanctioned tooling **MUST NOT** contradict `.importlinter`, CI workflows, `AGENTS.md`, or `RULES.md`.
+- Breaking CLI/API/schema/config changes **MUST** include labeled Migration / Breaking notes (what/who/how) in the same change set.

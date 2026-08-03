@@ -1,0 +1,8 @@
+schema_version: 1
+provider: chembl
+cassette_rel_path: tests/fixtures/vcr/chembl/TestChemblCompoundRecordPipeline.test_chembl_compound_record_error_handling.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 0cf234e1220452a16db9cd581e69178798b7852ddcd0ec5a73947e47667063d9
+recorded_at: '2026-07-03'
+staleness_ready: true

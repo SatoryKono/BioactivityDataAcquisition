@@ -1,0 +1,123 @@
+%% BioETL — Control-Plane Artifacts and Traceability
+%% Shows how runtime assembly publishes immutable provenance artifacts and resumes composite runs from checkpoint snapshot + ledger suffix replay.
+
+%% @version 1.1.0
+%% @date    2026-04-02
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   24
+%% @reference  Complements 12-bootstrap-di-container, 18-lock-checkpoint-shutdown, 23-reproducible-run-contract, and ADR-044
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=220 height=108 max_title_len=22 max_desc_lines=4
+flowchart LR
+    CALLER["build_pipeline_runner / CLI run"]:::size-md
+    CLI["run-manifest / lineage / inspection CLI"]:::size-md
+
+    subgraph Launch["Runtime descriptors"]
+        PRUN["PipelineRunContext<br/>launch descriptor"]:::size-md
+        PCTX["PipelineContext<br/>in-run processing context"]:::size-md
+    end
+
+    subgraph Composition["Composition runtime builders"]
+        CTRL["create_run_manifest_with_effective_config<br/>publish manifest + effective config"]:::size-md
+        LCOL["attach_control_plane_collaborators<br/>bind manifest / ledger / lineage"]:::size-md
+    end
+
+    subgraph Application["Application services"]
+        ECS["EffectiveConfigService"]:::size-md
+        RMS["RunManifestService"]:::size-md
+        RLS["RunLedgerService"]:::size-md
+        CLOAD["CompositeCheckpointLoadService<br/>resume gate + replay coordinator"]:::size-md
+        INS["RunManifestInspection +<br/>LineageInspection services"]:::size-md
+    end
+
+    subgraph Domain["Domain ports + replay model"]
+        RMP["RunManifestPort"]:::size-md
+        RLP["RunLedgerPort"]:::size-md
+        LSP["LineageStorePort"]:::size-md
+        CKPP["CompositeCheckpointPort"]:::size-md
+        RPROJ["project_run_ledger_replay<br/>suffix after last_event_id"]:::size-md
+    end
+
+    subgraph Infra["Infrastructure stores"]
+        EFS["FileEffectiveConfigArtifactStore"]:::size-md
+        MFS["FileRunManifestStore"]:::size-md
+        LGS["FileRunLedgerStore"]:::size-md
+        LNS["FileLineageStore"]:::size-md
+        LCK["LocalCheckpointAdapter"]:::size-md
+    end
+
+    subgraph Artifacts["Published artifacts"]
+        ECFG["Effective-config artifact"]:::size-md
+        MAN["Run manifest<br/>immutable provenance"]:::size-md
+        LED["Run-ledger entries<br/>append-only events"]:::size-md
+        FRAG["Lineage graph fragments"]:::size-md
+        CKPT["Composite checkpoint snapshot<br/>anchors + last_event_id"]:::size-md
+    end
+
+    subgraph Runtime["Runtime publishers / consumers"]
+        RUNNER["PipelineRunner"]:::size-md
+        CRUN["CompositePipelineRunner"]:::size-md
+        WRITERS["SilverWriter / GoldWriter"]:::size-md
+    end
+
+    CALLER --> PRUN
+    PRUN --> CTRL
+    CTRL --> ECS
+    CTRL --> RMS
+    CTRL --> RLS
+    CTRL --> LCOL
+
+    ECS --> ECFG
+    ECS --> EFS
+    RMS --> MAN
+    RMS --> RMP
+    RLS --> LED
+    RLS --> RLP
+    PRUN --> LCOL
+    LCOL --> PCTX
+    LCOL --> RUNNER
+    LCOL --> CRUN
+    RUNNER -->|"run_* lifecycle"| RLS
+    CRUN -->|"stage_started / stage_completed"| RLS
+    WRITERS -->|"artifact_published + lineage refs"| LSP
+
+    RMP -.-> MFS
+    RLP -.-> LGS
+    LSP -.-> LNS
+    CKPP -.-> LCK
+    LSP --> FRAG
+    LCK --> CKPT
+    CKPT -->|"snapshot + last_event_id"| CLOAD
+    CLOAD -->|"manifest_id + last_event_id"| RLP
+    RLP --> RPROJ
+    RPROJ -->|"deterministic replay delta"| CLOAD
+    CLOAD -->|"resume state"| CRUN
+    CLI --> INS
+    INS --> RMP
+    INS --> RLP
+    INS --> LSP
+
+    classDef comp fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef artifact fill:#f1f5f9,stroke:#64748b,stroke-width:2px
+
+    class CALLER,CLI,PRUN,PCTX artifact
+    class CTRL,LCOL comp
+    class ECS,RMS,RLS,CLOAD,INS,RUNNER,CRUN,WRITERS app
+    class RMP,RLP,LSP,CKPP,RPROJ port
+    class EFS,MFS,LGS,LNS,LCK infra
+    class ECFG,MAN,LED,FRAG,CKPT artifact

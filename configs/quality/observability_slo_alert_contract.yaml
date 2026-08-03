@@ -1,0 +1,357 @@
+version: 1
+status: active
+owner: observability
+slo_contracts:
+  pipeline_terminal_success_rate:
+    target: ">= 95% successful terminal runs over 7d"
+    metrics:
+      - bioetl_pipeline_runs_total
+      - bioetl_pipeline_health_check_passed
+      - bioetl_infrastructure_validated
+    alerts:
+      - name: BioETLPipelinePreflightDataSourceFailed
+        severity: critical
+        for: 2m
+        runbook: docs/05-operations/runbooks/pipeline-failure-critical.md
+      - name: BioETLPipelineInfrastructureValidationFailed
+        severity: critical
+        for: 2m
+        runbook: docs/05-operations/runbooks/pipeline-failure-critical.md
+      - name: BioETLPipelineRunFailed
+        severity: critical
+        for: 1m
+        runbook: docs/05-operations/runbooks/pipeline-failure-critical.md
+  monitoring_stack_health:
+    owner: "@bioetl-observability"
+    target: "Monitoring stack must keep BioETL, Prometheus, Grafana, Pushgateway, and the Grafana renderer observable (Quarantine Explorer removed 2026-07-23; identity via BioETL Ops HTTP on health server)"
+    service_boundaries:
+      bioetl_ops_http:
+        owner: "@bioetl-observability"
+        slo_intent: "HTTP-backed identity on bioetl health server remains available before dashboard data is treated as trustworthy"
+      grafana_image_renderer:
+        owner: "@bioetl-observability"
+        slo_intent: "Reviewed screenshot and render evidence remains available; an outage blocks render acceptance but not Prometheus collection"
+    metrics:
+      - up
+      - bioetl_pipeline_runs_total
+    alerts:
+      - name: BioETLMetricsEndpointUnavailable
+        severity: critical
+        for: 5m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLMetricsEndpointScrapeMissing
+        severity: warning
+        for: 10m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLMetricsEndpointLivenessMissing
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLPrometheusUnavailable
+        severity: critical
+        for: 2m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLGrafanaUnavailable
+        severity: critical
+        for: 2m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLPushgatewayUnavailable
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLGrafanaRendererUnavailable
+        severity: warning
+        for: 2m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+  optional_docker_runtime_stability:
+    owner: "@bioetl-observability"
+    target: "Optional Docker stacks have zero unexpected restarts, OOM kills, unresolved unhealthy services, identity drift, and recovery breaches"
+    metrics:
+      - bioetl_docker_runtime_primary_cause
+      - bioetl_docker_runtime_probe_success
+      - bioetl_docker_runtime_daemon_available
+      - bioetl_docker_runtime_service_ready
+      - bioetl_docker_runtime_restart_delta
+      - bioetl_docker_runtime_oom_kills
+      - bioetl_docker_runtime_disk_free_bytes
+      - bioetl_docker_runtime_recovery_attempts
+      - bioetl_docker_runtime_recovery_duration_seconds
+    alerts:
+      - name: BioETLDockerRuntimeIncident
+        severity: critical
+        for: 1m
+        runbook: docs/05-operations/runbooks/docker-stability.md
+      - name: BioETLDockerRuntimeProbeMissing
+        severity: warning
+        for: 1m
+        runbook: docs/05-operations/runbooks/docker-stability.md
+  pipeline_throughput_continuity:
+    target: "Every observed pipeline run should process records unless explicitly empty by design"
+    metrics:
+      - bioetl_pipeline_runs_total
+      - bioetl_records_processed_total
+    alerts:
+      - name: BioETLNoRecordsProcessed
+        severity: warning
+        for: 10m
+        runbook: docs/05-operations/runbooks/pipeline-failure-critical.md
+  runtime_error_ratio:
+    target: "<= 5% runtime processing errors per pipeline over 30m when bronze >= 20"
+    metrics:
+      - bioetl_errors_total
+      - bioetl_records_processed_total
+    alerts:
+      - name: BioETLRuntimeErrorRateHigh
+        severity: warning
+        for: 10m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+  pipeline_flow_invariant_health:
+    target: "zero sustained record-flow invariant breaches, ingestion throughput stalls, unresolved backlog, or stage lag >= 300s"
+    metrics:
+      - bioetl_record_flow_invariants_total
+      - bioetl_stage_backlog_records
+      - bioetl_stage_lag_seconds
+    alerts:
+      - name: BioETLRecordFlowInvariantViolated
+        severity: critical
+        for: 5m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLIngestionThroughputDegraded
+        severity: warning
+        for: 1m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLStageBacklogActive
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLStageLagHigh
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+  adaptive_memory_health:
+    target: "Adaptive memory pressure should not remain active for sustained windows"
+    metrics:
+      - bioetl_memory_pressure_state
+    alerts:
+      - name: BioETLMemoryPressureActive
+        severity: warning
+        for: 10m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+  control_plane_write_success_ratio:
+    target: ">= 99% successful manifest and ledger writes over 7d"
+    metrics:
+      - bioetl_control_plane_manifest_writes_total
+      - bioetl_control_plane_ledger_appends_total
+    alerts:
+      - name: BioETLControlPlaneManifestWriteFailed
+        severity: critical
+        for: 2m
+        runbook: docs/05-operations/runbooks/run-manifest-inspection.md
+      - name: BioETLControlPlaneManifestWriteFailureRateHigh
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/run-manifest-inspection.md
+      - name: BioETLRunLedgerAppendFailed
+        severity: critical
+        for: 2m
+        runbook: docs/05-operations/runbooks/run-manifest-inspection.md
+      - name: BioETLRunLedgerAppendFailureRateHigh
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/run-manifest-inspection.md
+  control_plane_read_success_ratio:
+    target: ">= 99% successful control-plane reads over 24h"
+    metrics:
+      - bioetl_control_plane_reads_total
+    alerts:
+      - name: BioETLControlPlaneReadFailureRate
+        severity: warning
+        for: 15m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+  traceability_integrity:
+    target: "zero checkpoint compatibility blocks, lineage write failures, or missing lineage refs"
+    metrics:
+      - bioetl_checkpoint_compatibility_events_total
+      - bioetl_checkpoint_load_events_total
+      - bioetl_checkpoint_operator_operations_total
+      - bioetl_checkpoint_operator_duration_seconds
+      - bioetl_checkpoint_save_duration_seconds
+      - bioetl_checkpoint_save_events_total
+      - bioetl_lineage_fragments_emitted_total
+      - bioetl_lineage_refs_missing_total
+      - bioetl_replay_drift_events_total
+      - bioetl_replay_lag_seconds
+      - bioetl_replay_reconstructability_events_total
+    alerts:
+      - name: BioETLCheckpointCompatibilityBlocked
+        severity: warning
+        for: 2m
+        runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+      - name: BioETLCheckpointLoadFailed
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+      - name: BioETLCheckpointSaveFailed
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+      - name: BioETLCheckpointOperatorFailed
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+      - name: BioETLCheckpointSaveLatencyHigh
+        severity: warning
+        for: 15m
+        runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+      - name: BioETLCheckpointOperatorLatencyHigh
+        severity: warning
+        for: 15m
+        runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+      - name: BioETLReplayNotReconstructable
+        severity: critical
+        for: 5m
+        runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+      - name: BioETLReplayLagHigh
+        severity: warning
+        for: 15m
+        runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+      - name: BioETLReplayDriftDetected
+        severity: critical
+        for: 5m
+        runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+      - name: BioETLLineageFragmentPersistenceFailed
+        severity: warning
+        for: 2m
+        runbook: docs/05-operations/runbooks/traceability-signal-ownership.md
+      - name: BioETLLineageRefsMissing
+        severity: warning
+        for: 2m
+        runbook: docs/05-operations/runbooks/traceability-signal-ownership.md
+  provider_health_completion_ratio:
+    target: ">= 95% successful or degraded provider health completions over 24h"
+    metrics:
+      - bioetl_health_check_success_total
+      - bioetl_health_check_degraded_total
+      - bioetl_health_check_failures_total
+      - bioetl_provider_health_check_failures_15m
+      - bioetl_provider_health_check_total_15m
+      - bioetl_circuit_breaker_state
+      - bioetl_adapter_request_duration_seconds
+      - bioetl_http_request_errors_total
+      - bioetl_http_request_duration_seconds
+      - bioetl_rate_limiter_wait_seconds
+      - bioetl_rate_limiter_tokens_available
+    alerts:
+      - name: BioETLProviderHealthCheckFailuresDetected
+        severity: warning
+        for: 2m
+        runbook: docs/05-operations/runbooks/incident-response.md
+      - name: BioETLProviderFailureRateHigh
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/incident-response.md
+      - name: BioETLCircuitBreakerStuckOpen
+        severity: warning
+        for: 10m
+        runbook: docs/05-operations/runbooks/incident-response.md
+      - name: BioETLProviderAdapterLatencyHigh
+        severity: warning
+        for: 15m
+        runbook: docs/05-operations/runbooks/incident-response.md
+      - name: BioETLProviderHttpErrorRateHigh
+        severity: warning
+        for: 10m
+        runbook: docs/05-operations/runbooks/incident-response.md
+      - name: BioETLProviderRateLimiterWaitHigh
+        severity: warning
+        for: 10m
+        runbook: docs/05-operations/runbooks/incident-response.md
+      - name: BioETLProviderRateLimiterTokensDepleted
+        severity: warning
+        for: 10m
+        runbook: docs/05-operations/runbooks/incident-response.md
+  retry_exhaustion_containment:
+    target: "< 3 retry exhaustions per provider/operation over 1h"
+    metrics:
+      - bioetl_data_source_retry_exhausted_total
+    alerts:
+      - name: BioETLProviderRetriesExhausted
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/incident-response.md
+      - name: BioETLProviderRetriesExhaustedPersistent
+        severity: critical
+        for: 10m
+        runbook: docs/05-operations/runbooks/incident-response.md
+  dq_quarantine_ratio:
+    target: "<= 5% quarantined records per pipeline/run_type over 24h when bronze >= 20"
+    metrics:
+      - bioetl_dq_records_quarantined_total
+      - bioetl_records_processed_total
+      - bioetl_dq_soft_threshold_exceeded
+    alerts:
+      - name: BioETLDQSoftThresholdExceeded
+        severity: warning
+        for: 2m
+        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+      - name: BioETLDQQuarantineRateHigh
+        severity: warning
+        for: 10m
+        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+      - name: BioETLDQQuarantineRateCritical
+        severity: critical
+        for: 5m
+        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+  dq_validation_health:
+    target: "zero hard-fail validation failures and immediate critical anomaly review"
+    metrics:
+      - bioetl_dq_validation_failures_total
+      - bioetl_dq_anomaly_detected
+      - bioetl_silver_validation_failures_total
+      - bioetl_silver_filter_reject_total_mismatch_15m
+    alerts:
+      - name: BioETLDQValidationFailuresCritical
+        severity: critical
+        for: 2m
+        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+      - name: BioETLGoldValidationFailuresCritical
+        severity: critical
+        for: 2m
+        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+      - name: BioETLDQCriticalAnomaliesDetected
+        severity: critical
+        for: 5m
+        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+      - name: BioETLSilverValidationFailuresDetected
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+      - name: BioETLSilverFilterRejectAccountingMismatch
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+  data_freshness_lag:
+    target: "<= 24h active pipeline lag; > 72h is critical"
+    metrics:
+      - bioetl_data_freshness_seconds
+    alerts:
+      - name: BioETLDataFreshnessLagHigh
+        severity: warning
+        for: 15m
+        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+      - name: BioETLDataFreshnessLagCritical
+        severity: critical
+        for: 15m
+        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+  observability_signal_completeness:
+    target: "Operator-facing runtime and DQ verdict telemetry must stay present whenever pipelines run or DQ monitoring is enabled"
+    metrics:
+      - bioetl_pipeline_runs_total
+      - bioetl_runtime_pipeline_run_type_universe
+      - bioetl_dq_monitor_enabled
+      - bioetl_dq_current_status
+    alerts:
+      - name: BioETLDQCurrentStatusMissing
+        severity: warning
+        for: 15m
+        runbook: docs/05-operations/runbooks/dq-failure-investigation.md

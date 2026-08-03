@@ -1,0 +1,27 @@
+{
+  "probes": {
+    "specific_protein_lookup": {
+      "paths": {
+        "entryType": "str",
+        "primaryAccession": "str",
+        "sequence": "dict"
+      }
+    },
+    "taxonomy_endpoint": {
+      "paths": {
+        "scientificName": "str",
+        "taxonId": "int"
+      }
+    },
+    "uniprotkb_search_endpoint": {
+      "paths": {
+        "results": "list",
+        "results[0].entryType": "str",
+        "results[0].primaryAccession": "str",
+        "results[0].uniProtkbId": "str"
+      }
+    }
+  },
+  "provider": "uniprot",
+  "version": 1
+}

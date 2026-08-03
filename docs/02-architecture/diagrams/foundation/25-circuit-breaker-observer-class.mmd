@@ -1,0 +1,272 @@
+%% Title: Circuit Breaker and Observer Classes
+%% Covers: RULES.md §3.6 (Resilience), ADR-007
+%% Updated: 2026-07-31
+%% Components: CircuitState, CircuitBreakerPort, CircuitBreaker, ProviderHealthTracker, PipelineObserver
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    classDiagram
+%% @level   Mixed (System / Component / Class)
+%% @nodes   8
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform class width=208 height=240 max_title_len=21 max_desc_lines=27
+classDiagram
+    direction TB
+
+    class CircuitState {
+        <<enumeration>>
+        CLOSED = 0
+        HALF_OPEN = 1
+        OPEN = 2
+        +is_allowing_requests() bool
+        +to_metric_value() int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class CircuitBreakerPort {
+        <<Protocol>>
+        +get_state() CircuitState
+        +get_failure_count() int
+        +call(func: Callable, *args, **kwargs) T
+        +reset() None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class CircuitBreaker {
+        -_state: CircuitState = CLOSED
+        -_failure_count: int = 0
+        -_success_count: int = 0
+        -_last_failure_time: datetime | None
+        -_last_state_change: datetime
+        -_failure_threshold: int = 5
+        -_recovery_timeout: int = 300
+        -_half_open_max_calls: int = 1
+        -_provider: str
+        -_metrics: MetricsPort | None
+        -_logger: LoggerPort | None
+        -_lock: asyncio.Lock
+        +get_state() CircuitState
+        +get_failure_count() int
+        +call(func: Callable, *args, **kwargs) T
+        +reset() None
+        +is_closed() bool
+        +is_open() bool
+        +is_half_open() bool
+        -_record_success() None
+        -_record_failure() None
+        -_should_trip() bool
+        -_should_attempt_reset() bool
+        -_transition_to(new_state: CircuitState) None
+        -_emit_state_metric() None
+        -_emit_trip_metric() None
+        -_log_state_change(old: CircuitState, new: CircuitState) None
+    }
+
+    class CircuitBreakerMetrics {
+        <<dataclass>>
+        +state_gauge: str = "circuit_breaker_state"
+        +trips_counter: str = "circuit_breaker_trips_total"
+        +failures_counter: str = "circuit_breaker_failures_total"
+        +calls_counter: str = "circuit_breaker_calls_total"
+        +success_counter: str = "circuit_breaker_success_total"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class CircuitBreakerConfig {
+        <<dataclass>>
+        +failure_threshold: int = 5
+        +recovery_timeout: int = 300
+        +half_open_max_calls: int = 1
+        +excluded_exceptions: tuple = ()
+        +from_provider(provider: str)$ CircuitBreakerConfig
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class CircuitOpenError {
+        <<Exception>>
+        +provider: str
+        +state: CircuitState
+        +time_until_half_open: float
+        +message: str
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class ProviderHealthTracker {
+        -_circuit_breakers: dict~str, CircuitBreaker~
+        -_health_states: dict~str, HealthState~
+        -_logger: LoggerPort
+        -_metrics: MetricsPort
+        +get_circuit_breaker(provider: str) CircuitBreaker
+        +get_health_state(provider: str) HealthState
+        +record_success(provider: str) None
+        +record_failure(provider: str, error: Exception) None
+        +is_healthy(provider: str) bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    class HealthState {
+        <<enumeration>>
+        HEALTHY = 2
+        DEGRADED = 1
+        UNHEALTHY = 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    %% Relationships
+    CircuitBreakerPort <|.. CircuitBreaker : implements
+    CircuitBreaker --> CircuitState : uses
+    CircuitBreaker --> CircuitBreakerMetrics : emits
+    CircuitBreaker --> CircuitBreakerConfig : configured by
+    CircuitBreaker ..> CircuitOpenError : throws
+
+    ProviderHealthTracker --> CircuitBreaker : manages
+    ProviderHealthTracker --> HealthState : tracks
+
+    note for CircuitBreaker "State flow<br/>CLOSED -> OPEN (5 fails)<br/>OPEN -> HALF_OPEN (timeout)<br/>HALF_OPEN -> CLOSED/OPEN"
+
+    note for CircuitBreakerMetrics "Prometheus metrics<br/>state gauge (0/1/2)<br/>trips_total + success_total<br/>failure_total"
+
+    note for CircuitOpenError "Raised when circuit is OPEN<br/>includes provider<br/>includes retry ETA"
+
+    note for ProviderHealthTracker "Health manager<br/>tracks breaker + health<br/>tracks consecutive errors<br/>feeds batching/alerts"

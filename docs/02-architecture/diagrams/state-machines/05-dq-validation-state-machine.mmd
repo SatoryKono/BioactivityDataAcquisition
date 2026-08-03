@@ -1,0 +1,474 @@
+---
+title: DQ Validation State Machine
+version: 1.0.0
+status: active
+author: BioETL Team
+last_verified: 2026-07-24
+adr_references:
+  - ADR-027: DQ Rules Externalization
+  - ADR-045: DQ Contract System
+  - ADR-050: Silver Structural and Gold Semantic Filter Boundary
+  - ADR-040: Diagram Governance
+description: |
+  State machine diagram showing DQ validation flow including validation start,
+  rule evaluation, threshold check, quarantine routing, and success/failure paths.
+  Covers DQ contract system and filter boundary rules.
+---
+
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type state
+%% @level system
+stateDiagram-v2
+    [*] --> ValidationStart: Start validation
+    
+    ValidationStart --> SchemaValidation: Validate schema
+    ValidationStart --> Failed: Validation start failed
+    
+    SchemaValidation --> SchemaValid: Schema valid
+    SchemaValidation --> SchemaInvalid: Schema invalid
+    
+    SchemaValid --> RuleEvaluation: Apply DQ rules
+    SchemaInvalid --> Failed: Schema validation failed
+    
+    RuleEvaluation --> RuleComplete: Rules applied
+    RuleEvaluation --> Failed: Rule evaluation failed
+    
+    RuleComplete --> ThresholdCheck: Evaluate thresholds
+    RuleComplete --> Warning: Rules applied with warnings
+    
+    ThresholdCheck --> ThresholdPass: All MUST thresholds pass
+    ThresholdCheck --> ThresholdFail: MUST threshold fails
+    ThresholdCheck --> ThresholdWarning: SHOULD thresholds fail
+    
+    ThresholdPass --> DQScore: Calculate DQ score
+    ThresholdFail --> Quarantine: Route to quarantine
+    ThresholdWarning --> DQScore: Calculate DQ score
+    
+    DQScore --> HighScore: High DQ score
+    DQScore --> MediumScore: Medium DQ score
+    DQScore --> LowScore: Low DQ score
+    
+    HighScore --> StandardRouting: Route to standard storage
+    MediumScore --> StandardRouting: Route to standard storage with warning
+    LowScore --> Quarantine: Route to quarantine
+    
+    StandardRouting --> Success: DQ validation success
+    StandardRouting --> StorageError: Storage write failed
+    
+    Warning --> Success: DQ validation with warnings
+    Warning --> StorageError: Storage write failed
+    
+    Quarantine --> QuarantineHandling: Handle quarantined data
+    QuarantineHandling --> QuarantineComplete: Quarantine handling complete
+    QuarantineHandling --> QuarantineError: Quarantine handling failed
+    
+    QuarantineComplete --> Quarantined: Data quarantined
+    QuarantineError --> Failed: Quarantine handling failed
+    
+    StorageError --> Failed: Storage write failed
+    
+    Success --> ValidationComplete: Validation complete
+    Quarantined --> ValidationComplete: Validation complete
+    Failed --> ValidationComplete: Validation failed
+    
+    ValidationComplete --> [*]: End validation
+    
+    note right of ValidationStart
+        DQ validation initiated
+        Batch data to validate
+    end note
+    
+    note right of SchemaValidation
+        Validate against Pydantic schema
+        Data type and constraint checks
+    end note
+    
+    note right of RuleEvaluation
+        Apply DQ rules from external config
+        Completeness, accuracy, consistency
+    end note
+    
+    note right of ThresholdCheck
+        Evaluate DQ thresholds
+        MUST/SHOULD/MAY severity
+    end note
+    
+    note right of DQScore
+        Calculate overall DQ score
+        Based on rule results
+    end note
+    
+    note right of HighScore
+        High DQ score
+        All critical rules pass
+    end note
+    
+    note right of MediumScore
+        Medium DQ score
+        SHOULD rules fail
+    end note
+    
+    note right of LowScore
+        Low DQ score
+        MUST rules fail
+    end note
+    
+    note right of StandardRouting
+        Route to standard storage
+        Silver/Gold writes
+    end note
+    
+    note right of Quarantine
+        Route to quarantine storage
+        Failed DQ validation
+    end note
+    
+    note right of Success
+        DQ validation successful
+        Data written to storage
+    end note
+    
+    note right of Quarantined
+        Data quarantined
+        Manual review required
+    end note
+    
+    note right of Failed
+        DQ validation failed
+        Terminal state
+    end note
+```
+
+## State Definitions
+
+### ValidationStart
+- **Description**: DQ validation initiated, batch data to validate
+- **Trigger**: Pipeline requests DQ validation
+- **Terminal**: No
+
+### SchemaValidation
+- **Description**: Validate against Pydantic schema, data type and constraint checks
+- **Trigger**: Validation started
+- **Terminal**: No
+
+### SchemaValid
+- **Description**: Schema validation passed
+- **Trigger**: Schema validation successful
+- **Terminal**: No
+
+### SchemaInvalid
+- **Description**: Schema validation failed
+- **Trigger**: Schema validation error
+- **Terminal**: No
+
+### RuleEvaluation
+- **Description**: Apply DQ rules from external config (completeness, accuracy, consistency)
+- **Trigger**: Schema validation passed
+- **Terminal**: No
+
+### RuleComplete
+- **Description**: DQ rules applied successfully
+- **Trigger**: Rule evaluation completed
+- **Terminal**: No
+
+### Warning
+- **Description**: DQ rules applied with warnings
+- **Trigger**: Some rules failed but not critical
+- **Terminal**: No
+
+### ThresholdCheck
+- **Description**: Evaluate DQ thresholds with MUST/SHOULD/MAY severity
+- **Trigger**: Rule evaluation completed
+- **Terminal**: No
+
+### ThresholdPass
+- **Description**: All MUST thresholds pass
+- **Trigger**: Threshold evaluation successful
+- **Terminal**: No
+
+### ThresholdFail
+- **Description**: MUST threshold fails
+- **Trigger**: Critical threshold violation
+- **Terminal**: No
+
+### ThresholdWarning
+- **Description**: SHOULD thresholds fail
+- **Trigger**: Important threshold violation
+- **Terminal**: No
+
+### DQScore
+- **Description**: Calculate overall DQ score based on rule results
+- **Trigger**: Threshold evaluation completed
+- **Terminal**: No
+
+### HighScore
+- **Description**: High DQ score, all critical rules pass
+- **Trigger**: DQ score above high threshold
+- **Terminal**: No
+
+### MediumScore
+- **Description**: Medium DQ score, SHOULD rules fail
+- **Trigger**: DQ score in medium range
+- **Terminal**: No
+
+### LowScore
+- **Description**: Low DQ score, MUST rules fail
+- **Trigger**: DQ score below low threshold
+- **Terminal**: No
+
+### StandardRouting
+- **Description**: Route to standard storage for Silver/Gold writes
+- **Trigger**: High or medium DQ score
+- **Terminal**: No
+
+### Quarantine
+- **Description**: Route to quarantine storage for failed DQ validation
+- **Trigger**: Low DQ score or threshold failure
+- **Terminal**: No
+
+### QuarantineHandling
+- **Description**: Handle quarantined data with detailed logging
+- **Trigger**: Data routed to quarantine
+- **Terminal**: No
+
+### QuarantineComplete
+- **Description**: Quarantine handling completed successfully
+- **Trigger**: Quarantine write successful
+- **Terminal**: No
+
+### QuarantineError
+- **Description**: Quarantine handling failed
+- **Trigger**: Quarantine write error
+- **Terminal**: No
+
+### Success
+- **Description**: DQ validation successful, data written to storage
+- **Trigger**: Standard routing successful
+- **Terminal**: No
+
+### StorageError
+- **Description**: Storage write failed
+- **Trigger**: Storage write error
+- **Terminal**: No
+
+### Quarantined
+- **Description**: Data quarantined, manual review required
+- **Trigger**: Quarantine handling complete
+- **Terminal**: No
+
+### Failed
+- **Description**: DQ validation failed, terminal state
+- **Trigger**: Any validation failure
+- **Terminal**: Yes
+
+### ValidationComplete
+- **Description**: Validation process completed
+- **Trigger**: Success, quarantined, or failed
+- **Terminal**: No
+
+## Transition Triggers
+
+### ValidationStart → SchemaValidation
+- **Trigger**: Pipeline requests DQ validation
+- **Condition**: Valid batch data provided
+
+### ValidationStart → Failed
+- **Trigger**: Validation start failed
+- **Condition**: Invalid input or system error
+
+### SchemaValidation → SchemaValid
+- **Trigger**: Schema validation passed
+- **Condition**: Data matches Pydantic schema
+
+### SchemaValidation → SchemaInvalid
+- **Trigger**: Schema validation failed
+- **Condition**: Data type or constraint violation
+
+### SchemaValid → RuleEvaluation
+- **Trigger**: Schema validation passed
+- **Condition**: Proceed with DQ rules
+
+### SchemaInvalid → Failed
+- **Trigger**: Schema validation failed
+- **Condition**: Cannot proceed with validation
+
+### RuleEvaluation → RuleComplete
+- **Trigger**: DQ rules applied successfully
+- **Condition**: All rules evaluated
+
+### RuleEvaluation → Failed
+- **Trigger**: Rule evaluation failed
+- **Condition**: Rule application error
+
+### RuleComplete → ThresholdCheck
+- **Trigger**: Rules applied successfully
+- **Condition**: Evaluate thresholds
+
+### RuleComplete → Warning
+- **Trigger**: Some rules failed but not critical
+- **Condition**: Non-critical rule violations
+
+### ThresholdCheck → ThresholdPass
+- **Trigger**: All MUST thresholds pass
+- **Condition**: Critical thresholds satisfied
+
+### ThresholdCheck → ThresholdFail
+- **Trigger**: MUST threshold fails
+- **Condition**: Critical threshold violation
+
+### ThresholdCheck → ThresholdWarning
+- **Trigger**: SHOULD thresholds fail
+- **Condition**: Important threshold violation
+
+### ThresholdPass → DQScore
+- **Trigger**: Thresholds passed
+- **Condition**: Calculate DQ score
+
+### ThresholdFail → Quarantine
+- **Trigger**: MUST threshold fails
+- **Condition**: Critical violation requires quarantine
+
+### ThresholdWarning → DQScore
+- **Trigger**: SHOULD thresholds fail
+- **Condition**: Calculate DQ score with warning
+
+### DQScore → HighScore
+- **Trigger**: DQ score above high threshold
+- **Condition**: All critical rules pass
+
+### DQScore → MediumScore
+- **Trigger**: DQ score in medium range
+- **Condition**: SHOULD rules fail
+
+### DQScore → LowScore
+- **Trigger**: DQ score below low threshold
+- **Condition**: MUST rules fail
+
+### HighScore → StandardRouting
+- **Trigger**: High DQ score
+- **Condition**: Route to standard storage
+
+### MediumScore → StandardRouting
+- **Trigger**: Medium DQ score
+- **Condition**: Route to standard storage with warning
+
+### LowScore → Quarantine
+- **Trigger**: Low DQ score
+- **Condition**: Route to quarantine
+
+### StandardRouting → Success
+- **Trigger**: Standard routing successful
+- **Condition**: Storage write successful
+
+### StandardRouting → StorageError
+- **Trigger**: Storage write failed
+- **Condition**: Storage system error
+
+### Warning → Success
+- **Trigger**: DQ validation with warnings
+- **Condition**: Non-critical violations acceptable
+
+### Warning → StorageError
+- **Trigger**: Storage write failed
+- **Condition**: Storage system error
+
+### Quarantine → QuarantineHandling
+- **Trigger**: Data routed to quarantine
+- **Condition**: Handle quarantined data
+
+### QuarantineHandling → QuarantineComplete
+- **Trigger**: Quarantine write successful
+- **Condition**: Quarantine handling completed
+
+### QuarantineHandling → QuarantineError
+- **Trigger**: Quarantine write error
+- **Condition**: Quarantine handling failed
+
+### QuarantineComplete → Quarantined
+- **Trigger**: Quarantine handling complete
+- **Condition**: Data successfully quarantined
+
+### QuarantineError → Failed
+- **Trigger**: Quarantine handling failed
+- **Condition**: Quarantine system error
+
+### StorageError → Failed
+- **Trigger**: Storage write failed
+- **Condition**: Storage system error
+
+### Success → ValidationComplete
+- **Trigger**: DQ validation successful
+- **Condition**: Validation completed successfully
+
+### Quarantined → ValidationComplete
+- **Trigger**: Data quarantined
+- **Condition**: Validation completed with quarantine
+
+### Failed → ValidationComplete
+- **Trigger**: DQ validation failed
+- **Condition**: Validation failed
+
+## ADR References
+
+- **ADR-027**: DQ Rules Externalization — DQ rules from external configuration
+- **ADR-045**: DQ Contract System — DQ contract structure and validation
+- **ADR-050**: Silver Structural and Gold Semantic Filter Boundary — quarantine routing
+- **ADR-040**: Diagram Governance — diagram metadata and quality standards
+
+## DQ Rule Categories
+
+### Completeness Rules
+- **Required Field Presence**: Check for missing required fields
+- **Null Value Checks**: Identify null or missing values
+- **Missing Data Thresholds**: Evaluate missing data percentages
+
+### Accuracy Rules
+- **Format Validation**: Validate data formats (dates, numbers, etc.)
+- **Range Validation**: Check value ranges and constraints
+- **Pattern Matching**: Validate patterns (regex, formats)
+- **Reference Data Validation**: Validate against reference data
+
+### Consistency Rules
+- **Cross-Field Consistency**: Validate relationships between fields
+- **Historical Consistency**: Check for historical inconsistencies
+- **Business Rule Validation**: Apply business logic rules
+
+### Timeliness Rules
+- **Data Freshness**: Check data age and freshness
+- **Update Frequency**: Validate update frequency
+- **Timestamp Validation**: Validate timestamp formats and ranges
+
+### Uniqueness Rules
+- **Duplicate Detection**: Identify duplicate records
+- **Primary Key Validation**: Validate primary key constraints
+- **Unique Constraint Validation**: Validate unique constraints
+
+## Threshold Severity Levels
+
+- **MUST**: Critical threshold — failure blocks data write
+- **SHOULD**: Important threshold — failure generates warning
+- **MAY**: Optional threshold — failure logged only
+
+## Routing Logic
+
+- **High DQ score**: All MUST thresholds pass → standard storage
+- **Medium DQ score**: SHOULD thresholds fail → standard storage with warning
+- **Low DQ score**: MUST thresholds fail → quarantine routing
+
+## Metrics Emitted
+
+- `dq_validation_start` — DQ validation initiated
+- `dq_validation_complete` — DQ validation completed
+- `dq_validation_success` — DQ validation passed
+- `dq_validation_failed` — DQ validation failed
+- `dq_validation_warning` — DQ validation passed with warnings
+- `dq_validation_quarantined` — Data routed to quarantine
+- `schema_validation_success` — Schema validation passed
+- `schema_validation_failed` — Schema validation failed
+- `dq_rules_applied` — DQ rules applied
+- `dq_threshold_passed` — DQ thresholds passed
+- `dq_threshold_failed` — DQ thresholds failed
+- `dq_score_high` — High DQ score
+- `dq_score_medium` — Medium DQ score
+- `dq_score_low` — Low DQ score

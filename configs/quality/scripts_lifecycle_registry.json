@@ -1,0 +1,1386 @@
+{
+  "schema_version": "1.0",
+  "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
+  "entries": {
+    "scripts/ai/junie/check_junie_mirror.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Python implementation behind the canonical check_junie_mirror.sh entrypoint; keep direct contributor usage routed through the shell wrapper."
+    },
+    "scripts/docs/fixers/fix_links_auto.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/fixers/fix_links_explicit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/fixers/link_warnings.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/fixers/repo_identity.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/fixers/sentence_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/matrix/build_matrix_dicts.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/matrix/enrich_normalization_details.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/matrix/export_structural_contract.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/matrix/filter_rows.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/matrix/generate_field_matrix.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/matrix/normalize_values.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/passports/duplicate_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal duplication-audit helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
+    "scripts/docs/passports/inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal passport inventory collector behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
+    "scripts/docs/passports/manual_sidecar.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal manual-sidecar helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
+    "scripts/docs/passports/markdown_renderer.py": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-09-30",
+      "next_step": "Either integrate this extracted renderer behind the canonical passport projector or remove it if the projector remains the rendering source of truth; do not expose it as another standalone script surface."
+    },
+    "scripts/docs/passports/pipeline_projection.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal pipeline-projection helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
+    "scripts/docs/passports/projector.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal passport projection helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
+    "scripts/docs/passports/rename_underscore_to_hyphen.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation behind the canonical `python -m scripts.docs rename-passport-paths` command; keep contributor execution routed through the docs command surface."
+    },
+    "scripts/docs/passports/source_facts.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the shared source-fact extraction helper used by passport and diagram tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/passports/validation.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal passport validation helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
+    },
+    "scripts/ai/codex/helper/check-env.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side environment-check helper invoked by Codex launcher and setup flows; keep it supporting unless it becomes a standalone documented entrypoint."
+    },
+    "scripts/ai/codex/helper/check-env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the sourced shell environment-check helper used by Codex setup flows; keep it supporting unless it becomes a standalone documented entrypoint."
+    },
+    "scripts/ai/codex/helper/ensure-codex-cli.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal Codex CLI installation check used by governed setup launchers; keep it supporting and route standalone setup through the public launcher surface."
+    },
+    "scripts/ai/codex/helper/ensure-mcp.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal MCP bootstrap helper called by Codex setup flows; keep it supporting and route direct MCP setup through the canonical setup command."
+    },
+    "scripts/ai/codex/helper/run-codex-impl.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation backend shared by public Codex launchers; keep it supporting because callers should use the governed launcher surface."
+    },
+    "scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as the bounded non-interactive WSL helper used to avoid Codex launch hangs while the surrounding Windows bootstrap flow is still being consolidated; remove it if launch-codex-wsl.ps1 is retired or rewritten onto a different startup path."
+    },
+    "scripts/ai/codex/helper/setup-env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the sourced environment bootstrap shared by Codex setup scripts; keep it supporting because it is not a standalone setup entrypoint."
+    },
+    "scripts/ai/codex/helper/wsl-support.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared Windows-side WSL path and invocation helper for Codex PowerShell launchers; promote to active only if the Windows launcher flow becomes a governed first-class runtime entrypoint."
+    },
+    "scripts/ai/codex/helper/wsl_proxy_env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a sourced WSL proxy environment helper for Codex setup flows; keep it supporting unless it becomes a standalone, documented CLI entrypoint."
+    },
+    "scripts/ai/codex/setup.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a Windows compatibility setup wrapper while the canonical Codex setup flow remains split between WSL setup scripts and documented launcher entrypoints; promote only if it becomes the governed primary setup command."
+    },
+    "scripts/ai/gemini/gemini-interactive.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as the Windows compatibility launcher that delegates through scripts/ai/gemini/gemini-interactive.sh; remove it once callers migrate to the canonical scripts/ai/gemini/run-gemini.ps1 or run-gemini.sh launcher surface."
+    },
+    "scripts/ai/gemini/gemini-interactive.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a backward-compatible Gemini launcher while the canonical interactive entrypoint delegates through scripts/ai/gemini/run-gemini.sh; remove it once callers migrate to the canonical launcher surface."
+    },
+    "scripts/ai/gemini/helper/check-env.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows wrapper around the Gemini shell environment-check helper; keep it supporting unless it becomes a standalone documented entrypoint."
+    },
+    "scripts/ai/gemini/helper/check-env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the WSL environment-check helper invoked by the Windows Gemini helper wrapper; keep it supporting unless it becomes a standalone documented launcher surface."
+    },
+    "scripts/ai/gemini/helper/ensure-gemini-cli.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal Gemini CLI installation check used by governed setup launchers; keep it supporting and route standalone setup through the public launcher surface."
+    },
+    "scripts/ai/gemini/helper/ensure-mcp.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal MCP bootstrap helper called by Gemini setup flows; keep it supporting and route direct MCP setup through the canonical setup command."
+    },
+    "scripts/ai/gemini/helper/run-gemini-impl.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation backend shared by public Gemini launchers; keep it supporting because callers should use the governed launcher surface."
+    },
+    "scripts/ai/gemini/helper/setup-env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the sourced environment bootstrap shared by Gemini setup scripts; keep it supporting because it is not a standalone setup entrypoint."
+    },
+    "scripts/ai/gemini/helper/wsl-support.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the shared WSL path and invocation helper imported by the Gemini Windows environment check; keep it supporting unless it becomes a standalone launcher surface."
+    },
+    "scripts/ai/gemini/setup-bash-alias.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as an optional manual shell-alias helper for local Gemini ergonomics; keep it supporting and do not promote it to a canonical launcher while run-gemini.sh remains the governed entrypoint."
+    },
+    "scripts/ai/mcp/_check_env_keys.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded local diagnostic that reports MCP .env key presence and lengths without printing values; prefer the canonical MCP check workflow for routine validation and remove this helper once token diagnostics are consolidated."
+    },
+    "scripts/ai/mcp/_patch_grok_mcp_tokens.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded one-time Grok MCP config migration helper for Ref headers and startup timeouts; do not use it for Codex configuration and remove it after supported Grok configs no longer require migration."
+    },
+    "scripts/ai/mcp/check.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the shell backend for the canonical scripts.ai.mcp check router command; prefer the router in new docs and promote back to an active public script only if direct shell invocation remains a reviewed public surface."
+    },
+    "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the documented Windows-side helper for exporting MCP variables to process or user scope when Grok launches HTTP MCP servers outside repo wrappers; keep secret values out of tracked configs and retire the helper if Grok gains direct repo env loading."
+    },
+    "scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical ADR Analysis MCP wrapper generated on Windows; keep it supporting unless tracked Windows runtime configs become first-class governed artifacts."
+    },
+    "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP transport wrapper for ADR Analysis while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint."
+    },
+    "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the Windows-side companion for the canonical AST Grep MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_brave_search_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the Windows-side companion for the canonical Brave Search MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical Code Analyzer MCP wrapper generated on Windows; keep it supporting unless tracked Windows runtime configs become first-class governed artifacts."
+    },
+    "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP transport wrapper for Code Analyzer while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint."
+    },
+    "scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the Windows-side companion for the canonical Code Interpreter MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_context7_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the Windows-side companion for the canonical Context7 MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_deja_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical deja MCP wrapper generated on Windows; keep it supporting unless tracked Windows runtime configs become first-class governed artifacts."
+    },
+    "scripts/ai/mcp/mcp_deja_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP transport wrapper for deja while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint."
+    },
+    "scripts/ai/mcp/mcp_docker_docs_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Docker Docs server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_docker_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the Windows-side companion for the canonical Docker MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical DockerHub MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_dockerhub_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for DockerHub server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_fetch_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical Fetch MCP wrapper generated on Windows; keep it supporting unless tracked Windows runtime configs become first-class governed artifacts."
+    },
+    "scripts/ai/mcp/mcp_filesystem_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical filesystem MCP wrapper; keep it supporting while portable tracked projections may select the POSIX wrapper."
+    },
+    "scripts/ai/mcp/mcp_github_actions_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical GitHub Actions MCP wrapper generated on Windows; keep it supporting unless tracked Windows runtime configs become first-class governed artifacts."
+    },
+    "scripts/ai/mcp/mcp_github_actions_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP transport wrapper for GitHub Actions while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint."
+    },
+    "scripts/ai/mcp/mcp_grafana_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the Windows-side companion for the canonical Grafana MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_mermaid_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the Windows-side companion for the canonical Mermaid MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_mermaid_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Mermaid diagram server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_mutmut_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical mutmut MCP wrapper generated on Windows; keep it supporting unless tracked Windows runtime configs become first-class governed artifacts."
+    },
+    "scripts/ai/mcp/mcp_mutmut_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP transport wrapper for mutmut while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint."
+    },
+    "scripts/ai/mcp/mcp_needle_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Needle search server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the Windows-side companion for the canonical Neo4j Cypher MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the Windows-side companion for the canonical Neo4j Memory MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_paper_search_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Paper Search server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_prometheus_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the Windows-side companion for the canonical Prometheus MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/protocol_smoke.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the bounded MCP initialize/tools-list readiness helper behind frontend checks; keep it supporting and do not restore persistent stdio Compose servers."
+    },
+    "scripts/ai/mcp/support/docker_cli_resolver.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the PowerShell Docker CLI resolver helper used by MCP wrapper transports; keep it supporting unless Docker CLI discovery becomes a standalone governed MCP command."
+    },
+    "scripts/ai/mcp/support/uv_resolver.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal PowerShell uvx resolution and proxy-cleanup helper shared by MCP wrappers; keep it supporting unless command resolution becomes a standalone governed MCP command."
+    },
+    "scripts/ai/mcp/support/uv_resolver.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal shell uvx resolution and proxy-cleanup helper shared by MCP wrappers; keep it supporting unless command resolution becomes a standalone governed MCP command."
+    },
+    "scripts/ai/sync_ai_governance.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the AI governance sync helper for Codex/docs agent and skill mirrors; keep it supporting unless it becomes a governed CI workflow."
+    },
+    "scripts/ai/sync_cursor_rules.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual mirror-sync utility for Cursor rule deploy surfaces while docs expose the direct script path; promote it into a governed AI-rules workflow or retire it once tracked mirrors no longer need explicit sync execution."
+    },
+    "scripts/ai/sync_windsurf_rules.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual mirror-sync utility for Windsurf/Cascade rule surfaces while docs and Makefile still expose the direct script path; promote it into a governed AI-rules workflow or retire it once tracked mirrors no longer need explicit sync execution."
+    },
+    "scripts/data_quality/export_chembl_observed_vocab.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the deterministic ChEMBL observed-vocabulary export helper while docs-generated inventory artifacts and normalization parity checks still consume this surface; fold it into broader QA/docs generation only if that reporting pipeline is consolidated."
+    },
+    "scripts/data_quality/run_silver_gold_filter_parity.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the deterministic Silver/Gold migration parity report helper consumed by reproducibility contract tests and CI artifacts; fold it into a broader governed QA parity runner only if filter-migration report surfaces consolidate."
+    },
+    "scripts/diagrams/diagram_paths.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared diagram path resolver during the diagrams layout migration; keep it non-active unless diagram path discovery becomes a standalone command surface."
+    },
+    "scripts/diagrams/pipeline_dataflow_ir.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the IR builder for generated pipeline dataflow diagrams; keep it supporting unless promoted to a standalone scripts.diagrams command surface."
+    },
+    "scripts/diagrams/pipeline_dataflow_render.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the renderer for generated pipeline dataflow Mermaid/SVG artifacts; keep it supporting unless promoted to a standalone scripts.diagrams command surface."
+    },
+    "scripts/docker-setup.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the legacy root PowerShell Docker setup wrapper while operator references migrate to scripts/ops/docker-setup.ps1; keep it supporting and do not promote root setup launchers back to active script inventory."
+    },
+    "scripts/docker-setup.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the legacy root shell Docker setup wrapper while operator references migrate to scripts/ops/docker-setup.sh; keep it supporting and do not promote root setup launchers back to active script inventory."
+    },
+    "scripts/docs/_compat_shim.py": {
+      "owner": "@bioetl-docs",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an internal compatibility-shim helper that centralizes thin docs wrappers while the mixed top-level scripts/docs entrypoint surface remains in place; do not expose it as a supported user-facing command."
+    },
+    "scripts/docs/check_doc_drift.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level docs drift compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-drift."
+    },
+    "scripts/docs/check_docstring_coverage.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level docstring coverage compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-docstrings."
+    },
+    "scripts/docs/checks/_bootstrap.py": {
+      "owner": "@bioetl-docs",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an internal bootstrap helper for scripts.docs.checks modules while repo-root/path setup remains shared across those modules; fold it into a broader canonical scripts bootstrap layer if that consolidation lands."
+    },
+    "scripts/docs/chembl_matrix_structural_contract.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level ChEMBL matrix compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
+    },
+    "scripts/docs/common/markdown.py": {
+      "owner": "@bioetl-docs",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a shared markdown parsing helper imported by docs checks and docs KPI reporting; keep it non-active unless it is promoted to a standalone docs command surface."
+    },
+    "scripts/docs/common/paths.py": {
+      "owner": "@bioetl-docs",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a shared docs path-policy helper consumed by docs tooling; keep it non-active unless it becomes a documented standalone docs command surface."
+    },
+    "scripts/docs/common/xlsx.py": {
+      "owner": "@bioetl-docs",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a shared workbook helper consumed by docs matrix tooling; keep it non-active unless workbook mutation becomes a documented standalone docs command surface."
+    },
+    "scripts/docs/enrich_chembl_matrix_normalization_details.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level ChEMBL matrix enrichment compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
+    },
+    "scripts/docs/export_chembl_matrix_structural_contract.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level ChEMBL structural contract export shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
+    },
+    "scripts/docs/filter_chembl_matrix_rows.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level ChEMBL matrix row-filter compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
+    },
+    "scripts/docs/fix_doc_links_auto.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level docs link auto-fix compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs fix-links-auto."
+    },
+    "scripts/docs/generate_chembl_activity_field_matrix.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level ChEMBL activity-field matrix shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
+    },
+    "scripts/docs/generate_pipeline_normalization_field_matrix.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level pipeline normalization matrix compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs generate-pipeline-normalization-matrix."
+    },
+    "scripts/docs/matrix/_bootstrap.py": {
+      "owner": "@bioetl-docs",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an internal bootstrap helper for scripts.docs.matrix modules while matrix-generation internals still share repo-root/path setup; fold it into a broader canonical scripts bootstrap layer if that consolidation lands."
+    },
+    "scripts/docs/matrix/structural_contract.py": {
+      "owner": "@bioetl-docs",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal structural-contract library for documentation matrix generation and its architecture guard; keep it supporting because it is not a standalone command."
+    },
+    "scripts/docs/report_docs_kpi.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level docs KPI reporting compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-kpi."
+    },
+    "scripts/docs/sync_repo_identity.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level repo-identity compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs sync-repo-identity."
+    },
+    "scripts/engineering/ci/_compatibility_registry.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal compatibility-registry loader imported by telemetry and reporting modules; keep it supporting because it has no standalone command surface."
+    },
+    "scripts/engineering/ci/_compatibility_telemetry.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal compatibility telemetry library imported by governed CI reports; keep it supporting because it has no standalone command surface."
+    },
+    "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow."
+    },
+    "scripts/engineering/ci/apply-ci-optimizations.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow."
+    },
+    "scripts/engineering/common/cli_dispatch.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification."
+    },
+    "scripts/engineering/common/repo_paths.py": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded shared path helper while governed scripts still depend on repository-root resolution; fold it into broader canonical helper surfaces once the remaining bootstrap helpers converge."
+    },
+    "scripts/engineering/dev/check_commit_message.py": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the internal Conventional Commit validator invoked by the local pre-commit commit-msg hook; keep it dependency-light and avoid promoting it into a broader public CLI unless additional governed callers emerge."
+    },
+    "scripts/engineering/dev/zed_env_doctor.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-31",
+      "next_step": "Retain as the stdlib-only environment validation helper shared by the tracked Zed task adapters; keep `.zed/tasks.json` as the governed editor entry surface and do not promote this helper without offsetting an active script elsewhere."
+    },
+    "scripts/engineering/dev/zed_run.py": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-10-31",
+      "next_step": "Retain as the guarded Python launcher behind tracked native-Windows Zed tasks; keep `.zed/tasks.json` as the governed editor entry surface and do not promote this launcher without offsetting an active script elsewhere."
+    },
+    "scripts/engineering/dev/zed_task.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-10-21",
+      "next_step": "Retain as a bounded Zed editor task launcher helper for local Windows development; promote only if Zed task automation becomes a governed first-class developer workflow entrypoint."
+    },
+    "scripts/engineering/dev/zed_lint_imports.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded Zed editor adapter for the canonical import-linter contracts; keep it supporting unless editor-specific execution becomes a governed first-class developer workflow."
+    },
+    "scripts/engineering/dev/zed_xenon.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded Zed editor adapter for the canonical Xenon complexity gate; keep it supporting unless editor-specific execution becomes a governed first-class developer workflow."
+    },
+    "scripts/engineering/dev/zed_vulture.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded Zed editor adapter for the canonical Vulture dead-code gate; keep it supporting unless editor-specific execution becomes a governed first-class developer workflow."
+    },
+    "scripts/engineering/diagnostics/generate_src_bioetl_refactor_evidence.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual diagnostics utility for refactor evidence packs; route any recurring use through a governed QA report before promoting it back to active inventory."
+    },
+    "scripts/engineering/qa/analyze_duplicate_functions.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as the compatibility wrapper for the legacy AST duplicate-function analyzer under src/tools/scripts/duplicate_function_analyzer.py; remove the wrapper when documented callers move to the canonical implementation or the analyzer is retired."
+    },
+    "scripts/engineering/qa/check_duplication_complexity_exemptions.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the governed duplication/complexity exemption registry validator behind the QA router and CI workflow; keep it supporting unless it is promoted to an operator-facing command."
+    },
+    "scripts/engineering/qa/check_test_audit_preflight.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded manual preflight utility for reproducible test-audit claims while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated."
+    },
+    "scripts/engineering/qa/config_surface_governance.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared config-surface governance helper while canonical matrix generation and adjacent backlog scripts still import its sanctioned partial-key policy; fold it into a broader schema/governance helper only if those surfaces consolidate."
+    },
+    "scripts/engineering/qa/create_github_issues.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded historical GitHub issue seeding helper tied to a legacy markdown source and local .env token flow; either replace it with a governed issue-creation workflow or retire it once no reviewed maintenance lane needs it."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/commands.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the bounded command and observation adapter behind the opt-in Docker stability campaign; keep it supporting and preserve hard timeouts, bounded output, and redaction."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/cycles.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the cycle and fault-matrix coordinator behind the opt-in Docker stability campaign; keep it supporting while campaign orchestration remains explicitly scheduled."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/faults.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the bounded fault-case construction and execution helper behind the opt-in Docker stability campaign; keep host-disruptive operations fail-closed and explicitly scheduled."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/model.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the immutable state, release-gate, evidence-integrity, and redaction model behind the opt-in Docker stability campaign; keep it supporting and deterministic."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/promotion.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the recovery-trial and promotion-gate helper behind the opt-in Docker stability campaign; keep promotion evidence fail-closed and reviewable."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/runner.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the CLI orchestration implementation behind the supporting opt-in Docker stability campaign facade; keep it supporting while host-disruptive execution remains explicitly scheduled."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/soak.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the bounded soak-stage helper behind the opt-in Docker stability campaign; keep probe cadence, deadlines, and persisted evidence deterministic."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/stage_support.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the shared stage-state, baseline, and restoration helper behind the opt-in Docker stability campaign; keep resumability evidence atomic and fail-closed."
+    },
+    "scripts/engineering/qa/extract_uniprot_semantic_payload_vocab.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the governed vocabulary-extraction helper while UniProt semantic payload inventory docs and parity checks still consume this generated support surface; only fold it into a broader schema/docs generator when that pipeline is consolidated."
+    },
+    "scripts/engineering/qa/file_discovery.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared filesystem discovery helper consumed by QA inventory and report generators; fold it into a broader canonical discovery helper only if those generators consolidate on a different traversal surface."
+    },
+    "scripts/engineering/qa/generate_reproducibility_support_matrix.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the canonical reproducibility support-matrix generator while architecture/docs drift tests and operator policy docs depend on this generated surface; only fold it into broader docs tooling if the reproducibility policy generator layer is consolidated."
+    },
+    "scripts/engineering/qa/hotspot_family_metrics.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the hotspot-family metrics helper consumed by QA report generation and architecture ratchet tests; only move or inline it if the hotspot baseline/report flow is consolidated into a different canonical helper surface."
+    },
+    "scripts/engineering/qa/import_graph_inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared first-party import-graph helper consumed by QA inventory reports; fold it into a broader canonical graph helper surface only if the inventory/reporting pipeline is consolidated."
+    },
+    "scripts/engineering/qa/refresh_test_governance_baseline.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded cached refresh helper for test-governance baseline artifacts while pretest guardrails and review workflows still need a dedicated warm-path entrypoint; consolidate it into the canonical report command if the caching path stops being independently useful."
+    },
+    "scripts/engineering/qa/report_adr_enforcement_matrix.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded ADR enforcement matrix reporter while architecture governance tests and generated QA evidence still depend on this surface; promote it into the canonical scripts.engineering.qa command router or retire it after ADR evidence generation consolidates."
+    },
+    "scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded remote-main baseline comparison utility for architecture-debt governance while closure campaigns still need reproducible baseline evidence; promote or retire it when the debt baseline workflow is consolidated under the canonical QA report surface."
+    },
+    "scripts/engineering/qa/report_architecture_quality_scorecard.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded architecture scorecard reporter while closeout audits and debt-governance artifacts still depend on the direct script surface; promote it into the canonical scripts.engineering.qa command router or retire it after scorecard generation fully consolidates there."
+    },
+    "scripts/engineering/qa/report_artifact_duplication_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded manual artifact-duplication audit utility while architecture governance tests and generated quality artifacts still depend on this exact surface; promote it into the canonical scripts.engineering.qa reporting lane or retire it after duplication governance consolidates elsewhere."
+    },
+    "scripts/engineering/qa/report_basedpyright_error_snapshot.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded basedpyright error-snapshot utility while the typing debt campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
+    },
+    "scripts/engineering/qa/report_basedpyright_suppression_inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded basedpyright suppression-inventory utility while suppression governance needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
+    },
+    "scripts/engineering/qa/report_basedpyright_tests_snapshot.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded basedpyright test-snapshot utility while the test typing campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
+    },
+    "scripts/engineering/qa/report_basedpyright_warning_snapshot.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded basedpyright warning-snapshot utility while the typing debt campaign needs reproducible shrink-only evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
+    },
+    "scripts/engineering/qa/report_config_surface_backlog.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded historical backlog-report utility for the Stream B config-surface burn-down; either route it through a governed reporting workflow or retire it once the burn-down campaign is formally closed."
+    },
+    "scripts/engineering/qa/report_dashboard_promql_scope.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-31",
+      "next_step": "Retain as the supporting QA helper behind dashboard PromQL scope checks while dashboard selector and forbidden-label governance remains split across static dashboard audits and live Grafana evidence; promote to active only with an explicit active-surface budget reduction elsewhere."
+    },
+    "scripts/engineering/qa/report_dashboard_scenes_parity.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded dashboard-scenes parity reporter pending consolidation into the canonical observability quality-report command surface."
+    },
+    "scripts/engineering/qa/report_domain_io_taint_inventory.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded architecture-audit evidence helper consumed by the read-only architecture audit lane; keep it non-active unless it becomes a separately documented public QA command surface."
+    },
+    "scripts/engineering/qa/report_flaky_test_burndown_review.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the deterministic implementation behind the governed scripts.engineering.qa report-flaky-test-burndown-review command; keep the module supporting while the QA router remains the canonical active entrypoint."
+    },
+    "scripts/engineering/qa/report_invariant_audit_rebaseline.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded invariant-audit rebaseline reporter while issue triage needs stale-path, current-anchor, and duplicate-issue evidence; retire or fold it into a broader audit-to-issue workflow after the June 2026 stale-audit closeout."
+    },
+    "scripts/engineering/qa/report_non_chembl_observed_value_inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the deterministic reporting helper for non-ChEMBL observed-value inventory generation while docs-generated inventory artifacts and normalization parity checks still consume this surface; fold it into broader QA/docs generation only if that reporting pipeline is consolidated."
+    },
+    "scripts/engineering/qa/report_port_adapter_factory_coverage.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded architecture-audit evidence helper consumed by the read-only architecture audit lane; keep it non-active unless it becomes a separately documented public QA command surface."
+    },
+    "scripts/engineering/qa/report_test_governance_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated."
+    },
+    "scripts/engineering/qa/run_architecture_audit_read_only.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the bounded read-only architecture-audit coordinator; keep it non-active while it is a governance helper rather than a general developer bootstrap entrypoint."
+    },
+    "scripts/engineering/qa/run_docker_stability_campaign.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the opt-in resumable Docker stability campaign utility; keep it supporting because Docker is an ADR-010 adjunct and host-disruptive execution remains explicitly scheduled."
+    },
+    "scripts/engineering/qa/technical_debt_audit_registry.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the SHA-pinned technical-debt audit lifecycle resolver and validation helper consumed by closeout guards and TDX publishing; keep it supporting unless it becomes a separately budgeted active operator workflow."
+    },
+    "scripts/engineering/repo/_branch_cleanup_policy.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the shared branch-cleanup classification policy helper consumed by the governed branch cleanup command and unit tests; keep it side-effect free and fold it into branch_cleanup.py only if the cleanup workflow is retired."
+    },
+    "scripts/engineering/repo/_root_governance.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared root-governance helper consumed by structure auditors and cleanup tooling; fold it into a broader canonical governance helper surface only if root policy loaders are consolidated further."
+    },
+    "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual branch-cleanup orchestration helper for phases 0-2 evidence runs; keep it supporting unless branch cleanup becomes a governed operator workflow with an explicit active-surface budget."
+    },
+    "scripts/engineering/repo/branch_cleanup.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the governed manual branch-cleanup implementation behind scripts.engineering.repo commands while it remains dry-run by default; do not expand destructive apply behavior without fresh owner review."
+    },
+    "scripts/engineering/repo/cleanup_root_local_clutter.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded reviewed-maintenance cleanup utility for exact root-local clutter candidates from the hygiene registry; keep it non-active unless root cleanup becomes a broader governed operator workflow with a dedicated active surface budget."
+    },
+    "scripts/engineering/repo/publish_tdx_audit_issues.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual TDX-AUDIT issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget."
+    },
+    "scripts/engineering/repo/publish_test_sys_issues.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual TEST-SYS issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget."
+    },
+    "scripts/engineering/repo/sync_scripts_inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the router implementation for the canonical scripts.engineering.repo sync-inventory command while inventory refresh remains exposed through the module entrypoint; keep this file non-active unless direct script execution becomes a governed public surface."
+    },
+    "scripts/generate_test_github_issues.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual historical test-issue generator; prefer current GitHub issue creation workflows and keep token-bearing direct script invocation out of active script inventory."
+    },
+    "scripts/memory/prompts/print_seed.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual prompt-printing helper for memory seeding; replace with canonical memory workflow documentation before promoting it to an active command surface."
+    },
+    "scripts/ops/maintenance/github/update_github_issue.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual GitHub issue update utility after removing the scripts.ops router command; prefer the governed issue lifecycle workflow or GitHub API client paths before re-exposing it as an active ops command."
+    },
+    "scripts/ops/migrations/active/migrate_gold_parquet_to_delta.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual migration for legacy Gold Parquet datasets while the operator guide and repo-backed owner tests use this canonical path; remove after the migration window closes and reference proof is complete."
+    },
+    "scripts/ops/migrations/oneoff/migrate_exemption_keys_to_paths.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a completed one-off migration helper with explicit sunset review; do not re-run or promote unless the exemption-key migration is reopened under reviewed governance."
+    },
+    "scripts/ops/migrations/oneoff/migrate_vcr_extensionless.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a completed one-off migration helper with explicit sunset review; do not re-run or promote unless VCR extensionless cassette migration is reopened under reviewed governance."
+    },
+    "scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an optional Docker-based screenshot fallback for hosts where the canonical Grafana render flow cannot launch Chromium; keep it supporting and do not make Docker monitoring mandatory."
+    },
+    "scripts/ops/observability/grafana/ensure_quarantine_explorer.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the fail-closed compatibility stub for the removed Quarantine Explorer command; keep it supporting while documented legacy invocations must receive the explicit exit-2 retirement message."
+    },
+    "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a Windows compatibility helper while screenshot orchestration remains primarily Linux/WSL-driven; promote to active utility only if a Windows-native observability flow is formally governed."
+    },
+    "scripts/ops/observability/grafana/render_nav_bus.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual dashboard JSON regeneration helper while navigation-bus generation remains owned by the Grafana dashboard extension workflow; keep it supporting until it is exposed through a canonical governed command surface."
+    },
+    "scripts/ops/observability/grafana/run_grafana_render_matrix.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the matrix orchestration backend invoked through the canonical scripts.ops command surface; keep the implementation module supporting so the active script inventory does not duplicate the dispatcher entrypoint."
+    },
+    "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a Windows compatibility helper while screenshot runtime setup remains driven by Linux/WSL-compatible workflows; promote to active utility only if a Windows-native observability bootstrap is formally governed."
+    },
+    "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded legacy Linux bootstrap helper for Grafana screenshot runtime while screenshot orchestration remains primarily governed elsewhere; retire once screenshot bootstrap flows are formalized under a canonical Linux runbook."
+    },
+    "scripts/ops/observability/grafana/start_quarantine_explorer.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the Windows-side compatibility launcher for the canonical scripts.ops ensure-quarantine-explorer command while Grafana local audit flows may still need a direct PowerShell entrypoint; retire it once Windows-specific observability launch wrappers are fully consolidated."
+    },
+    "scripts/ops/observability/validate_emitter_contracts.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual observability contract-audit utility while audit evidence references the direct script; promote it to an active governed command only after CI ownership and deterministic regression coverage are established."
+    },
+    "scripts/ops/observability/validate_live_observability.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual live-stack validation utility while audit evidence references the direct script; promote it to an active governed command only after local-only runtime prerequisites, CI ownership, and deterministic checks are formalized."
+    },
+    "scripts/ops/observability/validate_metric_to_panel_mapping.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual metric-to-panel audit utility while audit evidence references the direct script; promote it to an active governed command only after CI ownership and deterministic dashboard-contract coverage are established."
+    },
+    "scripts/ops/run-coderabbit-reviews.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual CodeRabbit review launcher; keep it supporting unless promoted to a governed CI-only review workflow."
+    },
+    "scripts/ops/runtime/docker/_rf017_finalize_observation.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an RF-017 Docker restore observation helper; keep private underscore modules supporting and do not promote them to public ops commands."
+    },
+    "scripts/ops/runtime/docker/_rf017_recreate_once.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an RF-017 one-shot stack recreate helper; keep private underscore modules supporting and do not promote them to public ops commands."
+    },
+    "scripts/ops/runtime/docker/_rf017_restore_and_observe.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an RF-017 restore-and-observe helper; keep private underscore modules supporting and do not promote them to public ops commands."
+    },
+    "scripts/ops/runtime/docker/apply-docker-stable-mcp.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an opt-in local host posture utility for MCP profile projection and cleanup; keep it supporting because local-only Docker monitoring and shared MCP remain optional."
+    },
+    "scripts/ops/runtime/docker/docker_runtime_probe.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a Docker runtime probe helper for Docker health checks and diagnostics; keep it supporting unless it becomes a governed CI workflow or first-class ops entrypoint."
+    },
+    "scripts/ops/runtime/docker/recover-neo4j.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Deprecated for one release while callers migrate to runtime_manager.py diagnose/recover --stack neo4j; retain only as a historical Windows recovery helper and remove after first-party reference proof."
+    },
+    "scripts/ops/runtime/docker/recreate_cutover_stacks.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual cutover-stack recreate utility for Docker RF-017 evidence runs; keep it supporting unless promoted to a governed ops command."
+    },
+    "scripts/ops/runtime/docker/reset-mcp-host-sessions.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a safe-by-default manual host-session recovery utility for local MCP diagnostics; keep it supporting and require its explicit execution switches for process changes."
+    },
+    "scripts/ops/runtime/docker/runtime_manager.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a Docker runtime manager helper for container lifecycle management; keep it supporting unless it becomes a governed CI workflow or first-class ops entrypoint."
+    },
+    "scripts/ops/runtime/mcp/apply-shared-to-grok.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded, opt-in local Grok configuration migration helper for the experimental shared MCP plane; keep it supporting and remove it if that client-specific migration path is retired."
+    },
+    "scripts/ops/runtime/mcp/health-shared.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Linux/WSL companion health probe for the shared MCP runtime plane while the governed PowerShell launcher surface remains active; remove it if cross-platform shared-plane support is retired."
+    },
+    "scripts/ops/runtime/mcp/start-shared.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Linux/WSL companion launcher for the shared MCP runtime plane while cross-platform local tooling depends on it; keep it supporting until it gains a governed direct caller or is retired with the shared-plane workflow."
+    },
+    "scripts/ops/runtime/mcp/stop-shared.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Linux/WSL companion shutdown helper for the shared MCP runtime plane while cross-platform local tooling depends on it; remove it together with the shared-plane launcher if that workflow is retired."
+    },
+    "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Deprecated for one release while callers migrate to runtime_manager.py diagnose/recover --stack neo4j; retain only as historical operator guidance."
+    },
+    "scripts/ops/runtime/neo4j/neo4j_quick_start.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Deprecated for one release while callers migrate to runtime_manager.py --stack neo4j; do not add lifecycle behavior and remove after reference proof."
+    },
+    "scripts/ops/runtime/neo4j/start-neo4j-audit.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Deprecated for one release while Windows PowerShell callers migrate to runtime_manager.py --stack neo4j-audit; remove after first-party PowerShell reference proof."
+    },
+    "scripts/ops/runtime/neo4j/start-neo4j-audit.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Deprecated for one release while POSIX/WSL callers migrate to runtime_manager.py --stack neo4j-audit; remove after first-party shell reference proof."
+    },
+    "scripts/ops/support/load_repo_env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared repo-environment bootstrap helper consumed by local launcher scripts while `.env` loading remains centralized; fold it into a broader canonical shell bootstrap surface only if launcher setup paths are consolidated."
+    },
+    "scripts/ops/support/skills/check_ai_skills_layout.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a backward-compatible wrapper while the canonical Codex skills layout audit lives under scripts/ai/codex/check_skills_layout.sh; remove it once operator/docs callers migrate to the canonical path."
+    },
+    "scripts/ops/support/skills/check_skills_mirror.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a backward-compatible wrapper while the canonical Codex skills mirror audit lives under scripts/ai/codex/check_skills_mirror.sh; remove it once operator/docs callers migrate to the canonical path."
+    },
+    "scripts/schema/generate_protein_class_l1_target_type_artifacts.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the deterministic protein-class L1 target-type artifact generator consumed by generated-artifact drift tests; promote to an active scripts.schema command only if it becomes a documented public schema generation surface."
+    },
+    "scripts/schema/generate_typed_arrow_schema_sources.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only for the bounded PD7-4 typed Arrow schema migration and its check mode; consolidate into the canonical schema command surface or retire it after the migration closes."
+    },
+    "scripts/shutdown.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the legacy root PowerShell shutdown wrapper for project-isolated Compose helpers; prefer scripts/ops/docker-setup.ps1 and keep this surface supporting."
+    },
+    "scripts/shutdown.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the legacy root shell shutdown wrapper for project-isolated Compose helpers; prefer scripts/ops/docker-setup.sh and keep this surface supporting."
+    },
+    "scripts/startup.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the legacy root PowerShell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.ps1; keep it supporting and do not expand its fixed-delay startup behavior."
+    },
+    "scripts/startup.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior."
+    },
+    "scripts/engineering/qa/report_live_residual_snapshot.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded architecture-freeze reporting utility pending consolidation into the canonical quality-report command surface; do not count it as a new active entrypoint."
+    },
+    "scripts/engineering/qa/report_vcr_cassette_census.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded VCR census utility pending consolidation into the canonical QA command surface; do not count it as a new active entrypoint."
+    },
+    "scripts/ops/observability/grafana/_apply_ds2_all.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DS2 migration helper for auditability; do not promote it to an active operator workflow."
+    },
+    "scripts/ops/observability/grafana/_apply_dsa_residual.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DSA residual migration helper for auditability; do not promote it to an active operator workflow."
+    },
+    "scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off dashboard no-scroll migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
+    },
+    "scripts/ops/observability/grafana/apply_dux2_residual.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DUX2 residual migration helper for auditability; do not promote it to an active operator workflow."
+    },
+    "scripts/ops/observability/grafana/apply_dux4_enforcement.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DUX4 dashboard enforcement helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
+    },
+    "scripts/ops/observability/grafana/apply_dux5_residual.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DUX5 residual dashboard migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
+    },
+    "scripts/ops/observability/grafana/apply_dux6_residual.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DUX6 residual dashboard migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
+    },
+    "scripts/ops/observability/grafana/apply_dux7_live_residual.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DUX7 live residual dashboard migration helper for auditability; retire it after the live review protocol is complete and the generated evidence becomes the durable record."
+    },
+    "scripts/ops/observability/grafana/generate_dux4_issue_pack.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded DUX4 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
+    },
+    "scripts/ops/observability/grafana/generate_dux5_issue_pack.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded DUX5 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
+    },
+    "scripts/ops/observability/grafana/generate_dux6_issue_pack.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded DUX6 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
+    },
+    "scripts/ops/observability/grafana/run_dux7_live_residual.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the bounded DUX7 live residual review runner for auditability; retire it after the review protocol is complete and the generated evidence becomes the durable record."
+    },
+    "scripts/ops/_build_arch_review_report.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the bounded formatter for ad-hoc CodeRabbit architecture-review evidence; remove it when that review campaign is complete or fold it into a canonical review-report command if the workflow becomes recurring."
+    },
+    "scripts/ops/_run_cr_arch_review_remaining.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the bounded resume helper for the current CodeRabbit architecture-review campaign; remove it after the remaining-layer review is complete rather than treating it as a public active script."
+    },
+    "src/tools/apply_elk_layout.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual Mermaid layout-governance helper while architecture-diagram guidance still references the direct script path; promote it only if ELK layout normalization graduates to a canonical scripts.docs or scripts.engineering diagram workflow."
+    },
+    "src/tools/differentiate_linkstyle.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual Mermaid semantics helper while diagram-governance guidance and security regression tests still reference the direct script path; promote it only if link-style normalization graduates to a canonical scripts.docs or scripts.engineering diagram workflow."
+    },
+    "src/tools/harmonize_link_styles.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual Mermaid semantics helper while diagram-governance guidance still references the direct script path; promote it only if link-style harmonization graduates to a canonical scripts.docs or scripts.engineering diagram workflow."
+    },
+    "src/tools/neo4j_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the context-aware Neo4j audit connection helper while deployment and live-audit runbooks still reference src/tools/neo4j_audit.py; fold it into a broader canonical ops helper surface only if the audit workflow is consolidated."
+    }
+  }
+}

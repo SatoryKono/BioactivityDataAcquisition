@@ -1,0 +1,225 @@
+---
+title: ChEMBL Error Handling Flow
+version: 1.0.0
+status: active
+author: BioETL Team
+last_verified: 2026-07-24
+adr_references:
+  - ADR-032: Unified HTTP Client
+  - ADR-016: Error Handling Strategy
+  - ADR-040: Diagram Governance
+description: |
+  Error handling flow diagram for ChEMBL provider showing API errors,
+  validation failures, DQ threshold breaches, retry logic, and circuit breaker activation.
+  Covers ChEMBL-specific error handling patterns.
+---
+
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type flowchart
+%% @level system
+flowchart TD
+    Start([ChEMBL Error Handling Start]) --> ErrorType[Detect Error Type]
+    
+    ErrorType --> TypeClass{Error Category?}
+    TypeClass -->|API Error| API[API Error]
+    TypeClass -->|Validation Error| Validation[Validation Error]
+    TypeClass -->|DQ Error| DQ[DQ Error]
+    TypeClass -->|Storage Error| Storage[Storage Error]
+    
+    API --> APIStatus{HTTP Status?}
+    APIStatus -->|429 Rate Limit| RateLimit[Rate Limit Error]
+    APIStatus -->|5xx Server| Server[Server Error]
+    APIStatus -->|4xx Client| Client[Client Error]
+    APIStatus -->|Network| Network[Network Error]
+    
+    RateLimit --> RateLimitRetry{Retry Eligible?}
+    RateLimitRetry -->|Yes| Backoff1[Wait with Backoff]
+    RateLimitRetry -->|No| RateLimitFail[Rate Limit Failure]
+    Backoff1 --> API
+    
+    Server --> ServerRetry{Retry Eligible?}
+    ServerRetry -->|Yes| Backoff2[Wait with Backoff]
+    ServerRetry -->|No| ServerFail[Server Failure]
+    Backoff2 --> API
+    
+    Client --> ClientType{Client Error Type?}
+    ClientType -->|401 Auth| Auth[Authentication Error]
+    ClientType -->|404 Not Found| NotFound[Resource Not Found]
+    ClientType -->|Other Client| ClientFail[Client Error]
+    
+    Auth --> AuthFail[Authentication Failure]
+    NotFound --> NotFoundFail[Resource Not Found Failure]
+    ClientFail --> ClientFail
+    
+    Network --> NetworkRetry{Retry Eligible?}
+    NetworkRetry -->|Yes| Backoff3[Wait with Backoff]
+    NetworkRetry -->|No| NetworkFail[Network Failure]
+    Backoff3 --> API
+    
+    Validation --> ValidationType{Validation Type?}
+    ValidationType -->|Schema| Schema[Schema Validation Error]
+    ValidationType -->|Field| Field[Field Validation Error]
+    ValidationType -->|Type| Type[Type Validation Error]
+    
+    Schema --> SchemaError[Schema Error]
+    Field --> FieldError[Field Error]
+    Type --> TypeError[Type Error]
+    
+    DQ --> DQType{DQ Error Type?}
+    DQType -->|Completeness| Completeness[Completeness Error]
+    DQType -->|Accuracy| Accuracy[Accuracy Error]
+    DQType -->|Consistency| Consistency[Consistency Error]
+    
+    Completeness --> CompletenessFail[Completeness Failure]
+    Accuracy --> AccuracyFail[Accuracy Failure]
+    Consistency --> ConsistencyFail[Consistency Failure]
+    
+    Storage --> StorageType{Storage Error?}
+    StorageType -->|Write| Write[Write Error]
+    StorageType -->|Read| Read[Read Error]
+    StorageType -->|Delta| Delta[Delta Lake Error]
+    
+    Write --> WriteFail[Write Failure]
+    Read --> ReadFail[Read Failure]
+    Delta --> DeltaFail[Delta Lake Failure]
+    
+    %% Circuit Breaker Check
+    API --> CircuitBreaker[Check Circuit Breaker]
+    CircuitBreaker --> CBState{Circuit Breaker State?}
+    CBState -->|OPEN| CBFail[Circuit Breaker Open]
+    CBState -->|HALF_OPEN| CBHalfOpen[Circuit Breaker Half-Open]
+    CBState -->|CLOSED| CBOk[Circuit Breaker Closed]
+    
+    CBHalfOpen --> CBHalfOpenCheck{Request Success?}
+    CBHalfOpenCheck -->|Yes| CBOk
+    CBHalfOpenCheck -->|No| CBFail
+    
+    %% Error Classification
+    RateLimitFail --> Classify[Classify Error Severity]
+    ServerFail --> Classify
+    AuthFail --> Classify
+    NotFoundFail --> Classify
+    ClientFail --> Classify
+    NetworkFail --> Classify
+    SchemaError --> Classify
+    FieldError --> Classify
+    TypeError --> Classify
+    CompletenessFail --> Classify
+    AccuracyFail --> Classify
+    ConsistencyFail --> Classify
+    WriteFail --> Classify
+    ReadFail --> Classify
+    DeltaFail --> Classify
+    CBFail --> Classify
+    
+    Classify --> Severity{Error Severity?}
+    Severity -->|Transient| Transient[Transient Error]
+    Severity -->|Permanent| Permanent[Permanent Error]
+    Severity -->|Unknown| Unknown[Unknown Error]
+    
+    %% Error Handling Strategy
+    Transient --> RetryStrategy[Apply Retry Strategy]
+    Permanent --> NoRetry[No Retry]
+    Unknown --> UnknownStrategy[Unknown Strategy]
+    
+    RetryStrategy --> RetryCheck{Max Retries?}
+    RetryCheck -->|No| NoRetry
+    RetryCheck -->|Yes| Backoff4[Wait with Backoff]
+    Backoff4 --> API
+    
+    NoRetry --> Log[Log Error Details]
+    UnknownStrategy --> Log
+    
+    Log --> Metrics[Emit Error Metrics]
+    Metrics --> Alert[Generate Alert]
+    Alert --> AlertSeverity{Alert Severity?}
+    AlertSeverity -->|Critical| CriticalAlert[Critical Alert]
+    AlertSeverity -->|Warning| WarningAlert[Warning Alert]
+    AlertSeverity -->|Info| InfoAlert[Info Alert]
+    
+    CriticalAlert --> Fail[Error Handling Failed]
+    WarningAlert --> Warning[Error Handling Warning]
+    InfoAlert --> Info[Error Handling Info]
+    
+    Fail --> End([ChEMBL Error Handling End])
+    Warning --> End
+    Info --> End
+
+    style Start fill:#e1f5ff
+    style End fill:#e1f5ff
+    style Fail fill:#ffcccc
+    style Warning fill:#fff4e6
+    style Info fill:#e1f5ff
+    style TypeClass fill:#fff4e6
+    style APIStatus fill:#fff4e6
+    style ValidationType fill:#fff4e6
+    style DQType fill:#fff4e6
+    style StorageType fill:#fff4e6
+    style CBState fill:#fff4e6
+    style Severity fill:#fff4e6
+    style RetryCheck fill:#fff4e6
+    style AlertSeverity fill:#fff4e6
+```
+
+## Key Components
+
+### Error Detection
+- **Error Type Classification**: API, validation, DQ, storage errors
+- **Circuit Breaker**: Prevents cascading failures
+- **Error Severity**: Transient vs permanent classification
+
+### Error Handling Strategies
+- **Retry Strategy**: Exponential backoff for transient errors
+- **No Retry**: Permanent errors require manual intervention
+- **Alert Generation**: Critical, warning, and info alerts
+
+### Observability
+- **Error Metrics**: Comprehensive error classification metrics
+- **Alert System**: Multi-severity alerting for operator notification
+
+## ChEMBL-Specific Error Handling
+
+### API Errors
+- **Rate Limiting (429)**: ChEMBL-specific rate limits
+- **Authentication (401)**: API key authentication issues
+- **Not Found (404)**: Invalid ChEMBL identifiers
+
+### Validation Errors
+- **Schema Validation**: ChEMBL response schema validation
+- **Field Validation**: ChEMBL field-specific validation
+- **Type Validation**: ChEMBL data type validation
+
+### DQ Errors
+- **Completeness**: Missing required ChEMBL fields
+- **Accuracy**: Invalid ChEMBL data values
+- **Consistency**: Inconsistent ChEMBL data relationships
+
+## ADR References
+
+- **ADR-032**: Unified HTTP Client — centralized HTTP client error handling
+- **ADR-016**: Error Handling Strategy — error classification and handling
+- **ADR-040**: Diagram Governance — diagram metadata and quality standards
+
+## Error Categories
+
+### Transient Errors
+- **Rate Limit (429)**: Temporary rate limit violations
+- **Server Errors (5xx)**: ChEMBL server-side issues
+- **Network Errors**: Connection or timeout issues
+
+### Permanent Errors
+- **Authentication (401)**: Invalid API credentials
+- **Not Found (404)**: Invalid ChEMBL identifiers
+- **Validation Errors**: Schema or data validation failures
+
+## Metrics Emitted
+
+- `chembl_error_api` — ChEMBL API error
+- `chembl_error_validation` — ChEMBL validation error
+- `chembl_error_dq` — ChEMBL DQ error
+- `chembl_error_storage` — ChEMBL storage error
+- `chembl_error_transient` — Transient ChEMBL error
+- `chembl_error_permanent` — Permanent ChEMBL error
+- `chembl_retry_attempt` — ChEMBL retry attempt
+- `chembl_circuit_breaker_open` — ChEMBL circuit breaker open

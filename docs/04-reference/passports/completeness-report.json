@@ -1,0 +1,15 @@
+{
+  "blocking_diagnostics": 0,
+  "counts": {
+    "composite": 5,
+    "pipeline": 22,
+    "total": 54,
+    "workflow": 27
+  },
+  "duplicate_typed_identities": [],
+  "orphan_passports": [],
+  "passport_schema_version": "1.0.0",
+  "registry_config_mismatches": [],
+  "source_revision": "ec48c9da54018a057886a275553e4e0b886997de",
+  "unresolved_aliases": []
+}

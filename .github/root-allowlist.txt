@@ -1,0 +1,63 @@
+# Tracked files allowed at repository root.
+# Any new root-level tracked file must be explicitly reviewed and added here.
+# See docs/00-project/governance/03-file-policy.md §0 for root policy.
+# Canonical project / packaging / security / docs tooling entrypoints retained at root.
+# Reconciled 2026-07-27 (RH-02 / #6702): dropped phantom DOCKER_QUICKSTART.md and
+# docker-compose.monitoring.desktop.yml; restored .pr_agent.toml for Qodo contract.
+.aiignore
+.coderabbit.yaml
+.dockerignore
+.editorconfig
+.env.example
+.gitattributes
+.gitignore
+.gitleaks.toml
+.importlinter
+.jscpd.json
+# Dockerfile lint policy (DL3008 exception for moving Debian security packages).
+.hadolint.yaml
+# Exact-root workspace MCP entrypoint; must remain repo-relative and generated
+# from scripts/ai/codex/setup_mcp.py together with scripts/ai/.mcp.json.
+.mcp.json
+.npmrc
+.pr_agent.toml
+.pre-commit-config.yaml
+.python-version
+.secrets.baseline
+commitlint.config.mjs
+CONTRIBUTING.md
+LICENSE
+Makefile
+README.md
+mkdocs.yml
+package-lock.json
+package.json
+pyproject.toml
+uv.lock
+
+# Canonical runtime / governance entrypoints retained at root.
+# WARNING: .env files are SECRET-BEARING and MUST NOT be tracked at root.
+# Only .env.example is allowed as a template.
+AGENTS.md
+CHANGELOG.md
+GEMINI.md
+skills-lock.json
+
+# Vendor-documented repo-wide review configuration and guidance retained at
+# their exact root filenames.
+best_practices.md
+
+# Reviewed optional ADR-010 Docker helper dispositions. Current exact-root
+# compose/image entrypoints below are retained only while operator flows still
+# require those filenames. Candidate adjuncts moved under
+# scripts/ops/runtime/docker/** after owner-approved shim-first review.
+# See docs/00-project/governance/03-file-policy.md §0 and
+# docs/05-operations/verification/docker-helper-root-relocation-audit.md for policy.
+#
+# DOCKER_QUICKSTART.md is NOT root-allowed; use docs/DOCKER_QUICKSTART.md.
+# docker-compose.monitoring.desktop.yml was dropped from main (no tracked overlay).
+docker-compose.monitoring.yml
+docker-compose.neo4j-audit.yml
+docker-compose.neo4j.yml
+docker-compose.yml
+Dockerfile.bioetl

@@ -1,0 +1,10 @@
+{
+  "content_hash": "cf9ff25c793d0074474aa2747ec931541a43c37b2329f1777e692f06ed8746d6",
+  "normalized": {
+    "activity_id": "ACT-001",
+    "activity_properties": "[\"beta\",\"alpha\"]",
+    "standard_relation": "<=",
+    "standard_type": "IC50",
+    "standard_units": "µM"
+  }
+}

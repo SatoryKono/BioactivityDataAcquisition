@@ -1,0 +1,325 @@
+{
+  "bronze": {
+    "capability": "append_only_snapshot",
+    "content_hash": {
+      "exclude": [],
+      "include": []
+    }
+  },
+  "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "data_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Source[\"chembl:protein_class\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: chembl.protein_class + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: chembl.protein_class (scd2)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
+    }
+  ],
+  "execution": {
+    "cached_bronze_is_mode": true,
+    "control_plane": {
+      "checkpoints": true,
+      "run_ledger": true,
+      "run_manifest": true
+    },
+    "effective_config_hash": "sha256:f40f69140a85529770bfbad0c89a21a25ef17f81af824161eea802359d82ee40",
+    "projection_profiles": [
+      "batch",
+      "http"
+    ],
+    "resilience": {
+      "resolution_owner": "UnifiedHTTPClient and provider config",
+      "source_refs": [
+        "src/bioetl/infrastructure/adapters/http/client.py",
+        "configs/providers/chembl.yaml"
+      ],
+      "status": "runtime_resolved"
+    }
+  },
+  "extraction": {
+    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data/protein_classification",
+    "field_groups": [
+      {
+        "field_count": 7,
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_ingestion_ts",
+          "_index"
+        ],
+        "name": "system"
+      },
+      {
+        "field_count": 10,
+        "fields": [
+          "protein_class_id",
+          "parent_id",
+          "replaced_by",
+          "pref_name",
+          "short_name",
+          "protein_class_desc",
+          "definition",
+          "class_level",
+          "sort_order",
+          "downgraded"
+        ],
+        "name": "business"
+      }
+    ],
+    "filters": [
+      {
+        "description": "IDs from data/input/protein_class.csv column protein_class_id; CLI may override the input CSV",
+        "name": "protein_class_id",
+        "required": false,
+        "source": "cli"
+      }
+    ],
+    "method": "GET",
+    "selected_fields": [
+      {
+        "name": "protein_class_id",
+        "required": true,
+        "source_object": "protein_class",
+        "target_group": "business"
+      },
+      {
+        "name": "parent_id",
+        "required": false,
+        "source_object": "protein_class",
+        "target_group": "business"
+      },
+      {
+        "name": "replaced_by",
+        "required": false,
+        "source_object": "protein_class",
+        "target_group": "business"
+      },
+      {
+        "name": "pref_name",
+        "required": true,
+        "source_object": "protein_class",
+        "target_group": "business"
+      },
+      {
+        "name": "short_name",
+        "required": false,
+        "source_object": "protein_class",
+        "target_group": "business"
+      },
+      {
+        "name": "protein_class_desc",
+        "required": false,
+        "source_object": "protein_class",
+        "target_group": "business"
+      },
+      {
+        "name": "definition",
+        "required": false,
+        "source_object": "protein_class",
+        "target_group": "business"
+      },
+      {
+        "name": "class_level",
+        "required": true,
+        "source_object": "protein_class",
+        "target_group": "business"
+      },
+      {
+        "name": "sort_order",
+        "required": false,
+        "source_object": "protein_class",
+        "target_group": "business"
+      },
+      {
+        "name": "downgraded",
+        "required": false,
+        "source_object": "protein_class",
+        "target_group": "business"
+      }
+    ],
+    "source_collections": [
+      "protein_classification"
+    ],
+    "source_kind": "http_api",
+    "source_resource": "chembl:protein_class",
+    "source_tables": []
+  },
+  "gold": {
+    "column_projection": {
+      "exclude_fields": [
+        "_dq_*",
+        "_source_batch_id",
+        "_index"
+      ],
+      "include_groups": [
+        "system",
+        "business"
+      ]
+    },
+    "contract_ref": "chembl.protein_class",
+    "contract_validation": {
+      "status": "resolved_by_adr_018",
+      "strict": true
+    },
+    "contract_version": "1.0.0",
+    "write": {
+      "idempotency_contract": "scd2",
+      "mode": "scd2",
+      "scd_config": {
+        "current_flag_col": "_is_current",
+        "valid_from_col": "_valid_from",
+        "valid_to_col": "_valid_to",
+        "version_col": "_version"
+      }
+    }
+  },
+  "identity": {
+    "aliases": [],
+    "derived_source_identity": {
+      "data_source_provider": null,
+      "entity": "protein_class",
+      "provider": "chembl"
+    },
+    "entity": "protein_class",
+    "pipeline_id": "chembl_protein_class",
+    "pipeline_type": "provider_entity",
+    "provider": "chembl",
+    "status": "active",
+    "typed_id": "pipeline:chembl_protein_class"
+  },
+  "kind": "pipeline",
+  "observability": {
+    "correlation_fields": [
+      "run_id",
+      "manifest_id"
+    ],
+    "metric_labels": [
+      "provider",
+      "pipeline",
+      "run_type",
+      "status"
+    ]
+  },
+  "operator_commands": [
+    {
+      "command": "bioetl run --pipeline chembl_protein_class",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_protein_class --limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_protein_class --run-type backfill --dry-run",
+      "result": "Проверяет backfill/rebuild path без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline chembl_protein_class --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline chembl_protein_class --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline chembl_protein_class",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
+  "passport_schema_version": "1.0.0",
+  "provenance": {
+    "projector_version": "1.1.0",
+    "semantic_content_hash": "sha256:be1d7bfcea4a9da99683c32a84a180d747017f3b052b0bbf6e3e1178fa613247",
+    "source_revision": "ec48c9da54018a057886a275553e4e0b886997de"
+  },
+  "silver": {
+    "column_projection": {
+      "exclude_fields": [],
+      "include_groups": [
+        "system",
+        "business",
+        "dq"
+      ]
+    },
+    "dq_execution": {
+      "hard_fail_threshold": 0.5,
+      "invalid_record_policy": "quarantine",
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
+    },
+    "normalization_profile": "chembl.protein_class",
+    "write": {
+      "partition_by": [
+        "class_level"
+      ]
+    }
+  },
+  "source_references": [
+    {
+      "path": "configs/entities/chembl/protein_class.yaml",
+      "role": "effective_entity_config"
+    },
+    {
+      "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
+      "role": "pipeline_registration"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "role": "run_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
+    },
+    {
+      "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
+      "role": "gold_validation_contract"
+    },
+    {
+      "path": "src/bioetl/domain/_observability_contract_primitives.py",
+      "role": "observability_contract"
+    },
+    {
+      "path": "configs/contracts/chembl/protein_class.yaml",
+      "role": "dq_contract"
+    },
+    {
+      "path": "configs/providers/chembl.yaml",
+      "role": "provider_config"
+    }
+  ],
+  "summary": {
+    "excluded_data_summary": "invalid_record_policy=quarantine",
+    "field_selection_summary": "В business-проекцию входят `protein_class_id`, `parent_id`, `replaced_by`, `pref_name`, `short_name`, `protein_class_desc`, `definition`, `class_level` и ещё 2 полей.",
+    "query_filter_summary": "protein_class_id=IDs from data/input/protein_class.csv column protein_class_id; CLI may override the input CSV",
+    "sentences": [
+      "ChEMBL Protein Classification hierarchy (enzyme classes, receptor types, etc.). Источник — `chembl:protein_class` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: protein_class_id=IDs from data/input/protein_class.csv column protein_class_id; CLI may override the input CSV.",
+      "В business-проекцию входят `protein_class_id`, `parent_id`, `replaced_by`, `pref_name`, `short_name`, `protein_class_desc`, `definition`, `class_level` и ещё 2 полей.",
+      "Silver использует профиль `chembl.protein_class` и проверяет обязательные поля `class_level`, `pref_name`, `protein_class_id`; невалидные записи направляются в `quarantine`.",
+      "Перед Gold применяется строгий Pandera-контракт `chembl.protein_class`; Gold filters/constraints заданы в entity config (6 групп правил)."
+    ],
+    "silver_processing_summary": "Silver использует профиль `chembl.protein_class` и проверяет обязательные поля `class_level`, `pref_name`, `protein_class_id`; невалидные записи направляются в `quarantine`.",
+    "source_description": "ChEMBL Protein Classification hierarchy (enzyme classes, receptor types, etc.). Источник — `chembl:protein_class` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: protein_class_id=IDs from data/input/protein_class.csv column protein_class_id; CLI may override the input CSV.",
+    "validation_summary": "Перед Gold применяется строгий Pandera-контракт `chembl.protein_class`; Gold filters/constraints заданы в entity config (6 групп правил)."
+  }
+}

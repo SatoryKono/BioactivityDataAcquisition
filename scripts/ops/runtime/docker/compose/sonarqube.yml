@@ -1,0 +1,78 @@
+name: bioetl-sonarqube
+
+services:
+  postgres-sonarqube:
+    image: postgres:15-alpine@sha256:3d0f7584ed7d04e27fa050d6683a74746608faf21f202be78460d679cc56461f
+    environment:
+      POSTGRES_DB: sonarqube
+      POSTGRES_USER: sonarqube
+      POSTGRES_PASSWORD: ${SONARQUBE_DB_PASSWORD:?Set SONARQUBE_DB_PASSWORD before starting scripts/ops/runtime/docker/compose/sonarqube.yml}
+    volumes:
+      - postgres-sonarqube-data:/var/lib/postgresql/data
+    networks:
+      - monitoring
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonarqube -d sonarqube"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    mem_limit: 1g
+    mem_reservation: 512m
+    cpus: 0.75
+    pids_limit: 256
+    init: true
+    stop_grace_period: 30s
+    logging: {driver: local, options: {max-size: "20m", max-file: "5"}}
+
+  sonarqube:
+    image: sonarqube:10-community@sha256:0842dcd4c8f851ce44f8edaf45ac93f7c9079017d60d99f614663e60cef5efe9
+    depends_on:
+      postgres-sonarqube:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:9010:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres-sonarqube:5432/sonarqube
+      SONAR_JDBC_USERNAME: sonarqube
+      SONAR_JDBC_PASSWORD: ${SONARQUBE_DB_PASSWORD:?Set SONARQUBE_DB_PASSWORD before starting scripts/ops/runtime/docker/compose/sonarqube.yml}
+      SONAR_WEB_JAVAOPTS: "-Xmx2048m -Xms1024m"
+      SONAR_CE_JAVAOPTS: "-Xmx2048m -Xms512m"
+      SONAR_WEB_SYSTEMPASSCODE: ${SONARQUBE_SYSTEM_PASSCODE:?Set SONARQUBE_SYSTEM_PASSCODE before starting scripts/ops/runtime/docker/compose/sonarqube.yml}
+      SONAR_FORCEAUTHENTICATION: "true"
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-logs:/opt/sonarqube/logs
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-temp:/opt/sonarqube/temp
+    ulimits:
+      memlock: -1
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9000/api/system/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
+    restart: unless-stopped
+    mem_limit: 4g
+    mem_reservation: 2g
+    cpus: 2.0
+    pids_limit: 1024
+    init: true
+    stop_grace_period: 60s
+    logging: {driver: local, options: {max-size: "20m", max-file: "5"}}
+
+volumes:
+  postgres-sonarqube-data:
+  sonarqube-data:
+  sonarqube-logs:
+  sonarqube-extensions:
+  sonarqube-temp:
+
+networks:
+  monitoring:
+    external: true
+    name: bioetl-monitoring

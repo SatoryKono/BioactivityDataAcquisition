@@ -1,0 +1,254 @@
+---
+title: Lock Acquisition State Machine
+version: 1.0.0
+status: active
+author: BioETL Team
+last_verified: 2026-07-24
+adr_references:
+  - ADR-021: Idempotent Processing Guards
+  - ADR-010: Local-Only Deployment
+  - ADR-040: Diagram Governance
+description: |
+  State machine diagram showing lock acquisition state transitions including lock request →
+  pending → acquired/failed, lock renewal, lock release, and lock timeout handling.
+  Covers lock lifecycle management for idempotent processing.
+---
+
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type state
+%% @level system
+stateDiagram-v2
+    [*] --> LockRequest: Request lock
+    
+    LockRequest --> Pending: Lock request submitted
+    LockRequest --> Failed: Lock immediately unavailable
+    
+    Pending --> Acquired: Lock granted
+    Pending --> Failed: Lock denied
+    Pending --> Timeout: Lock request timeout
+    
+    Acquired --> Active: Lock active
+    Acquired --> Renewal: Lock renewal requested
+    
+    Active --> Renewal: Renewal during active period
+    Active --> Release: Lock release requested
+    Active --> Timeout: Lock timeout
+    
+    Renewal --> Active: Renewal successful
+    Renewal --> Failed: Renewal failed
+    Renewal --> Timeout: Renewal timeout
+    
+    Release --> Released: Lock released
+    Release --> Failed: Release failed
+    
+    Timeout --> Expired: Lock expired
+    Timeout --> Failed: Lock timeout failure
+    
+    Failed --> [*]: Lock acquisition failed
+    Released --> [*]: Lock successfully released
+    Expired --> [*]: Lock expired
+    
+    note right of LockRequest
+        Pipeline requests lock for idempotent execution
+    end note
+    
+    note right of Pending
+        Lock request being processed
+        Waiting for lock availability
+    end note
+    
+    note right of Acquired
+        Lock successfully acquired
+        Pipeline can proceed with execution
+    end note
+    
+    note right of Active
+        Lock is active and owned
+        Pipeline execution in progress
+    end note
+    
+    note right of Renewal
+        Lock renewal during long-running execution
+        Extends lock ownership period
+    end note
+    
+    note right of Release
+        Lock release requested after completion
+        Normal cleanup path
+    end note
+    
+    note right of Timeout
+        Lock timeout reached
+        Automatic lock expiration
+    end note
+    
+    note right of Failed
+        Lock acquisition or management failed
+        Terminal state
+    end note
+    
+    note right of Released
+        Lock successfully released
+        Resource available for others
+    end note
+    
+    note right of Expired
+        Lock expired due to timeout
+        Automatic cleanup
+    end note
+```
+
+## State Definitions
+
+### LockRequest
+- **Description**: Pipeline requests lock for idempotent execution
+- **Trigger**: Pipeline initialization
+- **Terminal**: No
+
+### Pending
+- **Description**: Lock request being processed, waiting for availability
+- **Trigger**: Lock request submitted
+- **Terminal**: No
+
+### Acquired
+- **Description**: Lock successfully acquired, pipeline can proceed
+- **Trigger**: Lock granted by lock service
+- **Terminal**: No
+
+### Active
+- **Description**: Lock is active and owned by pipeline
+- **Trigger**: Pipeline execution in progress
+- **Terminal**: No
+
+### Renewal
+- **Description**: Lock renewal requested during long-running execution
+- **Trigger**: Lock ownership period ending
+- **Terminal**: No
+
+### Release
+- **Description**: Lock release requested after pipeline completion
+- **Trigger**: Pipeline finished successfully
+- **Terminal**: No
+
+### Timeout
+- **Description**: Lock timeout reached, automatic expiration
+- **Trigger**: Lock ownership period exceeded
+- **Terminal**: No
+
+### Failed
+- **Description**: Lock acquisition or management failed
+- **Trigger**: Lock denied, renewal failed, or release failed
+- **Terminal**: Yes
+
+### Released
+- **Description**: Lock successfully released, resource available
+- **Trigger**: Release operation completed
+- **Terminal**: Yes
+
+### Expired
+- **Description**: Lock expired due to timeout, automatic cleanup
+- **Trigger**: Lock timeout reached
+- **Terminal**: Yes
+
+## Transition Triggers
+
+### LockRequest → Pending
+- **Trigger**: Pipeline requests lock with pipeline_id and run_id
+- **Condition**: Lock service accepts request
+
+### LockRequest → Failed
+- **Trigger**: Lock immediately unavailable
+- **Condition**: Lock held by another pipeline
+
+### Pending → Acquired
+- **Trigger**: Lock granted by lock service
+- **Condition**: Lock available and request valid
+
+### Pending → Failed
+- **Trigger**: Lock denied by lock service
+- **Condition**: Lock unavailable or request invalid
+
+### Pending → Timeout
+- **Trigger**: Lock request timeout
+- **Condition**: Lock request took too long
+
+### Acquired → Active
+- **Trigger**: Pipeline starts execution
+- **Condition**: Lock ownership established
+
+### Active → Renewal
+- **Trigger**: Lock ownership period ending
+- **Condition**: Long-running pipeline needs lock extension
+
+### Active → Release
+- **Trigger**: Pipeline completed successfully
+- **Condition**: Normal completion path
+
+### Active → Timeout
+- **Trigger**: Lock ownership period exceeded
+- **Condition**: Lock timeout reached
+
+### Renewal → Active
+- **Trigger**: Renewal successful
+- **Condition**: Lock renewal granted
+
+### Renewal → Failed
+- **Trigger**: Renewal failed
+- **Condition**: Lock renewal denied or error
+
+### Renewal → Timeout
+- **Trigger**: Renewal timeout
+- **Condition**: Renewal request took too long
+
+### Release → Released
+- **Trigger**: Release operation completed
+- **Condition**: Lock successfully released
+
+### Release → Failed
+- **Trigger**: Release operation failed
+- **Condition**: Lock release error
+
+### Timeout → Expired
+- **Trigger**: Lock timeout reached
+- **Condition**: Automatic lock expiration
+
+## ADR References
+
+- **ADR-021**: Idempotent Processing Guards — lock management for idempotency
+- **ADR-010**: Local-Only Deployment — no external lock coordination
+- **ADR-040**: Diagram Governance — diagram metadata and quality standards
+
+## Lock Properties
+
+### Lock Identification
+- **pipeline_id**: Unique pipeline identifier
+- **run_id**: Unique run identifier
+- **owner**: Pipeline instance owning the lock
+
+### Lock Duration
+- **initial_ttl**: Initial lock ownership period
+- **renewal_ttl**: Lock renewal period
+- **max_ttl**: Maximum lock ownership period
+
+### Lock Timeout
+- **request_timeout**: Maximum time to acquire lock
+- **renewal_timeout**: Maximum time for renewal request
+- **operation_timeout**: Maximum time for lock operations
+
+## Error Scenarios
+
+### Lock Acquisition Failures
+- **Lock held by another pipeline**: Immediate denial
+- **Lock service unavailable**: Service error
+- **Invalid lock parameters**: Validation error
+
+### Lock Renewal Failures
+- **Lock ownership lost**: Another pipeline acquired lock
+- **Renewal timeout**: Renewal request took too long
+- **Lock service error**: Service error during renewal
+
+### Lock Release Failures
+- **Lock ownership lost**: Cannot release non-owned lock
+- **Lock service error**: Service error during release
+- **Lock already expired**: Cannot release expired lock

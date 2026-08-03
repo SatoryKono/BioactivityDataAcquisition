@@ -1,0 +1,241 @@
+version: 1
+policy_scope: deterministic_identity_generation
+review_date: '2026-09-30'
+compatibility_reduction_plan:
+  linked_issue: '#4569'
+  review_date: '2026-09-30'
+  allowed_outcomes:
+  - retain_occurrence_only_generator
+  - keep_compatibility_alias_but_block_new_semantics
+  - keep_hash_policy_split_until_backfill
+  - v2_default_active_with_explicit_v1_date_compatibility
+  occurrence_identity_budget:
+    max_allowed_call_sites: 0
+    ratchet_policy: Production uuid4-based occurrence identity generators are forbidden
+      across src/bioetl.
+  replay_hash_policy_budget:
+    allowed_legacy_alias_fields:
+    - config_hash
+    allowed_hash_datetime_defaults:
+    - v1_date
+    - v2_datetime_utc
+    ratchet_policy: Compatibility-only replay/hash aliases may stay only while they
+      remain explicitly documented and outside semantic execution identity.
+artifact_identity_contract:
+  operational_correlation_artifacts:
+  - artifact: control_plane.run_manifest_occurrence_envelope
+    allowed_occurrence_identity_fields:
+    - manifest_id
+    - run_id
+    rationale: Persisted run manifests may retain occurrence lookup identifiers,
+      but those fields remain outside semantic replay anchors.
+  - artifact: control_plane.run_ledger_event_occurrence
+    allowed_occurrence_identity_fields:
+    - ledger_entry_id
+    - workflow_ledger_entry_id
+    rationale: Append-only ledger rows need per-event occurrence IDs for storage
+      and ordering only.
+  - artifact: workflow.execution_occurrence
+    allowed_occurrence_identity_fields:
+    - workflow_run_id
+    rationale: Workflow orchestration may publish per-occurrence run IDs while replay
+      semantics stay anchored by workflow manifests and fingerprints.
+  semantic_identity_anchors:
+  - artifact: control_plane.run_manifest.execution_fingerprint
+    required_fields:
+    - execution_fingerprint
+    - pipeline_name
+    - run_type
+    - effective_config_hash
+    - effective_config_artifact_id
+    forbidden_occurrence_identity_fields:
+    - manifest_id
+    - run_id
+    - ledger_entry_id
+    - workflow_ledger_entry_id
+    - workflow_run_id
+    - composite_run_id
+    - service_run_id
+    - log_correlation_run_id
+    - cli_preview_run_id
+    - metrics_gateway_correlation_run_id
+    forbidden_runtime_timestamp_fields:
+    - created_at
+    - updated_at
+    - completed_at
+    - duration_seconds
+    - duration_ms
+    - elapsed_seconds
+    - metric_duration_seconds
+    - debug_created_at
+    - debug_export_created_at
+    - export_created_at
+    - export_manifest_created_at
+  - artifact: control_plane.run_manifest.exact_replay_anchors
+    required_fields:
+    - semantic_identity_anchor
+    - execution_fingerprint
+    - effective_config_hash
+    - effective_config_artifact_id
+    - input_snapshot_identity_fingerprint
+    forbidden_occurrence_identity_fields:
+    - manifest_id
+    - run_id
+    - ledger_entry_id
+    - workflow_ledger_entry_id
+    - workflow_run_id
+    - composite_run_id
+    - service_run_id
+    - log_correlation_run_id
+    - cli_preview_run_id
+    - metrics_gateway_correlation_run_id
+    forbidden_runtime_timestamp_fields:
+    - created_at
+    - updated_at
+    - completed_at
+    - duration_seconds
+    - duration_ms
+    - elapsed_seconds
+    - metric_duration_seconds
+    - debug_created_at
+    - debug_export_created_at
+    - export_created_at
+    - export_manifest_created_at
+  - artifact: runtime.checkpoint_execution_identity
+    required_fields:
+    - pipeline_name
+    - run_type
+    - effective_config_hash
+    - effective_config_artifact_id
+    - contract_ref
+    - contract_version
+    - execution_fingerprint
+    forbidden_occurrence_identity_fields:
+    - manifest_id
+    - run_id
+    - ledger_entry_id
+    - workflow_ledger_entry_id
+    - workflow_run_id
+    - composite_run_id
+    - service_run_id
+    - log_correlation_run_id
+    - cli_preview_run_id
+    - metrics_gateway_correlation_run_id
+    forbidden_runtime_timestamp_fields:
+    - created_at
+    - updated_at
+    - completed_at
+    - duration_seconds
+    - duration_ms
+    - elapsed_seconds
+    - metric_duration_seconds
+    - debug_created_at
+    - debug_export_created_at
+    - export_created_at
+    - export_manifest_created_at
+runtime_timestamp_identity_contract:
+  replay_identity_anchor: false
+  forbidden_semantic_identity_fields:
+  - created_at
+  - updated_at
+  - completed_at
+  - duration_seconds
+  - duration_ms
+  - elapsed_seconds
+  - metric_duration_seconds
+  - debug_created_at
+  - debug_export_created_at
+  - export_created_at
+  - export_manifest_created_at
+  allowed_non_identity_surfaces:
+  - artifact: runtime.metrics.duration_observations
+    fields:
+    - duration_seconds
+    - duration_ms
+    - elapsed_seconds
+    replay_identity_anchor: false
+    rationale: Runtime durations are operator-facing performance evidence and must
+      not participate in content hashes, execution fingerprints, or checkpoint
+      execution identity.
+  - artifact: operator.debug_export.metadata
+    fields:
+    - debug_created_at
+    - debug_export_created_at
+    replay_identity_anchor: false
+    rationale: Debug export timestamps describe when an operator artifact was
+      generated; replay must compare semantic inputs and outputs instead.
+  - artifact: operator.export_manifest.metadata
+    fields:
+    - export_created_at
+    - export_manifest_created_at
+    replay_identity_anchor: false
+    rationale: Export manifest creation times are correlation metadata and are
+      excluded from deterministic content identity.
+allowed_occurrence_identity_generators: []
+legacy_config_hash_policy:
+  field: config_hash
+  alias_of: resolved_config_hash
+  semantic_classification: compatibility-only
+  replay_identity_anchor: false
+  primary_semantic_anchor: effective_config_hash
+  canonical_replay_anchors:
+  - execution_fingerprint
+  - resolved_config_hash
+  - effective_config_hash
+  rationale: Legacy config_hash is retained for older manifest and sidecar consumers;
+    new replay comparisons must use execution_fingerprint plus the explicit resolved/effective
+    config hashes and must not promote config_hash to a primary semantic anchor.
+  issue: '#4467'
+  reviewed_outcome: keep_compatibility_alias_but_block_new_semantics
+content_hash_datetime_policy:
+  active_policy: v2_datetime_utc
+  migration_target: v2_datetime_utc
+  reviewed_outcome: v2_default_active_with_explicit_v1_date_compatibility
+  policies:
+    v1_date:
+      description: Historical content-hash compatibility contract.
+      datetime_normalization: date_only_iso
+      distinguishes_same_day_timestamps: false
+      migration_status: explicit_date_only_compatibility
+    v2_datetime_utc:
+      description: Timestamp-sensitive business identity contract.
+      datetime_normalization: utc_iso_microseconds
+      distinguishes_same_day_timestamps: true
+      migration_status: active_default
+  invariants:
+  - Existing content_hash values must not be silently rewritten.
+  - Versioned hash policy must be recorded before changing defaults.
+  - META_FIELDS and underscore-prefixed runtime fields remain excluded.
+  datetime_hash_backfill_plan:
+    issue: '#4587'
+    owner: architecture-governance
+    status: deterministic_default_switched_backfill_complete
+    default_switch_target: v2_datetime_utc
+    default_switch_gate: Active default is v2_datetime_utc; historical v1_date hashes
+      remain readable only through explicit compatibility metadata and must not
+      expand through new entity-level date-only declarations.
+    phases:
+    - id: inventory
+      exit_criteria: Enumerate fields whose source values can carry sub-day timestamp
+        semantics and classify date-only sources separately.
+    - id: dual_write
+      exit_criteria: Persist v1_date and v2_datetime_utc evidence side by side for
+        migrated entities without rewriting historical content_hash values.
+    - id: backfill
+      exit_criteria: Generate reviewed mapping from historical v1_date hashes to v2_datetime_utc
+        hashes for timestamp-sensitive entities.
+    - id: ratchet
+      exit_criteria: Keep active_policy at v2_datetime_utc and fail if date-only compatibility
+        use is not declared in entity config metadata.
+  timestamp_sensitive_entity_inventory:
+  - provider: uniprot
+    entity: protein
+    fields:
+    - entry_created
+    - entry_modified
+    - sequence_modified
+    configured_policy: v2_datetime_utc
+    status: migrated
+    rationale: UniProt revision timestamps participate in business identity and must
+      distinguish same-day changes when represented as datetime values.
+  date_only_entity_inventory: []

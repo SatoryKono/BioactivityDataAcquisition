@@ -1,0 +1,307 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit configuration for BioETL project
+# Based on official CodeRabbit configuration schema (updated 09.07.2026)
+# Target profile: Python, pytest, external providers, ETL/scientific pipelines
+
+# Language
+language: "en-US"
+
+# Language and tone
+tone_instructions: "Be concise, neutral, and evidence-based. Prioritize correctness, security, data integrity, backward compatibility, and maintainability. Avoid praise, repetition, style-only comments, and claims not supported by the diff."
+
+# PR review settings
+reviews:
+  # Enable high-level summary
+  high_level_summary: true
+
+  # Show summary in walkthrough
+  high_level_summary_in_walkthrough: true
+
+  # Review profile
+  profile: "assertive"
+
+  # Review every changed repository path unless a future rule excludes it.
+  path_filters:
+    - "**"
+
+  # Request changes workflow
+  request_changes_workflow: false
+
+  # Auto review settings
+  auto_review:
+    enabled: true
+    drafts: false
+
+  # Keep assignment and label mutations disabled until pilot validation.
+  auto_assign_reviewers: false
+  auto_apply_labels: false
+
+  # High-level summary instructions
+  high_level_summary_instructions: |
+    Provide one sentence about the goal and resulting behavior.
+    List 3-7 bullet points covering only applicable categories:
+    - Behavior changes and public contract impact
+    - Data quality implications (schema evolution, contracts)
+    - Architecture impact (layer/port placement)
+    - Observability integration (metrics, tracing, logging)
+    - Testing approach (coverage, VCR usage, architecture tests)
+    - Breaking changes with migration notes
+    - Security implications
+    Include explicit sections for Breaking changes / Migration required / Risk when applicable.
+    Maximum 200 words. No unconfirmed test results or performance claims.
+
+  # Automatic PR title instructions
+  auto_title_instructions: |
+    Generate one Conventional Commits-style PR title: <type>(<scope>): <imperative summary>.
+    Use feat, fix, refactor, perf, test, docs, build, ci, chore, or revert.
+    Select the type from the dominant material change, use the narrowest useful scope,
+    keep the title at or below 72 characters, omit a trailing period,
+    and do not add issue IDs unless they are already present in the PR context.
+
+  # PR labeling instructions (disabled until validated on PR history)
+  labeling_instructions:
+    - label: "type:feature"
+      instructions: "Apply when the PR introduces a new or substantially expanded user-facing capability."
+    - label: "type:bug"
+      instructions: "Apply when the PR fixes a confirmed behavior mismatch."
+    - label: "type:refactor"
+      instructions: "Apply when the PR changes internal structure without intentional behavior change."
+    - label: "security"
+      instructions: "Apply when the PR changes trust boundaries, auth, secrets, cryptography, or sensitive data handling."
+    - label: "breaking-change"
+      instructions: "Apply when the PR introduces confirmed incompatibility in public contracts (API, schema, CLI, config, events, data formats)."
+    - label: "dependencies"
+      instructions: "Apply when the PR materially changes dependencies, not incidental lockfile churn."
+    - label: "tests"
+      instructions: "Apply when tests are the primary delivery of the PR."
+    - label: "documentation"
+      instructions: "Apply when documentation is the primary deliverable."
+
+  # Suggested reviewers instructions (disabled until demo handles are replaced)
+  suggested_reviewers_instructions:
+    - reviewers:
+        - handle: "security-team"
+          type: "group"
+      instructions: "Request review for changes to auth, access control, secrets, cryptography, network exposure, or sensitive data."
+    - reviewers:
+        - handle: "data-platform"
+          type: "group"
+      instructions: "Request review for migrations, persisted formats, ETL contracts, lineage, or idempotency changes."
+    - reviewers:
+        - handle: "api-owners"
+          type: "group"
+      instructions: "Request review for public API, CLI, events, versioned schemas, or config format changes."
+
+  # Path-based review instructions
+  path_instructions:
+    - path: "src/**/*.py"
+      instructions: |
+        Focus on correctness, error handling, typing, resource management, concurrency, and compatibility.
+        Check for:
+        - Architecture compliance (Hexagonal + DDD layer boundaries)
+        - Domain layer purity (no I/O, HTTP, DB, env access, concrete logging)
+        - Proper error boundaries and resilience patterns
+        - Type safety (mypy strict mode compliance)
+        - Resource cleanup and proper context management
+        - Backward compatibility and contract stability
+        - Security best practices (no secrets, proper env handling)
+        - Observability integration (metrics, structured logging, tracing)
+
+    - path: "tests/**/*.py"
+      instructions: |
+        Focus on observable behavior, meaningful assertions, edge/error paths, and determinism.
+        Check for:
+        - Observable behavior over implementation details
+        - Meaningful assertions with clear failure messages
+        - Coverage of edge cases and error paths
+        - Determinism and reproducibility
+        - Proper use of VCR for HTTP tests
+        - Property-based testing (Hypothesis) for domain logic
+        - Architecture test coverage
+        - No live service dependencies (use fixtures/fakes)
+
+    - path: "src/bioetl/infrastructure/adapters/**/*.py"
+      instructions: |
+        Focus on external provider integration resilience.
+        Check for:
+        - Proper timeout configuration
+        - Retry/backoff logic with exponential backoff
+        - Pagination handling
+        - Rate limit compliance
+        - Schema drift detection
+        - Secret handling (no hardcoded credentials)
+        - Error mapping to domain errors
+        - Telemetry and observability
+
+    - path: "src/bioetl/application/pipelines/**/*.py"
+      instructions: |
+        Focus on ETL pipeline correctness and data integrity.
+        Check for:
+        - Reproducibility (stable ordering, deterministic outputs)
+        - Proper units and schema handling
+        - Data lineage tracking
+        - Stable ordering for idempotent operations
+        - Atomic writes (tmp → os.replace pattern)
+        - Checkpoint durability
+        - Idempotency contracts
+        - Quarantine handling for failed records
+
+    - path: "**/migrations/**"
+      instructions: |
+        Focus on data safety and migration reliability.
+        Check for:
+        - Data loss prevention
+        - Proper locking mechanisms
+        - Rollout order (forward then backward migration)
+        - Mixed-version compatibility
+        - Schema evolution contracts
+        - Migration testing and validation
+        - Rollback procedures
+
+    - path: ".github/workflows/**"
+      instructions: |
+        Focus on CI/CD security and reliability.
+        Check for:
+        - Minimal required permissions
+        - Injection prevention
+        - Secret handling (no hardcoded secrets)
+        - Action pinning (specific SHA hashes)
+        - Cache and artifact trust boundaries
+        - Deterministic workflow behavior
+        - Proper timeout handling
+
+    - path: "docs/**"
+      instructions: |
+        Focus on documentation accuracy and completeness.
+        Check for:
+        - Correspondence with implementation
+        - Accurate default values and examples
+        - Correct command syntax and versions
+        - Migration step completeness
+        - Architecture diagram accuracy
+        - Contract documentation alignment
+        - Breaking change documentation
+
+    - path: "pyproject.toml"
+      instructions: |
+        Focus on dependency management and Python compatibility.
+        Check for:
+        - Proper version bounds (no overly broad ranges)
+        - Runtime vs dev dependency classification
+        - Python version compatibility
+        - Lockfile and CI consistency
+        - Security update implications
+        - Minimum version age (7+ days for new deps)
+
+  # Custom finishing touches recipes
+  finishing_touches:
+    custom:
+      - name: "harden-python-change"
+        instructions: |
+          Scope: Only modified Python files and directly affected tests.
+          Allowed: Local behavior-preserving fixes (typing, error handling, resource cleanup).
+          Forbidden: Public API redesign, schema/data changes, new dependencies, suppression diagnostics, unrelated cleanup.
+          Required: Run configured formatter, linter, type checker, and affected tests.
+          Validation: Report exact commands run or explain why a command could not execute.
+          Format: Provide diff with clear justification for each change.
+
+  # Pre-merge checks
+  pre_merge_checks:
+    title:
+      requirements: |
+        The title must follow <type>(<optional-scope>): <imperative summary>,
+        use a valid Conventional Commits type (feat, fix, refactor, perf, test, docs, build, ci, chore, revert),
+        describe the dominant material change, be 72 characters or fewer,
+        and have no trailing period.
+        Do not require a scope when no stable component name exists.
+
+    custom_checks:
+      - name: "public-contract-compatibility"
+        instructions: |
+          PASS: No changes to public contracts (API, schema, CLI, events, config formats, data formats) OR changes include version bump, ADR reference, migration notes, and rollback procedure.
+          FAIL: Unversioned breaking change to public contract without migration path.
+          NOT APPLICABLE: Changes only to private implementation or tests.
+          Do not fail on speculative risk; require concrete contract violation.
+          Cite specific symbol/path/contract when failing.
+
+      - name: "behavioral-test-adequacy"
+        instructions: |
+          PASS: Behavior changes include meaningful automated verification (unit, integration, or contract tests) OR change is trivial refactor with identical behavior.
+          FAIL: Material behavior change without observable test coverage.
+          NOT APPLICABLE: Documentation-only changes, test additions, or configuration updates.
+          Do not fail on missing edge case coverage; require nominal path verification.
+          Cite specific function/path requiring test when failing.
+
+      - name: "data-reproducibility-integrity"
+        instructions: |
+          PASS: Data pipeline changes maintain schema, units, seeds, provenance, ordering, idempotency, and partial output semantics OR include explicit migration plan.
+          FAIL: Silent change to data contracts, units, or ordering without migration.
+          NOT APPLICABLE: Code-only changes without data pipeline impact.
+          Do not fail on hypothetical reproducibility issues; require concrete contract violation.
+          Cite specific pipeline/schema/contract when failing.
+
+  # Post-merge actions (disabled until pilot testing)
+  post_merge_actions:
+    - name: "update-changelog"
+      enabled: false
+      prompt: |
+        Determine if changelog update is needed: only for user-visible, public, security, or deployment impact.
+        If no impact, take no action.
+        If impact exists, edit only Unreleased section in existing changelog format.
+        Forbidden: changing version, date, tag, or publishing artifacts.
+        Required: validate format and create follow-up PR if needed.
+        Report specific changes made or rationale for no action.
+
+# Knowledge base for linked repositories (commented until real ORG/REPO provided)
+# knowledge_base:
+#   linked_repositories:
+#     - repository: "ORG/REPO"
+#       instructions: |
+#         This repository owns versioned API/data contracts consumed by BioETL.
+#         Verify exact endpoint/event/schema compatibility.
+#         Direction: BioETL must remain compatible with this repository's contracts.
+#         Report only confirmed mismatches; do not infer undocumented dependencies.
+
+# Code generation settings
+code_generation:
+  docstrings:
+    path_instructions:
+      - path: "src/**/*.py"
+        instructions: |
+          Use NumPy-style docstrings for public modules, classes, functions, and methods.
+          Include: Parameters, Returns/Yields, Raises, side effects.
+          Specify units, shapes, dtypes, ranges, and mutability when applicable.
+          Describe only behavior confirmed by implementation or tests.
+          Avoid verbose docstrings for trivial private helpers.
+
+  unit_tests:
+    path_instructions:
+      - path: "tests/**/*.py"
+        instructions: |
+          Use pytest framework.
+          Focus on: observable behavior, regression, nominal/boundary/error paths.
+          Specify values, units, shapes, dtypes, ordering, and side effects.
+          Use meaningful parametrization.
+          Control seed, time, locale, environment, filesystem, and network.
+          Use fakes or recorded fixtures instead of live services.
+          Do not duplicate production logic or weaken production code.
+          Report exact tests executed or limitations.
+
+# Issue enrichment settings
+issue_enrichment:
+  labeling:
+    labeling_instructions:
+      - label: "bug"
+        instructions: "Apply for confirmed behavior mismatches with reproduction steps."
+      - label: "enhancement"
+        instructions: "Apply for new feature requests or capability expansions."
+      - label: "documentation"
+        instructions: "Apply for documentation improvements or corrections."
+      - label: "security"
+        instructions: "Apply for security vulnerabilities or sensitive data issues."
+      - label: "needs-reproduction"
+        instructions: "Apply when issue lacks sufficient reproduction data or evidence."
+
+# Chat settings
+chat:
+  auto_reply: true
