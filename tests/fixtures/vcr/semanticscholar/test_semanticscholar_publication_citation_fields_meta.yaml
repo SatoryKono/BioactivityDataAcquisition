@@ -1,0 +1,8 @@
+schema_version: 1
+provider: semanticscholar
+cassette_rel_path: tests/fixtures/vcr/semanticscholar/test_semanticscholar_publication_citation_fields.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 7d2789a1a23afefdcbee37d7e852f8fb39dabd73853d709ac45afb28f14f27cd
+recorded_at: '2026-07-03'
+staleness_ready: true

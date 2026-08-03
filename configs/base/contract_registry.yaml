@@ -1,0 +1,662 @@
+# Contract Registry
+# Machine-verifiable governance for data contracts.
+
+version: "1.0"
+entries:
+  chembl.molecule:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "88766938764c3a2f81dbb8ca0feb41d7ac0b36cbe4ae2405c54d4c794f5f3fb3"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.molecule"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "df6a4fa6a47a157164fb6fde9ac9f7b3e16813f02fec005fffc105981f04c880"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_molecule_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-04-23T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.molecule"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "df6a4fa6a47a157164fb6fde9ac9f7b3e16813f02fec005fffc105981f04c880"
+
+  chembl.activity:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "324651bc17fbcdae6688f2aed5bb1e80f70e3b4bc00eee70d1ee86af0e818f36"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.activity"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "c3afc70ea63d61d224e2f38b5fa26be5841c84c457289ca39fec3da98e4daed3"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_activity_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-05-08T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.activity"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "c3afc70ea63d61d224e2f38b5fa26be5841c84c457289ca39fec3da98e4daed3"
+
+  chembl.assay:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "86ce8c8430ea0744f95a00e2bed3322582638a3ecbb52d8db712957dbd0021ff"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.assay"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "95de938fc8165e6284031be87f03471cb3dc29cfb3f06c5e21652cffa52a7fcd"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_assay_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-05-16T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.assay"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "95de938fc8165e6284031be87f03471cb3dc29cfb3f06c5e21652cffa52a7fcd"
+
+  chembl.assay_parameters:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "4aac16cdf8b8f2a3fe3e2a3682d00df937eeed6b17d4ca5e1a3bca9a0a7501c0"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.assay_parameters"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "cd43d4d61524b0ca8b0cc1b61372278efce0e813dc026beb1ed36ccb9b3457f8"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-05-16T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.assay_parameters"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "cd43d4d61524b0ca8b0cc1b61372278efce0e813dc026beb1ed36ccb9b3457f8"
+
+  chembl.cell_line:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "625b91e73df51e9eca500f0507b672e8935709edea512e3a83694a5d962a2c78"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.cell_line"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "9cfc00ac9b5fe34f99cabedb3988f7d9090a4b93d3f2943d8021ac218eb711e7"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_cell_line_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-04-23T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.cell_line"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "9cfc00ac9b5fe34f99cabedb3988f7d9090a4b93d3f2943d8021ac218eb711e7"
+
+  chembl.compound_record:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "aa13425a7b3240c061045c6d6e421f9b6a35f5a7ee15894862d4e38f30455f51"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.compound_record"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "66d1e0248a0dfea6ee45f88c9e14d551bc072a2e6d95e123456d787a975b4684"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_compound_record_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-04-23T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.compound_record"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "66d1e0248a0dfea6ee45f88c9e14d551bc072a2e6d95e123456d787a975b4684"
+
+  chembl.protein_class:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "df226109bbe2cc442f481d3e1600539e345d9eef58f01105c52a37e26ee48243"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.protein_class"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "bbe60d25376d451e1adaea0d48eafbee3f5420e33e7a163b502d7e1930be0b90"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_protein_class_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-04-23T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.protein_class"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "bbe60d25376d451e1adaea0d48eafbee3f5420e33e7a163b502d7e1930be0b90"
+
+  chembl.publication:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "0146fb5f60c128294d12971425adf85633be2c768c4f1d1937643e6bfa1a789f"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.publication"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "cdee6fa6bf30f6bae72b48e989aef7192b5b6ee2223962fe90a7810e4de54d64"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_publication_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-04-23T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.publication"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "cdee6fa6bf30f6bae72b48e989aef7192b5b6ee2223962fe90a7810e4de54d64"
+
+  chembl.publication_similarity:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "db6a6e6e26cb3bbfea38616334a289c4128830954ed320fa84d98af67ba2711e"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.publication_similarity"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "657878c5a190656b33f472d2b4c102e5fd1ecb6497e4d775843a3be415739dff"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_publication_similarity_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-05-06T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.publication_similarity"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "657878c5a190656b33f472d2b4c102e5fd1ecb6497e4d775843a3be415739dff"
+
+  chembl.publication_term:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "9939ba7c202e352eee849332839badc5ec1814afc77580ee435b61a89571baf4"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.publication_term"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "0d2baa8bf5b49753c84b58933a03c2cce70b77bf3009137758a2a4c61d2e38ef"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_publication_term_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-05-06T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.publication_term"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "0d2baa8bf5b49753c84b58933a03c2cce70b77bf3009137758a2a4c61d2e38ef"
+
+  chembl.subcellular_fraction:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "446236ee7277058c3813c7b0227fc2ad61ca469ca257e851ecec88202e00ace1"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.subcellular_fraction"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "fe87a870ebca0d4d4a589b5ba172af5e525dcc9079a03ab9b65a636b645d133a"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_subcellular_fraction_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-05-06T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.subcellular_fraction"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "fe87a870ebca0d4d4a589b5ba172af5e525dcc9079a03ab9b65a636b645d133a"
+
+  chembl.target:
+    identity:
+      contract_version: "3.0.0"
+      compatibility_level: "major"
+      schema_hash: "89e905a362dd5fdde7d50b8b5f31a2338147a5583687aa989f94175cc21da1db"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.target"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "7375d30c12f21a666d18023ef52d071e0971ae60b9cc66efc0197fa40ba273f6"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_target_v3.0.json"
+    supported_versions: ["1.0.0", "2.0.0", "3.0.0"]
+    migration_guides: {}
+    last_updated: "2026-06-01T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.target"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "7375d30c12f21a666d18023ef52d071e0971ae60b9cc66efc0197fa40ba273f6"
+
+  chembl.target_component:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "7405ce9f89ab5704a4b38f28a1d35463fdcc9ea3a79637d0772f41c79befe663"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.target_component"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "b02c701935ff7014ed61b909351480afd2e651e3a9bce01e214526f3d6a2ec34"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_target_component_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-04-23T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.target_component"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "b02c701935ff7014ed61b909351480afd2e651e3a9bce01e214526f3d6a2ec34"
+
+  chembl.target_protein_classification:
+    identity:
+      contract_version: "2.2.0"
+      compatibility_level: "major"
+      schema_hash: "7be57aad010b1d8a0f51c56793873a2d5701597ee2fd0b2f79b3c605a64a6799"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.target_protein_classification"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "b930bb41e088bd2dc6c329a5a15068618dd5dc2e4ccc547aadd4a8ba24a424b8"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.2.json"
+    supported_versions: ["1.0.0", "2.0.0", "2.1.0", "2.2.0"]
+    migration_guides: {}
+    last_updated: "2026-06-16T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.target_protein_classification"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "b930bb41e088bd2dc6c329a5a15068618dd5dc2e4ccc547aadd4a8ba24a424b8"
+
+  chembl.tissue:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "9c515a3a906a9f3ed2b7fa60d2f0534ba2f7cf59de87a78093c6ea71233aeeac"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.tissue"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "442f35f1b18e7bfb8c6903788f8a5250a49affbd12c89111529182e3d8f19afb"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_tissue_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-04-23T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.tissue"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "442f35f1b18e7bfb8c6903788f8a5250a49affbd12c89111529182e3d8f19afb"
+
+  pubchem.compound:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "caa17be6e466eaae2eb97f9fffda050897bdf5e7169ab5ed7e92a73320ba79f5"
+      dq_policy_ref: "pubchem.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "pubchem.compound"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "4ee86e738dedda541f331d2e2cba187971fc4fab651ea56329ef9c31c484e8ef"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/pubchem.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/pubchem_compound_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-03-25T00:00:00Z"
+    owners: ["pubchem-team"]
+    dq_policy_ref: "pubchem.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "pubchem.compound"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "4ee86e738dedda541f331d2e2cba187971fc4fab651ea56329ef9c31c484e8ef"
+
+  pubmed.publication:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "fb070a529d0c8c2ac0001b4f66e0815dc68c9415e166ffc76b1adc6944c0e6b1"
+      dq_policy_ref: "pubmed.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "pubmed.publication"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "54ac95c83794ef82ee42b16496061554b49466d03e85ad295ba90fc084db623c"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/publications_pubmed.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/pubmed_publication_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-03-25T00:00:00Z"
+    owners: ["biblio-team"]
+    dq_policy_ref: "pubmed.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "pubmed.publication"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "54ac95c83794ef82ee42b16496061554b49466d03e85ad295ba90fc084db623c"
+
+  crossref.publication:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "3e5380ad743d4efe2bf92d13aec12c730515cdb619d9f87a49b3bbf78d6ed569"
+      dq_policy_ref: "crossref.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "crossref.publication"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "c16188cc293254168b4f40ff0054b6b57307289968b1756793925e1247977b80"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/publications_crossref.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/crossref_publication_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-04-29T00:00:00Z"
+    owners: ["biblio-team"]
+    dq_policy_ref: "crossref.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "crossref.publication"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "c16188cc293254168b4f40ff0054b6b57307289968b1756793925e1247977b80"
+
+  openalex.publication:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "b233899a4972e858304320b895f5466bae95824582e279016a047850cbcab4da"
+      dq_policy_ref: "openalex.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "openalex.publication"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "08680f888194c42da25c3776b23aa3e48cb2bd74365fbe82f43c4169c7e91f46"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/publications_openalex.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/openalex_publication_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-04-29T00:00:00Z"
+    owners: ["biblio-team"]
+    dq_policy_ref: "openalex.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "openalex.publication"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "08680f888194c42da25c3776b23aa3e48cb2bd74365fbe82f43c4169c7e91f46"
+
+  semanticscholar.publication:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "8b1cebefd23c6a6a5f7e8b772d91e7fcc35b7d16f8694b04024e810d585d07f8"
+      dq_policy_ref: "semanticscholar.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "semanticscholar.publication"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "c167fa44a41a2628a896f9f3389b569baa8d55a44cbd1f4bbcb1a34459c01106"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/publications_semanticscholar.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/semanticscholar_publication_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-04-29T00:00:00Z"
+    owners: ["biblio-team"]
+    dq_policy_ref: "semanticscholar.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "semanticscholar.publication"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "c167fa44a41a2628a896f9f3389b569baa8d55a44cbd1f4bbcb1a34459c01106"
+
+  uniprot.idmapping:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "8c3de53d4e04953bf8e1afa60c504c97e480152077e59448f35d4a32a2c25a69"
+      dq_policy_ref: "uniprot.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "uniprot.idmapping"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "946a7726d194580cd86aa645c38081f34436db4d89a18717891f3b331db417b8"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/uniprot.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/uniprot_idmapping_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-04-29T00:00:00Z"
+    owners: ["uniprot-team"]
+    dq_policy_ref: "uniprot.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "uniprot.idmapping"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "946a7726d194580cd86aa645c38081f34436db4d89a18717891f3b331db417b8"
+
+  uniprot.protein:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "15787b32473c2bee407cb9135980dd730d8553e383f8de9c2910222923128a8e"
+      dq_policy_ref: "uniprot.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "uniprot.protein"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "26e622571b5d4f40f35108c263e170e4ff916a49737c197fc8b9b0efd1622a5e"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/uniprot.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/uniprot_protein_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-04-29T00:00:00Z"
+    owners: ["uniprot-team"]
+    dq_policy_ref: "uniprot.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "uniprot.protein"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "26e622571b5d4f40f35108c263e170e4ff916a49737c197fc8b9b0efd1622a5e"
+
+  composite.activity:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "0a087d24257e1936f265ae0fe12ddbfebaf0a0c541ec9c338108eaa35c37a12b"
+      dq_policy_ref: "composite.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "composite.activity"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "1d6acfc137f3678487f98601533c861f077fae509565193e7965e7c95a908163"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/composite_bioassay.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/composite_activity_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-05-12T00:00:00Z"
+    owners: ["platform-team"]
+    dq_policy_ref: "composite.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "composite.activity"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "1d6acfc137f3678487f98601533c861f077fae509565193e7965e7c95a908163"
+
+  composite.assay:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "de572f7142e982606839846c8bb69e459e1261b6c3cf44f8c52b601fec3e2f4d"
+      dq_policy_ref: "composite.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "composite.assay"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "4ca9fe6cdcb6e24868fd32870d36768bf982a451db9114d6f5939b87c2a267d5"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/composite_bioassay.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/composite_assay_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-05-12T00:00:00Z"
+    owners: ["platform-team"]
+    dq_policy_ref: "composite.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "composite.assay"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "4ca9fe6cdcb6e24868fd32870d36768bf982a451db9114d6f5939b87c2a267d5"
+
+  composite.molecule:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "52d5693b02f9b420248690b88f24ab65e15325b806bec412b9341f95cda743d1"
+      dq_policy_ref: "composite.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "composite.molecule"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "e36695bf796c1d18f9e47dd857819c163c7e196f69ec12a5629d12868455ea04"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/composite_molecule.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/composite_molecule_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-05-12T00:00:00Z"
+    owners: ["platform-team"]
+    dq_policy_ref: "composite.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "composite.molecule"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "e36695bf796c1d18f9e47dd857819c163c7e196f69ec12a5629d12868455ea04"
+
+  composite.publication:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "9a47462d277f8381eb3315c232a62490f21059baf7781faa5b238e92ba7464e0"
+      dq_policy_ref: "composite.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "composite.publication"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "df8a56b060cf691dda4bb6ed7f3b94b66f2502fa0ba3b0fa36b84a74a7b78a3e"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/composite_publication.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/composite_publication_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-05-12T00:00:00Z"
+    owners: ["platform-team"]
+    dq_policy_ref: "composite.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "composite.publication"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "df8a56b060cf691dda4bb6ed7f3b94b66f2502fa0ba3b0fa36b84a74a7b78a3e"
+
+  composite.target:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "0ec1052105617c504180be079b0087b8bfff3eea1a24bb8643756dc7e0a8d89a"
+      dq_policy_ref: "composite.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "composite.target"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "cc730198b861c74be4251c3ee013153c8f0397efdbcc588e150c01d8c044df20"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/composite_bioassay.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/composite_target_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-05-12T00:00:00Z"
+    owners: ["platform-team"]
+    dq_policy_ref: "composite.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "composite.target"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "cc730198b861c74be4251c3ee013153c8f0397efdbcc588e150c01d8c044df20"
+
+metadata:
+  last_updated: "2026-05-12T00:00:00Z"
+  updated_by: "technical-debt-3909"
+  governance_policy: "ADR-045"
+  validation_rules:
+    - "All contracts must have explicit owners"
+    - "All contracts must have valid source paths"
+    - "Current version must be in supported_versions"
+    - "Migration guides must exist for all version transitions"

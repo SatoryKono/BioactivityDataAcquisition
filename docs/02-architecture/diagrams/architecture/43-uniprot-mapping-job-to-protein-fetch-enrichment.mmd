@@ -1,0 +1,34 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: UniProt IDMapping To Protein Fetch Enrichment
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    flowchart
+%% @level   Provider / Component
+%% RULES: RULES.md §2.1, ADR-009, ADR-031
+flowchart TB
+    seed[seed ids or accessions]
+    adapter[UniProtAdapter]
+    idmap[UniProtIdMappingClient]
+    job[start idmapping job]
+    poll[poll job status]
+    mapped[mapped accession set]
+    protein[protein fetch adapter mixin]
+    features[feature sequence adapter mixin]
+    models[UniProt models]
+    silver[silver protein output]
+
+    seed --> adapter
+    adapter --> idmap
+    idmap --> job
+    job --> poll
+    poll ==> mapped
+    mapped ==> protein
+    protein --> features
+    features ==> models
+    models ==> silver
+
+    class seed ext;
+    class adapter app;
+    class idmap,job,poll,protein,features infra;
+    class mapped,models domain;
+    class silver silver;

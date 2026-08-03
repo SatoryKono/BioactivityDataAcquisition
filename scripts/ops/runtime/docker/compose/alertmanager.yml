@@ -1,0 +1,38 @@
+name: bioetl-alertmanager
+
+services:
+  alertmanager:
+    image: prom/alertmanager:latest@sha256:9e082985f56f4c8c9f724e18f2288c6708f472e56a5286b8863d080434ea065d
+    ports:
+      - "127.0.0.1:9093:9093"
+    volumes:
+      - ./grafana/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9093/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 128m
+    cpus: 0.50
+    pids_limit: 128
+    init: true
+    stop_grace_period: 30s
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
+
+volumes:
+  alertmanager-data:
+
+networks:
+  monitoring:
+    external: true
+    name: bioetl-monitoring

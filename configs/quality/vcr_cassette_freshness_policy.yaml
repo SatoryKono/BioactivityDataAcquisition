@@ -1,0 +1,38 @@
+# VCR cassette freshness + LFS pointer preflight (test-audit #6645).
+
+schema_version: 1
+owner: "@bioetl-platform"
+linked_issues:
+  - 6645
+  - 6636
+reviewed_on: "2026-07-27"
+
+cassette_root: tests/fixtures/vcr
+integration_vcr_policy: configs/quality/integration_vcr_policy.yaml
+
+freshness:
+  review_cadence_days: 90
+  provider_families:
+    - chembl
+    - pubchem
+    - pubmed
+    - openalex
+    - crossref
+    - semanticscholar
+    - uniprot
+
+lfs_pointer_preflight:
+  enabled: true
+  helper: tests/helpers/vcr_config.py
+  fail_mode_for_deterministic_lanes: skip_with_reason
+  reason_code: vcr_lfs_pointer
+  forbid_live_network_fallback_in:
+    - unit
+    - unit-fast
+    - architecture
+
+ownership:
+  default: "@bioetl-platform"
+  note: >-
+    Provider owners refresh cassettes when API contracts or pagination change.
+    LFS pointers must be resolved before deterministic VCR lanes run.

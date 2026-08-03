@@ -1,0 +1,403 @@
+{
+  "composite": {
+    "cross_validation": {
+      "enabled": false,
+      "enricher_pairings": [],
+      "error_threshold": 2,
+      "fuzzy_threshold": 0.8,
+      "numeric_tolerance": 0.1,
+      "quarantine_threshold": 2,
+      "warning_threshold": 1
+    },
+    "dependencies": [],
+    "enrichers": [
+      {
+        "filter_condition": "cell_id IS NOT NULL",
+        "join_keys": [
+          "cell_id"
+        ],
+        "pipeline": "chembl_cell_line",
+        "required": false,
+        "silver_table": "silver/chembl/cell_line",
+        "timeout_seconds": 300
+      },
+      {
+        "filter_condition": "tissue_id IS NOT NULL",
+        "join_keys": [
+          "tissue_id"
+        ],
+        "pipeline": "chembl_tissue",
+        "required": false,
+        "silver_table": "silver/chembl/tissue",
+        "timeout_seconds": 300
+      }
+    ],
+    "execution": {
+      "checkpoint_enabled": true,
+      "max_concurrency": 2,
+      "retry": {
+        "backoff_multiplier": 2.0,
+        "max_attempts": 3
+      }
+    },
+    "invariants": {
+      "aggregation_is_explicit": true,
+      "conflict_priorities_are_complete": true,
+      "join_keys_must_exist_in_seed_or_prior_key_source_output": true,
+      "supported_cardinalities": [
+        "one_to_one",
+        "many_to_one"
+      ]
+    },
+    "merge": {
+      "column_groups": [
+        {
+          "fields": [
+            "entity_id",
+            "content_hash",
+            "_source",
+            "_index",
+            "_lookup_method",
+            "_original_id"
+          ],
+          "name": "system",
+          "pattern": "^_composite_|^_source_providers|^_enrichment_|^_lineage_|^_dq_",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "assay_id",
+            "cell_id",
+            "tissue_id",
+            "target_id",
+            "publication_id",
+            "src_id",
+            "src_assay_id",
+            "aidx"
+          ],
+          "name": "identifiers",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "assay_type",
+            "assay_category",
+            "assay_test_type",
+            "assay_group",
+            "assay_pref_name",
+            "relationship_type",
+            "relationship_description",
+            "confidence_score",
+            "confidence_description"
+          ],
+          "name": "classification",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "assay_organism",
+            "assay_taxonomy_id",
+            "assay_strain",
+            "assay_tissue",
+            "assay_cell_type",
+            "assay_subcellular_fraction"
+          ],
+          "name": "biological_context",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "assay_description",
+            "confidence_score"
+          ],
+          "name": "description",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "bao_format",
+            "bao_label"
+          ],
+          "name": "ontology",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "cell_name",
+            "cell_description",
+            "cell_type",
+            "cell_source_tissue",
+            "cell_source_organism",
+            "cell_source_taxonomy_id",
+            "cellosaurus_id",
+            "clo_id",
+            "cl_lincs_id",
+            "cell_efo_id"
+          ],
+          "name": "cell_line",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "tissue_pref_name",
+            "tissue_uberon_id",
+            "tissue_bto_id",
+            "tissue_caloha_id",
+            "tissue_efo_id"
+          ],
+          "name": "tissue",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "variant_accession",
+            "variant_isoform",
+            "variant_mutation",
+            "variant_organism",
+            "variant_sequence",
+            "variant_taxonomy_id",
+            "variant_sequence_json"
+          ],
+          "name": "variant",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "assay_classifications",
+            "assay_parameters"
+          ],
+          "name": "complex",
+          "provider_order": [
+            "chembl"
+          ]
+        }
+      ],
+      "conflict_resolution": "seed_priority",
+      "exclude_fields": [
+        "chembl.cell_line.cell_id",
+        "chembl.tissue.tissue_id"
+      ],
+      "output": {
+        "gold": "data/output/gold/composite/assay",
+        "silver": "data/output/silver/composite/assay"
+      },
+      "preserve_all_sources": false,
+      "sort_by": {
+        "gold": [
+          "entity_id",
+          "assay_id"
+        ],
+        "silver": [
+          "entity_id",
+          "assay_id"
+        ]
+      },
+      "strategy": "left_outer"
+    },
+    "seed": {
+      "output_keys": [
+        "assay_id",
+        "cell_id",
+        "tissue_id",
+        "target_id",
+        "publication_id",
+        "assay_type",
+        "assay_description"
+      ],
+      "pipeline": "chembl_assay",
+      "silver_table": "silver/chembl/assay"
+    },
+    "version": "1.0.0"
+  },
+  "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "composite_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Seed[\"Seed: chembl_assay\"]\n    Input1[\"chembl_cell_line · cell_id\"]\n    Input1 --> Merge\n    Input2[\"chembl_tissue · tissue_id\"]\n    Input2 --> Merge\n    Merge[\"Merge: left_outer / seed_priority\"]\n    Validate[\"Cross-validation: False\"]\n    Excluded[\"Quarantine / nullification\"]\n    Gold[\"Gold: composite_assay\"]\n    Seed --> Merge --> Validate\n    Validate -->|valid| Gold\n    Validate -->|excluded| Excluded"
+    }
+  ],
+  "execution": {
+    "control_plane": {
+      "checkpoints": true,
+      "run_manifest": true
+    }
+  },
+  "extraction": {
+    "endpoint_template": null,
+    "field_groups": [],
+    "filters": [
+      {
+        "description": "cell_id IS NOT NULL",
+        "name": "chembl_cell_line",
+        "required": false,
+        "source": "dependency"
+      },
+      {
+        "description": "tissue_id IS NOT NULL",
+        "name": "chembl_tissue",
+        "required": false,
+        "source": "dependency"
+      }
+    ],
+    "method": null,
+    "selected_fields": [],
+    "source_collections": [],
+    "source_kind": "composite",
+    "source_resource": "chembl_assay",
+    "source_tables": [
+      "silver/chembl/assay",
+      "silver/chembl/cell_line",
+      "silver/chembl/tissue"
+    ]
+  },
+  "gold": {
+    "contract_ref": "composite.assay",
+    "contract_validation": {
+      "status": "resolved_by_adr_018",
+      "strict": true
+    },
+    "contract_version": "1.0.0",
+    "write": {
+      "enabled": true
+    }
+  },
+  "identity": {
+    "aliases": [],
+    "entity": "assay",
+    "pipeline_id": "composite_assay",
+    "pipeline_type": "composite",
+    "provider": "composite",
+    "status": "active",
+    "typed_id": "composite:composite_assay"
+  },
+  "kind": "pipeline",
+  "observability": {
+    "correlation_fields": [
+      "run_id",
+      "manifest_id"
+    ],
+    "metric_labels": [
+      "pipeline",
+      "run_type",
+      "status"
+    ]
+  },
+  "operator_commands": [
+    {
+      "command": "bioetl run-composite --composite assay",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run-composite --composite assay --seed-limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run-composite --composite assay --use-cached-bronze --dry-run",
+      "result": "Проверяет cached Bronze composite без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline composite_assay --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline composite_assay --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline composite_assay",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
+  "passport_schema_version": "1.0.0",
+  "provenance": {
+    "projector_version": "1.1.0",
+    "semantic_content_hash": "sha256:dd39c6922fbc64494621c6310164ca665743024c778b1e629a642d90f3396a5d",
+    "source_revision": "ec48c9da54018a057886a275553e4e0b886997de"
+  },
+  "silver": {
+    "dq_execution": {
+      "hard_fail_threshold": 0.5,
+      "invalid_record_policy": "quarantine",
+      "soft_fail_threshold": 0.1,
+      "strict_validation": true
+    },
+    "normalization_profile": "composite.assay",
+    "write": {
+      "idempotency_contract": "merge_upsert",
+      "mode": "merge"
+    }
+  },
+  "source_references": [
+    {
+      "path": "configs/composites/assay.yaml",
+      "role": "composite_config"
+    },
+    {
+      "path": "configs/entities/composite/assay.yaml",
+      "role": "effective_entity_config"
+    },
+    {
+      "path": "configs/contracts/composite/assay.yaml",
+      "role": "gold_contract"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "role": "composite_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
+    }
+  ],
+  "summary": {
+    "excluded_data_summary": "quarantine/nullification per composite policy",
+    "field_selection_summary": "seed outputs plus configured enrichers",
+    "query_filter_summary": "composite join/filter conditions",
+    "sentences": [
+      "Composite pipeline `composite_assay` использует seed `chembl_assay` и объединяет его с configured dependencies/enrichers.",
+      "Join keys, cardinality и source tables берутся из composite configuration; merge и conflict resolution выполняются общей CompositePipelineRunner.",
+      "После merge применяется configured cross-validation; исключённые значения направляются в quarantine или nullification branch согласно composite policy.",
+      "Результат проходит строгий Gold-контракт `composite.assay` и публикует manifest/checkpoint evidence."
+    ],
+    "silver_processing_summary": "composite merge",
+    "source_description": "seed=chembl_assay",
+    "validation_summary": "cross-validation and strict Gold contract"
+  }
+}

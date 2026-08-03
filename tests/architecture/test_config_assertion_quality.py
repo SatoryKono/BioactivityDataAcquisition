@@ -1,0 +1,54 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+"""Ratchets for config/checkpoint assertion quality."""
+
+from __future__ import annotations
+
+import re
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parents[2]
+
+TARGETS = (
+    ROOT
+    / "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py",
+)
+
+BANNED_PATTERNS = {
+    r"assert\s+len\(result\.recovery_suggestions\)\s*>\s*0": (
+        "recovery suggestions must be asserted as explicit lists"
+    ),
+    r"assert\s+.*result\.message\.lower\(\).*?\bor\b": (
+        "compatibility messages must be asserted exactly"
+    ),
+    r"assert\s+.*suggestions_text.*?\bor\b": (
+        "suggestion assertions must check exact ordered outputs"
+    ),
+}
+
+
+@pytest.mark.architecture
+def test_checkpoint_compatibility_tests_do_not_use_weak_assertion_forms() -> None:
+    """Compatibility tests should assert stable invariants, not broad text matches."""
+    violations: list[str] = []
+    for path in TARGETS:
+        content = path.read_text(encoding="utf-8")
+        for pattern, reason in BANNED_PATTERNS.items():
+            for match in re.finditer(pattern, content):
+                line = content.count("\n", 0, match.start()) + 1
+                violations.append(f"{path.relative_to(ROOT)}:{line}: {reason}")
+
+    assert not violations, (
+        "Weak config/checkpoint compatibility assertions found:\n"
+        + "\n".join(violations)
+    )

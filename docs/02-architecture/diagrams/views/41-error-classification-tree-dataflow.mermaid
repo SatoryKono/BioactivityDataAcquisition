@@ -1,0 +1,57 @@
+%% View: Data-Flow | Parent: 41-error-classification-tree-full.mermaid
+%% @uniform width=140 height=56 max_title_len=11 max_desc_lines=0
+flowchart TB
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N3["SCHEMA"]
+        N7["HTTP"]
+        N8["ERROR"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N2["BATCH_FAIL"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["QUARANTINE2"]
+        N4["MISSING"]
+        N5["FORMAT"]
+        N6["DQTHRESH"]
+        N9["INFRA"]
+        N10["DOMAIN"]
+        N11["no"]
+        N12["classify"]
+    end
+
+    N8 ==> N7
+    N8 --> N10
+    N8 --> N9
+    N7 --> N11
+    N7 --> N12
+    N3 --> N1
+    N4 --> N1
+    N5 --> N1
+    N6 --> N2
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 1 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 2 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 3 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 4 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 5 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 6 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 7 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 8 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4

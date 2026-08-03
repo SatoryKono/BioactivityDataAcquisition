@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repo Config"
+  short_description: "Resolve repository context"
+  default_prompt: "Use $repo-config to resolve repository defaults, branch context, and local repo settings."

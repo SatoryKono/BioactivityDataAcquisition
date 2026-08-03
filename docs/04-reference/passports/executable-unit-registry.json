@@ -1,0 +1,330 @@
+{
+  "units": [
+    {
+      "aliases": [],
+      "config_path": "configs/composites/activity.yaml",
+      "passport_path": "pipelines/composite-activity.md",
+      "typed_id": "composite:composite_activity"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/composites/assay.yaml",
+      "passport_path": "pipelines/composite-assay.md",
+      "typed_id": "composite:composite_assay"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/composites/molecule.yaml",
+      "passport_path": "pipelines/composite-molecule.md",
+      "typed_id": "composite:composite_molecule"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/composites/publication.yaml",
+      "passport_path": "pipelines/composite-publication.md",
+      "typed_id": "composite:composite_publication"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/composites/target.yaml",
+      "passport_path": "pipelines/composite-target.md",
+      "typed_id": "composite:composite_target"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/activity.yaml",
+      "passport_path": "pipelines/chembl-activity.md",
+      "typed_id": "pipeline:chembl_activity"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/assay.yaml",
+      "passport_path": "pipelines/chembl-assay.md",
+      "typed_id": "pipeline:chembl_assay"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/assay_parameters.yaml",
+      "passport_path": "pipelines/chembl-assay-parameters.md",
+      "typed_id": "pipeline:chembl_assay_parameters"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/cell_line.yaml",
+      "passport_path": "pipelines/chembl-cell-line.md",
+      "typed_id": "pipeline:chembl_cell_line"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/compound_record.yaml",
+      "passport_path": "pipelines/chembl-compound-record.md",
+      "typed_id": "pipeline:chembl_compound_record"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/molecule.yaml",
+      "passport_path": "pipelines/chembl-molecule.md",
+      "typed_id": "pipeline:chembl_molecule"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/protein_class.yaml",
+      "passport_path": "pipelines/chembl-protein-class.md",
+      "typed_id": "pipeline:chembl_protein_class"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/publication.yaml",
+      "passport_path": "pipelines/chembl-publication.md",
+      "typed_id": "pipeline:chembl_publication"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/publication_similarity.yaml",
+      "passport_path": "pipelines/chembl-publication-similarity.md",
+      "typed_id": "pipeline:chembl_publication_similarity"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/publication_term.yaml",
+      "passport_path": "pipelines/chembl-publication-term.md",
+      "typed_id": "pipeline:chembl_publication_term"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/subcellular_fraction.yaml",
+      "passport_path": "pipelines/chembl-subcellular-fraction.md",
+      "typed_id": "pipeline:chembl_subcellular_fraction"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/target.yaml",
+      "passport_path": "pipelines/chembl-target.md",
+      "typed_id": "pipeline:chembl_target"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/target_component.yaml",
+      "passport_path": "pipelines/chembl-target-component.md",
+      "typed_id": "pipeline:chembl_target_component"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/target_protein_classification.yaml",
+      "passport_path": "pipelines/chembl-target-protein-classification.md",
+      "typed_id": "pipeline:chembl_target_protein_classification"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/chembl/tissue.yaml",
+      "passport_path": "pipelines/chembl-tissue.md",
+      "typed_id": "pipeline:chembl_tissue"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/crossref/publication.yaml",
+      "passport_path": "pipelines/crossref-publication.md",
+      "typed_id": "pipeline:crossref_publication"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/openalex/publication.yaml",
+      "passport_path": "pipelines/openalex-publication.md",
+      "typed_id": "pipeline:openalex_publication"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/pubchem/compound.yaml",
+      "passport_path": "pipelines/pubchem-compound.md",
+      "typed_id": "pipeline:pubchem_compound"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/pubmed/publication.yaml",
+      "passport_path": "pipelines/pubmed-publication.md",
+      "typed_id": "pipeline:pubmed_publication"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/semanticscholar/publication.yaml",
+      "passport_path": "pipelines/semanticscholar-publication.md",
+      "typed_id": "pipeline:semanticscholar_publication"
+    },
+    {
+      "aliases": [
+        "data-source:uniprot_idmapping"
+      ],
+      "config_path": "configs/entities/uniprot/idmapping.yaml",
+      "passport_path": "pipelines/uniprot-idmapping.md",
+      "typed_id": "pipeline:uniprot_idmapping"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/entities/uniprot/protein.yaml",
+      "passport_path": "pipelines/uniprot-protein.md",
+      "typed_id": "pipeline:uniprot_protein"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_activity.yaml",
+      "passport_path": "workflows/chembl-activity.md",
+      "typed_id": "workflow:chembl_activity"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_assay.yaml",
+      "passport_path": "workflows/chembl-assay.md",
+      "typed_id": "workflow:chembl_assay"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_assay_parameters.yaml",
+      "passport_path": "workflows/chembl-assay-parameters.md",
+      "typed_id": "workflow:chembl_assay_parameters"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_baseline.yaml",
+      "passport_path": "workflows/chembl-baseline.md",
+      "typed_id": "workflow:chembl_baseline"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_cell_line.yaml",
+      "passport_path": "workflows/chembl-cell-line.md",
+      "typed_id": "workflow:chembl_cell_line"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_compound_record.yaml",
+      "passport_path": "workflows/chembl-compound-record.md",
+      "typed_id": "workflow:chembl_compound_record"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_core.yaml",
+      "passport_path": "workflows/chembl-core.md",
+      "typed_id": "workflow:chembl_core"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_molecule.yaml",
+      "passport_path": "workflows/chembl-molecule.md",
+      "typed_id": "workflow:chembl_molecule"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_protein_class.yaml",
+      "passport_path": "workflows/chembl-protein-class.md",
+      "typed_id": "workflow:chembl_protein_class"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_publication.yaml",
+      "passport_path": "workflows/chembl-publication.md",
+      "typed_id": "workflow:chembl_publication"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_publication_similarity.yaml",
+      "passport_path": "workflows/chembl-publication-similarity.md",
+      "typed_id": "workflow:chembl_publication_similarity"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_publication_term.yaml",
+      "passport_path": "workflows/chembl-publication-term.md",
+      "typed_id": "workflow:chembl_publication_term"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_reference_pack.yaml",
+      "passport_path": "workflows/chembl-reference-pack.md",
+      "typed_id": "workflow:chembl_reference_pack"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_subcellular_fraction.yaml",
+      "passport_path": "workflows/chembl-subcellular-fraction.md",
+      "typed_id": "workflow:chembl_subcellular_fraction"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_target.yaml",
+      "passport_path": "workflows/chembl-target.md",
+      "typed_id": "workflow:chembl_target"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_target_component.yaml",
+      "passport_path": "workflows/chembl-target-component.md",
+      "typed_id": "workflow:chembl_target_component"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_target_protein_classification.yaml",
+      "passport_path": "workflows/chembl-target-protein-classification.md",
+      "typed_id": "workflow:chembl_target_protein_classification"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/chembl_tissue.yaml",
+      "passport_path": "workflows/chembl-tissue.md",
+      "typed_id": "workflow:chembl_tissue"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/crossref_publication.yaml",
+      "passport_path": "workflows/crossref-publication.md",
+      "typed_id": "workflow:crossref_publication"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/openalex_publication.yaml",
+      "passport_path": "workflows/openalex-publication.md",
+      "typed_id": "workflow:openalex_publication"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/pubchem_compound.yaml",
+      "passport_path": "workflows/pubchem-compound.md",
+      "typed_id": "workflow:pubchem_compound"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/publication_provider_pack.yaml",
+      "passport_path": "workflows/publication-provider-pack.md",
+      "typed_id": "workflow:publication_provider_pack"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/pubmed_publication.yaml",
+      "passport_path": "workflows/pubmed-publication.md",
+      "typed_id": "workflow:pubmed_publication"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/semanticscholar_publication.yaml",
+      "passport_path": "workflows/semanticscholar-publication.md",
+      "typed_id": "workflow:semanticscholar_publication"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/uniprot_idmapping.yaml",
+      "passport_path": "workflows/uniprot-idmapping.md",
+      "typed_id": "workflow:uniprot_idmapping"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/uniprot_protein.yaml",
+      "passport_path": "workflows/uniprot-protein.md",
+      "typed_id": "workflow:uniprot_protein"
+    },
+    {
+      "aliases": [],
+      "config_path": "configs/workflows/uniprot_support_pack.yaml",
+      "passport_path": "workflows/uniprot-support-pack.md",
+      "typed_id": "workflow:uniprot_support_pack"
+    }
+  ]
+}

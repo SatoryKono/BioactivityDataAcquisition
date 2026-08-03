@@ -1,0 +1,273 @@
+# Fast Check - Contract Governance
+# Runs quick validation checks for contract identity and registry consistency
+
+name: Contract Governance Fast Check
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'configs/base/contract_registry.yaml'
+      - 'configs/contracts/**'
+      - 'configs/entities/**'
+      - 'src/bioetl/domain/**/*contract*'
+      - 'reports/quality/contract-coverage-matrix.json'
+      - 'reports/quality/pipeline-config-contract-ownership-map.json'
+      - 'scripts/engineering/qa/report_contract_coverage_matrix.py'
+      - 'scripts/engineering/qa/report_pipeline_config_contract_ownership.py'
+      - 'scripts/engineering/ci/validate_contract_*.py'
+      - 'scripts/engineering/ci/validate_registry_dq_refs.py'
+      - 'scripts/engineering/ci/validate_schema_classifier_gate.py'
+      - 'tests/architecture/test_contract_coverage_matrix_*.py'
+      - 'tests/architecture/test_pipeline_config_contract_ownership_map_*.py'
+      - '.github/workflows/contract-governance-*.yml'
+  pull_request:
+    paths:
+      - 'configs/base/contract_registry.yaml'
+      - 'configs/contracts/**'
+      - 'configs/entities/**'
+      - 'src/bioetl/domain/**/*contract*'
+      - 'reports/quality/contract-coverage-matrix.json'
+      - 'reports/quality/pipeline-config-contract-ownership-map.json'
+      - 'scripts/engineering/qa/report_contract_coverage_matrix.py'
+      - 'scripts/engineering/qa/report_pipeline_config_contract_ownership.py'
+      - 'scripts/engineering/ci/validate_contract_*.py'
+      - 'scripts/engineering/ci/validate_registry_dq_refs.py'
+      - 'scripts/engineering/ci/validate_schema_classifier_gate.py'
+      - 'tests/architecture/test_contract_coverage_matrix_*.py'
+      - 'tests/architecture/test_pipeline_config_contract_ownership_map_*.py'
+      - '.github/workflows/contract-governance-*.yml'
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.13"
+  UV_VERSION: "0.7.9"
+
+jobs:
+  fast-check:
+    name: Fast Check - Contract Identity & Registry
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v4.9.1
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@cda7432b7ae1feb69168d44b610cb8e3cdbd09b0 # v1
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          uv venv
+          # Prefer lockfile-backed project sync (Sonar S8544/S8541).
+          uv sync --frozen --no-build --extra dev
+
+      - name: Run contract identity checks
+        id: identity-check
+        run: |
+          echo "::group::Contract Identity Validation"
+          set +e
+          uv run --frozen --no-build python scripts/engineering/ci/validate_contract_identity.py
+          IDENTITY_EXIT_CODE=$?
+          set -e
+          echo "::endgroup::"
+
+          if [ $IDENTITY_EXIT_CODE -eq 0 ]; then
+            echo "contract_identity_verdict=passed" >> $GITHUB_OUTPUT
+          else
+            echo "contract_identity_verdict=failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run registry consistency checks
+        id: registry-check
+        run: |
+          echo "::group::Registry Consistency Validation"
+          set +e
+          uv run --frozen --no-build python scripts/engineering/ci/validate_contract_registry.py
+          REGISTRY_EXIT_CODE=$?
+          set -e
+          echo "::endgroup::"
+
+          if [ $REGISTRY_EXIT_CODE -eq 0 ]; then
+            echo "registry_consistency_verdict=passed" >> $GITHUB_OUTPUT
+          else
+            echo "registry_consistency_verdict=failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run pipeline config contract ownership matrix check
+        id: ownership-map-check
+        run: |
+          echo "::group::Pipeline Config Contract Ownership Matrix"
+          set +e
+          uv run --frozen --no-build python -m scripts.engineering.qa report-pipeline-config-contract-ownership-map --check
+          OWNERSHIP_EXIT_CODE=$?
+          set -e
+          echo "::endgroup::"
+
+          if [ $OWNERSHIP_EXIT_CODE -eq 0 ]; then
+            echo "ownership_matrix_verdict=passed" >> $GITHUB_OUTPUT
+          else
+            echo "ownership_matrix_verdict=failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run contract coverage matrix check
+        id: coverage-matrix-check
+        run: |
+          echo "::group::Contract Coverage Matrix"
+          set +e
+          uv run --frozen --no-build python -m scripts.engineering.qa report-contract-coverage-matrix --check
+          COVERAGE_EXIT_CODE=$?
+          set -e
+          echo "::endgroup::"
+
+          if [ $COVERAGE_EXIT_CODE -eq 0 ]; then
+            echo "coverage_matrix_verdict=passed" >> $GITHUB_OUTPUT
+          else
+            echo "coverage_matrix_verdict=failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run schema classifier governance gate
+        id: classifier-check
+        run: |
+          echo "::group::Schema Classifier Governance"
+          BASE_SHA="${{ github.event.pull_request.base.sha || github.event.before }}"
+          HEAD_SHA="${{ github.sha }}"
+          set +e
+          if [ -n "$BASE_SHA" ]; then
+            uv run --frozen --no-build python scripts/engineering/ci/validate_schema_classifier_gate.py --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA"
+          else
+            uv run --frozen --no-build python scripts/engineering/ci/validate_schema_classifier_gate.py --head-sha "$HEAD_SHA"
+          fi
+          CLASSIFIER_EXIT_CODE=$?
+          set -e
+          echo "::endgroup::"
+
+          if [ $CLASSIFIER_EXIT_CODE -eq 0 ]; then
+            echo "classifier_verdict=passed" >> $GITHUB_OUTPUT
+          else
+            echo "classifier_verdict=failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run registry↔DQ ref consistency checks
+        id: registry-dq-check
+        run: |
+          echo "::group::Registry DQ Reference Validation"
+          set +e
+          uv run --frozen --no-build python scripts/engineering/ci/validate_registry_dq_refs.py
+          REGISTRY_DQ_EXIT_CODE=$?
+          set -e
+          echo "::endgroup::"
+
+          if [ $REGISTRY_DQ_EXIT_CODE -eq 0 ]; then
+            echo "registry_dq_verdict=passed" >> $GITHUB_OUTPUT
+          else
+            echo "registry_dq_verdict=failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine enforcement stage
+        id: enforcement
+        run: |
+          # Count failures
+          FAILED_CHECKS=0
+
+          if [ "${{ steps.identity-check.outputs.contract_identity_verdict }}" = "failed" ]; then
+            FAILED_CHECKS=$((FAILED_CHECKS + 1))
+          fi
+
+          if [ "${{ steps.registry-check.outputs.registry_consistency_verdict }}" = "failed" ]; then
+            FAILED_CHECKS=$((FAILED_CHECKS + 1))
+          fi
+
+          if [ "${{ steps.ownership-map-check.outputs.ownership_matrix_verdict }}" = "failed" ]; then
+            FAILED_CHECKS=$((FAILED_CHECKS + 1))
+          fi
+
+          if [ "${{ steps.coverage-matrix-check.outputs.coverage_matrix_verdict }}" = "failed" ]; then
+            FAILED_CHECKS=$((FAILED_CHECKS + 1))
+          fi
+
+          if [ "${{ steps.classifier-check.outputs.classifier_verdict }}" = "failed" ]; then
+            FAILED_CHECKS=$((FAILED_CHECKS + 1))
+          fi
+
+          if [ "${{ steps.registry-dq-check.outputs.registry_dq_verdict }}" = "failed" ]; then
+            FAILED_CHECKS=$((FAILED_CHECKS + 1))
+          fi
+
+          echo "failed_checks=$FAILED_CHECKS" >> $GITHUB_OUTPUT
+
+          # Hard-gate policy: any failed governance check blocks the workflow.
+          if [ "$FAILED_CHECKS" -ge 1 ]; then
+            STAGE="hard_fail"
+            MESSAGE="Contract governance checks failed"
+          else
+            STAGE="pass"
+            MESSAGE="All contract governance checks passed"
+          fi
+
+          echo "enforcement_stage=$STAGE" >> $GITHUB_OUTPUT
+          echo "enforcement_message=$MESSAGE" >> $GITHUB_OUTPUT
+
+      - name: Report results
+        run: |
+          echo "::notice title=Contract Governance Fast Check::${{ steps.enforcement.outputs.enforcement_message }}"
+          echo "Contract Identity: ${{ steps.identity-check.outputs.contract_identity_verdict }}"
+          echo "Registry Consistency: ${{ steps.registry-check.outputs.registry_consistency_verdict }}"
+          echo "Ownership Matrix: ${{ steps.ownership-map-check.outputs.ownership_matrix_verdict }}"
+          echo "Coverage Matrix: ${{ steps.coverage-matrix-check.outputs.coverage_matrix_verdict }}"
+          echo "Schema Classifier Gate: ${{ steps.classifier-check.outputs.classifier_verdict }}"
+          echo "Registry↔DQ Refs: ${{ steps.registry-dq-check.outputs.registry_dq_verdict }}"
+          echo "Failed Checks: ${{ steps.enforcement.outputs.failed_checks }}"
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: contract-governance-diagnostics
+          path: |
+            reports/quality/contract-identity-diagnostics.json
+            reports/quality/contract-registry-diagnostics.json
+            reports/quality/contract-schema-classifier-diagnostics.json
+            reports/quality/contract-registry-dq-diagnostics.json
+            reports/quality/contract-coverage-matrix.json
+            reports/quality/pipeline-config-contract-ownership-map.json
+          retention-days: 30
+
+      - name: Add to CI summary
+        run: |
+          cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+          ## Contract Governance Fast Check
+
+          **Stage**: ${{ steps.enforcement.outputs.enforcement_stage }}
+
+          ### Results
+          - **Contract Identity**: ${{ steps.identity-check.outputs.contract_identity_verdict }}
+          - **Registry Consistency**: ${{ steps.registry-check.outputs.registry_consistency_verdict }}
+          - **Ownership Matrix**: ${{ steps.ownership-map-check.outputs.ownership_matrix_verdict }}
+          - **Coverage Matrix**: ${{ steps.coverage-matrix-check.outputs.coverage_matrix_verdict }}
+          - **Schema Classifier Gate**: ${{ steps.classifier-check.outputs.classifier_verdict }}
+          - **Registry↔DQ Refs**: ${{ steps.registry-dq-check.outputs.registry_dq_verdict }}
+          - **Failed Checks**: ${{ steps.enforcement.outputs.failed_checks }}
+
+          **Message**: ${{ steps.enforcement.outputs.enforcement_message }}
+
+          ### Artifacts
+          - [Contract Governance Diagnostics](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          EOF
+
+      - name: Fail on hard failures
+        if: steps.enforcement.outputs.enforcement_stage == 'hard_fail'
+        run: |
+          echo "::error::Hard fail threshold exceeded"
+          exit 1

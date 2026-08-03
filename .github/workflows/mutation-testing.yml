@@ -1,0 +1,206 @@
+name: Mutation Testing
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "src/bioetl/domain/**"
+      - "src/bioetl/application/**"
+      - "tests/**"
+      - ".github/workflows/mutation-testing.yml"
+  pull_request:
+    paths:
+      - "src/bioetl/domain/**"
+      - "src/bioetl/application/**"
+      - "tests/**"
+      - ".github/workflows/mutation-testing.yml"
+  schedule:
+    # Run weekly on Sundays at 00:00 UTC
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+jobs:
+  mutation-testing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - id: domain
+            paths_to_mutate: src/bioetl/domain/
+            # Keep mutation pytest selection inside unit/domain to avoid loading
+            # architecture/integration plugin surfaces that require full repo pathing.
+            tests_dir: tests/unit/domain/
+            threshold: "70.0"
+          - id: application-control-plane
+            paths_to_mutate: src/bioetl/application/services/control_plane/
+            tests_dir: tests/unit/application/services/control_plane/
+            threshold: "60.0"
+          - id: application-export-manifests
+            paths_to_mutate: src/bioetl/application/services/export_manifests.py
+            tests_dir: tests/unit/application/services/
+            threshold: "60.0"
+          - id: application-workflow-runner
+            # mutmut 3.x intentionally skips decorated classes. Target the
+            # workflow runner's canonical, undecorated policy helpers so this
+            # lane exercises real mutants instead of a zero-mutant dataclass.
+            paths_to_mutate: src/bioetl/application/services/workflow_runner_support.py
+            tests_dir: tests/unit/repo_backed/application/services/test_workflow_runner_service.py
+            threshold: "60.0"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          uv-extras: "dev"
+
+      - name: Cache mutmut
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
+        with:
+          path: .mutmut-cache
+          key: ${{ runner.os }}-mutmut-${{ hashFiles('src/bioetl/domain/**', 'src/bioetl/application/**') }}
+          restore-keys: |
+            ${{ runner.os }}-mutmut-
+
+      - name: Configure mutation target
+        env:
+          MUTMUT_SOURCE_PATH: ${{ matrix.target.paths_to_mutate }}
+          MUTMUT_TESTS_DIR: ${{ matrix.target.tests_dir }}
+        run: |
+          uv run --frozen --no-build python - <<'PY'
+          import os
+          from pathlib import Path
+
+          import tomlkit
+
+          path = Path("pyproject.toml")
+          document = tomlkit.parse(path.read_text(encoding="utf-8"))
+          config = document["tool"]["mutmut"]
+          # mutmut 3.x reads paths_to_mutate (source_paths is ignored).
+          config["paths_to_mutate"] = [os.environ["MUTMUT_SOURCE_PATH"]]
+          if "source_paths" in config:
+              del config["source_paths"]
+          # Subset mutation still needs the full package + tooling imports.
+          config["also_copy"] = [
+              "src/bioetl",
+              "scripts",
+              "configs",
+          ]
+          config["pytest_add_cli_args_test_selection"] = [
+              os.environ["MUTMUT_TESTS_DIR"]
+          ]
+          path.write_text(tomlkit.dumps(document), encoding="utf-8")
+          PY
+
+      - name: Run mutation testing
+        env:
+          # mutmut executes pytest from a sandbox; ensure package + repo roots resolve.
+          PYTHONPATH: ${{ github.workspace }}/src:${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          echo "Running mutation testing for ${{ matrix.target.id }}..."
+          # mutmut is a dev dependency; invoke via uv so PATH/venv entrypoints resolve
+          # under the frozen CI environment (bare `mutmut` is not on runner PATH).
+          export PYTHONPATH="${GITHUB_WORKSPACE}/src:${GITHUB_WORKSPACE}${PYTHONPATH:+:$PYTHONPATH}"
+          uv run --frozen --no-build python -c "import bioetl.domain, scripts; print('mutation import preflight ok')"
+          uv run --frozen --no-build mutmut run
+
+      - name: Generate mutation report
+        if: success()
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src:${{ github.workspace }}
+        run: |
+          mkdir -p "reports/${{ matrix.target.id }}"
+          uv run --frozen --no-build mutmut results > "reports/${{ matrix.target.id }}/mutmut_results.txt"
+          uv run --frozen --no-build mutmut export-cicd-stats
+          if [ -f mutants/mutmut-cicd-stats.json ]; then
+            cp mutants/mutmut-cicd-stats.json \
+              "reports/${{ matrix.target.id }}/mutmut-cicd-stats.json"
+          else
+            echo "Mutation stats missing after run; treating as setup/runtime failure." >&2
+            exit 1
+          fi
+          # mutmut 3.x no longer ships a stable `html` CLI command on all installs.
+          # Prefer HTML when available; never fail the report step on its absence.
+          if uv run --frozen --no-build mutmut --help 2>/dev/null | grep -Eq '(^|[[:space:]])html([[:space:]]|$)'; then
+            uv run --frozen --no-build mutmut html || true
+          fi
+          if [ -d "html" ]; then
+            mv html "reports/${{ matrix.target.id }}/mutmut_html"
+          fi
+
+      - name: Check mutation score threshold
+        env:
+          MUTATION_TARGET: ${{ matrix.target.id }}
+          MUTATION_SCORE_THRESHOLD: ${{ matrix.target.threshold }}
+          PYTHONPATH: ${{ github.workspace }}/src
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          from pathlib import Path
+
+          target = os.environ["MUTATION_TARGET"]
+          stats_path = Path("reports") / target / "mutmut-cicd-stats.json"
+          if not stats_path.is_file():
+              print(
+                  f"mutmut CI/CD stats are missing for {target}; "
+                  "treating this as a broken gate."
+              )
+              sys.exit(1)
+
+          stats = json.loads(stats_path.read_text(encoding="utf-8"))
+          try:
+              killed = int(stats["killed"])
+              survived = int(stats["survived"])
+              timeout = int(stats["timeout"])
+          except (KeyError, TypeError, ValueError) as exc:
+              print(
+                  f"Invalid mutmut CI/CD stats for {target}; "
+                  f"treating this as a broken gate: {exc}"
+              )
+              print(json.dumps(stats, sort_keys=True))
+              sys.exit(1)
+
+          total = killed + survived + timeout
+          if total == 0:
+              print("Mutation workflow produced zero mutants; treating this as a broken gate.")
+              sys.exit(1)
+
+          score = (killed + timeout) / total * 100
+          print(f"Mutation Score: {score:.1f}%")
+          print(f"  Killed: {killed}")
+          print(f"  Survived: {survived}")
+          print(f"  Timeout: {timeout}")
+          print(f"  Total: {total}")
+
+          threshold = float(os.environ["MUTATION_SCORE_THRESHOLD"])
+          if score < threshold:
+              print(f"\n⚠️  Mutation score {score:.1f}% is below threshold {threshold}%")
+              print("Consider improving test coverage for the surviving mutants")
+              sys.exit(1)
+          else:
+              print(f"\n✅ Mutation score {score:.1f}% meets threshold {threshold}%")
+          PY
+
+      - name: Upload mutation reports
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        if: always()
+        with:
+          name: mutation-reports-${{ matrix.target.id }}
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 14

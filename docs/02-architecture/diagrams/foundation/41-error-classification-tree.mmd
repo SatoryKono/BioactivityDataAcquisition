@@ -1,0 +1,123 @@
+%% Title: Error Classification Decision Tree — Full Logic
+%% Covers: RULES.md §3.1 (Error Handling), domain/exceptions/
+%% Rank: 16 (Score 8.06) — Complete error classification reference
+%% Updated: 2026-07-31
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @nodes   22
+%% @png-scale 6
+%% @png-dpi   600
+%% @uniform-group root    nodes=ERROR,HTTP,DOMAIN,INFRA
+%% @uniform-group http    nodes=AUTH,NOTFOUND,RATE,SERVER,UNKNOWN_HTTP
+%% @uniform-group domain  nodes=SCHEMA,MISSING,FORMAT,DQTHRESH
+%% @uniform-group infra   nodes=LOCK,LOCKACQ,STORE,CB
+%% @uniform-group actions nodes=ACT_RETRY,ACT_QUARANTINE,FAIL_FAST,BATCH_FAIL,EXHAUST
+%% @uniform-width group
+
+%% @uniform width=168 groups=2 width_strategy=group
+%% @uniform-stats root         width=144 height=112 max_desc_lines=4
+%% @uniform-stats actions      width=168 height=112 max_desc_lines=4
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+flowchart TB
+    ERROR["Error Occurred"]
+
+    ERROR --> HTTP{{"HTTP Status Code?"}}
+    ERROR --> DOMAIN{{"Domain Error?"}}
+    ERROR --> INFRA{{"Infrastructure Error?"}}
+
+    %% HTTP errors
+    HTTP -->|"auth"| AUTH["[E] ServiceAuthenticationError\n(CriticalError)\n→ fail fast\n→ check API key"]
+    HTTP -->|"404"| NOTFOUND["[E] ApiError\n(RecoverableError)\n→ Log warning\n→ Skip entity"]
+    HTTP -->|"429"| RATE["[E] RateLimitExceededError\n(RecoverableError)\n→ use Retry-After\n→ exponential backoff"]
+    HTTP -->|"5xx"| SERVER["[E] ServiceUnavailableError\n(RecoverableError)\n→ Retry with backoff\n→ Max 3 attempts"]
+    HTTP -.->|"other"| UNKNOWN_HTTP["[E] ExternalServiceError\n→ Log, classify, retry"]
+
+    %% Domain errors
+    DOMAIN -->|"schema"| SCHEMA["[E] SchemaViolationError\n(DataQualityError → ValidationError)\n→ Route to Quarantine"]
+    DOMAIN -->|"missing"| MISSING["[E] ValidationError\n(error_type=MISSING_REQUIRED_FIELD)\n→ Route to Quarantine"]
+    DOMAIN -->|"format"| FORMAT["[E] ValidationError\n(error_type=INVALID_DATA)\n→ Route to Quarantine"]
+    DOMAIN -->|"dq"| DQTHRESH["[E] DataQualityThresholdError\n→ error_rate > 20%\n→ FAIL entire batch"]
+
+    %% Infrastructure errors
+    INFRA -->|"lock-lost"| LOCK["[E] LockLostError\n(CriticalError)\n→ ABORT immediately\n→ No partial write"]
+    INFRA -->|"lock-timeout"| LOCKACQ["[E] LockAcquisitionError\n(CriticalError)\n→ FAIL, another instance running"]
+    INFRA -->|"storage"| STORE["[E] StorageError\n(RecoverableError)\n→ Retry Delta write"]
+    INFRA -->|"cb-open"| CB["[E] CircuitBreakerOpenError\n(RecoverableError)\n→ wait timeout\n→ HALF_OPEN probe"]
+
+    %% Branch groups
+    subgraph HTTPBranch["HTTP Branch Outcomes"]
+        direction LR
+        AUTH
+        NOTFOUND
+        RATE
+        SERVER
+        UNKNOWN_HTTP
+    end
+    subgraph DomainBranch["Domain Branch Outcomes"]
+        direction LR
+        SCHEMA
+        MISSING
+        FORMAT
+        DQTHRESH
+    end
+    subgraph InfraBranch["Infrastructure Branch Outcomes"]
+        direction LR
+        LOCK
+        LOCKACQ
+        STORE
+        CB
+    end
+
+    %% Actions
+    subgraph Actions["Error Actions"]
+        direction LR
+        ACT_RETRY["[A] RETRY<br/>max_attempts: 3<br/>multiplier: 2.0<br/>jitter: MD5-based"]
+        ACT_QUARANTINE["[A] QUARANTINE<br/>QuarantineEntry created<br/>payload truncated 64KB<br/>payload_hash computed"]
+        FAIL_FAST["[A] FAIL FAST<br/>No retry<br/>Pipeline terminates<br/>ExitCode.PIPELINE_ERROR"]
+        BATCH_FAIL["[A] BATCH FAIL<br/>error_rate > 20%<br/>Entire batch rejected<br/>Checkpoint NOT saved"]
+    end
+
+    AUTH ==> FAIL_FAST
+    RATE --> ACT_RETRY
+    SERVER --> ACT_RETRY
+    SCHEMA ==> ACT_QUARANTINE
+    MISSING ==> ACT_QUARANTINE
+    FORMAT ==> ACT_QUARANTINE
+    DQTHRESH ==> BATCH_FAIL
+    LOCK ==> FAIL_FAST
+    LOCKACQ ==> FAIL_FAST
+    STORE --> ACT_RETRY
+    CB --> ACT_RETRY
+
+    %% Retry exhaustion
+    ACT_RETRY -.->|"exhausted"| EXHAUST["[E] RetryExhaustedError<br/>Record CB failure<br/>Circuit may trip"]
+    EXHAUST ==> FAIL_FAST
+
+    %% Layout constraints
+    HTTP ~~~ DOMAIN ~~~ INFRA
+    AUTH ~~~ NOTFOUND ~~~ RATE ~~~ SERVER ~~~ UNKNOWN_HTTP
+    SCHEMA ~~~ MISSING ~~~ FORMAT ~~~ DQTHRESH
+    LOCK ~~~ LOCKACQ ~~~ STORE ~~~ CB
+    ACT_RETRY ~~~ ACT_QUARANTINE ~~~ FAIL_FAST ~~~ BATCH_FAIL
+
+    %% Styling
+    style Actions fill:#fff7ed,stroke:#f59e0b
+    style FAIL_FAST fill:#ffe4e6,stroke:#dc2626
+    style ACT_QUARANTINE fill:#ffe4e6,stroke:#dc2626,color:#212121
+    style ACT_RETRY fill:#f0fdf4,stroke:#16a34a
+
+    %% Layer palette (semantic)
+    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
+    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    classDef layer_external fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+
+    class DOMAIN,SCHEMA,MISSING,FORMAT,DQTHRESH layer_domain;
+    class INFRA,LOCK,LOCKACQ,STORE,CB layer_infrastructure;
+    class HTTP,AUTH,NOTFOUND,RATE,SERVER,UNKNOWN_HTTP layer_external;
+    class ERROR,ACT_RETRY,ACT_QUARANTINE,FAIL_FAST,BATCH_FAIL,EXHAUST layer_application;
+
+    %% Click tooltips    click HTTP ../../00-project/RULES.md "Routes auth/404/429/5xx/other HTTP"    click DOMAIN ../../00-project/RULES.md "Routes schema/missing/format/dq"    click INFRA ../../00-project/RULES.md "Routes lock/storage/cb failures"

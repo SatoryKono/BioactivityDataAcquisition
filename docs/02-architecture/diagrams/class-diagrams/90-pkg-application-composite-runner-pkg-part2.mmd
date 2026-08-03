@@ -1,0 +1,37 @@
+%% Title: Package Family: application/composite/runner_pkg (Part 2/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/application/composite/runner_pkg; part 2/2; modules: runner_merge_stage_mixin, runner_stage_enrichment_mixin, runner_stage_mixin, runner_stage_support_mixin, runner_stage_support_types, runner_support_mixin.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   6
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace runner_merge_stage_mixin {
+        class CompositeRunnerMergeStageMixin
+    }
+
+    namespace runner_stage_enrichment_mixin {
+        class _CompositeRunnerStageEnrichmentMixin
+    }
+
+    namespace runner_stage_mixin {
+        class CompositeRunnerStageMixin
+    }
+
+    namespace runner_stage_support_mixin {
+        class _CompositeRunnerStageSupportMixin
+    }
+
+    namespace runner_stage_support_types {
+        class _CompositeRunnerStageSupportHostProtocol
+    }
+
+    namespace runner_support_mixin {
+        class CompositeRunnerSupportMixin
+    }
+
+    _CompositeRunnerStageEnrichmentMixin <|-- CompositeRunnerStageMixin
+    _CompositeRunnerStageSupportMixin <|-- CompositeRunnerStageMixin

@@ -1,0 +1,45 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Last verified: '2026-07-28'
+
+______________________________________________________________________
+
+---
+title: OpenAlex API Integration Flow
+version: 1.0.0
+status: active
+author: BioETL Team
+last_verified: 2026-07-28
+adr_references:
+  - ADR-032: Unified HTTP Client
+  - ADR-010: Local-Only Deployment
+  - ADR-040: Diagram Governance
+description: |
+  API integration flow for OpenAlex (works graph).
+---
+
+%% @version 1.0.0
+%% @date 2026-07-28
+%% @type flowchart
+%% @level system
+flowchart TD
+    Start([Start OpenAlex extract]) --> Client[UnifiedHTTPClient ADR-032]
+    Client --> RL{Rate limit OK?}
+    RL -->|No| Wait[Backoff / wait]
+    Wait --> RL
+    RL -->|Yes| Req[Build request + pagination cursor]
+    Req --> Call[HTTP call]
+    Call --> CB{Circuit breaker}
+    CB -->|Open| Fail[Fail extract / retry policy]
+    CB -->|Closed| Resp{Response class}
+    Resp -->|2xx| Parse[Parse payload]
+    Resp -->|429/5xx| Retry[Retry with jitter]
+    Retry --> Call
+    Resp -->|4xx permanent| Err[Error path / quarantine upstream]
+    Parse --> Page{More pages?}
+    Page -->|Yes| Req
+    Page -->|No| Done([Hand off records to Bronze writer])

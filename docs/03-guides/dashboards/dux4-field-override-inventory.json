@@ -1,0 +1,5286 @@
+{
+  "schema_version": "dux4-field-override-inventory-v1",
+  "issue": 7090,
+  "panel_count": 193,
+  "risk_counts": {
+    "green_at_or_below_zero": 103,
+    "red_at_or_below_zero": 3,
+    "alert_related": 8,
+    "scraping_related": 2
+  },
+  "panels": [
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 1000,
+      "title": "Navigate Dashboards",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9400,
+      "title": "Review Scope & Evidence",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9401,
+      "title": "Monitor Replay Readiness",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 906,
+      "title": "Review First Recovery Action",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 891,
+      "title": "Monitor Replay Safety",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 7
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 892,
+      "title": "Monitor Checkpoint Age",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 7
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 900
+        },
+        {
+          "color": "red",
+          "value": 3600
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 893,
+      "title": "Monitor Manifest & Ledger Failures",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 7
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 907,
+      "title": "Monitor Telemetry Coverage",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 7
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 894,
+      "title": "Review Replay Coverage Limits",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 130,
+      "title": "Track Replay Blockers in Range",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 3,
+      "title": "Track Checkpoint Incompatibilities",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 104,
+      "title": "Track Unreconstructable Replays",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 120,
+      "title": "Track Replay Drift",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 101,
+      "title": "Track Checkpoint Load Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 102,
+      "title": "Track Checkpoint Save Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 103,
+      "title": "Track Global Checkpoint Admin Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 37
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 121,
+      "title": "Track Peak Replay Lag",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 43
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 300
+        },
+        {
+          "color": "red",
+          "value": 900
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 5,
+      "title": "Compare Checkpoint Outcomes",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 43
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 134,
+      "title": "Track Replay Drift by Type",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 49
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "red",
+          "value": 1
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No replay drift samples",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 135,
+      "title": "Track Replay Lag",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 49
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 300
+        },
+        {
+          "color": "red",
+          "value": 900
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 105,
+      "title": "Track Checkpoint Save Latency",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 55
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 0.5
+        },
+        {
+          "color": "red",
+          "value": 1.0
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No optional latency samples in range. Treat this as telemetry absence, not proof of a healthy control-plane path.",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 106,
+      "title": "Track Global Checkpoint Admin Latency",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 62
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 0.5
+        },
+        {
+          "color": "red",
+          "value": 1.0
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No GLOBAL checkpoint operator latency samples in range. This is optional admin/operator telemetry, not pipeline success evidence.",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 908,
+      "title": "Review Terminal Run Outcomes",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 1,
+      "title": "Track Manifest Write Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 2,
+      "title": "Track Ledger Append Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 131,
+      "title": "Compare Manifest Writes by Status",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 7,
+      "title": "Compare Ledger Appends by Type & Status",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 132,
+      "title": "Monitor Manifest Failure Severity [30m]",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 133,
+      "title": "Monitor Ledger Failure Severity [30m]",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 47
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 4,
+      "title": "Track Global Read Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 136,
+      "title": "Monitor Global Read Failure Severity [30m]",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 6,
+      "title": "Compare Global Reads by Store",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 111,
+      "title": "Track Global Read Latency",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 0.5
+        },
+        {
+          "color": "red",
+          "value": 1.0
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No optional latency samples in range. Treat this as telemetry absence, not proof of a healthy control-plane path.",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 122,
+      "title": "Track Missing Lineage References",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 137,
+      "title": "Track Lineage Persistence Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 23
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 138,
+      "title": "Review Missing Lineage by Layer",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 10
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No missing-lineage reference samples in range. Empty means no sampled lineage-missing events or absent telemetry, not proof of full lineage closure.",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 107,
+      "title": "Compare Global Audit Write Outcomes",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 108,
+      "title": "Compare Global Audit Query Outcomes",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 42
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 109,
+      "title": "Track Global Audit Write Latency",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 49
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 0.5
+        },
+        {
+          "color": "red",
+          "value": 1.0
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No GLOBAL audit write latency samples in range. Empty means no audit writes were timed or audit telemetry is absent, not zero latency.",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 110,
+      "title": "Track Global Audit Query Latency",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 56
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 0.5
+        },
+        {
+          "color": "red",
+          "value": 1.0
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No GLOBAL audit query latency samples in range. Empty means no audit queries were timed or audit telemetry is absent, not zero latency.",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 112,
+      "title": "Compare Lineage Persistence Outcomes",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 63
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9407,
+      "title": "Copy Identity Values",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "No copyable identity handoffs for this scope. Use the summary cards above, then select an exact run_id or verify backend health before treating this as expected empty.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9404,
+      "title": "Review Run Identity",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "No overview identity rows. Use the replay/resume summary above first; then verify backend health (/health/live) and selected run_id before treating this forensic view as empty.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9410,
+      "title": "Identity Data Unavailable",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9411,
+      "title": "Record Counts Unavailable",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9405,
+      "title": "Review Identity Gaps",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 52
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "No identity gap rows for this forensic view. Use the summary cards above, then verify backend health and selected run scope before treating this as expected empty.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9406,
+      "title": "Compare Checkpoint Anchors",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 52
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "No checkpoint anchor comparison rows. Use checkpoint freshness above, then verify backend health and selected run scope before treating this as expected empty.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9408,
+      "title": "Review Required Replay Anchors",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 56
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "No P1 replay/evidence anchors for this forensic view. Use the replay/resume summary above, then verify backend health and selected run scope before treating this as expected empty.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9409,
+      "title": "Review Additional Forensic Anchors",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 56
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "No P2 forensic anchors for this scope. Use the summary cards above, then select an exact run_id or verify backend health before treating this as expected empty.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 139,
+      "title": "Review Uncovered Replay Signals",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 60
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9402,
+      "title": "Review Run Identity",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "file": "bioetl-control-plane-v1.json",
+      "panel_id": 9403,
+      "title": "Review Processed Records",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "threshold_steps": [],
+      "mapping_count": 1,
+      "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 1000,
+      "title": "Navigation",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9400,
+      "title": "Inspect Scope & Evidence",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9401,
+      "title": "Status",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9103,
+      "title": "Review: First Action",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9101,
+      "title": "Now · DQ Threshold State",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 9
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9102,
+      "title": "Now · DQ Current Reasons",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 5,
+        "w": 16,
+        "x": 8,
+        "y": 9
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "None observed",
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 152,
+      "title": "Monitor: Silver Filter Reject Accounting Mismatch",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
+        },
+        {
+          "color": "red",
+          "value": 1
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 121,
+      "title": "Inspect: Top Silver Reject Reasons (Pareto)",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 41
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No reject reason samples in range",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 122,
+      "title": "Inspect: Top Silver Reject Fields",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 41
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No reject field samples in range",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 118,
+      "title": "Inspect: Silver Filter Rejects by Pipeline",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 47
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No filtered-out samples in range",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 156,
+      "title": "Inspect: Gold Reject Outcomes by Pipeline",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 47
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No Gold reject samples in range",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 1,
+      "title": "Track Range Evidence: Bronze -> Silver -> Gold",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 3,
+      "title": "Track: Source Records in Range (Bronze)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 42
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 4,
+      "title": "Track: Clean Records in Range (Gold)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 7,
+      "title": "Track: Silver Validation Failures in Range",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 101,
+      "title": "Review: Latest Successful Data Timestamp",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 54
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "dateTimeAsIso",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9,
+      "title": "Inspect: Quarantine by Error Type",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 54
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "No quarantined records in range",
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 12,
+      "title": "Monitor: Silver Validation Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 60
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
+        },
+        {
+          "color": "red",
+          "value": 1
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 151,
+      "title": "Monitor: Gold Strict Validation Failures",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 60
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
+        },
+        {
+          "color": "red",
+          "value": 1
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 10,
+      "title": "Track: Anomalies Detected",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 66
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No anomaly events in range",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 11,
+      "title": "Track: DQ Check Duration (p95)",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 66
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No DQ duration samples",
+      "unit": "ms",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 155,
+      "title": "Track: DQ Threshold Events in Range Trend",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 72
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 153,
+      "title": "Track: Data Quality Score Trend (Volume-weighted)",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 72
+      },
+      "threshold_steps": [
+        {
+          "color": "red",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 0.8
+        },
+        {
+          "color": "green",
+          "value": 0.95
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "percentunit",
+      "risks": [
+        "red_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 116,
+      "title": "Review: Lineage Handoff to Control Plane",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 78
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 150,
+      "title": "Review: Aggregate Control-plane Handoff",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 82
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 2,
+      "title": "Monitor: Data Quality Score (Volume-weighted)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 0.8
+        },
+        {
+          "color": "green",
+          "value": 0.95
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "percentunit",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 5,
+      "title": "Monitor: Worst-Entity DQ Score",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 12,
+        "y": 0
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 0.8
+        },
+        {
+          "color": "green",
+          "value": 0.95
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "percentunit",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 8,
+      "title": "Time Range · Worst Freshness Age (hours; SLA 24/72)",
+      "type": "gauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 6
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 24
+        },
+        {
+          "color": "red",
+          "value": 72
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "TELEMETRY MISSING — no bioetl_data_freshness_seconds for scope",
+      "unit": "h",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 154,
+      "title": "Track: DQ Blocked Records in Range (Evidence)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 16,
+        "x": 8,
+        "y": 6
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 6,
+      "title": "Range · Records Quarantined",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 117,
+      "title": "Range · Silver Filter Rejects",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": null,
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9402,
+      "title": "ID",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "file": "bioetl-dq-v2.json",
+      "panel_id": 9403,
+      "title": "Processed Records",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 1000,
+      "title": "Navigation",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 9400,
+      "title": "Inspect Scope & Evidence",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 9401,
+      "title": "Status",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        },
+        {
+          "color": "gray",
+          "value": 3
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": null,
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2001,
+      "title": "Next Best Actions",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2010,
+      "title": "Ranked Active Suspects",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "None observed",
+      "unit": null,
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2005,
+      "title": "Evidence timeline · Current Alerts (now)",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "None observed",
+      "unit": null,
+      "risks": [
+        "alert_related"
+      ]
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2006,
+      "title": "Evidence timeline · Alert State History (range)",
+      "type": "state-timeline",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "None observed",
+      "unit": null,
+      "risks": [
+        "alert_related"
+      ]
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2007,
+      "title": "Impact / confidence (honest bounds)",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2002,
+      "title": "Active Suspects · Runtime",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 28
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "None observed",
+      "unit": null,
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2003,
+      "title": "Active Suspects · Provider",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 28
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "None observed",
+      "unit": null,
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "file": "bioetl-incident-v1.json",
+      "panel_id": 2004,
+      "title": "Active Suspects · DQ",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 28
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "None observed",
+      "unit": null,
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9601,
+      "title": "Triage Alert State",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "none",
+      "risks": [
+        "alert_related",
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 1000,
+      "title": "Navigation",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 99,
+      "title": "Inspect Scope & Evidence",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 214,
+      "title": "Status",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 215,
+      "title": "First Action",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 7,
+        "w": 10,
+        "x": 0,
+        "y": 7
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        },
+        {
+          "color": "green",
+          "value": 10
+        },
+        {
+          "color": "orange",
+          "value": 20
+        },
+        {
+          "color": "red",
+          "value": 40
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": null,
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9002,
+      "title": "Inputs",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 7,
+        "w": 14,
+        "x": 10,
+        "y": 7
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": null,
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9018,
+      "title": "Runtime Blockers Trend",
+      "type": "state-timeline",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 41
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9019,
+      "title": "DQ Status Trend",
+      "type": "state-timeline",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 41
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9020,
+      "title": "Gold Lifecycle Trend",
+      "type": "state-timeline",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 41
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9010,
+      "title": "Historical Failures",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 32
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9011,
+      "title": "Recent Terminal Runs",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 32
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9015,
+      "title": "Silver Rejects + Rate",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 32
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 0.05
+        },
+        {
+          "color": "red",
+          "value": 0.2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "percentunit",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9021,
+      "title": "Diagnostics Navigation",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9006,
+      "title": "Control Plane",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 0,
+        "y": 17
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": null,
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9003,
+      "title": "Runtime",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 5,
+        "y": 17
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": null,
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9004,
+      "title": "Data Quality",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 9,
+        "y": 17
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": null,
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9007,
+      "title": "Provider",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 14,
+        "y": 17
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": null,
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9005,
+      "title": "Data Validation",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 17
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": null,
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9013,
+      "title": "Workflow",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": null,
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9300,
+      "title": "ID",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "file": "bioetl-overview-v2.json",
+      "panel_id": 9301,
+      "title": "Processed Records",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 1000,
+      "title": "Navigation",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9400,
+      "title": "Inspect Scope & Evidence",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9401,
+      "title": "Status",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9002,
+      "title": "First Action",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9101,
+      "title": "Monitor GLOBAL Provider Severity Matrix",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 9
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9102,
+      "title": "Inspect Critical Providers",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 8,
+        "y": 9
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9103,
+      "title": "Inspect Provider Top Causes",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 14,
+        "y": 9
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "None observed",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9104,
+      "title": "Monitor Provider Telemetry Freshness",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 15
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "none",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 106,
+      "title": "Track Failure and Degraded Trend by Provider",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 45
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 107,
+      "title": "Track Provider Failure Share (Selected Range)",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 51
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 10
+        },
+        {
+          "color": "red",
+          "value": 30
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "percent",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 108,
+      "title": "Track Retries Exhausted by Provider/Operation",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 57
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 3
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 109,
+      "title": "Track Retries Exhausted Trend by Provider/Operation",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 64
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 3
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 102,
+      "title": "Inspect Provider Health Check Latency (p95) - $provider",
+      "type": "gauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 71
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 0.5
+        },
+        {
+          "color": "orange",
+          "value": 2
+        },
+        {
+          "color": "red",
+          "value": 5
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "No optional health-check latency samples in range; not a provider verdict.",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 110,
+      "title": "Inspect Adapter Request Latency by Endpoint (p95)",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 71
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 0.5
+        },
+        {
+          "color": "orange",
+          "value": 2
+        },
+        {
+          "color": "red",
+          "value": 5
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No optional adapter latency samples in range; not a provider verdict.",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 111,
+      "title": "Inspect Rate Limit Errors by Method",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 76
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 5
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No optional rate-limit error samples in range; not a provider verdict.",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 115,
+      "title": "Inspect Network Timeout Errors by Method",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 76
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No optional timeout/network samples in range; not a provider verdict.",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 112,
+      "title": "Track Rate Limiter Wait by Provider (p95)",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 81
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 0.5
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No optional rate-limiter wait samples in range; not a provider verdict.",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 113,
+      "title": "Monitor Minimum Rate Limiter Tokens Available",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 81
+      },
+      "threshold_steps": [
+        {
+          "color": "red",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 1
+        },
+        {
+          "color": "green",
+          "value": 5
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "No rate-limiter token samples in range. This remains diagnostic and does not disprove provider pressure.",
+      "unit": "short",
+      "risks": [
+        "red_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 31,
+      "title": "Monitor Cross-Scope Adapter Circuit Breaker State (max)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 86
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "No circuit-breaker state samples in range. Adapter-scoped telemetry is optional and does not imply CLOSED.",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 32,
+      "title": "Track Cross-Scope Adapter Circuit Breaker Trips",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 86
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No circuit-breaker trip samples in range. Adapter-scoped telemetry is optional and remains diagnostic.",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 114,
+      "title": "Review Raw Provider Health Enum",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 30
+      },
+      "threshold_steps": [
+        {
+          "color": "red",
+          "value": null
+        },
+        {
+          "color": "yellow",
+          "value": 1
+        },
+        {
+          "color": "green",
+          "value": 2
+        }
+      ],
+      "mapping_count": 3,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "red_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 1,
+      "title": "Track Health Check Latency by Provider (p95)",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 30
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No provider latency samples in range. This optional telemetry is neutral; use severity, freshness, and raw enum panels for provider verdict.",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 2,
+      "title": "Monitor Healthy Checks (Selected Range)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 36
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "N/A",
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 105,
+      "title": "Monitor Degraded Checks (Selected Range)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 36
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 104,
+      "title": "Track Provider Failure Rate (Selected Range)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 42
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 0.05
+        },
+        {
+          "color": "red",
+          "value": 0.2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "N/A",
+      "unit": "percentunit",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 7,
+      "title": "Track Health Checks Total (Selected Range)",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 47
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "N/A",
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9402,
+      "title": "ID",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "file": "bioetl-provider-health-v2.json",
+      "panel_id": 9403,
+      "title": "Processed Records",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 1000,
+      "title": "Navigation",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 1,
+      "title": "Inspect Run Selection & Evidence",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3010,
+      "title": "Browse · Recent pipeline runs (no selection)",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "No pipeline-run-report artifacts for this pipeline on disk (reports/run-reports/pipeline/<name>/). Not a Prometheus gap — run the pipeline to write reports, or pick a pipeline with reports.",
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 9402,
+      "title": "ID",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "Identity not resolved for scope — select exact run_id or wait for control-plane resolve (see resolved_via). Backend down is different from empty scope.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 9403,
+      "title": "Processed Records",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "No processed-record rows for scope — check Ops HTTP :8000 and selectors. Zeros mean none observed after successful response, not backend failure.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3011,
+      "title": "Selected run · funnel stages",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id.",
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3012,
+      "title": "Selected run · top reasons",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id.",
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3015,
+      "title": "Selected run · reconciliation",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id.",
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3016,
+      "title": "Selected run · layers (accounting)",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3013,
+      "title": "Selected run · artifacts",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id.",
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3014,
+      "title": "Selected run · stage timings / failure (optional)",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "file": "bioetl-run-explorer-v1.json",
+      "panel_id": 3001,
+      "title": "Next actions (≤4)",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 1000,
+      "title": "Navigation",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9400,
+      "title": "Inspect Scope & Evidence",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9401,
+      "title": "Status",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "none",
+      "risks": [
+        "scraping_related"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9991,
+      "title": "First Action",
+      "type": "text",
+      "collapsed": false,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9101,
+      "title": "Runtime Blockers",
+      "type": "table",
+      "collapsed": false,
+      "gridPos": {
+        "h": 5,
+        "w": 16,
+        "x": 0,
+        "y": 9
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "None observed",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9102,
+      "title": "Metrics Evidence",
+      "type": "stat",
+      "collapsed": false,
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 9
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero",
+        "scraping_related"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 238,
+      "title": "Track Stage Backlog Trend",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 35
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 240,
+      "title": "Track Records by Stage / Interval",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 35
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 242,
+      "title": "Inspect Active Runtime Blocker Detail",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "red",
+          "value": 1
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No blocker rows. Trust this only when Runtime Status is OK and Telemetry Gap is clean.",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9105,
+      "title": "Monitor Aggregate Stage Lag",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 47
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 60
+        },
+        {
+          "color": "red",
+          "value": 300
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "UNKNOWN",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 243,
+      "title": "Inspect Stage Expectedness",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 52
+      },
+      "threshold_steps": [
+        {
+          "color": "blue",
+          "value": null
+        },
+        {
+          "color": "green",
+          "value": 1
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "N/A",
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 220,
+      "title": "Runtime Error Rate",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 57
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 0.05
+        },
+        {
+          "color": "red",
+          "value": 0.2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "percentunit",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 207,
+      "title": "Track Pipeline Phase Duration p50/p95/p99",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No phase duration samples in range",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 239,
+      "title": "Track Pipeline Duration p50/p95/p99",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No terminal pipeline duration samples",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 256,
+      "title": "Inspect Errors by Stage / Error Code / Range",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No errors in selected range",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 241,
+      "title": "Track Records by Stage / Run Type / Range",
+      "type": "bargauge",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 37
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": "No processed-record samples",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 2541,
+      "title": "Review Runtime-owned escalation",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 230,
+      "title": "Monitor Pipeline Alert Conditions",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "alert_related",
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 236,
+      "title": "Monitor No-Records Runs",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 40
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 21,
+      "title": "Monitor Memory Pressure Active",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 45
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "bool",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 2542,
+      "title": "Review Cross-domain handoffs",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 50
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 4,
+      "title": "Inspect DQ Alert Conditions",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 52
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "alert_related",
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 5,
+      "title": "Inspect Control-plane Alert Conditions",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 57
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "alert_related",
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 6,
+      "title": "Inspect Provider Alert Conditions",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 62
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "alert_related",
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 259,
+      "title": "Inspect GLOBAL Provider Alert Conditions",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 67
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "alert_related",
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 7,
+      "title": "Inspect Freshness Lagged Entities >24h",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 72
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 2543,
+      "title": "Review Process-level signals (GLOBAL)",
+      "type": "text",
+      "collapsed": true,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 77
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": null,
+      "risks": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 209,
+      "title": "Track GLOBAL Shutdown Initiated by Reason / Interval",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 79
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 210,
+      "title": "Track GLOBAL Shutdown Completed by Reason / Interval",
+      "type": "timeseries",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 79
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        }
+      ],
+      "mapping_count": 0,
+      "noValue": null,
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 237,
+      "title": "Worst Stage Lag",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 300
+        },
+        {
+          "color": "red",
+          "value": 900
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "s",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 16,
+      "title": "Monitor Runtime Blockers",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "red",
+          "value": 1
+        }
+      ],
+      "mapping_count": 2,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 205,
+      "title": "Failed Runs",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 0,
+        "y": 6
+      },
+      "threshold_steps": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "UNKNOWN",
+      "unit": "short",
+      "risks": [
+        "green_at_or_below_zero"
+      ]
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9402,
+      "title": "ID",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9403,
+      "title": "Processed Records",
+      "type": "table",
+      "collapsed": true,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "threshold_steps": [],
+      "mapping_count": 0,
+      "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
+      "unit": "none",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9996,
+      "title": "Track Failed Workflow Runs",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 3
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "0",
+      "unit": "short",
+      "risks": []
+    },
+    {
+      "uid": "bioetl-runtime",
+      "file": "bioetl-runtime.json",
+      "panel_id": 9997,
+      "title": "Failed Pipeline Steps / Range",
+      "type": "stat",
+      "collapsed": true,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "threshold_steps": [
+        {
+          "color": "gray",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 3
+        }
+      ],
+      "mapping_count": 1,
+      "noValue": "0",
+      "unit": "short",
+      "risks": []
+    }
+  ]
+}

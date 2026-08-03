@@ -1,0 +1,65 @@
+version: 1
+storage_modes:
+  - versioned
+  - rebuild_only
+  - ephemeral
+artifact_classes:
+  policy:
+    storage_mode: versioned
+    commit_to_git: true
+    default_paths: ["src/memory/policy"]
+    notes: "Canonical governance policy for the memory subsystem."
+  catalog:
+    storage_mode: versioned
+    commit_to_git: true
+    default_paths: ["src/memory/catalog"]
+    notes: "Canonical structured reference data for source selection and placement rules."
+  schema:
+    storage_mode: versioned
+    commit_to_git: true
+    default_paths: ["src/memory/schemas"]
+    notes: "Canonical contracts for memory artifacts."
+  rag_manifest:
+    storage_mode: rebuild_only
+    commit_to_git: false
+    default_paths:
+      - "src/memory/derived/rag/manifests"
+      - "src/memory/rag/manifests"
+    notes: "Derived is the preferred rebuild-only lane; the legacy path remains a read fallback during migration."
+  graph_export:
+    storage_mode: rebuild_only
+    commit_to_git: false
+    default_paths: ["src/memory/graph/exports"]
+    notes: "Graph snapshots are derived from canonical repo sources and graph mappings."
+  graph_projection:
+    storage_mode: rebuild_only
+    commit_to_git: false
+    default_paths:
+      - "src/memory/graph/projections"
+      - "src/memory/graph/indexes"
+    notes: "Graph relation projections and lookup indexes are derived from graph snapshots."
+  timeline_event:
+    storage_mode: rebuild_only
+    commit_to_git: false
+    default_paths:
+      - "src/memory/derived/timeline/events"
+      - "src/memory/timeline/events"
+    notes: "Timeline projections are derived from control-plane, workflow, and runbook sources."
+  curated_note:
+    storage_mode: versioned
+    commit_to_git: true
+    default_paths:
+      - "src/memory/curated/decisions"
+      - "src/memory/curated/incidents"
+      - "src/memory/curated/lessons"
+      - "src/memory/curated/domain_knowledge"
+      - "src/memory/curated/archive"
+    notes: "Promoted durable memory should remain reviewable in git."
+  episodic_note:
+    storage_mode: ephemeral
+    commit_to_git: true
+    default_paths:
+      - "src/memory/episodic/tasks"
+      - "src/memory/episodic/sessions"
+      - "src/memory/episodic/summaries"
+    notes: "Task-scoped notes use the branch/worktree namespace under tasks; legacy flat lanes remain validation-only migration inputs."

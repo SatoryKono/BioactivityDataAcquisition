@@ -1,0 +1,149 @@
+{
+  "schema_version": "tech-debt-issues-5834-5838-closeout-v1",
+  "generated_on": "2026-07-02",
+  "generated_by": "codex",
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "issues": [
+    {
+      "number": 5834,
+      "title": "TDX root hygiene: execute the live-baseline cleanup and owner-review tranche",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/root_hygiene_review_registry.yaml",
+        "reports/quality/root-hygiene-review-evidence.json",
+        "reports/quality/root-hygiene-cleanup-classification.json",
+        "reports/quality/reports-workspace-review.json",
+        "tests/architecture/test_tech_debt_issues_5834_5838_closeout.py"
+      ]
+    },
+    {
+      "number": 5835,
+      "title": "TDX root hygiene: reduce tolerated local-only root clutter without changing the tracked baseline",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/root_hygiene_review_registry.yaml",
+        "reports/quality/root-hygiene-review-evidence.json",
+        "tests/architecture/test_root_hygiene_review_registry.py",
+        "tests/architecture/test_tech_debt_issues_5834_5838_closeout.py"
+      ]
+    },
+    {
+      "number": 5836,
+      "title": "TDX root hygiene: review root env surfaces and close secret-bearing exceptions safely",
+      "status": "closed-ready",
+      "evidence": [
+        ".github/root-allowlist.txt",
+        "configs/quality/root_hygiene_review_registry.yaml",
+        "reports/quality/root-hygiene-review-evidence.json",
+        "reports/quality/root-hygiene-cleanup-classification.json",
+        "tests/architecture/test_tech_debt_issues_5834_5838_closeout.py"
+      ]
+    },
+    {
+      "number": 5837,
+      "title": "TDX root hygiene: reduce root Codex/WSL launcher and setup shim sprawl",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/root_hygiene_review_registry.yaml",
+        "tests/architecture/test_root_hygiene_review_registry.py",
+        "tests/architecture/test_tech_debt_issues_5834_5838_closeout.py"
+      ]
+    },
+    {
+      "number": 5838,
+      "title": "TDX root hygiene: review root Docker helper adjuncts and provisioning strays",
+      "status": "closed-ready",
+      "evidence": [
+        ".github/root-allowlist.txt",
+        "configs/quality/root_hygiene_review_registry.yaml",
+        "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
+        "reports/quality/root-hygiene-review-evidence.json",
+        "tests/architecture/test_root_hygiene_review_registry.py",
+        "tests/architecture/test_tech_debt_issues_5834_5838_closeout.py"
+      ]
+    }
+  ],
+  "outcomes": {
+    "5834": {
+      "committed_root_review_summary": {
+        "BLOCKED": 6,
+        "REVIEW_REQUIRED": 90,
+        "ROOT_POLICY_MISMATCH": 0,
+        "SECURITY_REVIEW_REQUIRED": 3
+      },
+      "committed_cleanup_summary": {
+        "BLOCKED": 6,
+        "REVIEW_REQUIRED": 90,
+        "SAFE": 9,
+        "SECURITY_REVIEW_REQUIRED": 3
+      },
+      "root_review_rows": 99,
+      "cleanup_candidates": 9,
+      "reports_workspace_review": "reports/quality/reports-workspace-review.json"
+    },
+    "5835": {
+      "reviewed_local_only_root_clutter": [
+        ".coverage",
+        ".scannerwork",
+        ".venv-docs",
+        ".venv-win",
+        ".venv-win-corrupt"
+      ],
+      "tracked_root_baseline_status": "unchanged_pass",
+      "governance_surface": "configs/quality/root_hygiene_review_registry.yaml"
+    },
+    "5836": {
+      "canonical_root_env_template": ".env.example",
+      "security_review_only_surfaces": [
+        ".env",
+        ".env.local",
+        "new.env"
+      ],
+      "cleanup_candidate_intersection_with_secret_bearing_roots": []
+    },
+    "5837": {
+      "reviewed_root_shims": [
+        ".wsl_proxy_env.sh",
+        "codex.bat",
+        "codex.ps1",
+        "run-codex-wsl.ps1",
+        "run-codex.ps1",
+        "setup-codex-wsl.bat",
+        "setup-codex-wsl.ps1",
+        "setup-codex-wsl.sh"
+      ],
+      "owner_lane_id": "root_launcher_shims",
+      "canonical_owner_root": "scripts/ai/codex"
+    },
+    "5838": {
+      "reviewed_root_docker_surfaces": [
+        "Dockerfile.bioetl",
+        "Dockerfile.mcp-fetch",
+        "Dockerfile.mcp-filesystem",
+        "Dockerfile.mcp-github",
+        "Dockerfile.mcp-memory",
+        "Dockerfile.warp",
+        "docker-compose.alertmanager.yml",
+        "docker-compose.codex.yml",
+        "docker-compose.minio.yml",
+        "docker-compose.monitoring.yml",
+        "docker-compose.neo4j-audit.yml",
+        "docker-compose.neo4j.yml",
+        "docker-compose.redis.yml",
+        "docker-compose.sonarqube.yml",
+        "docker-compose.yml",
+        "docker-setup.ps1",
+        "docker-setup.sh",
+        "grafana-datasource.yml"
+      ],
+      "owner_lane_id": "root_docker_adjuncts",
+      "relocation_audit": "docs/05-operations/verification/docker-helper-root-relocation-audit.md"
+    }
+  },
+  "checks_run": [
+    "python3 -m scripts.engineering.repo check-root-review-registry",
+    "python3 scripts/ops/support/repo/cleanup_repository.py --dry-run --detail-limit 0 --report-json reports/quality/root-hygiene-cleanup-classification.json --report-root-review-json reports/quality/root-hygiene-review-evidence.json --report-reports-workspace-json reports/quality/reports-workspace-review.json",
+    "./.venv/bin/pytest tests/architecture/test_root_hygiene_review_registry.py tests/architecture/test_root_hygiene_workflow.py -q",
+    "./.venv/bin/pytest tests/architecture/test_tech_debt_issues_5834_5838_closeout.py -q"
+  ]
+}

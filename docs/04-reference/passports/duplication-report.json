@@ -1,0 +1,25 @@
+{
+  "after": {
+    "average_passport_lines": 81.0,
+    "duplicate_diagram_groups": 0,
+    "duplicate_line_groups": 72,
+    "duplicate_paragraph_groups": 13,
+    "empty_section_count": 0,
+    "identity_duplicate_count": 0,
+    "maximum_passport_lines": 88,
+    "passport_count": 27,
+    "total_markdown_lines": 2187
+  },
+  "before": {
+    "average_passport_lines": 241.1,
+    "duplicate_diagram_groups": 0,
+    "duplicate_line_groups": 250,
+    "duplicate_paragraph_groups": 4,
+    "empty_section_count": 0,
+    "identity_duplicate_count": 0,
+    "maximum_passport_lines": 665,
+    "passport_count": 27,
+    "total_markdown_lines": 6511
+  },
+  "method": "normalized Markdown lines, paragraphs, diagrams, and identity labels"
+}

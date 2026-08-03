@@ -1,0 +1,373 @@
+schema_version: 1
+_surface_defaults: &surface_defaults
+  load_trigger: agent-or-tool-explicit-load
+  write_trigger: owner-approved-workflow
+  version_binding: repository-git-history
+  branch_binding: repository-checkout
+  freshness_mechanism: source-review
+  invalidation_mechanism: source-change-or-policy-expiry
+  conflict_resolution: explicit-precedence-and-owner-review
+  concurrency_model: single-writer-or-locked
+  provenance: repository-path-and-git-history
+  security_classification: internal
+  contains_secrets_or_pii: false
+  risks: [staleness, scope-confusion]
+surfaces:
+  - memory_id: MEM-NORMATIVE
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: project
+    subtype: normative-governance
+    path_or_backend: docs/00-project/RULES.md
+    format: markdown
+    scope: repository
+    owner: architecture-governance
+    canonicality: canonical
+    source_of_truth: docs/00-project/NORMATIVE_SOURCES.md
+    readers: [all-agents, contributors]
+    writers: [architecture-governance]
+    lifetime: durable
+    retention_policy: git-history-and-supersession
+    cleanup_policy: never-delete-without-governance
+    runtime_usage_proven: true
+    evidence: [AGENTS.md, docs/00-project/NORMATIVE_SOURCES.md]
+    status: PASS
+  - memory_id: MEM-CODEX-RUNTIME
+    <<: *surface_defaults
+    agent_or_runtime: codex
+    memory_type: procedural
+    subtype: runtime-instructions-and-skills
+    path_or_backend: .codex
+    format: markdown-yaml
+    scope: repository
+    owner: ai-runtime-governance
+    canonicality: canonical
+    source_of_truth: .codex
+    readers: [codex]
+    writers: [ai-runtime-governance]
+    lifetime: durable
+    retention_policy: git-history
+    cleanup_policy: reviewed-retirement
+    runtime_usage_proven: true
+    evidence: [AGENTS.md, .codex/agents/CODEX-RUNTIME.md]
+    status: PASS
+  - memory_id: MEM-DEVIN-RUNTIME
+    <<: *surface_defaults
+    agent_or_runtime: devin
+    memory_type: procedural
+    subtype: runtime-projection
+    path_or_backend: .devin
+    format: json-markdown
+    scope: repository
+    owner: ai-runtime-governance
+    canonicality: mirror
+    source_of_truth: .codex
+    readers: [devin]
+    writers: [ai-runtime-governance]
+    lifetime: durable
+    retention_policy: git-history
+    cleanup_policy: regenerate-or-retire
+    runtime_usage_proven: true
+    evidence: [.devin/config.json, .github/workflows/skills-consistency.yml]
+    status: WARN
+  - memory_id: MEM-DOCS-AI-MIRROR
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: procedural
+    subtype: documentation-mirror
+    path_or_backend: docs/00-project/ai
+    format: markdown-json
+    scope: repository
+    owner: ai-runtime-governance
+    canonicality: mirror
+    source_of_truth: .codex
+    readers: [all-agents, contributors]
+    writers: [ai-runtime-governance]
+    lifetime: durable
+    retention_policy: git-history
+    cleanup_policy: regenerate-or-archive
+    runtime_usage_proven: true
+    evidence: [AGENTS.md, .github/workflows/skills-consistency.yml]
+    status: WARN
+  - memory_id: MEM-PROJECT-CATALOG
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: semantic
+    subtype: structured-project-map
+    path_or_backend: src/memory/catalog
+    format: yaml
+    scope: repository
+    owner: memory-governance
+    canonicality: canonical
+    source_of_truth: src/memory/catalog
+    readers: [memory-tooling, all-agents]
+    writers: [memory-governance]
+    lifetime: durable
+    retention_policy: git-history
+    cleanup_policy: reviewed-update
+    runtime_usage_proven: true
+    evidence: [src/memory/resources.py, src/memory/validation.py]
+    status: PASS
+  - memory_id: MEM-CURATED
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: semantic
+    subtype: reviewed-project-knowledge
+    path_or_backend: src/memory/curated
+    format: markdown-yaml-frontmatter
+    scope: repository
+    owner: memory-governance
+    canonicality: derived
+    source_of_truth: repository-canonical-sources
+    readers: [memory-tooling, all-agents]
+    writers: [approved-curators]
+    lifetime: durable-reviewed
+    retention_policy: src/memory/policy/retention.yaml
+    cleanup_policy: archive-superseded
+    runtime_usage_proven: true
+    evidence: [src/memory/tooling/promote_note.py, src/memory/tooling/review_curated.py]
+    status: PASS
+  - memory_id: MEM-EPISODIC
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: working
+    subtype: task-session-and-summary
+    path_or_backend: src/memory/episodic
+    format: markdown-yaml-frontmatter
+    scope: repository-task
+    owner: task-owner
+    canonicality: transient
+    source_of_truth: null
+    readers: [memory-tooling, task-agent]
+    writers: [memory-workflow]
+    lifetime: 14-days
+    retention_policy: src/memory/policy/retention.yaml
+    cleanup_policy: explicit-prune
+    runtime_usage_proven: true
+    evidence: [src/memory/tooling/workflow.py, src/memory/tooling/prune.py]
+    status: PASS
+  - memory_id: MEM-RAG
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: semantic
+    subtype: rebuild-only-retrieval-index
+    path_or_backend: src/memory/derived/rag/manifests
+    format: json-jsonl
+    scope: repository-commit
+    owner: memory-tooling
+    canonicality: generated
+    source_of_truth: repository-canonical-sources
+    readers: [memory-query]
+    writers: [memory-indexer]
+    lifetime: rebuildable
+    retention_policy: src/memory/policy/retention.yaml
+    cleanup_policy: delete-and-rebuild
+    runtime_usage_proven: true
+    evidence: [src/memory/rag/indexing.py, src/memory/rag/validation.py]
+    status: PASS
+  - memory_id: MEM-GRAPH
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: semantic
+    subtype: project-knowledge-graph
+    path_or_backend: src/memory/graph
+    format: yaml-json
+    scope: repository
+    owner: memory-tooling
+    canonicality: derived
+    source_of_truth: repository-canonical-sources
+    readers: [memory-query, neo4j-mcp]
+    writers: [memory-graph-sync]
+    lifetime: rebuildable
+    retention_policy: src/memory/policy/retention.yaml
+    cleanup_policy: delete-and-rebuild
+    runtime_usage_proven: true
+    evidence:
+      - src/memory/graph/sync.py
+      - src/memory/graph/query.py
+      - src/memory/tooling/check_freshness.py
+      - tests/unit/memory/test_check_freshness.py
+    status: PASS
+  - memory_id: MEM-TIMELINE
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: episodic
+    subtype: derived-event-projection
+    path_or_backend: src/memory/derived/timeline/events
+    format: jsonl
+    scope: repository
+    owner: memory-tooling
+    canonicality: generated
+    source_of_truth: repository-control-plane-sources
+    readers: [memory-query]
+    writers: [memory-timeline-ingesters]
+    lifetime: rebuildable
+    retention_policy: src/memory/policy/retention.yaml
+    cleanup_policy: delete-and-rebuild
+    runtime_usage_proven: true
+    evidence:
+      - src/memory/timeline/ingest_runs.py
+      - src/memory/timeline/ingest_ci.py
+      - src/memory/timeline/ingest_incidents.py
+      - src/memory/artifact_readiness.py
+      - tests/integration/memory/test_timeline_ingest.py
+      - tests/unit/memory/test_query_facade.py
+    status: PASS
+  - memory_id: MEM-MCP-FILE
+    <<: *surface_defaults
+    agent_or_runtime: mcp-clients
+    memory_type: shared
+    subtype: file-backed-knowledge-graph
+    path_or_backend: .cache/mcp-memory/<worktree>/<branch>/<commit>/memory.json
+    format: json
+    scope: repository-worktree-branch-commit-local-clients
+    owner: mcp-runtime-operator
+    canonicality: local-only
+    source_of_truth: repository-canonical-sources
+    readers: [mcp-clients]
+    writers: [mcp-memory-server]
+    lifetime: durable
+    retention_policy: commit-scope-lifetime
+    cleanup_policy: safe-delete-and-reseed
+    runtime_usage_proven: true
+    evidence:
+      - scripts/ai/mcp/mcp_memory_wrapper.sh
+      - scripts/ai/mcp/mcp_memory_wrapper.ps1
+      - src/memory/mcp_scope.py
+      - src/memory/mcp_server.py
+      - tests/unit/memory/test_mcp_scope.py
+      - tests/integration/memory/test_mcp_server_isolation.py
+    status: PASS
+  - memory_id: MEM-MCP-NEO4J
+    <<: *surface_defaults
+    agent_or_runtime: mcp-clients
+    memory_type: tool
+    subtype: external-graph-backend
+    path_or_backend: neo4j
+    format: property-graph
+    scope: local-service
+    owner: mcp-runtime-operator
+    canonicality: derived
+    source_of_truth: repository-canonical-sources
+    readers: [authorized-mcp-clients]
+    writers: [neo4j-memory-sync]
+    lifetime: operator-managed
+    retention_policy: undefined
+    cleanup_policy: operator-managed
+    runtime_usage_proven: false
+    evidence: [scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh]
+    status: NOT_PROVEN
+  - memory_id: MEM-IDE-LOCAL
+    <<: *surface_defaults
+    agent_or_runtime: cursor-gemini-junie-ide
+    memory_type: cache
+    subtype: vendor-local-state
+    path_or_backend: .cursor;.gemini;.junie;.idea
+    format: vendor-specific
+    scope: user-worktree
+    owner: local-user
+    canonicality: local-only
+    source_of_truth: null
+    readers: [vendor-runtime]
+    writers: [vendor-runtime]
+    lifetime: vendor-defined
+    retention_policy: unknown
+    cleanup_policy: vendor-defined
+    runtime_usage_proven: false
+    evidence: [.gitignore, docs/00-project/ai]
+    status: NOT_PROVEN
+  - memory_id: MEM-EVIDENCE-STORE
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: evidence
+    subtype: immutable-content-addressed-events
+    path_or_backend: repository-operator-selected/evidence.jsonl
+    format: jsonl
+    scope: repository-commit-task
+    owner: memory-governance
+    canonicality: canonical
+    source_of_truth: collected-source-evidence
+    readers: [authorized-agents, decision-replay]
+    writers: [evidence-store-api]
+    lifetime: durable
+    retention_policy: classification-bound
+    cleanup_policy: archive-by-reviewed-policy
+    runtime_usage_proven: true
+    evidence: [src/memory/evidence.py, tests/unit/memory/test_evidence_store.py]
+    status: PASS
+  - memory_id: MEM-DECISION-STORE
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: decision
+    subtype: supersedable-evidence-bound-decisions
+    path_or_backend: repository-operator-selected/decisions.jsonl
+    format: jsonl
+    scope: repository-commit-task
+    owner: architecture-governance
+    canonicality: canonical
+    source_of_truth: approved-decision-records
+    readers: [authorized-agents, decision-replay]
+    writers: [decision-store-api]
+    lifetime: durable
+    retention_policy: supersession-history
+    cleanup_policy: archive-never-silent-overwrite
+    runtime_usage_proven: true
+    evidence: [src/memory/evidence.py, src/memory/replay.py]
+    status: PASS
+  - memory_id: MEM-MUTATION-LEDGER
+    <<: *surface_defaults
+    agent_or_runtime: all
+    memory_type: shared
+    subtype: append-only-mutation-audit
+    path_or_backend: repository-operator-selected/audit.jsonl
+    format: jsonl
+    scope: repository-commit-task
+    owner: memory-governance
+    canonicality: canonical
+    source_of_truth: mutation-events
+    readers: [authorized-auditors]
+    writers: [mutation-ledger-api]
+    lifetime: durable
+    retention_policy: classification-bound
+    cleanup_policy: governed-archive
+    runtime_usage_proven: true
+    evidence: [src/memory/ledger.py, tests/unit/memory/test_mutation_ledger.py]
+    status: PASS
+  - memory_id: MEM-USER-REPOSITORY
+    <<: *surface_defaults
+    agent_or_runtime: repository-memory-api
+    memory_type: user
+    subtype: consent-gated-preferences
+    path_or_backend: repository-operator-selected/users
+    format: json
+    scope: repository-user
+    owner: data-subject
+    canonicality: local-only
+    source_of_truth: explicit-user-input
+    readers: [consented-user]
+    writers: [consented-user]
+    lifetime: consent-bound
+    retention_policy: revoke-correct-export-delete
+    cleanup_policy: tombstone-or-explicit-delete
+    runtime_usage_proven: true
+    evidence: [src/memory/user_memory.py, tests/unit/memory/test_user_memory.py]
+    status: PASS
+  - memory_id: MEM-PYTHON-CACHE
+    <<: *surface_defaults
+    agent_or_runtime: python
+    memory_type: cache
+    subtype: bytecode-cache
+    path_or_backend: src/memory/**/__pycache__
+    format: pyc
+    scope: checkout
+    owner: python-runtime
+    canonicality: cache
+    source_of_truth: python-sources
+    readers: [python-runtime]
+    writers: [python-runtime]
+    lifetime: disposable
+    retention_policy: none
+    cleanup_policy: safe-delete-and-rebuild
+    runtime_usage_proven: true
+    evidence: [src/memory/validation.py]
+    status: WARN

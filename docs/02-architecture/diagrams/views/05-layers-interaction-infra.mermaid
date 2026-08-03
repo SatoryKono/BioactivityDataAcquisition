@@ -1,0 +1,33 @@
+%% View: Infra | Parent: 05-layers-interaction-full.mermaid
+%% @uniform width=184 height=56 max_title_len=20 max_desc_lines=0
+flowchart LR
+    subgraph Composition["Composition"]
+        Builder["build_pipeline_runner"]
+        StorageFactory["StorageFactory"]
+    end
+
+    subgraph Application["Application"]
+        Services["PipelineService"]
+        Lifecycle["Preflight / Postrun"]
+    end
+
+    subgraph Infrastructure["Infrastructure adapters"]
+        Adapters["Provider adapters"]
+        Storage["Bronze / Delta / Gold"]
+        Runtime["Locks / checkpoints"]
+        Obs["Metrics / tracing"]
+    end
+
+    Builder -.-> Runtime
+    Builder -.-> Obs
+    StorageFactory ==> Storage
+    Services --> Adapters
+    Services --> Storage
+    Services --> Runtime
+    Services --> Obs
+    Lifecycle ==> Storage
+    Lifecycle -.-> Obs
+
+    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px

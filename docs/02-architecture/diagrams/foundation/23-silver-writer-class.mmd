@@ -1,0 +1,102 @@
+%% Title: SilverWriter Class Diagram
+%% Covers: RULES.md §2.1 (Silver Layer), §2.5 (ACID via Delta Lake), RF-010, RF-014
+%% Updated: 2026-03-19
+%% Components: SilverStoragePort, MergedStoragePort, StorageMaintenancePort, SilverWriter, runtime services
+
+%% @version 1.1.0
+%% @date    2026-03-19
+%% @type    classDiagram
+%% @level   Mixed (System / Component / Class)
+%% @nodes   9
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform class width=184 height=232 max_title_len=18 max_desc_lines=20
+classDiagram
+    direction TB
+
+    class SilverStoragePort {
+        <<Protocol>>
+        +write_silver(table_name, records, primary_keys, schema, mode, partition_cols, on_schema_mismatch, column_order, bronze_refs, key_nullability_rules) SilverWriteResult | None
+        +read_silver(table_name, columns) list~BronzeRecord~
+        +clear_silver(table_name, dry_run) int
+    }
+
+    class MergedStoragePort {
+        <<Protocol>>
+        +write_silver_merged(table_name, records, primary_keys, run_id, sources_used, preserve_column_order) None
+    }
+
+    class StorageMaintenancePort {
+        <<Protocol>>
+        +vacuum(table_name, retention_hours, dry_run) int
+        +optimize(table_name, retention_hours, dry_run) None
+        +preview_cleanup(silver_table, gold_table) MetaDict
+        +deduplicate_silver(table_name, primary_keys) int
+        +get_table_version(table_path, layer) int | None
+    }
+
+    class SilverWriter {
+        -_write_policy: WriteModePolicy
+        -_metadata_writer: MetadataWriterPort | None
+        -_merge_resilience_policy: SilverMergeResiliencePolicy | None
+        -csv_exporter: CsvExporter | None
+        +write_silver(table_name, records, primary_keys, schema, mode, partition_cols, on_schema_mismatch, column_order, bronze_refs, key_nullability_rules) SilverWriteResult | None
+        +write_silver_merged(table_name, records, primary_keys, run_id, sources_used, preserve_column_order) None
+        +read_silver(table_name, columns) list~BronzeRecord~
+        +vacuum(table_name, retention_hours, dry_run) list~str~
+        +optimize(table_name, target_size, partition_filters) MetaDict
+        +get_table_info(table_name) MetaDict
+        +time_travel(table_name, version, timestamp) DeltaTable
+        +deduplicate_silver(table_name, primary_keys) int
+        +preview_cleanup(table_name) MetaDict
+        +finalize_csv_export(table_name, primary_keys) None
+    }
+
+    class SilverWriterRuntimeServices {
+        <<dataclass>>
+        +csv_exporter: CsvExporter | None
+        +metrics: MetricsPort | None
+        +audit: AuditPort | None
+        +tracing: TracingPort | None
+        +write_policy: WriteModePolicy
+        +silver_validator: SilverValidatorPort | None
+        +metadata_writer: MetadataWriterPort | None
+        +metadata_coordinator: MetadataCoordinatorPort | None
+        +dq_calculator: DQMetricsCalculator | None
+        +merge_resilience_policy: SilverMergeResiliencePolicy | None
+    }
+
+    class WriteModePolicy {
+        <<dataclass>>
+        +default_mode: SilverWriteMode
+        +backfill_mode: SilverWriteMode
+        +rebuild_mode: SilverWriteMode
+        +get_mode_for_run_type(run_type) SilverWriteMode
+    }
+
+    class CsvExporter {
+        +export(table_name, arrow_data, append, primary_keys) None
+        +finalize_csv(table_name, primary_keys) None
+    }
+
+    class MetadataWriterPort {
+        <<Protocol>>
+        +write_silver_metadata(base_path, metadata, table_name, provider, entity) str
+    }
+
+    class SilverMergeResiliencePolicy {
+        +execute(operation_name, operation, on_retry) T
+    }
+
+    SilverStoragePort <|.. SilverWriter : implements
+    MergedStoragePort <|.. SilverWriter : implements
+    StorageMaintenancePort <|.. SilverWriter : implements
+
+    SilverWriter --> SilverWriterRuntimeServices : grouped DI
+    SilverWriter --> WriteModePolicy : uses
+    SilverWriter --> CsvExporter : optional
+    SilverWriter --> MetadataWriterPort : optional
+    SilverWriter --> SilverMergeResiliencePolicy : optional
+
+    note for SilverWriter "Thin facade over mixins<br/>schema-aware Silver writes<br/>merged-write path for composites<br/>maintenance + optional CSV side effects"
+
+    note for SilverWriterRuntimeServices "Writer-specific runtime bundle<br/>groups validation, metadata, DQ, tracing,<br/>metrics, resilience, and CSV export"

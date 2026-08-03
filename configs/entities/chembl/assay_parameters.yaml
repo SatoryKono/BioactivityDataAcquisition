@@ -1,0 +1,417 @@
+version: 1.0.0
+provider: chembl
+entity: assay_parameters
+pipeline:
+  pipeline_name: chembl_assay_parameters
+  provider: chembl
+  entity_type: assay_parameters
+  description: Extract experimental assay parameters from ChEMBL API
+  field_policy: {}
+  business_primary_keys:
+  - assay_param_id
+
+  sink:
+    silver:
+      partition_by:
+      - parameter_type
+    gold:
+      mode: scd2
+      idempotency_contract: scd2
+      scd_config:
+        valid_from_col: _valid_from
+        valid_to_col: _valid_to
+        current_flag_col: _is_current
+        version_col: _version
+  batch_size: 1000
+  checkpoint_interval: 1000
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _ingestion_ts
+    - _index
+  - name: business
+    fields:
+    - assay_param_id
+    - assay_id
+    - type_raw
+    - parameter_type
+    - parameter_relation
+    - parameter_value
+    - qudt_units
+    - qudt_unit_iri
+    - qudt_unit_mapping_status
+    - qudt_ontology_version
+    - units
+    - text_value
+    - comments
+    - standard_type
+    - standard_relation
+    - standard_value
+    - standard_units
+    - standard_text_value
+    - uo_units
+    - uo_unit_iri
+    - uo_unit_mapping_status
+    - uo_ontology_version
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - business
+    - dq
+    exclude_fields: []
+  gold:
+    include_groups:
+    - system
+    - business
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+quality:
+  version: 1.0.0
+  provider: chembl
+  entity: assay_parameters
+  entity_field_validations:
+  - field: assay_param_id
+    type: range
+    min: 1
+    nullable: false
+    error_message: Assay parameter ID is required and must be positive
+  - field: assay_id
+    type: pattern
+    pattern: ^CHEMBL\d+$
+    nullable: false
+    error_message: assay_id must match CHEMBL format
+  - field: parameter_type
+    type: enum
+    allowed:
+    - IC50
+    - EC50
+    - Ki
+    - Kd
+    - AC50
+    - GI50
+    - Potency
+    - Inhibition
+    - '% Inhibition'
+    - Activity
+    - Ratio
+    - ED50
+    - ID50
+    - CONC
+    - PH
+    - TEMP
+    - TIME
+    - DOSE
+    - VOLUME
+    - WAVELENGTH
+    - PERCENT
+    - PRESSURE
+    - HUMIDITY
+    - CELL_COUNT
+    - CELL_DENSITY
+    - SERUM
+    nullable: false
+    error_message: Invalid assay parameter type value
+  - field: type
+    type: enum
+    allowed:
+    - IC50
+    - EC50
+    - Ki
+    - Kd
+    - AC50
+    - GI50
+    - Potency
+    - Inhibition
+    - '% Inhibition'
+    - Activity
+    - Ratio
+    - ED50
+    - ID50
+    - CONC
+    - PH
+    - TEMP
+    - TIME
+    - DOSE
+    - VOLUME
+    - WAVELENGTH
+    - PERCENT
+    - PRESSURE
+    - HUMIDITY
+    - CELL_COUNT
+    - CELL_DENSITY
+    - SERUM
+    nullable: false
+    error_message: Invalid assay parameter type value
+  - field: type_raw
+    type: pattern
+    pattern: ^.{1,100}$
+    nullable: true
+    error_message: Raw parameter type must not exceed 100 chars
+  - field: standard_type
+    type: enum
+    allowed:
+    - IC50
+    - EC50
+    - Ki
+    - Kd
+    - AC50
+    - GI50
+    - Potency
+    - Inhibition
+    - '% Inhibition'
+    - Activity
+    - Ratio
+    - ED50
+    - ID50
+    - CONC
+    - PH
+    - TEMP
+    - TIME
+    - DOSE
+    - VOLUME
+    - WAVELENGTH
+    - PERCENT
+    - PRESSURE
+    - HUMIDITY
+    - CELL_COUNT
+    - CELL_DENSITY
+    - SERUM
+    nullable: true
+    error_message: Invalid assay parameter standard_type value
+  - field: standard_relation
+    type: enum
+    allowed:
+    - '='
+    - <
+    - <=
+    - '>'
+    - '>='
+    - '~'
+    nullable: true
+    error_message: Invalid assay parameter standard_relation value
+  - field: standard_units
+    type: enum
+    allowed:
+    - nM
+    - µM
+    - mM
+    - pM
+    - M
+    - '%'
+    - ug.mL-1
+    - mg.kg-1
+    nullable: true
+    error_message: Invalid assay parameter standard_units value
+  - field: qudt_units
+    type: pattern
+    pattern: '^(?:https?://[^\\s]+|[A-Za-zµ%][A-Za-z0-9µ%._/-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'
+    nullable: true
+    error_message: QUDT assay parameter units must be a raw QUDT URI or canonical unit token when present
+  - field: qudt_unit_iri
+    type: pattern
+    pattern: '^https?://[^\\s]+$'
+    nullable: true
+    error_message: qudt_unit_iri must be an HTTP(S) IRI when present
+  - field: qudt_unit_mapping_status
+    type: enum
+    allowed:
+    - mapped
+    - unmapped
+    - missing
+    nullable: true
+    error_message: Invalid QUDT unit mapping status
+  - field: uo_units
+    type: pattern
+    pattern: '^(?:UO_[0-9]{7}|[A-Za-zµ%][A-Za-z0-9µ%._-]*)$'
+    nullable: true
+    error_message: uo_units must be a canonical ontology/unit token when present
+  - field: uo_unit_iri
+    type: pattern
+    pattern: '^https?://[^\\s]+$'
+    nullable: true
+    error_message: uo_unit_iri must be an HTTP(S) IRI when present
+  - field: uo_unit_mapping_status
+    type: enum
+    allowed:
+    - mapped
+    - unmapped
+    - missing
+    nullable: true
+    error_message: Invalid UO unit mapping status
+  - field: units
+    type: pattern
+    pattern: '^(?:[A-Za-zµ%][A-Za-z0-9µ%._-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'
+    nullable: true
+    error_message: Assay parameter units must be a canonical unit token when present
+  entity_cross_field_validations:
+  - name: param_linkage
+    fields:
+    - assay_param_id
+    - assay_id
+    condition: all_present
+    error_message: Both param ID and assay ID are required
+  - name: uo_unit_requires_mapping_status
+    fields:
+    - uo_units
+    - uo_unit_mapping_status
+    condition: conditional_required
+    trigger_field: uo_units
+    required_field: uo_unit_mapping_status
+    error_message: UO unit mappings must publish a companion mapping status
+  - name: qudt_unit_requires_mapping_status
+    fields:
+    - qudt_units
+    - qudt_unit_mapping_status
+    condition: conditional_required
+    trigger_field: qudt_units
+    required_field: qudt_unit_mapping_status
+    error_message: QUDT unit mappings must publish a companion mapping status
+  entity_conditional_validations:
+  - name: mapped_uo_unit_requires_bundle
+    condition_field: uo_unit_mapping_status
+    condition_value: mapped
+    condition_operator: eq
+    then_validations:
+    - field: uo_unit_iri
+      type: required
+      nullable: false
+      error_message: Mapped UO unit identifiers must publish a canonical IRI
+    - field: uo_ontology_version
+      type: required
+      nullable: false
+      error_message: Mapped UO unit identifiers must publish an ontology version
+  - name: mapped_qudt_unit_requires_bundle
+    condition_field: qudt_unit_mapping_status
+    condition_value: mapped
+    condition_operator: eq
+    then_validations:
+    - field: qudt_unit_iri
+      type: required
+      nullable: false
+      error_message: Mapped QUDT unit identifiers must publish a canonical IRI
+    - field: qudt_ontology_version
+      type: required
+      nullable: false
+      error_message: Mapped QUDT unit identifiers must publish an ontology version
+  key_nullability:
+  - field: assay_param_id
+    key_type: merge
+    nullable: false
+  - field: parameter_type
+    key_type: partition
+    nullable: false
+filters:
+  version: 1.0.0
+  provider: chembl
+  entity: assay_parameters
+  input_filter:
+    enabled: true
+    source_path: data/input/assay_parameters.csv
+    column_name: assay_param_id
+    filter_field: assay_param_id
+    batch_size: 1000
+    checkpoint_interval: 1000
+    fallback_column: title
+  extraction_params: {}
+  silver_filters:
+    exclude_if_present: []
+    required_fields:
+    - assay_id
+    - assay_param_id
+    - parameter_type
+    - type
+  gold_filters:
+    list_contains: {}
+    list_lengths: {}
+    ranges:
+      publication_year:
+        min: 1950
+        max: 2050
+    required_fields:
+    - assay_id
+    - parameter_type
+    columns: {}
+    exclude_if_present: []
+contracts:
+  primary_key:
+  - assay_param_id
+  merge_keys:
+  - assay_param_id
+  hash_include: []
+  hash_exclude: []
+  hash_datetime_policy: v2_datetime_utc
+  contract_ref: chembl.assay_parameters
+  active_version: 1.0.0
+  rollout:
+    mode: single
+    read_order:
+    - 1.0.0
+    write_versions:
+    - 1.0.0
+    affects_hash: false
+hash_policy:
+  provider: chembl
+  entity: assay_parameters
+  contract:
+    version: 1.0.0
+    migration_note: 'Explicit config-level hash contract for the normalized ChEMBL assay_parameters Silver surface.'
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - assay_param_id
+    - assay_id
+    - type_raw
+    - parameter_type
+    - parameter_relation
+    - parameter_value
+    - qudt_units
+    - qudt_unit_iri
+    - qudt_unit_mapping_status
+    - qudt_ontology_version
+    - units
+    - text_value
+    - comments
+    - standard_type
+    - standard_relation
+    - standard_value
+    - standard_units
+    - standard_text_value
+    - uo_units
+    - uo_unit_iri
+    - uo_unit_mapping_status
+    - uo_ontology_version
+    exclude_fields:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_warn
+    - _dq_error
+    - _source_batch_id
+    - _index
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

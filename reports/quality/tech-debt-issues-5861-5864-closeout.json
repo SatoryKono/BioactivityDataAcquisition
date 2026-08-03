@@ -1,0 +1,114 @@
+{
+  "schema_version": "tech-debt-issues-5861-5864-closeout-v1",
+  "generated_on": "2026-07-03",
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "parent_theme": "tdx-audit-2026-07-03-determinism-hotspot",
+  "issues": [
+    {
+      "number": 5861,
+      "title": "TDX-AUDIT-008 Strengthen DQ rule evaluator determinism with golden and property tests",
+      "status": "closed-ready",
+      "evidence": [
+        "tests/fixtures/golden/dq_rule_evaluator/coercion_vocab_cross_ordering.json",
+        "tests/unit/domain/behavior/test_dq_rule_evaluator_golden.py",
+        "tests/unit/domain/behavior/test_dq_rule_evaluator_properties.py",
+        "reports/quality/module-coverage-inventory.json"
+      ]
+    },
+    {
+      "number": 5862,
+      "title": "TDX-AUDIT-009 Add domain contract registry and ledger invariant tests",
+      "status": "closed-ready",
+      "evidence": [
+        "tests/fixtures/golden/control_plane/gold_contract_identity.json",
+        "tests/unit/domain/control_plane/test_contract_registry_invariants.py",
+        "tests/unit/domain/control_plane/test_ledger_core_events_replay.py",
+        "src/bioetl/domain/control_plane/ledger/core_events.py",
+        "reports/quality/module-coverage-inventory.json"
+      ]
+    },
+    {
+      "number": 5863,
+      "title": "TDX-AUDIT-010 Ratchet control-plane hotspot LOC and fan-in ceilings",
+      "status": "closed-ready",
+      "evidence": [
+        "src/bioetl/application/services/control_plane/forensic_diff_service.py",
+        "src/bioetl/application/services/control_plane/forensic/diagnostics_support.py",
+        "reports/quality/hotspot-family-baseline.json",
+        "reports/quality/hotspot-duplication-baseline.json"
+      ]
+    },
+    {
+      "number": 5864,
+      "title": "TDX-AUDIT-011 Explicitize composition runtime builder registration and ratchet DI fan-in",
+      "status": "closed-ready",
+      "evidence": [
+        "src/bioetl/composition/runtime_builders/registry_manifest.py",
+        "src/bioetl/composition/runtime_builders/_config_access_loaders.py",
+        "src/bioetl/composition/runtime_builders/__init__.py",
+        "tests/unit/composition/runtime_builders/test_runtime_builder_registry_manifest.py",
+        "reports/quality/hotspot-family-baseline.json"
+      ]
+    }
+  ],
+  "metrics": {
+    "dq_rule_evaluator_coverage_percent": {
+      "current": 98.39,
+      "opening": 98.39,
+      "source": "reports/quality/module-coverage-inventory.json"
+    },
+    "ledger_core_events_coverage_percent": {
+      "current": 100.0,
+      "opening": 100.0,
+      "source": "reports/quality/module-coverage-inventory.json"
+    },
+    "control_plane_files_ge_250_loc": {
+      "current": 13,
+      "opening": 15,
+      "max": 15,
+      "source": "reports/quality/hotspot-family-baseline.json"
+    },
+    "control_plane_max_internal_fan_in": {
+      "current": 4,
+      "max": 4,
+      "source": "reports/quality/hotspot-family-baseline.json"
+    },
+    "runtime_builders_helper_function_ratio": {
+      "current": 0.359,
+      "opening": 0.382,
+      "source": "reports/quality/hotspot-family-baseline.json"
+    },
+    "runtime_builders_max_internal_fan_in": {
+      "current": 3,
+      "max": 5,
+      "source": "reports/quality/hotspot-family-baseline.json"
+    },
+    "runtime_builders_files_ge_250_loc": {
+      "current": 0,
+      "max": 3,
+      "source": "reports/quality/hotspot-family-baseline.json"
+    }
+  },
+  "outcomes": {
+    "5861": {
+      "status": "closeable",
+      "outcome": "DQ evaluator determinism is backed by committed golden fixtures and hypothesis/property coverage for stable ordering and idempotent evaluation.",
+      "debt_outcome": "improved"
+    },
+    "5862": {
+      "status": "closeable",
+      "outcome": "Domain contract registry validation ordering and ledger replay-safe serialization are regression-tested without infrastructure imports.",
+      "debt_outcome": "improved"
+    },
+    "5863": {
+      "status": "closeable",
+      "outcome": "Control-plane hotspot file count at or above 250 LOC decreased from 15 to 13 without growing family budgets.",
+      "debt_outcome": "improved"
+    },
+    "5864": {
+      "status": "closeable",
+      "outcome": "Runtime builder lazy exports are declared in an explicit registry manifest and helper ratio improved while fan-in remains within the reviewed ceiling.",
+      "debt_outcome": "improved"
+    }
+  }
+}

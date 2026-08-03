@@ -1,0 +1,343 @@
+{
+  "bronze": {
+    "capability": "append_only_snapshot",
+    "content_hash": {
+      "exclude": [],
+      "include": []
+    }
+  },
+  "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "data_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Source[\"uniprot:idmapping\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: uniprot.idmapping + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: uniprot.idmapping (configured)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
+    }
+  ],
+  "execution": {
+    "cached_bronze_is_mode": true,
+    "control_plane": {
+      "checkpoints": true,
+      "run_ledger": true,
+      "run_manifest": true
+    },
+    "effective_config_hash": "sha256:ef614184bf8a2841a55e4b624acc21c7295434f6d74cdd693b5e9e98c6040c29",
+    "projection_profiles": [
+      "async_mapping",
+      "batch",
+      "http"
+    ],
+    "resilience": {
+      "resolution_owner": "UnifiedHTTPClient and provider config",
+      "source_refs": [
+        "src/bioetl/infrastructure/adapters/http/client.py",
+        "configs/providers/uniprot.yaml"
+      ],
+      "status": "runtime_resolved"
+    }
+  },
+  "extraction": {
+    "endpoint_template": "https://rest.uniprot.org",
+    "field_groups": [
+      {
+        "field_count": 7,
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_ingestion_ts",
+          "_index"
+        ],
+        "name": "system"
+      },
+      {
+        "field_count": 14,
+        "fields": [
+          "target_id",
+          "uniprot_accession",
+          "mapping_status",
+          "uniprot_entry_name",
+          "organism_scientific",
+          "organism_common",
+          "taxonomy_id",
+          "protein_name",
+          "gene_primary",
+          "sequence_length",
+          "sequence_mass",
+          "reviewed",
+          "annotation_score",
+          "all_mappings"
+        ],
+        "name": "business"
+      }
+    ],
+    "filters": [
+      {
+        "description": "IDs from data/input/target.csv column target_chembl_id; CLI may override the input CSV",
+        "name": "target_id",
+        "required": false,
+        "source": "cli"
+      }
+    ],
+    "method": "GET",
+    "selected_fields": [
+      {
+        "name": "target_id",
+        "required": true,
+        "source_object": "idmapping",
+        "target_group": "business"
+      },
+      {
+        "name": "uniprot_accession",
+        "required": false,
+        "source_object": "idmapping",
+        "target_group": "business"
+      },
+      {
+        "name": "mapping_status",
+        "required": true,
+        "source_object": "idmapping",
+        "target_group": "business"
+      },
+      {
+        "name": "uniprot_entry_name",
+        "required": false,
+        "source_object": "idmapping",
+        "target_group": "business"
+      },
+      {
+        "name": "organism_scientific",
+        "required": false,
+        "source_object": "idmapping",
+        "target_group": "business"
+      },
+      {
+        "name": "organism_common",
+        "required": false,
+        "source_object": "idmapping",
+        "target_group": "business"
+      },
+      {
+        "name": "taxonomy_id",
+        "required": false,
+        "source_object": "idmapping",
+        "target_group": "business"
+      },
+      {
+        "name": "protein_name",
+        "required": false,
+        "source_object": "idmapping",
+        "target_group": "business"
+      },
+      {
+        "name": "gene_primary",
+        "required": false,
+        "source_object": "idmapping",
+        "target_group": "business"
+      },
+      {
+        "name": "sequence_length",
+        "required": false,
+        "source_object": "idmapping",
+        "target_group": "business"
+      },
+      {
+        "name": "sequence_mass",
+        "required": false,
+        "source_object": "idmapping",
+        "target_group": "business"
+      },
+      {
+        "name": "reviewed",
+        "required": false,
+        "source_object": "idmapping",
+        "target_group": "business"
+      },
+      {
+        "name": "annotation_score",
+        "required": false,
+        "source_object": "idmapping",
+        "target_group": "business"
+      },
+      {
+        "name": "all_mappings",
+        "required": false,
+        "source_object": "idmapping",
+        "target_group": "business"
+      }
+    ],
+    "source_collections": [
+      "idmapping"
+    ],
+    "source_kind": "http_api",
+    "source_resource": "uniprot:idmapping",
+    "source_tables": []
+  },
+  "gold": {
+    "column_projection": {
+      "exclude_fields": [
+        "_dq_*",
+        "_source_batch_id",
+        "_index"
+      ],
+      "include_groups": [
+        "system",
+        "business"
+      ]
+    },
+    "contract_ref": "uniprot.idmapping",
+    "contract_validation": {
+      "status": "resolved_by_adr_018",
+      "strict": true
+    },
+    "contract_version": "1.0.0",
+    "write": {}
+  },
+  "identity": {
+    "aliases": [
+      "data-source:uniprot_idmapping"
+    ],
+    "derived_source_identity": {
+      "data_source_provider": null,
+      "entity": "idmapping",
+      "provider": "uniprot"
+    },
+    "entity": "idmapping",
+    "pipeline_id": "uniprot_idmapping",
+    "pipeline_type": "provider_entity",
+    "provider": "uniprot",
+    "status": "active",
+    "typed_id": "pipeline:uniprot_idmapping"
+  },
+  "kind": "pipeline",
+  "observability": {
+    "correlation_fields": [
+      "run_id",
+      "manifest_id"
+    ],
+    "metric_labels": [
+      "provider",
+      "pipeline",
+      "run_type",
+      "status"
+    ]
+  },
+  "operator_commands": [
+    {
+      "command": "bioetl run --pipeline uniprot_idmapping",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run --pipeline uniprot_idmapping --limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run --pipeline uniprot_idmapping --run-type backfill --dry-run",
+      "result": "Проверяет backfill/rebuild path без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline uniprot_idmapping --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline uniprot_idmapping --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline uniprot_idmapping",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
+  "passport_schema_version": "1.0.0",
+  "provenance": {
+    "projector_version": "1.1.0",
+    "semantic_content_hash": "sha256:e84ee14b38ed888c4f979f7f36a04afb5be393ad47bdde2772a2241e215cc454",
+    "source_revision": "ec48c9da54018a057886a275553e4e0b886997de"
+  },
+  "silver": {
+    "column_projection": {
+      "exclude_fields": [],
+      "include_groups": [
+        "system",
+        "business",
+        "dq"
+      ]
+    },
+    "dq_execution": {
+      "hard_fail_threshold": 0.5,
+      "invalid_record_policy": "quarantine",
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
+    },
+    "normalization_profile": "uniprot.idmapping",
+    "write": {}
+  },
+  "source_references": [
+    {
+      "path": "configs/entities/uniprot/idmapping.yaml",
+      "role": "effective_entity_config"
+    },
+    {
+      "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
+      "role": "pipeline_registration"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "role": "run_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
+    },
+    {
+      "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
+      "role": "gold_validation_contract"
+    },
+    {
+      "path": "src/bioetl/domain/_observability_contract_primitives.py",
+      "role": "observability_contract"
+    },
+    {
+      "path": "configs/contracts/uniprot/idmapping.yaml",
+      "role": "dq_contract"
+    },
+    {
+      "path": "configs/providers/uniprot.yaml",
+      "role": "provider_config"
+    }
+  ],
+  "summary": {
+    "excluded_data_summary": "invalid_record_policy=quarantine",
+    "field_selection_summary": "В business-проекцию входят `target_id`, `uniprot_accession`, `mapping_status`, `uniprot_entry_name`, `organism_scientific`, `organism_common`, `taxonomy_id`, `protein_name` и ещё 6 полей.",
+    "query_filter_summary": "target_id=IDs from data/input/target.csv column target_chembl_id; CLI may override the input CSV",
+    "sentences": [
+      "Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API. Источник — `uniprot:idmapping` на `https://rest.uniprot.org`; применяемые extraction/input filters: target_id=IDs from data/input/target.csv column target_chembl_id; CLI may override the input CSV.",
+      "В business-проекцию входят `target_id`, `uniprot_accession`, `mapping_status`, `uniprot_entry_name`, `organism_scientific`, `organism_common`, `taxonomy_id`, `protein_name` и ещё 6 полей.",
+      "Silver использует профиль `uniprot.idmapping` и проверяет обязательные поля `target_id`, `mapping_status`; невалидные записи направляются в `quarantine`.",
+      "Перед Gold применяется строгий Pandera-контракт `uniprot.idmapping`; Gold filters/constraints заданы в entity config (6 групп правил)."
+    ],
+    "silver_processing_summary": "Silver использует профиль `uniprot.idmapping` и проверяет обязательные поля `target_id`, `mapping_status`; невалидные записи направляются в `quarantine`.",
+    "source_description": "Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API. Источник — `uniprot:idmapping` на `https://rest.uniprot.org`; применяемые extraction/input filters: target_id=IDs from data/input/target.csv column target_chembl_id; CLI may override the input CSV.",
+    "validation_summary": "Перед Gold применяется строгий Pandera-контракт `uniprot.idmapping`; Gold filters/constraints заданы в entity config (6 групп правил)."
+  }
+}

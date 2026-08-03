@@ -1,0 +1,144 @@
+schema_version: 1
+audit_date: "2026-05-15"
+epic_issue: "4134"
+source: "configs/quality/test_surface_hardening.yaml"
+issues:
+  - id: "4134"
+    priority: epic
+    evidence_paths:
+      - configs/quality/test_surface_hardening.yaml
+      - tests/architecture/test_test_surface_hardening.py
+  - id: "4135"
+    priority: P0
+    evidence_paths:
+      - tests/unit/domain/aggregates/test_batch.py
+      - tests/unit/domain/aggregates/test_batch_invariant_properties.py
+  - id: "4136"
+    priority: P0
+    evidence_paths:
+      - tests/unit/domain/aggregates/test_pipeline_run.py
+      - tests/unit/domain/aggregates/test_pipeline_run_invariant_properties.py
+  - id: "4137"
+    priority: P0
+    evidence_paths:
+      - tests/unit/domain/aggregates/test_quarantine_entry.py
+      - tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py
+  - id: "4138"
+    priority: P0
+    evidence_paths:
+      - tests/conftest.py
+      - tests/helpers/clock.py
+      - tests/helpers/deterministic_ids.py
+      - tests/architecture/test_deterministic_test_identity_builders.py
+      - tests/architecture/test_test_surface_hardening.py
+  - id: "4139"
+    priority: P1
+    evidence_paths:
+      - tests/architecture/test_domain_unit_test_purity.py
+      - tests/architecture/test_test_surface_hardening.py
+  - id: "4140"
+    priority: P1
+    evidence_paths:
+      - configs/quality/test_matrix.yaml
+      - configs/quality/pytest_shards.yaml
+      - docs/03-guides/testing.md
+      - scripts/engineering/dev/README.md
+  - id: "4141"
+    priority: P1
+    evidence_paths:
+      - configs/quality/test_matrix.yaml
+      - tests/architecture/test_test_matrix_lane_policy.py
+      - tests/unit/scripts/qa/test_test_health.py
+  - id: "4142"
+    priority: P2
+    evidence_paths:
+      - configs/quality/retirement_candidate_triage.yaml
+      - tests/architecture/test_retirement_candidate_triage.py
+      - tests/architecture/test_test_surface_hardening.py
+  - id: "4143"
+    priority: P2
+    evidence_paths:
+      - tests/helpers/golden_files.py
+      - tests/helpers/synthetic_paths.py
+      - tests/helpers/vcr_config.py
+      - configs/quality/fixture_governance_ledger.yaml
+      - tests/architecture/test_fixture_governance_ledger.py
+      - tests/architecture/test_vcr_metadata_inventory.py
+  - id: "4144"
+    priority: P1
+    evidence_paths:
+      - tests/architecture/test_medallion_invariants.py
+      - tests/unit/repo_backed/application/composite/test_merger_golden_snapshots.py
+      - tests/unit/application/composite/test_join_key_resolution_property.py
+      - tests/contract/test_gold_dq_golden_snapshots.py
+helper_contracts:
+  deterministic_id_targets:
+    - path: tests/unit/application/services/run_manifest_test_support.py
+      required_import: tests.helpers.deterministic_ids
+      forbidden_tokens:
+        - "uuid4("
+    - path: tests/unit/application/services/test_run_ledger_service.py
+      required_import: tests.helpers.deterministic_ids
+      forbidden_tokens:
+        - "uuid4("
+    - path: tests/unit/application/services/test_run_manifest_inspection_service.py
+      required_import: tests.helpers.deterministic_ids
+      forbidden_tokens:
+        - "uuid4("
+    - path: tests/unit/application/services/test_metadata_assemblers.py
+      required_import: tests.helpers.deterministic_ids
+      forbidden_tokens:
+        - "uuid4("
+    - path: tests/unit/application/services/test_metadata_assemblers_helpers.py
+      required_import: tests.helpers.deterministic_ids
+      forbidden_tokens:
+        - "uuid4("
+  synthetic_path_targets:
+    - path: tests/unit/application/services/run_manifest_test_support.py
+      required_import: tests.helpers.synthetic_paths
+      forbidden_tokens:
+        - "tempfile.mkdtemp("
+        - "TemporaryDirectory("
+    - path: tests/unit/application/services/test_run_ledger_service.py
+      required_import: tests.helpers.synthetic_paths
+      forbidden_tokens:
+        - "tempfile.mkdtemp("
+        - "TemporaryDirectory("
+    - path: tests/unit/application/services/test_run_manifest_inspection_service.py
+      required_import: tests.helpers.synthetic_paths
+      forbidden_tokens:
+        - "tempfile.mkdtemp("
+        - "TemporaryDirectory("
+    - path: tests/unit/application/services/test_metadata_assemblers.py
+      required_import: tests.helpers.synthetic_paths
+      forbidden_tokens:
+        - "tempfile.mkdtemp("
+        - "TemporaryDirectory("
+    - path: tests/unit/application/services/test_metadata_assemblers_helpers.py
+      required_import: tests.helpers.synthetic_paths
+      forbidden_tokens:
+        - "tempfile.mkdtemp("
+        - "TemporaryDirectory("
+    - path: tests/unit/application/services/test_cli_run_orchestration_service.py
+      required_import: tests.helpers.synthetic_paths
+      forbidden_tokens:
+        - "tempfile.mkdtemp("
+        - "TemporaryDirectory("
+    - path: tests/unit/application/services/test_export_models.py
+      required_import: tests.helpers.synthetic_paths
+      forbidden_tokens:
+        - "tempfile.mkdtemp("
+        - "TemporaryDirectory("
+  golden_fixture_targets:
+    - path: tests/unit/application/core/test_chembl_normalization_hash_golden.py
+      required_import: tests.helpers.golden_files
+      forbidden_tokens:
+        - "json.loads("
+    - path: tests/unit/application/core/test_non_chembl_normalization_hash_golden.py
+      required_import: tests.helpers.golden_files
+      forbidden_tokens:
+        - "json.loads("
+    - path: tests/unit/repo_backed/application/composite/test_merger_golden_snapshots.py
+      required_import: tests.helpers.golden_files
+      forbidden_tokens:
+        - "json.loads("

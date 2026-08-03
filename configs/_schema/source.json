@@ -1,0 +1,362 @@
+{
+  "$defs": {
+    "BaseRateLimitConfig": {
+      "description": "Rate limit configuration from YAML.",
+      "properties": {
+        "requests_per_second": {
+          "default": 5.0,
+          "description": "Maximum requests per second",
+          "maximum": 100.0,
+          "minimum": 0.1,
+          "title": "Requests Per Second",
+          "type": "number"
+        },
+        "burst": {
+          "default": 10,
+          "description": "Maximum burst capacity (token bucket)",
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Burst",
+          "type": "integer"
+        }
+      },
+      "title": "BaseRateLimitConfig",
+      "type": "object"
+    },
+    "FallbackPolicyYamlConfig": {
+      "description": "Provider fallback orchestration policy from YAML.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "supported_filter_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Supported Filter Field"
+        },
+        "unsupported_filter_event": {
+          "default": "unsupported_filter_field_for_fallback",
+          "title": "Unsupported Filter Event",
+          "type": "string"
+        },
+        "unsupported_filter_message": {
+          "default": "Fallback only supports '{expected}' filtering, skipping",
+          "title": "Unsupported Filter Message",
+          "type": "string"
+        },
+        "skip_on_unsupported_filter_field": {
+          "default": true,
+          "title": "Skip On Unsupported Filter Field",
+          "type": "boolean"
+        },
+        "primary_lookup_method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Primary Lookup Method"
+        },
+        "trim_primary_ids_to_limit": {
+          "default": false,
+          "title": "Trim Primary Ids To Limit",
+          "type": "boolean"
+        },
+        "fallback_operation": {
+          "default": "fetch_filtered_with_fallback",
+          "title": "Fallback Operation",
+          "type": "string"
+        }
+      },
+      "title": "FallbackPolicyYamlConfig",
+      "type": "object"
+    },
+    "HttpClientConfig": {
+      "description": "HTTP client configuration from YAML.",
+      "properties": {
+        "timeout_sec": {
+          "default": 30.0,
+          "maximum": 300.0,
+          "minimum": 1.0,
+          "title": "Timeout Sec",
+          "type": "number"
+        },
+        "max_retries": {
+          "default": 3,
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Max Retries",
+          "type": "integer"
+        },
+        "retry_base_delay": {
+          "default": 1.0,
+          "maximum": 120.0,
+          "minimum": 0.1,
+          "title": "Retry Base Delay",
+          "type": "number"
+        },
+        "retry_max_delay": {
+          "default": 60.0,
+          "maximum": 600.0,
+          "minimum": 1.0,
+          "title": "Retry Max Delay",
+          "type": "number"
+        },
+        "max_connections": {
+          "default": 50,
+          "maximum": 500,
+          "minimum": 1,
+          "title": "Max Connections",
+          "type": "integer"
+        },
+        "max_keepalive_connections": {
+          "default": 10,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Keepalive Connections",
+          "type": "integer"
+        },
+        "trust_env": {
+          "default": true,
+          "description": "Whether httpx should inherit HTTP(S)_PROXY and other network-related environment variables from the process environment.",
+          "title": "Trust Env",
+          "type": "boolean"
+        }
+      },
+      "title": "HttpClientConfig",
+      "type": "object"
+    },
+    "PaginationConfig": {
+      "description": "API pagination configuration.\n\nSingle source of truth for all API pagination parameters.\nDefined per-provider in configs/providers/*.yaml.\n\nPipelines may only override ``page_size`` via ``page_size_override``\nbut cannot redefine the pagination strategy.\n\nAttributes:\n    page_size: Number of records per paginated API page.\n    id_batch_size: Number of IDs per filtered query batch.\n    strategy: Pagination strategy (offset or cursor).\n    max_url_length: Maximum URL length for GET requests.",
+      "properties": {
+        "page_size": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page Size"
+        },
+        "id_batch_size": {
+          "anyOf": [
+            {
+              "maximum": 5000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Id Batch Size"
+        },
+        "strategy": {
+          "default": "offset",
+          "enum": [
+            "offset",
+            "cursor"
+          ],
+          "title": "Strategy",
+          "type": "string"
+        },
+        "max_url_length": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 100,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Url Length"
+        }
+      },
+      "title": "PaginationConfig",
+      "type": "object"
+    },
+    "ProviderConfigYaml": {
+      "description": "Provider-specific configuration from YAML.\n\nAttributes:\n    provider: Provider name (chembl, pubchem, uniprot, pubmed).\n    base_url: Base URL for the API.\n    client: HTTP client settings.\n    pagination: API pagination settings (single source of truth).\n    default_email: Default email for NCBI APIs (PubMed specific).",
+      "properties": {
+        "provider": {
+          "default": "",
+          "title": "Provider",
+          "type": "string"
+        },
+        "base_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Url"
+        },
+        "auth_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Auth Type"
+        },
+        "api_key_env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Api Key Env"
+        },
+        "api_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Api Key"
+        },
+        "mailto": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mailto"
+        },
+        "client": {
+          "$ref": "#/$defs/HttpClientConfig"
+        },
+        "pagination": {
+          "$ref": "#/$defs/PaginationConfig"
+        },
+        "api_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Api Version"
+        },
+        "default_email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default Email"
+        },
+        "fallback": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FallbackPolicyYamlConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "ProviderConfigYaml",
+      "type": "object"
+    },
+    "SourceCircuitBreakerYamlConfig": {
+      "description": "Circuit breaker configuration from YAML.\n\nInherits from BaseCircuitBreakerConfig for consistency with other schemas.\n\nAttributes:\n    failure_threshold: Number of consecutive failures before opening circuit.\n    recovery_timeout: Time in seconds before attempting recovery.",
+      "properties": {
+        "failure_threshold": {
+          "default": 5,
+          "description": "Number of consecutive failures before opening circuit",
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Failure Threshold",
+          "type": "integer"
+        },
+        "recovery_timeout": {
+          "default": 300,
+          "description": "Time in seconds before attempting recovery",
+          "maximum": 3600,
+          "minimum": 60,
+          "title": "Recovery Timeout",
+          "type": "integer"
+        }
+      },
+      "title": "SourceCircuitBreakerYamlConfig",
+      "type": "object"
+    },
+    "SourceSectionConfig": {
+      "description": "Source section configuration from YAML.\n\nThis represents the 'source' section in configs/providers/*.yaml files.\n\nAttributes:\n    provider_config: Provider-specific settings.\n    circuit_breaker: Circuit breaker configuration.\n    rate_limit: Rate limiting configuration.",
+      "properties": {
+        "provider_config": {
+          "$ref": "#/$defs/ProviderConfigYaml"
+        },
+        "circuit_breaker": {
+          "$ref": "#/$defs/SourceCircuitBreakerYamlConfig"
+        },
+        "rate_limit": {
+          "$ref": "#/$defs/BaseRateLimitConfig"
+        }
+      },
+      "title": "SourceSectionConfig",
+      "type": "object"
+    }
+  },
+  "description": "Root schema for source configuration files.\n\nValidates configs/providers/*.yaml files.\n\nExample YAML:\n    source:\n        provider_config:\n            provider: chembl\n            base_url: https://www.ebi.ac.uk/chembl/api/data\n        circuit_breaker:\n            failure_threshold: 5\n            recovery_timeout: 300\n        rate_limit:\n            requests_per_second: 5.0\n            burst: 10",
+  "properties": {
+    "source": {
+      "$ref": "#/$defs/SourceSectionConfig"
+    }
+  },
+  "title": "SourceYamlConfig",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

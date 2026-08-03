@@ -1,0 +1,187 @@
+---
+title: Pipeline State Machine
+version: 1.0.0
+status: active
+author: BioETL Team
+last_verified: 2026-07-24
+adr_references:
+  - ADR-015: Pipeline Services Lifecycle
+  - ADR-010: Local-Only Deployment
+  - ADR-040: Diagram Governance
+description: |
+  State machine diagram showing pipeline state transitions including initial → running → success/failure,
+  retry states, circuit breaker states, and cleanup states.
+  Covers pipeline lifecycle state management.
+---
+
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type state
+%% @level system
+stateDiagram-v2
+    [*] --> Initial: Pipeline created
+    
+    Initial --> Running: Start execution
+    
+    Running --> Success: All steps succeed
+    Running --> Failed: Step or workflow failure
+    Running --> Retry: Transient error
+    
+    Retry --> Running: Retry successful
+    Retry --> Failed: Max retries exceeded
+    Retry --> CircuitBreaker: Circuit breaker triggered
+    
+    CircuitBreaker --> Failed: Circuit breaker open
+    CircuitBreaker --> Running: Circuit breaker closed
+    
+    Failed --> Cleanup: Start cleanup
+    Success --> Cleanup: Start cleanup
+    
+    Cleanup --> [*]: Pipeline terminated
+    
+    note right of Initial
+        Pipeline created but not started
+    end note
+    
+    note right of Running
+        Active execution state
+        At least one step in progress
+    end note
+    
+    note right of Success
+        All selected steps completed successfully
+        Terminal state
+    end note
+    
+    note right of Failed
+        Pipeline stopped due to failure
+        Terminal state
+    end note
+    
+    note right of Retry
+        Transient error detected
+        Retry with backoff
+    end note
+    
+    note right of CircuitBreaker
+        Circuit breaker activated
+        Prevents cascading failures
+    end note
+    
+    note right of Cleanup
+        Resource cleanup and shutdown
+        Lock release, connection close
+    end note
+```
+
+## State Definitions
+
+### Initial
+- **Description**: Pipeline created but not started
+- **Trigger**: Pipeline instantiation
+- **Terminal**: No
+
+### Running
+- **Description**: Active execution state with at least one step in progress
+- **Trigger**: Pipeline start or retry
+- **Terminal**: No
+
+### Success
+- **Description**: All selected steps completed successfully
+- **Trigger**: All steps succeed
+- **Terminal**: Yes
+
+### Failed
+- **Description**: Pipeline stopped due to step or workflow failure
+- **Trigger**: Non-retryable error or max retries exceeded
+- **Terminal**: Yes
+
+### Retry
+- **Description**: Transient error detected, retrying with backoff
+- **Trigger**: Transient error (rate limit, network issue)
+- **Terminal**: No
+
+### CircuitBreaker
+- **Description**: Circuit breaker activated to prevent cascading failures
+- **Trigger**: Failure rate threshold exceeded
+- **Terminal**: No (transient state)
+
+### Cleanup
+- **Description**: Resource cleanup and shutdown phase
+- **Trigger**: Success or failure reached
+- **Terminal**: No (transient state)
+
+## Transition Triggers
+
+### Initial → Running
+- **Trigger**: `bioetl run <pipeline>` command
+- **Condition**: Valid configuration and resources available
+
+### Running → Success
+- **Trigger**: All selected steps complete successfully
+- **Condition**: No errors in critical path
+
+### Running → Failed
+- **Trigger**: Non-retryable error or max retries exceeded
+- **Condition**: Permanent error or retry limit reached
+
+### Running → Retry
+- **Trigger**: Transient error detected
+- **Condition**: Retryable error and max retries not exceeded
+
+### Retry → Running
+- **Trigger**: Retry successful
+- **Condition**: Retry attempt succeeded
+
+### Retry → Failed
+- **Trigger**: Max retries exceeded
+- **Condition**: Retry limit reached without success
+
+### Retry → CircuitBreaker
+- **Trigger**: Failure rate threshold exceeded
+- **Condition**: Circuit breaker threshold triggered
+
+### CircuitBreaker → Failed
+- **Trigger**: Circuit breaker in OPEN state
+- **Condition**: Circuit breaker prevents execution
+
+### CircuitBreaker → Running
+- **Trigger**: Circuit breaker in CLOSED/HALF_OPEN state
+- **Condition**: Circuit breaker allows execution
+
+### Success → Cleanup
+- **Trigger**: Pipeline completed successfully
+- **Condition**: Normal completion path
+
+### Failed → Cleanup
+- **Trigger**: Pipeline failed
+- **Condition**: Error or failure condition
+
+### Cleanup → [*]
+- **Trigger**: Cleanup operations complete
+- **Condition**: All resources released
+
+## ADR References
+
+- **ADR-015**: Pipeline Services Lifecycle — pipeline lifecycle management
+- **ADR-010**: Local-Only Deployment — no external orchestration required
+- **ADR-040**: Diagram Governance — diagram metadata and quality standards
+
+## Error Classification
+
+### Transient Errors
+- **Rate Limit (429)**: Temporary API rate limit
+- **Network Errors**: Connection or timeout issues
+- **Server Errors (5xx)**: Temporary server issues
+
+### Permanent Errors
+- **Authentication Errors**: Invalid credentials
+- **Configuration Errors**: Invalid pipeline configuration
+- **Data Errors**: Invalid or corrupted data
+- **Resource Errors**: Insufficient resources
+
+## Circuit Breaker States
+
+- **CLOSED**: Normal operation, requests allowed
+- **OPEN**: Circuit breaker active, requests blocked
+- **HALF_OPEN**: Testing if system has recovered

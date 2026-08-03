@@ -1,0 +1,193 @@
+{
+  "schema_version": "gold-replay-representative-v1",
+  "snapshot_date": "2026-06-18",
+  "network_policy": "no_live_api",
+  "cases": [
+    {
+      "case_id": "provider_gold_chembl_activity",
+      "gold_family": "provider",
+      "provider": "chembl",
+      "entity": "activity",
+      "pipeline_name": "chembl_activity",
+      "layer": "gold",
+      "contract_ref": "chembl.activity",
+      "contract_version": "1.0",
+      "manifest": {
+        "manifest_id": "manifest-gold-replay-chembl-activity-001",
+        "run_id": "run-gold-replay-chembl-activity-001",
+        "effective_config_hash": "sha256:0f1d7b6c43e48f72df7d9b0a0d3f4d41051e7d44e0d54daff612f5f9c9b3a001",
+        "effective_config_artifact_id": "eca-gold-replay-chembl-activity-001",
+        "contract_ref": "chembl.activity",
+        "contract_version": "1.0",
+        "input_snapshot_content_hashes": [
+          "sha256:833ed4f0ec1f00be1f3f9f05a9e7c9c3e7767f734c733f7e0f08d7c7b6511001"
+        ]
+      },
+      "ledger": {
+        "events": [
+          {
+            "event_type": "gold_artifact_published",
+            "manifest_id": "manifest-gold-replay-chembl-activity-001",
+            "artifact_layer": "gold",
+            "artifact_path": "gold/chembl/activity/part-00001.parquet",
+            "artifact_content_hash": "487ce3b579e1bf0f17ca6780276927d59cbbd50be6837a46563c67224fb448bb"
+          }
+        ]
+      },
+      "checkpoint": {
+        "manifest_id": "manifest-gold-replay-chembl-activity-001",
+        "effective_config_hash": "sha256:0f1d7b6c43e48f72df7d9b0a0d3f4d41051e7d44e0d54daff612f5f9c9b3a001",
+        "contract_ref": "chembl.activity",
+        "input_snapshot_content_hashes": [
+          "sha256:833ed4f0ec1f00be1f3f9f05a9e7c9c3e7767f734c733f7e0f08d7c7b6511001"
+        ],
+        "output_content_hash": "487ce3b579e1bf0f17ca6780276927d59cbbd50be6837a46563c67224fb448bb"
+      },
+      "output": {
+        "content_hash": "487ce3b579e1bf0f17ca6780276927d59cbbd50be6837a46563c67224fb448bb",
+        "rows": [
+          {
+            "activity_id": "CHEMBL-ACT-0001",
+            "assay_id": "CHEMBL-ASSAY-0001",
+            "molecule_id": "CHEMBL-MOL-0001",
+            "standard_type": "IC50",
+            "standard_units": "nM",
+            "standard_value": "42.0",
+            "target_id": "CHEMBL-TARGET-0001"
+          }
+        ]
+      },
+      "evidence": [
+        "tests/fixtures/golden/gold/chembl_activity_dq_bundle_v1.json",
+        "reports/quality/contract-coverage-matrix.json"
+      ]
+    },
+    {
+      "case_id": "publication_gold_pubmed_publication",
+      "gold_family": "publication",
+      "provider": "pubmed",
+      "entity": "publication",
+      "pipeline_name": "pubmed_publication",
+      "layer": "gold",
+      "contract_ref": "pubmed.publication",
+      "contract_version": "1.0",
+      "manifest": {
+        "manifest_id": "manifest-gold-replay-pubmed-publication-001",
+        "run_id": "run-gold-replay-pubmed-publication-001",
+        "effective_config_hash": "sha256:2b3d7f943feebc6023ff1a8c0f9d6ed2c7734f3be481af7a2d6062eabf3b2002",
+        "effective_config_artifact_id": "eca-gold-replay-pubmed-publication-001",
+        "contract_ref": "pubmed.publication",
+        "contract_version": "1.0",
+        "input_snapshot_content_hashes": [
+          "sha256:40f9e8e0103b17ce64b65d80d6a01f60795e516e4e53beac1ccf154c75182002"
+        ]
+      },
+      "ledger": {
+        "events": [
+          {
+            "event_type": "gold_artifact_published",
+            "manifest_id": "manifest-gold-replay-pubmed-publication-001",
+            "artifact_layer": "gold",
+            "artifact_path": "gold/pubmed/publication/part-00001.parquet",
+            "artifact_content_hash": "904b64739be18d69cabaccff8b001cdc282417a012be9508d7db4149928f4acb"
+          }
+        ]
+      },
+      "checkpoint": {
+        "manifest_id": "manifest-gold-replay-pubmed-publication-001",
+        "effective_config_hash": "sha256:2b3d7f943feebc6023ff1a8c0f9d6ed2c7734f3be481af7a2d6062eabf3b2002",
+        "contract_ref": "pubmed.publication",
+        "input_snapshot_content_hashes": [
+          "sha256:40f9e8e0103b17ce64b65d80d6a01f60795e516e4e53beac1ccf154c75182002"
+        ],
+        "output_content_hash": "904b64739be18d69cabaccff8b001cdc282417a012be9508d7db4149928f4acb"
+      },
+      "output": {
+        "content_hash": "904b64739be18d69cabaccff8b001cdc282417a012be9508d7db4149928f4acb",
+        "rows": [
+          {
+            "abstract": "Bounded replay fixture publication abstract.",
+            "doi": "10.0000/bioetl.replay.1",
+            "journal": "BioETL Fixtures",
+            "pmid": "10000001",
+            "publication_date": "2024-01-15",
+            "title": "Deterministic Gold replay fixture"
+          }
+        ]
+      },
+      "evidence": [
+        "tests/fixtures/golden/gold/pubmed_publication_dq_bundle_v1.json",
+        "reports/quality/contract-coverage-matrix.json"
+      ]
+    },
+    {
+      "case_id": "composite_gold_publication",
+      "gold_family": "composite",
+      "provider": "composite",
+      "entity": "publication",
+      "pipeline_name": "composite_publication",
+      "layer": "gold",
+      "contract_ref": "composite.publication",
+      "contract_version": "1.0",
+      "manifest": {
+        "manifest_id": "manifest-gold-replay-composite-publication-001",
+        "run_id": "run-gold-replay-composite-publication-001",
+        "effective_config_hash": "sha256:3f13a2d9c0132d466f8245f5187c972431b2b89ac44b8dcd7295c3e72ef93003",
+        "effective_config_artifact_id": "eca-gold-replay-composite-publication-001",
+        "contract_ref": "composite.publication",
+        "contract_version": "1.0",
+        "input_snapshot_content_hashes": [
+          "sha256:f7d0edb94fc19108dfc78ad53e1a80179d34461f70b1a890d65cfd521e531003",
+          "sha256:8b1b6ffb6430f97a3dd0d6df13c1676bb342f26cd267734e2ec947d94e072003"
+        ]
+      },
+      "ledger": {
+        "events": [
+          {
+            "event_type": "gold_artifact_published",
+            "manifest_id": "manifest-gold-replay-composite-publication-001",
+            "artifact_layer": "gold",
+            "artifact_path": "gold/composite/publication/part-00001.parquet",
+            "artifact_content_hash": "7be5fef195c04a25b6af2a1634d1f12b0da260d18c5180698c3d8bc6f6634953"
+          }
+        ]
+      },
+      "checkpoint": {
+        "manifest_id": "manifest-gold-replay-composite-publication-001",
+        "effective_config_hash": "sha256:3f13a2d9c0132d466f8245f5187c972431b2b89ac44b8dcd7295c3e72ef93003",
+        "contract_ref": "composite.publication",
+        "input_snapshot_content_hashes": [
+          "sha256:f7d0edb94fc19108dfc78ad53e1a80179d34461f70b1a890d65cfd521e531003",
+          "sha256:8b1b6ffb6430f97a3dd0d6df13c1676bb342f26cd267734e2ec947d94e072003"
+        ],
+        "output_content_hash": "7be5fef195c04a25b6af2a1634d1f12b0da260d18c5180698c3d8bc6f6634953"
+      },
+      "output": {
+        "content_hash": "7be5fef195c04a25b6af2a1634d1f12b0da260d18c5180698c3d8bc6f6634953",
+        "rows": [
+          {
+            "canonical_title": "Deterministic Gold replay fixture",
+            "entity_id": "publication:10.0000/bioetl.replay.1",
+            "merged_provider_count": 2,
+            "primary_identifier": "10.0000/bioetl.replay.1",
+            "source_providers": [
+              "crossref",
+              "pubmed"
+            ]
+          }
+        ]
+      },
+      "evidence": [
+        "tests/fixtures/golden/gold/composite_publication_dq_bundle_v1.json",
+        "reports/quality/contract-coverage-matrix.json"
+      ]
+    }
+  ],
+  "out_of_scope": {
+    "reason": "Fixture is intentionally bounded; exhaustive Gold coverage remains in contract-coverage-matrix and DQ golden snapshots.",
+    "evidence": [
+      "reports/quality/contract-coverage-matrix.json",
+      "tests/contract/test_gold_dq_golden_snapshots.py"
+    ]
+  }
+}

@@ -1,0 +1,237 @@
+{
+  "schema_version": "tech-debt-issues-6220-6229-closeout-v1",
+  "generated_on": "2026-07-12",
+  "generated_by": "codex",
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "issue_batch": {
+    "issues": [
+      6220,
+      6221,
+      6222,
+      6224,
+      6225,
+      6226,
+      6227,
+      6229
+    ],
+    "theme": "architecture_ownership_governance_drift_closeout"
+  },
+  "issues": [
+    {
+      "number": 6220,
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/public_lazy_facade_inventory.yaml",
+        "tests/architecture/test_public_lazy_facade_inventory.py",
+        "reports/quality/compatibility-importer-census.json"
+      ]
+    },
+    {
+      "number": 6221,
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_public_surface_importer_census_governance.py"
+      ]
+    },
+    {
+      "number": 6222,
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/composition_bootstrap_owner_map.yaml",
+        "configs/quality/control_plane_facade_import_policy.yaml",
+        "tests/architecture/test_bootstrap_layer_boundaries.py",
+        "reports/quality/architecture-quality-scorecard.json"
+      ]
+    },
+    {
+      "number": 6224,
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/dead-code-inventory.json",
+        "reports/quality/dead-code-inventory.md",
+        "tests/architecture/test_retirement_candidate_triage.py"
+      ]
+    },
+    {
+      "number": 6225,
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/domain_aggregate_classification.yaml",
+        "reports/quality/domain-aggregate-invariant-registry.json",
+        "tests/architecture/test_domain_aggregate_classification.py",
+        "tests/architecture/test_domain_aggregate_invariant_registry.py"
+      ]
+    },
+    {
+      "number": 6226,
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/pipeline-config-contract-ownership-map.json",
+        "reports/quality/pipeline-config-contract-ownership-map.md",
+        "reports/quality/contract-registry-dq-diagnostics.json",
+        "reports/quality/config-discrepancy-baseline.json",
+        "tests/architecture/test_pipeline_config_contract_ownership_map_integrity.py",
+        "tests/architecture/test_pipeline_config_contract_ownership_map_drift.py"
+      ]
+    },
+    {
+      "number": 6227,
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/runtime_uuid_seams.yaml",
+        "configs/quality/determinism_identity_policy.yaml",
+        "reports/observability/runtime_cardinality_inventory.json",
+        "reports/observability/runtime_cardinality_review.json",
+        "configs/base/bronze_fixture_gaps.yaml",
+        "reports/quality/vcr-metadata-catalog.json",
+        "tests/architecture/test_runtime_uuid_seam_inventory.py",
+        "tests/architecture/test_determinism_identity_policy.py",
+        "tests/architecture/test_observability_metric_governance.py",
+        "tests/architecture/test_vcr_metadata_catalog_drift.py",
+        "tests/architecture/test_bronze_fixture_replay_baseline.py"
+      ]
+    },
+    {
+      "number": 6229,
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/test_matrix.yaml",
+        "configs/quality/pytest_shards.yaml",
+        "configs/quality/test_telemetry_baseline.yaml",
+        "reports/test-telemetry/slowest-tests.json",
+        "reports/test-telemetry/slowest-tests.md",
+        "tests/architecture/test_test_matrix_lane_policy.py",
+        "tests/architecture/test_test_telemetry_governance.py"
+      ]
+    }
+  ],
+  "outcomes": {
+    "6220": {
+      "status": "closeable",
+      "summary": "All lazy __getattr__, _PUBLIC_EXPORTS, and _PUBLIC_SYMBOL_TARGETS surfaces under src/bioetl are inventoried with owner, importer class, classification, markers, and exit criteria."
+    },
+    "6221": {
+      "status": "closeable",
+      "summary": "Infrastructure config compatibility shims remain bounded at zero first-party src importers with owner tests and exit criteria."
+    },
+    "6222": {
+      "status": "closeable",
+      "summary": "Bootstrap runtime, CLI service assembly, and composite runner ownership are mapped to reviewed owner graphs, and architecture scorecard layer violations remain zero."
+    },
+    "6224": {
+      "status": "closeable",
+      "summary": "Dead-code inventory has zero untriaged zero-import candidates and retained candidates are owner-test anchored."
+    },
+    "6225": {
+      "status": "closeable",
+      "summary": "True aggregate roots stay aligned with invariant registry evidence, while non-aggregate domain clusters and root modules are explicitly classified."
+    },
+    "6226": {
+      "status": "closeable",
+      "summary": "Pipeline config-contract ownership map covers all 27 rows; contract diagnostics and config discrepancy baselines have zero blocking/inconsistent findings."
+    },
+    "6227": {
+      "status": "closeable",
+      "summary": "Runtime UUID seams, runtime cardinality review requirements, bronze fixture gaps, and VCR ownership gaps are all at zero."
+    },
+    "6229": {
+      "status": "closeable",
+      "summary": "S7 architecture scan hotspots are documented in telemetry, slow-governance cache evidence is captured, and fast/slow architecture lanes remain split."
+    }
+  },
+  "ratchets": {
+    "public_lazy_facade_rows": {
+      "current": 53,
+      "max": 53,
+      "opening": 53,
+      "source": "configs/quality/public_lazy_facade_inventory.yaml"
+    },
+    "unclassified_public_lazy_facades": {
+      "current": 0,
+      "max": 0,
+      "opening": 0,
+      "source": "configs/quality/public_lazy_facade_inventory.yaml"
+    },
+    "retained_public_export_facades": {
+      "current": 4,
+      "max": 4,
+      "opening": 4,
+      "source": "reports/quality/compatibility-importer-census.json"
+    },
+    "config_root_src_importers": {
+      "current": 0,
+      "max": 0,
+      "opening": 0,
+      "source": "reports/quality/compatibility-importer-census.json"
+    },
+    "layer_violations": {
+      "current": 0,
+      "max": 0,
+      "opening": 0,
+      "source": "reports/quality/architecture-quality-scorecard.json"
+    },
+    "repo_wide_untriaged_zero_import_candidates": {
+      "current": 0,
+      "max": 0,
+      "opening": 0,
+      "source": "reports/quality/dead-code-inventory.json"
+    },
+    "aggregate_registry_missing_source_paths": {
+      "current": 0,
+      "max": 0,
+      "opening": 0,
+      "source": "reports/quality/domain-aggregate-invariant-registry.json"
+    },
+    "pipeline_config_contract_rows": {
+      "current": 27,
+      "max": 27,
+      "opening": 27,
+      "source": "reports/quality/pipeline-config-contract-ownership-map.json"
+    },
+    "contract_registry_dq_blocking_issues": {
+      "current": 0,
+      "max": 0,
+      "opening": 0,
+      "source": "reports/quality/contract-registry-dq-diagnostics.json"
+    },
+    "config_discrepancy_inconsistent_parameters": {
+      "current": 0,
+      "max": 0,
+      "opening": 0,
+      "source": "reports/quality/config-discrepancy-baseline.json"
+    },
+    "runtime_uuid4_seams": {
+      "current": 0,
+      "max": 0,
+      "opening": 0,
+      "source": "configs/quality/runtime_uuid_seams.yaml"
+    },
+    "runtime_cardinality_review_required": {
+      "current": 0,
+      "max": 0,
+      "opening": 0,
+      "source": "reports/observability/runtime_cardinality_inventory.json"
+    },
+    "runtime_cardinality_threshold_violations": {
+      "current": 0,
+      "max": 0,
+      "opening": 0,
+      "source": "reports/observability/runtime_cardinality_inventory.json"
+    },
+    "bronze_fixture_gaps": {
+      "current": 0,
+      "max": 0,
+      "opening": 0,
+      "source": "configs/base/bronze_fixture_gaps.yaml"
+    },
+    "vcr_unowned_cassettes": {
+      "current": 0,
+      "max": 0,
+      "opening": 0,
+      "source": "reports/quality/vcr-metadata-catalog.json"
+    }
+  }
+}

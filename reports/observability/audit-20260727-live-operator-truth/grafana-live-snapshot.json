@@ -1,0 +1,75 @@
+{
+  "grafana_auth": "basic_admin_ok",
+  "dashboard_count": 5,
+  "dashboards": [
+    {
+      "uid": "bioetl-control-plane-v1",
+      "title": "0. Trust"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "title": "1. Overview"
+    },
+    {
+      "uid": "bioetl-runtime",
+      "title": "2. Pipeline Diagnostics"
+    },
+    {
+      "uid": "bioetl-provider-health-v2",
+      "title": "3. Provider Health"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "title": "4. Data Quality"
+    }
+  ],
+  "datasources": [
+    {
+      "name": "BioETL Ops HTTP",
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "bioetl-ops-http"
+    },
+    {
+      "name": "Prometheus",
+      "type": "prometheus",
+      "uid": "prometheus"
+    },
+    {
+      "name": "Pushgateway",
+      "type": "prometheus",
+      "uid": "pushgateway"
+    }
+  ],
+  "prom_via_grafana": {
+    "pipeline_runs_sum": {
+      "status": "ok",
+      "value": "2",
+      "n": 1
+    },
+    "scrape_up": {
+      "status": "ok",
+      "value": "1",
+      "n": 1
+    },
+    "up_bioetl": {
+      "status": "ok",
+      "value": "1",
+      "n": 1
+    },
+    "l0_status_count": {
+      "status": "ok",
+      "value": "5",
+      "n": 1
+    },
+    "telemetry_missing": {
+      "status": "ok",
+      "value": "3",
+      "n": 1
+    },
+    "trusted_status_count": {
+      "status": "ok",
+      "value": "3",
+      "n": 1
+    }
+  }
+}

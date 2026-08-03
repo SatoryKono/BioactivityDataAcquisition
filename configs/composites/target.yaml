@@ -1,0 +1,771 @@
+# configs/composites/target.yaml
+# =============================================================================
+# Composite Target Pipeline Configuration
+# =============================================================================
+#
+# Combines biological target data from multiple sources:
+# - Seed: ChEMBL targets (target_id, target_type, pref_name, ...)
+# - Dependencies (ordered, chained):
+#   1. chembl_target_component: fetches component data using primary_component_id from seed
+#   2. chembl_protein_class: fetches protein classifications using
+#      protein_classification_id from target_component Silver table (chained dep)
+#   3. chembl_target_protein_classification: deterministic target-level
+#      L1-L5 hierarchy summary from target classification relation rows
+#   4. uniprot_idmapping: maps ChEMBL target IDs to UniProt accessions
+#   5. uniprot_protein: fetches detailed protein data using uniprot_accession
+#      from idmapping Silver table (chained dep)
+#
+# Dependency chaining (key_source):
+# - chembl_target_component uses primary_component_id from seed (standard)
+# - chembl_protein_class uses protein_classification_id from target_component
+#   Silver table via key_source field (chained dependency)
+# - uniprot_idmapping uses target_id from seed (standard)
+# - uniprot_protein uses uniprot_accession from idmapping Silver table
+#   via key_source field (chained dependency)
+#
+# Version: 1.3.0
+# Reference: ADR-026 Composite Pipeline Pattern
+# Last Updated: 2026-06-01
+#
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Composite Pipeline Configuration
+# -----------------------------------------------------------------------------
+composite:
+  name: composite_target
+  version: "1.3.0"
+  normalized_anchor_policy:
+    uniprot_idmapping:
+      join_boundary:
+        source_anchor: target_id
+        normalized_output_anchor: uniprot_accession
+        required_status: found
+        downstream_pipeline: uniprot_protein
+        rationale: UniProt accession joins are chained through normalized idmapping output and filtered to mapping_status='found'.
+
+    pubchem_compound:
+      join_boundary:
+        active_join_keys:
+        - inchi_key
+        - canonical_smiles
+        retained_validation_anchors:
+        - standardized_inchi_key
+        - structure_parent_key
+        activation_condition: seed pipelines emit matching normalized PubChem anchors
+        rationale: PubChem normalized anchors are retained in composite output but not used as symmetric join keys until seed sources expose the same anchor family.
+
+  # ---------------------------------------------------------------------------
+  # Merge Configuration
+  # ---------------------------------------------------------------------------
+  # Defines how enriched data is combined into the final output.
+  normalized_join_key_policy:
+    publication_identity:
+      primary_join_keys: []
+      fallback_join_keys: []
+      rationale: Non-publication composite; publication join policy not applicable.
+
+  # ---------------------------------------------------------------------------
+  # Seed Pipeline Configuration
+  # ---------------------------------------------------------------------------
+  # The seed pipeline extracts primary entities from ChEMBL.
+  # Its output provides join keys (target_id) for enrichment.
+  seed:
+    pipeline: chembl_target
+    output_keys:
+    - target_id           # ChEMBL target ID (primary key, join key for idmapping)
+    - primary_component_id        # Primary component ID (join key for target_component)
+    - pref_name           # Target name (for logging/debugging)
+    - target_type         # Classification (for filtering)
+    silver_table: silver/chembl/target
+
+  # ---------------------------------------------------------------------------
+  # Dependency Pipelines (sequential, pre-populate Silver)
+  # ---------------------------------------------------------------------------
+  # Dependencies run after seed but before enrichers to populate Silver tables.
+  # They execute as full standalone pipelines (API -> Bronze -> Silver).
+  #
+  # Order matters for chained dependencies:
+  # 1. chembl_target_component runs first (uses primary_component_id from seed)
+  # 2. chembl_protein_class runs second (uses protein_classification_id from
+  #    target_component Silver table via key_source)
+  # 3. chembl_target_protein_classification runs third and is collapsed to
+  #    one deterministic target summary row before joining on target_id
+  # 4. uniprot_idmapping runs fourth (uses target_id from seed)
+  # 5. uniprot_protein runs fifth (uses uniprot_accession from idmapping
+  #    Silver table via key_source - CHAINED)
+  dependencies:
+    # ChEMBL Target Component: detailed per-component data
+    # Fetches protein_classifications, xrefs for each component.
+    # Uses primary_component_id from seed to filter API requests.
+  - pipeline: chembl_target_component
+    join_keys:
+    - primary_component_id          # Scalar join key from seed (int)
+    filter_field: component_id      # Target API filter field
+    required: false         # Optional - some targets have no components
+    timeout_seconds: 600
+    silver_table: silver/chembl/target_component
+
+    # ChEMBL Protein Classification: hierarchical protein class tree
+    # Uses protein_classification_id from target_component Silver table.
+    # This is a CHAINED DEPENDENCY: reads keys from another dependency's output.
+    # Field mapping: source column (protein_classification_id) differs from
+    # target API field (protein_class_id).
+  - pipeline: chembl_protein_class
+    join_keys:
+    - protein_classification_id      # Source column in target_component Silver
+    filter_field: protein_class_id    # Target API filter field
+    key_source: chembl_target_component    # Read keys from this Silver table
+    required: false
+    timeout_seconds: 300
+    silver_table: silver/chembl/protein_class
+
+    # ChEMBL Target Protein Classification: target-level L1-L5 hierarchy
+    # summary. The relation table is 1:N by target_id; application pre-join
+    # projection collapses it to exactly one deterministic row per target.
+  - pipeline: chembl_target_protein_classification
+    join_keys:
+    - target_id
+    required: false
+    timeout_seconds: 300
+    silver_table: silver/chembl/target_protein_classification
+
+    # UniProt ID Mapping: maps canonical ChEMBL target IDs to canonical UniProt
+    # accessions. The uniprot_idmapping normalization profile owns both anchor
+    # families and all_mappings set-like accession-array semantics.
+    # This MUST run before uniprot_protein to provide uniprot_accession keys.
+    # OPTIONAL: Many non-protein targets lack UniProt mappings.
+    #
+    # ID source: target_id values extracted from seed DataFrame
+    #   (NOT from data/input/target.csv — CSV is fallback for standalone mode only).
+    #   Flow: seed DataFrame → dependencies_runner_factory extracts join_keys
+    #         → filter_ids → IDMappingDataSource.seed_ids → UniProt API.
+    #
+    # API parameters (from configs/entities/uniprot/idmapping.yaml and configs/providers/uniprot.yaml):
+    #   from_db: ChEMBL          — source database for UniProt ID Mapping API
+    #   to_db: UniProtKB         — target database
+    #   base_url: https://rest.uniprot.org
+    #   batch_size: 500 IDs/job  — MAX_IDS_PER_BATCH in idmapping_client.py
+    #   polling_interval: 3s     — job status polling period
+    #   max_poll_attempts: 100   — ~5 min max wait per batch
+  - pipeline: uniprot_idmapping
+    join_keys:
+    - target_id      # Direct join key from seed
+    required: false         # Optional - many targets lack UniProt accessions
+    filter_condition: "target_id IS NOT NULL"
+    timeout_seconds: 600
+    silver_table: silver/uniprot/idmapping
+
+    # UniProt Protein: detailed protein functional data
+    # Uses normalized uniprot_accession from idmapping Silver table.
+    # This is a CHAINED DEPENDENCY: reads keys from uniprot_idmapping output.
+    # Only fetches proteins where mapping_status = 'found'.
+    # Provides: function, GO terms, disease associations, subcellular location,
+    # pathway, catalytic activity, PDB cross-references, and more.
+  - pipeline: uniprot_protein
+    join_keys:
+    - uniprot_accession      # Source column in idmapping Silver
+    filter_field: accession    # Target API filter field (UniProt uses 'accession')
+    key_source: uniprot_idmapping    # Read keys from idmapping Silver table
+    key_filter: "mapping_status = 'found'"    # Only fetch successfully mapped IDs
+    required: false         # Optional - not all targets have UniProt data
+    timeout_seconds: 900    # Longer timeout due to rich data
+    silver_table: silver/uniprot/protein
+
+  # ---------------------------------------------------------------------------
+  # Enricher Pipelines
+  # ---------------------------------------------------------------------------
+  # Enrichers read from pre-populated Silver tables and join with seed data.
+  # All UniProt pipelines moved to dependencies for proper chaining.
+  enrichers: []
+  # ---------------------------------------------------------------------------
+  # Merge Configuration
+  # ---------------------------------------------------------------------------
+  # Defines how enriched data is combined into the final output.
+  merge:
+    # Join strategy: left_outer preserves all seed records
+    strategy: left_outer
+
+    # Conflict resolution: seed values take priority
+    conflict_resolution: seed_priority
+
+    # preserve_all_sources: false
+    # Multiple sources with field overlap. Seed values take priority.
+    preserve_all_sources: false
+
+    target_protein_classification_projection:
+      source_prefix: "chembl.target_protein_classification"
+      include_protein_classifications: true
+      levels: [1, 2, 3, 4, 5]
+
+    # Output paths for merged data
+    output:
+      silver: data/output/silver/composite/target
+      gold: data/output/gold/composite/target
+    sort_by:
+      silver:
+      - entity_id
+      - target_id
+      gold:
+      - entity_id
+      - target_id
+
+    # -------------------------------------------------------------------------
+    # Column Ordering by Semantic Categories
+    # -------------------------------------------------------------------------
+    # Defines the order of columns in the merged output.
+    # The "system" group MUST be first: it captures ETL metadata columns
+    # that would otherwise fall into the "remaining" bucket at the end.
+      abstract:
+      - pubmed                   # PubMed has best abstracts
+      - openalex
+      - chembl
+      - semanticscholar            # Fallback (mapped from TLDR)
+
+            # === Citation Metrics ===
+      affiliation_list:
+      - pubmed                   # PubMed raw affiliations
+      - openalex
+      - semanticscholar
+      affiliation_structured:
+      - pubmed                   # PubMed has structured affiliation data with ROR/GRID
+      aromatic_ring_count:
+      - pubchem
+      - chembl
+
+      # === Names and Synonyms (merge from both) ===
+      author_details:
+      - crossref                 # CrossRef-unique detailed author objects
+      author_h_indices:
+      - semanticscholar            # S2-unique h-index data
+
+            # === Affiliations ===
+            # Note: affiliation_structured (PubMed) preferred over affiliation_list
+            # PubMed affiliation_structured contains ROR/GRID identifiers
+      author_openalex_ids:
+      - openalex                   # OpenAlex-unique author identifiers
+
+      author_orcids:
+      - crossref                 # CrossRef has most complete ORCID data
+
+      - openalex
+      - semanticscholar
+      author_s2_ids:
+      - semanticscholar            # S2-unique author identifiers
+
+      black_box_warning:
+      - chembl
+
+      # === Quality Metrics (ChEMBL) ===
+      canonical_smiles:
+      - chembl             # ChEMBL structures are manually curated
+      - pubchem
+      cell_id:
+      - chembl.assay
+      chemicals:
+      - pubmed                   # PubMed-unique chemical substances
+
+      citation_contexts:
+      - semanticscholar            # S2-unique citation context sentences
+
+
+            # === Quality Indicators ===
+
+      citations_made:
+      - crossref                 # CrossRef has most complete reference data
+
+      - openalex
+      - pubmed
+      - semanticscholar
+      citations_received:
+      - crossref                 # CrossRef is citation authority
+
+      - openalex
+      - semanticscholar
+      databanks:
+      - pubmed                   # PubMed-unique databank accessions
+
+
+            # === Alternative Identifiers ===
+
+      dblp_id:
+      - semanticscholar            # S2-unique DBLP identifier
+
+      first_approval:
+      - chembl             # FDA/EMA approval year
+      fwci:
+      - openalex                 # OpenAlex-unique FWCI metric
+
+
+            # === Funding ===
+
+      gene_symbols:
+      - pubmed                   # PubMed-unique gene symbols
+
+      grants:
+      - openalex                 # OpenAlex-unique grant/funding data
+
+
+            # === Chemicals & Genes (PubMed-specific) ===
+
+      hba_count:
+      - pubchem
+      - chembl
+      hbd_count:
+      - pubchem
+      - chembl
+      heavy_atom_count:
+      - pubchem
+      - chembl
+      inchi:
+      - chembl
+      - pubchem
+      inchi_key:
+      - chembl             # ChEMBL InChIKey from standardized structures
+      - pubchem
+      influential_citation_count:
+      - semanticscholar            # S2-only field
+
+
+            # === Classification/Topics ===
+
+            # NOTE: subject_topics replaces deprecated concepts/topics per OpenAlex 2024 migration
+
+      institution_country_codes:
+      - openalex                 # OpenAlex institution country codes (ISO 2-letter)
+
+
+            # === References/Citations Context ===
+
+      institution_ids:
+      - openalex                 # OpenAlex institution IDs (e.g., I1234567890)
+
+      is_retracted:
+      - openalex                 # OpenAlex-unique retraction status (CRITICAL)
+
+      isomeric_smiles:
+      - pubchem            # PubChem provides isomeric SMILES
+      - chembl
+
+      # === Physicochemical Properties (PubChem more complete) ===
+      # PubChem has computed descriptors for more compounds
+      iupac_name:
+      - pubchem            # PubChem has computed IUPAC names
+      - chembl
+      logp:
+      - pubchem            # PubChem uses XLogP3
+      - chembl             # ChEMBL uses ALogP
+      logp_method:
+      - pubchem
+      - chembl
+      mag_id:
+      - openalex                 # OpenAlex MAG legacy ID
+
+
+        # -------------------------------------------------------------------------
+
+        # Column Ordering by Canonical Categories
+
+        # -------------------------------------------------------------------------
+
+        # Defines the order of columns in the merged output.
+
+        # Categories and field order follow the historical ordering artifact
+
+        # docs/04-reference/schemas/publication_field_order.csv.
+
+        # Canonical field names and aliases live in
+
+        # configs/entities/{provider}/publication.yaml and provider reference docs.
+
+        #
+
+        # The "system" group MUST be first: it captures persisted system columns
+
+        # (entity_id, content_hash, etc.) that would otherwise fall
+
+        # into the "remaining" bucket at the end of the output.
+
+      max_phase:
+      - chembl             # Clinical phase (0-4)
+      mid:
+      - pubmed                   # PubMed Manuscript ID
+
+      molecular_formula:
+      - pubchem
+      - chembl
+      molecular_weight:
+      - pubchem            # PubChem has MW for all compounds
+      - chembl
+      molecule_id:
+      - chembl.activity       # Activity FK is authoritative
+      pii:
+      - pubmed                   # PubMed Publisher Item Identifier
+
+      polar_surface_area:
+      - pubchem
+      - chembl
+      pref_name:
+      - chembl             # ChEMBL has curated preferred names
+      - pubchem
+      primary_topic:
+      - openalex                 # OpenAlex-unique field
+
+      publication_class:
+      - chembl
+      - pubmed
+      - openalex
+      - crossref
+      - semanticscholar
+
+            # === Author Metadata ===
+
+      publication_id:
+      - chembl.activity       # Activity document reference is primary
+
+      publication_subclass:
+      - chembl
+      - pubmed
+      - openalex
+      - crossref
+      - semanticscholar
+      publication_type_unified:
+      - chembl
+      - pubmed
+      - openalex
+      - crossref
+      - semanticscholar
+      publisher_id:
+      - pubmed                   # PubMed publisher-specific ID
+
+      qed_weighted:
+      - chembl             # QED (Quantitative Estimate of Drug-likeness)
+
+      references:
+      - crossref                 # CrossRef-unique cited references
+
+      rotatable_bond_count:
+      - pubchem
+      - chembl
+      subject_fields:
+      - semanticscholar            # S2-unique field
+
+      subject_keywords:
+      - crossref                 # CrossRef subjects -> subject_keywords
+
+      - openalex
+      - pubmed
+      - semanticscholar
+      subject_mesh:
+      - pubmed                   # PubMed MeSH is authoritative
+
+      - openalex                 # OpenAlex MeSH extraction (fallback)
+
+      subject_topics:
+      - openalex                 # OpenAlex hierarchical topics
+
+      synonyms:
+      - chembl             # Merge arrays from both
+      - pubchem
+
+      # === Clinical Data (ChEMBL only) ===
+      # PubChem doesn't have clinical development data
+      therapeutic_flag:
+      - chembl
+      tissue_id:
+      - chembl.assay
+
+    # Field renaming for conflicts
+      title:
+      - chembl                   # ChEMBL title is authoritative
+
+      - crossref
+      - openalex
+      withdrawn_flag:
+      - chembl
+    column_groups:
+      # === System / ETL metadata (MUST be first) ===
+    - name: system
+      fields:
+      - entity_id
+      - content_hash
+      - _source
+      - _index
+      - _lookup_method
+      - _original_id
+      pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_|^_dq_"
+      provider_order: [chembl, uniprot]
+      # === Business identifiers ===
+    - name: identifiers
+      fields:
+      - target_id
+      - primary_component_id
+      - uniprot_accession
+      - mapping_status
+      provider_order: [chembl, uniprot]
+      # === Target classification ===
+    - name: classification
+      fields:
+      - target_type
+      - organism
+      - taxonomy_id
+      - species_group_flag
+      provider_order: [chembl]
+      # === Descriptive metadata ===
+    - name: descriptors
+      fields:
+      - pref_name
+      - target_description
+      provider_order: [chembl]
+      # === Component data (pre-flattened from ChEMBL API) ===
+    - name: components
+      fields:
+      - component_ids
+      - component_accessions
+      - component_types
+      - component_relationships
+      - component_descriptions
+      - component_organisms
+      - component_taxonomy_ids
+      - target_component_synonyms
+      provider_order: [chembl]
+      # === Enriched component data (from target_component dependency) ===
+    - name: enriched_components
+      fields:
+      - component_type
+      - component_description
+      - protein_classification_id
+      - protein_classification_ids
+      provider_order: [chembl]
+      # === Target-level protein classification summary ===
+    - name: protein_classification_summary
+      fields:
+      - protein_classifications
+      - target_protein_class_id_L1
+      - target_protein_class_name_L1
+      - target_protein_class_desc_L1
+      - target_protein_class_id_L2
+      - target_protein_class_name_L2
+      - target_protein_class_desc_L2
+      - target_protein_class_id_L3
+      - target_protein_class_name_L3
+      - target_protein_class_desc_L3
+      - target_protein_class_id_L4
+      - target_protein_class_name_L4
+      - target_protein_class_desc_L4
+      - target_protein_class_id_L5
+      - target_protein_class_name_L5
+      - target_protein_class_desc_L5
+      - target_protein_class_type
+      - top_level_count
+      - canonical_top_levels
+      - counted_top_levels
+      - ignored_top_levels
+      - primary_top_level
+      - target_type_reason_code
+      - multifunctional_origin
+      - major_family
+      - major_family_rule_version
+      - target_type_rule_version
+      - l1_mapping_version
+      provider_order: [chembl]
+      # === UniProt protein functional annotations ===
+    - name: protein_function
+      fields:
+      - function_comment
+      - catalytic_activity
+      - activity_regulation
+      - pathway
+      - subcellular_location
+      - tissue_specificity
+      - subunit
+      provider_order: [uniprot]
+      # === UniProt disease and pharmacology ===
+    - name: disease_pharma
+      fields:
+      - disease_involvement
+      - drugbank_ids
+      - guidetopharmacology_ids
+      - chembl_ids
+      provider_order: [uniprot]
+      # === UniProt ontology and structure ===
+    - name: ontology_structure
+      fields:
+      - go_terms
+      - pdb_xrefs
+      - interpro_xrefs          # InterPro domain families (NEW)
+      - pfam_xrefs              # Pfam protein families (NEW)
+      - reactome_xrefs          # Reactome pathway entries (NEW)
+      - keywords
+      provider_order: [uniprot]
+      # === UniProt protein properties ===
+    - name: protein_properties
+      fields:
+      - protein_name
+      - gene_primary
+      - protein_existence
+      - annotation_score
+      - reviewed
+      - sequence_length
+      - sequence_mass
+      provider_order: [uniprot]
+    # Fields excluded from merged output (Silver + Gold)
+    exclude_fields:
+      # --- ChEMBL target exclusions ---
+    - chembl.target.target_components
+    - chembl.target.cross_references
+      # --- ChEMBL target_component exclusions ---
+    - chembl.target_component.primary_component_id
+    - chembl.target_component.protein_classifications
+    - chembl.target_component.target_component_synonyms
+    - chembl.target_component.target_component_xrefs
+      # --- ChEMBL protein_class exclusions ---
+    - chembl.protein_class.protein_class_id
+      # --- UniProt idmapping exclusions (data comes from protein) ---
+    - uniprot.idmapping.all_mappings
+    - uniprot.idmapping.annotation_score
+    - uniprot.idmapping.gene_primary
+    - uniprot.idmapping.organism_common
+    - uniprot.idmapping.organism_scientific
+    - uniprot.idmapping.protein_name
+    - uniprot.idmapping.reviewed
+    - uniprot.idmapping.sequence_length
+    - uniprot.idmapping.sequence_mass
+    - uniprot.idmapping.target_id
+    - uniprot.idmapping.taxonomy_id
+    - uniprot.idmapping.uniprot_entry_name
+      # --- UniProt protein exclusions (redundant or too large) ---
+    - uniprot.protein.accession             # Already have uniprot_accession from idmapping
+    - uniprot.protein.entry_name            # Technical field, not needed
+    - uniprot.protein.entry_type            # Technical field
+    - uniprot.protein.secondary_accessions    # Rarely needed
+    - uniprot.protein.sequence              # Too large for composite table
+    - uniprot.protein.sequence_checksum     # Technical field
+    - uniprot.protein.sequence_modified     # Audit field
+    - uniprot.protein.lineage               # Redundant with taxonomy_id
+    - uniprot.protein.gene_synonyms         # Too verbose
+    - uniprot.protein.gene_orf_names        # Too verbose
+    - uniprot.protein.protein_short_names    # Use protein_name instead
+    - uniprot.protein.protein_alternative_names    # Too verbose
+    - uniprot.protein.protein_ec_numbers    # Specialized
+    - uniprot.protein.flag                  # Technical field
+    - uniprot.protein.entry_version         # Audit field
+    - uniprot.protein.entry_created         # Audit field
+    - uniprot.protein.entry_modified        # Audit field
+    - uniprot.protein.features_json         # JSON, too large
+    - uniprot.protein.alternative_products    # Specialized
+    - uniprot.protein.similarity_comment    # Low value
+    - uniprot.protein.caution               # Low value
+    - uniprot.protein.cofactors             # Specialized
+    - uniprot.protein.biophysicochemical_properties    # Specialized
+    - uniprot.protein.induction             # Specialized
+    - uniprot.protein.cross_reference_count    # Metadata
+    - uniprot.protein.feature_count         # Metadata
+    - uniprot.protein.keyword_count         # Metadata
+    - uniprot.protein.isoform_count         # Metadata
+    - uniprot.protein.organism_scientific    # Use ChEMBL organism
+    - uniprot.protein.organism_common       # Use ChEMBL organism
+
+    # Note: output paths auto-computed per ADR-029 convention-based resolution
+    # silver: data/output/silver/composite/target (auto)
+    # gold: data/output/gold/composite/target (auto)
+
+  cross_validation:
+    enabled: false
+    warning_threshold: 1
+    error_threshold: 2
+    quarantine_threshold: 2
+    fuzzy_threshold: 0.8
+    numeric_tolerance: 0.10
+    enricher_pairings: []
+  # ---------------------------------------------------------------------------
+  # Data Quality Configuration
+  # ---------------------------------------------------------------------------
+  # Thresholds, required_fields, and field_validations externalized to:
+  #   configs/quality/entities/composite/target.yaml
+  # Only pipeline-specific enricher_overrides remain inline.
+  dq_overrides:
+    # External baseline DQ config (ADR-027)
+    dq_config_file: ../quality/entities/composite/target.yaml
+    # Per-dependency threshold overrides (pipeline-specific)
+    enricher_overrides:
+      semanticscholar_publication:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      pubmed_publication:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      pubchem_compound:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      chembl_tissue:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      chembl_compound_record:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      chembl_cell_line:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      # Many non-protein targets -> UniProt mapping_status="not_found" is expected
+      uniprot_idmapping:
+        soft_fail_threshold: 0.30  # 30% not_found is acceptable
+        hard_fail_threshold: 0.80  # Only fail if >80% errors
+      # UniProt protein: chained from idmapping, some accessions may not resolve
+      uniprot_protein:
+        soft_fail_threshold: 0.20  # 20% missing is acceptable
+        hard_fail_threshold: 0.60  # Only fail if >60% errors
+
+  # ---------------------------------------------------------------------------
+  # Execution Options
+  # ---------------------------------------------------------------------------
+  execution:
+    # Maximum concurrent dependencies/enrichers
+    max_concurrency: 2
+
+    # Enable checkpointing for resume capability
+    checkpoint_enabled: true
+
+    # Retry configuration for recoverable errors
+    retry:
+      max_attempts: 3
+      backoff_multiplier: 2.0
+
+  # ---------------------------------------------------------------------------
+  # Lineage Configuration
+  # ---------------------------------------------------------------------------
+  lineage:
+    # Track which source provided each field value
+    track_field_sources: true
+
+    # Include timestamps for each enrichment
+    track_timestamps: true
+
+    # Include per-record enrichment status
+    track_status: true
+
+    # Field-level source tracking (for fields from multiple providers)
+    track_source_for_fields:
+    - target_id    # Overlapping field between seed and idmapping
+    - primary_component_id        # Overlapping field between seed and target_component
+    - taxonomy_id         # Overlapping between ChEMBL and UniProt
+    - organism            # Overlapping between ChEMBL and UniProt
+
+# -----------------------------------------------------------------------------
+# Filter Configuration (ADR-028)
+# -----------------------------------------------------------------------------
+# Composite-local top-level `gold_filters` are unsupported.
+# Entity pipeline filter config remains authoritative unless explicit
+# composite runtime support is introduced.
+
+# -----------------------------------------------------------------------------
+# Maintenance Configuration
+# -----------------------------------------------------------------------------
+maintenance:
+  composite_shared_policy_file: field_groups/shared_policy.yaml

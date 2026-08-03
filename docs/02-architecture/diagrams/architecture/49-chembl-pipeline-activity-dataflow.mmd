@@ -1,0 +1,46 @@
+%% BioETL — ChEMBL Activity Source To Silver And Gold
+%% Generated from the resolved chembl_activity configuration and contracts.
+
+%% @version 1.0.0
+%% @date    2026-07-31
+%% @type    flowchart
+%% @level   Pipeline / Dataflow
+%% @nodes   14
+%% @adr     ADR-002, ADR-040
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}, 'flowchart': {'wrappingWidth': 360}}}%%
+flowchart LR
+    API["ChEMBL activity API"]
+    Query["Source query<br/>9 criteria"]
+    Bronze["Bronze records<br/>raw source payload"]
+    Input["Input-file filter<br/>disabled"]
+    Transform["Activity Transformer<br/>Bronze to Silver"]
+    SilverFilter["Silver structural filter<br/>29 criteria"]
+    DQ["Effective DQ policy<br/>29 field rules<br/>6 cross-field rules"]
+    Silver["Silver output<br/>77 fields<br/>views 51a + 51b"]
+    GoldTransform["Gold post-processing<br/>code-defined"]
+    GoldFilter["Gold record filter<br/>13 criteria"]
+    GoldValidate["Gold contract validation<br/>projected schema"]
+    Gold["Gold output<br/>66 published fields<br/>views 52a + 52b"]
+    Artifacts["Pipeline passport<br/>JSON + CSV"]
+    Drift["CI drift check<br/>generate-dataflows --check"]
+
+    API --> Query --> Bronze --> Transform
+    Input -.-> Query
+    Transform --> SilverFilter --> DQ --> Silver
+    Silver --> GoldTransform --> GoldFilter --> GoldValidate --> Gold
+    Gold --> Artifacts --> Drift
+
+    class API,Input source
+    class Query,Transform,SilverFilter,GoldTransform,GoldFilter process
+    class Bronze bronze
+    class DQ dq
+    class Silver silver
+    class GoldValidate,Gold gold
+    class Artifacts,Drift source
+    classDef source fill:#f1f5f9,stroke:#64748b,stroke-width:2px
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef bronze fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef silver fill:#f8fafc,stroke:#475569,stroke-width:2px
+    classDef gold fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    classDef dq fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef warning fill:#fff1f2,stroke:#dc2626,stroke-width:2px

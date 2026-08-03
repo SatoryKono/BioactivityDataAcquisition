@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "generated_for": "TEST-SYS-01",
+  "linked_issue": 7022,
+  "generated_on": "2026-07-29",
+  "summary": {
+    "family_count": 22,
+    "chembl_family_count": 15,
+    "non_chembl_family_count": 7,
+    "non_chembl_with_edge_fixtures": 7,
+    "gaps_registry_empty": true
+  },
+  "non_chembl_families": [
+    {
+      "family": "crossref/publication",
+      "provider": "crossref",
+      "fixture_kind": "tracked_ci_sample",
+      "validation_status": "valid",
+      "records": 20,
+      "line_count": 20,
+      "edge_fixture_count": 1,
+      "edge_paths": [
+        "tests/fixtures/bronze/crossref/publication/sample_edge_structured_payloads_2026-05-12.jsonl"
+      ],
+      "is_chembl": false
+    },
+    {
+      "family": "openalex/publication",
+      "provider": "openalex",
+      "fixture_kind": "tracked_ci_sample",
+      "validation_status": "valid",
+      "records": 20,
+      "line_count": 20,
+      "edge_fixture_count": 1,
+      "edge_paths": [
+        "tests/fixtures/bronze/openalex/publication/sample_edge_nested_vocab_2026-05-05.jsonl"
+      ],
+      "is_chembl": false
+    },
+    {
+      "family": "pubchem/compound",
+      "provider": "pubchem",
+      "fixture_kind": "tracked_ci_sample",
+      "validation_status": "valid",
+      "records": 20,
+      "line_count": 20,
+      "edge_fixture_count": 1,
+      "edge_paths": [
+        "tests/fixtures/bronze/pubchem/compound/sample_edge_property_vocab_2026-05-05.jsonl"
+      ],
+      "is_chembl": false
+    },
+    {
+      "family": "pubmed/publication",
+      "provider": "pubmed",
+      "fixture_kind": "tracked_ci_sample",
+      "validation_status": "valid",
+      "records": 20,
+      "line_count": 20,
+      "edge_fixture_count": 1,
+      "edge_paths": [
+        "tests/fixtures/bronze/pubmed/publication/sample_edge_publication_types_mesh_2026-05-05.jsonl"
+      ],
+      "is_chembl": false
+    },
+    {
+      "family": "semanticscholar/publication",
+      "provider": "semanticscholar",
+      "fixture_kind": "tracked_ci_sample",
+      "validation_status": "valid",
+      "records": 20,
+      "line_count": 20,
+      "edge_fixture_count": 1,
+      "edge_paths": [
+        "tests/fixtures/bronze/semanticscholar/publication/sample_edge_publication_types_citations_2026-05-05.jsonl"
+      ],
+      "is_chembl": false
+    },
+    {
+      "family": "uniprot/protein",
+      "provider": "uniprot",
+      "fixture_kind": "tracked_ci_sample",
+      "validation_status": "valid",
+      "records": 20,
+      "line_count": 20,
+      "edge_fixture_count": 1,
+      "edge_paths": [
+        "tests/fixtures/bronze/uniprot/protein/sample_edge_semantic_payloads_2026-05-12.jsonl"
+      ],
+      "is_chembl": false
+    },
+    {
+      "family": "uniprot/idmapping",
+      "provider": "uniprot",
+      "fixture_kind": "tracked_ci_sample",
+      "validation_status": "valid",
+      "records": 20,
+      "line_count": 20,
+      "edge_fixture_count": 1,
+      "edge_paths": [
+        "tests/fixtures/bronze/uniprot/idmapping/sample_edge_statuses_2026-05-05.jsonl"
+      ],
+      "is_chembl": false
+    }
+  ],
+  "acceptance": {
+    "exact_replay_families_have_tracked_ci_sample": true,
+    "non_chembl_major_providers_have_edge_fixtures": true,
+    "notes": "All exact-replay non-ChEMBL families already carry sample_ci + edge fixtures; residual risk is depth vs VCR, not missing keys."
+  }
+}

@@ -1,0 +1,120 @@
+name: Setup Python + uv
+description: >
+  Composite action that sets up Python, installs uv, caches dependencies,
+  and installs project packages. Replaces duplicated setup steps across workflows.
+
+inputs:
+  python-version:
+    description: Python version to install
+    required: false
+    default: "3.12"
+  uv-extras:
+    description: "Space-separated uv extras to install (e.g. 'dev tracing performance')"
+    required: false
+    default: "dev tracing"
+  enable-pytest-cache:
+    description: Enable pytest/hypothesis cache restoration
+    required: false
+    default: "false"
+  pytest-cache-prefix:
+    description: Cache key prefix for pytest cache (to differentiate cache scopes)
+    required: false
+    default: "pytest"
+  pytest-cache-fingerprint:
+    description: Optional precomputed fingerprint for pytest/hypothesis cache invalidation scope
+    required: false
+    default: ""
+  uv-sync-args:
+    description: "Additional args for uv sync (e.g. '--frozen'). Default: '--frozen'"
+    required: false
+    default: "--frozen"
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+
+    - name: Compute environment cache fingerprint
+      id: environment-cache
+      shell: bash
+      env:
+        INPUT_PYTHON_VERSION: ${{ inputs.python-version }}
+        INPUT_UV_EXTRAS: ${{ inputs.uv-extras }}
+        INPUT_UV_SYNC_ARGS: ${{ inputs.uv-sync-args }}
+      run: |
+        # Environment cache invalidates on dependency, extras, Python, or action
+        # setup semantics. Pytest cache fingerprinting remains separate below.
+        python_fragment="${INPUT_PYTHON_VERSION//[^0-9A-Za-z._-]/_}"
+        {
+          printf 'python-version=%s\n' "$INPUT_PYTHON_VERSION"
+          printf 'uv-extras=%s\n' "$INPUT_UV_EXTRAS"
+          printf 'uv-sync-args=%s\n' "$INPUT_UV_SYNC_ARGS"
+          sha256sum uv.lock pyproject.toml .github/actions/setup-python-uv/action.yml
+        } | sha256sum | awk '{print "fingerprint="$1}' >> "$GITHUB_OUTPUT"
+        printf 'python-fragment=py%s\n' "$python_fragment" >> "$GITHUB_OUTPUT"
+
+    - name: Cache uv and virtualenv
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
+      with:
+        path: |
+          ~/.cache/uv
+          .venv
+        key: uv-${{ runner.os }}-${{ steps.environment-cache.outputs.python-fragment }}-${{ steps.environment-cache.outputs.fingerprint }}
+        restore-keys: |
+          uv-${{ runner.os }}-${{ steps.environment-cache.outputs.python-fragment }}-
+
+    - name: Pin UV_PYTHON for subsequent steps
+      shell: bash
+      env:
+        INPUT_PYTHON_VERSION: ${{ inputs.python-version }}
+      run: |
+        case "$INPUT_PYTHON_VERSION" in
+          ''|*[!0-9.]*)
+            echo "Invalid python-version input: $INPUT_PYTHON_VERSION" >&2
+            exit 1
+            ;;
+        esac
+        printf 'UV_PYTHON=%s\n' "$INPUT_PYTHON_VERSION" >> "$GITHUB_ENV"
+
+    - name: Install dependencies
+      shell: bash
+      env:
+        EXTRAS: ${{ inputs.uv-extras }}
+        SYNC_ARGS: ${{ inputs.uv-sync-args }}
+      run: |
+        CMD="uv sync ${SYNC_ARGS}"
+        for extra in $EXTRAS; do
+          CMD="${CMD} --extra ${extra}"
+        done
+        echo "Running: ${CMD}"
+        ${CMD}
+
+    - name: Pin locked/no-build/no-sync defaults for subsequent uv run steps
+      shell: bash
+      run: |
+        # Dependencies and the editable project were installed by the sync step.
+        # Prevent every later `uv run --no-build` from trying to re-resolve the
+        # editable project, which uv rejects because it has no binary distribution.
+        # Workflows also pass --frozen/--no-build explicitly for Sonar S8544/S8541.
+        {
+          echo "UV_FROZEN=1"
+          echo "UV_NO_BUILD=1"
+          echo "UV_NO_SYNC=1"
+        } >> "$GITHUB_ENV"
+
+    - name: Cache pytest and hypothesis
+      if: inputs.enable-pytest-cache == 'true'
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
+      with:
+        path: |
+          .pytest_cache
+          .hypothesis
+        key: ${{ inputs.pytest-cache-prefix }}-${{ runner.os }}-py${{ inputs.python-version }}-${{ inputs.pytest-cache-fingerprint != '' && inputs.pytest-cache-fingerprint || hashFiles('tests/**/*.py') }}
+        restore-keys: |
+          ${{ inputs.pytest-cache-prefix }}-${{ runner.os }}-py${{ inputs.python-version }}-

@@ -1,0 +1,199 @@
+version: 1.0.0
+provider: chembl
+entity: publication_similarity
+pipeline:
+  pipeline_name: chembl_publication_similarity
+  provider: chembl
+  entity_type: publication_similarity
+  version: 2.1.0
+  description: Extract publication similarity data (Tanimoto coefficients) from ChEMBL API
+  loading_strategy: full_scan_only
+  field_policy: {}
+  business_primary_keys:
+  - sim_id
+
+  sink:
+    silver:
+      partition_by: []
+    gold:
+      mode: overwrite
+      idempotency_contract: overwrite_rebuild
+  batch_size: 1000
+  checkpoint_interval: 1000
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _ingestion_ts
+    - _index
+  - name: business
+    fields:
+    - sim_id
+    - doc_1
+    - doc_2
+    - pubmed_id1
+    - pubmed_id2
+    - tid_tani
+    - mol_tani
+    - avg_tani
+    - max_tani
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - business
+    - dq
+    exclude_fields: []
+  gold:
+    include_groups:
+    - system
+    - business
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+quality:
+  version: 1.0.0
+  provider: chembl
+  entity: publication_similarity
+  entity_field_validations:
+  - field: sim_id
+    type: range
+    min: 1
+    nullable: false
+    error_message: Similarity ID is required and must be positive
+  - field: doc_1
+    type: range
+    min: 1
+    nullable: false
+    error_message: First document ID is required
+  - field: doc_2
+    type: range
+    min: 1
+    nullable: false
+    error_message: Second document ID is required
+  - field: max_tani
+    type: range
+    min: 0
+    max: 1
+    nullable: true
+    error_message: Tanimoto coefficient must be between 0 and 1
+  - field: avg_tani
+    type: range
+    min: 0
+    max: 1
+    nullable: true
+    error_message: Average Tanimoto must be between 0 and 1
+  entity_cross_field_validations:
+  - name: similarity_pair
+    fields:
+    - doc_1
+    - doc_2
+    condition: all_present
+    error_message: Both document IDs are required
+  entity_conditional_validations: []
+  key_nullability:
+  - field: sim_id
+    key_type: merge
+    nullable: false
+filters:
+  version: 1.0.0
+  provider: chembl
+  entity: publication_similarity
+  input_filter:
+    enabled: false
+    source_path: data/input/publication_similarity.csv
+    column_name: sim_id
+    filter_field: sim_id
+    batch_size: 1000
+    checkpoint_interval: 1000
+    fallback_column: title
+  extraction_params: {}
+  silver_filters:
+    exclude_if_present: []
+    required_fields:
+    - sim_id
+    - doc_1
+    - doc_2
+  gold_filters:
+    list_contains: {}
+    list_lengths: {}
+    ranges:
+      max_tani:
+        min: 0.5
+        include_min: true
+      publication_year:
+        min: 1950
+        max: 2050
+    required_fields:
+    - sim_id
+    - doc_1
+    - doc_2
+    columns: {}
+    exclude_if_present: []
+contracts:
+  primary_key:
+  - sim_id
+  merge_keys:
+  - sim_id
+  hash_include: []
+  hash_exclude: []
+  hash_datetime_policy: v2_datetime_utc
+  contract_ref: chembl.publication_similarity
+  active_version: 1.0.0
+  rollout:
+    mode: single
+    read_order:
+    - 1.0.0
+    write_versions:
+    - 1.0.0
+    affects_hash: false
+hash_policy:
+  provider: chembl
+  entity: publication_similarity
+  contract:
+    version: 1.0.0
+    migration_note: 'Explicit config-level hash contract for the normalized ChEMBL publication_similarity Silver surface.'
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - sim_id
+    - doc_1
+    - doc_2
+    - pubmed_id1
+    - pubmed_id2
+    - tid_tani
+    - mol_tani
+    - avg_tani
+    - max_tani
+    exclude_fields:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_warn
+    - _dq_error
+    - _source_batch_id
+    - _index
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

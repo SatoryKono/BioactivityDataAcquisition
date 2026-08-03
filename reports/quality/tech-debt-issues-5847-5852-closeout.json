@@ -1,0 +1,163 @@
+{
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "issues": [
+    {
+      "evidence": [
+        ".github/root-allowlist.txt",
+        "configs/quality/root_hygiene_review_registry.yaml",
+        "reports/quality/root-hygiene-review-evidence.json"
+      ],
+      "number": 5847,
+      "status": "closed-ready",
+      "title": "Root hygiene residual tranche: execute post-2026-07 shim-first root reduction"
+    },
+    {
+      "evidence": [
+        "scripts/engineering/repo/cleanup_root_local_clutter.py",
+        "tests/unit/scripts/repo/test_cleanup_root_local_clutter.py",
+        ".github/workflows/root-hygiene.yml"
+      ],
+      "number": 5848,
+      "status": "closed-ready",
+      "title": "root-hygiene/local-clutter: turn reviewed SAFE root-local clutter into an operator cleanup command"
+    },
+    {
+      "evidence": [
+        "configs/quality/root_hygiene_review_registry.yaml",
+        "scripts/ops/codex.bat",
+        "scripts/ai/codex/run-codex.ps1",
+        "scripts/ai/codex/README.md",
+        "scripts/ai/codex/QUICKSTART_WSL.md"
+      ],
+      "number": 5849,
+      "status": "closed-ready",
+      "title": "root-hygiene/codex-shims: collapse legacy root Codex launcher aliases under the primary shim surface"
+    },
+    {
+      "evidence": [
+        "scripts/ops/runtime/docker/compose/alertmanager.yml",
+        "scripts/ops/runtime/docker/compose/minio.yml",
+        "scripts/ops/runtime/docker/compose/redis.yml",
+        "scripts/ops/runtime/docker/compose/sonarqube.yml",
+        "configs/quality/docker_helper_contracts.yaml"
+      ],
+      "number": 5850,
+      "status": "closed-ready",
+      "title": "root-hygiene/docker-compose-helpers: rehome candidate root compose adjuncts behind reviewed shims"
+    },
+    {
+      "evidence": [
+        "grafana/provisioning/datasources-local/grafana-datasource.yml"
+      ],
+      "number": 5851,
+      "status": "closed-ready",
+      "title": "root-hygiene/docker-images: rehome candidate helper Dockerfiles and Grafana provisioning behind reviewed path updates"
+    },
+    {
+      "evidence": [
+        "configs/quality/root_hygiene_review_registry.yaml",
+        "tests/architecture/test_root_hygiene_review_registry.py",
+        "docs/00-project/governance/03-file-policy.md"
+      ],
+      "number": 5852,
+      "status": "closed-ready",
+      "title": "root-hygiene/review-contracts: verify exact-filename retention contracts for remaining review-class root files"
+    }
+  ],
+  "outcomes": {
+    "5847": {
+      "allowlist_entries_after": 37,
+      "retired_root_entries": [
+        ".wsl_proxy_env.sh",
+        "Dockerfile.mcp-fetch",
+        "Dockerfile.mcp-filesystem",
+        "Dockerfile.mcp-github",
+        "Dockerfile.mcp-memory",
+        "Dockerfile.warp",
+        "codex.bat",
+        "codex.ps1",
+        "docker-compose.alertmanager.yml",
+        "docker-compose.minio.yml",
+        "docker-compose.redis.yml",
+        "docker-compose.sonarqube.yml",
+        "docker-setup.ps1",
+        "docker-setup.sh",
+        "grafana-datasource.yml",
+        "run-codex.ps1",
+        "run-codex-wsl.ps1",
+        "setup-codex-wsl.bat",
+        "setup-codex-wsl.ps1",
+        "setup-codex-wsl.sh"
+      ],
+      "tracked_root_dirs_after": 13,
+      "tracked_root_files_after": 53
+    },
+    "5848": {
+      "blocked_paths": [
+        ".env",
+        ".env.local",
+        "new.env",
+        "data",
+        "reports",
+        "docs/99-archive",
+        "tests/fixtures"
+      ],
+      "dry_run_default": true,
+      "operator_command": "python -m scripts.engineering.repo cleanup-root-local-clutter",
+      "opt_in_families": [
+        "local_virtualenv",
+        "local_dependency_tree",
+        "local_logs"
+      ]
+    },
+    "5849": {
+      "canonical_owner": "configs/quality/root_hygiene_review_registry.yaml",
+      "primary_root_shims": [
+        ".wsl_proxy_env.sh",
+        "codex.bat",
+        "codex.ps1",
+        "run-codex.ps1",
+        "run-codex-wsl.ps1",
+        "setup-codex-wsl.bat",
+        "setup-codex-wsl.ps1",
+        "setup-codex-wsl.sh"
+      ],
+      "retired_legacy_aliases": [
+        ".wsl_proxy_env.sh",
+        "codex.bat",
+        "codex.ps1",
+        "run-codex.ps1",
+        "run-codex-wsl.ps1",
+        "setup-codex-wsl.bat",
+        "setup-codex-wsl.ps1",
+        "setup-codex-wsl.sh"
+      ]
+    },
+    "5850": {
+      "compose_rehome_map": {
+        "docker-compose.alertmanager.yml": "scripts/ops/runtime/docker/compose/alertmanager.yml",
+        "docker-compose.minio.yml": "scripts/ops/runtime/docker/compose/minio.yml",
+        "docker-compose.redis.yml": "scripts/ops/runtime/docker/compose/redis.yml",
+        "docker-compose.sonarqube.yml": "scripts/ops/runtime/docker/compose/sonarqube.yml"
+      }
+    },
+    "5851": {
+      "image_rehome_map": {
+        "Dockerfile.mcp-fetch": "scripts/ops/runtime/docker/images/mcp-fetch/Dockerfile",
+        "Dockerfile.mcp-filesystem": "scripts/ops/runtime/docker/images/mcp-filesystem/Dockerfile",
+        "Dockerfile.mcp-github": "scripts/ops/runtime/docker/images/mcp-github/Dockerfile",
+        "Dockerfile.mcp-memory": "scripts/ops/runtime/docker/images/mcp-memory/Dockerfile",
+        "Dockerfile.warp": "scripts/ops/runtime/docker/images/warp/Dockerfile",
+        "grafana-datasource.yml": "grafana/provisioning/datasources-local/grafana-datasource.yml"
+      }
+    },
+    "5852": {
+      "exact_filename_contracts": [
+        "best_practices.md",
+        "commitlint.config.mjs"
+      ],
+      "owner_lane_id": "root_review_contract_entrypoints"
+    }
+  },
+  "schema_version": "tech-debt-issues-5847-5852-closeout-v1"
+}

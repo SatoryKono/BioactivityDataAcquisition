@@ -1,0 +1,1177 @@
+rule_files:
+  - ../bioetl_observability.yml
+  - ../bioetl_control_plane_current_status.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: metrics-endpoint-unavailable
+    interval: 1m
+    input_series: []
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: BioETLMetricsEndpointUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              summary: BioETL metrics are unavailable
+              description: No BioETL metrics (bioetl_pipeline_runs_total) have been observed for 10m via either direct scrape or Pushgateway. This indicates either BioETL is not running or metrics collection is completely broken.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: metrics-endpoint-scrape-missing
+    interval: 1m
+    input_series:
+      - series: 'up{job="bioetl",instance="host.docker.internal:8000"}'
+        values: "0 0 0 0 0 0 0 0 0 0 0 0"
+      - series: 'bioetl_pipeline_runs_total{pipeline="test",run_type="test",status="success"}'
+        values: "0+1x12"
+    alert_rule_test:
+      - eval_time: 11m
+        alertname: BioETLMetricsEndpointScrapeMissing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: bioetl
+              instance: host.docker.internal:8000
+            exp_annotations:
+              summary: BioETL scrape endpoint is unavailable but Pushgateway metrics are present
+              description: The BioETL /metrics scrape endpoint is unavailable (up{job="bioetl"} is zero or absent), but BioETL metrics are still being received via Pushgateway. This is expected when using Pushgateway instead of direct scraping.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+      - eval_time: 11m
+        alertname: BioETLMetricsEndpointUnavailable
+        exp_alerts: []
+
+  - name: metrics-endpoint-healthy
+    interval: 1m
+    input_series:
+      - series: 'up{job="bioetl",instance="host.docker.internal:8000"}'
+        values: "1+0x12"
+      - series: 'bioetl_health_server_scrape_up{job="bioetl",instance="host.docker.internal:8000"}'
+        values: "1+0x12"
+      - series: 'bioetl_pipeline_runs_total{pipeline="test",run_type="test",status="success"}'
+        values: "0+1x12"
+    alert_rule_test:
+      - eval_time: 11m
+        alertname: BioETLMetricsEndpointUnavailable
+        exp_alerts: []
+      - eval_time: 11m
+        alertname: BioETLMetricsEndpointScrapeMissing
+        exp_alerts: []
+      - eval_time: 11m
+        alertname: BioETLMetricsEndpointLivenessMissing
+        exp_alerts: []
+
+  - name: metrics-endpoint-liveness-missing-stub-body
+    interval: 1m
+    input_series:
+      - series: 'up{job="bioetl",instance="bioetl:8000"}'
+        values: "1+0x12"
+      # Intentionally omit bioetl_health_server_scrape_up (comment-only stub process)
+      - series: 'bioetl_pipeline_runs_total{pipeline="test",run_type="test",status="success"}'
+        values: "0+1x12"
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: BioETLMetricsEndpointLivenessMissing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: bioetl
+              instance: bioetl:8000
+            exp_annotations:
+              summary: BioETL /metrics scrape is up but liveness series is missing
+              description: up{job="bioetl"}=1 while bioetl_health_server_scrape_up is absent or zero. This usually means a stale health process serving a comment-only stub, or a deploy that predates the non-stub /metrics contract (#6731/#6738).
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: prometheus-unavailable
+    interval: 1m
+    input_series:
+      - series: 'up{job="prometheus",instance="prometheus:9090"}'
+        values: "0 0 0 0 0"
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: BioETLPrometheusUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: prometheus
+              instance: prometheus:9090
+            exp_annotations:
+              summary: Prometheus is unavailable
+              description: Prometheus self-scrape failed for instance=prometheus:9090.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: grafana-unavailable
+    interval: 1m
+    input_series:
+      - series: 'up{job="grafana",instance="grafana:3000"}'
+        values: "0 0 0 0 0"
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: BioETLGrafanaUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: grafana
+              instance: grafana:3000
+            exp_annotations:
+              summary: Grafana is unavailable
+              description: Grafana metrics endpoint is unavailable for instance=grafana:3000.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: pushgateway-unavailable
+    interval: 1m
+    input_series:
+      - series: 'up{job="pushgateway",instance="pushgateway:9091"}'
+        values: "0 0 0 0 0 0 0"
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: BioETLPushgatewayUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: pushgateway
+              instance: pushgateway:9091
+            exp_annotations:
+              summary: Pushgateway is unavailable
+              description: Pushgateway is not reachable for instance=pushgateway:9091.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: optional-docker-runtime-primary-incident
+    interval: 1m
+    input_series:
+      - series: 'bioetl_docker_runtime_primary_cause{project="bioetl-main",stack="main"}'
+        values: "5 5 5"
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: BioETLDockerRuntimeIncident
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              owner: bioetl-observability
+              stack: main
+              project: bioetl-main
+            exp_annotations:
+              summary: Optional Docker runtime has one actionable incident
+              description: Host probe classified stack=main with bounded primary cause code=5; inspect the bounded report before recovery.
+              runbook: docs/05-operations/runbooks/docker-stability.md
+
+  - name: optional-docker-runtime-probe-missing
+    interval: 1m
+    input_series:
+      - series: 'unrelated_metric{scope="fixture"}'
+        values: "1+0x12"
+    alert_rule_test:
+      - eval_time: 12m
+        alertname: BioETLDockerRuntimeProbeMissing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              owner: bioetl-observability
+            exp_annotations:
+              summary: Optional Docker runtime probe stopped reporting
+              description: No host-side Docker stability probe sample was observed for 10m; Docker adjunct state is unknown.
+              runbook: docs/05-operations/runbooks/docker-stability.md
+
+  - name: grafana-renderer-unavailable
+    interval: 1m
+    input_series:
+      - series: 'up{job="grafana-image-renderer",instance="renderer:8081"}'
+        values: "0 0 0 0 0"
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: BioETLGrafanaRendererUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              owner: bioetl-observability
+              job: grafana-image-renderer
+              instance: renderer:8081
+            exp_annotations:
+              summary: Grafana image renderer is unavailable
+              description: Grafana image renderer metrics endpoint is unavailable for instance=renderer:8081; screenshot evidence and reviewed render workflows are blocked.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: grafana-renderer-healthy
+    interval: 1m
+    input_series:
+      - series: 'up{job="grafana-image-renderer",instance="renderer:8081"}'
+        values: "1 1 1 1 1"
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: BioETLGrafanaRendererUnavailable
+        exp_alerts: []
+
+  - name: memory-pressure-active
+    interval: 1m
+    input_series:
+      - series: 'bioetl_memory_pressure_state{pipeline="chembl",stage="bronze",reason="rss_limit",monitor_mode="psutil",status="resize"}'
+        values: "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: BioETLMemoryPressureActive
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+            exp_annotations:
+              summary: Adaptive memory pressure is active
+              description: bioetl_memory_pressure_state stayed active for pipeline=chembl within the last 15m.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: circuit-breaker-stuck-open
+    interval: 1m
+    input_series:
+      - series: 'bioetl_circuit_breaker_state{adapter="pubmed"}'
+        values: "2 2 2 2 2 2 2 2 2 2 2 2 2 2 2"
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: BioETLCircuitBreakerStuckOpen
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              adapter: pubmed
+            exp_annotations:
+              summary: Circuit breaker remained open
+              description: bioetl_circuit_breaker_state stayed open for adapter=pubmed within the last 15m.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: gold-validation-failures
+    interval: 1m
+    input_series:
+      - series: 'bioetl_dq_validation_failures_total{pipeline="chembl",stage="gold",severity="hard_fail"}'
+        values: "0+1x20"
+    alert_rule_test:
+      - eval_time: 16m
+        alertname: BioETLGoldValidationFailuresCritical
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+            exp_annotations:
+              summary: Gold-stage strict validation failures detected
+              description: bioetl_dq_validation_failures_total increased with stage=gold severity=hard_fail for pipeline=chembl in the last 15m.
+              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+
+  - name: replay-not-reconstructable
+    interval: 1m
+    input_series:
+      - series: 'bioetl_replay_reconstructability_events_total{pipeline="chembl",replay_capability="resume_only",strict_requirement="true",status="not_reconstructable"}'
+        values: "0+1x35"
+    alert_rule_test:
+      - eval_time: 31m
+        alertname: BioETLReplayNotReconstructable
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              replay_capability: resume_only
+              strict_requirement: "true"
+            exp_annotations:
+              summary: Replay request cannot be reconstructed safely
+              description: bioetl_replay_reconstructability_events_total recorded not_reconstructable for pipeline=chembl replay_capability=resume_only strict_requirement=true in the last 30m.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: replay-lag-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_replay_lag_seconds{pipeline="chembl",run_type="incremental",replay_capability="resume_only",status="blocked"}'
+        values: "400+0x35"
+    alert_rule_test:
+      - eval_time: 31m
+        alertname: BioETLReplayLagHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              run_type: incremental
+              replay_capability: resume_only
+              status: blocked
+            exp_annotations:
+              summary: Replay lag is elevated
+              description: bioetl_replay_lag_seconds exceeded 300s for pipeline=chembl run_type=incremental replay_capability=resume_only status=blocked.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: replay-drift-detected
+    interval: 1m
+    input_series:
+      - series: 'bioetl_replay_drift_events_total{pipeline="chembl",run_type="incremental",replay_capability="resume_only",drift_type="strict_replay_not_reconstructable",status="detected"}'
+        values: "0+1x35"
+    alert_rule_test:
+      - eval_time: 31m
+        alertname: BioETLReplayDriftDetected
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              run_type: incremental
+              replay_capability: resume_only
+              drift_type: strict_replay_not_reconstructable
+              status: detected
+            exp_annotations:
+              summary: Replay drift was detected
+              description: bioetl_replay_drift_events_total increased for pipeline=chembl run_type=incremental replay_capability=resume_only drift_type=strict_replay_not_reconstructable.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: provider-adapter-latency-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_adapter_request_duration_seconds_bucket{provider="pubmed",le="5.0"}'
+        values: "0+0x50"
+      - series: 'bioetl_adapter_request_duration_seconds_bucket{provider="pubmed",le="10.0"}'
+        values: "0+20x50"
+      - series: 'bioetl_adapter_request_duration_seconds_bucket{provider="pubmed",le="30.0"}'
+        values: "0+20x50"
+      - series: 'bioetl_adapter_request_duration_seconds_bucket{provider="pubmed",le="+Inf"}'
+        values: "0+20x50"
+    alert_rule_test:
+      - eval_time: 45m
+        alertname: BioETLProviderAdapterLatencyHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: pubmed
+            exp_annotations:
+              summary: Provider adapter latency is elevated
+              description: Adapter request p95 exceeded 5s for provider=pubmed over the last 30m.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: provider-http-error-rate-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_http_request_errors_total{provider="crossref",method="GET",error_type="timeout"}'
+        values: "0+2x30"
+      - series: 'bioetl_http_request_duration_seconds_count{provider="crossref",method="GET",status="200"}'
+        values: "0+10x30"
+    alert_rule_test:
+      - eval_time: 25m
+        alertname: BioETLProviderHttpErrorRateHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: crossref
+            exp_annotations:
+              summary: Provider HTTP error rate is elevated
+              description: HTTP error ratio exceeded 10% for provider=crossref in the last 15m.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: provider-rate-limiter-wait-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_rate_limiter_wait_seconds_bucket{provider="semanticscholar",le="1.0"}'
+        values: "0+0x50"
+      - series: 'bioetl_rate_limiter_wait_seconds_bucket{provider="semanticscholar",le="2.5"}'
+        values: "0+12x50"
+      - series: 'bioetl_rate_limiter_wait_seconds_bucket{provider="semanticscholar",le="5.0"}'
+        values: "0+12x50"
+      - series: 'bioetl_rate_limiter_wait_seconds_bucket{provider="semanticscholar",le="+Inf"}'
+        values: "0+12x50"
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: BioETLProviderRateLimiterWaitHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: semanticscholar
+            exp_annotations:
+              summary: Provider rate-limiter wait is elevated
+              description: Rate-limiter wait p95 exceeded 1s for provider=semanticscholar over the last 30m.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: provider-rate-limiter-tokens-depleted
+    interval: 1m
+    input_series:
+      - series: 'bioetl_rate_limiter_tokens_available{provider="pubchem"}'
+        values: "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLProviderRateLimiterTokensDepleted
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: pubchem
+            exp_annotations:
+              summary: Provider rate-limiter tokens were depleted
+              description: Rate-limiter tokens dropped below 1 for provider=pubchem within the last 15m.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: provider-current-status-fallback-materializes-unknown
+    interval: 1m
+    input_series:
+      - series: 'bioetl_health_check_success_total{provider="chembl"}'
+        values: "0+0x20"
+    promql_expr_test:
+      - expr: count by (provider) (bioetl_provider_current_status)
+        eval_time: 16m
+        exp_samples:
+          - labels: '{provider="chembl"}'
+            value: 1
+
+  - name: provider-current-status-projects-healthy-raw-status
+    interval: 1m
+    input_series:
+      - series: 'bioetl_provider_health_status{provider="chembl"}'
+        values: "2+0x20"
+    promql_expr_test:
+      - expr: bioetl_provider_current_status{provider="chembl"}
+        eval_time: 5m
+        exp_samples:
+          - labels: '{__name__="bioetl_provider_current_status",provider="chembl"}'
+            value: 0
+
+  - name: provider-range-operational-ok-from-adapter-activity
+    interval: 1m
+    input_series:
+      - series: 'bioetl_adapter_requests_total{provider="chembl"}'
+        values: "0+1x20"
+      - series: 'bioetl_health_check_failures_total{provider="chembl"}'
+        values: "0+0x20"
+      - series: 'bioetl_http_request_errors_total{provider="chembl"}'
+        values: "0+0x20"
+    promql_expr_test:
+      - expr: bioetl_provider_range_operational_ok{provider="chembl"}
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_provider_range_operational_ok",provider="chembl"}'
+            value: 0
+
+  - name: provider-current-cause-projects-raw-health-status
+    interval: 1m
+    input_series:
+      - series: 'bioetl_provider_health_status{provider="chembl"}'
+        values: "0 0 0 0 0 0 0 0 0 0"
+      - series: 'bioetl_provider_health_status{provider="pubmed"}'
+        values: "1 1 1 1 1 1 1 1 1 1"
+    promql_expr_test:
+      - expr: bioetl_provider_current_cause{provider="chembl",cause="health_status_unhealthy",severity="failing"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_provider_current_cause",cause="health_status_unhealthy",provider="chembl",severity="failing"}'
+            value: 1
+      - expr: bioetl_provider_current_cause{provider="pubmed",cause="health_status_degraded",severity="degraded"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_provider_current_cause",cause="health_status_degraded",provider="pubmed",severity="degraded"}'
+            value: 1
+
+  - name: pipeline-runs-without-processed-records
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: "0+1x50"
+      - series: 'bioetl_records_processed_total{pipeline="chembl",run_type="incremental",stage="gold"}'
+        values: "0x50"
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: BioETLNoRecordsProcessed
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              run_type: incremental
+            exp_annotations:
+              summary: Pipeline runs completed without processing records
+              description: At least one pipeline run was observed for pipeline=chembl run_type=incremental over the last 30m, but bioetl_records_processed_total did not increase.
+              runbook: docs/05-operations/runbooks/pipeline-failure-critical.md
+
+  - name: dq-quarantine-rate-warning
+    interval: 1m
+    input_series:
+      - series: 'bioetl_records_processed_total{pipeline="chembl",run_type="incremental",stage="bronze"}'
+        values: "0+10x50"
+      - series: 'bioetl_dq_records_quarantined_total{pipeline="chembl",run_type="incremental",error_type="schema"}'
+        values: "0+1x50"
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: BioETLDQQuarantineRateHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              run_type: incremental
+            exp_annotations:
+              summary: DQ quarantine rate is elevated
+              description: Quarantine rate stayed between 5% and 50% for pipeline=chembl run_type=incremental over the last 30m, with at least 20 bronze records observed.
+              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+
+  - name: dq-quarantine-rate-critical
+    interval: 1m
+    input_series:
+      - series: 'bioetl_records_processed_total{pipeline="chembl",run_type="incremental",stage="bronze"}'
+        values: "0+10x30"
+      - series: 'bioetl_dq_records_quarantined_total{pipeline="chembl",run_type="incremental",error_type="schema"}'
+        values: "0+6x30"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLDQQuarantineRateCritical
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              run_type: incremental
+            exp_annotations:
+              summary: DQ Hard Threshold exceeded
+              description: Quarantine rate exceeded 50% hard threshold for pipeline=chembl run_type=incremental over the last 15m, with at least 20 bronze records observed.
+              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+
+  - name: data-freshness-warning
+    interval: 1m
+    input_series:
+      - series: 'bioetl_data_freshness_seconds{pipeline="chembl",entity="activity"}'
+        values: "-90000x40"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLDataFreshnessLagHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              entity: activity
+            exp_annotations:
+              summary: Data freshness lag is elevated
+              description: time() - bioetl_data_freshness_seconds stayed between 24h and 72h for pipeline=chembl entity=activity.
+              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+
+  - name: data-freshness-critical
+    interval: 1m
+    input_series:
+      - series: 'bioetl_data_freshness_seconds{pipeline="chembl",entity="activity"}'
+        values: "-260000x40"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLDataFreshnessLagCritical
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              entity: activity
+            exp_annotations:
+              summary: Data freshness lag is critical
+              description: time() - bioetl_data_freshness_seconds exceeded 72h for pipeline=chembl entity=activity.
+              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+
+  - name: control-plane-read-failure-rate
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_reads_total{store="manifest",operation="read_latest",status="failed"}'
+        values: "0+2x50"
+      - series: 'bioetl_control_plane_reads_total{store="manifest",operation="read_latest",status="success"}'
+        values: "0+10x50"
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: BioETLControlPlaneReadFailureRate
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              store: manifest
+              operation: read_latest
+            exp_annotations:
+              summary: Control-plane read failure rate is elevated
+              description: Control-plane read failure rate exceeded 5% for store=manifest operation=read_latest in the last 30m.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: runtime-error-rate-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_errors_total{pipeline="chembl",stage="processing",error_code="timeout"}'
+        values: "0+1x50"
+      - series: 'bioetl_records_processed_total{pipeline="chembl",stage="bronze",run_type="incremental"}'
+        values: "0+10x50"
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: BioETLRuntimeErrorRateHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+            exp_annotations:
+              summary: Pipeline runtime error ratio is elevated
+              description: Pipeline runtime error ratio exceeded 5% for pipeline=chembl over the last 30m, with at least 20 bronze records observed.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: provider-failure-rate-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_health_check_failures_total{provider="pubmed"}'
+        values: "0+3x30"
+      - series: 'bioetl_health_check_success_total{provider="pubmed"}'
+        values: "0+7x30"
+      - series: 'bioetl_health_check_degraded_total{provider="pubmed"}'
+        values: "0+0x30"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLProviderFailureRateHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: pubmed
+            exp_annotations:
+              summary: Provider health-check failure ratio is elevated
+              description: Health-check failure ratio exceeded 20% for provider=pubmed in the last 15m.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: provider-health-check-failures-detected
+    interval: 1m
+    input_series:
+      - series: 'bioetl_health_check_failures_total{provider="openalex"}'
+        values: "0+1x20"
+    alert_rule_test:
+      - eval_time: 12m
+        alertname: BioETLProviderHealthCheckFailuresDetected
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: openalex
+            exp_annotations:
+              summary: Provider health-check failures detected
+              description: bioetl_health_check_failures_total increased for provider=openalex in the last 10m.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: provider-retries-exhausted-warning
+    interval: 1m
+    input_series:
+      - series: 'bioetl_data_source_retry_exhausted_total{provider="crossref",operation="fetch_page"}'
+        values: "0+0x59 1+0x10"
+    alert_rule_test:
+      - eval_time: 65m
+        alertname: BioETLProviderRetriesExhausted
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: crossref
+              operation: fetch_page
+            exp_annotations:
+              summary: Provider retries exhausted
+              description: bioetl_data_source_retry_exhausted_total increased 1-2 times for provider=crossref operation=fetch_page in the last 1h.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: provider-retries-exhausted-persistent
+    interval: 1m
+    input_series:
+      - series: 'bioetl_data_source_retry_exhausted_total{provider="crossref",operation="fetch_page"}'
+        values: "0+1x70"
+    alert_rule_test:
+      - eval_time: 69m
+        alertname: BioETLProviderRetriesExhaustedPersistent
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              provider: crossref
+              operation: fetch_page
+            exp_annotations:
+              summary: Provider retries are repeatedly exhausted
+              description: bioetl_data_source_retry_exhausted_total increased at least 3 times for provider=crossref operation=fetch_page in the last 1h.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: checkpoint-load-failed
+    interval: 1m
+    input_series:
+      - series: 'bioetl_checkpoint_load_events_total{pipeline="chembl",status="failed"}'
+        values: "0+1x30"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLCheckpointLoadFailed
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+            exp_annotations:
+              summary: Checkpoint load failures detected
+              description: bioetl_checkpoint_load_events_total increased with status=failed for pipeline=chembl in the last 15m.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: checkpoint-save-failed
+    interval: 1m
+    input_series:
+      - series: 'bioetl_checkpoint_save_events_total{pipeline="chembl",operation="persist",status="failed"}'
+        values: "0+1x30"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLCheckpointSaveFailed
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              operation: persist
+            exp_annotations:
+              summary: Checkpoint save failures detected
+              description: bioetl_checkpoint_save_events_total increased with status=failed for pipeline=chembl operation=persist in the last 15m.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: checkpoint-operator-failed
+    interval: 1m
+    input_series:
+      - series: 'bioetl_checkpoint_operator_operations_total{operation="prune",status="failed"}'
+        values: "0+1x30"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLCheckpointOperatorFailed
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              operation: prune
+            exp_annotations:
+              summary: Checkpoint operator action failures detected
+              description: bioetl_checkpoint_operator_operations_total increased with status=failed for operation=prune in the last 15m.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: checkpoint-save-latency-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_checkpoint_save_duration_seconds_bucket{pipeline="chembl",operation="persist",le="1.0"}'
+        values: "0+0x50"
+      - series: 'bioetl_checkpoint_save_duration_seconds_bucket{pipeline="chembl",operation="persist",le="2.5"}'
+        values: "0+8x50"
+      - series: 'bioetl_checkpoint_save_duration_seconds_bucket{pipeline="chembl",operation="persist",le="5.0"}'
+        values: "0+8x50"
+      - series: 'bioetl_checkpoint_save_duration_seconds_bucket{pipeline="chembl",operation="persist",le="+Inf"}'
+        values: "0+8x50"
+    alert_rule_test:
+      - eval_time: 45m
+        alertname: BioETLCheckpointSaveLatencyHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              operation: persist
+            exp_annotations:
+              summary: Checkpoint save latency is elevated
+              description: Checkpoint save p95 exceeded 1s for pipeline=chembl operation=persist over the last 30m.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: checkpoint-operator-latency-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_checkpoint_operator_duration_seconds_bucket{operation="list",le="1.0"}'
+        values: "0+0x50"
+      - series: 'bioetl_checkpoint_operator_duration_seconds_bucket{operation="list",le="2.5"}'
+        values: "0+8x50"
+      - series: 'bioetl_checkpoint_operator_duration_seconds_bucket{operation="list",le="5.0"}'
+        values: "0+8x50"
+      - series: 'bioetl_checkpoint_operator_duration_seconds_bucket{operation="list",le="+Inf"}'
+        values: "0+8x50"
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: BioETLCheckpointOperatorLatencyHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              operation: list
+            exp_annotations:
+              summary: Checkpoint operator latency is elevated
+              description: Checkpoint operator p95 exceeded 1s for operation=list over the last 30m.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: processed-records-reconciliation-ok
+    interval: 1m
+    input_series:
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="bronze",outcome="records"}'
+        values: "100+0x20"
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="silver",outcome="valid"}'
+        values: "80+0x20"
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="silver",outcome="quarantined"}'
+        values: "10+0x20"
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="silver",outcome="filtered_out"}'
+        values: "10+0x20"
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="gold",outcome="written"}'
+        values: "80+0x20"
+    promql_expr_test:
+      - expr: bioetl_processed_records_silver_delta_current{pipeline="chembl",run_type="incremental"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_processed_records_silver_delta_current",pipeline="chembl",run_type="incremental"}'
+            value: 0
+      - expr: bioetl_processed_records_gold_delta_current{pipeline="chembl",run_type="incremental"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_processed_records_gold_delta_current",pipeline="chembl",run_type="incremental"}'
+            value: 0
+      - expr: bioetl_processed_records_reconciliation_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_processed_records_reconciliation_status",pipeline="chembl",run_type="incremental"}'
+            value: 1
+
+  - name: processed-records-reconciliation-terminal-delta-failing
+    interval: 1m
+    input_series:
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="bronze",outcome="records"}'
+        values: "100+0x20"
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="silver",outcome="valid"}'
+        values: "70+0x20"
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="silver",outcome="quarantined"}'
+        values: "10+0x20"
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="silver",outcome="filtered_out"}'
+        values: "5+0x20"
+      - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="gold",outcome="written"}'
+        values: "60+0x20"
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: "0+0x10 1+0x10"
+    promql_expr_test:
+      - expr: bioetl_processed_records_silver_delta_current{pipeline="chembl",run_type="incremental"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_processed_records_silver_delta_current",pipeline="chembl",run_type="incremental"}'
+            value: -15
+      - expr: bioetl_processed_records_gold_delta_current{pipeline="chembl",run_type="incremental"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_processed_records_gold_delta_current",pipeline="chembl",run_type="incremental"}'
+            value: -10
+      - expr: bioetl_processed_records_reconciliation_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_processed_records_reconciliation_status",pipeline="chembl",run_type="incremental"}'
+            value: 3
+
+  - name: gold-contract-exclusions-are-terminal
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_stage_expected{pipeline="chembl_assay",stage="gold"}'
+        values: "1+0x20"
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl_assay",run_type="backfill",status="success"}'
+        values: "0+0x10 1+0x10"
+      - series: 'bioetl_stage_backlog_records{pipeline="chembl_assay",run_type="backfill",stage="output"}'
+        values: "0+0x20"
+      - series: 'bioetl_stage_records_total{pipeline="chembl_assay",run_type="backfill",stage="gold",outcome="excluded_by_contract"}'
+        values: "10000+0x20"
+      - series: 'prometheus_rule_evaluation_failures_total{rule_group="grafana/prometheus-rules/bioetl_observability.yml;bioetl_runtime_dashboard_recording"}'
+        values: "0+0x20"
+      - series: 'prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group="grafana/prometheus-rules/bioetl_observability.yml;bioetl_runtime_dashboard_recording"}'
+        values: "0+60x20"
+    promql_expr_test:
+      - expr: bioetl_gold_terminal_records_15m{pipeline="chembl_assay",run_type="backfill"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_gold_terminal_records_15m",pipeline="chembl_assay",run_type="backfill"}'
+            value: 10000
+      - expr: bioetl_runtime_alert_condition_gold_write_missing_15m{pipeline="chembl_assay",run_type="backfill"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_alert_condition_gold_write_missing_15m",pipeline="chembl_assay",run_type="backfill"}'
+            value: 0
+      - expr: bioetl_runtime_current_status{pipeline="chembl_assay",run_type="backfill"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_current_status",pipeline="chembl_assay",run_type="backfill"}'
+            value: 0
+      # Scoped trusted status does NOT invent pipeline=workflow_* labels.
+      # Workflow identity stays on the dedicated workflow universe metrics.
+      - expr: bioetl_runtime_current_status_trusted{pipeline="chembl_assay",run_type="backfill"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_current_status_trusted",pipeline="chembl_assay",run_type="backfill"}'
+            value: 0
+      - expr: bioetl_runtime_current_status_trusted{pipeline="workflow_chembl_assay",run_type="backfill"}
+        eval_time: 19m
+        exp_samples: []
+      - expr: bioetl_l1_gold_lifecycle_status{pipeline="chembl_assay",run_type="backfill",lifecycle_state="terminal_contract_excluded"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_l1_gold_lifecycle_status",lifecycle_state="terminal_contract_excluded",pipeline="chembl_assay",run_type="backfill"}'
+            value: 0
+      - expr: bioetl_l1_gold_lifecycle_status{pipeline="chembl_assay",run_type="backfill",lifecycle_state="pending_no_recent_gold"}
+        eval_time: 19m
+        exp_samples: []
+
+  - name: runtime-trusted-status-fails-closed-on-telemetry-gap
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl_assay",run_type="backfill",status="success"}'
+        values: "0+0x10 1+0x10"
+      - series: 'up{job="bioetl"}'
+        values: "0+0x20"
+      - series: 'prometheus_rule_evaluation_failures_total{rule_group="grafana/prometheus-rules/bioetl_observability.yml;bioetl_runtime_dashboard_recording"}'
+        values: "0+0x20"
+      - series: 'prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group="grafana/prometheus-rules/bioetl_observability.yml;bioetl_runtime_dashboard_recording"}'
+        values: "0+60x20"
+    promql_expr_test:
+      - expr: bioetl_runtime_trust_gap_status_10m
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_trust_gap_status_10m"}'
+            value: 0
+      - expr: bioetl_runtime_current_status_trusted{pipeline="chembl_assay",run_type="backfill"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_current_status_trusted",pipeline="chembl_assay",run_type="backfill"}'
+            value: 0
+
+  - name: runtime-trusted-status-fails-closed-on-complete-metrics-absence
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl_assay",run_type="backfill",status="success"}'
+        values: "0+0x9 _x11"
+      - series: 'up{job="bioetl"}'
+        values: "0+0x20"
+      - series: 'bioetl_workflow_pipeline_expected{workflow="chembl_baseline",pipeline="chembl_assay",run_type="backfill",provider="chembl"}'
+        values: "1+0x20"
+    promql_expr_test:
+      - expr: bioetl_runtime_trust_gap_status_10m
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_trust_gap_status_10m"}'
+            value: 2
+      - expr: bioetl_runtime_current_status_trusted{pipeline="chembl_assay",run_type="backfill"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_current_status_trusted",pipeline="chembl_assay",run_type="backfill"}'
+            value: 3
+
+  - name: control-plane-trusted-status-ok-with-complete-fresh-evidence
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: "0+1x10"
+      - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",status="success"}'
+        values: "0+1x10"
+      - series: 'bioetl_checkpoint_saved_at_seconds{pipeline="chembl"}'
+        values: "0+60x10"
+      - series: 'bioetl_control_plane_terminal_events_total{pipeline="chembl",status="success"}'
+        values: "0+1x10"
+    promql_expr_test:
+      - expr: bioetl_control_plane_run_type_universe{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_run_type_universe",pipeline="chembl",run_type="incremental"}'
+            value: 1
+      - expr: bioetl_replay_safety_blockers_15m{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_replay_safety_blockers_15m",pipeline="chembl",run_type="incremental"}'
+            value: 0
+      - expr: bioetl_manifest_ledger_failures_15m{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_manifest_ledger_failures_15m",pipeline="chembl",run_type="incremental"}'
+            value: 0
+      - expr: bioetl_control_plane_telemetry_missing_5m{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl",run_type="incremental"}'
+            value: 0
+      - expr: bioetl_checkpoint_age_seconds{pipeline="chembl"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_checkpoint_age_seconds",pipeline="chembl"}'
+            value: 0
+      - expr: bioetl_control_plane_checkpoint_evidence_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_checkpoint_evidence_status",pipeline="chembl",run_type="incremental"}'
+            value: 0
+      - expr: bioetl_control_plane_current_status_trusted{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="chembl",run_type="incremental"}'
+            value: 0
+      - expr: bioetl_terminal_events_15m{pipeline="chembl"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_terminal_events_15m",pipeline="chembl"}'
+            value: 10
+
+  - name: control-plane-counter-reset-preserves-failure-evidence
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="failed"}'
+        values: "0 1 2 3 4 0 1 2 3 4 5"
+      - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",status="success"}'
+        values: "0+1x10"
+      - series: 'bioetl_checkpoint_saved_at_seconds{pipeline="chembl"}'
+        values: "0+60x10"
+    promql_expr_test:
+      - expr: bioetl_manifest_ledger_failures_15m{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_manifest_ledger_failures_15m",pipeline="chembl",run_type="incremental"}'
+            value: 9
+
+  - name: control-plane-trusted-status-incomplete-with-missing-checkpoint
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: "0+1x10"
+      - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",status="success"}'
+        values: "0+1x10"
+    promql_expr_test:
+      - expr: bioetl_control_plane_current_status_trusted{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="chembl",run_type="incremental"}'
+            value: 3
+
+  - name: control-plane-trusted-status-critical-with-stale-checkpoint
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: "0+1x70"
+      - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",status="success"}'
+        values: "0+1x70"
+      - series: 'bioetl_checkpoint_saved_at_seconds{pipeline="chembl"}'
+        values: "0+0x70"
+    promql_expr_test:
+      - expr: bioetl_control_plane_current_status_trusted{pipeline="chembl",run_type="incremental"}
+        eval_time: 70m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="chembl",run_type="incremental"}'
+            value: 2
+
+  - name: workflow-pipeline-verdict-fails-closed-after-intermediate-failure
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="failed"}'
+        values: "0+0x10 1+0x10"
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: "0+0x11 1+0x9"
+    promql_expr_test:
+      - expr: bioetl_workflow_pipeline_verdict_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_workflow_pipeline_verdict_status",pipeline="chembl",run_type="incremental"}'
+            value: 2
+
+  - name: workflow-pipeline-verdict-ok-on-terminal-success-without-failure
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: "0+0x10 1+0x10"
+    promql_expr_test:
+      - expr: bioetl_workflow_pipeline_verdict_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_workflow_pipeline_verdict_status",pipeline="chembl",run_type="incremental"}'
+            value: 0
+
+  - name: workflow-pipeline-verdict-warns-on-non-success-terminal-or-active-status
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="shutdown"}'
+        values: "0+0x10 1+0x10"
+    promql_expr_test:
+      - expr: bioetl_workflow_pipeline_verdict_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_workflow_pipeline_verdict_status",pipeline="chembl",run_type="incremental"}'
+            value: 1
+
+  - name: workflow-planned-pipeline-universe-materializes-child-pipelines
+    interval: 1m
+    input_series:
+      - series: 'bioetl_workflow_pipeline_expected{workflow="chembl_baseline",pipeline="chembl_target",run_type="backfill",provider="chembl"}'
+        values: "1+0x10"
+      - series: 'bioetl_workflow_pipeline_expected{workflow="chembl_baseline",pipeline="chembl_publication",run_type="backfill",provider="chembl"}'
+        values: "1+0x10"
+    promql_expr_test:
+      - expr: bioetl_runtime_pipeline_run_type_universe{pipeline=~"chembl_target|chembl_publication"}
+        eval_time: 2m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_pipeline_run_type_universe",pipeline="chembl_target",run_type="backfill"}'
+            value: 1
+          - labels: '{__name__="bioetl_runtime_pipeline_run_type_universe",pipeline="chembl_publication",run_type="backfill"}'
+            value: 1
+      - expr: bioetl_overview_pipeline_run_type_universe{pipeline=~"chembl_target|chembl_publication"}
+        eval_time: 2m
+        exp_samples:
+          - labels: '{__name__="bioetl_overview_pipeline_run_type_universe",pipeline="chembl_target",run_type="backfill"}'
+            value: 1
+          - labels: '{__name__="bioetl_overview_pipeline_run_type_universe",pipeline="chembl_publication",run_type="backfill"}'
+            value: 1
+
+  - name: workflow-expected-universe-materializes-started-workflows
+    interval: 1m
+    input_series:
+      - series: 'bioetl_workflow_expected{workflow="chembl_target",provider="chembl"}'
+        values: "1+0x10"
+    promql_expr_test:
+      - expr: bioetl_workflow_universe{workflow="chembl_target"}
+        eval_time: 2m
+        exp_samples:
+          - labels: '{__name__="bioetl_workflow_universe",workflow="chembl_target"}'
+            value: 1
+
+  - name: workflow-l0-input-status-projects-context-labels
+    interval: 1m
+    input_series:
+      - series: 'bioetl_overview_pipeline_run_type_universe{pipeline="chembl_activity",run_type="incremental"}'
+        values: "1+0x20"
+      - series: 'bioetl_overview_pipeline_run_type_universe{pipeline="chembl_assay",run_type="backfill"}'
+        values: "1+0x20"
+      - series: 'bioetl_overview_pipeline_run_type_universe{pipeline="chembl_target",run_type="incremental"}'
+        values: "1+0x20"
+      - series: 'bioetl_workflow_current_status{workflow="activity_workflow",pipeline_context="chembl_activity",run_type_context="incremental",provider_context="chembl"}'
+        values: "0+0x20"
+      - series: 'bioetl_workflow_current_status{workflow="assay_workflow",pipeline_context="chembl_assay",run_type_context="backfill",provider_context="chembl"}'
+        values: "1+0x20"
+      - series: 'bioetl_workflow_current_status{workflow="target_workflow",pipeline_context="chembl_target",run_type_context="incremental",provider_context="chembl"}'
+        values: "2+0x20"
+    promql_expr_test:
+      - expr: bioetl_l0_input_status{input="workflow"}
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_l0_input_status",input="workflow",pipeline="chembl_activity",run_type="incremental"}'
+            value: 0
+          - labels: '{__name__="bioetl_l0_input_status",input="workflow",pipeline="chembl_assay",run_type="backfill"}'
+            value: 1
+          - labels: '{__name__="bioetl_l0_input_status",input="workflow",pipeline="chembl_target",run_type="incremental"}'
+            value: 2
+      - expr: bioetl_l0_input_status_selected{input="workflow"}
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_l0_input_status_selected",input="workflow",pipeline="chembl_activity",run_type="incremental"}'
+            value: 0
+          - labels: '{__name__="bioetl_l0_input_status_selected",input="workflow",pipeline="chembl_assay",run_type="backfill"}'
+            value: 1
+          - labels: '{__name__="bioetl_l0_input_status_selected",input="workflow",pipeline="chembl_target",run_type="incremental"}'
+            value: 2
+      - expr: bioetl_l1_workflow_selected_status
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_l1_workflow_selected_status",input="workflow",pipeline="chembl_activity",run_type="incremental"}'
+            value: 0
+          - labels: '{__name__="bioetl_l1_workflow_selected_status",input="workflow",pipeline="chembl_assay",run_type="backfill"}'
+            value: 1
+          - labels: '{__name__="bioetl_l1_workflow_selected_status",input="workflow",pipeline="chembl_target",run_type="incremental"}'
+            value: 2
+      - expr: bioetl_l1_workflow_global_status
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_l1_workflow_global_status",pipeline="chembl_activity",run_type="incremental"}'
+            value: 0
+          - labels: '{__name__="bioetl_l1_workflow_global_status",pipeline="chembl_assay",run_type="backfill"}'
+            value: 1
+          - labels: '{__name__="bioetl_l1_workflow_global_status",pipeline="chembl_target",run_type="incremental"}'
+            value: 2
+
+  - name: workflow-l0-input-status-fails-closed-without-workflow-evidence
+    interval: 1m
+    input_series:
+      - series: 'bioetl_overview_pipeline_run_type_universe{pipeline="chembl_publication",run_type="backfill"}'
+        values: "1+0x20"
+    promql_expr_test:
+      - expr: bioetl_l0_input_status{input="workflow",pipeline="chembl_publication",run_type="backfill"}
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_l0_input_status",input="workflow",pipeline="chembl_publication",run_type="backfill"}'
+            value: 3
+      - expr: bioetl_l1_workflow_global_status{pipeline="chembl_publication",run_type="backfill"}
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_l1_workflow_global_status",pipeline="chembl_publication",run_type="backfill"}'
+            value: 3
+
+  - name: dq-current-status-missing
+    interval: 1m
+    input_series:
+      - series: 'bioetl_dq_monitor_enabled{pipeline="chembl_target"}'
+        values: "1+0x20"
+    alert_rule_test:
+      - eval_time: 16m
+        alertname: BioETLDQCurrentStatusMissing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              summary: "DQ current-status recording rule is missing"
+              description: "DQ monitoring is enabled but bioetl_dq_current_status is absent for at least one pipeline; first-screen DQ verdict panels may read UNKNOWN without raising threshold alerts."
+              runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"

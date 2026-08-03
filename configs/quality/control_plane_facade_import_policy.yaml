@@ -1,0 +1,72 @@
+schema_version: 1
+policy_scope: control_plane_facade_import_policy
+linked_issue: "#5567"
+review_date: "2026-06-23"
+owner: "@bioetl-architecture"
+new_src_import_policy: fail_fast_review_required
+facades:
+  - module: bioetl.composition.control_plane_api
+    path: src/bioetl/composition/control_plane_api.py
+    lifecycle: retained_external_composition_api
+    owner: "@bioetl-composition"
+    disposition: retain_external_public_api_zero_first_party_src
+    max_src_importer_count: 0
+    allowed_src_importers: []
+    rationale: >-
+      Public control-plane composition API remains an external integration seam;
+      first-party runtime and CLI code must use owner composition/bootstrap
+      modules rather than this wrapper.
+  - module: bioetl.composition.entrypoints
+    path: src/bioetl/composition/entrypoints.py
+    lifecycle: retained_external_composition_api
+    owner: "@bioetl-composition"
+    disposition: retain_external_public_api_zero_first_party_src
+    max_src_importer_count: 0
+    allowed_src_importers: []
+    rationale: >-
+      Stable composition entrypoint facade is retained for external callers and
+      dedicated seam tests; first-party source imports stay at zero.
+  - module: bioetl.composition.health_api
+    path: src/bioetl/composition/health_api.py
+    lifecycle: retained_external_composition_api
+    owner: "@bioetl-composition"
+    disposition: retain_external_public_api_zero_first_party_src
+    max_src_importer_count: 0
+    allowed_src_importers: []
+    rationale: >-
+      Health composition facade is retained as a public seam while owner runtime
+      code uses narrower health-service access modules.
+  - module: bioetl.composition.maintenance_api
+    path: src/bioetl/composition/maintenance_api.py
+    lifecycle: retained_external_composition_api
+    owner: "@bioetl-composition"
+    disposition: retain_external_public_api_zero_first_party_src
+    max_src_importer_count: 0
+    allowed_src_importers: []
+    rationale: >-
+      Maintenance facade remains stable externally; first-party source imports
+      are currently zero and must not regrow without review.
+  - module: bioetl.application.services.control_plane
+    path: src/bioetl/application/services/control_plane/__init__.py
+    lifecycle: retained_package_root_lazy_facade
+    owner: "@bioetl-application-control-plane"
+    disposition: retain_external_package_root_zero_first_party_src
+    max_src_importer_count: 0
+    allowed_src_importers: []
+    rationale: >-
+      The control-plane package root preserves lazy exports for external
+      compatibility; first-party source must import responsibility-focused
+      subpackages directly.
+  - module: bioetl.application.services.control_plane.replay
+    path: src/bioetl/application/services/control_plane/replay/__init__.py
+    lifecycle: retained_owner_package_root_lazy_facade
+    owner: "@bioetl-replay"
+    disposition: retain_bounded_owner_internal_facade
+    max_src_importer_count: 1
+    allowed_src_importers:
+      - src/bioetl/application/services/control_plane/replay/historical_corpus_service.py
+    rationale: >-
+      Replay package root remains a bounded owner seam for replay bundle and
+      certification exports. The only first-party source importer is the replay
+      corpus owner module; any additional caller is facade pressure and must
+      fail fast.

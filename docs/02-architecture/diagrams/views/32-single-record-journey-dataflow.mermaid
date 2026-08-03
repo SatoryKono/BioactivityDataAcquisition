@@ -1,0 +1,23 @@
+%% View: Data-Flow | Parent: 32-single-record-journey-full.mermaid
+%% @uniform width=172 height=56 max_title_len=18 max_desc_lines=0
+flowchart LR
+    Source["BronzeRecord"]
+    Bronze["write_bronze_layer"]
+    Transform["transform_batch"]
+    Route["dq route"]
+    Silver["write_silver"]
+    Gold["write_gold"]
+    Quarantine["quarantine_records"]
+
+    Source --> Bronze --> Transform --> Route
+    Route ==> Silver
+    Route ==> Gold
+    Route --> Quarantine
+
+    style Source fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Bronze fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Transform fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Route fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Silver fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style Gold fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style Quarantine fill:#ffe4e6,stroke:#dc2626,stroke-width:2px

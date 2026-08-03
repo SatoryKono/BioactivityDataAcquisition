@@ -1,0 +1,77 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/diagrams/foundation/12-local-deployment-architecture.mmd
+%% Full reference diagram retained after decomposition.
+%% Synced: 2026-07-08
+
+%% Title: Local Deployment Architecture
+%% Covers: local-only runtime, in-process locking, local filesystem outputs
+%% Updated: 2026-03-16
+%% Components: CLI, MemoryLock, local filesystem, observability
+
+%% @version 1.1.0
+%% @date    2026-03-16
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @nodes   13
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%% @uniform width=200 height=72 max_title_len=20 max_desc_lines=2
+flowchart TB
+    ProviderAPIs["🌐 Provider APIs<br/>ChEMBL + PubChem + UniProt + PubMed"]:::size-md
+
+    subgraph Local["Local Machine (Single Instance)"]
+        subgraph Orchestration["CLI Execution"]
+            CLI["🖥️ CLI / Manual run<br/>PipelineRunner"]
+            Schedule["⏰ Local scheduler<br/>(cron/systemd)"]
+        end
+
+        subgraph Runtime["Local Pipeline Workers"]
+            Workers["📦 Local pipelines<br/>chembl_* + pubchem_compound +<br/>uniprot_protein"]:::size-md
+        end
+
+        subgraph Locking["In-Process Locking"]
+            MemoryLock["MemoryLock<br/>in-process only<br/>no cross-process coordination"]
+        end
+
+        subgraph Data["Local filesystem (data/)"]
+            Bronze[("📁 bronze/<br/>JSONL+zstd")]
+            Silver[("📁 silver/<br/>Delta Lake")]
+            Gold[("📁 gold/<br/>Delta/Parquet")]
+            Quarantine[("📁 quarantine/<br/>Parquet")]
+            Checkpoints[("📁 checkpoints/<br/>JSON")]
+            Lineage[("📁 lineage/<br/>Parquet")]
+        end
+
+        subgraph Observability["Local Observability"]
+            Logs["📋 Local logs<br/>stdout/file"]
+            Metrics["📊 In-process metrics<br/>"]
+        end
+    end
+
+    %% External API connections
+    ProviderAPIs --> Workers
+
+    %% Orchestration to runtime
+    CLI --> Workers
+    Schedule --> CLI
+
+    %% Runtime to MemoryLock
+    Workers -.->|lock| MemoryLock
+
+    %% Runtime to local filesystem
+    Workers --> Bronze
+    Workers --> Silver
+    Workers --> Gold
+    Workers --> Quarantine
+    Workers --> Checkpoints
+    Workers --> Lineage
+
+    %% Runtime to local observability
+    Workers --> Logs
+    Workers --> Metrics
+
+    %% Styling
+    style Bronze fill:#fff7ed,stroke:#f59e0b,color:#212121
+    style Silver fill:#f1f5f9,stroke:#475569,color:#212121
+    style Gold fill:#fefce8,stroke:#ca8a04,color:#212121
+    style Quarantine fill:#ffe4e6,stroke:#dc2626,color:#212121
+    style MemoryLock fill:#eff6ff,stroke:#2563eb,color:#212121

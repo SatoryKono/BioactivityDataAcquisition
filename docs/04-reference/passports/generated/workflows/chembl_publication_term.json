@@ -1,0 +1,73 @@
+{
+  "control_plane": {
+    "commit_pending_confirmation": true,
+    "exclusive_lock": true,
+    "force_steps": true,
+    "repair_steps": true,
+    "resume_last": true,
+    "run_ledger_links": true,
+    "workflow_manifest": true
+  },
+  "dag": {
+    "edge_count": 0,
+    "edges": [],
+    "mermaid": "flowchart TD\n  run_chembl_publication_term[\"chembl_publication_term\"]\n",
+    "step_count": 1,
+    "steps": [
+      {
+        "kind": "pipeline",
+        "pipeline_name": "chembl_publication_term",
+        "step_id": "run_chembl_publication_term"
+      }
+    ],
+    "topological_order": [
+      "run_chembl_publication_term"
+    ]
+  },
+  "diagnostics": [],
+  "external_data_operations": [],
+  "identity": {
+    "status": "active",
+    "typed_id": "workflow:chembl_publication_term",
+    "version": "1.0.0",
+    "workflow_id": "chembl_publication_term"
+  },
+  "kind": "workflow",
+  "observability": {
+    "correlation_fields": [
+      "run_id",
+      "manifest_id",
+      "workflow_run_id"
+    ],
+    "metric_labels": [
+      "workflow",
+      "pipeline",
+      "step_kind",
+      "status",
+      "run_type"
+    ],
+    "prohibited_metric_labels": [
+      "run_id",
+      "manifest_id",
+      "workflow_run_id",
+      "payload_hash",
+      "record_id"
+    ]
+  },
+  "passport_schema_version": "1.0.0",
+  "provenance": {
+    "projector_version": "1.0.0",
+    "semantic_content_hash": "sha256:33f64f63cd6ea3b9d7689a48dfa1a992ff235035c7fae8009564dbe2cb4c53c0",
+    "source_revision": "ec48c9da54018a057886a275553e4e0b886997de"
+  },
+  "source_references": [
+    {
+      "path": "configs/workflows/chembl_publication_term.yaml",
+      "role": "workflow_config"
+    },
+    {
+      "path": "docs/02-architecture/decisions/ADR-047-workflow-control-plane.md",
+      "role": "workflow_control_plane"
+    }
+  ]
+}

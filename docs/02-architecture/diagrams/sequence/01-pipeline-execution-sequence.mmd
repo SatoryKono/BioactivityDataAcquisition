@@ -1,0 +1,179 @@
+---
+title: Pipeline Execution Sequence
+version: 1.0.0
+status: active
+author: BioETL Team
+last_verified: 2026-07-24
+adr_references:
+  - ADR-010: Local-Only Deployment
+  - ADR-015: Pipeline Services Lifecycle
+  - ADR-018: Gold Strict Validation
+  - ADR-023: Entity Type Patterns
+  - ADR-032: Unified HTTP Client
+  - ADR-040: Diagram Governance
+description: |
+  Complete sequence diagram showing pipeline execution flow from CLI invocation
+  through bootstrap, data extraction, transformation, writes, and cleanup.
+  Covers standard pipeline lifecycle and error handling paths.
+---
+
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type sequence
+%% @level system
+sequenceDiagram
+    autonumber
+    participant CLI as CLI User
+    participant Router as CLI Router
+    participant Bootstrap as Bootstrap Service
+    participant Config as Config Loader
+    participant Pipeline as Pipeline Service
+    participant Lock as Lock Service
+    participant Transformer as Transformer
+    participant Writer as Storage Writer
+    participant Metrics as Metrics/Tracing
+    participant Cleanup as Cleanup Service
+
+    Note over CLI, Cleanup: Pipeline Execution Sequence
+
+    %% CLI Invocation Phase
+    CLI->>Router: bioetl run <pipeline> <config>
+    Router->>Router: Parse CLI arguments
+    Router->>Config: Load pipeline config
+    Config->>Config: Validate YAML schema
+    Config-->>Router: Validated config
+    Router->>Bootstrap: Initialize DI container
+    Bootstrap->>Bootstrap: Register services (ports, adapters)
+    Bootstrap->>Metrics: Initialize logger/metrics/tracer
+    Metrics-->>Bootstrap: Observability bundle
+    Bootstrap-->>Router: Ready composition root
+
+    %% Pipeline Instantiation Phase
+    Router->>Pipeline: Create pipeline instance
+    Pipeline->>Config: Load effective config
+    Config-->>Pipeline: Effective config artifact
+    Pipeline->>Metrics: Emit pipeline_start metric
+    Pipeline->>Metrics: Start pipeline tracing span
+
+    %% Lock Acquisition Phase
+    Pipeline->>Lock: Request lock (pipeline_id, run_id)
+    Lock->>Lock: Check lock availability
+    alt Lock available
+        Lock->>Lock: Acquire lock
+        Lock-->>Pipeline: Lock acquired
+    else Lock held
+        Lock-->>Pipeline: Lock denied
+        Pipeline->>Metrics: Emit lock_denied metric
+        Pipeline->>CLI: Return error (lock held)
+    end
+
+    %% Data Extraction Phase
+    Pipeline->>Transformer: Instantiate transformers
+    Transformer->>Config: Load transformer configs
+    Config-->>Transformer: Transformer configs
+    Pipeline->>Transformer: Execute extraction
+    Transformer->>Transformer: Read source data
+    Transformer->>Metrics: Emit extraction_start metric
+    Transformer->>Metrics: Start extraction span
+    Transformer->>Transformer: Apply business logic
+    Transformer->>Metrics: Emit extraction_complete metric
+    Transformer-->>Pipeline: Extracted data
+
+    %% Transformation Phase
+    Pipeline->>Transformer: Apply transformations
+    Transformer->>Metrics: Emit transformation_start metric
+    Transformer->>Metrics: Start transformation span
+    Transformer->>Transformer: Apply schema validation
+    Transformer->>Transformer: Apply data quality rules
+    Transformer->>Metrics: Emit transformation_complete metric
+    Transformer-->>Pipeline: Transformed data
+
+    %% Silver Write Phase
+    Pipeline->>Writer: Write Silver data
+    Writer->>Metrics: Emit silver_write_start metric
+    Writer->>Metrics: Start silver_write span
+    Writer->>Writer: Write to Delta Lake (Silver)
+    Writer->>Writer: Apply DQ validation
+    alt DQ validation passes
+        Writer->>Writer: Commit to Silver
+        Writer-->>Pipeline: Silver write success
+    else DQ validation fails
+        Writer->>Writer: Route to quarantine
+        Writer->>Metrics: Emit quarantine_write metric
+        Writer-->>Pipeline: Quarantine routing
+    end
+    Writer->>Metrics: Emit silver_write_complete metric
+
+    %% Gold Write Phase
+    Pipeline->>Writer: Write Gold data
+    Writer->>Metrics: Emit gold_write_start metric
+    Writer->>Metrics: Start gold_write span
+    Writer->>Writer: Apply strict validation (ADR-018)
+    alt Strict validation passes
+        Writer->>Writer: Commit to Gold
+        Writer-->>Pipeline: Gold write success
+    else Strict validation fails
+        Writer->>Metrics: Emit gold_validation_failed metric
+        Writer-->>Pipeline: Gold write failed
+    end
+    Writer->>Metrics: Emit gold_write_complete metric
+
+    %% Error Handling Phase
+    alt Extraction error
+        Transformer->>Metrics: Emit extraction_error metric
+        Transformer->>Metrics: Record error in span
+        Transformer-->>Pipeline: Extraction error
+    else Transformation error
+        Transformer->>Metrics: Emit transformation_error metric
+        Transformer->>Metrics: Record error in span
+        Transformer-->>Pipeline: Transformation error
+    else Write error
+        Writer->>Metrics: Emit write_error metric
+        Writer->>Metrics: Record error in span
+        Writer-->>Pipeline: Write error
+    end
+
+    %% Cleanup and Shutdown Phase
+    Pipeline->>Metrics: Emit pipeline_complete metric
+    Pipeline->>Metrics: Finish pipeline span
+    Pipeline->>Lock: Release lock
+    Lock->>Lock: Clear lock ownership
+    Lock-->>Pipeline: Lock released
+    Pipeline->>Cleanup: Run cleanup operations
+    Cleanup->>Cleanup: Close connections
+    Cleanup->>Metrics: Flush metrics
+    Cleanup->>Metrics: Close tracer
+    Cleanup-->>Pipeline: Cleanup complete
+    Pipeline-->>CLI: Pipeline execution result
+
+    Note over CLI, Cleanup: End of Pipeline Execution Sequence
+```
+
+## Key Components
+
+### CLI Phase
+- **CLI Router**: Parses arguments and routes to appropriate pipeline
+- **Config Loader**: Validates YAML schemas and loads configuration
+- **Bootstrap Service**: Initializes DI container and observability
+
+### Pipeline Phase
+- **Pipeline Service**: Orchestrates the complete pipeline lifecycle
+- **Lock Service**: Manages lock acquisition for idempotent execution
+- **Transformer**: Applies business logic and transformations
+- **Storage Writer**: Handles Silver/Gold writes with DQ validation
+
+### Observability
+- **Metrics/Tracing**: Provides structured logging, metrics, and distributed tracing
+- **Error Handling**: Comprehensive error classification and reporting
+
+### Cleanup
+- **Cleanup Service**: Ensures proper resource cleanup and shutdown
+
+## ADR References
+
+- **ADR-010**: Local-Only Deployment — no external orchestration required
+- **ADR-015**: Pipeline Services Lifecycle — service instantiation and management
+- **ADR-018**: Gold Strict Validation — mandatory validation before Gold writes
+- **ADR-023**: Entity Type Patterns — standardized entity naming and structure
+- **ADR-032**: UnifiedHTTP Client — consistent HTTP client usage
+- **ADR-040**: Diagram Governance — diagram metadata and quality standards

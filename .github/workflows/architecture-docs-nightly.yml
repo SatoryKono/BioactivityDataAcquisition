@@ -1,0 +1,63 @@
+name: Architecture Docs Nightly
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  schedule:
+    - cron: "15 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  generate-architecture-dependency-map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          uv-extras: "dev"
+
+      - name: Regenerate and validate all executable passports
+        run: |
+          uv run --frozen --no-build python -m scripts.docs passports generate \
+            --output-root /tmp/bioetl-passports \
+            --manual-root docs/04-reference/passports/manual \
+            --source-revision "$(git rev-parse HEAD)"
+          uv run --frozen --no-build pytest \
+            tests/unit/scripts/docs/passports \
+            tests/architecture/test_passport_documentation_projections.py
+
+      - name: Regenerate architecture dependency map
+        run: uv run --frozen --no-build python -m scripts.engineering.qa.generate_architecture_dependency_map --update
+
+      - name: Collect drift summary
+        run: |
+          git status --short docs/02-architecture/generated > /tmp/architecture-docs-status.txt
+          if git diff --quiet -- docs/02-architecture/generated; then
+            echo "Architecture dependency docs are already up to date." > /tmp/architecture-docs-summary.txt
+          else
+            {
+              echo "Architecture dependency docs changed:"
+              git diff --stat -- docs/02-architecture/generated
+            } > /tmp/architecture-docs-summary.txt
+          fi
+          cat /tmp/architecture-docs-summary.txt >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload architecture docs artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: architecture-dependency-map-nightly
+          path: |
+            docs/02-architecture/generated/module-dependency-map.md
+            docs/02-architecture/generated/module-dependency-map.json
+            /tmp/architecture-docs-status.txt
+            /tmp/architecture-docs-summary.txt
+          retention-days: 14

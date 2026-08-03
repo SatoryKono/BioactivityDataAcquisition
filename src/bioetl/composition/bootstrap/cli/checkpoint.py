@@ -1,0 +1,182 @@
+"""Bootstrap functions for checkpoint and quarantine CLI operations.
+
+Contains bootstrap functions for checkpoint runtime service, checkpoint service,
+quarantine runtime service, and quarantine service. Used for CLI inspection
+and administrative operations.
+
+Note:
+    CLI diagnostics use NoOp logging by default. Metrics and tracing are
+    resolved through composition so operator workflows can publish bounded
+    observability signals when those capabilities are enabled.
+"""
+
+from __future__ import annotations
+
+from functools import partial
+from pathlib import Path
+from typing import TYPE_CHECKING
+from uuid import UUID
+
+from bioetl.composition.bootstrap.assembly.checkpoint import (
+    bootstrap_checkpoint_adapter,
+    bootstrap_checkpoint_compatibility_service,
+    bootstrap_quarantine_adapter,
+)
+from bioetl.composition.bootstrap.cli.lineage import bootstrap_lineage_service
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.composition.bootstrap.cli.run_manifest import (
+    bootstrap_run_manifest_service,
+)
+from bioetl.composition.bootstrap.cli.service_builders import (
+    build_cli_audit_inspection_service,
+    build_cli_checkpoint_runtime_service,
+    build_cli_checkpoint_service,
+    build_cli_observability_workflow_service,
+    build_cli_quarantine_runtime_service,
+    build_cli_quarantine_service,
+)
+from bioetl.composition.factories.storage.audit import create_audit_port
+from bioetl.composition.observability_resolution import (
+    resolve_metrics_port,
+    resolve_tracing_port,
+)
+from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.domain.types import RunID
+
+if TYPE_CHECKING:
+    from bioetl.application.core.lifecycle.checkpoint_manager import (
+        CheckpointRuntimeService,
+    )
+    from bioetl.application.services.admin_runtime_api import QuarantineRuntimeService
+    from bioetl.application.services.audit_inspection_service import (
+        AuditInspectionService,
+    )
+    from bioetl.application.services.checkpoint_service import CheckpointService
+    from bioetl.application.services.observability_workflow_service import (
+        ObservabilityWorkflowService,
+    )
+    from bioetl.application.services.quarantine_service import QuarantineService
+
+__all__ = [
+    "CLI_INSPECTION_RUN_ID",
+    "bootstrap_audit_inspection_service",
+    "bootstrap_checkpoint_runtime_service",
+    "bootstrap_checkpoint_service",
+    "bootstrap_observability_workflow_service",
+    "bootstrap_quarantine_runtime_service",
+    "bootstrap_quarantine_service",
+]
+
+CLI_INSPECTION_RUN_ID = RunID(UUID("00000000-0000-0000-0000-000000003353"))
+"""Deterministic sentinel run id for operator-only checkpoint inspection."""
+
+
+def bootstrap_quarantine_runtime_service(
+    pipeline_name: str,
+) -> QuarantineRuntimeService:
+    """Bootstrap QuarantineRuntimeService for CLI inspection operations.
+
+    Creates a QuarantineRuntimeService for quarantine inspection and reporting.
+    Used by CLI for `quarantine inspect` and similar commands.
+
+    Args:
+        pipeline_name: Name of the pipeline to inspect.
+
+    Returns:
+        QuarantineRuntimeService configured for the specified pipeline.
+    """
+    return build_cli_quarantine_runtime_service(
+        quarantine_port_factory=bootstrap_quarantine_adapter,
+        pipeline_name=pipeline_name,
+    )
+
+
+def bootstrap_checkpoint_runtime_service(
+    pipeline_name: str,
+) -> CheckpointRuntimeService:
+    """Bootstrap CheckpointRuntimeService for CLI inspection operations.
+
+    Creates a minimal CheckpointRuntimeService for checkpoint listing and inspection.
+    Uses NoOpLogger and a deterministic sentinel run_id since CLI operations don't need full
+    pipeline execution context.
+
+    Args:
+        pipeline_name: Name of the pipeline (used for context, may be ignored
+            for operations like list_all).
+
+    Returns:
+        CheckpointRuntimeService configured for CLI inspection.
+    """
+    return build_cli_checkpoint_runtime_service(
+        checkpoint_port_factory=bootstrap_checkpoint_adapter,
+        logger_factory=create_noop_logger,
+        pipeline_name=pipeline_name,
+        run_id=CLI_INSPECTION_RUN_ID,
+        compatibility_service_factory=bootstrap_checkpoint_compatibility_service,
+    )
+
+
+def bootstrap_checkpoint_service() -> CheckpointService:
+    """Bootstrap CheckpointService for CLI administrative operations.
+
+    Creates a CheckpointService for checkpoint listing, deletion, and inspection.
+    Uses a generic checkpoint port that can list all pipelines.
+
+    Returns:
+        CheckpointService configured for CLI operations.
+    """
+    return build_cli_checkpoint_service(
+        settings=get_settings(),
+        logger_factory=create_noop_logger,
+        metrics_resolver=resolve_metrics_port,
+        tracing_resolver=resolve_tracing_port,
+    )
+
+
+def bootstrap_audit_inspection_service() -> AuditInspectionService:
+    """Bootstrap AuditInspectionService for operator diagnostics workflows."""
+    return build_cli_audit_inspection_service(
+        settings=get_settings(),
+        logger_factory=create_noop_logger,
+        metrics_resolver=resolve_metrics_port,
+        tracing_resolver=resolve_tracing_port,
+        audit_port_factory=create_audit_port,
+    )
+
+
+def bootstrap_observability_workflow_service() -> ObservabilityWorkflowService:
+    """Bootstrap canonical audit/checkpoint diagnostics workflows."""
+    settings = get_settings()
+    return build_cli_observability_workflow_service(
+        settings=settings,
+        checkpoint_service_factory=bootstrap_checkpoint_service,
+        audit_service_factory=bootstrap_audit_inspection_service,
+        run_manifest_service_factory=bootstrap_run_manifest_service,
+        lineage_service_factory=bootstrap_lineage_service,
+        quarantine_service_factory=bootstrap_quarantine_service,
+        tracing_resolver=resolve_tracing_port,
+    )
+
+
+def bootstrap_quarantine_service(
+    *,
+    data_root: Path | None = None,
+) -> QuarantineService:
+    """Bootstrap QuarantineService for CLI administrative operations.
+
+    Creates a QuarantineService for quarantine inspection, replay, and purge.
+
+    Returns:
+        QuarantineService configured for CLI operations.
+    """
+    return build_cli_quarantine_service(
+        settings=get_settings(),
+        quarantine_port_factory=partial(
+            bootstrap_quarantine_adapter,
+            data_root=data_root,
+        ),
+        logger_factory=create_noop_logger,
+        metrics_resolver=resolve_metrics_port,
+        tracing_resolver=resolve_tracing_port,
+        run_manifest_service_factory=bootstrap_run_manifest_service,
+    )

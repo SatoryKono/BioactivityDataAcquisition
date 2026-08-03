@@ -1,0 +1,230 @@
+name: Duplication and Complexity Checks
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
+    branches:
+      - main
+      - master
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
+
+jobs:
+  duplication-complexity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Python tooling
+        run: "python -m pip install --only-binary=:all: radon==6.0.1 xenon==0.9.3 pylint==3.3.4"
+
+      - name: Prepare report directory
+        run: mkdir -p reports
+
+      - name: Generate Radon complexity reports
+        run: |
+          radon cc src tests -a -s > reports/radon_cc.txt
+          radon cc src tests -a -s -j > reports/radon_cc.json
+
+      - name: Enforce cyclomatic complexity threshold (CC ≤ 10)
+        run: |
+          echo "Checking overall code complexity (max CC = 10, grade B)..."
+          # Path exemptions MUST stay byte-synced with
+          # configs/quality/duplication_complexity_exemptions.yaml (xenon scope).
+          # DQ analyzers, composite orchestration, CLI formatters, runtime builders,
+          # silver storage, control-plane artifacts, quarantine, observability,
+          # quality governance, input adapters, extractor modules, tools, memory.
+          xenon --max-absolute B --max-modules B --max-average A \
+            --exclude "tests/*,src/tools/*,src/memory/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/composition/runtime_builders/*,src/bioetl/composition/factories/services/*,src/bioetl/infrastructure/storage/silver/*,src/bioetl/infrastructure/control_plane/*,src/bioetl/infrastructure/quarantine/*,src/bioetl/infrastructure/observability/*,src/bioetl/infrastructure/quality/*" src
+
+      - name: Strict complexity check for domain layer (CC ≤ 5)
+        run: |
+          echo "Checking domain layer complexity (max CC = 5, grade A)..."
+          xenon --max-absolute A --max-modules A --max-average A src/bioetl/domain || {
+            echo "⚠️  Domain layer has functions with CC > 5"
+            echo "Consider refactoring to keep domain logic simple"
+            exit 1
+          }
+
+      - name: Generate detailed complexity report
+        run: |
+          echo "=== Functions with CC > 5 ===" > reports/high_complexity.txt
+          radon cc src -a -s --min C >> reports/high_complexity.txt || true
+          echo "" >> reports/high_complexity.txt
+          echo "=== Maintainability Index ===" >> reports/high_complexity.txt
+          radon mi src -s >> reports/high_complexity.txt
+
+      - name: Validate duplication/complexity exemption registry
+        run: python -m scripts.engineering.qa check-duplication-complexity-exemptions
+
+      - name: Check for critical complexity violations
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          # Read radon JSON output
+          report_path = Path("reports/radon_cc.json")
+          if not report_path.exists():
+              print("No complexity report found")
+              sys.exit(0)
+
+          with open(report_path) as f:
+              data = json.load(f)
+
+          # Exempted paths (kept in sync with configs/quality/duplication_complexity_exemptions.yaml)
+          EXEMPT_PATHS = {
+              "src/tools/",
+              "src/memory/",
+              "src/bioetl/infrastructure/adapters/input/",
+              "src/bioetl/application/services/dq/",
+              "src/bioetl/application/composite/",
+              "src/bioetl/application/pipelines/",
+              "src/bioetl/interfaces/cli/",
+              "src/bioetl/composition/runtime_builders/",
+              "src/bioetl/composition/factories/services/",
+              "src/bioetl/infrastructure/storage/silver/",
+              "src/bioetl/infrastructure/control_plane/",
+              "src/bioetl/infrastructure/quarantine/",
+              "src/bioetl/infrastructure/observability/",
+              "src/bioetl/infrastructure/quality/",
+          }
+
+          # Exempted functions (with documented reasons; registry function_entries)
+          EXEMPT_FUNCTIONS = {
+              "fetch_filtered_with_fallback": 25,  # DOI→title fallback with batch processing
+              "_request_with_retry": 20,  # HTTP retry logic with circuit breaker
+              "fetch_batch": 15,  # CrossRef batch DOI resolution with fallback to individual
+              "load_filter_with_fallback": 15,  # CSV filter loading with multiple fallback strategies (CC=12)
+          }
+
+          violations = []
+          for filepath, functions in data.items():
+              # Skip test files - test complexity is checked separately
+              if filepath.startswith("tests/"):
+                  continue
+              # Skip exempted paths
+              if any(filepath.startswith(exempt) for exempt in EXEMPT_PATHS):
+                  continue
+              for func in functions:
+                  cc = func.get("complexity", 0)
+                  name = func.get("name", "unknown")
+                  # Check exempted functions with higher thresholds
+                  max_cc = EXEMPT_FUNCTIONS.get(name, 10)
+                  if cc > max_cc:
+                      violations.append(f"{filepath}:{func.get('lineno', '?')} - {name}() has CC={cc} (max={max_cc})")
+
+          if violations:
+              print("❌ Critical complexity violations:")
+              for v in violations:
+                  print(f"  {v}")
+              sys.exit(1)
+          else:
+              print("✅ No critical complexity violations found")
+          PY
+
+      - name: Install Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: "20"
+
+      - name: Run jscpd for duplication detection
+        run: |
+          set -euo pipefail
+          mkdir -p reports/jscpd
+          TOOL_DIR="${RUNNER_TEMP}/jscpd-cli"
+          mkdir -p "${TOOL_DIR}"
+          cd "${TOOL_DIR}"
+          npm init -y >/dev/null
+          # Pin + local install (no npx on-demand install; Sonar S6505/S8543).
+          npm install --ignore-scripts --no-fund --no-audit jscpd@4.0.8
+          "${TOOL_DIR}/node_modules/.bin/jscpd" \
+            "${GITHUB_WORKSPACE}/src" "${GITHUB_WORKSPACE}/tests" \
+            --config "${GITHUB_WORKSPACE}/.jscpd.json" \
+            --threshold 5 --format python \
+            --reporters "console,html,json" \
+            --output "${GITHUB_WORKSPACE}/reports/jscpd"
+
+      - name: Enforce BioETL hotspot duplication zero ratchet
+        run: |
+          python -m scripts.engineering.qa report-duplication-baseline \
+            --targets src/bioetl/application/core src/bioetl/composition/bootstrap/runtime src/bioetl/composition/factories/pipeline src/bioetl/application/services/control_plane src/bioetl/composition/runtime_builders \
+            --json-out reports/quality/hotspot-duplication-baseline.json \
+            --md-out reports/quality/hotspot-duplication-baseline.md \
+            --max-duplicate-clusters 0 \
+            --timeout-seconds 120
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: duplication-complexity-reports
+          path: reports
+          if-no-files-found: warn
+          retention-days: 14
+
+  constructor-args-check:
+    name: Constructor Arguments Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
+        with:
+          python-version: "3.13"
+
+      - name: Install required dependencies
+        run: "pip install --only-binary=:all: pyyaml==6.0.3"
+
+      - name: Check constructor argument counts
+        run: python -m scripts.engineering.qa check-constructor-args
+
+  executor-complexity:
+    name: Executor Complexity Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
+        with:
+          python-version: "3.13"
+
+      - name: Install tooling
+        run: "python -m pip install --only-binary=:all: radon==6.0.1 xenon==0.9.3"
+
+      - name: Check batch_executor.py complexity (max CC = 10)
+        run: |
+          echo "Checking batch_executor.py complexity..."
+          xenon --max-absolute B --max-modules B --max-average A \
+            src/bioetl/application/core/batch_executor.py

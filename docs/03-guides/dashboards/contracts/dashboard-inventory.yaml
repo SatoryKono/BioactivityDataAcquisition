@@ -1,0 +1,237 @@
+# Shipped 7-dashboard surface inventory (DRM residual; UIDs stable post-DUX).
+# Source of truth for panel counts is grafana/dashboards/*.json.
+
+dashboards:
+  - uid: bioetl-control-plane-v1
+    title: 0. Trust
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/run-manifest-inspection.md
+    family: primary
+    navigation_id: 0
+    data_sources:
+      - Prometheus
+      - BioETL Ops HTTP
+      - Grafana
+    panel_count: 58
+    key_panels:
+      - id: 891
+        title: "Monitor Replay Safety"
+        type: stat
+        description: Current replay safety state for selected pipeline
+      - id: 130
+        title: "Track Replay Blockers"
+        type: stat
+        description: Replay and resume blockers in selected time range
+      - id: 9402
+        title: Review Run Summary
+        type: table
+        description: Shared shell panel for run/manifest identity
+      - id: 9403
+        title: Review Processed Records
+        type: table
+        description: Shared shell panel for Bronze/Silver/Gold accounting
+      - id: 9401
+        title: Monitor Replay Readiness
+        type: stat
+        description:
+          Evidence-aware replay/resume verdict; required evidence gaps render
+          INCOMPLETE
+    selector_variables:
+      - workflow
+      - pipeline
+      - run_id
+      - run_type
+  - uid: bioetl-overview-v2
+    title: 1. Overview
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/observability-checklist.md
+    family: primary
+    navigation_id: 1
+    data_sources:
+      - Prometheus
+      - BioETL Ops HTTP
+      - Grafana
+    panel_count: 26
+    key_panels:
+      - id: 214
+        title: Monitor Fleet Health
+        type: stat
+        description: Current system status summary
+      - id: 215
+        title: Review First Action
+        type: table
+        description: Recommended first action for current state
+      - id: 1000
+        title: Navigate Dashboards
+        type: text
+        description: Theme-safe wrapping navigation bus (0-4 shipped surface)
+    selector_variables:
+      - workflow
+      - pipeline
+      - run_id
+      - run_type
+  - uid: bioetl-runtime
+    title: 2. Pipeline Diagnostics
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/pipeline-failure-critical.md
+    family: primary
+    navigation_id: 2
+    data_sources:
+      - Prometheus
+      - BioETL Ops HTTP
+      - Grafana
+    panel_count: 42
+    key_panels:
+      - id: 9401
+        title: Monitor Pipeline Status
+        type: stat
+        description: Trust-gated current runtime health status
+      - id: 205
+        title: Monitor Failed Runs
+        type: stat
+        description: Failed runs in the selected range
+      - id: 237
+        title: Monitor Worst Stage Lag
+        type: stat
+        description: Worst observed stage lag in the selected range
+      - id: 9102
+        title: Monitor Metrics Coverage
+        type: stat
+        description: Telemetry confidence chip / scrape-rule trust gate; a gap forces the headline to INCOMPLETE
+    selector_variables:
+      - workflow
+      - pipeline
+      - provider_hint
+      - run_id
+      - run_type
+      - stage
+  - uid: bioetl-provider-health-v2
+    title: 3. Provider Health
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/incident-response.md
+    family: primary
+    navigation_id: 3
+    data_sources:
+      - Prometheus
+      - BioETL Ops HTTP
+      - Grafana
+    panel_count: 31
+    key_panels:
+      - id: 9101
+        title: Monitor Fleet Severity
+        type: table
+        description: Provider health severity matrix
+      - id: 9103
+        title: Inspect Top Provider Causes
+        type: table
+        description: Top causes of provider failures
+    selector_variables:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - provider
+      - pipeline_context
+      - adapter
+  - uid: bioetl-dq-v2
+    title: 4. Data Quality
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/dq-failure-investigation.md
+    family: primary
+    navigation_id: 4
+    target_workspace: Data Trust Explorer
+    ux_phase: dux-06
+    data_sources:
+      - Prometheus
+      - BioETL Ops HTTP
+      - Grafana
+    panel_count: 37
+    key_panels:
+      - id: 9401
+        title: Monitor Current DQ Status
+        type: stat
+        description: Current DQ status summary
+      - id: 9101
+        title: Monitor DQ Threshold State
+        type: stat
+        description: DQ threshold violation state (NOW lane)
+      - id: 9102
+        title: Inspect Current DQ Reasons
+        type: table
+        description: Current DQ violation reasons breakdown (NOW lane)
+      - id: 8
+        title: Monitor Worst Freshness Age
+        type: gauge
+        description: TIME RANGE freshness age in hours with WARN 24h and CRIT 72h
+    selector_variables:
+      - workflow
+      - pipeline
+      - run_id
+      - run_type
+      - stage
+
+  - uid: bioetl-incident-v1
+    title: Incident Workspace
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/incident-response.md
+    family: adjunct
+    navigation_id: 5
+    target_workspace: Incident Workspace
+    ux_phase: drm-04
+    data_sources:
+      - Prometheus
+      - BioETL Ops HTTP
+    panel_count: 12
+    key_panels:
+      - id: 2010
+        title: "Inspect Ranked Suspects"
+        type: table
+        description: Cross-domain ranked suspects (primary)
+      - id: 2005
+        title: "Monitor Current Alerts"
+        type: table
+        description: Instant ALERTS snapshot (evidence timeline chain)
+      - id: 2006
+        title: "Track Alert State History"
+        type: state-timeline
+        description: Range ALERTS history (same chain; not persistent incident log)
+    selector_variables:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - provider
+  - uid: bioetl-run-explorer-v1
+    title: Run Explorer
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/run-manifest-inspection.md
+    family: adjunct
+    navigation_id: 6
+    target_workspace: Run Explorer
+    ux_phase: drm-05
+    data_sources:
+      - Prometheus
+      - BioETL Ops HTTP
+    panel_count: 13
+    key_panels:
+      - id: 9402
+        title: Inspect Run Identity
+        type: table
+        description: HTTP identity hub; run_id never a Prometheus label
+      - id: 9403
+        title: Inspect Processed Records
+        type: table
+        description: Bronze/Silver/Gold accounting hub via Ops HTTP
+      - id: 3010
+        title: Browse Recent Runs
+        type: table
+        description: pipeline-run-reports index (empty-selection utility)
+      - id: 3011
+        title: Inspect Stage Funnel
+        type: table
+        description: pipeline-run-report funnel
+    selector_variables:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id

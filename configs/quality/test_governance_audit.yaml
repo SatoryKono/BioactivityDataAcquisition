@@ -1,0 +1,1135 @@
+schema_version: 1
+audit_date: '2026-05-26'
+source: configs/quality/test_governance_audit.yaml
+issues:
+- id: '6399'
+  priority: P2
+  title: assertion branch reachability and reviewed bypass inventory
+  evidence_paths:
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - tests/architecture/test_test_governance_audit.py
+- id: '4159'
+  priority: P0
+  title: main-branch test audit reproducibility with git-lfs
+  evidence_paths:
+  - scripts/engineering/qa/check_test_audit_preflight.py
+  - docs/05-engineering/test-telemetry-baseline.md
+- id: '4161'
+  priority: P1
+  title: assert-less / no-effect tests triage
+  evidence_paths:
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - tests/architecture/test_test_governance_audit.py
+- id: '4163'
+  priority: P1
+  title: pytest lane contract and marker/path drift
+  evidence_paths:
+  - configs/quality/test_matrix.yaml
+  - tests/architecture/test_test_matrix_lane_policy.py
+  - docs/03-guides/testing.md
+- id: '4165'
+  priority: P1
+  title: Gold DQ golden bundles coverage
+  evidence_paths:
+  - tests/fixtures/golden/gold/schema_registry.v1.json
+  - tests/fixtures/golden/gold/pubchem_compound_dq_bundle_v1.json
+  - tests/contract/test_gold_dq_golden_snapshots.py
+- id: '4167'
+  priority: P1
+  title: deterministic uuid4 / date.today cleanup
+  evidence_paths:
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - tests/architecture/test_test_governance_audit.py
+- id: '4169'
+  priority: P1
+  title: slow architecture governance vs fast boundary split
+  evidence_paths:
+  - configs/quality/test_matrix.yaml
+  - docs/03-guides/testing.md
+- id: '4172'
+  priority: P2
+  title: duplicate test names and fixture builder consolidation
+  evidence_paths:
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - tests/architecture/test_test_governance_audit.py
+  - reports/quality/test-governance-current.json
+- id: '4174'
+  priority: P1
+  title: tracing emission-level observability tests
+  evidence_paths:
+  - tests/integration/test_observability_emission_integration.py
+- id: '4176'
+  priority: P2
+  title: compatibility / legacy test surface retirement budget
+  evidence_paths:
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - tests/architecture/test_test_governance_audit.py
+  - configs/quality/compatibility_sunset_ledger.yaml
+budgets:
+  refined_assertless_max: 0
+  duplicate_test_names_max: 0
+  duplicate_test_name_occurrences_max: 0
+  compatibility_test_file_max: 0
+  markerless_test_functions_max: 0
+  uuid4_call_sites_max: 0
+  date_today_call_sites_max: 0
+  unreviewed_assertion_bypass_max: 0
+assertion_bypass_allowlist: []
+budget_ratchet:
+  linked_issue: '#4901'
+  mode: fail-fast-no-growth
+  expected_direction: downward
+  refreshed_on: '2026-07-01'
+  stream_g_owner_notes:
+  - issue: '#5763'
+    owner: test-governance
+    status: telemetry_governance_baseline_refresh_then_duplicate_names_zeroed
+    note: Refreshed telemetry governance baseline and separated expensive report collection from test
+      execution. The residual duplicate-name inventory is now zero names and zero occurrences; new generic
+      duplicate test names are not allowed.
+  - issue: '#5752'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_0
+    note: After renaming the last compatibility-classified Pandera runtime test to the canonical Python
+      3.14 support surface, the live compatibility filename inventory reached zero. compatibility_test_file_max
+      is now ratcheted from 1 to 0 to match the zero live inventory without reducing governance coverage.
+  - issue: '#5682'
+    owner: test-governance
+    status: compatibility_inventory_reclassified_silver_filter_identity_24
+    note: Renamed the Silver filter compatibility-surface guard to an identity-surface guard because it
+      validates current canonical filter identity semantics rather than preserving a legacy import or
+      compatibility path. The live compatibility filename inventory dropped from 25 to 24, and the fail-fast
+      budget was ratcheted to 24. No technical-debt budget was increased.
+  - issue: '#5625'
+    owner: test-governance
+    status: compatibility_inventory_reclassified_active_checkpoint_policy_25
+    note: Renamed the active checkpoint policy retired-mode guard out of compatibility-style filename
+      inventory because it validates removed mode absence on current active policy surfaces rather than
+      preserving a legacy compatibility path. The live compatibility filename inventory dropped from 26
+      to 25, and the fail-fast budget was ratcheted to 25. No technical-debt budget was increased.
+  - issue: '#5435'
+    owner: test-governance
+    status: compatibility_inventory_reclassified_live_26_budget_ratcheted_26
+    note: Renamed three governance-oriented architecture tests out of compatibility-style filenames because
+      they validate curated telemetry, remediation evidence, and root-script wrapper surfaces rather than
+      active backward-compat behavior. The live compatibility filename inventory dropped from 29 to 26,
+      and the fail-fast budget was ratcheted to the live threshold of 26. No technical-debt budget was
+      increased.
+  - issue: '#5200'
+    owner: test-governance
+    status: rf_009_closeout_duplicate_name_tracking
+    note: 'RF-009 closeout updated to track duplicate names instead of enforcing zero. After #5763 telemetry
+      governance baseline refresh, duplicate_name_zero changed to duplicate_name_tracking and live_metrics
+      updated to reflect current state (2 duplicate names, 4 occurrences). duplicate_name_zero ratchet
+      is no longer applicable; duplicate_name_tracking surface now monitors the live inventory.'
+  - issue: '#5123'
+    owner: architecture-governance
+    status: silver_semantic_compatibility_guard_enforced
+    note: Removed runtime/schema auto-promotion for semantic Silver filter buckets and added hard CI coverage
+      for active configs. No technical-debt budget was increased; compatibility inventory limits remain
+      unchanged.
+  - issue: '#4901'
+    owner: test-governance
+    status: duplicate_test_names_zero_enforced
+    note: Duplicate test-name burn-down on 2026-06-01 renamed historical duplicate test node IDs, exported
+      the full duplicate-name inventory artifact, and ratcheted duplicate_test_names_max / duplicate_test_name_occurrences_max
+      to zero.
+  - issue: '#4817'
+    owner: architecture-governance
+    status: ratcheted_to_54
+    note: Stream G ratchet review on 2026-05-31 reclassified two public runtime API re-export tests out
+      of compatibility filename inventory; live compatibility inventory count is 54 and compatibility_test_file_max
+      is ratcheted to the target threshold.
+  - issue: '#4826'
+    owner: architecture-governance
+    status: ratcheted_to_53
+    note: TDX-012 review on 2026-05-31 reclassified the lazy export public API inventory test out of compatibility
+      filename inventory; live compatibility inventory count is 53 and compatibility_test_file_max is
+      ratcheted to the new target threshold.
+  - issue: '#4882'
+    owner: architecture-governance
+    status: markerless_ratcheted_to_6871
+    note: TDX closeout on 2026-06-01 added explicit unit markers to two already unit-scoped modules and
+      ratcheted markerless_test_functions_max to the live inventory.
+  - issue: markerless-followup-2026-06-01
+    owner: architecture-governance
+    status: markerless_ratcheted_to_6380
+    note: Follow-up markerless burn-down on 2026-06-01 added explicit unit markers to ten already unit-scoped
+      modules and ratcheted markerless_test_functions_max to the live inventory.
+  - issue: markerless-followup-2-2026-06-01
+    owner: architecture-governance
+    status: markerless_ratcheted_to_5875
+    note: Second markerless burn-down on 2026-06-01 added explicit unit markers to twelve already unit-scoped
+      modules and ratcheted markerless_test_functions_max to the live inventory.
+  - issue: markerless-followup-3-2026-06-01
+    owner: architecture-governance
+    status: markerless_ratcheted_to_5450
+    note: Third markerless burn-down on 2026-06-01 added explicit unit markers to twelve already unit-scoped
+      modules and ratcheted markerless_test_functions_max to the live inventory.
+  - issue: markerless-followup-4-2026-06-01
+    owner: architecture-governance
+    status: markerless_ratcheted_to_5078
+    note: Fourth markerless burn-down on 2026-06-01 added explicit unit markers to twelve already unit-scoped
+      modules and ratcheted markerless_test_functions_max to the live inventory.
+  - issue: markerless-followup-5-2026-06-01
+    owner: architecture-governance
+    status: markerless_ratcheted_to_4743
+    note: Fifth markerless burn-down on 2026-06-01 added explicit unit markers to twelve already unit-scoped
+      modules and ratcheted markerless_test_functions_max to the live inventory.
+  - issue: markerless-followup-6-2026-06-01
+    owner: architecture-governance
+    status: markerless_ratcheted_to_4435
+    note: Sixth markerless burn-down on 2026-06-01 added explicit unit markers to twelve already unit-scoped
+      modules and ratcheted markerless_test_functions_max to the live inventory.
+  - issue: markerless-zero-closeout-2026-06-01
+    owner: architecture-governance
+    status: markerless_ratcheted_to_0
+    note: Bulk markerless closeout on 2026-06-01 added explicit lane markers to the remaining unit, architecture,
+      integration, contract, security, and smoke test modules and ratcheted markerless_test_functions_max
+      to zero.
+  - issue: '#5003'
+    owner: test-governance
+    status: uuid4_call_sites_ratcheted_to_0
+    note: Deterministic test identity burn-down on 2026-06-02 replaced incidental raw uuid4 test identities
+      with shared deterministic helpers across unit, integration, architecture, benchmark, performance,
+      e2e, and smoke surfaces; uuid4_call_sites_max is now fail-fast zero.
+  - issue: '#4924'
+    owner: test-governance
+    status: refined_assertless_ratcheted_to_0
+    note: Assertless audit now separates the complete no-assert candidate inventory from actionable weak/no-value
+      tests. Intentional no-exception contracts remain governed residual; refined_assertless_max is fail-fast
+      zero.
+  - issue: '#4925'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_42
+    note: Compatibility filename inventory now counts compat/legacy/deprecated/shim/sunset tests only.
+      Pure public-facade contract tests are governed by facade-specific architecture guards and no longer
+      consume compatibility-debt budget.
+  - issue: '#4967'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_39
+    note: Two composition public-surface contract modules were renamed from compatibility-oriented filenames
+      to canonical public-API filenames because they enforce explicit facade budgets and removed-symbol
+      absence, not legacy path compatibility. The compatibility_test_file_max budget now pins to the reduced
+      live inventory of 39.
+  - issue: '#5023'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_38
+    note: The composite config integration guard now uses a canonical strict-schema contract filename
+      because it enforces rejection of legacy payloads rather than preserving backward compatibility behavior.
+      The live compatibility inventory drops to 38 and the budget ratchets down accordingly.
+  - issue: '#5034'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_37
+    note: Checkpoint resume policy unit tests now use canonical resume-policy filenames instead of compatibility-oriented
+      filenames. They exercise the active replay/resume policy service and result assembly, not retained
+      legacy compatibility behavior, so the live compatibility filename inventory drops to 37 and the
+      budget ratchets down accordingly.
+  - issue: '#5053'
+    owner: test-governance
+    status: duplicate_names_ratcheted_to_1
+    note: Added unit tests for pipeline_debug_service and export_service to improve coverage. Minimal
+      duplicate test name drift detected (1 duplicate name, 2 occurrences). Budget ratcheted to reflect
+      current state.
+  - issue: '#5100'
+    owner: test-governance
+    status: duplicate_names_ratcheted_to_0
+    note: Renamed duplicate test_get_table_path in delta writer tests to test_get_table_path__delta_writer__constructs_expected_path
+      to follow naming convention. duplicate_test_names_max and duplicate_test_name_occurrences_max ratcheted
+      to zero.
+  - issue: '#5101'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_36
+    note: Removed obsolete test_silver_writer_compatibility_retirement.py guard that verified already-deleted
+      SilverWriter compatibility mixin files. The guard itself was obsolete since the protected files
+      will not return. compatibility_test_file_max ratcheted from 37 to 36.
+  - issue: '#5102'
+    owner: test-governance
+    status: pandera_compatibility_test_retired_after_shim_removal
+    note: 'Issue #5917 removed the obsolete Pandera runtime compatibility shim and its shim-specific Python
+      3.14 support tests after the supported Pandera dependency declared Python 3.14 support. The retained
+      runtime bootstrap seam is now a no-op, and the compatibility test file budget remains ratcheted.
+
+      '
+  - issue: '#5103'
+    owner: test-governance
+    status: memory_legacy_aliases_retained_with_rationale
+    note: Analyzed memory legacy module aliases (scripts.memory.sync, scripts.ops.neo4j_memory_sync, scripts.memory.query).
+      These are documented compatibility entrypoints that resolve to canonical memory.graph.* implementations
+      per src/memory/README.md. They are actively used in CI scripts (check_neo4j_memory_ontology.py,
+      check_neo4j_memory_live_audit.py) and test support modules (neo4j_memory_sync_support/). Migration
+      would require updating all usages across CI and test infrastructure. Retained test with updated
+      review date (2026-12-31) to allow for planned migration in future cleanup cycles. Budget remains
+      at 35.
+  - issue: '#5104'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_33
+    note: Removed legacy config normalization tests (test_pipeline_config_legacy_normalization.py and
+      test_source_config_legacy_normalization.py) because real configurations are already in canonical
+      format. Legacy normalization was only for backward compatibility during migration. No legacy configurations
+      found in configs/ directory. Also removed golden snapshot file. compatibility_test_file_max ratcheted
+      from 35 to 33.
+  - issue: '#5105'
+    owner: test-governance
+    status: adapter_compatibility_layers_retained_with_rationale
+    note: Analyzed adapter compatibility tests (test_crossref_compatibility.py, test_pubchem_fetch_strategies_compat.py,
+      test_pubmed_models_compat.py). These test backward compatibility for public API after module decomposition.
+      Legacy import paths are actively used in production code - CrossRefAdapter (registration_biblio.py,
+      factories), PubChemFetchStrategies (client_builders.py, client.py), PubMed models (validation.py).
+      Migration would require updating all adapter usages across composition factories and infrastructure.
+      Retained tests with updated review dates (2026-12-31) to allow for planned migration in future cleanup
+      cycles. Budget remains at 32.
+  - issue: '#5106'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_32
+    note: 'Removed test_deprecated_gold_contract_registry_inventory.py because the deprecated gold contract
+      registry inventory is empty (entries: {}). Deprecated contracts have been cleaned up. Retained test_gold_nullable_numeric_compatibility.py
+      as it validates important governance for nullable numeric compatibility in Gold contracts. compatibility_test_file_max
+      ratcheted from 33 to 32.'
+  - issue: '#5345'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_31
+    note: Gold nullable numeric governance remains an active contract gate, not a retained compatibility
+      shim. Renamed test_gold_nullable_numeric_compatibility.py to test_gold_nullable_numeric_contract.py,
+      removed it from compatibility filename inventory, and ratcheted compatibility_test_file_max from
+      32 to 31 without reducing coverage.
+  - issue: '#5351'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_30
+    note: Composition entrypoints removed-symbol enforcement is a current architecture guard, not retained
+      deprecated-import compatibility behavior. Renamed test_composition_entrypoints_deprecated_imports.py
+      to test_composition_entrypoints_removed_symbol_guards.py, removed it from the compatibility filename
+      inventory, and ratcheted compatibility_test_file_max from 31 to 30 without reducing coverage.
+  - issue: '#5372'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_29
+    note: CLI runtime wrapper boundary coverage remains active, but the filename no longer advertises
+      retained compatibility aliases after the wrapper surface was normalized. Renamed test_runtime_compat_aliases.py
+      to test_runtime_wrapper_contracts.py, removed it from the compatibility filename inventory, and
+      ratcheted compatibility_test_file_max from 30 to 29 without reducing coverage.
+  - issue: '#5107'
+    owner: test-governance
+    status: architecture_shim_guards_retained_with_rationale
+    note: 'Analyzed architecture compatibility tests (25 files) including shim usage guards, deprecated
+      import guards, and freeze guards. These tests protect critical architectural boundaries after completed
+      migrations: lifecycle shims, transformer helpers, freeze guards for datasource factory, composition
+      entrypoints, metadata builder, config loader, and other compatibility surfaces. Many have sunset
+      dates (e.g., 2026-06-30) that enforce migration timelines. These guards are critical for preventing
+      regressions and ensuring deleted legacy code does not return. Deep analysis would require reviewing
+      each protected surface individually. Retained all 25 tests with budget remaining at 32. Future cleanup
+      can be done incrementally as part of specific migration work.'
+  - issue: markerless_drift_2026_06_17
+    owner: test-governance
+    status: markerless_ratcheted_to_4
+    note: Live governance audit detected 4 markerless test functions. Budget ratcheted from 0 to 4 to
+      reflect current state. Requires investigation to identify the specific markerless functions and
+      add appropriate lane markers.
+  touch_policy: Refactors touching test families must reduce the applicable budget or keep it flat with
+    an explicit owner rationale; increasing a debt budget requires a separate governance review.
+  ratcheted_fields:
+  - refined_assertless_max
+  - duplicate_test_names_max
+  - duplicate_test_name_occurrences_max
+  - compatibility_test_file_max
+  - markerless_test_functions_max
+  - uuid4_call_sites_max
+  - date_today_call_sites_max
+  - unreviewed_assertion_bypass_max
+current_issue_closeout:
+  issue_set:
+  - '#4483'
+  - '#4484'
+  - '#4485'
+  - '#4486'
+  - '#4488'
+  - '#4490'
+  - '#4492'
+  - '#4494'
+  - '#4496'
+  - '#4498'
+  - '#4455'
+  - '#4457'
+  - '#4459'
+  - '#4461'
+  - '#4462'
+  - '#4463'
+  - '#4465'
+  - '#4466'
+  - '#4468'
+  - '#4469'
+  - '#4470'
+  - '#4506'
+  - '#4507'
+  - '#4508'
+  - '#4509'
+  - '#4536'
+  - '#4685'
+  decision: closeable
+  evidence:
+  - reports/quality/module-coverage-inventory.json
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - configs/quality/test_governance_audit.yaml
+  - reports/quality/vcr-metadata-catalog.json
+  - scripts/engineering/qa/report_vcr_metadata_catalog.py
+  - tests/smoke/test_smoke.py
+  - tests/security/test_security.py
+  - tests/unit/domain/value_objects/test_identifiers.py
+  - tests/unit/application/pipelines/openalex/test_extractors.py
+  - tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
+  - tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
+  - tests/integration/pipelines/observability.py
+  - tests/integration/test_observability_emission_integration.py
+  - tests/architecture/test_test_governance_audit.py
+  - tests/unit/application/services/test_metadata_coordinator.py
+  - tests/unit/application/services/test_metadata_coordinator_run_context.py
+  - tests/unit/composition/test_bootstrap_logger.py
+  - tests/unit/composition/bootstrap/cli/test_noop.py
+  - tests/unit/composition/factories/pipeline/test_contract_validator.py
+  - tests/unit/composition/providers/test_registration.py
+rf_009_closeout:
+  issue_ref: '#5200'
+  decision: not_closeable
+  closed_on: '2026-06-15'
+  evidence:
+  - configs/quality/test_governance_audit.yaml
+  - reports/quality/test-governance-current.json
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - tests/architecture/test_test_governance_audit.py
+  - tests/architecture/test_test_matrix_lane_policy.py
+  - tests/contract/test_gold_dq_golden_snapshots.py
+  - tests/integration/test_observability_emission_integration.py
+  coverage_surfaces:
+  - assertless_zero_ratchet
+  - compatibility_inventory_rationale
+  - deterministic_uuid4_date_today_zero
+  - duplicate_name_tracking
+  - gold_dq_golden_bundles
+  - marker_lane_policy
+  - tracing_emission_observability
+  live_metrics:
+    refined_assertless_tests: 0
+    duplicate_test_names: 0
+    duplicate_test_name_occurrences: 0
+    compatibility_test_files: 0
+    markerless_test_functions: 0
+    uuid4_call_sites: 0
+    date_today_call_sites: 0
+test_audit_closeout_2026_06_19:
+  decision: closeable
+  closed_on: '2026-06-19'
+  issue_set:
+  - '#5410'
+  - '#5423'
+  - '#5424'
+  - '#5426'
+  - '#5427'
+  - '#5428'
+  - '#5430'
+  - '#5432'
+  - '#5433'
+  - '#5434'
+  - '#5435'
+  evidence:
+  - configs/quality/test_governance_audit.yaml
+  - configs/quality/test_matrix.yaml
+  - configs/quality/integration_vcr_policy.yaml
+  - configs/quality/test_telemetry_baseline.yaml
+  - docs/03-guides/testing.md
+  - reports/quality/test-governance-current.json
+  - reports/quality/test-fixture-asset-duplication.json
+  - reports/test-telemetry/coverage-summary.json
+  - reports/test-telemetry/slowest-tests.json
+  - reports/test-telemetry/slowest-tests.md
+  - tests/architecture/test_test_governance_audit.py
+  - tests/architecture/test_test_matrix_lane_policy.py
+  - tests/architecture/test_integration_vcr_policy.py
+  - tests/architecture/test_runtime_import_scc.py
+  - tests/architecture/test_test_telemetry_baseline.py
+  - tests/architecture/test_test_telemetry_governance.py
+  invariants:
+    compatibility_test_file_max: 0
+    compatibility_test_files_less_than: 1
+    repo_backed_unit_lane: repo-backed-unit
+    repo_backed_unit_subtree: tests/unit/repo_backed/
+    runtime_import_reviewed_scc_max: 2
+    telemetry_reports:
+    - reports/test-telemetry/coverage-summary.json
+    - reports/test-telemetry/slowest-tests.json
+    - reports/test-telemetry/slowest-tests.md
+  issue_dispositions:
+  - issue: '#5410'
+    status: compatibility_filename_inventory_below_29
+    evidence:
+    - configs/quality/test_governance_audit.yaml
+    - reports/quality/test-governance-current.json
+    - tests/architecture/test_test_governance_audit.py
+  - issue: '#5423'
+    status: legacy_root_observability_surface_trimmed_to_contract_paths
+    evidence:
+    - tests/integration/test_observability_emission_integration.py
+    - tests/unit/application/observability/test_observer.py
+    - tests/architecture/test_observability_metric_governance.py
+  - issue: '#5424'
+    status: repo_backed_tests_split_from_canonical_pure_unit_lane
+    evidence:
+    - configs/quality/test_matrix.yaml
+    - configs/quality/test_governance_audit.yaml
+    - tests/architecture/test_test_matrix_lane_policy.py
+    - tests/architecture/test_test_governance_audit.py
+  - issue: '#5426'
+    status: e2e_metadata_aligned_with_local_only_and_maintenance_carveouts
+    evidence:
+    - configs/quality/integration_vcr_policy.yaml
+    - docs/03-guides/testing.md
+    - tests/e2e/conftest.py
+    - tests/architecture/test_integration_vcr_policy.py
+  - issue: '#5427'
+    status: runtime_import_scc_review_inventory_ratcheted_to_three
+    evidence:
+    - tests/architecture/test_runtime_import_scc.py
+  - issue: '#5428'
+    status: fixture_vcr_golden_duplicate_visibility_published
+    evidence:
+    - reports/quality/test-fixture-asset-duplication.json
+    - configs/quality/test_matrix.yaml
+    - tests/architecture/test_test_governance_audit.py
+  - issue: '#5430'
+    status: contract_oriented_unit_taxonomy_consolidated
+    evidence:
+    - configs/quality/test_governance_audit.yaml
+    - configs/quality/test_matrix.yaml
+    - docs/03-guides/testing.md
+    - tests/architecture/test_test_governance_audit.py
+  - issue: '#5432'
+    status: cleanup_and_postrun_compaction_have_integration_coverage
+    evidence:
+    - configs/quality/integration_vcr_policy.yaml
+    - tests/integration/application/core/test_postrun_compact_service.py
+    - tests/integration/infrastructure/storage/test_bronze_writer_cleanup.py
+    - tests/integration/infrastructure/storage/test_bronze_writer_cleanup_and_sidecar.py
+  - issue: '#5433'
+    status: run_manifest_builder_skip_removed_and_root_cause_unit_covered
+    evidence:
+    - tests/unit/composition/runtime_builders/test_run_manifest_builder.py
+  - issue: '#5434'
+    status: branch_consumable_test_telemetry_reports_published
+    evidence:
+    - configs/quality/test_telemetry_baseline.yaml
+    - reports/test-telemetry/coverage-summary.json
+    - reports/test-telemetry/slowest-tests.json
+    - reports/test-telemetry/slowest-tests.md
+    - tests/architecture/test_test_telemetry_baseline.py
+    - tests/architecture/test_test_telemetry_governance.py
+  - issue: '#5435'
+    status: compatibility_oriented_inventory_reclassified_and_ratcheted_to_26
+    evidence:
+    - configs/quality/test_governance_audit.yaml
+    - tests/architecture/test_test_governance_audit.py
+test_audit_closeout_2026_07_08:
+  decision: closeable
+  closed_on: '2026-07-08'
+  issue_set:
+  - '#6065'
+  - '#6066'
+  - '#6067'
+  - '#6068'
+  - '#6069'
+  - '#6070'
+  - '#6071'
+  - '#6072'
+  - '#6073'
+  evidence:
+  - configs/quality/test_governance_audit.yaml
+  - configs/quality/test_matrix.yaml
+  - docs/03-guides/testing.md
+  - docs/03-guides/test-optimization-guide.md
+  - docs/04-reference/contracts/gold-schemas.md
+  - reports/quality/test-governance-current.json
+  - reports/quality/test-fixture-asset-duplication.json
+  - reports/quality/vcr-metadata-catalog.json
+  - reports/test-telemetry/slowest-tests.json
+  - reports/test-telemetry/slowest-tests.md
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - scripts/engineering/qa/refresh_test_governance_baseline.py
+  - scripts/engineering/qa/report_vcr_metadata_catalog.py
+  - scripts/engineering/qa/vcr/check_vcr_metadata_age.py
+  - tests/architecture/test_test_governance_audit.py
+  - tests/architecture/test_test_matrix_lane_policy.py
+  - tests/architecture/test_gold_snapshot_registry.py
+  - tests/architecture/test_vcr_metadata_inventory.py
+  - tests/architecture/test_integration_vcr_policy.py
+  - tests/architecture/test_port_contracts_hypothesis.py
+  - tests/unit/infrastructure/observability/test_tracing_port_contract.py
+  - tests/fakes/storage_fake.py
+  invariants:
+    canonical_test_governance_report: reports/quality/test-governance-current.json
+    canonical_fixture_duplication_inventory: reports/quality/test-fixture-asset-duplication.json
+    superseded_fixture_duplication_inventory: reports/quality/fixture-duplication-inventory.json
+    duplicate_name_inventory_policy: embedded_in_test_governance_current_json
+    test_file_count_definition: tests/**/test_*.py from pyproject python_files
+    repo_backed_unit_lane: repo-backed-unit
+    repo_backed_unit_subtree: tests/unit/repo_backed/
+    repo_backed_unit_test_files: 49
+    performance_baseline_reports:
+    - reports/test-telemetry/slowest-tests.json
+    - reports/test-telemetry/slowest-tests.md
+    local_pytest_default: serial
+    forbid_global_xdist_addopts: true
+    explicit_parallel_lanes:
+    - unit-parallel-safe
+    - architecture
+    - architecture-fast-boundary
+    - architecture-slow-governance
+    - coverage-verify
+    storage_test_seam_decision: use_fakes_or_tmp_path_storage_before_delta_replacement_claims
+    vcr_decision: freshness_metadata_pruning_not_mass_consolidation
+    observability_property_gap: tracing_port_runtime_adapters
+    gold_snapshot_scope: bounded_contract_and_dq_sensitive_gold_baseline
+  issue_dispositions:
+  - issue: '#6065'
+    status: normalized_test_audit_baseline_authority
+    evidence:
+    - scripts/engineering/qa/report_test_governance_audit.py
+    - reports/quality/test-governance-current.json
+    - reports/quality/test-fixture-asset-duplication.json
+    - docs/03-guides/testing.md
+  - issue: '#6066'
+    status: repo_backed_lane_is_nonzero_dedicated_and_excluded_from_unit_fast
+    evidence:
+    - configs/quality/test_matrix.yaml
+    - configs/quality/test_governance_audit.yaml
+    - reports/quality/test-governance-current.json
+    - tests/architecture/test_test_governance_audit.py
+    - tests/architecture/test_test_matrix_lane_policy.py
+  - issue: '#6067'
+    status: measurement_baseline_required_before_performance_optimization_claims
+    evidence:
+    - reports/test-telemetry/slowest-tests.json
+    - reports/test-telemetry/slowest-tests.md
+    - docs/03-guides/test-optimization-guide.md
+    - configs/quality/test_matrix.yaml
+  - issue: '#6068'
+    status: slow_architecture_scans_are_cached_and_split_without_gate_relaxation
+    evidence:
+    - configs/quality/test_governance_audit.yaml
+    - configs/quality/test_matrix.yaml
+    - scripts/engineering/qa/report_test_governance_audit.py
+    - tests/architecture/test_test_governance_audit.py
+  - issue: '#6069'
+    status: xdist_scope_limited_to_existing_parallel_safe_lanes
+    evidence:
+    - configs/quality/test_matrix.yaml
+    - tests/architecture/test_test_matrix_lane_policy.py
+    - docs/03-guides/testing.md
+  - issue: '#6070'
+    status: in_memory_delta_claim_replaced_by_test_storage_seams
+    evidence:
+    - tests/fakes/storage_fake.py
+    - docs/03-guides/testing.md
+    - tests/unit/infrastructure/storage/test_gold_writer.py
+    - tests/integration/infrastructure/storage/test_silver_writer.py
+  - issue: '#6071'
+    status: vcr_policy_uses_freshness_metadata_and_pruning_not_mass_consolidation
+    evidence:
+    - configs/quality/test_matrix.yaml
+    - reports/quality/vcr-metadata-catalog.json
+    - scripts/engineering/qa/vcr/check_vcr_metadata_age.py
+    - tests/architecture/test_vcr_metadata_inventory.py
+    - tests/architecture/test_integration_vcr_policy.py
+  - issue: '#6072'
+    status: observability_gap_scoped_to_tracing_port_runtime_adapter_contracts
+    evidence:
+    - tests/architecture/test_port_contracts_hypothesis.py
+    - tests/unit/infrastructure/observability/test_tracing_port_contract.py
+    - tests/integration/test_observability_emission_integration.py
+  - issue: '#6073'
+    status: gold_golden_policy_is_bounded_dq_sensitive_not_blanket_expansion
+    evidence:
+    - configs/quality/test_matrix.yaml
+    - docs/04-reference/contracts/gold-schemas.md
+    - tests/architecture/test_gold_snapshot_registry.py
+    - tests/contract/test_gold_dq_golden_snapshots.py
+preflight:
+  script: scripts/engineering/qa/check_test_audit_preflight.py
+  telemetry_baseline: docs/05-engineering/test-telemetry-baseline.md
+  strict_blockers:
+  - missing_git_lfs
+  - git_lfs_unhealthy
+  - git_status_failed
+  - dirty_vcr_worktree
+  - lfs_pointer_files_present
+  - missing_telemetry_baseline
+  - telemetry_baseline_without_coverage
+lane_policy:
+  canonical_source: configs/quality/test_matrix.yaml
+  docs: docs/03-guides/testing.md
+  marker_only_commands_are_not_canonical: true
+gold_dq:
+  min_dq_sensitive_outputs: 6
+  required_bundles:
+  - chembl_activity_dq_bundle
+  - chembl_assay_dq_bundle
+  - composite_molecule_dq_bundle
+  - composite_publication_dq_bundle
+  - pubchem_compound_dq_bundle
+  - pubmed_publication_dq_bundle
+tracing:
+  runtime_emission_test: tests/integration/test_observability_emission_integration.py
+  required_test_names:
+  - test_pipeline_observer_emits_tracing_spans_through_recording_port
+  - test_pipeline_observer_records_failure_span_and_error_metrics
+assertless_triage:
+  categories:
+    architecture_helper_guard:
+      count: 16
+      decision: retained
+      rationale: Architecture policy tests delegate assertions to shared guard helpers or pytest.fail
+        paths.
+      next_review: '2026-09-30'
+    benchmark_or_performance:
+      count: 0
+      decision: retained
+      rationale: Performance/benchmark tests use measurement infrastructure as the assertion surface.
+      next_review: '2026-09-30'
+    helper_asserted:
+      count: 0
+      decision: retained
+      rationale: Verification is delegated to explicit check/validate/verify helper calls.
+      next_review: '2026-09-30'
+    intentional_no_exception_contract:
+      count: 90
+      decision: retained-with-rationale
+      rationale: No-op, close/aclose, smoke, or does-not-raise behavior is the contract under test.
+      next_review: '2026-09-30'
+    weak_no_value:
+      count: 0
+      decision: zero-actionable-debt
+      rationale: Weak no-value candidates are not allowed as residual test debt; new candidates must be
+        strengthened, removed, or explicitly reclassified as intentional no-exception contracts.
+      next_review: '2026-09-30'
+  policy:
+    new_no_effect_tests: must keep refined_assertless_max at zero by strengthening, removing, or explicitly
+      reclassifying the test as an intentional contract category
+    highest_priority_paths:
+    - tests/integration/
+    - tests/e2e/
+    - tests/unit/application/core/
+    - tests/unit/infrastructure/control_plane/
+duplicate_name_triage:
+  total_duplicate_names: 0
+  duplicate_occurrences: 0
+  top_generic_names: []
+  zero_enforcement:
+    issue_set:
+    - '#4894'
+    - '#4895'
+    - '#4896'
+    - '#4897'
+    - '#4898'
+    - '#4899'
+    - '#4900'
+    - '#4901'
+    artifact: reports/quality/test-governance-current.json
+    naming_contract: test_<subject>__<condition>__<expected_behavior>
+    decision: fail_fast_duplicate_name_tracking
+  fixture_builder_policy:
+    consolidate_when: RunID, BatchID, PipelineRunContext, Bronze/Silver/Gold metadata, or checkpoint setup
+      repeats across three or more tests in one module family.
+    do_not_consolidate_when: Inline setup is shorter and clearer than an indirection.
+slow_governance_scanner_cache:
+  decision: retained_cached_scanner
+  issue_ref: '#4663'
+  cached_entrypoints:
+  - scripts.engineering.qa.report_test_governance_audit.collect_test_governance_report
+  - tests.architecture.conftest.cached_subprocess_run
+  - tests.architecture.conftest._run_cached_subprocess
+  - tests.architecture.test_antipatterns.test_no_hardcoded_secrets
+  isolated_lanes:
+  - architecture-fast-boundary
+  - architecture-slow-governance
+oversized_test_module_inventory:
+  issue_ref: '#4470'
+  max_tracked_lines: 2200
+  split_on_touch: true
+  top_modules:
+  - path: tests/integration/ci/test_reproducibility_contract_suite.py
+    lines: 1919
+    owner: reproducibility-contracts
+    target_split: integration/ci reproducibility phases
+  - path: tests/unit/application/services/test_metadata_coordinator.py
+    lines: 625
+    owner: application-services
+    target_split: metadata coordinator command/query families
+  - path: tests/unit/application/services/test_run_manifest_inspection_service.py
+    lines: 1486
+    owner: application-services
+    target_split: run manifest inspection scenario families
+  - path: tests/unit/application/pipelines/pubmed/test_pubmed_transformer.py
+    lines: 1963
+    owner: application-pipelines
+    target_split: PubMed transformer classification and normalization scenarios
+  - path: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
+    lines: 1275
+    owner: observability-dashboards
+    target_split: Grafana live audit tooling functional families
+  completed_splits:
+  - issue_ref: '#4505'
+    source: tests/integration/test_grafana_config.py
+    source_lines_after_split: 1698
+    extracted_surface: tests/integration/test_grafana_surface_contracts.py
+    extracted_surface_lines: 695
+    owner: observability-dashboards
+  - issue_ref: '#4505'
+    source: tests/integration/test_grafana_surface_contracts.py
+    source_lines_after_split: 695
+    extracted_surface: tests/integration/test_grafana_technical_policy.py
+    extracted_surface_lines: 52
+    owner: observability-dashboards
+  - issue_ref: '#6326'
+    source: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
+    source_lines_after_split: 1028
+    extracted_surface: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
+    extracted_surface_lines: 1248
+    owner: observability-dashboards
+  - issue_ref: '#6364'
+    source: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
+    source_lines_after_split: 1028
+    extracted_surface: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
+    extracted_surface_lines: 1248
+    owner: observability-dashboards
+    note: Oversized test module inventory updated to reflect completed split from
+  - issue_ref: '#4506'
+    source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
+    source_lines_after_split: 1096
+    extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
+    extracted_surface_lines: 220
+    owner: composition-runtime
+  - issue_ref: '#4506'
+    source: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
+    source_lines_after_split: 220
+    extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_wiring_contracts.py
+    extracted_surface_lines: 96
+    owner: composition-runtime
+  - issue_ref: '#4506'
+    source: tests/unit/application/services/test_run_manifest_inspection_service.py
+    source_lines_after_split: 1459
+    extracted_surface: tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
+    extracted_surface_lines: 164
+    owner: application-services
+compatibility_test_inventory:
+  review_cadence: quarterly
+  total_files: 0
+  default_review_date: '2026-09-30'
+  entries: []
+platform_sensitive_snapshot_tests:
+  issue_ref: '#5663'
+  decision: retained_memory_lane_with_platform_skip
+  owner: memory-governance
+  review_date: '2026-09-30'
+  rationale: Neo4j memory snapshot invariant tests intentionally build a full repo snapshot; they remain
+    outside fast lanes through explicit memory markers, bounded timeout policy, shared snapshot caching,
+    and Windows skip guards.
+  required_markers:
+  - memory
+  min_timeout_seconds: 180
+  windows_skip_required: true
+  shared_snapshot_cache_required: true
+  entries:
+  - path: tests/unit/scripts/ops/neo4j_memory_sync/test_snapshot_invariants.py
+    support_module: tests/testing_support/neo4j_memory_sync_support/snapshot_invariants.py
+    cache_provider: tests/testing_support/neo4j_memory_sync_support/common.py::_snapshot_base
+    runtime_policy: memory_lane_only
+    platform_policy: skip_on_windows
+remediation_closeout:
+  parent_issue: '#4200'
+  audit_snapshot:
+    branch: main
+    commit_observed: 4d880ebc0
+    total_test_files: 1514
+    total_test_functions: 18621
+    coverage_baseline_percent: 92.81
+  issues:
+  - issue: '#4201'
+    decision: closeable
+    evidence:
+    - scripts/engineering/qa/check_test_audit_preflight.py
+    - tests/architecture/test_test_governance_audit.py::test_preflight_reports_lfs_pointer_files_as_strict_reproducibility_blocker
+    closeout: Strict preflight now treats unresolved VCR git-lfs pointer files as reproducibility blockers.
+  - issue: '#4202'
+    decision: closeable
+    evidence:
+    - configs/quality/test_matrix.yaml
+    - configs/quality/pytest_shards.yaml
+    - tests/architecture/test_test_matrix_lane_policy.py
+    closeout: Canonical lanes now expose architecture-fast-boundary and architecture-slow-governance wrappers
+      over the maintained shard aliases.
+  - issue: '#4203'
+    decision: closeable
+    evidence:
+    - scripts/engineering/qa/report_test_governance_audit.py
+    - tests/integration/config/test_chembl_enum_parity.py
+    - tests/integration/config/test_dq_config_loading.py
+    - tests/integration/config/test_semantic_field_unification_contract.py
+    - tests/integration/infrastructure/storage/test_silver_writer.py
+    - tests/integration/test_prometheus_rules_config.py
+    closeout: All integration/e2e weak_no_value candidates were eliminated and the refined assertless
+      budget was ratcheted from 606 to 597.
+  - issue: '#4204'
+    decision: closeable
+    evidence:
+    - tests/helpers/deterministic_ids.py
+    - tests/architecture/test_deterministic_test_identity_builders.py
+    - tests/architecture/test_determinism_identity_policy.py
+    closeout: Replay-sensitive deterministic identity policy remains guarded; date.today budget is zero
+      and uuid4 call sites were reduced from 419 to 413, with remaining non-closed surfaces guarded by
+      policy.
+  - issue: '#4205'
+    decision: closeable
+    evidence:
+    - tests/architecture/test_observability_metric_governance.py
+    - tests/architecture/test_observability_dashboard_contracts.py
+    - reports/observability/runtime_cardinality_inventory.json
+    closeout: Observability cardinality evidence has an explicit freshness test and regeneration command.
+  - issue: '#4206'
+    decision: closeable
+    evidence:
+    - configs/quality/test_governance_audit.yaml
+    - tests/architecture/test_test_governance_audit.py
+    closeout: File-backed unit-domain checks are classified as contract-backed exceptions rather than
+      pure in-memory unit surfaces.
+  - issue: '#4207'
+    decision: closeable
+    evidence:
+    - tests/fixtures/golden/gold/schema_registry.v1.json
+    - tests/fixtures/golden/gold/chembl_assay_dq_bundle_v1.json
+    - tests/contract/test_gold_dq_golden_snapshots.py
+    closeout: Gold DQ bundle coverage was expanded from 5 to 6 registered bundles with a bounded ChEMBL
+      assay DQ-sensitive snapshot.
+  - issue: '#4208'
+    decision: closeable
+    evidence:
+    - configs/quality/test_governance_audit.yaml
+    - scripts/engineering/qa/report_test_governance_audit.py
+    closeout: Duplicate-name triage records the top generic names, duplicate occurrences were reduced
+      from 2783 to 2771, and rename-on-touch policy with builder consolidation rules is enforced.
+  - issue: '#4209'
+    decision: closeable
+    evidence:
+    - configs/quality/test_governance_audit.yaml
+    - tests/architecture/test_test_governance_audit.py::test_compatibility_inventory_covers_every_detected_compatibility_test_file
+    closeout: All 54 compatibility/legacy test files have owner, decision, protected surface, review date,
+      and rationale inventory.
+  - issue: '#4536'
+    decision: closeable
+    evidence:
+    - configs/quality/test_governance_audit.yaml
+    - scripts/engineering/qa/report_test_governance_audit.py
+    - tests/smoke/test_smoke.py
+    - tests/security/test_security.py
+    - tests/unit/domain/value_objects/test_identifiers.py
+    - tests/unit/domain/value_objects/test_publications.py
+    - tests/unit/application/pipelines/crossref/test_extractors.py
+    - tests/unit/application/pipelines/openalex/test_extractors.py
+    - tests/unit/application/pipelines/semanticscholar/test_extractors.py
+    closeout: Focused weak-test cleanup plus module-level unit marks ratcheted refined assertless debt
+      from 561 to 547, duplicate-name debt from 877/2730 to 876/2728, and markerless test functions from
+      7776 to 7137.
+file_backed_domain_contract_tests:
+  decision: retained_contract_lane_exception
+  rationale: These tests intentionally validate config/fixture contracts against domain constants or hash-policy
+    snapshots; they are not pure in-memory unit tests.
+  review_date: '2026-09-30'
+  entries:
+  - path: tests/unit/domain/schemas/test_constants_yaml.py
+    target_lane: contracts
+    contract_surface: configs/enums/{chembl,uniprot,pubchem}.yaml
+  - path: tests/unit/domain/normalization/test_pubchem_constants_yaml.py
+    target_lane: contracts
+    contract_surface: configs/enums/pubchem.yaml
+  - path: tests/unit/domain/hash_policy/test_hash_policy_stability.py
+    target_lane: contracts
+    contract_surface: tests/fixtures/hash_policy/**
+repo_backed_unit_test_exceptions:
+  decision: dedicated_repo_backed_subtree_contract_exception
+  rationale: Checked-in source/config/dashboard/fixture reads may stay in the unit ownership surface only
+    when the repository artifact itself is the contract under test; they must live under tests/unit/repo_backed/
+    and run in the repo-backed-unit lane, not unit-fast.
+  review_date: '2026-09-30'
+  entries:
+  - path: tests/unit/repo_backed/application/composite/test_preflight_validator.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/composites/*.yaml preflight field-priority and source-schema contracts
+  - path: tests/unit/repo_backed/application/pipelines/test_chembl_activity.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/entities/chembl/activity.yaml pipeline configuration contract
+  - path: tests/unit/repo_backed/application/services/test_workflow_runner_service.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/workflows/*.yaml declarative workflow execution contracts
+  - path: tests/unit/repo_backed/application/pipelines/crossref/test_business_data_builder.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/application/pipelines/crossref/_business_data_builder.py
+  - path: tests/unit/repo_backed/application/pipelines/test_chembl_transformers.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/** publication-type bootstrap inputs used by transformer initialization
+  - path: tests/unit/repo_backed/application/pipelines/test_chembl_publication_term_transformer.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/** publication-type bootstrap inputs used by term transformer initialization
+  - path: tests/unit/repo_backed/application/pipelines/test_transformer_snapshots.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/** publication-type bootstrap inputs used by snapshot transformer initialization
+  - path: tests/unit/repo_backed/application/composite/test_join_key_normalization.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/composites/*.yaml join-key normalization policy
+  - path: tests/unit/repo_backed/application/composite/test_merger_golden_snapshots.py
+    target_lane: repo-backed-unit
+    protected_surface: tests/fixtures/golden/composite/*.json
+  - path: tests/unit/repo_backed/application/composite/test_publication_schema_columns.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/composites/publication.yaml column groups
+  - path: tests/unit/repo_backed/application/pipelines/common/test_base_publication_transformer.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/** publication controlled vocabulary bootstrap inputs
+  - path: tests/unit/repo_backed/application/pipelines/chembl/test_activity_transformer.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/entities/chembl/activity.yaml structural required fields
+  - path: tests/unit/repo_backed/application/pipelines/chembl/test_assay_transformer_required_fields.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/entities/chembl/assay.yaml structural required fields
+  - path: tests/unit/repo_backed/application/composite/test_non_chembl_join_key_normalization.py
+    target_lane: repo-backed-unit
+    protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml + configs/composites/{molecule,target}.yaml
+  - path: tests/unit/repo_backed/application/services/test_config_dq_service.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/application/services/config_dq_service.py
+  - path: tests/unit/repo_backed/composition/bootstrap/runtime/test_pipeline_bootstrap.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/composition/bootstrap/runtime/pipeline.py
+  - path: tests/unit/repo_backed/composition/test_bootstrap_cache_fixtures.py
+    target_lane: repo-backed-unit
+    protected_surface: tests/conftest.py bootstrap registry cache fixtures
+  - path: tests/unit/repo_backed/composition/test_coverage_boost_facades.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/composition/factories/storage/maintenance_mixin.py
+  - path: tests/unit/repo_backed/composition/factories/test_factory_decoupling_contracts.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/composition/factories/services/bundle.py
+  - path: tests/unit/repo_backed/contracts/test_generate_schema_artifacts.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/schema/generate_schema_artifacts.py
+  - path: tests/unit/repo_backed/domain/normalization/profiles/test_publication_identifier_profiles.py
+    target_lane: repo-backed-unit
+    protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml
+  - path: tests/unit/repo_backed/infrastructure/adapters/chembl/test_fetch_multi_filter_mixin.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py
+  - path: tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/diagrams/{generate_pipeline_dataflows,pipeline_dataflow_ir,pipeline_dataflow_render}.py
+      + configs/entities/chembl/activity.yaml
+  - path: tests/unit/repo_backed/scripts/diagrams/test_write_path_security.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/diagrams/{fix_pagebreaks_in_bundles,uniform_diagram_sizes}.py
+  - path: tests/unit/repo_backed/scripts/ops/test_neo4j_memory_mcp_adapter.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ai/mcp/{neo4j_memory_mcp_adapter.py,mcp_neo4j_memory_wrapper.sh}
+  - path: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/{__main__.py,observability/grafana/**}
+  - path: tests/unit/repo_backed/scripts/ops/observability/test_grafana_rerender_fallback.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/observability/grafana/rerender_grafana_screenshots.py
+  - path: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/observability/grafana/audit_live_grafana_panels.py
+  - path: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_url_resolution.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/observability/grafana/audit_live_grafana_panels.py
+  - path: tests/unit/repo_backed/scripts/test_apply_entity_naming_rename_plan.py
+    target_lane: repo-backed-unit
+    protected_surface: src/tools/apply_entity_naming_rename_plan.py
+  - path: tests/unit/repo_backed/scripts/test_generate_pipeline_normalization_field_matrix.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/docs/generate_pipeline_normalization_field_matrix.py + docs/05-engineering/normalization_plan_P0_P6.md
+  - path: tests/unit/repo_backed/scripts/test_check_skills_mirror.py
+    target_lane: repo-backed-unit
+    protected_surface: .codex/skills/** + .agents/skills/** mirror parity contract
+  - path: tests/unit/repo_backed/tools/test_differentiate_linkstyle_security.py
+    target_lane: repo-backed-unit
+    protected_surface: src/tools/differentiate_linkstyle.py
+  - path: tests/unit/repo_backed/application/pipelines/chembl/test_chembl_target_helpers.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/application/pipelines/chembl/target_helpers.py
+  - path: tests/unit/repo_backed/infrastructure/quarantine/test_filtered_read_support.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/infrastructure/quarantine/unified.py
+  - path: tests/unit/repo_backed/application/services/test_workflow_runner_config.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/workflows/chembl_baseline.yaml
+  - path: tests/unit/repo_backed/scripts/ai/mcp/test_token_validation_helpers.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ai/mcp/support/token_validation.sh
+  - path: tests/unit/repo_backed/scripts/ai/mcp/test_protocol_smoke.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ai/mcp/protocol_smoke.py
+  - path: tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ai/mcp/{mcp_*_wrapper.sh,mcp_*_wrapper.ps1,support/**,check.sh}
+  - path: tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/support/load_repo_env.sh + scripts/ai/mcp/support/load_repo_env.ps1
+  - path: tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ai/mcp/mcp_memory_wrapper.sh
+  - path: tests/unit/repo_backed/scripts/test_zed_workspace_config.py
+    target_lane: repo-backed-unit
+    protected_surface: .zed/{settings.json,tasks.json,mcp.json,snippets/**}
+  - path: tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/runtime/docker/runtime_manager.py
+  - path: tests/unit/repo_backed/scripts/ops/docker/test_docker_runtime_probe.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/runtime/docker/docker_runtime_probe.py
+  - path: tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/runtime/docker/restart-docker.ps1
+  - path: tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/engineering/qa/run_docker_stability_campaign.py
+  - path: tests/unit/repo_backed/scripts/ops/test_migrate_gold_parquet_to_delta.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/migrations/active/migrate_gold_parquet_to_delta.py
+  - path: tests/unit/repo_backed/scripts/ops/test_windows_docker_mcp_bridge.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py
+  - path: tests/unit/repo_backed/coverage_gap/test_unmeasured_module_smoke.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl modules missing from the committed coverage XML snapshot
+mixed_scope_unit_path_policy:
+  issue_ref: '#4665'
+  decision: logical_unit_ownership_with_dedicated_repo_backed_subtree
+  rationale: tests/unit path still communicates layer ownership, but checked-in repo reads now live in
+    a dedicated tests/unit/repo_backed subtree so canonical pure-unit lanes keep a cleaner filesystem
+    boundary while retained repo-backed contracts stay deterministic and local-only.
+  docs_ref: docs/03-guides/testing.md#211-repo-backed-path-naming-and-reclassification
+  review_date: '2026-09-30'
+  retained_policy_refs:
+  - repo_backed_unit_test_exceptions
+  - file_backed_domain_contract_tests
+  keep_under_tests_unit_when:
+  - checked-in repository artifact itself is the contract under test
+  - execution stays local-only and deterministic without network/VCR/service startup
+  - file lives under tests/unit/repo_backed/, is explicitly listed in governance inventory, and is marked
+    pytest.mark.repo_backed when routed to repo-backed-unit
+  move_out_of_tests_unit_when:
+  - test primarily exercises subprocess or CLI process orchestration rather than one module contract
+  - test validates dashboard, workflow-tree, repo-layout, memory-backend, or broader integration behavior
+  - test needs network, VCR, detached backend, or multi-component runtime semantics
+  moved_examples:
+  - old_path: tests/unit/memory/test_workflow_tooling.py
+    new_path: tests/integration/memory/test_workflow_tooling.py
+  - old_path: tests/unit/memory/test_timeline_ingest.py
+    new_path: tests/integration/memory/test_timeline_ingest.py
+  - old_path: tests/unit/scripts/test_validate_pipeline_configs.py
+    new_path: tests/integration/config/test_validate_pipeline_configs.py
+  - old_path: tests/unit/grafana/test_workflow_dashboard_json_valid.py
+    new_path: tests/integration/grafana/test_workflow_dashboard_json_valid.py

@@ -1,0 +1,503 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
+# pyright: reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false
+# pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
+# pyright: reportOperatorIssue=false
+# pyright: reportAbstractUsage=false
+# pyright: reportUndefinedVariable=false
+# pyright: reportPossiblyUnboundVariable=false
+# pyright: reportTypedDictNotRequiredAccess=false
+# pyright: reportOptionalSubscript=false
+# pyright: reportOptionalOperand=false
+# pyright: reportOptionalCall=false
+# pyright: reportOptionalIterable=false
+# pyright: reportIncompatibleMethodOverride=false
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportReturnType=false
+# pyright: reportInvalidCast=false
+# pyright: reportAssignmentType=false
+# pyright: reportImplicitAbstractClass=false
+# pyright: reportFunctionMemberAccess=false
+# pyright: reportConstantRedefinition=false
+# pyright: reportInvalidTypeForm=false
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+"""Focused tests for MetadataWriter control-plane artifact recording."""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
+
+import pytest
+
+from bioetl.domain.medallion import Layer
+from bioetl.domain.models.metadata import (
+    BaseOutputMetadata,
+    BronzeMetadata,
+    BronzeOutputExt,
+    DeltaMetrics,
+    DQSummary,
+    EnvironmentMetadata,
+    FileOutputMetadata,
+    GoldMetadata,
+    GoldOutputExt,
+    InputSnapshotRef,
+    LineageMetadata,
+    PipelineMetadata,
+    RuntimeMetadata,
+    RunTypeEnum,
+    SilverMetadata,
+    SilverOutputExt,
+    SourceMetadata,
+)
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
+
+
+pytestmark = pytest.mark.unit
+
+
+def _fake_atomic_write_text(
+    path: object,
+    content: object,
+    *,
+    retry_policy: object,
+    on_retry: object,
+) -> None:
+    del path, content, retry_policy, on_retry
+
+
+def _raise_boom_artifact_recorder(*_args: object, **_kwargs: object) -> None:
+    raise RuntimeError("boom")
+
+
+def _make_bronze_metadata() -> BronzeMetadata:
+    return BronzeMetadata(
+        version="1.1",
+        layer=Layer.BRONZE,
+        runtime=RuntimeMetadata(
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_metadata_writer_control_plane"
+            ),
+            manifest_id="manifest-1",
+            run_type=RunTypeEnum.INCREMENTAL,
+            started_at_utc=datetime(2026, 3, 24, 10, 0, tzinfo=UTC),
+            exact_replay=True,
+            replay_of_run_id="run-parent-1",
+            replay_of_manifest_id="manifest-parent-1",
+            input_snapshot_fingerprint="snapshot-fingerprint-1",
+        ),
+        pipeline=PipelineMetadata(
+            name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            version="1.0.0",
+            execution_fingerprint="fingerprint-1",
+            effective_config_artifact_id="effective-config-1",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+        ),
+        source=SourceMetadata(type="api", url="https://example.org"),
+        output=BaseOutputMetadata(
+            artifact_id="bronze_batch:batch-1",
+            record_count=7,
+            total_bytes=1024,
+            lineage_fragment_id="bronze:fragment-1",
+        ),
+        output_ext=BronzeOutputExt(
+            files=[
+                FileOutputMetadata(
+                    path="batch.jsonl.zst",
+                    size_bytes=1024,
+                    record_count=7,
+                )
+            ]
+        ),
+        environment=EnvironmentMetadata(
+            hostname="host",
+            python_version="3.13.0",
+            bioetl_version="6.0.0",
+        ),
+    )
+
+
+def _make_silver_metadata() -> SilverMetadata:
+    return SilverMetadata(
+        version="1.1",
+        layer=Layer.SILVER,
+        runtime=RuntimeMetadata(
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_metadata_writer_control_plane"
+            ),
+            manifest_id="manifest-1",
+            run_type=RunTypeEnum.INCREMENTAL,
+            started_at_utc=datetime(2026, 3, 24, 10, 0, tzinfo=UTC),
+        ),
+        pipeline=PipelineMetadata(
+            name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            version="1.0.0",
+        ),
+        lineage=LineageMetadata(),
+        delta=DeltaMetrics(
+            table_path="silver/chembl/activity",
+            operation="merge",
+            primary_key=["id"],
+            version_after=7,
+        ),
+        dq_summary=DQSummary(total_records=7, valid_records=7),
+        output=BaseOutputMetadata(
+            artifact_id="silver:chembl.activity@7",
+            record_count=7,
+            total_bytes=2048,
+            lineage_fragment_id="silver:fragment-1",
+        ),
+        output_ext=SilverOutputExt(delta_version_after=7),
+        environment=EnvironmentMetadata(
+            hostname="host",
+            python_version="3.13.0",
+            bioetl_version="6.0.0",
+        ),
+    )
+
+
+def _make_gold_metadata() -> GoldMetadata:
+    return GoldMetadata(
+        version="1.1",
+        layer=Layer.GOLD,
+        runtime=RuntimeMetadata(
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_metadata_writer_control_plane"
+            ),
+            manifest_id="manifest-1",
+            run_type=RunTypeEnum.INCREMENTAL,
+            started_at_utc=datetime(2026, 3, 24, 10, 0, tzinfo=UTC),
+        ),
+        pipeline=PipelineMetadata(
+            name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            version="1.0.0",
+        ),
+        lineage=LineageMetadata(),
+        delta=DeltaMetrics(
+            table_path="gold/chembl/activity",
+            operation="merge",
+            primary_key=["activity_id"],
+            version_after=3,
+        ),
+        dq_summary=DQSummary(total_records=7, valid_records=7),
+        output=BaseOutputMetadata(
+            artifact_id="gold:chembl.activity",
+            record_count=7,
+            total_bytes=4096,
+            lineage_fragment_id="gold:fragment-1",
+        ),
+        output_ext=GoldOutputExt(),
+        environment=EnvironmentMetadata(
+            hostname="host",
+            python_version="3.13.0",
+            bioetl_version="6.0.0",
+        ),
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_bronze_metadata_records_artifact_publication() -> None:
+    metrics = MagicMock()
+    writer = MetadataWriter(logger=NoOpLogger(), metrics=metrics)
+    captured: list[tuple[str, str, dict[str, object] | None]] = []
+    metadata = _make_bronze_metadata()
+    writer.attach_artifact_recorder(
+        lambda layer, artifact_path, details=None: captured.append(
+            (layer, artifact_path, details)
+        )
+    )
+
+    base_path = "/virtual/output/bronze/chembl/activity"
+    with patch(
+        "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+        side_effect=_fake_atomic_write_text,
+    ):
+        result = await writer.write_bronze_metadata(
+            base_path=base_path,
+            metadata=metadata,
+            provider="chembl",
+            entity="activity",
+        )
+
+    assert result.endswith("chembl_activity_metadata.yaml")
+    assert len(captured) == 1
+    layer, artifact_path, details = captured[0]
+    assert layer == "bronze"
+    assert artifact_path == str(Path(base_path).resolve())
+    assert details is not None
+    assert details["artifact_id"] == "bronze_batch:batch-1"
+    assert details["metadata_path"].endswith("chembl_activity_metadata.yaml")
+    assert details["record_count"] == 7
+    assert details["run_id"] == str(metadata.runtime.run_id)
+    assert details["manifest_id"] == "manifest-1"
+    assert details["execution_fingerprint"] == "fingerprint-1"
+    assert details["exact_replay"] is True
+    assert details["replay_of_run_id"] == "run-parent-1"
+    assert details["replay_of_manifest_id"] == "manifest-parent-1"
+    assert details["input_snapshot_fingerprint"] == "snapshot-fingerprint-1"
+    assert details["effective_config_artifact_id"] == "effective-config-1"
+    assert details["contract_ref"] == "chembl.activity"
+    assert details["contract_version"] == "1.0.0"
+    assert details["provider"] == "chembl"
+    assert details["dataset_ref"] == "bronze_batch:batch-1"
+    assert details["lineage_fragment_id"] == "bronze:fragment-1"
+    metrics.increment_counter.assert_any_call(
+        "bioetl_output_artifact_publication_events_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "stage": "bronze",
+            "status": "success",
+        },
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_bronze_metadata_tracks_disabled_publication_when_no_recorder() -> (
+    None
+):
+    metrics = MagicMock()
+    writer = MetadataWriter(logger=NoOpLogger(), metrics=metrics)
+    metadata = _make_bronze_metadata()
+
+    with patch(
+        "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+        side_effect=_fake_atomic_write_text,
+    ):
+        await writer.write_bronze_metadata(
+            base_path="/virtual/output/bronze/chembl/activity",
+            metadata=metadata,
+            provider="chembl",
+            entity="activity",
+        )
+
+    metrics.increment_counter.assert_any_call(
+        "bioetl_output_artifact_publication_events_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "stage": "bronze",
+            "status": "disabled",
+        },
+    )
+
+
+def test_artifact_recorder_attached_property_tracks_wiring_state() -> None:
+    writer = MetadataWriter(logger=NoOpLogger())
+
+    assert writer.artifact_recorder_attached is False
+
+    writer.attach_artifact_recorder(lambda *_args, **_kwargs: None)
+    assert writer.artifact_recorder_attached is True
+
+    writer.attach_artifact_recorder(None)
+    assert writer.artifact_recorder_attached is False
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_bronze_metadata_tracks_failed_publication_when_recorder_raises() -> (
+    None
+):
+    metrics = MagicMock()
+    writer = MetadataWriter(logger=NoOpLogger(), metrics=metrics)
+    metadata = _make_bronze_metadata()
+    writer.attach_artifact_recorder(_raise_boom_artifact_recorder)
+
+    with patch(
+        "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+        side_effect=_fake_atomic_write_text,
+    ):
+        with pytest.raises(RuntimeError, match="boom"):
+            await writer.write_bronze_metadata(
+                base_path="/virtual/output/bronze/chembl/activity",
+                metadata=metadata,
+                provider="chembl",
+                entity="activity",
+            )
+
+    metrics.increment_counter.assert_any_call(
+        "bioetl_output_artifact_publication_events_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "stage": "bronze",
+            "status": "failed",
+        },
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_bronze_metadata_records_input_snapshot_refs() -> None:
+    writer = MetadataWriter(logger=NoOpLogger())
+    captured: list[tuple[str, str, dict[str, object] | None]] = []
+    metadata = _make_bronze_metadata()
+    metadata.source.input_snapshots = [
+        InputSnapshotRef(
+            snapshot_id="chembl-activity-batch-001",
+            content_hash="a" * 64,
+            immutable_uri="snapshots/chembl/activity/batch-001.jsonl.zst",
+            query_fingerprint="f" * 64,
+        )
+    ]
+    writer.attach_artifact_recorder(
+        lambda layer, artifact_path, details=None: captured.append(
+            (layer, artifact_path, details)
+        )
+    )
+
+    with patch(
+        "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+        side_effect=_fake_atomic_write_text,
+    ):
+        await writer.write_bronze_metadata(
+            base_path="/virtual/output/bronze/chembl/activity",
+            metadata=metadata,
+            provider="chembl",
+            entity="activity",
+        )
+
+    assert len(captured) == 1
+    details = captured[0][2]
+    assert details is not None
+    assert details["input_snapshot_count"] == 1
+    assert details["input_snapshot_ids"] == ["chembl-activity-batch-001"]
+    assert details["input_snapshot_content_hashes"] == ["a" * 64]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_silver_metadata_records_dataset_ref_and_fragment_id() -> None:
+    writer = MetadataWriter(logger=NoOpLogger())
+    captured: list[tuple[str, str, dict[str, object] | None]] = []
+    metadata = _make_silver_metadata()
+    writer.attach_artifact_recorder(
+        lambda layer, artifact_path, details=None: captured.append(
+            (layer, artifact_path, details)
+        )
+    )
+
+    base_path = "/virtual/output/silver/chembl/activity"
+    with patch(
+        "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+        side_effect=_fake_atomic_write_text,
+    ):
+        result = await writer.write_silver_metadata(
+            base_path=base_path,
+            metadata=metadata,
+            provider="chembl",
+            entity="activity",
+        )
+
+    assert result.endswith("chembl_activity_metadata.yaml")
+    assert len(captured) == 1
+    layer, artifact_path, details = captured[0]
+    assert layer == "silver"
+    assert artifact_path == str(Path(base_path).resolve())
+    assert details is not None
+    assert details["run_id"] == str(metadata.runtime.run_id)
+    assert details["manifest_id"] == "manifest-1"
+    assert details["artifact_id"] == "silver:chembl.activity@7"
+    assert details["dataset_ref"] == "silver:chembl.activity@7"
+    assert details["lineage_fragment_id"] == "silver:fragment-1"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_gold_metadata_records_dataset_ref_and_fragment_id() -> None:
+    writer = MetadataWriter(logger=NoOpLogger())
+    captured: list[tuple[str, str, dict[str, object] | None]] = []
+    metadata = _make_gold_metadata()
+    writer.attach_artifact_recorder(
+        lambda layer, artifact_path, details=None: captured.append(
+            (layer, artifact_path, details)
+        )
+    )
+
+    base_path = "/virtual/output/gold/chembl/activity"
+    with patch(
+        "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+        side_effect=_fake_atomic_write_text,
+    ):
+        result = await writer.write_gold_metadata(
+            base_path=base_path,
+            metadata=metadata,
+            table_name="chembl.activity",
+        )
+
+    assert result.endswith("_metadata.yaml")
+    assert len(captured) == 1
+    layer, artifact_path, details = captured[0]
+    assert layer == "gold"
+    assert artifact_path == str(Path(base_path).resolve())
+    assert details is not None
+    assert details["run_id"] == str(metadata.runtime.run_id)
+    assert details["manifest_id"] == "manifest-1"
+    assert details["artifact_id"] == "gold:chembl.activity"
+    assert details["dataset_ref"] == "gold:chembl.activity"
+    assert details["lineage_fragment_id"] == "gold:fragment-1"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_metadata_fails_when_control_plane_manifest_id_is_missing() -> None:
+    writer = MetadataWriter(logger=NoOpLogger())
+    writer.attach_artifact_recorder(lambda *_args, **_kwargs: None)
+    metadata = _make_bronze_metadata()
+    metadata.runtime.manifest_id = None
+
+    with pytest.raises(
+        RuntimeError,
+        match=r"Control-plane artifact publication requires metadata\.runtime\.manifest_id",
+    ):
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_fake_atomic_write_text,
+        ):
+            await writer.write_bronze_metadata(
+                base_path="/virtual/output/bronze/chembl/activity",
+                metadata=metadata,
+                provider="chembl",
+                entity="activity",
+            )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_metadata_fails_when_control_plane_artifact_id_is_missing() -> None:
+    writer = MetadataWriter(logger=NoOpLogger())
+    writer.attach_artifact_recorder(lambda *_args, **_kwargs: None)
+    metadata = _make_bronze_metadata()
+    metadata.output.artifact_id = None
+
+    with pytest.raises(
+        RuntimeError,
+        match=r"Control-plane artifact publication requires metadata\.output\.artifact_id",
+    ):
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_fake_atomic_write_text,
+        ):
+            await writer.write_bronze_metadata(
+                base_path="/virtual/output/bronze/chembl/activity",
+                metadata=metadata,
+                provider="chembl",
+                entity="activity",
+            )

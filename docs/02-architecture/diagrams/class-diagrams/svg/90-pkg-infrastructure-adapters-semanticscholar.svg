@@ -1,0 +1,495 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" class="classDiagram" style="max-width: 4266.97px; background-color: white;" viewBox="0 0 4266.96875 623" role="graphics-document document" aria-roledescription="class"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .cluster-label text{fill:#1e40af;}#my-svg .cluster-label span{color:#1e40af;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .cluster rect{fill:#f8fafc;stroke:#94a3b8;stroke-width:1px;}#my-svg .cluster text{fill:#1e40af;}#my-svg .cluster span{color:#1e40af;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .noteLabel .nodeLabel,#my-svg .noteLabel .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .labelBkg{background:#eff6ff;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg [id$="-compositionStart"],#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-compositionEnd"],#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-dependencyStart"],#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-dependencyEnd"],#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-extensionStart"],#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-extensionEnd"],#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-aggregationStart"],#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-aggregationEnd"],#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-lollipopStart"],#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-lollipopEnd"],#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;line-height:initial;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg .edgeLabel[data-look="neo"]{background-color:#ffffff;text-align:center;}#my-svg .edgeLabel[data-look="neo"] p{background-color:#ffffff;}#my-svg .edgeLabel[data-look="neo"] rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg .node .neo-node{stroke:#2563eb;}#my-svg [data-look="neo"].node rect,#my-svg [data-look="neo"].cluster rect,#my-svg [data-look="neo"].node polygon{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node path{stroke:url(#my-svg-gradient);stroke-width:1px;}#my-svg [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node .neo-line path{stroke:#2563eb;filter:none;}#my-svg [data-look="neo"].node circle{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node circle .state-start{fill:#000000;}#my-svg [data-look="neo"].icon-shape .icon{fill:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].icon-shape .icon-neo path{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><g><defs><marker id="my-svg_class-aggregationStart" class="marker aggregation class" refX="18" refY="7" markerWidth="190" markerHeight="240" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-aggregationEnd" class="marker aggregation class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-aggregationStart-margin" class="marker aggregation class" refX="15" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 2;" /></marker></defs><defs><marker id="my-svg_class-aggregationEnd-margin" class="marker aggregation class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 2;" /></marker></defs><defs><marker id="my-svg_class-extensionStart" class="marker extension class" refX="18" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 1,7 L18,13 V 1 Z" /></marker></defs><defs><marker id="my-svg_class-extensionEnd" class="marker extension class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 1,1 V 13 L18,7 Z" /></marker></defs><marker id="my-svg_class-extensionStart-margin" class="marker extension class" refX="18" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 20 14"><polygon points="10,7 18,13 18,1" style="stroke-width: 2; stroke-dasharray: 0;" /></marker><defs><marker id="my-svg_class-extensionEnd-margin" class="marker extension class" refX="9" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 20 14"><polygon points="10,1 10,13 18,7" style="stroke-width: 2; stroke-dasharray: 0;" /></marker></defs><defs><marker id="my-svg_class-compositionStart" class="marker composition class" refX="18" refY="7" markerWidth="190" markerHeight="240" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-compositionEnd" class="marker composition class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-compositionStart-margin" class="marker composition class" refX="15" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><path viewBox="0 0 15 15" d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-compositionEnd-margin" class="marker composition class" refX="3.5" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-dependencyStart" class="marker dependency class" refX="6" refY="7" markerWidth="190" markerHeight="240" orient="auto"><path d="M 5,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-dependencyEnd" class="marker dependency class" refX="13" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L14,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-dependencyStart-margin" class="marker dependency class" refX="4" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><path d="M 5,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-dependencyEnd-margin" class="marker dependency class" refX="16" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L14,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-lollipopStart" class="marker lollipop class" refX="13" refY="7" markerWidth="190" markerHeight="240" orient="auto"><circle fill="transparent" cx="7" cy="7" r="6" /></marker></defs><defs><marker id="my-svg_class-lollipopEnd" class="marker lollipop class" refX="1" refY="7" markerWidth="190" markerHeight="240" orient="auto"><circle fill="transparent" cx="7" cy="7" r="6" /></marker></defs><defs><marker id="my-svg_class-lollipopStart-margin" class="marker lollipop class" refX="13" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><circle fill="transparent" cx="7" cy="7" r="6" stroke-width="2" /></marker></defs><defs><marker id="my-svg_class-lollipopEnd-margin" class="marker lollipop class" refX="1" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><circle fill="transparent" cx="7" cy="7" r="6" stroke-width="2" /></marker></defs><g class="root"><g class="clusters"><g class="cluster undefined" id="my-svg-health_metadata_mixin" data-look="classic"><rect style="" x="1227.578125" y="8" width="2366.546875" height="413" /><g class="cluster-label" transform="translate(2326.09375, 8)"><text x="84.758" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="84.758">health_metadata_mix</tspan><tspan x="84.758" dy="16.8">in</tspan></text></g></g><g class="cluster undefined" id="my-svg-client_fallback_policy" data-look="classic"><rect style="" x="3614.125" y="272" width="644.84375" height="149" /><g class="cluster-label" transform="translate(3859.8359375, 272)"><text x="76.711" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="76.711">client_fallback_po</tspan><tspan x="76.711" dy="16.8">licy</tspan></text></g></g><g class="cluster undefined" id="my-svg-search_fetch_flow" data-look="classic"><rect style="" x="403.3125" y="8" width="369.328125" height="219" /><g class="cluster-label" transform="translate(521.90625, 8)"><text x="66.07" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="66.07">search_fetch_flow</tspan></text></g></g><g class="cluster undefined" id="my-svg-adapter" data-look="classic"><rect style="" x="154.9609375" y="466" width="3671.2109375" height="149" /><g class="cluster-label" transform="translate(1962.40234375, 466)"><text x="28.164" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="28.164">adapter</tspan></text></g></g><g class="cluster undefined" id="my-svg-batch_request_mixin" data-look="classic"><rect style="" x="8" y="272" width="373.921875" height="149" /><g class="cluster-label" transform="translate(119.7734375, 272)"><text x="75.188" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="75.188">batch_request_mixi</tspan><tspan x="75.188" dy="16.8">n</tspan></text></g></g><g class="cluster undefined" id="my-svg-fetch_adapter_mixin" data-look="classic"><rect style="" x="401.921875" y="272" width="372.109375" height="149" /><g class="cluster-label" transform="translate(513.6875, 272)"><text x="74.289" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="74.289">fetch_adapter_mixi</tspan><tspan x="74.289" dy="16.8">n</tspan></text></g></g></g><g class="edgePaths"><path d="M194.961,415.75L194.961,415.75L194.961,421L194.961,421L194.961,443.5L194.961,443.5L194.961,466L938.426,466L938.426,535.39L1681.891,535.39" id="my-svg-id_SemanticScholarBatchRequestMixin_SemanticScholarAdapter_1" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_SemanticScholarBatchRequestMixin_SemanticScholarAdapter_1" data-points="W3sieCI6MTk0Ljk2MDkzNzUsInkiOjM5OC41fSx7IngiOjE5NC45NjA5Mzc1LCJ5Ijo0MjF9LHsieCI6MTk0Ljk2MDkzNzUsInkiOjQ0My41fSx7IngiOjE5NC45NjA5Mzc1LCJ5Ijo0NjZ9LHsieCI6MTY4MS44OTA2MjUsInkiOjUzNS4zOTAwMDM1NzI0MjQ4fV0=" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M587.977,415.75L587.977,415.75L587.977,421L587.977,421L587.977,443.5L587.977,443.5L587.977,466L1134.934,466L1134.934,533.721L1681.891,533.721" id="my-svg-id_SemanticScholarFetchAdapterMixin_SemanticScholarAdapter_2" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_SemanticScholarFetchAdapterMixin_SemanticScholarAdapter_2" data-points="W3sieCI6NTg3Ljk3NjU2MjUsInkiOjM5OC41fSx7IngiOjU4Ny45NzY1NjI1LCJ5Ijo0MjF9LHsieCI6NTg3Ljk3NjU2MjUsInkiOjQ0My41fSx7IngiOjU4Ny45NzY1NjI1LCJ5Ijo0NjZ9LHsieCI6MTY4MS44OTA2MjUsInkiOjUzMy43MjExNjExNDk1OTR9XQ==" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M2994.805,415.75L2994.805,415.75L2994.805,421L2994.805,421L2994.805,443.5L2994.805,443.5L2994.805,466L2447.848,466L2447.848,533.721L1900.891,533.721" id="my-svg-id_SemanticScholarHealthMetadataMixin_SemanticScholarAdapter_3" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_SemanticScholarHealthMetadataMixin_SemanticScholarAdapter_3" data-points="W3sieCI6Mjk5NC44MDQ2ODc1LCJ5IjozOTguNX0seyJ4IjoyOTk0LjgwNDY4NzUsInkiOjQyMX0seyJ4IjoyOTk0LjgwNDY4NzUsInkiOjQ0My41fSx7IngiOjI5OTQuODA0Njg3NSwieSI6NDY2fSx7IngiOjE5MDAuODkwNjI1LCJ5Ijo1MzMuNzIxMTYxMTQ5NTk0fV0=" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M2994.805,186.75L2994.805,186.75L2994.805,227L2994.805,227L2994.805,249.5L2994.805,249.5L2994.805,272L2994.805,272L2994.805,294.5L2994.805,294.5" id="my-svg-id_SemanticScholarHealthMetadataMixinABC_SemanticScholarHealthMetadataMixin_4" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_SemanticScholarHealthMetadataMixinABC_SemanticScholarHealthMetadataMixin_4" data-points="W3sieCI6Mjk5NC44MDQ2ODc1LCJ5IjoxNjkuNX0seyJ4IjoyOTk0LjgwNDY4NzUsInkiOjIyN30seyJ4IjoyOTk0LjgwNDY4NzUsInkiOjI0OS41fSx7IngiOjI5OTQuODA0Njg3NSwieSI6MjcyfSx7IngiOjI5OTQuODA0Njg3NSwieSI6Mjk0LjV9XQ==" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M3806.172,415.75L3806.172,415.75L3806.172,421L3806.172,421L3806.172,443.5L3806.172,443.5L3806.172,466L2853.531,466L2853.531,536.451L1900.891,536.451" id="my-svg-id__SemanticScholarFallbackPolicyMixin_SemanticScholarAdapter_5" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id__SemanticScholarFallbackPolicyMixin_SemanticScholarAdapter_5" data-points="W3sieCI6MzgwNi4xNzE4NzUsInkiOjM5OC41fSx7IngiOjM4MDYuMTcxODc1LCJ5Ijo0MjF9LHsieCI6MzgwNi4xNzE4NzUsInkiOjQ0My41fSx7IngiOjM4MDYuMTcxODc1LCJ5Ijo0NjZ9LHsieCI6MTkwMC44OTA2MjUsInkiOjUzNi40NTEwNDkyNzY0NDEzfV0=" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M587.977,186.75L587.977,186.75L587.977,227L587.977,227L587.977,249.5L587.977,249.5L587.977,272L587.977,272L587.977,294.5L587.977,294.5" id="my-svg-id__SemanticScholarSearchFetchMixin_SemanticScholarFetchAdapterMixin_6" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id__SemanticScholarSearchFetchMixin_SemanticScholarFetchAdapterMixin_6" data-points="W3sieCI6NTg3Ljk3NjU2MjUsInkiOjE2OS41fSx7IngiOjU4Ny45NzY1NjI1LCJ5IjoyMjd9LHsieCI6NTg3Ljk3NjU2MjUsInkiOjI0OS41fSx7IngiOjU4Ny45NzY1NjI1LCJ5IjoyNzJ9LHsieCI6NTg3Ljk3NjU2MjUsInkiOjI5NC41fV0=" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /></g><g class="edgeLabels" /><g class="nodes"><g class="root" transform="translate(791.640625, 22.5)"><g class="clusters"><g class="cluster undefined" id="my-svg-fallback" data-look="classic"><rect style="" x="8" y="8" width="384.9375" height="174" /><g class="cluster-label" transform="translate(172.5703125, 8)"><text x="27.898" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="27.898">fallback</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-SemanticScholarTitleFallbackHandler-12" data-look="classic" transform="translate(200.46875, 95)"><g class="basic label-container outer-path"><path d="M-157.46875 -52 L157.46875 -52 L157.46875 52 L-157.46875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-157.46875 -52 C-46.306436351064804 -52, 64.85587729787039 -52, 157.46875 -52 M-157.46875 -52 C-86.918586748149 -52, -16.368423496297993 -52, 157.46875 -52 M157.46875 -52 C157.46875 -14.69372709729938, 157.46875 22.61254580540124, 157.46875 52 M157.46875 -52 C157.46875 -30.730495189903596, 157.46875 -9.460990379807193, 157.46875 52 M157.46875 52 C80.18134706478477 52, 2.8939441295695474 52, -157.46875 52 M157.46875 52 C44.18682161487517 52, -69.09510677024966 52, -157.46875 52 M-157.46875 52 C-157.46875 24.991512945858283, -157.46875 -2.016974108283435, -157.46875 -52 M-157.46875 52 C-157.46875 10.870598144092078, -157.46875 -30.258803711815844, -157.46875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-141.46875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="141.469" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="141.469">SemanticScholarTitleFallbackHan</tspan><tspan x="141.469" dy="16.8">dler</tspan></text></g></g><g class="members-group text" transform="translate(-141.46875, 36)" /><g class="methods-group text" transform="translate(-141.46875, 76)" /><g class="divider" style=""><path d="M-157.46875 4 C-90.67040823334463 4.000212100311225, -23.87206646668926 4.000424200622452, 157.46875 4.001 M-157.46875 4 C-76.7725690361526 4.0002562291913915, 3.923611927694793 4.000512458382783, 157.46875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-157.46875 28 C-61.988995279651675 28.00030317048532, 33.49075944069665 28.00060634097064, 157.46875 28.001 M-157.46875 28 C-43.76550548081872 28.000361034314807, 69.93773903836257 28.000722068629614, 157.46875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="node default" id="my-svg-classId-SemanticScholarAdapterMetricsProtocol-0" data-look="classic" transform="translate(1432.7265625, 346.5)"><g class="basic label-container outer-path"><path d="M-170.1484375 -52 L170.1484375 -52 L170.1484375 52 L-170.1484375 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-170.1484375 -52 C-41.63835073737627 -52, 86.87173602524746 -52, 170.1484375 -52 M-170.1484375 -52 C-95.18461694824315 -52, -20.220796396486293 -52, 170.1484375 -52 M170.1484375 -52 C170.1484375 -17.104761542424114, 170.1484375 17.79047691515177, 170.1484375 52 M170.1484375 -52 C170.1484375 -26.412644407543237, 170.1484375 -0.8252888150864734, 170.1484375 52 M170.1484375 52 C90.58715839726418 52, 11.025879294528352 52, -170.1484375 52 M170.1484375 52 C88.07197784335318 52, 5.995518186706363 52, -170.1484375 52 M-170.1484375 52 C-170.1484375 17.375629876334543, -170.1484375 -17.248740247330915, -170.1484375 -52 M-170.1484375 52 C-170.1484375 17.7122255283915, -170.1484375 -16.575548943217, -170.1484375 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-154.1484375, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="154.148" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="154.148">SemanticScholarAdapterMetricsProto</tspan><tspan x="154.148" dy="16.8">col</tspan></text></g></g><g class="members-group text" transform="translate(-154.1484375, 36)" /><g class="methods-group text" transform="translate(-154.1484375, 76)" /><g class="divider" style=""><path d="M-170.1484375 4 C-55.931668924331746 4.000335638605485, 58.28509965133651 4.0006712772109685, 170.1484375 4.001 M-170.1484375 4 C-58.6994163310202 4.00032750527365, 52.749604837959595 4.000655010547299, 170.1484375 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-170.1484375 28 C-58.79921120676168 28.00032721201537, 52.550015086476634 28.000654424030742, 170.1484375 28.001 M-170.1484375 28 C-90.69786229631336 28.00023347430153, -11.24728709262672 28.000466948603062, 170.1484375 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-SemanticScholarHTTPClientProtocol-1" data-look="classic" transform="translate(1807.09375, 346.5)"><g class="basic label-container outer-path"><path d="M-154.21875 -52 L154.21875 -52 L154.21875 52 L-154.21875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-154.21875 -52 C-41.031548506573984 -52, 72.15565298685203 -52, 154.21875 -52 M-154.21875 -52 C-33.20840634386353 -52, 87.80193731227294 -52, 154.21875 -52 M154.21875 -52 C154.21875 -30.172887742813078, 154.21875 -8.345775485626156, 154.21875 52 M154.21875 -52 C154.21875 -17.527960072261955, 154.21875 16.94407985547609, 154.21875 52 M154.21875 52 C87.09144574330831 52, 19.964141486616626 52, -154.21875 52 M154.21875 52 C76.33069491236859 52, -1.5573601752628292 52, -154.21875 52 M-154.21875 52 C-154.21875 29.06625566851734, -154.21875 6.132511337034678, -154.21875 -52 M-154.21875 52 C-154.21875 20.34068924534407, -154.21875 -11.31862150931186, -154.21875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-138.21875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="138.219" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="138.219">SemanticScholarHTTPClientProtoc</tspan><tspan x="138.219" dy="16.8">ol</tspan></text></g></g><g class="members-group text" transform="translate(-138.21875, 36)" /><g class="methods-group text" transform="translate(-138.21875, 76)" /><g class="divider" style=""><path d="M-154.21875 4 C-86.8147692430988 4.000218533676213, -19.41078848619759 4.000437067352426, 154.21875 4.001 M-154.21875 4 C-38.37491897974179 4.000375582836135, 77.46891204051641 4.000751165672269, 154.21875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-154.21875 28 C-79.94183411453601 28.000240816748565, -5.664918229072015 28.00048163349713, 154.21875 28.001 M-154.21875 28 C-82.30893901726922 28.000233142244323, -10.39912803453845 28.000466284488642, 154.21875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-SemanticScholarHTTPResponseProtocol-2" data-look="classic" transform="translate(2179.1796875, 346.5)"><g class="basic label-container outer-path"><path d="M-167.8671875 -52 L167.8671875 -52 L167.8671875 52 L-167.8671875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-167.8671875 -52 C-77.09197395891987 -52, 13.683239582160269 -52, 167.8671875 -52 M-167.8671875 -52 C-48.686339265755365 -52, 70.49450896848927 -52, 167.8671875 -52 M167.8671875 -52 C167.8671875 -22.321301617285478, 167.8671875 7.357396765429044, 167.8671875 52 M167.8671875 -52 C167.8671875 -26.213694131370367, 167.8671875 -0.4273882627407346, 167.8671875 52 M167.8671875 52 C82.99247388243032 52, -1.8822397351393647 52, -167.8671875 52 M167.8671875 52 C57.38627039992565 52, -53.0946467001487 52, -167.8671875 52 M-167.8671875 52 C-167.8671875 23.511902009844054, -167.8671875 -4.976195980311893, -167.8671875 -52 M-167.8671875 52 C-167.8671875 29.106521557844324, -167.8671875 6.213043115688649, -167.8671875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-151.8671875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="151.867" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="151.867">SemanticScholarHTTPResponseProtoco</tspan><tspan x="151.867" dy="16.8">l</tspan></text></g></g><g class="members-group text" transform="translate(-151.8671875, 36)" /><g class="methods-group text" transform="translate(-151.8671875, 76)" /><g class="divider" style=""><path d="M-167.8671875 4 C-60.3086743284901 4.00032036788956, 47.2498388430198 4.00064073577912, 167.8671875 4.001 M-167.8671875 4 C-61.87246762290461 4.000315710060601, 44.122252254190784 4.000631420121202, 167.8671875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-167.8671875 28 C-95.44910839900975 28.000215700519497, -23.03102929801949 28.000431401039, 167.8671875 28.001 M-167.8671875 28 C-87.37044734432494 28.00023976317634, -6.873707188649888 28.000479526352674, 167.8671875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-SemanticScholarHealthMetadataDependencies-3" data-look="classic" transform="translate(2590.484375, 346.5)"><g class="basic label-container outer-path"><path d="M-193.4375 -52 L193.4375 -52 L193.4375 52 L-193.4375 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-193.4375 -52 C-42.23123301276763 -52, 108.97503397446474 -52, 193.4375 -52 M-193.4375 -52 C-76.44724490293929 -52, 40.54301019412142 -52, 193.4375 -52 M193.4375 -52 C193.4375 -17.774148001645166, 193.4375 16.451703996709668, 193.4375 52 M193.4375 -52 C193.4375 -15.227722947437563, 193.4375 21.544554105124874, 193.4375 52 M193.4375 52 C102.13435628085524 52, 10.831212561710487 52, -193.4375 52 M193.4375 52 C91.66438585146962 52, -10.108728297060765 52, -193.4375 52 M-193.4375 52 C-193.4375 19.301184193708835, -193.4375 -13.39763161258233, -193.4375 -52 M-193.4375 52 C-193.4375 27.37236122599071, -193.4375 2.744722451981417, -193.4375 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-177.4375, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="177.438" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="177.438">SemanticScholarHealthMetadataDependenci</tspan><tspan x="177.438" dy="16.8">es</tspan></text></g></g><g class="members-group text" transform="translate(-177.4375, 36)" /><g class="methods-group text" transform="translate(-177.4375, 76)" /><g class="divider" style=""><path d="M-193.4375 4 C-79.60466828730459 4.000294236721713, 34.22816342539082 4.000588473443426, 193.4375 4.001 M-193.4375 4 C-111.1015857428436 4.000212823041699, -28.765671485687193 4.000425646083397, 193.4375 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-193.4375 28 C-56.62395109142847 28.000353637606228, 80.18959781714307 28.000707275212452, 193.4375 28.001 M-193.4375 28 C-83.93823624506993 28.00028303525365, 25.56102750986014 28.000566070507297, 193.4375 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-SemanticScholarHealthMetadataMixin-4" data-look="classic" transform="translate(2994.8046875, 346.5)"><g class="basic label-container outer-path"><path d="M-160.8828125 -52 L160.8828125 -52 L160.8828125 52 L-160.8828125 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-160.8828125 -52 C-89.95235505474452 -52, -19.02189760948903 -52, 160.8828125 -52 M-160.8828125 -52 C-42.96820159460083 -52, 74.94640931079834 -52, 160.8828125 -52 M160.8828125 -52 C160.8828125 -20.79705683750622, 160.8828125 10.405886324987563, 160.8828125 52 M160.8828125 -52 C160.8828125 -22.40922873424117, 160.8828125 7.181542531517657, 160.8828125 52 M160.8828125 52 C52.887195260830495 52, -55.10842197833901 52, -160.8828125 52 M160.8828125 52 C49.9060894575737 52, -61.0706335848526 52, -160.8828125 52 M-160.8828125 52 C-160.8828125 21.391686629511263, -160.8828125 -9.216626740977475, -160.8828125 -52 M-160.8828125 52 C-160.8828125 27.340513148792155, -160.8828125 2.68102629758431, -160.8828125 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-144.8828125, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="144.883" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="144.883">SemanticScholarHealthMetadata</tspan><tspan x="144.883" dy="16.8">Mixin</tspan></text></g></g><g class="members-group text" transform="translate(-144.8828125, 36)" /><g class="methods-group text" transform="translate(-144.8828125, 76)" /><g class="divider" style=""><path d="M-160.8828125 4 C-40.093515310345325 4.000375395280927, 80.69578187930935 4.000750790561855, 160.8828125 4.001 M-160.8828125 4 C-38.34797792189248 4.000380820153111, 84.18685665621504 4.00076164030622, 160.8828125 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-160.8828125 28 C-87.46458279440732 28.000228173005446, -14.04635308881464 28.000456346010893, 160.8828125 28.001 M-160.8828125 28 C-48.790335372970446 28.000348366849714, 63.30214175405911 28.000696733699424, 160.8828125 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-SemanticScholarHealthMetadataMixinABC-5" data-look="classic" transform="translate(2994.8046875, 117.5)"><g class="basic label-container outer-path"><path d="M-176.921875 -52 L176.921875 -52 L176.921875 52 L-176.921875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-176.921875 -52 C-50.43091727324858 -52, 76.06004045350284 -52, 176.921875 -52 M-176.921875 -52 C-70.10944405627416 -52, 36.70298688745169 -52, 176.921875 -52 M176.921875 -52 C176.921875 -29.12631087728005, 176.921875 -6.252621754560103, 176.921875 52 M176.921875 -52 C176.921875 -19.845328143606444, 176.921875 12.309343712787111, 176.921875 52 M176.921875 52 C50.18254333424521 52, -76.55678833150958 52, -176.921875 52 M176.921875 52 C54.28596291267537 52, -68.34994917464925 52, -176.921875 52 M-176.921875 52 C-176.921875 22.82668666793166, -176.921875 -6.346626664136679, -176.921875 -52 M-176.921875 52 C-176.921875 18.823948672800654, -176.921875 -14.352102654398692, -176.921875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-160.921875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="160.922" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="160.922">SemanticScholarHealthMetadataMixinAB</tspan><tspan x="160.922" dy="16.8">C</tspan></text></g></g><g class="members-group text" transform="translate(-160.921875, 36)" /><g class="methods-group text" transform="translate(-160.921875, 76)" /><g class="divider" style=""><path d="M-176.921875 4 C-39.08252341483279 4.00038954864, 98.75682817033442 4.0007790972800015, 176.921875 4.001 M-176.921875 4 C-71.89632975261904 4.00029681333992, 33.12921549476192 4.000593626679841, 176.921875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-176.921875 28 C-44.74962281439369 28.0003735328155, 87.42262937121262 28.000747065631007, 176.921875 28.001 M-176.921875 28 C-95.56324560370558 28.00022992812335, -14.204616207411163 28.0004598562467, 176.921875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-SemanticScholarRequestCollectorProtocol-6" data-look="classic" transform="translate(3382.40625, 346.5)"><g class="basic label-container outer-path"><path d="M-176.71875 -52 L176.71875 -52 L176.71875 52 L-176.71875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-176.71875 -52 C-40.995092895397875 -52, 94.72856420920425 -52, 176.71875 -52 M-176.71875 -52 C-86.6835125092224 -52, 3.3517249815552077 -52, 176.71875 -52 M176.71875 -52 C176.71875 -27.477293216354514, 176.71875 -2.9545864327090285, 176.71875 52 M176.71875 -52 C176.71875 -12.36474388740838, 176.71875 27.27051222518324, 176.71875 52 M176.71875 52 C75.16516288484246 52, -26.38842423031508 52, -176.71875 52 M176.71875 52 C65.82670905242831 52, -45.06533189514337 52, -176.71875 52 M-176.71875 52 C-176.71875 27.978561855724298, -176.71875 3.9571237114485953, -176.71875 -52 M-176.71875 52 C-176.71875 25.489409486892395, -176.71875 -1.02118102621521, -176.71875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-160.71875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="160.719" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="160.719">SemanticScholarRequestCollectorProto</tspan><tspan x="160.719" dy="16.8">col</tspan></text></g></g><g class="members-group text" transform="translate(-160.71875, 36)" /><g class="methods-group text" transform="translate(-160.71875, 76)" /><g class="divider" style=""><path d="M-176.71875 4 C-55.125361543960494 4.000344030807303, 66.46802691207901 4.000688061614605, 176.71875 4.001 M-176.71875 4 C-70.13456321008648 4.000301564454224, 36.44962357982703 4.000603128908449, 176.71875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-176.71875 28 C-88.03899609353404 28.000250906465517, 0.6407578129319234 28.000501812931038, 176.71875 28.001 M-176.71875 28 C-62.411614039040714 28.00032341541563, 51.89552192191857 28.000646830831258, 176.71875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-_SemanticScholarFallbackPolicyMixin-7" data-look="classic" transform="translate(3806.171875, 346.5)"><g class="basic label-container outer-path"><path d="M-157.046875 -52 L157.046875 -52 L157.046875 52 L-157.046875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-157.046875 -52 C-46.28369946992271 -52, 64.47947606015458 -52, 157.046875 -52 M-157.046875 -52 C-60.656392554587455 -52, 35.73408989082509 -52, 157.046875 -52 M157.046875 -52 C157.046875 -21.819718210177022, 157.046875 8.360563579645955, 157.046875 52 M157.046875 -52 C157.046875 -29.204828829210896, 157.046875 -6.409657658421793, 157.046875 52 M157.046875 52 C32.96247485059577 52, -91.12192529880846 52, -157.046875 52 M157.046875 52 C94.1033139160055 52, 31.15975283201101 52, -157.046875 52 M-157.046875 52 C-157.046875 26.452634297982247, -157.046875 0.9052685959644933, -157.046875 -52 M-157.046875 52 C-157.046875 13.418097744703275, -157.046875 -25.16380451059345, -157.046875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-141.046875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="141.047" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="141.047">_SemanticScholarFallbackPolicy</tspan><tspan x="141.047" dy="16.8">Mixin</tspan></text></g></g><g class="members-group text" transform="translate(-141.046875, 36)" /><g class="methods-group text" transform="translate(-141.046875, 76)" /><g class="divider" style=""><path d="M-157.046875 4 C-43.62777648936316 4.000361099507745, 69.79132202127369 4.000722199015489, 157.046875 4.001 M-157.046875 4 C-38.304036636951636 4.000378049032695, 80.43880172609673 4.0007560980653905, 157.046875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-157.046875 28 C-61.5078250143237 28.000304173674216, 34.0312249713526 28.000608347348432, 157.046875 28.001 M-157.046875 28 C-74.27187700208866 28.000263535960197, 8.503120995822684 28.000527071920395, 157.046875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-_SupportsNormalizeDoi-8" data-look="classic" transform="translate(4118.59375, 346.5)"><g class="basic label-container outer-path"><path d="M-105.375 -52 L105.375 -52 L105.375 52 L-105.375 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-105.375 -52 C-23.35147783143438 -52, 58.67204433713124 -52, 105.375 -52 M-105.375 -52 C-28.914863815645774 -52, 47.54527236870845 -52, 105.375 -52 M105.375 -52 C105.375 -17.5057522837404, 105.375 16.9884954325192, 105.375 52 M105.375 -52 C105.375 -11.891051594867868, 105.375 28.217896810264264, 105.375 52 M105.375 52 C48.533929706637245 52, -8.30714058672551 52, -105.375 52 M105.375 52 C59.78506767536863 52, 14.19513535073726 52, -105.375 52 M-105.375 52 C-105.375 14.563925826156144, -105.375 -22.872148347687713, -105.375 -52 M-105.375 52 C-105.375 30.117881957279764, -105.375 8.235763914559527, -105.375 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-89.375, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="89.375" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="89.375">_SupportsNormalizeDo</tspan><tspan x="89.375" dy="16.8">i</tspan></text></g></g><g class="members-group text" transform="translate(-89.375, 36)" /><g class="methods-group text" transform="translate(-89.375, 76)" /><g class="divider" style=""><path d="M-105.375 4 C-59.20100016399339 4.000219093712152, -13.027000327986784 4.000438187424304, 105.375 4.001 M-105.375 4 C-56.17464381253776 4.0002334536473905, -6.974287625075519 4.00046690729478, 105.375 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-105.375 28 C-40.883086404953474 28.00030601145241, 23.608827190093052 28.000612022904818, 105.375 28.001 M-105.375 28 C-25.132560338597628 28.00038074704466, 55.109879322804744 28.000761494089314, 105.375 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-_SemanticScholarSearchFetchMixin-9" data-look="classic" transform="translate(587.9765625, 117.5)"><g class="basic label-container outer-path"><path d="M-149.6640625 -52 L149.6640625 -52 L149.6640625 52 L-149.6640625 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-149.6640625 -52 C-62.54832505865784 -52, 24.567412382684324 -52, 149.6640625 -52 M-149.6640625 -52 C-77.13895148657876 -52, -4.6138404731575235 -52, 149.6640625 -52 M149.6640625 -52 C149.6640625 -27.35448198389908, 149.6640625 -2.7089639677981623, 149.6640625 52 M149.6640625 -52 C149.6640625 -11.891978382724226, 149.6640625 28.21604323455155, 149.6640625 52 M149.6640625 52 C36.34198583696107 52, -76.98009082607786 52, -149.6640625 52 M149.6640625 52 C51.32517733438456 52, -47.013707831230874 52, -149.6640625 52 M-149.6640625 52 C-149.6640625 12.422866961437755, -149.6640625 -27.15426607712449, -149.6640625 -52 M-149.6640625 52 C-149.6640625 28.284507366899255, -149.6640625 4.569014733798511, -149.6640625 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-133.6640625, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="133.664" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="133.664">_SemanticScholarSearchFetch</tspan><tspan x="133.664" dy="16.8">Mixin</tspan></text></g></g><g class="members-group text" transform="translate(-133.6640625, 36)" /><g class="methods-group text" transform="translate(-133.6640625, 76)" /><g class="divider" style=""><path d="M-149.6640625 4 C-86.22323896479577 4.00021194407821, -22.782415429591524 4.000423888156418, 149.6640625 4.001 M-149.6640625 4 C-48.306175716662594 4.0003386179858085, 53.05171106667481 4.000677235971617, 149.6640625 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-149.6640625 28 C-35.62238113167044 28.00038099220168, 78.41930023665913 28.00076198440336, 149.6640625 28.001 M-149.6640625 28 C-62.47990752561397 28.000291266164762, 24.704247448772065 28.000582532329528, 149.6640625 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-SemanticScholarAdapter-10" data-look="classic" transform="translate(1791.390625, 540.5)"><g class="basic label-container outer-path"><path d="M-109.5 -52 L109.5 -52 L109.5 52 L-109.5 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-109.5 -52 C-64.34183967648364 -52, -19.18367935296729 -52, 109.5 -52 M-109.5 -52 C-48.09661293301817 -52, 13.306774133963657 -52, 109.5 -52 M109.5 -52 C109.5 -14.58460438662324, 109.5 22.83079122675352, 109.5 52 M109.5 -52 C109.5 -11.190419999170054, 109.5 29.619160001659893, 109.5 52 M109.5 52 C44.34826358268002 52, -20.80347283463996 52, -109.5 52 M109.5 52 C43.96009032783654 52, -21.57981934432692 52, -109.5 52 M-109.5 52 C-109.5 17.851924537037746, -109.5 -16.296150925924508, -109.5 -52 M-109.5 52 C-109.5 24.81229208720778, -109.5 -2.37541582558444, -109.5 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-93.5, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="93.5" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="93.5">SemanticScholar</tspan><tspan x="93.5" dy="16.8">Adapter</tspan></text></g></g><g class="members-group text" transform="translate(-93.5, 36)" /><g class="methods-group text" transform="translate(-93.5, 76)" /><g class="divider" style=""><path d="M-109.5 4 C-46.773518453037894 4.000286422290169, 15.952963093924211 4.000572844580338, 109.5 4.001 M-109.5 4 C-36.305953875521155 4.000334219388696, 36.88809224895769 4.000668438777392, 109.5 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-109.5 28 C-28.4003480193051 28.000370318045576, 52.6993039613898 28.000740636091148, 109.5 28.001 M-109.5 28 C-52.43879868592682 28.000260553430657, 4.622402628146361 28.000521106861317, 109.5 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-SemanticScholarBatchRequestMixin-11" data-look="classic" transform="translate(194.9609375, 346.5)"><g class="basic label-container outer-path"><path d="M-151.9609375 -52 L151.9609375 -52 L151.9609375 52 L-151.9609375 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-151.9609375 -52 C-85.38187974208601 -52, -18.802821984172027 -52, 151.9609375 -52 M-151.9609375 -52 C-53.42896330816336 -52, 45.10301088367328 -52, 151.9609375 -52 M151.9609375 -52 C151.9609375 -18.80163896342306, 151.9609375 14.396722073153882, 151.9609375 52 M151.9609375 -52 C151.9609375 -28.98503564180397, 151.9609375 -5.970071283607943, 151.9609375 52 M151.9609375 52 C71.59768941723303 52, -8.765558665533945 52, -151.9609375 52 M151.9609375 52 C82.28812123299406 52, 12.615304965988116 52, -151.9609375 52 M-151.9609375 52 C-151.9609375 27.562693290433597, -151.9609375 3.1253865808671932, -151.9609375 -52 M-151.9609375 52 C-151.9609375 23.934829584502847, -151.9609375 -4.130340830994307, -151.9609375 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-135.9609375, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="135.961" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="135.961">SemanticScholarBatchRequest</tspan><tspan x="135.961" dy="16.8">Mixin</tspan></text></g></g><g class="members-group text" transform="translate(-135.9609375, 36)" /><g class="methods-group text" transform="translate(-135.9609375, 76)" /><g class="divider" style=""><path d="M-151.9609375 4 C-82.1759071351938 4.000229615029734, -12.390876770387592 4.000459230059468, 151.9609375 4.001 M-151.9609375 4 C-51.66168464602316 4.00033001656381, 48.63756820795368 4.000660033127619, 151.9609375 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-151.9609375 28 C-83.85019080529038 28.00022410610192, -15.739444110580763 28.000448212203843, 151.9609375 28.001 M-151.9609375 28 C-62.51587772626776 28.000294302803226, 26.92918204746448 28.00058860560645, 151.9609375 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-SemanticScholarFetchAdapterMixin-13" data-look="classic" transform="translate(587.9765625, 346.5)"><g class="basic label-container outer-path"><path d="M-151.0546875 -52 L151.0546875 -52 L151.0546875 52 L-151.0546875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-151.0546875 -52 C-67.64876118016198 -52, 15.757165139676033 -52, 151.0546875 -52 M-151.0546875 -52 C-87.97604168893598 -52, -24.897395877871958 -52, 151.0546875 -52 M151.0546875 -52 C151.0546875 -15.261405900044792, 151.0546875 21.477188199910415, 151.0546875 52 M151.0546875 -52 C151.0546875 -26.632824994923894, 151.0546875 -1.2656499898477875, 151.0546875 52 M151.0546875 52 C76.67761708054479 52, 2.3005466610895837 52, -151.0546875 52 M151.0546875 52 C57.04253868270048 52, -36.96961013459904 52, -151.0546875 52 M-151.0546875 52 C-151.0546875 23.7802598300722, -151.0546875 -4.439480339855599, -151.0546875 -52 M-151.0546875 52 C-151.0546875 15.759746293124593, -151.0546875 -20.480507413750814, -151.0546875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-135.0546875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="135.055" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="135.055">SemanticScholarFetchAdapter</tspan><tspan x="135.055" dy="16.8">Mixin</tspan></text></g></g><g class="members-group text" transform="translate(-135.0546875, 36)" /><g class="methods-group text" transform="translate(-135.0546875, 76)" /><g class="divider" style=""><path d="M-151.0546875 4 C-65.63458939227876 4.000282745605322, 19.78550871544249 4.000565491210644, 151.0546875 4.001 M-151.0546875 4 C-79.95545567242952 4.000235342686163, -8.856223844859045 4.000470685372327, 151.0546875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-151.0546875 28 C-61.40485434904103 28.00029674627989, 28.244978801917938 28.00059349255978, 151.0546875 28.001 M-151.0546875 28 C-45.206036598522275 28.00035036533011, 60.64261430295545 28.000700730660224, 151.0546875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000" /></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000" /></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#7c3aed" stop-opacity="1" /><stop offset="100%" stop-color="#dc2626" stop-opacity="1" /></linearGradient><style>/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px;
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*="Domain"] &gt; rect,
+[id*="Domain"] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*="Domain"] &gt; rect,
+.cluster[id*="Domain"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Application"] &gt; rect,
+[id*="Application"] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*="Application"] &gt; rect,
+.cluster[id*="Application"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Infrastructure"] &gt; rect,
+[id*="Infrastructure"] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*="Infrastructure"] &gt; rect,
+.cluster[id*="Infrastructure"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Composition"] &gt; rect,
+[id*="Composition"] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*="Composition"] &gt; rect,
+.cluster[id*="Composition"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Interfaces"] &gt; rect,
+[id*="Interfaces"] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*="Interfaces"] &gt; rect,
+.cluster[id*="Interfaces"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="External"] &gt; rect,
+[id*="External"] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*="External"] &gt; rect,
+.cluster[id*="External"] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*="Domain"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Application"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Infrastructure"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Composition"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Interfaces"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="External"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Bronze"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Silver"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Gold"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Quarantine"] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*="Domain"] .cluster-label text.fo-fallback,
+g.cluster[id*="Application"] .cluster-label text.fo-fallback,
+g.cluster[id*="Infrastructure"] .cluster-label text.fo-fallback,
+g.cluster[id*="Composition"] .cluster-label text.fo-fallback,
+g.cluster[id*="Interfaces"] .cluster-label text.fo-fallback,
+g.cluster[id*="External"] .cluster-label text.fo-fallback,
+g.cluster[id*="Bronze"] .cluster-label text.fo-fallback,
+g.cluster[id*="Silver"] .cluster-label text.fo-fallback,
+g.cluster[id*="Gold"] .cluster-label text.fo-fallback,
+g.cluster[id*="Quarantine"] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*="Bronze"] &gt; rect,
+[id*="Bronze"] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*="Silver"] &gt; rect,
+[id*="Silver"] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*="Gold"] &gt; rect,
+[id*="Gold"] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*="Quarantine"] &gt; rect,
+[id*="Quarantine"] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}
+</style></svg>

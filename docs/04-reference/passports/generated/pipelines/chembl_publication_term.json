@@ -1,0 +1,302 @@
+{
+  "bronze": {
+    "capability": "append_only_snapshot",
+    "content_hash": {
+      "exclude": [],
+      "include": []
+    }
+  },
+  "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "data_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Source[\"chembl.publication_term.curated\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: chembl.publication_term + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: chembl.publication_term (overwrite)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
+    }
+  ],
+  "execution": {
+    "cached_bronze_is_mode": true,
+    "control_plane": {
+      "checkpoints": true,
+      "run_ledger": true,
+      "run_manifest": true
+    },
+    "effective_config_hash": "sha256:fb32ca11bd4f62fde10d341bd40fe78451956f73eafd34372ef1d85827fc1fb5",
+    "projection_profiles": [
+      "batch",
+      "http"
+    ],
+    "resilience": {
+      "resolution_owner": "UnifiedHTTPClient and provider config",
+      "source_refs": [
+        "src/bioetl/infrastructure/adapters/http/client.py",
+        "configs/providers/chembl.yaml"
+      ],
+      "status": "runtime_resolved"
+    }
+  },
+  "extraction": {
+    "endpoint_template": "https://www.ebi.ac.uk/chembl/api/data/document",
+    "field_groups": [
+      {
+        "field_count": 7,
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_ingestion_ts",
+          "_index"
+        ],
+        "name": "system"
+      },
+      {
+        "field_count": 5,
+        "fields": [
+          "publication_id",
+          "term",
+          "term_type",
+          "mesh_id",
+          "qualifier"
+        ],
+        "name": "business"
+      }
+    ],
+    "filters": [
+      {
+        "description": "PUBLICATION",
+        "name": "doc_type",
+        "required": false,
+        "source": "config"
+      },
+      {
+        "description": "1950",
+        "name": "year__gte",
+        "required": false,
+        "source": "config"
+      },
+      {
+        "description": "2050",
+        "name": "year__lte",
+        "required": false,
+        "source": "config"
+      },
+      {
+        "description": "IDs from data/input/publication.csv column publication_id; CLI may override the input CSV",
+        "name": "publication_id",
+        "required": true,
+        "source": "cli"
+      }
+    ],
+    "method": "GET",
+    "selected_fields": [
+      {
+        "name": "publication_id",
+        "required": true,
+        "source_object": "publication_term",
+        "target_group": "business"
+      },
+      {
+        "name": "term",
+        "required": true,
+        "source_object": "publication_term",
+        "target_group": "business"
+      },
+      {
+        "name": "term_type",
+        "required": true,
+        "source_object": "publication_term",
+        "target_group": "business"
+      },
+      {
+        "name": "mesh_id",
+        "required": false,
+        "source_object": "publication_term",
+        "target_group": "business"
+      },
+      {
+        "name": "qualifier",
+        "required": false,
+        "source_object": "publication_term",
+        "target_group": "business"
+      }
+    ],
+    "source_collections": [
+      "document"
+    ],
+    "source_kind": "derived",
+    "source_resource": "chembl.publication_term.curated",
+    "source_tables": []
+  },
+  "gold": {
+    "column_projection": {
+      "exclude_fields": [
+        "_dq_*",
+        "_source_batch_id",
+        "_index"
+      ],
+      "include_groups": [
+        "system",
+        "business"
+      ]
+    },
+    "contract_ref": "chembl.publication_term",
+    "contract_validation": {
+      "status": "resolved_by_adr_018",
+      "strict": true
+    },
+    "contract_version": "1.0.0",
+    "write": {
+      "idempotency_contract": "overwrite_rebuild",
+      "mode": "overwrite"
+    }
+  },
+  "identity": {
+    "aliases": [],
+    "derived_source_identity": {
+      "data_source_provider": null,
+      "entity": "publication_term",
+      "provider": "chembl"
+    },
+    "entity": "publication_term",
+    "pipeline_id": "chembl_publication_term",
+    "pipeline_type": "provider_entity",
+    "provider": "chembl",
+    "status": "active",
+    "typed_id": "pipeline:chembl_publication_term"
+  },
+  "kind": "pipeline",
+  "observability": {
+    "correlation_fields": [
+      "run_id",
+      "manifest_id"
+    ],
+    "metric_labels": [
+      "provider",
+      "pipeline",
+      "run_type",
+      "status"
+    ]
+  },
+  "operator_commands": [
+    {
+      "command": "bioetl run --pipeline chembl_publication_term",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_publication_term --limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run --pipeline chembl_publication_term --run-type backfill --dry-run",
+      "result": "Проверяет backfill/rebuild path без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline chembl_publication_term --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline chembl_publication_term --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline chembl_publication_term",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
+  "passport_schema_version": "1.0.0",
+  "provenance": {
+    "projector_version": "1.1.0",
+    "semantic_content_hash": "sha256:9502fc7bee33288d5197a3a6ef4f32febdd710daaf3677342eaf0317d6698167",
+    "source_revision": "ec48c9da54018a057886a275553e4e0b886997de"
+  },
+  "silver": {
+    "column_projection": {
+      "exclude_fields": [],
+      "include_groups": [
+        "system",
+        "business",
+        "dq"
+      ]
+    },
+    "dq_execution": {
+      "hard_fail_threshold": 0.5,
+      "invalid_record_policy": "quarantine",
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
+    },
+    "normalization_profile": "chembl.publication_term",
+    "write": {
+      "partition_by": [
+        "term_type"
+      ]
+    }
+  },
+  "source_references": [
+    {
+      "path": "configs/entities/chembl/publication_term.yaml",
+      "role": "effective_entity_config"
+    },
+    {
+      "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
+      "role": "pipeline_registration"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+      "role": "run_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
+    },
+    {
+      "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
+      "role": "gold_validation_contract"
+    },
+    {
+      "path": "src/bioetl/domain/_observability_contract_primitives.py",
+      "role": "observability_contract"
+    },
+    {
+      "path": "configs/contracts/chembl/publication_term.yaml",
+      "role": "dq_contract"
+    },
+    {
+      "path": "configs/providers/chembl.yaml",
+      "role": "provider_config"
+    }
+  ],
+  "summary": {
+    "excluded_data_summary": "invalid_record_policy=quarantine",
+    "field_selection_summary": "В business-проекцию входят `publication_id`, `term`, `term_type`, `mesh_id`, `qualifier`.",
+    "query_filter_summary": "doc_type=PUBLICATION; year__gte=1950; year__lte=2050; publication_id=IDs from data/input/publication.csv column publication_id; CLI may override the input CSV",
+    "sentences": [
+      "Extract publication terms (MeSH, keywords) from ChEMBL Publication records. Источник — `chembl.publication_term.curated` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: doc_type=PUBLICATION; year__gte=1950; year__lte=2050; publication_id=IDs from data/input/publication.csv column publication_id; CLI may override the input CSV.",
+      "В business-проекцию входят `publication_id`, `term`, `term_type`, `mesh_id`, `qualifier`.",
+      "Silver использует профиль `chembl.publication_term` и проверяет обязательные поля `publication_id`, `term`, `term_type`; невалидные записи направляются в `quarantine`.",
+      "Перед Gold применяется строгий Pandera-контракт `chembl.publication_term`; Gold filters/constraints заданы в entity config (6 групп правил)."
+    ],
+    "silver_processing_summary": "Silver использует профиль `chembl.publication_term` и проверяет обязательные поля `publication_id`, `term`, `term_type`; невалидные записи направляются в `quarantine`.",
+    "source_description": "Extract publication terms (MeSH, keywords) from ChEMBL Publication records. Источник — `chembl.publication_term.curated` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: doc_type=PUBLICATION; year__gte=1950; year__lte=2050; publication_id=IDs from data/input/publication.csv column publication_id; CLI may override the input CSV.",
+    "validation_summary": "Перед Gold применяется строгий Pandera-контракт `chembl.publication_term`; Gold filters/constraints заданы в entity config (6 групп правил)."
+  }
+}

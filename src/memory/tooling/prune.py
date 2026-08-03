@@ -1,0 +1,306 @@
+"""Prune expiring episodic memory artifacts."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from typing import IO, Any
+
+import yaml
+
+from memory.resources import POLICY_DIR, discover_memory_root, load_yaml_resource
+
+SUPPORTED_NOTE_EXTENSIONS = {".json", ".yaml", ".yml", ".md"}
+NON_PRUNABLE_EPISODIC_DIRECTORIES = {"templates"}
+
+
+def _episodic_root() -> Path:
+    return discover_memory_root() / "episodic"
+
+
+@dataclass(frozen=True, slots=True)
+class PruneCandidate:
+    """Represents one episodic artifact eligible for pruning."""
+
+    path: str
+    created_at: str
+    ttl_days: int
+    expires_at: str
+
+
+def _default_ttl_days() -> int:
+    retention = load_yaml_resource(POLICY_DIR / "retention.yaml")
+    return int(retention["artifact_classes"]["episodic_note"]["ttl_days"])
+
+
+def _default_max_active() -> int | None:
+    retention = load_yaml_resource(POLICY_DIR / "retention.yaml")
+    raw_value = retention["artifact_classes"]["episodic_note"].get("max_active")
+    if raw_value is None:
+        return None
+    return int(raw_value)
+
+
+def _parse_iso_datetime(value: str) -> datetime | None:
+    normalized = value.strip().replace("Z", "+00:00")
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
+
+
+def _coerce_created_at(value: object) -> datetime | None:
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
+        return value.astimezone(UTC)
+    if isinstance(value, str):
+        return _parse_iso_datetime(value)
+    return None
+
+
+def _extract_metadata(path: Path) -> dict[str, Any]:
+    if path.suffix == ".json":
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        return payload if isinstance(payload, dict) else {}
+    if path.suffix in {".yaml", ".yml"}:
+        payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        return payload if isinstance(payload, dict) else {}
+    if path.suffix == ".md":
+        return _extract_markdown_metadata(path)
+    return {}
+
+
+def _extract_markdown_metadata(path: Path) -> dict[str, Any]:
+    """Read only the front-matter fields prune logic actually needs."""
+    with path.open("r", encoding="utf-8") as handle:
+        if handle.readline() != "---\n":
+            return {}
+        return _read_prune_fields_from_front_matter(handle)
+
+
+def _is_prunable_note_path(path: Path, root: Path) -> bool:
+    """Return whether ``path`` belongs to ephemeral episodic-note storage."""
+    relative = path.relative_to(root)
+    return not any(
+        part in NON_PRUNABLE_EPISODIC_DIRECTORIES for part in relative.parts[:-1]
+    )
+
+
+def _unquote_front_matter_value(value: str) -> str:
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+        return value[1:-1]
+    return value
+
+
+def _parse_prune_front_matter_line(line: str) -> tuple[str, object] | None:
+    if ":" not in line:
+        return None
+    key, raw_value = line.split(":", 1)
+    key = key.strip()
+    if key not in {"created_at", "ttl_days"}:
+        return None
+    value = _unquote_front_matter_value(raw_value.strip())
+    if key != "ttl_days":
+        return key, value
+    try:
+        return key, int(value)
+    except ValueError:
+        return None
+
+
+def _read_prune_fields_from_front_matter(handle: IO[str]) -> dict[str, Any]:
+    metadata: dict[str, Any] = {}
+    for line in handle:
+        if line == "---\n":
+            return metadata
+        parsed = _parse_prune_front_matter_line(line)
+        if parsed is None:
+            continue
+        key, value = parsed
+        metadata[key] = value
+    return metadata
+
+
+def find_prunable_episodic_notes(
+    root: Path | None = None,
+    *,
+    now: datetime | None = None,
+) -> list[PruneCandidate]:
+    """Find episodic notes whose TTL has expired."""
+    current_time = now or datetime.now(UTC)
+    default_ttl = _default_ttl_days()
+    candidates: list[PruneCandidate] = []
+    resolved_root = root or _episodic_root()
+
+    if not resolved_root.exists():
+        return candidates
+
+    for path in sorted(resolved_root.rglob("*")):
+        if not path.is_file() or path.suffix not in SUPPORTED_NOTE_EXTENSIONS:
+            continue
+        if path.name == "README.md" or not _is_prunable_note_path(path, resolved_root):
+            continue
+        metadata = _extract_metadata(path)
+        created_at = _coerce_created_at(metadata.get("created_at"))
+        if created_at is None:
+            continue
+        ttl_days = int(metadata.get("ttl_days", default_ttl))
+        expires_at = created_at + timedelta(days=ttl_days)
+        if expires_at <= current_time:
+            candidates.append(
+                PruneCandidate(
+                    path=str(path),
+                    created_at=created_at.isoformat(),
+                    ttl_days=ttl_days,
+                    expires_at=expires_at.isoformat(),
+                )
+            )
+    return candidates
+
+
+def prune_episodic_notes(
+    root: Path | None = None,
+    *,
+    apply: bool = False,
+    now: datetime | None = None,
+    max_active: int | None = None,
+) -> dict[str, Any]:
+    """Report or prune expired episodic notes."""
+    candidates = find_prunable_episodic_notes(root, now=now)
+    resolved_root = root or _episodic_root()
+    total_count = _count_episodic_notes(resolved_root)
+    active_count = max(total_count - len(candidates), 0)
+    invalid_metadata = _find_invalid_metadata(resolved_root)
+    removed_paths: list[str] = []
+    if apply:
+        from memory.storage import exclusive_lock
+
+        for candidate in candidates:
+            candidate_path = Path(candidate.path)
+            if candidate_path.exists():
+                with exclusive_lock(candidate_path):
+                    if candidate_path.exists():
+                        candidate_path.unlink()
+                        removed_paths.append(candidate.path)
+    effective_max_active = _default_max_active() if max_active is None else max_active
+    density_status = "not_checked"
+    density_excess = 0
+    if effective_max_active is not None:
+        density_excess = max(active_count - effective_max_active, 0)
+        density_status = "review" if density_excess else "ok"
+    return {
+        "apply": apply,
+        "candidate_count": len(candidates),
+        "total_count": total_count,
+        "active_count": active_count,
+        "max_active": effective_max_active,
+        "density_status": density_status,
+        "density_excess": density_excess,
+        "invalid_metadata": invalid_metadata,
+        "policy_violation": bool(candidates or density_excess or invalid_metadata),
+        "removed_count": len(removed_paths),
+        "candidates": [asdict(candidate) for candidate in candidates],
+        "removed_paths": removed_paths,
+    }
+
+
+def _count_episodic_notes(root: Path) -> int:
+    if not root.exists():
+        return 0
+    return sum(
+        1
+        for path in root.rglob("*")
+        if path.is_file()
+        and path.suffix in SUPPORTED_NOTE_EXTENSIONS
+        and path.name != "README.md"
+        and _is_prunable_note_path(path, root)
+    )
+
+
+def _find_invalid_metadata(root: Path) -> list[str]:
+    """Report governed notes that cannot be aged without unsafe mtime fallback."""
+    if not root.exists():
+        return []
+    invalid: list[str] = []
+    for path in sorted(root.rglob("*")):
+        if (
+            path.is_file()
+            and path.suffix in SUPPORTED_NOTE_EXTENSIONS
+            and path.name != "README.md"
+            and _is_prunable_note_path(path, root)
+            and _coerce_created_at(_extract_metadata(path).get("created_at")) is None
+        ):
+            invalid.append(str(path))
+    return invalid
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Prune episodic memory artifacts that exceeded TTL."
+    )
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=_episodic_root(),
+        help="Episodic memory root to scan.",
+    )
+    parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="Delete expired notes. Default mode is report-only.",
+    )
+    parser.add_argument(
+        "--max-active",
+        type=int,
+        default=None,
+        help="Report review status when active episodic notes exceed this count.",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit prune report as JSON.",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Exit non-zero when expired, excess, or invalid notes are present.",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+    report = prune_episodic_notes(
+        args.root.resolve(), apply=args.apply, max_active=args.max_active
+    )
+    if args.json:
+        print(json.dumps(report, indent=2, sort_keys=True))
+    else:
+        mode = "apply" if args.apply else "dry-run"
+        print(f"Episodic prune {mode}: {report['candidate_count']} candidate(s)")
+        if report["max_active"] is not None:
+            print(
+                "Episodic density: "
+                f"{report['active_count']} active "
+                f"(max_active={report['max_active']}, status={report['density_status']})"
+            )
+        if args.apply:
+            print(f"Removed: {report['removed_count']}")
+        for candidate in report["candidates"]:
+            print(
+                f"- {candidate['path']} (created_at={candidate['created_at']}, "
+                f"expires_at={candidate['expires_at']})"
+            )
+    return 1 if args.check and report["policy_violation"] else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,8 @@
+schema_version: 1
+provider: chembl
+cassette_rel_path: tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_subcellular_fraction.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: a1edb7cb3bf74d7a8db26b4748009ca1a428d0a77ae5d4730ad9460e59da0c3c
+recorded_at: '2026-07-03'
+staleness_ready: true

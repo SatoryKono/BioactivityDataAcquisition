@@ -1,0 +1,777 @@
+{
+  "composite": {
+    "cross_validation": {
+      "enabled": false,
+      "enricher_pairings": [],
+      "error_threshold": 2,
+      "fuzzy_threshold": 0.8,
+      "numeric_tolerance": 0.1,
+      "quarantine_threshold": 2,
+      "warning_threshold": 1
+    },
+    "dependencies": [
+      {
+        "filter_field": "component_id",
+        "join_keys": [
+          "primary_component_id"
+        ],
+        "pipeline": "chembl_target_component",
+        "required": false,
+        "silver_table": "silver/chembl/target_component",
+        "timeout_seconds": 600
+      },
+      {
+        "filter_field": "protein_class_id",
+        "join_keys": [
+          "protein_classification_id"
+        ],
+        "key_source": "chembl_target_component",
+        "pipeline": "chembl_protein_class",
+        "required": false,
+        "silver_table": "silver/chembl/protein_class",
+        "timeout_seconds": 300
+      },
+      {
+        "join_keys": [
+          "target_id"
+        ],
+        "pipeline": "chembl_target_protein_classification",
+        "required": false,
+        "silver_table": "silver/chembl/target_protein_classification",
+        "timeout_seconds": 300
+      },
+      {
+        "filter_condition": "target_id IS NOT NULL",
+        "join_keys": [
+          "target_id"
+        ],
+        "pipeline": "uniprot_idmapping",
+        "required": false,
+        "silver_table": "silver/uniprot/idmapping",
+        "timeout_seconds": 600
+      },
+      {
+        "filter_field": "accession",
+        "join_keys": [
+          "uniprot_accession"
+        ],
+        "key_filter": "mapping_status = 'found'",
+        "key_source": "uniprot_idmapping",
+        "pipeline": "uniprot_protein",
+        "required": false,
+        "silver_table": "silver/uniprot/protein",
+        "timeout_seconds": 900
+      }
+    ],
+    "enrichers": [],
+    "execution": {
+      "checkpoint_enabled": true,
+      "max_concurrency": 2,
+      "retry": {
+        "backoff_multiplier": 2.0,
+        "max_attempts": 3
+      }
+    },
+    "invariants": {
+      "aggregation_is_explicit": true,
+      "conflict_priorities_are_complete": true,
+      "join_keys_must_exist_in_seed_or_prior_key_source_output": true,
+      "supported_cardinalities": [
+        "one_to_one",
+        "many_to_one"
+      ]
+    },
+    "merge": {
+      "column_groups": [
+        {
+          "fields": [
+            "entity_id",
+            "content_hash",
+            "_source",
+            "_index",
+            "_lookup_method",
+            "_original_id"
+          ],
+          "name": "system",
+          "pattern": "^_composite_|^_source_providers|^_enrichment_|^_lineage_|^_dq_",
+          "provider_order": [
+            "chembl",
+            "uniprot"
+          ]
+        },
+        {
+          "fields": [
+            "target_id",
+            "primary_component_id",
+            "uniprot_accession",
+            "mapping_status"
+          ],
+          "name": "identifiers",
+          "provider_order": [
+            "chembl",
+            "uniprot"
+          ]
+        },
+        {
+          "fields": [
+            "target_type",
+            "organism",
+            "taxonomy_id",
+            "species_group_flag"
+          ],
+          "name": "classification",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "pref_name",
+            "target_description"
+          ],
+          "name": "descriptors",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "component_ids",
+            "component_accessions",
+            "component_types",
+            "component_relationships",
+            "component_descriptions",
+            "component_organisms",
+            "component_taxonomy_ids",
+            "target_component_synonyms"
+          ],
+          "name": "components",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "component_type",
+            "component_description",
+            "protein_classification_id",
+            "protein_classification_ids"
+          ],
+          "name": "enriched_components",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "protein_classifications",
+            "target_protein_class_id_L1",
+            "target_protein_class_name_L1",
+            "target_protein_class_desc_L1",
+            "target_protein_class_id_L2",
+            "target_protein_class_name_L2",
+            "target_protein_class_desc_L2",
+            "target_protein_class_id_L3",
+            "target_protein_class_name_L3",
+            "target_protein_class_desc_L3",
+            "target_protein_class_id_L4",
+            "target_protein_class_name_L4",
+            "target_protein_class_desc_L4",
+            "target_protein_class_id_L5",
+            "target_protein_class_name_L5",
+            "target_protein_class_desc_L5",
+            "target_protein_class_type",
+            "top_level_count",
+            "canonical_top_levels",
+            "counted_top_levels",
+            "ignored_top_levels",
+            "primary_top_level",
+            "target_type_reason_code",
+            "multifunctional_origin",
+            "major_family",
+            "major_family_rule_version",
+            "target_type_rule_version",
+            "l1_mapping_version"
+          ],
+          "name": "protein_classification_summary",
+          "provider_order": [
+            "chembl"
+          ]
+        },
+        {
+          "fields": [
+            "function_comment",
+            "catalytic_activity",
+            "activity_regulation",
+            "pathway",
+            "subcellular_location",
+            "tissue_specificity",
+            "subunit"
+          ],
+          "name": "protein_function",
+          "provider_order": [
+            "uniprot"
+          ]
+        },
+        {
+          "fields": [
+            "disease_involvement",
+            "drugbank_ids",
+            "guidetopharmacology_ids",
+            "chembl_ids"
+          ],
+          "name": "disease_pharma",
+          "provider_order": [
+            "uniprot"
+          ]
+        },
+        {
+          "fields": [
+            "go_terms",
+            "pdb_xrefs",
+            "interpro_xrefs",
+            "pfam_xrefs",
+            "reactome_xrefs",
+            "keywords"
+          ],
+          "name": "ontology_structure",
+          "provider_order": [
+            "uniprot"
+          ]
+        },
+        {
+          "fields": [
+            "protein_name",
+            "gene_primary",
+            "protein_existence",
+            "annotation_score",
+            "reviewed",
+            "sequence_length",
+            "sequence_mass"
+          ],
+          "name": "protein_properties",
+          "provider_order": [
+            "uniprot"
+          ]
+        }
+      ],
+      "conflict_resolution": "seed_priority",
+      "exclude_fields": [
+        "chembl.target.target_components",
+        "chembl.target.cross_references",
+        "chembl.target_component.primary_component_id",
+        "chembl.target_component.protein_classifications",
+        "chembl.target_component.target_component_synonyms",
+        "chembl.target_component.target_component_xrefs",
+        "chembl.protein_class.protein_class_id",
+        "uniprot.idmapping.all_mappings",
+        "uniprot.idmapping.annotation_score",
+        "uniprot.idmapping.gene_primary",
+        "uniprot.idmapping.organism_common",
+        "uniprot.idmapping.organism_scientific",
+        "uniprot.idmapping.protein_name",
+        "uniprot.idmapping.reviewed",
+        "uniprot.idmapping.sequence_length",
+        "uniprot.idmapping.sequence_mass",
+        "uniprot.idmapping.target_id",
+        "uniprot.idmapping.taxonomy_id",
+        "uniprot.idmapping.uniprot_entry_name",
+        "uniprot.protein.accession",
+        "uniprot.protein.entry_name",
+        "uniprot.protein.entry_type",
+        "uniprot.protein.secondary_accessions",
+        "uniprot.protein.sequence",
+        "uniprot.protein.sequence_checksum",
+        "uniprot.protein.sequence_modified",
+        "uniprot.protein.lineage",
+        "uniprot.protein.gene_synonyms",
+        "uniprot.protein.gene_orf_names",
+        "uniprot.protein.protein_short_names",
+        "uniprot.protein.protein_alternative_names",
+        "uniprot.protein.protein_ec_numbers",
+        "uniprot.protein.flag",
+        "uniprot.protein.entry_version",
+        "uniprot.protein.entry_created",
+        "uniprot.protein.entry_modified",
+        "uniprot.protein.features_json",
+        "uniprot.protein.alternative_products",
+        "uniprot.protein.similarity_comment",
+        "uniprot.protein.caution",
+        "uniprot.protein.cofactors",
+        "uniprot.protein.biophysicochemical_properties",
+        "uniprot.protein.induction",
+        "uniprot.protein.cross_reference_count",
+        "uniprot.protein.feature_count",
+        "uniprot.protein.keyword_count",
+        "uniprot.protein.isoform_count",
+        "uniprot.protein.organism_scientific",
+        "uniprot.protein.organism_common"
+      ],
+      "output": {
+        "gold": "data/output/gold/composite/target",
+        "silver": "data/output/silver/composite/target"
+      },
+      "preserve_all_sources": false,
+      "sort_by": {
+        "abstract": [
+          "pubmed",
+          "openalex",
+          "chembl",
+          "semanticscholar"
+        ],
+        "affiliation_list": [
+          "pubmed",
+          "openalex",
+          "semanticscholar"
+        ],
+        "affiliation_structured": [
+          "pubmed"
+        ],
+        "aromatic_ring_count": [
+          "pubchem",
+          "chembl"
+        ],
+        "author_details": [
+          "crossref"
+        ],
+        "author_h_indices": [
+          "semanticscholar"
+        ],
+        "author_openalex_ids": [
+          "openalex"
+        ],
+        "author_orcids": [
+          "crossref",
+          "openalex",
+          "semanticscholar"
+        ],
+        "author_s2_ids": [
+          "semanticscholar"
+        ],
+        "black_box_warning": [
+          "chembl"
+        ],
+        "canonical_smiles": [
+          "chembl",
+          "pubchem"
+        ],
+        "cell_id": [
+          "chembl.assay"
+        ],
+        "chemicals": [
+          "pubmed"
+        ],
+        "citation_contexts": [
+          "semanticscholar"
+        ],
+        "citations_made": [
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ],
+        "citations_received": [
+          "crossref",
+          "openalex",
+          "semanticscholar"
+        ],
+        "databanks": [
+          "pubmed"
+        ],
+        "dblp_id": [
+          "semanticscholar"
+        ],
+        "first_approval": [
+          "chembl"
+        ],
+        "fwci": [
+          "openalex"
+        ],
+        "gene_symbols": [
+          "pubmed"
+        ],
+        "gold": [
+          "entity_id",
+          "target_id"
+        ],
+        "grants": [
+          "openalex"
+        ],
+        "hba_count": [
+          "pubchem",
+          "chembl"
+        ],
+        "hbd_count": [
+          "pubchem",
+          "chembl"
+        ],
+        "heavy_atom_count": [
+          "pubchem",
+          "chembl"
+        ],
+        "inchi": [
+          "chembl",
+          "pubchem"
+        ],
+        "inchi_key": [
+          "chembl",
+          "pubchem"
+        ],
+        "influential_citation_count": [
+          "semanticscholar"
+        ],
+        "institution_country_codes": [
+          "openalex"
+        ],
+        "institution_ids": [
+          "openalex"
+        ],
+        "is_retracted": [
+          "openalex"
+        ],
+        "isomeric_smiles": [
+          "pubchem",
+          "chembl"
+        ],
+        "iupac_name": [
+          "pubchem",
+          "chembl"
+        ],
+        "logp": [
+          "pubchem",
+          "chembl"
+        ],
+        "logp_method": [
+          "pubchem",
+          "chembl"
+        ],
+        "mag_id": [
+          "openalex"
+        ],
+        "max_phase": [
+          "chembl"
+        ],
+        "mid": [
+          "pubmed"
+        ],
+        "molecular_formula": [
+          "pubchem",
+          "chembl"
+        ],
+        "molecular_weight": [
+          "pubchem",
+          "chembl"
+        ],
+        "molecule_id": [
+          "chembl.activity"
+        ],
+        "pii": [
+          "pubmed"
+        ],
+        "polar_surface_area": [
+          "pubchem",
+          "chembl"
+        ],
+        "pref_name": [
+          "chembl",
+          "pubchem"
+        ],
+        "primary_topic": [
+          "openalex"
+        ],
+        "publication_class": [
+          "chembl",
+          "pubmed",
+          "openalex",
+          "crossref",
+          "semanticscholar"
+        ],
+        "publication_id": [
+          "chembl.activity"
+        ],
+        "publication_subclass": [
+          "chembl",
+          "pubmed",
+          "openalex",
+          "crossref",
+          "semanticscholar"
+        ],
+        "publication_type_unified": [
+          "chembl",
+          "pubmed",
+          "openalex",
+          "crossref",
+          "semanticscholar"
+        ],
+        "publisher_id": [
+          "pubmed"
+        ],
+        "qed_weighted": [
+          "chembl"
+        ],
+        "references": [
+          "crossref"
+        ],
+        "rotatable_bond_count": [
+          "pubchem",
+          "chembl"
+        ],
+        "silver": [
+          "entity_id",
+          "target_id"
+        ],
+        "subject_fields": [
+          "semanticscholar"
+        ],
+        "subject_keywords": [
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ],
+        "subject_mesh": [
+          "pubmed",
+          "openalex"
+        ],
+        "subject_topics": [
+          "openalex"
+        ],
+        "synonyms": [
+          "chembl",
+          "pubchem"
+        ],
+        "therapeutic_flag": [
+          "chembl"
+        ],
+        "tissue_id": [
+          "chembl.assay"
+        ],
+        "title": [
+          "chembl",
+          "crossref",
+          "openalex"
+        ],
+        "withdrawn_flag": [
+          "chembl"
+        ]
+      },
+      "strategy": "left_outer",
+      "target_protein_classification_projection": {
+        "include_protein_classifications": true,
+        "levels": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "source_prefix": "chembl.target_protein_classification"
+      }
+    },
+    "seed": {
+      "output_keys": [
+        "target_id",
+        "primary_component_id",
+        "pref_name",
+        "target_type"
+      ],
+      "pipeline": "chembl_target",
+      "silver_table": "silver/chembl/target"
+    },
+    "version": "1.3.0"
+  },
+  "diagnostics": [],
+  "diagrams": [
+    {
+      "diagram_id": "composite_flow",
+      "kind": "flowchart",
+      "mermaid": "flowchart LR\n    Seed[\"Seed: chembl_target\"]\n    Input1[\"chembl_target_component · primary_component_id\"]\n    Input1 --> Merge\n    Input2[\"chembl_protein_class · protein_classification_id\"]\n    Input2 --> Merge\n    Input3[\"chembl_target_protein_classification · target_id\"]\n    Input3 --> Merge\n    Input4[\"uniprot_idmapping · target_id\"]\n    Input4 --> Merge\n    Input5[\"uniprot_protein · uniprot_accession\"]\n    Input5 --> Merge\n    Merge[\"Merge: left_outer / seed_priority\"]\n    Validate[\"Cross-validation: False\"]\n    Excluded[\"Quarantine / nullification\"]\n    Gold[\"Gold: composite_target\"]\n    Seed --> Merge --> Validate\n    Validate -->|valid| Gold\n    Validate -->|excluded| Excluded"
+    }
+  ],
+  "execution": {
+    "control_plane": {
+      "checkpoints": true,
+      "run_manifest": true
+    }
+  },
+  "extraction": {
+    "endpoint_template": null,
+    "field_groups": [],
+    "filters": [
+      {
+        "description": "no condition",
+        "name": "chembl_target_component",
+        "required": false,
+        "source": "dependency"
+      },
+      {
+        "description": "no condition",
+        "name": "chembl_protein_class",
+        "required": false,
+        "source": "dependency"
+      },
+      {
+        "description": "no condition",
+        "name": "chembl_target_protein_classification",
+        "required": false,
+        "source": "dependency"
+      },
+      {
+        "description": "target_id IS NOT NULL",
+        "name": "uniprot_idmapping",
+        "required": false,
+        "source": "dependency"
+      },
+      {
+        "description": "no condition",
+        "name": "uniprot_protein",
+        "required": false,
+        "source": "dependency"
+      }
+    ],
+    "method": null,
+    "selected_fields": [],
+    "source_collections": [],
+    "source_kind": "composite",
+    "source_resource": "chembl_target",
+    "source_tables": [
+      "silver/chembl/target",
+      "silver/chembl/target_component",
+      "silver/chembl/protein_class",
+      "silver/chembl/target_protein_classification",
+      "silver/uniprot/idmapping",
+      "silver/uniprot/protein"
+    ]
+  },
+  "gold": {
+    "contract_ref": "composite.target",
+    "contract_validation": {
+      "status": "resolved_by_adr_018",
+      "strict": true
+    },
+    "contract_version": "1.0.0",
+    "write": {
+      "enabled": true
+    }
+  },
+  "identity": {
+    "aliases": [],
+    "entity": "target",
+    "pipeline_id": "composite_target",
+    "pipeline_type": "composite",
+    "provider": "composite",
+    "status": "active",
+    "typed_id": "composite:composite_target"
+  },
+  "kind": "pipeline",
+  "observability": {
+    "correlation_fields": [
+      "run_id",
+      "manifest_id"
+    ],
+    "metric_labels": [
+      "pipeline",
+      "run_type",
+      "status"
+    ]
+  },
+  "operator_commands": [
+    {
+      "command": "bioetl run-composite --composite target",
+      "result": "Запускает pipeline с effective config.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "task": "Запуск"
+    },
+    {
+      "command": "bioetl run-composite --composite target --seed-limit 100",
+      "result": "Ограничивает число обрабатываемых записей.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
+      "task": "Ограниченный запуск"
+    },
+    {
+      "command": "bioetl run-composite --composite target --use-cached-bronze --dry-run",
+      "result": "Проверяет cached Bronze composite без записи.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "task": "Безопасная проверка"
+    },
+    {
+      "command": "bioetl quarantine inspect --pipeline composite_target --limit 100",
+      "result": "Показывает quarantined и Silver-filter records; доступны --error-code и --run-id.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Quarantine"
+    },
+    {
+      "command": "bioetl quarantine stats --pipeline composite_target --group-by reason-code",
+      "result": "Группирует исключения; Gold/cross-validation причины видны только если runtime их публикует.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "task": "Статистика исключений"
+    },
+    {
+      "command": "bioetl checkpoint inspect --pipeline composite_target",
+      "result": "Показывает checkpoint и связанные audit/manifest anchors.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/checkpoint.py",
+      "task": "Checkpoint"
+    },
+    {
+      "command": "bioetl run-manifest show <run-id-or-manifest-id>",
+      "result": "Показывает immutable manifest и ledger evidence запуска.",
+      "source_ref": "src/bioetl/interfaces/cli/commands/run_manifest.py",
+      "task": "Manifest"
+    }
+  ],
+  "passport_schema_version": "1.0.0",
+  "provenance": {
+    "projector_version": "1.1.0",
+    "semantic_content_hash": "sha256:9899e26e84e1fb808d5d90c9c18171b0216015c4bc80dfba87ae077cc456c998",
+    "source_revision": "ec48c9da54018a057886a275553e4e0b886997de"
+  },
+  "silver": {
+    "dq_execution": {
+      "hard_fail_threshold": 0.5,
+      "invalid_record_policy": "quarantine",
+      "soft_fail_threshold": 0.1,
+      "strict_validation": true
+    },
+    "normalization_profile": "composite.target",
+    "write": {
+      "idempotency_contract": "merge_upsert",
+      "mode": "merge"
+    }
+  },
+  "source_references": [
+    {
+      "path": "configs/composites/target.yaml",
+      "role": "composite_config"
+    },
+    {
+      "path": "configs/entities/composite/target.yaml",
+      "role": "effective_entity_config"
+    },
+    {
+      "path": "configs/contracts/composite/target.yaml",
+      "role": "gold_contract"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "role": "composite_cli"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "role": "quarantine_cli"
+    }
+  ],
+  "summary": {
+    "excluded_data_summary": "quarantine/nullification per composite policy",
+    "field_selection_summary": "seed outputs plus configured enrichers",
+    "query_filter_summary": "composite join/filter conditions",
+    "sentences": [
+      "Composite pipeline `composite_target` использует seed `chembl_target` и объединяет его с configured dependencies/enrichers.",
+      "Join keys, cardinality и source tables берутся из composite configuration; merge и conflict resolution выполняются общей CompositePipelineRunner.",
+      "После merge применяется configured cross-validation; исключённые значения направляются в quarantine или nullification branch согласно composite policy.",
+      "Результат проходит строгий Gold-контракт `composite.target` и публикует manifest/checkpoint evidence."
+    ],
+    "silver_processing_summary": "composite merge",
+    "source_description": "seed=chembl_target",
+    "validation_summary": "cross-validation and strict Gold contract"
+  }
+}

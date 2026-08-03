@@ -1,0 +1,9 @@
+{
+  "content_hash": "c938255a2c72722c8d607477087a1867cb9b2037e1655f1731d75713ad12f6ae",
+  "normalized": {
+    "canonical_smiles": "CCO",
+    "chemical_standardization_policy_version": "pubchem-basic-v1",
+    "chemical_standardization_status": "standardized",
+    "isomeric_smiles": "C[C@H](O)C"
+  }
+}

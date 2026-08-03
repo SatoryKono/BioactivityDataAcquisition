@@ -1,0 +1,8 @@
+schema_version: 1
+provider: chembl
+cassette_rel_path: tests/fixtures/vcr/chembl/TestChEMBLPipelineE2E.test_chembl_activity_full_run.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: dfc7b3a09704ffd2eb9669fa3fef414faa29b2fc83a5602b637cc855de66e24d
+recorded_at: '2026-07-03'
+staleness_ready: true

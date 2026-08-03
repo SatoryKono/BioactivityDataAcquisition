@@ -1,0 +1,74 @@
+{
+  "mcpServers": {
+    "memory": {
+      "url": "http://127.0.0.1:8826/mcp"
+    },
+    "filesystem": {
+      "url": "http://127.0.0.1:8827/mcp"
+    },
+    "fetch": {
+      "url": "http://127.0.0.1:8821/mcp"
+    },
+    "github": {
+      "url": "http://127.0.0.1:8820/mcp"
+    },
+    "docker": {
+      "url": "http://127.0.0.1:8817/mcp"
+    },
+    "context7": {
+      "url": "http://127.0.0.1:8815/mcp"
+    },
+    "ast-grep": {
+      "url": "http://127.0.0.1:8816/mcp"
+    },
+    "mcp-code-interpreter": {
+      "url": "http://127.0.0.1:8829/mcp"
+    },
+    "prometheus": {
+      "url": "http://127.0.0.1:8822/mcp"
+    },
+    "grafana": {
+      "url": "http://127.0.0.1:8823/mcp"
+    },
+    "brave-search": {
+      "url": "http://127.0.0.1:8811/mcp"
+    },
+    "neo4j-cypher": {
+      "url": "http://127.0.0.1:8824/mcp"
+    },
+    "neo4j-memory": {
+      "url": "http://127.0.0.1:8825/mcp"
+    },
+    "mermaid": {
+      "url": "http://127.0.0.1:8818/mcp"
+    },
+    "deja": {
+      "url": "http://127.0.0.1:8814/mcp"
+    },
+    "adr-analysis": {
+      "url": "http://127.0.0.1:8813/mcp"
+    },
+    "mutmut": {
+      "url": "http://127.0.0.1:8830/mcp"
+    },
+    "code-analyzer": {
+      "url": "http://127.0.0.1:8828/mcp"
+    },
+    "github-actions": {
+      "url": "http://127.0.0.1:8831/mcp"
+    },
+    "deepwiki": {
+      "url": "https://mcp.deepwiki.com/mcp",
+      "headers": {
+        "x-deepwiki-api-key": "$DEEPWIKI_API_KEY",
+        "x-deepwiki-organisation-id": "$DEEPWIKI_ORGANISATION_ID"
+      }
+    },
+    "ref": {
+      "url": "https://api.ref.tools/mcp",
+      "headers": {
+        "x-ref-api-key": "$REF_TOOL_API_KEY"
+      }
+    }
+  }
+}

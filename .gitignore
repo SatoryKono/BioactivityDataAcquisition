@@ -1,0 +1,549 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# Cygwin/MSYS crash dumps
+*.stackdump
+
+# Virtual environments
+.venv/
+.venv-win/
+.venv-wsl/
+venv/
+env/
+ENV/
+.python-user/
+MagicMock/
+
+# AI agent temporary files
+.devin/.tmp*
+.codex_tmp/
+.codex_tmp_issue_*.md
+scripts/ai/codex/.env.codex
+scripts/ai/gemini/.env.gemini
+scripts/ai/vibe/.env.vibe
+git_out.txt
+/memory/
+/check_cfg.py
+/debug_*.py
+_agent_*.bat
+_agent_*.py
+_agent_*.txt
+_agent_*.done.txt
+_kill_*.bat
+_kill_*.vbs
+_temp_*.bat
+_temp_*.py
+_temp_*.ps1
+_temp_*.sh
+temp_*
+/TODO.md
+
+# Prevent root-level test scripts
+/test_*.js
+/test_*.py
+/test_*.json
+
+# Testing
+.pytest_cache/
+.pytest-tmp/
+.hypothesis/
+.tox/
+.nox/
+.benchmarks/
+.coverage-sharded/
+test-checkpoints/
+.cache/
+
+# Type checking / Linting
+.mypy_cache/
+**/.mypy_cache/
+.ruff_cache/
+.ruff_cache_cli/
+.dmypy.json
+.import_linter_cache/
+.coverage-sharded-current-main/
+
+# Build / Distribution
+build/
+dist/
+*.egg-info/
+*.egg
+*.whl
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data outputs
+data/output/
+data/_output/
+data/bronze/
+data/silver/
+data/gold/
+data/quarantine/
+data/checkpoints/
+data/_dq_reports/
+data/chembl_*
+data/pubchem_*
+data/input/bronze/
+/data/json
+
+# Logs and reports
+artifacts/
+logs/
+test-output/
+*.log
+*.tmp
+*report*.txt
+full_log.txt
+final_report*.txt
+project_rules_failures.txt
+git_commit_*.txt
+*_gitshow_err.txt
+log_test.txt
+
+# Root-level accidental test dumps (RH-01 / RH-03 / CR-02 / #6701 #6703 #6718).
+# JUnit/chunked pytest XML and agent temp dumps must never be tracked at root.
+/uchunk*.xml
+/final_chunk*.xml
+/extra_chunk*.xml
+/tmp_sub_*.txt
+/temp_closeout.json
+/.tmp_test_run.log
+/.mcp-server-context.md
+/.gitignore~
+/reports/*
+!/reports/semantic_pipeline_audit/
+/reports/semantic_pipeline_audit/*
+# Track the reviewed canonical semantic audit snapshot used by CI gates and
+# configs/field_registry/semantic_* authority + budget surfaces.
+!/reports/semantic_pipeline_audit/*_2026-07-01.*
+!/reports/review/
+!/reports/review/**
+!/reports/quality/
+/reports/quality/*
+!/reports/quality/documentation-governance-2026-07-28-closeout.md
+!/reports/quality/architecture-coderabbit-2026-07-29-issue-publish.json
+!/reports/quality/architecture-coderabbit-2026-07-29-arch-cr2-closeout.md
+!/reports/quality/docs-open-runs-2-4-closeout-2026-07-28.md
+!/reports/quality/test-sys-2026-07-29-closeout.md
+!/reports/quality/test-sys-01-bronze-nonchembl-inventory.json
+!/reports/quality/test-basename-collision-inventory.json
+!/reports/quality/test-system-audit-2026-07-29-issue-publish.json
+!/reports/quality/test-system-architecture-audit-20260729_FULL.md
+!/reports/docs-evidence/
+/reports/docs-evidence/*
+!/reports/docs-evidence/README.md
+!/reports/quality/hotspot-family-baseline.json
+!/reports/quality/hotspot-family-baseline.md
+!/reports/quality/hotspot-duplication-baseline.json
+!/reports/quality/hotspot-duplication-baseline.md
+!/reports/quality/hotspot-duplication-history.jsonl
+!/reports/quality/compatibility-importer-census.json
+!/reports/quality/compatibility-importer-census.md
+!/reports/quality/config-discrepancy-baseline.json
+!/reports/quality/dead-code-inventory.json
+!/reports/quality/dead-code-inventory.md
+!/reports/quality/module-coverage-inventory.json
+!/reports/quality/architecture-quality-scorecard.json
+!/reports/quality/adr-enforcement-matrix.json
+!/reports/quality/adr-enforcement-matrix.md
+!/reports/quality/architecture-debt-remote-main-baseline.json
+!/reports/quality/architecture-debt-remote-main-baseline.md
+!/reports/quality/debt-governance-gates.json
+!/reports/quality/debt-governance-gates.md
+!/reports/quality/contract-registry-diagnostics.json
+!/reports/quality/vcr-metadata-catalog.json
+!/reports/quality/domain-composite-config-importer-map.md
+!/reports/quality/config-compatibility-legacy-taxonomy-review.json
+!/reports/quality/tech-debt-issues-5253-5264-closeout.json
+!/reports/quality/tech-debt-issues-5581-5584-closeout.json
+!/reports/quality/diagram-issues-6205-6211-closeout.json
+!/reports/quality/tech-debt-issues-5626-5637-closeout.json
+!/reports/quality/tech-debt-issues-5639-5644-closeout.json
+!/reports/quality/tech-debt-issues-5642-5645-closeout.json
+!/reports/quality/tech-debt-issues-5646-5663-closeout.json
+!/reports/quality/tech-debt-issues-5657-5661-closeout.json
+!/reports/quality/tech-debt-issues-5700-5706-closeout.json
+!/reports/quality/tech-debt-issues-5707-5715-closeout.json
+!/reports/quality/tech-debt-issues-5729-5733-closeout.json
+!/reports/quality/tech-debt-issues-5744-5751-closeout.json
+!/reports/quality/tech-debt-issues-5790-5796-closeout.json
+!/reports/quality/tech-debt-issues-6159-6169-closeout.json
+!/reports/quality/tech-debt-issues-5834-5838-closeout.json
+!/reports/quality/tech-debt-issues-5839-5845-closeout.json
+!/reports/quality/tech-debt-issues-5861-5864-closeout.json
+!/reports/quality/tech-debt-issues-5866-5872-closeout.json
+!/reports/quality/tech-debt-issues-6011-6020-closeout.json
+!/reports/quality/tech-debt-issue-5647-closeout.json
+!/reports/quality/issue-5272-application-core-coverage-closeout.json
+!/reports/quality/issue-5376-coverage-tail-closeout.json
+!/reports/quality/low-coverage-targeted-tests-6045.json
+!/reports/quality/total-tech-debt-audit-main-2026-06-16.md
+!/reports/quality/total-tech-debt-audit-main-current.md
+!/reports/quality/test-governance-current.json
+!/reports/quality/tech-debt-issues-6220-6229-closeout.json
+!/reports/quality/test-support-helper-ownership-map.json
+!/reports/quality/test-bootstrap-fixture-scope-profile.json
+!/reports/quality/test-audit-issues-5996-6003-closeout.json
+!/reports/quality/contract-registry-dq-diagnostics.json
+!/reports/quality/test-fixture-asset-duplication.json
+!/reports/quality/flaky-test-burndown-review.json
+!/reports/quality/branch-cleanup-7350-closeout-2026-08-03.md
+!/reports/quality/domain-io-taint-inventory.json
+!/reports/quality/config-contract-registry-artifact-duplication.json
+!/reports/quality/config-surface-backlog.json
+!/reports/quality/pipeline-config-contract-ownership-map.json
+!/reports/quality/pipeline-config-contract-ownership-map.md
+!/reports/quality/contract-coverage-matrix.json
+!/reports/quality/contract-coverage-matrix.md
+!/reports/quality/full-app-duplication-baseline.json
+!/reports/quality/full-app-duplication-baseline.md
+!/reports/quality/port-adapter-factory-coverage.json
+!/reports/quality/port-adapter-factory-coverage.md
+!/reports/quality/domain-aggregate-invariant-registry.json
+!/reports/quality/invariant-audit-rebaseline-2026-06-19.json
+!/reports/quality/invariant-audit-rebaseline-2026-06-19.md
+!/reports/quality/silver-gold-filter-parity-report.json
+!/reports/test-telemetry/
+/reports/test-telemetry/*
+!/reports/test-telemetry/coverage-summary.json
+!/reports/test-telemetry/slowest-tests.json
+!/reports/test-telemetry/slowest-tests.md
+!/reports/observability/
+/reports/observability/*
+!/reports/observability/runtime_cardinality_inventory.json
+!/reports/observability/runtime_cardinality_review.json
+# Tracked selector live-closure evidence referenced by selector-contracts.yaml
+# and tests/integration/test_grafana_selector_contract.py (issue #6359).
+# Un-ignore only this audit snapshot; keep other grafana audit dumps ignored.
+!/reports/observability/grafana/
+/reports/observability/grafana/*
+!/reports/observability/grafana/selector-audit-2026-07-20/
+!/reports/observability/grafana/selector-audit-2026-07-20/**/reports/Codex/review_documentation-cascade-audit_*.md
+/reports/Codex/review_py-test-swarm_*.md
+
+# IDE / Editors
+# PyCharm project state is machine-local. Portable project templates live in
+# configs/ide/pycharm/ and may be copied into this ignored directory.
+.idea/
+.vscode/
+.agent-work/
+.agentbridge/
+.agents/
+.cursor/
+.sonarlint/
+.trae/
+.windsurf/
+.cursorrules
+.cursor_tmp_*
+*.swp
+*~
+~$*
+
+# AI assistant configs (vendor-specific, not project code)
+.ai/
+.aiassistant/
+!.codex/
+.codex/*
+!.codex/agents/
+!.codex/agents/*.md
+!.codex/skills/
+.codex/skills/*
+!.codex/skills/SKILLS-CATALOG.md
+!.codex/skills/*/
+!.codex/skills/*/SKILL.md
+!.codex/skills/*/agents/
+!.codex/skills/*/agents/openai.yaml
+.devin/config.local.json
+.gemini/
+.jules/
+# .junie/ â€” JetBrains Junie runtime surface. Tracked as equal-peer runtime to
+# `.codex/**` (see AGENTS.md, .junie/guidelines.md). Selective un-ignore below
+# keeps machine-local state (history/state/cache) out of git while allowing
+# runtime tree (guidelines.md, agents/, skills/) and mirror-check artifacts.
+.junie/*
+!.junie/guidelines.md
+!.junie/agents/
+!.junie/agents/**
+!.junie/skills/
+!.junie/skills/**
+!.junie/plans/
+!.junie/plans/**
+# Machine-local Junie state MUST NOT be tracked.
+.junie/history/
+.junie/state/
+.junie/cache/
+.qodo/*
+!.qodo/
+!.qodo/README.md
+!.qodo/.pr_agent.toml
+!.qodo/best_practices.md
+!.qodo/pr_compliance_checklist.yaml
+!.qodo/workflows/
+!.qodo/workflows/best_practices.md
+!.qodo/workflows/pr_compliance_checklist.yaml
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Secrets / API keys (RULES.md REQ-SECRET-004)
+*.env
+!.env.example
+API_KEY.env
+secrets.json
+credentials.json
+
+# Docker volumes (RULES.md Â§8.2)
+docker-data/
+docker/volumes/
+
+# VCR cassettes (keep for testing, but exclude sensitive ones)
+tests/fixtures/vcr/*_sensitive.yaml
+
+# Delta Lake metadata (local development)
+_delta_log/
+*.checkpoint.parquet
+
+# Temporary pipeline artifacts
+tmp/
+/tmp_*_cov.json
+/tmp_*coverage.json
+/.tmp_check_env.py
+data/local/*
+!data/local/.gitkeep
+
+# Node
+node_modules/
+
+# Coverage
+.coverage
+.coverage.*
+coverage.xml
+coverage-*.xml
+coverage_*.xml
+/coverage.html
+/Test Results - Pytest_All.html
+/Test Results - Pytest_All.xml
+/coverage.json
+coverage_output.txt
+coverage_summary.txt
+htmlcov/
+reports/coverage/
+reports/pytest/
+reports/junit/
+reports/logs/
+!reports/logs/
+reports/logs/*
+!reports/logs/.gitkeep
+reports/observability/grafana/screenshots/
+reports/quality/architecture_debt_execution_plan_*.json
+reports/quality/tasks_architecture_metric_exemptions_*.json
+reports/quality/test-runs/
+reports/security/
+
+# Other generated artifacts
+.vercel/
+/puppeteer-config.json
+nul
+/profile.svg
+.output.txt
+.mkdocs-site-tmp/
+output/
+site/
+src/tools/reports/
+docs/site/
+docs/exports/*.merged.md
+tests.zip
+configs/pipelines.zip
+/all_fixtures.txt
+data/input/chembl_target_component.csv
+# Diagram policy (ADR-040 / DOC-GOV-02): SVG under **/svg/ remains tracked for
+# PR source-vs-render drift. PNG under **/png/ is gitignored (CI/local render).
+
+# Root-level test dump files (MUST be in tests/fixtures/vcr/)
+/test_backfill_*
+/test_chembl_*
+/test_failed_*
+/test_full_pipeline_*
+/test_multiple_*
+/test_pipeline_*
+/test_pubchem_*
+/test_pubmed_*
+/test_rebuild_*
+/test_run_type_*
+/test_uniprot_*
+/test_crossref_*
+/Test*.test_*
+/test_vacuum_*
+
+# Temp scripts and artifacts
+/run_extract.bat
+/test_author_quick.py
+/temp_batch_executor.txt
+/.tmp_*
+/contract-registry-diagnostics.json
+/.tmp_mypy_*.log
+/mypy_*.log
+/bash.exe.stackdump
+/NUL
+
+# Codex CLI temp files
+.setup_wsl_codex.sh
+.run_codex.sh
+.test_api.sh
+.test_codex.sh
+.ca-bundle.pem
+.export_certs.ps1
+.oai_key_tmp
+.codex-sessions/
+
+# Local worktrees and rollback snapshots
+.worktrees/
+.rollback/
+
+# Nested IDEA project files
+data/.idea/
+*.hyb
+*.pak
+
+# Machine-local / one-off artifacts (do not track)
+.claude/settings*
+.claude/marketplace.json
+.claude/.dropbox.cache/
+.claude/*.docx
+/docs/.claude/settings*
+/.venv-docs
+/script-codex
+/script-gemini
+/script-mistrall
+/script-mistrallvibe
+.env.local
+/.npm-cache/_cacache
+/.npm-cache/
+/caddy/
+/silver/
+
+!scripts/docs/build/
+!scripts/docs/build/**
+scripts/docs/build/**/__pycache__/
+scripts/docs/build/**/*.pyc
+!/docs/99-archive/
+/docs/99-archive/*
+!/docs/99-archive/legacy-05-architecture/
+!/docs/99-archive/legacy-05-architecture/**
+!/docs/99-archive/root-concepts-surface/
+!/docs/99-archive/root-concepts-surface/**
+# Preserve the reviewed branch-cleanup completion report after its root rehome.
+!/docs/99-archive/root-status-artifacts/
+/docs/99-archive/root-status-artifacts/*
+!/docs/99-archive/root-status-artifacts/BRANCH_CLEANUP_PLAN.md
+!/docs/99-archive/reports/
+!/docs/99-archive/reports/quality/
+!/docs/99-archive/reports/quality/total-tech-debt-audit-main-2026-07-01.md
+!/docs/99-archive/README.md
+!/docs/99-archive/plans/
+!/docs/99-archive/plans/**
+!/docs/99-archive/engineering/
+!/docs/99-archive/engineering/**
+# docs/reports is retention-sensitive. Keep broad local reports ignored and
+# allowlist only curated entrypoints, generated cleanup inventory, and reviewed
+# bounded evidence manifests.
+/docs/reports/*
+!/docs/reports/
+!/docs/reports/README.md
+!/docs/reports/index.md
+!/docs/reports/generated/
+/docs/reports/generated/*
+!/docs/reports/generated/documentation-cleanup-inventory.json
+!/docs/reports/generated/documentation-cleanup-inventory.md
+!/docs/reports/generated/chembl_matrix_structural_contract_v1.json
+!/docs/reports/generated/pipeline_normalization_field_matrix/
+!/docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md
+!/docs/reports/evidence/
+/docs/reports/evidence/*
+!/docs/reports/evidence/README.md
+!/docs/reports/evidence/INDEX.md
+!/docs/reports/evidence/project-test-health/
+/docs/reports/evidence/project-test-health/*
+!/docs/reports/evidence/project-test-health/metadata.yaml
+!/docs/reports/evidence/project-test-health/shard_registry.yaml
+!/docs/reports/evidence/project-test-health/SUMMARY.md
+!/docs/reports/evidence/project-legacy-compatibility-remediation/
+/docs/reports/evidence/project-legacy-compatibility-remediation/*
+!/docs/reports/evidence/project-legacy-compatibility-remediation/SUMMARY.md
+!/docs/reports/evidence/project-legacy-compatibility-remediation/*/
+/docs/reports/evidence/project-legacy-compatibility-remediation/*/*
+!/docs/reports/evidence/project-legacy-compatibility-remediation/*/SUMMARY.md
+!/docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/
+/docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/*
+!/docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md
+!/docs/reports/evidence/project-legacy-compatibility-remediation/04-decisions/
+/docs/reports/evidence/project-legacy-compatibility-remediation/04-decisions/*
+!/docs/reports/evidence/project-legacy-compatibility-remediation/04-decisions/DECISIONS.yaml
+!/docs/reports/evidence/project-package-topology/
+/docs/reports/evidence/project-package-topology/*
+!/docs/reports/evidence/project-package-topology/04-decisions/
+/docs/reports/evidence/project-package-topology/04-decisions/*
+!/docs/reports/evidence/project-package-topology/04-decisions/DECISIONS.yaml
+!/docs/reports/evidence/project-legacy-compatibility-remediation/05-risks/
+/docs/reports/evidence/project-legacy-compatibility-remediation/05-risks/*
+!/docs/reports/evidence/project-legacy-compatibility-remediation/05-risks/RISKS.yaml
+!/docs/reports/evidence/project-legacy-compatibility-remediation/06-status/
+/docs/reports/evidence/project-legacy-compatibility-remediation/06-status/*
+!/docs/reports/evidence/project-legacy-compatibility-remediation/06-status/recovered-cross-synthesis-provenance-2026-05-21.yaml
+/src/memory/episodic/sessions/
+/src/memory/episodic/summaries/
+# Memory rebuild-only artifacts are generated locally by the memory workflow.
+/src/memory/derived/rag/manifests/
+/src/memory/rag/manifests/
+/src/memory/graph/exports/
+/src/memory/graph/projections/
+/src/memory/graph/indexes/
+/src/memory/timeline/events/
+data/2026-07-03_20-21-59.gif
+.github/workflows/docs.yml
+.xml
+/_loop_*
+
+# Grok machine-local runtime (never track root .grok/ â€” root hygiene + absolute paths)
+.grok/
+
+# Local-only agent scratch (not CI source)
+_local_only_mcp/
+
+# Auto-generated MCP server context (added automatically)
+.mcp-server-context.md
+
+# Local agent temp scratch (never commit)
+_tmp_*.py
+/_cr_*.py
+/_publish_*.py
+tmp_sub_*.txt
+# Accidental single-letter root scratch dumps (RH-01 / #6876)
+_a.txt
+/_arch_results.xml
+
+/_unit_results.xml
+/_arch_results.xml
+_fail_batch1.txt
+_fail_*.txt
+/bash.exe.stackdump
+
+!/docs/reports/evidence/technical-debt/
+/docs/reports/evidence/technical-debt/*
+!/docs/reports/evidence/technical-debt/SUMMARY.md
+!/docs/reports/evidence/technical-debt/complexity-hotspots/
+/docs/reports/evidence/technical-debt/complexity-hotspots/*
+!/docs/reports/evidence/technical-debt/complexity-hotspots/SUMMARY.md
+!/docs/reports/evidence/technical-debt/03-synthesis/
+/docs/reports/evidence/technical-debt/03-synthesis/*
+!/docs/reports/evidence/technical-debt/03-synthesis/CROSS-SYNTHESIS.md
+# ADR-040 / DOC-GOV-02 PNG not tracked
+/docs/02-architecture/diagrams/**/png/
+/docs/02-architecture/diagrams/**/png/**

@@ -1,0 +1,48 @@
+%% View: Data-Flow | Parent: 28-composition-root-di-graph-full.mermaid
+%% @uniform width=140 height=56 max_title_len=4 max_desc_lines=0
+flowchart TB
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["BOOT"]
+        N2["SB"]
+        N3["BL"]
+        N4["HCF"]
+        N5["DSF"]
+        N6["STF"]
+        N7["STA"]
+        N8["SW"]
+        N9["GW"]
+        N10["RF"]
+        N12["SLL"]
+    end
+
+    subgraph Interfaces["Interfaces Layer"]
+        direction TB
+        N11["CLI"]
+    end
+
+    N11 ==> N1
+    N1 --> N3
+    N3 --> N12
+    N1 --> N4
+    N1 --> N5
+    N1 --> N6
+    N6 --> N7
+    N7 --> N8
+    N7 --> N9
+    N1 --> N2
+    N2 --> N8
+    N2 --> N9
+    N1 --> N10
+
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle default stroke:#1E293B,stroke-width:4px

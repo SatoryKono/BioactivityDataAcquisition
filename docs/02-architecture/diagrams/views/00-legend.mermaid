@@ -1,0 +1,75 @@
+%% View: Legend | Parent: (root)
+%% Shared legend for coded edge labels and link weights
+flowchart TB
+%% keep-orphan: C0, K01, K02, K03, K04, K05, K06, K07, K08, K09, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K20, K21, K22, K23, K24, K25, K26, K27, K28, K29, K30, K31, K32, K33, K34, K35, K36, K37, K38, K39, S1, S2, S3, S4
+    subgraph Legend["📋 Legend"]
+        direction TB
+
+    subgraph LinkTypes["Link Types"]
+        direction LR
+        LW1[" "] -->|"data flow"| LW2[" "]
+        LW3[" "] -.->|"DI / implements"| LW4[" "]
+        LW5[" "] -->|"orchestration"| LW6[" "]
+        LW7[" "] -->|"observability"| LW8[" "]
+        LW9[" "] -->|"error / quarantine"| LW10[" "]
+    end
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#1E293B,stroke-width:2px
+    linkStyle 1 stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 2 stroke:#16a34a,stroke-width:2px
+    linkStyle 3 stroke:#94A3B8,stroke-width:1px
+    linkStyle 4 stroke:#dc2626,stroke-width:2px,stroke-dasharray:4
+
+        S1["Main data flow: solid, 4px"]
+        S2["Dependency/DI: dashed, 2px"]
+        S3["Observability: gray, 1px"]
+        S4["Error/Quarantine: red dashed, 2px"]
+        C0["Codes used in diagrams"]
+        K01["K01 = Transform & normalize"]
+        K02["K02 = Validate & flatten"]
+        K03["K03 = assay_id FK"]
+        K04["K04 = molecule_id FK"]
+        K05["K05 = target_id FK"]
+        K06["K06 = injects storage"]
+        K07["K07 = injects lock"]
+        K08["K08 = injects checkpoint"]
+        K09["K09 = injects quarantine"]
+        K10["K10 = injects logger"]
+        K11["K11 = injects metrics"]
+        K12["K12 = injects tracing"]
+        K13["K13 = registered in"]
+        K14["K14 = < 5% errors"]
+        K15["K15 = per-record error"]
+        K16["K16 = > 20% errors"]
+        K17["K17 = INCREMENTAL"]
+        K18["K18 = unaffected by run_type"]
+        K19["K19 = 500, 502, 504"]
+        K20["K20 = Schema mismatch"]
+        K21["K21 = Missing field"]
+        K22["K22 = Invalid format"]
+        K23["K23 = DQ threshold"]
+        K24["K24 = Lock timeout"]
+        K25["K25 = Storage failure"]
+        K26["K26 = max attempts exhausted"]
+        K27["K27 = seed (doi, pmid, title, authors)"]
+        K28["K28 = enriches (citations, funders, references)"]
+        K29["K29 = enriches (abstract, mesh_terms, pub_type)"]
+        K30["K30 = enriches (concepts, institutions, cited_by)"]
+        K31["K31 = enriches (tldr, embedding, fields_of_study)"]
+        K32["K32 = source merge"]
+        K33["K33 = _deep_merge(base, override)"]
+        K34["K34 = to_domain()"]
+        K35["K35 = resolve_dq_config()"]
+        K36["K36 = ADR-029: provider source merge + auto-resolve dq_config_file / filter_config_file"]
+        K37["K37 = ADR-029: auto-resolve sink paths from provider + entity_type"]
+        K38["K38 = RECOVERABLE"]
+        K39["K39 = DATA_QUALITY"]
+    end
+
+    style Legend fill:#F8FAFC,stroke:#94A3B8,stroke-width:2px

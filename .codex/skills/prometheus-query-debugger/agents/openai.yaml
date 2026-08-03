@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prometheus Query Debugger"
+  short_description: "Debug PromQL semantics and empty-state behavior"
+  default_prompt: "Use $prometheus-query-debugger to diagnose and fix PromQL queries that are empty, misleading, noisy, or too expensive."

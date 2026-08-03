@@ -1,0 +1,165 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/diagrams/foundation/10-infrastructure-layer-class-diagram.mmd
+%% Full reference diagram retained after decomposition.
+%% Synced: 2026-07-08
+
+%% Title: Infrastructure Layer Class Diagram
+%% Covers: RULES.md §1.1 (Infrastructure Layer), §3.6 (Resilience), RF-014
+%% Updated: 2026-03-19
+%% Components: UnifiedHTTPClient, provider adapters, storage writers, metadata writer, observability
+
+%% @version 1.1.0
+%% @date    2026-03-19
+%% @type    classDiagram
+%% @level   Mixed (System / Component / Class)
+%% @nodes   18
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform class width=216 height=220 max_title_len=22 max_desc_lines=14
+classDiagram
+    direction TB
+
+    namespace HTTP_Infrastructure {
+        class UnifiedHTTPClient {
+            -_client: httpx.AsyncClient
+            -_rate_limiter: RateLimiterPort
+            -_circuit_breaker: CircuitBreakerPort
+            -_retry_policy: RetryPolicy
+            +request(method, url, **kwargs) Response
+            +get(url, **kwargs) Response
+            +post(url, data, **kwargs) Response
+        }
+
+        class CircuitBreaker {
+            -_state: CircuitState
+            -_failure_count: int
+            +call(func, *args) T
+            +reset() None
+            +get_state() CircuitState
+        }
+
+        class TokenBucket {
+            -_rate: float
+            -_capacity: int
+            -_tokens: float
+            +acquire() None
+            +try_acquire() bool
+            +available_tokens() int
+        }
+    }
+
+    namespace DataSource_Adapters {
+        class ChemblAdapter {
+            -_http_client: UnifiedHTTPClient
+            +fetch(query) AsyncIterator~BronzeRecord~
+            +health_check() HealthStatus
+        }
+
+        class PubchemAdapter {
+            -_http_client: UnifiedHTTPClient
+            +fetch(query) AsyncIterator~BronzeRecord~
+            +health_check() HealthStatus
+        }
+
+        class UniprotAdapter {
+            -_http_client: UnifiedHTTPClient
+            +fetch(query) AsyncIterator~BronzeRecord~
+            +health_check() HealthStatus
+        }
+
+        class PubmedAdapter {
+            -_http_client: UnifiedHTTPClient
+            +fetch(query) AsyncIterator~BronzeRecord~
+            +health_check() HealthStatus
+        }
+    }
+
+    namespace Storage_Writers {
+        class BronzeWriter {
+            +write_bronze(records, provider, entity) BronzeWriteResult
+        }
+
+        class SilverWriter {
+            +write_silver(table_name, records, primary_keys, schema, mode) SilverWriteResult
+            +write_silver_merged(table_name, records, primary_keys, run_id, sources_used) None
+            +read_silver(table_name, columns) list~BronzeRecord~
+            +vacuum(table_name, retention_hours, dry_run) list~str~
+            +preview_cleanup(table_name) MetaDict
+            +finalize_csv_export(table_name, primary_keys) None
+        }
+
+        class GoldWriter {
+            +write_gold(table_name, records, schema, primary_keys, mode) GoldWriteResult
+            +write_gold_merged(table_name, records, primary_keys, run_id, sources_used) None
+        }
+
+        class MetadataWriter {
+            +write_bronze_metadata(base_path, metadata, provider, entity) str
+            +write_silver_metadata(base_path, metadata, table_name, provider, entity) str
+            +write_gold_metadata(base_path, metadata, table_name, provider, entity) str
+        }
+
+        class CsvExporter {
+            +export(table_name, arrow_data, append, primary_keys) None
+            +finalize_csv(table_name, primary_keys) None
+        }
+    }
+
+    namespace Coordination {
+        class MemoryLock {
+            +acquire(key, owner_id, ttl, wait, timeout, exclusive) bool
+            +release(key, owner_id, exclusive) bool
+            +heartbeat(key, owner_id, exclusive) bool
+        }
+
+        class FileCheckpointManager {
+            +save(key, state) None
+            +load(key) CheckpointState?
+            +list_all() list~str~
+            +delete(key) None
+        }
+
+        class QuarantineWriter {
+            +write(record) None
+            +inspect(pipeline, limit) list~QuarantineRecord~
+            +get_stats(pipeline) QuarantineStats
+        }
+    }
+
+    namespace Observability {
+        class StructlogAdapter {
+            +bind(**context) LoggerPort
+            +info(msg, **kwargs) None
+            +warning(msg, **kwargs) None
+            +error(msg, **kwargs) None
+        }
+
+        class PrometheusMetrics {
+            +observe_histogram(name, value, labels) None
+            +increment_counter(name, labels, value) None
+            +set_gauge(name, value, labels) None
+        }
+
+        class NoOpMetrics {
+            +observe_histogram(name, value, labels) None
+            +increment_counter(name, labels, value) None
+            +set_gauge(name, value, labels) None
+        }
+    }
+
+    ChemblAdapter --> UnifiedHTTPClient
+    PubchemAdapter --> UnifiedHTTPClient
+    UniprotAdapter --> UnifiedHTTPClient
+    PubmedAdapter --> UnifiedHTTPClient
+
+    UnifiedHTTPClient --> CircuitBreaker
+    UnifiedHTTPClient --> TokenBucket
+
+    BronzeWriter --> MetadataWriter
+    SilverWriter --> CsvExporter
+    SilverWriter --> MetadataWriter
+    GoldWriter --> CsvExporter
+    GoldWriter --> MetadataWriter
+
+    note for SilverWriter "Delta Lake writer facade<br/>schema-aware write_silver<br/>merged-write path for composite pipelines<br/>maintenance and CSV export helpers"
+
+    note for MetadataWriter "Metadata sidecar writer<br/>bronze / silver / gold methods<br/>atomic YAML writes"

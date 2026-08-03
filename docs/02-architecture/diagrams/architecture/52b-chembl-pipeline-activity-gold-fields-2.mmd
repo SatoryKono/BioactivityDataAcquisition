@@ -1,0 +1,28 @@
+%% BioETL — ChEMBL Activity Gold Output Fields 2 Of 2
+%% Generated from the resolved chembl_activity configuration and contracts.
+
+%% @version 1.0.0
+%% @date    2026-07-31
+%% @type    flowchart
+%% @level   Pipeline / Gold Contract
+%% @nodes   3
+%% @adr     ADR-002, ADR-040
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}, 'flowchart': {'wrappingWidth': 360}}}%%
+flowchart TB
+    Layer["Gold output<br/>sheet 2 of 2<br/>6 fields"]
+    Fields1["Fields 61-65<br/>bao_ontology_version<br/>journal<br/>publication_doi<br/>publication_pmid<br/>publication_pmc_id"]
+    Fields2["Fields 66-66<br/>publication_year"]
+
+    Layer --> Fields1
+    Layer --> Fields2
+
+    class Layer,Fields1,Fields2 gold
+    class Fields1,Fields2 fieldCard
+    classDef fieldCard font-size:13px
+    classDef source fill:#f1f5f9,stroke:#64748b,stroke-width:2px
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef bronze fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef silver fill:#f8fafc,stroke:#475569,stroke-width:2px
+    classDef gold fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    classDef dq fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef warning fill:#fff1f2,stroke:#dc2626,stroke-width:2px

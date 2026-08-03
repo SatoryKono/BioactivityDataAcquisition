@@ -1,0 +1,52 @@
+name: Quality Debt Weekly
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  schedule:
+    - cron: "45 4 * * 1"
+  workflow_dispatch:
+
+env:
+  QUALITY_EXEMPTIONS_REGISTRY: configs/quality/architecture_metric_exemptions.yaml
+  QUALITY_EXEMPTIONS_SCORECARD: configs/quality/debt_scorecard.yaml
+
+jobs:
+  quality-debt-weekly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          uv-extras: "dev"
+
+      - name: Generate weekly debt report
+        run: |
+          uv run --frozen --no-build python scripts/engineering/ci/report_quality_debt_weekly.py \
+            --registry "${QUALITY_EXEMPTIONS_REGISTRY}" \
+            --scorecard "${QUALITY_EXEMPTIONS_SCORECARD}" \
+            --json-out reports/quality/debt-weekly.json \
+            --markdown-out reports/quality/debt-weekly.md \
+            --summary-out "$GITHUB_STEP_SUMMARY"
+
+      - name: Run config gap analysis
+        run: |
+          uv run --frozen --no-build python -m scripts.schema analyze-gaps
+
+      - name: Upload weekly debt artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: quality-debt-weekly
+          path: |
+            reports/quality/debt-weekly.json
+            reports/quality/debt-weekly.md
+          retention-days: 30

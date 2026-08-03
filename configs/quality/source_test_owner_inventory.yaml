@@ -1,0 +1,196 @@
+version: "1.0.0"
+policy_scope: "curated_behavior_heavy_modules"
+description: >
+  Canonical source-to-test ownership inventory for high-signal behavior-heavy
+  modules. Entries may use direct same-path tests or sanctioned cluster-owner
+  suites where one module is intentionally owned by a broader focused test file.
+
+modules:
+  - source: src/bioetl/application/core/subcellular_fraction_data_source.py
+    ownership: direct_test
+    rationale: "Standalone wrapper module with dedicated same-path owner suite."
+    owner_tests:
+      - tests/unit/application/core/test_subcellular_fraction_data_source.py
+
+  - source: src/bioetl/application/core/batch_executor_loop_helpers.py
+    ownership: cluster_owner
+    rationale: >
+      Loop helpers are owned through the focused batch executor suite that covers
+      extraction loop state, progress payloads, flushing, and checkpoint payloads.
+    owner_tests:
+      - tests/unit/application/core/test_batch_executor.py
+
+  - source: src/bioetl/application/composite/dependency_joiner.py
+    ownership: cluster_owner
+    rationale: >
+      Join routing is verified through a focused service-level suite rather than
+      a same-path mirror name.
+    owner_tests:
+      - tests/unit/application/composite/test_dependency_joiner_service.py
+
+  - source: src/bioetl/application/composite/coordinator.py
+    ownership: cluster_owner
+    rationale: >
+      Coordinator execution policy is owned by focused coordinator edge and
+      logging suites rather than a strict same-path mirror file.
+    owner_tests:
+      - tests/unit/application/composite/test_coordinator_edges.py
+      - tests/unit/application/composite/test_coordinator_logging.py
+
+  - source: src/bioetl/application/composite/preflight_validator.py
+    ownership: cluster_owner
+    rationale: >
+      Preflight validation is owned by the dedicated repository-backed suite
+      because its config-loading scenarios depend on checked-in repository files.
+    owner_tests:
+      - tests/unit/repo_backed/application/composite/test_preflight_validator.py
+
+  - source: src/bioetl/application/composite/protocols.py
+    ownership: cluster_owner
+    rationale: >
+      Composite protocol contracts are intentionally owned by a structural suite
+      with explicit contract assertions rather than a mirror-path test name.
+    owner_tests:
+      - tests/unit/application/composite/test_protocols_structural.py
+
+  - source: src/bioetl/application/composite/runtime_models.py
+    ownership: direct_test
+    rationale: "Runtime facade ownership stays on the direct same-path suite."
+    owner_tests:
+      - tests/unit/application/composite/test_runtime_models.py
+
+  - source: src/bioetl/application/composite/checkpoint/service.py
+    ownership: cluster_owner
+    rationale: >
+      Checkpoint service behavior is intentionally owned by the package-aware
+      checkpoint suite rather than a strict mirror-path file name.
+    owner_tests:
+      - tests/unit/application/composite/checkpoint/test_checkpoint_service.py
+
+  - source: src/bioetl/application/composite/checkpoint/state.py
+    ownership: cluster_owner
+    rationale: >
+      Checkpoint state coverage stays on the package-aware checkpoint suite
+      instead of a strict mirror-path test name.
+    owner_tests:
+      - tests/unit/application/composite/checkpoint/test_checkpoint_state.py
+
+  - source: src/bioetl/application/composite/runner_pkg/runner.py
+    ownership: cluster_owner
+    rationale: >
+      Runner facade behavior is owned through focused FSM and lifecycle suites
+      that exercise the public orchestration surface.
+    owner_tests:
+      - tests/unit/application/composite/test_runner.py
+      - tests/unit/application/composite/test_runner_fsm.py
+
+  - source: src/bioetl/application/composite/runner_pkg/runner_completion_helpers.py
+    ownership: direct_test
+    rationale: "Completion helper seam already has a dedicated same-path owner suite."
+    owner_tests:
+      - tests/unit/application/composite/runner_pkg/test_runner_completion_helpers.py
+
+  - source: src/bioetl/application/composite/runner_pkg/runner_execution_orchestrator.py
+    ownership: direct_test
+    rationale: "Locked execution phase orchestration has a direct same-path owner suite."
+    owner_tests:
+      - tests/unit/application/composite/runner_pkg/test_runner_execution_orchestrator.py
+
+  - source: src/bioetl/application/composite/runner_pkg/runner_helpers.py
+    ownership: direct_test
+    rationale: "Runner helper surface is owned by a dedicated same-path test file."
+    owner_tests:
+      - tests/unit/application/composite/runner_pkg/test_runner_helpers.py
+
+  - source: src/bioetl/application/composite/runner_pkg/runner_key_flow.py
+    ownership: direct_test
+    rationale: "Key extraction flow is covered by a direct same-path owner suite."
+    owner_tests:
+      - tests/unit/application/composite/runner_pkg/test_runner_key_flow.py
+
+  - source: src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py
+    ownership: direct_test
+    rationale: "Runtime helper seam has a dedicated same-path owner suite."
+    owner_tests:
+      - tests/unit/application/composite/runner_pkg/test_runner_runtime_helpers.py
+
+  - source: src/bioetl/infrastructure/adapters/cached_bronze_data_source.py
+    ownership: direct_test
+    rationale: "Cached bronze source wrapper already has a direct same-path owner test."
+    owner_tests:
+      - tests/unit/infrastructure/adapters/test_cached_bronze_data_source.py
+
+  - source: src/bioetl/infrastructure/adapters/filterable_mixin.py
+    ownership: direct_test
+    rationale: "Filterable adapter mixin keeps a direct same-path owner suite."
+    owner_tests:
+      - tests/unit/infrastructure/adapters/test_filterable_mixin.py
+
+  - source: src/bioetl/infrastructure/adapters/health_probe_policy.py
+    ownership: direct_test
+    rationale: "Health probe policy remains owned by a direct same-path test."
+    owner_tests:
+      - tests/unit/infrastructure/adapters/test_health_probe_policy.py
+
+  - source: src/bioetl/infrastructure/adapters/common/fallback_fetch_service.py
+    ownership: direct_test
+    rationale: "Fallback fetch orchestration has a dedicated same-path owner suite."
+    owner_tests:
+      - tests/unit/infrastructure/adapters/common/test_fallback_fetch_service.py
+
+  - source: src/bioetl/infrastructure/adapters/http/client.py
+    ownership: cluster_owner
+    rationale: >
+      Unified HTTP facade behavior is owned by focused HTTP client suites rather
+      than a mirror-path test file.
+    owner_tests:
+      - tests/unit/infrastructure/adapters/http/test_http_client.py
+      - tests/unit/infrastructure/adapters/http/test_client_retries.py
+
+  - source: src/bioetl/infrastructure/adapters/http/client_context_mixin.py
+    ownership: direct_test
+    rationale: "Context-management mixin already has a direct same-path owner suite."
+    owner_tests:
+      - tests/unit/infrastructure/adapters/http/test_client_context_mixin.py
+
+  - source: src/bioetl/infrastructure/adapters/openalex/response_parser.py
+    ownership: direct_test
+    rationale: "OpenAlex response parsing helper has a dedicated same-path owner suite."
+    owner_tests:
+      - tests/unit/infrastructure/adapters/openalex/test_response_parser.py
+
+  - source: src/bioetl/infrastructure/adapters/pubchem/fetch_flow.py
+    ownership: direct_test
+    rationale: "PubChem fetch flow behavior is owned by a direct same-path test."
+    owner_tests:
+      - tests/unit/infrastructure/adapters/pubchem/test_fetch_flow.py
+
+  - source: src/bioetl/infrastructure/adapters/pubchem/query_builder.py
+    ownership: direct_test
+    rationale: "PubChem query-building logic already has a direct same-path owner suite."
+    owner_tests:
+      - tests/unit/infrastructure/adapters/pubchem/test_query_builder.py
+
+  - source: src/bioetl/infrastructure/storage/silver/runtime_helpers.py
+    ownership: cluster_owner
+    rationale: >
+      Runtime helper defaults are intentionally covered by the focused SilverWriter
+      core suite rather than a separate mirror file.
+    owner_tests:
+      - tests/unit/infrastructure/storage/silver_writer/test_silver_writer_core.py
+
+  - source: src/bioetl/infrastructure/storage/gold/io_delta_mixins.py
+    ownership: cluster_owner
+    rationale: >-
+      Gold Delta I/O mixins are owned by the focused GoldWriter I/O suite rather
+      than a strict same-path mirror file.
+    owner_tests:
+      - tests/unit/infrastructure/storage/test_gold_writer_io_delta_mixins.py
+
+  - source: src/bioetl/infrastructure/storage/bronze/pipeline_helpers.py
+    ownership: cluster_owner
+    rationale: >-
+      Bronze pipeline helper behavior is owned by the focused BronzeWriter
+      pipeline-helper suite rather than a strict same-path mirror file.
+    owner_tests:
+      - tests/unit/infrastructure/storage/test_bronze_writer_pipeline_helpers.py

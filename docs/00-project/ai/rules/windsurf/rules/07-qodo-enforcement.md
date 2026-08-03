@@ -1,0 +1,84 @@
+---
+trigger: model_decision
+description: "Qodo platform enforcement rules synced into Cursor guidance"
+---
+
+# Qodo Enforcement Rules
+
+**Source:** Qodo `POST /rules/search` for `/SatoryKono/BioactivityDataAcquisition/`
+**Synced:** 2026-07-16 (**66** unique rule IDs)
+**Evidence:** `reports/quality/qodo-rules-extract-2026-07-16.md`
+
+These rules are integrated into thematic `.mdc` files (`00`–`11`). This file is the traceability index.
+
+Coverage matrix: `docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md`
+
+## Canonical Governance Links
+
+- `AGENTS.md`
+- `docs/00-project/NORMATIVE_SOURCES.md`
+- `docs/00-project/RULES.md`
+- `docs/01-requirements/REQUIREMENTS.md`
+- `docs/02-architecture/decisions/`
+
+## Extract Caveats
+
+- Semantic search only (`top_k` ≤ 20); not a full org export
+- Severity omitted by API → recorded as `UNSPECIFIED`
+- Near-duplicate titles with different IDs are retained as distinct API records
+
+## Deduplicated Themes → Target Files
+
+| Theme | Qodo IDs | Target |
+| ----- | -------- | ------ |
+| No secrets in code/docs/tests/logs/artifacts | `717996`, `717895`, `717966`, `717812` | `05`, `08` |
+| No secrets in tracked `configs/**` YAML | `718010`, `717976`, `718034` | `05`, `08` |
+| Do not weaken `.env` / secret-file protections | `1433724` | `05`, `08` |
+| Explicit per-task approval before `.env` edits | `717904`, `717802` | `05` |
+| Critical config modes: no implicit defaults; validate enums | `718012`, `718032`, `718013` | `02`, `11` |
+| Public APIs typed; `mypy --strict`; avoid bare `Any` | `718001`, `717987`, `717867`, `717880`, `717968` | `02` |
+| YAML deterministic key ordering | `718011`, `718031` | `02` |
+| Deterministic outputs (order, serialization, UTC) | `718014`, `717993` | `01`, `00` |
+| Idempotent merge by PK/business key | `1433434` | `01` |
+| Refresh `module-coverage-inventory.json` on `src/bioetl` | `837441` | `05` |
+| Never increase tech-debt budgets / widen exclusions | `883024` | `05` |
+| Contributor-facing behavior ↔ in-repo docs | `1433447` | `06` |
+| Behavior/public-API changes need tests (no weakened asserts) | `717831`, `717936`, `718007`, `718028`, `718008` | `03` |
+| Breaking changes: migration notes + changelog | `717893`, `718035`, `718017`, `717995` | `06`, `11` |
+| Schema/column/CLI → docs + `CHANGELOG.md` | `718030`, `718009` | `06` |
+| Import ports only via `bioetl.domain.ports` facade | `717998` | `00-arch` |
+| HTTP only via `UnifiedHTTPClient` | `1433318` | `04` |
+| Atomic artifact writes (`tmp` → `os.replace`) | `717994` | `01` |
+| Deterministic tests; VCR/fixtures for HTTP | `718005`, `718026`, `718006` | `03` |
+| Docs must not contradict governance / gates | `1433681` | `06` |
+| No undocumented Qodo config keys/schemas | `1433499` | `07` (this file) |
+| No `print()` for runtime logging | `718004`, `717896` | `00-arch`, `09` |
+| Constructor DI; wiring/factories only in `composition/` | `718021`, `718000`, `717830` | `00-arch` |
+| No `interfaces` → `infrastructure` imports | `1433571` | `00-arch` |
+| No domain logic in infrastructure adapters | `1433310` | `00-arch` |
+| Domain purity (no I/O/HTTP/FS); no infra imports in domain/app | `718020`, `717999`, `717997`, `717826` | `00-arch` |
+| No service locator | `717965`, `717897` | `00-arch` |
+| Naming suffixes `*Port`/`*Service`/`*Factory`/`*Adapter` | `718002`, `718023` | `00-arch`, `02` |
+| Silver/Gold: Delta Lake only; no raw Parquet Silver | `1559442`, `718003` | `01` |
+| Silver validate before write; Gold strict fail-closed Pandera | `1433643`, `1433655`, `1433385`, `1433400` | `01` |
+
+## BioETL Local Extensions (not required by this extract)
+
+| Rule | Target |
+| ---- | ------ |
+| Sanitize VCR cassettes from secrets before commit | `03` |
+| Local-only runtime (no Docker/Redis by default) | `05`, `08` |
+| Coverage gate ≥85% | `03`, `02` |
+
+## Qodo Config Guard (`1433499`)
+
+- Do not invent undocumented top-level keys or unsupported `schema`/`version` values in `.qodo.yml` / `.qodo.yaml` / `.qodo.json`
+- Stick to documented Qodo schema; custom keys only under an explicitly allowed extensions/`x-*` section
+
+## Refresh
+
+```bash
+# Evidence: reports/quality/qodo-rules-extract-YYYY-MM-DD.md
+uv run python scripts/ai/sync_cursor_rules.py --deploy
+uv run python scripts/ai/sync_windsurf_rules.py
+```

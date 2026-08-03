@@ -1,0 +1,2821 @@
+{
+  "diagnostics": [
+    {
+      "code": "GOLD_CONTRACT_FIELDS_EXCLUDED_BY_POLICY",
+      "fields": [
+        "_dq_error",
+        "_dq_warn",
+        "_index"
+      ],
+      "message": "Gold layer policy explicitly excludes contract fields.",
+      "severity": "info"
+    },
+    {
+      "code": "GOLD_CONTRACT_FIELDS_NOT_SELECTED_BY_GROUPS",
+      "fields": [
+        "relation",
+        "type",
+        "value"
+      ],
+      "message": "Gold contract fields are not selected by the configured column groups; the generated output list mirrors the runtime projection.",
+      "severity": "warning"
+    }
+  ],
+  "dq": {
+    "conditional_validations": [
+      {
+        "condition_field": "bao_endpoint_mapping_status",
+        "condition_operator": "eq",
+        "condition_value": "mapped",
+        "name": "mapped_bao_endpoint_requires_bundle",
+        "then_validations": [
+          {
+            "allowed": [],
+            "error_message": "Mapped BAO endpoint identifiers must publish a canonical IRI",
+            "field": "bao_endpoint_iri",
+            "max_length": null,
+            "max_value": null,
+            "min_value": null,
+            "nullable": false,
+            "pattern": null,
+            "severity": "error",
+            "severity_enricher": null,
+            "validation_type": "required",
+            "validator": null
+          },
+          {
+            "allowed": [],
+            "error_message": "Mapped BAO endpoint identifiers must publish an ontology version",
+            "field": "bao_ontology_version",
+            "max_length": null,
+            "max_value": null,
+            "min_value": null,
+            "nullable": false,
+            "pattern": null,
+            "severity": "error",
+            "severity_enricher": null,
+            "validation_type": "required",
+            "validator": null
+          }
+        ]
+      },
+      {
+        "condition_field": "bao_format_mapping_status",
+        "condition_operator": "eq",
+        "condition_value": "mapped",
+        "name": "mapped_bao_format_requires_bundle",
+        "then_validations": [
+          {
+            "allowed": [],
+            "error_message": "Mapped BAO format identifiers must publish a canonical IRI",
+            "field": "bao_format_iri",
+            "max_length": null,
+            "max_value": null,
+            "min_value": null,
+            "nullable": false,
+            "pattern": null,
+            "severity": "error",
+            "severity_enricher": null,
+            "validation_type": "required",
+            "validator": null
+          },
+          {
+            "allowed": [],
+            "error_message": "Mapped BAO format identifiers must publish an ontology version",
+            "field": "bao_ontology_version",
+            "max_length": null,
+            "max_value": null,
+            "min_value": null,
+            "nullable": false,
+            "pattern": null,
+            "severity": "error",
+            "severity_enricher": null,
+            "validation_type": "required",
+            "validator": null
+          }
+        ]
+      },
+      {
+        "condition_field": "uo_unit_mapping_status",
+        "condition_operator": "eq",
+        "condition_value": "mapped",
+        "name": "mapped_uo_unit_requires_bundle",
+        "then_validations": [
+          {
+            "allowed": [],
+            "error_message": "Mapped UO unit identifiers must publish a canonical IRI",
+            "field": "uo_unit_iri",
+            "max_length": null,
+            "max_value": null,
+            "min_value": null,
+            "nullable": false,
+            "pattern": null,
+            "severity": "error",
+            "severity_enricher": null,
+            "validation_type": "required",
+            "validator": null
+          },
+          {
+            "allowed": [],
+            "error_message": "Mapped UO unit identifiers must publish an ontology version",
+            "field": "uo_ontology_version",
+            "max_length": null,
+            "max_value": null,
+            "min_value": null,
+            "nullable": false,
+            "pattern": null,
+            "severity": "error",
+            "severity_enricher": null,
+            "validation_type": "required",
+            "validator": null
+          }
+        ]
+      },
+      {
+        "condition_field": "qudt_unit_mapping_status",
+        "condition_operator": "eq",
+        "condition_value": "mapped",
+        "name": "mapped_qudt_unit_requires_bundle",
+        "then_validations": [
+          {
+            "allowed": [],
+            "error_message": "Mapped QUDT unit identifiers must publish a canonical IRI",
+            "field": "qudt_unit_iri",
+            "max_length": null,
+            "max_value": null,
+            "min_value": null,
+            "nullable": false,
+            "pattern": null,
+            "severity": "error",
+            "severity_enricher": null,
+            "validation_type": "required",
+            "validator": null
+          },
+          {
+            "allowed": [],
+            "error_message": "Mapped QUDT unit identifiers must publish an ontology version",
+            "field": "qudt_ontology_version",
+            "max_length": null,
+            "max_value": null,
+            "min_value": null,
+            "nullable": false,
+            "pattern": null,
+            "severity": "error",
+            "severity_enricher": null,
+            "validation_type": "required",
+            "validator": null
+          }
+        ]
+      },
+      {
+        "condition_field": "assay_type",
+        "condition_operator": "eq",
+        "condition_value": "B",
+        "name": "binding_requires_target",
+        "then_validations": [
+          {
+            "allowed": [],
+            "error_message": "Binding assays must have a target",
+            "field": "target_id",
+            "max_length": null,
+            "max_value": null,
+            "min_value": null,
+            "nullable": false,
+            "pattern": null,
+            "severity": "error",
+            "severity_enricher": null,
+            "validation_type": "required",
+            "validator": null
+          }
+        ]
+      },
+      {
+        "condition_field": "standard_type",
+        "condition_operator": "eq",
+        "condition_value": "IC50",
+        "name": "ic50_range_check",
+        "then_validations": [
+          {
+            "allowed": [],
+            "error_message": null,
+            "field": "standard_value",
+            "max_length": null,
+            "max_value": 100000.0,
+            "min_value": 0.001,
+            "nullable": false,
+            "pattern": null,
+            "severity": "error",
+            "severity_enricher": null,
+            "validation_type": "range",
+            "validator": null
+          }
+        ]
+      }
+    ],
+    "cross_field_validations": [
+      {
+        "condition": "conditional_required",
+        "error_message": "standard_units required when standard_value is present",
+        "fields": [
+          "standard_value",
+          "standard_units"
+        ],
+        "name": "value_requires_units",
+        "required_field": "standard_units",
+        "severity": "error",
+        "trigger_field": "standard_value",
+        "validator": null
+      },
+      {
+        "condition": "all_present",
+        "error_message": "Complete activity data requires value, units, and type",
+        "fields": [
+          "standard_value",
+          "standard_units",
+          "standard_type"
+        ],
+        "name": "activity_completeness",
+        "required_field": null,
+        "severity": "error",
+        "trigger_field": null,
+        "validator": null
+      },
+      {
+        "condition": "conditional_required",
+        "error_message": "BAO endpoint mappings must publish a companion mapping status",
+        "fields": [
+          "bao_endpoint",
+          "bao_endpoint_mapping_status"
+        ],
+        "name": "bao_endpoint_requires_mapping_status",
+        "required_field": "bao_endpoint_mapping_status",
+        "severity": "error",
+        "trigger_field": "bao_endpoint",
+        "validator": null
+      },
+      {
+        "condition": "conditional_required",
+        "error_message": "BAO format mappings must publish a companion mapping status",
+        "fields": [
+          "bao_format",
+          "bao_format_mapping_status"
+        ],
+        "name": "bao_format_requires_mapping_status",
+        "required_field": "bao_format_mapping_status",
+        "severity": "error",
+        "trigger_field": "bao_format",
+        "validator": null
+      },
+      {
+        "condition": "conditional_required",
+        "error_message": "UO unit mappings must publish a companion mapping status",
+        "fields": [
+          "uo_units",
+          "uo_unit_mapping_status"
+        ],
+        "name": "uo_unit_requires_mapping_status",
+        "required_field": "uo_unit_mapping_status",
+        "severity": "error",
+        "trigger_field": "uo_units",
+        "validator": null
+      },
+      {
+        "condition": "conditional_required",
+        "error_message": "QUDT unit mappings must publish a companion mapping status",
+        "fields": [
+          "qudt_units",
+          "qudt_unit_mapping_status"
+        ],
+        "name": "qudt_unit_requires_mapping_status",
+        "required_field": "qudt_unit_mapping_status",
+        "severity": "error",
+        "trigger_field": "qudt_units",
+        "validator": null
+      }
+    ],
+    "field_validations": [
+      {
+        "allowed": [],
+        "error_message": "Content hash is required for deduplication",
+        "field": "content_hash",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": false,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "required",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "Ingestion timestamp must be ISO 8601 format",
+        "field": "_ingestion_ts",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": false,
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "pattern",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "Invalid ChEMBL molecule ID format",
+        "field": "molecule_id",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": "^CHEMBL\\d+$",
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "pattern",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "Invalid ChEMBL target ID format",
+        "field": "target_id",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": "^CHEMBL\\d+$",
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "pattern",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "Invalid ChEMBL assay ID format",
+        "field": "assay_id",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": "^CHEMBL\\d+$",
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "pattern",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "Invalid ChEMBL document ID format",
+        "field": "publication_id",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": "^CHEMBL\\d+$",
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "pattern",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "Activity ID is required",
+        "field": "activity_id",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": false,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "required",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "canonical_smiles must be a valid canonical SMILES value when present",
+        "field": "canonical_smiles",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "custom",
+        "validator": "smiles_validator"
+      },
+      {
+        "allowed": [],
+        "error_message": "standard_value must be non-negative and below 1B",
+        "field": "standard_value",
+        "max_length": null,
+        "max_value": 1000000000.0,
+        "min_value": 0.0,
+        "nullable": true,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "range",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "standard_flag must be 0 or 1",
+        "field": "standard_flag",
+        "max_length": null,
+        "max_value": 1.0,
+        "min_value": 0.0,
+        "nullable": false,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "range",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "potential_duplicate must be 0 or 1",
+        "field": "potential_duplicate",
+        "max_length": null,
+        "max_value": 1.0,
+        "min_value": 0.0,
+        "nullable": false,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "range",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "manual_curation_flag must be 0 or 1 when present",
+        "field": "manual_curation_flag",
+        "max_length": null,
+        "max_value": 1.0,
+        "min_value": 0.0,
+        "nullable": true,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "range",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "pChEMBL value must be between 0 and 15",
+        "field": "pchembl_value",
+        "max_length": null,
+        "max_value": 15.0,
+        "min_value": 0.0,
+        "nullable": true,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "range",
+        "validator": null
+      },
+      {
+        "allowed": [
+          "IC50",
+          "EC50",
+          "Ki",
+          "Kd",
+          "AC50",
+          "GI50",
+          "Potency",
+          "Inhibition",
+          "% Inhibition",
+          "Activity",
+          "Ratio",
+          "ED50",
+          "ID50"
+        ],
+        "error_message": "Invalid standard_type value",
+        "field": "standard_type",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "enum",
+        "validator": null
+      },
+      {
+        "allowed": [
+          "=",
+          "<",
+          "<=",
+          ">",
+          ">=",
+          "~"
+        ],
+        "error_message": "Invalid standard_relation value",
+        "field": "standard_relation",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": false,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "enum",
+        "validator": null
+      },
+      {
+        "allowed": [
+          "B",
+          "F",
+          "A",
+          "T",
+          "P",
+          "U"
+        ],
+        "error_message": "Invalid assay_type value",
+        "field": "assay_type",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": false,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "enum",
+        "validator": null
+      },
+      {
+        "allowed": [
+          "Potential missing data",
+          "Potential author error",
+          "Manually validated",
+          "Potential transcription error",
+          "Outside typical range",
+          "Non standard unit for type",
+          "Author confirmed error"
+        ],
+        "error_message": "Invalid data_validity_comment value",
+        "field": "data_validity_comment",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "enum",
+        "validator": null
+      },
+      {
+        "allowed": [
+          "nM",
+          "µM",
+          "mM",
+          "pM",
+          "M",
+          "%",
+          "ug.mL-1",
+          "mg.kg-1"
+        ],
+        "error_message": "Invalid standard_units value",
+        "field": "standard_units",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "enum",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "units must be a canonical unit token when present",
+        "field": "units",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": "^(?:[A-Za-zµ%][A-Za-z0-9µ%._-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$",
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "pattern",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "qudt_units must be a raw QUDT URI or canonical unit token when present",
+        "field": "qudt_units",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": "^(?:https?://[^\\s]+|[A-Za-zµ%][A-Za-z0-9µ%._/-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$",
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "pattern",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "uo_units must be a canonical ontology/unit token when present",
+        "field": "uo_units",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": "^(?:UO_[0-9]{7}|[A-Za-zµ%][A-Za-z0-9µ%._-]*)$",
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "pattern",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "bao_endpoint_iri must be an HTTP(S) IRI when present",
+        "field": "bao_endpoint_iri",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": "^https?://[^\\s]+$",
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "pattern",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "bao_format_iri must be an HTTP(S) IRI when present",
+        "field": "bao_format_iri",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": "^https?://[^\\s]+$",
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "pattern",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "uo_unit_iri must be an HTTP(S) IRI when present",
+        "field": "uo_unit_iri",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": "^https?://[^\\s]+$",
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "pattern",
+        "validator": null
+      },
+      {
+        "allowed": [],
+        "error_message": "qudt_unit_iri must be an HTTP(S) IRI when present",
+        "field": "qudt_unit_iri",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": "^https?://[^\\s]+$",
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "pattern",
+        "validator": null
+      },
+      {
+        "allowed": [
+          "mapped",
+          "unmapped",
+          "missing"
+        ],
+        "error_message": "Invalid BAO endpoint mapping status",
+        "field": "bao_endpoint_mapping_status",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "enum",
+        "validator": null
+      },
+      {
+        "allowed": [
+          "mapped",
+          "unmapped",
+          "missing"
+        ],
+        "error_message": "Invalid BAO format mapping status",
+        "field": "bao_format_mapping_status",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "enum",
+        "validator": null
+      },
+      {
+        "allowed": [
+          "mapped",
+          "unmapped",
+          "missing"
+        ],
+        "error_message": "Invalid UO unit mapping status",
+        "field": "uo_unit_mapping_status",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "enum",
+        "validator": null
+      },
+      {
+        "allowed": [
+          "mapped",
+          "unmapped",
+          "missing"
+        ],
+        "error_message": "Invalid QUDT unit mapping status",
+        "field": "qudt_unit_mapping_status",
+        "max_length": null,
+        "max_value": null,
+        "min_value": null,
+        "nullable": true,
+        "pattern": null,
+        "severity": "error",
+        "severity_enricher": null,
+        "validation_type": "enum",
+        "validator": null
+      }
+    ],
+    "hard_fail_threshold": 0.5,
+    "invalid_record_policy": "quarantine",
+    "soft_fail_threshold": 0.05,
+    "strict_validation": false
+  },
+  "effective_config_loader": "scripts.docs.passports.source_facts.load_effective_pipeline_facts",
+  "effective_config_sha256": "90b2b848882ce0d0681dd613c91724859a19ad23d2d82e43686e2054919a4204",
+  "entity": "activity",
+  "extraction_criteria": [
+    {
+      "category": "api query",
+      "enabled": true,
+      "field": "assay_type",
+      "operator": "in",
+      "source_key": "assay_type__in",
+      "stage": "source",
+      "value": "B,F"
+    },
+    {
+      "category": "api query",
+      "enabled": true,
+      "field": "data_validity_comment",
+      "operator": "is null",
+      "source_key": "data_validity_comment__isnull",
+      "stage": "source",
+      "value": true
+    },
+    {
+      "category": "api query",
+      "enabled": true,
+      "field": "pchembl_value",
+      "operator": "is not null",
+      "source_key": "pchembl_value__isnull",
+      "stage": "source",
+      "value": false
+    },
+    {
+      "category": "api query",
+      "enabled": true,
+      "field": "potential_duplicate",
+      "operator": "=",
+      "source_key": "potential_duplicate",
+      "stage": "source",
+      "value": 0
+    },
+    {
+      "category": "api query",
+      "enabled": true,
+      "field": "standard_flag",
+      "operator": "=",
+      "source_key": "standard_flag",
+      "stage": "source",
+      "value": 1
+    },
+    {
+      "category": "api query",
+      "enabled": true,
+      "field": "standard_relation",
+      "operator": "=",
+      "source_key": "standard_relation",
+      "stage": "source",
+      "value": "="
+    },
+    {
+      "category": "api query",
+      "enabled": true,
+      "field": "standard_type",
+      "operator": "in",
+      "source_key": "standard_type__in",
+      "stage": "source",
+      "value": "IC50,Ki"
+    },
+    {
+      "category": "api query",
+      "enabled": true,
+      "field": "standard_units",
+      "operator": "=",
+      "source_key": "standard_units",
+      "stage": "source",
+      "value": "nM"
+    },
+    {
+      "category": "api query",
+      "enabled": true,
+      "field": "target_tax_id",
+      "operator": "is not null",
+      "source_key": "target_tax_id__isnull",
+      "stage": "source",
+      "value": false
+    }
+  ],
+  "generated_date": "2026-07-31",
+  "generator_version": "1.0.0",
+  "gold": {
+    "contract_field_count": 72,
+    "exclude_fields": [
+      "_dq_*",
+      "_source_batch_id",
+      "_index"
+    ],
+    "fields": [
+      {
+        "data_type": "string",
+        "description": "",
+        "group": "system",
+        "name": "entity_id",
+        "nullable": false,
+        "ordinal": 1,
+        "required": true,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string",
+        "description": "",
+        "group": "system",
+        "name": "content_hash",
+        "nullable": false,
+        "ordinal": 2,
+        "required": true,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string",
+        "description": "",
+        "group": "business",
+        "name": "activity_id",
+        "nullable": false,
+        "ordinal": 3,
+        "required": true,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "assay_id",
+        "nullable": true,
+        "ordinal": 4,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string",
+        "description": "",
+        "group": "business",
+        "name": "molecule_id",
+        "nullable": false,
+        "ordinal": 5,
+        "required": true,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "target_id",
+        "nullable": true,
+        "ordinal": 6,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "publication_id",
+        "nullable": true,
+        "ordinal": 7,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "standard_relation",
+        "nullable": true,
+        "ordinal": 8,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "standard_value",
+        "nullable": true,
+        "ordinal": 9,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "standard_units",
+        "nullable": true,
+        "ordinal": 10,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "standard_type",
+        "nullable": true,
+        "ordinal": 11,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "standard_flag",
+        "nullable": true,
+        "ordinal": 12,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "pchembl_value",
+        "nullable": true,
+        "ordinal": 13,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "data_validity_comment",
+        "nullable": true,
+        "ordinal": 14,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "activity_comment",
+        "nullable": true,
+        "ordinal": 15,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "potential_duplicate",
+        "nullable": true,
+        "ordinal": 16,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "bao_endpoint",
+        "nullable": true,
+        "ordinal": 17,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "bao_endpoint_iri",
+        "nullable": true,
+        "ordinal": 18,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "bao_endpoint_mapping_status",
+        "nullable": true,
+        "ordinal": 19,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "uo_units",
+        "nullable": true,
+        "ordinal": 20,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "uo_unit_iri",
+        "nullable": true,
+        "ordinal": 21,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "uo_unit_mapping_status",
+        "nullable": true,
+        "ordinal": 22,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "uo_ontology_version",
+        "nullable": true,
+        "ordinal": 23,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "qudt_units",
+        "nullable": true,
+        "ordinal": 24,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "qudt_unit_iri",
+        "nullable": true,
+        "ordinal": 25,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "qudt_unit_mapping_status",
+        "nullable": true,
+        "ordinal": 26,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "qudt_ontology_version",
+        "nullable": true,
+        "ordinal": 27,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "src_id",
+        "nullable": true,
+        "ordinal": 28,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "record_id",
+        "nullable": true,
+        "ordinal": 29,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "units",
+        "nullable": true,
+        "ordinal": 30,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "text_value",
+        "nullable": true,
+        "ordinal": 31,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "standard_text_value",
+        "nullable": true,
+        "ordinal": 32,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "upper_value",
+        "nullable": true,
+        "ordinal": 33,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "standard_upper_value",
+        "nullable": true,
+        "ordinal": 34,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "toid",
+        "nullable": true,
+        "ordinal": 35,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "manual_curation_flag",
+        "nullable": true,
+        "ordinal": 36,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "original_activity_id",
+        "nullable": true,
+        "ordinal": 37,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "data_validity_description",
+        "nullable": true,
+        "ordinal": 38,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "ligand_efficiency_bei",
+        "nullable": true,
+        "ordinal": 39,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "ligand_efficiency_le",
+        "nullable": true,
+        "ordinal": 40,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "ligand_efficiency_lle",
+        "nullable": true,
+        "ordinal": 41,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "ligand_efficiency_sei",
+        "nullable": true,
+        "ordinal": 42,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "action_type",
+        "nullable": true,
+        "ordinal": 43,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "action_type_description",
+        "nullable": true,
+        "ordinal": 44,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "action_type_parent_type",
+        "nullable": true,
+        "ordinal": 45,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "activity_properties",
+        "nullable": true,
+        "ordinal": 46,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "canonical_smiles",
+        "nullable": true,
+        "ordinal": 47,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "molecule_pref_name",
+        "nullable": true,
+        "ordinal": 48,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "parent_molecule_id",
+        "nullable": true,
+        "ordinal": 49,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "target_pref_name",
+        "nullable": true,
+        "ordinal": 50,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "target_organism",
+        "nullable": true,
+        "ordinal": 51,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "target_taxonomy_id",
+        "nullable": true,
+        "ordinal": 52,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "assay_type",
+        "nullable": true,
+        "ordinal": 53,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "assay_description",
+        "nullable": true,
+        "ordinal": 54,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "assay_variant_accession",
+        "nullable": true,
+        "ordinal": 55,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "assay_variant_mutation",
+        "nullable": true,
+        "ordinal": 56,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "bao_format",
+        "nullable": true,
+        "ordinal": 57,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "bao_format_iri",
+        "nullable": true,
+        "ordinal": 58,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "bao_format_mapping_status",
+        "nullable": true,
+        "ordinal": 59,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "bao_label",
+        "nullable": true,
+        "ordinal": 60,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "bao_ontology_version",
+        "nullable": true,
+        "ordinal": 61,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "journal",
+        "nullable": true,
+        "ordinal": 62,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "publication_doi",
+        "nullable": true,
+        "ordinal": 63,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "publication_pmid",
+        "nullable": true,
+        "ordinal": 64,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "string|null",
+        "description": "",
+        "group": "business",
+        "name": "publication_pmc_id",
+        "nullable": true,
+        "ordinal": 65,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      },
+      {
+        "data_type": "number|null",
+        "description": "",
+        "group": "business",
+        "name": "publication_year",
+        "nullable": true,
+        "ordinal": 66,
+        "required": false,
+        "schema_source": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+      }
+    ],
+    "include_groups": [
+      "system",
+      "business"
+    ],
+    "name": "Gold",
+    "omitted_contract_fields": [
+      "_dq_error",
+      "_dq_warn",
+      "_index",
+      "relation",
+      "type",
+      "value"
+    ],
+    "schema_ref": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+  },
+  "gold_criteria": [
+    {
+      "category": "column",
+      "enabled": true,
+      "field": "assay_type",
+      "operator": "in",
+      "source_key": "columns.assay_type",
+      "stage": "gold",
+      "value": [
+        "B",
+        "F"
+      ]
+    },
+    {
+      "category": "column",
+      "enabled": true,
+      "field": "potential_duplicate",
+      "operator": "in",
+      "source_key": "columns.potential_duplicate",
+      "stage": "gold",
+      "value": [
+        0
+      ]
+    },
+    {
+      "category": "column",
+      "enabled": true,
+      "field": "standard_relation",
+      "operator": "in",
+      "source_key": "columns.standard_relation",
+      "stage": "gold",
+      "value": [
+        "="
+      ]
+    },
+    {
+      "category": "column",
+      "enabled": true,
+      "field": "standard_type",
+      "operator": "in",
+      "source_key": "columns.standard_type",
+      "stage": "gold",
+      "value": [
+        "IC50",
+        "Ki"
+      ]
+    },
+    {
+      "category": "column",
+      "enabled": true,
+      "field": "standard_units",
+      "operator": "in",
+      "source_key": "columns.standard_units",
+      "stage": "gold",
+      "value": [
+        "nM"
+      ]
+    },
+    {
+      "category": "range",
+      "enabled": true,
+      "field": "activity_id",
+      "operator": "range",
+      "source_key": "ranges.activity_id",
+      "stage": "gold",
+      "value": {
+        "include_max": true,
+        "include_min": true,
+        "max": 10000000000.0,
+        "min": 1.0
+      }
+    },
+    {
+      "category": "range",
+      "enabled": true,
+      "field": "pchembl_value",
+      "operator": "range",
+      "source_key": "ranges.pchembl_value",
+      "stage": "gold",
+      "value": {
+        "include_max": true,
+        "include_min": true,
+        "max": 10.0,
+        "min": 3.0
+      }
+    },
+    {
+      "category": "range",
+      "enabled": true,
+      "field": "publication_year",
+      "operator": "range",
+      "source_key": "ranges.publication_year",
+      "stage": "gold",
+      "value": {
+        "include_max": true,
+        "include_min": true,
+        "max": 2050.0,
+        "min": 1950.0
+      }
+    },
+    {
+      "category": "range",
+      "enabled": true,
+      "field": "standard_value",
+      "operator": "range",
+      "source_key": "ranges.standard_value",
+      "stage": "gold",
+      "value": {
+        "include_max": true,
+        "include_min": false,
+        "max": null,
+        "min": 0.0
+      }
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "standard_type",
+      "operator": "is not null",
+      "source_key": "required_fields.standard_type",
+      "stage": "gold",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "standard_value",
+      "operator": "is not null",
+      "source_key": "required_fields.standard_value",
+      "stage": "gold",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "standard_units",
+      "operator": "is not null",
+      "source_key": "required_fields.standard_units",
+      "stage": "gold",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "target_id",
+      "operator": "is not null",
+      "source_key": "required_fields.target_id",
+      "stage": "gold",
+      "value": true
+    }
+  ],
+  "input_criteria": [
+    {
+      "category": "input file",
+      "enabled": false,
+      "field": "activity_id",
+      "operator": "enabled",
+      "source_key": "input_filter",
+      "stage": "input",
+      "value": {
+        "column_name": "activity_id",
+        "enabled": false,
+        "source_path": "data/input/activity.csv"
+      }
+    }
+  ],
+  "pipeline_name": "chembl_activity",
+  "post_processing": {
+    "code_defined_methods": [
+      "_postprocess_pre_silver_record",
+      "transform_for_gold"
+    ],
+    "declarative_steps": [],
+    "inspection_policy": "Method presence is recorded; implementation semantics are intentionally not inferred from source code.",
+    "transformer_class": "bioetl.application.pipelines.chembl.activity_transformer.ActivityTransformer"
+  },
+  "provider": "chembl",
+  "schema_version": "1.0.0",
+  "silver": {
+    "contract_field_count": 77,
+    "exclude_fields": [],
+    "fields": [
+      {
+        "data_type": "string",
+        "description": "Unique business identifier for the entity.",
+        "group": "system",
+        "name": "entity_id",
+        "nullable": true,
+        "ordinal": 1,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "SHA256 hash of canonical record representation (64 hex chars).",
+        "group": "system",
+        "name": "content_hash",
+        "nullable": true,
+        "ordinal": 2,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Correlation ID for the pipeline run.",
+        "group": "system",
+        "name": "_run_id",
+        "nullable": true,
+        "ordinal": 3,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Type of pipeline run.",
+        "group": "system",
+        "name": "_run_type",
+        "nullable": true,
+        "ordinal": 4,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Batch context ID from the source.",
+        "group": "system",
+        "name": "_source_batch_id",
+        "nullable": false,
+        "ordinal": 5,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Timestamp when the record was ingested (UTC, ISO 8601 format).",
+        "group": "system",
+        "name": "_ingestion_ts",
+        "nullable": true,
+        "ordinal": 6,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "int64",
+        "description": "Sequential index of the record in the pipeline run.",
+        "group": "system",
+        "name": "_index",
+        "nullable": true,
+        "ordinal": 7,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Processing state for the activity record.",
+        "group": "system",
+        "name": "_state",
+        "nullable": false,
+        "ordinal": 8,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Primary key.",
+        "group": "business",
+        "name": "activity_id",
+        "nullable": false,
+        "ordinal": 9,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Foreign key to assay.",
+        "group": "business",
+        "name": "assay_id",
+        "nullable": false,
+        "ordinal": 10,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Foreign key to molecule.",
+        "group": "business",
+        "name": "molecule_id",
+        "nullable": false,
+        "ordinal": 11,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Foreign key to target.",
+        "group": "business",
+        "name": "target_id",
+        "nullable": false,
+        "ordinal": 12,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Foreign key to document.",
+        "group": "business",
+        "name": "publication_id",
+        "nullable": false,
+        "ordinal": 13,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Standardized operator.",
+        "group": "business",
+        "name": "standard_relation",
+        "nullable": false,
+        "ordinal": 14,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "double",
+        "description": "Standardized value.",
+        "group": "business",
+        "name": "standard_value",
+        "nullable": false,
+        "ordinal": 15,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Standardized units.",
+        "group": "business",
+        "name": "standard_units",
+        "nullable": false,
+        "ordinal": 16,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Standardized measurement type.",
+        "group": "business",
+        "name": "standard_type",
+        "nullable": false,
+        "ordinal": 17,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "int64",
+        "description": "Standardization flag.",
+        "group": "business",
+        "name": "standard_flag",
+        "nullable": false,
+        "ordinal": 18,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "double",
+        "description": "-log10 of molar activity.",
+        "group": "business",
+        "name": "pchembl_value",
+        "nullable": false,
+        "ordinal": 19,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Data quality comment.",
+        "group": "business",
+        "name": "data_validity_comment",
+        "nullable": true,
+        "ordinal": 20,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Textual comment.",
+        "group": "business",
+        "name": "activity_comment",
+        "nullable": true,
+        "ordinal": 21,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "int64",
+        "description": "Duplicate flag.",
+        "group": "business",
+        "name": "potential_duplicate",
+        "nullable": false,
+        "ordinal": 22,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "BAO ID.",
+        "group": "business",
+        "name": "bao_endpoint",
+        "nullable": false,
+        "ordinal": 23,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Persistent IRI for the BAO endpoint ID.",
+        "group": "business",
+        "name": "bao_endpoint_iri",
+        "nullable": true,
+        "ordinal": 24,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "BAO endpoint IRI mapping status.",
+        "group": "business",
+        "name": "bao_endpoint_mapping_status",
+        "nullable": true,
+        "ordinal": 25,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Units Ontology ID.",
+        "group": "business",
+        "name": "uo_units",
+        "nullable": false,
+        "ordinal": 26,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Persistent IRI for the Units Ontology unit ID.",
+        "group": "business",
+        "name": "uo_unit_iri",
+        "nullable": true,
+        "ordinal": 27,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Units Ontology IRI mapping status.",
+        "group": "business",
+        "name": "uo_unit_mapping_status",
+        "nullable": true,
+        "ordinal": 28,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Units Ontology release/version used for IRI mapping.",
+        "group": "business",
+        "name": "uo_ontology_version",
+        "nullable": true,
+        "ordinal": 29,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "QUDT unit.",
+        "group": "business",
+        "name": "qudt_units",
+        "nullable": true,
+        "ordinal": 30,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Persistent QUDT unit IRI.",
+        "group": "business",
+        "name": "qudt_unit_iri",
+        "nullable": true,
+        "ordinal": 31,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "QUDT unit IRI mapping status.",
+        "group": "business",
+        "name": "qudt_unit_mapping_status",
+        "nullable": true,
+        "ordinal": 32,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "QUDT ontology release/version used for IRI mapping.",
+        "group": "business",
+        "name": "qudt_ontology_version",
+        "nullable": true,
+        "ordinal": 33,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "int64",
+        "description": "Source ID.",
+        "group": "business",
+        "name": "src_id",
+        "nullable": false,
+        "ordinal": 34,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "int64",
+        "description": "FK to compound_record.",
+        "group": "business",
+        "name": "record_id",
+        "nullable": false,
+        "ordinal": 35,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Original type.",
+        "group": "business",
+        "name": "activity_type",
+        "nullable": true,
+        "ordinal": 36,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Original operator.",
+        "group": "business",
+        "name": "activity_relation",
+        "nullable": false,
+        "ordinal": 37,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "double",
+        "description": "Original value.",
+        "group": "business",
+        "name": "activity_value",
+        "nullable": false,
+        "ordinal": 38,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Original units.",
+        "group": "business",
+        "name": "units",
+        "nullable": false,
+        "ordinal": 39,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Text value.",
+        "group": "business",
+        "name": "text_value",
+        "nullable": true,
+        "ordinal": 40,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Standardized text value.",
+        "group": "business",
+        "name": "standard_text_value",
+        "nullable": true,
+        "ordinal": 41,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "double",
+        "description": "Upper bound.",
+        "group": "business",
+        "name": "upper_value",
+        "nullable": true,
+        "ordinal": 42,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "double",
+        "description": "Standardized upper bound.",
+        "group": "business",
+        "name": "standard_upper_value",
+        "nullable": true,
+        "ordinal": 43,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "double",
+        "description": "Test Occasion ID (float for nullable int).",
+        "group": "business",
+        "name": "toid",
+        "nullable": true,
+        "ordinal": 44,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "int64",
+        "description": "Manual curation flag.",
+        "group": "business",
+        "name": "manual_curation_flag",
+        "nullable": true,
+        "ordinal": 45,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "double",
+        "description": "Original activity ID (float for nullable int).",
+        "group": "business",
+        "name": "original_activity_id",
+        "nullable": true,
+        "ordinal": 46,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Human-readable data validity explanation.",
+        "group": "business",
+        "name": "data_validity_description",
+        "nullable": true,
+        "ordinal": 47,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "double",
+        "description": "Binding Efficiency Index (BEI).",
+        "group": "business",
+        "name": "ligand_efficiency_bei",
+        "nullable": true,
+        "ordinal": 48,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "double",
+        "description": "Ligand Efficiency (LE).",
+        "group": "business",
+        "name": "ligand_efficiency_le",
+        "nullable": true,
+        "ordinal": 49,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "double",
+        "description": "Lipophilic Ligand Efficiency (LLE).",
+        "group": "business",
+        "name": "ligand_efficiency_lle",
+        "nullable": true,
+        "ordinal": 50,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "double",
+        "description": "Surface Efficiency Index (SEI).",
+        "group": "business",
+        "name": "ligand_efficiency_sei",
+        "nullable": true,
+        "ordinal": 51,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Action type classification.",
+        "group": "business",
+        "name": "action_type",
+        "nullable": true,
+        "ordinal": 52,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Action type description.",
+        "group": "business",
+        "name": "action_type_description",
+        "nullable": true,
+        "ordinal": 53,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Parent action type category.",
+        "group": "business",
+        "name": "action_type_parent_type",
+        "nullable": true,
+        "ordinal": 54,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "JSON string of activity properties.",
+        "group": "business",
+        "name": "activity_properties",
+        "nullable": true,
+        "ordinal": 55,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Canonical SMILES of molecule.",
+        "group": "business",
+        "name": "canonical_smiles",
+        "nullable": false,
+        "ordinal": 56,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Molecule preferred name.",
+        "group": "business",
+        "name": "molecule_pref_name",
+        "nullable": true,
+        "ordinal": 57,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Parent molecule ChEMBL ID.",
+        "group": "business",
+        "name": "parent_molecule_id",
+        "nullable": true,
+        "ordinal": 58,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Target preferred name.",
+        "group": "business",
+        "name": "target_pref_name",
+        "nullable": true,
+        "ordinal": 59,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Target organism.",
+        "group": "business",
+        "name": "target_organism",
+        "nullable": false,
+        "ordinal": 60,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "int64",
+        "description": "Target taxonomy ID.",
+        "group": "business",
+        "name": "target_taxonomy_id",
+        "nullable": false,
+        "ordinal": 61,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Assay type (B/F/A/T/P/U).",
+        "group": "business",
+        "name": "assay_type",
+        "nullable": false,
+        "ordinal": 62,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Assay description text.",
+        "group": "business",
+        "name": "assay_description",
+        "nullable": false,
+        "ordinal": 63,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Assay variant protein accession.",
+        "group": "business",
+        "name": "assay_variant_accession",
+        "nullable": true,
+        "ordinal": 64,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Assay variant mutation description.",
+        "group": "business",
+        "name": "assay_variant_mutation",
+        "nullable": true,
+        "ordinal": 65,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "BioAssay Ontology format ID.",
+        "group": "business",
+        "name": "bao_format",
+        "nullable": false,
+        "ordinal": 66,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Persistent IRI for the BAO format ID.",
+        "group": "business",
+        "name": "bao_format_iri",
+        "nullable": true,
+        "ordinal": 67,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "BAO format IRI mapping status.",
+        "group": "business",
+        "name": "bao_format_mapping_status",
+        "nullable": true,
+        "ordinal": 68,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "BioAssay Ontology label.",
+        "group": "business",
+        "name": "bao_label",
+        "nullable": false,
+        "ordinal": 69,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "BAO ontology release/version used for IRI mapping.",
+        "group": "business",
+        "name": "bao_ontology_version",
+        "nullable": true,
+        "ordinal": 70,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Journal name.",
+        "group": "business",
+        "name": "journal",
+        "nullable": false,
+        "ordinal": 71,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Publication DOI.",
+        "group": "business",
+        "name": "publication_doi",
+        "nullable": true,
+        "ordinal": 72,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Publication PMID.",
+        "group": "business",
+        "name": "publication_pmid",
+        "nullable": true,
+        "ordinal": 73,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "string",
+        "description": "Publication PMC ID.",
+        "group": "business",
+        "name": "publication_pmc_id",
+        "nullable": true,
+        "ordinal": 74,
+        "required": false,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "int64",
+        "description": "Publication year.",
+        "group": "business",
+        "name": "publication_year",
+        "nullable": false,
+        "ordinal": 75,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "bool",
+        "description": "Flag for data quality errors.",
+        "group": "dq",
+        "name": "_dq_error",
+        "nullable": true,
+        "ordinal": 76,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      },
+      {
+        "data_type": "bool",
+        "description": "Flag for data quality warnings.",
+        "group": "dq",
+        "name": "_dq_warn",
+        "nullable": true,
+        "ordinal": 77,
+        "required": true,
+        "schema_source": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+      }
+    ],
+    "include_groups": [
+      "system",
+      "business",
+      "dq"
+    ],
+    "name": "Silver",
+    "omitted_contract_fields": [],
+    "schema_ref": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+  },
+  "silver_criteria": [
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "activity_id",
+      "operator": "is not null",
+      "source_key": "required_fields.activity_id",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "molecule_id",
+      "operator": "is not null",
+      "source_key": "required_fields.molecule_id",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "assay_id",
+      "operator": "is not null",
+      "source_key": "required_fields.assay_id",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "target_id",
+      "operator": "is not null",
+      "source_key": "required_fields.target_id",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "publication_id",
+      "operator": "is not null",
+      "source_key": "required_fields.publication_id",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "record_id",
+      "operator": "is not null",
+      "source_key": "required_fields.record_id",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "src_id",
+      "operator": "is not null",
+      "source_key": "required_fields.src_id",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "canonical_smiles",
+      "operator": "is not null",
+      "source_key": "required_fields.canonical_smiles",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "target_organism",
+      "operator": "is not null",
+      "source_key": "required_fields.target_organism",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "assay_description",
+      "operator": "is not null",
+      "source_key": "required_fields.assay_description",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "bao_endpoint",
+      "operator": "is not null",
+      "source_key": "required_fields.bao_endpoint",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "bao_format",
+      "operator": "is not null",
+      "source_key": "required_fields.bao_format",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "bao_label",
+      "operator": "is not null",
+      "source_key": "required_fields.bao_label",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "activity_relation",
+      "operator": "is not null",
+      "source_key": "required_fields.activity_relation",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "activity_value",
+      "operator": "is not null",
+      "source_key": "required_fields.activity_value",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "units",
+      "operator": "is not null",
+      "source_key": "required_fields.units",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "standard_value",
+      "operator": "is not null",
+      "source_key": "required_fields.standard_value",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "standard_units",
+      "operator": "is not null",
+      "source_key": "required_fields.standard_units",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "standard_type",
+      "operator": "is not null",
+      "source_key": "required_fields.standard_type",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "standard_flag",
+      "operator": "is not null",
+      "source_key": "required_fields.standard_flag",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "pchembl_value",
+      "operator": "is not null",
+      "source_key": "required_fields.pchembl_value",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "uo_units",
+      "operator": "is not null",
+      "source_key": "required_fields.uo_units",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "journal",
+      "operator": "is not null",
+      "source_key": "required_fields.journal",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "publication_year",
+      "operator": "is not null",
+      "source_key": "required_fields.publication_year",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "_state",
+      "operator": "is not null",
+      "source_key": "required_fields._state",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "assay_type",
+      "operator": "is not null",
+      "source_key": "required_fields.assay_type",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "potential_duplicate",
+      "operator": "is not null",
+      "source_key": "required_fields.potential_duplicate",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "standard_relation",
+      "operator": "is not null",
+      "source_key": "required_fields.standard_relation",
+      "stage": "silver",
+      "value": true
+    },
+    {
+      "category": "structural",
+      "enabled": true,
+      "field": "data_validity_comment",
+      "operator": "exclude if present",
+      "source_key": "exclude_if_present.data_validity_comment",
+      "stage": "silver",
+      "value": true
+    }
+  ],
+  "source_profile": {
+    "description": "Baseline curated ChEMBL activity extraction profile; no widening in ADR-050 cleanup.",
+    "extraction_params_sha256": "d4c7fc76dfcd88aa075762c96795ebd6de8af735540cf28a551a6d75149e4078",
+    "profile_id": "chembl.activity.curated",
+    "status": "baseline",
+    "version": "1.0.0"
+  },
+  "sources": [
+    {
+      "kind": "effective config layer",
+      "path": "configs/base/pipeline.yaml",
+      "symbol": null
+    },
+    {
+      "kind": "effective config layer",
+      "path": "configs/base/quality.yaml",
+      "symbol": null
+    },
+    {
+      "kind": "effective config layer",
+      "path": "configs/providers/chembl.yaml",
+      "symbol": null
+    },
+    {
+      "kind": "effective config layer",
+      "path": "configs/entities/chembl/activity.yaml",
+      "symbol": null
+    },
+    {
+      "kind": "pipeline registry",
+      "path": "src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py",
+      "symbol": "chembl_activity"
+    },
+    {
+      "kind": "Silver PyArrow schema",
+      "path": "src/bioetl/infrastructure/schemas/silver_chembl_core.py",
+      "symbol": "bioetl.infrastructure.schemas.silver_chembl_core.CHEMBL_ACTIVITY_SCHEMA"
+    },
+    {
+      "kind": "Silver Pandera schema",
+      "path": "src/bioetl/domain/schemas/chembl/activity.py",
+      "symbol": "bioetl.domain.schemas.chembl.activity.ActivitySchema"
+    },
+    {
+      "kind": "Gold contract",
+      "path": "src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
+      "symbol": "bioetl.domain.contracts.gold._chembl_activity_assay_schemas.ChEMBLActivityGoldSchema"
+    },
+    {
+      "kind": "transformer",
+      "path": "src/bioetl/application/pipelines/chembl/activity_transformer.py",
+      "symbol": "bioetl.application.pipelines.chembl.activity_transformer.ActivityTransformer"
+    }
+  ]
+}

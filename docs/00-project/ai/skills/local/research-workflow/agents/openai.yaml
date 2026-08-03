@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Workflow"
+  short_description: "Run traceable evidence-to-spec research"
+  default_prompt: "Use $research-workflow to conduct traceable research from evidence collection through decisions and constrained specifications."

@@ -1,0 +1,51 @@
+%% View: Overview | Parent: 26-hexagonal-ports-adapters-full.mermaid
+%% @uniform width=232 height=64 max_title_len=24 max_desc_lines=1
+flowchart TB
+%% keep-orphan: N15
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N1["DataSourcePort"]
+        N9["Bronze/Silver/GoldStoragePorts"]
+        N13["DeltaReaderPort"]
+        N15["LockPort"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N2["ChemblAdapter"]
+        N3["PubchemAdapter"]
+        N4["UniprotAdapter"]
+        N5["PubmedAdapter"]
+        N6["CrossRefAdapter"]
+        N7["OpenAlexAdapter"]
+        N8["SemanticScholarAdapter"]
+        N10["BronzeWriter"]
+        N11["SilverWriter"]
+        N12["GoldWriter"]
+        N14["DeltaReader"]
+    end
+
+    N1 --> N2
+    N1 --> N3
+    N1 --> N4
+    N1 --> N5
+    N1 --> N6
+    N1 --> N7
+    N1 --> N8
+    N9 --> N10
+    N9 --> N11
+    N9 --> N12
+    N13 --> N14
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5,opacity:0.85

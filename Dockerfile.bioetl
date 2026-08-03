@@ -1,0 +1,84 @@
+# Multi-stage build for bioetl: dependencies → runtime
+# Stage 1: Builder (install dependencies with uv)
+# docker:S8431 — pin by digest only (no tag+digest).
+FROM python@sha256:c3d81d25b3154142b0b42eb1e61300024426268edeb5b5a26dd7ddf64d9daf28 AS builder
+
+WORKDIR /app
+
+# Install build dependencies and uv.
+# Debian security packages track moving distro revisions (no stable =version pins).
+# hadolint ignore=DL3008
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        ca-certificates \
+        libffi-dev \
+        libssl-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --only-binary=:all: --no-cache-dir uv==0.11.26
+
+# Copy package metadata and source required by setuptools/uv build resolution.
+COPY pyproject.toml uv.lock ./
+COPY src/ ./src/
+# Lockfile-backed third-party install without sdist/setup scripts (Sonar docker:S8541).
+# Local project: build a wheel, then install that binary artifact pinned by pyproject version.
+RUN printf '# BioETL\n' > README.md \
+    && UV_NO_BUILD=1 uv sync --no-dev --frozen --no-build --no-install-project \
+        --directory /app \
+    && uv build --wheel --out-dir /tmp/bioetl-wheels --directory /app \
+    && BIOETL_VERSION="$(python -c "import tomllib; \
+print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")" \
+    && uv pip install --python /app/.venv/bin/python --no-deps \
+        --only-binary :all: --no-index \
+        --find-links=/tmp/bioetl-wheels "bioetl==${BIOETL_VERSION}" \
+    && rm -rf /tmp/bioetl-wheels
+
+# Stage 2: Runtime (minimal image)
+# docker:S8431 — pin by digest only (no tag+digest).
+FROM python@sha256:c3d81d25b3154142b0b42eb1e61300024426268edeb5b5a26dd7ddf64d9daf28
+
+WORKDIR /app
+
+# Install runtime dependencies and create non-root user for security.
+# Debian security packages track moving distro revisions (no stable =version pins).
+# hadolint ignore=DL3008
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+    && groupadd -r bioetl \
+    && useradd -r -g bioetl bioetl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy virtual environment from builder
+COPY --from=builder /app/.venv /app/.venv
+
+# Copy application source code as root-owned runtime assets. Default directory
+# and file modes keep them readable/traversable while the non-root user cannot
+# mutate them.
+COPY --chown=root:root src/ ./src/
+COPY --chown=root:root configs/ ./configs/
+
+# Create logs directory
+RUN mkdir -p /app/logs && chown bioetl:bioetl /app/logs
+
+# Enable the venv
+ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONPATH="/app/src"
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Switch to non-root user
+USER bioetl
+
+# Expose metrics ports
+EXPOSE 8000 8081
+
+# Canonical CLI entrypoint so docker-compose can pass subcommands only.
+ENTRYPOINT ["bioetl"]
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=10s \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready').read()"
+
+# Default command (override via docker-compose)
+CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]
