@@ -1,5 +1,5 @@
 schema_version: 1
-reviewed_on: "2026-07-17"
+reviewed_on: "2026-08-03"
 linked_issues:
   - 5514
   - 5962
@@ -7,8 +7,11 @@ linked_issues:
 
 evidence_scope: >-
   Curated flaky-test inventory bound to the current tracked static
-  test-governance fingerprint. This inventory does not replace repeated-run
-  CI telemetry or claim that static analysis can detect intermittent outcomes.
+  test-governance fingerprint, reconciled against SWARM-001 telemetry
+  (reports/test-swarm/SWARM-001/flakiness-database.json and
+  reports/test-swarm/SWARM-001/telemetry/failure_frequency_summary.md).
+  This inventory does not replace repeated-run CI telemetry or claim that
+  static analysis can detect intermittent outcomes.
 
 flaky_test_definition:
   - intermittent pass/fail outcome across repeated or sharded runs
@@ -53,5 +56,7 @@ reviewed_flaky_tests: []
 
 review_notes:
   - The curated residual flaky-test inventory is empty at this review point.
+  - SWARM-001 flakiness-database.json reports total_flaky=0 with empty flaky_tests.
   - Current suite size and source identity are derived from test-governance-current.json.
   - Repeated-run CI telemetry remains the authority for discovering intermittent outcomes.
+  - "Review owner: BioETL Team (governance closeout for issue #5514)."
