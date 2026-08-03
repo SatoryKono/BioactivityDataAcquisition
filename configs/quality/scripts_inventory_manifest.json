@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-03T14:54:25.080904+00:00",
+  "generated_at": "2026-08-03T15:07:47.777432+00:00",
   "summary": {
     "total_scripts": 571,
     "status_counts": {
@@ -590,7 +590,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 879,
+          "line": 872,
           "source_group": "tests",
           "text": "ensure_script = _to_bash_path(root / \"scripts/ai/codex/helper/ensure-mcp.sh\")"
         }
@@ -3191,13 +3191,13 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 849,
+          "line": 842,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 919,
+          "line": 912,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         }
@@ -19613,7 +19613,7 @@
       "references": [
         {
           "path": "scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py",
-          "line": 159,
+          "line": 165,
           "source_group": "scripts",
           "text": "relay_script = Path(__file__).with_name(\"windows_tcp_relay.ps1\")"
         }
