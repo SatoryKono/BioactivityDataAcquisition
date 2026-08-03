@@ -99,9 +99,7 @@ def check_interpreter(
         findings.append(
             Finding(
                 code="wrong_interpreter",
-                message=(
-                    f"Running under {exe}, but Zed tasks expect {venv_python}."
-                ),
+                message=(f"Running under {exe}, but Zed tasks expect {venv_python}."),
                 recovery=(
                     "Select the `.venv-win` toolchain in Zed, or re-run tasks "
                     f"from the project venv. Refresh with: {SETUP_HINT}"
@@ -144,7 +142,9 @@ def check_modules(modules: Iterable[str]) -> list[Finding]:
     return findings
 
 
-def check_workdir(*, repo_root: Path | None = None, cwd: Path | None = None) -> list[Finding]:
+def check_workdir(
+    *, repo_root: Path | None = None, cwd: Path | None = None
+) -> list[Finding]:
     """Ensure the process is running from the repository root (or a child)."""
     root = (REPO_ROOT if repo_root is None else repo_root).resolve(strict=False)
     current = (Path.cwd() if cwd is None else cwd).resolve(strict=False)
@@ -173,9 +173,7 @@ def diagnose(
     required = tuple(DEFAULT_REQUIRED_MODULES if modules is None else modules)
     findings: list[Finding] = []
     if not skip_interpreter:
-        findings.extend(
-            check_interpreter(repo_root=repo_root, executable=executable)
-        )
+        findings.extend(check_interpreter(repo_root=repo_root, executable=executable))
     findings.extend(check_workdir(repo_root=repo_root, cwd=cwd))
     findings.extend(check_modules(required))
     return findings
@@ -219,9 +217,7 @@ def ensure_ready(
     try:
         os.chdir(root)
     except OSError as exc:
-        sys.stderr.write(
-            f"[zed_env_doctor] cannot chdir to repo root {root}: {exc}\n"
-        )
+        sys.stderr.write(f"[zed_env_doctor] cannot chdir to repo root {root}: {exc}\n")
         raise SystemExit(2) from None
 
     findings = diagnose(modules=modules, repo_root=root)

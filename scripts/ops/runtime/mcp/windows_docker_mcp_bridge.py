@@ -68,11 +68,17 @@ def _wait_for_port(port: int, timeout: float) -> None:
 
 
 def _as_windows_path(path: Path) -> str:
-    """Translate a WSL path before passing it to Windows PowerShell ``-File``."""
+    """Translate a WSL path before passing it to Windows PowerShell ``-File``.
+
+    ``wslpath -w`` expects a Linux-style path with forward slashes. Using
+    ``str(Path(...))`` on a Windows-hosted pytest/runtime rewrites separators to
+    backslashes (e.g. ``\\mnt\\e\\...``), which breaks the probe. Always pass
+    the POSIX form.
+    """
     from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
     completed = subprocess.run(
-        ensure_safe_cli_argv(["wslpath", "-w", str(path)]),
+        ensure_safe_cli_argv(["wslpath", "-w", path.as_posix()]),
         check=True,
         capture_output=True,
         text=True,

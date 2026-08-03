@@ -206,7 +206,11 @@ def extract_lane_membership(argv_tail: Sequence[str]) -> dict[str, Any]:
                 token == "none" and index > 0 and tokens[index - 1] == "--vcr-record"
             ):
                 has_vcr_none = True
-            if token == "--vcr-record" and index + 1 < len(tokens) and tokens[index + 1] == "none":
+            if (
+                token == "--vcr-record"
+                and index + 1 < len(tokens)
+                and tokens[index + 1] == "none"
+            ):
                 has_vcr_none = True
                 index += 2
                 continue

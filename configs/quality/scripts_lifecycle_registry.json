@@ -674,6 +674,18 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the internal Conventional Commit validator invoked by the local pre-commit commit-msg hook; keep it dependency-light and avoid promoting it into a broader public CLI unless additional governed callers emerge."
     },
+    "scripts/engineering/dev/zed_env_doctor.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-31",
+      "next_step": "Retain as the stdlib-only environment validation helper shared by the tracked Zed task adapters; keep `.zed/tasks.json` as the governed editor entry surface and do not promote this helper without offsetting an active script elsewhere."
+    },
+    "scripts/engineering/dev/zed_run.py": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-10-31",
+      "next_step": "Retain as the guarded Python launcher behind tracked native-Windows Zed tasks; keep `.zed/tasks.json` as the governed editor entry surface and do not promote this launcher without offsetting an active script elsewhere."
+    },
     "scripts/engineering/dev/zed_task.ps1": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",

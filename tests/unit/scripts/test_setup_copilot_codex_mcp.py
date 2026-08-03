@@ -542,8 +542,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     )
     assert runtime_servers["fetch"]["args"][0] == str(
         (
-            workspace_root
-            / f"scripts/ai/mcp/mcp_fetch_wrapper{host_wrapper_suffix}"
+            workspace_root / f"scripts/ai/mcp/mcp_fetch_wrapper{host_wrapper_suffix}"
         ).resolve()
     )
     assert servers["fetch"]["env"] == {
@@ -565,8 +564,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     )
     assert runtime_servers["github"]["args"][0] == str(
         (
-            workspace_root
-            / f"scripts/ai/mcp/github-mcp-wrapper{host_wrapper_suffix}"
+            workspace_root / f"scripts/ai/mcp/github-mcp-wrapper{host_wrapper_suffix}"
         ).resolve()
     )
     assert servers["docker"]["args"][0] == (
@@ -583,8 +581,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     )
     assert runtime_servers["mermaid"]["args"][0] == str(
         (
-            workspace_root
-            / f"scripts/ai/mcp/mcp_mermaid_wrapper{host_wrapper_suffix}"
+            workspace_root / f"scripts/ai/mcp/mcp_mermaid_wrapper{host_wrapper_suffix}"
         ).resolve()
     )
     for server_name, wrapper_stem in {
@@ -599,8 +596,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(
         )
         assert runtime_servers[server_name]["args"][0] == str(
             (
-                workspace_root
-                / f"scripts/ai/mcp/{wrapper_stem}{host_wrapper_suffix}"
+                workspace_root / f"scripts/ai/mcp/{wrapper_stem}{host_wrapper_suffix}"
             ).resolve()
         )
     assert servers["deja"]["env"]["NPM_CONFIG_CACHE"] == ".cache/npm-cache"
@@ -800,10 +796,7 @@ def test_setup_mcp_check_mode_is_read_only_and_detects_drift(
         if path.is_file()
     }
     assert setup_mcp.main(check_args) == 0
-    after = {
-        path: path.read_text(encoding="utf-8")
-        for path in before
-    }
+    after = {path: path.read_text(encoding="utf-8") for path in before}
     assert after == before
 
     drifted = workspace_root / ".mcp.json"
