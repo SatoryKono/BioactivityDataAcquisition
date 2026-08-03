@@ -1,6 +1,6 @@
 {
   "summary": {
-    "snapshot_date": "2026-07-31",
+    "snapshot_date": "2026-08-01",
     "targets": 1,
     "total_duplicate_clusters": 0,
     "total_raw_duplicate_clusters": 0,
@@ -12,7 +12,7 @@
   },
   "trend": {
     "status": "no_prior_snapshot",
-    "snapshot_date": "2026-07-31"
+    "snapshot_date": "2026-08-01"
   },
   "reduction_leverage_ranking": [
     {

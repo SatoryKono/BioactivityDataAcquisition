@@ -22,7 +22,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src" / "bioetl"
 
-EXPECTED_LAZY_EXPORT_FACADES = {
+RETIRED_LAZY_EXPORT_FACADES = {
     "src/bioetl/application/composite/__init__.py": "public_package_facade",
     "src/bioetl/application/core/wiring/__init__.py": "public_package_facade",
     "src/bioetl/application/pipelines/common/blocks.py": "dynamic_entrypoint",
@@ -93,6 +93,11 @@ EXPECTED_LAZY_EXPORT_FACADES = {
         "public_package_facade"
     ),
 }
+
+# The lazy-export compatibility wave is complete: retain the former ownership
+# map above as a reviewed retirement ledger while ratcheting the live surface
+# to zero. Any reintroduced module-level ``__getattr__`` will fail the guard.
+EXPECTED_LAZY_EXPORT_FACADES: dict[str, str] = {}
 
 ALLOWED_CLASSIFICATIONS = frozenset(
     {
