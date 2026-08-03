@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2434 |
-| Tracked doc-like files | 2379 |
+| Doc-like files | 2600 |
+| Tracked doc-like files | 2545 |
 | Ignored local docs/reports files | 55 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 55 |
-| tracked | 2379 |
+| tracked | 2545 |
 
 ## Lifecycle Counts
 
@@ -27,22 +27,22 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 264 |
-| active_quality_baseline | 24 |
-| closeout_evidence | 39 |
+| active_quality_baseline | 32 |
+| closeout_evidence | 89 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 40 |
 | docs_reports_generated_or_route_owned | 23 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
 | generated_skill_reference_mirror | 12 |
-| generated_test_run_evidence | 4 |
+| generated_test_run_evidence | 10 |
 | guide | 4 |
 | index | 4 |
 | issue_pack | 48 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 33 |
-| working_report | 75 |
+| working_report | 177 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -61,8 +61,8 @@
 | Active | 866 |
 | Archived | 130 |
 | Canonical | 73 |
-| Generated | 878 |
-| Working | 487 |
+| Generated | 885 |
+| Working | 646 |
 
 ## Surface Families
 
@@ -71,17 +71,17 @@
 | active | 866 |
 | archive | 130 |
 | canonical | 73 |
-| generated | 878 |
-| working | 487 |
+| generated | 885 |
+| working | 646 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 108 |
-| generate-automatically | 878 |
-| keep | 1132 |
+| archive-after-migration | 209 |
+| generate-automatically | 885 |
+| keep | 1190 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -150,24 +150,24 @@
 | `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-refactoring-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-residual-2026-07-27-issue-publish.json` | Working | 0 | archive-after-migration |
-| `reports/quality/compatibility-importer-census.json` | Working | 0 | archive-after-migration |
-| `reports/quality/compatibility-importer-census.md` | Working | 0 | archive-after-migration |
-| `reports/quality/config-compatibility-legacy-taxonomy-review.json` | Working | 0 | archive-after-migration |
-| `reports/quality/config-surface-backlog.json` | Working | 0 | archive-after-migration |
-| `reports/quality/contract-coverage-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/contract-coverage-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/diagram-freshness-7316-verification.md` | Working | 0 | archive-after-migration |
-| `reports/quality/domain-aggregate-invariant-registry.json` | Working | 0 | archive-after-migration |
-| `reports/quality/domain-composite-config-importer-map.md` | Working | 0 | archive-after-migration |
-| `reports/quality/hotspot-coverage-tail-owner-map.json` | Working | 0 | archive-after-migration |
-| `reports/quality/issue-6480-application-core-partial-tranche.json` | Working | 0 | archive-after-migration |
-| `reports/quality/low-coverage-targeted-tests-6045.json` | Working | 0 | archive-after-migration |
-| `reports/quality/partial-coverage-top50-arch-res-03.json` | Working | 0 | archive-after-migration |
-| `reports/quality/partial-coverage-top50-arch-res-03.md` | Working | 0 | archive-after-migration |
-| `reports/quality/port-adapter-factory-coverage.json` | Working | 0 | archive-after-migration |
-| `reports/quality/port-adapter-factory-coverage.md` | Working | 0 | archive-after-migration |
-| `reports/quality/reports-workspace-review.json` | Working | 0 | archive-after-migration |
-| `reports/quality/root-hygiene-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-15-16-52.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-16-11-47.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-16-14-36.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-16-15-52.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-16-17-12.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-17-09-15.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-17-15-27.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-18-17-55.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-19-09-36.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-19-10-50.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-19-11-23.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-19-13-27.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-19-13-38.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-19-16-07.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-19-16-49.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-22-10-10.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-22-11-50.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-22-15-44.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
