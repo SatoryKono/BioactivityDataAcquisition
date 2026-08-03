@@ -129,7 +129,7 @@ def _make_service(
     expected_anchors: _ExpectedCheckpointAnchors | None = None,
     run_ledger_port: MagicMock | None = None,
     metrics: MagicMock | None = None,
-    clock: FixedClock | None | object = _DEFAULT_CLOCK,
+    clock: FixedClock | object | None = _DEFAULT_CLOCK,
 ) -> tuple[CompositeCheckpointService, MagicMock, MagicMock]:
     """Convenience factory — returns (service, storage_mock, logger_mock)."""
     s = storage if storage is not None else _make_storage()

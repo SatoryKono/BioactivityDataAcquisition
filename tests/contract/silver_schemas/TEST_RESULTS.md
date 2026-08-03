@@ -127,9 +127,9 @@ ______________________________________________________________________
 Added to `numeric_id_fields` whitelist:
 
 ```python
-"corpus_id",  # Semantic Scholar internal corpus ID
-"parent_id",  # Protein class parent ID - internal hierarchy
-"toid",  # Target organism ID - ChEMBL numeric taxonomy ID
+("corpus_id",)  # Semantic Scholar internal corpus ID
+("parent_id",)  # Protein class parent ID - internal hierarchy
+("toid",)  # Target organism ID - ChEMBL numeric taxonomy ID
 ```
 
 **Rationale:** Internal numeric IDs that never have prefixes or leading zeros.
@@ -141,9 +141,9 @@ Added to `numeric_id_fields` whitelist:
 Added `date_only_fields` exclusion:
 
 ```python
-"sequence_modified",  # UniProt sequence modification date
-"entry_created",  # UniProt entry creation date
-"entry_modified",  # UniProt entry modification date
+("sequence_modified",)  # UniProt sequence modification date
+("entry_created",)  # UniProt entry creation date
+("entry_modified",)  # UniProt entry modification date
 ```
 
 **Rationale:** API provides calendar dates without time components. Using `date` type is semantically correct and memory-efficient.

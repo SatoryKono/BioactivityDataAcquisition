@@ -49,24 +49,26 @@ Invalid transitions:
 ### Step 2: Create Exhaustive Test Matrix
 Create `tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py`:
 ```python
-@pytest.mark.parametrize("from_state,to_state,should_succeed", [
-    # Valid transitions
-    (BatchState.OPEN, BatchState.SEALED, True),
-    (BatchState.SEALED, BatchState.WRITING, True),
-    (BatchState.WRITING, BatchState.COMMITTED, True),
-    (BatchState.WRITING, BatchState.FAILED, True),
-    
-    # Invalid transitions
-    (BatchState.COMMITTED, BatchState.OPEN, False),
-    (BatchState.FAILED, BatchState.OPEN, False),
-    (BatchState.SEALED, BatchState.COMMITTED, False),
-    (BatchState.OPEN, BatchState.COMMITTED, False),
-    # ... all combinations
-])
+@pytest.mark.parametrize(
+    "from_state,to_state,should_succeed",
+    [
+        # Valid transitions
+        (BatchState.OPEN, BatchState.SEALED, True),
+        (BatchState.SEALED, BatchState.WRITING, True),
+        (BatchState.WRITING, BatchState.COMMITTED, True),
+        (BatchState.WRITING, BatchState.FAILED, True),
+        # Invalid transitions
+        (BatchState.COMMITTED, BatchState.OPEN, False),
+        (BatchState.FAILED, BatchState.OPEN, False),
+        (BatchState.SEALED, BatchState.COMMITTED, False),
+        (BatchState.OPEN, BatchState.COMMITTED, False),
+        # ... all combinations
+    ],
+)
 def test_batch_state_transitions_exhaustive(from_state, to_state, should_succeed):
     batch = Batch(...)
     batch.state = from_state
-    
+
     if should_succeed:
         batch.transition_to(to_state)
         assert batch.state == to_state

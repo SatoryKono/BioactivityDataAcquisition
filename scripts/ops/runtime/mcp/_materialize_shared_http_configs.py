@@ -39,6 +39,7 @@ def _catalog_http_servers(catalog: dict[str, object]) -> dict[str, dict[str, obj
         path = str(entry.get("path") or "/mcp")
         timeout = int(entry.get("readiness_timeout_sec") or 180)
         servers[str(name)] = {
+            "type": "http",
             "url": f"http://127.0.0.1:{port}{path}",
             "startup_timeout_sec": timeout,
         }
@@ -60,10 +61,24 @@ def _merge_tracked_https_servers(
             servers[name] = {"type": "http", "url": url}
 
 
-def _write_targets(text: str, *, server_count: int) -> None:
+def _payload_for_target(
+    target: Path,
+    servers: dict[str, dict[str, object]],
+) -> dict[str, object]:
+    key = "servers" if target.parent.name == ".vscode" else "mcpServers"
+    return {key: servers}
+
+
+def _write_targets(
+    servers: dict[str, dict[str, object]],
+    *,
+    server_count: int,
+) -> None:
     for target in TARGETS:
         if not target.parent.is_dir():
             continue
+        payload = _payload_for_target(target, servers)
+        text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
         target.write_text(text, encoding="utf-8")
         print(f"wrote {target.relative_to(ROOT)} ({server_count} servers)")
 
@@ -74,9 +89,7 @@ def main() -> int:
     # Preserve approved remote HTTPS servers from tracked .mcp.json when present.
     _merge_tracked_https_servers(servers, ROOT / _DOT_MCP_JSON)
 
-    payload = {"mcpServers": servers}
-    text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
-    _write_targets(text, server_count=len(servers))
+    _write_targets(servers, server_count=len(servers))
     print("sample memory=", servers.get("memory"))
     print("sample mutmut=", servers.get("mutmut"))
     return 0

@@ -40,12 +40,24 @@ esac
 
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 mkdir -p "${NPM_CONFIG_CACHE}"
+
+if [[ -n "${BIOETL_WSL_VENV_DIR:-}" && -x "${BIOETL_WSL_VENV_DIR}/bin/python" ]]; then
+  MEMORY_PYTHON="${BIOETL_WSL_VENV_DIR}/bin/python"
+elif [[ -x "${REPO_ROOT}/.venv/bin/python" ]]; then
+  MEMORY_PYTHON="${REPO_ROOT}/.venv/bin/python"
+elif command -v python3 >/dev/null 2>&1; then
+  MEMORY_PYTHON="$(command -v python3)"
+else
+  printf '%s\n' "Memory MCP requires a project Python interpreter" >&2
+  exit 69
+fi
+
 if [[ -z "${MEMORY_FILE_PATH:-}" ]]; then
   export PYTHONPATH="${REPO_ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}"
   export MEMORY_FILE_PATH="$(
-    python -m memory.mcp_scope \
+    "${MEMORY_PYTHON}" -m memory.mcp_scope \
       --repo-root "${REPO_ROOT}" \
       --seed "${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
   )"
 fi
-exec python -m memory.mcp_server "$@"
+exec "${MEMORY_PYTHON}" -m memory.mcp_server "$@"

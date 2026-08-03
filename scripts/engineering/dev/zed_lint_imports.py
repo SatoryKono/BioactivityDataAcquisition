@@ -13,10 +13,18 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+_DEV_DIR = Path(__file__).resolve().parent
+if str(_DEV_DIR) not in sys.path:
+    sys.path.insert(0, str(_DEV_DIR))
+
+from zed_env_doctor import ensure_ready  # noqa: E402
 
 
 def main() -> int:
     os.chdir(REPO_ROOT)
+    # Fail with an actionable bootstrap diagnostic instead of ModuleNotFoundError.
+    ensure_ready(modules=("importlinter", "grimp"))
+
     # Prefer the tracked contracts file explicitly so a wrong --config from an
     # old task definition cannot point at pyproject.toml.
     config_path = REPO_ROOT / ".importlinter"

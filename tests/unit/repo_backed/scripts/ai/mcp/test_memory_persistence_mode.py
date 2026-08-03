@@ -79,4 +79,6 @@ def test_mcp_memory_wrapper_is_git_executable() -> None:
     assert result.returncode == 0, result.stderr
     # Format: <mode> <object> <stage><tab><path>
     mode = result.stdout.split(maxsplit=1)[0]
-    assert mode == "100755", f"expected git mode 100755, got {mode!r}: {result.stdout!r}"
+    assert mode == "100755", (
+        f"expected git mode 100755, got {mode!r}: {result.stdout!r}"
+    )

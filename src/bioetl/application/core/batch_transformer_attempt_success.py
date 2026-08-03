@@ -179,7 +179,7 @@ async def build_transform_success_outcome(
 
 
 async def resolve_transform_result(
-    transformed_result: dict[str, object] | PreSilverRecord | None | object,
+    transformed_result: dict[str, object] | PreSilverRecord | object | None,
 ) -> dict[str, object] | PreSilverRecord | None:
     """Await transform output when needed and normalize the static type."""
     if isawaitable(transformed_result):

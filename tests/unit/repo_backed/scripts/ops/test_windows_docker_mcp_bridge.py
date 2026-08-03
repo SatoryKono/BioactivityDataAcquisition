@@ -30,6 +30,8 @@
 from __future__ import annotations
 
 import subprocess
+import sys
+from pathlib import Path
 
 import pytest
 
@@ -64,3 +66,81 @@ def test_port_is_open_reports_failed_probe(
     monkeypatch.setattr(windows_docker_mcp_bridge.subprocess, "run", fake_run)
 
     assert not windows_docker_mcp_bridge._port_is_open(18818)
+
+
+def test_as_windows_path_uses_wslpath(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed: list[list[str]] = []
+
+    def fake_run(command: list[str], **_kwargs: object) -> subprocess.CompletedProcess:
+        observed.append(command)
+        return subprocess.CompletedProcess(command, 0, stdout="E:\\repo\\relay.ps1\n")
+
+    monkeypatch.setattr(windows_docker_mcp_bridge.subprocess, "run", fake_run)
+
+    translated = windows_docker_mcp_bridge._as_windows_path(
+        Path("/mnt/e/repo/relay.ps1")
+    )
+
+    assert translated == "E:\\repo\\relay.ps1"
+    assert observed == [["wslpath", "-w", "/mnt/e/repo/relay.ps1"]]
+
+
+def test_main_reuses_existing_windows_gateway(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class FakeServer:
+        timeout = 0
+
+        def __init__(self, *_args: object, **_kwargs: object) -> None:
+            self.requests = 0
+
+        def __enter__(self) -> FakeServer:
+            return self
+
+        def __exit__(self, *_args: object) -> None:
+            return None
+
+        def handle_request(self) -> None:
+            self.requests += 1
+
+    class FakeEvent:
+        def __init__(self) -> None:
+            self.checks = 0
+
+        def is_set(self) -> bool:
+            self.checks += 1
+            return self.checks > 1
+
+        def set(self) -> None:
+            return None
+
+    def fail_popen(*_args: object, **_kwargs: object) -> None:
+        pytest.fail("an existing Windows gateway must not be started twice")
+
+    monkeypatch.setattr(windows_docker_mcp_bridge, "_port_is_open", lambda _port: True)
+    monkeypatch.setattr(
+        windows_docker_mcp_bridge, "_wait_for_port", lambda *_args: None
+    )
+    monkeypatch.setattr(
+        windows_docker_mcp_bridge, "_as_windows_path", lambda path: str(path)
+    )
+    monkeypatch.setattr(windows_docker_mcp_bridge, "_ForwardServer", FakeServer)
+    monkeypatch.setattr(windows_docker_mcp_bridge.threading, "Event", FakeEvent)
+    monkeypatch.setattr(windows_docker_mcp_bridge.subprocess, "Popen", fail_popen)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "windows_docker_mcp_bridge.py",
+            "--server",
+            "docker",
+            "--local-port",
+            "8817",
+            "--remote-port",
+            "18817",
+        ],
+    )
+
+    assert windows_docker_mcp_bridge.main() == 0

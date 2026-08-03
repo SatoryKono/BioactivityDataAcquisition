@@ -26,7 +26,7 @@ run_subagent(
     title="py-audit-bot baseline audit",
     task="Follow .devin/agents/py-audit-bot/AGENT.md for task_id=AUD-001, phase=baseline, scope=src/bioetl/application/.",
     profile="py-audit-bot",
-    is_background=False
+    is_background=False,
 )
 ```
 

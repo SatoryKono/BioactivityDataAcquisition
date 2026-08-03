@@ -22,7 +22,7 @@ $dockerArgs = @(
     "-i",
     "--label", "bioetl.mcp=brave-search",
     "-e",
-    "BRAVE_API_KEY=$($env:BRAVE_API_KEY)",
+    "BRAVE_API_KEY",
     "mcp/brave-search"
 )
 

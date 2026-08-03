@@ -123,9 +123,7 @@ def score_checkpoint_safety(summary: JsonDict) -> ScoreCardRecord:
         score -= 1
         evidence.append("resume_contract_missing")
         blockers.append("resume_contract_missing")
-    return build_score_card_record(
-        "checkpoint_safety", score, evidence, blockers, refs
-    )
+    return build_score_card_record("checkpoint_safety", score, evidence, blockers, refs)
 
 
 __all__ = [

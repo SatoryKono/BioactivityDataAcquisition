@@ -39,7 +39,7 @@ run_subagent(
     title="py-audit-bot baseline audit",
     task="Follow .devin/agents/py-audit-bot/AGENT.md for task_id=AUD-001, phase=baseline, scope=src/bioetl/application/.",
     profile="py-audit-bot",
-    is_background=False
+    is_background=False,
 )
 ```
 
@@ -50,7 +50,7 @@ run_subagent(
     title="py-test-bot final tests",
     task="Follow .devin/agents/py-test-bot/AGENT.md for task_id=TEST-001, phase=final, scope=src/bioetl/domain/.",
     profile="py-test-bot",
-    is_background=True
+    is_background=True,
 )
 ```
 
@@ -61,7 +61,7 @@ run_subagent(
     title="py-plan-bot task planning",
     task="Follow .devin/agents/py-plan-bot/AGENT.md for task_id=PLAN-001, task_description='Implement new transformer for ChEMBL data'.",
     profile="py-plan-bot",
-    is_background=False
+    is_background=False,
 )
 ```
 

@@ -633,6 +633,22 @@ def _write_workspace_codex_settings(
     return settings_path
 
 
+def _write_local_profile_state(
+    output_root: Path,
+    *,
+    profile: str,
+    transport_mode: str,
+) -> Path:
+    """Persist the selected machine-local profile for idempotent ensure runs."""
+    state_path = output_root / ".codex" / "mcp-profile.json"
+    _write_json(
+        state_path,
+        {"profile": profile, "transport_mode": transport_mode},
+        allowed_root=output_root,
+    )
+    return state_path
+
+
 def _write_devin_config(
     output_root: Path,
     workspace_root: Path,
@@ -1038,6 +1054,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             "Tracked portable inventory always stays stdio."
         ),
     )
+    parser.add_argument(
+        "--persist-local-profile",
+        action="store_true",
+        help=(
+            "Persist the selected profile/transport in the machine-local "
+            ".codex/mcp-profile.json so future ensure runs keep this explicit "
+            "operator choice. Implicit/default setup calls do not overwrite it."
+        ),
+    )
     args = parser.parse_args(list(argv) if argv is not None else None)
     _apply_setup_mcp_flag_shortcuts(args)
     output_root = args.root.absolute()
@@ -1049,6 +1074,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         profile=args.profile,
         transport_mode=args.transport_mode,
     )
+    if not args.qodo_only and args.persist_local_profile:
+        profile_state_path = _write_local_profile_state(
+            output_root,
+            profile=args.profile,
+            transport_mode=args.transport_mode,
+        )
+        print(f"Wrote {profile_state_path}")
     _print_written_mcp_paths(written_paths, qodo_only=args.qodo_only)
     _write_optional_side_configs(args, output_root, workspace_root)
     if not args.skip_codex and not args.skip_codex_validation:

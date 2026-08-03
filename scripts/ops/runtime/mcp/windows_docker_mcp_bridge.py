@@ -41,7 +41,9 @@ def _port_is_open(port: int) -> bool:
 
     safe_port = _validated_port(port)
     # Port is validated numeric — interpolated only into a fixed Connect call.
-    command = ensure_safe_cli_argv([_POWERSHELL_EXE, "-NoProfile", "-Command"])
+    command = ensure_safe_cli_argv(
+        [_POWERSHELL_EXE, "-NoLogo", "-NonInteractive", "-NoProfile", "-Command"]
+    )
     command.append(
         "$c=[Net.Sockets.TcpClient]::new();"
         f"try{{$c.Connect('127.0.0.1',{safe_port});$c.Close();exit 0}}"
@@ -65,6 +67,22 @@ def _wait_for_port(port: int, timeout: float) -> None:
     raise TimeoutError(f"Windows Docker MCP did not listen on 127.0.0.1:{port}")
 
 
+def _as_windows_path(path: Path) -> str:
+    """Translate a WSL path before passing it to Windows PowerShell ``-File``."""
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    completed = subprocess.run(
+        ensure_safe_cli_argv(["wslpath", "-w", str(path)]),
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    translated = completed.stdout.strip()
+    if not translated:
+        raise RuntimeError(f"wslpath returned an empty path for {path}")
+    return translated
+
+
 class _ForwardHandler(socketserver.BaseRequestHandler):
     remote_port: int
     relay_script: str
@@ -76,6 +94,8 @@ class _ForwardHandler(socketserver.BaseRequestHandler):
         command = ensure_safe_cli_argv(
             [
                 _POWERSHELL_EXE,
+                "-NoLogo",
+                "-NonInteractive",
                 "-NoProfile",
                 "-File",
                 self.relay_script,
@@ -141,6 +161,8 @@ def main() -> int:
     command = ensure_safe_cli_argv(
         [
             _POWERSHELL_EXE,
+            "-NoLogo",
+            "-NonInteractive",
             "-NoProfile",
             "-Command",
             (
@@ -151,29 +173,35 @@ def main() -> int:
             ),
         ]
     )
-    child = subprocess.Popen(  # NOSONAR - argv sanitized; server/port validated
-        command,
-        close_fds=True,
-    )
+    # A previous WSL bridge can disappear while the Windows-side Docker MCP
+    # gateway remains alive.  Reuse that singleton instead of racing a second
+    # gateway against the same remote port.
+    child: subprocess.Popen[bytes] | None = None
+    if not _port_is_open(args.remote_port):
+        child = subprocess.Popen(  # NOSONAR - argv sanitized; server/port validated
+            command,
+            close_fds=True,
+        )
     stopped = threading.Event()
 
     def stop(_signum: int, _frame: object) -> None:
         stopped.set()
-        child.terminate()
+        if child is not None:
+            child.terminate()
 
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
     try:
         _wait_for_port(args.remote_port, args.startup_timeout)
         _ForwardHandler.remote_port = args.remote_port
-        _ForwardHandler.relay_script = str(relay_script)
+        _ForwardHandler.relay_script = _as_windows_path(relay_script)
         with _ForwardServer(("127.0.0.1", args.local_port), _ForwardHandler) as server:
             server.timeout = 1
-            while not stopped.is_set() and child.poll() is None:
+            while not stopped.is_set() and (child is None or child.poll() is None):
                 server.handle_request()
-        return child.poll() or 0
+        return 0 if child is None else child.poll() or 0
     finally:
-        if child.poll() is None:
+        if child is not None and child.poll() is None:
             child.terminate()
             try:
                 child.wait(timeout=10)

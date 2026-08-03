@@ -42,6 +42,27 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+PROFILE_STATE="${REPO_ROOT}/.codex/mcp-profile.json"
+if [[ -f "${PROFILE_STATE}" ]]; then
+    mapfile -t _mcp_profile_state < <(
+        python3 - "${PROFILE_STATE}" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+print(str(payload.get("profile") or ""))
+print(str(payload.get("transport_mode") or ""))
+PY
+    )
+    if [[ -z "${CODEX_MCP_PROFILE:-}" && -n "${_mcp_profile_state[0]:-}" ]]; then
+        export CODEX_MCP_PROFILE="${_mcp_profile_state[0]}"
+    fi
+    if [[ -z "${CODEX_MCP_TRANSPORT_MODE:-}" && -n "${_mcp_profile_state[1]:-}" ]]; then
+        export CODEX_MCP_TRANSPORT_MODE="${_mcp_profile_state[1]}"
+    fi
+fi
+
 fail() {
     echo "[mcp] ERROR: $*" >&2
     exit 1

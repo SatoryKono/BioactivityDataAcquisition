@@ -117,6 +117,7 @@ def test_core_profile_omits_high_privilege_servers_from_local_projections(
             str(workspace_root),
             "--skip-codex",
             "--skip-codex-config",
+            "--persist-local-profile",
             "--skip-gemini-settings",
             "--profile",
             "core",
@@ -128,6 +129,10 @@ def test_core_profile_omits_high_privilege_servers_from_local_projections(
     cursor = json.loads(
         (output_root / ".cursor" / "mcp.json").read_text(encoding="utf-8")
     )
+    profile_state = json.loads(
+        (output_root / ".codex" / "mcp-profile.json").read_text(encoding="utf-8")
+    )
+    assert profile_state == {"profile": "core", "transport_mode": "shared"}
     vscode = json.loads(
         (output_root / ".vscode" / "mcp.json").read_text(encoding="utf-8")
     )
@@ -231,11 +236,80 @@ def test_shared_launcher_enforces_singleton_and_loopback() -> None:
         Path(__file__).resolve().parents[3] / "scripts/ops/runtime/mcp/start-shared.sh"
     ).read_text(encoding="utf-8")
     assert "flock 9" in launcher
+    assert (
+        'GLOBAL_LOCK_DIR="${XDG_RUNTIME_DIR:-/tmp}/bioetl-mcp-shared-$(id -u)"'
+        in launcher
+    )
+    assert 'exec 9>"$GLOBAL_LOCK_DIR/launcher.lock"' in launcher
+    assert 'exec 9>"$PID_DIR/launcher.lock"' not in launcher
+    assert 'MCP_CACHE_ROOT="$NATIVE_CACHE_HOME/bioetl-mcp"' in launcher
+    assert 'NPM_CACHE="$LOG_DIR/npm-cache"' not in launcher
+    assert '"scripts.ops.runtime.mcp.windows_docker_mcp_bridge"' in launcher
+    assert 'child_env["BIOETL_AI_MEMORY_MODE"] = "read-write"' in launcher
     assert '"--host",' in launcher
     assert "bind_host" in launcher
     assert "start_new_session=True" in launcher
     assert '"unmanaged_ready"' in launcher
     assert "readiness_timeout_sec" in launcher
+
+
+def test_docker_mcp_wrappers_do_not_embed_secret_values_in_argv() -> None:
+    wrapper_dir = Path(__file__).resolve().parents[3] / "scripts" / "ai" / "mcp"
+    sources = {
+        name: (wrapper_dir / name).read_text(encoding="utf-8")
+        for name in (
+            "mcp_brave_search_wrapper.sh",
+            "mcp_brave_search_wrapper.ps1",
+            "mcp_grafana_wrapper.sh",
+            "mcp_grafana_wrapper.ps1",
+        )
+    }
+
+    assert (
+        '-e "BRAVE_API_KEY=${BRAVE_API_KEY}"'
+        not in sources["mcp_brave_search_wrapper.sh"]
+    )
+    assert (
+        '"BRAVE_API_KEY=$($env:BRAVE_API_KEY)"'
+        not in sources["mcp_brave_search_wrapper.ps1"]
+    )
+    for source in sources.values():
+        assert "GRAFANA_SERVICE_ACCOUNT_TOKEN=" not in source
+        assert '"GRAFANA_PASSWORD=${grafana_password}"' not in source
+        assert '"GRAFANA_PASSWORD=$($env:GRAFANA_PASSWORD)"' not in source
+
+    assert "-e BRAVE_API_KEY" in sources["mcp_brave_search_wrapper.sh"]
+    assert '"BRAVE_API_KEY"' in sources["mcp_brave_search_wrapper.ps1"]
+    assert (
+        "docker_args+=(-e GRAFANA_SERVICE_ACCOUNT_TOKEN)"
+        in sources["mcp_grafana_wrapper.sh"]
+    )
+    assert "docker_args+=(-e GRAFANA_PASSWORD)" in sources["mcp_grafana_wrapper.sh"]
+    assert (
+        '@("-e", "GRAFANA_SERVICE_ACCOUNT_TOKEN")' in sources["mcp_grafana_wrapper.ps1"]
+    )
+    assert '@("-e", "GRAFANA_PASSWORD")' in sources["mcp_grafana_wrapper.ps1"]
+
+
+def test_shared_materializer_uses_client_specific_payload_shapes() -> None:
+    from scripts.ops.runtime.mcp import _materialize_shared_http_configs as materialize
+
+    servers = {
+        "example": {
+            "type": "http",
+            "url": "http://127.0.0.1:8899/mcp",
+        }
+    }
+
+    vscode = materialize._payload_for_target(
+        Path("/workspace/.vscode/mcp.json"), servers
+    )
+    cursor = materialize._payload_for_target(
+        Path("/workspace/.cursor/mcp.json"), servers
+    )
+
+    assert vscode == {"servers": servers}
+    assert cursor == {"mcpServers": servers}
 
 
 def test_default_local_transport_is_shared_http(

@@ -7,9 +7,30 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../../.." && pwd))}"
 
 GEMINI_TOOL_HOME_DEFAULT="${REPO_ROOT}/.cache/tools/gemini-cli"
-GEMINI_NPM_PREFIX="${GEMINI_NPM_PREFIX:-${GEMINI_TOOL_HOME_DEFAULT}/npm-global}"
-GEMINI_NPM_CACHE="${GEMINI_NPM_CACHE:-${GEMINI_TOOL_HOME_DEFAULT}/npm-cache}"
-GEMINI_CLI_HOME="${GEMINI_CLI_HOME:-${GEMINI_TOOL_HOME_DEFAULT}/home}"
+# Windows-mounted paths under /mnt/* often reject npm rename (EACCES) and are
+# extremely slow for global installs. Prefer a Linux-native home cache when the
+# repo lives on a WSL mount and no explicit prefix was provided by the caller.
+if [[ -z "${GEMINI_NPM_PREFIX:-}" ]]; then
+    if [[ "${REPO_ROOT}" == /mnt/* || "${REPO_ROOT}" == /mnt ]]; then
+        GEMINI_NPM_PREFIX="${HOME}/.cache/bioetl-gemini/npm-global"
+    else
+        GEMINI_NPM_PREFIX="${GEMINI_TOOL_HOME_DEFAULT}/npm-global"
+    fi
+fi
+if [[ -z "${GEMINI_NPM_CACHE:-}" ]]; then
+    if [[ "${REPO_ROOT}" == /mnt/* || "${REPO_ROOT}" == /mnt ]]; then
+        GEMINI_NPM_CACHE="${HOME}/.cache/bioetl-gemini/npm-cache"
+    else
+        GEMINI_NPM_CACHE="${GEMINI_TOOL_HOME_DEFAULT}/npm-cache"
+    fi
+fi
+if [[ -z "${GEMINI_CLI_HOME:-}" ]]; then
+    if [[ "${REPO_ROOT}" == /mnt/* || "${REPO_ROOT}" == /mnt ]]; then
+        GEMINI_CLI_HOME="${HOME}/.cache/bioetl-gemini/home"
+    else
+        GEMINI_CLI_HOME="${GEMINI_TOOL_HOME_DEFAULT}/home"
+    fi
+fi
 GEMINI_BIN="${GEMINI_NPM_PREFIX}/bin/gemini"
 GEMINI_NODE_BIN="${GEMINI_NPM_PREFIX}/bin/node"
 

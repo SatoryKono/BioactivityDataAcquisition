@@ -7,14 +7,19 @@ cd "$ROOT"
 CATALOG="$ROOT/scripts/ops/runtime/mcp/shared-servers.json"
 LOG_DIR="$ROOT/logs/mcp-shared"
 PID_DIR="$LOG_DIR/pids"
-NPM_CACHE="$LOG_DIR/npm-cache"
-UV_CACHE="${UV_CACHE_DIR:-/tmp/bioetl-mcp-uv-cache}"
-UV_TOOLS="${UV_TOOL_DIR:-/tmp/bioetl-mcp-uv-tools}"
-mkdir -p "$PID_DIR" "$NPM_CACHE" "$UV_CACHE" "$UV_TOOLS"
+NATIVE_CACHE_HOME="${XDG_CACHE_HOME:-$(python3 -c 'from pathlib import Path; print(Path.home() / ".cache")')}"
+MCP_CACHE_ROOT="$NATIVE_CACHE_HOME/bioetl-mcp"
+NPM_CACHE="$MCP_CACHE_ROOT/npm-cache"
+UV_CACHE="$MCP_CACHE_ROOT/uv-cache"
+UV_TOOLS="$MCP_CACHE_ROOT/uv-tools"
+GLOBAL_LOCK_DIR="${XDG_RUNTIME_DIR:-/tmp}/bioetl-mcp-shared-$(id -u)"
+mkdir -p "$PID_DIR" "$NPM_CACHE" "$UV_CACHE" "$UV_TOOLS" "$GLOBAL_LOCK_DIR"
+chmod 700 "$GLOBAL_LOCK_DIR"
 
-# One launcher owns reconciliation at a time. Child processes do not inherit
-# this descriptor because Python Popen closes unrelated file descriptors.
-exec 9>"$PID_DIR/launcher.lock"
+# One launcher owns reconciliation across every checkout for this OS user.
+# Child processes do not inherit this descriptor because Python Popen closes
+# unrelated file descriptors.
+exec 9>"$GLOBAL_LOCK_DIR/launcher.lock"
 flock 9
 
 export NPM_CONFIG_CACHE="$NPM_CACHE"
@@ -215,7 +220,8 @@ for name, entry in items:
     if entry.get("launch_mode") == "windows_docker_streaming":
         command = [
             sys.executable,
-            str(root / "scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py"),
+            "-m",
+            "scripts.ops.runtime.mcp.windows_docker_mcp_bridge",
             "--server",
             name,
             "--local-port",
@@ -247,6 +253,8 @@ for name, entry in items:
     print(f"START {name} 127.0.0.1:{port}")
     child_env = os.environ.copy()
     child_env["BIOETL_MCP_SHARED"] = "1"
+    if name == "memory":
+        child_env["BIOETL_AI_MEMORY_MODE"] = "read-write"
     process = subprocess.Popen(
         command,
         cwd=root,

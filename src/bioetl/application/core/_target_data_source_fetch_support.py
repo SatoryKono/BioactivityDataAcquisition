@@ -38,8 +38,8 @@ async def yield_wrapped_fetch_records(
     entity_type: str,
     limit: int | None = None,
     query: str | None = None,
-    filter_ids: list[str] | None | object = _UNSET_FETCH_ARG,
-    filter_field: str | None | object = _UNSET_FETCH_ARG,
+    filter_ids: list[str] | object | None = _UNSET_FETCH_ARG,
+    filter_field: str | object | None = _UNSET_FETCH_ARG,
     offset: int | None = None,
 ) -> AsyncIterator[RecordT]:
     """Delegate a plain fetch call to a wrapped data source adapter."""

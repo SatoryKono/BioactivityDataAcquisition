@@ -23,5 +23,5 @@ remove_mcp_exited_containers "mcp/brave-search"
 docker_bin="$(resolve_docker_bin)"
 exec "${docker_bin}" run --rm -i \
   --label "bioetl.mcp=brave-search" \
-  -e "BRAVE_API_KEY=${BRAVE_API_KEY}" \
+  -e BRAVE_API_KEY \
   mcp/brave-search "$@"

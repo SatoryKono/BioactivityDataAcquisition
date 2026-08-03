@@ -80,7 +80,7 @@ run_subagent(
     title="py-audit-bot baseline audit",
     task="Follow .devin/agents/py-audit-bot/AGENT.md for task_id=AUD-001, phase=baseline, scope=src/bioetl/application/.",
     profile="py-audit-bot",
-    is_background=False
+    is_background=False,
 )
 ```
 
@@ -94,7 +94,7 @@ run_subagent(
     title="Codebase exploration",
     task="Explore the architecture of X",
     profile="subagent_explore",
-    is_background=True
+    is_background=True,
 )
 
 # For general code changes
@@ -102,7 +102,7 @@ run_subagent(
     title="Implementation",
     task="Implement feature X",
     profile="subagent_general",
-    is_background=False
+    is_background=False,
 )
 ```
 

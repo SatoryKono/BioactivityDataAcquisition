@@ -20,6 +20,12 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+_DEV_DIR = Path(__file__).resolve().parent
+if str(_DEV_DIR) not in sys.path:
+    sys.path.insert(0, str(_DEV_DIR))
+
+from zed_env_doctor import ensure_ready  # noqa: E402
+
 BIOETL_PATH = REPO_ROOT / "src" / "bioetl"
 MIN_CONFIDENCE = 80
 
@@ -117,6 +123,7 @@ def _findings() -> list[object]:
 def main(argv: list[str] | None = None) -> int:
     del argv
     os.chdir(REPO_ROOT)
+    ensure_ready(modules=("vulture",))
     unused = _findings()
     print(
         f"[zed_vulture] path={BIOETL_PATH.as_posix()} "

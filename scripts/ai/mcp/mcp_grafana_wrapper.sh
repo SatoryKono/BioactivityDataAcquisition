@@ -58,6 +58,10 @@ if [[ -z "${GRAFANA_SERVICE_ACCOUNT_TOKEN:-}" && -z "${grafana_password}" ]]; th
   mcp_warn "Grafana MCP has neither GRAFANA_SERVICE_ACCOUNT_TOKEN nor username/password; server may start but Grafana calls can fail."
 fi
 
+if [[ -n "${grafana_password}" ]]; then
+  export GRAFANA_PASSWORD="${grafana_password}"
+fi
+
 docker_args=(
   run
   --rm
@@ -66,13 +70,13 @@ docker_args=(
 )
 
 if [[ -n "${GRAFANA_SERVICE_ACCOUNT_TOKEN:-}" ]]; then
-  docker_args+=(-e "GRAFANA_SERVICE_ACCOUNT_TOKEN=${GRAFANA_SERVICE_ACCOUNT_TOKEN}")
+  docker_args+=(-e GRAFANA_SERVICE_ACCOUNT_TOKEN)
 fi
 if [[ -n "${grafana_username}" ]]; then
   docker_args+=(-e "GRAFANA_USERNAME=${grafana_username}")
 fi
 if [[ -n "${grafana_password}" ]]; then
-  docker_args+=(-e "GRAFANA_PASSWORD=${grafana_password}")
+  docker_args+=(-e GRAFANA_PASSWORD)
 fi
 if [[ -n "${GRAFANA_ORG_ID:-}" ]]; then
   docker_args+=(-e "GRAFANA_ORG_ID=${GRAFANA_ORG_ID}")

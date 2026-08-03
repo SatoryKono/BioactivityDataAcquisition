@@ -162,7 +162,7 @@ def _normalize_profile_float_value(value: object) -> object:
     return _finalize_profile_float(coerced, fallback=value)
 
 
-def _coerce_profile_int(value: object) -> int | str | float | None | object:
+def _coerce_profile_int(value: object) -> int | str | float | object | None:
     if isinstance(value, float):
         return int(value) if value.is_integer() else value
     if not isinstance(value, str):
@@ -184,7 +184,7 @@ def _parse_profile_int_text(value: str) -> int | str:
         return value
 
 
-def _coerce_profile_float(value: object) -> float | str | None | object:
+def _coerce_profile_float(value: object) -> float | str | object | None:
     if isinstance(value, int | float):
         return float(value)
     if not isinstance(value, str):
@@ -199,7 +199,7 @@ def _coerce_profile_float(value: object) -> float | str | None | object:
 
 
 def _finalize_profile_float(
-    coerced: float | str | None | object,
+    coerced: float | str | object | None,
     *,
     fallback: object,
 ) -> object:
