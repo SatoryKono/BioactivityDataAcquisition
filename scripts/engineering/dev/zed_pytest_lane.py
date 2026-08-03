@@ -24,7 +24,6 @@ import os
 import sys
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any
 
 _DEV_DIR = Path(__file__).resolve().parent
 if str(_DEV_DIR) not in sys.path:
@@ -176,7 +175,7 @@ LANES: dict[str, tuple[str, ...]] = {
 }
 
 
-def extract_lane_membership(argv_tail: Sequence[str]) -> dict[str, Any]:
+def extract_lane_membership(argv_tail: Sequence[str]) -> dict[str, object]:
     """Extract paths, marker, ignores, and vcr flags from a lane argv tail.
 
     Used by repo-backed parity tests against ``test_matrix.yaml``.
@@ -231,9 +230,9 @@ def extract_lane_membership(argv_tail: Sequence[str]) -> dict[str, Any]:
     }
 
 
-def canonical_lane_specs() -> Mapping[str, dict[str, Any]]:
+def canonical_lane_specs() -> Mapping[str, dict[str, object]]:
     """Return membership specs for parity-tested Zed lanes."""
-    specs: dict[str, dict[str, Any]] = {}
+    specs: dict[str, dict[str, object]] = {}
     for lane_key, suite_name in CANONICAL_SUITE_BY_LANE.items():
         membership = extract_lane_membership(LANES[lane_key])
         membership["suite_name"] = suite_name

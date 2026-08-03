@@ -1149,7 +1149,7 @@ def _apply_setup_mcp_flag_shortcuts(args: argparse.Namespace) -> None:
         args.skip_codex_config = True
 
 
-def _render_portable_mcp_payload(workspace_root: Path) -> dict[str, Any]:
+def _render_portable_mcp_payload(workspace_root: Path) -> dict[str, object]:
     """Canonical tracked portable inventory (full profile, POSIX wrappers)."""
     full_servers = _canonical_servers(
         workspace_root,
@@ -1192,7 +1192,14 @@ def _check_tracked_portable_projections(
             continue
         actual = path.read_text(encoding="utf-8")
         if actual != expected_text:
-            actual_obj = json.loads(actual) if actual.strip() else {}
+            try:
+                actual_obj = json.loads(actual) if actual.strip() else {}
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                mismatches.append(
+                    f"stale: {relative.as_posix()}; invalid JSON; "
+                    f"bytes actual={len(actual)} expected={len(expected_text)}"
+                )
+                continue
             expected_obj = json.loads(expected_text)
             actual_names = set(actual_obj.get("mcpServers") or {})
             expected_names = set(expected_obj.get("mcpServers") or {})
