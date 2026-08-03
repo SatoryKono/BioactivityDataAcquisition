@@ -4,15 +4,40 @@ Project-local Zed config for BioETL. Source of truth for contracts:
 
 `tests/unit/repo_backed/scripts/test_zed_workspace_config.py`
 
+## Support contract (Windows first)
+
+| Mode | Status | Notes |
+|------|--------|--------|
+| **Native Windows Zed** | **Canonical / supported** | Tracked `.zed/tasks.json` invokes `.venv-win/Scripts/python.exe` directly. |
+| **WSL / Linux Zed** | CLI wrappers only | Project tasks are **not** a cross-platform task set. Use `setup_env_wsl.sh` + `run_pytest.sh` / `run_mypy.sh` from a WSL shell. |
+| Dual-OS checkout | Supported with **separate** venvs | Never share one venv between PowerShell and WSL. |
+
+Native Windows recovery and bootstrap:
+
+```powershell
+.\scripts\engineering\dev\setup_env_windows.ps1
+# Task: Environment: verify
+```
+
+WSL / Linux recovery:
+
+```bash
+bash scripts/engineering/dev/setup_env_wsl.sh
+bash scripts/engineering/dev/run_pytest.sh tests/smoke --narrow --timeout=120
+```
+
+`basedpyright` project config may pin `venv = ".venv-win"` for Windows analysis.
+That does **not** imply WSL task parity; WSL development stays on repository shell wrappers.
+
 ## Files
 
 | File | Purpose |
 |------|---------|
 | `settings.json` | Editor, LSP, agent profiles (**no agent MCP**), terminal/venv |
-| `tasks.json` | `uv`-based quality/test tasks (pytest lanes + runnables) |
+| `tasks.json` | Quality/test tasks via `.venv-win` (+ doctor-guarded launcher) |
 | `mcp.json` | Optional workspace MCP inventory (prefer shared HTTP plane; not attached to Agent profiles) |
 | `USER_SETTINGS_NO_AGENT_MCP.overlay.json` | Snippet for user-level Zed settings (disable extension MCP + thrash agents) |
-| `snippets/` | Optional copy-into-user snippets |
+| `snippets/` | Optional copy-into-user snippets (not auto-loaded) |
 | `README.md` | This guide |
 
 Zed loads `.zed/settings.json` and `.zed/tasks.json` from the worktree root automatically.
@@ -39,10 +64,30 @@ Zed **does not** expose a CLI `login` subcommand in current Windows builds
 | Project config | `.zed/settings.json`, `.zed/tasks.json` |
 | User config | `%APPDATA%\Zed\settings.json` (machine-local; may hold keys) |
 | Agent MCP thrash | Apply `USER_SETTINGS_NO_AGENT_MCP.overlay.json` so extension MCP stays off |
-| Python toolchain | `.venv-win` selected after `setup_env_windows.ps1` |
+| Python toolchain | `.venv-win` after `setup_env_windows.ps1` |
+| Environment | Task **Environment: verify** exits 0 |
 
 If Agent shows “Sign in” or cannot send: sign in again, reload window, then
 re-select the default model. Do **not** paste API tokens into project `.zed/`.
+
+## Environment doctor (P0)
+
+Tracked quality tasks expect a complete `.venv-win` with the developer extras.
+
+| Task / helper | Behavior |
+|---------------|----------|
+| **Environment: verify** | Read-only doctor (`scripts/engineering/dev/zed_env_doctor.py`) |
+| `zed_run.py` | Doctor, then `python -m <tool>` or a helper script |
+| `zed_pytest_lane.py`, `zed_lint_imports.py`, `zed_vulture.py`, `zed_xenon.py`, `zed_mypy.py` | Call `ensure_ready()` before tool imports |
+
+Missing `.venv-win` or packages (e.g. `importlinter`) produce an actionable
+diagnostic and non-zero exit — **not** a raw architecture traceback.
+
+Routine tasks **do not** auto-install dependencies. Recover with:
+
+```powershell
+.\scripts\engineering\dev\setup_env_windows.ps1
+```
 
 ## Agent without MCP thrash
 
@@ -71,29 +116,19 @@ MCP for coding should stay on:
 .\scripts\ops\runtime\mcp\apply-shared-to-grok.ps1 -DisableDockerGateways
 ```
 
-## Design principles (optimized)
+## Design principles
 
 1. **Delegate tool config to the repo** — Ruff uses `configurationPreference: filesystemFirst` (`pyproject.toml`).
 2. **Cheap diagnostics** — basedpyright `diagnosticMode: openFilesOnly` (full check via tasks/CI).
-3. **No agent-attached MCP by default** — `context_servers: {}` and both
-   BioETL agent profiles set `enable_all_context_servers: false` with empty
-   `context_servers`. MCP runs on the shared HTTP plane (`scripts/ops/runtime/mcp/`)
-   for Grok/Codex CLI, not via Zed Agent / External Agent stdio thrash.
-   Optional: enable specific remote MCP later under a profile only when needed.
-4. **Safe defaults** — terminal tool confirms; secrets/certs denied for file tools; `redact_private_values`.
-5. **Tasks without `uv` on PATH** — call
-   `$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe ...` directly
-   (Zed GUI PowerShell often has no `uv` in PATH).
-6. **PowerShell-safe pytest markers** — multi-word `-m` expressions live in
-   `scripts/engineering/dev/zed_pytest_lane.py` so `and`/`or` are not re-tokenized
-   by `powershell -C` into fake file paths.
-7. **No autosave thrash** — `autosave: on_focus_change` (better on network/GDrive mounts).
+3. **No agent-attached MCP by default** — `context_servers: {}` and both BioETL agent profiles set `enable_all_context_servers: false`.
+4. **Safe defaults** — global Agent permission default is `confirm`; secrets/certs denied; `redact_private_values`.
+5. **Tasks without `uv` on PATH** — call `$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe ...` (never bare `uv` / `uv run` in tasks).
+6. **PowerShell-safe pytest markers** — multi-word `-m` expressions live in `zed_pytest_lane.py`.
+7. **No autosave thrash** — `autosave: on_focus_change`; global `format_on_save: off` (Python off; YAML/JSON/Compose on).
 8. **Local pytest defaults** — `VCR_RECORD_MODE=none`, `--no-cov` on non-coverage lanes, gutter runnables on.
-9. **Windows dual-OS env** — `VIRTUAL_ENV=.venv-win`; prefer `.venv-win` over broken WSL `.venv`.
+9. **Windows dual-OS env detection** — terminal prefers `.venv-win`, then `.venv`, then `.venv-wsl`.
 
 ## Python environment
-
-Dual-OS layout (do **not** share one venv between Windows and WSL):
 
 ```powershell
 # Windows (canonical for native Zed on Windows)
@@ -102,22 +137,16 @@ Dual-OS layout (do **not** share one venv between Windows and WSL):
 ```
 
 ```bash
-# WSL / Linux
+# WSL / Linux (CLI wrappers; not project Zed tasks)
 bash scripts/engineering/dev/setup_env_wsl.sh
-# Prefer $HOME/.venvs/bioetl or .venv-wsl when present
 ```
 
-Or with `uv` extras used by quality gates:
-
-```bash
-uv sync --extra dev --extra tests --extra tracing
-```
-
-In Zed:
+In Zed (Windows):
 
 1. Open a Python file.
-2. Status bar → **toolchain selector** → choose `.venv-win` (Windows) or the WSL/Linux venv.
-3. Terminal auto-activates via `terminal.detect_venv` (prefers `.venv-win`, then `.venv`, then `.venv-wsl`).
+2. Status bar → **toolchain selector** → choose `.venv-win`.
+3. Terminal auto-activates via `terminal.detect_venv` (prefers `.venv-win`).
+4. Run **Environment: verify**.
 
 ## LSP
 
@@ -125,62 +154,50 @@ In Zed:
 |--------|------|
 | **basedpyright** | Types / navigation (`strict`, open files only) |
 | **ruff** | Format + lint (config from `pyproject.toml`) |
-| **docker-compose** | Compose completion, validation, hover, and formatting via `microsoft/compose-language-service` |
+| **docker-compose** | Compose completion/validation via `microsoft/compose-language-service` |
 | **pylsp** | Explicitly disabled (`!pylsp`) |
 
-Docker Compose support uses the community **Docker Compose** extension
-(`eth0net/zed-docker-compose`). The project declares it in
-`auto_install_extensions`, so Zed installs or updates it when the workspace
-loads. Project `file_types` map root
-`docker-compose*.yml` / `compose*.yml` manifests and the repository's
-`scripts/ops/**` Compose manifests to the dedicated language server instead of
-generic YAML.
-
-Full typecheck: task **Type check** → `uv run mypy src/`.
+Full typecheck: task **Check: types** → mypy on `src/bioetl` (same product gate as CI).
 
 ## Running tests in Zed
 
 ### Gutter runnables (fastest)
 
 1. Open a file under `tests/**/*.py`.
-2. Click the **play** icon in the gutter next to a `test_*` / class, or use **editor: toggle code actions** on that line.
-3. Bound task: **Test: current file** (`tags: ["python-test"]`) → `uv run pytest $ZED_FILE ...`.
+2. Click the **play** icon next to a `test_*` / class.
+3. Bound task: **Test: current file** → `zed_pytest_lane.py file $ZED_FILE`.
 
 ### Task picker
 
-Command Palette → **task: spawn** (default often `Ctrl+Shift+T` / `Cmd+Shift+T` depending on keymap):
+Command Palette → **task: spawn**:
 
-| Task | What it runs |
-|------|----------------|
-| **Test: current file** | Active buffer via pytest (`python-test` runnable) |
-| **Test: nearest symbol** | `$ZED_FILE -k $ZED_SYMBOL` |
-| **Test: smoke** | `tests/smoke/` |
-| **Test: unit-fast** | `tests/unit/` without `repo_backed` / `slow` / `serial` / `benchmark` / `memory` |
-| **Test: unit** | Full `tests/unit/` |
-| **Test: architecture** | Fast architecture slice |
-| **Test: integration-replay** | Offline integration (VCR replay) |
-| **Test: contracts** | Offline contracts |
-| **Test: security** | `tests/security/` |
-| **Test: e2e-smoke** | `e2e_smoke` marker |
-| **Test: failed last run** | `--lf` |
-| **Test: coverage (gate 85%)** | Stable non-e2e/non-contract coverage gate |
+| Task | What it runs | Authority |
+|------|----------------|-----------|
+| **Test: current file** | Active buffer | local |
+| **Test: nearest symbol** | `$ZED_FILE -k $ZED_SYMBOL` | local |
+| **Test: smoke** | matrix `smoke` | local projection of matrix |
+| **Test: unit-fast** | matrix `unit-fast` | local projection of matrix |
+| **Test: unit** | full `tests/unit/` convenience | local only |
+| **Test: architecture-fast** | matrix `architecture-fast-boundary` | local projection |
+| **Test: integration-replay** | matrix `integration-replay` + VCR none | local projection |
+| **Test: contracts** | matrix `contracts` | local projection |
+| **Test: security** | matrix `security` | local projection |
+| **Test: e2e-smoke** | matrix `e2e-smoke` bounded files | local projection |
+| **Test: failed last run** | `--lf` | local |
+| **Coverage: local estimate (85%)** | advisory coverage estimate | **not** `coverage-verify` |
+
+Canonical suite definitions: `configs/quality/test_matrix.yaml`.
+Zed labels are **local UX shortcuts**; merge-blocking coverage remains the
+sharded `coverage-verify` lane / CI, not the Zed estimate task.
 
 Common flags on local test tasks:
 
-- `--no-cov` (except coverage task)
+- `--no-cov` (except coverage estimate)
 - `-p no:benchmark`
 - `VCR_RECORD_MODE=none`
 - `--maxfail=1` / `-q` / `--tb=short` where appropriate
 
-Canonical lane names for CI/telemetry live in `configs/quality/test_matrix.yaml`.
-Zed task labels are **local UX shortcuts**, not suite telemetry IDs.
-
-### Debug (pytest + debugpy)
-
-F4 / **debugger: start** can attach to pytest if `debugpy` is available in the selected toolchain.
-Prefer gutter/task for ordinary runs; use debugger only when stepping is needed.
-
-### CLI wrappers (when tasks are not enough)
+### CLI wrappers (WSL / when tasks are not enough)
 
 ```powershell
 .\scripts\engineering\dev\run_pytest.ps1 tests\smoke --narrow --timeout=120
@@ -196,104 +213,136 @@ python -m scripts.engineering.dev run-tests smoke
 
 | Profile | Use |
 |---------|-----|
-| **BioETL Ask** | Read/search/fetch only; no terminal/edits; no MCP |
-| **BioETL Write** | Edits + terminal (confirm) + MCP allowlist `memory`/`fetch`/`deepwiki` |
+| **BioETL Ask** (default) | Read/search/fetch only; no terminal/edits; no MCP |
+| **BioETL Write** | Edits + terminal (confirm) + empty project MCP attachment |
 
-Secret-bearing MCP (GitHub, Brave, Neo4j, Grafana, …) belongs in **user** Zed settings / env — not in this repo.
+Project Agent profiles keep `context_servers: {}` and
+`enable_all_context_servers: false`. Secret-bearing MCP belongs in **user**
+settings / the shared HTTP plane — not in this repo.
 
-Do **not** put API tokens in `settings.json` as plain text. Rotate any key that was stored that way.
+### Permissions (native Windows)
 
-### Permissions (high level)
+- Global tool default: **confirm** (unlisted tools are not implicitly allowed)
+- Read/search/fetch tools: **allow** (low friction in Ask)
+- File mutators: **confirm**, with unconditional deny for `.env`, `secrets/`, keys/certs
+- Terminal: **confirm**; deny Unix `rm -rf`, PowerShell `Remove-Item -Recurse/-Force`,
+  `rmdir /s`, `del /s`, `git clean -f*`, `git reset --hard`, force-push patterns;
+  confirm `git push`, `sudo`, `.env` paths, broader `Remove-Item`/`del`/`git reset`
+- `spawn_agent`: disabled on both profiles
+- Zed terminal sandboxing on Windows applies only to actions inside WSL; native
+  PowerShell safety depends on these permission rules
 
-- Terminal: default **confirm**; deny `rm -rf /`, `sudo rm`; confirm `git push`, `sudo`, `.env` paths
-- File tools: deny `.env`, `secrets/`, `.pem`/`.key`/`.cert`/`.crt` (and `.git` for delete/move)
-- `vim_mode: false` in project so Agent Panel input stays editable
+Do **not** put API tokens in `settings.json` as plain text.
 
-## Tasks (Command Palette → Tasks)
+## Tasks (behavior policy)
 
-All tasks: `cwd: $ZED_WORKTREE_ROOT`, interpreter/tool binaries under
-`.venv-win/Scripts/` (no PATH dependency on `uv`).
+All tasks: `cwd: $ZED_WORKTREE_ROOT`, interpreter under `.venv-win/Scripts/`.
+
+| Category | `save` | `reveal` | `hide` | concurrent |
+|----------|--------|----------|--------|------------|
+| Current-file / nearest | `current` | `always` | `never` | false |
+| Fast checks (lint, MCP check, env verify) | `all` / `none` | `no_focus` or `always` | `on_success` | false |
+| Long tests / audits / generate | `all` | `always` | `never` | false |
+| Format | `all` | `always` | `on_success` | false |
 
 **Quality**
 
-- Format code — `python -m ruff format .`
-- Lint code — `python -m ruff check src tests scripts`
-  (uses `[tool.ruff]` from `pyproject.toml`; CI full gate is `src tests`,
-  scripts match pre-commit advisory scope)
-- Type check — `python -m mypy --config-file pyproject.toml src/bioetl`
-  (same product gate as `.github/workflows/type-checking.yml`; not bare `mypy src/`)
-- Architecture compliance — `python scripts/engineering/dev/zed_lint_imports.py` (contracts in `.importlinter`)
-- Refresh MCP config — `python scripts/ai/codex/setup_mcp.py ...`
-
-**Tests** — see table above.
+- Format: code — `zed_run.py -m ruff format .`
+- Check: lint — `zed_run.py -m ruff check src tests scripts`
+- Check: types — `zed_run.py -m mypy --config-file pyproject.toml src/bioetl`
+- Check: architecture imports — `zed_lint_imports.py` (contracts in `.importlinter`)
+- Environment: verify — `zed_env_doctor.py`
 
 **Security / hygiene**
 
-- Security scan — `python -m bandit -c pyproject.toml -r src/bioetl`
-  (same as pre-commit; skips B101/B104/B311; not bare `bandit -r src/`)
-- Dependency audit — `python -m pip_audit --skip-editable --cache-dir .cache/pip-audit`
-- Dead code — `python scripts/engineering/dev/zed_vulture.py`
-  (same filter as architecture `test_dead_code_vulture`: min confidence 80,
-  ignore private names / dunders / reserved API params; not bare `vulture`)
-- Complexity check — `python scripts/engineering/dev/zed_xenon.py`
-  (CI thresholds B/B/A + xenon excludes from
-  `configs/quality/duplication_complexity_exemptions.yaml`)
+- Audit: security — bandit with `pyproject.toml`
+- Audit: dependencies — `pip_audit --skip-editable`
+- Audit: dead code — `zed_vulture.py`
+- Audit: complexity — `zed_xenon.py`
 
-CLI agents (Codex, Devin, Grok) run from a **Terminal thread** in Agent Panel — not as project tasks.
+**MCP**
+
+- Check: MCP manifests — `setup_mcp.py --check` (read-only, no writes)
+- Generate: MCP tracked manifests — regenerates tracked portable projections
+
+CLI agents (Codex, Devin, Grok) run from a **Terminal** thread — not as project tasks.
 
 ## MCP
 
 | Surface | Role |
 |---------|------|
-| `.zed/settings.json` → `context_servers` | What Agent Panel actually starts |
-| `.zed/mcp.json` | Generated inventory (setup_mcp) |
-| Shared `.mcp.json` | Cross-tool manifest |
+| `.zed/settings.json` → `context_servers` | What Agent Panel starts (empty by default) |
+| `.zed/mcp.json` | Generated portable inventory (`bash` + `.sh` wrappers) |
+| Shared `.mcp.json` | Cross-tool portable SSOT |
 
-Refresh:
+Read-only parity:
 
-```bash
-uv run python scripts/ai/codex/setup_mcp.py --skip-codex --skip-gemini-settings
+```powershell
+.\.venv-win\Scripts\python.exe scripts\ai\codex\setup_mcp.py --check --skip-codex --skip-gemini-settings
 ```
 
-Or task **Refresh MCP config**. After regenerate, keep Zed runtime servers slim (`memory` / `fetch` / `deepwiki` only).
+Regenerate (mutating):
+
+```powershell
+.\.venv-win\Scripts\python.exe scripts\ai\codex\setup_mcp.py --skip-codex --skip-gemini-settings
+```
+
+Tracked portable inventory always uses POSIX wrappers (`bash` + `.sh`) so
+Windows and Linux checkouts share one deterministic SSOT.
 
 ## Snippets
 
-Zed does not auto-load `.zed/snippets/*.json`. Copy into user snippets (Settings → Snippets) if needed.
+Zed does **not** auto-load `.zed/snippets/*.json`. Copy into **user** snippets
+(Settings → Snippets) if needed. Installation is optional and non-destructive.
 
 Python snippets require `from __future__ import annotations` and avoid retired APIs.
 
-## Formatting
+## Formatting and file scan
 
-- Line length 88 (soft wrap); Ruff E501 migration target 120 in `pyproject.toml`
-- Format on save: Python/YAML/JSON on; Markdown off
-- Organize imports via Ruff on format (no `fixAll` on save)
+| Setting | Value |
+|---------|-------|
+| Global `tab_size` | `4` |
+| YAML / JSON / JSONC / Compose | `tab_size: 2` |
+| Global `format_on_save` | `off` |
+| Python / Markdown format on save | `off` |
+| YAML / JSON / JSONC / Compose format on save | `on` |
+| Autosave | `on_focus_change` (does not reformat Python) |
+| Soft wrap | preferred line length 88 |
+
+Scan exclusions include local venvs/caches (`.venv-win`, `.venv-wsl`, `.cache`,
+`.worktrees`) and the large tracked debug export tree `data/debug_exports`
+(discoverability tradeoff: hide heavy debug dumps from project search; other
+`data/**` and `reports/**` remain navigable).
 
 ## Troubleshooting
 
 | Issue | Action |
 |-------|--------|
-| `uv` not recognized | Expected: tasks no longer call `uv`. Reload window and re-run task |
-| Wrong interpreter | Toolchain selector → `.venv-win` (Windows) or WSL venv |
+| `ModuleNotFoundError: importlinter` | Run **Environment: verify**, then `setup_env_windows.ps1` |
 | Missing `.venv-win` | `.\scripts\engineering\dev\setup_env_windows.ps1` |
+| `uv` not recognized | Expected: tasks never call `uv`. Use `.venv-win` python |
+| Wrong interpreter | Toolchain selector → `.venv-win` |
 | LSP quiet / bad imports | Same toolchain; `editor: restart language server` |
-| Compose files use generic YAML | Reload Zed so `auto_install_extensions` can update **Docker Compose**, then run `editor: restart language server` |
-| Slow on GDrive | Expected; prefer local clone; `openFilesOnly` already set |
-| Tasks missing | Reload window; check `.zed/tasks.json` is a JSON array |
+| Compose files use generic YAML | Reload so **Docker Compose** extension installs; restart LS |
+| Slow on cloud sync | Prefer local clone; `openFilesOnly` already set |
+| Tasks missing | Reload window; `.zed/tasks.json` must be a JSON array |
 | Runnable play missing | `gutter.runnables: true`; open a `test_*.py` buffer |
 | VCR / network flakes | Local tasks force `VCR_RECORD_MODE=none` |
-| Coverage slow | Use non-coverage tasks by default; only **Test: coverage** enables cov |
+| Coverage slow / CI mismatch | Use non-coverage tasks; estimate is advisory only |
 | Agent cannot send | Sign in / pick model (`agent: open settings`) |
-| MCP red | Node/`uvx` installed; caches under `.cache/` |
+| MCP red | Prefer shared HTTP plane; project Agent MCP stays empty |
 
 ## Related
 
 - `docs/00-project/RULES.md`
 - `docs/03-guides/testing.md`
 - `docs/00-project/ai/mcp-governance.md`
+- `configs/quality/test_matrix.yaml`
 - `scripts/ai/codex/setup_mcp.py`
+- `scripts/engineering/dev/setup_env_windows.ps1`
+- `scripts/engineering/dev/zed_env_doctor.py`
+- `scripts/engineering/dev/zed_run.py`
+- `scripts/engineering/dev/zed_pytest_lane.py`
 - `scripts/engineering/dev/run_pytest.ps1` / `run_pytest.sh`
-- `scripts/engineering/dev/zed_task.ps1` — optional Windows helper to run
-  `pytest`/`ruff`/`mypy` via `.venv-win` without requiring `uv` on PATH
 - https://zed.dev/docs/tasks
 - https://zed.dev/docs/languages/python

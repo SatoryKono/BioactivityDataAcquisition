@@ -492,8 +492,17 @@ def test_main_uses_workspace_root_for_generated_server_paths(
                 header: f"${env_name}" for header, env_name in env_http_headers.items()
             }
         assert devin_servers[server_name] == expected_devin
-    assert qodo_payload["mcpServers"] == servers
+    # Portable tracked inventory (root/.mcp.json, .zed) stays POSIX/bash.
+    # Local IDE projections (qodo) use host-native wrappers on this machine.
     assert zed_payload["mcpServers"] == servers
+    assert set(qodo_payload["mcpServers"]) == set(servers)
+    assert qodo_payload["mcpServers"]["filesystem"]["command"] in {"bash", "powershell"}
+    if os.name == "nt":
+        assert qodo_payload["mcpServers"]["filesystem"]["command"] == "powershell"
+        assert qodo_payload["mcpServers"]["filesystem"]["args"][0].endswith(".ps1")
+    else:
+        assert qodo_payload["mcpServers"]["filesystem"]["command"] == "bash"
+        assert qodo_payload["mcpServers"]["filesystem"]["args"][0].endswith(".sh")
     assert not REMOVED_FULL_PROFILE_SERVERS.intersection(servers)
     assert not REMOVED_FULL_PROFILE_SERVERS.intersection(gemini_settings["mcpServers"])
     for server_name, gemini_server in gemini_settings["mcpServers"].items():
@@ -767,6 +776,43 @@ url = "https://retired.invalid/mcp"
     assert "filesystem" in rendered
 
 
+def test_setup_mcp_check_mode_is_read_only_and_detects_drift(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``--check`` compares portable projections without writing files."""
+    workspace_root, _fake_home = _seed_workspace_mcp(tmp_path, monkeypatch)
+    check_args = [
+        "--root",
+        str(workspace_root),
+        "--workspace-root",
+        str(workspace_root),
+        "--check",
+        "--skip-codex",
+        "--skip-gemini-settings",
+    ]
+    before = {
+        path: path.read_text(encoding="utf-8")
+        for path in (
+            workspace_root / ".mcp.json",
+            workspace_root / "scripts" / "ai" / ".mcp.json",
+            workspace_root / ".zed" / "mcp.json",
+        )
+        if path.is_file()
+    }
+    assert setup_mcp.main(check_args) == 0
+    after = {
+        path: path.read_text(encoding="utf-8")
+        for path in before
+    }
+    assert after == before
+
+    drifted = workspace_root / ".mcp.json"
+    payload = json.loads(drifted.read_text(encoding="utf-8"))
+    payload["mcpServers"]["filesystem"]["args"][0] = "unexpected-wrapper"
+    drifted.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    assert setup_mcp.main(check_args) == 1
+
+
 def test_setup_mcp_reuses_current_config_and_repairs_drift(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -869,7 +915,6 @@ def test_ensure_mcp_shell_reuses_current_config_and_repairs_drift(
     assert repaired.returncode == 0, repaired.stderr
     assert "[mcp] MCP config is ready (refreshed)" in repaired.stdout
     repaired_payload = json.loads(workspace_config.read_text(encoding="utf-8"))
-    wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
     assert repaired_payload["mcpServers"]["filesystem"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+        "scripts/ai/mcp/mcp_filesystem_wrapper.sh"
     )

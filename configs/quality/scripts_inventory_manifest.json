@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-31T18:36:31.695217+00:00",
+  "generated_at": "2026-08-03T14:45:16.161040+00:00",
   "summary": {
-    "total_scripts": 569,
+    "total_scripts": 571,
     "status_counts": {
-      "active": 341,
+      "active": 343,
       "supporting": 223,
       "temporary_diagnostic": 5
     },
@@ -13,10 +13,10 @@
       "build": 12,
       "ci": 67,
       "docs": 234,
-      "other": 77,
-      "scripts": 449,
+      "other": 80,
+      "scripts": 453,
       "skills": 18,
-      "tests": 354
+      "tests": 359
     }
   },
   "scripts": [
@@ -590,7 +590,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 751,
+          "line": 879,
           "source_group": "tests",
           "text": "ensure_script = _to_bash_path(root / \"scripts/ai/codex/helper/ensure-mcp.sh\")"
         }
@@ -1354,7 +1354,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 46,
+      "reference_count": 50,
       "references": [
         {
           "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
@@ -1382,27 +1382,27 @@
         },
         {
           "path": ".zed/README.md",
-          "line": 226,
+          "line": 265,
           "source_group": "other",
-          "text": "- Refresh MCP config — `python scripts/ai/codex/setup_mcp.py ...`"
+          "text": "- Check: MCP manifests — `setup_mcp.py --check` (read-only, no writes)"
         },
         {
           "path": ".zed/README.md",
-          "line": 255,
+          "line": 281,
           "source_group": "other",
-          "text": "uv run python scripts/ai/codex/setup_mcp.py --skip-codex --skip-gemini-settings"
+          "text": ".\\.venv-win\\Scripts\\python.exe scripts\\ai\\codex\\setup_mcp.py --check --skip-codex --skip-gemini-settings"
         },
         {
           "path": ".zed/README.md",
-          "line": 294,
+          "line": 287,
+          "source_group": "other",
+          "text": ".\\.venv-win\\Scripts\\python.exe scripts\\ai\\codex\\setup_mcp.py --skip-codex --skip-gemini-settings"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 341,
           "source_group": "other",
           "text": "- `scripts/ai/codex/setup_mcp.py`"
-        },
-        {
-          "path": ".zed/tasks.json",
-          "line": 290,
-          "source_group": "other",
-          "text": "\"scripts/ai/codex/setup_mcp.py\","
         }
       ]
     },
@@ -2691,13 +2691,31 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 4,
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
           "line": 66,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\": \"Test-McpRequiredToken\","
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 262,
+          "source_group": "tests",
+          "text": "\"mcp_brave_search_wrapper.ps1\","
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 274,
+          "source_group": "tests",
+          "text": "not in sources[\"mcp_brave_search_wrapper.ps1\"]"
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 282,
+          "source_group": "tests",
+          "text": "assert '\"BRAVE_API_KEY\"' in sources[\"mcp_brave_search_wrapper.ps1\"]"
         }
       ],
       "owner": "@bioetl-platform",
@@ -2710,7 +2728,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 8,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -2741,6 +2759,24 @@
           "line": 52,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\": \"mcp_validate_required_token\","
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 261,
+          "source_group": "tests",
+          "text": "\"mcp_brave_search_wrapper.sh\","
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 270,
+          "source_group": "tests",
+          "text": "not in sources[\"mcp_brave_search_wrapper.sh\"]"
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 281,
+          "source_group": "tests",
+          "text": "assert \"-e BRAVE_API_KEY\" in sources[\"mcp_brave_search_wrapper.sh\"]"
         }
       ]
     },
@@ -3127,7 +3163,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -3152,6 +3188,18 @@
           "line": 20,
           "source_group": "scripts",
           "text": "EXPECTED_FILESYSTEM_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 849,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 919,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         }
       ]
     },
@@ -3210,13 +3258,31 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 4,
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
           "line": 67,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\": \"Test-McpOptionalToken\","
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 264,
+          "source_group": "tests",
+          "text": "\"mcp_grafana_wrapper.ps1\","
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 289,
+          "source_group": "tests",
+          "text": "'@(\"-e\", \"GRAFANA_SERVICE_ACCOUNT_TOKEN\")' in sources[\"mcp_grafana_wrapper.ps1\"]"
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 291,
+          "source_group": "tests",
+          "text": "assert '@(\"-e\", \"GRAFANA_PASSWORD\")' in sources[\"mcp_grafana_wrapper.ps1\"]"
         }
       ],
       "owner": "@bioetl-platform",
@@ -3229,7 +3295,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 8,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -3260,6 +3326,24 @@
           "line": 53,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\": \"mcp_validate_optional_token\","
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 263,
+          "source_group": "tests",
+          "text": "\"mcp_grafana_wrapper.sh\","
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 285,
+          "source_group": "tests",
+          "text": "in sources[\"mcp_grafana_wrapper.sh\"]"
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 287,
+          "source_group": "tests",
+          "text": "assert \"docker_args+=(-e GRAFANA_PASSWORD)\" in sources[\"mcp_grafana_wrapper.sh\"]"
         }
       ]
     },
@@ -3268,7 +3352,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "tests/architecture/test_ai_memory_program_contracts.py",
@@ -3281,12 +3365,6 @@
           "line": 204,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
-        },
-        {
-          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 446,
-          "source_group": "tests",
-          "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         }
       ]
     },
@@ -3295,7 +3373,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -3328,10 +3406,16 @@
           "text": "WRAPPER = Path(\"scripts/ai/mcp/mcp_memory_wrapper.sh\")"
         },
         {
-          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 446,
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
+          "line": 68,
           "source_group": "tests",
-          "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
+          "text": "Without the executable bit, ``exec ./mcp_memory_wrapper.sh`` returns 126"
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 532,
+          "source_group": "tests",
+          "text": "assert servers[\"memory\"][\"args\"][0].endswith(\"mcp_memory_wrapper.sh\")"
         }
       ]
     },
@@ -5787,7 +5871,7 @@
         },
         {
           "path": "scripts/diagrams/pipeline_dataflow_render.py",
-          "line": 524,
+          "line": 525,
           "source_group": "scripts",
           "text": "\"<!-- Generated by scripts/diagrams/generate_pipeline_dataflows.py; do not edit manually. -->\","
         },
@@ -6116,13 +6200,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 230,
+          "line": 233,
           "source_group": "tests",
           "text": "from scripts.diagrams.pipeline_dataflow_ir import _project_fields"
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 242,
+          "line": 245,
           "source_group": "tests",
           "text": "from scripts.diagrams.pipeline_dataflow_ir import _project_fields"
         }
@@ -8707,13 +8791,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 240,
+          "line": 245,
           "source_group": "docs",
           "text": "| `scripts.engineering.baselines`   | `uv run python -m scripts.engineering.baselines`   | Baseline maintenance for engineering checks |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 285,
+          "line": 290,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.baselines dq-baseline --dry-run"
         },
@@ -8803,13 +8887,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 239,
+          "line": 244,
           "source_group": "docs",
           "text": "| `scripts.engineering.ci`          | `uv run python -m scripts.engineering.ci`          | CI pipeline: pytest runner, quality gates   |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 281,
+          "line": 286,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.ci quality-gate"
         }
@@ -9509,7 +9593,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 220,
+      "reference_count": 221,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
@@ -9543,7 +9627,7 @@
         },
         {
           "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 586,
+          "line": 619,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.repo_paths import ("
         },
@@ -9589,7 +9673,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 192,
+          "line": 209,
           "source_group": "other",
           "text": "python -m scripts.engineering.dev run-tests smoke"
         },
@@ -9607,7 +9691,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 248,
+          "line": 253,
           "source_group": "docs",
           "text": "| `scripts.engineering.dev`         | `uv run python -m scripts.engineering.dev`         | Dev setup, test runner, mock metrics        |"
         },
@@ -10028,7 +10112,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 36,
+      "reference_count": 37,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -10067,16 +10151,16 @@
           "text": "- `bash scripts/engineering/dev/run_pytest.sh ...` / `bash scripts/engineering/dev/run_mypy.sh ...` (WSL/Linux mixed checkout)"
         },
         {
+          "path": ".zed/README.md",
+          "line": 12,
+          "source_group": "other",
+          "text": "| **WSL / Linux Zed** | CLI wrappers only | Project tasks are **not** a cross-platform task set. Use `setup_env_wsl.sh` + `run_pytest.sh` / `run_mypy.sh` from a WSL shell. |"
+        },
+        {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
           "line": 48,
           "source_group": "docs",
           "text": "- Mixed checkout в WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
-        },
-        {
-          "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 380,
-          "source_group": "docs",
-          "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         }
       ]
     },
@@ -10204,7 +10288,7 @@
         "py-test-bot",
         "py-test-swarm"
       ],
-      "reference_count": 72,
+      "reference_count": 74,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -10250,9 +10334,9 @@
         },
         {
           "path": ".zed/README.md",
-          "line": 191,
+          "line": 12,
           "source_group": "other",
-          "text": "bash scripts/engineering/dev/run_pytest.sh tests/smoke --narrow --timeout=120"
+          "text": "| **WSL / Linux Zed** | CLI wrappers only | Project tasks are **not** a cross-platform task set. Use `setup_env_wsl.sh` + `run_pytest.sh` / `run_mypy.sh` from a WSL shell. |"
         }
       ]
     },
@@ -10322,7 +10406,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 187,
+          "line": 204,
           "source_group": "other",
           "text": ".\\scripts\\engineering\\dev\\run_tests.ps1 quick"
         },
@@ -10453,55 +10537,55 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 37,
+      "reference_count": 47,
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 42,
-          "source_group": "other",
-          "text": "| Python toolchain | `.venv-win` selected after `setup_env_windows.ps1` |"
-        },
-        {
-          "path": ".zed/README.md",
-          "line": 100,
+          "line": 18,
           "source_group": "other",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         },
         {
           "path": ".zed/README.md",
-          "line": 278,
+          "line": 67,
+          "source_group": "other",
+          "text": "| Python toolchain | `.venv-win` after `setup_env_windows.ps1` |"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 89,
+          "source_group": "other",
+          "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 135,
+          "source_group": "other",
+          "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 321,
+          "source_group": "other",
+          "text": "| `ModuleNotFoundError: importlinter` | Run **Environment: verify**, then `setup_env_windows.ps1` |"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 322,
           "source_group": "other",
           "text": "| Missing `.venv-win` | `.\\scripts\\engineering\\dev\\setup_env_windows.ps1` |"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 342,
+          "source_group": "other",
+          "text": "- `scripts/engineering/dev/setup_env_windows.ps1`"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
           "line": 157,
           "source_group": "docs",
           "text": "- `.\\scripts\\engineering\\dev\\setup_env_windows.ps1` → `.venv-win`"
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 165,
-          "source_group": "docs",
-          "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
-          "line": 48,
-          "source_group": "docs",
-          "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
-        },
-        {
-          "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 214,
-          "source_group": "docs",
-          "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
-        },
-        {
-          "path": "docs/00-project/ai/memory/gh-issues-documentation-update.md",
-          "line": 40,
-          "source_group": "docs",
-          "text": "- Windows PowerShell: `setup_env_windows.ps1`, `run_pytest.ps1`, `run_mypy.ps1`"
         }
       ]
     },
@@ -10510,11 +10594,23 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 31,
+      "reference_count": 33,
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 106,
+          "line": 12,
+          "source_group": "other",
+          "text": "| **WSL / Linux Zed** | CLI wrappers only | Project tasks are **not** a cross-platform task set. Use `setup_env_wsl.sh` + `run_pytest.sh` / `run_mypy.sh` from a WSL shell. |"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 25,
+          "source_group": "other",
+          "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 141,
           "source_group": "other",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         },
@@ -10538,7 +10634,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 220,
+          "line": 225,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         },
@@ -10547,18 +10643,6 @@
           "line": 41,
           "source_group": "docs",
           "text": "- WSL/Linux: `setup_env_wsl.sh`, `run_pytest.sh`, `run_mypy.sh`"
-        },
-        {
-          "path": "docs/00-project/index.md",
-          "line": 86,
-          "source_group": "docs",
-          "text": "`bash scripts/engineering/dev/setup_env_wsl.sh`, then prefer"
-        },
-        {
-          "path": "docs/00-project/index.md",
-          "line": 157,
-          "source_group": "docs",
-          "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         }
       ]
     },
@@ -10686,33 +10770,90 @@
       ]
     },
     {
+      "path": "scripts/engineering/dev/zed_env_doctor.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": ".zed/README.md",
+          "line": 79,
+          "source_group": "other",
+          "text": "| **Environment: verify** | Read-only doctor (`scripts/engineering/dev/zed_env_doctor.py`) |"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 254,
+          "source_group": "other",
+          "text": "- Environment: verify — `zed_env_doctor.py`"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 343,
+          "source_group": "other",
+          "text": "- `scripts/engineering/dev/zed_env_doctor.py`"
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 6,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_env_doctor.py\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+          "line": 304,
+          "source_group": "tests",
+          "text": "assert env_verify[\"args\"] == [\"scripts/engineering/dev/zed_env_doctor.py\"]"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+          "line": 370,
+          "source_group": "tests",
+          "text": "assert \"zed_env_doctor.py\" in serialized"
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/dev/zed_lint_imports.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 225,
+          "line": 81,
           "source_group": "other",
-          "text": "- Architecture compliance — `python scripts/engineering/dev/zed_lint_imports.py` (contracts in `.importlinter`)"
+          "text": "| `zed_pytest_lane.py`, `zed_lint_imports.py`, `zed_vulture.py`, `zed_xenon.py`, `zed_mypy.py` | Call `ensure_ready()` before tool imports |"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 253,
+          "source_group": "other",
+          "text": "- Check: architecture imports — `zed_lint_imports.py` (contracts in `.importlinter`)"
         },
         {
           "path": ".zed/tasks.json",
-          "line": 236,
+          "line": 291,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_lint_imports.py\""
         },
         {
+          "path": "scripts/engineering/dev/zed_run.py",
+          "line": 54,
+          "source_group": "scripts",
+          "text": "if name == \"zed_lint_imports.py\":"
+        },
+        {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 221,
+          "line": 310,
           "source_group": "tests",
           "text": "assert arch[\"args\"] == [\"scripts/engineering/dev/zed_lint_imports.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 268,
+          "line": 367,
           "source_group": "tests",
           "text": "assert \"zed_lint_imports.py\" in serialized"
         }
@@ -10727,13 +10868,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/README.md",
+          "line": 81,
+          "source_group": "other",
+          "text": "| `zed_pytest_lane.py`, `zed_lint_imports.py`, `zed_vulture.py`, `zed_xenon.py`, `zed_mypy.py` | Call `ensure_ready()` before tool imports |"
+        },
         {
           "path": "pyproject.toml",
           "line": 318,
           "source_group": "build",
           "text": "# only (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py)."
+        },
+        {
+          "path": "scripts/engineering/dev/zed_run.py",
+          "line": 60,
+          "source_group": "scripts",
+          "text": "if name == \"zed_mypy.py\":"
         }
       ]
     },
@@ -10742,55 +10895,112 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 19,
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 88,
+          "line": 81,
           "source_group": "other",
-          "text": "`scripts/engineering/dev/zed_pytest_lane.py` so `and`/`or` are not re-tokenized"
+          "text": "| `zed_pytest_lane.py`, `zed_lint_imports.py`, `zed_vulture.py`, `zed_xenon.py`, `zed_mypy.py` | Call `ensure_ready()` before tool imports |"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 126,
+          "source_group": "other",
+          "text": "6. **PowerShell-safe pytest markers** — multi-word `-m` expressions live in `zed_pytest_lane.py`."
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 168,
+          "source_group": "other",
+          "text": "3. Bound task: **Test: current file** → `zed_pytest_lane.py file $ZED_FILE`."
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 345,
+          "source_group": "other",
+          "text": "- `scripts/engineering/dev/zed_pytest_lane.py`"
         },
         {
           "path": ".zed/tasks.json",
-          "line": 48,
+          "line": 69,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 68,
+          "line": 91,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 86,
+          "line": 111,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 101,
+          "line": 129,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/dev/zed_run.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 12,
+      "references": [
+        {
+          "path": ".zed/README.md",
+          "line": 80,
+          "source_group": "other",
+          "text": "| `zed_run.py` | Doctor, then `python -m <tool>` or a helper script |"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 250,
+          "source_group": "other",
+          "text": "- Format: code — `zed_run.py -m ruff format .`"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 251,
+          "source_group": "other",
+          "text": "- Check: lint — `zed_run.py -m ruff check src tests scripts`"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 252,
+          "source_group": "other",
+          "text": "- Check: types — `zed_run.py -m mypy --config-file pyproject.toml src/bioetl`"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 344,
+          "source_group": "other",
+          "text": "- `scripts/engineering/dev/zed_run.py`"
         },
         {
           "path": ".zed/tasks.json",
-          "line": 116,
+          "line": 18,
           "source_group": "other",
-          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+          "text": "\"scripts/engineering/dev/zed_run.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 131,
+          "line": 34,
           "source_group": "other",
-          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+          "text": "\"scripts/engineering/dev/zed_run.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 146,
+          "line": 52,
           "source_group": "other",
-          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+          "text": "\"scripts/engineering/dev/zed_run.py\","
         }
       ]
     },
@@ -10799,15 +11009,8 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": ".zed/README.md",
-          "line": 296,
-          "source_group": "other",
-          "text": "- `scripts/engineering/dev/zed_task.ps1` — optional Windows helper to run"
-        }
-      ],
+      "reference_count": 0,
+      "references": [],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-10-21",
@@ -10818,29 +11021,41 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 235,
+          "line": 81,
           "source_group": "other",
-          "text": "- Dead code — `python scripts/engineering/dev/zed_vulture.py`"
+          "text": "| `zed_pytest_lane.py`, `zed_lint_imports.py`, `zed_vulture.py`, `zed_xenon.py`, `zed_mypy.py` | Call `ensure_ready()` before tool imports |"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 260,
+          "source_group": "other",
+          "text": "- Audit: dead code — `zed_vulture.py`"
         },
         {
           "path": ".zed/tasks.json",
-          "line": 272,
+          "line": 338,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_vulture.py\""
         },
         {
+          "path": "scripts/engineering/dev/zed_run.py",
+          "line": 56,
+          "source_group": "scripts",
+          "text": "if name == \"zed_vulture.py\":"
+        },
+        {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 235,
+          "line": 324,
           "source_group": "tests",
           "text": "assert dead_code[\"args\"] == [\"scripts/engineering/dev/zed_vulture.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 270,
+          "line": 369,
           "source_group": "tests",
           "text": "assert \"zed_vulture.py\" in serialized"
         }
@@ -10855,35 +11070,47 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 7,
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 238,
+          "line": 81,
           "source_group": "other",
-          "text": "- Complexity check — `python scripts/engineering/dev/zed_xenon.py`"
+          "text": "| `zed_pytest_lane.py`, `zed_lint_imports.py`, `zed_vulture.py`, `zed_xenon.py`, `zed_mypy.py` | Call `ensure_ready()` before tool imports |"
+        },
+        {
+          "path": ".zed/README.md",
+          "line": 261,
+          "source_group": "other",
+          "text": "- Audit: complexity — `zed_xenon.py`"
         },
         {
           "path": ".zed/tasks.json",
-          "line": 281,
+          "line": 350,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_xenon.py\""
         },
         {
+          "path": "scripts/engineering/dev/zed_run.py",
+          "line": 58,
+          "source_group": "scripts",
+          "text": "if name == \"zed_xenon.py\":"
+        },
+        {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 54,
+          "line": 79,
           "source_group": "tests",
           "text": "str(ROOT / \"scripts\" / \"engineering\" / \"dev\" / \"zed_xenon.py\")"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 228,
+          "line": 317,
           "source_group": "tests",
           "text": "assert complexity[\"args\"] == [\"scripts/engineering/dev/zed_xenon.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 269,
+          "line": 368,
           "source_group": "tests",
           "text": "assert \"zed_xenon.py\" in serialized"
         }
@@ -10938,7 +11165,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 249,
+          "line": 254,
           "source_group": "docs",
           "text": "| `scripts.engineering.diagnostics` | `uv run python -m scripts.engineering.diagnostics` | Debug: cleanup, pandera, storage            |"
         },
@@ -11375,7 +11602,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 258,
+          "line": 263,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa check-c901"
         },
@@ -13051,7 +13278,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 251,
+          "line": 256,
           "source_group": "docs",
           "text": "Каждая группа поддерживает `--help` и `<command> --help`. Скрипты также доступны напрямую: `python scripts/engineering/qa/naming_audit.py`."
         },
@@ -14052,13 +14279,13 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 144,
+          "line": 195,
           "source_group": "tests",
           "text": "assert committed[\"generated_by\"].endswith(\"report_module_coverage_inventory.py\")"
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 798,
+          "line": 849,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -14813,7 +15040,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 243,
+          "line": 248,
           "source_group": "docs",
           "text": "| `scripts.engineering.qa.vcr`      | `uv run python -m scripts.engineering.qa.vcr`      | VCR governance: placement, naming, secrets  |"
         }
@@ -14887,7 +15114,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 277,
+          "line": 282,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -14944,7 +15171,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 257,
+          "line": 262,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa check-naming --check"
         },
@@ -15533,7 +15760,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 259,
+          "line": 264,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.repo check-inventory --check"
         },
@@ -16461,13 +16688,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 242,
+          "line": 247,
           "source_group": "docs",
           "text": "| `scripts.ops.data`                | `uv run python -m scripts.ops.data`                | Data integrity: checksums, delta, data dir  |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 278,
+          "line": 283,
           "source_group": "docs",
           "text": "uv run python -m scripts.ops.data checksums --generate"
         },
@@ -19001,7 +19228,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/runtime/mcp/OPERATOR.md",
@@ -19014,6 +19241,12 @@
           "line": 41,
           "source_group": "scripts",
           "text": "python scripts/ops/runtime/mcp/_materialize_shared_http_configs.py"
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 295,
+          "source_group": "tests",
+          "text": "from scripts.ops.runtime.mcp import _materialize_shared_http_configs as materialize"
         }
       ]
     },
@@ -19041,7 +19274,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 71,
+          "line": 116,
           "source_group": "other",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1 -DisableDockerGateways"
         },
@@ -19096,7 +19329,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 70,
+          "line": 115,
           "source_group": "other",
           "text": ".\\scripts\\ops\\runtime\\mcp\\health-shared.ps1"
         },
@@ -19135,7 +19368,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/helper/ensure-mcp.sh",
-          "line": 280,
+          "line": 301,
           "source_group": "scripts",
           "text": "local health=\"${REPO_ROOT}/scripts/ops/runtime/mcp/health-shared.sh\""
         },
@@ -19172,7 +19405,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 69,
+          "line": 114,
           "source_group": "other",
           "text": ".\\scripts\\ops\\runtime\\mcp\\start-shared.ps1"
         },
@@ -19229,7 +19462,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/helper/ensure-mcp.sh",
-          "line": 279,
+          "line": 300,
           "source_group": "scripts",
           "text": "local launcher=\"${REPO_ROOT}/scripts/ops/runtime/mcp/start-shared.sh\""
         },
@@ -19350,16 +19583,16 @@
       "reference_count": 2,
       "references": [
         {
-          "path": "scripts/ops/runtime/mcp/start-shared.sh",
-          "line": 218,
-          "source_group": "scripts",
-          "text": "str(root / \"scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py\"),"
+          "path": "tests/unit/repo_backed/scripts/ops/test_windows_docker_mcp_bridge.py",
+          "line": 38,
+          "source_group": "tests",
+          "text": "from scripts.ops.runtime.mcp import windows_docker_mcp_bridge"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/test_windows_docker_mcp_bridge.py",
-          "line": 36,
+          "line": 136,
           "source_group": "tests",
-          "text": "from scripts.ops.runtime.mcp import windows_docker_mcp_bridge"
+          "text": "\"windows_docker_mcp_bridge.py\","
         }
       ]
     },
@@ -19372,7 +19605,7 @@
       "references": [
         {
           "path": "scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py",
-          "line": 139,
+          "line": 159,
           "source_group": "scripts",
           "text": "relay_script = Path(__file__).with_name(\"windows_tcp_relay.ps1\")"
         }

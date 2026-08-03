@@ -25,7 +25,7 @@ _DEV_DIR = Path(__file__).resolve().parent
 if str(_DEV_DIR) not in sys.path:
     sys.path.insert(0, str(_DEV_DIR))
 
-from zed_env_doctor import ensure_ready  # noqa: E402
+from zed_env_doctor import ensure_ready
 
 WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "duplication-complexity.yml"
 

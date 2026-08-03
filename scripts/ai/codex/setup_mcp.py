@@ -1194,8 +1194,8 @@ def _check_tracked_portable_projections(
         if actual != expected_text:
             actual_obj = json.loads(actual) if actual.strip() else {}
             expected_obj = json.loads(expected_text)
-            actual_names = set((actual_obj.get("mcpServers") or {}))
-            expected_names = set((expected_obj.get("mcpServers") or {}))
+            actual_names = set(actual_obj.get("mcpServers") or {})
+            expected_names = set(expected_obj.get("mcpServers") or {})
             only_actual = sorted(actual_names - expected_names)
             only_expected = sorted(expected_names - actual_names)
             shared_drift = sorted(
