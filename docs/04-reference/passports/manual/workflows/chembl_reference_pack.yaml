@@ -1,6 +1,0 @@
-owner: BioETL Team
-owner_approved: true
-purpose: Execute the ordered ChEMBL reference-data workflow as one recoverable control-plane unit.
-rationale: The workflow passport makes cross-pipeline handoffs and recovery boundaries visible.
-known_limitations:
-  - Individual provider results remain independently inspectable and may complete at different times.

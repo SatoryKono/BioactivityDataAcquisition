@@ -1,4 +1,0 @@
-interface:
-  display_name: "Python Reproducibility Audit"
-  short_description: "Audit code changes for reproducibility and replay capability"
-  default_prompt: "Use $py-reproducibility-audit to audit code changes for deterministic behavior, test coverage, schema validation, and replay capability."

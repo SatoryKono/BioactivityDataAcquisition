@@ -1,8 +1,0 @@
-schema_version: 1
-provider: uniprot
-cassette_rel_path: tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check.yaml
-metadata_status: managed_inventory
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 0f965c39dcb1005b540a34af11723a1cd4650f5444fcb90701a4b34d0c0c4b7e
-recorded_at: '2026-07-03'
-staleness_ready: true

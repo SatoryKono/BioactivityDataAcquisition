@@ -1,6 +1,0 @@
-owner: BioETL Team
-owner_approved: true
-purpose: Build the baseline ChEMBL assay, target, and publication datasets with bidirectional referential reconciliation.
-known_limitations:
-  - Four ordered Gold reconciliation steps make transform order semantically relevant.
-rationale: ADR-055 requires the mutation and its recovery boundary to remain explicit in this passport.
