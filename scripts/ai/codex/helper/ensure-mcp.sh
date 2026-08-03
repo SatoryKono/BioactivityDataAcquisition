@@ -50,7 +50,10 @@ import json
 import sys
 from pathlib import Path
 
-payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+try:
+    payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+    payload = {}
 print(str(payload.get("profile") or ""))
 print(str(payload.get("transport_mode") or ""))
 PY
