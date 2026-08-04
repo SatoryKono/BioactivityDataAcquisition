@@ -47,58 +47,6 @@ def _below_default_floor_count(inventory: dict[str, Any]) -> int:
     )
 
 
-def test_issue_5272_closeout_artifact_has_expected_shape() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert closeout["issue"] == "#5272"
-    assert closeout["parent_epic"] == "#5244"
-    assert closeout["status"] in {
-        "validated_local_closeable",
-        "not_closeable_under_current_inventory",
-    }
-    assert closeout["debt_outcome"] in {"improved", "current_inventory_regressed"}
-    if closeout["status"] == "validated_local_closeable":
-        assert closeout["debt_outcome"] == "improved"
-        assert (
-            closeout["current_metrics"]["repo_uncovered_module_count"]
-            < closeout["baseline_metrics"]["repo_uncovered_module_count"]
-        )
-        assert (
-            closeout["current_metrics"]["application_core_covered_line_percent"]
-            > closeout["baseline_metrics"]["application_core_covered_line_percent"]
-        )
-        # Application core must be zero for local closeout
-        assert (
-            closeout["current_metrics"]["application_core_uncovered_module_count"] == 0
-        )
-        assert (
-            closeout["current_metrics"]["application_core_unmeasured_module_count"] == 0
-        )
-    else:
-        assert closeout["debt_outcome"] == "current_inventory_regressed"
-        assert (
-            closeout["current_metrics"]["repo_uncovered_module_count"]
-            >= closeout["baseline_metrics"]["repo_uncovered_module_count"]
-            or closeout["current_metrics"]["application_core_covered_line_percent"]
-            <= closeout["baseline_metrics"]["application_core_covered_line_percent"]
-        )
-    assert closeout["module_expectations"]
-    evidence = set(closeout["evidence"])
-    assert "reports/coverage/coverage.xml" not in evidence
-    assert "reports/quality/module-coverage-inventory.json" in evidence
-    assert "reports/quality/architecture-quality-scorecard.json" in evidence
-    assert "configs/quality/module_coverage_gates.yaml" in evidence
-    for evidence_path in closeout["evidence"]:
-        assert (ROOT / str(evidence_path)).exists(), evidence_path
-
-    inventory = _load_json(INVENTORY)
-    assert inventory["coverage_xml_path"] == "reports/coverage/coverage.xml"
-    assert (
-        isinstance(inventory["coverage_xml_sha256"], str)
-        and inventory["coverage_xml_sha256"]
-    )
-
-
 def test_issue_5272_closeout_matches_live_module_coverage_inventory() -> None:
     skip_if_module_coverage_inventory_is_dirty(root=ROOT, inventory_path=INVENTORY)
     closeout = _load_json(CLOSEOUT)

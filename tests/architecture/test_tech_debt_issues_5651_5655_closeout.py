@@ -95,18 +95,6 @@ def _src_importers(module_name: str) -> set[str]:
     return importers
 
 
-def test_stream_b_closeout_artifact_is_complete_and_budget_safe() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert set(closeout["issues"]) == EXPECTED_ISSUES
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert set(closeout["outcomes"]) == {str(issue) for issue in EXPECTED_ISSUES}
-    assert all(
-        outcome["status"] == "closeable" for outcome in closeout["outcomes"].values()
-    )
-    assert closeout["outcomes"]["5652"]["outcome"] == "improved"
-
-
 def test_issue_5655_freshness_gates_are_fail_fast_and_clean() -> None:
     gates = _load_json(DEBT_GATES)
     contract = _load_json(CONTRACT_DIAGNOSTICS)

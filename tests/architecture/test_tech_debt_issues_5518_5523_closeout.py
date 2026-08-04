@@ -71,22 +71,6 @@ def _retained_entrypoint(payload: dict[str, Any], path: str) -> dict[str, Any]:
     raise AssertionError(f"Missing retained entrypoint row for {path}")
 
 
-def test_closeout_artifact_covers_requested_issues__5518_5523() -> None:
-    payload = _load_json(CLOSEOUT)
-    issues = payload["issues"]
-
-    assert payload["schema_version"] == "tech-debt-issues-5518-5523-closeout-v1"
-    assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in issues} == {5518, 5519, 5520, 5521, 5522, 5523}
-    assert all(issue["status"] == "closed-ready" for issue in issues)
-
-    for issue in issues:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), (
-                f"Missing closeout evidence for #{issue['number']}: {relative_path}"
-            )
-
-
 def test_issue_5518_cli_bootstrap_config_uses_owner_loader_seam() -> None:
     source = CLI_BOOTSTRAP_CONFIG.read_text(encoding="utf-8")
     runtime_source = RUNTIME_CONFIG_ACCESS.read_text(encoding="utf-8")

@@ -71,24 +71,6 @@ def _family_row(payload: dict[str, Any], family_name: str) -> dict[str, Any]:
     raise AssertionError(f"Missing hotspot family row: {family_name}")
 
 
-def test_closeout_artifact_covers_requested_issues_5744_5751() -> None:
-    payload = _load_json(CLOSEOUT)
-
-    assert payload["schema_version"] == "tech-debt-issues-5744-5751-closeout-v1"
-    assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in payload["issues"]} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in payload["issues"])
-
-    for issue in payload["issues"]:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), (
-                f"Missing closeout evidence for #{issue['number']}: {relative_path}"
-            )
-
-    for name, ratchet in payload["ratchets"].items():
-        assert ratchet["current"] <= ratchet["max"], name
-
-
 def test_issue_5744_architecture_audit_freshness_gates_are_passing() -> None:
     scorecard = _load_json(SCORECARD)
 

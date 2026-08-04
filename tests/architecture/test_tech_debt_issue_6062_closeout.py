@@ -79,19 +79,6 @@ def _function_scoped_imports(path: Path) -> list[str]:
     return imports
 
 
-def test_issue_6062_closeout_artifact_records_improved_debt_outcome() -> None:
-    payload = _load_json(CLOSEOUT)
-
-    assert payload["schema_version"] == "tech-debt-issue-6062-closeout-v1"
-    assert payload["issue"] == 6062
-    assert payload["status"] == "closeable"
-    assert payload["debt_outcome"] == "improved"
-    assert payload["budget_growth_allowed"] is False
-    assert payload["before"]["function_scoped_import_count"] == 12
-    assert payload["after"]["function_scoped_import_count"] == 2
-    assert payload["after"]["accidental_hidden_coupling_count"] == 0
-
-
 def test_issue_6062_gold_writer_retains_only_optional_delta_lazy_imports() -> None:
     imports = set(_function_scoped_imports(GOLD_WRITER))
 

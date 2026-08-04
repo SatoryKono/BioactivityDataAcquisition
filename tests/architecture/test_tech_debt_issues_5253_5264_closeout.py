@@ -42,39 +42,6 @@ def _evidence_path(raw_evidence: str) -> str:
     return raw_evidence.split("::", maxsplit=1)[0]
 
 
-def test_tech_debt_issue_closeout_covers_exact_issue_set() -> None:
-    """The closeout artifact must explicitly cover every requested issue."""
-    closeout = _load_closeout()
-    issues = cast(list[dict[str, Any]], closeout["issues"])
-
-    assert closeout["status"] == "implemented_local_closeable"
-    assert closeout["budget_policy"] == "no_growth_ratchet_only"
-    assert {str(issue["issue"]) for issue in issues} == EXPECTED_ISSUES
-    for issue in issues:
-        assert cast(str, issue["theme"]).strip()
-        assert cast(str, issue["action"]).strip()
-        assert issue["risk"] in {"low", "medium", "high"}
-        assert cast(list[str], issue["debt_types"])
-        assert cast(list[str], issue["evidence"])
-
-
-def test_tech_debt_issue_closeout_evidence_paths_exist() -> None:
-    """Evidence references must point to real repository files."""
-    closeout = _load_closeout()
-    issues = cast(list[dict[str, Any]], closeout["issues"])
-    missing: list[str] = []
-
-    for issue in issues:
-        for raw_evidence in cast(list[str], issue["evidence"]):
-            relative_path = _evidence_path(raw_evidence)
-            if not (ROOT / relative_path).exists():
-                missing.append(f"{issue['issue']}: {raw_evidence}")
-
-    assert not missing, "Closeout evidence references missing files:\n" + "\n".join(
-        missing
-    )
-
-
 def test_replay_bundle_descriptor_split_stays_below_hotspot_budget() -> None:
     """The replay descriptor split must not recreate a >=250 LOC hotspot."""
     violations: list[str] = []

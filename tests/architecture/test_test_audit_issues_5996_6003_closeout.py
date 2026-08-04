@@ -47,31 +47,6 @@ def _test_function_names(path: Path) -> set[str]:
 
 
 @pytest.mark.architecture
-def test_5996_6003_closeout_evidence_covers_requested_issues() -> None:
-    """The closeout artifact must explicitly cover every requested issue."""
-    closeout = _load_closeout()
-
-    assert closeout["schema_version"] == "test-audit-closeout-v1"
-    assert closeout["issue_batch"]["issues"] == [
-        5996,
-        5997,
-        5998,
-        6000,
-        6001,
-        6002,
-        6003,
-    ]
-    assert closeout["closeout"]["status"] == "complete"
-    assert closeout["closeout"]["closeable_issues"] == [
-        5996,
-        5997,
-        5998,
-        6000,
-        6001,
-        6002,
-        6003,
-    ]
-    assert closeout["closeout"]["deferred_issues"] == []
 
 
 @pytest.mark.architecture

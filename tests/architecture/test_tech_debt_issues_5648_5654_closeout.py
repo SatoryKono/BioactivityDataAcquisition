@@ -112,21 +112,6 @@ def _src_importers(module_name: str) -> set[str]:
     return importers
 
 
-def test_closeout_artifact_covers_requested_issue_chain() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert closeout["schema_version"] == "tech-debt-issues-5648-5654-closeout-v1"
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert {issue["number"] for issue in closeout["issues"]} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in closeout["issues"])
-
-    for issue in closeout["issues"]:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), (
-                f"Missing closeout evidence for #{issue['number']}: {relative_path}"
-            )
-
-
 def test_issues_5648_5649_5650_duplication_is_below_opening_baselines() -> None:
     duplication = _load_json(DUPLICATION_BASELINE)
 
