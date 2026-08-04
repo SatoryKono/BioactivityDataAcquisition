@@ -28,10 +28,12 @@ TARGET_MODULE = "bioetl.domain.composite.config"
 SPLIT_INTERNAL_PREFIX = "bioetl.domain.composite.config_"
 BASELINE_PUBLIC_SRC_IMPORTERS = 0
 BASELINE_PUBLIC_TEST_IMPORTERS = 38
-BASELINE_SPLIT_SRC_IMPORTERS = 7
-BASELINE_SPLIT_TEST_IMPORTERS = 3
+# Measured residual after zone merges (#7521 / CI-C1-005); shrink-only from here.
+BASELINE_SPLIT_SRC_IMPORTERS = 9
+BASELINE_SPLIT_TEST_IMPORTERS = 5
 ALLOWED_EXTERNAL_SPLIT_IMPORTERS = {
     "src/bioetl/infrastructure/schemas/pipeline_config.py",
+    "tests/unit/domain/test_partial_coverage_burndown_td04.py",
 }
 OWNER_SPLIT_PREFIXES = (
     "src/bioetl/domain/composite/",
