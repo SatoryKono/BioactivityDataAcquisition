@@ -657,21 +657,24 @@ def _load_suffix_rule_lists(
     list[SuffixBoundaryRule],
     list[FamilyFreezeRule],
 ]:
+    function_rules_payload = payload.get("function_suffix_rules")
+    suffix_rules_payload = payload.get("suffix_boundary_rules")
+    family_rules_payload = payload.get("family_freeze_rules")
     function_rules = [
         rule
-        for item in payload.get("function_suffix_rules", [])  # type: ignore[union-attr]
+        for item in function_rules_payload
         if (rule := _function_suffix_rule_from_config(item)) is not None
-    ]
+    ] if isinstance(function_rules_payload, list) else []
     suffix_rules = [
         rule
-        for item in payload.get("suffix_boundary_rules", [])  # type: ignore[union-attr]
+        for item in suffix_rules_payload
         if (rule := _suffix_boundary_rule_from_config(item)) is not None
-    ]
+    ] if isinstance(suffix_rules_payload, list) else []
     family_rules = [
         rule
-        for item in payload.get("family_freeze_rules", [])  # type: ignore[union-attr]
+        for item in family_rules_payload
         if (rule := _family_freeze_rule_from_config(item)) is not None
-    ]
+    ] if isinstance(family_rules_payload, list) else []
     return function_rules, suffix_rules, family_rules
 
 

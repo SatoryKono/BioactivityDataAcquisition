@@ -7,6 +7,7 @@ import ast
 import sys
 from datetime import UTC, date, datetime
 from pathlib import Path
+from typing import Any
 
 MAX_CONSTRUCTOR_ARGS = 8
 EXCLUDE_PATTERNS = ["test_", "conftest"]
@@ -40,7 +41,7 @@ def check_file(filepath: Path) -> list[tuple[str, int, int]]:
     return violations
 
 
-def _load_waivers(waiver_path: Path) -> dict:
+def _load_waivers(waiver_path: Path) -> dict[str, Any]:
     """Load waivers from YAML file. Exits on error."""
     if not waiver_path.exists():
         return {}
@@ -71,7 +72,7 @@ def _parse_expiry(expiry_str: str) -> date:
 def _check_single_waiver(
     class_name: str,
     count: int,
-    waivers: dict,
+    waivers: dict[str, Any],
     today: date,
     max_ttl_days: int,
 ) -> tuple[bool, str | None]:
@@ -96,7 +97,7 @@ def _check_single_waiver(
 
 def _collect_violations_and_waivers(
     src_path: Path,
-    waivers: dict,
+    waivers: dict[str, Any],
     today: date,
     max_ttl_days: int,
 ) -> tuple[

@@ -55,6 +55,11 @@ docker, neo4j-cypher, neo4j-memory,
 deja, adr-analysis, mutmut, code-analyzer, github-actions,
 deepwiki, ref
 
+`mermaid` is served by the pinned Windows-native `mcp-mermaid@0.4.1` backend.
+The Docker MCP catalog entry is not used because it exposes no Mermaid tools on
+this host; all active clients use the singleton endpoint at
+`http://127.0.0.1:8818/mcp`.
+
 `deepwiki` uses environment-backed header references to `DEEPWIKI_API_KEY` and
 `DEEPWIKI_ORGANISATION_ID`. `ref` uses the key-free
 `https://api.ref.tools/mcp` endpoint and authenticates through OAuth or an

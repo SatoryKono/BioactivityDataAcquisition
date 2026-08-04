@@ -46,6 +46,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TypeVar
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -226,12 +227,15 @@ def _assign_groups(
     return assignment
 
 
+_DiagramItem = TypeVar("_DiagramItem", ClassBlock, FlowchartNode)
+
+
 def _partition_by_group(
-    items: list[ClassBlock] | list[FlowchartNode],
+    items: list[_DiagramItem],
     assignment: dict[str, str],
-) -> dict[str, list]:
+) -> dict[str, list[_DiagramItem]]:
     """Partition items into groups based on assignment map."""
-    groups: dict[str, list] = {}
+    groups: dict[str, list[_DiagramItem]] = {}
     for item in items:
         name = item.name if isinstance(item, ClassBlock) else item.node_id
         g = assignment.get(name, "default")
@@ -700,6 +704,7 @@ def _normalize_flowchart(lines: list[str]) -> list[str]:
             width_strategy=width_strategy,
         )
     else:
+        assert stats is not None
         result = _update_uniform_tag(result, stats, "flowchart")
 
     return result

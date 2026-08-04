@@ -51,7 +51,7 @@ Classes:
 | filesystem | T2 | wrapper stdio | shared port 8827; repository-root allowlist |
 | fetch | T2 | uvx wrapper | **Phase 2** port 8821 |
 | github | T2 | wrapper | **Phase 2** port 8820 |
-| docker | T2 | docker mcp gateway stdio | **catalog optional** port 8817 (`daily=false`) |
+| docker | T2 | Windows Docker MCP streaming gateway | **daily** port 8817 |
 | context7 | T2 | wrapper | **daily** port 8815 |
 | ast-grep | T2 | wrapper | **daily** port 8816 |
 | mcp-code-interpreter | T2 | uvx stdio | shared port 8829 |
@@ -60,8 +60,7 @@ Classes:
 | brave-search | T2 | docker run stdio | **daily** port 8811 |
 | neo4j-cypher | T2 | wrapper | **catalog** port 8824 (needs healthy neo4j auth) |
 | neo4j-memory | T2 | wrapper | **catalog** port 8825 (needs healthy neo4j auth) |
-| mermaid | T2 | gateway stdio | **catalog optional** port 8818 (`daily=false`) |
-| dockerhub | T2 | gateway stdio | **catalog optional** port 8819 (`daily=false`) |
+| mermaid | T2 | pinned `mcp-mermaid@0.4.1` Windows-native streaming | **daily** port 8818 |
 | deja | T2 | npx stdio | **Phase 1** port 8814 |
 | adr-analysis | T2 | npx stdio | **Phase 1 MVP** port 8813 |
 | mutmut | T2 | wrapper | shared port 8830 |
@@ -89,7 +88,7 @@ Bridge pin: **`mcp-proxy@6.5.4`** (stdio → Streamable HTTP `/mcp`).
 | Server group | Ports | Daily profile `shared` |
 | --- | --- | --- |
 | search/analysis | `8811`, `8813`–`8816` | yes |
-| Docker gateway (`docker`, `mermaid`) | `8817`–`8818` | yes |
+| Windows-native streaming (`docker` gateway, pinned `mermaid`) | `8817`–`8818` | yes |
 | GitHub/fetch/monitoring | `8820`–`8823` | yes |
 | Neo4j | `8824`–`8825` | optional; included by `--all` |
 | stateful memory/filesystem | `8826`–`8827` | yes |
@@ -177,8 +176,9 @@ Localhost allowlist (not SaaS remote list):
   retry is started.
 - A ready listener without a managed PID fails as `unmanaged_ready`.
 - Every mcp-proxy binds explicitly to `127.0.0.1`.
-- On non-mirrored WSL networking, Docker MCP servers use one native Windows
-  streaming gateway and a binary relay to WSL loopback.
+- On non-mirrored WSL networking, `docker` uses one native Windows Docker MCP
+  gateway and `mermaid` uses one pinned Windows `mcp-mermaid@0.4.1` process;
+  each has one binary relay to WSL loopback.
 - Runtime status and health JSON are replaced atomically.
 
 ## Related files
