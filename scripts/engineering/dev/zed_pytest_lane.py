@@ -26,9 +26,9 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-_DEV_DIR = Path(__file__).resolve().parent
-if str(_DEV_DIR) not in sys.path:
-    sys.path.insert(0, str(_DEV_DIR))
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.engineering.dev.zed_env_doctor import ensure_ready
 

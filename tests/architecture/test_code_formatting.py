@@ -82,8 +82,9 @@ def _ruff_env() -> dict[str, str]:
 
 def _run_format_check(target: str) -> subprocess.CompletedProcess[str]:
     """Run `ruff format --check` with Windows retry for line-ending churn."""
+    assert _RUFF_CMD is not None
     result = subprocess.run(
-        [*_RUFF_CMD, "format", "--check", target],  # type: ignore[arg-type]
+        [*_RUFF_CMD, "format", "--check", target],
         capture_output=True,
         env=_ruff_env(),
         text=True,
@@ -93,13 +94,13 @@ def _run_format_check(target: str) -> subprocess.CompletedProcess[str]:
 
     # On Windows, normalize line endings and retry once to avoid flaky churn.
     subprocess.run(
-        [*_RUFF_CMD, "format", target],  # type: ignore[arg-type]
+        [*_RUFF_CMD, "format", target],
         capture_output=True,
         env=_ruff_env(),
         text=True,
     )
     return subprocess.run(
-        [*_RUFF_CMD, "format", "--check", target],  # type: ignore[arg-type]
+        [*_RUFF_CMD, "format", "--check", target],
         capture_output=True,
         env=_ruff_env(),
         text=True,
@@ -112,7 +113,8 @@ def _run_isort_check() -> subprocess.CompletedProcess[str]:
     if platform.system() == "Windows" and find_spec("ruff") is not None:
         check_cmd = [sys.executable, "-m", "ruff"]
     else:
-        check_cmd = [*_RUFF_CMD]  # type: ignore[misc]
+        assert _RUFF_CMD is not None
+        check_cmd = [*_RUFF_CMD]
     return subprocess.run(
         [*check_cmd, "check", "--select", "I", "src", "tests"],
         capture_output=True,
