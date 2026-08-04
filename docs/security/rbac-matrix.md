@@ -1,6 +1,17 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: active
+Class: repo-only
+Owner: BioETL Team
+Last verified: '2026-08-04'
+
+______________________________________________________________________
+
 # BioETL Dashboard And Export RBAC Matrix
 
-Last verified: 2026-07-24
+> **Classification:** repo-only security/ops matrix (outside MkDocs nav). Path
+> is stable for architecture closeout tests. #7434.
 
 This matrix governs the local-only Grafana, identity HTTP, and export surfaces used
 by the observability rollout. It does not replace backend authorization; hidden
