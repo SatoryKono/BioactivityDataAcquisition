@@ -35,6 +35,9 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_categories import (
     score_run_identity as score_run_identity,
 )
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
+    CATEGORY_SCORER_EXPORTS,
+)
 from bioetl.application.services.control_plane.run_manifest_reproducibility_claims import (
     build_executable_run_contract_claim as build_executable_run_contract_claim,
 )
@@ -52,11 +55,5 @@ __all__ = [
     "evaluate_threshold_failures",
     "overall_blockers",
     "overall_evidence_refs",
-    "score_checkpoint_safety",
-    "score_determinism",
-    "score_idempotency",
-    "score_layer_consistency",
-    "score_lineage_completeness",
-    "score_replay_readiness",
-    "score_run_identity",
+    *CATEGORY_SCORER_EXPORTS,
 ]

@@ -1,0 +1,155 @@
+{
+  "schema_version": "tech-debt-issues-5648-5654-closeout-v1",
+  "reviewed_on": "2026-06-26",
+  "issues": [
+    {
+      "number": 5648,
+      "status": "closed-ready",
+      "debt_type": "cli_command_shell_duplication",
+      "outcome": "reduced",
+      "opening_baseline": {
+        "target": "src/bioetl/interfaces/cli",
+        "duplicate_count": 3
+      },
+      "current_counts": {
+        "target": "src/bioetl/interfaces/cli",
+        "duplicate_count": 2
+      },
+      "evidence": [
+        "src/bioetl/interfaces/cli/commands/domains/composite/command_input.py",
+        "src/bioetl/interfaces/cli/commands/run_composite.py",
+        "reports/quality/full-app-duplication-baseline.json"
+      ],
+      "closeout_reason": "Composite CLI command input now composes the existing runtime option bundle instead of duplicating the runtime option shell; full-app duplication reports CLI clusters below the opening baseline."
+    },
+    {
+      "number": 5649,
+      "status": "closed-ready",
+      "debt_type": "adapter_layer_duplication",
+      "outcome": "reduced",
+      "opening_baseline": {
+        "target": "src/bioetl/infrastructure/adapters",
+        "duplicate_count": 67
+      },
+      "current_counts": {
+        "target": "src/bioetl/infrastructure/adapters",
+        "duplicate_count": 63
+      },
+      "evidence": [
+        "src/bioetl/infrastructure/adapters/pubmed/_errors.py",
+        "src/bioetl/infrastructure/adapters/pubmed/_fetch.py",
+        "src/bioetl/infrastructure/adapters/pubmed/_health.py",
+        "src/bioetl/infrastructure/adapters/pubmed/_search.py",
+        "reports/quality/full-app-duplication-baseline.json"
+      ],
+      "closeout_reason": "PubMed adapter exception groups are centralized in a private helper, removing repeated adapter template clusters while preserving exported error aliases."
+    },
+    {
+      "number": 5650,
+      "status": "closed-ready",
+      "debt_type": "pipeline_transformer_contract_duplication",
+      "outcome": "reduced",
+      "opening_baseline": {
+        "target": "src/bioetl/application/pipelines",
+        "duplicate_count": 18
+      },
+      "current_counts": {
+        "target": "src/bioetl/application/pipelines",
+        "duplicate_count": 17,
+        "contract_registry_blocking_issues": 0,
+        "dq_contract_registry_blocking_issues": 0
+      },
+      "evidence": [
+        "src/bioetl/application/pipelines/pubmed/blocks.py",
+        "reports/quality/full-app-duplication-baseline.json",
+        "reports/quality/contract-registry-diagnostics.json",
+        "scripts/engineering/ci/validate_registry_dq_refs.py"
+      ],
+      "closeout_reason": "PubMed block re-export now uses block_definitions as the single source of truth, lowering pipeline duplication while contract and DQ registry diagnostics remain clean."
+    },
+    {
+      "number": 5651,
+      "status": "closed-ready",
+      "debt_type": "compatibility_public_entrypoint_governance",
+      "outcome": "unchanged_but_fully_justified",
+      "current_counts": {
+        "retained_entrypoint_count": 12,
+        "retained_public_entrypoint_burden": 0,
+        "retained_public_export_facade_count": 4,
+        "twin_pair_count": 0
+      },
+      "evidence": [
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "reports/quality/compatibility-importer-census.json",
+        "reports/quality/debt-governance-gates.json"
+      ],
+      "closeout_reason": "Retained public entrypoints are reviewed external API seams with zero first-party source importers, no transition debt, and no duplicate/conflicting public facade exports."
+    },
+    {
+      "number": 5652,
+      "status": "closed-ready",
+      "debt_type": "silver_filter_runtime_identity_compatibility",
+      "outcome": "reduced",
+      "current_counts": {
+        "silver_filter_migration_max_src_importer_count": 0,
+        "silver_filter_migration_src_importer_count": 0
+      },
+      "evidence": [
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "src/bioetl/domain/filtering/silver_filter_identity.py",
+        "src/bioetl/infrastructure/config/silver_filter_migration.py",
+        "reports/quality/compatibility-importer-census.json"
+      ],
+      "closeout_reason": "The Silver filter migration facade remains external-identity compatibility only; first-party runtime source imports are at zero."
+    },
+    {
+      "number": 5653,
+      "status": "closed-ready",
+      "debt_type": "dead_code_review_window_governance",
+      "outcome": "fully_triaged",
+      "current_counts": {
+        "repo_wide_zero_import_candidate_count": 10,
+        "repo_wide_classified_zero_import_candidate_count": 10,
+        "repo_wide_untriaged_zero_import_candidate_count": 0,
+        "repo_wide_owner_test_anchored_candidate_count": 10
+      },
+      "evidence": [
+        "reports/quality/dead-code-inventory.json",
+        "configs/quality/retirement_candidate_triage.yaml"
+      ],
+      "closeout_reason": "The dead-code inventory remains within the existing budget and all repo-wide zero-import candidates are classified, owner-test anchored, and under a zero-untriaged review window."
+    },
+    {
+      "number": 5654,
+      "status": "closed-ready",
+      "debt_type": "hotspot_family_budget_warning_reduction",
+      "outcome": "reduced",
+      "opening_baseline": {
+        "hotspot_family_budget_warnings": 7,
+        "composition_factories_pipeline_files_ge_250_loc": 3
+      },
+      "current_counts": {
+        "hotspot_family_budget_warnings": 6,
+        "composition_factories_pipeline_files_ge_250_loc": 2
+      },
+      "evidence": [
+        "src/bioetl/composition/factories/pipeline/_registry_factory_catalog.py",
+        "src/bioetl/composition/factories/pipeline/registry.py",
+        "reports/quality/hotspot-family-baseline.json",
+        "reports/quality/debt-governance-gates.json",
+        "configs/quality/debt_scorecard.yaml"
+      ],
+      "closeout_reason": "The pipeline factory registry now delegates lazy factory catalog logic to a private helper, lowering the family over-250-LOC count below budget and reducing hotspot warnings from 7 to 6 without raising debt budgets."
+    }
+  ],
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "required_closeout_checks": [
+    "python -m scripts.engineering.qa report-duplication-baseline --targets src/bioetl/infrastructure/adapters src/bioetl/application/pipelines src/bioetl/composition/bootstrap src/bioetl/interfaces/cli --json-out reports/quality/full-app-duplication-baseline.json --md-out reports/quality/full-app-duplication-baseline.md --timeout-seconds 300",
+    "python -m scripts.engineering.qa report-family-baseline --update",
+    "python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml",
+    "python -m scripts.engineering.qa report-dead-code-inventory",
+    "python -m scripts.engineering.qa report-compatibility-importer-census",
+    "python -m scripts.engineering.qa report-debt-governance-gates --update",
+    "pytest tests/architecture/test_tech_debt_issues_5648_5654_closeout.py"
+  ]
+}

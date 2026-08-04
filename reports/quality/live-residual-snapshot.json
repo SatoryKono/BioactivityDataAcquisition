@@ -1,0 +1,72 @@
+{
+  "schema_version": "live-residual-snapshot-v1",
+  "linked_issue": "#6891",
+  "parent_epic": "#6890",
+  "snapshot_date": "2026-07-28",
+  "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
+  "policy": {
+    "direction": "shrink_only",
+    "tech_debt_budget_growth": "forbidden",
+    "freeze_mode": "live_snapshot_non_growth"
+  },
+  "hotspot_families": {
+    "application_core": {
+      "files_ge_250_loc": 0,
+      "max_internal_fan_in": 8,
+      "helper_function_ratio": 0.365,
+      "files": 187,
+      "total_loc": 22716,
+      "budget_files_ge_250_loc": 0,
+      "budget_max_internal_fan_in": 10
+    },
+    "composition_bootstrap_runtime": {
+      "files_ge_250_loc": 0,
+      "max_internal_fan_in": 2,
+      "helper_function_ratio": 0.325,
+      "files": 51,
+      "total_loc": 6310,
+      "budget_files_ge_250_loc": 0,
+      "budget_max_internal_fan_in": 3
+    },
+    "composition_factories_pipeline": {
+      "files_ge_250_loc": 1,
+      "max_internal_fan_in": 3,
+      "helper_function_ratio": 0.33,
+      "files": 32,
+      "total_loc": 3939,
+      "budget_files_ge_250_loc": 2,
+      "budget_max_internal_fan_in": 3
+    },
+    "application_services_control_plane": {
+      "files_ge_250_loc": 0,
+      "max_internal_fan_in": 3,
+      "helper_function_ratio": 0.423,
+      "files": 139,
+      "total_loc": 15873,
+      "budget_files_ge_250_loc": 0,
+      "budget_max_internal_fan_in": 3
+    },
+    "composition_runtime_builders": {
+      "files_ge_250_loc": 0,
+      "max_internal_fan_in": 3,
+      "helper_function_ratio": 0.359,
+      "files": 56,
+      "total_loc": 6978,
+      "budget_files_ge_250_loc": 0,
+      "budget_max_internal_fan_in": 5
+    }
+  },
+  "dead_code": {
+    "repo_wide_zero_import_candidate_count": 6,
+    "repo_wide_untriaged_zero_import_candidate_count": 0,
+    "repo_wide_classified_zero_import_candidate_count": 6,
+    "repo_wide_candidates_without_owner_tests_count": 0
+  },
+  "config_surface": {
+    "duplicate_cluster_count": 10
+  },
+  "module_coverage": {
+    "uncovered_module_count": 0,
+    "unmeasured_module_count": 0
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "schema_version": "tech-debt-issues-5524-5528-closeout-v1",
+  "reviewed_on": "2026-07-01",
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "issues": [
+    {
+      "number": 5524,
+      "title": "config(entity): replace duplicated publication filter metadata blocks with a shared registry profile",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/entity_filter_metadata_registry.yaml",
+        "reports/quality/config-surface-backlog.json",
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/pubmed/publication.yaml"
+      ]
+    },
+    {
+      "number": 5525,
+      "title": "config(entity): remove repeated pipeline sink shells from reviewed raw entity configs",
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/config-surface-backlog.json",
+        "configs/entities/chembl/cell_line.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/uniprot/idmapping.yaml"
+      ]
+    },
+    {
+      "number": 5526,
+      "title": "governance(coverage): replace warning-only module coverage debt with reviewed zero-residual ratchets",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/module_coverage_gates.yaml",
+        "reports/quality/debt-governance-gates.json",
+        "tests/architecture/test_tech_debt_issues_5524_5528_closeout.py"
+      ]
+    },
+    {
+      "number": 5527,
+      "title": "refactor(cli): remove the internal composite command wrapper dependency from the retained public seam",
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/compatibility-importer-census.json",
+        "src/bioetl/interfaces/cli/commands/run_composite.py",
+        "tests/architecture/test_tech_debt_issues_5524_5528_closeout.py"
+      ]
+    },
+    {
+      "number": 5528,
+      "title": "governance(compatibility): ratchet the reviewed public export budget for composition entrypoints",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_tech_debt_issues_5524_5528_closeout.py"
+      ]
+    }
+  ],
+  "metrics": {
+    "shared_publication_filter_metadata_targets": 19,
+    "sink_shell_deduplicated_targets": 9,
+    "module_coverage_unmeasured_max_count": 0,
+    "module_coverage_uncovered_max_count": 0,
+    "run_composite_src_importer_count": 0,
+    "entrypoints_max_public_exports": 13,
+    "retained_entrypoint_count": 12
+  }
+}

@@ -57,6 +57,12 @@ jobs:
                 run: |
                     set -euo pipefail
 
+                    # Persist the change list on disk only. Never put thousands of
+                    # paths into GITHUB_OUTPUT / job env — that triggers Linux
+                    # ARG_MAX ("Argument list too long") when the next step starts.
+                    list_file="${RUNNER_TEMP}/ruff-changed-python.txt"
+                    : > "$list_file"
+
                     if [[ "$EVENT_NAME" == "pull_request" ]]; then
                       git fetch --no-tags --depth=1 origin "$BASE_REF"
                       diff_range="origin/$BASE_REF...HEAD"
@@ -69,38 +75,55 @@ jobs:
                       fi
                     fi
 
-                    mapfile -t changed_py < <(git diff --name-only --diff-filter=ACMR "$diff_range" -- "*.py")
+                    file_count=0
+                    while IFS= read -r file; do
+                      [[ -z "$file" ]] && continue
+                      [[ -f "$file" ]] || continue
+                      printf '%s\n' "$file" >> "$list_file"
+                      file_count=$((file_count + 1))
+                    done < <(git diff --name-only --diff-filter=ACMR "$diff_range" -- "*.py")
 
-                    if [[ ${#changed_py[@]} -eq 0 ]]; then
+                    echo "list_file=${list_file}" >> "$GITHUB_OUTPUT"
+                    echo "file_count=${file_count}" >> "$GITHUB_OUTPUT"
+                    if [[ "$file_count" -eq 0 ]]; then
                       echo "has_changes=false" >> "$GITHUB_OUTPUT"
-                      exit 0
+                    else
+                      echo "has_changes=true" >> "$GITHUB_OUTPUT"
                     fi
-
-                    {
-                      echo "has_changes=true"
-                      echo "files<<EOF"
-                      printf "%s\n" "${changed_py[@]}"
-                      echo "EOF"
-                    } >> "$GITHUB_OUTPUT"
+                    echo "Changed Python files detected: ${file_count}"
 
             -   name: Ruff (autoformat changed Python files)
                 if: steps.changed-python.outputs.has_changes == 'true'
                 shell: bash
                 env:
-                    CHANGED_FILES: ${{ steps.changed-python.outputs.files }}
+                    LIST_FILE: ${{ steps.changed-python.outputs.list_file }}
+                    FILE_COUNT: ${{ steps.changed-python.outputs.file_count }}
                 run: |
                     set -euo pipefail
 
-                    changed_py=()
-                    while IFS= read -r file; do
-                      [[ -n "$file" ]] && changed_py+=("$file")
-                    done <<< "$CHANGED_FILES"
+                    list_file="${LIST_FILE}"
+                    file_count="${FILE_COUNT}"
+                    if [[ ! -f "$list_file" ]]; then
+                      echo "::error::Missing changed-python list file: ${list_file}"
+                      exit 1
+                    fi
 
-                    uv run --frozen --no-build ruff format "${changed_py[@]}"
+                    echo "Changed Python files for format gate: ${file_count}"
 
-                    if ! git diff --quiet -- "${changed_py[@]}"; then
+                    # Large restore merges / full-tree diffs: avoid per-path argv.
+                    if [[ "$file_count" -gt 400 ]]; then
+                      echo "Large change set (${file_count}); using directory-level ruff format --check."
+                      uv run --frozen --no-build ruff format --check src tests
+                      exit 0
+                    fi
+
+                    # Batch paths via xargs to stay under ARG_MAX.
+                    xargs -a "$list_file" -d '\n' -n 100 \
+                      uv run --frozen --no-build ruff format
+
+                    if ! xargs -a "$list_file" -d '\n' -n 100 git diff --quiet --; then
                       echo "::error::Ruff autoformat changed Python files. Run 'ruff format' locally and commit."
-                      git --no-pager diff -- "${changed_py[@]}"
+                      xargs -a "$list_file" -d '\n' -n 100 git --no-pager diff --
                       exit 1
                     fi
 
