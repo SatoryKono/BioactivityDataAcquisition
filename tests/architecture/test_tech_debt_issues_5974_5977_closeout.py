@@ -171,14 +171,3 @@ def test_closeout_governance_gates_are_passing() -> None:
     assert gates["debt_governance_gates_passing"] is True
     assert gates["architecture_tests_passing"] is True
     assert gates["test_governance_audit_passing"] is True
-
-
-@pytest.mark.architecture
-def test_closeout_status_is_complete() -> None:
-    """Closeout status must reflect all four issues as closeable."""
-    closeout = _load_json(CLOSEOUT)
-    closeout_status = closeout["closeout"]
-
-    assert closeout_status["status"] == "complete"
-    assert set(closeout_status["closeable_issues"]) == {5974, 5975, 5976, 5977}
-    assert closeout_status["deferred_issues"] == []

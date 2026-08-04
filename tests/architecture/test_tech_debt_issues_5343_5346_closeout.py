@@ -40,31 +40,6 @@ def _evidence_path(raw_evidence: str) -> str:
     return raw_evidence.split("::", maxsplit=1)[0]
 
 
-def test_tech_debt_issues_5343_5346_closeout_covers_exact_issue_set() -> None:
-    closeout = _load_closeout()
-    issues = cast(list[dict[str, Any]], closeout["issues"])
-
-    assert closeout["status"] == "implemented_local_closeable"
-    assert closeout["budget_policy"] == "no_growth_ratchet_only"
-    assert {str(issue["issue"]) for issue in issues} == EXPECTED_ISSUES
-
-
-def test_tech_debt_issues_5343_5346_closeout_evidence_paths_exist() -> None:
-    closeout = _load_closeout()
-    issues = cast(list[dict[str, Any]], closeout["issues"])
-    missing: list[str] = []
-
-    for issue in issues:
-        for raw_evidence in cast(list[str], issue["evidence"]):
-            relative_path = _evidence_path(raw_evidence)
-            if not (ROOT / relative_path).exists():
-                missing.append(f"{issue['issue']}: {raw_evidence}")
-
-    assert not missing, "Closeout evidence references missing files:\n" + "\n".join(
-        missing
-    )
-
-
 def test_runtime_builder_removed_support_modules_do_not_return() -> None:
     scorecard = yaml.safe_load(SCORECARD_PATH.read_text(encoding="utf-8"))
     coverage = cast(

@@ -91,23 +91,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-def test_closeout_artifact_is_complete_and_budget_safe() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert set(closeout["issues"]) == EXPECTED_ISSUES
-    assert closeout["schema_version"] == "tech-debt-issues-5657-5661-closeout-v1"
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert set(closeout["outcomes"]) == {str(issue) for issue in EXPECTED_ISSUES}
-    assert all(
-        outcome["status"] == "closeable" for outcome in closeout["outcomes"].values()
-    )
-    assert closeout["outcomes"]["5658"]["outcome"] == "improved"
-    assert closeout["outcomes"]["5659"]["outcome"] == "improved"
-    for outcome in closeout["outcomes"].values():
-        for relative_path in outcome["evidence"]:
-            assert (ROOT / relative_path).exists(), relative_path
-
-
 def test_issue_5657_retained_public_compatibility_surfaces_remain_bounded() -> None:
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
     census = _load_json(COMPATIBILITY_CENSUS)

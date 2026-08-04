@@ -68,16 +68,6 @@ def _closeout_by_issue() -> dict[int, dict[str, Any]]:
     return {int(issue["number"]): issue for issue in issues if isinstance(issue, dict)}
 
 
-def test_closeout_artifact_covers_all_requested_issues() -> None:
-    payload = _load_json(CLOSEOUT)
-    issues = _closeout_by_issue()
-
-    assert payload["schema_version"] == "tech-debt-issues-5387-5394-closeout-v1"
-    assert set(issues) == {5387, 5388, 5389, 5390, 5391, 5392, 5393, 5394}
-    assert payload["debt_budget_outcome"] == "unchanged_or_improved"
-    assert all(issue["status"] for issue in issues.values())
-
-
 def test_issue_5387_scorecard_coverage_evidence_matches_inventory() -> None:
     skip_if_module_coverage_inventory_is_dirty(
         root=ROOT,

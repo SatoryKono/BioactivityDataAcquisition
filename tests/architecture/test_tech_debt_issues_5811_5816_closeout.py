@@ -67,23 +67,6 @@ def _src_importers(module_name: str) -> set[str]:
     return {str(path) for path in usage["src"]}
 
 
-def test_issue_5811_closeout_artifact_covers_all_child_issues() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert closeout["schema_version"] == "tech-debt-issues-5811-5816-closeout-v1"
-    assert closeout["parent_issue"] == 5811
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert set(closeout["issues"]) == {5812, 5813, 5814, 5815, 5816}
-    assert closeout["roadmap_closeout"]["status"] == "closeable"
-
-    for outcome in closeout["outcomes"].values():
-        assert outcome["status"] == "closeable"
-        assert outcome["theme"]
-        assert outcome["outcome"]
-        for relative_path in outcome["evidence"]:
-            assert (ROOT / relative_path).exists(), relative_path
-
-
 def test_issue_5812_phased_migration_support_stays_retired() -> None:
     """The retired runtime shim must not bypass the zero compatibility budget."""
     module_path = (

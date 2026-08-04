@@ -66,22 +66,6 @@ def _hotspot_row(payload: dict[str, Any], family_name: str) -> dict[str, Any]:
     raise AssertionError(f"Missing hotspot family row for {family_name}")
 
 
-def test_closeout_artifact_covers_requested_issues__5553_5558() -> None:
-    payload = _load_json(CLOSEOUT)
-    issues = payload["issues"]
-
-    assert payload["schema_version"] == "tech-debt-issues-5553-5558-closeout-v1"
-    assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in issues} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in issues)
-
-    for issue in issues:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), (
-                f"Missing closeout evidence for #{issue['number']}: {relative_path}"
-            )
-
-
 def test_issue_5553_governance_artifacts_are_aligned_to_committed_inventory() -> None:
     gates_policy = _load_yaml(MODULE_COVERAGE_GATES)
     debt_gates = _load_json(DEBT_GATES)

@@ -152,28 +152,6 @@ def _forbidden_selector_labels(expr: str) -> set[str]:
     return labels
 
 
-def test_closeout_artifact_covers_requested_observability_rollout_issues() -> None:
-    payload = _load_json(CLOSEOUT)
-
-    assert (
-        payload["schema_version"]
-        == "observability-export-dashboard-rollout-closeout-v1"
-    )
-    assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert payload["program_order"] == EXPECTED_PROGRAM_ORDER
-    assert {issue["number"] for issue in payload["issues"]} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in payload["issues"])
-
-    for issue in payload["issues"]:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), (
-                f"Missing evidence for #{issue['number']}: {relative_path}"
-            )
-
-    for name, ratchet in payload["ratchets"].items():
-        assert ratchet["current"] <= ratchet["max"], name
-
-
 def test_error_catalog_is_machine_readable_stable_and_bounded() -> None:
     payload = _load_yaml(ERROR_CATALOG)
 

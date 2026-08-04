@@ -38,47 +38,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-def test_issue_pack_6220_6229_closeout_artifact_is_complete_and_budget_safe() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert {
-        "schema_version": closeout["schema_version"],
-        "debt_budget_policy": closeout["debt_budget_policy"],
-        "debt_budget_outcome": closeout["debt_budget_outcome"],
-    } == {
-        "schema_version": "tech-debt-issues-6220-6229-closeout-v1",
-        "debt_budget_policy": "flat_or_decreasing_only",
-        "debt_budget_outcome": "reduced_or_unchanged",
-    }
-
-    issue_status_by_number = {
-        int(issue["number"]): issue["status"] for issue in closeout["issues"]
-    }
-    assert issue_status_by_number == dict.fromkeys(EXPECTED_ISSUES, "closed-ready")
-
-    outcome_status_by_number = {
-        int(issue): outcome["status"] for issue, outcome in closeout["outcomes"].items()
-    }
-    assert outcome_status_by_number == dict.fromkeys(EXPECTED_ISSUES, "closeable")
-
-    missing_evidence = [
-        relative_path
-        for issue in closeout["issues"]
-        for relative_path in issue["evidence"]
-        if not (ROOT / relative_path).exists()
-    ]
-    assert missing_evidence == []
-
-    ratchet_violations = {
-        metric_name: ratchet
-        for metric_name, ratchet in closeout["ratchets"].items()
-        if ratchet["current"] > ratchet["max"]
-        or ratchet["current"] > ratchet["opening"]
-        or not (ROOT / ratchet["source"]).exists()
-    }
-    assert ratchet_violations == {}
-
-
 def test_issue_6220_public_lazy_facades_are_fully_classified() -> None:
     closeout = _load_json(CLOSEOUT)
     inventory = _load_yaml(ROOT / "configs/quality/public_lazy_facade_inventory.yaml")

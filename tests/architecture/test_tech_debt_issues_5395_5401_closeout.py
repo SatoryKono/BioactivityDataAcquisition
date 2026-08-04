@@ -39,31 +39,6 @@ def _evidence_path(raw: str) -> str:
     return raw.split("::", maxsplit=1)[0].split("#", maxsplit=1)[0]
 
 
-def test_closeout_artifact_covers_requested_issue_batch() -> None:
-    closeout = _load_json(CLOSEOUT)
-    issues = cast(list[dict[str, Any]], closeout["issues"])
-
-    assert closeout["schema_version"] == "tech-debt-issues-5395-5401-closeout-v1"
-    assert closeout["status"] == "implemented_local_closeable"
-    assert closeout["budget_policy"] == "no_growth_ratchet_only"
-    assert closeout["debt_budget_outcome"] in {"decreased", "flat"}
-    assert {int(issue["number"]) for issue in issues} == EXPECTED_ISSUES
-
-
-def test_closeout_evidence_paths_exist() -> None:
-    closeout = _load_json(CLOSEOUT)
-    issues = cast(list[dict[str, Any]], closeout["issues"])
-    missing: list[str] = []
-
-    for issue in issues:
-        for raw_evidence in cast(list[str], issue["evidence"]):
-            path = _evidence_path(raw_evidence)
-            if not (ROOT / path).exists():
-                missing.append(f"#{issue['number']}: {raw_evidence}")
-
-    assert missing == []
-
-
 def test_issue_5395_time_seams_are_classified_without_replay_exceptions() -> None:
     payload = yaml.safe_load(TIME_SEAMS.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)

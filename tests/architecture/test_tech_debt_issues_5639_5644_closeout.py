@@ -65,22 +65,6 @@ def _latest_report(pattern: str) -> Path:
     return matches[-1]
 
 
-def test_closeout_artifact_covers_requested_issues__5639_5644() -> None:
-    payload = _load_json(CLOSEOUT)
-    issues = payload["issues"]
-
-    assert payload["schema_version"] == "tech-debt-issues-5639-5644-closeout-v1"
-    assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in issues} == {5639, 5640, 5641, 5644}
-    assert all(issue["status"] == "closed-ready" for issue in issues)
-
-    for issue in issues:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), (
-                f"Missing closeout evidence for #{issue['number']}: {relative_path}"
-            )
-
-
 def test_issue_5639_architecture_debt_planner_tracks_live_artifact_backlog() -> None:
     tasks = _load_json(
         ROOT

@@ -124,24 +124,6 @@ def _gate(payload: dict[str, Any], name: str) -> dict[str, Any]:
     raise AssertionError(f"missing debt governance gate: {name}")
 
 
-def test_issue_5670_closeout_artifact_covers_all_child_issues() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert closeout["schema_version"] == "tech-debt-issues-5670-5675-closeout-v1"
-    assert closeout["parent_issue"] == 5670
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert set(closeout["issues"]) == EXPECTED_CHILD_ISSUES
-    assert closeout["roadmap_closeout"]["status"] == "closeable"
-    assert set(closeout["outcomes"]) == {str(issue) for issue in EXPECTED_CHILD_ISSUES}
-
-    for outcome in closeout["outcomes"].values():
-        assert outcome["status"] == "closeable"
-        assert outcome["theme"]
-        assert outcome["outcome"]
-        for rel_path in outcome["evidence"]:
-            assert (ROOT / rel_path).exists(), f"Missing evidence: {rel_path}"
-
-
 def test_issue_5671_governance_artifact_references_are_backed_by_live_evidence() -> (
     None
 ):

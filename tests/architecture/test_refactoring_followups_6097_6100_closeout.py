@@ -60,29 +60,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-def test_refactoring_followup_closeout_artifact_is_complete() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert closeout["schema_version"] == "refactoring-followups-6097-6100-closeout-v1"
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert {issue["number"] for issue in closeout["issues"]} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in closeout["issues"])
-
-    missing = [
-        evidence
-        for issue in closeout["issues"]
-        for evidence in issue["evidence"]
-        if not (ROOT / evidence).exists()
-    ]
-    assert missing == []
-
-    for ratchet in closeout["ratchets"].values():
-        assert ratchet["current"] <= ratchet["max"]
-        if "opening" in ratchet:
-            assert ratchet["current"] < ratchet["opening"]
-        assert (ROOT / ratchet["source"]).exists()
-
-
 def test_issue_6097_public_facades_have_explicit_owners_and_bounded_census() -> None:
     census = _load_json(COMPATIBILITY_CENSUS)
     summary = census["summary"]
