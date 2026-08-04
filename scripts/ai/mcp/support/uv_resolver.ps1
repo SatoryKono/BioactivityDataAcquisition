@@ -26,7 +26,7 @@ function Get-BioetlProxyEnvironmentSnapshot {
     Write-Output -NoEnumerate $snapshot
 }
 
-function Restore-BioetlProxyEnvironment {
+function ConvertTo-BioetlCaseSensitiveEnvironmentMap {
     param(
         [Parameter(Mandatory = $true)]
         $Snapshot
@@ -47,6 +47,47 @@ function Restore-BioetlProxyEnvironment {
             $map[[string]$prop.Name] = $prop.Value
         }
     }
+    Write-Output -NoEnumerate $map
+}
+
+function Remove-BioetlProcessEnvironmentVariable {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Name
+    )
+
+    [Environment]::SetEnvironmentVariable(
+        $Name,
+        $null,
+        [EnvironmentVariableTarget]::Process
+    )
+    Remove-Item -LiteralPath "Env:$Name" -ErrorAction SilentlyContinue
+}
+
+function Set-BioetlProcessEnvironmentVariable {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Value
+    )
+
+    Set-Item -LiteralPath "Env:$Name" -Value $Value
+    [Environment]::SetEnvironmentVariable(
+        $Name,
+        $Value,
+        [EnvironmentVariableTarget]::Process
+    )
+}
+
+function Restore-BioetlProxyEnvironment {
+    param(
+        [Parameter(Mandatory = $true)]
+        $Snapshot
+    )
+
+    $map = ConvertTo-BioetlCaseSensitiveEnvironmentMap -Snapshot $Snapshot
 
     # Delete missing entries first. PowerShell's Env provider can conflate
     # upper/lowercase names while removing them on POSIX, so restoring values
@@ -58,12 +99,7 @@ function Restore-BioetlProxyEnvironment {
             $value = $map[$name]
         }
         if ($null -eq $value -or $value -eq "") {
-            Remove-Item -LiteralPath "Env:$name" -ErrorAction SilentlyContinue
-            [Environment]::SetEnvironmentVariable(
-                $name,
-                $null,
-                [EnvironmentVariableTarget]::Process
-            )
+            Remove-BioetlProcessEnvironmentVariable -Name $name
         }
     }
 
@@ -73,12 +109,7 @@ function Restore-BioetlProxyEnvironment {
             $value = $map[$name]
         }
         if ($null -ne $value -and $value -ne "") {
-            Set-Item -LiteralPath "Env:$name" -Value ([string]$value)
-            [Environment]::SetEnvironmentVariable(
-                $name,
-                [string]$value,
-                [EnvironmentVariableTarget]::Process
-            )
+            Set-BioetlProcessEnvironmentVariable -Name $name -Value ([string]$value)
         }
     }
 }
@@ -96,22 +127,13 @@ function Enable-BioetlUvxNetworkBypass {
         return
     }
     foreach ($name in @("NO_PROXY", "no_proxy")) {
-        [Environment]::SetEnvironmentVariable(
-            $name,
-            "*",
-            [EnvironmentVariableTarget]::Process
-        )
+        Set-BioetlProcessEnvironmentVariable -Name $name -Value "*"
     }
     foreach ($name in @(
             "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
             "http_proxy", "https_proxy", "all_proxy"
         )) {
-        [Environment]::SetEnvironmentVariable(
-            $name,
-            $null,
-            [EnvironmentVariableTarget]::Process
-        )
-        Remove-Item -LiteralPath "Env:$name" -ErrorAction SilentlyContinue
+        Remove-BioetlProcessEnvironmentVariable -Name $name
     }
 }
 
