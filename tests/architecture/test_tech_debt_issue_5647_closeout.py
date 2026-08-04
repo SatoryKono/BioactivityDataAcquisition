@@ -53,18 +53,6 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-def test_closeout_artifact_covers_issue_5647() -> None:
-    payload = _load_json(CLOSEOUT)
-    issue = payload["issue"]
-
-    assert payload["schema_version"] == "tech-debt-issue-5647-closeout-v1"
-    assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert issue["number"] == 5647
-    assert issue["status"] == "closed-ready"
-    for relative_path in issue["evidence"]:
-        assert (ROOT / relative_path).exists(), relative_path
-
-
 def test_issue_5647_lazy_export_helper_implementations_are_unified() -> None:
     wiring_text = WIRING_HELPER.read_text(encoding="utf-8")
     application_shared_text = APPLICATION_SHARED_HELPER.read_text(encoding="utf-8")

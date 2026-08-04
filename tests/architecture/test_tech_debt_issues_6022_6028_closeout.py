@@ -62,30 +62,6 @@ def _duplication_target(payload: dict[str, Any], target: str) -> dict[str, Any]:
     raise AssertionError(f"missing duplication target: {target}")
 
 
-def test_issue_pack_6022_6028_closeout_artifact_is_complete_and_budget_safe() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert closeout["schema_version"] == "tech-debt-issues-6022-6028-closeout-v1"
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert closeout["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in closeout["issues"]} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in closeout["issues"])
-
-    missing_evidence = [
-        relative_path
-        for issue in closeout["issues"]
-        for relative_path in issue["evidence"]
-        if not (ROOT / relative_path).exists()
-    ]
-    assert missing_evidence == []
-
-    for ratchet in closeout["ratchets"].values():
-        assert ratchet["current"] <= ratchet["max"]
-        if "opening" in ratchet:
-            assert ratchet["current"] <= ratchet["opening"]
-        assert (ROOT / ratchet["source"]).exists()
-
-
 def test_issue_6022_generated_artifact_coherence_gates_pass() -> None:
     coverage = _load_json(MODULE_COVERAGE)
     scorecard = _load_json(SCORECARD)

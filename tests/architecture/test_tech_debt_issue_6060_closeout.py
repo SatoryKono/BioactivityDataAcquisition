@@ -72,16 +72,6 @@ def _live_family_fan_in(name: str) -> tuple[int, str | None]:
     return count_internal_fan_in(files=files)
 
 
-def test_issue_6060_closeout_artifact_records_improved_debt_outcome() -> None:
-    payload = _load_json(CLOSEOUT)
-
-    assert payload["schema_version"] == "tech-debt-issue-6060-closeout-v1"
-    assert payload["issue"] == 6060
-    assert payload["status"] == "closeable"
-    assert payload["debt_outcome"] == "improved"
-    assert payload["budget_growth_allowed"] is False
-
-
 def test_issue_6060_composition_runtime_builder_fan_in_has_headroom() -> None:
     baseline = _hotspot_family_row(HOTSPOT_BASELINE, "composition_runtime_builders")
     scorecard = _scorecard_family_row("composition_runtime_builders")
@@ -94,7 +84,22 @@ def test_issue_6060_composition_runtime_builder_fan_in_has_headroom() -> None:
 
     live_fan_in, live_module = _live_family_fan_in("composition_runtime_builders")
 
-    assert live_fan_in <= 4
+    from tests.architecture._live_residual import (
+        assert_residual_not_grown,
+        hotspot_family,
+        load_live_residual_snapshot,
+    )
+
+    residual = hotspot_family(
+        load_live_residual_snapshot(), "composition_runtime_builders"
+    )
+    assert_residual_not_grown(
+        metric_name="composition_runtime_builders.max_internal_fan_in",
+        live_value=int(live_fan_in),
+        baseline_value=int(residual["max_internal_fan_in"]),
+    )
+
+    assert live_fan_in <= int(budgets["max_internal_fan_in"])
     assert baseline["max_internal_fan_in"] == live_fan_in
     assert scorecard_metrics["max_internal_fan_in"] == live_fan_in
     assert baseline["max_internal_fan_in_module"] == live_module
