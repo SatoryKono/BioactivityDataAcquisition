@@ -54913,7 +54913,7 @@
       "canonical_successor": null,
       "catalog_lifecycle": null,
       "commit_policy": null,
-      "declared_class": "repo-only",
+      "declared_class": "published",
       "declared_status": "active",
       "diagram_kind": null,
       "duplicate_group": null,
@@ -67596,6 +67596,34 @@
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/quality/vcr-fixture-pruning-report-20260804.json",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
       "commit_policy": "working_output",
       "declared_class": null,
       "declared_status": null,
@@ -69013,11 +69041,11 @@
       "live_issue_mirror": 4,
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 33,
-      "working_report": 94
+      "working_report": 95
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 312,
-      "archive-after-migration": 89,
+      "archive-after-migration": 90,
       "generate-automatically": 861,
       "keep": 1171,
       "reconcile-with-github-state": 4
@@ -69048,7 +69076,7 @@
       "mkdocs.yml": 1,
       "plans": 2,
       "plugins": 4,
-      "reports": 223,
+      "reports": 224,
       "ru": 3,
       "security": 2
     },
@@ -69057,17 +69085,17 @@
       "Archived": 141,
       "Canonical": 73,
       "Generated": 861,
-      "Working": 500
+      "Working": 501
     },
     "by_surface_family": {
       "active": 862,
       "archive": 141,
       "canonical": 73,
       "generated": 861,
-      "working": 500
+      "working": 501
     },
     "by_tracking_state": {
-      "tracked": 2437
+      "tracked": 2438
     },
     "docs_reports_local_count": 30,
     "duplicate_group_count": 6,
@@ -69083,8 +69111,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 2437,
+    "total_doc_like": 2438,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 2437
+    "total_doc_like_tracked": 2438
   }
 }

@@ -2,6 +2,30 @@
   "schema_version": "1.0",
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/ai/codex/mcp_profile_contract.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the profile-matrix helper behind doctor.py and ensure-mcp.sh; keep contributor-facing diagnostics routed through the canonical doctor or launcher command."
+    },
+    "scripts/ai/codex/native_runtime_contract.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the static validation and adapter-rendering library behind doctor.py and sync_native_skills.py; do not expose it as another standalone setup surface."
+    },
+    "scripts/ai/codex/setup_agents.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as an optional validator/personal installer during native agent-discovery migration; trusted project sessions discover .codex/agents/*.toml directly."
+    },
+    "scripts/ai/codex/setup_skills.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as an optional validator/personal installer during native skill-discovery migration; trusted project sessions discover generated .agents/skills adapters directly."
+    },
     "scripts/ai/junie/check_junie_mirror.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

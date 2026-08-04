@@ -92,7 +92,7 @@
       "path": "/mcp",
       "wrapper": "mcp_code_interpreter_wrapper",
       "priority": 4,
-      "daily": true,
+      "daily": false,
       "readiness_timeout_sec": 300,
       "state_model": "shared_process"
     },
@@ -101,7 +101,7 @@
       "path": "/mcp",
       "wrapper": "mcp_mutmut_wrapper",
       "priority": 4,
-      "daily": true,
+      "daily": false,
       "readiness_timeout_sec": 240,
       "state_model": "shared_repo_root"
     },
@@ -110,7 +110,7 @@
       "path": "/mcp",
       "wrapper": "mcp_github_actions_wrapper",
       "priority": 4,
-      "daily": true,
+      "daily": false,
       "readiness_timeout_sec": 240,
       "state_model": "shared_credentials"
     },
@@ -119,7 +119,7 @@
       "path": "/mcp",
       "wrapper": "mcp_brave_search_wrapper",
       "priority": 5,
-      "daily": true,
+      "daily": false,
       "readiness_timeout_sec": 300,
       "state_model": "shared_credentials"
     },
@@ -128,7 +128,7 @@
       "path": "/mcp",
       "wrapper": "mcp_docker_wrapper",
       "priority": 5,
-      "daily": true,
+      "daily": false,
       "readiness_timeout_sec": 300,
       "state_model": "shared_docker_host",
       "launch_mode": "windows_docker_streaming",
@@ -139,7 +139,7 @@
       "path": "/mcp",
       "wrapper": "mcp_mermaid_wrapper",
       "priority": 5,
-      "daily": true,
+      "daily": false,
       "readiness_timeout_sec": 300,
       "state_model": "stateless",
       "launch_mode": "windows_npx_streaming",
@@ -150,7 +150,7 @@
       "path": "/mcp",
       "wrapper": "mcp_prometheus_wrapper",
       "priority": 6,
-      "daily": true,
+      "daily": false,
       "readiness_timeout_sec": 300,
       "state_model": "shared_optional_upstream"
     },
@@ -159,7 +159,7 @@
       "path": "/mcp",
       "wrapper": "mcp_grafana_wrapper",
       "priority": 6,
-      "daily": true,
+      "daily": false,
       "readiness_timeout_sec": 300,
       "state_model": "shared_optional_upstream"
     },

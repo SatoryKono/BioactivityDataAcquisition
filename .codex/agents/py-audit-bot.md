@@ -354,28 +354,18 @@ ______________________________________________________________________
 
 ## MCP Tools
 
-### ChEMBL — валидация схем данных
+MCP используется только как дополнительный источник evidence. Выбирать
+capability через runtime discovery; не предполагать наличие provider-specific
+сервера по имени из исторической документации.
 
-> **Примечание:** MCP инструменты доступны через `ToolSearch`. Перед использованием выполнить `ToolSearch("ChEMBL")`.
+| Сценарий | Capability | Evidence |
+| --- | --- | --- |
+| Schema drift | bounded HTTP/reference lookup | сравнение ответа с entity и schema |
+| Dependency audit | filesystem, AST/code analysis | воспроизводимый import/dependency finding |
+| Architecture diagram | Mermaid при выбранном `core` profile | валидированная диаграмма |
 
-| Сценарий                     | Инструмент               | Параметры                       | Результат                     |
-| ---------------------------- | ------------------------ | ------------------------------- | ----------------------------- |
-| Валидация Molecule schema    | `ChEMBL:compound_search` | `name="imatinib"`               | Сравнение полей API vs entity |
-| Валидация Target schema      | `ChEMBL:target_search`   | `gene_symbol="EGFR"`            | Проверка target_type          |
-| Валидация Bioactivity schema | `ChEMBL:get_bioactivity` | `molecule_chembl_id="CHEMBL25"` | Проверка activity_type, units |
-
-**Schema Drift Detection Workflow:**
-
-1. Fetch sample данных через MCP
-1. Извлечь набор полей и типов
-1. Сравнить с domain entity и Pandera schema
-1. При расхождении → finding `AUD-SCHEMA-*` с severity MUST
-
-### Mermaid Chart — архитектурные диаграммы
-
-| Сценарий                | Инструмент                                          | Параметры                 |
-| ----------------------- | --------------------------------------------------- | ------------------------- |
-| Import dependency graph | `Mermaid Chart:validate_and_render_mermaid_diagram` | `diagramType="flowchart"` |
+При недоступном optional MCP продолжить repo-backed аудит и явно отметить
+ограничение evidence.
 
 ______________________________________________________________________
 

@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2437 |
-| Tracked doc-like files | 2437 |
+| Doc-like files | 2438 |
+| Tracked doc-like files | 2438 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2437 |
+| tracked | 2438 |
 
 ## Lifecycle Counts
 
@@ -41,7 +41,7 @@
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 33 |
-| working_report | 94 |
+| working_report | 95 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -61,7 +61,7 @@
 | Archived | 141 |
 | Canonical | 73 |
 | Generated | 861 |
-| Working | 500 |
+| Working | 501 |
 
 ## Surface Families
 
@@ -71,14 +71,14 @@
 | archive | 141 |
 | canonical | 73 |
 | generated | 861 |
-| working | 500 |
+| working | 501 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 89 |
+| archive-after-migration | 90 |
 | generate-automatically | 861 |
 | keep | 1171 |
 | reconcile-with-github-state | 4 |
@@ -158,6 +158,7 @@
 | `reports/quality/test-system-audit-2026-07-29-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/total-tech-debt-audit-main-2026-06-16.md` | Working | 0 | archive-after-migration |
 | `reports/quality/total-tech-debt-audit-main-current.md` | Working | 0 | archive-after-migration |
+| `reports/quality/vcr-fixture-pruning-report-20260804.json` | Working | 0 | archive-after-migration |
 | `reports/quality/zero-ref-supporting-scripts-review-20260804.json` | Working | 0 | archive-after-migration |
 | `reports/review/S1-domain.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1.1-contracts-ports.md` | Working | 0 | archive-after-migration |
@@ -166,7 +167,6 @@
 | `reports/review/S2.1-core-composite.md` | Working | 0 | archive-after-migration |
 | `reports/review/S2.2-services-pipelines.md` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/base_config_semantic_coverage_2026-07-01.json` | Working | 0 | archive-after-migration |
-| `reports/semantic_pipeline_audit/critical_inconsistencies_2026-07-01.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

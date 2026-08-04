@@ -19,6 +19,9 @@ on:
     paths:
       - ".codex/skills/**"
       - ".codex/agents/**"
+      - ".codex/config.toml"
+      - ".agents/skills/**"
+      - ".gitignore"
       - ".junie/agents/**"
       - ".junie/skills/**"
       - "AGENTS.md"
@@ -31,6 +34,18 @@ on:
       - "docs/00-project/ai/skills/README.md"
       - "docs/00-project/ai/skills/SKILLS-CATALOG.md"
       - "scripts/ai/codex/check_skills_mirror.sh"
+      - "scripts/ai/codex/doctor.py"
+      - "scripts/ai/codex/mcp_profile_contract.py"
+      - "scripts/ai/codex/native_runtime_contract.py"
+      - "scripts/ai/codex/setup_mcp.py"
+      - "scripts/ai/codex/setup_agents.sh"
+      - "scripts/ai/codex/setup_skills.sh"
+      - "scripts/ai/codex/sync_native_skills.py"
+      - "scripts/ai/codex/helper/ensure-mcp.sh"
+      - "scripts/ai/codex/run-codex.sh"
+      - "scripts/ops/runtime/mcp/health-shared.sh"
+      - "scripts/ops/runtime/mcp/shared-servers.json"
+      - "tests/architecture/test_codex_native_runtime.py"
       - "scripts/ai/codex/skills-mirror-contract.json"
       - "scripts/ai/junie/check_junie_mirror.py"
       - "scripts/ai/junie/check_junie_mirror.sh"
@@ -47,6 +62,9 @@ on:
     paths:
       - ".codex/skills/**"
       - ".codex/agents/**"
+      - ".codex/config.toml"
+      - ".agents/skills/**"
+      - ".gitignore"
       - ".junie/agents/**"
       - ".junie/skills/**"
       - "AGENTS.md"
@@ -59,6 +77,18 @@ on:
       - "docs/00-project/ai/skills/README.md"
       - "docs/00-project/ai/skills/SKILLS-CATALOG.md"
       - "scripts/ai/codex/check_skills_mirror.sh"
+      - "scripts/ai/codex/doctor.py"
+      - "scripts/ai/codex/mcp_profile_contract.py"
+      - "scripts/ai/codex/native_runtime_contract.py"
+      - "scripts/ai/codex/setup_mcp.py"
+      - "scripts/ai/codex/setup_agents.sh"
+      - "scripts/ai/codex/setup_skills.sh"
+      - "scripts/ai/codex/sync_native_skills.py"
+      - "scripts/ai/codex/helper/ensure-mcp.sh"
+      - "scripts/ai/codex/run-codex.sh"
+      - "scripts/ops/runtime/mcp/health-shared.sh"
+      - "scripts/ops/runtime/mcp/shared-servers.json"
+      - "tests/architecture/test_codex_native_runtime.py"
       - "scripts/ai/codex/skills-mirror-contract.json"
       - "scripts/ai/junie/check_junie_mirror.py"
       - "scripts/ai/junie/check_junie_mirror.sh"
@@ -72,6 +102,16 @@ on:
       - ".github/workflows/skills-consistency.yml"
 
 jobs:
+  verify-native-codex-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Verify static native discovery and MCP matrices
+        run: python3 scripts/ai/codex/doctor.py static --no-write
+
   detect-runtime-skill-drift:
     if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
