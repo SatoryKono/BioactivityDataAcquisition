@@ -24,7 +24,10 @@ Read before planning or editing:
 
 ## 1. Обзор
 
-Команда из **9 активных субагентов** (7 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя работу субагентам через native agent roles (`default` / `explorer` / `worker`) с привязкой к логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
+Runtime mapping: `.codex/agents/CODEX-RUNTIME.md`; native `py-*.toml` descriptors inherit the parent model. MCP readiness uses the profile contract in `scripts/ai/codex/setup_mcp.py`: `FAIL` is a required-server failure, `WARN` is optional, and remote/auth-managed endpoints are skipped. Use `python3 scripts/ai/codex/doctor.py static --no-write` for CI and `bash scripts/ai/codex/run-codex.sh mcp-check --profile <profile>` for bounded live checks.
+
+
+Команда из **9 активных субагентов** (7 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. В Codex runtime логические профили используют native roles и наследуют модель родительского runtime. Основной агент (Codex) выступает оркестратором, делегируя работу субагентам через native agent roles (`default` / `explorer` / `worker`) с привязкой к логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
 
 **Запуск логического профиля в Codex runtime:**
 
