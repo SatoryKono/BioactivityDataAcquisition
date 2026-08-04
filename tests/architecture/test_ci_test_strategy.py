@@ -28,16 +28,24 @@ def _read_workflow(path: str) -> str:
 
 
 def _workflow_job_block(workflow: str, job_name: str) -> str:
-    """Return one top-level workflow job block by name."""
-    marker = f"    {job_name}:\n"
+    """Return one top-level workflow job block by name.
+
+    ``tests.yml`` uses 2-space job indentation under ``jobs:`` (CI-C1 follow-up).
+    """
+    marker = f"  {job_name}:\n"
     start = workflow.index(marker)
-    next_job = workflow.find("\n    ", start + len(marker))
+    next_job = workflow.find("\n  ", start + len(marker))
     while next_job != -1:
         candidate_line_end = workflow.find("\n", next_job + 1)
         candidate_line = workflow[next_job + 1 : candidate_line_end]
-        if candidate_line.endswith(":") and not candidate_line.startswith("        "):
+        # Next top-level job lines are exactly two spaces then name ending with ':'
+        if (
+            candidate_line.endswith(":")
+            and candidate_line.startswith("  ")
+            and not candidate_line.startswith("    ")
+        ):
             return workflow[start:next_job]
-        next_job = workflow.find("\n    ", next_job + 1)
+        next_job = workflow.find("\n  ", next_job + 1)
     return workflow[start:]
 
 
@@ -130,7 +138,7 @@ def test_tests_workflow_publishes_duration_telemetry_artifact() -> None:
 def test_tests_workflow_publishes_test_health_telemetry_artifact() -> None:
     """Tests workflow should fold JUnit telemetry into test-health summaries."""
     workflow = _read_workflow(".github/workflows/tests.yml")
-    assert "duration-telemetry:\n        if: always()" in workflow, (
+    assert "duration-telemetry:\n    if: always()" in workflow, (
         "duration-telemetry must run even when upstream test jobs fail"
     )
     assert "continue-on-error: true" in workflow, (

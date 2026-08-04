@@ -1,0 +1,18 @@
+{
+  "duplicate_files": 0,
+  "duplicate_groups": 0,
+  "groups": [],
+  "max_group_size": 0,
+  "scan_root": "tests/fixtures",
+  "scope_file_counts": {
+    "fixture": 25,
+    "golden": 30,
+    "vcr": 394
+  },
+  "total_files": 449,
+  "tracked_extensions": [
+    ".json",
+    ".yaml",
+    ".yml"
+  ]
+}

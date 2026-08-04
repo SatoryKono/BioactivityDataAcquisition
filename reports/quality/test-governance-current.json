@@ -27,7 +27,7 @@
       "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
       "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
     ],
-    "scanned_test_count": 362,
+    "scanned_test_count": 352,
     "unreviewed_count": 0
   },
   "assertion_branch_reachability_percent": 100.0,
@@ -1327,7 +1327,7 @@
         "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
-      "scanned_test_count": 362,
+      "scanned_test_count": 352,
       "unreviewed_count": 0
     },
     "assertion_branch_reachability_percent": 100.0,
