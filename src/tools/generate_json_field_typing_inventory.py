@@ -366,7 +366,26 @@ def build_inventory() -> str:
     lines = [
         "# JSON Field Typing Inventory (Bronze -> Silver -> Gold)",
         "",
-        "Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold contracts.",
+        "Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold "
+        "contracts, including governed non-ChEMBL structured fields under "
+        "[ADR-035](../02-architecture/decisions/ADR-035-json-field-typing-policy.md) "
+        "(canonical JSON string Silver/Gold contract).",
+        "",
+        "Governed structured payloads (publications, UniProt semantic-sensitive "
+        "fields, and related sidecars) MUST remain `canonical JSON string` across "
+        "Silver Pandera, Silver PyArrow, domain schemas, and Gold contracts. "
+        "Regenerate this inventory with:",
+        "",
+        "```bash",
+        "python src/tools/generate_json_field_typing_inventory.py",
+        "```",
+        "",
+        "Generator: `src/tools/generate_json_field_typing_inventory.py`.",
+        "",
+        "Related:",
+        "- `docs/02-architecture/decisions/ADR-035-json-field-typing-policy.md`",
+        "- `src/bioetl/domain/normalization/publication_structured_fields.py`",
+        "- `src/bioetl/domain/normalization/structured_payload_policies.py`",
         "",
         "| Field | Bronze inferred | Silver Pandera | Silver PyArrow | Gold contract |",
         "| --- | --- | --- | --- | --- |",
