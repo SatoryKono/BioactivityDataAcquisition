@@ -1796,12 +1796,16 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     )
     identity = panels[identity_id]
     processed = panels[processed_id]
-    assert identity.get("gridPos", {}).get("h") == processed.get(
-        "gridPos", {}
-    ).get("h") == 6
-    assert identity.get("options", {}).get("cellHeight") == processed.get(
-        "options", {}
-    ).get("cellHeight") == "sm"
+    assert (
+        identity.get("gridPos", {}).get("h")
+        == processed.get("gridPos", {}).get("h")
+        == 6
+    )
+    assert (
+        identity.get("options", {}).get("cellHeight")
+        == processed.get("options", {}).get("cellHeight")
+        == "sm"
+    )
     default_identity_cell_options = (
         identity.get("fieldConfig", {})
         .get("defaults", {})
