@@ -476,16 +476,26 @@ def test_tests_workflow_runs_strict_test_audit_preflight_before_governance_close
 
 
 @pytest.mark.architecture
-def test_governance_preflight_uses_approved_lfs_conditional_contract() -> None:
-    """Governance must mirror the dedicated VCR lane's LFS availability seam."""
+def test_governance_preflight_uses_fail_closed_lfs_contract() -> None:
+    """Required governance VCR checks must fail closed when LFS is unavailable (#7493)."""
     workflow = (ROOT / ".github" / "workflows" / "tests.yml").read_text(
         encoding="utf-8"
     )
+    match = re.search(
+        r"^    governance-preflight:\n(?P<body>.*?)(?=^    [A-Za-z0-9_-]+:|\Z)",
+        workflow,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    assert match, "workflow is missing governance-preflight job"
+    body = match.group("body")
 
-    assert "id: governance_lfs_pull" in workflow
-    assert "if: steps.governance_lfs_pull.outcome == 'success'" in workflow
-    assert "if: steps.governance_lfs_pull.outcome != 'success'" in workflow
-    assert "Non-VCR governance gates remain blocking." in workflow
+    assert "id: governance_lfs_pull" in body
+    assert "if: steps.governance_lfs_pull.outcome == 'success'" not in body
+    assert "if: steps.governance_lfs_pull.outcome != 'success'" not in body
+    assert "continue-on-error: true" not in body
+    assert "check_test_audit_preflight.py --strict" in body
+    assert "Skip VCR-bound governance preflight when LFS is unavailable" not in body
+    assert "Fail-closed (#7493)" in body
 
 
 @pytest.mark.architecture

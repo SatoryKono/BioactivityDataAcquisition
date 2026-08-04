@@ -130,9 +130,10 @@ jobs:
 
             -   name: Fetch Git LFS objects for VCR cassettes
                 id: lfs_pull
-                continue-on-error: true
                 run: |
                     set -euo pipefail
+                    # Fail-closed (#7493): required VCR preflight must not succeed
+                    # without materialized cassette payloads.
                     if ! git lfs pull; then
                       echo "::error::Git LFS pull failed. Typical causes: exhausted LFS bandwidth/storage budget or missing git-lfs credentials. Increase the GitHub LFS data pack (Settings â†’ Billing â†’ Git LFS) or free LFS storage, then re-run. VCR content SHA checks cannot run on pointer files."
                       exit 1
@@ -147,35 +148,25 @@ jobs:
                     fi
 
             -   name: Install uv + cache + dependencies
-                if: steps.lfs_pull.outcome == 'success'
                 uses: ./.github/actions/setup-python-uv
                 with:
                     python-version: "3.12"
 
             -   name: Validate VCR cassette placement
-                if: steps.lfs_pull.outcome == 'success'
                 run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement
 
             -   name: Validate VCR filename policy
-                if: steps.lfs_pull.outcome == 'success'
                 run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming
 
             -   name: Validate full VCR metadata inventory
-                if: steps.lfs_pull.outcome == 'success'
                 run: uv run --frozen --no-build python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check
 
             -   name: Validate VCR metadata stale-age policy
-                if: steps.lfs_pull.outcome == 'success'
                 run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90
 
             -   name: Validate VCR metadata catalog
-                if: steps.lfs_pull.outcome == 'success'
                 run: uv run --frozen --no-build python -m scripts.engineering.qa report-vcr-metadata --check
 
-            -   name: Skip VCR content gates when LFS budget is exhausted
-                if: steps.lfs_pull.outcome != 'success'
-                run: |
-                    echo "::warning::vcr-preflight skipped: Git LFS objects could not be fetched (account LFS data pack/budget). Increase GitHub LFS data pack under Settings â†’ Billing, then re-run. Application code gates continue without VCR content SHA verification."
 
     control-plane-e2e:
         runs-on: ubuntu-latest
@@ -191,33 +182,32 @@ jobs:
             -   name: Checkout code
                 uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
                 with:
-                    # Prefer real LFS payloads for PubChem VCR smoke. If the account
-                    # LFS budget is exhausted, continue and skip the VCR-bound smoke.
+                    # Prefer real LFS payloads for PubChem VCR smoke. Fail closed
+                    # when required cassette payloads cannot be materialized (#7493).
                     lfs: false
 
             -   name: Fetch Git LFS objects for VCR cassettes
                 id: lfs_pull
-                continue-on-error: true
                 run: |
                     set -euo pipefail
+                    # Fail-closed (#7493): blocking control-plane confidence lane
+                    # must not succeed without replay-critical VCR evidence.
                     if ! git lfs pull; then
-                      echo "::warning::Git LFS pull failed for control-plane-e2e; VCR smoke will be skipped."
+                      echo "::error::Git LFS pull failed for control-plane-e2e. Required VCR smoke cannot run without cassette payloads. Increase the GitHub LFS data pack and re-run."
                       exit 1
                     fi
                     cassette="tests/fixtures/vcr/pubchem/test_pubchem_compound_full_cycle.yaml"
                     if [ -f "$cassette" ] && head -n 1 "$cassette" | grep -q 'git-lfs.github.com/spec/v1'; then
-                      echo "::warning::PubChem VCR cassette is still an LFS pointer; skipping control-plane-e2e smoke."
+                      echo "::error::PubChem VCR cassette is still an LFS pointer. Materialize LFS objects and re-run control-plane-e2e."
                       exit 1
                     fi
 
             -   name: Setup Python + uv
-                if: steps.lfs_pull.outcome == 'success'
                 uses: ./.github/actions/setup-python-uv
                 with:
                     python-version: "3.12"
 
             -   name: Run control-plane completeness smoke
-                if: steps.lfs_pull.outcome == 'success'
                 run: |
                     mkdir -p reports/e2e
                     VCR_RECORD_MODE=none uv run --frozen --no-build pytest \
@@ -226,10 +216,6 @@ jobs:
                       -q --tb=short \
                       --junitxml=reports/e2e/control-plane-completeness.xml
 
-            -   name: Skip control-plane VCR smoke when LFS is unavailable
-                if: steps.lfs_pull.outcome != 'success'
-                run: |
-                    echo "::warning::control-plane-e2e VCR smoke skipped: Git LFS objects unavailable. Increase the GitHub LFS data pack and re-run for full coverage."
 
             -   name: Upload control-plane completeness artifacts
                 uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
@@ -237,7 +223,7 @@ jobs:
                 with:
                     name: control-plane-completeness
                     path: reports/e2e/control-plane-completeness.xml
-                    if-no-files-found: warn
+                    if-no-files-found: error
                     retention-days: 14
 
     # Blocking confidence lane outside the aggregate 85% coverage threshold.
@@ -343,17 +329,18 @@ jobs:
 
             -   name: Fetch Git LFS objects for governance preflight
                 id: governance_lfs_pull
-                continue-on-error: true
                 run: |
                     set -euo pipefail
+                    # Fail-closed (#7493): VCR-bound governance preflight must not
+                    # be skipped when required LFS cassette payloads are missing.
                     if ! git lfs pull; then
-                      echo "::warning::Git LFS objects are unavailable; the VCR-bound governance preflight will follow the approved vcr-preflight conditional path."
+                      echo "::error::Git LFS pull failed for governance-preflight. Required VCR-bound governance checks cannot run without cassette payloads. Increase the GitHub LFS data pack and re-run."
                       exit 1
                     fi
                     if git lfs ls-files -n | head -n 1 | grep -q .; then
                       sample="$(git lfs ls-files -n | head -n 1)"
                       if [ -f "$sample" ] && head -n 1 "$sample" | grep -q 'git-lfs.github.com/spec/v1'; then
-                        echo "::warning::Git LFS objects remain pointer files; the VCR-bound governance preflight will follow the approved vcr-preflight conditional path."
+                        echo "::error::Git LFS objects remain pointer files for governance-preflight. Materialize LFS objects and re-run."
                         exit 1
                       fi
                     fi
@@ -387,13 +374,8 @@ jobs:
                 run: uv run --frozen --no-build python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml
 
             -   name: Test governance closeout preflight (VCR/LFS fail-fast)
-                if: steps.governance_lfs_pull.outcome == 'success'
                 run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict
 
-            -   name: Skip VCR-bound governance preflight when LFS is unavailable
-                if: steps.governance_lfs_pull.outcome != 'success'
-                run: |
-                    echo "::warning::VCR/LFS governance preflight skipped under the same approved condition as vcr-preflight. Non-VCR governance gates remain blocking."
 
             -   name: Validate committed test-governance snapshots
                 run: |
