@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-04T06:42:54.216974+00:00",
+  "generated_at": "2026-08-04T07:11:07.148488+00:00",
   "summary": {
     "total_scripts": 571,
     "status_counts": {
@@ -14,7 +14,7 @@
       "ci": 67,
       "docs": 232,
       "other": 80,
-      "scripts": 453,
+      "scripts": 454,
       "skills": 18,
       "tests": 359
     }
@@ -398,7 +398,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 218,
+          "line": 212,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.ps1\","
         },
@@ -423,7 +423,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 219,
+          "line": 213,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.sh\","
         }
@@ -701,7 +701,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 220,
+          "line": 214,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/setup-env.sh\","
         },
@@ -852,7 +852,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 217,
+          "line": 211,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/test-basic.sh\","
         }
@@ -1678,7 +1678,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 221,
+          "line": 215,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/check-env.ps1\","
         }
@@ -1863,7 +1863,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 222,
+          "line": 216,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
         },
@@ -3424,8 +3424,15 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py",
+          "line": 112,
+          "source_group": "scripts",
+          "text": "/ \"mcp_mermaid_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -3868,7 +3875,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_docker_wrapper.ps1",
@@ -3881,12 +3888,6 @@
           "line": 13,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/docker_cli_resolver.ps1\")"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_mermaid_wrapper.ps1",
-          "line": 7,
-          "source_group": "scripts",
-          "text": "$dockerCliResolverPath = Join-Path -Path $scriptDir -ChildPath \"support\\docker_cli_resolver.ps1\""
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
@@ -4595,7 +4596,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 223,
+          "line": 217,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.ps1\","
         }
@@ -4616,7 +4617,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 224,
+          "line": 218,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.sh\","
         }
@@ -4637,7 +4638,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 225,
+          "line": 219,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.ps1\","
         }
@@ -4670,7 +4671,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 226,
+          "line": 220,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.sh\","
         },
@@ -4805,7 +4806,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 213,
+          "line": 207,
           "source_group": "scripts",
           "text": "\"scripts/check_dq_dsl_parity.py\","
         }
@@ -4865,7 +4866,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 211,
+          "line": 205,
           "source_group": "scripts",
           "text": "\"scripts/ci_check_docs_parity.sh\","
         }
@@ -4907,7 +4908,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/filters/README.md",
@@ -4926,6 +4927,24 @@
           "line": 3,
           "source_group": "docs",
           "text": "Generated by `scripts/data_quality/inventory_silver_filters_migration.py` for ADR-050 Silver structural / Gold semantic boundary governance."
+        },
+        {
+          "path": "docs/filters/migration-plan.md",
+          "line": 41,
+          "source_group": "docs",
+          "text": "- `scripts/data_quality/inventory_silver_filters_migration.py` — анализатор конфигов"
+        },
+        {
+          "path": "docs/filters/migration-plan.md",
+          "line": 101,
+          "source_group": "docs",
+          "text": "`scripts/data_quality/inventory_silver_filters_migration.py`:"
+        },
+        {
+          "path": "docs/filters/migration-plan.md",
+          "line": 198,
+          "source_group": "docs",
+          "text": "`scripts/data_quality/inventory_silver_filters_migration.py`."
         },
         {
           "path": "tests/architecture/test_silver_filter_boundary_inventory.py",
@@ -7550,7 +7569,7 @@
           "path": "scripts/docs/matrix/filter_rows.py",
           "line": 22,
           "source_group": "scripts",
-          "text": "from scripts.docs.common.xlsx import (  # noqa: E402"
+          "text": "from scripts.docs.common.xlsx import ("
         },
         {
           "path": "scripts/docs/matrix/normalize_values.py",
@@ -7562,7 +7581,7 @@
           "path": "scripts/docs/matrix/sync_structural_policy.py",
           "line": 23,
           "source_group": "scripts",
-          "text": "from scripts.docs.common.xlsx import (  # noqa: E402"
+          "text": "from scripts.docs.common.xlsx import ("
         }
       ],
       "owner": "@bioetl-docs",
@@ -8153,7 +8172,7 @@
           "path": "docs/filters/inventory-baseline.csv",
           "line": 170,
           "source_group": "docs",
-          "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1688,Source-profile extraction policy,extraction_"
+          "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1694,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
@@ -8165,7 +8184,7 @@
           "path": "docs/filters/inventory-baseline.md",
           "line": 127,
           "source_group": "docs",
-          "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1688 | Source-profile extraction policy |"
+          "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1694 | Source-profile extraction policy |"
         },
         {
           "path": "scripts/data_quality/inventory_silver_filters_migration.py",
@@ -8223,7 +8242,7 @@
           "path": "scripts/docs/matrix/sync_structural_policy.py",
           "line": 32,
           "source_group": "scripts",
-          "text": "from scripts.docs.matrix.structural_contract import (  # noqa: E402"
+          "text": "from scripts.docs.matrix.structural_contract import ("
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
@@ -8945,13 +8964,13 @@
         },
         {
           "path": "scripts/engineering/ci/quality_integral_gate.py",
-          "line": 25,
+          "line": 26,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci._compatibility_telemetry import (  # type: ignore[import-not-found]"
         },
         {
           "path": "scripts/engineering/ci/quality_integral_gate.py",
-          "line": 30,
+          "line": 33,
           "source_group": "scripts",
           "text": "from ._compatibility_telemetry import ("
         },
@@ -9314,7 +9333,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 215,
+          "line": 209,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/update_test_telemetry_baseline.py\","
         },
@@ -9395,7 +9414,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 214,
+          "line": 208,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_control_plane_artifacts.py\","
         },
@@ -11824,13 +11843,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 148,
+          "line": 142,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": ("
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 149,
+          "line": 143,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/check_naming_package_consistency.py\""
         },
@@ -13102,7 +13121,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/report_compatibility_importer_census.py",
-          "line": 1124,
+          "line": 1141,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.import_graph_inventory import ("
         },
@@ -15218,7 +15237,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 155,
+          "line": 149,
           "source_group": "scripts",
           "text": "\"check-metadata-age\": \"scripts/engineering/qa/vcr/check_vcr_metadata_age.py\","
         },
@@ -16388,14 +16407,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
-        {
-          "path": "scripts/engineering/ci/check_neo4j_memory_live_audit.py",
-          "line": 15,
-          "source_group": "scripts",
-          "text": "from scripts.memory.sync import ("
-        },
         {
           "path": "scripts/engineering/ci/check_neo4j_memory_ontology.py",
           "line": 15,
@@ -16515,7 +16528,7 @@
       "references": [
         {
           "path": "scripts/ops/_build_arch_review_report.py",
-          "line": 259,
+          "line": 268,
           "source_group": "scripts",
           "text": "\"- Helper scripts: `scripts/ops/_run_cr_arch_review_wsl.sh`, `scripts/ops/_run_cr_arch_review_remaining.sh`\""
         }
@@ -16990,13 +17003,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 135,
+          "line": 129,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/codex-exec.bat\": (\"scripts/codex-exec.bat\",),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 138,
+          "line": 132,
           "source_group": "scripts",
           "text": "\"scripts/codex-exec.bat\": (\"scripts/ops/launchers/codex/codex-exec.bat\",),"
         },
@@ -17161,13 +17174,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 136,
+          "line": 130,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/codex.bat\": (\"scripts/codex.bat\",),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 139,
+          "line": 133,
           "source_group": "scripts",
           "text": "\"scripts/codex.bat\": (\"scripts/ops/launchers/codex/codex.bat\",),"
         },
@@ -19583,7 +19596,7 @@
       "references": [
         {
           "path": "scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py",
-          "line": 165,
+          "line": 221,
           "source_group": "scripts",
           "text": "relay_script = Path(__file__).with_name(\"windows_tcp_relay.ps1\")"
         }
@@ -19598,7 +19611,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 228,
+          "line": 222,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         },
@@ -19659,7 +19672,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 229,
+          "line": 223,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         },
@@ -19781,7 +19794,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 231,
+          "line": 225,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/start-neo4j-audit.sh\","
         }
@@ -20007,7 +20020,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 212,
+          "line": 206,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/repo/cleanup_repository.py\","
         },
@@ -20420,7 +20433,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 201,
+          "line": 195,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/generate_contracts.py\","
         },
