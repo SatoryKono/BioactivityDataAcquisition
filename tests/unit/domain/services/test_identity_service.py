@@ -210,6 +210,7 @@ class TestMetaFieldExclusion:
         }
         assert META_FIELDS == expected
 
+    @staticmethod
     @pytest.mark.hypothesis
     # The invariant only depends on metadata exclusion, not on full-Unicode or
     # giant numeric domains. Keep the strategy broad enough for mixed scalars
@@ -224,7 +225,6 @@ class TestMetaFieldExclusion:
         meta_value=_HASH_SAFE_SCALAR,
     )
     def test_hash_is_stable_when_only_metadata_changes(
-        self,
         business_record: dict[str, object],
         meta_value: object,
     ) -> None:

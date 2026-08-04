@@ -9,9 +9,14 @@ $script:BioetlProxyEnvironmentNames = @(
 )
 
 function Get-BioetlProxyEnvironmentSnapshot {
-    # Use a plain hashtable and suppress enumeration so callers receive one
-    # map (PowerShell otherwise unwraps single-collection returns).
-    $snapshot = @{}
+    # Suppress enumeration so callers receive one case-sensitive map
+    # (PowerShell otherwise unwraps single-collection returns).
+    # Proxy variables are case-sensitive on POSIX. A normal PowerShell
+    # hashtable is case-insensitive and would let a missing ``https_proxy``
+    # overwrite a populated ``HTTPS_PROXY`` entry.
+    $snapshot = [System.Collections.Generic.Dictionary[string, object]]::new(
+        [System.StringComparer]::Ordinal
+    )
     foreach ($name in $script:BioetlProxyEnvironmentNames) {
         $envPath = "Env:$name"
         $snapshot[$name] = if (Test-Path -LiteralPath $envPath) {
@@ -31,7 +36,9 @@ function Restore-BioetlProxyEnvironment {
 
     # Normalize to a dictionary whether callers pass Hashtable, OrderedDictionary,
     # or a PSCustomObject-wrapped map from PowerShell pipeline unwrapping.
-    $map = @{}
+    $map = [System.Collections.Generic.Dictionary[string, object]]::new(
+        [System.StringComparer]::Ordinal
+    )
     if ($Snapshot -is [System.Collections.IDictionary]) {
         foreach ($key in @($Snapshot.Keys)) {
             $map[[string]$key] = $Snapshot[$key]
