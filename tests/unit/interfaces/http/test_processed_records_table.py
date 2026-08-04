@@ -150,6 +150,7 @@ class TestProcessedRecordsTable:
         assert rows["09 gold_quarantined_records"]["percentage"] == ("0%")
         assert rows["10 gold_skipped_records"]["percentage"] == ("0%")
         assert rows["11 gold_deduplicated_records"]["percentage"] == ("0%")
+        assert all("percintage" not in row for row in payload["rows"])
         assert len(payload["rows"]) == 11
         assert all("__zero" not in str(row["parameter"]) for row in payload["rows"])
         assert payload["run_type"] == ["backfill"]

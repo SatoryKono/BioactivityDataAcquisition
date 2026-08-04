@@ -191,9 +191,9 @@ Gold outcomes render up to three decimals with trailing zeroes trimmed
 table. Silver and Gold outcome percentages use Bronze total as denominator. It
 formats `value` with a space as the thousands separator, left-pads shorter
 values to the displayed `bronze [total]` width, and right-aligns the `value`
-column. The internal `row_status` field and deprecated `percintage`
-compatibility alias are hidden. It does not replace the
-dashboard-specific `Status` or `First Action` route.
+column. The internal `row_status` field is hidden; the payload exposes
+canonical `percentage` only. It does not replace the dashboard-specific
+`Status` or `First Action` route.
 If this table is empty, distinguish backend unavailable, no selected run/scope,
 and true zero accounting rows before acting: the card links the Quarantine
 Explorer health probe and monitoring setup docs for that reason.
