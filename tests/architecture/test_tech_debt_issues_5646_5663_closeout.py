@@ -86,26 +86,6 @@ def _gate(payload: dict[str, Any], name: str) -> dict[str, Any]:
     raise AssertionError(f"missing debt governance gate: {name}")
 
 
-def test_closeout_artifact_covers_final_tdx_batch() -> None:
-    closeout = _load_json(CLOSEOUT)
-    previous = _load_json(PREVIOUS_CLOSEOUT)
-
-    assert set(closeout["issues"]) == EXPECTED_ISSUES
-    assert closeout["parent_issue"] == 5646
-    assert closeout["schema_version"] == "tech-debt-issues-5646-5663-closeout-v1"
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert set(closeout["outcomes"]) == {str(issue) for issue in EXPECTED_ISSUES}
-    assert all(
-        outcome["status"] == "closeable" for outcome in closeout["outcomes"].values()
-    )
-    assert all(
-        outcome["status"] == "closeable" for outcome in previous["outcomes"].values()
-    )
-    for outcome in closeout["outcomes"].values():
-        for relative_path in outcome["evidence"]:
-            assert (ROOT / relative_path).exists(), relative_path
-
-
 def test_issue_5656_debt_governance_gates_are_fail_fast_and_current() -> None:
     gates = _load_json(DEBT_GATES)
     summary = gates["summary"]

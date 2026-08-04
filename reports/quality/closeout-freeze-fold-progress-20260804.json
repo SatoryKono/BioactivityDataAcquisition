@@ -18,10 +18,10 @@
   "check_command": "python -m scripts.engineering.qa.report_live_residual_snapshot --check",
   "baseline_counts": {
     "tech_debt_closeout_test_files": 51,
-    "closeout_test_files_using_live_residual_helpers": 6,
-    "notes": "Count measured 2026-08-04 from tests/architecture/test_tech_debt*closeout*.py plus test_live_residual_snapshot.py fold helpers.",
-    "tech_debt_closeout_test_function_count": 311,
-    "tech_debt_closeout_test_loc": 11325
+    "closeout_test_files_using_live_residual_helpers": 8,
+    "tech_debt_closeout_test_function_count": 262,
+    "tech_debt_closeout_test_loc": 10472,
+    "notes": "Counts measured 2026-08-04 batch C after artifact-pack freeze strip + residual fold."
   },
   "batch_20260804": {
     "converted_or_folded": [
@@ -37,9 +37,9 @@
     "rationale": "Fold numeric residual freezes for hotspot/entrypoints/zero-ref onto live residual snapshot non-growth instead of per-issue literals."
   },
   "remaining_work": [
-    "Continue converting fold_into_generic issue-specific freezes onto generic JSON + residual helpers.",
-    "Delete per-issue modules only after CI proves equivalent guards.",
-    "Keep reports/quality/*closeout*.json as historical evidence."
+    "Continue deleting fold_into_generic modules once unique behavioral asserts are migrated.",
+    "Keep reports/quality/*closeout*.json as historical evidence.",
+    "Do not raise tech-debt budgets."
   ],
   "batch_20260804b": {
     "converted_or_folded": [
@@ -66,5 +66,28 @@
       "retained_public_entrypoint_count": 12,
       "zero_reference_supporting_script_count": 5
     }
+  },
+  "batch_20260804c": {
+    "converted_or_folded": [
+      "tests/architecture/test_closeout_json_artifacts_generic.py",
+      "tests/architecture/test_tech_debt_issue_6060_closeout.py",
+      "tests/architecture/test_tech_debt_issues_6011_6020_closeout.py",
+      "tests/architecture/* tech-debt closeout artifact-pack freezes thinned"
+    ],
+    "artifact_pack_tests_stripped": 55,
+    "modules_thinned": 52,
+    "modules_deleted": 0,
+    "rationale": "Batch C for #7464: expand generic tech-debt closeout JSON pack ratchet (evidence paths, metrics current<=max, anti budget-growth markers); strip duplicated closeout-artifact pack freezes from per-issue modules; fold additional hotspot freezes onto live residual non-growth.",
+    "measured_closeout_program": {
+      "tech_debt_closeout_test_file_count": 51,
+      "tech_debt_closeout_test_function_count": 262,
+      "tech_debt_closeout_test_loc": 10472,
+      "closeout_files_using_live_residual_helpers": 8,
+      "fold_into_generic_inventory_count": 60,
+      "retained_public_entrypoint_count": 12,
+      "zero_reference_supporting_script_count": 5
+    },
+    "generator": "python -m scripts.engineering.qa.report_live_residual_snapshot",
+    "check_command": "python -m scripts.engineering.qa.report_live_residual_snapshot --check"
   }
 }

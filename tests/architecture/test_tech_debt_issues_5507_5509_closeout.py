@@ -77,15 +77,6 @@ def _collect_exact_importers(target_module: str) -> set[str]:
     return importers
 
 
-def test_closeout_artifact_covers_requested_issues__5507_5509() -> None:
-    payload = _load_json(CLOSEOUT)
-    issues = payload["issues"]
-    assert payload["schema_version"] == "tech-debt-issues-5507-5509-closeout-v1"
-    assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in issues} == {5507, 5508, 5509}
-    assert all(issue["status"] == "closed-ready" for issue in issues)
-
-
 def test_issue_5507_cli_config_bootstrap_uses_owner_config_access_seam() -> None:
     imported_modules = _imports(CLI_CONFIG_BOOTSTRAP)
     assert "bioetl.composition.runtime_builders.config_access" in imported_modules

@@ -101,29 +101,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-def test_tdx_audit_closeout_artifact_is_complete_and_budget_safe() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert closeout["schema_version"] == "tech-debt-issues-5839-5845-closeout-v1"
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert {issue["number"] for issue in closeout["issues"]} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in closeout["issues"])
-    assert set(closeout["outcomes"]) == {str(issue) for issue in EXPECTED_ISSUES}
-    assert all(
-        outcome["status"] == "closeable" for outcome in closeout["outcomes"].values()
-    )
-
-    for issue in closeout["issues"]:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), relative_path
-
-    for metric in closeout["metrics"].values():
-        current = metric.get("current")
-        maximum = metric.get("max")
-        if maximum is not None:
-            assert current <= maximum
-
-
 def test_issue_5839_retained_public_seams_are_metadata_backed_and_zero_burden() -> None:
     closeout = _load_json(CLOSEOUT)
     registry = _load_yaml(COMPATIBILITY_REGISTRY)

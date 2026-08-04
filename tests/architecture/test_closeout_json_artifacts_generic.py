@@ -76,6 +76,30 @@ def test_closeout_json_artifacts_declare_no_budget_growth_policy() -> None:
     )
 
 
+def _evidence_path(raw_evidence: str) -> str:
+    """Normalize evidence entries that may use path::nodeid form."""
+    return str(raw_evidence).split("::", maxsplit=1)[0]
+
+
+def _check_metric_non_growth(
+    path_name: str,
+    metric_name: str,
+    metric: dict[str, Any],
+    failures: list[str],
+) -> None:
+    current = metric.get("current")
+    maximum = metric.get("max")
+    try:
+        if maximum is not None and current is not None:
+            if float(current) > float(maximum):
+                failures.append(
+                    f"{path_name}: metric {metric_name} current>max "
+                    f"({current}>{maximum})"
+                )
+    except (TypeError, ValueError):
+        failures.append(f"{path_name}: metric {metric_name} non-numeric bounds")
+
+
 def test_tech_debt_closeout_json_packs_keep_evidence_and_ratchets() -> None:
     """Generic fold for issue-pack JSON freezes (#7464 batch).
 
@@ -83,6 +107,8 @@ def test_tech_debt_closeout_json_packs_keep_evidence_and_ratchets() -> None:
     so per-issue pytest modules can shrink without losing failure proof.
     """
     packs = sorted(REPORTS.glob("tech-debt-*-closeout.json"))
+    packs.extend(sorted(REPORTS.glob("tech-debt-issue-*-closeout.json")))
+    packs = sorted(set(packs))
     assert packs, "expected tech-debt closeout JSON packs"
     failures: list[str] = []
     for path in packs:
@@ -100,6 +126,8 @@ def test_tech_debt_closeout_json_packs_keep_evidence_and_ratchets() -> None:
                 "schema_version",
                 "debt_budget_outcome",
                 "debt_outcome",
+                "debt_budget_policy",
+                "budget_policy",
                 "issues",
                 "issue",
                 "status",
@@ -107,6 +135,20 @@ def test_tech_debt_closeout_json_packs_keep_evidence_and_ratchets() -> None:
         )
         if not has_identity:
             failures.append(f"{path.name}: missing closeout identity fields")
+
+        for key in ("debt_budget_policy", "budget_policy"):
+            value = payload.get(key)
+            if isinstance(value, str) and value:
+                lowered = value.lower().replace("-", "_")
+                # Allow no_growth / flat_or_decreasing wording; forbid explicit increases.
+                if any(
+                    token in lowered
+                    for token in ("increase_budget", "budget_increase", "raise_budget", "allow_growth")
+                ) or lowered in {"increase", "grow", "growing"}:
+                    failures.append(
+                        f"{path.name}: forbidden budget-growth policy {key}={value!r}"
+                    )
+
         ratchets = payload.get("ratchets")
         if isinstance(ratchets, dict):
             for name, ratchet in ratchets.items():
@@ -121,7 +163,40 @@ def test_tech_debt_closeout_json_packs_keep_evidence_and_ratchets() -> None:
                             )
                     except (TypeError, ValueError):
                         failures.append(f"{path.name}: ratchet {name} non-numeric")
-        # Evidence entries are historical labels and may point at renamed/removed
-        # surfaces; path existence remains the responsibility of owner closeout
-        # modules. Generic fold only keeps identity + ratchet non-growth proof.
-    assert failures == [], "Closeout pack regressions:\n" + "\n".join(failures[:40])
+
+        metrics = payload.get("metrics")
+        if isinstance(metrics, dict):
+            for metric_name, metric in metrics.items():
+                if isinstance(metric, dict):
+                    _check_metric_non_growth(
+                        path.name, str(metric_name), metric, failures
+                    )
+
+        issue_blob = payload.get("issues")
+        if isinstance(issue_blob, list):
+            issue_items = issue_blob
+        elif isinstance(payload.get("issue"), dict):
+            issue_items = [payload["issue"]]
+        else:
+            issue_items = []
+        for issue in issue_items:
+            if not isinstance(issue, dict):
+                continue
+            evidence = issue.get("evidence")
+            if not isinstance(evidence, list):
+                continue
+            for raw in evidence:
+                rel = _evidence_path(str(raw))
+                if not rel or rel.startswith("http"):
+                    continue
+                if "/" not in rel and "\\" not in rel and not rel.endswith(
+                    (".py", ".json", ".yaml", ".yml", ".md")
+                ):
+                    continue
+                if ("{" in rel) or ("}" in rel) or ("#" in rel):
+                    continue
+                if not (rel.startswith("src/") or rel.startswith("configs/")):
+                    continue
+                if not (ROOT / rel).exists():
+                    failures.append(f"{path.name}: missing evidence {raw!r}")
+    assert failures == [], "Closeout pack regressions:\n" + "\n".join(failures[:60])

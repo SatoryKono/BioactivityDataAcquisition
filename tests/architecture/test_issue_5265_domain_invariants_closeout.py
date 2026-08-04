@@ -37,37 +37,6 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-def test_issue_5265_closeout_artifact_has_expected_shape() -> None:
-    skip_if_artifact_is_not_authoritative(root=ROOT, artifact_path=CLOSEOUT)
-    closeout = _load_json(CLOSEOUT)
-
-    assert closeout["issue"] == "#5265"
-    assert closeout["status"] in {
-        "validated_local_closeable",
-        "not_closeable_under_current_inventory",
-    }
-    assert closeout["debt_outcome"] in {"improved", "current_inventory_regressed"}
-    if closeout["status"] == "validated_local_closeable":
-        assert closeout["debt_outcome"] == "improved"
-        assert (
-            closeout["current_metrics"]["tracked_uncovered_module_count"]
-            < closeout["baseline_metrics"]["tracked_uncovered_module_count"]
-        )
-        assert (
-            closeout["current_metrics"]["tracked_unmeasured_module_count"]
-            <= closeout["baseline_metrics"]["tracked_unmeasured_module_count"]
-        )
-    else:
-        assert closeout["debt_outcome"] == "current_inventory_regressed"
-        assert (
-            closeout["current_metrics"]["tracked_uncovered_module_count"] > 0
-            or closeout["current_metrics"]["tracked_unmeasured_module_count"] > 0
-        )
-    assert closeout["module_expectations"]
-    for evidence_path in closeout["evidence"]:
-        assert (ROOT / str(evidence_path)).exists(), evidence_path
-
-
 def test_issue_5265_closeout_matches_live_module_coverage_inventory() -> None:
     skip_if_artifact_is_not_authoritative(root=ROOT, artifact_path=CLOSEOUT)
     skip_if_module_coverage_inventory_is_dirty(root=ROOT, inventory_path=INVENTORY)

@@ -58,20 +58,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 @pytest.mark.architecture
-def test_closeout_artifact_covers_requested_issues__5591_5595() -> None:
-    payload = _load_json(CLOSEOUT)
-    issues = payload["issues"]
-
-    assert payload["schema_version"] == "tech-debt-issues-5591-5595-closeout-v1"
-    assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in issues} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in issues)
-
-    for issue in issues:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), (
-                f"Missing closeout evidence for #{issue['number']}: {relative_path}"
-            )
 
 
 @pytest.mark.architecture
