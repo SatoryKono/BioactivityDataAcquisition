@@ -38,7 +38,7 @@ flowchart LR
     subgraph Bronze_Layer["Bronze Layer"]
         direction TB
         BronzeWriter["BronzeWriter"]
-        Bronze[("Bronze Storage<br/>JSONL + zstd<br/>retention: 90d<br/>path: bronze/v1/{provider}/{entity}/{date}")]
+        Bronze[("Bronze Storage<br/>JSONL + zstd<br/>retention: 90d<br/>path: bronze/v1/&#123;provider&#125;/&#123;entity&#125;/&#123;date&#125;")]
     end
 
     subgraph Silver_Layer["Silver Layer"]

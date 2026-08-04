@@ -43,9 +43,9 @@ graph TB
     end
 
     subgraph FileSystem["File System Layout"]
-        FS_B["bronze/<br/>{provider}/{entity}/{date}/"]:::size-sm
-        FS_S["silver/<br/>{provider}_{entity}/_delta_log/"]:::size-sm
-        FS_G["gold/<br/>{provider}_{entity}/_delta_log/"]:::size-sm
+        FS_B["bronze/<br/>&#123;provider&#125;/&#123;entity&#125;/&#123;date&#125;/"]:::size-sm
+        FS_S["silver/<br/>&#123;provider&#125;_&#123;entity&#125;/_delta_log/"]:::size-sm
+        FS_G["gold/<br/>&#123;provider&#125;_&#123;entity&#125;/_delta_log/"]:::size-sm
     end
 
     %% Inheritance
