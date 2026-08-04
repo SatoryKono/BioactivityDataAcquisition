@@ -75,6 +75,25 @@ def test_check_spec_status_fails_for_historical_page_role_markers(
     ]
 
 
+def test_load_pipeline_specs_normalizes_multi_hyphen_entity_names(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    entities_dir = tmp_path / "configs" / "entities"
+    pipelines_dir = tmp_path / "docs" / "04-reference" / "pipelines"
+    spec_path = pipelines_dir / "chembl" / "11-target-protein-classification-spec.md"
+    _write_spec(spec_path, "# Target protein classification")
+
+    monkeypatch.setattr(parity_module, "ENTITIES_DIR", entities_dir)
+    monkeypatch.setattr(parity_module, "PIPELINES_DIR", pipelines_dir)
+
+    checker = parity_module.ParityChecker()
+
+    assert checker.pipeline_specs == {
+        ("chembl", "target_protein_classification"): spec_path
+    }
+
+
 def test_check_spec_status_allows_canonical_compact_summary_language(
     tmp_path: Path,
     monkeypatch,
