@@ -8,6 +8,7 @@ Credentials: GRAFANA_PASSWORD / GF_SECURITY_ADMIN_PASSWORD / service token.
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import os
 import re
@@ -325,7 +326,8 @@ def main() -> int:
     shot_dir = out / "screenshots"
     shot_dir.mkdir(parents=True, exist_ok=True)
 
-    from playwright.sync_api import sync_playwright
+    playwright_sync_api = importlib.import_module("playwright.sync_api")
+    sync_playwright = vars(playwright_sync_api)["sync_playwright"]
 
     themes = [t.strip() for t in args.themes.split(",") if t.strip()]
     report: dict[str, Any] = {

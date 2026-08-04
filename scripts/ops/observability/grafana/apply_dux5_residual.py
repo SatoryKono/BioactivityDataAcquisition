@@ -145,7 +145,11 @@ TEXT_REPLACEMENTS: list[tuple[re.Pattern[str], str]] = [
 ]
 
 
-def walk(panels: list | None, parent_collapsed: bool = False, acc: list | None = None):
+def walk(
+    panels: list[dict[str, Any]] | None,
+    parent_collapsed: bool = False,
+    acc: list[tuple[dict[str, Any], bool]] | None = None,
+) -> list[tuple[dict[str, Any], bool]]:
     acc = acc if acc is not None else []
     for panel in panels or []:
         collapsed = parent_collapsed or bool(panel.get("collapsed"))

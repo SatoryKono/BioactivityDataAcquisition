@@ -12,7 +12,7 @@ import sys
 from dataclasses import dataclass, asdict
 from datetime import datetime, UTC
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, TypedDict
 from collections import defaultdict
 
 # Configuration
@@ -48,8 +48,16 @@ class EmitterAuditReport:
     summary: dict[str, Any]
 
 
+class ForbiddenPattern(TypedDict):
+    """Static forbidden-emitter pattern configuration."""
+
+    pattern: str
+    description: str
+    severity: Literal["error", "warning", "info"]
+
+
 # Forbidden patterns for emitter bypass
-FORBIDDEN_PATTERNS = {
+FORBIDDEN_PATTERNS: dict[str, ForbiddenPattern] = {
     "direct_prometheus_import": {
         "pattern": r"from prometheus_client import|import prometheus_client",
         "description": "Direct Prometheus client import - use canonical emitter contracts",

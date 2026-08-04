@@ -23,7 +23,7 @@ COPY_LINK = {
 }
 
 
-def walk(panels: list | None):
+def walk(panels: list[dict[str, Any]] | None):
     for panel in panels or []:
         yield panel
         yield from walk(panel.get("panels"))

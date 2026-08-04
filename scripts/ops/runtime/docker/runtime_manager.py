@@ -624,11 +624,17 @@ def ensure_shared_networks(
         # Focused unit fixtures may supply an in-memory preflight without a file.
         # Production preflight cannot succeed when the contract is absent.
         return True, []
-    networks = [
-        raw
-        for raw in contract.get("shared_networks", {}).values()
-        if isinstance(raw, Mapping) and spec.name in raw.get("consumers", [])
-    ]
+    shared_networks = contract.get("shared_networks", {})
+    network_values = (
+        shared_networks.values() if isinstance(shared_networks, Mapping) else ()
+    )
+    networks = []
+    for raw in network_values:
+        if not isinstance(raw, Mapping):
+            continue
+        consumers = raw.get("consumers", [])
+        if isinstance(consumers, list) and spec.name in consumers:
+            networks.append(raw)
     observations: list[dict[str, Any]] = []
     findings: list[dict[str, Any]] = []
     for raw in networks:

@@ -17,6 +17,9 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
+
+from pydantic import BaseModel
 
 from bioetl.infrastructure.schemas.composite_config import CompositeConfigFileSchema
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile
@@ -39,7 +42,7 @@ def _normalize_newlines(content: str) -> str:
     return content.replace("\r\n", "\n").replace("\r", "\n")
 
 
-def generate_schema(model_cls: type) -> dict:
+def generate_schema(model_cls: type[BaseModel]) -> dict[str, Any]:
     """Generate JSON Schema dict from a Pydantic model class."""
     schema = model_cls.model_json_schema()
     # Add JSON Schema meta-fields
@@ -47,7 +50,7 @@ def generate_schema(model_cls: type) -> dict:
     return schema
 
 
-def write_schema(path: Path, schema: dict) -> None:
+def write_schema(path: Path, schema: dict[str, Any]) -> None:
     """Write schema to file with consistent formatting."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:

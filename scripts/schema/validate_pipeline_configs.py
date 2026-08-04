@@ -13,7 +13,7 @@ import json
 import sys
 from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
@@ -753,7 +753,7 @@ def _validate_registry_manifest_surface(configs_root: Path) -> list[str]:
 
     return validate_registry_manifest(
         configs_root=resolved_configs_root,
-        pipeline_configs=pipeline_configs,
+        pipeline_configs=cast(Iterable[Any], pipeline_configs),
     )
 
 
