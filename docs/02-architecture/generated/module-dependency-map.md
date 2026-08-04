@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2312`
-- Internal import edges (raw): `7171`
+- Internal import edges (raw): `7222`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `310`
@@ -21,8 +21,8 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1385 OK| application
-    application -->|911 OK| domain
+    application -->|1435 OK| application
+    application -->|912 OK| domain
     composition -->|158 OK| application
     composition -->|673 OK| composition
     composition -->|280 OK| domain
@@ -40,8 +40,8 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1385 | allowed |
-| `application`    | `domain`         |     911 | allowed |
+| `application`    | `application`    |    1435 | allowed |
+| `application`    | `domain`         |     912 | allowed |
 | `composition`    | `application`    |     158 | allowed |
 | `composition`    | `composition`    |     673 | allowed |
 | `composition`    | `domain`         |     280 | allowed |
@@ -61,7 +61,7 @@ flowchart LR
 | `application.services`         | `domain.control_plane`                     |     119 |
 | `infrastructure.adapters`      | `domain.types`                             |     104 |
 | `application.composite`        | `domain.composite`                         |      91 |
-| `application.core`             | `domain.types`                             |      85 |
+| `application.core`             | `domain.types`                             |      86 |
 | `application.services`         | `domain.types`                             |      79 |
 | `infrastructure.storage`       | `domain.types`                             |      71 |
 | `infrastructure.storage`       | `domain.ports`                             |      60 |
