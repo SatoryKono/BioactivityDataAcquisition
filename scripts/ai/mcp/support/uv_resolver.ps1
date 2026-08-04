@@ -48,19 +48,32 @@ function Restore-BioetlProxyEnvironment {
         }
     }
 
+    # Delete missing entries first. PowerShell's Env provider can conflate
+    # upper/lowercase names while removing them on POSIX, so restoring values
+    # afterwards guarantees that a missing lowercase alias cannot erase its
+    # populated uppercase peer.
     foreach ($name in $script:BioetlProxyEnvironmentNames) {
         $value = $null
         if ($map.ContainsKey($name)) {
             $value = $map[$name]
         }
         if ($null -eq $value -or $value -eq "") {
+            Remove-Item -LiteralPath "Env:$name" -ErrorAction SilentlyContinue
             [Environment]::SetEnvironmentVariable(
                 $name,
                 $null,
                 [EnvironmentVariableTarget]::Process
             )
         }
-        else {
+    }
+
+    foreach ($name in $script:BioetlProxyEnvironmentNames) {
+        $value = $null
+        if ($map.ContainsKey($name)) {
+            $value = $map[$name]
+        }
+        if ($null -ne $value -and $value -ne "") {
+            Set-Item -LiteralPath "Env:$name" -Value ([string]$value)
             [Environment]::SetEnvironmentVariable(
                 $name,
                 [string]$value,
@@ -98,6 +111,7 @@ function Enable-BioetlUvxNetworkBypass {
             $null,
             [EnvironmentVariableTarget]::Process
         )
+        Remove-Item -LiteralPath "Env:$name" -ErrorAction SilentlyContinue
     }
 }
 
