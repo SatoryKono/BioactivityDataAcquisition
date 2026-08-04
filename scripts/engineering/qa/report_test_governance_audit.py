@@ -246,8 +246,7 @@ def _read_source_tree_bytes(path: Path) -> bytes:
         "rb"
     ) as handle:  # NOSONAR - path confined by resolve_output_path
         payload = handle.read()
-    return payload.replace(b'\r\n', b'\n').replace(b'\r', b'\n')
-
+    return payload.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
 
 
 @cache
