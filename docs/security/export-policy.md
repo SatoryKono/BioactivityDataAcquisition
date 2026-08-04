@@ -1,6 +1,17 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: active
+Class: repo-only
+Owner: BioETL Team
+Last verified: '2026-08-04'
+
+______________________________________________________________________
+
 # BioETL Governed Export Policy
 
-Last verified: 2026-06-30
+> **Classification:** repo-only security/ops policy surface (outside MkDocs
+> nav). Path is stable for error catalog and architecture closeout tests. #7434.
 
 BioETL governed exports are application-level exports. Grafana inspector output
 is not a governed export surface.

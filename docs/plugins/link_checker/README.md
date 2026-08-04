@@ -1,4 +1,16 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: active
+Class: repo-only
+Owner: BioETL Team
+Last verified: '2026-08-04'
+
+______________________________________________________________________
+
 # BioETL Link Checker Plugin
+
+> **Classification:** repo-only plugin documentation (outside MkDocs nav). #7434.
 
 ## Overview
 

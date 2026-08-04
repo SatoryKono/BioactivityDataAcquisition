@@ -68,7 +68,10 @@ promoting every specialist page into the primary MkDocs navigation.
 - [Link checker reference](../plugins/link_checker/README.md)
 - [Export policy](../security/export-policy.md)
 - [RBAC matrix](../security/rbac-matrix.md)
-- [Grok CLI](../tools/grok-cli.md)
+
+### Archived tooling notes
+
+- [Obsolete pygrok CLI notes (archived)](../99-archive/tools/grok-cli.md)
 
 ### Archived support notes (historical only)
 

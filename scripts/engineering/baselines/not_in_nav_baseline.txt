@@ -286,4 +286,3 @@ ru/INDEX.md
 ru/README.md
 security/export-policy.md
 security/rbac-matrix.md
-tools/grok-cli.md
