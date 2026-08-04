@@ -413,8 +413,8 @@ def test_dashboard_titles_match_home_dashboard_navigation_names() -> None:
         "bioetl-runtime": "2. Pipeline Diagnostics",
         "bioetl-provider-health-v2": "3. Provider Health",
         "bioetl-dq-v2": "4. Data Quality",
-        "bioetl-incident-v1": "Incident Workspace",
-        "bioetl-run-explorer-v1": "Run Explorer",
+        "bioetl-incident-v1": "5. Incident Workspace",
+        "bioetl-run-explorer-v1": "6. Run Explorer",
     }
 
     for dashboard_path in get_dashboard_files():
@@ -506,16 +506,6 @@ def test_dashboard_links_forbid_universal_handoff_patterns() -> None:
             )
 
 
-@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
-def test_navigation_dashboards_expose_explore_drilldown_links() -> None:
-    """Every navigation panel should expose Logs and Traces drilldowns."""
-    for dashboard_path in get_dashboard_files():
-        _assert_dashboard_exposes_explore_drilldown_links(
-            dashboard_name=dashboard_path.name,
-            dashboard=load_dashboard(dashboard_path),
-        )
-
-
 def test_dashboard_bus_self_links_are_omitted() -> None:
     """Canonical bus and global adjunct links must omit top-level self-links."""
     for dashboard_path in get_dashboard_files():
@@ -573,142 +563,6 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
         _assert_navigation_panel_visual_bus(
             dashboard_name=dashboard_path.name,
             dashboard=load_dashboard(dashboard_path),
-        )
-
-
-@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
-def test_explore_links_use_drilldown_routes_and_time_range() -> None:
-    """Every dashboard Explore link should target Drilldown apps and preserve time range."""
-    dashboard_paths = [
-        path
-        for path in get_dashboard_files()
-        if load_dashboard(path).get("uid") not in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS
-    ]
-    assert dashboard_paths, "at least one dashboard must own Drilldown navigation"
-    for dashboard_path in dashboard_paths:
-        _assert_dashboard_drilldown_routes_and_time(
-            dashboard_name=dashboard_path.name,
-            dashboard=load_dashboard(Path("grafana/dashboards") / dashboard_path.name),
-        )
-
-
-@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
-def test_explore_traces_navigation_is_explicitly_traced_run_only() -> None:
-    """Explore Traces must be described as traced-run-only in shipped navigation."""
-    for dashboard_path in get_dashboard_files():
-        dashboard = load_dashboard(dashboard_path)
-        traces_link = next(
-            (
-                link
-                for link in get_dashboard_navigation_links(dashboard)
-                if str(link.get("title", "")) == "Explore Traces"
-            ),
-            None,
-        )
-        assert traces_link is not None, (
-            f"{dashboard_path.name} must expose Explore Traces in navigation"
-        )
-        tooltip = str(traces_link.get("tooltip", ""))
-        assert "Available only for traced runs" in tooltip, (
-            f"{dashboard_path.name} Explore Traces tooltip must say it is traced-run-only"
-        )
-        assert "--tracing" in tooltip, (
-            f"{dashboard_path.name} Explore Traces tooltip must explain how to enable tracing"
-        )
-        assert "adjunct evidence" in tooltip, (
-            f"{dashboard_path.name} Explore Traces tooltip must disclose adjunct-only semantics"
-        )
-
-
-@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
-def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
-    """Tempo drilldown links should route to Grafana Traces Drilldown app."""
-    dashboards = [
-        (path.name, load_dashboard(path))
-        for path in get_dashboard_files()
-        if load_dashboard(path).get("uid") not in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS
-    ]
-    assert dashboards, "at least one dashboard must own Tempo Drilldown navigation"
-    for dashboard_name, dashboard in dashboards:
-        tempo_links = [
-            link
-            for link in get_dashboard_navigation_links(dashboard)
-            if _is_traces_drilldown_url(link.get("url", ""))
-        ]
-        assert tempo_links, (
-            f"{dashboard_name} must expose at least one Traces Drilldown link"
-        )
-        for link in tempo_links:
-            url = link.get("url", "")
-            _assert_required_time_tokens(
-                url,
-                tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
-                context=f"{dashboard_name} traces drilldown link",
-            )
-
-
-@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
-def test_loki_drilldown_links_use_safe_bioetl_baseline_query() -> None:
-    """Loki drilldown links should start from a low-cardinality baseline query."""
-    dashboards = [
-        (path.name, load_dashboard(path))
-        for path in get_dashboard_files()
-        if load_dashboard(path).get("uid") not in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS
-    ]
-    assert dashboards, "at least one dashboard must own Loki Drilldown navigation"
-    for dashboard_name, dashboard in dashboards:
-        _assert_dashboard_loki_safe_baseline(
-            dashboard_name=dashboard_name, dashboard=dashboard
-        )
-
-
-@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
-def test_tempo_drilldown_links_are_contextual() -> None:
-    """Tempo drilldown links should carry explicit TraceQL context."""
-    pipeline_scoped = (
-        "bioetl-dq-v2.json",
-        "bioetl-overview-v2.json",
-        "bioetl-runtime.json",
-    )
-    for dashboard_name in pipeline_scoped:
-        _assert_pipeline_scoped_tempo_dashboard(dashboard_name)
-    _assert_provider_tempo_drilldown()
-    _assert_workflow_tempo_drilldown()
-
-
-@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
-def test_explore_drilldown_links_disclose_tracing_profile_dependency() -> None:
-    """Loki/Tempo drilldowns should warn that tracing profile is required."""
-    for dashboard_name in (path.name for path in get_dashboard_files()):
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        drilldown_links = [
-            link
-            for link in get_dashboard_navigation_links(dashboard)
-            if _is_logs_drilldown_url(link.get("url", ""))
-            or _is_traces_drilldown_url(link.get("url", ""))
-        ]
-        assert drilldown_links, f"{dashboard_name} must expose Drilldown links"
-        for link in drilldown_links:
-            title = link.get("title", "")
-            tooltip = str(link.get("tooltip", ""))
-            description = " ".join((title, tooltip)).lower()
-            assert "tracing" in description, (
-                f"{dashboard_name} Drilldown link must disclose tracing profile dependency"
-            )
-
-
-@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
-def test_loki_drilldown_uses_grafana_logs_drilldown_entrypoint() -> None:
-    """Loki drilldown should route to Grafana Logs Drilldown app entrypoint."""
-    sample_line = _emit_sample_structured_log(
-        pipeline="chembl_activity",
-        provider="chembl",
-    )
-    _assert_sample_structured_log_fields(sample_line)
-    for dashboard_name in (path.name for path in get_dashboard_files()):
-        _assert_dashboard_loki_entrypoint(
-            dashboard_name=dashboard_name,
-            dashboard=load_dashboard(Path("grafana/dashboards") / dashboard_name),
         )
 
 
