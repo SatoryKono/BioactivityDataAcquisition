@@ -214,10 +214,26 @@ if [[ ! -d "$DOCS_ROOT" ]]; then
   exit 2
 fi
 
-if [[ -n "$PUPPETEER_CFG" ]] || [[ -n "${PUPPETEER_EXECUTABLE_PATH:-}" ]] || [[ "$(id -u)" -eq 0 ]]; then
-  effective_cfg="$(prepare_puppeteer_cfg "$PUPPETEER_CFG")"
-  if [[ -n "$effective_cfg" ]]; then
-    PUPPETEER_CFG="$effective_cfg"
+# Only inject a Puppeteer config when a runnable Chrome is available or CI
+# explicitly provided one. Passing -p without a browser forces mermaid-cli to
+# look at an empty host/container cache and fail with "Could not find Chromium",
+# including Docker fallback runs that otherwise ship a working browser image.
+runnable_chrome=""
+runnable_chrome="$(resolve_chrome_headless_shell || true)"
+if [[ -n "$runnable_chrome" ]] || [[ -n "${PUPPETEER_EXECUTABLE_PATH:-}" ]] || [[ "$(id -u)" -eq 0 ]]; then
+  if [[ -n "$PUPPETEER_CFG" ]] || [[ -n "${PUPPETEER_EXECUTABLE_PATH:-}" ]] || [[ "$(id -u)" -eq 0 ]]; then
+    effective_cfg="$(prepare_puppeteer_cfg "$PUPPETEER_CFG")"
+    if [[ -n "$effective_cfg" ]]; then
+      PUPPETEER_CFG="$effective_cfg"
+    fi
+  fi
+elif [[ -n "$PUPPETEER_CFG" ]]; then
+  # Keep optional args-only configs when the file exists and does not hardcode
+  # a missing executablePath.
+  if [[ -f "$PUPPETEER_CFG" ]] && ! grep -Eq '"executablePath"' "$PUPPETEER_CFG"; then
+    :
+  else
+    PUPPETEER_CFG=""
   fi
 fi
 
@@ -229,7 +245,10 @@ mmdc_args=()
 if [[ -f "$THEME_CONFIG" ]]; then
   mmdc_args+=(-c "$THEME_CONFIG")
 fi
-if [[ -n "$PUPPETEER_CFG" ]]; then
+# Only pass -p when a runnable browser was resolved (CI host install) so we can
+# apply --no-sandbox args. Without a runnable browser, let Docker image
+# chromium use its defaults; an empty -p config can force a missing cache path.
+if [[ -n "$PUPPETEER_CFG" && -n "$runnable_chrome" ]]; then
   mmdc_args+=(-p "$PUPPETEER_CFG")
 fi
 
