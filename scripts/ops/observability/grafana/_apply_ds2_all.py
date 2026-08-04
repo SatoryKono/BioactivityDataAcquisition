@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from copy import deepcopy
 from pathlib import Path
+from typing import Any, Iterator, cast
 
 ROOT = Path(__file__).resolve().parents[4]
 DASH = ROOT / "grafana" / "dashboards"
@@ -17,20 +18,25 @@ DASHBOARD_CONTROL_PLANE_V1 = "bioetl-control-plane-v1.json"
 PANEL_PRIMARY_RECOVERY = "Review First Recovery Action"
 PANEL_NEXT_ACTION_REPLAY_DIAGNOSTICS = "Next Action: Replay Diagnostics"
 
+# Grafana dashboards are recursively heterogeneous JSON documents.  This
+# script intentionally mutates that external boundary in place, so ``Any`` is
+# confined to the JSON object alias instead of leaking into product code.
+type JsonObject = dict[str, Any]
 
-def walk(panels):
+
+def walk(panels: list[JsonObject] | None) -> Iterator[JsonObject]:
     for p in panels or []:
         yield p
         yield from walk(p.get("panels"))
 
 
-def load_dash(name: str) -> dict[str, object]:
+def load_dash(name: str) -> JsonObject:
     path = DASH / name
-    data = json.loads(path.read_text(encoding="utf-8"))
+    data = cast(JsonObject, json.loads(path.read_text(encoding="utf-8")))
     return data
 
 
-def save_dash(name: str, data: dict[str, object]) -> None:
+def save_dash(name: str, data: JsonObject) -> None:
     path = DASH / name
     path.write_text(
         json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
@@ -136,7 +142,7 @@ def fix_runtime() -> None:
     print("runtime 9105 OK", p9105["type"], p9105["title"])
 
 
-def _incident_status_mappings() -> list[dict[str, object]]:
+def _incident_status_mappings() -> list[JsonObject]:
     return [
         {
             "type": "value",
@@ -157,7 +163,7 @@ def _incident_status_mappings() -> list[dict[str, object]]:
     ]
 
 
-def _incident_status_thresholds() -> dict[str, object]:
+def _incident_status_thresholds() -> JsonObject:
     return {
         "mode": "absolute",
         "steps": [
@@ -169,7 +175,7 @@ def _incident_status_thresholds() -> dict[str, object]:
     }
 
 
-def _incident_value_override() -> dict[str, object]:
+def _incident_value_override() -> JsonObject:
     return {
         "matcher": {
             "id": "byRegexp",
@@ -197,7 +203,7 @@ def _incident_value_override() -> dict[str, object]:
 
 
 def _fix_incident_table(
-    panel: dict[str, object], *, value_override: dict[str, object]
+    panel: JsonObject, *, value_override: JsonObject
 ) -> None:
     fc = panel.setdefault("fieldConfig", {})
     defaults = fc.setdefault("defaults", {})
@@ -209,7 +215,7 @@ def _fix_incident_table(
     fc["overrides"] = [deepcopy(value_override)]
 
 
-def _apply_incident_status_panel(panel: dict[str, object]) -> None:
+def _apply_incident_status_panel(panel: JsonObject) -> None:
     defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
     defaults["mappings"] = _incident_status_mappings()
     defaults["thresholds"] = _incident_status_thresholds()
@@ -244,7 +250,7 @@ def _incident_handoff_urls() -> dict[int, str]:
     }
 
 
-def _apply_incident_handoffs(by_id: dict[str, object]) -> None:
+def _apply_incident_handoffs(by_id: dict[int, JsonObject]) -> None:
     for pid, url in _incident_handoff_urls().items():
         if pid not in by_id:
             continue
@@ -254,7 +260,7 @@ def _apply_incident_handoffs(by_id: dict[str, object]) -> None:
         ]
 
 
-def _incident_domain_links() -> list[dict[str, object]]:
+def _incident_domain_links() -> list[JsonObject]:
     return [
         {
             "title": "Open Pipeline Diagnostics",
@@ -298,7 +304,7 @@ def _incident_domain_links() -> list[dict[str, object]]:
     ]
 
 
-def _ranked_suspects_panel(*, value_override: dict[str, object]) -> dict[str, object]:
+def _ranked_suspects_panel(*, value_override: JsonObject) -> JsonObject:
     return {
         "id": 2010,
         "type": "table",
@@ -400,9 +406,9 @@ def _ranked_suspects_panel(*, value_override: dict[str, object]) -> dict[str, ob
 
 
 def _layout_incident_core_panels(
-    by_id: dict[str, object],
+    by_id: dict[int, JsonObject],
     *,
-    value_override: dict[str, object],
+    value_override: JsonObject,
 ) -> None:
     """Apply grid positions and NBA content for core incident panels."""
     nav = by_id.get(1000)
@@ -439,9 +445,9 @@ def _layout_incident_core_panels(
 
 
 def _incident_detail_row(
-    by_id: dict[str, object], *, value_override: dict[str, object]
-) -> dict[str, object]:
-    detail_row = {
+    by_id: dict[int, JsonObject], *, value_override: JsonObject
+) -> JsonObject:
+    detail_row: JsonObject = {
         "id": 2099,
         "type": "row",
         "title": "Domain suspect detail (forensics)",
@@ -567,14 +573,14 @@ def fix_trust() -> None:
     print("trust OK")
 
 
-def _append_desc_note(panel: dict[str, object], *, marker: str, note: str) -> None:
+def _append_desc_note(panel: JsonObject, *, marker: str, note: str) -> None:
     """Append a description note when the marker is not already present."""
     desc = panel.get("description") or ""
     if marker not in desc:
         panel["description"] = (desc + note).strip()
 
 
-def _fix_dq_panels(dq: dict[str, object]) -> None:
+def _fix_dq_panels(dq: JsonObject) -> None:
     for panel in walk(dq.get("panels")):
         if panel.get("title") == "Status" and panel.get("type") == "stat":
             _append_desc_note(
@@ -599,7 +605,7 @@ def _fix_dq_panels(dq: dict[str, object]) -> None:
             )
 
 
-def _is_fleet_matrix_panel(panel: dict[str, object]) -> bool:
+def _is_fleet_matrix_panel(panel: JsonObject) -> bool:
     title = panel.get("title") or ""
     if panel.get("type") not in {"table", "bargauge"}:
         return False
@@ -609,7 +615,7 @@ def _is_fleet_matrix_panel(panel: dict[str, object]) -> bool:
     return y <= 25
 
 
-def _provider_context_link() -> dict[str, object]:
+def _provider_context_link() -> JsonObject:
     return {
         "title": "Open selected provider context",
         "url": (
@@ -622,7 +628,7 @@ def _provider_context_link() -> dict[str, object]:
     }
 
 
-def _fix_provider_health_panels(ph: dict[str, object]) -> None:
+def _fix_provider_health_panels(ph: JsonObject) -> None:
     for panel in walk(ph.get("panels")):
         if not _is_fleet_matrix_panel(panel):
             continue
@@ -656,7 +662,7 @@ _RUN_EXPLORER_GUIDE_CONTENT = (
 
 
 def _shift_run_explorer_panels(
-    run_explorer: dict[str, object], *, delta_y: int = 3
+    run_explorer: JsonObject, *, delta_y: int = 3
 ) -> None:
     for panel in run_explorer.get("panels") or []:
         grid_pos = panel.get("gridPos") or {}
@@ -664,13 +670,13 @@ def _shift_run_explorer_panels(
             grid_pos["y"] = int(grid_pos["y"]) + delta_y
 
 
-def _fix_run_explorer_panels(run_explorer: dict[str, object]) -> None:
+def _fix_run_explorer_panels(run_explorer: JsonObject) -> None:
     for panel in run_explorer.get("panels") or []:
         if panel.get("id") == 1 and panel.get("type") == "text":
             panel.setdefault("options", {})["mode"] = "markdown"
             panel["options"]["content"] = _RUN_EXPLORER_BROWSE_CONTENT
             return
-    guide = {
+    guide: JsonObject = {
         "id": 9405,
         "type": "text",
         "title": "Browse · Selected run",

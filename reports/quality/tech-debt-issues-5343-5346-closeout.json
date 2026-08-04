@@ -1,0 +1,78 @@
+{
+  "snapshot_date": "2026-06-18",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
+  "issues": [
+    {
+      "issue": "#5343",
+      "theme": "Runtime builder manifest creation support fragmentation",
+      "debt_types": [
+        "Migration leftovers",
+        "Duplication",
+        "Composition debt"
+      ],
+      "action": "Folded run-manifest creation support policy/create-spec helpers into one owner module, removed the deleted support path from governance allowlists, and kept manifest-builder tests on the canonical support seam.",
+      "risk": "medium",
+      "evidence": [
+        "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
+        "src/bioetl/composition/runtime_builders/run_manifest_builder.py",
+        "configs/quality/debt_scorecard.yaml",
+        "tests/unit/composition/runtime_builders/test_run_manifest_support.py",
+        "tests/unit/composition/runtime_builders/test_run_manifest_builder.py"
+      ]
+    },
+    {
+      "issue": "#5344",
+      "theme": "Config/contract/registry duplication visibility outside JSCPD",
+      "debt_types": [
+        "Governance gap",
+        "Duplication",
+        "Config debt"
+      ],
+      "action": "Extended the config-surface backlog collector with a structured duplication audit for configs/** and added an architecture guard that keeps the committed duplication artifact synchronized with the live collector.",
+      "risk": "low",
+      "evidence": [
+        "scripts/engineering/qa/report_config_surface_backlog.py",
+        "reports/quality/config-surface-backlog.json",
+        "tests/architecture/test_config_surface_entity_residual_plateau.py"
+      ]
+    },
+    {
+      "issue": "#5345",
+      "theme": "Compatibility filename inventory ratchet after facade retirements",
+      "debt_types": [
+        "Test debt",
+        "Compatibility debt",
+        "Governance gap"
+      ],
+      "action": "Reclassified the Gold nullable numeric integration test as an active contract gate, renamed it to a canonical contract filename, and ratcheted compatibility filename governance from 32 to 31 without dropping coverage.",
+      "risk": "low",
+      "evidence": [
+        "tests/integration/config/test_gold_nullable_numeric_contract.py",
+        "configs/quality/test_governance_audit.yaml",
+        "configs/quality/integration_vcr_policy.yaml",
+        "reports/quality/test-governance-current.json",
+        "tests/architecture/test_test_governance_audit.py"
+      ]
+    },
+    {
+      "issue": "#5346",
+      "theme": "Date-only content-hash compatibility inventory burn-down",
+      "debt_types": [
+        "Determinism risk",
+        "Compatibility debt",
+        "Config debt"
+      ],
+      "action": "Moved four low-risk entity configs from explicit v1_date compatibility to the v2_datetime_utc default and tightened architecture guards so the migrated surfaces cannot silently fall back into the date-only inventory.",
+      "risk": "medium",
+      "evidence": [
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/entities/uniprot/idmapping.yaml",
+        "configs/quality/determinism_identity_policy.yaml",
+        "tests/architecture/test_content_hash_datetime_policy_inventory.py"
+      ]
+    }
+  ]
+}
