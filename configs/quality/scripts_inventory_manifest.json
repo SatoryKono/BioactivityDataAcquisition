@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-04T16:51:09.878018+00:00",
+  "generated_at": "2026-08-04T18:03:07.811853+00:00",
   "summary": {
     "total_scripts": 575,
     "status_counts": {
@@ -5022,7 +5022,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 431,
+          "line": 427,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/data_quality/run_silver_gold_filter_parity.py --check"
         },
@@ -8905,13 +8905,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 394,
+          "line": 390,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 552,
+          "line": 551,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -9335,7 +9335,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1038,
+          "line": 1037,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -11902,7 +11902,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 437,
+          "line": 433,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -12271,7 +12271,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 377,
+          "line": 374,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict"
         },
@@ -12962,7 +12962,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 601,
+          "line": 600,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -15103,19 +15103,19 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 156,
+          "line": 155,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 159,
+          "line": 158,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 165,
+          "line": 164,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
@@ -15201,7 +15201,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 156,
+          "line": 155,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -15252,7 +15252,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 159,
+          "line": 158,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
@@ -15309,7 +15309,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 165,
+          "line": 164,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
@@ -15784,7 +15784,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 374,
+          "line": 371,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -15841,7 +15841,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 366,
+          "line": 363,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \\"
         },
@@ -17526,7 +17526,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 162,
+          "line": 161,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check"
         },
@@ -20277,7 +20277,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 428,
+          "line": 424,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema generate-config-matrix --check"
         }

@@ -89,17 +89,16 @@ function Restore-BioetlProxyEnvironment {
 
     $map = ConvertTo-BioetlCaseSensitiveEnvironmentMap -Snapshot $Snapshot
 
-    # Delete missing entries first. PowerShell's Env provider can conflate
-    # upper/lowercase names while removing them on POSIX, so restoring values
-    # afterwards guarantees that a missing lowercase alias cannot erase its
-    # populated uppercase peer.
+    # POSIX PowerShell Env provider conflates upper/lowercase proxy names.
+    # Restore populated values FIRST so deleting an empty case alias cannot
+    # erase its populated peer before we write it back (#7520 / CI-C1-008).
     foreach ($name in $script:BioetlProxyEnvironmentNames) {
-        $value = $null
-        if ($map.ContainsKey($name)) {
-            $value = $map[$name]
+        if (-not $map.ContainsKey($name)) {
+            continue
         }
-        if ($null -eq $value -or $value -eq "") {
-            Remove-BioetlProcessEnvironmentVariable -Name $name
+        $value = $map[$name]
+        if ($null -ne $value -and $value -ne "") {
+            Set-BioetlProcessEnvironmentVariable -Name $name -Value ([string]$value)
         }
     }
 
@@ -109,7 +108,29 @@ function Restore-BioetlProxyEnvironment {
             $value = $map[$name]
         }
         if ($null -ne $value -and $value -ne "") {
-            Set-BioetlProcessEnvironmentVariable -Name $name -Value ([string]$value)
+            continue
+        }
+        # Skip removal when a case-variant sibling still holds a restored value.
+        $siblingHasValue = $false
+        $nameLower = $name.ToLowerInvariant()
+        foreach ($other in $script:BioetlProxyEnvironmentNames) {
+            if ($other -ceq $name) {
+                continue
+            }
+            if ($other.ToLowerInvariant() -ne $nameLower) {
+                continue
+            }
+            if (
+                $map.ContainsKey($other) -and
+                $null -ne $map[$other] -and
+                $map[$other] -ne ""
+            ) {
+                $siblingHasValue = $true
+                break
+            }
+        }
+        if (-not $siblingHasValue) {
+            Remove-BioetlProcessEnvironmentVariable -Name $name
         }
     }
 }

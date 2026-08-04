@@ -36,7 +36,7 @@ from bioetl.infrastructure.adapters.chembl.constants import (
     CHEMBL_API_BASE,
 )
 
-__all__ = ["ChemblEntityMapper", "ENTITY_MAPPING", "ENTITY_MAPPING_LIFECYCLE"]
+__all__ = ["ENTITY_MAPPING", "ENTITY_MAPPING_LIFECYCLE", "ChemblEntityMapper"]
 
 
 class ChemblEntityMapper:
