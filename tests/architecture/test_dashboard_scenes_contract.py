@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any, cast
 
 import pytest
 
@@ -17,11 +18,14 @@ ROUTES = PLUGIN / "src/routes/routes.json"
 PARITY = ROOT / "reports/observability/scenes-parity-ledger.json"
 RENDER_ROOT = ROOT / "reports/observability/scenes-baseline"
 
+type JsonObject = dict[str, Any]
 
-def _json(path: Path) -> dict[str, object]:
+
+def _json(path: Path) -> JsonObject:
+    """Load a generated Grafana contract at the dynamic JSON boundary."""
     payload = json.loads(path.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
-    return payload
+    return cast(JsonObject, payload)
 
 
 def test_scenes_package_is_optional_read_only_app_boundary() -> None:

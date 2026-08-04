@@ -15,6 +15,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 _DEVIN_DIR = ".devin"
@@ -38,17 +39,22 @@ DAILY_DISABLE = frozenset(
     }
 )
 
-
-def _load_catalog() -> dict:
-    return json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+type JsonObject = dict[str, Any]
 
 
-def _endpoint(entry: dict) -> str:
+def _load_catalog() -> JsonObject:
+    payload = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"MCP catalog must contain an object: {CATALOG_PATH}")
+    return cast(JsonObject, payload)
+
+
+def _endpoint(entry: JsonObject) -> str:
     path = entry.get("path") or "/mcp"
     return f"http://127.0.0.1:{int(entry['port'])}{path}"
 
 
-def _http_entry(url: str, *, timeout: int = 60) -> dict:
+def _http_entry(url: str, *, timeout: int = 60) -> JsonObject:
     return {
         "type": "http",
         "url": url,
@@ -56,7 +62,7 @@ def _http_entry(url: str, *, timeout: int = 60) -> dict:
     }
 
 
-def _normalize_tracked_host_entry(entry: dict) -> dict:
+def _normalize_tracked_host_entry(entry: JsonObject) -> JsonObject:
     """Prefer bash wrappers on Linux local for PowerShell-oriented tracked entries."""
     normalized = dict(entry)
     args = normalized.get("args")
@@ -66,31 +72,41 @@ def _normalize_tracked_host_entry(entry: dict) -> dict:
     return normalized
 
 
-def _seed_tracked_host_servers(tracked: dict) -> dict[str, dict]:
-    servers: dict[str, dict] = {}
+def _seed_tracked_host_servers(tracked: JsonObject) -> dict[str, JsonObject]:
+    servers: dict[str, JsonObject] = {}
     for name in ("memory", "filesystem"):
-        if name in tracked and isinstance(tracked[name], dict):
-            servers[name] = _normalize_tracked_host_entry(tracked[name])
+        entry = tracked.get(name)
+        if isinstance(entry, dict):
+            servers[name] = _normalize_tracked_host_entry(cast(JsonObject, entry))
     return servers
 
 
-def _load_tracked_servers() -> dict:
+def _load_tracked_servers() -> JsonObject:
     if not TRACKED_PATH.is_file():
         return {}
     raw = json.loads(TRACKED_PATH.read_text(encoding="utf-8"))
-    return raw.get("mcpServers") or {}
+    if not isinstance(raw, dict):
+        return {}
+    servers = raw.get("mcpServers")
+    return cast(JsonObject, servers) if isinstance(servers, dict) else {}
 
 
 def build_local_servers(
     *,
     include_optional: bool = False,
-) -> dict[str, dict]:
+) -> dict[str, JsonObject]:
     catalog = _load_catalog()
     # Prefer tracked portable inventory for non-catalog host wrappers that
     # remain useful (memory/filesystem) when present.
     servers = _seed_tracked_host_servers(_load_tracked_servers())
 
-    for name, entry in catalog["servers"].items():
+    catalog_servers = catalog.get("servers")
+    if not isinstance(catalog_servers, dict):
+        raise ValueError(f"MCP catalog lacks a servers object: {CATALOG_PATH}")
+    for name, entry_raw in catalog_servers.items():
+        if not isinstance(name, str) or not isinstance(entry_raw, dict):
+            continue
+        entry = cast(JsonObject, entry_raw)
         is_daily = entry.get("daily", True) is not False
         if not include_optional and not is_daily:
             continue
@@ -121,10 +137,15 @@ def main(argv: list[str] | None = None) -> int:
     local_path = root / _DEVIN_DIR / "config.local.json"
     local_path.parent.mkdir(parents=True, exist_ok=True)
 
-    existing: dict = {}
+    existing: JsonObject = {}
     if local_path.is_file():
         try:
-            existing = json.loads(local_path.read_text(encoding="utf-8"))
+            raw_existing = json.loads(local_path.read_text(encoding="utf-8"))
+            existing = (
+                cast(JsonObject, raw_existing)
+                if isinstance(raw_existing, dict)
+                else {}
+            )
         except json.JSONDecodeError:
             existing = {}
 

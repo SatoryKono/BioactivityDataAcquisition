@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2431 |
-| Tracked doc-like files | 2431 |
+| Doc-like files | 2434 |
+| Tracked doc-like files | 2434 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2431 |
+| tracked | 2434 |
 
 ## Lifecycle Counts
 
@@ -27,7 +27,7 @@
 | active_backlog | 1 |
 | active_draft | 264 |
 | active_quality_baseline | 31 |
-| closeout_evidence | 63 |
+| closeout_evidence | 64 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 1 |
 | docs_reports_generated_or_route_owned | 6 |
@@ -41,7 +41,7 @@
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 33 |
-| working_report | 90 |
+| working_report | 92 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -61,7 +61,7 @@
 | Archived | 141 |
 | Canonical | 73 |
 | Generated | 861 |
-| Working | 494 |
+| Working | 497 |
 
 ## Surface Families
 
@@ -71,16 +71,16 @@
 | archive | 141 |
 | canonical | 73 |
 | generated | 861 |
-| working | 494 |
+| working | 497 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 84 |
+| archive-after-migration | 86 |
 | generate-automatically | 861 |
-| keep | 1170 |
+| keep | 1171 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -135,6 +135,7 @@
 | `reports/quality/port-adapter-factory-coverage.json` | Working | 0 | archive-after-migration |
 | `reports/quality/port-adapter-factory-coverage.md` | Working | 0 | archive-after-migration |
 | `reports/quality/reports-workspace-review.json` | Working | 0 | archive-after-migration |
+| `reports/quality/retained-public-entrypoint-burn-down-plan.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
@@ -154,6 +155,7 @@
 | `reports/quality/test-system-audit-2026-07-29-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/total-tech-debt-audit-main-2026-06-16.md` | Working | 0 | archive-after-migration |
 | `reports/quality/total-tech-debt-audit-main-current.md` | Working | 0 | archive-after-migration |
+| `reports/quality/zero-ref-supporting-scripts-review-20260804.json` | Working | 0 | archive-after-migration |
 | `reports/review/S1-domain.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1.1-contracts-ports.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1.2-logic-models.md` | Working | 0 | archive-after-migration |
@@ -165,8 +167,6 @@
 | `reports/semantic_pipeline_audit/recommended_canonical_fields_2026-07-01.csv` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/semantic_cluster_registry_2026-07-01.json` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/semantic_pair_matrix_2026-07-01.csv` | Working | 0 | archive-after-migration |
-| `reports/semantic_pipeline_audit/semantic_pipeline_audit_2026-07-01.md` | Working | 0 | archive-after-migration |
-| `reports/semantic_pipeline_audit/semantic_pipeline_audit_exhaustive_2026-07-01.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

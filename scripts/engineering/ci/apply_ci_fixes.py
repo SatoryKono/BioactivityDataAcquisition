@@ -26,6 +26,7 @@ import base64
 import re as _re
 import sys
 import time
+from typing import Any, cast
 
 import requests
 
@@ -38,6 +39,8 @@ DOCKER_WORKFLOW_PATH = ".github/workflows/docker.yml"
 SECURITY_WORKFLOW_PATH = ".github/workflows/security.yml"
 UPLOAD_ARTIFACT_V3 = "actions/upload-artifact@v3"
 UPLOAD_ARTIFACT_V4 = "actions/upload-artifact@v4"
+
+type JsonObject = dict[str, Any]
 
 BRANCHES = {
     "ci-01": "fix/ci-checkout-v4",
@@ -334,26 +337,32 @@ class GitHubAPI:
         self.dry_run = dry_run
         self.base = f"https://api.github.com/repos/{OWNER}/{REPO}"
 
-    def get(self, path: str) -> dict:
+    def get(self, path: str) -> Any:
         resp = self.session.get(f"{self.base}{path}")
         resp.raise_for_status()
         return resp.json()
 
-    def post(self, path: str, data: dict) -> dict:
+    def post(self, path: str, data: JsonObject) -> JsonObject:
         if self.dry_run:
             print(f"  [DRY-RUN] POST {path}")
             return {}
         resp = self.session.post(f"{self.base}{path}", json=data)
         resp.raise_for_status()
-        return resp.json()
+        payload = resp.json()
+        if not isinstance(payload, dict):
+            raise ValueError(f"GitHub POST response is not an object: {path}")
+        return cast(JsonObject, payload)
 
-    def put(self, path: str, data: dict) -> dict:
+    def put(self, path: str, data: JsonObject) -> JsonObject:
         if self.dry_run:
             print(f"  [DRY-RUN] PUT {path}")
             return {}
         resp = self.session.put(f"{self.base}{path}", json=data)
         resp.raise_for_status()
-        return resp.json()
+        payload = resp.json()
+        if not isinstance(payload, dict):
+            raise ValueError(f"GitHub PUT response is not an object: {path}")
+        return cast(JsonObject, payload)
 
     def get_sha(self, branch: str = BASE_BRANCH) -> str:
         data = self.get(f"/git/refs/heads/{branch}")
@@ -416,8 +425,13 @@ class GitHubAPI:
         )
         return data.get("html_url", "(dry-run)")
 
-    def list_workflow_files(self) -> list[dict]:
-        return self.get("/contents/.github/workflows")
+    def list_workflow_files(self) -> list[JsonObject]:
+        payload = self.get("/contents/.github/workflows")
+        if not isinstance(payload, list) or not all(
+            isinstance(item, dict) for item in payload
+        ):
+            raise ValueError("GitHub workflow listing is not an object array")
+        return [cast(JsonObject, item) for item in payload]
 
 
 # ── CI-01 ────────────────────────────────────────────────────────────────────
@@ -544,7 +558,7 @@ def _patch_pip_disable(content: str) -> tuple[str, bool]:
 
 def _apply_ci01_fixes(
     api: GitHubAPI,
-    files: list[dict],
+    files: list[JsonObject],
     branch: str,
 ) -> list[str]:
     """Apply CI-01 fixes to workflow files."""
@@ -563,7 +577,7 @@ def _apply_ci01_fixes(
     return updated
 
 
-def _is_workflow_file(f: dict) -> bool:
+def _is_workflow_file(f: JsonObject) -> bool:
     """Check if the file is a workflow file."""
     return f["name"].endswith(".yml") or f["name"].endswith(".yaml")
 
