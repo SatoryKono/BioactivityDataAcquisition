@@ -191,28 +191,48 @@ mermaid_out="$(codex mcp get mermaid 2>&1 || true)"
 deepwiki_out="$(codex mcp get deepwiki 2>&1 || true)"
 ref_out="$(codex mcp get ref 2>&1 || true)"
 
-require_contains "$memory_out" "@modelcontextprotocol/server-memory@2026.1.26" "memory is pinned to @2026.1.26" || status=1
-require_wrapper_path "$filesystem_out" "$EXPECTED_FILESYSTEM_WRAPPER_PATH" "filesystem is routed through the project wrapper" || status=1
 filesystem_wrapper_source="$(<"$EXPECTED_FILESYSTEM_WRAPPER_PATH")"
 require_contains "$filesystem_wrapper_source" '@modelcontextprotocol/server-filesystem@2026.1.14' "filesystem wrapper pins @2026.1.14" || status=1
 require_contains "$filesystem_wrapper_source" 'REPO_ROOT' "filesystem wrapper scopes to resolved REPO_ROOT" || status=1
-require_wrapper_path "$fetch_out" "$EXPECTED_FETCH_WRAPPER_PATH" "fetch is routed through the project wrapper" || status=1
 fetch_wrapper_source="$(<"$EXPECTED_FETCH_WRAPPER_PATH")"
 require_contains "$fetch_wrapper_source" 'mcp-server-fetch==2025.4.7' "fetch wrapper pins mcp-server-fetch==2025.4.7" || status=1
 require_contains "$fetch_wrapper_source" 'mcp<2' "fetch wrapper constrains the compatible MCP SDK major" || status=1
 require_contains "$fetch_wrapper_source" 'bioetl_resolve_uvx_bin' "fetch wrapper resolves uvx" || status=1
 require_contains "$fetch_wrapper_source" '--python 3.13' "fetch wrapper uses the WSL-compatible CPython 3.13 runtime" || status=1
-require_wrapper_path "$github_out" "$EXPECTED_GITHUB_WRAPPER_PATH" "github is routed through the project wrapper" || status=1
-require_wrapper_path "$docker_out" "$EXPECTED_DOCKER_WRAPPER_PATH" "docker is routed through the project wrapper" || status=1
-require_wrapper_path "$context7_out" "$EXPECTED_CONTEXT7_WRAPPER_PATH" "context7 is routed through the project wrapper" || status=1
-require_wrapper_path "$ast_grep_out" "$EXPECTED_AST_GREP_WRAPPER_PATH" "ast-grep is routed through the project wrapper" || status=1
-require_wrapper_path "$code_interpreter_out" "$EXPECTED_CODE_INTERPRETER_WRAPPER_PATH" "mcp-code-interpreter is routed through the project wrapper" || status=1
-require_wrapper_path "$prometheus_out" "$EXPECTED_PROMETHEUS_WRAPPER_PATH" "prometheus is routed through the project wrapper" || status=1
-require_wrapper_path "$grafana_out" "$EXPECTED_GRAFANA_WRAPPER_PATH" "grafana is routed through the project wrapper" || status=1
-require_wrapper_path "$brave_out" "$EXPECTED_BRAVE_WRAPPER_PATH" "brave-search is routed through the project wrapper" || status=1
-require_wrapper_path "$neo4j_cypher_out" "$EXPECTED_NEO4J_CYPHER_WRAPPER_PATH" "neo4j-cypher is routed through the project wrapper" || status=1
-require_wrapper_path "$neo4j_memory_out" "$EXPECTED_NEO4J_MEMORY_WRAPPER_PATH" "neo4j-memory is routed through the project wrapper" || status=1
-require_wrapper_path "$mermaid_out" "$EXPECTED_MERMAID_WRAPPER_PATH" "mermaid is routed through the project wrapper" || status=1
+mermaid_wrapper_source="$(<"$EXPECTED_MERMAID_WRAPPER_PATH")"
+require_contains "$mermaid_wrapper_source" 'mcp-mermaid@0.4.1' "mermaid wrapper pins mcp-mermaid@0.4.1" || status=1
+
+if grep -Fq 'http://127.0.0.1:8826/mcp' <<<"$memory_out"; then
+  require_contains "$memory_out" 'http://127.0.0.1:8826/mcp' "memory uses the shared singleton endpoint" || status=1
+  require_contains "$filesystem_out" 'http://127.0.0.1:8827/mcp' "filesystem uses the shared singleton endpoint" || status=1
+  require_contains "$fetch_out" 'http://127.0.0.1:8821/mcp' "fetch uses the shared singleton endpoint" || status=1
+  require_contains "$github_out" 'http://127.0.0.1:8820/mcp' "github uses the shared singleton endpoint" || status=1
+  require_contains "$docker_out" 'http://127.0.0.1:8817/mcp' "docker uses the shared singleton endpoint" || status=1
+  require_contains "$context7_out" 'http://127.0.0.1:8815/mcp' "context7 uses the shared singleton endpoint" || status=1
+  require_contains "$ast_grep_out" 'http://127.0.0.1:8816/mcp' "ast-grep uses the shared singleton endpoint" || status=1
+  require_contains "$code_interpreter_out" 'http://127.0.0.1:8829/mcp' "mcp-code-interpreter uses the shared singleton endpoint" || status=1
+  require_contains "$prometheus_out" 'http://127.0.0.1:8822/mcp' "prometheus uses the shared singleton endpoint" || status=1
+  require_contains "$grafana_out" 'http://127.0.0.1:8823/mcp' "grafana uses the shared singleton endpoint" || status=1
+  require_contains "$brave_out" 'http://127.0.0.1:8811/mcp' "brave-search uses the shared singleton endpoint" || status=1
+  require_contains "$neo4j_cypher_out" 'http://127.0.0.1:8824/mcp' "neo4j-cypher uses the shared singleton endpoint" || status=1
+  require_contains "$neo4j_memory_out" 'http://127.0.0.1:8825/mcp' "neo4j-memory uses the shared singleton endpoint" || status=1
+  require_contains "$mermaid_out" 'http://127.0.0.1:8818/mcp' "mermaid uses the shared singleton endpoint" || status=1
+else
+  require_contains "$memory_out" "@modelcontextprotocol/server-memory@2026.1.26" "memory is pinned to @2026.1.26" || status=1
+  require_wrapper_path "$filesystem_out" "$EXPECTED_FILESYSTEM_WRAPPER_PATH" "filesystem is routed through the project wrapper" || status=1
+  require_wrapper_path "$fetch_out" "$EXPECTED_FETCH_WRAPPER_PATH" "fetch is routed through the project wrapper" || status=1
+  require_wrapper_path "$github_out" "$EXPECTED_GITHUB_WRAPPER_PATH" "github is routed through the project wrapper" || status=1
+  require_wrapper_path "$docker_out" "$EXPECTED_DOCKER_WRAPPER_PATH" "docker is routed through the project wrapper" || status=1
+  require_wrapper_path "$context7_out" "$EXPECTED_CONTEXT7_WRAPPER_PATH" "context7 is routed through the project wrapper" || status=1
+  require_wrapper_path "$ast_grep_out" "$EXPECTED_AST_GREP_WRAPPER_PATH" "ast-grep is routed through the project wrapper" || status=1
+  require_wrapper_path "$code_interpreter_out" "$EXPECTED_CODE_INTERPRETER_WRAPPER_PATH" "mcp-code-interpreter is routed through the project wrapper" || status=1
+  require_wrapper_path "$prometheus_out" "$EXPECTED_PROMETHEUS_WRAPPER_PATH" "prometheus is routed through the project wrapper" || status=1
+  require_wrapper_path "$grafana_out" "$EXPECTED_GRAFANA_WRAPPER_PATH" "grafana is routed through the project wrapper" || status=1
+  require_wrapper_path "$brave_out" "$EXPECTED_BRAVE_WRAPPER_PATH" "brave-search is routed through the project wrapper" || status=1
+  require_wrapper_path "$neo4j_cypher_out" "$EXPECTED_NEO4J_CYPHER_WRAPPER_PATH" "neo4j-cypher is routed through the project wrapper" || status=1
+  require_wrapper_path "$neo4j_memory_out" "$EXPECTED_NEO4J_MEMORY_WRAPPER_PATH" "neo4j-memory is routed through the project wrapper" || status=1
+  require_wrapper_path "$mermaid_out" "$EXPECTED_MERMAID_WRAPPER_PATH" "mermaid is routed through the project wrapper" || status=1
+fi
 require_contains "$deepwiki_out" "https://mcp.deepwiki.com/mcp" "deepwiki is registered as the official DeepWiki MCP" || status=1
 require_contains "$ref_out" "https://api.ref.tools/mcp" "ref is registered as the Ref Tools MCP" || status=1
 require_contains "$ref_out" "x-ref-api-key=REF_TOOL_API_KEY" "ref auth uses the local REF_TOOL_API_KEY env header" || status=1
@@ -251,7 +271,7 @@ if [[ "${BIOETL_MCP_SKIP_PROTOCOL_SMOKE:-0}" != "1" ]]; then
   if [[ ! -f "${protocol_config}" ]]; then
     protocol_config="${PROJECT_MCP_CONFIG}"
   fi
-  if python3 "${SCRIPT_DIR}/protocol_smoke.py" --config "${protocol_config}" --server memory --timeout 15 >/dev/null; then
+  if PYTHONPATH="${REPO_ROOT}${PYTHONPATH:+:${PYTHONPATH}}" python3 "${SCRIPT_DIR}/protocol_smoke.py" --config "${protocol_config}" --server memory --timeout 15 >/dev/null; then
     ok "memory MCP initialize/tools-list protocol smoke passed"
   else
     fail "memory MCP initialize/tools-list protocol smoke failed"

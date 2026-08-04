@@ -46,7 +46,6 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TypeVar
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -227,15 +226,12 @@ def _assign_groups(
     return assignment
 
 
-_DiagramItem = TypeVar("_DiagramItem", ClassBlock, FlowchartNode)
-
-
-def _partition_by_group(
-    items: list[_DiagramItem],
+def _partition_by_group[DiagramItem: (ClassBlock, FlowchartNode)](
+    items: list[DiagramItem],
     assignment: dict[str, str],
-) -> dict[str, list[_DiagramItem]]:
+) -> dict[str, list[DiagramItem]]:
     """Partition items into groups based on assignment map."""
-    groups: dict[str, list[_DiagramItem]] = {}
+    groups: dict[str, list[DiagramItem]] = {}
     for item in items:
         name = item.name if isinstance(item, ClassBlock) else item.node_id
         g = assignment.get(name, "default")

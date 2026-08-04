@@ -674,7 +674,7 @@ def _build_canonical_refreshed_cluster(
     )
     if not members:
         return None
-    refreshed_cluster = {
+    refreshed_cluster: dict[str, Any] = {
         "aliases": sorted(name for name in member_names if name != canonical_name),
         "canonical_field": canonical_name,
         "cluster_id": cluster_id,
@@ -1466,7 +1466,8 @@ def _render_residual_backlog_markdown(backlog: dict[str, Any]) -> str:
 
 def _render_pair_csv(rows: list[dict[str, str]]) -> str:
     output = io.StringIO()
-    writer = csv.DictWriter(output, fieldnames=list(PAIR_COLUMNS), lineterminator="\n")
+    fieldnames: list[str] = list(PAIR_COLUMNS)
+    writer = csv.DictWriter(output, fieldnames=fieldnames, lineterminator="\n")
     writer.writeheader()
     writer.writerows(rows)
     return output.getvalue()
@@ -1756,7 +1757,8 @@ def _accumulate_composite_unknown_typing_review(
             "fields": set(),
         },
     )
-    review_entry["row_count"] = int(review_entry["row_count"]) + 1
+    row_count = review_entry.get("row_count")
+    review_entry["row_count"] = (row_count if isinstance(row_count, int) else 0) + 1
     cast(set[str], review_entry["fields"]).add(f"{pipeline_name}.{field_name}")
 
 
