@@ -23,7 +23,7 @@
         "outcome": "reduced_to_top_level_direct_helper_import"
       },
       {
-        "scope": "DeltaTable",
+        "scope": "delta_table",
         "import": "from deltalake import DeltaTable as _DeltaTable",
         "classification": "optional dependency and compatibility patch-point",
         "outcome": "retained_lazy"
@@ -94,10 +94,10 @@
     "function_scoped_import_count": 2,
     "retained": [
       {
-        "scope": "DeltaTable",
+        "scope": "delta_table",
         "import": "from deltalake import DeltaTable as _DeltaTable",
         "classification": "optional dependency and compatibility patch-point",
-        "rationale": "Preserves Delta object laziness and canonical monkeypatch path bioetl.infrastructure.storage.gold_writer.DeltaTable."
+        "rationale": "Preserves Delta object laziness and canonical monkeypatch path bioetl.infrastructure.storage.gold_writer.delta_table."
       },
       {
         "scope": "write_deltalake",
