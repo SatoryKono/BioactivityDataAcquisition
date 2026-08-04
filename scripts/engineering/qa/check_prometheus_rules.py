@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import TypedDict
 
 OBSERVABILITY_RULES_FILE = Path("grafana/prometheus-rules/bioetl_observability.yml")
 CONTROL_PLANE_RULES_FILE = Path(
@@ -27,6 +28,22 @@ EXPECTED_RECORD_DEFINITIONS = 104
 # Floor after 2026-07-23: BioETLQuarantineExplorerUnavailable alert removed.
 MIN_TESTED_ALERTS = 36
 MIN_DIRECTLY_TESTED_RECORDS = 28
+
+
+class RuleTestCoverage(TypedDict):
+    """Deterministic coverage summary for shipped Prometheus rules."""
+
+    alert_definitions: int
+    tested_alerts: int
+    firing_alerts: int
+    non_firing_alerts: int
+    record_definitions: int
+    directly_tested_records: int
+    control_plane_records: list[str]
+    untested_control_plane_records: list[str]
+    undefined_fixture_alerts: list[str]
+    untested_alerts: list[str]
+    untested_records: list[str]
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -205,7 +222,7 @@ def _collect_directly_tested_records(
 
 def collect_rule_test_coverage(
     *, rules_files: tuple[Path, ...], test_file: Path
-) -> dict[str, object]:
+) -> RuleTestCoverage:
     """Measure direct promtool fixture coverage for shipped alerts and records."""
     import yaml
 
@@ -241,29 +258,29 @@ def collect_rule_test_coverage(
     }
 
 
-def _coverage_count_violations(coverage: dict[str, object]) -> list[str]:
+def _coverage_count_violations(coverage: RuleTestCoverage) -> list[str]:
     violations: list[str] = []
-    if int(coverage["alert_definitions"]) != EXPECTED_ALERT_DEFINITIONS:
+    if coverage["alert_definitions"] != EXPECTED_ALERT_DEFINITIONS:
         violations.append(
             "alert definitions changed from baseline "
             f"{EXPECTED_ALERT_DEFINITIONS}: {coverage['alert_definitions']}"
         )
-    if int(coverage["record_definitions"]) != EXPECTED_RECORD_DEFINITIONS:
+    if coverage["record_definitions"] != EXPECTED_RECORD_DEFINITIONS:
         violations.append(
             "record definitions changed from baseline "
             f"{EXPECTED_RECORD_DEFINITIONS}: {coverage['record_definitions']}"
         )
-    if int(coverage["tested_alerts"]) < MIN_TESTED_ALERTS:
+    if coverage["tested_alerts"] < MIN_TESTED_ALERTS:
         violations.append(
             f"tested alerts regressed below {MIN_TESTED_ALERTS}: "
             f"{coverage['tested_alerts']}"
         )
-    if int(coverage["firing_alerts"]) < MIN_TESTED_ALERTS:
+    if coverage["firing_alerts"] < MIN_TESTED_ALERTS:
         violations.append(
             f"firing alert fixtures regressed below {MIN_TESTED_ALERTS}: "
             f"{coverage['firing_alerts']}"
         )
-    if int(coverage["directly_tested_records"]) < MIN_DIRECTLY_TESTED_RECORDS:
+    if coverage["directly_tested_records"] < MIN_DIRECTLY_TESTED_RECORDS:
         violations.append(
             f"directly tested records regressed below {MIN_DIRECTLY_TESTED_RECORDS}: "
             f"{coverage['directly_tested_records']}"
@@ -271,7 +288,7 @@ def _coverage_count_violations(coverage: dict[str, object]) -> list[str]:
     return violations
 
 
-def _coverage_set_violations(coverage: dict[str, object]) -> list[str]:
+def _coverage_set_violations(coverage: RuleTestCoverage) -> list[str]:
     violations: list[str] = []
     if coverage["undefined_fixture_alerts"]:
         violations.append(
@@ -286,7 +303,7 @@ def _coverage_set_violations(coverage: dict[str, object]) -> list[str]:
     return violations
 
 
-def validate_rule_test_coverage(coverage: dict[str, object]) -> list[str]:
+def validate_rule_test_coverage(coverage: RuleTestCoverage) -> list[str]:
     """Return fail-closed rule-test coverage violations."""
     return _coverage_count_violations(coverage) + _coverage_set_violations(coverage)
 
