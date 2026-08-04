@@ -32,6 +32,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # ── Canonical semantic palette ────────────────────────────────────────────────
 
+
 class PaletteStyle(TypedDict):
     """One canonical SVG stroke style."""
 
