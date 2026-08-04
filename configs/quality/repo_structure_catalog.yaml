@@ -37,6 +37,8 @@ docs_code_zones:
 
 root_tooling_roots:
   approved_roots:
+    - path: .agents
+      role: derived_native_agent_skill_discovery_surface
     - path: .codex
       role: curated_shared_agent_runtime_surface
     - path: .cursor
@@ -69,8 +71,6 @@ local_tolerated_root_dirs:
       role: local_grok_runtime_state_untracked
     - path: .agentbridge
       role: local_agent_bridge_state_untracked
-    - path: .agents
-      role: local_agent_workspace_surface_untracked
     - path: .benchmarks
       role: local_benchmark_workspace_untracked
     - path: .cache
