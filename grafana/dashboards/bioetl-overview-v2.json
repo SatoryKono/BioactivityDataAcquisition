@@ -1603,7 +1603,8 @@
                   }
                 ]
               },
-              "unit": "percentunit"
+              "unit": "percentunit",
+              "noValue": "None observed"
             },
             "overrides": [
               {

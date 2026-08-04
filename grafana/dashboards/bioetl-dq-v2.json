@@ -506,7 +506,8 @@
                 ]
               },
               "unit": "short",
-              "links": []
+              "links": [],
+              "noValue": "None observed"
             },
             "overrides": []
           },
@@ -998,7 +999,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "None observed"
             },
             "overrides": []
           },
@@ -1067,7 +1069,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "None observed"
             },
             "overrides": []
           },
@@ -1136,7 +1139,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "None observed"
             },
             "overrides": []
           },
@@ -1176,12 +1180,12 @@
           },
           "targets": [
             {
-              "expr": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
+              "expr": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)))",
               "legendFormat": "Validation Failures",
               "refId": "A"
             }
           ],
-          "title": "Monitor Silver Validation Failures",
+          "title": "Monitor Silver Validation Failures (range composite)",
           "type": "stat"
         },
         {
@@ -1372,7 +1376,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "None observed"
             },
             "overrides": []
           },
@@ -1455,7 +1460,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "None observed"
             },
             "overrides": []
           },
@@ -2181,7 +2187,8 @@
                     }
                   }
                 }
-              ]
+              ],
+              "noValue": "None observed"
             },
             "overrides": []
           },
@@ -2267,7 +2274,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "None observed"
             },
             "overrides": []
           },
@@ -2351,7 +2359,8 @@
                 ]
               },
               "unit": "short",
-              "links": []
+              "links": [],
+              "noValue": "None observed"
             },
             "overrides": []
           },

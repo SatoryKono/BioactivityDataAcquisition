@@ -404,7 +404,8 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "s",
+          "noValue": "No data"
         },
         "overrides": []
       },
