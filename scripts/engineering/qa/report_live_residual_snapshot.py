@@ -156,7 +156,9 @@ def _closeout_program_residuals() -> dict[str, int]:
         except Exception:
             zero_ref = 0
     fold_into_generic = 0
-    inventory_path = ROOT / "configs" / "quality" / "architecture_closeout_inventory.yaml"
+    inventory_path = (
+        ROOT / "configs" / "quality" / "architecture_closeout_inventory.yaml"
+    )
     if inventory_path.is_file():
         try:
             import yaml
