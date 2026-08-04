@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2415 |
-| Tracked doc-like files | 2414 |
-| Ignored local docs/reports files | 1 |
+| Doc-like files | 2416 |
+| Tracked doc-like files | 2416 |
+| Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
 | Generated routes | 69 |
@@ -18,8 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1 |
-| tracked | 2414 |
+| tracked | 2416 |
 
 ## Lifecycle Counts
 
@@ -59,7 +58,7 @@
 | Status | Count |
 | --- | --- |
 | Active | 861 |
-| Archived | 140 |
+| Archived | 141 |
 | Canonical | 73 |
 | Generated | 861 |
 | Working | 480 |
@@ -69,7 +68,7 @@
 | Surface | Count |
 | --- | --- |
 | active | 861 |
-| archive | 140 |
+| archive | 141 |
 | canonical | 73 |
 | generated | 861 |
 | working | 480 |
@@ -81,7 +80,7 @@
 | archive-after-github-state-check | 312 |
 | archive-after-migration | 81 |
 | generate-automatically | 861 |
-| keep | 1157 |
+| keep | 1158 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -304,7 +303,7 @@
 | Path | Tracking | Lifecycle | Action |
 | --- | --- | --- | --- |
 | `docs/reports/README.md` | tracked | docs_reports_curated_entrypoint | keep |
-| `docs/reports/dashboard-ux-checks/README.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/README.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/evidence/INDEX.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/README.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
