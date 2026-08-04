@@ -453,55 +453,45 @@ ______________________________________________________________________
 
 ## 10. MCP & Tools Integration
 
-### 10.1 Матрица MCP-серверы × Субагенты
+### 10.1 Профили readiness
 
-Каждый субагент имеет доступ к MCP-серверам через runtime tooling. Полные описания сценариев — в соответствующих `.codex/agents/py-*.md`, секция `## MCP Tools`.
+Трековый полный inventory и live readiness — разные слои доказательств.
+Матрица required/optional определена в `scripts/ai/codex/setup_mcp.py` и
+проверяется статически без сети или локальных сервисов.
 
-> **Примечание:** Перед использованием MCP инструментов необходимо вызвать `ToolSearch("<provider>")` для загрузки.
+| Профиль | Required для live readiness | Optional |
+| --- | --- | --- |
+| `stable` | ежедневный host/HTTP набор | remote/auth-managed endpoints пропускаются |
+| `shared` | тот же ежедневный набор, что `stable` | Mermaid, Neo4j, monitoring и прочие расширения |
+| `core` | `stable` + Mermaid | remote/auth-managed endpoints |
+| `ops` | `stable` + Prometheus, Grafana, GitHub Actions | Mermaid и остальные расширения |
+| `graph` | `stable` + оба Neo4j endpoint | Mermaid, monitoring и прочие расширения |
+| `full` | весь явно выбранный inventory | нет |
 
-| MCP Server        |     py-audit-bot     |     py-plan-bot     |        py-test-bot        |   py-config-bot    |  py-debug-bot  |     py-doc-bot     |
-| ----------------- | :------------------: | :-----------------: | :-----------------------: | :----------------: | :------------: | :----------------: |
-| **ChEMBL**        | ✅ Schema validation |          —          | ✅ Golden data, contracts | ✅ Field reference | ✅ Error repro |         —          |
-| **PubMed**        |          —           |  ✅ Coverage eval   |       ✅ Test data        |         —          |       —        |    ✅ Citations    |
-| **bioRxiv**       |          —           | ✅ Trends, research |   ✅ Preprint test data   |         —          |       —        |     ✅ Context     |
-| **Mermaid Chart** |   ✅ Arch diagrams   |          —          |             —             |         —          |       —        |  ✅ All diagrams   |
-| **BioRender**     |          —           |          —          |             —             |         —          |       —        | ✅ Scientific figs |
+### 10.2 Протокол использования
 
-### 10.2 Матрица Platform Tools × Субагенты
+1. Использовать runtime tool discovery и выбирать только нужные задаче
+   capability; не предполагать наличие удалённого provider по старому имени.
+1. Для CI запускать
+   `python3 scripts/ai/codex/doctor.py static --no-write`.
+1. Для bounded live smoke запускать
+   `bash scripts/ai/codex/run-codex.sh mcp-check --profile <profile>`.
+1. `FAIL` означает недоступный required server, `WARN` — optional server,
+   `SKIP` — remote/auth-managed endpoint, проверяемый отдельно через
+   `codex mcp list`.
+1. MCP используется для верификации и исследования, а не для production data
+   flow. Никакой monitoring или Docker Compose stack не стартует неявно.
 
-| Tool        | py-audit-bot | py-plan-bot | py-test-bot | py-config-bot | py-debug-bot | py-doc-bot |
-| ----------- | :----------: | :---------: | :---------: | :-----------: | :----------: | :--------: |
-| `WebSearch` |     Docs     |  Research   |      —      |  Schema docs  |  Solutions   |  API docs  |
-| `WebFetch`  |    Pages     |    Pages    |      —      |       —       | SO/GH Issues |   Pages    |
+### 10.3 Типовые маршруты
 
-### 10.3 Протокол использования MCP
-
-**В Claude Code CLI:**
-
-1. Субагент определяет, нужны ли MCP-вызовы для текущей задачи (по таблице §10.1)
-1. Вызывает `ToolSearch("<provider>")` для загрузки MCP инструментов
-1. Использует загруженные инструменты напрямую
-1. Результат MCP → input для анализа (findings, reference data, test data)
-
-**Правила:**
-
-- MCP-вызовы **опциональны** — субагент работает и без них
-- MCP используется для **верификации** (schema drift, contract testing), **не для production data flow**
-- Результаты MCP **не кэшируются между сессиями** — каждый вызов fresh
-- При ошибке MCP → субагент продолжает работу без MCP data, помечает `[...] MCP недоступен`
-
-### 10.4 Типовые MCP workflows
-
-| Workflow                  | Агент         | Trigger                    | MCP Tools                                     | Output                    |
-| ------------------------- | ------------- | -------------------------- | --------------------------------------------- | ------------------------- |
-| Schema Drift Detection    | py-audit-bot  | audit ChEMBL pipeline      | ChEMBL:compound_search → compare with entity  | AUD-SCHEMA-\*             |
-| Golden Dataset Generation | py-test-bot   | new_tests for ChEMBL       | ChEMBL:compound_search/get_bioactivity → save | tests/golden/\*.json      |
-| Contract Testing          | py-test-bot   | final (ChEMBL scope)       | ChEMBL MCP → compare with contract            | FAIL-CONTRACT-\*          |
-| Research Context          | py-plan-bot   | new entity planning        | bioRxiv:search_preprints → analyze            | 01-plan §Research Context |
-| Documentation Diagrams    | py-doc-bot    | DOC-\* for architecture    | Mermaid:validate_and_render → save            | docs/diagrams/\*.svg      |
-| API Reference             | orchestrator  | new adapter implementation | ChEMBL/OT/PubMed → study response             | Field mapping in code     |
-| Config Fields Validation  | py-config-bot | new pipeline config        | ChEMBL MCP → compare fields                   | CFG-DRIFT-\*              |
-| Error Reproduction        | py-debug-bot  | DBG-\* for API failure     | ChEMBL MCP → reproduce request                | DBG-\* root cause         |
+| Задача | Capability | Профиль |
+| --- | --- | --- |
+| Repository evidence | filesystem, AST/code analysis, memory | `stable` |
+| External technical reference | Context7, Ref, DeepWiki или bounded web source | `stable` |
+| Pull request / CI evidence | GitHub, GitHub Actions | `stable` / `ops` |
+| Mermaid validation/render | Mermaid | `core` |
+| Monitoring investigation | Prometheus, Grafana | `ops` |
+| Graph research | Neo4j Cypher/Memory | `graph` |
 
 ______________________________________________________________________
 
@@ -534,13 +524,13 @@ ______________________________________________________________________
 
 ### v3.0 (2026-02-08)
 
-- **PLATFORM**: Адаптация для Claude Code CLI (ранее Codex/Claude.ai)
+- **PLATFORM**: Адаптация для legacy assistant CLI (до текущего Codex runtime)
 - **CHANGED**: Все субагенты переименованы: `pyXxxBot` → `py-xxx-bot` (для `subagent_type` в Task tool)
 - **CHANGED**: 8 старых Claude Code агентов заменены на 7 унифицированных: `py-audit-bot`, `py-plan-bot`, `py-test-bot`, `py-code-bot`, `py-config-bot`, `py-debug-bot`, `py-doc-bot`
 - **CHANGED**: Навыки из skills directory инлайнированы в файлы субагентов (секция `## Инлайнированные знания`)
 - **REMOVED**: `google_drive_search`, `message_compose`, `ask_user_input` (недоступны в CLI)
 - **CHANGED**: `web_search` / `web_fetch` → `WebSearch` / `WebFetch` (встроенные инструменты Claude Code)
-- **CHANGED**: MCP инструменты доступны через `ToolSearch` (deferred loading)
+- **CHANGED**: MCP инструменты использовали legacy deferred-loading contract
 - **CHANGED**: §9a — Skill Activation Protocol → Инлайнированные знания
 - **NEW**: Ссылки на `.claude/agents/py-*.md` вместо `SUBAGENT.md`
 

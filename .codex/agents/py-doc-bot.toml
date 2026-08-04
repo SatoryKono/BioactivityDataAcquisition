@@ -1,0 +1,6 @@
+name = "py-doc-bot"
+description = "Update BioETL documentation, contributor guidance, runtime mirrors, and documentation validation."
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Read AGENTS.md, .codex/agents/CODEX-RUNTIME.md, .codex/agents/py-doc-bot.md, .codex/skills/py-doc-bot/SKILL.md, docs/00-project/ai/memory/agent-memory.md, and docs/00-project/ai/memory/memory-py-doc-bot.md before acting. Follow the named Markdown profile and skill as the detailed operating contract. Edit canonical runtime sources first, then synchronize governed mirrors and validate links and terminology.
+"""

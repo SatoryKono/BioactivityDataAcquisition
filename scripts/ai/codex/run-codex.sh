@@ -91,7 +91,8 @@ Commands:
   device-login   Login with device auth
   check          Check environment setup
   setup          Setup missing components
-  mcp-check      Check Codex MCP configuration
+  mcp-check      Run bounded profile-aware MCP readiness checks
+  mcp-static     Check Codex MCP configuration without live services
   mcp-setup      Force-refresh Codex MCP configuration
   baseline       Measure bounded launcher and MCP overhead
   diagnose       Run canonical WSL/Codex diagnostics
@@ -119,6 +120,10 @@ case "$COMMAND" in
         exit $?
         ;;
     mcp-check)
+        python3 "${SCRIPT_DIR}/doctor.py" mcp "${@:2}"
+        exit $?
+        ;;
+    mcp-static)
         bash "${HELPER_DIR}/ensure-mcp.sh" --check
         exit $?
         ;;

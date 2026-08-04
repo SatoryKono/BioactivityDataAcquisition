@@ -26,7 +26,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-23'
+  Last verified: '2026-08-04'
 
 ______________________________________________________________________
 
@@ -57,20 +57,21 @@ mirror when behavior or contributor guidance changes.
 
 ## BioETL Core (9 active Codex runtime agents)
 
-Active set **MUST** match `.codex/agents/ORCHESTRATION.md` and the tracked
-`py-*.md` profiles under `.codex/agents/`.
+Active set **MUST** match `.codex/agents/ORCHESTRATION.md`, the tracked
+`py-*.md` behavioral profiles, and the native `py-*.toml` descriptors under
+`.codex/agents/`. The descriptors inherit the parent model.
 
-| Agent                        | Model  | Role                                                                                   |
-| ---------------------------- | ------ | -------------------------------------------------------------------------------------- |
-| `py-audit-bot`               | opus   | Baseline/final audit, code review, architecture guardian                               |
-| `py-architecture-debt-bot`   | opus   | Architecture-debt workflow: generate → plan → execute → verify                         |
-| `py-plan-bot`                | opus   | Task planning, RF-\* decomposition, composite design                                   |
-| `py-test-bot`                | sonnet | Tests (baseline/final/retest), coverage                                                |
-| `py-config-bot`              | sonnet | YAML configs (pipeline/DQ/filter/composite)                                            |
-| `py-debug-bot`               | opus   | RCA, bug fixes, regression debugging                                                   |
-| `py-doc-bot`                 | sonnet | Docs, ADR, CHANGELOG, Mermaid diagrams                                                 |
-| `py-test-swarm`              | opus   | Hierarchical testing (L1→L2→L3)                                                        |
-| `py-review-orchestrator`     | opus   | Hierarchical code review (S1–S8)                                                       |
+| Agent                        | Model | Role                                                                   |
+| ---------------------------- | ----- | ---------------------------------------------------------------------- |
+| `py-audit-bot`               | inherited | Baseline/final audit, code review, architecture guardian           |
+| `py-architecture-debt-bot`   | inherited | Architecture-debt workflow: generate → plan → execute → verify     |
+| `py-plan-bot`                | inherited | Task planning, RF-\* decomposition, composite design               |
+| `py-test-bot`                | inherited | Tests (baseline/final/retest), coverage                            |
+| `py-config-bot`              | inherited | YAML configs (pipeline/DQ/filter/composite)                        |
+| `py-debug-bot`               | inherited | RCA and regression diagnosis                                      |
+| `py-doc-bot`                 | inherited | Docs, ADR, CHANGELOG, Mermaid diagrams                             |
+| `py-test-swarm`              | inherited | Hierarchical testing (L1→L2→L3)                                   |
+| `py-review-orchestrator`     | inherited | Hierarchical code review (S1–S8)                                  |
 
 Runtime mapping: `.codex/agents/CODEX-RUNTIME.md`. Production code is written by
 the orchestrator directly (`py-code-bot` skill is a deprecated tombstone only).

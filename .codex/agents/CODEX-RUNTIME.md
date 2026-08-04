@@ -43,17 +43,17 @@ python -m memory.tooling.workflow <pre-task-or-post-task> ...
 omit it rather than guessing. Generated episodic records bind this actor
 identity to repository, commit, branch, worktree, task, and source references.
 
-## Recommended Mapping
+## Native Project Discovery
 
-- `py-audit-bot` -> `default`
-- `py-architecture-debt-bot` -> `default`
-- `py-plan-bot` -> `default`
-- `py-test-bot` -> `default` or `worker`
-- `py-config-bot` -> `worker`
-- `py-debug-bot` -> `worker`
-- `py-doc-bot` -> `worker`
-- `py-test-swarm` -> `default`
-- `py-review-orchestrator` -> `default`
+- `.codex/config.toml` contains portable trusted-project settings only.
+- `.codex/agents/py-*.toml` exposes the nine governed profiles to native Codex
+  custom-agent discovery. Each thin descriptor routes to its matching Markdown
+  profile, skill, and memory sheet; the parent model is inherited.
+- `.codex/skills/**` remains the behavioral skill source. Generated,
+  platform-neutral `.agents/skills/*/SKILL.md` adapters expose that catalog to
+  native repository discovery without requiring copies in the user home.
+- Validate these surfaces with
+  `python3 scripts/ai/codex/doctor.py static --no-write`.
 
 ## Common Task Routing
 
@@ -92,7 +92,10 @@ raising a budget or exemption limit.
 
 - `.codex/agents/ORCHESTRATION.md`
 - `.codex/agents/README.md`
+- `.codex/config.toml`
+- `.codex/agents/py-*.toml`
 - `.codex/skills/`
+- `.agents/skills/`
 
 ## Env File Guardrail
 

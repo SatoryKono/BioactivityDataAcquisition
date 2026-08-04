@@ -299,18 +299,29 @@ ensure_shared_plane() {
     fi
     local launcher="${REPO_ROOT}/scripts/ops/runtime/mcp/start-shared.sh"
     local health="${REPO_ROOT}/scripts/ops/runtime/mcp/health-shared.sh"
+    local matrix="${REPO_ROOT}/scripts/ai/codex/mcp_profile_contract.py"
     if [[ ! -x "${launcher}" || ! -x "${health}" ]]; then
         warn "Shared MCP launcher/health helper unavailable; config-only ensure"
         return 0
     fi
-    if bash "${health}" daily >/dev/null 2>&1; then
+    local profile="${CODEX_MCP_PROFILE:-stable}"
+    if bash "${health}" --profile "${profile}" --no-write >/dev/null 2>&1; then
+        return 0
+    fi
+    if [[ ! -f "${matrix}" ]]; then
+        fail "MCP profile contract unavailable: ${matrix}"
+    fi
+    mapfile -t required_servers < <(
+        python3 "${matrix}" --profile "${profile}" --required-local
+    )
+    if [[ "${#required_servers[@]}" -eq 0 ]]; then
         return 0
     fi
     local timeout_seconds="${CODEX_MCP_SHARED_START_TIMEOUT:-360}"
-    timeout "${timeout_seconds}" bash "${launcher}" --daily || \
-        fail "Shared MCP plane failed to become ready"
-    bash "${health}" daily >/dev/null || \
-        fail "Shared MCP plane health check failed after start"
+    timeout "${timeout_seconds}" bash "${launcher}" "${required_servers[@]}" || \
+        fail "Required MCP servers for profile ${profile} failed to become ready"
+    bash "${health}" --profile "${profile}" --no-write >/dev/null || \
+        fail "MCP profile ${profile} health check failed after start"
 }
 
 current_config_is_ready() {

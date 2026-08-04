@@ -1,325 +1,160 @@
-# Codex - Consolidated Setup
+# BioETL Codex runtime
 
-Единая точка входа для запуска Codex через canonical WSL/Bash launcher.
+Единая точка входа для project-scoped Codex runtime в BioETL. Команды
+выполняются из корня репозитория; Windows transport делегирует в canonical
+WSL/Bash launcher.
 
-Root-level launchers such as `codex.ps1`, `codex.bat`,
-`setup-codex-wsl.*`, `.wsl_proxy_env.sh`, `run-codex.ps1`, and
-`run-codex-wsl.ps1` are retired from the repository root. Use the maintained
-launchers under `scripts/**`.
+## Fresh checkout
 
-## Retired Root Shim Verification
+После того как checkout отмечен trusted в Codex, project runtime обнаруживается
+без копирования файлов в пользовательский home:
 
-Last verified: 2026-07-10 for root script hygiene issues #6152-#6158.
-This supersedes the earlier root hygiene issue #5994 root-shim delegation
-contract by retiring the root files instead of retaining thin wrappers.
+- `.codex/config.toml` — portable project policy;
+- `.codex/agents/py-*.toml` — девять native custom-agent descriptors;
+- `.codex/agents/py-*.md` — подробные behavioral profiles;
+- `.codex/skills/**` — canonical skill behavior;
+- `.agents/skills/**` — generated native discovery adapters.
 
-The repository root keeps no tracked `.sh`, `.ps1`, `.py`, or `.bat`
-compatibility entrypoints:
-
-| Retired root shim | Canonical owner | Retention decision |
-| --- | --- | --- |
-| `codex.ps1` | `scripts/ai/codex/run-codex.ps1` | root file retired; use the scripts-owned PowerShell transport |
-| `codex.bat` | `scripts/ops/codex.bat` | root file retired; use the scripts-owned CMD transport |
-| `setup-codex-wsl.bat` | `scripts/ai/codex/setup-codex-wsl.bat` | root file retired; use the scripts-owned Windows setup transport |
-| `setup-codex-wsl.ps1` | `scripts/ai/codex/setup.ps1` | root file retired; deletion-first decision retained |
-| `setup-codex-wsl.sh` | `scripts/ai/codex/helper/setup-wsl-complete.sh` | root file retired; use the scripts-owned Bash setup helper |
-| `.wsl_proxy_env.sh` | `scripts/engineering/dev/bash/.wsl_proxy_env.sh` | root file retired; shared proxy helper is scripts-owned |
-
-Any future root-script restoration must update `.github/root-allowlist.txt`,
-`configs/quality/root_hygiene_review_registry.yaml`, operator docs, and wrapper
-surface tests in the same change, and requires a fresh owner decision.
-
-## 📁 Структура
-
-```
-scripts/ai/codex/
-├── run-codex.ps1              PowerShell transport to the canonical WSL launcher
-├── run-codex.sh               ⭐ Canonical WSL/Bash entry point
-├── headless.ps1               PowerShell transport for headless Codex launch
-├── headless.sh                Headless Codex launch without MCP sync
-├── diagnose_wsl.ps1           PowerShell transport for WSL diagnostics
-├── diagnose_wsl.sh            WSL diagnostics entrypoint
-├── diagnose_wsl.bat           Windows batch transport for WSL diagnostics
-├── .env.codex                 # API key configuration
-├── SETUP_HANG_FIX.md          # 📋 Read if setup hangs
-├── helper/
-│   ├── check-env.ps1          # Check environment (PowerShell)
-│   ├── check-env.sh           # Check environment (Bash)
-│   ├── setup-env.sh           # Setup (skips hanging apt, uses Node.js binaries)
-│   ├── ensure-mcp.sh          # Verify persisted MCP config and repair drift
-│   ├── diagnose-hang.ps1      # 🔧 Debug setup hangs
-│   └── run-codex-impl.sh      # Codex launcher implementation
-├── README.md                  # This file
-├── QUICK_START.md             # Quick start guide
-└── docs/                      # Documentation
-```
-
-## 🚀 Quick Start
-
-### From PowerShell (Windows)
-
-```powershell
-# Repo-local launchers
-.\scripts\ops\codex.bat
-.\scripts\ops\codex.bat "analyze the code"
-
-# Or explicit commands
-.\scripts\ops\codex.bat help
-.\scripts\ops\codex-exec.bat "fix the failing test"
-.\scripts\ops\install-codex-cmd.bat
-```
-
-`scripts\ops\codex.bat` delegates to the canonical WSL/Bash launcher, so the
-WSL transport remains the single source of truth for environment checks, setup,
-MCP sync, and Codex execution.
-
-### From WSL (Ubuntu)
+Статическая проверка не требует login, сети, Docker или live MCP:
 
 ```bash
-cd scripts/ai/codex
-
-bash run-codex.sh check
-bash run-codex.sh setup
-bash run-codex.sh "analyze the code"
+python3 scripts/ai/codex/doctor.py static --no-write
+bash scripts/ai/codex/setup_agents.sh --check
+bash scripts/ai/codex/setup_skills.sh --check
 ```
 
-## 📋 Commands
+`setup_agents.sh` и `setup_skills.sh` больше не являются обязательным
+bootstrap. Их `--install-personal` режим остаётся явной compatibility-опцией и
+не перезаписывает существующие personal entries.
 
-```powershell
-# PowerShell
-.\run-codex.ps1 help              # Show help
-.\run-codex.ps1                   # Interactive mode
-.\run-codex.ps1 "prompt"          # With prompt
-.\run-codex.ps1 exec "prompt"     # Auto-exec mode
-.\run-codex.ps1 check             # Check setup
-.\run-codex.ps1 setup             # Install missing components
-.\run-codex.ps1 mcp-check         # Check MCP configuration
-.\run-codex.ps1 mcp-setup         # Force-refresh MCP configuration
-.\run-codex.ps1 login             # Login with API key
-.\run-codex.ps1 device-login      # Device auth login
-.\headless.ps1 exec "prompt"      # Launch without MCP sync
-.\diagnose_wsl.ps1                # Run WSL diagnostics
-```
+## Authentication
+
+По решению владельца launcher authentication сохраняет текущий repository
+contract. Existing machine-local `.env.codex` и login flow не изменяются этой
+настройкой. Secret-bearing `.env` files нельзя создавать, менять, перемещать
+или удалять без отдельного явного разрешения.
+
+Поддерживаемые текущим launcher команды:
 
 ```bash
-# WSL/Bash
-bash run-codex.sh help            # Show help
-bash run-codex.sh                 # Interactive mode
-bash run-codex.sh "prompt"        # With prompt
-bash run-codex.sh exec "prompt"   # Auto-exec mode
-bash run-codex.sh check           # Check setup
-bash run-codex.sh setup           # Install missing components
-bash run-codex.sh mcp-check       # Check MCP configuration
-bash run-codex.sh mcp-setup       # Force-refresh MCP configuration
-bash run-codex.sh baseline --runs 3 --output reports/quality/codex-efficiency-baseline.json
-bash run-codex.sh diagnose        # Canonical WSL/Codex diagnostics
-bash run-codex.sh login           # Login with API key
-bash run-codex.sh device-login    # Device auth login
-bash headless.sh exec "prompt"    # Launch without MCP sync
-bash diagnose_wsl.sh              # Run WSL diagnostics
+bash scripts/ai/codex/run-codex.sh login
+bash scripts/ai/codex/run-codex.sh device-login
+bash scripts/ai/codex/login-codex.sh
 ```
-
-## 🔧 What run-codex does
-
-1. **Check** - Validates the WSL/Bash environment and the managed Codex CLI path
-1. **Setup** (if needed) - Installs missing components through the repo-local helper flow
-1. **MCP verification before launch** - Reuses current MCP files and regenerates `.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.qodo/mcp.json`, `.codex/settings.json`, `.devin/config.json`, and the Codex-native `~/.codex/config.toml` MCP block only when state is missing or stale
-1. **Launch** - Runs Codex from the repo root with the managed Codex CLI
-
-Codex does not read the workspace `.mcp.json` directly. The launcher keeps `~/.codex/config.toml` synchronized so Codex starts with the repository MCP servers configured.
 
 ## Canonical launch modes
 
-| Mode | Command | MCP behavior |
-| --- | --- | --- |
-| Interactive | `bash scripts/ai/codex/run-codex.sh` | verifies and repairs missing/stale MCP state |
-| Fast/headless | `bash scripts/ai/codex/headless.sh exec "<prompt>"` | explicitly skips MCP synchronization |
-| Diagnostics | `bash scripts/ai/codex/run-codex.sh diagnose` | diagnostics only; does not start monitoring |
-| Baseline | `bash scripts/ai/codex/run-codex.sh baseline --runs 3` | measures bounded launcher/MCP overhead |
+```bash
+# Interactive
+bash scripts/ai/codex/run-codex.sh
+bash scripts/ai/codex/run-codex.sh "analyze the code"
 
-Do not install shell aliases automatically. Contributors may define local
-aliases for these canonical commands in their own shell configuration.
+# Auto-execute
+bash scripts/ai/codex/run-codex.sh exec "fix the focused failure"
 
-## ⚙️ Setup
+# Environment and setup
+bash scripts/ai/codex/run-codex.sh check
+bash scripts/ai/codex/run-codex.sh setup
 
-### 1. Edit .env.codex
+# MCP: static configuration versus bounded live readiness
+bash scripts/ai/codex/run-codex.sh mcp-static
+bash scripts/ai/codex/run-codex.sh mcp-check --profile stable
+bash scripts/ai/codex/run-codex.sh mcp-setup
 
-Launcher and setup scripts do not create `.env.codex` by default. Create it
-manually, or set `BIOETL_CREATE_LOCAL_ENV_FILES=1` when you explicitly want a
-local template generated.
-
-```powershell
-# Option 1: Create manually
-copy .env.codex.example .env.codex
-notepad .env.codex
-
-# Option 2: Generate with opt-in flag
-$env:BIOETL_CREATE_LOCAL_ENV_FILES="1"
-.\run-codex.ps1 setup
+# Diagnostics and performance evidence
+bash scripts/ai/codex/run-codex.sh diagnose
+bash scripts/ai/codex/run-codex.sh baseline --runs 3 \
+  --output reports/quality/codex-efficiency-baseline.json
 ```
 
-Add your OpenAI API key:
+PowerShell uses the same behavior through
+`scripts/ai/codex/run-codex.ps1`; CMD entrypoints live under `scripts/ops/`.
 
-```
-OPENAI_API_KEY=sk-your-key-here
-```
+Maintained platform-specific helpers remain discoverable for their bounded
+roles:
 
-Get API key from: https://platform.openai.com/api-keys
+- `scripts/ai/codex/headless.ps1` — PowerShell transport for headless mode;
+- `scripts/ai/codex/helper/diagnose-hang.ps1` — setup-hang diagnostics;
+- `scripts/ai/codex/setup-windows-dns.ps1` — explicit Windows DNS repair;
+- `scripts/ai/codex/setup-wsl-dns.sh` — explicit WSL DNS repair;
+- `scripts/ops/install-codex-cmd.bat` — optional Windows CMD installation.
 
-### 2. First Run
+### Fast/headless
 
-```powershell
-.\run-codex.ps1
-```
-
-This will:
-
-- Check all dependencies through the canonical WSL/Bash launcher
-- Install missing components through the repo-local helper flow if needed
-- Synchronize MCP configuration for Codex
-- Launch Codex from the managed WSL/Bash entrypoint
-
-## MCP configuration
-
-`run-codex.sh` runs `helper/ensure-mcp.sh` before launching Codex. The helper
-first validates the persisted files and leaves them unchanged when they are
-current; it regenerates them only when configuration is missing or stale.
-`run-codex.sh mcp-setup` remains the explicit force-refresh command.
-`run-codex.ps1` delegates to that same flow, and the retained transport launchers
-`scripts/ops/launchers/codex/codex.sh` and
-`scripts/ops/launchers/codex/codex-exec.sh` now do the same. This writes:
-
-- `.mcp.json` - workspace MCP config used by compatible tools
-- `scripts/ai/.mcp.json` - tracked portable mirror of the root workspace MCP config
-- `.vscode/mcp.json` - VS Code MCP config
-- `.cursor/mcp.json` - Cursor MCP config mirror
-- `.qodo/mcp.json` - Qodo Desktop MCP config mirror
-- `.codex/settings.json` - local-only generated Codex workspace MCP settings mirror
-- `.devin/config.json` - tracked portable Devin runtime projection; generation
-  replaces `mcpServers` and preserves Devin-owned top-level settings
-- `~/.codex/config.toml` - Codex-native MCP config used by `codex`
-
-The tracked workspace manifests `.mcp.json`, `scripts/ai/.mcp.json`, and
-`.devin/config.json` are repo-relative and portable. Local-only runtime outputs
-such as `~/.codex/config.toml` and `.codex/settings.json` may contain
-machine-local absolute paths for tools that require them.
-
-Set `CODEX_SKIP_MCP_SETUP=1` only when you intentionally want to launch Codex
-without verifying or repairing MCP. Set `CODEX_VALIDATE_MCP_LIST=1` to
-additionally run `codex mcp list --json`; this validation is off by default
-because some local MCP/server environments can make the CLI list operation
-hang.
-
-MCP stdio server processes are session-scoped and therefore start again for
-each Codex session. That process startup is expected and is distinct from
-rewriting or re-entering the persisted MCP configuration.
-
-The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`
-for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the
-canonical diagnostics entrypoints.
-
-## 🐧 Requirements
-
-- Windows 11 + WSL2
-- Ubuntu in WSL
-- Internet connection
-- OpenAI API key
-
-Node.js and npm are installed through the shared WSL helper flow if missing.
-
-## ⚠️ Setup Hangs / Freezes?
-
-See **[SETUP_HANG_FIX.md](./SETUP_HANG_FIX.md)** for detailed diagnostics.
-
-Quick diagnostics:
-
-```powershell
-.\helper\diagnose-hang.ps1
-```
-
-This will identify exactly where the hang occurs:
-
-- [1/5] WSL connectivity
-- [2/5] Bash execution
-- [3/5] apt-get update ← Usually hangs here
-- [4/5] Node.js check
-- [5/5] helper/setup-env.sh bootstrap
-
-**Fixed in new version**: setup-env.sh now skips apt-get if it hangs and downloads Node.js binaries directly.
-
-## 🆘 Troubleshooting
-
-### "API key not found"
-
-```powershell
-notepad .env.codex
-```
-
-Make sure you have `OPENAI_API_KEY=sk-...` with valid key.
-
-### "Node.js not found"
-
-Run setup:
-
-```powershell
-.\run-codex.ps1 setup
-```
-
-Or install manually in WSL:
+Headless mode intentionally skips the normal MCP synchronization path:
 
 ```bash
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo bash
-sudo apt-get install -y nodejs
+bash scripts/ai/codex/headless.sh exec "run a bounded task"
 ```
 
-### "WSL not available"
+Use it only when the task does not need the repository MCP projection.
 
-Install WSL2:
+## MCP profiles and doctor
 
-```powershell
-wsl --install
+Tracked MCP manifests retain the full portable inventory. Local projection and
+readiness use a selected profile:
+
+| Profile | Live gate |
+| --- | --- |
+| `stable` | daily required local set |
+| `shared` | `stable` required; heavy additions optional |
+| `core` | `stable` plus Mermaid required |
+| `ops` | `stable` plus Prometheus, Grafana, GitHub Actions required |
+| `graph` | `stable` plus Neo4j Cypher/Memory required |
+| `full` | complete explicitly selected inventory required |
+
+`mcp-check` prints `FAIL` for unavailable required servers, `WARN` for optional
+servers, and `SKIP` for remote/auth-managed endpoints. Every network probe has
+a per-server and overall timeout. It never starts Docker Compose or the
+monitoring stack. Static CI uses:
+
+```bash
+python3 scripts/ai/codex/mcp_profile_contract.py --check
+python3 scripts/ai/codex/doctor.py static --no-write
+python3 scripts/ai/codex/setup_mcp.py --check
 ```
 
-### Check what's wrong
+## Runtime ownership
 
-```powershell
-.\run-codex.ps1 check
+| Surface | Owner |
+| --- | --- |
+| `.codex/config.toml` | tracked portable trusted-project behavior |
+| `.codex/agents/*.toml` | Codex-only native discovery metadata |
+| `.codex/agents/*.md`, `.codex/skills/**` | canonical Codex behavior |
+| `.agents/skills/**` | generated discovery projection |
+| `~/.codex/config.toml` | user-owned preferences and generated local MCP block |
+| `.junie/**` | equal-peer Junie runtime under the mirror contract |
+| `.devin/**` | Devin-owned runtime behavior and tracked projections |
+
+После изменений runtime surfaces выполнить:
+
+```bash
+python3 scripts/ai/codex/sync_native_skills.py --check
+bash scripts/ai/junie/check_junie_mirror.sh --check
 ```
 
-## 📚 Helper Scripts
+## Retired Root Shim Verification
 
-All logic is in `helper/` folder:
+Last verified: 2026-08-04 for root script hygiene issues #6152-#6158. This
+retains the root hygiene issue #5994 decision: no Codex compatibility script is
+restored at repository root.
 
-- `check-env.ps1` / `check-env.sh` - Verify setup
-- `setup-env.sh` - Install components (Node.js, npm, Codex)
-- `ensure-mcp.sh` - Verify MCP configs and repair only missing or stale state
-  - **NEW**: Skips apt-get if it hangs
-  - **NEW**: Downloads Node.js binaries directly
-  - **NEW**: 3 retry attempts for npm install
-- `diagnose-hang.ps1` - **NEW**: Debug tool for setup hangs
-- `run-codex-impl.sh` - Launch Codex with environment
+Canonical owners remain:
 
-## 🔐 API Key
+- `scripts/ai/codex/run-codex.ps1` for PowerShell transport;
+- `scripts/ops/codex.bat` for CMD transport;
+- `scripts/ai/codex/setup-codex-wsl.bat` for Windows setup;
+- `scripts/ai/codex/helper/setup-wsl-complete.sh` for Bash setup;
+- `scripts/engineering/dev/bash/.wsl_proxy_env.sh` for shared proxy setup.
 
-Get from: https://platform.openai.com/api-keys
+Any future root-script restoration requires an explicit owner decision plus
+the root allowlist, hygiene registry, documentation, and surface tests in the
+same change.
 
-1. Create account on OpenAI
-1. Go to API keys section
-1. Create new secret key
-1. Copy (starts with `sk-`)
-1. Paste into `.env.codex`
+## Canonical references
 
-## ✅ Ready!
-
-Just run:
-
-```powershell
-.\run-codex.ps1
-```
-
-✨ **What happens**:
-
-- Checks components through the canonical WSL/Bash launcher
-- Runs repo-local setup helpers if needed
-- Synchronizes MCP configuration
-- Launches Codex from the managed WSL/Bash entrypoint
+- `AGENTS.md`
+- `.codex/agents/CODEX-RUNTIME.md`
+- `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`
+- `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`

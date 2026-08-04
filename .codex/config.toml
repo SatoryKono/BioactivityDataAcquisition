@@ -1,0 +1,6 @@
+# Portable project-scoped Codex settings for trusted repository sessions.
+# Authentication, model selection, providers, and user MCP credentials remain
+# user-scoped and MUST NOT be committed here.
+
+[agents]
+max_concurrent_threads_per_session = 3
