@@ -1,6 +1,10 @@
 version: 1
 policy_scope: semantic_compatibility_residue
 schema_version: 1
+# Provider identities MUST be a flat list of canonical provider keys.
+# Field membership for nullable/alias residue lives in the executable
+# baseline (tests/fixtures/contracts/publication_schema_compatibility.v1.yaml)
+# and is bound by contract tests for SSOT parity.
 retained_fields:
 - field_name: deprecated_aliases
   owner: bioetl.domain.value_objects.publication
@@ -26,11 +30,6 @@ retained_fields:
   external_breaking_change_required: true
   providers:
     - chembl
-      - publication_type_raw
-      - publication_doi
-      - publication_pmid
-      - publication_pmc_id
-      - oa_status
     - pubmed
     - crossref
     - openalex

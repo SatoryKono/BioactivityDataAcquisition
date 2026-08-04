@@ -34,24 +34,58 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def test_issue_6042_bootstrap_profile_blocks_unproven_scope_widening() -> None:
+    """Bootstrap profile stays live-topology-bound (#6042 remainder / #6892)."""
     profile = _load_json(BOOTSTRAP_PROFILE)
+    bootstrap_root = ROOT / "tests" / "unit" / "composition" / "bootstrap"
+    local_conftest = bootstrap_root / "conftest.py"
+    isolation_proof = bootstrap_root / "test_bootstrap_metadata_cache_isolation.py"
 
     assert profile["schema_version"] == "test-bootstrap-fixture-scope-profile-v1"
-    assert profile["issue"] == 6042
+    assert profile["issue"] in {6042, 6892}
     assert profile["debt_budget_policy"] == "flat_or_decreasing_only"
     assert profile["result"]["status"] == "pass"
     assert profile["result"]["test_count"] >= 300
     assert profile["result"]["test_file_count"] == len(
-        list((ROOT / "tests" / "unit" / "composition" / "bootstrap").rglob("test_*.py"))
+        list(bootstrap_root.rglob("test_*.py"))
     )
-    assert profile["result"]["local_conftest_present"] is False
+
+    # Live topology parity: do not hard-code a stale local_conftest_present
+    # literal. The profile must match the filesystem.
+    assert local_conftest.is_file()
+    assert profile["result"]["local_conftest_present"] is True
+    assert profile["result"]["local_conftest_path"] == (
+        "tests/unit/composition/bootstrap/conftest.py"
+    )
+    assert isolation_proof.is_file()
+    assert profile["result"]["isolation_proof"] == (
+        "tests/unit/composition/bootstrap/test_bootstrap_metadata_cache_isolation.py"
+    )
+
+    conftest_text = local_conftest.read_text(encoding="utf-8")
+    assert 'scope="session"' in conftest_text
+    assert "bootstrap_metadata_cache" in conftest_text
+    assert "cached_bootstrap_metadata" in conftest_text
+    assert "fresh_pipeline_registry" in conftest_text
+    assert "fresh_provider_registry" in conftest_text
+    assert set(profile["result"]["session_scoped_immutable_fixtures"]) == {
+        "bootstrap_metadata_cache",
+        "cached_bootstrap_metadata",
+    }
+    assert set(profile["result"]["function_scoped_mutable_clones"]) == {
+        "fresh_pipeline_registry",
+        "fresh_provider_registry",
+    }
 
     policy = profile["fixture_scope_policy"]
     assert policy["broad_scope_changes_made"] is False
     assert policy["session_scope_allowed_without_isolation_proof"] is False
     assert policy["requires_state_isolation_proof"] is True
+    assert policy["session_scope_isolation_proven"] is True
     assert "mutable service instances" in policy["blocked_session_scope_targets"]
     assert profile["closeout_decision"]["status"] == "closed-ready"
+    assert profile["closeout_decision"]["decision"] == (
+        "session_immutable_catalog_cache_with_per_test_clones"
+    )
 
 
 def test_issue_6044_support_helper_ownership_map_is_complete() -> None:
