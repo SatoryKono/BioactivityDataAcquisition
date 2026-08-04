@@ -3062,7 +3062,6 @@
               "id": "organize",
               "options": {
                 "excludeByName": {
-                  "percentage": true,
                   "row_status": true
                 },
                 "indexByName": {
