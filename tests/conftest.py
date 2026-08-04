@@ -1,7 +1,7 @@
 import asyncio
-import contextlib
 import enum
 import gc
+import importlib.util
 import inspect
 import os
 import pathlib
@@ -274,10 +274,11 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         default=False,
         help="Enable richer pilot-only live contract suites (equivalent to BIOETL_PILOT_SOAK_TESTS=true).",
     )
-    # Workflows pass --vcr-record=...; register a no-op-compatible option when
-    # pytest-recording is not loaded in a given dependency/env matrix cell.
-    with contextlib.suppress(ValueError):
-        # Already registered by pytest-recording or another plugin.
+    # Workflows pass --vcr-record=...; register only when no VCR plugin ships it.
+    if (
+        importlib.util.find_spec("pytest_vcr") is None
+        and importlib.util.find_spec("pytest_recording") is None
+    ):
         parser.addoption(
             "--vcr-record",
             action="store",

@@ -62,8 +62,8 @@ accounting table from `/ops/observability/processed-records`. Exact `$run_id`
 scopes resolve from RunLedger artifact/metrics evidence; aggregate scopes are
 backed by `bioetl_processed_records_*` recording rules with `value` and
 formatted canonical `percentage` columns, including zero-valued outcome rows.
-Internal `row_status` and deprecated `percintage` are hidden, and the table
-does not act as a `$__range` throughput summary.
+Internal `row_status` is hidden and the payload uses canonical `percentage`
+only, and the table does not act as a `$__range` throughput summary.
 All **seven** shipped dashboards share one theme-safe navigation panel: numbered
 bus `0..6`. Loki/Tempo Explore adjuncts and Silver Reject Explorer were removed
 2026-07-23. The bus wraps at `1024px` and stays readable in dark and light themes.
