@@ -416,8 +416,22 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         f"- Source branch: `{payload['source_branch']}`",
         f"- Source commit: `{source_commit}`",
         f"- Source run id: `{source_run_id}`",
+        f"- Source tree sha256: `{payload.get('source_tree_sha256') or 'pending'}`",
         f"- Refresh status: `{payload['refresh_status']}`",
         f"- Refreshed at (UTC): `{payload['refreshed_at_utc']}`",
+        "",
+        "## Branch-accurate provenance (#5729)",
+        "",
+        "- Continuous identity is `source_tree_sha256` over `tests/**/*.py`,",
+        "  `pyproject.toml`, `configs/quality/test_matrix.yaml`, and",
+        "  `.github/workflows/tests.yml`.",
+        "- Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)",
+        "  and rejects future/stale `refreshed_at_utc` values.",
+        "- `source_commit` must remain an ancestor of HEAD; exact `source_commit == HEAD`",
+        "  is opt-in via `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD=1`.",
+        "- Refresh command:",
+        "  `python -m scripts.engineering.ci.update_test_telemetry_baseline`",
+        "  `--source-commit <sha> --source-run-id <run-id>`.",
         "",
         "## Coverage",
         "",
@@ -569,7 +583,7 @@ def merge_existing_baseline_supplemental_fields(
         return payload
 
     merged: TelemetryPayload = dict(payload)
-    for field_name in ("slow_governance_cache_probe",):
+    for field_name in ("slow_governance_cache_probe", "branch_accurate_guard"):
         if field_name not in merged and field_name in existing_payload:
             merged[field_name] = existing_payload[field_name]
     return merged
