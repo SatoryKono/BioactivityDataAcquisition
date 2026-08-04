@@ -143,7 +143,12 @@ def test_tech_debt_closeout_json_packs_keep_evidence_and_ratchets() -> None:
                 # Allow no_growth / flat_or_decreasing wording; forbid explicit increases.
                 if any(
                     token in lowered
-                    for token in ("increase_budget", "budget_increase", "raise_budget", "allow_growth")
+                    for token in (
+                        "increase_budget",
+                        "budget_increase",
+                        "raise_budget",
+                        "allow_growth",
+                    )
                 ) or lowered in {"increase", "grow", "growing"}:
                     failures.append(
                         f"{path.name}: forbidden budget-growth policy {key}={value!r}"
@@ -189,8 +194,10 @@ def test_tech_debt_closeout_json_packs_keep_evidence_and_ratchets() -> None:
                 rel = _evidence_path(str(raw))
                 if not rel or rel.startswith("http"):
                     continue
-                if "/" not in rel and "\\" not in rel and not rel.endswith(
-                    (".py", ".json", ".yaml", ".yml", ".md")
+                if (
+                    "/" not in rel
+                    and "\\" not in rel
+                    and not rel.endswith((".py", ".json", ".yaml", ".yml", ".md"))
                 ):
                     continue
                 if ("{" in rel) or ("}" in rel) or ("#" in rel):
