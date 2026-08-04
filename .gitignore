@@ -455,6 +455,8 @@ scripts/docs/build/**/*.pyc
 !/docs/99-archive/fixes/**
 !/docs/99-archive/refactoring_plans/
 !/docs/99-archive/refactoring_plans/**
+!/docs/99-archive/filters/
+!/docs/99-archive/filters/**
 # docs/reports is retention-sensitive. Keep broad local reports ignored and
 # allowlist only curated entrypoints, generated cleanup inventory, and reviewed
 # bounded evidence manifests.

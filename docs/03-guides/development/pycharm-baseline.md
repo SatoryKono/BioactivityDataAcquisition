@@ -1,8 +1,22 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: active
+Class: repo-only
+Owner: BioETL Team
+Last verified: '2026-08-04'
+
+______________________________________________________________________
+
 # PyCharm configuration baseline (BioETL)
+
+> Relocated from orphan `docs/development/pycharm.md` during documentation
+> architecture audit cycle 2 (#7429). Prefer the published walkthrough
+> [pycharm-setup.md](pycharm-setup.md).
 
 Версия: 2026.01.4 stable, Python: 3.13.7 (Windows), проект: BioactivityDataAcquisition.
 
-Полный operator guide: [docs/03-guides/development/pycharm-setup.md](../03-guides/development/pycharm-setup.md).
+Полный operator guide: [pycharm-setup.md](pycharm-setup.md).
 
 ## Post-clone sync (canonical)
 
