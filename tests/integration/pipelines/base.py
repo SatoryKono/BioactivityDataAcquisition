@@ -49,6 +49,14 @@ class IntegrationPipelineTestCase:
     - Pipeline Runner instantiation
     """
 
+    storage_root: Path = Path()
+    data_dir: Path = Path()
+    bronze_path: str = ""
+    silver_path: str = ""
+    gold_path: str = ""
+    checkpoints_path: str = ""
+    json_path: str = ""
+
     @pytest.fixture(autouse=True)
     def _setup_storage(self, tmp_path):
         """Setup temporary storage paths and patch StorageFactory."""

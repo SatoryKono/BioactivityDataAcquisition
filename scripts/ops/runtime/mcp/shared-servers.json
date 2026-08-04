@@ -142,7 +142,7 @@
       "daily": true,
       "readiness_timeout_sec": 300,
       "state_model": "stateless",
-      "launch_mode": "windows_docker_streaming",
+      "launch_mode": "windows_npx_streaming",
       "remote_port": 18818
     },
     "prometheus": {

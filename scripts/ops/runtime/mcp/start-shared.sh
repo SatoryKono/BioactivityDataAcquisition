@@ -217,7 +217,15 @@ for name, entry in items:
     err_path = log_dir / f"{name}.err.log"
     out_handle = out_path.open("ab")
     err_handle = err_path.open("ab")
-    if entry.get("launch_mode") == "windows_docker_streaming":
+    if entry.get("launch_mode") in {
+        "windows_docker_streaming",
+        "windows_npx_streaming",
+    }:
+        backend = (
+            "mermaid-npx"
+            if entry.get("launch_mode") == "windows_npx_streaming"
+            else "docker-gateway"
+        )
         command = [
             sys.executable,
             "-m",
@@ -230,6 +238,8 @@ for name, entry in items:
             str(int(entry["remote_port"])),
             "--startup-timeout",
             str(int(entry.get("readiness_timeout_sec") or 180)),
+            "--backend",
+            backend,
         ]
     else:
         command = [

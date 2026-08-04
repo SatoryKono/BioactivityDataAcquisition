@@ -8,6 +8,7 @@ import json
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any, cast
 
 try:
     import fitz  # type: ignore[import-not-found]  # pyright: ignore[reportMissingImports]
@@ -50,14 +51,17 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _load_pdf_page(doc: fitz.Document, page_idx: int) -> fitz.Page:
+def _load_pdf_page(doc: Any, page_idx: int) -> Any:
     return (
         doc.load_page(page_idx) if hasattr(doc, "load_page") else doc.loadPage(page_idx)
     )
 
 
-def _page_content_dict(page: fitz.Page) -> dict[str, object]:
-    return page.get_text("dict") if hasattr(page, "get_text") else page.getText("dict")
+def _page_content_dict(page: Any) -> dict[str, object]:
+    payload = (
+        page.get_text("dict") if hasattr(page, "get_text") else page.getText("dict")
+    )
+    return cast(dict[str, object], payload) if isinstance(payload, dict) else {}
 
 
 def _bounds_issue(
@@ -148,12 +152,19 @@ def _issues_for_image_block(
     max_overflow_ratio: float,
 ) -> list[BoundsIssue]:
     bbox_raw = block.get("bbox", [0.0, 0.0, 0.0, 0.0])
+    if not isinstance(bbox_raw, (list, tuple)) or len(bbox_raw) != 4:
+        bbox_raw = [0.0, 0.0, 0.0, 0.0]
     x0, y0, x1, y1 = (float(v) for v in bbox_raw)
     bbox = [x0, y0, x1, y1]
     page_size = [page_width, page_height]
     bbox_width = x1 - x0
     bbox_height = y1 - y0
-    image_size = [int(block.get("width", 0)), int(block.get("height", 0))]
+    width_raw = block.get("width", 0)
+    height_raw = block.get("height", 0)
+    image_size = [
+        width_raw if isinstance(width_raw, int) else 0,
+        height_raw if isinstance(height_raw, int) else 0,
+    ]
 
     if _bbox_exceeds_page(
         x0=x0,
@@ -206,17 +217,26 @@ def _issues_for_image_block(
 
 
 def validate_pdf(pdf_path: Path, max_overflow_ratio: float) -> list[BoundsIssue]:
+    if fitz is None:
+        raise RuntimeError("PyMuPDF is required for PDF image bounds validation")
     issues: list[BoundsIssue] = []
     doc = fitz.open(str(pdf_path))
 
-    page_count = getattr(doc, "page_count", None) or getattr(doc, "pageCount", 0)
+    page_count_raw = getattr(doc, "page_count", None) or getattr(doc, "pageCount", 0)
+    page_count = page_count_raw if isinstance(page_count_raw, int) else 0
     for page_idx in range(page_count):
         page = _load_pdf_page(doc, page_idx)
         rect = page.rect
         page_width = float(rect.width)
         page_height = float(rect.height)
         content = _page_content_dict(page)
-        image_blocks = [b for b in content.get("blocks", []) if b.get("type") == 1]
+        blocks_raw = content.get("blocks", [])
+        blocks = blocks_raw if isinstance(blocks_raw, list) else []
+        image_blocks = [
+            cast(dict[str, object], block)
+            for block in blocks
+            if isinstance(block, dict) and block.get("type") == 1
+        ]
 
         for image_idx, block in enumerate(image_blocks, start=1):
             issues.extend(

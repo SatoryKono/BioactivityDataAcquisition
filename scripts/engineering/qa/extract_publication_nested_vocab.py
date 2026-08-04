@@ -28,6 +28,11 @@ def _add_if_present(bucket: set[str], value: object | None) -> None:
         bucket.add(str(value))
 
 
+def _json_list(value: object) -> list[object]:
+    """Narrow one optional JSON array before iterating over it."""
+    return value if isinstance(value, list) else []
+
+
 def _collect_openalex_primary_location(
     row: dict[str, object],
     observed: dict[str, set[str]],
@@ -47,7 +52,7 @@ def _collect_openalex_indexed_in(
     row: dict[str, object],
     observed: dict[str, set[str]],
 ) -> None:
-    for value in row.get("indexed_in") or []:
+    for value in _json_list(row.get("indexed_in")):
         observed["indexed_in"].add(str(value))
 
 
@@ -64,7 +69,7 @@ def _collect_openalex_locations(
     row: dict[str, object],
     observed: dict[str, set[str]],
 ) -> None:
-    for location in row.get("locations") or []:
+    for location in _json_list(row.get("locations")):
         if not isinstance(location, dict):
             continue
         _add_if_present(observed["version"], location.get("version"))
@@ -95,7 +100,7 @@ def _collect_semanticscholar_publication_types(
     row: dict[str, object],
     observed: dict[str, set[str]],
 ) -> None:
-    for value in row.get("publicationTypes") or []:
+    for value in _json_list(row.get("publicationTypes")):
         observed["publication_types"].add(str(value))
 
 
@@ -103,7 +108,7 @@ def _collect_semanticscholar_citation_context_keys(
     row: dict[str, object],
     observed: dict[str, set[str]],
 ) -> None:
-    for citation in row.get("citations") or []:
+    for citation in _json_list(row.get("citations")):
         if isinstance(citation, dict):
             observed["citation_context_keys"].update(map(str, citation.keys()))
 
@@ -112,7 +117,7 @@ def _collect_semanticscholar_subject_fields(
     row: dict[str, object],
     observed: dict[str, set[str]],
 ) -> None:
-    for value in row.get("fieldsOfStudy") or []:
+    for value in _json_list(row.get("fieldsOfStudy")):
         observed["subject_fields"].add(str(value))
 
 
@@ -120,7 +125,7 @@ def _collect_semanticscholar_author_id_families(
     row: dict[str, object],
     observed: dict[str, set[str]],
 ) -> None:
-    for author in row.get("authors") or []:
+    for author in _json_list(row.get("authors")):
         if not isinstance(author, dict):
             continue
         external_ids = author.get("externalIds") or {}
@@ -147,7 +152,7 @@ def _collect_pubmed_publication_types(
     row: dict[str, object],
     observed: dict[str, set[str]],
 ) -> None:
-    for value in row.get("PublicationTypeList") or []:
+    for value in _json_list(row.get("PublicationTypeList")):
         observed["publication_types"].add(str(value))
 
 
@@ -155,7 +160,7 @@ def _collect_pubmed_mesh_keys(
     row: dict[str, object],
     observed: dict[str, set[str]],
 ) -> None:
-    for mesh in row.get("MeshHeadingList") or []:
+    for mesh in _json_list(row.get("MeshHeadingList")):
         if isinstance(mesh, dict):
             observed["mesh_keys"].update(map(str, mesh.keys()))
 
@@ -164,7 +169,7 @@ def _collect_pubmed_affiliation_keys(
     row: dict[str, object],
     observed: dict[str, set[str]],
 ) -> None:
-    for author in row.get("AuthorList") or []:
+    for author in _json_list(row.get("AuthorList")):
         if isinstance(author, dict):
             observed["affiliation_keys"].update(map(str, author.keys()))
 

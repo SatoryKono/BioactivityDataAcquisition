@@ -404,7 +404,7 @@ def _default_evidence_lane(disposition: str | None) -> str | None:
         "retain_canonical_owner_module": "canonical_owner_contract",
         "retain_active": "retained_module_owner_suite",
     }
-    return lane_by_disposition.get(disposition)
+    return lane_by_disposition.get(disposition) if disposition is not None else None
 
 
 def _owner_test_evidence(
@@ -415,6 +415,8 @@ def _owner_test_evidence(
 ) -> dict[str, object]:
     evidence = ZERO_IMPORT_OWNER_TEST_EVIDENCE.get(module_path, {})
     raw_tests = evidence.get("owner_tests", ())
+    if not isinstance(raw_tests, (list, tuple)):
+        raw_tests = ()
     owner_tests = [
         str(path) for path in raw_tests if isinstance(path, str) and path.strip()
     ]
@@ -721,10 +723,16 @@ def _owner_test_anchored_count(rows: list[dict[str, object]]) -> int:
     return sum(
         1
         for row in rows
-        if int(row.get("owner_test_count", 0)) > 0
-        and int(row.get("owner_test_count", 0))
-        == int(row.get("owner_test_paths_exist_count", 0))
+        if _int_row_value(row, "owner_test_count") > 0
+        and _int_row_value(row, "owner_test_count")
+        == _int_row_value(row, "owner_test_paths_exist_count")
     )
+
+
+def _int_row_value(row: dict[str, object], key: str) -> int:
+    """Return one validated integer field from a generated inventory row."""
+    value = row.get(key)
+    return value if isinstance(value, int) else 0
 
 
 def _build_dead_code_summary(
@@ -939,7 +947,10 @@ def _md_owner_module_cell(row: dict[str, object]) -> str:
 
 
 def _md_owner_tests_cell(row: dict[str, object]) -> str:
-    return ", ".join(f"`{path}`" for path in row["owner_tests"])
+    owner_tests = row.get("owner_tests")
+    if not isinstance(owner_tests, list):
+        return ""
+    return ", ".join(f"`{path}`" for path in owner_tests if isinstance(path, str))
 
 
 def _md_retained_owner_test_table(
@@ -1100,11 +1111,13 @@ def main() -> int:
     safe_md.write_text(  # NOSONAR - path confined by resolve_output_path
         rendered_markdown, encoding="utf-8"
     )
+    summary = payload["summary"]
+    assert isinstance(summary, dict)
     print(
         "[dead-code-inventory] "
-        f"triaged_entries={payload['summary']['triaged_entry_count']}; "
+        f"triaged_entries={summary['triaged_entry_count']}; "
         "repo_wide_zero_import_candidates="
-        f"{payload['summary']['repo_wide_zero_import_candidate_count']}; "
+        f"{summary['repo_wide_zero_import_candidate_count']}; "
         f"json={safe_json}; markdown={safe_md}"
     )
     return 0
