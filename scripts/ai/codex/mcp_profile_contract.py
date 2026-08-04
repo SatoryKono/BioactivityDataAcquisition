@@ -34,6 +34,19 @@ def profile_plan(profile: str, repo_root: Path = REPO_ROOT) -> dict[str, object]
     }
 
 
+def _safe_plan_for_json(plan: dict[str, object]) -> dict[str, object]:
+    """Return an allowlisted, non-sensitive view of profile plan data."""
+    return {
+        "profile": str(plan.get("profile", "")),
+        "selected": list(plan.get("selected", [])),
+        "required": list(plan.get("required", [])),
+        "optional": list(plan.get("optional", [])),
+        "required_local": list(plan.get("required_local", [])),
+        "optional_local": list(plan.get("optional_local", [])),
+        "remote_or_external": list(plan.get("remote_or_external", [])),
+    }
+
+
 def validate_profile_matrix(repo_root: Path = REPO_ROOT) -> list[str]:
     errors: list[str] = []
     for profile in setup_mcp.MCP_PROFILES:
@@ -88,7 +101,7 @@ def main() -> int:
     if args.required_local:
         print("\n".join(plan["required_local"]))
     elif args.json:
-        print(json.dumps(plan, indent=2, sort_keys=True))
+        print(json.dumps(_safe_plan_for_json(plan), indent=2, sort_keys=True))
     else:
         print(f"profile={args.profile}")
         print(f"required={','.join(plan['required'])}")
