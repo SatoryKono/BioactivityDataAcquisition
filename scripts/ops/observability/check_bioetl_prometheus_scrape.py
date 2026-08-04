@@ -69,11 +69,11 @@ def main(argv: list[str] | None = None) -> int:
             print(detail, file=sys.stderr)
         return EXIT_PROMETHEUS
 
-    bioetl = [
-        target
-        for target in targets
-        if str((target.get("labels") or {}).get("job", "")).lower() == "bioetl"
-    ]
+    bioetl: list[dict[str, object]] = []
+    for target in targets:
+        labels = target.get("labels")
+        if isinstance(labels, dict) and str(labels.get("job", "")).lower() == "bioetl":
+            bioetl.append(target)
     if not bioetl:
         detail = (
             "no active Prometheus job named 'bioetl' "

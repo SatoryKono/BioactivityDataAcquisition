@@ -182,11 +182,10 @@ class _ForwardHandler(socketserver.BaseRequestHandler):
                 if not readable:
                     continue
                 for source in readable:
-                    data = (
-                        client_socket.recv(65536)
-                        if source is client_socket
-                        else source.read(65536)
-                    )
+                    if source is client_socket:
+                        data = client_socket.recv(65536)
+                    else:
+                        data = relay.stdout.read(65536)
                     if not data:
                         return
                     if source is client_socket:

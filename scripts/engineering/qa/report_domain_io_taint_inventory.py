@@ -314,7 +314,7 @@ def _scan_imports(
         for module in modules:
             _classify_import_module(
                 relative_path=relative_path,
-                line=node.lineno,
+                line=getattr(node, "lineno", 0),
                 root_module=module.split(".", maxsplit=1)[0],
                 violations=violations,
                 allowed_exceptions=allowed_exceptions,
