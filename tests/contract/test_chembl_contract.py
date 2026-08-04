@@ -127,9 +127,7 @@ def _format_reachability_error(exc: BaseException) -> str:
 class _AsyncRequestClient(Protocol):
     """Minimal async request surface used by the retry helper."""
 
-    async def request(
-        self, method: str, url: str, **kwargs: Any
-    ) -> httpx.Response: ...
+    async def request(self, method: str, url: str, **kwargs: Any) -> httpx.Response: ...
 
 
 async def _request_or_skip(

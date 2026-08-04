@@ -1429,7 +1429,9 @@ def _resolved_snapshot_selection(
     if selection is not None:
         return selection
     return SnapshotSelection(
-        only_labels=tuple(str(item) for item in _as_iterable(legacy_selection.get("only_labels"))),
+        only_labels=tuple(
+            str(item) for item in _as_iterable(legacy_selection.get("only_labels"))
+        ),
         only_analysis_layer=bool(legacy_selection.get("only_analysis_layer", False)),
         only_retirement_layer=bool(
             legacy_selection.get("only_retirement_layer", False)
@@ -4426,7 +4428,9 @@ def _add_provider_surface(
     )
 
 
-def _provider_config_properties(source_payload: object) -> tuple[str | None, str | None]:
+def _provider_config_properties(
+    source_payload: object,
+) -> tuple[str | None, str | None]:
     auth_type = None
     pagination = None
     provider_config = source_payload
@@ -6006,8 +6010,7 @@ def _file_structure_zone_roots(config: dict[str, object]) -> dict[str, tuple[str
     if not isinstance(raw_zones, dict):
         return {}
     return {
-        str(name): tuple(_as_string_list(paths))
-        for name, paths in raw_zones.items()
+        str(name): tuple(_as_string_list(paths)) for name, paths in raw_zones.items()
     }
 
 

@@ -101,7 +101,9 @@ def main() -> None:
     workflow_xenon_paths = _extract_xenon_excludes(workflow_text)
     raw_critical_paths = _extract_literal(workflow_text, "EXEMPT_PATHS")
     workflow_critical_paths = (
-        set(raw_critical_paths) if isinstance(raw_critical_paths, (list, set)) else set()
+        set(raw_critical_paths)
+        if isinstance(raw_critical_paths, (list, set))
+        else set()
     )
     workflow_critical_functions = _extract_literal(workflow_text, "EXEMPT_FUNCTIONS")
     if not isinstance(workflow_critical_functions, dict):
