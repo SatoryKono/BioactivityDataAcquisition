@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2435 |
+| Doc-like files | 2436 |
 | Tracked doc-like files | 2435 |
-| Ignored local docs/reports files | 0 |
+| Ignored local docs/reports files | 1 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
 | Generated routes | 69 |
@@ -18,6 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
+| ignored_local | 1 |
 | tracked | 2435 |
 
 ## Lifecycle Counts
@@ -29,7 +30,7 @@
 | active_quality_baseline | 31 |
 | closeout_evidence | 64 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 1 |
+| docs_reports_curated_or_historical_report | 2 |
 | docs_reports_generated_or_route_owned | 6 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
@@ -61,7 +62,7 @@
 | Archived | 141 |
 | Canonical | 73 |
 | Generated | 861 |
-| Working | 498 |
+| Working | 499 |
 
 ## Surface Families
 
@@ -71,14 +72,14 @@
 | archive | 141 |
 | canonical | 73 |
 | generated | 861 |
-| working | 498 |
+| working | 499 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 87 |
+| archive-after-migration | 88 |
 | generate-automatically | 861 |
 | keep | 1171 |
 | reconcile-with-github-state | 4 |
@@ -92,6 +93,7 @@
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
 | `docs/filters/migration-plan.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
+| `docs/reports/docs-link-check-report.json` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7340-specialized-subsystem-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7348-comprehensive-skills-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
@@ -166,7 +168,6 @@
 | `reports/semantic_pipeline_audit/base_config_semantic_coverage_2026-07-01.json` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/critical_inconsistencies_2026-07-01.md` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/recommended_canonical_fields_2026-07-01.csv` | Working | 0 | archive-after-migration |
-| `reports/semantic_pipeline_audit/semantic_cluster_registry_2026-07-01.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -304,6 +305,7 @@
 | --- | --- | --- | --- |
 | `docs/reports/README.md` | tracked | docs_reports_curated_entrypoint | keep |
 | `docs/reports/dashboard-ux-checks/README.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/docs-link-check-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/evidence/INDEX.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/README.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
