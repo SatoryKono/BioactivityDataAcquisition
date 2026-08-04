@@ -19,17 +19,28 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from io import TextIOWrapper
 from pathlib import Path
+from typing import TypedDict
 from urllib.parse import urlunsplit
 from xml.etree import ElementTree as ET
 
-sys.stdout.reconfigure(encoding="utf-8")
+if isinstance(sys.stdout, TextIOWrapper):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # ── Canonical semantic palette ────────────────────────────────────────────────
 
-PALETTE = {
+class PaletteStyle(TypedDict):
+    """One canonical SVG stroke style."""
+
+    stroke: str
+    width: str
+    dash: str | None
+
+
+PALETTE: dict[str, PaletteStyle] = {
     "data": {"stroke": "#1E293B", "width": "2", "dash": None},
     "orchestration": {"stroke": "#2e7d32", "width": "2", "dash": None},
     "di": {"stroke": "#6a1b9a", "width": "1.5", "dash": "5"},
@@ -70,8 +81,9 @@ def _set_style(elem: ET.Element, palette_key: str) -> None:
     style = PALETTE[palette_key]
     elem.set("stroke", style["stroke"])
     elem.set("stroke-width", style["width"])
-    if style["dash"]:
-        elem.set("stroke-dasharray", style["dash"])
+    dash = style["dash"]
+    if dash:
+        elem.set("stroke-dasharray", dash)
     else:
         # Remove dasharray if present — force solid
         if "stroke-dasharray" in elem.attrib:
