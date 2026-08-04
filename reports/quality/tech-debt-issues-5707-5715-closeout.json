@@ -142,7 +142,7 @@
       },
       "refreshed_at_utc": "2026-07-31T13:55:33.002896+00:00",
       "slow_governance_lane": "S7-architecture-slow-governance",
-      "telemetry_source_commit": "667c3020ce74f87c319f77612c765a5aaf30e6ad",
+      "telemetry_source_commit": "427718a2101cae45ce4a9db892b042dc655ffa13",
       "telemetry_source_run_id": "local-duration-rebuild-2026-07-23"
     },
     "5711": {

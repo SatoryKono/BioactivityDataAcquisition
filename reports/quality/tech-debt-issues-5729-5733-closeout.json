@@ -53,7 +53,7 @@
       "coverage_actual_percent": 92.44,
       "coverage_percent": 92.44,
       "refreshed_at_utc": "2026-07-31T13:55:33.002896+00:00",
-      "source_commit": "667c3020ce74f87c319f77612c765a5aaf30e6ad",
+      "source_commit": "427718a2101cae45ce4a9db892b042dc655ffa13",
       "source_run_id": "local-duration-rebuild-2026-07-23"
     },
     "5730": {
@@ -71,7 +71,7 @@
       }
     },
     "5732": {
-      "assertless_total_candidates": 106,
+      "assertless_total_candidates": 105,
       "intentional_no_exception_contract": 90,
       "target_file_family_counts": {
         "tests/unit/infrastructure/observability/test_unified_logger.py": 10
@@ -87,7 +87,7 @@
   },
   "ratchets": {
     "assertless_total_candidates": {
-      "current": 109,
+      "current": 105,
       "max": 113
     },
     "coverage_tail_modules": {
