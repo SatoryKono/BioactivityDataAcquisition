@@ -1,17 +1,21 @@
 ______________________________________________________________________
 
-Version: 1.0.0
-Status: published
-Class: runbook
+Version: 1.0.1
+Status: active
+Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-14'
+  Last verified: '2026-08-04'
 
 ______________________________________________________________________
 
 # Migration Runbook: Canonical Semantic Field Unification
+
+> Relocated from root `docs/migration.md` during documentation architecture
+> audit cycle 1 (#7421). Canonical path is now under published operations
+> runbooks.
 
 This runbook operationalizes the semantic-field-unification wave across dev,
 staging and prod.

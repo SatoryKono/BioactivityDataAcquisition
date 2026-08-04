@@ -33,6 +33,10 @@ current documentation.
   artifacts moved out of the active plan set.
 - [Archived Engineering](engineering/README.md) — closeouts relocated from
   `docs/05-engineering/` (DOC-GOV-08).
+- [Archived Fix Notes](fixes/) — one-off Windows/WSL and dependency fix notes
+  relocated from `docs/fixes/` (docs audit cycle 1 / #7420).
+- [Archived Refactoring Plans](refactoring_plans/) — completed naming/refactor
+  plans relocated from `docs/refactoring_plans/` (#7420).
 - [Archived Reports Index](reports/README.md) — superseded documentation-audit
   issue packs and generated report snapshots moved out of active report
   surfaces.

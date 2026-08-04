@@ -44,8 +44,6 @@ SKIP_PATH_PREFIXES: Final[tuple[str, ...]] = (
     "docs/02-architecture/generated/",
     "docs/99-archive/",
     "docs/exports/",
-    "docs/fixes/",
-    "docs/refactoring_plans/",
     "docs/reports/",
     "tests/fixtures/",
 )

@@ -1,5 +1,9 @@
 # Test Dependency Fixes
 
+> **Archived** 2026-08-04 (docs architecture audit cycle 1 / #7420).
+> One-time dependency remediation notes. Prefer current setup guides and
+> `pyproject.toml` extras. Not normative.
+
 ## Issues Resolved
 
 ### 1. Missing `respx` Dependency
