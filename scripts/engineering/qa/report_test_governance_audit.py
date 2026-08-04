@@ -236,8 +236,8 @@ def _read_source_tree_bytes(path: Path) -> bytes:
     """Read one source-tree file for the freshness hash.
 
     Normalize newlines to LF so Windows working trees with CRLF smudge produce
-    the same ``source_tree_sha256`` as Linux CI checkouts (eol=lf in
-    ``.gitattributes``).
+    the same source_tree_sha256 as Linux CI checkouts (eol=lf in
+    .gitattributes).
     """
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
@@ -250,6 +250,7 @@ def _read_source_tree_bytes(path: Path) -> bytes:
 ", b"
 ").replace(b"", b"
 ")
+
 
 
 @cache
