@@ -169,7 +169,26 @@ def test_issue_5863_control_plane_hotspot_loc_ratchet_improved() -> None:
 
     assert FORENSIC_SUPPORT.exists()
     assert len(FORENSIC_SERVICE.read_text(encoding="utf-8").splitlines()) < 250
-    assert family["files_ge_250_loc"] <= 12
+    # Fold literal freezes onto live residual snapshot non-growth (#7464 / #6891).
+    from tests.architecture._live_residual import (
+        assert_residual_not_grown,
+        hotspot_family,
+        load_live_residual_snapshot,
+    )
+
+    residual_family = hotspot_family(
+        load_live_residual_snapshot(), "application_services_control_plane"
+    )
+    assert_residual_not_grown(
+        metric_name="application_services_control_plane.files_ge_250_loc",
+        live_value=int(family["files_ge_250_loc"]),
+        baseline_value=int(residual_family["files_ge_250_loc"]),
+    )
+    assert_residual_not_grown(
+        metric_name="application_services_control_plane.max_internal_fan_in",
+        live_value=int(family["max_internal_fan_in"]),
+        baseline_value=int(residual_family["max_internal_fan_in"]),
+    )
     assert (
         family["files_ge_250_loc"]
         <= closeout["metrics"]["control_plane_files_ge_250_loc"]["opening"]

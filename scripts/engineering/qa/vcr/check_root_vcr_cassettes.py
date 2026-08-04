@@ -52,12 +52,50 @@ def get_legacy_vcr_cassettes_files() -> list[Path]:
     return sorted(path for path in LEGACY_VCR_ROOT.rglob("*") if path.is_file())
 
 
+def get_noncanonical_test_vcr_cassettes() -> list[Path]:
+    """Return VCR cassettes under tests/ outside the canonical fixtures/vcr tree.
+
+    Issue #4468: shadow cassettes under tests/integration/**/cassettes must not
+    reappear beside the managed catalog under tests/fixtures/vcr.
+    """
+    tests_root = ROOT / "tests"
+    if not tests_root.is_dir():
+        return []
+    noncanonical: list[Path] = []
+    for path in tests_root.rglob("*.yaml"):
+        if not path.is_file():
+            continue
+        try:
+            relative = path.relative_to(ROOT)
+        except ValueError:
+            continue
+        parts = relative.parts
+        # Canonical managed inventory lives only under tests/fixtures/vcr/**
+        if len(parts) >= 3 and parts[0] == "tests" and parts[1] == "fixtures":
+            if len(parts) >= 3 and parts[2] == "vcr":
+                continue
+            if len(parts) >= 3 and parts[2] == "vcr_cassettes":
+                # handled by get_legacy_vcr_cassettes_files
+                continue
+        if path.name.endswith("_meta.yaml"):
+            continue
+        if _looks_like_vcr_cassette(path):
+            noncanonical.append(path)
+    return sorted(noncanonical)
+
+
 def main() -> int:
     """Run check and report violations."""
     invalid_cassettes = get_root_vcr_cassettes()
     legacy_from_root = get_legacy_from_root_markers()
     legacy_vcr_cassettes = get_legacy_vcr_cassettes_files()
-    if not invalid_cassettes and not legacy_from_root and not legacy_vcr_cassettes:
+    noncanonical_test_cassettes = get_noncanonical_test_vcr_cassettes()
+    if (
+        not invalid_cassettes
+        and not legacy_from_root
+        and not legacy_vcr_cassettes
+        and not noncanonical_test_cassettes
+    ):
         sys.stdout.write("No VCR cassette anti-patterns detected.\n")
         return 0
 
@@ -78,6 +116,14 @@ def main() -> int:
             "Found files under legacy tests/fixtures/vcr_cassettes/. Move them under tests/fixtures/vcr/<provider>/:\n"
         )
         for cassette in legacy_vcr_cassettes:
+            sys.stdout.write(f" - {cassette.relative_to(ROOT)}\n")
+    if noncanonical_test_cassettes:
+        sys.stdout.write(
+            "Found non-canonical VCR cassettes outside tests/fixtures/vcr/. "
+            "Move or delete shadows; keep managed inventory under "
+            "tests/fixtures/vcr/<provider>/ (#4468):\n"
+        )
+        for cassette in noncanonical_test_cassettes:
             sys.stdout.write(f" - {cassette.relative_to(ROOT)}\n")
     return 1
 
