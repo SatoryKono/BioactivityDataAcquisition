@@ -7,8 +7,6 @@ from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy import (
     requires_artifact_publication_closure as _requires_artifact_publication_closure,
-)
-from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy import (
     validate_artifact_recorder_attachment as _validate_artifact_recorder_attachment,
 )
 from bioetl.composition.runtime_builders._runner_control_plane_data_root_policy import (

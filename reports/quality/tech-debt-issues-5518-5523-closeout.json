@@ -1,0 +1,82 @@
+{
+  "schema_version": "tech-debt-issues-5518-5523-closeout-v1",
+  "reviewed_on": "2026-06-23",
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "issues": [
+    {
+      "number": 5518,
+      "title": "refactor(config): finish the owner-seam migration for CLI bootstrap config loading",
+      "status": "closed-ready",
+      "evidence": [
+        "src/bioetl/composition/bootstrap/cli/config.py",
+        "src/bioetl/composition/runtime_builders/config_access.py",
+        "tests/unit/composition/bootstrap/cli/test_config.py",
+        "tests/architecture/test_rf014_composition_bootstrap_closeout.py"
+      ]
+    },
+    {
+      "number": 5519,
+      "title": "refactor(composition): eliminate the remaining first-party callers of bioetl.composition.health_api",
+      "status": "closed-ready",
+      "evidence": [
+        "src/bioetl/composition/health_service_access.py",
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_health_cli_config_seam.py"
+      ]
+    },
+    {
+      "number": 5520,
+      "title": "refactor(domain): start the second-wave reduction of bioetl.domain.composite.config facade burden",
+      "status": "closed-ready",
+      "evidence": [
+        "src/bioetl/domain/composite/__init__.py",
+        "src/bioetl/domain/composite/config.py",
+        "src/bioetl/domain/composite/config_models.py",
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_domain_composite_config_importer_map.py"
+      ]
+    },
+    {
+      "number": 5521,
+      "title": "refactor(cli): collapse the remaining run-manifest output twin helper pair",
+      "status": "closed-ready",
+      "evidence": [
+        "src/bioetl/interfaces/cli/commands/run_manifest_output_support.py",
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_private_module_imports.py"
+      ]
+    },
+    {
+      "number": 5522,
+      "title": "refactor(config): deduplicate the repeated entity contract metadata blocks across configs/entities",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/entity_contract_metadata_registry.yaml",
+        "reports/quality/config-surface-backlog.json",
+        "tests/architecture/_entity_contract_metadata_registry.py",
+        "tests/architecture/test_chembl_derived_vocabulary_policy.py",
+        "tests/architecture/test_chembl_publication_subset_policy.py"
+      ]
+    },
+    {
+      "number": 5523,
+      "title": "governance(observability): tighten runtime cardinality review freshness after the zero-residual debt closeout",
+      "status": "closed-ready",
+      "evidence": [
+        "scripts/engineering/qa/report_debt_governance_gates.py",
+        "reports/quality/debt-governance-gates.json",
+        "reports/observability/runtime_cardinality_review.json",
+        "tests/unit/scripts/qa/test_report_debt_governance_gates.py"
+      ]
+    }
+  ],
+  "metrics": {
+    "health_api_src_importer_count": 0,
+    "domain_composite_config_src_importer_count": 0,
+    "run_manifest_output_twin_pair_count": 0,
+    "shared_entity_quality_metadata_targets": 22,
+    "quality_metadata_duplication_clusters": 0,
+    "observability_release_review_freshness_limit_days": 21
+  }
+}

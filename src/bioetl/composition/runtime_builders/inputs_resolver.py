@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._runner_input_preparation import (
     prepare_runner_context as _prepare_runner_context,
-)
-from bioetl.composition.runtime_builders._runner_input_preparation import (
     resolve_runner_derived_inputs as _resolve_runner_derived_inputs,
 )
 import bioetl.composition.runtime_builders.inputs_runtime_assembly as _runtime_assembly

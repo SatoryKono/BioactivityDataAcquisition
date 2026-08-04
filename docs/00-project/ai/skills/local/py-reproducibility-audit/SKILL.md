@@ -69,7 +69,7 @@ timestamp = datetime.now()
 items = list(my_dict.keys())
 
 # GOOD: Deterministic
-result = df.sort_values('id').head(10)
+result = df.sort_values("id").head(10)
 timestamp = datetime.now(timezone.utc)
 items = sorted(my_dict.keys())
 ```
@@ -100,17 +100,17 @@ Review I/O operations for determinism:
 
 ```python
 # BAD: Non-deterministic file ordering
-files = os.listdir('data/')
+files = os.listdir("data/")
 
 # GOOD: Deterministic file ordering
-files = sorted(os.listdir('data/'))
+files = sorted(os.listdir("data/"))
 
 # BAD: Non-atomic writes
-with open('output.json', 'w') as f:
+with open("output.json", "w") as f:
     json.dump(data, f)
 
 # GOOD: Atomic writes via write_dataset_atomic
-write_dataset_atomic(data, 'output.json')
+write_dataset_atomic(data, "output.json")
 ```
 
 **Check for:**

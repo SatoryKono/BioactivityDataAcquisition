@@ -5,19 +5,6 @@
   "description": "Gold layer data contract for composite_activity. Auto-generated from Pandera schema CompositeActivityGoldSchema.",
   "type": "object",
   "properties": {
-    "entity_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_source": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": "Source-family lineage marker retained as composite metadata."
-    },
     "_dq_warn": {
       "type": "boolean",
       "nullable": false,
@@ -32,6 +19,19 @@
       "type": "integer",
       "nullable": false,
       "description": ""
+    },
+    "entity_id": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "_source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Source-family lineage marker retained as composite metadata."
     },
     "_source_providers": {
       "type": "string",
