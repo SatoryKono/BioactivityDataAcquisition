@@ -84,8 +84,7 @@ def _build_json_payload(
                 _list_size(family, "budget_warnings") for family in enriched_metrics
             ),
             "budget_review_notes": sum(
-                _list_size(family, "budget_review_notes")
-                for family in enriched_metrics
+                _list_size(family, "budget_review_notes") for family in enriched_metrics
             ),
         },
         "families": enriched_metrics,
