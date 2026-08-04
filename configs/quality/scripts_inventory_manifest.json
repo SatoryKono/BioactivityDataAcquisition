@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-04T06:11:57.275911+00:00",
+  "generated_at": "2026-08-04T06:42:54.216974+00:00",
   "summary": {
     "total_scripts": 571,
     "status_counts": {
@@ -9440,7 +9440,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 1074,
+          "line": 1092,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::\""
         },
@@ -11347,7 +11347,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 292,
+      "reference_count": 297,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -13108,7 +13108,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_dead_code_inventory.py",
-          "line": 797,
+          "line": 805,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.import_graph_inventory import ("
         },
@@ -13318,13 +13318,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
         {
           "path": "tests/architecture/test_architecture_audit_closeout_gates.py",
           "line": 238,
           "source_group": "tests",
           "text": "assert (ROOT / \"scripts/engineering/qa/refresh_governance_artifacts.py\").is_file()"
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_roadmap_7461_7465.py",
+          "line": 25,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.refresh_governance_artifacts import _run_refresh"
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_roadmap_7461_7465.py",
+          "line": 47,
+          "source_group": "tests",
+          "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"refresh_governance_artifacts.py\""
         }
       ]
     },
@@ -13830,7 +13842,7 @@
         },
         {
           "path": "tests/architecture/test_dashboard_scenes_contract.py",
-          "line": 10,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_dashboard_scenes_parity import build_payload"
         }
@@ -13896,7 +13908,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -13927,6 +13939,18 @@
           "line": 214,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_debt_governance_gates.py\""
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_roadmap_7461_7465.py",
+          "line": 22,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.report_debt_governance_gates import ("
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_roadmap_7461_7465.py",
+          "line": 50,
+          "source_group": "tests",
+          "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"report_debt_governance_gates.py\""
         },
         {
           "path": "tests/unit/scripts/qa/test_report_debt_governance_gates.py",
@@ -16278,13 +16302,13 @@
         },
         {
           "path": "tests/unit/memory/test_rag_indexing.py",
-          "line": 54,
+          "line": 55,
           "source_group": "tests",
           "text": "assert infer_source_type(Path(\"src/memory/query.py\")) == \"memory\""
         },
         {
           "path": "tests/unit/memory/test_rag_indexing.py",
-          "line": 69,
+          "line": 70,
           "source_group": "tests",
           "text": "assert infer_domain(Path(\"src/memory/query.py\")) == \"memory_subsystem\""
         },
