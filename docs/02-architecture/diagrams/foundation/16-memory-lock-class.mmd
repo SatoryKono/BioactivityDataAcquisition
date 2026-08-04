@@ -150,6 +150,6 @@ classDiagram
 
     note for MemoryLock "Local-only lock<br/>single-process runtime<br/>TTL expiry + heartbeat<br/>defaults: ttl=90s, hb=30s"
 
-    note for LockRuntimeService "Lock wrapper<br/>heartbeat + key build<br/>log integration<br/>key: lock:&#123;provider&#125;_&#123;entity&#125;"
+    note for LockRuntimeService "Lock wrapper<br/>heartbeat + key build<br/>log integration<br/>key: lock:{provider}_{entity}"
 
     note for BackfillLock "Exclusive BACKFILL/REBUILD lock<br/>prevents concurrent modification<br/>suffix: :exclusive"

@@ -27,7 +27,7 @@ flowchart TD
     end
 
     subgraph Classification["Error Classification (§3.1)"]
-        Classify&#123;ErrorClassifier&#125; -->|"critical"| Critical
+        Classify{ErrorClassifier} -->|"critical"| Critical
         Classify -->|"recoverable"| Retry
         Classify -->|"data quality"| DQ
     end
