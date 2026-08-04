@@ -92,9 +92,9 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Purpose:** Count quarantined records.
 - **Data sources:** `bioetl_dq_records_quarantined_total`
 
-### 16. Monitor Silver Validation Failures
+### 16. Monitor Silver Validation Failures (range composite)
 - **Type:** Stat
-- **Purpose:** Count Silver validation failures.
+- **Purpose:** Count Silver validation failures over the selected range.
 - **Data sources:** `bioetl_silver_validation_failures_total`
 
 ### 17. Monitor Worst Freshness Age

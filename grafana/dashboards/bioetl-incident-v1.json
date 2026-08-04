@@ -561,7 +561,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "transparent",
+                "color": "green",
                 "value": null
               },
               {
@@ -576,7 +576,7 @@
               "options": {
                 "0": {
                   "text": "inactive",
-                  "color": "transparent"
+                  "color": "green"
                 },
                 "1": {
                   "text": "active",
