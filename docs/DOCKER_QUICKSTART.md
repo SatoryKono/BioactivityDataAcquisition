@@ -1,5 +1,18 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: active
+Class: repo-only
+Owner: BioETL Team
+Last verified: '2026-08-04'
+
+______________________________________________________________________
+
 # Docker quick start
 
+> **Classification:** repo-only adjunct guide (outside MkDocs nav). Path is
+> stable for architecture/docker helper contracts. Docs audit cycle 2 / #7430.
+>
 > BIOETL_DOCKER_HELPER_ADR010_ADJUNCT — Local-Only Docker helpers governed by ADR-010.
 > Contract: `configs/quality/docker_helper_contracts.yaml`
 

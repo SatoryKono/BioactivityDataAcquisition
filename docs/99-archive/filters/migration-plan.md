@@ -1,14 +1,19 @@
 ______________________________________________________________________
 
 Version: 0.2.0
-Status: historical-plan-implemented-for-yaml-cleanup
-Class: historical-working-document
+Status: archived
+Class: archive
 Owner: BioETL Team
 Last updated: '2026-06-15'
+Last verified: '2026-08-04'
 
 ______________________________________________________________________
 
 # План миграции: silver_filters → gold_filters (вариант D — гибрид)
+
+> **Archived** 2026-08-04 (docs architecture audit cycle 2 / #7428).
+> Historical implementation plan. Normative boundary: ADR-050.
+> Active pointer + inventory: `docs/filters/README.md`.
 
 > Current-state note (2026-06-03): this plan is no longer a pure future plan.
 > The compatibility boundary is already partially implemented in current code:
