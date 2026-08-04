@@ -159,6 +159,11 @@ SKIP_TEXT_SCAN_PATHS = {
     "reports/merged_output.txt",
     "reports/project_structure.md",
 }
+# CI writes this ignored report immediately before running the cleanup inventory
+# check. It is a transient upload artifact, not a local documentation surface.
+LOCAL_DOC_REPORT_SCAN_EXCLUSIONS = {
+    "docs/reports/docs-link-check-report.json",
+}
 SKIP_TEXT_SCAN_SUFFIXES = {".csv", EXT_JSON}
 MAX_LOCAL_DOC_REPORT_FILES = 25_000
 QUARANTINED_PATH_MARKERS = (
@@ -227,6 +232,8 @@ def _handle_scan_entry(
     """Process one scandir entry. Return False when the file limit is exceeded."""
     entry_path = Path(entry.path)
     relative = _repo_relative(entry_path)
+    if relative in LOCAL_DOC_REPORT_SCAN_EXCLUSIONS:
+        return True
     try:
         if entry.is_dir(follow_symlinks=False):
             if _is_quarantined_path(relative):
@@ -237,9 +244,7 @@ def _handle_scan_entry(
         if entry.is_file(follow_symlinks=False) and _is_doc_like(relative):
             paths.append(relative)
             if len(paths) > MAX_LOCAL_DOC_REPORT_FILES:
-                errors.append(
-                    _scan_error(root_relative, "LocalScanFileLimitExceeded")
-                )
+                errors.append(_scan_error(root_relative, "LocalScanFileLimitExceeded"))
                 return False
     except OSError as error:
         errors.append(_scan_error(relative, error.__class__.__name__))
@@ -582,9 +587,7 @@ def _outgoing_links(text: str) -> list[str]:
         # Split scheme prefixes so S5332 does not flag this filter itself.
         _http = "http" + "://"
         _https = "https" + "://"
-        if not raw or raw.startswith(
-            ("#", _http, _https, "mailto:", "tel:", "app://")
-        ):
+        if not raw or raw.startswith(("#", _http, _https, "mailto:", "tel:", "app://")):
             continue
         if re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", raw) and not re.match(
             r"^[A-Za-z]:[\\/]", raw
@@ -687,11 +690,7 @@ def _duplicate_groups(texts: dict[str, str]) -> dict[str, int]:
 def _diagram_kind_from_mmd(path: str) -> str | None:
     if "/class-diagrams/90-pkg-" in path:
         return "diagram_generated_source"
-    if (
-        "/architecture/" in path
-        or "/class-diagrams/" in path
-        or "/foundation/" in path
-    ):
+    if "/architecture/" in path or "/class-diagrams/" in path or "/foundation/" in path:
         return "diagram_canonical_source"
     return None
 
@@ -720,8 +719,6 @@ def _diagram_kind(path: str) -> str | None:
         if mmd_kind is not None:
             return mmd_kind
     return _diagram_kind_from_path_markers(path)
-
-
 
 
 def _classify_from_lifecycle(
@@ -1325,10 +1322,14 @@ def _write_if_changed(path: Path, content: str) -> bool:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     safe_path = resolve_output_path(path, root=REPO_ROOT)
-    if safe_path.exists() and safe_path.read_text(encoding="utf-8") == content:  # NOSONAR
+    if (
+        safe_path.exists() and safe_path.read_text(encoding="utf-8") == content
+    ):  # NOSONAR
         return False
     safe_path.parent.mkdir(parents=True, exist_ok=True)
-    safe_path.write_text(content, encoding="utf-8")  # NOSONAR - confined by resolve_output_path
+    safe_path.write_text(
+        content, encoding="utf-8"
+    )  # NOSONAR - confined by resolve_output_path
     return True
 
 
