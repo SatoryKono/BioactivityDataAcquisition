@@ -35,5 +35,11 @@ CATEGORY_SCORER_EXPORTS: tuple[str, ...] = (
     "score_replay_readiness",
     "score_run_identity",
 )
+# Backward-compatible private alias for intermediate facades.
+_CATEGORY_SCORER_EXPORTS = CATEGORY_SCORER_EXPORTS
 
-__all__ = ["CATEGORY_SCORER_EXPORTS", *CATEGORY_SCORER_EXPORTS]
+__all__ = [
+    "CATEGORY_SCORER_EXPORTS",
+    "_CATEGORY_SCORER_EXPORTS",
+    *CATEGORY_SCORER_EXPORTS,
+]

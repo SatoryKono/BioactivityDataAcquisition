@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
-    _CATEGORY_SCORER_EXPORTS,
+    CATEGORY_SCORER_EXPORTS as _CATEGORY_SCORER_EXPORTS,
 )
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores import (
     score_checkpoint_safety as score_checkpoint_safety,

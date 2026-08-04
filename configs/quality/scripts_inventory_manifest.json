@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-03T15:07:47.777432+00:00",
+  "generated_at": "2026-08-04T03:17:46.051711+00:00",
   "summary": {
     "total_scripts": 571,
     "status_counts": {
@@ -16,7 +16,7 @@
       "other": 80,
       "scripts": 453,
       "skills": 18,
-      "tests": 359
+      "tests": 367
     }
   },
   "scripts": [
@@ -590,7 +590,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 872,
+          "line": 878,
           "source_group": "tests",
           "text": "ensure_script = _to_bash_path(root / \"scripts/ai/codex/helper/ensure-mcp.sh\")"
         }
@@ -2485,7 +2485,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 153,
+          "line": 175,
           "source_group": "docs",
           "text": "`scripts/ai/mcp/export_mcp_env_from_dotenv.ps1` can export already configured"
         },
@@ -2584,7 +2584,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
@@ -2597,6 +2597,12 @@
           "line": 61,
           "source_group": "tests",
           "text": "ADR_ANALYSIS_PS1 = MCP_DIR / \"mcp_adr_analysis_wrapper.ps1\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1337,
+          "source_group": "tests",
+          "text": "\"mcp_adr_analysis_wrapper.ps1\","
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_adr_analysis_wrapper_contracts.py",
@@ -2615,7 +2621,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -2634,6 +2640,12 @@
           "line": 128,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1341,
+          "source_group": "tests",
+          "text": "\"mcp_adr_analysis_wrapper.sh\","
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_adr_analysis_wrapper_contracts.py",
@@ -2701,19 +2713,19 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 262,
+          "line": 268,
           "source_group": "tests",
           "text": "\"mcp_brave_search_wrapper.ps1\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 274,
+          "line": 280,
           "source_group": "tests",
           "text": "not in sources[\"mcp_brave_search_wrapper.ps1\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 282,
+          "line": 288,
           "source_group": "tests",
           "text": "assert '\"BRAVE_API_KEY\"' in sources[\"mcp_brave_search_wrapper.ps1\"]"
         }
@@ -2762,19 +2774,19 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 261,
+          "line": 267,
           "source_group": "tests",
           "text": "\"mcp_brave_search_wrapper.sh\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 270,
+          "line": 276,
           "source_group": "tests",
           "text": "not in sources[\"mcp_brave_search_wrapper.sh\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 281,
+          "line": 287,
           "source_group": "tests",
           "text": "assert \"-e BRAVE_API_KEY\" in sources[\"mcp_brave_search_wrapper.sh\"]"
         }
@@ -2785,13 +2797,19 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 111,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1345,
+          "source_group": "tests",
+          "text": "\"mcp_code_analyzer_wrapper.ps1\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -2804,7 +2822,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -2823,6 +2841,12 @@
           "line": 149,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1349,
+          "source_group": "tests",
+          "text": "\"mcp_code_analyzer_wrapper.sh\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -2933,13 +2957,19 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 85,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1329,
+          "source_group": "tests",
+          "text": "\"mcp_deja_wrapper.ps1\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -2952,7 +2982,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -2971,6 +3001,12 @@
           "line": 118,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1333,
+          "source_group": "tests",
+          "text": "\"mcp_deja_wrapper.sh\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3054,13 +3090,19 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 150,
           "source_group": "docs",
           "text": "`scripts/ai/mcp/mcp_dockerhub_wrapper.ps1` (Windows)"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1381,
+          "source_group": "tests",
+          "text": "\"mcp_dockerhub_wrapper.ps1\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3144,13 +3186,19 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 232,
           "source_group": "docs",
           "text": "| `filesystem` | `scripts/ai/mcp/mcp_filesystem_wrapper.sh` (WSL) / `scripts/ai/mcp/mcp_filesystem_wrapper.ps1` (Windows) | Repo-scoped file access (host-native absolute root) |"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1321,
+          "source_group": "tests",
+          "text": "\"mcp_filesystem_wrapper.ps1\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3163,7 +3211,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -3190,14 +3238,20 @@
           "text": "EXPECTED_FILESYSTEM_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         },
         {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1325,
+          "source_group": "tests",
+          "text": "\"mcp_filesystem_wrapper.sh\","
+        },
+        {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 842,
+          "line": 848,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 912,
+          "line": 918,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         }
@@ -3208,13 +3262,19 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 117,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1373,
+          "source_group": "tests",
+          "text": "\"mcp_github_actions_wrapper.ps1\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3227,7 +3287,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -3246,6 +3306,12 @@
           "line": 159,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1377,
+          "source_group": "tests",
+          "text": "\"mcp_github_actions_wrapper.sh\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3268,19 +3334,19 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 264,
+          "line": 270,
           "source_group": "tests",
           "text": "\"mcp_grafana_wrapper.ps1\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 289,
+          "line": 295,
           "source_group": "tests",
           "text": "'@(\"-e\", \"GRAFANA_SERVICE_ACCOUNT_TOKEN\")' in sources[\"mcp_grafana_wrapper.ps1\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 291,
+          "line": 297,
           "source_group": "tests",
           "text": "assert '@(\"-e\", \"GRAFANA_PASSWORD\")' in sources[\"mcp_grafana_wrapper.ps1\"]"
         }
@@ -3329,19 +3395,19 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 263,
+          "line": 269,
           "source_group": "tests",
           "text": "\"mcp_grafana_wrapper.sh\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 285,
+          "line": 291,
           "source_group": "tests",
           "text": "in sources[\"mcp_grafana_wrapper.sh\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 287,
+          "line": 293,
           "source_group": "tests",
           "text": "assert \"docker_args+=(-e GRAFANA_PASSWORD)\" in sources[\"mcp_grafana_wrapper.sh\"]"
         }
@@ -3352,7 +3418,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "tests/architecture/test_ai_memory_program_contracts.py",
@@ -3365,6 +3431,12 @@
           "line": 204,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1361,
+          "source_group": "tests",
+          "text": "\"mcp_memory_wrapper.ps1\","
         }
       ]
     },
@@ -3373,7 +3445,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -3400,6 +3472,12 @@
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         },
         {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1365,
+          "source_group": "tests",
+          "text": "\"mcp_memory_wrapper.sh\","
+        },
+        {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py",
           "line": 11,
           "source_group": "tests",
@@ -3413,7 +3491,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 532,
+          "line": 538,
           "source_group": "tests",
           "text": "assert servers[\"memory\"][\"args\"][0].endswith(\"mcp_memory_wrapper.sh\")"
         }
@@ -3467,7 +3545,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
@@ -3480,6 +3558,12 @@
           "line": 60,
           "source_group": "tests",
           "text": "MUTMUT_PS1 = MCP_DIR / \"mcp_mutmut_wrapper.ps1\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1353,
+          "source_group": "tests",
+          "text": "\"mcp_mutmut_wrapper.ps1\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3492,7 +3576,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -3517,6 +3601,12 @@
           "line": 59,
           "source_group": "tests",
           "text": "MUTMUT_SH = MCP_DIR / \"mcp_mutmut_wrapper.sh\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1357,
+          "source_group": "tests",
+          "text": "\"mcp_mutmut_wrapper.sh\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3637,7 +3727,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 26,
       "references": [
         {
           "path": ".zed/mcp.json",
@@ -3769,9 +3859,9 @@
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
-          "line": 56,
+          "line": 49,
           "source_group": "scripts",
-          "text": "exec \"${PYTHON_BIN}\" \"${REPO_ROOT}/scripts/ai/mcp/neo4j_memory_mcp_adapter.py\" -- \\"
+          "text": "export NEO4J_MEMORY_ADAPTER_PATH=\"${NEO4J_MEMORY_ADAPTER_PATH:-${REPO_ROOT}/scripts/ai/mcp/neo4j_memory_mcp_adapter.py}\""
         },
         {
           "path": "scripts/memory/README.md",
@@ -3868,7 +3958,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_docker_wrapper.ps1",
@@ -3893,6 +3983,12 @@
           "line": 558,
           "source_group": "tests",
           "text": "powershell = (ROOT / \"scripts/ai/mcp/support/docker_cli_resolver.ps1\").read_text("
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 1385,
+          "source_group": "tests",
+          "text": "\"support/docker_cli_resolver.ps1\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -3905,7 +4001,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 20,
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
@@ -3966,7 +4062,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 150,
+          "line": 172,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/load_repo_env.ps1`"
         },
@@ -4116,7 +4212,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 167,
+          "line": 189,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
@@ -4173,7 +4269,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 166,
+          "line": 188,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
@@ -11598,7 +11694,7 @@
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 129,
+          "line": 152,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -18724,7 +18820,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 118,
+          "line": 140,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
@@ -18761,13 +18857,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 120,
+          "line": 142,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 135,
+          "line": 157,
           "source_group": "docs",
           "text": "after reconnects run `cleanup-mcp-orphans.ps1` or `ensure-stable.ps1`."
         },
@@ -18912,7 +19008,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 135,
+          "line": 157,
           "source_group": "docs",
           "text": "after reconnects run `cleanup-mcp-orphans.ps1` or `ensure-stable.ps1`."
         },
@@ -19252,7 +19348,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 295,
+          "line": 301,
           "source_group": "tests",
           "text": "from scripts.ops.runtime.mcp import _materialize_shared_http_configs as materialize"
         }
@@ -19361,9 +19457,9 @@
         },
         {
           "path": "scripts/ops/runtime/mcp/watchdog-shared.ps1",
-          "line": 29,
+          "line": 36,
           "source_group": "scripts",
-          "text": "$healthScript = Join-Path $PSScriptRoot 'health-shared.ps1'"
+          "text": "Join-Path $PSScriptRoot 'health-shared.ps1'"
         }
       ]
     },
@@ -19419,7 +19515,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 136,
+          "line": 158,
           "source_group": "docs",
           "text": "Alternatively run the **shared HTTP plane** (`start-shared.ps1` +"
         },
@@ -19613,9 +19709,9 @@
       "references": [
         {
           "path": "scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py",
-          "line": 165,
+          "line": 169,
           "source_group": "scripts",
-          "text": "relay_script = Path(__file__).with_name(\"windows_tcp_relay.ps1\")"
+          "text": "str(Path(__file__).with_name(\"windows_tcp_relay.ps1\")),"
         }
       ]
     },
@@ -19952,7 +20048,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 149,
+          "line": 171,
           "source_group": "docs",
           "text": "- `scripts/ops/support/load_repo_env.sh`"
         },
@@ -21386,7 +21482,7 @@
           "path": "src/tools/schema_parity_baseline.json",
           "line": 2,
           "source_group": "scripts",
-          "text": "\"description\": \"Known Silver↔Gold field differences. Only NEW mismatches not in this baseline trigger blocking failures. Update with: python src/tools/verify_schema_parity.py --update-baseline\","
+          "text": "\"description\": \"Known Silver<->Gold field differences. Only NEW mismatches not in this baseline trigger blocking failures. Update with: python src/tools/verify_schema_parity.py --update-baseline\","
         }
       ]
     }
