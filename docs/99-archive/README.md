@@ -39,6 +39,9 @@ current documentation.
   plans relocated from `docs/refactoring_plans/` (#7420).
 - [Archived Filters Migration Prose](filters/) — historical silver→gold
   migration plan and retired draft relocated from `docs/filters/` (#7428).
+- [Archived Tools](tools/) — obsolete pygrok CLI notes (#7432).
+- [Archived Dashboard UX Checks](reports/dashboard-ux-checks/) — dated UX
+  residual reports (#7433); active gate stays at `docs/reports/dashboard-ux-checks/`.
 - [Archived Reports Index](reports/README.md) — superseded documentation-audit
   issue packs and generated report snapshots moved out of active report
   surfaces.

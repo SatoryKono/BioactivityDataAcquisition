@@ -1,5 +1,10 @@
 # Grok CLI для BioETL
 
+> **Archived** 2026-08-04 (docs architecture audit cycle 3 / #7432).
+> Obsolete: `scripts/grok_cli.py`, `scripts/grok_cli_advanced.py`, and the
+> `pygrok` package are **not** present in the current repository. Do not follow
+> the commands below. Prefer current logging/ops guides under `docs/05-operations/`.
+
 ## Обзор
 
 Grok CLI установлен в проекте через библиотеку `pygrok` и предоставляет функциональность для парсинга структурированных логов и текстовых данных с использованием Grok паттернов.
