@@ -520,7 +520,8 @@
         "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "cellHeight": "sm"
       }
     },
     {
