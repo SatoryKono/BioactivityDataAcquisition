@@ -74,3 +74,54 @@ def test_closeout_json_artifacts_declare_no_budget_growth_policy() -> None:
     assert failures == [], "Closeout artifact policy regressions:\n" + "\n".join(
         failures
     )
+
+
+def test_tech_debt_closeout_json_packs_keep_evidence_and_ratchets() -> None:
+    """Generic fold for issue-pack JSON freezes (#7464 batch).
+
+    Historical closeout JSON remains; repeated existence/schema freezes move here
+    so per-issue pytest modules can shrink without losing failure proof.
+    """
+    packs = sorted(REPORTS.glob("tech-debt-*-closeout.json"))
+    assert packs, "expected tech-debt closeout JSON packs"
+    failures: list[str] = []
+    for path in packs:
+        try:
+            payload: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            failures.append(f"{path.name}: invalid json ({exc})")
+            continue
+        if not isinstance(payload, dict) or not payload:
+            failures.append(f"{path.name}: empty/non-object payload")
+            continue
+        has_identity = any(
+            key in payload
+            for key in (
+                "schema_version",
+                "debt_budget_outcome",
+                "debt_outcome",
+                "issues",
+                "issue",
+                "status",
+            )
+        )
+        if not has_identity:
+            failures.append(f"{path.name}: missing closeout identity fields")
+        ratchets = payload.get("ratchets")
+        if isinstance(ratchets, dict):
+            for name, ratchet in ratchets.items():
+                if not isinstance(ratchet, dict):
+                    continue
+                if "current" in ratchet and "max" in ratchet:
+                    try:
+                        if float(ratchet["current"]) > float(ratchet["max"]):
+                            failures.append(
+                                f"{path.name}: ratchet {name} current>max "
+                                f"({ratchet['current']}>{ratchet['max']})"
+                            )
+                    except (TypeError, ValueError):
+                        failures.append(f"{path.name}: ratchet {name} non-numeric")
+        # Evidence entries are historical labels and may point at renamed/removed
+        # surfaces; path existence remains the responsibility of owner closeout
+        # modules. Generic fold only keeps identity + ratchet non-growth proof.
+    assert failures == [], "Closeout pack regressions:\n" + "\n".join(failures[:40])

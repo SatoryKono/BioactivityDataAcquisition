@@ -72,6 +72,10 @@
   },
   "closeout_program": {
     "tech_debt_closeout_test_file_count": 51,
+    "tech_debt_closeout_test_function_count": 311,
+    "tech_debt_closeout_test_loc": 11325,
+    "closeout_files_using_live_residual_helpers": 6,
+    "fold_into_generic_inventory_count": 60,
     "retained_public_entrypoint_count": 12,
     "zero_reference_supporting_script_count": 5
   }

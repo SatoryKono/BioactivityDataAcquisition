@@ -112,6 +112,37 @@ def test_live_residual_snapshot_dead_code_and_clusters_match_committed_artifacts
     )
 
 
+def test_closeout_program_mass_metrics_only_shrink() -> None:
+    """Closeout freeze mass may only shrink relative to the live residual snapshot."""
+    from scripts.engineering.qa.report_live_residual_snapshot import (
+        _closeout_program_residuals,
+    )
+
+    committed = load_live_residual_snapshot()
+    live = _closeout_program_residuals()
+    program = committed.get("closeout_program") or {}
+    for key in (
+        "tech_debt_closeout_test_file_count",
+        "tech_debt_closeout_test_function_count",
+        "tech_debt_closeout_test_loc",
+        "fold_into_generic_inventory_count",
+        "retained_public_entrypoint_count",
+        "zero_reference_supporting_script_count",
+    ):
+        if key not in program:
+            continue
+        assert_residual_not_grown(
+            metric_name=f"closeout_program.{key}",
+            live_value=int(live[key]),
+            baseline_value=int(program[key]),
+        )
+    # Helper adoption may grow (fold progress); do not treat as residual.
+    if "closeout_files_using_live_residual_helpers" in program:
+        assert int(live["closeout_files_using_live_residual_helpers"]) >= int(
+            program["closeout_files_using_live_residual_helpers"]
+        )
+
+
 def test_historical_tech_debt_closeout_json_artifacts_remain_present() -> None:
     """Evidence of closed issue packs remains as reports, not thrashing freezes.
 
