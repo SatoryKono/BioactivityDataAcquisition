@@ -398,9 +398,7 @@ def _is_status_like_panel(panel: JsonObject) -> bool:
     return any(token in title or token in description for token in STATUS_PANEL_TOKENS)
 
 
-def _stat_threshold_color_errors(
-    dashboard_path: Path, panel: JsonObject
-) -> list[str]:
+def _stat_threshold_color_errors(dashboard_path: Path, panel: JsonObject) -> list[str]:
     if panel.get("type") != "stat":
         return []
 
@@ -473,9 +471,7 @@ def _panel_errors(dashboard_path: Path, panel: JsonObject) -> list[str]:
     )
 
 
-def _collapsed_row_errors(
-    dashboard_path: Path, panels: list[JsonObject]
-) -> list[str]:
+def _collapsed_row_errors(dashboard_path: Path, panels: list[JsonObject]) -> list[str]:
     return [
         error
         for panel in panels
