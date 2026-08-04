@@ -13,10 +13,12 @@ function Get-BioetlProxyEnvironmentSnapshot {
     # map (PowerShell otherwise unwraps single-collection returns).
     $snapshot = @{}
     foreach ($name in $script:BioetlProxyEnvironmentNames) {
-        $snapshot[$name] = [Environment]::GetEnvironmentVariable(
-            $name,
-            [EnvironmentVariableTarget]::Process
-        )
+        $envPath = "Env:$name"
+        $snapshot[$name] = if (Test-Path -LiteralPath $envPath) {
+            (Get-Item -LiteralPath $envPath).Value
+        } else {
+            $null
+        }
     }
     Write-Output -NoEnumerate $snapshot
 }
