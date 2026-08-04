@@ -123,6 +123,9 @@ log_test.txt
 !/reports/semantic_pipeline_audit/*_2026-07-01.*
 !/reports/review/
 !/reports/review/**
+!/reports/test-swarm/
+!/reports/test-swarm/SWARM-001/
+!/reports/test-swarm/SWARM-001/flakiness-database.json
 !/reports/quality/
 /reports/quality/*
 !/reports/quality/documentation-governance-2026-07-28-closeout.md
