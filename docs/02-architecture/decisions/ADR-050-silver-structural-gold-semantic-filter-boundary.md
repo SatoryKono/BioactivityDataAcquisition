@@ -247,5 +247,5 @@ Implementation and follow-up work must verify:
 - [ADR-045: Data Quality Contract System](ADR-045-dq-contract-system.md)
 - [ADR-046: Checkpoint Versus Ledger-Based Resume](ADR-046-checkpoint-vs-ledger-resume.md)
 - [ADR-047: Workflow Control Plane for Declarative Workflows](ADR-047-workflow-control-plane.md)
-- [Retired Silver-filter draft](../../99-archive/filters/retired-silver-filters-structural-scope.md)
-- [Silver-to-Gold migration plan](../../99-archive/filters/migration-plan.md)
+- [Retired Silver-filter draft](../../99-archive/filters/retired-silver-filters-structural-scope.md) — historical draft *(archived)*
+- [Silver-to-Gold migration plan](../../99-archive/filters/migration-plan.md) — historical migration context *(archived)*

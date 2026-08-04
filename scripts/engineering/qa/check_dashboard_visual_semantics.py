@@ -5,8 +5,14 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any, cast
 
 DASHBOARDS_DIR = Path("grafana/dashboards")
+
+# Grafana payloads are recursively heterogeneous JSON.  Keep the dynamic type
+# at this file-format boundary while exposing precise panel collections to the
+# validation helpers below.
+type JsonObject = dict[str, Any]
 
 # Dashboard / panel title identities (python:S1192).
 DASHBOARD_RUNTIME = "bioetl-runtime.json"
@@ -25,12 +31,12 @@ PANEL_MONITOR_MANIFEST_LEDGER_INTEGRITY = "Monitor Manifest & Ledger Failures"
 PANEL_INSPECT_TELEMETRY_MISSING = "Monitor Telemetry Coverage"
 UNTITLED_PANEL_TITLE = "<untitled>"
 
-EXPECTED_STEPS = [
+EXPECTED_STEPS: list[JsonObject] = [
     {"color": "green", "value": None},
     {"color": "orange", "value": 1},
     {"color": "red", "value": 2},
 ]
-EXPECTED_STEPS_BY_PANEL = {
+EXPECTED_STEPS_BY_PANEL: dict[tuple[str, str], list[JsonObject]] = {
     (DASHBOARD_RUNTIME, PANEL_MONITOR_RUNTIME_BLOCKERS): [
         {"color": "green", "value": None},
         {"color": "red", "value": 1},
@@ -46,7 +52,7 @@ EXPECTED_STEPS_BY_PANEL = {
         {"color": "red", "value": 900},
     ],
 }
-EXPECTED_UNKNOWN_MAPPING = {
+EXPECTED_UNKNOWN_MAPPING: JsonObject = {
     "type": "special",
     "options": {"match": "null", "result": {"text": "UNKNOWN", "color": "gray"}},
 }
@@ -82,7 +88,7 @@ SCALAR_TREND_TIMESERIES_PANELS = {
     (DASHBOARD_OVERVIEW_V2, "Gold Lifecycle Trend"),
 }
 ALLOWED_TABLE_CELL_OPTION_TYPES = {"auto", "color-background", "color-text"}
-EXPLICIT_VALUE_MAPPING_STAT_PANELS = {
+EXPLICIT_VALUE_MAPPING_STAT_PANELS: dict[tuple[str, str], JsonObject] = {
     (DASHBOARD_OVERVIEW_V2, "Status"): {
         "0": {"text": "OK", "color": "green"},
         "1": {"text": "WARN", "color": "orange"},
@@ -149,12 +155,12 @@ REQUIRED_TRUST_MARKER_PANELS = {
 }
 
 
-def _grid_pos(panel: dict[str, object]) -> dict[str, object]:
+def _grid_pos(panel: JsonObject) -> JsonObject:
     grid_pos = panel.get("gridPos", {})
     return grid_pos if isinstance(grid_pos, dict) else {}
 
 
-def _grid_rectangles_overlap(left: dict[str, object], right: dict[str, object]) -> bool:
+def _grid_rectangles_overlap(left: JsonObject, right: JsonObject) -> bool:
     left_grid = _grid_pos(left)
     right_grid = _grid_pos(right)
     left_x = int(left_grid.get("x", 0))
@@ -171,7 +177,7 @@ def _grid_rectangles_overlap(left: dict[str, object], right: dict[str, object]) 
 
 
 def _collapsed_row_grid_overlap_errors(
-    dashboard_path: Path, row_panel: dict[str, object]
+    dashboard_path: Path, row_panel: JsonObject
 ) -> list[str]:
     nested_panels = [
         panel for panel in row_panel.get("panels", []) if isinstance(panel, dict)
@@ -189,8 +195,8 @@ def _collapsed_row_grid_overlap_errors(
     return errors
 
 
-def iter_panels(panels: list[dict[str, object]]) -> list[dict[str, object]]:
-    collected: list[dict[str, object]] = []
+def iter_panels(panels: list[JsonObject]) -> list[JsonObject]:
+    collected: list[JsonObject] = []
     for panel in panels:
         if panel.get("type") == "row" and isinstance(panel.get("panels"), list):
             collected.extend(iter_panels(panel["panels"]))
@@ -200,7 +206,7 @@ def iter_panels(panels: list[dict[str, object]]) -> list[dict[str, object]]:
 
 
 def _stat_color_mode_error(
-    dashboard_path: Path, title: str, defaults: dict[str, object]
+    dashboard_path: Path, title: str, defaults: JsonObject
 ) -> str | None:
     if defaults.get("color", {}).get("mode") == "thresholds":
         return None
@@ -208,7 +214,7 @@ def _stat_color_mode_error(
 
 
 def _stat_threshold_steps_error(
-    dashboard_path: Path, title: str, defaults: dict[str, object]
+    dashboard_path: Path, title: str, defaults: JsonObject
 ) -> str | None:
     expected_steps = _expected_threshold_steps(dashboard_path, str(title))
     steps = defaults.get("thresholds", {}).get("steps")
@@ -218,7 +224,10 @@ def _stat_threshold_steps_error(
 
 
 def _stat_unknown_mapping_error(
-    dashboard_path: Path, title: str, panel: dict[str, object], mappings: list
+    dashboard_path: Path,
+    title: str,
+    panel: JsonObject,
+    mappings: list[JsonObject],
 ) -> str | None:
     if not _requires_unknown_mapping(panel):
         return None
@@ -228,7 +237,7 @@ def _stat_unknown_mapping_error(
 
 
 def _stat_background_color_mode_error(
-    dashboard_path: Path, title: str, panel: dict[str, object]
+    dashboard_path: Path, title: str, panel: JsonObject
 ) -> str | None:
     if (dashboard_path.name, str(title)) not in BACKGROUND_SEVERITY_STAT_PANELS:
         return None
@@ -238,7 +247,7 @@ def _stat_background_color_mode_error(
 
 
 def _stat_value_mapping_error(
-    dashboard_path: Path, title: str, mappings: list
+    dashboard_path: Path, title: str, mappings: list[JsonObject]
 ) -> str | None:
     expected_value_mapping = EXPLICIT_VALUE_MAPPING_STAT_PANELS.get(
         (dashboard_path.name, str(title))
@@ -260,7 +269,7 @@ def _stat_value_mapping_error(
 
 
 def _stat_panel_visual_semantics_errors(
-    dashboard_path: Path, panel: dict[str, object]
+    dashboard_path: Path, panel: JsonObject
 ) -> list[str]:
     title = panel.get("title", UNTITLED_PANEL_TITLE)
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
@@ -276,7 +285,7 @@ def _stat_panel_visual_semantics_errors(
 
 
 def _gauge_panel_visual_semantics_errors(
-    dashboard_path: Path, panel: dict[str, object]
+    dashboard_path: Path, panel: JsonObject
 ) -> list[str]:
     title = panel.get("title", UNTITLED_PANEL_TITLE)
     options = panel.get("options", {})
@@ -295,7 +304,7 @@ def _gauge_panel_visual_semantics_errors(
 
 
 def _table_panel_visual_semantics_errors(
-    dashboard_path: Path, panel: dict[str, object]
+    dashboard_path: Path, panel: JsonObject
 ) -> list[str]:
     title = panel.get("title", UNTITLED_PANEL_TITLE)
     field_config = panel.get("fieldConfig", {})
@@ -328,7 +337,7 @@ def _table_panel_visual_semantics_errors(
 
 
 def _timeseries_panel_visual_semantics_errors(
-    dashboard_path: Path, panel: dict[str, object]
+    dashboard_path: Path, panel: JsonObject
 ) -> list[str]:
     title = str(panel.get("title", UNTITLED_PANEL_TITLE))
     tooltip = panel.get("options", {}).get("tooltip", {})
@@ -352,7 +361,7 @@ def _timeseries_panel_visual_semantics_errors(
 
 def _expected_threshold_steps(
     dashboard_path: Path, title: str
-) -> list[dict[str, object]] | None:
+) -> list[JsonObject] | None:
     custom_steps = EXPECTED_STEPS_BY_PANEL.get((dashboard_path.name, title))
     if custom_steps is not None:
         return custom_steps
@@ -361,7 +370,7 @@ def _expected_threshold_steps(
     return None
 
 
-def _requires_unknown_mapping(panel: dict[str, object]) -> bool:
+def _requires_unknown_mapping(panel: JsonObject) -> bool:
     title = str(panel.get("title", ""))
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     return defaults.get("noValue") == "UNKNOWN" or any(
@@ -369,7 +378,7 @@ def _requires_unknown_mapping(panel: dict[str, object]) -> bool:
     )
 
 
-def _l0_terminology_errors(dashboard_path: Path, panel: dict[str, object]) -> list[str]:
+def _l0_terminology_errors(dashboard_path: Path, panel: JsonObject) -> list[str]:
     if dashboard_path.name not in L0_DASHBOARD_FILES:
         return []
 
@@ -383,14 +392,14 @@ def _l0_terminology_errors(dashboard_path: Path, panel: dict[str, object]) -> li
     ]
 
 
-def _is_status_like_panel(panel: dict[str, object]) -> bool:
+def _is_status_like_panel(panel: JsonObject) -> bool:
     title = str(panel.get("title", "")).lower()
     description = str(panel.get("description", "")).lower()
     return any(token in title or token in description for token in STATUS_PANEL_TOKENS)
 
 
 def _stat_threshold_color_errors(
-    dashboard_path: Path, panel: dict[str, object]
+    dashboard_path: Path, panel: JsonObject
 ) -> list[str]:
     if panel.get("type") != "stat":
         return []
@@ -404,7 +413,7 @@ def _stat_threshold_color_errors(
     return [f"{dashboard_path}: stat panel '{title}' must use color.mode=thresholds"]
 
 
-def _status_panel_errors(dashboard_path: Path, panel: dict[str, object]) -> list[str]:
+def _status_panel_errors(dashboard_path: Path, panel: JsonObject) -> list[str]:
     if panel.get("type") not in {"stat", "gauge"} or not _is_status_like_panel(panel):
         return []
     return _stat_panel_visual_semantics_errors(
@@ -412,7 +421,7 @@ def _status_panel_errors(dashboard_path: Path, panel: dict[str, object]) -> list
     ) + _l0_terminology_errors(dashboard_path, panel)
 
 
-def _panel_type_errors(dashboard_path: Path, panel: dict[str, object]) -> list[str]:
+def _panel_type_errors(dashboard_path: Path, panel: JsonObject) -> list[str]:
     panel_type = panel.get("type")
     if panel_type == "gauge":
         return _gauge_panel_visual_semantics_errors(dashboard_path, panel)
@@ -423,7 +432,7 @@ def _panel_type_errors(dashboard_path: Path, panel: dict[str, object]) -> list[s
     return []
 
 
-def _panel_expressions(panel: dict[str, object]) -> list[str]:
+def _panel_expressions(panel: JsonObject) -> list[str]:
     return [
         str(target.get("expr", ""))
         for target in panel.get("targets", [])
@@ -432,7 +441,7 @@ def _panel_expressions(panel: dict[str, object]) -> list[str]:
 
 
 def _fail_closed_panel_errors(
-    dashboard_path: Path, panel: dict[str, object], expected_no_value: str | None
+    dashboard_path: Path, panel: JsonObject, expected_no_value: str | None
 ) -> list[str]:
     if expected_no_value is None:
         return []
@@ -452,7 +461,7 @@ def _fail_closed_panel_errors(
     return errors
 
 
-def _panel_errors(dashboard_path: Path, panel: dict[str, object]) -> list[str]:
+def _panel_errors(dashboard_path: Path, panel: JsonObject) -> list[str]:
     title = str(panel.get("title", ""))
     panel_key = (dashboard_path.name, title)
     expected_no_value = FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS.get(panel_key)
@@ -464,7 +473,9 @@ def _panel_errors(dashboard_path: Path, panel: dict[str, object]) -> list[str]:
     )
 
 
-def _collapsed_row_errors(dashboard_path: Path, panels: list) -> list[str]:
+def _collapsed_row_errors(
+    dashboard_path: Path, panels: list[JsonObject]
+) -> list[str]:
     return [
         error
         for panel in panels
@@ -473,14 +484,16 @@ def _collapsed_row_errors(dashboard_path: Path, panels: list) -> list[str]:
     ]
 
 
-def _trust_marker_is_above_fold(panel: dict[str, object]) -> bool:
+def _trust_marker_is_above_fold(panel: JsonObject) -> bool:
     grid_pos = panel.get("gridPos", {})
     # Trust markers must stay on the first screen, including the dedicated
     # first-screen evidence row used by the Runtime dashboard at y=23.
     return isinstance(grid_pos, dict) and int(grid_pos.get("y", 999)) <= 23
 
 
-def _trust_marker_panel_errors(dashboard_path: Path, panels: list) -> list[str]:
+def _trust_marker_panel_errors(
+    dashboard_path: Path, panels: list[JsonObject]
+) -> list[str]:
     required_panels = REQUIRED_TRUST_MARKER_PANELS.get(dashboard_path.name, set())
     if not required_panels:
         return []
@@ -501,8 +514,8 @@ def _trust_marker_panel_errors(dashboard_path: Path, panels: list) -> list[str]:
 
 
 def _dashboard_errors(dashboard_path: Path) -> list[str]:
-    payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
-    panels = payload.get("panels", [])
+    payload = cast(JsonObject, json.loads(dashboard_path.read_text(encoding="utf-8")))
+    panels = cast(list[JsonObject], payload.get("panels", []))
     errors = [
         error
         for panel in iter_panels(panels)

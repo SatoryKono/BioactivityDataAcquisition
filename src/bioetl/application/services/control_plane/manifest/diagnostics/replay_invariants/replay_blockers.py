@@ -9,8 +9,14 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
 )
 from bioetl.application.services.control_plane.run_manifest_exact_replay_blockers import (
     append_mode_exact_replay_blockers as _append_mode_exact_replay_blockers,
+)
+from bioetl.application.services.control_plane.run_manifest_exact_replay_blockers import (
     dependency_lock_exact_replay_blockers as _dependency_lock_exact_replay_blockers,
+)
+from bioetl.application.services.control_plane.run_manifest_exact_replay_blockers import (
     profile_exact_replay_blockers as _profile_exact_replay_blockers,
+)
+from bioetl.application.services.control_plane.run_manifest_exact_replay_blockers import (
     snapshot_exact_replay_blockers as _snapshot_exact_replay_blockers,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
