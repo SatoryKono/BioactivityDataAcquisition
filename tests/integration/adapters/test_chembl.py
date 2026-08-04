@@ -223,16 +223,30 @@ class TestChemblAdapterUnit:
     """Unit tests for ChemblAdapter that don't require HTTP calls."""
 
     def test_entity_url_generation(self) -> None:
-        """Test URL generation for different entity types."""
+        """ENTITY_MAPPING resources match ChemblEntityMapper for known entities."""
+        from bioetl.infrastructure.adapters.chembl._entity_mapping_lookup import (
+            build_legacy_entity_mapping,
+        )
         from bioetl.infrastructure.adapters.chembl.entity_mapper import (
             CHEMBL_API_BASE,
             ENTITY_MAPPING,
+            ChemblEntityMapper,
         )
 
-        for _entity, resource in ENTITY_MAPPING.items():
-            expected_url = f"{CHEMBL_API_BASE}/{resource}.json"
-            # Verify mapping exists
-            assert resource in expected_url
+        assert ENTITY_MAPPING == build_legacy_entity_mapping()
+        assert ENTITY_MAPPING["compound"] == "molecule"
+        assert ENTITY_MAPPING["publication"] == "document"
+
+        for entity, resource in ENTITY_MAPPING.items():
+            assert isinstance(entity, str) and entity
+            assert isinstance(resource, str) and resource
+            if not ChemblEntityMapper.is_known_entity(entity):
+                assert entity.startswith("document")
+                continue
+            url = ChemblEntityMapper.get_resource_url(entity)
+            assert url == f"{CHEMBL_API_BASE}/{resource}"
+            assert resource in url
+            assert url.startswith(CHEMBL_API_BASE)
 
     def test_api_base_url(self) -> None:
         """API base URL should be correct."""
