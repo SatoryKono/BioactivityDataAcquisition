@@ -1118,7 +1118,7 @@ def _build_report_payload(
         errors=errors,
         issues=issues,
     )
-    payload = {
+    payload: dict[str, object] = {
         "checked_sources": report.checked_sources,
         "checked_renders": report.checked_renders,
         "warnings": report.warnings,

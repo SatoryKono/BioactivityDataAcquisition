@@ -14,6 +14,7 @@ import os
 import subprocess
 import sys
 from datetime import datetime
+from typing import TypedDict
 
 import requests
 from dotenv import load_dotenv
@@ -25,8 +26,17 @@ load_dotenv()
 GITHUB_REPO = os.getenv("GITHUB_REPO", "SatoryKono/BioactivityDataAcquisition")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
+class TestProblemCategory(TypedDict):
+    """Configuration for one generated test-problem issue."""
+
+    title: str
+    description: str
+    labels: list[str]
+    severity: str
+
+
 # Test problem categories
-TEST_PROBLEM_CATEGORIES = {
+TEST_PROBLEM_CATEGORIES: dict[str, TestProblemCategory] = {
     "timeout": {
         "title": "Test Timeout Issues",
         "description": "Tests that exceed reasonable execution time limits",

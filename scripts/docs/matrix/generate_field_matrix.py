@@ -152,7 +152,7 @@ def build_field_matrix_rows() -> list[dict[str, str]]:
 def render_csv(rows: list[dict[str, str]]) -> str:
     """Render one deterministic CSV payload."""
     output = io.StringIO()
-    writer = csv.DictWriter(
+    writer = csv.DictWriter[str](
         output,
         fieldnames=list(CSV_COLUMNS),
         lineterminator="\n",

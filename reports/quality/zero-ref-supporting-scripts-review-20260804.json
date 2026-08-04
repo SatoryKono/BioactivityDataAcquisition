@@ -60,21 +60,6 @@
       "next_step": "Retain until Windows MCP configs are first-class tracked entrypoints or wrapper is proven unused on Windows."
     },
     {
-      "path": "scripts/ai/mcp/mcp_mermaid_wrapper.ps1",
-      "inventory_reference_count": 0,
-      "decision": "retain",
-      "lifecycle_decision": "windows_compatibility_wrapper",
-      "review_by": "2026-10-15",
-      "last_reviewed_on": "2026-08-04",
-      "importer_proof": {
-        "method": "git_grep_basename",
-        "active_callers": [],
-        "companion_canonical": "scripts/ai/mcp/mcp_mermaid_wrapper.sh",
-        "notes": "Windows companion for Mermaid MCP wrapper; keep paired with .sh."
-      },
-      "next_step": "Retain with .sh companion; re-check at 2026-10-15."
-    },
-    {
       "path": "scripts/engineering/dev/zed_task.ps1",
       "inventory_reference_count": 0,
       "decision": "retain",
@@ -121,8 +106,8 @@
     }
   ],
   "summary": {
-    "script_count": 6,
-    "retain_count": 6,
+    "script_count": 5,
+    "retain_count": 5,
     "delete_count": 0,
     "promote_candidates": [
       "scripts/engineering/qa/report_live_residual_snapshot.py"

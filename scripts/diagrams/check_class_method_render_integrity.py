@@ -116,8 +116,9 @@ def parse_expected_methods(mmd_path: Path) -> dict[str, list[str]]:
     for line in lines:
         class_match = CLASS_DECL_RE.match(line)
         if class_match:
-            in_class = class_match.group(1)
-            methods.setdefault(in_class, [])
+            class_name = class_match.group(1)
+            in_class = class_name
+            methods.setdefault(class_name, [])
             continue
 
         if in_class is not None and line.strip() == "}":

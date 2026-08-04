@@ -306,8 +306,11 @@ def load_compatibility_registry(
         raise ValueError("tracked_docstring_prefixes must be a non-empty list")
     tracked_docstring_prefixes = tuple(str(item) for item in prefixes)
 
+    raw_version = payload["version"]
+    if not isinstance(raw_version, (int, str)):
+        raise ValueError("version must be an integer")
     registry = CompatibilityRegistry(
-        version=int(payload["version"]),
+        version=int(raw_version),
         policy_scope=str(payload["policy_scope"]),
         tracked_docstring_prefixes=tracked_docstring_prefixes,
         transition_debt=_parse_inventory_rows(

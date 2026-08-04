@@ -67,7 +67,11 @@ def _run_module_command_in_process(spec: CommandSpec, argv: list[str]) -> int:
     finally:
         sys.argv = original_argv
 
-    return 0 if result is None else int(result)
+    if result is None:
+        return 0
+    if isinstance(result, int):
+        return result
+    raise TypeError(f"{spec.target}.main() returned non-integer result: {result!r}")
 
 
 def run_command(

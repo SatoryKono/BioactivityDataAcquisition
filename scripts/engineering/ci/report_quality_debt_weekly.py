@@ -163,7 +163,10 @@ def _scorecard_evaluation(
 def _baseline_total_debt(current_total: int, scorecard: dict[str, object]) -> int:
     """Resolve baseline debt total from scorecard payload."""
     baseline = scorecard.get("baseline", {})
-    return int(baseline.get("total_exemptions", current_total))
+    if not isinstance(baseline, dict):
+        return current_total
+    value = baseline.get("total_exemptions", current_total)
+    return int(value) if isinstance(value, (int, str)) else current_total
 
 
 def _new_debt_total(current_total: int, baseline_total: int) -> int:

@@ -247,7 +247,7 @@ def _evaluate_status(
     return "monitoring", breaches
 
 
-def _current_docs_state() -> tuple[list[str], list[str], set[str], list[str]]:
+def _current_docs_state() -> tuple[list[str], set[str], set[str], list[str]]:
     all_docs = _collect_all_docs()
     nav_docs = _load_nav_docs()
     all_rel_paths = [path.relative_to(DOCS_DIR).as_posix() for path in all_docs]

@@ -14,11 +14,13 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import io
 import re
 import sys
 from pathlib import Path
 
-sys.stdout.reconfigure(encoding="utf-8")  # Windows cp1251 fix
+if isinstance(sys.stdout, io.TextIOWrapper):
+    sys.stdout.reconfigure(encoding="utf-8")  # Windows cp1251 fix
 
 MERMAID_DIR = (
     Path(__file__).resolve().parents[2] / "docs/02-architecture/diagrams/mermaid"
@@ -314,6 +316,7 @@ def process_file(fpath: Path, dry_run: bool = False) -> tuple[bool, str]:
     new_ls_lines, _type_indices = build_linkstyle_block(conns, node_layer)
 
     if ls_start is not None:
+        assert ls_end is not None
         new_lines = lines[:ls_start] + new_ls_lines + lines[ls_end + 1 :]
     else:
         # Append before final blank line

@@ -294,6 +294,9 @@ def _collect_sheet_details(
     for sheet_path, sheet_name in sheet_targets.items():
         root = ET.fromstring(archive.read(sheet_path))
         sheet_data = root.find("a:sheetData", NS)
+        if sheet_data is None:
+            detail_rows_by_sheet[sheet_name] = []
+            continue
         rows = sheet_data.findall("a:row", NS)
         if not rows:
             detail_rows_by_sheet[sheet_name] = []
@@ -356,6 +359,9 @@ def main() -> int:
 
                 root = ET.fromstring(data)
                 sheet_data = root.find("a:sheetData", NS)
+                if sheet_data is None:
+                    zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
+                    continue
                 rows = sheet_data.findall("a:row", NS)
                 if not rows:
                     zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))

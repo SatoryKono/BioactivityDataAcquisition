@@ -100,7 +100,7 @@ def _extract_indent(line: str) -> str:
 
 def _is_valid_linkstyle(index: str, separator: str) -> bool:
     """Check if the linkStyle index and separator are valid."""
-    return separator and index.isdigit()
+    return bool(separator) and index.isdigit()
 
 
 def _get_node_labels(lines: list[str]) -> dict[str, str]:

@@ -125,7 +125,11 @@ def _read_workbook(path: Path) -> dict[str, list[dict[str, str]]]:
         workbook_rows: dict[str, list[dict[str, str]]] = {}
         for sheet_name, target in iter_sheet_targets(archive):
             root = ET.fromstring(archive.read(target))
-            rows = root.find("a:sheetData", NS).findall("a:row", NS)
+            sheet_data = root.find("a:sheetData", NS)
+            if sheet_data is None:
+                workbook_rows[sheet_name] = []
+                continue
+            rows = sheet_data.findall("a:row", NS)
             if not rows:
                 workbook_rows[sheet_name] = []
                 continue

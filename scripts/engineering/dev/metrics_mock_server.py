@@ -42,14 +42,14 @@ class MetricsHandler(BaseHTTPRequestHandler):
 
             self.send_response(200)
             self.send_header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
-            self.send_header("Content-Length", len(metrics_output))
+            self.send_header("Content-Length", str(len(metrics_output)))
             self.end_headers()
             self.wfile.write(metrics_output)
         elif self.path == "/health":
             response = b'{"status":"healthy"}'
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", len(response))
+            self.send_header("Content-Length", str(len(response)))
             self.end_headers()
             self.wfile.write(response)
         else:
