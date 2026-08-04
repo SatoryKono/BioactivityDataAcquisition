@@ -53,6 +53,9 @@ runs:
           node -e 'process.stdout.write(require("puppeteer").executablePath())'
         )"
         test -x "${PUPPETEER_EXECUTABLE}"
+        # Export so validate_mermaid_syntax.sh resolve_chrome_headless_shell and
+        # prepare_puppeteer_cfg can inject executablePath + --no-sandbox args.
+        echo "PUPPETEER_EXECUTABLE_PATH=${PUPPETEER_EXECUTABLE}" >> "$GITHUB_ENV"
         if [ "$INSTALL_LIBRSVG" = "true" ]; then
           # svgo is already present via the locked package.json dependencies.
           sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin

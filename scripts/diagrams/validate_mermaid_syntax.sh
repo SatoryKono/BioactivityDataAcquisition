@@ -205,7 +205,10 @@ elif command -v python >/dev/null 2>&1; then
   PYTHON_BIN="python"
 fi
 
-if [[ "$DOCS_ROOT" != /* ]]; then
+# Absolute on Unix (/...), Windows drive (E:/...), or UNC (//...).
+# Git Bash reports Windows roots as E:/path (not /*), so only relative
+# paths should be joined with REPO_ROOT.
+if [[ "$DOCS_ROOT" != /* && "$DOCS_ROOT" != [A-Za-z]:/* && "$DOCS_ROOT" != //* ]]; then
   DOCS_ROOT="$REPO_ROOT/$DOCS_ROOT"
 fi
 
@@ -214,10 +217,11 @@ if [[ ! -d "$DOCS_ROOT" ]]; then
   exit 2
 fi
 
-# Only inject a Puppeteer config when a runnable Chrome is available or CI
-# explicitly provided one. Passing -p without a browser forces mermaid-cli to
-# look at an empty host/container cache and fail with "Could not find Chromium",
-# including Docker fallback runs that otherwise ship a working browser image.
+# Inject Puppeteer config for sandbox-safe CI runs. Args-only configs
+# (--no-sandbox etc.) MUST still be passed via -p even when
+# resolve_chrome_headless_shell cannot locate the browser binary: host mmdc
+# from setup-mermaid often installs Chrome under RUNNER_TEMP, which is outside
+# the default cache scan, and omitting -p causes "No usable sandbox" on GHA.
 runnable_chrome=""
 runnable_chrome="$(resolve_chrome_headless_shell || true)"
 if [[ -n "$runnable_chrome" ]] || [[ -n "${PUPPETEER_EXECUTABLE_PATH:-}" ]] || [[ "$(id -u)" -eq 0 ]]; then
@@ -229,9 +233,12 @@ if [[ -n "$runnable_chrome" ]] || [[ -n "${PUPPETEER_EXECUTABLE_PATH:-}" ]] || [
   fi
 elif [[ -n "$PUPPETEER_CFG" ]]; then
   # Keep optional args-only configs when the file exists and does not hardcode
-  # a missing executablePath.
+  # a missing executablePath. Still prepare so required sandbox flags are present.
   if [[ -f "$PUPPETEER_CFG" ]] && ! grep -Eq '"executablePath"' "$PUPPETEER_CFG"; then
-    :
+    effective_cfg="$(prepare_puppeteer_cfg "$PUPPETEER_CFG")"
+    if [[ -n "$effective_cfg" ]]; then
+      PUPPETEER_CFG="$effective_cfg"
+    fi
   else
     PUPPETEER_CFG=""
   fi
@@ -245,11 +252,13 @@ mmdc_args=()
 if [[ -f "$THEME_CONFIG" ]]; then
   mmdc_args+=(-c "$THEME_CONFIG")
 fi
-# Only pass -p when a runnable browser was resolved (CI host install) so we can
-# apply --no-sandbox args. Without a runnable browser, let Docker image
-# chromium use its defaults; an empty -p config can force a missing cache path.
-if [[ -n "$PUPPETEER_CFG" && -n "$runnable_chrome" ]]; then
-  mmdc_args+=(-p "$PUPPETEER_CFG")
+# Pass -p when we have a usable config file:
+# - with resolved chrome (may include executablePath), or
+# - args-only config without executablePath (CI sandbox flags).
+if [[ -n "$PUPPETEER_CFG" && -f "$PUPPETEER_CFG" ]]; then
+  if [[ -n "$runnable_chrome" ]] || ! grep -Eq '"executablePath"' "$PUPPETEER_CFG"; then
+    mmdc_args+=(-p "$PUPPETEER_CFG")
+  fi
 fi
 
 # Extract the Mermaid source from either a pure diagram file or a composite
@@ -314,8 +323,9 @@ run_validation_with_docker_fallback() {
     return 0
   fi
 
-  if grep -q "Could not find Chrome" "$err" && command -v docker >/dev/null 2>&1; then
-    echo "INFO: Chrome runtime unavailable for $file; retrying via Docker mmdc fallback." >&2
+  if grep -Eqi "Could not find Chrome|No usable sandbox|Failed to launch the browser" "$err" \
+    && command -v docker >/dev/null 2>&1; then
+    echo "INFO: Chrome runtime unavailable/sandbox-blocked for $file; retrying via Docker mmdc fallback." >&2
     if MMDC_FORCE_DOCKER=1 "$MMDC_BIN" -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
       return 0
     fi
