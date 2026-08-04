@@ -24,7 +24,7 @@ class MockAdapter:
         self.latency_ms = latency_ms
         self.call_count = 0
 
-    def fetch(self, identifier: str) -> dict:
+    def fetch(self, identifier: str) -> dict[str, str]:
         """Simulate API fetch with configurable latency."""
         self.call_count += 1
         time.sleep(self.latency_ms / 1000.0)
@@ -71,7 +71,7 @@ def test_adapter_call_latency_with_retry() -> None:
     """Test adapter call latency with retry simulation."""
     call_count = 0
 
-    def mock_fetch_with_failure(identifier: str) -> dict:
+    def mock_fetch_with_failure(identifier: str) -> dict[str, str]:
         nonlocal call_count
         call_count += 1
         if call_count < 3:

@@ -28,6 +28,7 @@ import pickle
 import subprocess
 import sys
 import tempfile
+from typing import cast
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 from tests.helpers.compat_shim_guards import ImportRecord, build_import_records
 
@@ -472,7 +473,7 @@ def _build_text_cache(
         _load_disk_cached_payload(cache_name, cache_paths) if use_disk_cache else None
     )
     if cached_payload is not None:
-        return cached_payload
+        return cast(dict[Path, str], cached_payload)
 
     max_workers = _cache_worker_count(len(cache_paths))
     if max_workers == 1:
@@ -495,7 +496,7 @@ def _build_ast_cache(
     cache_paths = list(cached_text)
     cached_payload = _load_disk_cached_payload(cache_name, cache_paths)
     if cached_payload is not None:
-        return cached_payload
+        return cast(dict[Path, ast.Module], cached_payload)
 
     max_workers = _cache_worker_count(len(cache_paths))
     result = _read_ast_cache_entries(cached_text, max_workers)

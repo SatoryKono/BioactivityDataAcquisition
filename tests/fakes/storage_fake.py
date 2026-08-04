@@ -102,7 +102,7 @@ class InMemoryStorage:
         if mode == "merge":
             # Simple merge: replace by primary keys
             pk_set = set(primary_keys)
-            existing_by_pk: dict[tuple, dict[str, Any]] = {}
+            existing_by_pk: dict[tuple[object, ...], dict[str, Any]] = {}
             for rec in self.silver[table_name]:
                 pk_vals = tuple(rec.get(k) for k in pk_set)
                 existing_by_pk[pk_vals] = rec

@@ -113,7 +113,7 @@ def _load_catalog_module() -> CatalogModule:
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
-    return cast(CatalogModule, module)
+    return cast(CatalogModule, cast(object, module))
 
 
 def test_vcr_metadata_catalog_drift_check_passes_current_repo() -> None:

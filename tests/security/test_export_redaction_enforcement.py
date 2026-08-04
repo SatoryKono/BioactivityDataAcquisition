@@ -26,6 +26,7 @@ def test_unprivileged_export_removes_all_sensitive_columns() -> None:
         options=ExportOptions(role="viewer"),
     )
 
+    assert isinstance(redacted, pa.Table)
     assert redacted.column_names == ["entity_id"]
     assert columns == ("raw_payload", "api_token", "credential_blob")
 

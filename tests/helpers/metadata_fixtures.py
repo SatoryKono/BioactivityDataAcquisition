@@ -175,7 +175,7 @@ def build_gold_metadata(
         lineage=LineageMetadata(
             source_tables={"silver/chembl/activity": 43},
         ),
-        schema_info=SchemaMetadata(
+        schema=SchemaMetadata(
             contract_path="docs/contracts/gold/activity_v1.0.json",
             version="1.0",
             validation="strict",

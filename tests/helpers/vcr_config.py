@@ -233,7 +233,10 @@ def _is_transient_html_server_error(response: Any) -> bool:
         return False
 
     try:
-        status_code = int(status.get("code"))
+        raw_status_code = status.get("code")
+        if not isinstance(raw_status_code, (int, str)):
+            return False
+        status_code = int(raw_status_code)
     except (TypeError, ValueError):
         return False
 

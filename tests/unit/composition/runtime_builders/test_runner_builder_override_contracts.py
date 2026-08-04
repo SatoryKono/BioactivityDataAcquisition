@@ -23,7 +23,7 @@ def test_runner_input_assembly_lazy_resolves_default_observability_builder(
         "bioetl.composition.runtime_builders.observability_builder"
     )
     build_observability_bundle = MagicMock(name="build_observability_bundle")
-    fake_module.build_observability_bundle = build_observability_bundle
+    vars(fake_module)["build_observability_bundle"] = build_observability_bundle
     monkeypatch.setitem(
         sys.modules,
         "bioetl.composition.runtime_builders.observability_builder",

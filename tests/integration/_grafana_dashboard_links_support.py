@@ -326,12 +326,12 @@ def _assert_l1_inbound_status_policy(
 
 
 def _target_panel_links(panel: dict[str, object], target_uid: str) -> list[str]:
-    return [
-        link["url"]
-        for link in _iter_panel_data_links(panel)
-        if isinstance(link.get("url"), str)
-        and _extract_dashboard_uid(link["url"]) == target_uid
-    ]
+    urls: list[str] = []
+    for link in _iter_panel_data_links(panel):
+        url = link.get("url")
+        if isinstance(url, str) and _extract_dashboard_uid(url) == target_uid:
+            urls.append(url)
+    return urls
 
 
 def _assert_inbound_target_link_policy(

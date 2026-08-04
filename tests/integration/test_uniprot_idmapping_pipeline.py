@@ -169,7 +169,7 @@ class TestUniProtIDMappingPipelineTransform:
         assert silver_record["taxonomy_id"] == 9606
         assert silver_record["mapping_status"] == "found"
         assert silver_record["_dq_warn"] is False
-        assert silver_record["entity_id"] == "uniprot:CHEMBL204"
+        assert silver_record.get("entity_id") == "uniprot:CHEMBL204"
         assert "content_hash" in silver_record
 
     async def test_transform_bronze_to_silver_multiple_mapping_normalizes_identifier_set(

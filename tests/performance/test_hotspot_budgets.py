@@ -24,7 +24,7 @@ import time
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from tests.helpers.deterministic_ids import (
     deterministic_uuid_from_callsite,
     deterministic_uuid_string_from_callsite,
@@ -34,6 +34,7 @@ import pyarrow as pa
 import pytest
 
 from bioetl.infrastructure.adapters.crossref.batch import DoiBatchProcessor
+from bioetl.infrastructure.adapters.crossref.batch import BaseMetrics, HttpTransport
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.support.atomic_ops import AtomicWriteGroup
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -524,9 +525,9 @@ def test_crossref_batch_adapter_budget(pytestconfig: pytest.Config) -> None:
     dois = [f"10.1000/test{i:04d}" for i in range(200)]
     items = [{"DOI": doi, "title": [f"title_{i}"]} for i, doi in enumerate(dois)]
     processor = DoiBatchProcessor(
-        http=_FakeHttp(_FakeResponse(items)),
+        http=cast(HttpTransport, cast(object, _FakeHttp(_FakeResponse(items)))),
         logger=NoOpLogger(),
-        metrics=_FakeMetrics(),
+        metrics=cast(BaseMetrics, cast(object, _FakeMetrics())),
         mailto="perf@example.com",
         api_base="https://api.crossref.org",
         headers_fn=lambda: {"User-Agent": "bioetl-perf"},

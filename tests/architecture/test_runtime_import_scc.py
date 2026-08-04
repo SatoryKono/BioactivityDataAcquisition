@@ -159,7 +159,7 @@ def _resolve_relative_import(
     source_module: str,
     level: int,
     module: str | None,
-) -> list[str] | list[object]:
+) -> list[str]:
     package_parts = source_module.split(".")[:-1]
     depth = max(level - 1, 0)
     if depth > len(package_parts):

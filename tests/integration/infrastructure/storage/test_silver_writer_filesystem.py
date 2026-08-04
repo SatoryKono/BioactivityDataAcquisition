@@ -29,9 +29,7 @@ class _ConcreteMaintMixin(SilverWriterMaintenanceMixin):
 
     def __init__(self, base_path: Path) -> None:
         self._base_path = base_path
-
-    def get_table_path(self, name: str) -> Path:
-        return self._base_path / name
+        self.get_table_path = lambda name: self._base_path / name
 
 
 def test_writer_filesystem__clear_specific_table__81bdf630(

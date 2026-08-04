@@ -38,8 +38,8 @@ def test_hidden_windows_subprocess_kwargs_hide_console() -> None:
         subprocess_module=fake_subprocess,
     )
 
-    assert kwargs["creationflags"] == 0x08000000
-    assert kwargs["startupinfo"] is startupinfo
+    assert kwargs.get("creationflags") == 0x08000000
+    assert kwargs.get("startupinfo") is startupinfo
     assert startupinfo.dwFlags == 0x00000001
     assert startupinfo.wShowWindow == 0
 

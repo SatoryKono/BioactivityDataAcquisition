@@ -578,7 +578,7 @@ class TestCircuitBreakerPortConcurrentAccess:
 
         async def failing_call():
             try:
-                await breaker.call(self._async_fail)
+                await breaker.call(_async_fail)
             except RuntimeError:
                 pass
             except Exception:
@@ -586,8 +586,6 @@ class TestCircuitBreakerPortConcurrentAccess:
 
         async def _async_fail():
             raise RuntimeError("Fail")
-
-        self._async_fail = _async_fail
 
         tasks = [failing_call() for _ in range(10)]
         await asyncio.gather(*tasks)
@@ -610,13 +608,11 @@ class TestCircuitBreakerPortConcurrentAccess:
         breaker._failure_count = 5
 
         async def success_call():
-            return await breaker.call(self._async_success)
+            return await breaker.call(_async_success)
 
         async def _async_success():
             await asyncio.sleep(0)
             return "success"
-
-        self._async_success = _async_success
 
         tasks = [success_call() for _ in range(5)]
         await asyncio.gather(*tasks)

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import dataclasses
 import inspect
-from typing import TYPE_CHECKING, Any
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer.structural_policy import (
@@ -90,7 +91,8 @@ def instantiate_test_transformer[TTransformer](
     if context_kwargs:
         dependencies = dataclasses.replace(dependencies, **context_kwargs)
 
-    return transformer_class(
+    constructor = cast(Callable[..., TTransformer], transformer_class)
+    return constructor(
         dependencies=dependencies,
         **kwargs,
     )
