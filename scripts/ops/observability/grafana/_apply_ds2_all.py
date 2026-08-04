@@ -204,9 +204,7 @@ def _incident_value_override() -> JsonObject:
     }
 
 
-def _fix_incident_table(
-    panel: JsonObject, *, value_override: JsonObject
-) -> None:
+def _fix_incident_table(panel: JsonObject, *, value_override: JsonObject) -> None:
     fc = panel.setdefault("fieldConfig", {})
     defaults = fc.setdefault("defaults", {})
     custom = defaults.setdefault("custom", {})
@@ -663,9 +661,7 @@ _RUN_EXPLORER_GUIDE_CONTENT = (
 )
 
 
-def _shift_run_explorer_panels(
-    run_explorer: JsonObject, *, delta_y: int = 3
-) -> None:
+def _shift_run_explorer_panels(run_explorer: JsonObject, *, delta_y: int = 3) -> None:
     for panel in run_explorer.get("panels") or []:
         grid_pos = panel.get("gridPos") or {}
         if "y" in grid_pos:
