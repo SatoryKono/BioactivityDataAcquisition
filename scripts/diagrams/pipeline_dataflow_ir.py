@@ -40,27 +40,42 @@ type _JsonObject = dict[str, Any]
 
 def _source_date() -> str:
     """Return the last canonical input change date without wall-clock entropy."""
-    start_ref = (
-        "HEAD^2" if os.environ.get("GITHUB_EVENT_NAME") == "pull_request" else "HEAD"
-    )
-    result = subprocess.run(
-        [
-            "git",
-            "log",
-            "--no-merges",
-            "-1",
-            "--format=%cs",
-            start_ref,
-            "--",
-            "configs",
-            "src/bioetl",
-        ],
-        cwd=PROJECT_ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    return result.stdout.strip()
+    # On pull_request checkouts the head commit is usually a non-merge tip of the
+    # PR branch. Prefer HEAD^2 only when it resolves (true merge commits); always
+    # fall back to HEAD so CI does not fail with exit 128 on ordinary PR SHAs.
+    candidates = ("HEAD",)
+    if os.environ.get("GITHUB_EVENT_NAME") == "pull_request":
+        candidates = ("HEAD^2", "HEAD")
+
+    last_error: subprocess.CalledProcessError | None = None
+    for start_ref in candidates:
+        result = subprocess.run(
+            [
+                "git",
+                "log",
+                "--no-merges",
+                "-1",
+                "--format=%cs",
+                start_ref,
+                "--",
+                "configs",
+                "src/bioetl",
+            ],
+            cwd=PROJECT_ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+        last_error = subprocess.CalledProcessError(
+            result.returncode,
+            result.args,
+            output=result.stdout,
+            stderr=result.stderr,
+        )
+    assert last_error is not None
+    raise last_error
 
 
 class _ArrowField(Protocol):
