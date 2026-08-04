@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2411 |
-| Tracked doc-like files | 2411 |
+| Doc-like files | 2413 |
+| Tracked doc-like files | 2413 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2411 |
+| tracked | 2413 |
 
 ## Lifecycle Counts
 
@@ -57,30 +57,30 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 863 |
-| Archived | 132 |
+| Active | 862 |
+| Archived | 136 |
 | Canonical | 73 |
 | Generated | 861 |
-| Working | 482 |
+| Working | 481 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 863 |
-| archive | 132 |
+| active | 862 |
+| archive | 136 |
 | canonical | 73 |
 | generated | 861 |
-| working | 482 |
+| working | 481 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 83 |
+| archive-after-migration | 82 |
 | generate-automatically | 861 |
-| keep | 1151 |
+| keep | 1154 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -90,7 +90,6 @@
 | `docs/00-project/ai/skills/global/documentation-audit/references/audit-checklist.md` | Working | 0 | archive-after-migration |
 | `docs/00-project/ai/skills/global/documentation-audit/references/report-template.md` | Working | 0 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
-| `docs/filters/migration-plan.md` | Working | 1 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28-drmr.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28.md` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7340-specialized-subsystem-analysis-20260731.md` | Working | 0 | archive-after-migration |
@@ -167,6 +166,7 @@
 | `reports/semantic_pipeline_audit/semantic_pair_matrix_2026-07-01.csv` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/semantic_pipeline_audit_2026-07-01.md` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/semantic_pipeline_audit_exhaustive_2026-07-01.md` | Working | 0 | archive-after-migration |
+| `reports/semantic_pipeline_audit/semantic_pipeline_audit_manifest_2026-07-01.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

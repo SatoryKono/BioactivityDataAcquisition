@@ -60,8 +60,8 @@ promoting every specialist page into the primary MkDocs navigation.
 ## Repository support documents
 
 - [Configuration discrepancies](../config-discrepancies-report.md)
-- [PyCharm development](../development/pycharm.md)
-- [Filter documentation](../filters/README.md)
+- [PyCharm baseline](../03-guides/development/pycharm-baseline.md)
+- [Filter inventory pointer](../filters/README.md)
 - [Filter inventory baseline](../filters/inventory-baseline.md)
 - [Canonical semantic field unification runbook](../05-operations/runbooks/canonical-semantic-field-unification.md)
 - [Link checker integration](../plugins/link_checker/INTEGRATION_GUIDE.md)

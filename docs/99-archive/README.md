@@ -37,6 +37,8 @@ current documentation.
   relocated from `docs/fixes/` (docs audit cycle 1 / #7420).
 - [Archived Refactoring Plans](refactoring_plans/) — completed naming/refactor
   plans relocated from `docs/refactoring_plans/` (#7420).
+- [Archived Filters Migration Prose](filters/) — historical silver→gold
+  migration plan and retired draft relocated from `docs/filters/` (#7428).
 - [Archived Reports Index](reports/README.md) — superseded documentation-audit
   issue packs and generated report snapshots moved out of active report
   surfaces.

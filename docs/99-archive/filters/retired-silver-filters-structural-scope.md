@@ -1,17 +1,20 @@
 ______________________________________________________________________
 
 Version: 0.2.0
-Status: Retired Draft
-Class: historical-working-document
+Status: archived
+Class: archive
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-15'
+  Last verified: '2026-08-04'
 
 ______________________________________________________________________
 
 # Retired Draft: Silver Filters Structural Scope
+
+> **Archived** 2026-08-04 (docs architecture audit cycle 2 / #7428).
+> Non-canonical historical design rationale only. Normative SSOT: ADR-050.
 
 **Date:** 2026-05-12
 **Status:** Retired Draft

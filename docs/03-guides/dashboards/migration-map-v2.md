@@ -1,14 +1,18 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
-Class: published
+Class: repo-only
 Owner: BioETL Team
-Last verified: '2026-07-28'
+Last verified: '2026-08-04'
 
 ______________________________________________________________________
 
 # Migration map — Dashboard System 2.0
+
+> **Classification:** repo-only working map (not MkDocs-published SSOT).
+> Docs audit cycle 2 / #7430. Prefer dashboard README + navigation contract for
+> operator entry; this table tracks UID stability for System 2.0 migration.
 
 Epic #6800. UIDs stay stable for primary boards unless noted.
 
