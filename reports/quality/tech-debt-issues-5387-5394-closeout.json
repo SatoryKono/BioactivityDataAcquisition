@@ -1,0 +1,132 @@
+{
+  "schema_version": "tech-debt-issues-5387-5394-closeout-v1",
+  "generated_by": "codex",
+  "snapshot_date": "2026-07-01",
+  "source_ref": "origin/main@438bf67df9981e04e21f897e87d84c8c2aa98636",
+  "issues": [
+    {
+      "number": 5387,
+      "priority": "P0",
+      "type": "Contract drift / governance debt",
+      "status": "closed_by_live_gate",
+      "evidence": [
+        "tests/architecture/test_architecture_quality_scorecard.py::test_architecture_quality_scorecard_module_coverage_evidence_is_consistent",
+        "reports/quality/architecture-quality-scorecard.json",
+        "reports/quality/module-coverage-inventory.json"
+      ],
+      "outcome": "Scorecard module counts and module-coverage hashes are required to match the canonical module coverage inventory."
+    },
+    {
+      "number": 5388,
+      "priority": "P1",
+      "type": "Compatibility debt",
+      "status": "closed_by_ratchet",
+      "evidence": [
+        "tests/architecture/test_compatibility_importer_census_governance.py",
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "reports/quality/compatibility-importer-census.json",
+        "configs/quality/debt_scorecard.yaml#sanctioned_public_entrypoint_governance"
+      ],
+      "outcome": "Retained public entrypoints and export facades remain explicitly inventoried and bounded by no-growth budgets."
+    },
+    {
+      "number": 5389,
+      "priority": "P1",
+      "type": "Architectural violation risk / control-plane hotspot",
+      "status": "closed_by_boundary_evidence",
+      "evidence": [
+        "src/bioetl/application/services/control_plane/{manifest,ledger,replay,effective_config,workflow}",
+        "reports/quality/control-plane-duplication.json",
+        "reports/quality/semantic-ddd-use-case-audit-2026-06-17.md",
+        "reports/quality/hotspot-family-baseline.json"
+      ],
+      "outcome": "Control-plane use-case ownership is represented by explicit owner packages and the control-plane duplication report remains clean."
+    },
+    {
+      "number": 5390,
+      "priority": "P1",
+      "type": "Test debt",
+      "status": "closed_by_zero_review_debt",
+      "evidence": [
+        "reports/quality/vcr-metadata-catalog.json",
+        "tests/architecture/test_vcr_metadata_catalog_drift.py",
+        "tests/architecture/test_vcr_metadata_inventory.py"
+      ],
+      "outcome": "VCR metadata review debt is zero while cassette ownership and duplicate-stem checks remain active."
+    },
+    {
+      "number": 5391,
+      "priority": "P1",
+      "type": "Compatibility debt / contract drift risk",
+      "status": "closed_by_no_growth_taxonomy_ratchet",
+      "evidence": [
+        "configs/quality/debt_scorecard.yaml#parameter_taxonomy",
+        "reports/quality/config-discrepancy-baseline.json",
+        "reports/quality/config-compatibility-legacy-taxonomy-review.json",
+        "tests/architecture/test_config_taxonomy_review.py",
+        "tests/architecture/test_quality_debt_scorecard.py"
+      ],
+      "outcome": "compatibility_legacy taxonomy counts are owner-reviewed and bounded by no-growth budgets."
+    },
+    {
+      "number": 5392,
+      "priority": "P2",
+      "type": "Test debt",
+      "status": "regressed_after_bounded_tail_reduction",
+      "evidence": [
+        "tests/unit/infrastructure/storage/metadata/test_builder_base.py",
+        "reports/coverage/coverage.xml",
+        "reports/quality/module-coverage-inventory.json",
+        "reports/quality/architecture-quality-scorecard.json"
+      ],
+      "coverage_tail_delta": {
+        "before_below_85_module_count": 105,
+        "after_below_85_module_count": 104,
+        "below_85_module_count_delta": -1,
+        "improved_module": "src/bioetl/infrastructure/storage/metadata/builder_base.py",
+        "before_coverage_percent": 54.08,
+        "after_coverage_percent": 87.76
+      },
+      "current_live_coverage": {
+        "below_85_module_count": 51,
+        "uncovered_module_count": 0,
+        "unmeasured_module_count": 0,
+        "improved_module_current_coverage_percent": 87.76,
+        "improved_module_current_status": "partially_covered"
+      },
+      "outcome": "The original bounded improvement remains reflected in the current canonical coverage inventory; the below-85 tail is rebaselined to the live inventory (51 modules) and remains open until paid down further."
+    },
+    {
+      "number": 5393,
+      "priority": "P2",
+      "type": "Duplication / governance debt",
+      "status": "closed_by_visibility_baseline",
+      "evidence": [
+        "reports/quality/full-app-duplication-baseline.json",
+        "reports/quality/full-app-duplication-baseline.md",
+        "tests/architecture/test_duplication_report_governance.py::test_full_app_duplication_baseline_covers_audit_visibility_scope"
+      ],
+      "outcome": "Full-app duplication visibility covers adapters, pipelines, composition bootstrap, and CLI interfaces in report-only baseline mode."
+    },
+    {
+      "number": 5394,
+      "priority": "P2",
+      "type": "Compatibility debt / determinism risk",
+      "status": "closed_by_compatibility_seam_guard",
+      "evidence": [
+        "src/bioetl/application/core/lifecycle/checkpoint_load_validation.py",
+        "src/bioetl/application/services/control_plane/manifest/validation.py",
+        "tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py",
+        "tests/architecture/test_checkpoint_compatibility_policy_surface.py",
+        "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py"
+      ],
+      "outcome": "Legacy checkpoint metadata hydration is confined to the checkpoint load-validation seam, while manifest creation fails closed on missing canonical config identity anchors."
+    }
+  ],
+  "debt_budget_outcome": "unchanged_or_improved",
+  "notes": [
+    "No technical-debt budgets were increased.",
+    "Coverage-tail evidence improved by representing existing focused tests in the canonical coverage inventory.",
+    "Compatibility surfaces remain bounded by existing no-growth ratchets rather than relaxed."
+  ]
+}
