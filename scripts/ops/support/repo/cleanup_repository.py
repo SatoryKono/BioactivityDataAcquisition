@@ -1407,28 +1407,52 @@ def collect_reports_workspace_evidence(
     retention_metadata = _reports_retention_metadata(repo_root)
     rows: dict[str, ReportsWorkspaceEvidence] = {}
     _collect_retained_report_rows(
-        repo_root, tracked_paths, tracked_ancestor_dirs,
-        route_metadata=route_metadata, retention_metadata=retention_metadata, rows=rows,
+        repo_root,
+        tracked_paths,
+        tracked_ancestor_dirs,
+        route_metadata=route_metadata,
+        retention_metadata=retention_metadata,
+        rows=rows,
     )
     _collect_local_prune_dir_rows(
-        repo_root, tracked_paths, tracked_ancestor_dirs,
-        route_metadata=route_metadata, retention_metadata=retention_metadata, rows=rows,
+        repo_root,
+        tracked_paths,
+        tracked_ancestor_dirs,
+        route_metadata=route_metadata,
+        retention_metadata=retention_metadata,
+        rows=rows,
     )
     _collect_registered_route_rows(
-        repo_root, tracked_paths, tracked_ancestor_dirs,
-        route_metadata=route_metadata, retention_metadata=retention_metadata, rows=rows,
+        repo_root,
+        tracked_paths,
+        tracked_ancestor_dirs,
+        route_metadata=route_metadata,
+        retention_metadata=retention_metadata,
+        rows=rows,
     )
     _collect_root_prune_report_rows(
-        repo_root, tracked_paths, tracked_ancestor_dirs,
-        route_metadata=route_metadata, retention_metadata=retention_metadata, rows=rows,
+        repo_root,
+        tracked_paths,
+        tracked_ancestor_dirs,
+        route_metadata=route_metadata,
+        retention_metadata=retention_metadata,
+        rows=rows,
     )
     _collect_transient_retained_rows(
-        repo_root, tracked_paths, tracked_ancestor_dirs,
-        route_metadata=route_metadata, retention_metadata=retention_metadata, rows=rows,
+        repo_root,
+        tracked_paths,
+        tracked_ancestor_dirs,
+        route_metadata=route_metadata,
+        retention_metadata=retention_metadata,
+        rows=rows,
     )
     _collect_uncurated_surface_rows(
-        repo_root, tracked_paths, tracked_ancestor_dirs,
-        route_metadata=route_metadata, retention_metadata=retention_metadata, rows=rows,
+        repo_root,
+        tracked_paths,
+        tracked_ancestor_dirs,
+        route_metadata=route_metadata,
+        retention_metadata=retention_metadata,
+        rows=rows,
     )
     return sorted(rows.values(), key=lambda item: (item.classification, item.rel_path))
 
