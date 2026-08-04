@@ -1,7 +1,7 @@
 version: 1.0.0
 status: active
 owner: Engineering / Architecture
-last_verified: "2026-07-29"
+last_verified: "2026-08-04"
 
 current_live_root_baseline:
   tracked_root_audit_status: pass
@@ -12,7 +12,10 @@ current_live_root_baseline:
     .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py
     --strict-untracked
   note: >-
-    2026-07-29 RH5 epic #7015: verified tracked root ≡ allowlist (37≡37).
+    2026-08-04 CI-C1 follow-up: `.agents` promoted to curated root tooling
+    (shared skill adapters from #7529); accidental
+    docker-compose.monitoring.local-override.yml removed from tracked root.
+    Prior 2026-07-29 RH5 epic #7015: verified tracked root ≡ allowlist (37≡37).
     Transient unauthorized root scripts (_cr_one_scope.py, _cr_write_final.py,
     _publish_arch_cr2_issues.py) are absent from the index; gitignore hardened
     for /_cr_*.py and /_publish_*.py (RH5-01/#7016, RH5-02/#7017). Registry
@@ -228,10 +231,15 @@ review_lanes:
     retention_action: retain_curated_runtime_roots_and_keep_local_generated_state_untracked
     cleanup_policy: owner_decision_required_before_rehome_or_delete
     verification:
-      - git ls-files .claude .vibe .ai .gemini .idea .jules .zed skills-lock.json
-      - rg -n "\\.claude/|\\.vibe|\\.ai/|\\.gemini/|\\.idea/|\\.jules/|\\.zed/|skills-lock\\.json" .github docs scripts tests configs README.md pyproject.toml
+      - git ls-files .agents .claude .vibe .ai .gemini .idea .jules .zed skills-lock.json
+      - rg -n "\\.agents/|\\.claude/|\\.vibe|\\.ai/|\\.gemini/|\\.idea/|\\.jules/|\\.zed/|skills-lock\\.json" .github docs scripts tests configs README.md pyproject.toml
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
+      - path: .agents
+        current_live_state: present_approved_root_surface
+        canonical_path: .agents
+        disposition: must_stay_root
+        action_if_reintroduced: retain_as_curated_shared_agent_skills_adapter_surface_with_gitignore_scoped_skill_markdown
       - path: .ai
         current_live_state: present_local_only_root_surface
         canonical_path: null
@@ -376,9 +384,9 @@ review_lanes:
     retention_action: keep_untracked_or_prune_only_when_rebuildable_and_outside_blocked_zones
     cleanup_policy: exact_candidate_review_only_no_root_allowlist_promotion
     verification:
-      - git ls-files .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache .mypy_cache node_modules .npm-cache .pytest_cache .ruff_cache .scannerwork test-output tmp .venv .venv-docs .venv-win .venv-win-corrupt caddy '~'
-      - git check-ignore -v .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache .mypy_cache node_modules .npm-cache .pytest_cache .ruff_cache .scannerwork test-output tmp .venv .venv-docs .venv-win .venv-win-corrupt caddy '~'
-      - rg -n "\\.agent-work/|\\.agentbridge/|\\.agents/|\\.benchmarks/|\\.cache/|\\.codex_tmp/|\\.coverage-sharded-current-main/|\\.hypothesis/|\\.import_linter_cache/|\\.mypy_cache/|node_modules/|\\.npm-cache/|\\.pytest_cache/|\\.ruff_cache/|\\.scannerwork/|test-output/|tmp/|\\.venv/|\\.venv-docs/|\\.venv-win/|\\.venv-win-corrupt/|caddy/|~/" .gitignore docs scripts .github tests configs README.md
+      - git ls-files .agent-work .agentbridge .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache .mypy_cache node_modules .npm-cache .pytest_cache .ruff_cache .scannerwork test-output tmp .venv .venv-docs .venv-win .venv-win-corrupt caddy '~'
+      - git check-ignore -v .agent-work .agentbridge .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache .mypy_cache node_modules .npm-cache .pytest_cache .ruff_cache .scannerwork test-output tmp .venv .venv-docs .venv-win .venv-win-corrupt caddy '~'
+      - rg -n "\\.agent-work/|\\.agentbridge/|\\.benchmarks/|\\.cache/|\\.codex_tmp/|\\.coverage-sharded-current-main/|\\.hypothesis/|\\.import_linter_cache/|\\.mypy_cache/|node_modules/|\\.npm-cache/|\\.pytest_cache/|\\.ruff_cache/|\\.scannerwork/|test-output/|tmp/|\\.venv/|\\.venv-docs/|\\.venv-win/|\\.venv-win-corrupt/|caddy/|~/" .gitignore docs scripts .github tests configs README.md
     candidates:
       - path: .agent-work
         current_live_state: present_local_only_root_surface
@@ -386,10 +394,6 @@ review_lanes:
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .agentbridge
         current_live_state: absent_from_root_baseline
-        canonical_path: null
-        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
-      - path: .agents
-        current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .benchmarks

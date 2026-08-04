@@ -10,7 +10,7 @@ $script:BioetlProxyEnvironmentNames = @(
 
 function Get-BioetlProxyEnvironmentSnapshot {
     # Suppress enumeration so callers receive one case-sensitive map
-    # (PowerShell otherwise unwraps single-collection returns).
+    # (PowerShell otherwise unwraps IDictionary enumeration on return).
     # Proxy variables are case-sensitive on POSIX. A normal PowerShell
     # hashtable is case-insensitive and would let a missing ``https_proxy``
     # overwrite a populated ``HTTPS_PROXY`` entry.
@@ -23,7 +23,9 @@ function Get-BioetlProxyEnvironmentSnapshot {
             [EnvironmentVariableTarget]::Process
         )
     }
-    Write-Output -NoEnumerate $snapshot
+    # Unary comma + NoEnumerate: Dictionary implements IEnumerable and is
+    # otherwise expanded into KeyValuePair items across the pipeline (#7520).
+    return , $snapshot
 }
 
 function ConvertTo-BioetlCaseSensitiveEnvironmentMap {
@@ -42,12 +44,31 @@ function ConvertTo-BioetlCaseSensitiveEnvironmentMap {
             $map[[string]$key] = $Snapshot[$key]
         }
     }
+    elseif (
+        $null -ne $Snapshot -and
+        $Snapshot -is [System.Collections.IEnumerable] -and
+        -not ($Snapshot -is [string])
+    ) {
+        # KeyValuePair[] / DictionaryEntry[] from accidental IDictionary unwrap.
+        foreach ($item in $Snapshot) {
+            if ($null -eq $item) {
+                continue
+            }
+            $itemProps = $item.PSObject.Properties
+            if ($null -ne $itemProps['Key'] -and $null -ne $itemProps['Value']) {
+                $map[[string]$item.Key] = $item.Value
+            }
+            elseif ($null -ne $itemProps['Name'] -and $null -ne $itemProps['Value']) {
+                $map[[string]$item.Name] = $item.Value
+            }
+        }
+    }
     elseif ($null -ne $Snapshot) {
         foreach ($prop in $Snapshot.PSObject.Properties) {
             $map[[string]$prop.Name] = $prop.Value
         }
     }
-    Write-Output -NoEnumerate $map
+    return , $map
 }
 
 function Remove-BioetlProcessEnvironmentVariable {
@@ -89,48 +110,21 @@ function Restore-BioetlProxyEnvironment {
 
     $map = ConvertTo-BioetlCaseSensitiveEnvironmentMap -Snapshot $Snapshot
 
-    # POSIX PowerShell Env provider conflates upper/lowercase proxy names.
-    # Restore populated values FIRST so deleting an empty case alias cannot
-    # erase its populated peer before we write it back (#7520 / CI-C1-008).
+    # PowerShell's Env: provider is case-insensitive even on Linux runners, so
+    # removing an empty ``https_proxy`` alias can clear a restored
+    # ``HTTPS_PROXY``. Wipe every known proxy name first, then re-apply only
+    # the names that had a real value in the pre-bypass snapshot (#7520).
+    foreach ($name in $script:BioetlProxyEnvironmentNames) {
+        Remove-BioetlProcessEnvironmentVariable -Name $name
+    }
+
     foreach ($name in $script:BioetlProxyEnvironmentNames) {
         if (-not $map.ContainsKey($name)) {
             continue
         }
         $value = $map[$name]
-        if ($null -ne $value -and $value -ne "") {
+        if ($null -ne $value -and "$value" -ne "") {
             Set-BioetlProcessEnvironmentVariable -Name $name -Value ([string]$value)
-        }
-    }
-
-    foreach ($name in $script:BioetlProxyEnvironmentNames) {
-        $value = $null
-        if ($map.ContainsKey($name)) {
-            $value = $map[$name]
-        }
-        if ($null -ne $value -and $value -ne "") {
-            continue
-        }
-        # Skip removal when a case-variant sibling still holds a restored value.
-        $siblingHasValue = $false
-        $nameLower = $name.ToLowerInvariant()
-        foreach ($other in $script:BioetlProxyEnvironmentNames) {
-            if ($other -ceq $name) {
-                continue
-            }
-            if ($other.ToLowerInvariant() -ne $nameLower) {
-                continue
-            }
-            if (
-                $map.ContainsKey($other) -and
-                $null -ne $map[$other] -and
-                $map[$other] -ne ""
-            ) {
-                $siblingHasValue = $true
-                break
-            }
-        }
-        if (-not $siblingHasValue) {
-            Remove-BioetlProcessEnvironmentVariable -Name $name
         }
     }
 }
@@ -186,7 +180,10 @@ function Invoke-BioetlUvxWithScopedBypass {
     )
 
     $snapshotVariable = "BIOETL_UVX_PROXY_ENV_B64"
-    $snapshot = Get-BioetlProxyEnvironmentSnapshot
+    # Freeze immediately into a case-sensitive map so later restore cannot see
+    # a Dictionary that was accidentally unwrapped into KeyValuePair items.
+    $snapshot = ConvertTo-BioetlCaseSensitiveEnvironmentMap `
+        -Snapshot (Get-BioetlProxyEnvironmentSnapshot)
     $originalSnapshotValue = [Environment]::GetEnvironmentVariable(
         $snapshotVariable,
         [EnvironmentVariableTarget]::Process
