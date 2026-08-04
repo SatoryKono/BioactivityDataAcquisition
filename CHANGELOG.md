@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Processed-records table payload:** Removed the deprecated misspelled `percintage` field. Consumers should read the canonical `percentage` field instead.
+
 - **Monitoring surface reduction (2026-07-23, strategy A soft + hard removals):**
   Opt-in monitoring stack is Prometheus / Pushgateway / Grafana / image-renderer
   only (`make docker-start-monitoring`). **Removed** from shipping Docker/UI:
