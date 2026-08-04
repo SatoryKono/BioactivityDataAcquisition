@@ -99,7 +99,7 @@ class _MetricsGatewayHost(_MetricsTracingHost, Protocol):
 class _MetricsTracingMixin:
     """Tracing attribute helpers for metrics administration flows."""
 
-    TRACER_NAME = "bioetl.metrics_admin"
+    TRACER_NAME: ClassVar[str] = "bioetl.metrics_admin"
 
     def _build_span_attributes(
         self,
