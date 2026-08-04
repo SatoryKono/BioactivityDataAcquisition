@@ -229,6 +229,8 @@ def test_shared_endpoints_sync_with_catalog() -> None:
         path = entry.get("path") or "/mcp"
         expected = f"http://127.0.0.1:{int(entry['port'])}{path}"
         assert setup_mcp.MCP_SHARED_SERVER_ENDPOINTS[name] == expected
+    assert servers["docker"]["launch_mode"] == "windows_docker_streaming"
+    assert servers["mermaid"]["launch_mode"] == "windows_npx_streaming"
 
 
 def test_shared_launcher_enforces_singleton_and_loopback() -> None:
@@ -245,6 +247,8 @@ def test_shared_launcher_enforces_singleton_and_loopback() -> None:
     assert 'MCP_CACHE_ROOT="$NATIVE_CACHE_HOME/bioetl-mcp"' in launcher
     assert 'NPM_CACHE="$LOG_DIR/npm-cache"' not in launcher
     assert '"scripts.ops.runtime.mcp.windows_docker_mcp_bridge"' in launcher
+    assert '"windows_npx_streaming"' in launcher
+    assert '"mermaid-npx"' in launcher
     assert 'child_env["BIOETL_AI_MEMORY_MODE"] = "read-write"' in launcher
     assert '"--host",' in launcher
     assert "bind_host" in launcher

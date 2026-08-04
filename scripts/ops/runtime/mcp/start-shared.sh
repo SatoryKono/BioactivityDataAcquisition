@@ -90,7 +90,10 @@ def ping_ready(port: int, timeout: float = 1.0) -> bool:
 
 def endpoint_ready(entry: dict[str, object]) -> bool:
     port = int(entry["port"])
-    if entry.get("launch_mode") == "windows_docker_streaming":
+    if entry.get("launch_mode") in {
+        "windows_docker_streaming",
+        "windows_npx_streaming",
+    }:
         return port_open(port)
     return ping_ready(port)
 

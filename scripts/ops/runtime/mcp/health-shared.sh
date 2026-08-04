@@ -16,6 +16,7 @@ mode = sys.argv[3]
 failed = 0
 warned = 0
 results = []
+windows_streaming_modes = {"windows_docker_streaming", "windows_npx_streaming"}
 
 def port_open(port: int, timeout: float = 1.0) -> bool:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -35,7 +36,7 @@ for name, entry in sorted(catalog["servers"].items(), key=lambda kv: kv[0]):
     up = port_open(port, timeout=1.0)
     ping_ok = False
     if up:
-        if entry.get("launch_mode") == "windows_docker_streaming":
+        if entry.get("launch_mode") in windows_streaming_modes:
             ping_ok = True
         else:
             try:
