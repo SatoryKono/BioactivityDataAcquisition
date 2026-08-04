@@ -1,11 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-04T04:53:05.075244+00:00",
+  "generated_at": "2026-08-04T04:57:12.336662+00:00",
   "summary": {
-    "total_scripts": 572,
+    "total_scripts": 571,
     "status_counts": {
       "active": 341,
-      "legacy": 1,
       "supporting": 225,
       "temporary_diagnostic": 5
     },
@@ -11453,14 +11452,6 @@
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog \\"
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/qa/_tmp_residual_delta.py",
-      "type": "py",
-      "status": "legacy",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/engineering/qa/analyze_duplicate_functions.py",
