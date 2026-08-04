@@ -118,6 +118,13 @@ def test_issue_5598_cli_duplication_first_wave_is_burned_down() -> None:
 
 @pytest.mark.architecture
 def test_issue_5599_active_hotspot_total_loc_decreases_without_budget_growth() -> None:
+    """Fold residual freezes onto live residual snapshot non-growth (#7464 / #6891)."""
+    from tests.architecture._live_residual import (
+        assert_residual_not_grown,
+        hotspot_family,
+        load_live_residual_snapshot,
+    )
+
     hotspot = _load_json(HOTSPOT_BASELINE)
     scorecard = _load_yaml(SCORECARD)
     application_core = _family_row(hotspot, "application_core")
@@ -126,12 +133,24 @@ def test_issue_5599_active_hotspot_total_loc_decreases_without_budget_growth() -
         for row in scorecard["hotspot_family_ratchets"]["families"]
         if isinstance(row, dict)
     }
+    residual = load_live_residual_snapshot()
+    residual_core = hotspot_family(residual, "application_core")
 
-    assert application_core["total_loc"] <= 22617 + 200
-    assert application_core["files_ge_250_loc"] <= 5
-    assert application_core["max_internal_fan_in"] <= 11
-    assert application_core["bounded_growth_budgets"]["files_ge_250_loc"] <= 5
-    assert application_core["bounded_growth_budgets"]["max_internal_fan_in"] <= 10
+    assert_residual_not_grown(
+        metric_name="application_core.total_loc",
+        live_value=int(application_core["total_loc"]),
+        baseline_value=int(residual_core["total_loc"]),
+    )
+    assert_residual_not_grown(
+        metric_name="application_core.files_ge_250_loc",
+        live_value=int(application_core["files_ge_250_loc"]),
+        baseline_value=int(residual_core["files_ge_250_loc"]),
+    )
+    assert_residual_not_grown(
+        metric_name="application_core.max_internal_fan_in",
+        live_value=int(application_core["max_internal_fan_in"]),
+        baseline_value=int(residual_core["max_internal_fan_in"]),
+    )
     assert (
         application_core["bounded_growth_budgets"]["files_ge_250_loc"]
         >= application_core["files_ge_250_loc"]

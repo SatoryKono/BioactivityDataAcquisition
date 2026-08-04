@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-08-04'
 
 ______________________________________________________________________
 
@@ -45,6 +45,41 @@ Mandatory enforcement points:
 1. `removal_step` references concrete follow-up action (refactor/task/RF).
 1. `scripts/engineering/qa/check_quality_exemptions.py --mode warn` passes.
 1. If active `technical_debt` remains in the registry after the change, active owner count stays >= 2 once Q3 diversification policy is in force.
+
+## Tech-debt PR path scope (#7462)
+
+Tech-debt / quality-baseline remediations **SHOULD** stay quality-artifact
+scoped so concurrent MCP/docs agent work cannot smuggle unrelated noise into
+debt PRs.
+
+**Allowed paths (default allowlist):**
+
+- `configs/quality/**` scorecard, inventories, registries, waivers
+- `reports/quality/**` gates, baselines, closeouts, censuses, residual snapshots
+- `tests/architecture/**` debt/closeout/residual guards tied to the change
+- `scripts/engineering/qa/**` generators for the artifacts above
+- Minimal `.gitignore` allowlists for newly tracked quality evidence
+
+**Disallowed by default (own PR / separate issue):**
+
+- `docs/00-project/ai/**` MCP policy/agent mirrors
+- `scripts/ai/mcp/**`, `scripts/ops/runtime/mcp/**`, root `.mcp.json` helpers
+- Broad docs matrix regenerations under `docs/reports/generated/**` unless the
+  issue is explicitly documentation-governance debt
+- Unrelated mass lint rewrites outside the debt finding path list
+
+**Exceptions:** allowed when the PR body cites a concrete dependency (for
+example a generator lives under another tree) and reviewers accept the scope.
+
+After scorecard/baseline input changes, refresh debt gates last:
+
+```bash
+python -m scripts.engineering.qa.refresh_governance_artifacts
+python -m scripts.engineering.qa report-debt-governance-gates --check
+```
+
+Canonical gate input set is embedded in
+`reports/quality/debt-governance-gates.json` field `input_artifacts` (#7465).
 
 ## Dashboard
 

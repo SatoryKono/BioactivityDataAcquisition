@@ -158,6 +158,10 @@ log_test.txt
 !/reports/quality/architecture-debt-remote-main-baseline.md
 !/reports/quality/debt-governance-gates.json
 !/reports/quality/debt-governance-gates.md
+!/reports/quality/live-residual-snapshot.json
+!/reports/quality/retained-public-entrypoint-burn-down-plan.json
+!/reports/quality/zero-ref-supporting-scripts-review-20260804.json
+!/reports/quality/closeout-freeze-fold-progress-20260804.json
 !/reports/quality/contract-registry-diagnostics.json
 !/reports/quality/vcr-metadata-catalog.json
 !/reports/quality/domain-composite-config-importer-map.md
