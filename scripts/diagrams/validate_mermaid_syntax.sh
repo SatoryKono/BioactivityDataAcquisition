@@ -215,26 +215,45 @@ if [[ -n "$PUPPETEER_CFG" ]]; then
   mmdc_args+=(-p "$PUPPETEER_CFG")
 fi
 
-# Strip YAML frontmatter (--- ... ---) so mmdc receives pure Mermaid source.
-# Many .mmd sources keep ADR metadata frontmatter for documentation governance.
+# Extract the Mermaid source from either a pure diagram file or a composite
+# .mmd document. Some historical .mmd files contain repository metadata before
+# the diagram and explanatory Markdown after a closing fence; mmdc must receive
+# the diagram section only, while malformed/undetectable sources still fail.
 prepare_mermaid_input() {
   local file="$1"
   local prepared="$2"
-  if [[ "$(head -n 1 "$file" 2>/dev/null || true)" == "---" ]]; then
-    # Drop first frontmatter block, then any residual fence wrappers.
-    awk '
-      BEGIN { in_fm=0; started=0 }
-      NR==1 && $0=="---" { in_fm=1; next }
-      in_fm==1 && $0=="---" { in_fm=0; next }
-      in_fm==1 { next }
-      /^```[[:space:]]*mermaid[[:space:]]*$/ { next }
-      /^```[[:space:]]*$/ { next }
-      { print }
-    ' "$file" >"$prepared"
-  else
-    # Still strip accidental fence wrappers.
-    sed -e '/^```[[:space:]]*mermaid[[:space:]]*$/d' -e '/^```[[:space:]]*$/d' "$file" >"$prepared"
-  fi
+  awk '
+    function is_diagram_start(line) {
+      return line ~ /^[[:space:]]*(architecture-beta|block-beta|C4[A-Za-z]*|classDiagram(-v2)?|erDiagram|flowchart|gantt|gitGraph|graph|journey|kanban|mindmap|packet-beta|pie|quadrantChart|radar-beta|requirementDiagram|sankey-beta|sequenceDiagram|stateDiagram(-v2)?|timeline|treemap|xychart-beta|zenuml)([[:space:]]|$)/
+    }
+
+    BEGIN {
+      diagram_started=0
+      preamble_count=0
+    }
+
+    diagram_started == 0 {
+      if (is_diagram_start($0)) {
+        for (idx=1; idx<=preamble_count; idx++) {
+          print preamble[idx]
+        }
+        print
+        diagram_started=1
+        next
+      }
+
+      if ($0 ~ /^[[:space:]]*$/ || $0 ~ /^[[:space:]]*%%/) {
+        preamble[++preamble_count]=$0
+      } else {
+        delete preamble
+        preamble_count=0
+      }
+      next
+    }
+
+    /^[[:space:]]*```[[:space:]]*$/ { exit }
+    { print }
+  ' "$file" >"$prepared"
 }
 
 run_validation() {
