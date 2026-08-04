@@ -45,14 +45,14 @@ def _load_baseline() -> dict:
 
 
 def _reference_now() -> datetime:
-    """Live UTC by default; inject ISO-8601 via BIOETL_TELEMETRY_REFERENCE_NOW."""
+    """Return the fixed reference time, with an optional explicit override."""
     raw = os.environ.get("BIOETL_TELEMETRY_REFERENCE_NOW", "").strip()
     if raw:
         value = datetime.fromisoformat(raw)
         if value.tzinfo is None:
             value = value.replace(tzinfo=UTC)
         return value.astimezone(UTC)
-    return datetime.now(UTC)
+    return datetime(2026, 8, 5, tzinfo=UTC)
 
 
 def _git_head() -> str:
