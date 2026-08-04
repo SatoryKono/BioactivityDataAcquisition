@@ -569,7 +569,7 @@ test_audit_closeout_2026_07_08:
     test_file_count_definition: tests/**/test_*.py from pyproject python_files
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
-    repo_backed_unit_test_files: 49
+    repo_backed_unit_test_files: 50
     performance_baseline_reports:
     - reports/test-telemetry/slowest-tests.json
     - reports/test-telemetry/slowest-tests.md
@@ -1083,6 +1083,9 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/scripts/test_zed_workspace_config.py
     target_lane: repo-backed-unit
     protected_surface: .zed/{settings.json,tasks.json,mcp.json,snippets/**}
+  - path: tests/unit/repo_backed/scripts/test_zed_helper_entrypoints.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/engineering/dev/zed_{lint_imports,mypy,pytest_lane,run,vulture,xenon}.py direct-entrypoint import bootstrap contract
   - path: tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py
     target_lane: repo-backed-unit
     protected_surface: scripts/ops/runtime/docker/runtime_manager.py
