@@ -1,17 +1,4 @@
-______________________________________________________________________
-
-Version: 1.0.0
-Status: active
-Class: repo-only
-Owner: BioETL Team
-Last verified: '2026-08-04'
-
-______________________________________________________________________
-
 # Config Discrepancies Report
-
-> **Classification:** repo-only debt-scorecard companion
-> (`configs/quality/debt_scorecard.yaml`). Not MkDocs-published. #7430.
 
 Total configs: 27
 Total unique parameters: 419
