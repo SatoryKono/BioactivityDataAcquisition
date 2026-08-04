@@ -1,6 +1,7 @@
 {
   "schema_version": "live-residual-snapshot-v1",
   "linked_issue": "#6891",
+  "follow_up_issue": "#7464",
   "parent_epic": "#6890",
   "snapshot_date": "2026-08-04",
   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
@@ -33,7 +34,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.33,
       "files": 32,
-      "total_loc": 3939,
+      "total_loc": 3940,
       "budget_files_ge_250_loc": 2,
       "budget_max_internal_fan_in": 3
     },
@@ -68,5 +69,10 @@
   "module_coverage": {
     "uncovered_module_count": 0,
     "unmeasured_module_count": 0
+  },
+  "closeout_program": {
+    "tech_debt_closeout_test_file_count": 51,
+    "retained_public_entrypoint_count": 12,
+    "zero_reference_supporting_script_count": 6
   }
 }
