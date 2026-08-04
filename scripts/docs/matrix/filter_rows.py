@@ -19,7 +19,7 @@ else:
 
 ensure_repo_imports()
 
-from scripts.docs.common.xlsx import (  # noqa: E402
+from scripts.docs.common.xlsx import (
     NS,
     cell_text,
     column_index,
@@ -146,6 +146,8 @@ def _serialize_filtered_sheet(
 ) -> bytes:
     root = ET.fromstring(data)
     sheet_data = root.find("a:sheetData", NS)
+    if sheet_data is None:
+        return ET.tostring(root, encoding="utf-8")
     rows = sheet_data.findall("a:row", NS)
     if not rows:
         return ET.tostring(root, encoding="utf-8")

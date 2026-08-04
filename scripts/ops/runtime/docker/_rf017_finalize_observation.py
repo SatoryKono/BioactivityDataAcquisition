@@ -81,13 +81,11 @@ def _resolve_container_snapshot(name: str) -> tuple[str, dict[str, object] | Non
 
 
 def _restart_delta_for(snap: dict[str, object], base: dict[str, object]) -> int:
-    try:
-        return max(
-            0,
-            int(snap.get("restart_count") or 0) - int(base.get("restart_count") or 0),
-        )
-    except (TypeError, ValueError):
-        return 0
+    current = snap.get("restart_count")
+    baseline = base.get("restart_count")
+    current_count = current if isinstance(current, int) else 0
+    baseline_count = baseline if isinstance(baseline, int) else 0
+    return max(0, current_count - baseline_count)
 
 
 def _evaluate_container(
@@ -113,7 +111,8 @@ def _evaluate_container(
     if not isinstance(base, dict):
         base = {}
     restart_delta = _restart_delta_for(snap, base)
-    nets = snap.get("networks") or []
+    networks_raw = snap.get("networks")
+    nets = networks_raw if isinstance(networks_raw, list) else []
     if "warp-network" in nets:
         failures.append(f"{name}: warp-network present")
     cfg = str(snap.get("config_files") or "")
@@ -210,7 +209,7 @@ def _write_observation_artifacts(
         json.dumps(final, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
 
-    closeout = {
+    closeout: dict[str, object] = {
         "contract": "docker_dashboard_cutover_rf017_closeout_v1",
         "generated_at": finished,
         "issues": [6311, 6303],

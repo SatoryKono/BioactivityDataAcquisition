@@ -887,6 +887,9 @@ def _retained_entrypoint_base_row(
     repo_path = str(row["path"])
     module_name = _module_name_from_repo_path(repo_path)
     importers = importer_map.get(module_name, {"src": (), "tests": ()})
+    src_importers = list(importers.get("src", ()))
+    test_importers = list(importers.get("tests", ()))
+    src_importer_count = len(src_importers)
     retained_row: dict[str, object] = {
         "path": repo_path,
         "module_name": module_name,
@@ -898,14 +901,14 @@ def _retained_entrypoint_base_row(
         ),
         "internal_callers_zero": bool(row.get("internal_callers_zero")),
         "usage_classification": _usage_classification(row),
-        "src_importers": list(importers.get("src", ())),
-        "test_importers": list(importers.get("tests", ())),
-        "src_importer_count": len(importers.get("src", ())),
-        "test_importer_count": len(importers.get("tests", ())),
+        "src_importers": src_importers,
+        "test_importers": test_importers,
+        "src_importer_count": src_importer_count,
+        "test_importer_count": len(test_importers),
     }
     retained_row["surface_classification"] = _surface_classification(
         row,
-        src_importer_count=int(retained_row["src_importer_count"]),
+        src_importer_count=src_importer_count,
     )
     retained_row["consumer_class"] = retained_row["usage_classification"]
     retained_row["sunset_status"] = retained_row["surface_classification"]
@@ -1077,24 +1080,24 @@ def _census_summary(
     return {
         "retained_entrypoint_count": len(retained_rows),
         "retained_public_entrypoint_burden": sum(
-            int(row["src_importer_count"]) for row in retained_rows
+            _int_row_value(row, "src_importer_count") for row in retained_rows
         ),
         "removed_compatibility_surface_count": len(removed_surface_rows),
         "removed_compatibility_surfaces_with_src_importers": sum(
-            1 for row in removed_surface_rows if row["src_importer_count"] > 0
+            1 for row in removed_surface_rows if _int_row_value(row, "src_importer_count") > 0
         ),
         "removed_compatibility_surfaces_with_test_importers": sum(
-            1 for row in removed_surface_rows if row["test_importer_count"] > 0
+            1 for row in removed_surface_rows if _int_row_value(row, "test_importer_count") > 0
         ),
         "removed_compatibility_surfaces_still_present": sum(
             1 for row in removed_surface_rows if row["path_exists"]
         ),
         "twin_pair_count": len(twin_rows),
         "twin_pairs_with_private_src_importers": sum(
-            1 for row in twin_rows if row["private_src_importer_count"] > 0
+            1 for row in twin_rows if _int_row_value(row, "private_src_importer_count") > 0
         ),
         "twin_pairs_without_public_src_importers": sum(
-            1 for row in twin_rows if row["public_src_importer_count"] == 0
+            1 for row in twin_rows if _int_row_value(row, "public_src_importer_count") == 0
         ),
         "tracked_twin_family_count": len(tracked_twin_rows),
         "config_root_symbol_count": len(config_symbol_rows),
@@ -1116,6 +1119,12 @@ def _census_summary(
             or row["unexpected_retained_wrappers_outside_all"]
         ),
     }
+
+
+def _int_row_value(row: dict[str, object], key: str) -> int:
+    """Return one validated integer field from a generated census row."""
+    value = row.get(key)
+    return value if isinstance(value, int) else 0
 
 
 def build_compatibility_importer_census(
@@ -1315,15 +1324,22 @@ def _md_retained_owner_usage_lines(
 
 def _md_public_export_wrapper_cell(row: dict[str, object]) -> str:
     """Render retained-wrapper + drift cell for a public export facade row."""
-    wrapper_names = row["retained_wrappers_outside_all"]
+    wrapper_names = sorted(_string_values(row.get("retained_wrappers_outside_all")))
     wrapper_drift = sorted(
-        set(row["missing_retained_wrappers_outside_all"])
-        | set(row["unexpected_retained_wrappers_outside_all"])
+        _string_values(row.get("missing_retained_wrappers_outside_all"))
+        | _string_values(row.get("unexpected_retained_wrappers_outside_all"))
     )
     wrapper_cell = ", ".join(wrapper_names) if wrapper_names else "none"
     if wrapper_drift:
         wrapper_cell = f"{wrapper_cell} (drift: {', '.join(wrapper_drift)})"
     return wrapper_cell
+
+
+def _string_values(value: object) -> set[str]:
+    """Narrow a generated sequence-like field to its string members."""
+    if not isinstance(value, (list, tuple, set)):
+        return set()
+    return {item for item in value if isinstance(item, str)}
 
 
 def _md_public_export_lines(public_export_rows: list[object]) -> list[str]:
@@ -1618,10 +1634,12 @@ def main() -> int:
     md_out.parent.mkdir(parents=True, exist_ok=True)
     json_out.write_text(rendered_json, encoding="utf-8")
     md_out.write_text(rendered_markdown, encoding="utf-8")
+    summary = payload["summary"]
+    assert isinstance(summary, dict)
     print(
         "[compatibility-importer-census] "
-        f"retained_entrypoints={payload['summary']['retained_entrypoint_count']}; "
-        f"twin_pairs={payload['summary']['twin_pair_count']}; "
+        f"retained_entrypoints={summary['retained_entrypoint_count']}; "
+        f"twin_pairs={summary['twin_pair_count']}; "
         f"json={json_out}; markdown={md_out}"
     )
     return 0

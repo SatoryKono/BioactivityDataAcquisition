@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Forward one Windows Docker MCP streaming gateway to WSL loopback."""
+"""Forward one Windows-native MCP streaming server to WSL loopback."""
 
 from __future__ import annotations
 
@@ -17,6 +17,9 @@ from pathlib import Path
 
 _SERVER_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
 _POWERSHELL_EXE = "powershell.exe"
+_BACKEND_DOCKER_GATEWAY = "docker-gateway"
+_BACKEND_MERMAID_NPX = "mermaid-npx"
+_SUPPORTED_BACKENDS = (_BACKEND_DOCKER_GATEWAY, _BACKEND_MERMAID_NPX)
 
 
 def _validated_port(port: int) -> int:
@@ -64,7 +67,7 @@ def _wait_for_port(port: int, timeout: float) -> None:
         if _port_is_open(port):
             return
         time.sleep(0.5)
-    raise TimeoutError(f"Windows Docker MCP did not listen on 127.0.0.1:{port}")
+    raise TimeoutError(f"Windows MCP backend did not listen on 127.0.0.1:{port}")
 
 
 def _as_windows_path(path: Path) -> str:
@@ -87,6 +90,58 @@ def _as_windows_path(path: Path) -> str:
     if not translated:
         raise RuntimeError(f"wslpath returned an empty path for {path}")
     return translated
+
+
+def _windows_backend_command(
+    *, server: str, remote_port: int, backend: str
+) -> list[str]:
+    """Build validated Windows backend argv for one shared endpoint."""
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    safe_server = _validated_server_name(server)
+    safe_port = _validated_port(remote_port)
+    prefix = [_POWERSHELL_EXE, "-NoLogo", "-NonInteractive", "-NoProfile"]
+    if backend == _BACKEND_MERMAID_NPX:
+        if safe_server != "mermaid":
+            raise ValueError("mermaid-npx backend is valid only for server 'mermaid'")
+        wrapper = (
+            Path(__file__).resolve().parents[4]
+            / "scripts"
+            / "ai"
+            / "mcp"
+            / "mcp_mermaid_wrapper.ps1"
+        )
+        return ensure_safe_cli_argv(
+            [
+                *prefix,
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                _as_windows_path(wrapper),
+                "-Transport",
+                "streamable",
+                "-BindHost",
+                "127.0.0.1",
+                "-Port",
+                str(safe_port),
+                "-Endpoint",
+                "/mcp",
+            ]
+        )
+    if backend != _BACKEND_DOCKER_GATEWAY:
+        raise ValueError(f"unsupported Windows MCP backend: {backend!r}")
+    return ensure_safe_cli_argv(
+        [
+            *prefix,
+            "-Command",
+            (
+                "docker mcp gateway run "
+                f"--servers {safe_server} --transport streaming "
+                f"--host 127.0.0.1 --port {safe_port} "
+                "--allow-unauthenticated"
+            ),
+        ]
+    )
 
 
 class _ForwardHandler(socketserver.BaseRequestHandler):
@@ -152,6 +207,9 @@ def main() -> int:
     parser.add_argument("--local-port", type=int, required=True)
     parser.add_argument("--remote-port", type=int, required=True)
     parser.add_argument("--startup-timeout", type=float, default=120)
+    parser.add_argument(
+        "--backend", choices=_SUPPORTED_BACKENDS, default=_BACKEND_DOCKER_GATEWAY
+    )
     args = parser.parse_args()
     server = _validated_server_name(str(args.server))
     remote_port = _validated_port(int(args.remote_port))
@@ -160,28 +218,12 @@ def main() -> int:
     args.remote_port = remote_port
     args.local_port = local_port
 
-    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
-
     relay_script = Path(__file__).with_name("windows_tcp_relay.ps1")
-    # Prefer argv list form (no shell) with validated server/port tokens.
-    command = ensure_safe_cli_argv(
-        [
-            _POWERSHELL_EXE,
-            "-NoLogo",
-            "-NonInteractive",
-            "-NoProfile",
-            "-Command",
-            (
-                "docker mcp gateway run "
-                f"--servers {server} --transport streaming "
-                f"--host 127.0.0.1 --port {remote_port} "
-                "--allow-unauthenticated"
-            ),
-        ]
+    command = _windows_backend_command(
+        server=server, remote_port=remote_port, backend=str(args.backend)
     )
-    # A previous WSL bridge can disappear while the Windows-side Docker MCP
-    # gateway remains alive.  Reuse that singleton instead of racing a second
-    # gateway against the same remote port.
+    # A previous WSL bridge can disappear while the Windows-side MCP backend
+    # remains alive. Reuse it instead of racing a second backend on the port.
     child: subprocess.Popen[bytes] | None = None
     if not _port_is_open(args.remote_port):
         child = subprocess.Popen(  # NOSONAR - argv sanitized; server/port validated

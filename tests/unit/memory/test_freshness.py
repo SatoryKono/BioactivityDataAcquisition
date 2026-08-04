@@ -26,7 +26,10 @@ def _envelope(**overrides: str) -> RecordEnvelope:
         actor=ActorIdentity(runtime="test", agent="test"),
         source_refs=("source",),
         created_at="2026-07-29T00:00:00+00:00",
-        **values,
+        repo_id=values["repo_id"],
+        git_commit=values["git_commit"],
+        branch=values["branch"],
+        worktree_id=values["worktree_id"],
     )
 
 

@@ -23,10 +23,13 @@ import shutil
 import sys
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Any, cast
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACT_PATH = REPO_ROOT / "scripts" / "ai" / "junie" / "junie-mirror-contract.json"
+
+type JsonObject = dict[str, Any]
 
 
 def sha256_of(path: Path) -> str:
@@ -50,9 +53,12 @@ def rel(path: Path) -> str:
     return str(path.relative_to(REPO_ROOT)).replace("\\", "/")
 
 
-def load_contract() -> dict:
+def load_contract() -> JsonObject:
     with CONTRACT_PATH.open("r", encoding="utf-8") as fh:
-        return json.load(fh)
+        payload = json.load(fh)
+    if not isinstance(payload, dict):
+        raise ValueError(f"Junie mirror contract must be an object: {CONTRACT_PATH}")
+    return cast(JsonObject, payload)
 
 
 def collect_files(root: Path, exclude_prefixes: Iterable[str] = ()) -> dict[str, Path]:
@@ -70,7 +76,7 @@ def collect_files(root: Path, exclude_prefixes: Iterable[str] = ()) -> dict[str,
     return result
 
 
-def check_agents(contract: dict, issues: list[str]) -> None:
+def check_agents(contract: JsonObject, issues: list[str]) -> None:
     scope = contract["parity_scope"]["agents"]
     codex_dir = REPO_ROOT / ".codex" / "agents"
     junie_dir = REPO_ROOT / ".junie" / "agents"
@@ -92,7 +98,7 @@ def check_agents(contract: dict, issues: list[str]) -> None:
             )
 
 
-def check_shared_agent_docs(contract: dict, issues: list[str]) -> None:
+def check_shared_agent_docs(contract: JsonObject, issues: list[str]) -> None:
     scope = contract["parity_scope"]["shared_agent_docs"]
     for src_rel, mir_rel in zip(
         scope["source_files"], scope["mirror_files"], strict=True
@@ -109,7 +115,7 @@ def check_shared_agent_docs(contract: dict, issues: list[str]) -> None:
             issues.append(f"[shared_agent_docs] content drift: {mir_rel} != {src_rel}")
 
 
-def check_skills_catalog(contract: dict, issues: list[str]) -> None:
+def check_skills_catalog(contract: JsonObject, issues: list[str]) -> None:
     scope = contract["parity_scope"]["skills_catalog"]
     src = REPO_ROOT / scope["source_file"]
     mir = REPO_ROOT / scope["mirror_file"]
@@ -125,7 +131,7 @@ def check_skills_catalog(contract: dict, issues: list[str]) -> None:
         )
 
 
-def check_skills(contract: dict, issues: list[str]) -> None:
+def check_skills(contract: JsonObject, issues: list[str]) -> None:
     scope = contract["parity_scope"]["skills"]
     exclude = set(scope.get("exclude_directory_names", []))
     codex_dir = REPO_ROOT / ".codex" / "skills"
@@ -142,7 +148,7 @@ def check_skills(contract: dict, issues: list[str]) -> None:
         issues.append(f"[skills] unexpected in .junie/skills/: {name}/")
 
 
-def check_skill_contents(contract: dict, issues: list[str]) -> None:
+def check_skill_contents(contract: JsonObject, issues: list[str]) -> None:
     scope = contract["parity_scope"]["skill_contents"]
     exclude_prefixes = tuple(scope.get("exclude_relative_path_prefixes", []))
     codex_dir = REPO_ROOT / ".codex" / "skills"
@@ -166,7 +172,7 @@ def check_skill_contents(contract: dict, issues: list[str]) -> None:
             issues.append(f"[skill_contents] content drift: .junie/skills/{rel_path}")
 
 
-def check_runtime_only_files(contract: dict, issues: list[str]) -> None:
+def check_runtime_only_files(contract: JsonObject, issues: list[str]) -> None:
     ro = contract["runtime_only_files"]
     for path_str in ro["codex_only"]:
         if not (REPO_ROOT / path_str).exists():
@@ -176,7 +182,7 @@ def check_runtime_only_files(contract: dict, issues: list[str]) -> None:
             issues.append(f"[runtime_only] missing junie_only file: {path_str}")
 
 
-def do_check(contract: dict) -> int:
+def do_check(contract: JsonObject) -> int:
     issues: list[str] = []
     check_agents(contract, issues)
     check_shared_agent_docs(contract, issues)
@@ -200,7 +206,7 @@ def do_check(contract: dict) -> int:
     return 0
 
 
-def do_sync(contract: dict) -> int:
+def do_sync(contract: JsonObject) -> int:
     """One-way sync .codex → .junie for every file under parity scope.
 
     Never writes into `.codex/**`. Preserves Junie runtime-only files.

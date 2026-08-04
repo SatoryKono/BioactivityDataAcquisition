@@ -8,6 +8,7 @@ import csv
 import io
 import json
 import sys
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from functools import cache
 from pathlib import Path
@@ -58,6 +59,7 @@ else:
 ensure_repo_imports(include_src=True)
 
 from bioetl.application.composite.checkpoint import (
+    ExpectedCheckpointContext,
     create_expected_checkpoint_context,
     merge_expected_anchors,
 )
@@ -76,6 +78,7 @@ from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
     initialize_chembl_policy_registry as initialize_bootstrap_chembl_policy_registry,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.config import FieldValidation
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
     normalize_run_ledger_payload,
@@ -182,7 +185,7 @@ NON_CHEMBL_PIPELINES = frozenset(
     }
 )
 
-CSV_COLUMNS = (
+CSV_COLUMNS: tuple[str, ...] = (
     "provider",
     "pipeline_name",
     "pipeline_kind",
@@ -1509,7 +1512,9 @@ def _non_chembl_row_metadata(row: dict[str, str]) -> dict[str, str]:
         else:
             metadata["raw_sidecar"] = ""
     metadata["canonical_sidecar"] = classification.get("canonical_sidecar", "") or (
-        semantic_policy.canonical_sidecar_field if semantic_policy is not None else ""
+        (semantic_policy.canonical_sidecar_field or "")
+        if semantic_policy is not None
+        else ""
     )
     metadata["composite_usage"] = classification.get("composite_usage", "")
     metadata["observed_source"] = classification.get("observed_source", "") or (
@@ -1519,7 +1524,7 @@ def _non_chembl_row_metadata(row: dict[str, str]) -> dict[str, str]:
 
 
 def _augment_row_with_inventory_metadata(row: dict[str, str]) -> dict[str, str]:
-    augmented = dict[str, object](row)
+    augmented = dict(row)
     augmented.update(_non_chembl_row_metadata(augmented))
     return augmented
 
@@ -1636,8 +1641,8 @@ _dq_allowed_values = cache(_dq_allowed_values)
 
 
 def _matching_dq_enum_rules(
-    field_validations: list[object], *, field_name: str
-) -> list[object]:
+    field_validations: tuple[FieldValidation, ...], *, field_name: str
+) -> list[FieldValidation]:
     return [
         rule
         for rule in field_validations
@@ -1654,7 +1659,9 @@ def _csv_filter_values(raw: str) -> frozenset[str]:
     return frozenset(result)
 
 
-def _sequence_filter_values(raw: list | tuple | set) -> frozenset[str]:
+def _sequence_filter_values(
+    raw: list[object] | tuple[object, ...] | set[object],
+) -> frozenset[str]:
     result: set[str] = set()
     for item in raw:
         stripped = str(item).strip()
@@ -3052,7 +3059,7 @@ def _ledger_status_covered(ledger_status: dict[str, object]) -> bool:
 
 
 def _execution_identity_status_covered(
-    execution_identity_status: dict[str, object],
+    execution_identity_status: Mapping[str, object],
 ) -> bool:
     """Return whether execution identity normalization produces canonical values."""
     return (
@@ -3063,7 +3070,7 @@ def _execution_identity_status_covered(
     )
 
 
-def _runtime_anchor_status_covered(runtime_anchor_status: dict[str, object]) -> bool:
+def _runtime_anchor_status_covered(runtime_anchor_status: Mapping[str, object]) -> bool:
     """Return whether runtime anchor normalization produces canonical values."""
     return (
         runtime_anchor_status.get("effective_config_hash")
@@ -3073,7 +3080,9 @@ def _runtime_anchor_status_covered(runtime_anchor_status: dict[str, object]) -> 
     )
 
 
-def _checkpoint_context_covered(checkpoint_context: object) -> bool:
+def _checkpoint_context_covered(
+    checkpoint_context: ExpectedCheckpointContext,
+) -> bool:
     """Return whether checkpoint context normalization preserves canonical anchors."""
     return (
         checkpoint_context.effective_config_hash == CANONICAL_EFFECTIVE_CONFIG_HASH
@@ -3082,7 +3091,7 @@ def _checkpoint_context_covered(checkpoint_context: object) -> bool:
     )
 
 
-def _checkpoint_anchor_merge_covered(merged_checkpoint: object) -> bool:
+def _checkpoint_anchor_merge_covered(merged_checkpoint: CompositeCheckpointState) -> bool:
     """Return whether merged checkpoint anchors preserve canonical values."""
     return (
         merged_checkpoint.effective_config_hash == CANONICAL_EFFECTIVE_CONFIG_HASH
@@ -3371,7 +3380,12 @@ def _semantic_kpi_lines(semantic_kpis: list[dict[str, object]]) -> list[str]:
 
 def _semantic_kpi_line(kpi: dict[str, object]) -> str:
     """Render one semantic invariant KPI line with optional regressions."""
-    regressions = list(kpi.get("regressions", []))
+    regressions_raw = kpi.get("regressions", [])
+    regressions = (
+        [item for item in regressions_raw if isinstance(item, str)]
+        if isinstance(regressions_raw, list)
+        else []
+    )
     regression_note = f" Regressions: {', '.join(regressions)}." if regressions else ""
     return (
         f"- {kpi['surface']} / {kpi['name']}: `{kpi['value_pct']:.2f}%` "
@@ -3382,7 +3396,7 @@ def _semantic_kpi_line(kpi: dict[str, object]) -> str:
 
 def _markdown_table_lines(
     rows: list[dict[str, str]],
-    headers: list[str],
+    headers: Sequence[str],
 ) -> list[str]:
     """Render markdown table header and all matrix rows."""
     lines = [
@@ -3394,7 +3408,7 @@ def _markdown_table_lines(
     return lines
 
 
-def _markdown_table_row(row: dict[str, str], headers: list[str]) -> str:
+def _markdown_table_row(row: dict[str, str], headers: Sequence[str]) -> str:
     """Render one markdown table row."""
     return "| " + " | ".join(row.get(header, "") for header in headers) + " |"
 

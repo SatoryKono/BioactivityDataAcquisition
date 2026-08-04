@@ -488,15 +488,15 @@ def build_inventory_payload() -> dict[str, object]:
             fixture_key=str(state["fixture_key"]),
             field_name=str(state["field_name"]),
             classification_hint=str(state["classification_hint"]),
-            fixture_paths=tuple(sorted(str(path) for path in state["fixture_paths"])),
+            fixture_paths=tuple(sorted(_state_string_set(state, "fixture_paths"))),
             raw_field_present=bool(state["raw_field_present"]),
-            observed_distinct_count=len(state["observed_values"]),
-            normalized_distinct_count=len(state["normalized_values"]),
+            observed_distinct_count=len(_state_string_set(state, "observed_values")),
+            normalized_distinct_count=len(_state_string_set(state, "normalized_values")),
             observed_examples=tuple(
-                sorted(str(value) for value in state["observed_values"])[:10]
+                sorted(_state_string_set(state, "observed_values"))[:10]
             ),
             normalized_examples=tuple(
-                sorted(str(value) for value in state["normalized_values"])[:10]
+                sorted(_state_string_set(state, "normalized_values"))[:10]
             ),
         )
         for _, state in sorted(governed_field_states.items())
@@ -516,6 +516,14 @@ def build_inventory_payload() -> dict[str, object]:
         "rows_count": len(rows),
         "rows": [row.as_dict() for row in rows],
     }
+
+
+def _state_string_set(state: dict[str, object], key: str) -> set[str]:
+    """Return stringified members from one governed-field state collection."""
+    value = state.get(key)
+    if not isinstance(value, (list, tuple, set, frozenset)):
+        return set()
+    return {str(item) for item in value}
 
 
 def _render_csv(rows: list[dict[str, object]]) -> str:

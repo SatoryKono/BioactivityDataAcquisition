@@ -12,7 +12,7 @@ import shlex
 import subprocess
 import sys
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import lru_cache
@@ -50,7 +50,7 @@ def _load_lanes(matrix_path: Path = MATRIX_PATH) -> dict[str, dict[str, Any]]:
 @lru_cache(maxsize=8)
 def _load_failure_classifiers(
     config_path: Path = CLASSIFIERS_PATH,
-) -> tuple[tuple[str, re.Pattern[str]], str, str, str]:
+) -> tuple[tuple[tuple[str, re.Pattern[str]], ...], str, str, str]:
     payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
     classifiers = payload.get("classifiers", [])
     if not isinstance(classifiers, list) or not classifiers:
@@ -126,8 +126,8 @@ def _git_sha() -> str | None:
     return completed.stdout.strip() or None
 
 
-def _with_pythonpath_src(env: dict[str, str]) -> dict[str, str]:
-    updated = env.copy()
+def _with_pythonpath_src(env: Mapping[str, str]) -> dict[str, str]:
+    updated = dict(env)
     src = str(ROOT / "src")
     parts = (
         [] if not updated.get("PYTHONPATH") else updated["PYTHONPATH"].split(os.pathsep)

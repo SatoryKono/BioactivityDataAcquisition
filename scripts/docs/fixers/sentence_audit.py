@@ -265,10 +265,12 @@ def iter_code_files() -> Iterable[Path]:
                 yield path
 
 
-def build_index() -> tuple[dict[str, set[int]], list[tuple[Path, int, str]], Counter]:
+def build_index() -> tuple[
+    dict[str, set[int]], list[tuple[Path, int, str]], Counter[str]
+]:
     lines: list[tuple[Path, int, str]] = []
     inverted: dict[str, set[int]] = defaultdict(set)
-    freq: Counter = Counter()
+    freq: Counter[str] = Counter()
 
     for file_path in sorted(iter_code_files(), key=lambda path: str(path).lower()):
         try:
@@ -289,7 +291,7 @@ def find_evidence(
     sentence: str,
     inverted: dict[str, set[int]],
     lines: list[tuple[Path, int, str]],
-    freq: Counter,
+    freq: Counter[str],
     first_line_idx_by_path: dict[str, int],
 ) -> Evidence | None:
     """Find evidence in code for a given sentence."""
@@ -312,7 +314,7 @@ def _extract_backticks(sentence: str) -> list[str]:
     return [x.strip() for x in BACKTICK_RE.findall(sentence) if x.strip()]
 
 
-def _get_probe_tokens(sentence: str, freq: Counter) -> list[str]:
+def _get_probe_tokens(sentence: str, freq: Counter[str]) -> list[str]:
     """Get the top probe tokens from the sentence."""
     sentence_tokens = tokenize(sentence)
     ranked_tokens = sorted(
@@ -491,7 +493,7 @@ def _process_documents(
     doc_files: list[Path],
     inverted: dict[str, set[int]],
     lines: list[tuple[Path, int, str]],
-    freq: Counter,
+    freq: Counter[str],
     first_line_idx_by_path: dict[str, int],
 ) -> list[dict[str, str]]:
     """Process documents and collect rows for the report."""

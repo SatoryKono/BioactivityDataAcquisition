@@ -15,6 +15,7 @@ import subprocess
 import sys
 import tempfile
 import xml.etree.ElementTree as ET
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -23,11 +24,15 @@ import yaml
 
 if __package__ in {None, ""}:
     from scripts.engineering.ci._compatibility_telemetry import (  # type: ignore[import-not-found]
+        CompatibilitySurfaceSnapshot,
+        DebtGovernanceSnapshot,
         collect_debt_governance_snapshot,
         render_debt_governance_section,
     )
 else:
     from ._compatibility_telemetry import (
+        CompatibilitySurfaceSnapshot,
+        DebtGovernanceSnapshot,
         collect_debt_governance_snapshot,
         render_debt_governance_section,
     )
@@ -36,6 +41,7 @@ from bioetl.infrastructure.quality.architecture_quality_scorecard import (
     build_architecture_quality_scorecard,
 )
 from bioetl.infrastructure.quality.debt_scorecard import (
+    DebtScorecardResult,
     evaluate_debt_scorecard,
     load_debt_scorecard,
 )
@@ -119,12 +125,12 @@ class QualityGateOutputContext:
     provider_vcr_counts: dict[str, int]
     ruff_violations: int
     coverage_percent: float | None
-    compatibility_surface: object
-    debt_governance_surface: object
-    architecture_quality_scorecard: dict[str, object]
+    compatibility_surface: CompatibilitySurfaceSnapshot
+    debt_governance_surface: DebtGovernanceSnapshot
+    architecture_quality_scorecard: Mapping[str, object]
     test_health_payload: dict[str, object]
     bonus: float
-    summary: object
+    summary: DebtScorecardResult
     adjusted_integral_score: float
     gate_pass: bool
     violations: list[str]
@@ -543,7 +549,9 @@ def _not_run_lane_entries(test_matrix: dict[str, object]) -> tuple[dict[str, str
         lane = entry.get("lane")
         skip_class = entry.get("skip_class")
         reason = entry.get("reason")
-        if not all(isinstance(value, str) and value for value in (lane, skip_class)):
+        if not isinstance(lane, str) or not lane:
+            continue
+        if not isinstance(skip_class, str) or not skip_class:
             continue
         normalized.append(
             {
@@ -960,12 +968,15 @@ def _summary_lines(
     test_health: TestHealthClassification,
     test_health_payload: dict[str, object],
     total_exemptions: int,
-    compatibility_surface: object,
-    debt_governance_surface: object,
+    compatibility_surface: CompatibilitySurfaceSnapshot,
+    debt_governance_surface: DebtGovernanceSnapshot,
 ) -> list[str]:
     """Build compact markdown summary lines."""
     del compatibility_surface
-    skip_classes_detail = test_health_payload["skip_classes_detail"]
+    skip_classes_detail_raw = test_health_payload["skip_classes_detail"]
+    skip_classes_detail = (
+        skip_classes_detail_raw if isinstance(skip_classes_detail_raw, list) else []
+    )
     skip_classes_rendered = (
         ", ".join(
             f"{item['short_label']}={item['count']}" for item in skip_classes_detail

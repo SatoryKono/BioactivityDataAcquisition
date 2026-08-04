@@ -87,18 +87,24 @@ def _ingest_agent_events(
             continue
         kind = obj.get("type")
         if kind == "review_context":
-            current = obj.get("workingDirectory")  # type: ignore[assignment]
+            working_directory = obj.get("workingDirectory")
+            current = working_directory if isinstance(working_directory, str) else None
             continue
         if kind == "finding":
             _append_agent_finding(findings, obj, current)
             continue
         if kind == "complete":
-            completes.append((layer_of(current), int(obj.get("findings") or 0)))
+            finding_count = obj.get("findings")
+            completes.append(
+                (layer_of(current), finding_count if isinstance(finding_count, int) else 0)
+            )
     return findings, completes
 
 
 def _layer_status_cell(
-    layer: str, by_layer: collections.Counter, complete_map: dict
+    layer: str,
+    by_layer: collections.Counter[str],
+    complete_map: dict[str, int],
 ) -> str:
     n = by_layer.get(layer, 0)
     if layer in complete_map:

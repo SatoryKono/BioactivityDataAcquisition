@@ -26,7 +26,7 @@ from collections import defaultdict
 from collections.abc import Callable, Sequence
 from datetime import UTC, date, datetime
 from pathlib import Path
-from typing import Final, Protocol, TypedDict
+from typing import Any, Final, Protocol, TypedDict, cast
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -405,7 +405,7 @@ def _hidden_windows_subprocess_kwargs(
 
     startupinfo_factory = getattr(subprocess_module, "STARTUPINFO", None)
     if callable(startupinfo_factory):
-        startupinfo = startupinfo_factory()
+        startupinfo = cast(_StartupInfoLike, startupinfo_factory())
         startf_use_show_window = int(
             getattr(subprocess_module, "STARTF_USESHOWWINDOW", 0)
         )
@@ -1849,7 +1849,7 @@ def _consume_prometheus_rule(
 
 
 def _scan_typed_prometheus_rules(
-    repo_root: Path, yaml_module: object
+    repo_root: Path, yaml_module: Any
 ) -> tuple[set[str], set[str], set[str], list[str]]:
     recording_outputs: set[str] = set()
     recording_inputs: set[str] = set()
@@ -2413,7 +2413,7 @@ def _sample_matches_metric(sample_name: str, metric_name: str) -> bool:
 
 
 def _observed_labelsets_for_metric(
-    metric: object, metric_name: str
+    metric: Any, metric_name: str
 ) -> set[tuple[tuple[str, str], ...]]:
     observed_labelsets: set[tuple[tuple[str, str], ...]] = set()
     for family in metric.collect():  # type: ignore[attr-defined]

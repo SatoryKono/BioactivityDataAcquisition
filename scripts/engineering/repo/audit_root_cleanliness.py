@@ -7,7 +7,7 @@ import argparse
 import subprocess  # nosec B404
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, NotRequired, TypedDict
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -73,6 +73,25 @@ FORBIDDEN_LOCAL_ROOT_FILES: frozenset[str] = frozenset(
         "Test Results - Pytest_All.xml",
     }
 )
+
+
+class RootLayoutState(TypedDict):
+    """Typed root-layout evidence shared by the audit and report callers."""
+
+    allowed_root_files: frozenset[str]
+    allowed_root_dirs: frozenset[str]
+    structure_catalog: dict[str, Any]
+    tracked_paths: list[str]
+    tracked_root_files: set[str]
+    tracked_root_dirs: set[str]
+    root_file_allowlist_violations: list[str]
+    root_directory_approval_violations: list[str]
+    unexpected_root_files: list[str]
+    unexpected_root_dirs: list[str]
+    missing_allowed_files: list[str]
+    untracked_paths: NotRequired[list[str]]
+    unexpected_untracked_root_files: NotRequired[list[str]]
+    unexpected_untracked_root_dirs: NotRequired[list[str]]
 FORBIDDEN_DATA_SUBPATH_PREFIXES: tuple[str, ...] = ("data/.idea/",)
 
 ALLOWED_ROOT_DIRECTORIES: frozenset[str] = root_governance.BASE_ALLOWED_ROOT_DIRECTORIES
@@ -703,7 +722,7 @@ def collect_root_layout_state(
     repo_root: Path,
     *,
     include_untracked: bool = True,
-) -> dict[str, object]:
+) -> RootLayoutState:
     """Return deterministic root-layout state for audits and evidence export."""
     allowed_root_files = _load_allowed_root_files(repo_root)
     structure_catalog = _load_structure_catalog(repo_root)
@@ -719,7 +738,7 @@ def collect_root_layout_state(
         allowed_root_dirs,
     )
 
-    state: dict[str, object] = {
+    state: RootLayoutState = {
         "allowed_root_files": allowed_root_files,
         "allowed_root_dirs": allowed_root_dirs,
         "structure_catalog": structure_catalog,
@@ -835,8 +854,12 @@ def main() -> int:
     if args.strict_untracked and strict_local_root_violation:
         return 1
 
-    unexpected_untracked_root_files = layout_state["unexpected_untracked_root_files"]
-    unexpected_untracked_root_dirs = layout_state["unexpected_untracked_root_dirs"]
+    unexpected_untracked_root_files = layout_state.get(
+        "unexpected_untracked_root_files", []
+    )
+    unexpected_untracked_root_dirs = layout_state.get(
+        "unexpected_untracked_root_dirs", []
+    )
     strict_untracked_violation = _report_untracked_root_entries(
         unexpected_untracked_root_files=unexpected_untracked_root_files,
         unexpected_untracked_root_dirs=unexpected_untracked_root_dirs,
