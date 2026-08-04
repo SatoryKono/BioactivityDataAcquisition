@@ -529,8 +529,12 @@ def main(argv: list[str] | None = None) -> int:
             _write_text_atomically(
                 output_path, _canonical_json(payload), root=repo_root
             )
-            untriaged = payload["curated_inventory_reconciliation"]["untriaged_count"]  # type: ignore[index]
-            replay_stable = payload["comparison"]["replay_fingerprint_stable"]  # type: ignore[index]
+            reconciliation = payload["curated_inventory_reconciliation"]
+            comparison = payload["comparison"]
+            if not isinstance(reconciliation, dict) or not isinstance(comparison, dict):
+                raise ValueError("empirical payload summary sections must be mappings")
+            untriaged = reconciliation["untriaged_count"]
+            replay_stable = comparison["replay_fingerprint_stable"]
             print(f"[flaky-test-empirical] wrote {output_path}")
             return 1 if untriaged or not replay_stable else 0
         payload = build_payload(

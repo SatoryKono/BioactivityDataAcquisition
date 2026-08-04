@@ -9,7 +9,7 @@ import subprocess
 from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeGuard
 
 import yaml
 
@@ -309,7 +309,9 @@ def _parse_python_ast(path: Path) -> ast.AST | None:
         return None
 
 
-def _is_counted_function(node: ast.AST) -> bool:
+def _is_counted_function(
+    node: ast.AST,
+) -> TypeGuard[ast.FunctionDef | ast.AsyncFunctionDef]:
     """Return whether the AST node counts as a user-defined function."""
     if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
         return False
@@ -579,6 +581,8 @@ def _bounded_growth_budgets(family: dict[str, object]) -> dict[str, int]:
 def _path_prefixes(family: dict[str, object]) -> tuple[str, ...]:
     """Return normalized hotspot family path prefixes."""
     raw_prefixes = family.get("path_prefixes", [])
+    if not isinstance(raw_prefixes, list):
+        return ()
     return tuple(prefix for prefix in raw_prefixes if isinstance(prefix, str))
 
 

@@ -227,7 +227,9 @@ def _count(value: object) -> int:
         return len(value)
     if value is None:
         return 0
-    return int(value)
+    if isinstance(value, str):
+        return int(value)
+    raise TypeError(f"Unsupported count value: {value!r}")
 
 
 def _is_budget_key(key: str) -> bool:

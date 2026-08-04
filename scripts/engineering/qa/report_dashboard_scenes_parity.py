@@ -89,13 +89,19 @@ def build_payload() -> dict[str, object]:
                 continue
             panel_id = int(panel["id"])
             source = _source_summary(panel)
-            expressions = [str(value) for value in source["expressions"]]
+            raw_expressions = source["expressions"]
+            expressions = (
+                [str(value) for value in raw_expressions]
+                if isinstance(raw_expressions, list)
+                else []
+            )
             if source["datasource_type"] == "prometheus" and any(
                 "run_id" in expression for expression in expressions
             ):
                 run_id_prometheus_violations.append(f"{uid}#{panel_id}")
 
-            has_query = int(source["target_count"]) > 0
+            raw_target_count = source["target_count"]
+            has_query = isinstance(raw_target_count, int) and raw_target_count > 0
             disposition = (
                 "route-primary"
                 if panel_id in primary_ids

@@ -46,9 +46,12 @@ _HOTSPOT_METRIC_NAMES = (
 def _baseline_families_by_name(
     baseline: dict[str, object],
 ) -> dict[str, dict[str, object]]:
+    raw_families = baseline.get("families", [])
+    if not isinstance(raw_families, list):
+        return {}
     return {
         row["name"]: row
-        for row in baseline.get("families", [])
+        for row in raw_families
         if isinstance(row, dict) and isinstance(row.get("name"), str)
     }
 

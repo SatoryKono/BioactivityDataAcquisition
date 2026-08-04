@@ -169,7 +169,12 @@ def _record_soak_sample(
         index_and_save(state, state_path, evidence_dir)
         return False
     if previous is not None:
-        state["soak_observed_seconds"] = float(state["soak_observed_seconds"]) + (
+        observed = state["soak_observed_seconds"]
+        if not isinstance(observed, (int, float, str)) or not isinstance(
+            previous, (int, float, str)
+        ):
+            raise TypeError("soak timing state must be numeric")
+        state["soak_observed_seconds"] = float(observed) + (
             sampled_at - float(previous)
         )
     state["soak_last_sample_at"] = sampled_at
@@ -207,7 +212,11 @@ def _handle_soak_gap_interrupt(
     allowed_gap: float,
 ) -> bool | None:
     """Return recursive result when gap interrupts; None when sampling should continue."""
-    if previous is None or sampled_at - float(previous) <= allowed_gap:
+    if previous is None:
+        return None
+    if not isinstance(previous, (int, float, str)):
+        raise TypeError("previous soak sample timestamp must be numeric")
+    if sampled_at - float(previous) <= allowed_gap:
         return None
     state["soak_window_interrupted"] = True
     index_and_save(state, state_path, evidence_dir)

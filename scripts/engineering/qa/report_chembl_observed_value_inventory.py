@@ -309,6 +309,9 @@ def main(argv: list[str] | None = None) -> int:
 
     payload = build_inventory_payload(max_examples=args.max_examples)
     markdown = _render_markdown(payload, limit=args.limit) + "\n"
+    raw_rows = payload["rows"]
+    if not isinstance(raw_rows, list):
+        raise ValueError("inventory rows must be a list")
     csv_rows = [
         FixtureSummaryRow(
             pipeline_name=str(row["pipeline_name"]),
@@ -320,7 +323,7 @@ def main(argv: list[str] | None = None) -> int:
             observed_examples=tuple(str(value) for value in row["observed_examples"]),
             fixture_path=str(row["fixture_path"]),
         ).as_csv_row()
-        for row in payload["rows"]
+        for row in raw_rows
         if isinstance(row, dict)
     ]
     rendered_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"

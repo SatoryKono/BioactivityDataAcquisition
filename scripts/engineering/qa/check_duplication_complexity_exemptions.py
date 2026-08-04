@@ -47,7 +47,11 @@ def _validate_metadata(entries: list[dict[str, object]], *, label: str) -> list[
     seen: set[tuple[str, tuple[str, ...]]] = set()
     for entry in entries:
         raw_scopes = entry.get("scopes")
-        scopes = tuple(sorted(str(scope) for scope in raw_scopes or []))
+        scopes = (
+            tuple(sorted(str(scope) for scope in raw_scopes))
+            if isinstance(raw_scopes, list)
+            else ()
+        )
         key = (str(entry.get("path") or entry.get("name")), scopes)
         if key in seen:
             errors.append(
@@ -95,7 +99,10 @@ def main() -> None:
     ]
 
     workflow_xenon_paths = _extract_xenon_excludes(workflow_text)
-    workflow_critical_paths = set(_extract_literal(workflow_text, "EXEMPT_PATHS"))
+    raw_critical_paths = _extract_literal(workflow_text, "EXEMPT_PATHS")
+    workflow_critical_paths = (
+        set(raw_critical_paths) if isinstance(raw_critical_paths, (list, set)) else set()
+    )
     workflow_critical_functions = _extract_literal(workflow_text, "EXEMPT_FUNCTIONS")
     if not isinstance(workflow_critical_functions, dict):
         errors.append("EXEMPT_FUNCTIONS must stay a dict literal in workflow")

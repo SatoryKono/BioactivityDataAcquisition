@@ -225,6 +225,10 @@ class DQConsistencyValidator:
         resolver = DQPolicyResolver(config)
         actual_hash = resolver.build_policy_ref().policy_hash
 
+        if actual_hash is None:
+            self.issues.append("Policy hash is missing")
+            return False
+
         if expected_hash and actual_hash != expected_hash:
             self.issues.append(
                 f"Policy hash mismatch: expected {expected_hash}, got {actual_hash}"

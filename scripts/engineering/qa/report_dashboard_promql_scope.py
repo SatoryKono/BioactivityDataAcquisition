@@ -31,14 +31,20 @@ def _load_allowlist() -> tuple[frozenset[str], frozenset[str]]:
 def _panel_queries(panel: dict[str, object]) -> list[tuple[str, str]]:
     title = str(panel.get("title", ""))
     rows: list[tuple[str, str]] = []
-    for target in panel.get("targets", []):
+    raw_targets = panel.get("targets", [])
+    if not isinstance(raw_targets, list):
+        raw_targets = []
+    for target in raw_targets:
         if not isinstance(target, dict):
             continue
         expr = target.get("expr", "")
         if isinstance(expr, str) and expr.strip():
             rows.append((title, expr))
     if panel.get("type") == "row":
-        for nested in panel.get("panels", []):
+        nested_panels = panel.get("panels", [])
+        if not isinstance(nested_panels, list):
+            nested_panels = []
+        for nested in nested_panels:
             if isinstance(nested, dict):
                 rows.extend(_panel_queries(nested))
     return rows

@@ -70,20 +70,22 @@ def _build_json_payload(
     metrics: list[dict[str, object]],
 ) -> dict[str, object]:
     enriched_metrics = [_with_budget_warnings(family) for family in metrics]
+
+    def _list_size(family: dict[str, object], key: str) -> int:
+        value = family.get(key, [])
+        return len(value) if isinstance(value, list) else 0
+
     return {
         "summary": {
             "snapshot_date": snapshot_date,
             "families": len(enriched_metrics),
             "scorecard": SCORECARD_PATH.relative_to(PROJECT_ROOT).as_posix(),
             "budget_warnings": sum(
-                len(family.get("budget_warnings", []))
-                for family in enriched_metrics
-                if isinstance(family.get("budget_warnings"), list)
+                _list_size(family, "budget_warnings") for family in enriched_metrics
             ),
             "budget_review_notes": sum(
-                len(family.get("budget_review_notes", []))
+                _list_size(family, "budget_review_notes")
                 for family in enriched_metrics
-                if isinstance(family.get("budget_review_notes"), list)
             ),
         },
         "families": enriched_metrics,

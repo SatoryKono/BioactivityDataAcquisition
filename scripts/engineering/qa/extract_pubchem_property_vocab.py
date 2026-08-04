@@ -29,7 +29,10 @@ def _iter_jsonl_payloads(paths: list[Path]) -> list[dict[str, object]]:
 
 def _iter_pubchem_urns(payload: dict[str, object]) -> list[dict[str, object]]:
     urns: list[dict[str, object]] = []
-    for prop in payload.get("props", []):
+    raw_props = payload.get("props", [])
+    if not isinstance(raw_props, list):
+        return urns
+    for prop in raw_props:
         if not isinstance(prop, dict):
             continue
         urn = prop.get("urn") or {}
