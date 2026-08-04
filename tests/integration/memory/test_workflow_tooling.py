@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -644,6 +645,42 @@ def test_smoke_workflow_exercises_pre_and_post_without_persistent_refresh(
     assert payload["post_task_ok"] is True
     assert payload["post_task_validation_status"] == "completed"
     assert payload["generated_artifacts"] == "temporary_directory_removed"
+    assert payload["actor"] == {
+        "runtime": workflow._SMOKE_RUNTIME,
+        "agent": workflow._SMOKE_AGENT,
+    }
+
+
+def test_smoke_workflow_injects_provenance_when_env_absent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Smoke must not require manual BIOETL_AI_* env (AI-MEM-C1-001 / #7484)."""
+    monkeypatch.delenv("BIOETL_AI_RUNTIME", raising=False)
+    monkeypatch.delenv("BIOETL_AI_AGENT", raising=False)
+    monkeypatch.setattr(workflow, "validate_memory_scaffold", lambda: [])
+
+    payload = workflow.smoke_workflow(validation_timeout_seconds=0)
+
+    assert payload["ok"] is True
+    assert payload["actor"]["runtime"] == "smoke"
+    assert payload["actor"]["agent"] == "memory-workflow-smoke"
+    # Smoke must restore caller environment (no leak of smoke identity).
+    assert "BIOETL_AI_RUNTIME" not in os.environ
+    assert "BIOETL_AI_AGENT" not in os.environ
+
+
+def test_smoke_workflow_restores_caller_provenance_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("BIOETL_AI_RUNTIME", "caller-runtime")
+    monkeypatch.setenv("BIOETL_AI_AGENT", "caller-agent")
+    monkeypatch.setattr(workflow, "validate_memory_scaffold", lambda: [])
+
+    payload = workflow.smoke_workflow(validation_timeout_seconds=0)
+
+    assert payload["ok"] is True
+    assert os.environ["BIOETL_AI_RUNTIME"] == "caller-runtime"
+    assert os.environ["BIOETL_AI_AGENT"] == "caller-agent"
 
 
 def test_compact_prune_report_accepts_minimal_stub_payload() -> None:
