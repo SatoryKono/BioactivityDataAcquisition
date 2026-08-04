@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar, Protocol
 
 from bioetl.application.observability.span_attribute_values import (
     coerce_span_attribute_value,
@@ -49,6 +49,53 @@ class DeleteResult:
     error: str | None = None
 
 
+class _MetricsTracingHost(Protocol):
+    """Structural host contract shared by metrics tracing mixins."""
+
+    TRACER_NAME: ClassVar[str]
+    tracer: TracingPort | None
+
+    def _build_span_attributes(
+        self,
+        *,
+        operation: str,
+        **extra: object,
+    ) -> dict[str, object]: ...
+
+    @staticmethod
+    def _set_result_attributes(
+        span: Span,
+        *,
+        success: bool,
+        error: str | None = None,
+        attributes: Mapping[str, object] | None = None,
+    ) -> None: ...
+
+
+class _MetricsGatewayHost(_MetricsTracingHost, Protocol):
+    """Structural host contract for gateway publication helpers."""
+
+    logger: LoggerPort
+    _publisher: MetricsPublisherPort | None
+
+    def _push_to_gateway_impl(
+        self,
+        *,
+        gateway: str,
+        run_label: str,
+        labels: dict[str, str],
+        metric_names: tuple[str, ...] | None,
+    ) -> PushResult: ...
+
+    def _delete_from_gateway_impl(
+        self,
+        *,
+        gateway: str,
+        run_label: str,
+        labels: dict[str, str],
+    ) -> DeleteResult: ...
+
+
 class _MetricsTracingMixin:
     """Tracing attribute helpers for metrics administration flows."""
 
@@ -87,7 +134,6 @@ class _MetricsTracingMixin:
 class _MetricsGatewayMixin(_MetricsTracingMixin):
     """Gateway publication helpers for metrics administration flows."""
 
-    logger: LoggerPort
     tracer: TracingPort | None = (
         None  # Any: host attr default  # Any: host attr default (PD6)
     )
@@ -96,7 +142,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
     )
 
     def push_to_gateway(
-        self,
+        self: _MetricsGatewayHost,
         *,
         gateway: str,
         run_label: str = "bioetl",
@@ -136,7 +182,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
             return result
 
     def _push_to_gateway_impl(
-        self,
+        self: _MetricsGatewayHost,
         *,
         gateway: str,
         run_label: str,
@@ -217,7 +263,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
         )
 
     def delete_from_gateway(
-        self,
+        self: _MetricsGatewayHost,
         *,
         gateway: str,
         run_label: str = "bioetl",
@@ -254,7 +300,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
             return result
 
     def _delete_from_gateway_impl(
-        self,
+        self: _MetricsGatewayHost,
         *,
         gateway: str,
         run_label: str,

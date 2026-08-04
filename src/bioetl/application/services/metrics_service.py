@@ -15,13 +15,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.observability.tracing_operation_helpers import traced_operation
 from bioetl.application.services._metrics_service_gateway_support import (
     DeleteResult,
     PushResult,
     _MetricsGatewayMixin,
+    _MetricsTracingHost,
     _MetricsTracingMixin,
 )
 from bioetl.domain.exceptions import BioETLError, MetricsServerError
@@ -86,18 +87,47 @@ class StartResult:
     error: str | None = None
 
 
-class _MetricsStartMixin(_MetricsTracingMixin):
-    """Metrics server start lifecycle helpers."""
+class _MetricsStartHost(_MetricsTracingHost, Protocol):
+    """Structural host contract for metrics-server lifecycle helpers."""
 
     logger: LoggerPort
     _server: MetricsServerPort
-    tracer: TracingPort | None = (
-        None  # Any: host attr default  # Any: host attr default (PD6)
-    )
     clock: ClockPort
 
     def _handle_start_error(
         self,
+        port: int,
+        addr: str,
+        e: Exception,
+        fail_fast: bool,
+    ) -> StartResult: ...
+
+    def _start_impl(
+        self,
+        *,
+        port: int,
+        addr: str,
+        fail_fast: bool,
+        retry_count: int,
+        retry_delay: float,
+    ) -> StartResult: ...
+
+
+class _MetricsStatusHost(_MetricsTracingHost, Protocol):
+    """Structural host contract for metrics-server status helpers."""
+
+    _server: MetricsServerPort
+
+
+class _MetricsStartMixin(_MetricsTracingMixin):
+    """Metrics server start lifecycle helpers."""
+
+    tracer: TracingPort | None = (
+        None  # Any: host attr default  # Any: host attr default (PD6)
+    )
+
+    def _handle_start_error(
+        self: _MetricsStartHost,
         port: int,
         addr: str,
         e: Exception,
@@ -129,7 +159,7 @@ class _MetricsStartMixin(_MetricsTracingMixin):
         return StartResult(success=False, port=port, addr=addr, error=error_msg)
 
     def start(
-        self,
+        self: _MetricsStartHost,
         port: int = 8000,
         addr: str = "0.0.0.0",
         *,
@@ -190,7 +220,7 @@ class _MetricsStartMixin(_MetricsTracingMixin):
             return result
 
     def _start_impl(
-        self,
+        self: _MetricsStartHost,
         *,
         port: int,
         addr: str,
@@ -243,12 +273,11 @@ class _MetricsStartMixin(_MetricsTracingMixin):
 class _MetricsStatusMixin(_MetricsTracingMixin):
     """Metrics server status helpers."""
 
-    _server: MetricsServerPort
     tracer: TracingPort | None = (
         None  # Any: host attr default  # Any: host attr default (PD6)
     )
 
-    def get_status(self) -> MetricsServerStatus:
+    def get_status(self: _MetricsStatusHost) -> MetricsServerStatus:
         """Get the current status of the metrics server.
 
         Returns:
@@ -284,7 +313,7 @@ class _MetricsStatusMixin(_MetricsTracingMixin):
                 started_at=runtime_status.started_at,
             )
 
-    def is_running(self) -> bool:
+    def is_running(self: _MetricsStatusHost) -> bool:
         """Check if the metrics server is currently running.
 
         Returns:

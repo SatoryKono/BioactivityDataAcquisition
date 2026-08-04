@@ -41,7 +41,11 @@ class _HasWrappedDataSource(Protocol):
     """Structural protocol for wrappers that delegate to a data source adapter."""
 
     _data_source: DataSourcePort
-    provider_name: str
+
+    @property
+    def provider_name(self) -> str:
+        """Provider name exposed by the wrapped data source."""
+        ...
 
     def _after_wrapped_data_source_enter(self) -> None:
         """Reset wrapper-local state after entering the wrapped data source."""

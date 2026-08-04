@@ -105,7 +105,7 @@
       "source": "reports/quality/compatibility-importer-census.json"
     },
     "zero_reference_supporting_scripts": {
-      "current": 5,
+      "current": 6,
       "max": 32,
       "opening": 46,
       "source": "configs/quality/scripts_inventory_manifest.json"

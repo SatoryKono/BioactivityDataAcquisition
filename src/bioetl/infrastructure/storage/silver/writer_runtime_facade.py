@@ -110,8 +110,8 @@ class SilverWriterRuntimeFacade(
     ) -> SilverWriteResult | None:
         """Execute all configured Silver contract-version write targets."""
         return await _write_dual_targets(
-            cast(_SilverWriterDispatchHost, self),
-            invocation=invocation,  # pyright: ignore[reportInvalidCast]
+            cast(_SilverWriterDispatchHost, cast(object, self)),
+            invocation=invocation,
         )
 
     async def _dispatch_write_with_domain_errors(
