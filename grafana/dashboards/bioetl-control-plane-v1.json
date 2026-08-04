@@ -3288,7 +3288,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "links": [
                 {
@@ -3323,8 +3323,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
-                      "wrapText": true
+                      "type": "auto"
                     }
                   }
                 ]
@@ -3424,7 +3423,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "unit": "none",
               "noValue": "No overview identity rows. Use the replay/resume summary above first; then verify backend health (/health/live) and selected run_id before treating this forensic view as empty."
@@ -3451,8 +3450,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
-                      "wrapText": true
+                      "type": "auto"
                     }
                   }
                 ]
@@ -3616,7 +3614,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "unit": "none",
               "noValue": "No identity gap rows for this forensic view. Use the summary cards above, then verify backend health and selected run scope before treating this as expected empty."
@@ -3643,8 +3641,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
-                      "wrapText": true
+                      "type": "auto"
                     }
                   }
                 ]
@@ -3706,7 +3703,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "unit": "none",
               "noValue": "No checkpoint anchor comparison rows. Use checkpoint freshness above, then verify backend health and selected run scope before treating this as expected empty."
@@ -3733,8 +3730,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
-                      "wrapText": true
+                      "type": "auto"
                     }
                   }
                 ]
@@ -3796,7 +3792,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "unit": "none",
               "noValue": "No P1 replay/evidence anchors for this forensic view. Use the replay/resume summary above, then verify backend health and selected run scope before treating this as expected empty."
@@ -3823,8 +3819,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
-                      "wrapText": true
+                      "type": "auto"
                     }
                   }
                 ]
@@ -3886,7 +3881,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "unit": "none",
               "noValue": "No P2 forensic anchors for this scope. Use the summary cards above, then select an exact run_id or verify backend health before treating this as expected empty."
@@ -3913,8 +3908,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
-                      "wrapText": true
+                      "type": "auto"
                     }
                   }
                 ]
