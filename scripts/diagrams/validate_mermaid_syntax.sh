@@ -43,26 +43,44 @@ cleanup_temp_files() {
 }
 trap cleanup_temp_files EXIT
 
+chrome_headless_shell_is_runnable() {
+  local candidate="$1"
+  [[ -n "$candidate" && -x "$candidate" ]] || return 1
+  # Prefer dependency resolution check: broken puppeteer caches often have the
+  # binary present but missing shared libraries (libnss3, etc.).
+  if command -v ldd >/dev/null 2>&1; then
+    if ldd "$candidate" 2>/dev/null | grep -Eq 'not found'; then
+      return 1
+    fi
+    return 0
+  fi
+  "$candidate" --version >/dev/null 2>&1
+}
+
 resolve_chrome_headless_shell() {
   local env_exec="${PUPPETEER_EXECUTABLE_PATH:-}"
   if [[ -n "$env_exec" ]]; then
-    if [[ -x "$env_exec" ]]; then
+    if chrome_headless_shell_is_runnable "$env_exec"; then
       echo "$env_exec"
       return 0
     fi
-    echo "WARN: PUPPETEER_EXECUTABLE_PATH is not executable: $env_exec" >&2
+    echo "WARN: PUPPETEER_EXECUTABLE_PATH is not runnable: $env_exec" >&2
   fi
 
   if command -v chrome-headless-shell >/dev/null 2>&1; then
-    command -v chrome-headless-shell
-    return 0
+    local system_exec
+    system_exec="$(command -v chrome-headless-shell)"
+    if chrome_headless_shell_is_runnable "$system_exec"; then
+      echo "$system_exec"
+      return 0
+    fi
   fi
 
   local cache_root="${PUPPETEER_CACHE_DIR:-${HOME:-}/.cache/puppeteer}/chrome-headless-shell"
   if [[ -d "$cache_root" ]]; then
     local cached_exec
     cached_exec="$(find "$cache_root" -type f -name chrome-headless-shell 2>/dev/null | sort -V | tail -n 1 || true)"
-    if [[ -n "$cached_exec" ]] && [[ -x "$cached_exec" ]]; then
+    if chrome_headless_shell_is_runnable "$cached_exec"; then
       echo "$cached_exec"
       return 0
     fi
