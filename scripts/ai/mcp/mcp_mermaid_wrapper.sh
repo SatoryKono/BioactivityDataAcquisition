@@ -2,16 +2,17 @@
 set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-repo_root="$(cd -- "${script_dir}/../../.." && pwd)"
-# shellcheck source=./support/docker_cli_resolver.sh
-source "${script_dir}/support/docker_cli_resolver.sh"
+package="mcp-mermaid@0.4.1"
 
-export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${repo_root}/.cache/npm-cache}"
-
-if docker_bin="$(resolve_docker_mcp_gateway_bin)"; then
-  exec "${docker_bin}" mcp gateway run --servers mermaid --transport stdio "$@"
+# WSL uses the Windows-native browser payload, avoiding Linux system-package
+# installation while keeping protocol traffic on stdio for portable configs.
+if command -v powershell.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
+  wrapper="$(wslpath -w "${script_dir}/mcp_mermaid_wrapper.ps1")"
+  exec powershell.exe -NoLogo -NonInteractive -NoProfile -ExecutionPolicy Bypass \
+    -File "${wrapper}" -Transport stdio "$@"
 fi
 
-printf '%s\n' \
-  "Mermaid MCP requires the Docker Desktop MCP gateway; enable Docker Desktop WSL integration." >&2
-exit 1
+cache_home="${XDG_CACHE_HOME:-${HOME}/.cache}"
+export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${cache_home}/bioetl-mcp/npm-cache}"
+export npm_config_ignore_scripts=true
+exec npx -y "${package}" --transport stdio "$@"

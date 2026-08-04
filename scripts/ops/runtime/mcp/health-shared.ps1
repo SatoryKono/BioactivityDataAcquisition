@@ -141,7 +141,7 @@ foreach ($name in $selected) {
     $portUp = Test-TcpPort -Port $port -TimeoutMs $timeoutMs
     $pingOk = $false
     if ($portUp) {
-        if ([string]$entry.launch_mode -eq 'windows_docker_streaming') {
+        if ([string]$entry.launch_mode -in @('windows_docker_streaming', 'windows_npx_streaming')) {
             $pingOk = $true
         } else {
             $pingOk = Test-HttpPing -Uri $pingUrl -TimeoutSec $perTimeout

@@ -8,6 +8,7 @@ param(
     [string]$Endpoint = "/mcp",
     [ValidateSet("127.0.0.1", "localhost")]
     [string]$BindHost = "127.0.0.1",
+    [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$ArgumentList
 )
 
@@ -30,13 +31,18 @@ if (-not [string]::IsNullOrWhiteSpace($env:PLAYWRIGHT_BROWSERS_PATH) -and $env:P
 # Avoid upstream's sudo-oriented postinstall. Browser payload is user-local and
 # the explicit install is idempotent after the first successful download.
 $env:npm_config_ignore_scripts = "true"
-$previousErrorActionPreference = $ErrorActionPreference
-$ErrorActionPreference = "Continue"
-& npx -y "--package=$package" playwright install chromium *> $null
-$installExitCode = $LASTEXITCODE
-$ErrorActionPreference = $previousErrorActionPreference
-if ($installExitCode -ne 0) {
-    throw "Failed to install Playwright Chromium for Mermaid MCP."
+$browserRoot = Join-Path $localAppData "ms-playwright"
+$installedChromium = Get-ChildItem -Path $browserRoot -Filter "chrome.exe" -File -Recurse -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+if ($null -eq $installedChromium) {
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    & npx -y "--package=$package" playwright install chromium *> $null
+    $installExitCode = $LASTEXITCODE
+    $ErrorActionPreference = $previousErrorActionPreference
+    if ($installExitCode -ne 0) {
+        throw "Failed to install Playwright Chromium for Mermaid MCP."
+    }
 }
 
 $arguments = @("-y", $package, "--transport", $Transport)

@@ -87,6 +87,46 @@ def test_as_windows_path_uses_wslpath(
     assert observed == [["wslpath", "-w", "/mnt/e/repo/relay.ps1"]]
 
 
+def test_mermaid_backend_uses_pinned_windows_wrapper(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        windows_docker_mcp_bridge,
+        "_as_windows_path",
+        lambda path: f"WIN:{path.name}",
+    )
+
+    command = windows_docker_mcp_bridge._windows_backend_command(
+        server="mermaid", remote_port=18818, backend="mermaid-npx"
+    )
+
+    assert command[:5] == [
+        "powershell.exe",
+        "-NoLogo",
+        "-NonInteractive",
+        "-NoProfile",
+        "-ExecutionPolicy",
+    ]
+    assert "WIN:mcp_mermaid_wrapper.ps1" in command
+    assert command[-8:] == [
+        "-Transport",
+        "streamable",
+        "-BindHost",
+        "127.0.0.1",
+        "-Port",
+        "18818",
+        "-Endpoint",
+        "/mcp",
+    ]
+
+
+def test_mermaid_backend_rejects_non_mermaid_server() -> None:
+    with pytest.raises(ValueError, match="valid only for server 'mermaid'"):
+        windows_docker_mcp_bridge._windows_backend_command(
+            server="docker", remote_port=18818, backend="mermaid-npx"
+        )
+
+
 def test_main_reuses_existing_windows_gateway(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

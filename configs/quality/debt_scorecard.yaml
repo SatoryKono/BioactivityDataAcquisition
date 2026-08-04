@@ -702,10 +702,10 @@ oversized_source_module_inventory:
   - issue: '#6478'
     source: src/bioetl/application/services/control_plane/run_manifest_reproducibility_score_cards.py
     extracted_surface: src/bioetl/application/services/control_plane/run_manifest_reproducibility_score_cards.py
-    source_lines_after_split: 44
-    extracted_surface_lines: 44
+    source_lines_after_split: 59
+    extracted_surface_lines: 59
     rationale: Active top-list entry retired after prior extractions left the module well under the practical
-      split threshold (44 lines); no further split required.
+      split threshold (59 lines); no further split required.
   - issue: '#6478'
     source: src/bioetl/application/services/checkpoint_compatibility_service.py
     extracted_surface: src/bioetl/application/services/checkpoint_compatibility_telemetry.py

@@ -245,9 +245,21 @@ def main() -> int:
         _ForwardHandler.relay_script = _as_windows_path(relay_script)
         with _ForwardServer(("127.0.0.1", args.local_port), _ForwardHandler) as server:
             server.timeout = 1
-            while not stopped.is_set() and (child is None or child.poll() is None):
+            next_backend_probe = time.monotonic() + 10
+            while not stopped.is_set():
                 server.handle_request()
-        return 0 if child is None else child.poll() or 0
+                # Windows npm can leave its node server detached after the
+                # PowerShell wrapper exits. Keep the relay alive while the
+                # backend listener remains healthy, but notice a later exit.
+                if (
+                    child is not None
+                    and child.poll() is not None
+                    and time.monotonic() >= next_backend_probe
+                ):
+                    if not _port_is_open(args.remote_port):
+                        return child.returncode or 1
+                    next_backend_probe = time.monotonic() + 10
+        return 0
     finally:
         if child is not None and child.poll() is None:
             child.terminate()
