@@ -1,7 +1,7 @@
 import asyncio
+import contextlib
 import enum
 import gc
-import importlib.util
 import inspect
 import os
 import pathlib
@@ -278,7 +278,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     # Register a compatibility flag when no plugin already owns it. A
     # present-but-inactive pytest-recording install must not leave the option
     # unregistered (control-plane-e2e / CI-C1 closeout).
-    try:
+    with contextlib.suppress(ValueError):
         parser.addoption(
             "--vcr-record",
             action="store",
@@ -288,9 +288,6 @@ def pytest_addoption(parser: pytest.Parser) -> None:
                 "(none|once|new_episodes|all). Prefer VCR_RECORD_MODE env."
             ),
         )
-    except ValueError:
-        # Already registered by pytest-recording / pytest-vcr.
-        pass
 
 
 def pytest_cmdline_main(config):
