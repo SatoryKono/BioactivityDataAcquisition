@@ -600,13 +600,11 @@ def _start_managed_observability_backend(
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with log_path.open("w", encoding="utf-8") as f:
         f.write("")
-    kwargs: dict[str, object] = {
-        "cwd": str(repo_root),
-        "env": _build_detached_backend_env(),
-        "stdin": subprocess.DEVNULL,
-    }
-    if sys.platform == "win32":
-        kwargs["creationflags"] = int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    creationflags = (
+        int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        if sys.platform == "win32"
+        else 0
+    )
     with log_path.open("ab") as log_handle:
         process = subprocess.Popen(
             [
@@ -620,9 +618,12 @@ def _start_managed_observability_backend(
                 "--port",
                 str(port),
             ],
+            cwd=str(repo_root),
+            env=_build_detached_backend_env(),
+            stdin=subprocess.DEVNULL,
             stdout=log_handle,
             stderr=subprocess.STDOUT,
-            **kwargs,
+            creationflags=creationflags,
         )
     ready = wait_for_observability_backend_ready(health_url)
     required_ready = ready and wait_for_observability_backend_required_paths_ready(
@@ -892,7 +893,7 @@ def _discover_filled_dashboard_uids(
 
 
 def _run_semantic_phase(
-    config: object,
+    config: AuditCycleConfig,
     *,
     backend_ready: bool,
     app_base_url: str,
@@ -957,7 +958,7 @@ def _run_semantic_phase(
 
 
 def _run_render_phase(
-    config: object,
+    config: AuditCycleConfig,
     *,
     app_base_url: str,
     screenshot_uids: tuple[str, ...],
