@@ -94,7 +94,7 @@ ACTIVE_SURFACES = (
     / "silver_filter_migration.py",
     ROOT / "src" / "bioetl" / "infrastructure" / "config" / "filter_config_loader.py",
     ROOT / "docs" / "filters" / "retired-silver-filters-structural-scope.md",
-    ROOT / "docs" / "filters" / "migration-plan.md",
+    ROOT / "docs" / "99-archive" / "filters" / "migration-plan.md",
     ROOT
     / "docs"
     / "02-architecture"

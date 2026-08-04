@@ -142,9 +142,7 @@ def main(argv: list[str] | None = None) -> int:
         try:
             raw_existing = json.loads(local_path.read_text(encoding="utf-8"))
             existing = (
-                cast(JsonObject, raw_existing)
-                if isinstance(raw_existing, dict)
-                else {}
+                cast(JsonObject, raw_existing) if isinstance(raw_existing, dict) else {}
             )
         except json.JSONDecodeError:
             existing = {}
