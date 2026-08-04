@@ -74,13 +74,33 @@ run_with_docker() {
     -w "$PWD"
   )
 
-  # Mount a host Puppeteer cache into the container so Docker fallback can
-  # reuse a previously installed chrome-headless-shell runtime.
+  # Mount a host Puppeteer cache only when it contains a runnable
+  # chrome-headless-shell (executable and dynamic loader deps satisfied).
+  # A broken host install would shadow the image runtime and fail validation.
   if [[ -d "$HOST_PUPPETEER_CACHE_DIR" ]]; then
-    docker_args+=(
-      -e PUPPETEER_CACHE_DIR=/home/node/.cache/puppeteer
-      -v "$HOST_PUPPETEER_CACHE_DIR:/home/node/.cache/puppeteer"
-    )
+    host_chrome=""
+    host_chrome="$(
+      find "$HOST_PUPPETEER_CACHE_DIR" -type f -name chrome-headless-shell 2>/dev/null \
+        | sort -V \
+        | tail -n 1 \
+        || true
+    )"
+    if [[ -n "$host_chrome" && -x "$host_chrome" ]]; then
+      host_chrome_ok=0
+      if command -v ldd >/dev/null 2>&1; then
+        if ! ldd "$host_chrome" 2>/dev/null | grep -Eq 'not found'; then
+          host_chrome_ok=1
+        fi
+      elif "$host_chrome" --version >/dev/null 2>&1; then
+        host_chrome_ok=1
+      fi
+      if [[ "$host_chrome_ok" -eq 1 ]]; then
+        docker_args+=(
+          -e PUPPETEER_CACHE_DIR=/home/node/.cache/puppeteer
+          -v "$HOST_PUPPETEER_CACHE_DIR:/home/node/.cache/puppeteer"
+        )
+      fi
+    fi
   fi
 
   exec docker run \
