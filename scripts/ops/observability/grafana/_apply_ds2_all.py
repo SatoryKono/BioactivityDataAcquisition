@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterator
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Iterator, cast
+from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parents[4]
 DASH = ROOT / "grafana" / "dashboards"
@@ -101,8 +102,9 @@ def fix_runtime() -> None:
                 "tooltip": {"mode": "multi", "sort": "desc"},
             }
         if p.get("id") == 9991 or str(p.get("title") or "").startswith("First Action"):
-            p.setdefault("options", {})["mode"] = "markdown"
-            p["options"]["content"] = (
+            options = cast(JsonObject, p.setdefault("options", {}))
+            options["mode"] = "markdown"
+            options["content"] = (
                 "**Next best actions**\n"
                 "1. Read **Status** + Metrics Evidence (confidence) before treating OK as final.\n"
                 "2. Localize via **Aggregate Stage Lag** + Runtime Blockers.\n"
