@@ -353,7 +353,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 29
+        "y": 14
       },
       "datasource": "BioETL Ops HTTP",
       "description": "Do not put full UUIDs into Prometheus labels. DUX4-23/25: Canonical RUN hub — only board with first-class ID/Processed KPIs. Expected empty ≠ red failure (DUX3-03). Bronze/Silver/Gold accounting hub (Ops HTTP). Canonical portfolio hub for Processed Records. Valid empty: no matching accounting rows for the selected run. Backend unavailable is distinct; check /health/live",
