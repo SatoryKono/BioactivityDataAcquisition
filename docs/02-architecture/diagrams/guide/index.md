@@ -83,7 +83,10 @@ flowchart TB
         end
 
         subgraph ports["Ports"]
-            BronzeStoragePort / SilverStoragePort / GoldStoragePort / MergedStoragePort
+            BronzeStoragePort
+            SilverStoragePort
+            GoldStoragePort
+            MergedStoragePort
             LockPort
             CheckpointPort
             DataSourcePort

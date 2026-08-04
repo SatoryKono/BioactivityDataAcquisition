@@ -60,3 +60,21 @@ def test_validator_supports_embedded_mermaid_options() -> None:
     assert "INCLUDE_EMBEDDED=1" in script
     assert "INCLUDE_SOURCES=0" in script
     assert "embedded-mermaid.tsv" in script
+
+
+def test_validator_extracts_diagram_from_composite_mmd_sources() -> None:
+    script = _script_text()
+
+    assert "is_diagram_start" in script
+    assert "diagram_started=1" in script
+    assert "explanatory Markdown after a closing fence" in script
+    assert "/^[[:space:]]*```[[:space:]]*$/ { exit }" in script
+
+
+def test_mermaid_theme_uses_supported_class_renderer() -> None:
+    config = Path("docs/02-architecture/diagrams/theme/mermaid-config.json").read_text(
+        encoding="utf-8"
+    )
+
+    assert '"class": {' in config
+    assert '"defaultRenderer": "dagre-wrapper"' in config
