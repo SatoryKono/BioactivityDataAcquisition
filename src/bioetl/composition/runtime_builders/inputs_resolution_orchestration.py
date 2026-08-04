@@ -8,11 +8,7 @@ from typing import TYPE_CHECKING, Literal
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     build_runtime_config as _build_runtime_config,
-)
-from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     log_filter_config as _log_filter_config,
-)
-from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     resolve_runtime_projection as _resolve_runtime_projection,
 )
 from bioetl.domain.config import RuntimeConfig

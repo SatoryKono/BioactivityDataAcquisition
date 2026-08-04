@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-04T04:10:43.338867+00:00",
+  "generated_at": "2026-08-04T04:53:05.075244+00:00",
   "summary": {
-    "total_scripts": 571,
+    "total_scripts": 572,
     "status_counts": {
       "active": 341,
+      "legacy": 1,
       "supporting": 225,
       "temporary_diagnostic": 5
     },
@@ -6200,13 +6201,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 233,
+          "line": 234,
           "source_group": "tests",
           "text": "from scripts.diagrams.pipeline_dataflow_ir import _project_fields"
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 245,
+          "line": 246,
           "source_group": "tests",
           "text": "from scripts.diagrams.pipeline_dataflow_ir import _project_fields"
         }
@@ -11452,6 +11453,14 @@
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog \\"
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/qa/_tmp_residual_delta.py",
+      "type": "py",
+      "status": "legacy",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/engineering/qa/analyze_duplicate_functions.py",

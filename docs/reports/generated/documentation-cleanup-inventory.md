@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2391 |
-| Tracked doc-like files | 2391 |
+| Doc-like files | 2411 |
+| Tracked doc-like files | 2411 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2391 |
+| tracked | 2411 |
 
 ## Lifecycle Counts
 
@@ -26,8 +26,8 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 264 |
-| active_quality_baseline | 29 |
-| closeout_evidence | 40 |
+| active_quality_baseline | 30 |
+| closeout_evidence | 53 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 2 |
 | docs_reports_generated_or_route_owned | 6 |
@@ -41,7 +41,7 @@
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 33 |
-| working_report | 81 |
+| working_report | 87 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -61,7 +61,7 @@
 | Archived | 129 |
 | Canonical | 73 |
 | Generated | 861 |
-| Working | 462 |
+| Working | 482 |
 
 ## Surface Families
 
@@ -71,16 +71,16 @@
 | archive | 129 |
 | canonical | 73 |
 | generated | 861 |
-| working | 462 |
+| working | 482 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 77 |
+| archive-after-migration | 83 |
 | generate-automatically | 861 |
-| keep | 1137 |
+| keep | 1151 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -112,6 +112,8 @@
 | `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-refactoring-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-residual-2026-07-27-issue-publish.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-gap-report.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-gate-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/quality/compatibility-importer-census.json` | Working | 0 | archive-after-migration |
 | `reports/quality/compatibility-importer-census.md` | Working | 0 | archive-after-migration |
 | `reports/quality/config-compatibility-legacy-taxonomy-review.json` | Working | 0 | archive-after-migration |
@@ -120,6 +122,7 @@
 | `reports/quality/contract-coverage-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/control-plane-duplication.json` | Working | 0 | archive-after-migration |
 | `reports/quality/control-plane-duplication.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coverage-tail-branch-gate-plan.md` | Working | 0 | archive-after-migration |
 | `reports/quality/diagram-freshness-7316-verification.md` | Working | 0 | archive-after-migration |
 | `reports/quality/domain-aggregate-invariant-registry.json` | Working | 0 | archive-after-migration |
 | `reports/quality/domain-composite-config-importer-map.md` | Working | 0 | archive-after-migration |
@@ -127,6 +130,7 @@
 | `reports/quality/issue-6480-application-core-partial-tranche.json` | Working | 0 | archive-after-migration |
 | `reports/quality/layer-contract-coverage-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/layer-contract-coverage-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/live-residual-snapshot.json` | Working | 0 | archive-after-migration |
 | `reports/quality/low-coverage-targeted-tests-6045.json` | Working | 0 | archive-after-migration |
 | `reports/quality/partial-coverage-top50-arch-res-03.json` | Working | 0 | archive-after-migration |
 | `reports/quality/partial-coverage-top50-arch-res-03.md` | Working | 0 | archive-after-migration |
@@ -138,11 +142,13 @@
 | `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/quality/runtime-builders-duplication.json` | Working | 0 | archive-after-migration |
 | `reports/quality/runtime-builders-duplication.md` | Working | 0 | archive-after-migration |
+| `reports/quality/scripts_deprecation_backlog.md` | Working | 0 | archive-after-migration |
 | `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
 | `reports/quality/sonar/live-issues-20260728-manifest.json` | Working | 0 | archive-after-migration |
 | `reports/quality/sonar/live-issues-20260728-postmerge-full.json` | Working | 0 | archive-after-migration |
 | `reports/quality/sonar/live-snapshot-20260728-postmerge-summary.json` | Working | 0 | archive-after-migration |
 | `reports/quality/sonar/live-snapshot-20260728-summary.json` | Working | 0 | archive-after-migration |
+| `reports/quality/tasks_architecture_metric_exemptions_2026-06-26-15-51.json` | Working | 0 | archive-after-migration |
 | `reports/quality/test-bootstrap-fixture-scope-profile.json` | Working | 0 | archive-after-migration |
 | `reports/quality/test-support-helper-ownership-map.json` | Working | 0 | archive-after-migration |
 | `reports/quality/test-system-architecture-audit-20260729_FULL.md` | Working | 0 | archive-after-migration |
@@ -161,9 +167,6 @@
 | `reports/semantic_pipeline_audit/semantic_pair_matrix_2026-07-01.csv` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/semantic_pipeline_audit_2026-07-01.md` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/semantic_pipeline_audit_exhaustive_2026-07-01.md` | Working | 0 | archive-after-migration |
-| `reports/semantic_pipeline_audit/semantic_pipeline_audit_manifest_2026-07-01.json` | Working | 0 | archive-after-migration |
-| `reports/semantic_pipeline_audit/semantic_residual_backlog_2026-07-01.json` | Working | 0 | archive-after-migration |
-| `reports/semantic_pipeline_audit/semantic_residual_backlog_2026-07-01.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
