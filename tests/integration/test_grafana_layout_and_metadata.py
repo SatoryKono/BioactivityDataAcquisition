@@ -809,60 +809,6 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
     )
 
 
-@pytest.mark.skip(reason="Loki Explore dataLinks removed 2026-07-23")
-def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
-    """Only Runtime/DQ critical panels expose contextual Loki Explore links."""
-    dashboard_panels = {
-        "bioetl-runtime.json": "Monitor Failed Runs",
-        "bioetl-dq-v2.json": "Track Range Evidence: Bronze -> Silver -> Gold",
-    }
-
-    for dashboard_name, panel_title in dashboard_panels.items():
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        panels = {
-            panel.get("title"): panel
-            for panel in get_dashboard_panels(dashboard)
-            if panel.get("title")
-        }
-        panel = panels.get(panel_title)
-        assert panel is not None, (
-            f"{dashboard_name} missing critical panel {panel_title!r}"
-        )
-
-        links = panel.get("options", {}).get("dataLinks", [])
-        assert links, f"{dashboard_name}:{panel_title} must include dataLinks"
-
-        baseline = [
-            link
-            for link in links
-            if isinstance(link, dict)
-            and str(link.get("title", "")).startswith("Open Logs (Loki")
-            and "query=%7Bjob%3D%22bioetl%22%7D" in str(link.get("url", ""))
-        ]
-        assert baseline, (
-            f'{dashboard_name}:{panel_title} must keep baseline Loki link with {{job="bioetl"}}'
-        )
-
-        contextual = [
-            link
-            for link in links
-            if isinstance(link, dict)
-            and link.get("title")
-            in [
-                "Open Logs (Loki, contextual scope marker)",
-                "Open Logs (Loki, contextual scope marker, tracing)",
-            ]
-            and "scope_marker%3D%22dashboard_context%22" in str(link.get("url", ""))
-        ]
-        assert contextual, (
-            f"{dashboard_name}:{panel_title} must include contextual Loki link with scope marker"
-        )
-        for link in contextual:
-            url = str(link.get("url", ""))
-            assert "run_id" not in url
-            assert "payload_hash" not in url
-
-
 def test_dashboard_metadata_policy_invariants() -> None:
     """Metadata should follow documented policy without mechanical suite-wide rewrites."""
     allowed_schema_versions = {30, 39}
@@ -909,23 +855,3 @@ def test_dashboard_design_system_documents_metadata_policy() -> None:
     assert not missing, f"design-system metadata policy missing tokens: {missing}"
 
 
-@pytest.mark.skip(reason="Loki/Tempo Explore navigation links removed 2026-07-23")
-def test_control_plane_exposes_scope_preserving_explore_links() -> None:
-    """Control Plane navigation must offer scoped Logs and Traces handoffs."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    links_by_title = {
-        str(link.get("title")): str(link.get("url"))
-        for link in get_dashboard_navigation_links(dashboard)
-    }
-
-    expected_routes = {
-        "Explore Logs": "grafana-lokiexplore-app",
-        "Explore Traces": "grafana-exploretraces-app",
-    }
-    for title, route in expected_routes.items():
-        assert title in links_by_title, f"Control Plane must define a URL for {title!r}"
-        url = links_by_title[title]
-        assert route in url
-        assert "from=${__from}" in url
-        assert "to=${__to}" in url
-        assert "from=now-150m&to=now" not in url
