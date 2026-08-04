@@ -1,6 +1,19 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: active
+Class: repo-only
+Owner: BioETL Team
+Last verified: '2026-08-04'
+
+______________________________________________________________________
+
 # Link Checker Plugin - Integration Guide
 
-## 🎯 Overview
+> **Classification:** repo-only plugin integration notes (outside MkDocs nav).
+> #7434.
+
+## Overview
 
 This guide provides step-by-step instructions for integrating the BioETL Link Checker Plugin into your MkDocs documentation system. The plugin validates all links during the build process and exposes results as published link health metrics.
 
