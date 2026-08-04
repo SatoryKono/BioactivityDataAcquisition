@@ -1,4 +1,5 @@
 import asyncio
+import argparse
 import contextlib
 import enum
 import gc
@@ -275,11 +276,10 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         default=False,
         help="Enable richer pilot-only live contract suites (equivalent to BIOETL_PILOT_SOAK_TESTS=true).",
     )
-    # Workflows pass --vcr-record=...; register only when no VCR plugin ships it.
-    if (
-        importlib.util.find_spec("pytest_vcr") is None
-        and importlib.util.find_spec("pytest_recording") is None
-    ):
+    # Workflows pass --vcr-record=...; register it when no plugin does so.
+    # A plugin may already have registered the option, so suppress duplicate
+    # registration errors while keeping it available with plugin autoload off.
+    try:
         parser.addoption(
             "--vcr-record",
             action="store",
@@ -289,6 +289,8 @@ def pytest_addoption(parser: pytest.Parser) -> None:
                 "(none|once|new_episodes|all). Prefer VCR_RECORD_MODE env."
             ),
         )
+    except (ValueError, argparse.ArgumentError):
+        pass
 
 
 def pytest_cmdline_main(config):
