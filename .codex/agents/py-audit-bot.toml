@@ -1,0 +1,6 @@
+name = "py-audit-bot"
+description = "Run an independent BioETL audit across code, configuration, documentation, architecture, and regression risk."
+sandbox_mode = "read-only"
+developer_instructions = """
+Read AGENTS.md, .codex/agents/CODEX-RUNTIME.md, .codex/agents/py-audit-bot.md, .codex/skills/py-audit-bot/SKILL.md, docs/00-project/ai/memory/agent-memory.md, and docs/00-project/ai/memory/memory-py-audit-bot.md before acting. Follow the named Markdown profile and skill as the detailed operating contract. Remain evidence-led and read-only unless the parent task explicitly authorizes remediation.
+"""

@@ -3,31 +3,42 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+PERSONAL_CODEX_ROOT="${CODEX_HOME:-$HOME/.codex}"
 SKILLS_SOURCE_DIR="$REPO_ROOT/.codex/skills"
-AGENTS_SOURCE_DIR="$REPO_ROOT/.codex/agents"
-SKILLS_TARGET_DIR="$CODEX_HOME/skills"
-AGENTS_TARGET_DIR="$CODEX_HOME/subagents"
+SKILLS_TARGET_DIR="$PERSONAL_CODEX_ROOT/skills"
+INSTALL_PERSONAL=0
+SYNC_NATIVE=0
 DRY_RUN=0
-SYNC_PAIRED_AGENTS=1
 
 usage() {
     cat <<'EOF'
-Usage: setup_skills.sh [--dry-run] [--no-agents]
+Usage: setup_skills.sh [--check] [--sync-native] [--install-personal] [--dry-run]
 
-Sync repository Codex skills into the local Codex home. By default the script
-also syncs paired agents when a matching `.codex/agents/<skill>.md` exists.
+Check the generated `.agents/skills/*/SKILL.md` discovery adapters. Codex
+discovers these repository skills directly; no user-home bootstrap is required.
+
+`--sync-native` refreshes the tracked adapters from canonical `.codex/skills`.
+`--install-personal` explicitly copies canonical skills to the current user's
+Codex home. `--dry-run` previews only that optional personal copy.
 EOF
-    return 0
 }
 
 for arg in "$@"; do
     case "$arg" in
+        --check)
+            ;;
+        --sync-native)
+            SYNC_NATIVE=1
+            ;;
+        --install-personal)
+            INSTALL_PERSONAL=1
+            ;;
         --dry-run)
+            INSTALL_PERSONAL=1
             DRY_RUN=1
             ;;
         --no-agents)
-            SYNC_PAIRED_AGENTS=0
+            echo "[WARN] --no-agents is obsolete; skills no longer bootstrap paired agents" >&2
             ;;
         -h|--help)
             usage
@@ -41,53 +52,33 @@ for arg in "$@"; do
     esac
 done
 
-if [[ ! -d "$SKILLS_SOURCE_DIR" ]]; then
-    echo "Skills source directory not found: $SKILLS_SOURCE_DIR" >&2
-    exit 1
+if [[ "$SYNC_NATIVE" -eq 1 ]]; then
+    python3 "$SCRIPT_DIR/sync_native_skills.py" --sync
+else
+    python3 "$SCRIPT_DIR/sync_native_skills.py" --check
+fi
+
+if [[ "$INSTALL_PERSONAL" -eq 0 ]]; then
+    exit 0
 fi
 
 mapfile -t skill_dirs < <(find "$SKILLS_SOURCE_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
-paired_agents=()
-for path in "${skill_dirs[@]}"; do
-    name="$(basename "$path")"
-    agent_path="$AGENTS_SOURCE_DIR/$name.md"
-    if [[ -f "$agent_path" ]]; then
-        paired_agents+=("$name:$agent_path")
-    fi
-done
-
 if [[ "$DRY_RUN" -eq 1 ]]; then
-    echo "Would sync: $SKILLS_SOURCE_DIR -> $SKILLS_TARGET_DIR"
+    echo "Would copy optional personal skills: $SKILLS_SOURCE_DIR -> $SKILLS_TARGET_DIR"
     for path in "${skill_dirs[@]}"; do
         echo "  $(basename "$path")/"
     done
-    if [[ "$SYNC_PAIRED_AGENTS" -eq 1 ]]; then
-        echo "would also sync paired agents:"
-        for entry in "${paired_agents[@]}"; do
-            name="${entry%%:*}"
-            agent_path="${entry#*:}"
-            echo "  $name -> $AGENTS_TARGET_DIR/$(basename "$agent_path")"
-        done
-    fi
     exit 0
 fi
 
 mkdir -p "$SKILLS_TARGET_DIR"
 for path in "${skill_dirs[@]}"; do
     name="$(basename "$path")"
-    rm -rf "$SKILLS_TARGET_DIR/$name"
-    cp -R "$path" "$SKILLS_TARGET_DIR/$name"
+    destination="$SKILLS_TARGET_DIR/$name"
+    if [[ -e "$destination" ]]; then
+        echo "[WARN] Existing personal skill left unchanged: $destination" >&2
+        continue
+    fi
+    cp -R "$path" "$destination"
 done
-
-if [[ "$SYNC_PAIRED_AGENTS" -eq 1 ]]; then
-    mkdir -p "$AGENTS_TARGET_DIR"
-    for entry in "${paired_agents[@]}"; do
-        agent_path="${entry#*:}"
-        cp "$agent_path" "$AGENTS_TARGET_DIR/$(basename "$agent_path")"
-    done
-fi
-
-echo "Synced ${#skill_dirs[@]} skills into $SKILLS_TARGET_DIR"
-if [[ "$SYNC_PAIRED_AGENTS" -eq 1 ]]; then
-    echo "Synced ${#paired_agents[@]} paired agents into $AGENTS_TARGET_DIR"
-fi
+echo "Copied ${#skill_dirs[@]} optional personal skills into $SKILLS_TARGET_DIR"

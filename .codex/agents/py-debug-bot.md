@@ -227,17 +227,11 @@ ______________________________________________________________________
 
 ## MCP Tools
 
-### ChEMBL — воспроизведение ошибок
-
-**Когда использовать:** При debugging ChEMBL pipeline failures.
-
-> **Примечание:** MCP инструменты доступны через `ToolSearch`. Перед использованием выполнить `ToolSearch("ChEMBL")` для загрузки.
-
-| Сценарий               | Инструмент               | Параметры              | Результат                               |
-| ---------------------- | ------------------------ | ---------------------- | --------------------------------------- |
-| Reproduce API response | `ChEMBL:compound_search` | Параметры из error log | Воспроизведение условий ошибки          |
-| Check API contract     | `ChEMBL:get_bioactivity` | Known compound ID      | Проверка: ошибка в нашем коде или в API |
-| ADMET edge cases       | `ChEMBL:get_admet`       | ID из failing test     | Диагностика ADMET-specific failures     |
+MCP допустим как bounded diagnostic evidence после локального воспроизведения.
+Выбирать доступный capability через runtime discovery. Для external API
+failure сравнивать зафиксированный запрос/ответ с tracked adapter contract;
+не считать историческое имя provider-specific MCP гарантированным. При
+недоступном optional endpoint продолжить локальную RCA и отметить ограничение.
 
 ______________________________________________________________________
 
