@@ -8,19 +8,24 @@ Inputs table cellHeight=sm (no applyToRow).
 from __future__ import annotations
 
 import json
+from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[4]
 DASH = ROOT / "grafana" / "dashboards"
 
 
-def walk(panels: list | None):
+JsonObject = dict[str, Any]
+
+
+def walk(panels: list[JsonObject] | None) -> Iterator[JsonObject]:
     for panel in panels or []:
         yield panel
         yield from walk(panel.get("panels"))
 
 
-def save(path: Path, data: dict) -> None:
+def save(path: Path, data: JsonObject) -> None:
     path.write_text(
         json.dumps(data, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
@@ -198,7 +203,7 @@ RUN_STAGE_TIMINGS_FAILURE = (
 )
 
 
-def _set_html_panel(panel: dict, content: str) -> None:
+def _set_html_panel(panel: JsonObject, content: str) -> None:
     opts = dict(panel.get("options") or {})
     links = opts.get("dataLinks")
     opts["mode"] = "html"

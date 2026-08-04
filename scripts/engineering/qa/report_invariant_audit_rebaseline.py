@@ -461,7 +461,10 @@ def _classification_counts(rows: list[dict[str, object]]) -> dict[str, int]:
 def _missing_cited_paths(rows: list[dict[str, object]]) -> list[str]:
     missing: list[str] = []
     for row in rows:
-        for status in row["cited_paths"]:
+        cited_paths = row["cited_paths"]
+        if not isinstance(cited_paths, list):
+            continue
+        for status in cited_paths:
             assert isinstance(status, dict)
             if not status["exists"]:
                 missing.append(str(status["path"]))
@@ -541,8 +544,18 @@ def _validate_current_anchors(
 ) -> list[str]:
     violations: list[str] = []
     finding_id = str(row["finding_id"])
-    source_anchors = [str(path) for path in row["current_source_anchors"]]
-    test_anchors = [str(path) for path in row["current_test_anchors"]]
+    source_anchor_values = row["current_source_anchors"]
+    test_anchor_values = row["current_test_anchors"]
+    source_anchors = (
+        [str(path) for path in source_anchor_values]
+        if isinstance(source_anchor_values, list)
+        else []
+    )
+    test_anchors = (
+        [str(path) for path in test_anchor_values]
+        if isinstance(test_anchor_values, list)
+        else []
+    )
     if row["classification"] == "implemented":
         if not source_anchors:
             violations.append(f"{finding_id}: implemented row has no source anchors")

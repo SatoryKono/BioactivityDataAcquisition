@@ -171,7 +171,7 @@ def _semantic_decision(
 def _semantic_outcome_for_result(
     result: AuditResult,
     *,
-    required_by_panel: dict[tuple[str, int, str], bool],
+    required_by_panel: dict[tuple[str, int, str | None], bool],
 ) -> dict[str, Any]:
     """Build one panel-attributable semantic outcome row."""
     key = (result.dashboard_uid, result.panel_id, result.target_ref_id)

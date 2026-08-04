@@ -388,11 +388,13 @@ def _index_manifest_dashboards(
     dashboard_payload = manifest.get("dashboards")
     if not isinstance(dashboard_payload, list):
         return {}, "render manifest dashboards must be a list"
-    dashboards: dict[str, dict[str, object]] = {
-        item.get("uid"): item  # type: ignore[misc]
-        for item in dashboard_payload
-        if isinstance(item, dict) and isinstance(item.get("uid"), str)
-    }
+    dashboards: dict[str, dict[str, object]] = {}
+    for item in dashboard_payload:
+        if not isinstance(item, dict):
+            continue
+        uid = item.get("uid")
+        if isinstance(uid, str):
+            dashboards[uid] = item
     return dashboards, None
 
 
@@ -481,11 +483,12 @@ def _validate_panel_id_coverage(
     actual_ids = [state.get("id") for state in panel_states if isinstance(state, dict)]
     if any(not isinstance(panel_id, int) for panel_id in actual_ids):
         return f"render manifest dashboard {uid} has non-integer panel IDs"
-    if len(actual_ids) != len(set(actual_ids)):
+    integer_ids = [panel_id for panel_id in actual_ids if isinstance(panel_id, int)]
+    if len(integer_ids) != len(set(integer_ids)):
         return f"render manifest dashboard {uid} repeats panel evidence"
-    if set(actual_ids) != set(expected_ids):
-        missing_ids = sorted(set(expected_ids) - set(actual_ids))
-        extra_ids = sorted(set(actual_ids) - set(expected_ids))
+    if set(integer_ids) != set(expected_ids):
+        missing_ids = sorted(set(expected_ids) - set(integer_ids))
+        extra_ids = sorted(set(integer_ids) - set(expected_ids))
         return (
             f"render manifest dashboard {uid} panel coverage drift: "
             f"missing={missing_ids} extra={extra_ids}"
@@ -525,7 +528,11 @@ def _validate_screenshot_evidence(
 ) -> str | None:
     file_name = dashboard.get("file")
     evidence = dashboard.get("screenshotEvidence")
-    if file_name != f"{uid}.png" or not isinstance(evidence, dict):
+    if (
+        not isinstance(file_name, str)
+        or file_name != f"{uid}.png"
+        or not isinstance(evidence, dict)
+    ):
         return f"render manifest dashboard {uid} lacks bound PNG evidence"
     if evidence.get("file") != file_name:
         return f"render manifest dashboard {uid} PNG filename drift"

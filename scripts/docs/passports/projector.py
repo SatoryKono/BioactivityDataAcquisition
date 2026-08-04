@@ -303,7 +303,12 @@ def _composite_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
             pipeline_name,
             configs_root=DEFAULT_CONFIGS_ROOT,
         )
-        groups = effective.get("data_schema", {}).get("column_groups", [])
+        data_schema = effective.get("data_schema")
+        groups = (
+            data_schema.get("column_groups", [])
+            if isinstance(data_schema, dict)
+            else []
+        )
         pipeline_output_keys[pipeline_name] = {
             str(field)
             for group in groups
@@ -320,16 +325,12 @@ def _composite_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
     contract = _load_yaml(contract_path)
     entity_path = DEFAULT_CONFIGS_ROOT / "entities" / "composite" / f"{entity}.yaml"
     entity_payload = _load_yaml(entity_path)
+    entity_pipeline_value = entity_payload.get("pipeline")
     entity_pipeline = (
-        entity_payload.get("pipeline")
-        if isinstance(entity_payload.get("pipeline"), dict)
-        else {}
+        entity_pipeline_value if isinstance(entity_pipeline_value, dict) else {}
     )
-    entity_sink = (
-        entity_pipeline.get("sink")
-        if isinstance(entity_pipeline.get("sink"), dict)
-        else {}
-    )
+    entity_sink_value = entity_pipeline.get("sink")
+    entity_sink = entity_sink_value if isinstance(entity_sink_value, dict) else {}
     facts = {
         "passport_schema_version": SCHEMA_VERSION,
         "kind": "pipeline",

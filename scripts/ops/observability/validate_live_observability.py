@@ -29,7 +29,7 @@ class ValidationResult:
     """Result of a single validation check."""
 
     check_name: str
-    status: Literal["pass", "fail", "skip"]
+    status: Literal["pass", "fail", "skip", "partial"]
     message: str
     details: dict[str, Any] | None = None
     timestamp: str = ""
@@ -57,7 +57,7 @@ def _auth_header(username: str, password: str) -> str:
 
 def _fetch_json(
     url: str, timeout: float, headers: dict[str, str] | None = None
-) -> dict[str, Any]:
+) -> Any:
     """Fetch JSON from URL with optional headers."""
     from scripts.engineering.common.repo_paths import ensure_local_http_url
 

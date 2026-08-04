@@ -82,9 +82,9 @@ def _extract_metrics(expr: str) -> tuple[str, ...]:
     return tuple(sorted(set(_METRIC_RE.findall(expr))))
 
 
-def _walk_panels(panels: list[dict]) -> list[dict]:
+def _walk_panels(panels: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Flatten dashboard panels, including nested row-contained panels."""
-    flattened: list[dict] = []
+    flattened: list[dict[str, Any]] = []
     for panel in panels:
         flattened.append(panel)
         nested = panel.get("panels", [])
