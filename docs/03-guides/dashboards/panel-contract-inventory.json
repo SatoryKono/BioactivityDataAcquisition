@@ -1816,13 +1816,12 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
+      "formula": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)))",
       "kind": "promql",
       "panel_id": 7,
-      "panel_title": "Monitor Silver Validation Failures",
-      "query": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
+      "panel_title": "Monitor Silver Validation Failures (range composite)",
+      "query": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)))",
       "query_tokens": [
-        "bioetl_dq_soft_threshold_exceeded_total",
         "bioetl_silver_validation_failures_total"
       ],
       "ref_id": "A",
@@ -2519,7 +2518,16 @@
       "query_tokens": [],
       "ref_id": "A",
       "runbook_urls": [],
-      "thresholds": [],
+      "thresholds": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        }
+      ],
       "unit": ""
     },
     {
@@ -2733,8 +2741,12 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
         },
         {
           "color": "orange",
@@ -2743,6 +2755,10 @@
         {
           "color": "red",
           "value": 2
+        },
+        {
+          "color": "gray",
+          "value": 3
         }
       ],
       "unit": "none"
@@ -3754,8 +3770,12 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
         },
         {
           "color": "orange",
@@ -3785,8 +3805,12 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
         },
         {
           "color": "orange",
@@ -3816,8 +3840,12 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
         },
         {
           "color": "orange",
@@ -5087,8 +5115,12 @@
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "green",
+          "color": "gray",
           "value": null
+        },
+        {
+          "color": "green",
+          "value": 0
         },
         {
           "color": "orange",

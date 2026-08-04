@@ -416,10 +416,9 @@ def test_tests_workflow_keeps_local_cardinality_fallback_out_of_release_gate() -
     assert workflow.index("--allow-local-cardinality-fallback") < workflow.index(
         "Review observability runtime cardinality evidence"
     )
-    release_gate = workflow.split(
-        "-   name: Review observability runtime cardinality evidence",
-        1,
-    )[1]
+    marker = "name: Review observability runtime cardinality evidence"
+    assert marker in workflow
+    release_gate = workflow.split(marker, 1)[1]
     assert "--fail-on-degraded-live-review" in release_gate
     assert "--allow-local-cardinality-fallback" not in release_gate
 
