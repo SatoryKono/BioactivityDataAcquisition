@@ -4,26 +4,15 @@ from __future__ import annotations
 
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core import (
     score_checkpoint_safety as score_checkpoint_safety,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core import (
     score_determinism as score_determinism,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core import (
     score_idempotency as score_idempotency,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core import (
     score_run_identity as score_run_identity,
 )
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_extended import (
     score_layer_consistency as score_layer_consistency,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_extended import (
     score_lineage_completeness as score_lineage_completeness,
-)
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_extended import (
     score_replay_readiness as score_replay_readiness,
 )
-
 # Shared public scorer export names — also consumed by run-manifest score-card
 # facade so the export roster is defined once (R0801 residual, issue #7398).
 CATEGORY_SCORER_EXPORTS: tuple[str, ...] = (
