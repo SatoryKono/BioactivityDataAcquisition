@@ -1,5 +1,9 @@
 # Cross-Platform Test Setup Guide
 
+> **Archived** 2026-08-04 (docs architecture audit cycle 1 / #7420).
+> Historical Windows/WSL test-setup note. Prefer current guides under
+> `docs/03-guides/` and ops tooling docs. Not normative.
+
 ## Issue Description
 
 Tests are failing with `ModuleNotFoundError: No module named 'respx'` when run from Windows, even though the environment was set up in WSL.

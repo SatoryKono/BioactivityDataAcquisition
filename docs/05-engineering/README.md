@@ -1,14 +1,17 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.1.1
 Status: active
-Class: published
+Class: repo-only
 Owner: BioETL Team
-Last verified: '2026-07-28'
+Last verified: '2026-08-04'
 
 ______________________________________________________________________
 
 # Engineering Documentation (nav stub)
+
+> **Classification:** repo-only stub (MkDocs `exclude_docs: 05-engineering/**`).
+> Not a published SSOT. DOC-GOV-08 / #6888 / #7421.
 
 **DOC-GOV-08 / #6888:** closeout and migration plans formerly under
 `docs/05-engineering/` were archived to

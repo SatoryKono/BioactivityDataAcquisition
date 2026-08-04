@@ -1,5 +1,9 @@
 # Refactoring Plan: RuntimeMetadataFactory/RuntimeMetadataProtocol Naming Consistency
 
+> **Archived** 2026-08-04 (docs architecture audit cycle 1 / #7420).
+> Plan marked completed 2026-05-08; symbols no longer present under `src/**`.
+> Historical context only.
+
 ## Overview
 
 This plan addresses naming inconsistencies where "Factory" aliases exist for Protocol classes without actual factory implementations. The goal is to align naming with actual behavior and project conventions.
