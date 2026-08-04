@@ -10,5 +10,4 @@ class EntityTypeExtractor(Protocol):
 
     def __call__(self, pipeline_name: str) -> str | None: ...
 
-
 __all__ = ["EntityTypeExtractor"]

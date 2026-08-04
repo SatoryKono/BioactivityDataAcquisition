@@ -17,14 +17,8 @@ from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     build_checkpoint_anchor_projection as _build_checkpoint_anchor_projection,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     build_current_checkpoint_anchor_payload as _build_current_checkpoint_anchor_payload,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     build_resume_anchor_comparison as _build_resume_anchor_comparison,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     resolve_resume_identity_maps as _resolve_resume_identity_maps,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
