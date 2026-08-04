@@ -7,37 +7,18 @@
 # pyright: reportOptionalMemberAccess=false
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-# pyright: reportUndefinedVariable=false
-# pyright: reportPossiblyUnboundVariable=false
-# pyright: reportTypedDictNotRequiredAccess=false
-# pyright: reportOptionalSubscript=false
-# pyright: reportOptionalOperand=false
-# pyright: reportOptionalCall=false
-# pyright: reportOptionalIterable=false
-# pyright: reportIncompatibleMethodOverride=false
-# pyright: reportIncompatibleVariableOverride=false
-# pyright: reportUninitializedInstanceVariable=false
-# pyright: reportReturnType=false
-# pyright: reportInvalidCast=false
-# pyright: reportAssignmentType=false
-# pyright: reportImplicitAbstractClass=false
-# pyright: reportFunctionMemberAccess=false
-# pyright: reportConstantRedefinition=false
-# pyright: reportInvalidTypeForm=false
 # PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
-# tests/unit/domain/schemas/semanticscholar/test_publication_schema.py
 """Unit tests for Semantic Scholar Publication Schema field validations.
 
-Tests focus on Semantic Scholar-specific field constraints.
-ETL metadata fields are validated separately by base schema tests.
+Exercises SemanticScholarPublicationSchema via Pandera validate() on
+minimal fixtures. Field-table density is intentional (#6646); empty
+pass-bodies and self-fulfilled regex-only checks are forbidden.
 """
 
 from __future__ import annotations
 
-import re
-
 import pandas as pd
+import pandera as pa
 import pytest
 
 from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
@@ -45,296 +26,286 @@ from bioetl.domain.schemas.semanticscholar.publication import (
     OA_STATUS_VALUES,
     SemanticScholarPublicationSchema,
 )
+from bioetl.domain.validation import MAX_PUBLICATION_YEAR, MIN_PUBLICATION_YEAR
+from tests.unit.domain.schemas._schema_validation_assertions import (
+    assert_schema_validates_frame,
+)
 
 pytestmark = pytest.mark.unit
 
 
 class TestPaperIdValidation:
-    """Tests for paper_id field validation."""
+    def test_valid_paper_id_format(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["paper_id"] = "649def34f8be52c8b66281af98ae884c09aef38b"
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_valid_paper_id_format(self) -> None:
-        """Test that valid 40-char hex paper_id passes."""
-        valid_id = "649def34f8be52c8b66281af98ae884c09aef38b"
-        pattern = r"^[a-f0-9]{40}$"
-        assert re.match(pattern, valid_id) is not None
+    def test_invalid_paper_id_too_short(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["paper_id"] = "abc123"
+        with pytest.raises(pa.errors.SchemaError, match="paper_id"):
+            SemanticScholarPublicationSchema.validate(df)
 
-    def test_invalid_paper_id_too_short(self) -> None:
-        """Test that short paper_id fails pattern."""
-        invalid_id = "abc123"
-        pattern = r"^[a-f0-9]{40}$"
-        assert re.match(pattern, invalid_id) is None
-
-    def test_invalid_paper_id_not_hex(self) -> None:
-        """Test that non-hex paper_id fails pattern."""
-        invalid_id = "invalid-not-hex-characters-need-40-total"
-        pattern = r"^[a-f0-9]{40}$"
-        assert re.match(pattern, invalid_id) is None
+    def test_invalid_paper_id_not_hex(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["paper_id"] = "invalid-not-hex-characters-need-40-total"
+        with pytest.raises(pa.errors.SchemaError, match="paper_id"):
+            SemanticScholarPublicationSchema.validate(df)
 
 
 class TestDoiValidation:
-    """Tests for DOI field validation."""
+    def test_valid_doi_format(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["doi"] = "10.1038/s41586-024-07487-w"
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_valid_doi_format(self) -> None:
-        """Test valid DOI format."""
-        valid_doi = "10.1038/s41586-024-07487-w"
-        pattern = r"^10\.\d{4,}/.*$"
-        assert re.match(pattern, valid_doi) is not None
-
-    def test_invalid_doi_format(self) -> None:
-        """Test invalid DOI format fails."""
-        invalid_doi = "not-a-valid-doi"
-        pattern = r"^10\.\d{4,}/.*$"
-        assert re.match(pattern, invalid_doi) is None
+    def test_invalid_doi_format(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["doi"] = "not-a-valid-doi"
+        with pytest.raises(pa.errors.SchemaError, match="doi"):
+            SemanticScholarPublicationSchema.validate(df)
 
 
 class TestPmidValidation:
-    """Tests for PMID field validation."""
+    def test_valid_pmid_numeric(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["pmid"] = "12345678"
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_valid_pmid_numeric(self) -> None:
-        """Test valid numeric PMID."""
-        valid_pmid = "12345678"
-        pattern = r"^\d+$"
-        assert re.match(pattern, valid_pmid) is not None
-
-    def test_invalid_pmid_non_numeric(self) -> None:
-        """Test invalid non-numeric PMID fails."""
-        invalid_pmid = "abc-not-numeric"
-        pattern = r"^\d+$"
-        assert re.match(pattern, invalid_pmid) is None
+    def test_invalid_pmid_non_numeric(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["pmid"] = "abc-not-numeric"
+        with pytest.raises(pa.errors.SchemaError, match="pmid"):
+            SemanticScholarPublicationSchema.validate(df)
 
 
 class TestPmcIdValidation:
-    """Tests for PMCID field validation."""
+    def test_pmc_id_validation__valid_pmc_id_format__e264e3a6(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["pmc_id"] = "PMC1234567"
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_pmc_id_validation__valid_pmc_id_format__e264e3a6(self) -> None:
-        """Test valid PMCID with PMC prefix."""
-        valid_pmc_id = "PMC1234567"
-        pattern = r"^PMC\d+$"
-        assert re.match(pattern, valid_pmc_id) is not None
-
-    def test_invalid_pmc_id_no_prefix(self) -> None:
-        """Test PMCID without PMC prefix fails."""
-        invalid_pmc_id = "1234567"
-        pattern = r"^PMC\d+$"
-        assert re.match(pattern, invalid_pmc_id) is None
+    def test_invalid_pmc_id_no_prefix(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["pmc_id"] = "1234567"
+        with pytest.raises(pa.errors.SchemaError, match="pmc_id"):
+            SemanticScholarPublicationSchema.validate(df)
 
 
 class TestYearValidation:
-    """Tests for year field validation."""
+    def test_valid_year_in_range(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["publication_year"] = 2024
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    @staticmethod
-    def _is_supported_year(year: int) -> bool:
-        return 1500 <= year <= 2100
+    def test_year_at_lower_bound(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["publication_year"] = MIN_PUBLICATION_YEAR
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_valid_year_in_range(self) -> None:
-        """Test year within valid range."""
-        assert self._is_supported_year(2024)
+    def test_year_below_lower_bound(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["publication_year"] = MIN_PUBLICATION_YEAR - 1
+        with pytest.raises(pa.errors.SchemaError, match="publication_year"):
+            SemanticScholarPublicationSchema.validate(df)
 
-    def test_year_at_lower_bound(self) -> None:
-        """Test year at lower bound."""
-        assert self._is_supported_year(1500)
-
-    def test_year_below_lower_bound(self) -> None:
-        """Test year below lower bound fails."""
-        assert not self._is_supported_year(1499)
-
-    def test_year_above_upper_bound(self) -> None:
-        """Test year above upper bound fails."""
-        assert not self._is_supported_year(2101)
+    def test_year_above_upper_bound(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["publication_year"] = MAX_PUBLICATION_YEAR + 1
+        with pytest.raises(pa.errors.SchemaError, match="publication_year"):
+            SemanticScholarPublicationSchema.validate(df)
 
 
 class TestPublicationDateValidation:
-    """Tests for publication_date field validation."""
+    def test_valid_date_format(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["publication_date"] = "2024-05-15"
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_valid_date_format(self) -> None:
-        """Test valid ISO date format YYYY-MM-DD."""
-        valid_date = "2024-05-15"
-        pattern = r"^\d{4}-\d{2}-\d{2}$"
-        assert re.match(pattern, valid_date) is not None
-
-    def test_invalid_date_format_slash(self) -> None:
-        """Test invalid date format with slashes."""
-        invalid_date = "15/05/2024"
-        pattern = r"^\d{4}-\d{2}-\d{2}$"
-        assert re.match(pattern, invalid_date) is None
+    def test_invalid_date_format_slash(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["publication_date"] = "15/05/2024"
+        with pytest.raises(pa.errors.SchemaError, match="publication_date"):
+            SemanticScholarPublicationSchema.validate(df)
 
 
 class TestMetricsValidation:
-    """Tests for citations_received and citations_made validation."""
+    def test_valid_citation_count(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["citations_received"] = 42
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_valid_citation_count(self) -> None:
-        """Test valid non-negative citation count."""
-        valid_count = 42
-        assert valid_count >= 0
+    def test_invalid_negative_citation_count(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["citations_received"] = -1
+        with pytest.raises(pa.errors.SchemaError):
+            SemanticScholarPublicationSchema.validate(df)
 
-    def test_invalid_negative_citation_count(self) -> None:
-        """Test negative citation count fails."""
-        invalid_count = -1
-        assert not (invalid_count >= 0)
+    def test_valid_reference_count(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["citations_made"] = 85
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_valid_reference_count(self) -> None:
-        """Test valid non-negative reference count."""
-        valid_count = 85
-        assert valid_count >= 0
-
-    def test_invalid_negative_reference_count(self) -> None:
-        """Test negative reference count fails."""
-        invalid_count = -1
-        assert not (invalid_count >= 0)
+    def test_invalid_negative_reference_count(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["citations_made"] = -1
+        with pytest.raises(pa.errors.SchemaError):
+            SemanticScholarPublicationSchema.validate(df)
 
 
 class TestCorpusIdValidation:
-    """Tests for corpus_id field validation."""
+    def test_valid_corpus_id(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["corpus_id"] = 123456
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_valid_corpus_id(self) -> None:
-        """Test valid non-negative corpus_id."""
-        valid_id = 123456
-        assert valid_id >= 0
-
-    def test_invalid_negative_corpus_id(self) -> None:
-        """Test negative corpus_id fails."""
-        invalid_id = -1
-        assert not (invalid_id >= 0)
+    def test_invalid_negative_corpus_id(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["corpus_id"] = -1
+        with pytest.raises(pa.errors.SchemaError, match="corpus_id"):
+            SemanticScholarPublicationSchema.validate(df)
 
 
 class TestOaStatusValidation:
-    """Tests for oa_status enum validation (normalized to lowercase)."""
-
     @pytest.mark.parametrize("status", OA_STATUS_VALUES)
-    def test_valid_oa_status(self, status: str) -> None:
-        """Test all valid open access status values."""
-        assert status in OA_STATUS_VALUES
+    def test_valid_oa_status(
+        self,
+        status: str,
+        minimal_semanticscholar_publication_df: pd.DataFrame,
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["oa_status"] = status
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_invalid_oa_status(self) -> None:
-        """Test invalid open access status."""
-        invalid_status = "INVALID"
-        assert invalid_status not in OA_STATUS_VALUES
+    def test_invalid_oa_status(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["oa_status"] = "INVALID"
+        with pytest.raises(pa.errors.SchemaError, match="oa_status"):
+            SemanticScholarPublicationSchema.validate(df)
 
     def test_oa_status_values_are_lowercase(self) -> None:
-        """Test that all OA status values are lowercase."""
         for status in OA_STATUS_VALUES:
-            assert status == status.lower(), f"Status {status} should be lowercase"
-
-    def test_oa_status_includes_closed(self) -> None:
-        """Test that 'closed' is included in valid OA status values."""
+            assert status == status.lower()
         assert "closed" in OA_STATUS_VALUES
 
 
 class TestLookupMethodValidation:
-    """Tests for _lookup_method enum validation."""
-
     @pytest.mark.parametrize("method", LOOKUP_METHODS)
-    def test_valid_lookup_method(self, method: str) -> None:
-        """Test all valid lookup method values."""
-        assert method in LOOKUP_METHODS
+    def test_valid_lookup_method(
+        self,
+        method: str,
+        minimal_semanticscholar_publication_df: pd.DataFrame,
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["_lookup_method"] = method
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_invalid_lookup_method(self) -> None:
-        """Test invalid lookup method."""
-        invalid_method = "invalid_method"
-        assert invalid_method not in LOOKUP_METHODS
+    def test_invalid_lookup_method(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["_lookup_method"] = "invalid_method"
+        with pytest.raises(pa.errors.SchemaError):
+            SemanticScholarPublicationSchema.validate(df)
 
 
 class TestSourceValidation:
-    """Tests for source field validation."""
+    def test_valid_source(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        assert df["_source"].iloc[0] == "semanticscholar"
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_valid_source(self) -> None:
-        """Test source must be 'semanticscholar'."""
-        valid_source = "semanticscholar"
-        assert valid_source == "semanticscholar"
-
-    def test_invalid_source(self) -> None:
-        """Test invalid source value."""
-        invalid_source = "other_source"
-        assert invalid_source != "semanticscholar"
+    def test_invalid_source_field_contract(self) -> None:
+        field_info = SemanticScholarPublicationSchema.__dict__['_source']
+        assert field_info.nullable is False
+        assert any("equal_to" in getattr(check, "name", str(check)) for check in field_info.checks)
+        assert any("semanticscholar" in str(check) for check in field_info.checks)
 
 
 class TestSchemaFieldDefinitions:
-    """Tests that verify schema field definitions exist and have correct properties.
-
-    Note: pandera doesn't include underscore-prefixed fields in schema.columns,
-    so we only test the public business fields here.
-    """
-
     def test_schema_has_semanticscholar_fields(self) -> None:
-        """Test schema defines all required Semantic Scholar fields."""
         schema = SemanticScholarPublicationSchema.to_schema()
-        # Note: underscore-prefixed fields are not exposed in schema.columns
-        # by pandera, so we only test public business fields here
-        # Note: pmc_id, arxiv_id excluded per design (2026-01)
         required_fields = [
-            "paper_id",
-            "doi",
-            "pmid",
-            "dblp_id",
-            "corpus_id",
-            "title",
-            "abstract",
-            "tldr",
-            "publication_year",
-            "publication_date",
-            "journal",
-            "volume",
-            "page_range",
-            "citations_received",
-            "citations_made",
-            "influential_citation_count",
-            "is_oa",
-            "open_access_url",
-            "oa_status",
-            "subject_fields",
-            "publication_type",
-            "publication_types",
-            "authors",
-            # Note: _source is not in schema.columns because pandera ignores
-            # underscore-prefixed fields. It's validated through Arrow schema instead.
+            "paper_id", "doi", "pmid", "dblp_id", "corpus_id", "title",
+            "abstract", "tldr", "publication_year", "publication_date",
+            "journal", "volume", "page_range", "citations_received",
+            "citations_made", "influential_citation_count", "is_oa",
+            "open_access_url", "oa_status", "subject_fields",
+            "publication_type", "publication_types", "authors",
         ]
-
         for field in required_fields:
             assert field in schema.columns, f"Missing field: {field}"
 
     def test_paper_id_not_nullable(self) -> None:
-        """Test paper_id is not nullable."""
         schema = SemanticScholarPublicationSchema.to_schema()
         paper_id_col = schema.columns.get("paper_id")
         assert paper_id_col is not None
         assert paper_id_col.nullable is False
 
-    def test_source_field_validated(self) -> None:
-        """Test _source field is validated during schema check.
-
-        Note: underscore-prefixed fields are not exposed in schema.columns
-        by pandera, but they are still validated at runtime.
-        This test verifies _source validation indirectly through the
-        test fixtures that include the field.
-        """
-        # The _source field is validated through the valid_record fixture
-        # in other test classes. This test documents the expected behavior.
-        pass
+    def test_source_field_validated(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        field_info = SemanticScholarPublicationSchema.__dict__['_source']
+        assert field_info.nullable is False
+        assert any("semanticscholar" in str(check) for check in field_info.checks)
+        ok = minimal_semanticscholar_publication_df.copy()
+        assert ok["_source"].iloc[0] == "semanticscholar"
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, ok)
 
     def test_optional_fields_nullable(self) -> None:
-        """Test optional string fields are nullable."""
         schema = SemanticScholarPublicationSchema.to_schema()
-        # Note: underscore-prefixed fields like _original_id are not exposed
-        # Note: pmc_id, arxiv_id excluded per design (2026-01)
         nullable_fields = [
-            "doi",
-            "pmid",
-            "dblp_id",
-            "title",
-            "abstract",
-            "tldr",
-            "publication_date",
-            "journal",
-            "volume",
-            "page_range",
-            "open_access_url",
-            "oa_status",
-            "subject_fields",
-            "publication_type",
-            "publication_types",
-            "authors",
+            "doi", "pmid", "dblp_id", "title", "abstract", "tldr",
+            "publication_date", "journal", "volume", "page_range",
+            "open_access_url", "oa_status", "subject_fields",
+            "publication_type", "publication_types", "authors",
         ]
-
         for field in nullable_fields:
             col = schema.columns.get(field)
             assert col is not None, f"Missing field: {field}"
@@ -342,71 +313,87 @@ class TestSchemaFieldDefinitions:
 
 
 class TestContentHashValidation:
-    """Tests for content_hash format validation."""
+    def test_valid_content_hash_format(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["content_hash"] = "a" * 64
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_valid_content_hash_format(self) -> None:
-        """Test valid 64-char hex content_hash."""
-        valid_hash = "a" * 64
-        pattern = r"^[a-f0-9]{64}$"
-        assert re.match(pattern, valid_hash) is not None
-
-    def test_invalid_content_hash_short(self) -> None:
-        """Test short content_hash fails."""
-        invalid_hash = "short"
-        pattern = r"^[a-f0-9]{64}$"
-        assert re.match(pattern, invalid_hash) is None
+    def test_invalid_content_hash_short(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        df = minimal_semanticscholar_publication_df.copy()
+        df["content_hash"] = "short"
+        with pytest.raises(pa.errors.SchemaError, match="content_hash"):
+            SemanticScholarPublicationSchema.validate(df)
 
 
 class TestDataFrameWithPandas:
-    """Tests using pandas DataFrame str methods."""
+    def test_paper_id_pattern_with_dataframe(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        good = minimal_semanticscholar_publication_df.copy()
+        good["paper_id"] = "649def34f8be52c8b66281af98ae884c09aef38b"
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, good)
+        bad = minimal_semanticscholar_publication_df.copy()
+        bad["paper_id"] = "invalid"
+        with pytest.raises(pa.errors.SchemaError, match="paper_id"):
+            SemanticScholarPublicationSchema.validate(bad)
 
-    def test_paper_id_pattern_with_dataframe(self) -> None:
-        """Test paper_id pattern with pandas DataFrame."""
-        df = pd.DataFrame(
-            {"paper_id": ["649def34f8be52c8b66281af98ae884c09aef38b", "invalid"]}
-        )
-        # Valid 40-char hex pattern
-        matches = df["paper_id"].str.match(r"^[a-f0-9]{40}$")
-        assert bool(matches.iloc[0]) is True
-        assert bool(matches.iloc[1]) is False
+    def test_doi_pattern_with_dataframe(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        good = minimal_semanticscholar_publication_df.copy()
+        good["doi"] = "10.1038/s41586-024-07487-w"
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, good)
+        bad = minimal_semanticscholar_publication_df.copy()
+        bad["doi"] = "invalid-doi"
+        with pytest.raises(pa.errors.SchemaError, match="doi"):
+            SemanticScholarPublicationSchema.validate(bad)
 
-    def test_doi_pattern_with_dataframe(self) -> None:
-        """Test DOI pattern with pandas DataFrame."""
-        df = pd.DataFrame({"doi": ["10.1038/s41586-024-07487-w", "invalid-doi"]})
-        matches = df["doi"].str.match(r"^10\.\d{4,}/.*$")
-        assert bool(matches.iloc[0]) is True
-        assert bool(matches.iloc[1]) is False
-
-    def test_publication_date_pattern_with_dataframe(self) -> None:
-        """Test publication_date pattern with pandas DataFrame."""
-        df = pd.DataFrame({"publication_date": ["2024-05-15", "15/05/2024"]})
-        matches = df["publication_date"].str.match(r"^\d{4}-\d{2}-\d{2}$")
-        assert bool(matches.iloc[0]) is True
-        assert bool(matches.iloc[1]) is False
+    def test_publication_date_pattern_with_dataframe(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        good = minimal_semanticscholar_publication_df.copy()
+        good["publication_date"] = "2024-05-15"
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, good)
+        bad = minimal_semanticscholar_publication_df.copy()
+        bad["publication_date"] = "15/05/2024"
+        with pytest.raises(pa.errors.SchemaError, match="publication_date"):
+            SemanticScholarPublicationSchema.validate(bad)
 
 
 class TestNewFieldValidations:
-    """Tests for newly added fields (dblp_id, influential_citation_count)."""
-
-    def test_dblp_id_nullable(self) -> None:
-        """Test dblp_id field is nullable."""
+    def test_dblp_id_nullable(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
         schema = SemanticScholarPublicationSchema.to_schema()
         dblp_col = schema.columns.get("dblp_id")
         assert dblp_col is not None
         assert dblp_col.nullable is True
+        df = minimal_semanticscholar_publication_df.copy()
+        df["dblp_id"] = None
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_influential_citation_count_nullable(self) -> None:
-        """Test influential_citation_count field is nullable."""
+    def test_influential_citation_count_nullable(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
         schema = SemanticScholarPublicationSchema.to_schema()
         col = schema.columns.get("influential_citation_count")
         assert col is not None
         assert col.nullable is True
+        df = minimal_semanticscholar_publication_df.copy()
+        df["influential_citation_count"] = None
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
-    def test_influential_citation_count_must_be_non_negative(self) -> None:
-        """Test influential_citation_count must be >= 0."""
-        # This tests the schema constraint ge=0
-        valid_count = 0
-        assert valid_count >= 0
-
-        invalid_count = -1
-        assert invalid_count < 0  # Would fail schema validation
+    def test_influential_citation_count_must_be_non_negative(
+        self, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        good = minimal_semanticscholar_publication_df.copy()
+        good["influential_citation_count"] = 0
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, good)
+        bad = minimal_semanticscholar_publication_df.copy()
+        bad["influential_citation_count"] = -1
+        with pytest.raises(pa.errors.SchemaError):
+            SemanticScholarPublicationSchema.validate(bad)
