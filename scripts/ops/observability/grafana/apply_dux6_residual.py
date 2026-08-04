@@ -15,7 +15,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parents[4]
 DASH = ROOT / "grafana" / "dashboards"
@@ -24,6 +24,10 @@ DOCS = ROOT / "docs" / "03-guides" / "dashboards"
 NAV_ID = 1000
 MARKER = "DUX6:"
 PRIMARY_STATUS_IDS = {9401, 214}
+
+# Grafana payloads are recursively heterogeneous JSON documents.  Keep the
+# dynamic value type at this file-format mutation boundary.
+type JsonObject = dict[str, Any]
 
 RUN_SCOPE_HTML = (
     '<div style="padding:2px 6px;border-left:3px solid #64748b;'
@@ -83,7 +87,21 @@ HANDOFF_COMPACT: dict[str, dict[str, str]] = {
 }
 
 
-def walk(panels: list | None, acc: list | None = None) -> list[dict[str, Any]]:
+def _object_copy(value: object) -> JsonObject:
+    if not isinstance(value, dict):
+        return {}
+    return cast(JsonObject, value.copy())
+
+
+def _object_list(value: object) -> list[JsonObject]:
+    if not isinstance(value, list):
+        return []
+    return [cast(JsonObject, item) for item in value if isinstance(item, dict)]
+
+
+def walk(
+    panels: list[JsonObject] | None, acc: list[JsonObject] | None = None
+) -> list[JsonObject]:
     acc = acc if acc is not None else []
     for panel in panels or []:
         acc.append(panel)
@@ -92,11 +110,11 @@ def walk(panels: list | None, acc: list | None = None) -> list[dict[str, Any]]:
     return acc
 
 
-def load(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+def load(path: Path) -> JsonObject:
+    return cast(JsonObject, json.loads(path.read_text(encoding="utf-8")))
 
 
-def save(path: Path, data: dict[str, Any]) -> None:
+def save(path: Path, data: JsonObject) -> None:
     text = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_bytes(text.encode("utf-8"))
@@ -112,7 +130,7 @@ def prepend_description(panel: dict[str, Any], sentence: str) -> bool:
 
 
 def set_html(panel: dict[str, Any], content: str) -> None:
-    opts = dict(panel.get("options") or {})
+    opts = _object_copy(panel.get("options"))
     links = opts.get("dataLinks")
     opts["mode"] = "html"
     opts["content"] = content
@@ -124,8 +142,8 @@ def set_html(panel: dict[str, Any], content: str) -> None:
 def ensure_value_display_name(panel: dict[str, Any], display: str = "Count") -> bool:
     if panel.get("type") not in {"table", "table-old"}:
         return False
-    fc = dict(panel.get("fieldConfig") or {})
-    overrides = list(fc.get("overrides") or [])
+    fc = _object_copy(panel.get("fieldConfig"))
+    overrides = _object_list(fc.get("overrides"))
     changed = False
     matcher_re = r"^(Value|#Value|Value \(.*\)|value|Value #.*)$"
     found = False
@@ -135,7 +153,7 @@ def ensure_value_display_name(panel: dict[str, Any], display: str = "Count") -> 
             matcher.get("options") or ""
         ):
             found = True
-            props = list(ov.get("properties") or [])
+            props = _object_list(ov.get("properties"))
             if not any(p.get("id") == "displayName" for p in props):
                 props.append({"id": "displayName", "value": display})
                 ov["properties"] = props
@@ -149,12 +167,12 @@ def ensure_value_display_name(panel: dict[str, Any], display: str = "Count") -> 
         )
         changed = True
     # organize rename for Value #*
-    transforms = list(panel.get("transformations") or [])
+    transforms = _object_list(panel.get("transformations"))
     for tr in transforms:
         if tr.get("id") != "organize":
             continue
-        opts = dict(tr.get("options") or {})
-        rename = dict(opts.get("renameByName") or {})
+        opts = _object_copy(tr.get("options"))
+        rename = _object_copy(opts.get("renameByName"))
         for key in ("Value", "Value #A", "Value #B", "Value #C", "Value #J"):
             if key in rename or key == "Value":
                 target = (
@@ -183,7 +201,7 @@ def hide_path_columns(panel: dict[str, Any]) -> bool:
         return False
     if not any(k in title for k in ("browse", "recent", "artifact")):
         return False
-    transforms = list(panel.get("transformations") or [])
+    transforms = _object_list(panel.get("transformations"))
     organize = None
     for tr in transforms:
         if tr.get("id") == "organize":
@@ -192,9 +210,9 @@ def hide_path_columns(panel: dict[str, Any]) -> bool:
     if organize is None:
         organize = {"id": "organize", "options": {}}
         transforms.append(organize)
-    opts = dict(organize.get("options") or {})
-    exclude = dict(opts.get("excludeByName") or {})
-    rename = dict(opts.get("renameByName") or {})
+    opts = _object_copy(organize.get("options"))
+    exclude = _object_copy(opts.get("excludeByName"))
+    rename = _object_copy(opts.get("renameByName"))
     changed = False
     for col in (
         "json_path",
@@ -222,7 +240,7 @@ def hide_path_columns(panel: dict[str, Any]) -> bool:
     opts["renameByName"] = rename
     organize["options"] = opts
     panel["transformations"] = transforms
-    options = dict(panel.get("options") or {})
+    options = _object_copy(panel.get("options"))
     if options.get("cellHeight") != "sm":
         options["cellHeight"] = "sm"
         panel["options"] = options
@@ -240,7 +258,7 @@ def soft_evidence_stat_colors(panel: dict[str, Any]) -> bool:
         return False
     if "Freshness" in title or "Telemetry" in title:
         return False
-    opts = dict(panel.get("options") or {})
+    opts = _object_copy(panel.get("options"))
     if opts.get("colorMode") != "background":
         return False
     if any(
@@ -265,8 +283,8 @@ def soft_evidence_stat_colors(panel: dict[str, Any]) -> bool:
 
 
 def compress_percent_decimals(panel: dict[str, Any]) -> bool:
-    fc = dict(panel.get("fieldConfig") or {})
-    defaults = dict(fc.get("defaults") or {})
+    fc = _object_copy(panel.get("fieldConfig"))
+    defaults = _object_copy(fc.get("defaults"))
     unit = defaults.get("unit")
     decimals = defaults.get("decimals")
     if unit not in {"percent", "percentunit"}:
@@ -338,8 +356,8 @@ def annotate_empty_chart(panel: dict[str, Any]) -> bool:
 
 def rewrite_novalue_developer_tokens(panel: dict[str, Any]) -> bool:
     """Soften developer-facing noValue where tests allow."""
-    fc = dict(panel.get("fieldConfig") or {})
-    defaults = dict(fc.get("defaults") or {})
+    fc = _object_copy(panel.get("fieldConfig"))
+    defaults = _object_copy(fc.get("defaults"))
     no_value = defaults.get("noValue")
     if not isinstance(no_value, str):
         return False
@@ -419,7 +437,7 @@ def apply_board(path: Path) -> list[str]:
 
         # Text: strip residual developer tokens / endpoints
         if panel.get("type") == "text":
-            opts = dict(panel.get("options") or {})
+            opts = _object_copy(panel.get("options"))
             content = opts.get("content")
             if isinstance(content, str):
                 new = content
