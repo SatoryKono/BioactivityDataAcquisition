@@ -55,33 +55,45 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                 legacy_overrides=LegacyRunnerBuilderOverrides(
                     ensure_providers_loaded_fn=lambda: None,
                     register_all_pipelines_fn=lambda registry=None: None,
-                    get_settings_fn=cast(Any, lambda: SimpleNamespace(
-                        data_dir=str(tmp_path),
-                        pipeline=SimpleNamespace(
-                            heartbeat_interval=30,
-                            control_plane=SimpleNamespace(
-                                required_persistence_profile="degraded_observable",
-                                checkpoint_compatibility_policy="hard_fail",
-                                run_manifest_enabled=True,
-                                run_ledger_enabled=True,
+                    get_settings_fn=cast(
+                        Any,
+                        lambda: SimpleNamespace(
+                            data_dir=str(tmp_path),
+                            pipeline=SimpleNamespace(
+                                heartbeat_interval=30,
+                                control_plane=SimpleNamespace(
+                                    required_persistence_profile="degraded_observable",
+                                    checkpoint_compatibility_policy="hard_fail",
+                                    run_manifest_enabled=True,
+                                    run_ledger_enabled=True,
+                                ),
                             ),
+                            test_mode=False,
                         ),
-                        test_mode=False,
-                    )),
-                    load_pipeline_config_fn=cast(Any, lambda _: SimpleNamespace(
-                        provider="chembl",
-                        entity_type="activity",
-                        version="2.0.0",
-                        maintenance=None,
-                        input_filter=SimpleNamespace(),
-                        business_primary_keys=["activity_id"],
-                        technical_primary_key="entity_id",
-                        sink={
-                            "bronze": SimpleNamespace(enabled=True, save_metadata=True),
-                            "silver": SimpleNamespace(enabled=True, save_metadata=True),
-                            "gold": SimpleNamespace(enabled=True, save_metadata=True),
-                        },
-                    )),
+                    ),
+                    load_pipeline_config_fn=cast(
+                        Any,
+                        lambda _: SimpleNamespace(
+                            provider="chembl",
+                            entity_type="activity",
+                            version="2.0.0",
+                            maintenance=None,
+                            input_filter=SimpleNamespace(),
+                            business_primary_keys=["activity_id"],
+                            technical_primary_key="entity_id",
+                            sink={
+                                "bronze": SimpleNamespace(
+                                    enabled=True, save_metadata=True
+                                ),
+                                "silver": SimpleNamespace(
+                                    enabled=True, save_metadata=True
+                                ),
+                                "gold": SimpleNamespace(
+                                    enabled=True, save_metadata=True
+                                ),
+                            },
+                        ),
+                    ),
                     build_observability_bundle_fn=cast(
                         Any,
                         lambda **_: _namespace_observability(
@@ -95,28 +107,26 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                     assemble_filter_config_fn=lambda **_: None,
                     assemble_cached_bronze_context_fn=cast(
                         Any,
-                        lambda _: (
-                            _ensure_default_cached_bronze_fixture(
-                                settings=SimpleNamespace(
-                                    data_dir=str(tmp_path),
-                                    pipeline=SimpleNamespace(
-                                        heartbeat_interval=30,
-                                        control_plane=SimpleNamespace(
-                                            required_persistence_profile=(
-                                                "degraded_observable"
-                                            ),
-                                            checkpoint_compatibility_policy="hard_fail",
-                                            run_manifest_enabled=True,
-                                            run_ledger_enabled=True,
+                        lambda _: _ensure_default_cached_bronze_fixture(
+                            settings=SimpleNamespace(
+                                data_dir=str(tmp_path),
+                                pipeline=SimpleNamespace(
+                                    heartbeat_interval=30,
+                                    control_plane=SimpleNamespace(
+                                        required_persistence_profile=(
+                                            "degraded_observable"
                                         ),
+                                        checkpoint_compatibility_policy="hard_fail",
+                                        run_manifest_enabled=True,
+                                        run_ledger_enabled=True,
                                     ),
-                                    test_mode=False,
                                 ),
-                                pipeline_config=SimpleNamespace(
-                                    provider="chembl",
-                                    entity_type="activity",
-                                ),
-                            )
+                                test_mode=False,
+                            ),
+                            pipeline_config=SimpleNamespace(
+                                provider="chembl",
+                                entity_type="activity",
+                            ),
                         ),
                     ),
                 )
