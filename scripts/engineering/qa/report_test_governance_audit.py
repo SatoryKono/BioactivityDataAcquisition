@@ -233,14 +233,23 @@ def _source_tree_hash_workers(total_files: int) -> int:
 
 
 def _read_source_tree_bytes(path: Path) -> bytes:
-    """Read one source-tree file for the freshness hash."""
+    """Read one source-tree file for the freshness hash.
+
+    Normalize newlines to LF so Windows working trees with CRLF smudge produce
+    the same ``source_tree_sha256`` as Linux CI checkouts (eol=lf in
+    ``.gitattributes``).
+    """
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     safe_path = resolve_output_path(path, root=REPO_ROOT)
     with safe_path.open(
         "rb"
     ) as handle:  # NOSONAR - path confined by resolve_output_path
-        return handle.read()
+        payload = handle.read()
+    return payload.replace(b"
+", b"
+").replace(b"", b"
+")
 
 
 @cache
