@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
@@ -27,13 +28,16 @@ from bioetl.application.services.control_plane.replay.historical_corpus_service 
     HistoricalReplayCorpusService,
 )
 from bioetl.composition.factories.services.port_factories import create_metrics
-from bioetl.domain.control_plane import RunManifest
+from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
+from bioetl.domain.control_plane import RunManifest, RunSourceRef
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.control_plane import (
     FileHistoricalReplayClosureStore,
     FileRunLedgerStore,
     FileRunManifestStore,
 )
+
+type BronzeMetaIndex = dict[str, list[tuple[Path, dict[str, object]]]]
 
 
 def _parse_args() -> argparse.Namespace:
@@ -237,8 +241,8 @@ def _load_ledger_rows(path: Path) -> list[dict[str, object]]:
 
 def _build_bronze_meta_index(
     bronze_root: Path,
-) -> dict[str, list[tuple[Path, dict[str, object]]]]:
-    index: dict[str, list[tuple[Path, dict[str, object]]]] = {}
+) -> BronzeMetaIndex:
+    index: BronzeMetaIndex = {}
     for meta_path in bronze_root.rglob("*.meta.json"):
         try:
             payload = json.loads(
@@ -274,7 +278,7 @@ def _source_certification_from_meta(
     meta_path: Path,
     payload: dict[str, object],
     bronze_root: Path,
-    source_ref: object | None,
+    source_ref: RunSourceRef | None,
     manifest: RunManifest,
 ) -> HistoricalReplaySnapshotCertification | None:
     artifact_path = _resolve_meta_payload_artifact_path(meta_path)
@@ -308,7 +312,7 @@ def _build_source_auto_specs(
     inventory: HistoricalReplayCertifiabilityInventory,
     manifest_store: FileRunManifestStore,
     bronze_root: Path,
-    bronze_meta_index: dict[str, list[tuple[Path, dict[str, object]]]],
+    bronze_meta_index: BronzeMetaIndex,
 ) -> tuple[HistoricalReplayBulkCertificationSpec, ...]:
     specs: list[HistoricalReplayBulkCertificationSpec] = []
     for record in inventory.records:
@@ -392,7 +396,7 @@ def _choose_upstream_candidate(
 
 
 def _composite_certification_for_source_ref(
-    source_ref: object,
+    source_ref: RunSourceRef,
     *,
     manifest: RunManifest,
     upstream_index: dict[
@@ -475,7 +479,14 @@ def _build_composite_auto_specs(
 
 def _build_campaign_services(
     settings: Any,
-) -> tuple[Any, Any, Any, Any, Path, dict[str, object]]:
+) -> tuple[
+    FileRunManifestStore,
+    FileRunLedgerStore,
+    HistoricalReplayCorpusService,
+    HistoricalReplayClosureService,
+    Path,
+    BronzeMetaIndex,
+]:
     metrics = create_metrics(settings)
     output_root = Path(settings.data_dir) / "output" / "control"  # type: ignore[attr-defined]
     manifest_store = FileRunManifestStore(
@@ -492,9 +503,15 @@ def _build_campaign_services(
         certification_service=HistoricalReplayCertificationService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
+            entry_id_factory=lambda: create_runtime_occurrence_id(
+                "historical_replay_certification_ledger_entry"
+            ),
         ),
     )
-    closure_service = HistoricalReplayClosureService(corpus_service=corpus_service)
+    closure_service = HistoricalReplayClosureService(
+        corpus_service=corpus_service,
+        now_factory=current_utc_time,
+    )
     bronze_root = Path(settings.data_dir) / "output" / "bronze"  # type: ignore[attr-defined]
     bronze_meta_index = _build_bronze_meta_index(bronze_root)
     return (
@@ -515,7 +532,7 @@ def _maybe_auto_certify(
     manifest_store: Any,
     ledger_store: Any,
     bronze_root: Path,
-    bronze_meta_index: dict[str, object],
+    bronze_meta_index: BronzeMetaIndex,
 ) -> tuple[Any | None, Any | None, Any]:
     source_certification_result = None
     composite_certification_result = None
