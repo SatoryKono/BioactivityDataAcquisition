@@ -288,9 +288,11 @@ def pytest_addoption(parser: pytest.Parser) -> None:
                 "(none|once|new_episodes|all). Prefer VCR_RECORD_MODE env."
             ),
         )
-    except ValueError:
-        # Already registered by pytest-recording / pytest-vcr.
-        pass
+    except ValueError as exc:
+        # Already registered by pytest-recording / pytest-vcr. Do not mask
+        # unrelated registration errors.
+        if "already added" not in str(exc).lower():
+            raise
 
 
 def pytest_cmdline_main(config):
