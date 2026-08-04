@@ -29,7 +29,7 @@
 | active_quality_baseline | 31 |
 | closeout_evidence | 64 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 1 |
+| docs_reports_curated_or_historical_report | 2 |
 | docs_reports_generated_or_route_owned | 6 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
@@ -91,6 +91,7 @@
 | `docs/00-project/ai/skills/global/documentation-audit/references/report-template.md` | Working | 0 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
+| `docs/reports/docs-link-check-report.json` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7340-specialized-subsystem-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7348-comprehensive-skills-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
@@ -304,6 +305,7 @@
 | --- | --- | --- | --- |
 | `docs/reports/README.md` | tracked | docs_reports_curated_entrypoint | keep |
 | `docs/reports/dashboard-ux-checks/README.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/docs-link-check-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/evidence/INDEX.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/README.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
