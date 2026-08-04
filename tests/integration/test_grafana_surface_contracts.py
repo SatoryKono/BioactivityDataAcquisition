@@ -572,7 +572,6 @@ def test_adaptive_trend_panels_use_selected_interval(
         f"Panel '{panel_title}' in {dashboard_file} must use $__interval"
     )
 
-
 def test_shipped_dashboards_do_not_expose_loki_tempo_explore_navigation() -> None:
     """Loki/Tempo Explore adjuncts were removed; keep a negative absence contract."""
     forbidden_title_tokens = {"Explore Logs", "Explore Traces"}
@@ -614,3 +613,4 @@ def test_shipped_dashboards_do_not_expose_loki_tempo_explore_navigation() -> Non
                     assert token not in url, (
                         f"{dashboard_path.name} panel {panel.get('id')} must not keep {token!r}: {url}"
                     )
+
