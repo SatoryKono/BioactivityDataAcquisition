@@ -2723,8 +2723,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
-                      "wrapText": true
+                      "type": "auto"
                     }
                   }
                 ]
@@ -2742,8 +2741,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
-                      "wrapText": true
+                      "type": "auto"
                     }
                   },
                   {

@@ -322,6 +322,9 @@ credentials.json
 # Docker volumes (RULES.md Â§8.2)
 docker-data/
 docker/volumes/
+# Host-local CPU/memory overrides — never part of the shipped compose contract.
+/docker-compose*.local-override.yml
+/docker-compose*.local-override.yaml
 
 # VCR cassettes (keep for testing, but exclude sensitive ones)
 tests/fixtures/vcr/*_sensitive.yaml

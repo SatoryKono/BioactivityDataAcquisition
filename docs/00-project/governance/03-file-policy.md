@@ -113,8 +113,8 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   MUST route into approved `reports/**` or archive/report surfaces instead of a
   root-level txt dump.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and
-  project surfaces: `.codex`, `.cursor`, `.devin`, `.gemini`, `.github`, `.junie`,
-  `.vibe`, `.vscode`, `.zed`, `artifacts`, `assets`, `configs`, `data`,
+  project surfaces: `.agents`, `.codex`, `.cursor`, `.devin`, `.gemini`, `.github`,
+  `.junie`, `.vibe`, `.vscode`, `.zed`, `artifacts`, `assets`, `configs`, `data`,
   `docs`, `grafana`, `reports`, `scripts`, `src`, and `tests`.
 - Canonical machine-readable root governance lives in `.github/root-allowlist.txt`,
   `configs/quality/repo_structure_catalog.yaml`,
@@ -122,14 +122,14 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   `configs/quality/generated_artifact_routing.yaml`; prose docs in this section
   MUST stay aligned with those enforcement surfaces.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
-- Shared repo tooling surfaces such as `.codex/`, `.gemini/`, `.junie/`,
+- Shared repo tooling surfaces such as `.agents/`, `.codex/`, `.gemini/`, `.junie/`,
   curated `.vibe/`,
   and curated shared editor metadata roots such as `.cursor/`, `.vscode/`, and
   `.zed/` MAY оставаться tracked только если они поддерживаются как
   проектные runtime/editor integrations.
 - Editor/vendor/tooling roots such as `.ai/`, `.aiassistant/`, `ai/`,
   `.jules/`, `.sonarlint/`, `.windsurf/`, `.agent-work/`,
-  `.agentbridge/`, `.agents/`, `.benchmarks/`, `.cache/`, `.qodo/`,
+  `.agentbridge/`, `.benchmarks/`, `.cache/`, `.qodo/`,
   `.mypy_cache/`, `.pytest_cache/`, `.ruff_cache/`, `.hypothesis/`,
   `.import_linter_cache/`, `.venv/`, `node_modules/`, and `test-output/`
   MAY существовать в рабочем дереве, но MUST оставаться untracked и

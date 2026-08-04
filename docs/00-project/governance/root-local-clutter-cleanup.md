@@ -99,7 +99,8 @@ when no active process depends on them:
 | `.venv/`, `.venv-win/`, `node_modules/` | Local environments (optional purge) |
 | `logs/`, `tmp/`, `test-output/`, `caddy/`, `.tmp_fix/` | Local output trees (not retained git sinks) |
 | root `~/` | Accidental tool home-mirror directory (not user `$HOME`) |
-| `.idea/`, `.qodo/` (local), `.agents/`, `.ai/`, `.grok/`, `.windsurf/`, `.junie/` | Editor/agent local state |
+| `.idea/`, `.qodo/` (local), `.ai/`, `.grok/`, `.windsurf/` | Editor/agent local state |
+| non-SKILL.md content under `.agents/` | Local agent workspace noise; curated `SKILL.md` adapters remain tracked |
 | `nul` / `NUL` | Windows reserved-name pseudo-file; ignored. Some hosts cannot unlink via `Path.unlink` |
 
 ## Retain while in use; safe to regenerate
