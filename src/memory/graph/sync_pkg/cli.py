@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections.abc import Callable
 from pathlib import Path
+from typing import cast
 
 from memory.graph.sync_pkg import _core
 from memory.graph.sync_pkg._core import (
@@ -207,8 +209,9 @@ def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Build and optionally sync a deterministic BioETL graph into Neo4j.",
     )
+    add_argument = cast(Callable[..., argparse.Action], parser.add_argument)
     for flag, options in CLI_FLAG_DEFINITIONS:
-        parser.add_argument(flag, **options)
+        add_argument(flag, **options)
     return parser
 
 
@@ -309,7 +312,7 @@ def _write_report_if_requested(
 
 def _normalization_operation_count(summary: dict[str, JsonValue]) -> int:
     completed = summary.get("completed_statement_count", 0)
-    return max(1, int(completed))
+    return max(1, _core._coerce_int(completed))
 
 
 def _snapshot_operation_count(args: argparse.Namespace) -> int:

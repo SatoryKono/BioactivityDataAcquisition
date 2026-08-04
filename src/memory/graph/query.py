@@ -5,30 +5,32 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from collections.abc import Callable
 from pathlib import Path
 from typing import Final, NotRequired, TypedDict
 
-SRC_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_ROOT = Path(__file__).resolve().parents[3]
-if str(SRC_ROOT) not in sys.path:
-    sys.path.insert(0, str(SRC_ROOT))
-if str(DEFAULT_ROOT) not in sys.path:
-    sys.path.insert(0, str(DEFAULT_ROOT))
+from memory.graph.sync_pkg._core import (
+    JsonValue,
+    Neo4jHttpClient,
+    resolve_neo4j_connection,
+)
 
-try:
-    from memory.graph.sync import (
-        JsonValue,
-        Neo4jHttpClient,
-        resolve_neo4j_connection,
-    )
-except ModuleNotFoundError:  # pragma: no cover - direct script execution path
-    from memory.graph.sync import (
-        JsonValue,
-        Neo4jHttpClient,
-        resolve_neo4j_connection,
-    )
+DEFAULT_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _int_value(value: object) -> int:
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    if isinstance(value, str):
+        try:
+            return int(value)
+        except ValueError:
+            return 0
+    return 0
 
 DEFAULT_NEIGHBOR_RELATION_TYPES: Final[tuple[str, ...]] = (
     "DEPENDS_ON",
@@ -1098,7 +1100,7 @@ def _docs_drift_row_line(row: dict[str, JsonValue]) -> str | None:
             row,
             "line_number",
             label="line",
-            formatter=lambda value: str(int(value or 0)) if int(value or 0) else "",
+            formatter=lambda value: str(_int_value(value)) if _int_value(value) else "",
         ),
     ]
     return "- " + " | ".join(part for part in detail_parts if part)
@@ -1609,10 +1611,10 @@ def _format_normalization_pipeline_rows(
     lines.append(
         "- "
         f"profile_registered={bool(row.get('normalization_profile_registered'))} | "
-        f"profile_fields={int(row.get('profile_field_count') or 0)} | "
-        f"fallback_fields={int(row.get('fallback_field_count') or 0)} | "
-        f"fallback_business={int(row.get('fallback_business_field_count') or 0)} | "
-        f"fallback_technical={int(row.get('fallback_technical_passthrough_field_count') or 0)}"
+        f"profile_fields={_int_value(row.get('profile_field_count'))} | "
+        f"fallback_fields={_int_value(row.get('fallback_field_count'))} | "
+        f"fallback_business={_int_value(row.get('fallback_business_field_count'))} | "
+        f"fallback_technical={_int_value(row.get('fallback_technical_passthrough_field_count'))}"
     )
     module_path = str(row.get("normalization_profile_module_path") or "")
     if module_path:
@@ -1630,10 +1632,10 @@ def _fallback_pipeline_line(row: dict[str, JsonValue], pipeline_name: str) -> st
     return (
         "- "
         f"pipeline={pipeline_name} | "
-        f"fallback_business={int(row.get('fallback_business_field_count') or 0)} | "
-        f"fallback_total={int(row.get('fallback_field_count') or 0)} | "
+        f"fallback_business={_int_value(row.get('fallback_business_field_count'))} | "
+        f"fallback_total={_int_value(row.get('fallback_field_count'))} | "
         f"profile_registered={bool(row.get('normalization_profile_registered'))} | "
-        f"profile_fields={int(row.get('profile_field_count') or 0)}"
+        f"profile_fields={_int_value(row.get('profile_field_count'))}"
     )
 
 

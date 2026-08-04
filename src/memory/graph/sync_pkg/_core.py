@@ -20,7 +20,7 @@ import sys
 import tempfile
 import threading
 import time
-from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence, Set
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -78,6 +78,19 @@ def _coerce_int(value: object, default: int = 0) -> int:
     if isinstance(value, str):
         try:
             return int(value)
+        except ValueError:
+            return default
+    return default
+
+
+def _coerce_float(value: object, default: float = 0.0) -> float:
+    if isinstance(value, bool):
+        return float(value)
+    if isinstance(value, int | float):
+        return float(value)
+    if isinstance(value, str):
+        try:
+            return float(value)
         except ValueError:
             return default
     return default
@@ -1809,6 +1822,26 @@ class AnalysisLabelSets:
     test_labels: set[str]
 
 
+@dataclass
+class RetirementAnalysisContext:
+    label_sets: AnalysisLabelSets
+    indexes: SurfaceRelationIndexes
+    today_date: date
+    text_cache: dict[str, str] = field(default_factory=dict)
+    age_cache: dict[str, int | None] = field(default_factory=dict)
+    family_cache: dict[str, DuplicateFamilyConfig | None] = field(default_factory=dict)
+    family_names: set[str] = field(default_factory=set)
+
+
+@dataclass
+class ComplexityAnalysisContext:
+    label_sets: AnalysisLabelSets
+    indexes: SurfaceRelationIndexes
+    text_cache: dict[str, str] = field(default_factory=dict)
+    family_cache: dict[str, DuplicateFamilyConfig | None] = field(default_factory=dict)
+    family_names: set[str] = field(default_factory=set)
+
+
 @dataclass(frozen=True)
 class RetirementScoreInputs:
     runtime_count: int
@@ -1822,9 +1855,9 @@ class RetirementScoreInputs:
 
 @dataclass(frozen=True)
 class ComplexityScoreInputs:
-    indirection_markers: list[str]
-    stateful_markers: list[str]
-    deprecation_markers: list[str]
+    indirection_markers: tuple[str, ...]
+    stateful_markers: tuple[str, ...]
+    deprecation_markers: tuple[str, ...]
     runtime_count: int
     config_count: int
     doc_count: int
@@ -2099,7 +2132,7 @@ def _complexity_marker_buckets(
     relative_path: str,
     symbol_name: str,
     source_text: str,
-) -> tuple[list[str], list[str], list[str]]:
+) -> tuple[tuple[str, ...], tuple[str, ...], tuple[str, ...]]:
     normalized = f"{relative_path} {symbol_name}".casefold()
     indirection = sorted(
         {
@@ -2122,7 +2155,7 @@ def _complexity_marker_buckets(
             if marker in normalized or marker in source_text
         }
     )
-    return indirection, stateful, deprecation
+    return tuple(indirection), tuple(stateful), tuple(deprecation)
 
 
 def _retirement_scores(
@@ -2196,7 +2229,7 @@ def _complexity_scores(
 def _classify_complexity_candidate(
     config: ComplexityAnalysisConfig,
     *,
-    removable_score: int,
+    removable_score: float,
     runtime_count: int,
     config_count: int,
     doc_count: int,
@@ -3695,7 +3728,7 @@ def _select_alert_dashboards(
     alert_name: str,
     group_name: str,
     expr: str,
-    dashboard_metrics: dict[NodeKey, set[str]],
+    dashboard_metrics: Mapping[NodeKey, Set[str]],
     memory_mapping: dict[str, object],
 ) -> list[NodeKey]:
     config = _alert_dashboard_config(
@@ -3795,7 +3828,7 @@ def _dashboard_target_keys(names: Iterable[str]) -> set[NodeKey]:
 
 def _metric_dashboard_targets(
     expr: str,
-    dashboard_metrics: dict[NodeKey, set[str]],
+    dashboard_metrics: Mapping[NodeKey, Set[str]],
 ) -> set[NodeKey]:
     metrics = _extract_bioetl_metrics(expr)
     return {
@@ -11792,11 +11825,11 @@ def _add_retirement_analysis_surfaces(
     candidate_nodes = _retirement_candidate_nodes(
         snapshot,
         duplication_config=duplication_config,
-        family_names=context["family_names"],
-        family_cache=context["family_cache"],
+        family_names=context.family_names,
+        family_cache=context.family_cache,
     )
     _prime_retirement_age_cache(
-        root, context["today_date"], context["age_cache"], candidate_nodes
+        root, context.today_date, context.age_cache, candidate_nodes
     )
 
     for node, source_path, family, module_key in candidate_nodes:
@@ -11806,10 +11839,10 @@ def _add_retirement_analysis_surfaces(
             node,
             source_path,
             module_key,
-            indexes=context["indexes"],
-            label_sets=context["label_sets"],
-            text_cache=context["text_cache"],
-            age_cache=context["age_cache"],
+            indexes=context.indexes,
+            label_sets=context.label_sets,
+            text_cache=context.text_cache,
+            age_cache=context.age_cache,
             family_name=family.name,
             config=config,
         )
@@ -11824,16 +11857,13 @@ def _retirement_analysis_context(
     snapshot: GraphSnapshot,
     config: RetirementAnalysisConfig,
     today: str,
-) -> dict[str, object]:
-    return {
-        "label_sets": _retirement_analysis_label_sets(),
-        "indexes": _build_surface_relation_indexes(snapshot),
-        "today_date": date.fromisoformat(today),
-        "text_cache": {},
-        "age_cache": {},
-        "family_cache": {},
-        "family_names": set(config.family_names),
-    }
+) -> RetirementAnalysisContext:
+    return RetirementAnalysisContext(
+        label_sets=_retirement_analysis_label_sets(),
+        indexes=_build_surface_relation_indexes(snapshot),
+        today_date=date.fromisoformat(today),
+        family_names=set(config.family_names),
+    )
 
 
 def _prime_retirement_age_cache(
@@ -12188,7 +12218,7 @@ def _add_retirement_candidate_node(
     test_count: int,
     wip_markers: object,
 ) -> NodeKey:
-    anchors = payload["anchors"]
+    anchors = cast("AnalysisAnchors", payload["anchors"])
     return snapshot.add_node(
         "retirement_candidate",
         f"{node.key.label}:{node.key.name}",
@@ -12246,11 +12276,11 @@ def _add_complexity_analysis_surfaces(
             root,
             node,
             duplication_config=duplication_config,
-            family_names=analysis_context["family_names"],
-            family_cache=analysis_context["family_cache"],
-            label_sets=analysis_context["label_sets"],
-            indexes=analysis_context["indexes"],
-            text_cache=analysis_context["text_cache"],
+            family_names=analysis_context.family_names,
+            family_cache=analysis_context.family_cache,
+            label_sets=analysis_context.label_sets,
+            indexes=analysis_context.indexes,
+            text_cache=analysis_context.text_cache,
             config=config,
         )
         if candidate_payload is None:
@@ -12263,14 +12293,12 @@ def _add_complexity_analysis_surfaces(
 def _complexity_analysis_context(
     snapshot: GraphSnapshot,
     config: ComplexityAnalysisConfig,
-) -> dict[str, object]:
-    return {
-        "family_names": set(config.family_names),
-        "label_sets": _complexity_analysis_label_sets(),
-        "indexes": _build_surface_relation_indexes(snapshot),
-        "text_cache": {},
-        "family_cache": {},
-    }
+) -> ComplexityAnalysisContext:
+    return ComplexityAnalysisContext(
+        family_names=set(config.family_names),
+        label_sets=_complexity_analysis_label_sets(),
+        indexes=_build_surface_relation_indexes(snapshot),
+    )
 
 
 def _complexity_analysis_label_sets() -> AnalysisLabelSets:
@@ -12469,7 +12497,7 @@ def _complexity_candidate_context(
         doc_anchors=doc_anchors,
         test_anchors=test_anchors,
         blocked_by_current_cycle=bool(payload["blocked_by_current_cycle"]),
-        simplification_score=float(payload["simplification_score"]),
+        simplification_score=_coerce_float(payload["simplification_score"]),
         classification=str(payload["classification"]),
     )
 
@@ -13542,7 +13570,9 @@ def _batch_pipeline_names(batch: list[dict[str, JsonValue]]) -> list[str]:
     return [
         str(pipeline_name)
         for statement in batch
-        for pipeline_name in [statement.get("parameters", {}).get("pipeline_name")]
+        for pipeline_name in [
+            _as_mapping(statement.get("parameters")).get("pipeline_name")
+        ]
         if isinstance(pipeline_name, str) and pipeline_name
     ]
 
@@ -14113,7 +14143,7 @@ def _alert_surface_context(
     pipeline_nodes: dict[str, NodeKey],
     contract_nodes: dict[str, NodeKey],
     memory_mapping: dict[str, object],
-) -> tuple[dict[NodeKey, frozenset[str]], AlertTargetContext]:
+) -> tuple[dict[NodeKey, set[str]], AlertTargetContext]:
     return (
         _dashboard_metric_index(root),
         _alert_target_context(
@@ -14155,7 +14185,7 @@ def _add_alert_rule_file_surfaces(
     today: str,
     rules_path: Path,
     *,
-    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    dashboard_metrics: dict[NodeKey, set[str]],
     target_context: AlertTargetContext,
     memory_mapping: dict[str, object],
 ) -> None:
@@ -14280,7 +14310,7 @@ def _add_alert_rule_group_surfaces(
     artifact: NodeKey,
     group: dict[str, object],
     *,
-    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    dashboard_metrics: Mapping[NodeKey, Set[str]],
     target_context: AlertTargetContext,
     memory_mapping: dict[str, object],
 ) -> None:
@@ -14338,7 +14368,7 @@ def _add_single_alert_surface(
     group_name: str,
     rule: dict[str, object],
     *,
-    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    dashboard_metrics: Mapping[NodeKey, Set[str]],
     target_context: AlertTargetContext,
     memory_mapping: dict[str, object],
 ) -> None:
@@ -14387,7 +14417,7 @@ def _add_alert_surface_from_rule(
     *,
     group_name: str,
     rule: dict[str, object],
-    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    dashboard_metrics: Mapping[NodeKey, Set[str]],
     target_context: AlertTargetContext,
     memory_mapping: dict[str, object],
 ) -> None:
@@ -14431,7 +14461,7 @@ def _link_alert_targets(
     group_name: str,
     rule: dict[str, object],
     *,
-    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    dashboard_metrics: Mapping[NodeKey, Set[str]],
     target_context: AlertTargetContext,
     memory_mapping: dict[str, object],
 ) -> None:
@@ -14543,7 +14573,7 @@ def _link_alert_observer_dashboards(
     alert_name: str,
     group_name: str,
     expr: str,
-    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    dashboard_metrics: Mapping[NodeKey, Set[str]],
     memory_mapping: dict[str, object],
 ) -> None:
     for dashboard in _existing_snapshot_nodes(
@@ -14572,7 +14602,7 @@ def _selected_alert_dashboards(
     alert_name: str,
     group_name: str,
     expr: str,
-    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    dashboard_metrics: Mapping[NodeKey, Set[str]],
     memory_mapping: dict[str, object],
 ) -> tuple[NodeKey, ...]:
     return tuple(
@@ -15146,13 +15176,15 @@ class Neo4jHttpClient:
             context=context,
         )
         results = body.get("results", [])
-        if not results:
+        result_items = _as_iterable(results)
+        if not result_items:
             return []
-        result = results[0]
-        columns = result.get("columns", [])
+        result = _as_mapping(result_items[0])
+        columns = _as_iterable(result.get("columns"))
         rows: list[dict[str, JsonValue]] = []
-        for entry in result.get("data", []):
-            raw_row = entry.get("row", [])
+        for entry_value in _as_iterable(result.get("data")):
+            entry = _as_mapping(entry_value)
+            raw_row = _as_iterable(entry.get("row"))
             row = {str(column): raw_row[index] for index, column in enumerate(columns)}
             rows.append(row)
         return rows
@@ -15214,23 +15246,29 @@ def _sync_run_id() -> str:
 
 
 def _neo4j_property_value(value: JsonValue) -> JsonScalar | list[JsonScalar]:
-    if isinstance(value, dict):
+    if isinstance(value, Mapping):
         return json.dumps(value, sort_keys=True)
-    if isinstance(value, list):
+    if isinstance(value, Sequence) and not isinstance(value, str | bytes):
         normalized_items: list[JsonScalar] = []
         for item in value:
-            if isinstance(item, dict | list):
+            if isinstance(item, Mapping | Sequence) and not isinstance(
+                item, str | bytes
+            ):
                 normalized_items.append(json.dumps(item, sort_keys=True))
-            else:
+            elif isinstance(item, str | int | float | bool) or item is None:
                 normalized_items.append(item)
         return normalized_items
-    return value
+    if isinstance(value, str | int | float | bool) or value is None:
+        return value
+    return str(value)
 
 
 def _managed_properties(
     properties: dict[str, JsonValue], sync_run: str
 ) -> dict[str, JsonValue]:
-    managed = {key: _neo4j_property_value(value) for key, value in properties.items()}
+    managed: dict[str, JsonValue] = {
+        key: _neo4j_property_value(value) for key, value in properties.items()
+    }
     managed["managed_by"] = DEFAULT_MANAGED_BY
     managed["sync_run"] = sync_run
     managed.setdefault("ingest_wave", DEFAULT_INGEST_WAVE)
@@ -15383,7 +15421,9 @@ def _selection_from_legacy_kwargs(
     legacy_kwargs: dict[str, object],
 ) -> SnapshotSelection:
     return SnapshotSelection(
-        only_labels=tuple(legacy_kwargs.get("only_labels", ())),
+        only_labels=tuple(
+            str(item) for item in _as_iterable(legacy_kwargs.get("only_labels"))
+        ),
         only_analysis_layer=bool(legacy_kwargs.get("only_analysis_layer", False)),
         only_retirement_layer=bool(legacy_kwargs.get("only_retirement_layer", False)),
         only_complexity_layer=bool(legacy_kwargs.get("only_complexity_layer", False)),
@@ -15469,9 +15509,12 @@ def _delete_managed_wave_if_requested(
             delete_statement = _delete_managed_wave_nodes_statement(
                 label, delete_batch_size
             )
+            statement_text = _optional_text(delete_statement.get("statement"))
+            if statement_text is None:
+                raise ValueError("delete statement is missing Cypher text")
             rows = client.query(
-                delete_statement["statement"],
-                delete_statement["parameters"],
+                statement_text,
+                _as_mapping(delete_statement.get("parameters")),
             )
             deleted = _coerce_int(rows[0]["deleted"]) if rows else 0
             if deleted == 0:
@@ -15706,7 +15749,7 @@ def _batched[T](items: list[T], size: int) -> list[list[T]]:
 
 
 def _statement_failure_context(statement: dict[str, JsonValue]) -> str:
-    parameters = statement.get("parameters", {})
+    parameters = _as_mapping(statement.get("parameters"))
     node_name = parameters.get("name")
     if node_name is not None:
         return f"name={node_name!r}"
@@ -17934,7 +17977,7 @@ def _fast_analysis_live_summary(
 def _active_critical_names(
     snapshot_stats: dict[str, JsonValue],
     key: str,
-    critical_names: set[str],
+    critical_names: Iterable[str],
 ) -> tuple[str, ...]:
     raw_counts = snapshot_stats.get(key)
     if not isinstance(raw_counts, dict):
@@ -17975,7 +18018,7 @@ def _critical_analysis_audit_issues(report: dict[str, JsonValue]) -> list[str]:
 
 def _critical_diff_issues(
     rows: object,
-    critical_names: set[str],
+    critical_names: Iterable[str],
     *,
     kind: str,
 ) -> list[str]:
@@ -17987,7 +18030,7 @@ def _critical_diff_issues(
             continue
         name = row.get("name")
         delta = row.get("delta")
-        if name in critical_names and delta:
+        if isinstance(name, str) and name in critical_names and delta:
             issues.append(
                 f"{kind} `{name}` expected {row.get('snapshot')}, live managed {row.get('live_managed')}"
             )

@@ -10,7 +10,7 @@ import threading
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol, cast
 
 import yaml
 
@@ -26,6 +26,11 @@ LEGACY_INDENTED_TOP_LEVEL_KEY_PATTERN = re.compile(
 SLUG_PATTERN = re.compile(r"[^a-z0-9]+")
 # Bounded ATX heading capture without open nested quantifiers (S8786).
 HEADING_PATTERN = re.compile(r"^(#{1,6})[ \t]+(\S[^\n]{0,512})$", re.MULTILINE)
+
+
+class _StartupInfo(Protocol):
+    dwFlags: int
+    wShowWindow: int
 
 
 def _read_text_with_timeout(
@@ -262,7 +267,7 @@ def _hidden_windows_subprocess_kwargs(
 
     startupinfo_factory = getattr(subprocess_module, "STARTUPINFO", None)
     if callable(startupinfo_factory):
-        startupinfo = startupinfo_factory()
+        startupinfo = cast(_StartupInfo, startupinfo_factory())
         startf_use_show_window = int(
             getattr(subprocess_module, "STARTF_USESHOWWINDOW", 0)
         )
