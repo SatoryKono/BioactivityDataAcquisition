@@ -275,17 +275,12 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         help="Enable richer pilot-only live contract suites (equivalent to BIOETL_PILOT_SOAK_TESTS=true).",
     )
     # Workflows may pass --vcr-record=... Prefer VCR_RECORD_MODE when possible.
-    # Register a compatibility flag whenever no plugin already owns it — a
-    # present-but-inactive pytest-recording install must not leave the option
-    # unregistered (control-plane-e2e / CI-C1 closeout).
-    option_names = {opt.dest for opt in parser._anonymous.options}  # noqa: SLF001
-    option_names.update(
-        name.lstrip("-").replace("-", "_")
-        for group in parser._groups  # noqa: SLF001
-        for opt in getattr(group, "options", [])
-        for name in getattr(opt, "names", ())
-    )
-    if "vcr_record" not in option_names:
+    # Register a compatibility flag only when no VCR plugin ships the option —
+    # dual registration collides later in argparse materialization.
+    if (
+        importlib.util.find_spec("pytest_vcr") is None
+        and importlib.util.find_spec("pytest_recording") is None
+    ):
         parser.addoption(
             "--vcr-record",
             action="store",
