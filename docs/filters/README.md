@@ -22,10 +22,7 @@ governance:
 
 - `docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md`
 
-Accepted ADR-048 is the domain-schema/Pandera compatibility decision
-(`docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`).
-Do **not** cite historical local filter drafts as ADR-048. Use ADR-050 for
-normative filter-boundary governance.
+Do not reuse retired local filter drafts as ADR-048; accepted ADR-048 is the domain-schema/Pandera compatibility decision (`docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`). Always use ADR-050 for normative filter-boundary governance.
 
 ## Active artifacts
 
