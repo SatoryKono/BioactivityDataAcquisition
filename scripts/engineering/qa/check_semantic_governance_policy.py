@@ -108,7 +108,7 @@ def _cluster_counts(rows: tuple[dict[str, str], ...], status: str) -> Counter[st
     )
 
 
-def _non_empty_str(mapping: dict[str, Any], key: str) -> bool:
+def _non_empty_str(mapping: Mapping[str, Any], key: str) -> bool:
     value = mapping.get(key)
     return isinstance(value, str) and bool(value.strip())
 

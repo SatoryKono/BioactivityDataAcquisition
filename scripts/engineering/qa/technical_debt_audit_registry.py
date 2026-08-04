@@ -7,6 +7,7 @@ import hashlib
 import json
 import re
 import subprocess
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -319,7 +320,7 @@ def _commit_exists(root: Path, commit_sha: str) -> bool:
 
 def _validate_record_paths(
     root: Path,
-    records: list[Any],
+    records: Sequence[Any],
 ) -> list[str]:
     issues: list[str] = []
     for record in records:

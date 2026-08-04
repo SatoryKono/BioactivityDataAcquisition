@@ -121,10 +121,13 @@ def main(argv: list[str] | None = None) -> int:
             raw,
             raw_root=(audit_root / "evidence" / "raw").resolve(),
         )
+        campaign_binding = report["campaign_binding"]
+        if not isinstance(campaign_binding, dict):
+            raise ValueError("report campaign_binding must be a mapping")
         content_errors = campaign._validate_raw_content(
             parsed.category,
             retained,
-            report["campaign_binding"],
+            campaign_binding,
         )
         errors = [*raw_errors, *content_errors]
         if errors:

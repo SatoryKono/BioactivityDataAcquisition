@@ -358,7 +358,10 @@ def main(argv: list[str] | None = None) -> int:
             f"fail={summary['fail_count']}; "
             f"mutation_detected={summary['mutation_detected']}"
         )
-        for check in payload["checks"]:
+        checks = payload["checks"]
+        if not isinstance(checks, list):
+            raise ValueError("architecture audit checks must be a list")
+        for check in checks:
             assert isinstance(check, dict)
             print(
                 "[architecture-audit-read-only] "

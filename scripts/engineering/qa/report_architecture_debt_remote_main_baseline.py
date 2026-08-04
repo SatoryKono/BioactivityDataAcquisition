@@ -309,7 +309,10 @@ def _remote_artifact_availability_errors(
     payload: dict[str, object],
 ) -> list[str]:
     errors: list[str] = []
-    for row in payload["artifacts"]:
+    artifacts = payload["artifacts"]
+    if not isinstance(artifacts, list):
+        return ["artifacts must be a list"]
+    for row in artifacts:
         assert isinstance(row, dict)
         summary = row["summary"]
         assert isinstance(summary, dict)

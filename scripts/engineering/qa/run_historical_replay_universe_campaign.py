@@ -18,6 +18,8 @@ from bioetl.application.services.control_plane.replay.historical_universe_servic
     HistoricalReplayUniverseService,
 )
 from bioetl.composition.factories.services.port_factories import create_metrics
+from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.control_plane import (
     FileHistoricalReplayUniverseStore,
@@ -131,9 +133,15 @@ def main() -> int:
         certification_service=HistoricalReplayCertificationService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
+            entry_id_factory=lambda: create_runtime_occurrence_id(
+                "historical_replay_certification_ledger_entry"
+            ),
         ),
     )
-    universe_service = HistoricalReplayUniverseService(corpus_service=corpus_service)
+    universe_service = HistoricalReplayUniverseService(
+        corpus_service=corpus_service,
+        now_factory=current_utc_time,
+    )
     external_records = _load_external_records(args.external_pack)
     report = universe_service.build_universe_closure_report(
         external_records=external_records

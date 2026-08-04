@@ -21,7 +21,12 @@ HTTP_DATASOURCE_HINTS = (
 
 def _iter_panels(payload: dict[str, object]) -> list[dict[str, object]]:
     panels: list[dict[str, object]] = []
-    stack = [panel for panel in payload.get("panels", []) if isinstance(panel, dict)]
+    raw_panels = payload.get("panels", [])
+    stack = (
+        [panel for panel in raw_panels if isinstance(panel, dict)]
+        if isinstance(raw_panels, list)
+        else []
+    )
     while stack:
         panel = stack.pop(0)
         panels.append(panel)
@@ -55,7 +60,10 @@ def _datasource_kind(panel: dict[str, object]) -> str:
 
 def _panel_exprs(panel: dict[str, object]) -> list[str]:
     exprs: list[str] = []
-    for target in panel.get("targets", []):
+    raw_targets = panel.get("targets", [])
+    if not isinstance(raw_targets, list):
+        return exprs
+    for target in raw_targets:
         if not isinstance(target, dict):
             continue
         expr = target.get("expr")
