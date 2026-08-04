@@ -1,7 +1,9 @@
 """Runner-builder artifact recorder wiring contract."""
 
 import json
+from pathlib import Path
 from types import SimpleNamespace
+from typing import Any, cast
 
 import pytest
 
@@ -9,7 +11,18 @@ from bioetl.composition.runtime_builders.runner_builder_wiring import (
     LegacyRunnerBuilderOverrides,
     resolve_runner_builder_wiring,
 )
-from tests.unit.composition.runtime_builders.runner_builder_test_support import *
+from tests.unit.composition.runtime_builders.runner_builder_test_support import (
+    SILVER_METADATA_PATH,
+    SILVER_OUTPUT_PATH,
+    _FakeFactory,
+    _FakeRegistry,
+    _RecorderAwareMetadataWriter,
+    _build_context,
+    _clean_provenance_context_if_unpatched,
+    _ensure_default_cached_bronze_fixture,
+    _namespace_observability,
+    runner_builder,
+)
 
 
 pytestmark = pytest.mark.unit
@@ -42,7 +55,7 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                 legacy_overrides=LegacyRunnerBuilderOverrides(
                     ensure_providers_loaded_fn=lambda: None,
                     register_all_pipelines_fn=lambda registry=None: None,
-                    get_settings_fn=lambda: SimpleNamespace(
+                    get_settings_fn=cast(Any, lambda: SimpleNamespace(
                         data_dir=str(tmp_path),
                         pipeline=SimpleNamespace(
                             heartbeat_interval=30,
@@ -54,8 +67,8 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                             ),
                         ),
                         test_mode=False,
-                    ),
-                    load_pipeline_config_fn=lambda _: SimpleNamespace(
+                    )),
+                    load_pipeline_config_fn=cast(Any, lambda _: SimpleNamespace(
                         provider="chembl",
                         entity_type="activity",
                         version="2.0.0",
@@ -68,13 +81,13 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                             "silver": SimpleNamespace(enabled=True, save_metadata=True),
                             "gold": SimpleNamespace(enabled=True, save_metadata=True),
                         },
-                    ),
+                    )),
                     build_observability_bundle_fn=lambda **_: _namespace_observability(
                         SimpleNamespace(info=lambda *_, **__: None),
                     ),
-                    assemble_vacuum_settings_fn=lambda **_: None,
-                    assemble_runtime_config_fn=lambda **_: SimpleNamespace(
-                        run_type="incremental"
+                    assemble_vacuum_settings_fn=cast(Any, lambda **_: None),
+                    assemble_runtime_config_fn=cast(
+                        Any, lambda **_: SimpleNamespace(run_type="incremental")
                     ),
                     assemble_filter_config_fn=lambda **_: None,
                     assemble_cached_bronze_context_fn=lambda _: (
