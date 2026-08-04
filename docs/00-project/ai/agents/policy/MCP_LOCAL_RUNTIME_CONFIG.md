@@ -80,7 +80,7 @@ privilege servers are not always-on:
 | --- | --- | --- |
 | `stable` | host/HTTP MCP only (no docker/gateway thrash leaders; no neo4j/mutmut/code-interpreter) | **yes — daily default for local IDE projections** |
 | `shared` | full sanctioned local set over shared HTTP plus remote HTTP MCP | explicit multi-client heavy plane (`--profile shared`) |
-| `core` | `stable` + mermaid (gateway) | explicit legacy/local profile |
+| `core` | `stable` + pinned Mermaid MCP | explicit legacy/local profile |
 | `ops` | `core` + prometheus, grafana, github-actions | observability / dashboard work |
 | `graph` | `ops` + neo4j-*, brave-search, mutmut, mcp-code-interpreter, docker | research / graph / mutation work |
 | `full` | entire sanctioned inventory (same as tracked portable set) | only when explicitly needed |
@@ -94,7 +94,7 @@ stays stdio; only **local** projections may emit `http://127.0.0.1:…/mcp` when
 
 Stdio MCP transport starts **one process/container per client session**. Each
 AI host (Grok, Cursor, WSL gateway, etc.) that loads docker-backed servers
-(`brave-search`, `docker`, `mermaid`, `grafana`, `prometheus`, …) can leave
+(`brave-search`, `docker`, `grafana`, `prometheus`, …) can leave
 orphans with random names (`elastic_*`, labels `docker-mcp=true`). On 32 GiB
 hosts this thrash is a primary Docker Desktop failure mode — not a BioETL
 compose bug.

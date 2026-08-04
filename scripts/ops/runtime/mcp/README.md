@@ -18,7 +18,7 @@ Server ports, wrappers, state models and launch modes:
 | --- | --- |
 | 8811 | brave-search |
 | 8813–8816 | adr-analysis, deja, context7, ast-grep |
-| 8817–8818 | docker, mermaid |
+| 8817–8818 | Docker gateway, pinned `mcp-mermaid@0.4.1` |
 | 8820–8821 | github, fetch |
 | 8822–8823 | prometheus, grafana |
 | 8824–8825 | neo4j-cypher, neo4j-memory (optional) |
@@ -55,9 +55,10 @@ python scripts/ops/runtime/mcp/_materialize_shared_http_configs.py
 `start-shared.sh --all` is the full acceptance path. A repeated invocation must
 reuse the same managed PID for every endpoint.
 
-On non-mirrored WSL networking, `docker` and `mermaid` are owned by one native
-Windows streaming gateway each and exposed to WSL clients through a binary
-loopback relay. Client URLs remain `127.0.0.1`.
+On non-mirrored WSL networking, `docker` is owned by one native Windows Docker
+MCP streaming gateway. `mermaid` is owned by one pinned Windows
+`mcp-mermaid@0.4.1` Streamable HTTP process. Each is exposed to WSL clients
+through one binary loopback relay; client URLs remain `127.0.0.1`.
 
 Subset start:
 
