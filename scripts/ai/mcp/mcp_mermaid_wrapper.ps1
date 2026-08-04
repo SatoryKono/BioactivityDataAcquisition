@@ -30,9 +30,11 @@ if (-not [string]::IsNullOrWhiteSpace($env:PLAYWRIGHT_BROWSERS_PATH) -and $env:P
 # Avoid upstream's sudo-oriented postinstall. Browser payload is user-local and
 # the explicit install is idempotent after the first successful download.
 $env:npm_config_ignore_scripts = "true"
-& npx -y "--package=$package" playwright install chromium 2>&1 |
-    ForEach-Object { [Console]::Error.WriteLine([string]$_) }
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+& npx -y "--package=$package" playwright install chromium *> $null
 $installExitCode = $LASTEXITCODE
+$ErrorActionPreference = $previousErrorActionPreference
 if ($installExitCode -ne 0) {
     throw "Failed to install Playwright Chromium for Mermaid MCP."
 }
