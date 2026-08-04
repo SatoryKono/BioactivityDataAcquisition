@@ -61605,6 +61605,34 @@
       "canonical_successor": null,
       "catalog_lifecycle": null,
       "commit_policy": null,
+      "declared_class": "historical-working-document",
+      "declared_status": "Retired Draft",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/filters/retired-silver-filters-structural-scope.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "filters",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
       "declared_class": null,
       "declared_status": "Working planning artifacts (non-normative)",
       "diagram_kind": null,
@@ -67389,6 +67417,34 @@
       "lifecycle": "working_report",
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": "reports/quality/total-tech-debt-audit-main-2026-06-16.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": "reports/quality/total-tech-debt-audit-main-current.md",
       "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
@@ -68761,13 +68817,13 @@
       "live_issue_mirror": 4,
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 33,
-      "working_report": 88
+      "working_report": 89
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 312,
-      "archive-after-migration": 82,
+      "archive-after-migration": 83,
       "generate-automatically": 861,
-      "keep": 1169,
+      "keep": 1170,
       "reconcile-with-github-state": 4
     },
     "by_section": {
@@ -68792,30 +68848,30 @@
       "best_practices.md": 1,
       "config-discrepancies-report.md": 1,
       "doc.json": 1,
-      "filters": 4,
+      "filters": 5,
       "mkdocs.yml": 1,
       "plans": 2,
       "plugins": 4,
-      "reports": 216,
+      "reports": 217,
       "ru": 3,
       "security": 2
     },
     "by_status": {
-      "Active": 861,
+      "Active": 862,
       "Archived": 141,
       "Canonical": 73,
       "Generated": 861,
-      "Working": 492
+      "Working": 493
     },
     "by_surface_family": {
-      "active": 861,
+      "active": 862,
       "archive": 141,
       "canonical": 73,
       "generated": 861,
-      "working": 492
+      "working": 493
     },
     "by_tracking_state": {
-      "tracked": 2428
+      "tracked": 2430
     },
     "docs_reports_local_count": 30,
     "duplicate_group_count": 6,
@@ -68831,8 +68887,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 2428,
+    "total_doc_like": 2430,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 2428
+    "total_doc_like_tracked": 2430
   }
 }
