@@ -2,11 +2,11 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-07-31T13:55:33.002896+00:00'
+refreshed_at_utc: '2026-08-04T14:44:33.369974+00:00'
 refresh_status: captured
-source_commit: 667c3020ce74f87c319f77612c765a5aaf30e6ad
+source_commit: 4746568ef10687c8f3bd07652deb0ded564b4531
 source_run_id: local-duration-rebuild-2026-07-23
-source_tree_sha256: 31a6e6bc72f3cbb65df88f40ead8f8a42683bda7518356e14d9758c9668ccc9d
+source_tree_sha256: 92a1bbe14df0e5b04ac414a934ab8330c6f744f1953512df1761d199babde1d7
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
@@ -221,3 +221,10 @@ slow_governance_cache_probe:
       cache_path: .cache/bioetl-architecture-governance
       cache_key: source_tree_sha256 from module-coverage-inventory.json
       workflow_owner: .github/workflows/tests.yml#test-fast
+branch_accurate_guard:
+  enforced: true
+  require_source_commit_equals_head: false
+  require_source_tree_match: true
+  require_source_commit_is_ancestor: true
+  refresh_command: python -m scripts.engineering.ci.update_test_telemetry_baseline
+    --source-commit <sha> --source-run-id <run-id>
