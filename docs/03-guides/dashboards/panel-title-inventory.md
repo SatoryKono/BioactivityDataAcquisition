@@ -88,7 +88,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 1 | Track Record Flow by Stage |
 | bioetl-dq-v2.json | 3 | Monitor Bronze Records |
 | bioetl-dq-v2.json | 4 | Monitor Gold Records |
-| bioetl-dq-v2.json | 7 | Monitor Silver Validation Failures |
+| bioetl-dq-v2.json | 7 | Monitor Silver Validation Failures (range composite) |
 | bioetl-dq-v2.json | 101 | Inspect Latest Successful Data |
 | bioetl-dq-v2.json | 9 | Inspect Quarantine Error Types |
 | bioetl-dq-v2.json | 12 | Monitor Silver Validation Failures |

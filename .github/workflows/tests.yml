@@ -208,9 +208,11 @@ jobs:
       - name: Run control-plane completeness smoke
         run: |
           mkdir -p reports/e2e
+          # Prefer VCR_RECORD_MODE over --vcr-record so a present-but-inactive
+          # pytest-recording install cannot leave the CLI flag unregistered
+          # while blocking the conftest fallback (#7515-#7521 closeout).
           VCR_RECORD_MODE=none uv run --frozen --no-build pytest \
             tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle \
-            --vcr-record=none \
             -q --tb=short \
             --junitxml=reports/e2e/control-plane-completeness.xml
 

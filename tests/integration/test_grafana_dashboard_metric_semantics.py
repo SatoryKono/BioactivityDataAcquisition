@@ -1796,10 +1796,30 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     )
     identity = panels[identity_id]
     processed = panels[processed_id]
-    assert identity.get("gridPos", {}).get("h") == 6
-    assert processed.get("gridPos", {}).get("h") == 6
-    assert identity.get("options", {}).get("cellHeight") == "sm"
-    assert processed.get("options", {}).get("cellHeight") == "sm"
+    assert identity.get("gridPos", {}).get("h") == processed.get(
+        "gridPos", {}
+    ).get("h") == 6
+    assert identity.get("options", {}).get("cellHeight") == processed.get(
+        "options", {}
+    ).get("cellHeight") == "sm"
+    default_identity_cell_options = (
+        identity.get("fieldConfig", {})
+        .get("defaults", {})
+        .get("custom", {})
+        .get("cellOptions", {})
+    )
+    assert default_identity_cell_options.get("wrapText") is not True
+    identity_cell_options = [
+        property_.get("value", {})
+        for override in identity.get("fieldConfig", {}).get("overrides", [])
+        for property_ in override.get("properties", [])
+        if property_.get("id") == "custom.cellOptions"
+    ]
+    assert all(
+        cell_options.get("wrapText") is not True
+        for cell_options in identity_cell_options
+        if isinstance(cell_options, dict)
+    )
 
     targets = processed.get("targets", [])
     assert processed.get("datasource") == "BioETL Ops HTTP"

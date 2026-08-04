@@ -492,7 +492,8 @@
               "targetBlank": false,
               "includeVars": false
             }
-          ]
+          ],
+          "noValue": "None observed"
         },
         "overrides": [
           {
@@ -758,7 +759,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 8,
+        "w": 24,
         "x": 0,
         "y": 15
       },
