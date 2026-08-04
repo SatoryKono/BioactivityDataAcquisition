@@ -107,7 +107,7 @@ def test_issue_6032_application_core_fan_in_has_headroom() -> None:
         baseline_value=int(residual_core["max_internal_fan_in"]),
     )
     assert row["max_internal_fan_in"] < budgets["max_internal_fan_in"]
-    assert budgets["max_internal_fan_in"] >= residual_core["budget_max_internal_fan_in"]
+    assert budgets["max_internal_fan_in"] <= residual_core["budget_max_internal_fan_in"]
     assert (
         row["max_internal_fan_in_module"]
         == "bioetl.application.core.batch_runtime_failure_policy"
@@ -159,7 +159,7 @@ def test_issue_6034_composition_runtime_seams_keep_headroom() -> None:
     )
     assert (
         runtime_builder_budget["max_internal_fan_in"]
-        >= residual_runtime["budget_max_internal_fan_in"]
+        <= residual_runtime["budget_max_internal_fan_in"]
     )
     assert (
         _runtime_builder_importer_count(
