@@ -9,9 +9,14 @@ $script:BioetlProxyEnvironmentNames = @(
 )
 
 function Get-BioetlProxyEnvironmentSnapshot {
-    # Use a plain hashtable and suppress enumeration so callers receive one
-    # map (PowerShell otherwise unwraps single-collection returns).
-    $snapshot = @{}
+    # Suppress enumeration so callers receive one case-sensitive map
+    # (PowerShell otherwise unwraps single-collection returns).
+    # Proxy variables are case-sensitive on POSIX. A normal PowerShell
+    # hashtable is case-insensitive and would let a missing ``https_proxy``
+    # overwrite a populated ``HTTPS_PROXY`` entry.
+    $snapshot = [System.Collections.Generic.Dictionary[string, object]]::new(
+        [System.StringComparer]::Ordinal
+    )
     foreach ($name in $script:BioetlProxyEnvironmentNames) {
         $snapshot[$name] = [Environment]::GetEnvironmentVariable(
             $name,
@@ -21,7 +26,7 @@ function Get-BioetlProxyEnvironmentSnapshot {
     Write-Output -NoEnumerate $snapshot
 }
 
-function Restore-BioetlProxyEnvironment {
+function ConvertTo-BioetlCaseSensitiveEnvironmentMap {
     param(
         [Parameter(Mandatory = $true)]
         $Snapshot
@@ -29,7 +34,9 @@ function Restore-BioetlProxyEnvironment {
 
     # Normalize to a dictionary whether callers pass Hashtable, OrderedDictionary,
     # or a PSCustomObject-wrapped map from PowerShell pipeline unwrapping.
-    $map = @{}
+    $map = [System.Collections.Generic.Dictionary[string, object]]::new(
+        [System.StringComparer]::Ordinal
+    )
     if ($Snapshot -is [System.Collections.IDictionary]) {
         foreach ($key in @($Snapshot.Keys)) {
             $map[[string]$key] = $Snapshot[$key]
@@ -40,27 +47,69 @@ function Restore-BioetlProxyEnvironment {
             $map[[string]$prop.Name] = $prop.Value
         }
     }
+    Write-Output -NoEnumerate $map
+}
 
+function Remove-BioetlProcessEnvironmentVariable {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Name
+    )
+
+    [Environment]::SetEnvironmentVariable(
+        $Name,
+        $null,
+        [EnvironmentVariableTarget]::Process
+    )
+    Remove-Item -LiteralPath "Env:$Name" -ErrorAction SilentlyContinue
+}
+
+function Set-BioetlProcessEnvironmentVariable {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Value
+    )
+
+    Set-Item -LiteralPath "Env:$Name" -Value $Value
+    [Environment]::SetEnvironmentVariable(
+        $Name,
+        $Value,
+        [EnvironmentVariableTarget]::Process
+    )
+}
+
+function Restore-BioetlProxyEnvironment {
+    param(
+        [Parameter(Mandatory = $true)]
+        $Snapshot
+    )
+
+    $map = ConvertTo-BioetlCaseSensitiveEnvironmentMap -Snapshot $Snapshot
+
+    # Delete missing entries first. PowerShell's Env provider can conflate
+    # upper/lowercase names while removing them on POSIX, so restoring values
+    # afterwards guarantees that a missing lowercase alias cannot erase its
+    # populated uppercase peer.
     foreach ($name in $script:BioetlProxyEnvironmentNames) {
         $value = $null
         if ($map.ContainsKey($name)) {
             $value = $map[$name]
         }
         if ($null -eq $value -or $value -eq "") {
-            Remove-Item -Path "Env:$name" -ErrorAction SilentlyContinue
-            [Environment]::SetEnvironmentVariable(
-                $name,
-                $null,
-                [EnvironmentVariableTarget]::Process
-            )
+            Remove-BioetlProcessEnvironmentVariable -Name $name
         }
-        else {
-            Set-Item -Path "Env:$name" -Value ([string]$value)
-            [Environment]::SetEnvironmentVariable(
-                $name,
-                [string]$value,
-                [EnvironmentVariableTarget]::Process
-            )
+    }
+
+    foreach ($name in $script:BioetlProxyEnvironmentNames) {
+        $value = $null
+        if ($map.ContainsKey($name)) {
+            $value = $map[$name]
+        }
+        if ($null -ne $value -and $value -ne "") {
+            Set-BioetlProcessEnvironmentVariable -Name $name -Value ([string]$value)
         }
     }
 }
@@ -77,15 +126,14 @@ function Enable-BioetlUvxNetworkBypass {
     if ($env:BIOETL_UVX_DIRECT_NETWORK -ne "1") {
         return
     }
-    $env:NO_PROXY = "*"
-    $env:no_proxy = "*"
+    foreach ($name in @("NO_PROXY", "no_proxy")) {
+        Set-BioetlProcessEnvironmentVariable -Name $name -Value "*"
+    }
     foreach ($name in @(
             "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
             "http_proxy", "https_proxy", "all_proxy"
         )) {
-        if (Test-Path "Env:$name") {
-            Remove-Item "Env:$name" -ErrorAction SilentlyContinue
-        }
+        Remove-BioetlProcessEnvironmentVariable -Name $name
     }
 }
 

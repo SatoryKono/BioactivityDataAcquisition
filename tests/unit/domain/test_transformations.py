@@ -247,6 +247,7 @@ class TestGenerateContentHash:
 
         assert hash1 == hash2
 
+    @staticmethod
     @settings(deadline=None, suppress_health_check=[HealthCheck.too_slow])
     @given(
         st.dictionaries(
@@ -254,7 +255,7 @@ class TestGenerateContentHash:
             st.one_of(st.floats(allow_nan=False, allow_infinity=False), st.text()),
         )
     )
-    def test_hash_always_valid(self, record):
+    def test_hash_always_valid(record):
         """Property: Hash generation should never fail."""
         hash_val = generate_content_hash(record, "test")
         assert len(hash_val) == 64
