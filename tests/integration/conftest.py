@@ -17,9 +17,13 @@ import shutil
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, cast
 
 import pytest
+
+
+class _CacheClearable(Protocol):
+    def cache_clear(self) -> None: ...
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
@@ -50,7 +54,7 @@ def _clear_runtime_config_caches() -> None:
         load_pipeline_config,
         load_source_config,
     ):
-        vars(cached_function)["cache_clear"]()
+        cast(_CacheClearable, cached_function).cache_clear()
 
 
 def _is_wsl() -> bool:
