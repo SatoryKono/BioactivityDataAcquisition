@@ -47,8 +47,6 @@ def _test_function_names(path: Path) -> set[str]:
 
 
 @pytest.mark.architecture
-
-
 @pytest.mark.architecture
 def test_5996_corrected_evidence_does_not_grow_debt_budgets() -> None:
     """Rebased evidence must remove stale findings without increasing debt budgets."""

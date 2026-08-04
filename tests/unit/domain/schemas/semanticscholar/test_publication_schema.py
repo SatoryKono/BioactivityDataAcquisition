@@ -262,9 +262,12 @@ class TestSourceValidation:
         assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
     def test_invalid_source_field_contract(self) -> None:
-        field_info = SemanticScholarPublicationSchema.__dict__['_source']
+        field_info = SemanticScholarPublicationSchema.__dict__["_source"]
         assert field_info.nullable is False
-        assert any("equal_to" in getattr(check, "name", str(check)) for check in field_info.checks)
+        assert any(
+            "equal_to" in getattr(check, "name", str(check))
+            for check in field_info.checks
+        )
         assert any("semanticscholar" in str(check) for check in field_info.checks)
 
 
@@ -272,12 +275,29 @@ class TestSchemaFieldDefinitions:
     def test_schema_has_semanticscholar_fields(self) -> None:
         schema = SemanticScholarPublicationSchema.to_schema()
         required_fields = [
-            "paper_id", "doi", "pmid", "dblp_id", "corpus_id", "title",
-            "abstract", "tldr", "publication_year", "publication_date",
-            "journal", "volume", "page_range", "citations_received",
-            "citations_made", "influential_citation_count", "is_oa",
-            "open_access_url", "oa_status", "subject_fields",
-            "publication_type", "publication_types", "authors",
+            "paper_id",
+            "doi",
+            "pmid",
+            "dblp_id",
+            "corpus_id",
+            "title",
+            "abstract",
+            "tldr",
+            "publication_year",
+            "publication_date",
+            "journal",
+            "volume",
+            "page_range",
+            "citations_received",
+            "citations_made",
+            "influential_citation_count",
+            "is_oa",
+            "open_access_url",
+            "oa_status",
+            "subject_fields",
+            "publication_type",
+            "publication_types",
+            "authors",
         ]
         for field in required_fields:
             assert field in schema.columns, f"Missing field: {field}"
@@ -291,7 +311,7 @@ class TestSchemaFieldDefinitions:
     def test_source_field_validated(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
-        field_info = SemanticScholarPublicationSchema.__dict__['_source']
+        field_info = SemanticScholarPublicationSchema.__dict__["_source"]
         assert field_info.nullable is False
         assert any("semanticscholar" in str(check) for check in field_info.checks)
         ok = minimal_semanticscholar_publication_df.copy()
@@ -301,10 +321,22 @@ class TestSchemaFieldDefinitions:
     def test_optional_fields_nullable(self) -> None:
         schema = SemanticScholarPublicationSchema.to_schema()
         nullable_fields = [
-            "doi", "pmid", "dblp_id", "title", "abstract", "tldr",
-            "publication_date", "journal", "volume", "page_range",
-            "open_access_url", "oa_status", "subject_fields",
-            "publication_type", "publication_types", "authors",
+            "doi",
+            "pmid",
+            "dblp_id",
+            "title",
+            "abstract",
+            "tldr",
+            "publication_date",
+            "journal",
+            "volume",
+            "page_range",
+            "open_access_url",
+            "oa_status",
+            "subject_fields",
+            "publication_type",
+            "publication_types",
+            "authors",
         ]
         for field in nullable_fields:
             col = schema.columns.get(field)

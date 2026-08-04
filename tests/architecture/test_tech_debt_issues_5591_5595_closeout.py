@@ -58,8 +58,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 @pytest.mark.architecture
-
-
 @pytest.mark.architecture
 def test_issue_5591_repo_backed_unit_tests_stay_inside_dedicated_subtree() -> None:
     bad_paths: list[str] = []

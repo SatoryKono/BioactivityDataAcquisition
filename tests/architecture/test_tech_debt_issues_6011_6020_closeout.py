@@ -104,5 +104,7 @@ def test_issue_6015_local_full_coverage_attempt_is_not_overstated() -> None:
     assert attempt["result"] == "timed_out"
     log_path = ROOT / str(attempt["log"])
     if not log_path.exists():
-        pytest.skip(f"historical coverage-verify log not present in checkout: {log_path}")
+        pytest.skip(
+            f"historical coverage-verify log not present in checkout: {log_path}"
+        )
     assert "timed out after 900s" in log_path.read_text(encoding="utf-8")
