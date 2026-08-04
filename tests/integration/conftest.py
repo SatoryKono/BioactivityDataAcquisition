@@ -44,10 +44,13 @@ def _clear_runtime_config_caches() -> None:
     from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
     from bioetl.infrastructure.config.source_config_loader import load_source_config
 
-    get_settings.cache_clear()
-    get_pipeline_config.cache_clear()
-    load_pipeline_config.cache_clear()
-    load_source_config.cache_clear()
+    for cached_function in (
+        get_settings,
+        get_pipeline_config,
+        load_pipeline_config,
+        load_source_config,
+    ):
+        vars(cached_function)["cache_clear"]()
 
 
 def _is_wsl() -> bool:

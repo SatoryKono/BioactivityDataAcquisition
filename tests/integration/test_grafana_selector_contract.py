@@ -311,7 +311,9 @@ def test_pipeline_selector_live_closure_evidence_is_complete() -> None:
     navigation = evidence.get("navigation_handoff")
     assert isinstance(navigation, dict)
     # Historical capture listed 8 live dashboards; shipping surface is 7.
-    assert navigation.get("live_dashboard_count") >= len(registry)
+    live_dashboard_count = navigation.get("live_dashboard_count")
+    assert isinstance(live_dashboard_count, int)
+    assert live_dashboard_count >= len(registry)
     assert navigation.get("checked_dashboard_links") == navigation.get(
         "expected_dashboard_links"
     )

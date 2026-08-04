@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
-from typing import get_type_hints
+from typing import TypeGuard, get_type_hints
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
@@ -52,7 +52,9 @@ def _iter_port_classes(tree: ast.AST) -> list[ast.ClassDef]:
     ]
 
 
-def _is_port_method(node: ast.stmt) -> bool:
+def _is_port_method(
+    node: ast.stmt,
+) -> TypeGuard[ast.FunctionDef | ast.AsyncFunctionDef]:
     return isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
 
 

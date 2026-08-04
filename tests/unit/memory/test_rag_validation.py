@@ -10,6 +10,7 @@ import pytest
 from memory.rag.indexing import build_rag_manifests, write_rag_manifests
 from memory.rag.validation import (
     RagManifestValidationError,
+    RagValidationReport,
     normalize_rag_source_path,
     require_valid_rag_manifest,
     validate_rag_manifest_files,
@@ -26,8 +27,8 @@ def _write_source(root: Path, relative_path: str, content: str) -> Path:
     return path
 
 
-def _issue_codes(report: object) -> set[str]:
-    return {issue.code for issue in report.issues}  # type: ignore[attr-defined]
+def _issue_codes(report: RagValidationReport) -> set[str]:
+    return {issue.code for issue in report.issues}
 
 
 def test_valid_full_manifest_covers_current_source_surface(tmp_path: Path) -> None:

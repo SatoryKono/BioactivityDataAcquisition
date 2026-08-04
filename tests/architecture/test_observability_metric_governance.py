@@ -77,7 +77,9 @@ def _collect_inprocess_metric_inventory() -> dict[str, object]:
     finally:
         inventory._METRIC_INVENTORY_CACHE.clear()
     assert isinstance(loaded, dict)
-    return loaded
+    normalized: dict[str, object] = {}
+    normalized.update(loaded)
+    return normalized
 
 
 def _collect_fresh_metric_inventory() -> dict[str, object]:

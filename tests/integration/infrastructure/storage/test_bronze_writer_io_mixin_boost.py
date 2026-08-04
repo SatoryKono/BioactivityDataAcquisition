@@ -37,13 +37,11 @@ class _ConcreteBronzeMixin(BronzeWriterIOMixin):
         self.logger = MagicMock()
         self._logger = self.logger
         self._metrics = MagicMock()
-
-    def _resolve_bronze_path(
-        self, provider: str, entity: str, date_str: str, filename: str
-    ) -> str:
-        if self._flat_structure:
-            return f"{date_str}/{filename}"
-        return f"{provider}/{entity}/{date_str}/{filename}"
+        self._resolve_bronze_path = lambda provider, entity, date_str, filename: (
+            f"{date_str}/{filename}"
+            if self._flat_structure
+            else f"{provider}/{entity}/{date_str}/{filename}"
+        )
 
 
 @pytest.mark.integration

@@ -32,9 +32,7 @@ class ConcreteGoldReaderForTest(GoldWriterReadCleanupMixin):
 
     def __init__(self, base_path: str) -> None:
         self._base_path = base_path
-
-    def _resolve_table_path(self, table_name: str) -> str:
-        return f"{self._base_path}/{table_name}"
+        self._resolve_table_path = lambda table_name: f"{self._base_path}/{table_name}"
 
     async def _run_in_executor(self, fn, *args):
         return fn(*args)

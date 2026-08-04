@@ -13,7 +13,7 @@ import bioetl.infrastructure.control_plane.file_run_ledger_store as run_ledger_s
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionService,
 )
-from bioetl.application.services.control_plane import RunLedgerService
+from bioetl.application.services.control_plane.ledger.service import RunLedgerService
 from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
 from bioetl.domain.ports.observability.metrics import MetricsPort
 from bioetl.domain.types import RunID, RunType

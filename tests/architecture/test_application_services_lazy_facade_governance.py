@@ -368,10 +368,10 @@ def _source_has_package_root_import_marker(source: str) -> bool:
 def _read_candidate_source(path: Path) -> str | None:
     try:
         source = _read_candidate_source_direct(path)
-    except OSError:
-        source = _read_text_with_subprocess_timeout(path)
     except TimeoutError:  # pragma: no cover - architecture scan safety
         raise AssertionError(f"Timeout reading {path}") from None
+    except OSError:
+        source = _read_text_with_subprocess_timeout(path)
     except UnicodeError as exc:  # pragma: no cover - architecture scan safety
         raise AssertionError(f"Unable to decode {path}: {exc}") from exc
 

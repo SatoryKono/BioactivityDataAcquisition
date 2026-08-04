@@ -39,7 +39,7 @@ def test_non_chembl_root_hash_policy_matches_profile_and_golden_hash(
     profile = resolve_normalization_profile(provider, entity_type)
     assert profile is not None
 
-    load_pipeline_config.cache_clear()
+    vars(load_pipeline_config)["cache_clear"]()
     loaded = load_pipeline_config(pipeline_name)
     policy = loaded.content_hash_policy
     assert policy is not None

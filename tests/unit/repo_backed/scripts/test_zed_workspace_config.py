@@ -488,7 +488,7 @@ def test_zed_env_doctor_healthy_and_missing_module(
     """Doctor reports healthy envs and actionable missing-module diagnostics."""
     if str(DEV_SCRIPTS) not in sys.path:
         sys.path.insert(0, str(DEV_SCRIPTS))
-    import zed_env_doctor as doctor
+    from scripts.engineering.dev import zed_env_doctor as doctor
 
     # Healthy path under the real worktree / current interpreter.
     findings = doctor.diagnose(modules=("pytest",), repo_root=ROOT)
@@ -519,7 +519,7 @@ def test_zed_env_doctor_cli_exits_nonzero_on_missing_module(
     """CLI exits non-zero with actionable text when a required import is absent."""
     if str(DEV_SCRIPTS) not in sys.path:
         sys.path.insert(0, str(DEV_SCRIPTS))
-    import zed_env_doctor as doctor
+    from scripts.engineering.dev import zed_env_doctor as doctor
 
     monkeypatch.setattr(
         doctor,

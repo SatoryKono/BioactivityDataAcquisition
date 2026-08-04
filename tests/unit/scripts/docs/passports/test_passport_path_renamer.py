@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import subprocess as subprocess_real
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -30,7 +30,7 @@ def _init_repo(root: Path) -> None:
 
 @patch("scripts.docs.passports.rename_underscore_to_hyphen.subprocess.run")
 def test_migration_dry_run_apply_and_check_are_idempotent(
-    mock_run: subprocess.CompletedProcess,
+    mock_run: MagicMock,
     tmp_path: Path,
 ) -> None:
     # Mock rg command to return empty result (no files with references)
@@ -84,7 +84,7 @@ def test_migration_dry_run_apply_and_check_are_idempotent(
 
 @patch("scripts.docs.passports.rename_underscore_to_hyphen.subprocess.run")
 def test_migration_refuses_to_overwrite_existing_target(
-    mock_run: subprocess.CompletedProcess,
+    mock_run: MagicMock,
     tmp_path: Path,
 ) -> None:
     # Mock rg command to return empty result (no files with references)

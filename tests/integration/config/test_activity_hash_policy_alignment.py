@@ -45,7 +45,7 @@ def _business_schema_fields(config: dict[str, Any]) -> frozenset[str]:
 def test_chembl_activity_hash_policy_uses_normalized_business_fields() -> None:
     """Root hash_policy should be the runtime-authoritative ChEMBL hash selector."""
     config = _load_activity_config()
-    load_pipeline_config.cache_clear()
+    vars(load_pipeline_config)["cache_clear"]()
     loaded = load_pipeline_config("chembl_activity")
 
     assert loaded.content_hash.include == []

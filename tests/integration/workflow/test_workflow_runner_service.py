@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable
 from dataclasses import dataclass, field
 
 import pytest
@@ -103,7 +104,7 @@ class _PipelineRunner:
         dry_run: bool = False,
         run_id: object | None = None,
         options: object | None = None,
-    ) -> asyncio.Future | asyncio.Task:
+    ) -> Awaitable[RunResult]:
         del dry_run
         return self._fake_async_result(
             self._make_result(pipeline_name, run_id=run_id, options=options)

@@ -114,7 +114,7 @@ def test_config_discrepancy_evidence_scans_config_snapshot_once(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = 0
-    configs = {
+    configs: dict[str, dict[str, object]] = {
         "entity/demo/item": {"pipeline.name": "demo"},
         "composite/demo": {"composite.seed.pipeline": "demo_item"},
     }

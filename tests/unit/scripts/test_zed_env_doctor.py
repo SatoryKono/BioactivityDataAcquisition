@@ -17,7 +17,7 @@ pytestmark = [pytest.mark.unit]
 def doctor_module():
     if str(DEV_SCRIPTS) not in sys.path:
         sys.path.insert(0, str(DEV_SCRIPTS))
-    import zed_env_doctor
+    from scripts.engineering.dev import zed_env_doctor
 
     return zed_env_doctor
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -15,7 +16,7 @@ DOCS = ROOT / "docs" / "03-guides" / "dashboards"
 pytestmark = pytest.mark.integration
 
 
-def _walk(panels: list | None):
+def _walk(panels: list[dict[str, Any]] | None):
     for panel in panels or []:
         yield panel
         yield from _walk(panel.get("panels"))

@@ -9,6 +9,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from memory.graph import sync as graph_sync
+from memory.graph.sync_pkg import _core as graph_core
+from memory.graph.sync_pkg._core import GraphSnapshot
 from memory.tooling import workflow as workflow_module
 from memory.tooling.prune import find_prunable_episodic_notes, prune_episodic_notes
 from memory.tooling.refresh_all import refresh_all
@@ -140,15 +142,16 @@ def test_refresh_all_graph_export_uses_direct_snapshot_writer(
 
     def _fake_build_snapshot(root: Path):
         called["root"] = root
-        return graph_sync.GraphSnapshot()
+        return GraphSnapshot()
 
     def _fake_write_export(path: Path, snapshot: object) -> None:
         called["path"] = path
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("{}", encoding="utf-8")
 
-    monkeypatch.setattr(graph_sync, "build_snapshot", _fake_build_snapshot)
-    monkeypatch.setattr(graph_sync, "_write_export", _fake_write_export)
+    # refresh_all imports graph_core at call time; patch the canonical _core surface.
+    monkeypatch.setattr(graph_core, "build_snapshot", _fake_build_snapshot)
+    monkeypatch.setattr(graph_core, "_write_export", _fake_write_export)
 
     summary = refresh_all(
         tmp_path,

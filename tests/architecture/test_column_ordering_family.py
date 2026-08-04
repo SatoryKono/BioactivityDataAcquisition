@@ -95,6 +95,3 @@ def test_public_composite_exports_only_expose_canonical_column_order_service() -
     assert "ColumnOrderer" not in runtime_exports
     assert "ColumnPriorityOrderer" not in composite_exports
     assert "ColumnPriorityOrderer" not in runtime_exports
-
-
-SRC_ALLOWLIST = frozenset()
