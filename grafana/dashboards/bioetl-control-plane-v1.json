@@ -4011,7 +4011,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "unit": "none",
               "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
@@ -4167,7 +4167,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "decimals": 0,
               "unit": "none",
