@@ -1094,7 +1094,7 @@ def _parse_processed_records_row(
         raw_row, parameter=parameter, field="value"
     )
     percentage, percentage_error = _prefixed_cell_value(
-        raw_row, parameter=parameter, field="percintage"
+        raw_row, parameter=parameter, field="percentage"
     )
     if value_error or percentage_error:
         return (
