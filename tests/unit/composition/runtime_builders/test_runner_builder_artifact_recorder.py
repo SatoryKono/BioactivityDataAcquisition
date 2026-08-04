@@ -49,8 +49,8 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
 
     with _clean_provenance_context_if_unpatched():
         runner_builder.build_pipeline_runner(
-            context,
-            registry=fake_registry,
+            cast(Any, context),
+            registry=cast(Any, fake_registry),
             wiring=resolve_runner_builder_wiring(
                 legacy_overrides=LegacyRunnerBuilderOverrides(
                     ensure_providers_loaded_fn=lambda: None,
@@ -82,36 +82,42 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                             "gold": SimpleNamespace(enabled=True, save_metadata=True),
                         },
                     )),
-                    build_observability_bundle_fn=lambda **_: _namespace_observability(
-                        SimpleNamespace(info=lambda *_, **__: None),
+                    build_observability_bundle_fn=cast(
+                        Any,
+                        lambda **_: _namespace_observability(
+                            SimpleNamespace(info=lambda *_, **__: None),
+                        ),
                     ),
                     assemble_vacuum_settings_fn=cast(Any, lambda **_: None),
                     assemble_runtime_config_fn=cast(
                         Any, lambda **_: SimpleNamespace(run_type="incremental")
                     ),
                     assemble_filter_config_fn=lambda **_: None,
-                    assemble_cached_bronze_context_fn=lambda _: (
-                        _ensure_default_cached_bronze_fixture(
-                            settings=SimpleNamespace(
-                                data_dir=str(tmp_path),
-                                pipeline=SimpleNamespace(
-                                    heartbeat_interval=30,
-                                    control_plane=SimpleNamespace(
-                                        required_persistence_profile=(
-                                            "degraded_observable"
+                    assemble_cached_bronze_context_fn=cast(
+                        Any,
+                        lambda _: (
+                            _ensure_default_cached_bronze_fixture(
+                                settings=SimpleNamespace(
+                                    data_dir=str(tmp_path),
+                                    pipeline=SimpleNamespace(
+                                        heartbeat_interval=30,
+                                        control_plane=SimpleNamespace(
+                                            required_persistence_profile=(
+                                                "degraded_observable"
+                                            ),
+                                            checkpoint_compatibility_policy="hard_fail",
+                                            run_manifest_enabled=True,
+                                            run_ledger_enabled=True,
                                         ),
-                                        checkpoint_compatibility_policy="hard_fail",
-                                        run_manifest_enabled=True,
-                                        run_ledger_enabled=True,
                                     ),
+                                    test_mode=False,
                                 ),
-                                test_mode=False,
-                            ),
-                            pipeline_config=SimpleNamespace(
-                                provider="chembl",
-                                entity_type="activity",
-                            ),
-                        )
+                                pipeline_config=SimpleNamespace(
+                                    provider="chembl",
+                                    entity_type="activity",
+                                ),
+                            )
+                        ),
                     ),
                 )
             ),
@@ -119,8 +125,10 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
 
     for writer in (top_writer, bronze_writer, silver_writer, gold_writer):
         assert writer.recorder is not None
+    assert fake_factory.kwargs is not None
     manifest_id = fake_factory.kwargs["manifest_id"]
     assert isinstance(manifest_id, str)
+    assert callable(silver_writer.recorder)
     silver_writer.recorder(
         "silver",
         SILVER_OUTPUT_PATH,
