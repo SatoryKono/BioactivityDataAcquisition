@@ -5,8 +5,8 @@ title: Promote only repeatable knowledge
 kind: lesson
 source_refs:
 
-- docs/plans/project-memory-layer-implementation-plan-2026-04-20.md
-- src/memory/README.md
+- src/memory/curated/README.md
+- src/memory/curated/REVIEW_LOOP.md
 - Curated memory loses value quickly when one-off debugging details are promoted without
   durable reuse potential.
 - Short-lived task context belongs in episodic memory until the pattern repeats or
@@ -16,7 +16,7 @@ source_refs:
 - Prefer leaving narrow task details in episodic memory and pruning them on schedule
   instead of promoting them by default.
   confidence: curated
-  last_verified: '2026-04-20T00:00:00Z'
+  last_verified: '2026-08-04T00:00:00Z'
   summary: Promote notes only when the knowledge is reusable across future tasks.
 
 ______________________________________________________________________
