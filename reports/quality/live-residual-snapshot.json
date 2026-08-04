@@ -2,7 +2,7 @@
   "schema_version": "live-residual-snapshot-v1",
   "linked_issue": "#6891",
   "parent_epic": "#6890",
-  "snapshot_date": "2026-07-28",
+  "snapshot_date": "2026-08-04",
   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
   "policy": {
     "direction": "shrink_only",
@@ -15,7 +15,7 @@
       "max_internal_fan_in": 8,
       "helper_function_ratio": 0.365,
       "files": 187,
-      "total_loc": 22716,
+      "total_loc": 22521,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 10
     },
@@ -24,13 +24,13 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.325,
       "files": 51,
-      "total_loc": 6310,
+      "total_loc": 6298,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
     "composition_factories_pipeline": {
       "files_ge_250_loc": 1,
-      "max_internal_fan_in": 3,
+      "max_internal_fan_in": 2,
       "helper_function_ratio": 0.33,
       "files": 32,
       "total_loc": 3939,
@@ -40,9 +40,9 @@
     "application_services_control_plane": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 3,
-      "helper_function_ratio": 0.423,
-      "files": 139,
-      "total_loc": 15873,
+      "helper_function_ratio": 0.421,
+      "files": 140,
+      "total_loc": 15973,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -51,7 +51,7 @@
       "max_internal_fan_in": 3,
       "helper_function_ratio": 0.359,
       "files": 56,
-      "total_loc": 6978,
+      "total_loc": 6950,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 5
     }
@@ -63,7 +63,7 @@
     "repo_wide_candidates_without_owner_tests_count": 0
   },
   "config_surface": {
-    "duplicate_cluster_count": 10
+    "duplicate_cluster_count": 9
   },
   "module_coverage": {
     "uncovered_module_count": 0,
