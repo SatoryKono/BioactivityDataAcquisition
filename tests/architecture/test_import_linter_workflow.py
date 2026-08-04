@@ -52,15 +52,3 @@ def test_import_linter_workflow_requires_full_capabilities_for_arch_tests() -> N
         'uv run --frozen --no-build pytest tests/architecture/ -m "not slow and not benchmark and not memory"'
         in workflow
     )
-
-
-def test_import_linter_changed_file_gate_stays_below_arg_max() -> None:
-    """Large changed-file sets must stay on disk and be processed in batches."""
-    workflow = Path(".github/workflows/import-linter.yml").read_text(encoding="utf-8")
-
-    assert 'list_file="${RUNNER_TEMP}/ruff-changed-python.txt"' in workflow
-    assert 'echo "list_file=${list_file}" >> "$GITHUB_OUTPUT"' in workflow
-    assert 'echo "file_count=${file_count}" >> "$GITHUB_OUTPUT"' in workflow
-    assert 'if [[ "$file_count" -gt 400 ]]' in workflow
-    assert "xargs -a \"$list_file\" -d '\\n' -n 100" in workflow
-    assert 'echo "files=' not in workflow

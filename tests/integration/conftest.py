@@ -25,7 +25,6 @@ import pytest
 class _CacheClearable(Protocol):
     def cache_clear(self) -> None: ...
 
-
 if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter

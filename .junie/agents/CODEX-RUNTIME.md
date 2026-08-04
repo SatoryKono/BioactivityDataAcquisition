@@ -1,27 +1,50 @@
-# CODEX-RUNTIME.md — Navigation Pointer (Junie Tree)
+# CODEX-RUNTIME.md — Runtime Map For BioETL Agents
 
-> **Not a runtime SSOT.** This path is a navigation stub only.
->
-> Per `scripts/ai/junie/junie-mirror-contract.json` →
-> `runtime_only_files.codex_only`, the Codex peer runtime map is
-> **Codex-only** and is **not** mirrored into `.junie/**`.
+## Canonical Sources
 
-## Canonical sources
+Read before planning or editing:
 
-| Surface | Path | Role |
-| --- | --- | --- |
-| Codex peer runtime map | `.codex/agents/CODEX-RUNTIME.md` | Canonical Codex runtime map (Memory Provenance, task routing, risk validation) |
-| Junie peer runtime map | `.junie/agents/JUNIE-RUNTIME.md` | Canonical Junie runtime map for this tree |
-| Equal-peer entry | `AGENTS.md` | Repository-wide AI runtime precedence |
+- `docs/00-project/NORMATIVE_SOURCES.md`
+- `docs/00-project/RULES.md`
+- `docs/01-requirements/REQUIREMENTS.md`
+- `docs/02-architecture/decisions/`
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+- `AGENTS.md`
 
-## Why this stub exists
+## Purpose
 
-Historically a truncated copy of the Codex runtime map lived here and drifted
-silently (outside shared mirror parity scope). That copy is replaced by this
-pointer so agents do not treat a divergent Junie file as Codex SSOT.
+Map logical BioETL `py-*` profiles onto the native Codex runtime roles used in this repository.
 
-## Operator guidance
+## Response Language
 
-- For Codex identity and provenance env vars, read `.codex/agents/CODEX-RUNTIME.md`.
-- For Junie runtime behavior, read `.junie/agents/JUNIE-RUNTIME.md`.
-- Do not reintroduce a full content fork of CODEX-RUNTIME under `.junie/agents/`.
+- By default, answer the user in Russian when the user writes in Russian.
+- Keep code, commands, file paths, identifiers, API field names, and other technical literals in their valid original form.
+
+## Technical Debt Guardrail
+
+- **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.**
+- This includes scorecard budgets, exemption limits, hotspot thresholds, hotspot family caps, and equivalent budget surfaces.
+
+## Recommended Mapping
+
+- `py-audit-bot` -> `default`
+- `py-architecture-debt-bot` -> `default`
+- `py-plan-bot` -> `default`
+- `py-test-bot` -> `default` or `worker`
+- `py-config-bot` -> `worker`
+- `py-debug-bot` -> `worker`
+- `py-doc-bot` -> `worker`
+- `py-test-swarm` -> `default`
+- `py-review-orchestrator` -> `default`
+
+## Related Runtime Surfaces
+
+- `.codex/agents/ORCHESTRATION.md`
+- `.codex/agents/README.md`
+- `.codex/skills/`
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.

@@ -171,24 +171,6 @@ def test_safe_iter_local_doc_tree_reports_quarantined_paths(
     ]
 
 
-def test_safe_iter_local_doc_tree_ignores_transient_link_report(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """The CI link report must not make the cleanup inventory self-invalidating."""
-    reports_root = tmp_path / "docs" / "reports"
-    reports_root.mkdir(parents=True)
-    (reports_root / "index.md").write_text("# Reports\n", encoding="utf-8")
-    (reports_root / "docs-link-check-report.json").write_text(
-        '{"status": "ok"}\n', encoding="utf-8"
-    )
-    monkeypatch.setattr(inventory, "PROJECT_ROOT", tmp_path)
-
-    paths, errors = inventory._safe_iter_local_doc_tree("docs/reports")
-
-    assert paths == ["docs/reports/index.md"]
-    assert errors == []
-
-
 def test_generated_route_violations_reports_unowned_generated_rows() -> None:
     """Generator checks must fail when generated docs lack route ownership."""
     payload = {

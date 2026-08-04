@@ -94,7 +94,9 @@ class _UnconditionalInstantiationFinder(ast.NodeVisitor):
         self.generic_visit(node)
         self._current_class = old
 
-    def _visit_function(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+    def _visit_function(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> None:
         if node.name in ("__init__", "__post_init__"):
             old = self._in_init_method
             self._in_init_method = node.name

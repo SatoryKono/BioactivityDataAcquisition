@@ -109,7 +109,7 @@
     "edgeRouting": "ORTHOGONAL"
   },
   "class": {
-    "defaultRenderer": "dagre-wrapper",
+    "defaultRenderer": "elk",
     "useMaxWidth": true,
     "padding": 16,
     "htmlLabels": true

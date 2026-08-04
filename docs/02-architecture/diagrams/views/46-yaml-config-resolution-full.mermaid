@@ -23,9 +23,9 @@ flowchart TD
     subgraph YAML_FILES["YAML File Hierarchy"]
         direction TB
         BASE["configs/base/pipeline.yaml<br/>(global defaults)"]
-        PROVIDER_BASE["configs/providers/&#123;provider&#125;.yaml<br/>(provider defaults)"]
-        PIPELINE["configs/entities/&#123;provider&#125;/&#123;entity&#125;.yaml<br/>(unified entity config)"]
-        SOURCE["configs/providers/&#123;provider&#125;.yaml<br/>(source config + legacy-flat fallback)"]
+        PROVIDER_BASE["configs/providers/{provider}.yaml<br/>(provider defaults)"]
+        PIPELINE["configs/entities/{provider}/{entity}.yaml<br/>(unified entity config)"]
+        SOURCE["configs/providers/{provider}.yaml<br/>(source config + legacy-flat fallback)"]
     end
 
     DQ_HIER["DQ hierarchy<br/>base + provider + entity + inline"]:::size-md

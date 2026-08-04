@@ -20,7 +20,6 @@ class TestCategoryConfig(TypedDict):
     exclude_markers: NotRequired[list[str]]
     timeout: int
 
-
 # Test categories and their typical execution times
 TEST_CATEGORIES: dict[str, TestCategoryConfig] = {
     "unit-fast": {

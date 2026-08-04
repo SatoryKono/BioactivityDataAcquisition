@@ -61,9 +61,9 @@ graph LR
     end
 
     subgraph FileSystem["File System Layout"]
-        FS_B["bronze/&#123;provider&#125;/&#123;entity&#125;/&#123;date&#125;<br/>batch_*.jsonl.zst + _metadata.yaml"]:::size-lg
-        FS_S["silver/&#123;provider&#125;_&#123;entity&#125;<br/>_delta_log + parquet + metadata"]:::size-lg
-        FS_G["gold/&#123;provider&#125;_&#123;entity&#125;<br/>_delta_log + parquet + metadata"]:::size-lg
+        FS_B["bronze/{provider}/{entity}/{date}<br/>batch_*.jsonl.zst + _metadata.yaml"]:::size-lg
+        FS_S["silver/{provider}_{entity}<br/>_delta_log + parquet + metadata"]:::size-lg
+        FS_G["gold/{provider}_{entity}<br/>_delta_log + parquet + metadata"]:::size-lg
     end
 
     %% Inheritance

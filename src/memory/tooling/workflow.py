@@ -22,14 +22,6 @@ _UNKNOWN_PATH = "<unknown>"
 _DAILY_WORKFLOW_MD = "src/memory/DAILY_WORKFLOW.md"
 _CHUNKS_JSONL = "chunks.jsonl"
 _MEMORY_WORKFLOW_SMOKE_TITLE = "Memory workflow smoke"
-# Deterministic non-production actor identity for the smoke command only.
-# Must not be used by production pre-task / post-task CLI paths.
-_SMOKE_RUNTIME = "smoke"
-_SMOKE_AGENT = "memory-workflow-smoke"
-_SMOKE_PROVENANCE_ENV = (
-    "BIOETL_AI_RUNTIME",
-    "BIOETL_AI_AGENT",
-)
 
 
 def _discover_memory_root() -> Path:
@@ -1038,95 +1030,62 @@ def _write_smoke_inputs(root: Path) -> tuple[Path, Path]:
     return chunks_path, events_dir
 
 
-def _inject_smoke_provenance_env() -> dict[str, str | None]:
-    """Install smoke-only actor identity; return previous env values to restore."""
-    previous: dict[str, str | None] = {}
-    for key in _SMOKE_PROVENANCE_ENV:
-        previous[key] = os.environ.get(key)
-    os.environ["BIOETL_AI_RUNTIME"] = _SMOKE_RUNTIME
-    os.environ["BIOETL_AI_AGENT"] = _SMOKE_AGENT
-    return previous
-
-
-def _restore_provenance_env(previous: dict[str, str | None]) -> None:
-    """Restore actor-identity env keys to their pre-smoke values."""
-    for key, value in previous.items():
-        if value is None:
-            os.environ.pop(key, None)
-        else:
-            os.environ[key] = value
-
-
 def smoke_workflow(
     *,
     validation_timeout_seconds: float
     | None = DEFAULT_POST_TASK_VALIDATION_TIMEOUT_SECONDS,
 ) -> dict[str, Any]:
-    """Run a lightweight pre/post workflow smoke without committing artifacts.
-
-    Injects deterministic non-production provenance
-    (``BIOETL_AI_RUNTIME=smoke``, ``BIOETL_AI_AGENT=memory-workflow-smoke``)
-    for the smoke run only, then restores the previous environment. Production
-    ``pre-task`` / ``post-task`` paths remain fail-closed on missing identity.
-    """
+    """Run a lightweight pre/post workflow smoke without committing artifacts."""
     repo_root = _discover_repo_root() or Path(__file__).resolve().parents[3]
-    previous_env = _inject_smoke_provenance_env()
-    try:
-        with ExitStack() as stack:
-            temp_root = Path(stack.enter_context(tempfile.TemporaryDirectory()))
-            chunks_path, events_dir = _write_smoke_inputs(temp_root)
-            session_note_path = temp_root / "session.md"
-            summary_note_path = temp_root / "summary.md"
-            pre_payload = pre_task_workflow(
-                task_id="memory-workflow-smoke",
-                title=_MEMORY_WORKFLOW_SMOKE_TITLE,
-                query="memory workflow",
-                source_refs=[_DAILY_WORKFLOW_MD],
-                create_session_note=True,
-                session_note_path=session_note_path,
-                chunks_path=chunks_path,
-                events_dir=events_dir,
-                run_refresh_if_missing=False,
-                limit=3,
-                profile=DEFAULT_PROFILE,
-            )
-            post_payload = post_task_workflow(
-                task_id="memory-workflow-smoke",
-                title=_MEMORY_WORKFLOW_SMOKE_TITLE,
-                summary="Validated lightweight memory workflow pre/post smoke.",
-                source_refs=[_DAILY_WORKFLOW_MD],
-                run_refresh=False,
-                summary_note_path=summary_note_path,
-                validation_timeout_seconds=validation_timeout_seconds,
-            )
-            # Check file existence before context manager exits
-            session_exists = session_note_path.exists()
-            summary_exists = summary_note_path.exists()
-            ok = bool(
-                pre_payload.get("ok")
-                and post_payload.get("ok")
-                and session_exists
-                and summary_exists
-            )
-            return {
-                "kind": "smoke",
-                "ok": ok,
-                "python_executable": sys.executable,
-                "repo_root": str(repo_root),
-                "actor": {
-                    "runtime": _SMOKE_RUNTIME,
-                    "agent": _SMOKE_AGENT,
-                },
-                "pre_task_ok": bool(pre_payload.get("ok")),
-                "post_task_ok": bool(post_payload.get("ok")),
-                "post_task_degraded": bool(post_payload.get("degraded", False)),
-                "post_task_validation_status": post_payload.get(
-                    "validation_status", "completed"
-                ),
-                "generated_artifacts": "temporary_directory_removed",
-            }
-    finally:
-        _restore_provenance_env(previous_env)
+    with ExitStack() as stack:
+        temp_root = Path(stack.enter_context(tempfile.TemporaryDirectory()))
+        chunks_path, events_dir = _write_smoke_inputs(temp_root)
+        session_note_path = temp_root / "session.md"
+        summary_note_path = temp_root / "summary.md"
+        pre_payload = pre_task_workflow(
+            task_id="memory-workflow-smoke",
+            title=_MEMORY_WORKFLOW_SMOKE_TITLE,
+            query="memory workflow",
+            source_refs=[_DAILY_WORKFLOW_MD],
+            create_session_note=True,
+            session_note_path=session_note_path,
+            chunks_path=chunks_path,
+            events_dir=events_dir,
+            run_refresh_if_missing=False,
+            limit=3,
+            profile=DEFAULT_PROFILE,
+        )
+        post_payload = post_task_workflow(
+            task_id="memory-workflow-smoke",
+            title=_MEMORY_WORKFLOW_SMOKE_TITLE,
+            summary="Validated lightweight memory workflow pre/post smoke.",
+            source_refs=[_DAILY_WORKFLOW_MD],
+            run_refresh=False,
+            summary_note_path=summary_note_path,
+            validation_timeout_seconds=validation_timeout_seconds,
+        )
+        # Check file existence before context manager exits
+        session_exists = session_note_path.exists()
+        summary_exists = summary_note_path.exists()
+        ok = bool(
+            pre_payload.get("ok")
+            and post_payload.get("ok")
+            and session_exists
+            and summary_exists
+        )
+        return {
+            "kind": "smoke",
+            "ok": ok,
+            "python_executable": sys.executable,
+            "repo_root": str(repo_root),
+            "pre_task_ok": bool(pre_payload.get("ok")),
+            "post_task_ok": bool(post_payload.get("ok")),
+            "post_task_degraded": bool(post_payload.get("degraded", False)),
+            "post_task_validation_status": post_payload.get(
+                "validation_status", "completed"
+            ),
+            "generated_artifacts": "temporary_directory_removed",
+        }
 
 
 def review_curated_workflow(

@@ -480,7 +480,8 @@ def record_probe(
         for row in report.get("resources", [])
         if isinstance(row, Mapping)
         for key, value in row.items()
-        if str(key).endswith("_limit_ratio") and isinstance(value, int | float)
+        if str(key).endswith("_limit_ratio")
+        and isinstance(value, int | float)
     ]
     current_max_ratio = state.get("max_resource_ratio")
     state["max_resource_ratio"] = max(

@@ -8,6 +8,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
+from memory.graph import sync as graph_sync
 from memory.graph.sync_pkg import _core as graph_core
 from memory.graph.sync_pkg._core import GraphSnapshot
 from memory.tooling import workflow as workflow_module

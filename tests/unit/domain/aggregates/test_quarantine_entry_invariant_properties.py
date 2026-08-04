@@ -94,7 +94,6 @@ def _create_entry(
 class TestQuarantineEntryInvariantProperties:
     """Invariant-focused properties for QuarantineEntry value semantics."""
 
-    @staticmethod
     @pytest.mark.hypothesis
     @settings(
         deadline=None,
@@ -103,6 +102,7 @@ class TestQuarantineEntryInvariantProperties:
     )
     @given(payload=_PAYLOAD, metadata_a=_METADATA, metadata_b=_METADATA)
     def test_payload_hash_depends_only_on_payload(
+        self,
         payload: dict[str, object],
         metadata_a: dict[str, object],
         metadata_b: dict[str, object],
@@ -119,7 +119,6 @@ class TestQuarantineEntryInvariantProperties:
         assert first.status == QuarantineStatus.NEW
         assert second.status == QuarantineStatus.NEW
 
-    @staticmethod
     @pytest.mark.hypothesis
     @settings(
         deadline=None,
@@ -133,6 +132,7 @@ class TestQuarantineEntryInvariantProperties:
         resolution=st.sampled_from(["ignored", "reprocessed", "expired"]),
     )
     def test_resolution_paths_are_terminal_and_consistent(
+        self,
         payload: dict[str, object],
         metadata: dict[str, object],
         start_review_first: bool,
@@ -162,7 +162,6 @@ class TestQuarantineEntryInvariantProperties:
         assert entry.resolution_info.resolution_type == resolution
         assert entry.age_seconds == pytest.approx(10.0)
 
-    @staticmethod
     @pytest.mark.hypothesis
     @settings(
         deadline=None,
@@ -171,6 +170,7 @@ class TestQuarantineEntryInvariantProperties:
     )
     @given(payload=_PAYLOAD, metadata=_METADATA)
     def test_payload_and_metadata_accessors_are_defensive(
+        self,
         payload: dict[str, object],
         metadata: dict[str, object],
     ) -> None:

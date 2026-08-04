@@ -106,7 +106,9 @@ def _doc_symbol_hits() -> list[str]:
         "rg": _repo_symbol_hits_with_ripgrep,
     }
     for scanner_name in _doc_symbol_scan_order():
-        scanner_hits = scanners[scanner_name](DOC_ROOTS, skip_legacy=True)
+        scanner_hits = scanners[scanner_name](
+            DOC_ROOTS, skip_legacy=True
+        )
         if scanner_hits is not None:
             return scanner_hits
 

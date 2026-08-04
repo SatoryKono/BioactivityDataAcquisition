@@ -196,13 +196,13 @@ jobs:
         run: uv run --frozen --no-build python -m scripts.engineering.repo check-versions
 
       - name: Run documentation integrity guardrails
-        run: uv run --frozen --no-build python -m scripts.docs check-links --links --specs --configs --report-json reports/docs-link-check-report.json
+        run: uv run --frozen --no-build python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json
 
       - name: Upload docs link-check report artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: docs-link-check-report
-          path: reports/docs-link-check-report.json
+          path: docs/reports/docs-link-check-report.json
 
       - name: Run docs-config parity gate
         run: uv run --frozen --no-build python scripts/check_entity_config_parity.py

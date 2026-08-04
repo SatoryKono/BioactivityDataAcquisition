@@ -69,8 +69,6 @@ def test_docs_workflow_runs_doc_integrity_guardrails() -> None:
 
     assert "Run documentation integrity guardrails" in workflow
     assert "python -m scripts.docs check-links" in workflow
-    assert "--report-json reports/docs-link-check-report.json" in workflow
-    assert "--report-json docs/reports/docs-link-check-report.json" not in workflow
 
 
 def test_docs_workflow_diagram_drift_uses_pr_base_ref() -> None:

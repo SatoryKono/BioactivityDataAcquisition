@@ -335,16 +335,8 @@ def build_description(meta: dict[str, object], collection: str) -> str:
     subgraph_names_value = meta.get("subgraph_names", [])
     node_count = node_count_value if isinstance(node_count_value, int) else 0
     edge_count = edge_count_value if isinstance(edge_count_value, int) else 0
-    node_names = (
-        [item for item in node_names_value if isinstance(item, str)]
-        if isinstance(node_names_value, list)
-        else []
-    )
-    subgraph_names = (
-        [item for item in subgraph_names_value if isinstance(item, str)]
-        if isinstance(subgraph_names_value, list)
-        else []
-    )
+    node_names = [item for item in node_names_value if isinstance(item, str)] if isinstance(node_names_value, list) else []
+    subgraph_names = [item for item in subgraph_names_value if isinstance(item, str)] if isinstance(subgraph_names_value, list) else []
     nodes_meta = str(meta.get("nodes_meta", ""))
 
     # Use @nodes from metadata if available, otherwise counted

@@ -36,14 +36,7 @@ import pytest
 @pytest.mark.unit
 def test_value_objects_facade_resolves_exports_lazily() -> None:
     """Facade should not eagerly import every value-object symbol on package import."""
-    import importlib
-    import sys
-
-    # Other domain tests may have already resolved the lazy attribute on the
-    # shared package module. Re-import a clean facade so this test remains
-    # order-independent, including under mutmut's clean-test collection.
-    sys.modules.pop("bioetl.domain.value_objects", None)
-    facade = importlib.import_module("bioetl.domain.value_objects")
+    import bioetl.domain.value_objects as facade
     from bioetl.domain.value_objects.base import ValueObject as CanonicalValueObject
 
     assert "ValueObject" not in facade.__dict__

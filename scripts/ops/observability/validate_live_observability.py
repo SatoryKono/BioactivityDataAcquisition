@@ -55,7 +55,9 @@ def _auth_header(username: str, password: str) -> str:
     return f"Basic {token}"
 
 
-def _fetch_json(url: str, timeout: float, headers: dict[str, str] | None = None) -> Any:
+def _fetch_json(
+    url: str, timeout: float, headers: dict[str, str] | None = None
+) -> Any:
     """Fetch JSON from URL with optional headers."""
     from scripts.engineering.common.repo_paths import ensure_local_http_url
 

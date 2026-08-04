@@ -22,10 +22,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.engineering.dev.zed_env_doctor import (
-    DEFAULT_REQUIRED_MODULES,
-    ensure_ready,
-)
+from scripts.engineering.dev.zed_env_doctor import DEFAULT_REQUIRED_MODULES, ensure_ready
 
 # Map ``python -m`` targets used by `.zed/tasks.json` to importable packages.
 MODULE_IMPORT_MAP: dict[str, tuple[str, ...]] = {

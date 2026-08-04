@@ -32,7 +32,6 @@ def _int_value(value: object) -> int:
             return 0
     return 0
 
-
 DEFAULT_NEIGHBOR_RELATION_TYPES: Final[tuple[str, ...]] = (
     "DEPENDS_ON",
     "TESTED_BY",
