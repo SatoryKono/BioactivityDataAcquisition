@@ -43,6 +43,25 @@ def _write_spec(path: Path, body: str) -> None:
     path.write_text(body, encoding="utf-8")
 
 
+def test_load_pipeline_specs_maps_numbered_hyphenated_names_to_entities(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    entities_dir = tmp_path / "configs" / "entities"
+    pipelines_dir = tmp_path / "docs" / "04-reference" / "pipelines"
+    spec_path = pipelines_dir / "chembl" / "11-target-protein-classification-spec.md"
+    _write_spec(spec_path, "# Target protein classification")
+
+    monkeypatch.setattr(parity_module, "ENTITIES_DIR", entities_dir)
+    monkeypatch.setattr(parity_module, "PIPELINES_DIR", pipelines_dir)
+
+    checker = parity_module.ParityChecker()
+
+    assert checker.pipeline_specs == {
+        ("chembl", "target_protein_classification"): spec_path,
+    }
+
+
 def test_check_spec_status_fails_for_historical_page_role_markers(
     tmp_path: Path,
     monkeypatch,
