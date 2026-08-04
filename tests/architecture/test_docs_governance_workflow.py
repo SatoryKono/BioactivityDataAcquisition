@@ -24,7 +24,7 @@ def test_tests_workflow_keeps_docs_only_changes_out_of_heavy_matrix() -> None:
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
 
     assert "paths-ignore:" in workflow
-    assert "'docs/**'" in workflow
+    assert "'docs/**'" in workflow or '"docs/**"' in workflow
 
 
 def test_docs_workflow_runs_lightweight_docs_governance_profile() -> None:
