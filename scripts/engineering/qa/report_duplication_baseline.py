@@ -22,6 +22,7 @@ from collections import Counter
 from dataclasses import asdict, dataclass
 from datetime import date
 from pathlib import Path
+from typing import TypedDict, cast
 
 _HEADER_RE = re.compile(
     r"^(?P<path>.+?):(?P<line>\d+):\d+: R0801: Similar lines in 2 files$"
@@ -57,6 +58,25 @@ class TargetDuplicationReport:
     duplicate_count: int
     clusters: tuple[DuplicateCluster, ...]
     raw_duplicate_count: int | None = None
+
+
+class ActionabilityRow(TypedDict):
+    """Typed actionability summary row used by ranking and Markdown output."""
+
+    category: str
+    duplicate_clusters: int
+
+
+class ReductionLeverageRow(TypedDict):
+    """Typed reduction-leverage row for deterministic sorting and rendering."""
+
+    target: str
+    duplicate_clusters: int
+    dominant_actionability_category: str | None
+    dominant_actionability_cluster_count: int
+    low_risk_cluster_count: int
+    low_risk_cluster_share: float
+    recommended_first_wave: bool
 
 
 _LOW_RISK_ACTIONABILITY_CATEGORIES = frozenset(
@@ -141,7 +161,7 @@ def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
 def _actionability_summary(
     target: str,
     clusters: tuple[DuplicateCluster, ...],
-) -> list[dict[str, object]]:
+) -> list[ActionabilityRow]:
     """Return deterministic actionability counts for report triage."""
     counts = Counter(_cluster_actionability_category(cluster) for cluster in clusters)
     if not counts:
@@ -176,7 +196,7 @@ def _top_duplicate_pairs(
         modules = [module.module for module in cluster.modules[:2]]
         if len(modules) < 2:
             continue
-        pair = tuple(sorted(modules))
+        pair = (min(modules[0], modules[1]), max(modules[0], modules[1]))
         pair_counts[pair] = pair_counts.get(pair, 0) + 1
 
     ranked = sorted(
@@ -194,16 +214,14 @@ def _top_duplicate_pairs(
 
 def _build_reduction_leverage_ranking(
     reports: list[TargetDuplicationReport],
-) -> list[dict[str, object]]:
+) -> list[ReductionLeverageRow]:
     """Rank targets by first-wave reduction leverage using current report evidence."""
-    ranking_rows: list[dict[str, object]] = []
+    ranking_rows: list[ReductionLeverageRow] = []
     for report in reports:
         category_counts = Counter(
             {
-                str(item["category"]): int(item["duplicate_clusters"])
+                item["category"]: item["duplicate_clusters"]
                 for item in _actionability_summary(report.target, report.clusters)
-                if isinstance(item.get("category"), str)
-                and isinstance(item.get("duplicate_clusters"), int)
             }
         )
         dominant_category = None
@@ -242,16 +260,16 @@ def _build_reduction_leverage_ranking(
     return sorted(
         ranking_rows,
         key=lambda row: (
-            not bool(row["recommended_first_wave"]),
-            -float(row["low_risk_cluster_share"]),
-            -int(row["duplicate_clusters"]),
-            str(row["target"]),
+            not row["recommended_first_wave"],
+            -row["low_risk_cluster_share"],
+            -row["duplicate_clusters"],
+            row["target"],
         ),
     )
 
 
 def _build_first_wave_selection(
-    ranking_rows: list[dict[str, object]],
+    ranking_rows: list[ReductionLeverageRow],
 ) -> dict[str, object]:
     """Select the best current first-wave target from the reduction ranking."""
     if not ranking_rows:
@@ -379,7 +397,7 @@ def _load_history_records(
             continue
         payload = json.loads(line)
         if isinstance(payload, dict):
-            records.append(payload)
+            records.append(cast(dict[str, object], payload))
     return records
 
 
@@ -398,7 +416,12 @@ def _build_trend_summary(
     if previous is None:
         return {"status": "no_prior_distinct_snapshot", "snapshot_date": snapshot_date}
 
-    previous_summary = previous.get("summary", {})
+    previous_summary_raw = previous.get("summary", {})
+    previous_summary = (
+        cast(dict[str, object], previous_summary_raw)
+        if isinstance(previous_summary_raw, dict)
+        else {}
+    )
     previous_targets = _previous_target_map(previous.get("targets", []))
     comparison_rows = _comparison_rows(
         current_targets,
@@ -441,11 +464,15 @@ def _previous_target_map(
     """Build a lookup of prior target summaries by target path."""
     if not isinstance(previous_targets_raw, list):
         return {}
-    return {
-        item.get("target"): item
-        for item in previous_targets_raw
-        if isinstance(item, dict) and isinstance(item.get("target"), str)
-    }
+    previous_targets: dict[str, dict[str, object]] = {}
+    for item_raw in previous_targets_raw:
+        if not isinstance(item_raw, dict):
+            continue
+        item = cast(dict[str, object], item_raw)
+        target = item.get("target")
+        if isinstance(target, str):
+            previous_targets[target] = item
+    return previous_targets
 
 
 def _comparison_row(
@@ -459,12 +486,10 @@ def _comparison_row(
     if not isinstance(target, str) or not isinstance(current_count, int):
         return None
     previous_item = previous_targets.get(target)
-    previous_count = (
-        previous_item.get("duplicate_count")
-        if isinstance(previous_item, dict)
-        and isinstance(previous_item.get("duplicate_count"), int)
-        else None
+    previous_count_raw = (
+        previous_item.get("duplicate_count") if previous_item is not None else None
     )
+    previous_count = previous_count_raw if isinstance(previous_count_raw, int) else None
     return {
         "target": target,
         "current_duplicate_count": current_count,
@@ -759,7 +784,7 @@ def _reduction_ranking_markdown_section(
         lines.append(
             f"| `{row['target']}` | {row['duplicate_clusters']} | "
             f"`{row['dominant_actionability_category'] or 'n/a'}` | "
-            f"{float(row['low_risk_cluster_share']):.2f} | "
+            f"{row['low_risk_cluster_share']:.2f} | "
             f"{'yes' if row['recommended_first_wave'] else 'no'} |"
         )
     if first_wave.get("status") == "selected":
@@ -906,10 +931,15 @@ def _append_history_jsonl(
 
     path = resolve_output_path(path, root=root if root is not None else REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
-    targets = payload.get("targets", [])
+    summary_raw = payload.get("summary", {})
+    summary = (
+        cast(dict[str, object], summary_raw) if isinstance(summary_raw, dict) else {}
+    )
+    targets_raw = payload.get("targets", [])
+    targets = targets_raw if isinstance(targets_raw, list) else []
     record = {
-        "snapshot_date": payload.get("summary", {}).get("snapshot_date"),
-        "summary": payload.get("summary", {}),
+        "snapshot_date": summary.get("snapshot_date"),
+        "summary": summary,
         "normalization": payload.get("normalization", {}),
         "targets": [
             {
@@ -1010,7 +1040,7 @@ def main() -> int:
         )
         for target in args.targets
     ]
-    target_rows = [
+    target_rows: list[dict[str, object]] = [
         {
             "target": report.target,
             "duplicate_count": report.duplicate_count,

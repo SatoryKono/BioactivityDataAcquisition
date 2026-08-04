@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# ruff: noqa: E402
 """Generate deterministic normalization field-matrix artifacts for all pipelines."""
 
 from __future__ import annotations
