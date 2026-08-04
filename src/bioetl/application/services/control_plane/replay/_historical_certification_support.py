@@ -11,7 +11,11 @@ from bioetl.application.services.control_plane.ledger.service import (
 )
 from bioetl.application.services.control_plane.replay._historical_certification_models import (
     HistoricalReplayCertificationProtocol as HistoricalReplayCertificationProtocol,
+)
+from bioetl.application.services.control_plane.replay._historical_certification_models import (
     HistoricalReplayCertificationResult as HistoricalReplayCertificationResult,
+)
+from bioetl.application.services.control_plane.replay._historical_certification_models import (
     HistoricalReplayCertificationResultAssembler as HistoricalReplayCertificationResultAssembler,
 )
 from bioetl.application.services.control_plane.replay._historical_certification_models import (
