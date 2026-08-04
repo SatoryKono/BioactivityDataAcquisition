@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol
 
 import httpx
 
@@ -118,6 +118,6 @@ class HTTPClientRequestMethodsMixin:
         response = await self.circuit_breaker.call(
             client.request, "GET", url, params=params, headers=headers
         )
-        typed_response = cast("httpx.Response", response)
-        typed_response.raise_for_status()
-        return typed_response
+        # circuit_breaker.call is typed to return httpx.Response for this path.
+        response.raise_for_status()
+        return response
