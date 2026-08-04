@@ -4,11 +4,12 @@ schema_version: 1
 owner: "@bioetl-platform"
 linked_issues:
   - 6646
-reviewed_on: "2026-07-27"
+reviewed_on: "2026-08-04"
 
 policy:
   allow_parametrized_external_asserts: true
   forbid_empty_test_bodies: true
+  require_schema_reference_in_schema_modules: true
   review_threshold_asserts_per_test: 0.5
 
 reviewed_modules:
@@ -23,6 +24,12 @@ reviewed_modules:
     classification: table_driven_parametrized
   - path: tests/unit/domain/schemas/semanticscholar/test_semanticscholar_publication_validation.py
     classification: table_driven_parametrized
+  - path: tests/unit/domain/schemas/semanticscholar/test_publication_schema.py
+    classification: schema_validation_parametrized
+    notes: >-
+      Semantic Scholar field/schema suite must call SemanticScholarPublicationSchema
+      validate() (or assert_schema_validates_frame) for valid/invalid cases.
+      Bare pass and self-fulfilled regex-only checks are forbidden (C1-TS-001).
   - path: tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py
     classification: table_driven_parametrized
   - path: tests/unit/application/observability/test_pipeline_metrics.py
@@ -31,4 +38,5 @@ reviewed_modules:
 
 action: >-
   Keep table-driven patterns; prefer strengthening shared helpers over
-  duplicating assert lines into every parametrized case.
+  duplicating assert lines into every parametrized case. Schema modules must
+  exercise the owner Pandera model rather than standalone literal asserts.
