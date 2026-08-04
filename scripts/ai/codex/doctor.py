@@ -10,6 +10,7 @@ import os
 import socket
 import time
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -62,13 +63,14 @@ def run_static(repo_root: Path, *, output_json: bool = False) -> int:
 
 def _probe(name: str, entry: dict[str, Any], timeout: float) -> dict[str, Any]:
     started = time.monotonic()
-    port = int(entry["port"])
-    path = str(entry.get("path") or "/mcp")
-    url = f"http://127.0.0.1:{port}{path}"
     port_open = False
     ping_ok = False
     detail = "connection refused or timed out"
+    url = ""
     try:
+        port = int(entry["port"])
+        path = str(entry.get("path") or "/mcp")
+        url = f"http://127.0.0.1:{port}{path}"
         with socket.create_connection(("127.0.0.1", port), timeout=timeout):
             port_open = True
         if entry.get("launch_mode") in WINDOWS_STREAMING_MODES:
@@ -118,7 +120,19 @@ def run_mcp(
     }
     done, pending = concurrent.futures.wait(futures, timeout=overall_timeout)
     for future in done:
-        result = future.result()
+        name = futures[future]
+        try:
+            result = future.result()
+        except Exception as exc:
+            result = {
+                "server": name,
+                "url": "",
+                "port_open": False,
+                "ping_ok": False,
+                "ready": False,
+                "detail": f"{type(exc).__name__}: {exc}",
+                "elapsed_ms": 0,
+            }
         result["required"] = result["server"] in required
         result["status"] = (
             "OK" if result["ready"] else "FAIL" if result["required"] else "WARN"
@@ -146,7 +160,7 @@ def run_mcp(
     failed = sum(item["status"] == "FAIL" for item in results)
     warned = sum(item["status"] == "WARN" for item in results)
     payload = {
-        "checked_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "checked_at": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "profile": profile,
         "failed": failed,
         "warned": warned,
@@ -201,6 +215,12 @@ def main() -> int:
     args = parser.parse_args()
     repo_root = args.repo_root.resolve()
     profile = args.profile or selected_profile(repo_root)
+    if profile not in setup_mcp.MCP_PROFILES:
+        print(
+            f"[FAIL] Unknown MCP profile '{profile}'; choose one of: "
+            f"{', '.join(sorted(setup_mcp.MCP_PROFILES))}"
+        )
+        return 1
 
     static_status = 0
     if args.mode in {"static", "all"}:
