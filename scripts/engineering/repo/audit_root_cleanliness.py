@@ -92,6 +92,8 @@ class RootLayoutState(TypedDict):
     untracked_paths: NotRequired[list[str]]
     unexpected_untracked_root_files: NotRequired[list[str]]
     unexpected_untracked_root_dirs: NotRequired[list[str]]
+
+
 FORBIDDEN_DATA_SUBPATH_PREFIXES: tuple[str, ...] = ("data/.idea/",)
 
 ALLOWED_ROOT_DIRECTORIES: frozenset[str] = root_governance.BASE_ALLOWED_ROOT_DIRECTORIES

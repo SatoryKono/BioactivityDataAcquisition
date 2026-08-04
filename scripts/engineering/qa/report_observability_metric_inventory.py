@@ -1856,7 +1856,7 @@ def _scan_typed_prometheus_rules(
     direct_alert_inputs: set[str] = set()
     run_id_selector_violations: list[str] = []
     for relative_path in _TYPED_RULE_RELATIVE_PATHS:
-        payload = yaml_module.safe_load(  # type: ignore[attr-defined]
+        payload = yaml_module.safe_load(
             (repo_root / relative_path).read_text(encoding="utf-8")
         )
         for group in payload.get("groups", []):
@@ -2416,7 +2416,7 @@ def _observed_labelsets_for_metric(
     metric: Any, metric_name: str
 ) -> set[tuple[tuple[str, str], ...]]:
     observed_labelsets: set[tuple[tuple[str, str], ...]] = set()
-    for family in metric.collect():  # type: ignore[attr-defined]
+    for family in metric.collect():
         for sample in family.samples:
             if not _sample_matches_metric(str(sample.name), metric_name):
                 continue
