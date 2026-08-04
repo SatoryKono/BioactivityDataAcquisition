@@ -10,12 +10,17 @@ import re
 import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import yaml
 
 BRANCH_TELEMETRY_DIR = Path("reports/test-telemetry")
 TELEMETRY_FRESHNESS_MAX_AGE_DAYS = 45
 UNKNOWN_LABEL = "<unknown>"
+
+# Coverage, JUnit, YAML, and JSON inputs are heterogeneous external artifacts.
+# Keep their dynamic values confined to this report-materialization boundary.
+type TelemetryPayload = dict[str, Any]
 
 
 def compute_test_telemetry_source_tree_sha256(repo_root: Path = Path(".")) -> str:
@@ -144,7 +149,7 @@ def _read_coverage_percent_from_log(path: Path) -> float | None:
         return None
 
 
-def _read_slowest_summary(path: Path) -> dict[str, object]:
+def _read_slowest_summary(path: Path) -> TelemetryPayload:
     if not path.exists():
         return {"total_cases": None, "top_slowest": [], "execution_context": {}}
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -163,8 +168,8 @@ def _read_slowest_summary(path: Path) -> dict[str, object]:
 
 def _derive_slowest_summary_from_junit_paths(
     junit_paths: list[Path],
-) -> dict[str, object]:
-    rows: list[dict[str, object]] = []
+) -> TelemetryPayload:
+    rows: list[TelemetryPayload] = []
     for junit_path in junit_paths:
         if not junit_path.exists():
             continue
@@ -207,12 +212,12 @@ def _extract_slowest_zone(test_name: object) -> str:
 
 
 def _summarize_slowest_zones(
-    rows: list[dict[str, object]],
+    rows: list[TelemetryPayload],
     *,
     limit: int = 10,
-) -> list[dict[str, object]]:
+) -> list[TelemetryPayload]:
     """Summarize slow-test hotspots so audits can reason about zones, not only cases."""
-    zone_totals: dict[str, dict[str, object]] = {}
+    zone_totals: dict[str, TelemetryPayload] = {}
     for row in rows:
         zone = _extract_slowest_zone(row.get("test"))
         try:
@@ -261,7 +266,7 @@ def build_baseline_payload(
     source_run_id: str,
     coverage_threshold: float,
     source_tree_sha256: str | None = None,
-) -> dict[str, object]:
+) -> TelemetryPayload:
     resolved_coverage_percent = (
         _read_coverage_percent(coverage_xml_path)
         if coverage_percent is None
@@ -365,7 +370,7 @@ def _format_slowest_zone_table_rows(rows: object, *, limit: int = 10) -> list[st
     return lines
 
 
-def render_baseline_markdown(payload: dict[str, object]) -> str:
+def render_baseline_markdown(payload: TelemetryPayload) -> str:
     coverage = payload["coverage"]
     duration = payload["duration_telemetry"]
     source_commit = payload.get("source_commit") or "pending"
@@ -471,7 +476,7 @@ def render_baseline_markdown(payload: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
-def render_branch_telemetry_markdown(payload: dict[str, object]) -> str:
+def render_branch_telemetry_markdown(payload: TelemetryPayload) -> str:
     """Render committed slow-test summary as a lightweight branch-readable report."""
     duration = payload["duration_telemetry"]
     total_cases = duration["total_cases"]
@@ -506,7 +511,7 @@ def render_branch_telemetry_markdown(payload: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
-def build_branch_telemetry_reports(payload: dict[str, object]) -> dict[str, str]:
+def build_branch_telemetry_reports(payload: TelemetryPayload) -> dict[str, str]:
     """Build committed branch-readable telemetry report payloads."""
     coverage = payload["coverage"]
     duration = payload["duration_telemetry"]
@@ -551,10 +556,10 @@ def build_branch_telemetry_reports(payload: dict[str, object]) -> dict[str, str]
 
 
 def merge_existing_baseline_supplemental_fields(
-    payload: dict[str, object],
+    payload: TelemetryPayload,
     *,
     existing_yaml_path: Path,
-) -> dict[str, object]:
+) -> TelemetryPayload:
     """Preserve non-generated governance fields that live beside the baseline."""
     if not existing_yaml_path.exists():
         return payload
@@ -563,7 +568,7 @@ def merge_existing_baseline_supplemental_fields(
     if not isinstance(existing_payload, dict):
         return payload
 
-    merged = dict[str, object](payload)
+    merged = TelemetryPayload(payload)
     for field_name in ("slow_governance_cache_probe",):
         if field_name not in merged and field_name in existing_payload:
             merged[field_name] = existing_payload[field_name]
@@ -572,7 +577,7 @@ def merge_existing_baseline_supplemental_fields(
 
 def write_branch_telemetry_reports(
     *,
-    payload: dict[str, object],
+    payload: TelemetryPayload,
     output_dir: Path = BRANCH_TELEMETRY_DIR,
 ) -> None:
     """Write committed branch-readable telemetry summaries under reports/."""
@@ -583,7 +588,7 @@ def write_branch_telemetry_reports(
 
 def write_baseline_outputs(
     *,
-    payload: dict[str, object],
+    payload: TelemetryPayload,
     output_yaml_path: Path,
     output_md_path: Path,
     branch_reports_dir: Path = BRANCH_TELEMETRY_DIR,
