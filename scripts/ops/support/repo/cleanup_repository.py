@@ -354,10 +354,16 @@ def _count_reference_hits(repo_root: Path, path: Path) -> int:
     if absolute_path.is_dir():
         return 0
     path_text = path.as_posix()
-    for lane in _load_root_review_registry(repo_root).get("review_lanes", []):
+    review_lanes = _load_root_review_registry(repo_root).get("review_lanes", [])
+    if not isinstance(review_lanes, list):
+        return 0
+    for lane in review_lanes:
         if not isinstance(lane, dict):
             continue
-        for candidate in lane.get("candidates", []):
+        candidates = lane.get("candidates", [])
+        if not isinstance(candidates, list):
+            continue
+        for candidate in candidates:
             if (
                 isinstance(candidate, dict)
                 and str(candidate.get("path") or "") == path_text
@@ -957,10 +963,11 @@ def _reports_retention_metadata(
         path = entry.get("path")
         if not isinstance(path, str) or not path.startswith("reports/quality/"):
             continue
+        ttl_days = entry.get("ttl_days")
         metadata[path] = (
             str(entry.get("id", "")) or path,
             str(entry.get("owner")) if isinstance(entry.get("owner"), str) else None,
-            int(entry["ttl_days"]) if isinstance(entry.get("ttl_days"), int) else None,
+            ttl_days if isinstance(ttl_days, int) else None,
         )
     return metadata
 
@@ -1399,28 +1406,29 @@ def collect_reports_workspace_evidence(
     route_metadata = _reports_registered_route_metadata(repo_root)
     retention_metadata = _reports_retention_metadata(repo_root)
     rows: dict[str, ReportsWorkspaceEvidence] = {}
-    collector_kwargs = {
-        "route_metadata": route_metadata,
-        "retention_metadata": retention_metadata,
-        "rows": rows,
-    }
     _collect_retained_report_rows(
-        repo_root, tracked_paths, tracked_ancestor_dirs, **collector_kwargs
+        repo_root, tracked_paths, tracked_ancestor_dirs,
+        route_metadata=route_metadata, retention_metadata=retention_metadata, rows=rows,
     )
     _collect_local_prune_dir_rows(
-        repo_root, tracked_paths, tracked_ancestor_dirs, **collector_kwargs
+        repo_root, tracked_paths, tracked_ancestor_dirs,
+        route_metadata=route_metadata, retention_metadata=retention_metadata, rows=rows,
     )
     _collect_registered_route_rows(
-        repo_root, tracked_paths, tracked_ancestor_dirs, **collector_kwargs
+        repo_root, tracked_paths, tracked_ancestor_dirs,
+        route_metadata=route_metadata, retention_metadata=retention_metadata, rows=rows,
     )
     _collect_root_prune_report_rows(
-        repo_root, tracked_paths, tracked_ancestor_dirs, **collector_kwargs
+        repo_root, tracked_paths, tracked_ancestor_dirs,
+        route_metadata=route_metadata, retention_metadata=retention_metadata, rows=rows,
     )
     _collect_transient_retained_rows(
-        repo_root, tracked_paths, tracked_ancestor_dirs, **collector_kwargs
+        repo_root, tracked_paths, tracked_ancestor_dirs,
+        route_metadata=route_metadata, retention_metadata=retention_metadata, rows=rows,
     )
     _collect_uncurated_surface_rows(
-        repo_root, tracked_paths, tracked_ancestor_dirs, **collector_kwargs
+        repo_root, tracked_paths, tracked_ancestor_dirs,
+        route_metadata=route_metadata, retention_metadata=retention_metadata, rows=rows,
     )
     return sorted(rows.values(), key=lambda item: (item.classification, item.rel_path))
 
@@ -1998,9 +2006,9 @@ def _classification_mode(args: argparse.Namespace) -> str:
 def _log_root_and_reports_evidence(
     *,
     args: argparse.Namespace,
-    root_policy_mismatches: list[object],
-    review_evidence: list[object],
-    reports_evidence: object,
+    root_policy_mismatches: list[RootPolicyMismatch],
+    review_evidence: list[ReviewLaneEvidence],
+    reports_evidence: list[ReportsWorkspaceEvidence],
 ) -> None:
     detail_limit = max(args.detail_limit, 0)
     if args.root:
@@ -2013,10 +2021,10 @@ def _write_optional_cleanup_reports(
     *,
     args: argparse.Namespace,
     repo_root: Path,
-    candidates: object,
-    review_evidence: list[object],
-    root_policy_mismatches: list[object],
-    reports_evidence: object,
+    candidates: list[CleanupCandidate],
+    review_evidence: list[ReviewLaneEvidence],
+    root_policy_mismatches: list[RootPolicyMismatch],
+    reports_evidence: list[ReportsWorkspaceEvidence],
 ) -> None:
     if args.report_json is not None:
         report_path = write_cleanup_classification_report(

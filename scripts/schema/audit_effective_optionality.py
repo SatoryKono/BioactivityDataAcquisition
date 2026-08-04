@@ -97,7 +97,7 @@ def _schema_registry() -> dict[str, object]:
     return registry
 
 
-def _resolve_pandera_schema(schema_builder: object) -> object:
+def _resolve_pandera_schema(schema_builder: object) -> Any:
     if hasattr(schema_builder, "columns"):
         return schema_builder
     to_schema = getattr(schema_builder, "to_schema", None)
@@ -159,10 +159,11 @@ def _apply_required_filter_sources(
 
 def _quality_validation_source(item: dict[str, Any]) -> OptionalitySource | None:
     validation_type = item.get("type")
-    return {
-        "required": "dq_required_validation",
-        "not_null": "dq_not_null_validation",
-    }.get(validation_type)
+    if validation_type == "required":
+        return "dq_required_validation"
+    if validation_type == "not_null":
+        return "dq_not_null_validation"
+    return None
 
 
 def _optional_field_name(item: dict[str, Any]) -> str | None:
@@ -341,8 +342,15 @@ def _print_table(rows: list[dict[str, object]]) -> None:
         print(
             f"{row['pipeline']}\t{row['field']}\t{row['logical_type']}\t"
             f"{row['physical_type']}\t{row['nullable']}\t{row['optional']}\t"
-            f"{','.join(row['sources'])}"
+            f"{_render_sources(row.get('sources'))}"
         )
+
+
+def _render_sources(value: object) -> str:
+    """Render a validated optionality source sequence."""
+    if not isinstance(value, list):
+        return ""
+    return ",".join(item for item in value if isinstance(item, str))
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -299,9 +299,9 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def _publish_or_skip_draft(
-    draft: object, *, token: str, records: list[IssueRecord]
+    draft: IssueDraft, *, token: str, records: list[IssueRecord]
 ) -> None:
-    existing = _search_existing_issue(token=token, title=draft.title)  # type: ignore[attr-defined]
+    existing = _search_existing_issue(token=token, title=draft.title)
     if existing and existing.get("state") == "open":
         records.append(
             IssueRecord(
@@ -313,17 +313,17 @@ def _publish_or_skip_draft(
             )
         )
         print(
-            f"Skipping create for {draft.code}; already open as #{existing['number']}."  # type: ignore[attr-defined]
+            f"Skipping create for {draft.code}; already open as #{existing['number']}."
         )
         return
     if existing and existing.get("state") == "closed":
         print(
-            f"Creating fresh issue for {draft.code}; closed duplicate exists "  # type: ignore[attr-defined]
+            f"Creating fresh issue for {draft.code}; closed duplicate exists "
             f"as #{existing['number']}."
         )
     else:
-        print(f"Creating {draft.code}...")  # type: ignore[attr-defined]
-    records.append(_create_issue(token=token, draft=draft))  # type: ignore[arg-type]
+        print(f"Creating {draft.code}...")
+    records.append(_create_issue(token=token, draft=draft))
 
 
 def run(argv: list[str] | None = None) -> int:

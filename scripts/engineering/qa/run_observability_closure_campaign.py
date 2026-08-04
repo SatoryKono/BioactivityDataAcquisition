@@ -17,7 +17,7 @@ import os
 import re
 import subprocess  # nosec B404 - command is assembled from fixed literals.
 import sys
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -1247,7 +1247,11 @@ def _workflow_target_is_gold_eligible(row: dict[str, object]) -> bool:
         return False
     if not component.get("accession") or not component.get("component_id"):
         return False
-    classification = classify_organism(row.get("organism"), row.get("tax_id"))
+    organism_raw = row.get("organism")
+    tax_id_raw = row.get("tax_id")
+    organism = organism_raw if isinstance(organism_raw, str) else None
+    tax_id = tax_id_raw if isinstance(tax_id_raw, (int, str)) else None
+    classification = classify_organism(organism, tax_id)
     return (
         row.get("target_type") == "SINGLE PROTEIN"
         and bool(row.get("pref_name"))
@@ -1389,7 +1393,7 @@ def _attempt_result_signature(
     terminal_events: tuple[str, ...],
     metrics: dict[str, int],
     semantic_output: object,
-    terminal_rows: list[dict[str, object]],
+    terminal_rows: Sequence[dict[str, object]],
     semantic_output_records: int,
 ) -> str:
     """Hash the deterministic success signature when one terminal row exists."""
@@ -2001,10 +2005,11 @@ def _validate_evidence_object_fields(
     if not _parse_generated_at(payload.get("generated_at")):
         key_errors.append("generated_at must be timezone-aware ISO-8601")
     key_errors.extend(_validate_summary(key, payload.get("summary")))
-    if isinstance(payload.get("summary"), dict):
+    summary_raw = payload.get("summary")
+    if isinstance(summary_raw, dict):
         summaries = {
             str(field): value
-            for field, value in payload["summary"].items()
+            for field, value in summary_raw.items()
             if isinstance(field, str) and type(value) is int
         }
     key_errors.extend(_validate_evidence_producer(key, payload.get("producer")))
@@ -3005,7 +3010,7 @@ def _planned_payload(
     source_provenance: dict[str, object],
     registry_completed: subprocess.CompletedProcess[str],
     external_gate: dict[str, object],
-    scorecard: dict[str, object],
+    scorecard: dict[str, dict[str, float]],
     residual_limitations: list[str],
     finding_ids: list[str],
 ) -> dict[str, object]:
@@ -3168,7 +3173,7 @@ class _ExecuteReportInputs:
     after: dict[str, str]
     binding: dict[str, object]
     external_gate: dict[str, object]
-    scorecard: dict[str, object]
+    scorecard: dict[str, dict[str, float]]
     residual_limitations: list[str]
     finding_ids: list[str]
     residual_finding_gate: dict[str, object]

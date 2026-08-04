@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Callable
+from typing import Any, cast
+
 import pytest
 from vcr.request import Request
 
@@ -44,7 +47,9 @@ def test_build_base_vcr_config_sanitizes_request_headers_and_query() -> None:
         filter_headers=["authorization"],
         filter_query_parameters=["api_key"],
     )
-    before_record_request = config["before_record_request"]
+    before_record_request = cast(
+        Callable[[Any], Any], config["before_record_request"]
+    )
 
     request = Request(
         "GET",
@@ -68,7 +73,9 @@ def test_build_base_vcr_config_before_record_request_noops_on_unexpected_request
         filter_headers=["authorization"],
         filter_query_parameters=["api_key"],
     )
-    before_record_request = config["before_record_request"]
+    before_record_request = cast(
+        Callable[[Any], Any], config["before_record_request"]
+    )
 
     request = "unexpected-request-surface"
 
@@ -77,7 +84,9 @@ def test_build_base_vcr_config_before_record_request_noops_on_unexpected_request
 
 def test_build_base_vcr_config_filters_transient_html_server_errors() -> None:
     config = build_base_vcr_config()
-    before_record_response = config["before_record_response"]
+    before_record_response = cast(
+        Callable[[Any], Any], config["before_record_response"]
+    )
 
     response = {
         "status": {"code": 500, "message": "Internal Server Error"},
@@ -90,7 +99,9 @@ def test_build_base_vcr_config_filters_transient_html_server_errors() -> None:
 
 def test_build_base_vcr_config_preserves_successful_json_response() -> None:
     config = build_base_vcr_config()
-    before_record_response = config["before_record_response"]
+    before_record_response = cast(
+        Callable[[Any], Any], config["before_record_response"]
+    )
 
     response = {
         "status": {"code": 200, "message": "OK"},
@@ -105,7 +116,9 @@ def test_build_base_vcr_config_before_record_response_noops_on_unexpected_respon
     None
 ):
     config = build_base_vcr_config()
-    before_record_response = config["before_record_response"]
+    before_record_response = cast(
+        Callable[[Any], Any], config["before_record_response"]
+    )
 
     response = "unexpected-response-surface"
 

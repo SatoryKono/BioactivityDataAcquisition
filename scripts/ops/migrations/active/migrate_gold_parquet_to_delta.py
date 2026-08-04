@@ -265,17 +265,26 @@ def migrate_gold_table(
     parquet_files = _discover_parquet_files(source)
     metadata_files = _discover_metadata_files(source)
     inventory = build_source_inventory(source)
-    result_kwargs = {
-        "source": str(source),
-        "target": str(target),
-        "inventory": inventory,
-        "metadata_file_count": len(metadata_files),
-    }
+    source_text = str(source)
+    target_text = str(target)
+    metadata_file_count = len(metadata_files)
     if not apply:
-        return MigrationResult(status="planned", **result_kwargs)
+        return MigrationResult(
+            status="planned",
+            source=source_text,
+            target=target_text,
+            inventory=inventory,
+            metadata_file_count=metadata_file_count,
+        )
     if target.exists():
         if _validate_existing_target(target, inventory):
-            return MigrationResult(status="already_applied", **result_kwargs)
+            return MigrationResult(
+                status="already_applied",
+                source=source_text,
+                target=target_text,
+                inventory=inventory,
+                metadata_file_count=metadata_file_count,
+            )
         raise ValueError(f"Target already exists and is not this migration: {target}")
 
     staging = target.with_name(f".{target.name}.gold-v1-1-staging")
@@ -313,7 +322,13 @@ def migrate_gold_table(
         encoding="utf-8",
     )
     staging.replace(target)
-    return MigrationResult(status="applied", **result_kwargs)
+    return MigrationResult(
+        status="applied",
+        source=source_text,
+        target=target_text,
+        inventory=inventory,
+        metadata_file_count=metadata_file_count,
+    )
 
 
 def _parse_args() -> argparse.Namespace:

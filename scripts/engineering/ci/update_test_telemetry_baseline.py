@@ -568,7 +568,7 @@ def merge_existing_baseline_supplemental_fields(
     if not isinstance(existing_payload, dict):
         return payload
 
-    merged = TelemetryPayload(payload)
+    merged: TelemetryPayload = dict(payload)
     for field_name in ("slow_governance_cache_probe",):
         if field_name not in merged and field_name in existing_payload:
             merged[field_name] = existing_payload[field_name]

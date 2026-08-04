@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Sequence, Set
 from pathlib import Path
 from typing import Any
 
@@ -261,11 +262,11 @@ def check_inv_004(verbose: bool) -> list[str]:
             continue
         data = _load_yaml(src_path)
         source = data.get("source")
+        provider_config_raw = (
+            source.get("provider_config") if isinstance(source, dict) else None
+        )
         provider_config = (
-            source.get("provider_config")
-            if isinstance(source, dict)
-            and isinstance(source.get("provider_config"), dict)
-            else {}
+            provider_config_raw if isinstance(provider_config_raw, dict) else {}
         )
         found = [
             key
@@ -288,8 +289,8 @@ def _append_unknown_key_errors(
     path: Path,
     data: dict[str, Any],
     *,
-    top_level_keys: set[str],
-    nested_fields: list[tuple[str, set[str], str]],
+    top_level_keys: Set[str],
+    nested_fields: Sequence[tuple[str, Set[str], str]],
 ) -> None:
     unknown = set(data.keys()) - top_level_keys
     if unknown:

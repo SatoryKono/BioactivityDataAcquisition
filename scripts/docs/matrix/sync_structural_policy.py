@@ -20,7 +20,7 @@ else:
 
 ensure_repo_imports(include_src=True)
 
-from scripts.docs.common.xlsx import (  # noqa: E402
+from scripts.docs.common.xlsx import (
     MAIN_NS,
     NS,
     cell_text,
@@ -29,7 +29,7 @@ from scripts.docs.common.xlsx import (  # noqa: E402
     set_cell_text,
     sheet_target_paths,
 )
-from scripts.docs.matrix.structural_contract import (  # noqa: E402
+from scripts.docs.matrix.structural_contract import (
     DEFAULT_CONTRACT_EXPORT,
     INVALID_TYPE_TO_NULL,
     NOT_APPLICABLE,
@@ -324,7 +324,9 @@ def _prepare_output_directory(output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
 
-def _load_contract_rows(args: argparse.Namespace, contract_export_path: Path) -> list:
+def _load_contract_rows(
+    args: argparse.Namespace, contract_export_path: Path
+) -> list[MatrixStructuralContractRow]:
     """Load or refresh the contract rows."""
     if args.refresh_contract_export or not contract_export_path.exists():
         return write_runtime_contract_export(contract_export_path)
@@ -362,7 +364,8 @@ def _process_workbook(
                     continue
 
                 root = ET.fromstring(data)
-                rows = root.find("a:sheetData", NS).findall("a:row", NS)
+                sheet_data = root.find("a:sheetData", NS)
+                rows = sheet_data.findall("a:row", NS) if sheet_data is not None else []
                 if not rows:
                     zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
                     continue
@@ -384,7 +387,7 @@ def _process_workbook(
 
 
 def _extract_headers(
-    rows: list, shared_strings: dict[str, object]
+    rows: list[ET.Element], shared_strings: list[str]
 ) -> tuple[dict[int, str], dict[str, int]]:
     """Extract headers from the first row."""
     header_by_index: dict[int, str] = {}
@@ -397,7 +400,7 @@ def _extract_headers(
 
 
 def _build_row_map(
-    row: ET.Element, header_by_index: dict[int, str], shared_strings: dict[str, object]
+    row: ET.Element, header_by_index: dict[int, str], shared_strings: list[str]
 ) -> dict[str, str]:
     """Build a map of header to cell value for a row."""
     return {
@@ -411,7 +414,7 @@ def _apply_updates(
     row: ET.Element,
     updated: dict[str, str],
     index_by_header: dict[str, int],
-    shared_strings: dict[str, object],
+    shared_strings: list[str],
     change_counter: Counter[str],
 ) -> None:
     """Apply updates to the row cells."""
@@ -438,7 +441,7 @@ def _handle_check_mode(
     change_counter: Counter[str],
     input_path: Path,
     contract_export_path: Path,
-    contract_rows: list,
+    contract_rows: list[MatrixStructuralContractRow],
 ) -> int:
     """Handle check mode by printing changes and exiting."""
     if temp_output_path.exists():
@@ -463,7 +466,7 @@ def _print_summary(
     input_path: Path,
     output_path: Path,
     contract_export_path: Path,
-    contract_rows: list,
+    contract_rows: list[MatrixStructuralContractRow],
     change_counter: Counter[str],
 ) -> None:
     """Print a summary of the changes."""

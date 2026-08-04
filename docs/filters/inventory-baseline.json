@@ -2203,7 +2203,7 @@
       "symbol": "extraction_params",
       "path": "scripts/docs/matrix/generate_pipeline_normalization_matrix.py",
       "occurrence_count": 5,
-      "first_line": 1688,
+      "first_line": 1694,
       "role": "Source-profile extraction policy",
       "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
       "notes": ""

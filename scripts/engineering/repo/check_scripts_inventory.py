@@ -20,17 +20,11 @@ import re
 import sys
 import time
 from collections import Counter, defaultdict
+from collections.abc import Set
 from dataclasses import dataclass
-from datetime import datetime, timezone
-
-try:
-    from datetime import UTC
-except ImportError:
-    UTC = UTC
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Final
-
-UTC = UTC
 
 SCRIPT_EXTENSIONS: Final[tuple[str, ...]] = (
     ".py",
@@ -1608,7 +1602,7 @@ def _validate_target_registry_entries(
     *,
     script_map: dict[str, dict[str, object]],
     entries_raw: dict[str, object],
-    target_statuses: set[str],
+    target_statuses: Set[str],
     forbid_evaluate_active: bool,
 ) -> tuple[list[str], list[str], list[str]]:
     missing: list[str] = []
@@ -1639,7 +1633,7 @@ def _validate_stale_registry_entries(
     *,
     script_map: dict[str, dict[str, object]],
     entries_raw: dict[str, object],
-    target_statuses: set[str],
+    target_statuses: Set[str],
 ) -> tuple[list[str], list[str]]:
     stale: list[str] = []
     invalid: list[str] = []

@@ -6,13 +6,14 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Mapping
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[3]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.memory.sync import (
+from memory.graph.sync_pkg._core import (
     DEFAULT_BATCH_SIZE,
     build_audit_report,
     build_snapshot,
@@ -51,7 +52,7 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _audit_issues(report: dict[str, object]) -> list[str]:
+def _audit_issues(report: Mapping[str, object]) -> list[str]:
     live = report.get("live", {})
     if not isinstance(live, dict):
         return ["live report payload is malformed"]
@@ -64,7 +65,8 @@ def _audit_issues(report: dict[str, object]) -> list[str]:
 def _live_payload_issues(live: dict[str, object]) -> list[str]:
     """Return issues derived from live graph audit payload."""
     issues: list[str] = []
-    if int(live.get("unmanaged_repo_node_total", 0)) > 0:
+    unmanaged_total = live.get("unmanaged_repo_node_total", 0)
+    if isinstance(unmanaged_total, int) and unmanaged_total > 0:
         issues.append("live graph contains unmanaged repo-derived nodes")
     orphan_summary = live.get("orphan_summary", {})
     if isinstance(orphan_summary, dict) and int(orphan_summary.get("total", 0)) > 0:

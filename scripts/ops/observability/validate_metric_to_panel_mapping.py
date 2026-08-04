@@ -252,7 +252,7 @@ def _panel_query_execution_result(
     panel: dict[str, Any],
     *,
     dashboard_uid: str,
-    panel_id: object,
+    panel_id: int,
     panel_title: str,
     prometheus_url: str,
     timeout: float,
@@ -303,8 +303,9 @@ def _validate_panel_metrics(
     prometheus_url: str,
     timeout: float,
 ) -> list[MetricPanelValidationResult]:
-    panel_id = panel.get("id")
-    panel_title = panel.get("title", f"panel-{panel_id}")
+    panel_id_value = panel.get("id")
+    panel_id = panel_id_value if isinstance(panel_id_value, int) else 0
+    panel_title = str(panel.get("title", f"panel-{panel_id}"))
     panel_metrics = extract_panel_metrics(panel)
     if not panel_metrics:
         return [
