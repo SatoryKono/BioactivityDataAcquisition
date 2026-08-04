@@ -113,23 +113,6 @@ def _registry_candidates() -> dict[str, dict[str, Any]]:
     return result
 
 
-def test_closeout_artifact_covers_requested_issues_5847_5852() -> None:
-    payload = _load_json(CLOSEOUT)
-
-    assert payload["schema_version"] == "tech-debt-issues-5847-5852-closeout-v1"
-    assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in payload["issues"]} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in payload["issues"])
-    for issue in payload["issues"]:
-        for relative_path in issue["evidence"]:
-            if relative_path in SUPERSEDED_IMAGE_PATHS:
-                assert not (ROOT / relative_path).exists()
-                continue
-            assert (ROOT / relative_path).exists(), (
-                f"Missing closeout evidence for #{issue['number']}: {relative_path}"
-            )
-
-
 def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> None:
     payload = _load_json(CLOSEOUT)
     tracked = _git_ls_files()

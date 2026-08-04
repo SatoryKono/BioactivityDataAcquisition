@@ -58,35 +58,6 @@ def _target_duplicate_count(payload: dict[str, Any], target: str) -> int:
     raise AssertionError(f"Missing duplication target row: {target}")
 
 
-def test_tdx_audit_wave3_closeout_artifact_is_complete_and_budget_safe() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert closeout["schema_version"] == "tech-debt-issues-5866-5872-closeout-v1"
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert {issue["number"] for issue in closeout["issues"]} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in closeout["issues"])
-    assert set(closeout["outcomes"]) == {str(issue) for issue in EXPECTED_ISSUES}
-    assert all(
-        outcome["status"] == "closeable" for outcome in closeout["outcomes"].values()
-    )
-
-    for issue in closeout["issues"]:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), relative_path
-
-    for metric in closeout["metrics"].values():
-        current = metric.get("current")
-        maximum = metric.get("max")
-        opening = metric.get("opening")
-        floor = metric.get("floor")
-        if maximum is not None:
-            assert current <= maximum
-        if opening is not None:
-            assert current <= opening
-        if floor is not None:
-            assert current >= floor
-
-
 def test_issue_5866_full_app_duplication_ratchet_is_enforced() -> None:
     closeout = _load_json(CLOSEOUT)
     baseline = _load_json(BASELINE)

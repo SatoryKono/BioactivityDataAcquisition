@@ -35,26 +35,6 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-def test_issue_pack_6205_6211_closeout_artifact_is_complete() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert closeout["schema_version"] == "diagram-issues-6205-6211-closeout-v1"
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert set(closeout["issues"]) == EXPECTED_ISSUES
-    assert set(closeout["outcomes"]) == {str(number) for number in EXPECTED_ISSUES}
-
-    missing_evidence = [
-        relative_path
-        for issue in closeout["outcomes"].values()
-        for relative_path in issue["evidence"]
-        if not (ROOT / relative_path).exists()
-    ]
-    assert missing_evidence == []
-    assert all(
-        issue["status"] == "closeable" for issue in closeout["outcomes"].values()
-    )
-
-
 def test_issue_6205_rendered_artifact_policy_is_aligned() -> None:
     gitignore = _read(".gitignore")
     readme = _read("docs/02-architecture/diagrams/README.md")

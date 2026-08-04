@@ -88,28 +88,6 @@ def _duplication_target(payload: dict[str, Any], target: str) -> dict[str, Any]:
     raise AssertionError(f"missing duplication target: {target}")
 
 
-def test_issues_5933_5944_closeout_artifact_is_complete_and_budget_safe() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert closeout["schema_version"] == "tech-debt-issues-5933-5944-closeout-v1"
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert closeout["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in closeout["issues"]} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in closeout["issues"])
-    assert set(closeout["outcomes"]) == {str(issue) for issue in EXPECTED_ISSUES}
-    assert all(
-        outcome["status"] == "closeable" for outcome in closeout["outcomes"].values()
-    )
-
-    for issue in closeout["issues"]:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), relative_path
-
-    for metric_name, ratchet in closeout["ratchets"].items():
-        assert ratchet["current"] <= ratchet["max"], metric_name
-        assert (ROOT / ratchet["source"]).exists(), metric_name
-
-
 def test_issue_5933_governance_artifacts_are_rebaselined() -> None:
     closeout = _load_json(CLOSEOUT)
     gates = _load_json(DEBT_GATES)

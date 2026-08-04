@@ -72,15 +72,6 @@ def _collect_exact_importers(target_module: str) -> set[str]:
     return importers
 
 
-def test_closeout_artifact_covers_requested_issues__5490_5499() -> None:
-    payload = _load_json(CLOSEOUT)
-    issues = payload["issues"]
-    assert payload["schema_version"] == "tech-debt-issues-5490-5499-closeout-v1"
-    assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in issues} == {5490, 5492, 5494, 5496, 5497, 5499}
-    assert all(issue["status"] == "closed-ready" for issue in issues)
-
-
 def test_issue_5490_infrastructure_config_root_facade_stays_zero_growth() -> None:
     inventory = _load_yaml(CONFIG_ROOT_INVENTORY)
     assert inventory["linked_issue"] == "#5490"

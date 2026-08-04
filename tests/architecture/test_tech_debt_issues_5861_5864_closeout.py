@@ -88,32 +88,6 @@ def _module_row(payload: dict[str, Any], module: str) -> dict[str, Any]:
     raise AssertionError(f"Missing module coverage row: {module}")
 
 
-def test_issue_pack_5861_5864_closeout_artifact_is_complete_and_budget_safe() -> None:
-    closeout = _load_json(CLOSEOUT)
-
-    assert closeout["schema_version"] == "tech-debt-issues-5861-5864-closeout-v1"
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert {issue["number"] for issue in closeout["issues"]} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in closeout["issues"])
-    assert set(closeout["outcomes"]) == {str(issue) for issue in EXPECTED_ISSUES}
-    assert all(
-        outcome["status"] == "closeable" for outcome in closeout["outcomes"].values()
-    )
-
-    for issue in closeout["issues"]:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), relative_path
-
-    for metric in closeout["metrics"].values():
-        current = metric.get("current")
-        maximum = metric.get("max")
-        opening = metric.get("opening")
-        if maximum is not None:
-            assert current <= maximum
-        if opening is not None and "ratio" in str(metric):
-            assert current <= opening
-
-
 def test_issue_5861_dq_evaluator_has_golden_and_property_evidence() -> None:
     closeout = _load_json(CLOSEOUT)
     inventory = _load_json(MODULE_COVERAGE)

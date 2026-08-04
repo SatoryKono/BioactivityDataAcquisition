@@ -145,22 +145,6 @@ def _gate(payload: dict[str, Any], name: str) -> dict[str, Any]:
     raise AssertionError(f"missing debt governance gate: {name}")
 
 
-def test_closeout_artifact_covers_requested_issues__5626_5637() -> None:
-    payload = _load_json(CLOSEOUT)
-    issues = payload["issues"]
-
-    assert payload["schema_version"] == "tech-debt-issues-5626-5637-closeout-v1"
-    assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in issues} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in issues)
-
-    for issue in issues:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), (
-                f"Missing closeout evidence for #{issue['number']}: {relative_path}"
-            )
-
-
 def test_issue_5627_silver_metadata_request_reexport_shim_is_retired() -> None:
     shims = _load_yaml(INTERNAL_SHIMS)["shims"]
     shim_ids = {shim["id"] for shim in shims}

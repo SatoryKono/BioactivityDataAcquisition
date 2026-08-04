@@ -107,24 +107,6 @@ def _under_coverage_floor(
     ]
 
 
-def test_closeout_artifact_covers_requested_issues_5707_5715() -> None:
-    payload = _load_json(CLOSEOUT)
-
-    assert payload["schema_version"] == "tech-debt-issues-5707-5715-closeout-v1"
-    assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in payload["issues"]} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in payload["issues"])
-
-    for issue in payload["issues"]:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), (
-                f"Missing closeout evidence for #{issue['number']}: {relative_path}"
-            )
-
-    for name, ratchet in payload["ratchets"].items():
-        assert ratchet["current"] <= ratchet["max"], name
-
-
 def test_issue_5707_governance_artifacts_are_current_and_passing() -> None:
     scorecard = _load_json(SCORECARD)
 

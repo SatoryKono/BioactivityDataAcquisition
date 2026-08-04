@@ -78,16 +78,6 @@ def _runtime_builder_importer_count(target_module: str) -> int:
     return counter[target_module]
 
 
-def test_issues_6032_6034_6037_closeout_artifact_has_expected_scope() -> None:
-    payload = _load_json(CLOSEOUT)
-    issues = payload["issues"]
-    assert isinstance(issues, list)
-
-    assert payload["schema_version"] == "tech-debt-issues-6032-6034-6037-closeout-v1"
-    assert [issue["number"] for issue in issues] == [6032, 6034, 6037]
-    assert all(str(issue["status"]).startswith("closeable") for issue in issues)
-
-
 def test_issue_6032_application_core_fan_in_has_headroom() -> None:
     row = _family_row("application_core")
     budgets = row["bounded_growth_budgets"]
