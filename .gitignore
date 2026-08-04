@@ -167,6 +167,11 @@ log_test.txt
 !/reports/quality/vcr-metadata-catalog.json
 !/reports/quality/domain-composite-config-importer-map.md
 !/reports/quality/config-compatibility-legacy-taxonomy-review.json
+!/reports/quality/fixture-duplication-inventory.json
+!/reports/quality/branch-coverage-gap-report.md
+!/reports/quality/branch-coverage-gap-report.json
+!/reports/quality/architecture_debt_execution_plan_2026-06-26-15-51.json
+!/reports/quality/tasks_architecture_metric_exemptions_2026-07-12-12-33.json
 !/reports/quality/tech-debt-issues-5253-5264-closeout.json
 !/reports/quality/tech-debt-issues-5581-5584-closeout.json
 !/reports/quality/diagram-issues-6205-6211-closeout.json
@@ -359,7 +364,11 @@ reports/logs/*
 reports/observability/grafana/screenshots/
 reports/quality/architecture_debt_execution_plan_*.json
 reports/quality/tasks_architecture_metric_exemptions_*.json
+# Re-include closeout evidence required by architecture freezes (CI-C1-004 / #7518).
+# Negations must follow the broader ignores above (last match wins).
+!/reports/quality/architecture_debt_execution_plan_2026-06-26-15-51.json
 !/reports/quality/architecture_debt_execution_plan_2026-07-12-12-34.json
+!/reports/quality/tasks_architecture_metric_exemptions_2026-07-12-12-33.json
 reports/quality/test-runs/
 reports/security/
 

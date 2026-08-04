@@ -481,7 +481,7 @@ jobs:
             --junitxml=reports/observability/ci/dashboard-semantic-policy.xml
 
       - name: Upload dashboard semantic policy evidence
-        # Keep evidence when the gate fails; do not dual-fail solely because
+        # always(): keep evidence when the gate fails; do not dual-fail solely because
         # junit/json were not materialised (#7519 / CI-C1-007). The gate step
         # above remains the blocking status signal.
         if: always()

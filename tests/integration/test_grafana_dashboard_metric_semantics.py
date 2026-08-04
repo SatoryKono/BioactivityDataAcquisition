@@ -1222,8 +1222,10 @@ def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> No
     )
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
+    # Null/missing stays gray (not healthy green); explicit 0 remains OK/green.
     assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "green", "value": None},
+        {"color": "gray", "value": None},
+        {"color": "green", "value": 0},
         {"color": "orange", "value": 1},
         {"color": "red", "value": 2},
     ]
@@ -1306,8 +1308,10 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
     assert expressions == ["max by (provider) (bioetl_provider_current_status) >= 1"]
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
+    # Null/missing stays gray (not healthy green); explicit 0 remains OK/green.
     assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "green", "value": None},
+        {"color": "gray", "value": None},
+        {"color": "green", "value": 0},
         {"color": "orange", "value": 1},
         {"color": "red", "value": 2},
     ]
@@ -1859,7 +1863,9 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert organize_options.get("indexByName", {}).get("row_status") == 3
     excluded_fields = organize_options.get("excludeByName", {})
     assert excluded_fields.get("row_status") is True
-    assert excluded_fields.get("percintage") is True
+    assert "percintage" not in excluded_fields
+    assert "percintage" not in organize_options.get("indexByName", {})
+    assert "percintage" not in organize_options.get("renameByName", {})
     assert excluded_fields.get("percentage") is not True
 
     parameter_overrides = [

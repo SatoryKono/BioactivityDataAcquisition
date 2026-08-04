@@ -10,7 +10,6 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Integration tests for Grafana dashboard surface-level observability contracts."""
 
-import json
 from pathlib import Path
 
 import pytest
@@ -122,99 +121,6 @@ def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> 
         "Track GLOBAL Log Hygiene Trend",
     ):
         assert removed not in nested_titles
-
-
-@pytest.mark.skip(reason="Loki log-hygiene panels removed 2026-07-23")
-def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
-    """Warning log panels must not filter parsed JSON fields in the Loki selector."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    assert dashboard["version"] == 3
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title")
-    }
-
-    warning_panel = panels["Inspect Warning Logs"]
-    warning_expr = warning_panel["targets"][0]["expr"]
-    assert warning_panel["timeFrom"] == "1h"
-    assert '{job="bioetl"}' in warning_expr
-    assert '{job="bioetl", level="warning"}' not in warning_expr
-    assert "| json" in warning_expr
-    assert '__error__=""' in warning_expr
-    assert '| pipeline=~"$pipeline"' in warning_expr
-    assert '| level="warning"' in warning_expr
-
-    top_warning_panel = panels["Inspect Top Warning Events by Event / Logger / Range"]
-    top_warning_expr = top_warning_panel["targets"][0]["expr"]
-    assert top_warning_panel["timeFrom"] == "1h"
-    assert '{job="bioetl"}' in top_warning_expr
-    assert '{job="bioetl", level="warning"}' not in top_warning_expr
-    assert '| pipeline=~"$pipeline"' in top_warning_expr
-    assert "count_over_time(" in top_warning_expr
-    assert "sum by (event, logger)" in top_warning_expr
-    assert "sum by (message)" not in top_warning_expr
-    assert "topk(10" in top_warning_expr
-    assert "[1h]" in top_warning_expr
-    assert "$__range" not in top_warning_expr
-    assert top_warning_panel["type"] == "table"
-
-    unstructured_panel = panels["Inspect GLOBAL Unstructured Logs"]
-    unstructured_expr = unstructured_panel["targets"][0]["expr"]
-    assert unstructured_panel["timeFrom"] == "1h"
-    assert '{job="bioetl"}' in unstructured_expr
-    assert "| json" in unstructured_expr
-    assert '__error__!=""' in unstructured_expr
-    assert "{{.__error__}}" in unstructured_expr
-    assert "{{__error__}}" not in unstructured_expr
-    assert "__line__" not in unstructured_expr
-
-
-@pytest.mark.skip(reason="Loki log-hygiene panels removed 2026-07-23")
-def test_runtime_loki_panel_fixtures_cover_warning_and_malformed_paths() -> None:
-    fixture_path = Path("tests/fixtures/grafana/loki_runtime_panel_events.jsonl")
-    fixtures = [
-        json.loads(line)
-        for line in fixture_path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
-
-    warning = next(item for item in fixtures if item["kind"] == "warning")
-    malformed = next(item for item in fixtures if item["kind"] == "malformed")
-    empty = next(item for item in fixtures if item["kind"] == "empty")
-    assert warning["expected_panel_ids"] == [250, 257]
-    assert set(warning["line"]) >= {"pipeline", "level", "event", "logger"}
-    assert warning["line"]["pipeline"] == "chembl_activity"
-    assert warning["line"]["level"] == "warning"
-    assert set(warning["panel_results"]) == {"250", "257"}
-    warning_stream = warning["panel_results"]["250"]
-    assert warning_stream["resultType"] == "streams"
-    assert warning_stream["result"][0]["stream"]["event"] == warning["line"]["event"]
-    assert (
-        json.loads(warning_stream["result"][0]["values"][0][1])["event"]
-        == warning["line"]["event"]
-    )
-    warning_vector = warning["panel_results"]["257"]
-    assert warning_vector["resultType"] == "vector"
-    assert warning_vector["result"][0]["metric"]["event"] == warning["line"]["event"]
-    assert warning_vector["result"][0]["value"][1] == "1"
-    assert malformed["expected_panel_ids"] == [251]
-    assert set(malformed["panel_results"]) == {"251"}
-    with pytest.raises(json.JSONDecodeError):
-        json.loads(malformed["line"])
-    malformed_stream = malformed["panel_results"]["251"]
-    assert malformed_stream["resultType"] == "streams"
-    assert malformed_stream["result"][0]["values"][0][1] == "JSONParserErr"
-    assert empty["expected_panel_ids"] == [250, 251, 257]
-    assert empty["line"] is None
-    assert set(empty["panel_results"]) == {"250", "251", "257"}
-    assert {
-        panel_id: panel_result["resultType"]
-        for panel_id, panel_result in empty["panel_results"].items()
-    } == {"250": "streams", "251": "streams", "257": "vector"}
-    assert all(
-        panel_result["result"] == [] for panel_result in empty["panel_results"].values()
-    )
 
 
 def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
@@ -665,3 +571,46 @@ def test_adaptive_trend_panels_use_selected_interval(
     assert any("[$__interval]" in expr for expr in expressions), (
         f"Panel '{panel_title}' in {dashboard_file} must use $__interval"
     )
+
+def test_shipped_dashboards_do_not_expose_loki_tempo_explore_navigation() -> None:
+    """Loki/Tempo Explore adjuncts were removed; keep a negative absence contract."""
+    forbidden_title_tokens = {"Explore Logs", "Explore Traces"}
+    forbidden_url_tokens = (
+        "grafana-lokiexplore-app",
+        "grafana-exploretraces-app",
+        "/explore?left=",
+    )
+    for dashboard_path in sorted(Path("grafana/dashboards").glob("*.json")):
+        dashboard = load_dashboard(dashboard_path)
+        # Top-level dashboard links
+        for link in dashboard.get("links") or []:
+            title = str(link.get("title", ""))
+            url = str(link.get("url", ""))
+            assert title not in forbidden_title_tokens, (
+                f"{dashboard_path.name} must not expose {title!r} navigation link"
+            )
+            for token in forbidden_url_tokens:
+                assert token not in url, (
+                    f"{dashboard_path.name} must not keep removed explore URL token {token!r}: {url}"
+                )
+        # Panel dataLinks / links
+        for panel in get_dashboard_panels(dashboard):
+            link_bags = []
+            if isinstance(panel.get("links"), list):
+                link_bags.extend(panel["links"])
+            options = panel.get("options") or {}
+            if isinstance(options, dict) and isinstance(options.get("dataLinks"), list):
+                link_bags.extend(options["dataLinks"])
+            for link in link_bags:
+                if not isinstance(link, dict):
+                    continue
+                title = str(link.get("title", ""))
+                url = str(link.get("url", ""))
+                assert title not in forbidden_title_tokens, (
+                    f"{dashboard_path.name} panel {panel.get('id')} must not expose {title!r}"
+                )
+                for token in forbidden_url_tokens:
+                    assert token not in url, (
+                        f"{dashboard_path.name} panel {panel.get('id')} must not keep {token!r}: {url}"
+                    )
+

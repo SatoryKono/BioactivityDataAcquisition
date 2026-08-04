@@ -102,9 +102,10 @@ def test_issue_6015_local_full_coverage_attempt_is_not_overstated() -> None:
     assert isinstance(attempt, dict)
 
     assert attempt["result"] == "timed_out"
-    log_path = ROOT / str(attempt["log"])
-    if not log_path.exists():
-        pytest.skip(
-            f"historical coverage-verify log not present in checkout: {log_path}"
-        )
-    assert "timed out after 900s" in log_path.read_text(encoding="utf-8")
+    log_rel = str(attempt["log"]).replace("\\", "/")
+    # Durable claim lives in closeout JSON. The local parallel.log is under
+    # gitignored reports/pytest/** and is not available on CI (CI-C1-004 / #7518).
+    assert log_rel.startswith("reports/pytest/"), log_rel
+    log_path = ROOT / log_rel
+    if log_path.is_file():
+        assert "timed out after 900s" in log_path.read_text(encoding="utf-8")
