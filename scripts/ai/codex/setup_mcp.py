@@ -111,6 +111,42 @@ MCP_PROFILES: dict[str, tuple[str, ...] | None] = {
     "full": None,
 }
 
+# Live readiness is intentionally narrower than materialization. A profile may
+# expose optional tools without making them part of the launch gate. `stable`
+# is the daily capability set; `core` is the explicit diagram profile, `ops`
+# requires only operations services, and `graph` requires only graph add-ons.
+# `full` is explicit and therefore requires the complete selected inventory.
+MCP_PROFILE_REQUIRED: dict[str, tuple[str, ...] | None] = {
+    "stable": MCP_PROFILE_STABLE,
+    "shared": MCP_PROFILE_STABLE,
+    "core": MCP_PROFILE_STABLE + ("mermaid",),
+    "ops": MCP_PROFILE_STABLE + ("prometheus", "grafana", "github-actions"),
+    "graph": MCP_PROFILE_STABLE + ("neo4j-cypher", "neo4j-memory"),
+    "full": None,
+}
+
+
+def mcp_profile_requirements(
+    profile: str, selected_servers: tuple[str, ...] | list[str] | set[str]
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Return deterministic required/optional server names for *profile*."""
+
+    if profile not in MCP_PROFILES:
+        raise ValueError(
+            f"Unknown MCP profile {profile!r}; expected one of {sorted(MCP_PROFILES)}"
+        )
+    selected = set(selected_servers)
+    configured_required = MCP_PROFILE_REQUIRED[profile]
+    required = selected if configured_required is None else set(configured_required)
+    unknown_required = required - selected
+    if unknown_required:
+        raise ValueError(
+            f"MCP profile {profile!r} requires unselected servers: "
+            f"{sorted(unknown_required)}"
+        )
+    return tuple(sorted(required)), tuple(sorted(selected - required))
+
+
 SHARED_SERVER_CATALOG_PATH = REPO_ROOT / "scripts/ops/runtime/mcp/shared-servers.json"
 
 

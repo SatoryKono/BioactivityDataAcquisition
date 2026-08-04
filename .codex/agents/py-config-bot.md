@@ -296,15 +296,10 @@ python scripts/agents/py-config-bot-1.py -v
 
 ## MCP Tools
 
-### ChEMBL — reference для конфигурации полей
-
-> **Примечание:** MCP инструменты доступны через `ToolSearch`. Перед использованием выполнить `ToolSearch("ChEMBL")`.
-
-| Сценарий | Инструмент | Параметры | Результат |
-|----------|------------|-----------|-----------|
-| Поля Molecule | `ChEMBL:compound_search` | `name="aspirin", limit=1` | Список полей для config |
-| Поля Activity | `ChEMBL:get_bioactivity` | `molecule_chembl_id="CHEMBL25"` | Поля для activity config |
-| Поля Target | `ChEMBL:target_search` | `gene_symbol="EGFR"` | Поля для target config |
+Для внешней schema/reference evidence использовать только capability,
+обнаруженный текущим runtime (например Context7, Ref, Fetch). Поля конфигурации
+всегда сверять прежде всего с tracked entity/schema/contracts и provider
+adapter в репозитории. Отсутствие optional MCP не ослабляет config gates.
 
 ---
 

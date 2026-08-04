@@ -241,7 +241,12 @@ log_test.txt
 .vscode/
 .agent-work/
 .agentbridge/
-.agents/
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/*/
+.agents/skills/*/*
+!.agents/skills/*/SKILL.md
 .cursor/
 .sonarlint/
 .trae/
@@ -257,8 +262,10 @@ log_test.txt
 .aiassistant/
 !.codex/
 .codex/*
+!.codex/config.toml
 !.codex/agents/
 !.codex/agents/*.md
+!.codex/agents/*.toml
 !.codex/skills/
 .codex/skills/*
 !.codex/skills/SKILLS-CATALOG.md

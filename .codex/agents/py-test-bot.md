@@ -240,28 +240,11 @@ ______________________________________________________________________
 
 ## MCP Tools
 
-### ChEMBL — golden datasets и contract testing
-
-> **Примечание:** MCP инструменты доступны через `ToolSearch`. Перед использованием выполнить `ToolSearch("ChEMBL")`.
-
-| Сценарий                 | Инструмент                                | Параметры                       | Результат               |
-| ------------------------ | ----------------------------------------- | ------------------------------- | ----------------------- |
-| Golden data: molecules   | `ChEMBL:compound_search`                  | `name="imatinib", limit=10`     | Sample для golden tests |
-| Golden data: bioactivity | `ChEMBL:get_bioactivity`                  | `molecule_chembl_id="CHEMBL25"` | Sample для golden tests |
-| Contract testing         | `ChEMBL:compound_search` + schema compare | Fetch → validate vs contract    | API breaking changes    |
-
-### PubMed — тестовые данные для Publication pipeline
-
-| Сценарий            | Инструмент                    | Параметры                        | Результат        |
-| ------------------- | ----------------------------- | -------------------------------- | ---------------- |
-| Sample publications | `PubMed:search_articles`      | `query="CRISPR", max_results=10` | Test data        |
-| Full metadata       | `PubMed:get_article_metadata` | `pmids=["35486828"]`             | Detailed records |
-
-### bioRxiv — тестовые данные для preprint integration
-
-| Сценарий         | Инструмент                 | Параметры                                  | Результат |
-| ---------------- | -------------------------- | ------------------------------------------ | --------- |
-| Sample preprints | `bioRxiv:search_preprints` | `category="bioinformatics", recent_days=7` | Test data |
+Golden data и contract tests остаются repository-backed и воспроизводимыми.
+Для записи новых VCR/evidence samples разрешён только capability, обнаруженный
+текущим runtime, с последующей sanitization и проверкой determinism. Не
+предполагать наличие исторического provider-specific MCP и не делать live MCP
+обязательным для обычного CI.
 
 ______________________________________________________________________
 
