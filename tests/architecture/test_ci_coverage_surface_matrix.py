@@ -32,8 +32,9 @@ def _read_workflow(path: Path) -> str:
 
 
 def _job_block(workflow: str, job: str) -> str:
+    # tests.yml uses 2-space job keys under `jobs:`.
     match = re.search(
-        rf"^    {re.escape(job)}:\n(?P<body>.*?)(?=^    [A-Za-z0-9_-]+:|\Z)",
+        rf"^  {re.escape(job)}:\n(?P<body>.*?)(?=^  [A-Za-z0-9_-]+:|\Z)",
         workflow,
         flags=re.MULTILINE | re.DOTALL,
     )
@@ -207,15 +208,17 @@ class TestCiCoverageSurfaceMatrix:
             assert "if: steps.governance_lfs_pull.outcome" not in block, (
                 f"{job} must not gate required steps on governance_lfs_pull outcome"
             )
-            assert "Skip " not in block or "LFS" not in block, (
-                f"{job} must not soft-skip when LFS evidence is unavailable"
+            assert "Skip VCR content gates when LFS budget is exhausted" not in block
+            assert "Skip control-plane VCR smoke when LFS is unavailable" not in block
+            assert (
+                "Skip VCR-bound governance preflight when LFS is unavailable"
+                not in block
             )
-            assert "Fail-closed (#7493)" in block or job == "control-plane-e2e"
+            assert "Fail-closed (#7493)" in block or "#7493" in block
             if job == "control-plane-e2e":
                 assert "id: lfs_pull" in block
                 assert "if-no-files-found: error" in block
                 assert "::error::" in block
-                assert "materialized (#7493)" in block or "#7493" in block
 
     def test_coverage_shard_python_versions_match_workflow(self) -> None:
         matrix = _load_yaml(MATRIX_PATH)

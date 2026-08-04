@@ -31,8 +31,9 @@ def _read_workflow(policy: dict[str, object]) -> str:
 
 
 def _job_block(workflow: str, job: str) -> str:
+    # tests.yml uses 2-space job keys under `jobs:`.
     match = re.search(
-        rf"^    {re.escape(job)}:\n(?P<body>.*?)(?=^    [A-Za-z0-9_-]+:|\Z)",
+        rf"^  {re.escape(job)}:\n(?P<body>.*?)(?=^  [A-Za-z0-9_-]+:|\Z)",
         workflow,
         flags=re.MULTILINE | re.DOTALL,
     )
@@ -77,7 +78,7 @@ class TestCiHeavyLaneRebalance:
         workflow = _read_workflow(policy)
 
         for entry in policy["lanes"]:  # type: ignore[index]
-            assert f"    {entry['job']}:" in workflow
+            assert f"  {entry['job']}:" in workflow
 
     def test_track_d_gate_contains_only_runtime_linkage_suite(self) -> None:
         policy = _load_policy()
