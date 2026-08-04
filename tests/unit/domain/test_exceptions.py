@@ -361,13 +361,12 @@ class TestErrorClassifier:
         assert classifier.classify(CustomRecoverable("msg")) == ErrorType.NETWORK_ERROR
         assert classifier.classify(CustomDQ("msg")) == ErrorType.INVALID_DATA
 
+    @staticmethod
     @pytest.mark.slow
     @pytest.mark.hypothesis
     @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(st.text())
-    def test_classify_unknown_exception(
-        self, classifier: ErrorClassifier, msg: str
-    ) -> None:
+    def test_classify_unknown_exception(classifier: ErrorClassifier, msg: str) -> None:
         """Property-based test: Any unknown exception maps to INVALID_DATA unless keyword matched.
 
         Marked as slow because Hypothesis generates many examples.
