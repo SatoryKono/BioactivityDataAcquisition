@@ -18,7 +18,7 @@ source_refs:
 - Keep retrieval profile choices explicit in agent workflows so that context gathering
   remains repeatable and reviewable.
   confidence: curated
-  last_verified: '2026-04-20T00:00:00Z'
+  last_verified: '2026-08-04T00:00:00Z'
   summary: Retrieval profiles should match the task type instead of using one generic
   search mode.
 
