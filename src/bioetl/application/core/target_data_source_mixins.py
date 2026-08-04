@@ -18,6 +18,7 @@ from bioetl.application.core._target_data_source_fetch_support import (
     yield_wrapped_fetch_records,
 )
 from bioetl.domain.ports import FilterableDataSourcePort
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -39,7 +40,9 @@ def _invoke_target_fetch[RecordT](
     return fetch_target_records(*fetch_args)
 
 
-class _TargetEntityFetchWrapper(Protocol[RecordOutT]):
+class _TargetEntityFetchDelegationMixin(Protocol):
+    """Protocol mixin implementing target-aware fetch delegation."""
+
     _data_source: DataSourcePort
     TARGET_ENTITY_TYPE: str
 
@@ -50,19 +53,17 @@ class _TargetEntityFetchWrapper(Protocol[RecordOutT]):
         filter_ids: list[str] | None,
         filter_field: str | None,
         offset: int | None,
-    ) -> AsyncIterator[RecordOutT]: ...
+    ) -> AsyncIterator[JsonDict]: ...
 
-
-class _TargetEntityFetchDelegationMixin:
     def fetch(
-        self: _TargetEntityFetchWrapper[RecordT],
+        self,
         entity_type: str,
         limit: int | None = None,
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[RecordT]:
+    ) -> AsyncIterator[JsonDict]:
         """Fetch derived target records or delegate to the wrapped adapter."""
         target_fetch_args = (limit, query, filter_ids, filter_field, offset)
         return yield_target_or_delegate_records(

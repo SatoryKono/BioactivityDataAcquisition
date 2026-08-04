@@ -52,8 +52,10 @@ class AtomicWriteGroup:
     def commit(self) -> None:
         """Commit all pending writes atomically."""
         committed: list[tuple[Path, Path]] = []
+        failed_target: Path | None = None
         try:
             for target, temp_path, _ in self._pending:
+                failed_target = target
                 _replace_with_retry(
                     temp_path,
                     target,
@@ -62,9 +64,11 @@ class AtomicWriteGroup:
                 committed.append((target, temp_path))
         except (OSError, ValueError, TypeError, RuntimeError) as e:
             self._cleanup_uncommitted(committed)
+            if failed_target is None:
+                raise
             raise AtomicWriteError(
-                target,
-                f"Commit failed after {len(committed)} files: {e}",  # pyright: ignore[reportPossiblyUnboundVariable]
+                failed_target,
+                f"Commit failed after {len(committed)} files: {e}",
             ) from e
         finally:
             self._pending.clear()

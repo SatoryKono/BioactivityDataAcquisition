@@ -60,8 +60,8 @@ class SilverWriterMetadataFacade:
     async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
         """Get the schema of an existing Silver table."""
         return await BaseDeltaWriter._get_table_schema(
-            cast(BaseDeltaWriter, self),
-            table_name,  # pyright: ignore[reportInvalidCast]
+            cast(BaseDeltaWriter, cast(object, self)),
+            table_name,
         )
 
     async def _detect_schema_drift(

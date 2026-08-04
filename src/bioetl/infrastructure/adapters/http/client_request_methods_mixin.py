@@ -4,18 +4,27 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 import httpx
 
 from bioetl.domain.types import JsonDict
 
+if TYPE_CHECKING:
+    from bioetl.domain.ports import CircuitBreakerPort, RateLimiterPort
+
+
+class _HTTPClientRequestHost(Protocol):
+    """Structural host contract for one-shot HTTP requests."""
+
+    rate_limiter: RateLimiterPort
+    circuit_breaker: CircuitBreakerPort
+
+    def _get_client(self) -> httpx.AsyncClient: ...
+
 
 class HTTPClientRequestMethodsMixin:
     """Thin request verb wrappers around retry-orchestrated request flow."""
-
-    rate_limiter: Any  # Any: host provides async acquire()
-    circuit_breaker: Any  # Any: host provides async call()
 
     async def _request_with_retry(
         self,
@@ -89,7 +98,7 @@ class HTTPClientRequestMethodsMixin:
         return await self._request_with_retry("HEAD", url, headers=headers)
 
     async def get_once(
-        self,
+        self: _HTTPClientRequestHost,
         url: str,
         params: JsonDict | None = None,
         headers: dict[str, str] | None = None,

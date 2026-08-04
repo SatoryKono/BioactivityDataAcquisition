@@ -121,14 +121,14 @@ def _create_chembl_data_source(
     if pipeline_config.entity_type == "publication_term":
         base_adapter = PublicationTermDataSource(base_adapter)
     if pipeline_config.entity_type == "subcellular_fraction":
-        base_adapter = SubcellularFractionDataSource(base_adapter)  # pyright: ignore[reportArgumentType]
+        base_adapter = SubcellularFractionDataSource(base_adapter)
 
     return _wrap_with_filter(
         base_adapter,
         filter_config,
         logger,
         metrics,
-        pipeline_name,  # pyright: ignore[reportArgumentType]
+        pipeline_name,
     )
 
 

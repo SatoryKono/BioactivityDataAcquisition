@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
@@ -40,10 +40,9 @@ def get_health_server_dependencies(
     """Load health-listener dependencies through one composition owner seam."""
     from bioetl.composition._services import get_health_server_dependencies as _impl
 
-    # Boundary cast: runtime returns Protocol-shaped deps; callers need concrete alias.
     if data_root is None:
-        return cast("HealthServerDependencies", _impl())
-    return cast("HealthServerDependencies", _impl(data_root=data_root))
+        return _impl()
+    return _impl(data_root=data_root)
 
 
 def get_health_service() -> HealthService:

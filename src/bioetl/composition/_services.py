@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.composition._service_protocols import (
     BronzeCleanupServiceProtocol,
-    HealthServerDependenciesProtocol,
 )
 
 if TYPE_CHECKING:
@@ -42,6 +41,9 @@ if TYPE_CHECKING:
         WorkflowExecutionService,
         WorkflowInspectionService,
         WorkflowRunnerService,
+    )
+    from bioetl.composition.bootstrap.assembly.health_server import (
+        HealthServerDependencies,
     )
 
 
@@ -244,15 +246,15 @@ def get_observability_workflow_service() -> ObservabilityWorkflowService:
 def get_health_server_dependencies(
     *,
     data_root: Path | None = None,
-) -> HealthServerDependenciesProtocol:
+) -> HealthServerDependencies:
     """Get health-server dependencies without pipeline registration."""
     if data_root is None:
         return cast(
-            "HealthServerDependenciesProtocol",
+            "HealthServerDependencies",
             _invoke_bootstrap("bootstrap_health_server_dependencies"),
         )
     return cast(
-        "HealthServerDependenciesProtocol",
+        "HealthServerDependencies",
         _invoke_bootstrap(
             "bootstrap_health_server_dependencies",
             data_root=data_root,
