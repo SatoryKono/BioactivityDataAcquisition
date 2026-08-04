@@ -334,6 +334,9 @@ ______________________________________________________________________
 
 ```mermaid
 stateDiagram-v2
+    state "Silver-Clean" as SilverClean
+    state "Silver-Quarantine" as SilverQuarantine
+
     [*] --> Bronze: Raw data ingestion
 
     Bronze --> BaseValidation: Transform to Silver
@@ -345,25 +348,25 @@ stateDiagram-v2
     ExternalVerification --> LogicalValidation: PASS/WARN
     LogicalValidation --> SemanticValidation: PASS/WARN
 
-    SemanticValidation --> Silver-Clean: -dq-warn=False<br/>-dq-error=False
-    SemanticValidation --> Silver-Quarantine: -dq-warn=True<br/>-dq-error=False
+    SemanticValidation --> SilverClean: dq_warn=False<br/>dq_error=False
+    SemanticValidation --> SilverQuarantine: dq_warn=True<br/>dq_error=False
 
-    Silver-Clean --> Gold: Aggregation
-    Silver-Quarantine --> Gold: Manual review<br/>or auto-repair
+    SilverClean --> Gold: Aggregation
+    SilverQuarantine --> Gold: Manual review<br/>or auto-repair
 
     Rejected --> ErrorLog: Record dropped
     ErrorLog --> [*]
 
     Gold --> [*]: Analytics ready
 
-    note right of Silver-Clean
+    note right of SilverClean
         Clean records:
         - All validations passed
         - No warnings
         - Ready for Gold
     end note
 
-    note right of Silver-Quarantine
+    note right of SilverQuarantine
         Quarantine records:
         - Non-critical warnings
         - Require review
@@ -389,8 +392,8 @@ ______________________________________________________________________
 graph TB
     subgraph "Configuration Hierarchy"
         Default[Default Config<br/>domain/app defaults<br/>Priority: 1]
-        Provider[Provider Config<br/>configs/providers/{provider}.yaml<br/>Priority: 2]
-        Pipeline[Pipeline Config<br/>configs/entities/{provider}/{entity}.yaml<br/>Priority: 3]
+        Provider["Provider Config<br/>configs/providers/{provider}.yaml<br/>Priority: 2"]
+        Pipeline["Pipeline Config<br/>configs/entities/{provider}/{entity}.yaml<br/>Priority: 3"]
         CLI[CLI Arguments<br/>--validation-mode strict<br/>Priority: 4]
     end
 
