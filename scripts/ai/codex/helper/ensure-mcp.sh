@@ -311,10 +311,12 @@ ensure_shared_plane() {
     if [[ ! -f "${matrix}" ]]; then
         fail "MCP profile contract unavailable: ${matrix}"
     fi
-    mapfile -t required_servers < <(
-        python3 "${matrix}" --profile "${profile}" --required-local
-    )
-    if [[ "${#required_servers[@]}" -eq 0 ]]; then
+    local required_output
+    if ! required_output="$(python3 "${matrix}" --profile "${profile}" --required-local)"; then
+        fail "Unable to determine required MCP servers for profile ${profile}"
+    fi
+    mapfile -t required_servers <<<"${required_output}"
+    if [[ "${#required_servers[@]}" -eq 0 || ( "${#required_servers[@]}" -eq 1 && -z "${required_servers[0]}" ) ]]; then
         return 0
     fi
     local timeout_seconds="${CODEX_MCP_SHARED_START_TIMEOUT:-360}"
