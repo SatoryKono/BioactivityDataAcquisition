@@ -20,7 +20,7 @@ import sys
 import tempfile
 import threading
 import time
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -35,7 +35,10 @@ from bioetl.infrastructure.config.contract_registry_loader import (
 )
 
 type JsonScalar = str | int | float | bool | None
-type JsonValue = JsonScalar | list["JsonValue"] | dict[str, "JsonValue"]
+# Graph assembly ingests heterogeneous YAML/JSON and AST-derived values. Keep
+# that pre-serialization boundary explicit; serializers below narrow values to
+# the scalar/list shapes accepted by Neo4j and JSON.
+type JsonValue = object
 type RelationSpec = tuple[str, frozenset[str], frozenset[str]]
 type ShardFilterSpec = tuple[frozenset[str], tuple[RelationSpec, ...]]
 # Relation / shard filter keys used by snapshot filtering helpers.
@@ -1413,7 +1416,7 @@ def _resolved_snapshot_selection(
     if selection is not None:
         return selection
     return SnapshotSelection(
-        only_labels=tuple(legacy_selection.get("only_labels", ())),
+        only_labels=tuple(str(item) for item in _as_iterable(legacy_selection.get("only_labels"))),
         only_analysis_layer=bool(legacy_selection.get("only_analysis_layer", False)),
         only_retirement_layer=bool(
             legacy_selection.get("only_retirement_layer", False)
@@ -2298,7 +2301,7 @@ def _configured_duplicate_families(
 ) -> tuple[str, ...]:
     duplication_families = tuple(
         family.name
-        for family in duplication_config.get("families", ())
+        for family in _as_iterable(duplication_config.get("families"))
         if isinstance(family, DuplicateFamilyConfig)
     )
     configured_families = tuple(
@@ -2462,8 +2465,8 @@ def _complexity_analysis_config(
     return ComplexityAnalysisConfig(
         enabled=bool(payload.get("enabled", True)),
         family_names=family_names or retirement_config.family_names,
-        complexity_score_threshold=int(
-            payload.get("complexity_score_threshold", 4) or 4
+        complexity_score_threshold=_coerce_int(
+            payload.get("complexity_score_threshold", 4), 4
         ),
         removable_score_threshold=_coerce_int(
             payload.get("removable_score_threshold", 7), 7
@@ -2697,23 +2700,26 @@ def _run_git_history_subprocess(
     command: list[str], *, timeout_seconds: float | None = None
 ) -> subprocess.CompletedProcess[str]:
     """Run Git history probes with compatibility fallbacks for test doubles."""
-    command_kwargs: dict[str, object] = {
-        "check": False,
-        "capture_output": True,
-        "text": True,
-        "encoding": "utf-8",
-        "errors": "replace",
-    }
-    if timeout_seconds is not None:
-        command_kwargs["timeout"] = timeout_seconds
     try:
-        return subprocess.run(command, **command_kwargs)
+        return subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout_seconds,
+        )
     except subprocess.TimeoutExpired:
         raise
     except TypeError:
         # Some lightweight test doubles still implement the historical
         # positional-only signature (cmd, check, capture_output, text).
-        return subprocess.run(command, False, True, True)
+        legacy_run = cast(
+            Callable[..., subprocess.CompletedProcess[str]],
+            subprocess.run,
+        )
+        return legacy_run(command, False, True, True)
 
 
 def _git_chunk_commit_ages(
@@ -2889,7 +2895,7 @@ def _dashboard_panel_target_metrics(panel: dict[str, object]) -> set[str]:
     return metrics
 
 
-def _parse_python_ast(path: Path) -> ast.AST | None:
+def _parse_python_ast(path: Path) -> ast.Module | None:
     if path.suffix != ".py":
         return None
     try:
@@ -3451,16 +3457,8 @@ def _alert_rule_overrides(
 ) -> tuple[dict[str, object], dict[str, object]]:
     alerts_config = _alerts_config_section(memory_mapping)
     groups, rules = _alert_override_maps(alerts_config)
-    group_rule = (
-        groups.get(group_name)
-        if isinstance(groups, dict) and isinstance(groups.get(group_name), dict)
-        else {}
-    )
-    alert_rule = (
-        rules.get(alert_name)
-        if isinstance(rules, dict) and isinstance(rules.get(alert_name), dict)
-        else {}
-    )
+    group_rule = _as_mapping(groups.get(group_name)) if isinstance(groups, dict) else {}
+    alert_rule = _as_mapping(rules.get(alert_name)) if isinstance(rules, dict) else {}
     return group_rule, alert_rule
 
 
@@ -4375,9 +4373,7 @@ def _add_provider_surface(
         source_kind="provider_config",
         auth_type=auth_type,
         pagination_strategy=pagination,
-        entity_count=len(payload.get("entities", []))
-        if isinstance(payload.get("entities"), list)
-        else None,
+        entity_count=len(_as_iterable(payload.get("entities"))) or None,
         last_verified=today,
         ingest_wave="repo_sync_v1",
         confidence="high",
@@ -4397,17 +4393,17 @@ def _add_provider_surface(
     )
 
 
-def _provider_config_properties(source_payload: object) -> tuple[object, object]:
+def _provider_config_properties(source_payload: object) -> tuple[str | None, str | None]:
     auth_type = None
     pagination = None
     provider_config = source_payload
     if isinstance(provider_config, dict):
         provider_config = provider_config.get("provider_config", provider_config)
         if isinstance(provider_config, dict):
-            auth_type = provider_config.get("auth_type")
+            auth_type = _optional_text(provider_config.get("auth_type"))
             pagination_data = provider_config.get("pagination")
             if isinstance(pagination_data, dict):
-                pagination = pagination_data.get("strategy")
+                pagination = _optional_text(pagination_data.get("strategy"))
     return auth_type, pagination
 
 
@@ -4842,7 +4838,9 @@ def _add_curated_script_clusters(
         )
         entrypoint = _add_curated_cluster_entrypoint(snapshot, cluster, today)
 
-        for execution_payload in cluster["execution_paths"]:
+        for execution_payload in _as_iterable(cluster.get("execution_paths")):
+            if not isinstance(execution_payload, dict):
+                continue
             _add_curated_cluster_execution(
                 snapshot,
                 today,
@@ -4966,7 +4964,7 @@ def _add_cli_command_surface(
     execution: GraphNode,
     *,
     command_name: str,
-    source_path: str,
+    source_path: str | None,
     command_options: tuple[str, ...],
     today: str,
 ) -> NodeKey:
@@ -5284,19 +5282,19 @@ def _policy_governance_targets(
     targets: list[NodeKey] = []
     targets.extend(
         NodeKey("layer_family", str(name))
-        for name in policy_payload.get("governs_layers", ())
+        for name in _as_iterable(policy_payload.get("governs_layers"))
     )
     targets.extend(
         NodeKey("quality_gate", str(name))
-        for name in policy_payload.get("governs_quality_gates", ())
+        for name in _as_iterable(policy_payload.get("governs_quality_gates"))
     )
     targets.extend(
         NodeKey("test_surface", str(name))
-        for name in policy_payload.get("governs_test_surfaces", ())
+        for name in _as_iterable(policy_payload.get("governs_test_surfaces"))
     )
     targets.extend(
         NodeKey("doc_source_surface", str(name))
-        for name in policy_payload.get("governs_docs", ())
+        for name in _as_iterable(policy_payload.get("governs_docs"))
     )
     return tuple(targets)
 
@@ -5971,7 +5969,13 @@ def _materialize_file_structure(
 
 
 def _file_structure_zone_roots(config: dict[str, object]) -> dict[str, tuple[str, ...]]:
-    return config["repo_zones"]
+    raw_zones = config.get("repo_zones")
+    if not isinstance(raw_zones, dict):
+        return {}
+    return {
+        str(name): tuple(_as_string_list(paths))
+        for name, paths in raw_zones.items()
+    }
 
 
 def _add_file_structure_zones(
@@ -6047,15 +6051,9 @@ def _merge_sink_config(
 
 
 def _entity_pipeline_sink_config(payload: dict[str, object]) -> dict[str, object]:
-    direct_sink = payload.get("sink") if isinstance(payload.get("sink"), dict) else {}
-    pipeline_payload = (
-        payload.get("pipeline") if isinstance(payload.get("pipeline"), dict) else {}
-    )
-    nested_sink = (
-        pipeline_payload.get("sink")
-        if isinstance(pipeline_payload.get("sink"), dict)
-        else {}
-    )
+    direct_sink = _as_mapping(payload.get("sink"))
+    pipeline_payload = _as_mapping(payload.get("pipeline"))
+    nested_sink = _as_mapping(pipeline_payload.get("sink"))
     return _merge_sink_config(direct_sink, nested_sink)
 
 
@@ -6103,19 +6101,9 @@ def _storage_schema_properties(
     *,
     layer_name: str,
 ) -> dict[str, JsonValue]:
-    schema_payload = (
-        payload.get("schema") if isinstance(payload.get("schema"), dict) else {}
-    )
-    layer_schema = (
-        schema_payload.get(layer_name)
-        if isinstance(schema_payload.get(layer_name), dict)
-        else {}
-    )
-    column_groups = (
-        schema_payload.get("column_groups")
-        if isinstance(schema_payload.get("column_groups"), list)
-        else []
-    )
+    schema_payload = _as_mapping(payload.get("schema"))
+    layer_schema = _as_mapping(schema_payload.get(layer_name))
+    column_groups = _as_iterable(schema_payload.get("column_groups"))
     schema_column_groups = [
         name
         for item in column_groups
@@ -6137,9 +6125,7 @@ def _storage_schema_properties(
 
 
 def _schema_group_field_map(payload: dict[str, object]) -> dict[str, list[str]]:
-    schema_payload = (
-        payload.get("schema") if isinstance(payload.get("schema"), dict) else {}
-    )
+    schema_payload = _as_mapping(payload.get("schema"))
     column_groups = schema_payload.get("column_groups")
     group_map: dict[str, list[str]] = {}
     if not isinstance(column_groups, list):
@@ -6161,14 +6147,8 @@ def _filtered_group_fields(
     *,
     layer_name: str,
 ) -> list[tuple[str, str]]:
-    schema_payload = (
-        payload.get("schema") if isinstance(payload.get("schema"), dict) else {}
-    )
-    layer_schema = (
-        schema_payload.get(layer_name)
-        if isinstance(schema_payload.get(layer_name), dict)
-        else {}
-    )
+    schema_payload = _as_mapping(payload.get("schema"))
+    layer_schema = _as_mapping(schema_payload.get(layer_name))
     include_groups = _normalized_text_list(layer_schema.get("include_groups")) or []
     exclude_patterns = _normalized_text_list(layer_schema.get("exclude_fields")) or []
     group_map = _schema_group_field_map(payload)
@@ -6184,9 +6164,7 @@ def _filtered_group_fields(
 
 
 def _field_quality_index(payload: dict[str, object]) -> dict[str, dict[str, JsonValue]]:
-    quality_payload = (
-        payload.get("quality") if isinstance(payload.get("quality"), dict) else {}
-    )
+    quality_payload = _as_mapping(payload.get("quality"))
     index: dict[str, dict[str, JsonValue]] = {}
     field_validations = quality_payload.get("entity_field_validations")
     if isinstance(field_validations, list):
@@ -6378,7 +6356,7 @@ def _storage_surface_state(
         existing.properties.get("pipeline_names") if existing is not None else None
     )
     existing_pipeline_names = _normalized_text_list(existing_pipeline_names_raw) or []
-    pipeline_names = sorted(
+    pipeline_names: list[str] = sorted(
         {
             *existing_pipeline_names,
             *([pipeline_name] if pipeline_name is not None else []),
@@ -6462,11 +6440,7 @@ def _entity_pipeline_scope(
 
 
 def _scd_config_columns(layer_config: dict[str, object]) -> dict[str, str | None]:
-    scd_config = (
-        layer_config.get("scd_config")
-        if isinstance(layer_config.get("scd_config"), dict)
-        else {}
-    )
+    scd_config = _as_mapping(layer_config.get("scd_config"))
     return {
         "version_column": _optional_text(scd_config.get("version_col")),
         "current_flag_column": _optional_text(scd_config.get("current_flag_col")),
@@ -6899,11 +6873,7 @@ def _add_composite_seed_surface(
 
 
 def _composite_seed_storage_ref(composite_payload: dict[str, object]) -> str | None:
-    seed_payload = (
-        composite_payload.get("seed")
-        if isinstance(composite_payload.get("seed"), dict)
-        else {}
-    )
+    seed_payload = _as_mapping(composite_payload.get("seed"))
     seed_table = seed_payload.get("silver_table")
     if not isinstance(seed_table, str) or not seed_table.strip():
         return None
@@ -7084,9 +7054,9 @@ def _add_composite_output_surface(
                     output_config.merge_payload.get("strategy")
                 ),
                 "sort_by": _normalized_text_list(
-                    output_config.merge_payload.get("sort_by", {}).get(layer_name)
-                    if isinstance(output_config.merge_payload.get("sort_by"), dict)
-                    else None
+                    _as_mapping(output_config.merge_payload.get("sort_by")).get(
+                        layer_name
+                    )
                 ),
             },
         ),
@@ -7165,9 +7135,7 @@ def _base_pipeline_storage_config(
     base_payload = (
         _read_yaml(base_pipeline_path) if base_pipeline_path.is_file() else {}
     )
-    base_sink = (
-        base_payload.get("sink") if isinstance(base_payload.get("sink"), dict) else {}
-    )
+    base_sink = _as_mapping(base_payload.get("sink"))
     return base_payload, base_sink
 
 
@@ -7236,20 +7204,20 @@ def _entity_storage_context(
     *,
     today: str,
     base_payload: dict[str, object],
-) -> tuple[EntityPipelineContext, dict[str, object], dict[str, object]]:
+) -> tuple[
+    EntityPipelineContext,
+    dict[str, object],
+    dict[str, dict[str, JsonValue]],
+]:
     provider_name = str(payload.get("provider", entity_path.parent.name))
     entity_name = str(payload.get("entity", entity_path.stem))
-    pipeline_payload = (
-        payload.get("pipeline") if isinstance(payload.get("pipeline"), dict) else {}
-    )
+    pipeline_payload = _as_mapping(payload.get("pipeline"))
     pipeline_name = str(
         pipeline_payload.get("pipeline_name", f"{provider_name}_{entity_name}")
     )
     maintenance_config = _merged_maintenance_config(base_payload, payload)
     retention_days = maintenance_config.get("vacuum_retention_days")
-    quality_payload = (
-        payload.get("quality") if isinstance(payload.get("quality"), dict) else {}
-    )
+    quality_payload = _as_mapping(payload.get("quality"))
     context = EntityPipelineContext(
         provider_name=provider_name,
         entity_name=entity_name,
@@ -7315,16 +7283,8 @@ def _add_composite_storage_data_surfaces(
                 dependencies=dependencies,
             )
         )
-        merge_payload = (
-            composite_payload.get("merge")
-            if isinstance(composite_payload.get("merge"), dict)
-            else {}
-        )
-        output_payload = (
-            merge_payload.get("output")
-            if isinstance(merge_payload.get("output"), dict)
-            else {}
-        )
+        merge_payload = _as_mapping(composite_payload.get("merge"))
+        output_payload = _as_mapping(merge_payload.get("output"))
         layer_nodes, field_nodes_by_layer = _add_composite_output_layers(
             snapshot,
             project,
@@ -7378,9 +7338,7 @@ def _composite_storage_context(
     *,
     today: str,
 ) -> tuple[CompositePipelineContext, dict[str, object], object]:
-    composite_payload = (
-        payload.get("composite") if isinstance(payload.get("composite"), dict) else {}
-    )
+    composite_payload = _as_mapping(payload.get("composite"))
     composite_name = str(composite_payload.get("name", composite_path.stem))
     context = CompositePipelineContext(
         composite_name=composite_name,
@@ -7642,16 +7600,17 @@ def _add_runtime_evidence_storage_refs(
 
 def _runtime_evidence_storage_refs(
     storage_refs: object,
-) -> tuple[tuple[object, object, object], ...]:
+) -> tuple[tuple[str, str, str], ...]:
     if not isinstance(storage_refs, Iterable) or isinstance(
         storage_refs, str | bytes | dict
     ):
         return ()
-    refs: list[tuple[object, object, object]] = []
+    refs: list[tuple[str, str, str]] = []
     for candidate in storage_refs:
         if not isinstance(candidate, tuple | list) or len(candidate) != 3:
             continue
-        refs.append((candidate[0], candidate[1], candidate[2]))
+        if all(isinstance(item, str) for item in candidate):
+            refs.append((candidate[0], candidate[1], candidate[2]))
     return tuple(refs)
 
 
@@ -7751,7 +7710,7 @@ def _run_instance_fixture_spec(
     artifact_refs: tuple[str, ...],
     **extra: object,
 ) -> dict[str, object]:
-    spec = {
+    spec: dict[str, object] = {
         "manifest_id": manifest_id,
         "run_id": run_id,
         "source_path": source_path,
@@ -7878,7 +7837,7 @@ def _chembl_activity_run_instance_fixture(
 
 def _run_instance_definition_spec(
     definition: tuple[
-        str, str, str, tuple[str, ...], tuple[str, ...], dict[str, object]
+        str, str, str, tuple[str, ...], tuple[str, ...], Mapping[str, object]
     ],
 ) -> dict[str, object]:
     manifest_id, run_id, source_path, doc_paths, artifact_refs, extra = definition
@@ -7888,7 +7847,7 @@ def _run_instance_definition_spec(
         source_path=source_path,
         doc_paths=doc_paths,
         artifact_refs=artifact_refs,
-        **extra,
+        **dict(extra),
     )
 
 
@@ -8038,7 +7997,8 @@ def _run_instance_doc_targets(spec: dict[str, object]) -> tuple[NodeKey, ...]:
     if source_path is not None:
         targets.append(NodeKey("test_artifact", source_path))
     targets.extend(
-        NodeKey("doc_artifact", str(doc_path)) for doc_path in spec.get("doc_paths", ())
+        NodeKey("doc_artifact", str(doc_path))
+        for doc_path in _as_iterable(spec.get("doc_paths"))
     )
     return tuple(targets)
 
@@ -8046,7 +8006,7 @@ def _run_instance_doc_targets(spec: dict[str, object]) -> tuple[NodeKey, ...]:
 def _run_instance_artifact_targets(spec: dict[str, object]) -> tuple[NodeKey, ...]:
     return tuple(
         NodeKey("control_plane_artifact_surface", str(artifact_name))
-        for artifact_name in spec.get("artifact_refs", ())
+        for artifact_name in _as_iterable(spec.get("artifact_refs"))
     )
 
 
@@ -8195,7 +8155,7 @@ def _link_runtime_state_evidence_dependencies(
     state: NodeKey,
     spec: dict[str, object],
 ) -> None:
-    for evidence_name in spec.get("runtime_evidence_refs", ()):
+    for evidence_name in _as_iterable(spec.get("runtime_evidence_refs")):
         evidence_key = NodeKey("runtime_evidence_surface", str(evidence_name))
         if evidence_key in snapshot.nodes:
             snapshot.add_relation(
@@ -8223,13 +8183,14 @@ def _link_runtime_state_evidence_materials(
 def _runtime_state_artifact_targets(spec: dict[str, object]) -> tuple[NodeKey, ...]:
     return tuple(
         NodeKey("control_plane_artifact_surface", str(artifact_name))
-        for artifact_name in spec.get("artifact_refs", ())
+        for artifact_name in _as_iterable(spec.get("artifact_refs"))
     )
 
 
 def _runtime_state_doc_targets(spec: dict[str, object]) -> tuple[NodeKey, ...]:
     return tuple(
-        NodeKey("doc_artifact", str(doc_path)) for doc_path in spec.get("doc_paths", ())
+        NodeKey("doc_artifact", str(doc_path))
+        for doc_path in _as_iterable(spec.get("doc_paths"))
     )
 
 
@@ -8355,7 +8316,9 @@ _WORKFLOW_FAMILY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
 
 
 def _workflow_on_payload(payload: dict[str, object]) -> object:
-    return payload.get("on") if "on" in payload else payload.get(True)
+    if "on" in payload:
+        return payload.get("on")
+    return cast(dict[object, object], payload).get(True)
 
 
 def _workflow_trigger_names(payload: dict[str, object]) -> tuple[str, ...]:
@@ -9342,9 +9305,8 @@ def _add_workflow_file_surface(
 ) -> tuple[str, dict[str, object], WorkflowContext, NodeKey | None]:
     payload = _read_yaml(workflow_path)
     workflow_name = workflow_path.stem
-    title = (
-        payload.get("name") if isinstance(payload.get("name"), str) else workflow_name
-    )
+    title_value = payload.get("name")
+    title = title_value if isinstance(title_value, str) else workflow_name
     relative_path = _rel_path(root, workflow_path)
     context = _add_workflow_surface(
         snapshot,
@@ -9385,7 +9347,12 @@ def _add_workflow_jobs(
             workflow_call_entrypoint=workflow_call_entrypoint,
             job_nodes=job_nodes,
         )
-    _link_workflow_job_dependencies(snapshot, context.workflow_name, jobs, job_nodes)
+    _link_workflow_job_dependencies(
+        snapshot,
+        context.workflow_name,
+        {str(key): value for key, value in jobs.items()},
+        job_nodes,
+    )
 
 
 def _process_workflow_job(
@@ -10551,7 +10518,7 @@ def _add_adapter_package_impls(
     adapter: NodeKey,
     child: Path,
     port_module_surfaces: dict[str, set[str]],
-    port_symbol_index: dict[str, set[str]],
+    port_symbol_index: dict[str, dict[str, str]],
     port_names: set[str],
     today: str,
     *,
@@ -10975,9 +10942,7 @@ def _add_contract_entry_surface(
     raw_entry: dict[str, object],
     today: str,
 ) -> ContractEntryContext:
-    identity = (
-        raw_entry.get("identity") if isinstance(raw_entry.get("identity"), dict) else {}
-    )
+    identity = _as_mapping(raw_entry.get("identity"))
     registry_path = root / CONTRACT_REGISTRY_RELATIVE_PATH
     contract = snapshot.add_node(
         "contract_surface",
@@ -11622,7 +11587,7 @@ def _duplication_family_by_name(
     return next(
         (
             item
-            for item in config.get("families", ())
+            for item in _as_iterable(config.get("families"))
             if isinstance(item, DuplicateFamilyConfig) and item.name == family_name
         ),
         None,

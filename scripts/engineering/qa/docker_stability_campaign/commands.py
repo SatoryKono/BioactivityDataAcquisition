@@ -443,7 +443,8 @@ def restart_baseline(
         container_id = str(row.get("container_id") or "")
         if not service or not container_id:
             continue
-        restart_counts[service] = int(row.get("restart_count") or 0)
+        restart_value = row.get("restart_count")
+        restart_counts[service] = restart_value if isinstance(restart_value, int) else 0
         container_ids[service] = container_id
     if not restart_counts or any(value != 0 for value in restart_counts.values()):
         raise ValueError("campaign baseline requires zero restart counters")
@@ -480,9 +481,16 @@ def record_probe(
         if isinstance(row, Mapping)
         for key, value in row.items()
         if str(key).endswith("_limit_ratio")
+        and isinstance(value, int | float)
     ]
+    current_max_ratio = state.get("max_resource_ratio")
     state["max_resource_ratio"] = max(
-        [float(state.get("max_resource_ratio", 0.0)), *ratios]
+        [
+            float(current_max_ratio)
+            if isinstance(current_max_ratio, int | float)
+            else 0.0,
+            *ratios,
+        ]
     )
     state["restart_count_delta"] = max(
         int(state.get("restart_count_delta", 0)),

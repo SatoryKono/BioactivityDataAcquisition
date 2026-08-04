@@ -28,6 +28,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
+from typing import TypeGuard
 
 import yaml
 
@@ -766,7 +767,7 @@ def _exported_names_from_all_assign(node: ast.Assign) -> set[str]:
     }
 
 
-def _is_all_assignment(node: ast.AST) -> bool:
+def _is_all_assignment(node: ast.AST) -> TypeGuard[ast.Assign]:
     """Check whether a node assigns to __all__."""
     if not isinstance(node, ast.Assign):
         return False
@@ -860,6 +861,7 @@ def _is_public_alias_governance_candidate(alias_name: str, canonical_name: str) 
     if alias_suffix is None and canonical_suffix is None:
         return False
     if alias_suffix is None:
+        assert canonical_suffix is not None
         canonical_stem, _ = canonical_suffix
         return alias_name == canonical_stem
     if canonical_suffix is None:
@@ -925,7 +927,7 @@ def _class_surface_kind(py_file: Path, class_name: str) -> str | None:
     return None
 
 
-def _is_valid_class_node(node: ast.AST) -> bool:
+def _is_valid_class_node(node: ast.AST) -> TypeGuard[ast.ClassDef]:
     if not isinstance(node, ast.ClassDef):
         return False
     if node.name.startswith("_"):
