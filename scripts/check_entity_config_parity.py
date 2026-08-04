@@ -16,6 +16,7 @@ Exit Codes:
 
 # Compatibility wrapper
 
+import re
 import sys
 from pathlib import Path
 
@@ -79,23 +80,14 @@ class ParityChecker:
 
             provider = provider_dir.name
             for spec_file in provider_dir.glob("*spec.md"):
-                # Extract entity from filename (e.g., "05-activity-spec.md" -> "activity")
-                entity = spec_file.stem.replace("-spec", "").split("-")[-1]
-
-                # Handle common naming mismatches
-                entity_mapping = {
-                    "class": "protein_class",
-                    "line": "cell_line",
-                    "parameters": "assay_parameters",
-                    "record": "compound_record",
-                    "component": "target_component",
-                    "term": "publication_term",
-                    "similarity": "publication_similarity",
-                    "fraction": "subcellular_fraction",
-                }
-
-                # Use mapped name if available, otherwise use original
-                mapped_entity = entity_mapping.get(entity, entity)
+                # Extract entity from filename:
+                # "05-activity-spec.md" -> "activity"
+                # "11-target-protein-classification-spec.md" -> "target_protein_classification"
+                stem = spec_file.stem
+                if stem.endswith("-spec"):
+                    stem = stem[: -len("-spec")]
+                stem = re.sub(r"^\d+-", "", stem)
+                mapped_entity = stem.replace("-", "_")
                 specs[(provider, mapped_entity)] = spec_file
 
         return specs
