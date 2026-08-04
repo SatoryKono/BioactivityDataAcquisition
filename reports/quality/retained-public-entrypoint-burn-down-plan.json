@@ -1,0 +1,134 @@
+{
+  "schema_version": "retained-public-entrypoint-burn-down-plan-v1",
+  "linked_issue": "#7461",
+  "source_inventory": "configs/quality/compatibility_facade_inventory.yaml#retained_entrypoints",
+  "reviewed_on": "2026-08-04",
+  "owner": "@bioetl-architecture",
+  "policy": {
+    "silent_removal": "forbidden",
+    "transition_debt_must_stay_empty": true,
+    "budget_growth": "forbidden",
+    "first_wave_default": "empty_unless_importer_proof_and_deprecation_complete"
+  },
+  "wave": {
+    "id": "2026-08-04-plan-baseline",
+    "removal_candidates": [],
+    "rationale": "Empty first wave: all 12 surfaces remain sanctioned permanent public API or composition seams. Burn-down requires per-surface deprecation + external impact notes before any path leaves retained_entrypoints."
+  },
+  "surfaces": [
+    {
+      "path": "src/bioetl/interfaces/cli/commands/run.py",
+      "decision": "keep",
+      "sunset_status": "permanent",
+      "owner": "bioetl.interfaces.cli.commands",
+      "consumer_class": "public_cli_entrypoint",
+      "next_review_by": "2026-09-30",
+      "removal_blocked_by": "external_breaking_change_required; public CLI patch/import seam"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/run_all.py",
+      "decision": "keep",
+      "sunset_status": "permanent",
+      "owner": "bioetl.interfaces.cli.commands",
+      "consumer_class": "public_cli_entrypoint",
+      "next_review_by": "2026-09-30",
+      "removal_blocked_by": "external_breaking_change_required; public CLI patch/import seam"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/run_composite.py",
+      "decision": "keep",
+      "sunset_status": "permanent",
+      "owner": "bioetl.interfaces.cli.commands",
+      "consumer_class": "public_cli_entrypoint",
+      "next_review_by": "2026-09-30",
+      "removal_blocked_by": "external_breaking_change_required; public CLI patch/import seam"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/health.py",
+      "decision": "keep",
+      "sunset_status": "permanent",
+      "owner": "bioetl.interfaces.cli.commands",
+      "consumer_class": "public_cli_entrypoint",
+      "next_review_by": "2026-09-30",
+      "removal_blocked_by": "external_breaking_change_required; public CLI patch/import seam"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
+      "decision": "keep",
+      "sunset_status": "permanent",
+      "owner": "bioetl.interfaces.cli.commands",
+      "consumer_class": "public_cli_entrypoint",
+      "next_review_by": "2026-09-30",
+      "removal_blocked_by": "external_breaking_change_required; public CLI patch/import seam"
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "decision": "keep",
+      "sunset_status": "permanent",
+      "owner": "bioetl.interfaces.cli.commands",
+      "consumer_class": "public_cli_entrypoint",
+      "next_review_by": "2026-09-30",
+      "removal_blocked_by": "external_breaking_change_required; public CLI patch/import seam"
+    },
+    {
+      "path": "src/bioetl/composition/entrypoints.py",
+      "decision": "keep",
+      "sunset_status": "permanent",
+      "owner": "bioetl.composition",
+      "consumer_class": "composition_public_entrypoint",
+      "next_review_by": "2026-09-30",
+      "removal_blocked_by": "composition root public wiring seam"
+    },
+    {
+      "path": "src/bioetl/composition/health_api.py",
+      "decision": "keep",
+      "sunset_status": "permanent",
+      "owner": "bioetl.composition",
+      "consumer_class": "composition_public_entrypoint",
+      "next_review_by": "2026-09-30",
+      "removal_blocked_by": "composition health API public seam"
+    },
+    {
+      "path": "src/bioetl/composition/maintenance_api.py",
+      "decision": "keep",
+      "sunset_status": "permanent",
+      "owner": "bioetl.composition",
+      "consumer_class": "composition_public_entrypoint",
+      "next_review_by": "2026-09-30",
+      "removal_blocked_by": "composition maintenance API public seam"
+    },
+    {
+      "path": "src/bioetl/infrastructure/config/__init__.py",
+      "decision": "keep",
+      "sunset_status": "permanent",
+      "owner": "bioetl.infrastructure.config",
+      "consumer_class": "public_package_root",
+      "next_review_by": "2026-09-30",
+      "removal_blocked_by": "ADR-052 package-root public API; external_breaking_change_required",
+      "linked_adr": "ADR-052-infrastructure-config-package-root-public-api.md"
+    },
+    {
+      "path": "src/bioetl/domain/composite/config.py",
+      "decision": "keep",
+      "sunset_status": "permanent",
+      "owner": "bioetl.domain.composite",
+      "consumer_class": "domain_public_config_seam",
+      "next_review_by": "2026-09-30",
+      "removal_blocked_by": "composite domain config public contract surface"
+    },
+    {
+      "path": "src/bioetl/application/composite/merger.py",
+      "decision": "keep",
+      "sunset_status": "permanent",
+      "owner": "bioetl.application.composite",
+      "consumer_class": "application_public_merger_seam",
+      "next_review_by": "2026-09-30",
+      "removal_blocked_by": "composite merger public application seam"
+    }
+  ],
+  "acceptance": {
+    "plan_covers_all_inventory_paths": true,
+    "first_wave_removals": 0,
+    "notes": "Next wave may only remove a path after deprecation note + importer census + migration path in a dedicated PR."
+  }
+}

@@ -1,17 +1,15 @@
 version: 1
 policy_scope: compatibility_facades
 last_hygiene_review:
-  reviewed_on: "2026-07-27"
-  linked_issue: "#6627"
+  reviewed_on: "2026-08-04"
+  linked_issue: "#7461"
   result: retain_permanent_public_api
   summary: >-
-    TD-09 quarterly review confirms transition_debt empty, 12 retained
-    public entrypoints, census retained_public_export_facade_count=4,
-    twin_pairs=0, and transition/sunset/expired compat metrics at 0/0.
-    Permanent public CLI/composition/API seams remain; not reclassified as
-    dead code. Package-root infrastructure.config remains compatibility_debt
-    with external sunset design (TD-08 / #6624).
-  next_review_by: "2026-10-27"
+    Burn-down plan published under reports/quality/retained-public-entrypoint-burn-down-plan.json
+    (#7461). Empty first removal wave: all 12 retained public entrypoints kept as
+    permanent public API / composition seams. transition_debt remains empty.
+    Silent removal forbidden; next wave requires deprecation + importer census.
+  next_review_by: "2026-09-30"
 tracked_docstring_prefixes:
   - "Backward-compatible "
   - "Compatibility "

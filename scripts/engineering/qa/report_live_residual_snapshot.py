@@ -107,6 +107,46 @@ def _module_coverage_residuals() -> dict[str, int]:
     }
 
 
+def _closeout_program_residuals() -> dict[str, int]:
+    """Residual counts for closeout-freeze fold program (#7464 / #6891)."""
+    arch = ROOT / "tests" / "architecture"
+    closeout_files = sorted(arch.glob("test_tech_debt*closeout*.py"))
+    retained_count = 0
+    facade_path = ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+    if facade_path.is_file():
+        try:
+            import yaml
+
+            facade = yaml.safe_load(facade_path.read_text(encoding="utf-8"))
+            if isinstance(facade, dict):
+                retained = facade.get("retained_entrypoints") or []
+                if isinstance(retained, list):
+                    retained_count = len(retained)
+        except Exception:
+            retained_count = 0
+    zero_ref = 0
+    manifest_path = ROOT / "configs" / "quality" / "scripts_inventory_manifest.json"
+    if manifest_path.is_file():
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            scripts = manifest.get("scripts") or []
+            if isinstance(scripts, list):
+                zero_ref = sum(
+                    1
+                    for row in scripts
+                    if isinstance(row, dict)
+                    and row.get("status") == "supporting"
+                    and int(row.get("reference_count") or 0) == 0
+                )
+        except Exception:
+            zero_ref = 0
+    return {
+        "tech_debt_closeout_test_file_count": len(closeout_files),
+        "retained_public_entrypoint_count": retained_count,
+        "zero_reference_supporting_script_count": zero_ref,
+    }
+
+
 def build_snapshot() -> dict[str, Any]:
     """Build the current residual snapshot used by non-growth freezes."""
     hotspots = _hotspot_rows()
@@ -133,6 +173,7 @@ def build_snapshot() -> dict[str, Any]:
     return {
         "schema_version": "live-residual-snapshot-v1",
         "linked_issue": "#6891",
+        "follow_up_issue": "#7464",
         "parent_epic": "#6890",
         "snapshot_date": date.today().isoformat(),
         "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
@@ -147,6 +188,7 @@ def build_snapshot() -> dict[str, Any]:
             "duplicate_cluster_count": _config_duplicate_clusters(),
         },
         "module_coverage": _module_coverage_residuals(),
+        "closeout_program": _closeout_program_residuals(),
     }
 
 
