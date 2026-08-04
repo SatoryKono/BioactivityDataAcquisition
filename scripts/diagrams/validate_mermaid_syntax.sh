@@ -43,26 +43,44 @@ cleanup_temp_files() {
 }
 trap cleanup_temp_files EXIT
 
+chrome_headless_shell_is_runnable() {
+  local candidate="$1"
+  [[ -n "$candidate" && -x "$candidate" ]] || return 1
+  # Prefer dependency resolution check: broken puppeteer caches often have the
+  # binary present but missing shared libraries (libnss3, etc.).
+  if command -v ldd >/dev/null 2>&1; then
+    if ldd "$candidate" 2>/dev/null | grep -Eq 'not found'; then
+      return 1
+    fi
+    return 0
+  fi
+  "$candidate" --version >/dev/null 2>&1
+}
+
 resolve_chrome_headless_shell() {
   local env_exec="${PUPPETEER_EXECUTABLE_PATH:-}"
   if [[ -n "$env_exec" ]]; then
-    if [[ -x "$env_exec" ]]; then
+    if chrome_headless_shell_is_runnable "$env_exec"; then
       echo "$env_exec"
       return 0
     fi
-    echo "WARN: PUPPETEER_EXECUTABLE_PATH is not executable: $env_exec" >&2
+    echo "WARN: PUPPETEER_EXECUTABLE_PATH is not runnable: $env_exec" >&2
   fi
 
   if command -v chrome-headless-shell >/dev/null 2>&1; then
-    command -v chrome-headless-shell
-    return 0
+    local system_exec
+    system_exec="$(command -v chrome-headless-shell)"
+    if chrome_headless_shell_is_runnable "$system_exec"; then
+      echo "$system_exec"
+      return 0
+    fi
   fi
 
   local cache_root="${PUPPETEER_CACHE_DIR:-${HOME:-}/.cache/puppeteer}/chrome-headless-shell"
   if [[ -d "$cache_root" ]]; then
     local cached_exec
     cached_exec="$(find "$cache_root" -type f -name chrome-headless-shell 2>/dev/null | sort -V | tail -n 1 || true)"
-    if [[ -n "$cached_exec" ]] && [[ -x "$cached_exec" ]]; then
+    if chrome_headless_shell_is_runnable "$cached_exec"; then
       echo "$cached_exec"
       return 0
     fi
@@ -215,26 +233,45 @@ if [[ -n "$PUPPETEER_CFG" ]]; then
   mmdc_args+=(-p "$PUPPETEER_CFG")
 fi
 
-# Strip YAML frontmatter (--- ... ---) so mmdc receives pure Mermaid source.
-# Many .mmd sources keep ADR metadata frontmatter for documentation governance.
+# Extract the Mermaid source from either a pure diagram file or a composite
+# .mmd document. Some historical .mmd files contain repository metadata before
+# the diagram and explanatory Markdown after a closing fence; mmdc must receive
+# the diagram section only, while malformed/undetectable sources still fail.
 prepare_mermaid_input() {
   local file="$1"
   local prepared="$2"
-  if [[ "$(head -n 1 "$file" 2>/dev/null || true)" == "---" ]]; then
-    # Drop first frontmatter block, then any residual fence wrappers.
-    awk '
-      BEGIN { in_fm=0; started=0 }
-      NR==1 && $0=="---" { in_fm=1; next }
-      in_fm==1 && $0=="---" { in_fm=0; next }
-      in_fm==1 { next }
-      /^```[[:space:]]*mermaid[[:space:]]*$/ { next }
-      /^```[[:space:]]*$/ { next }
-      { print }
-    ' "$file" >"$prepared"
-  else
-    # Still strip accidental fence wrappers.
-    sed -e '/^```[[:space:]]*mermaid[[:space:]]*$/d' -e '/^```[[:space:]]*$/d' "$file" >"$prepared"
-  fi
+  awk '
+    function is_diagram_start(line) {
+      return line ~ /^[[:space:]]*(architecture-beta|block-beta|C4[A-Za-z]*|classDiagram(-v2)?|erDiagram|flowchart|gantt|gitGraph|graph|journey|kanban|mindmap|packet-beta|pie|quadrantChart|radar-beta|requirementDiagram|sankey-beta|sequenceDiagram|stateDiagram(-v2)?|timeline|treemap|xychart-beta|zenuml)([[:space:]]|$)/
+    }
+
+    BEGIN {
+      diagram_started=0
+      preamble_count=0
+    }
+
+    diagram_started == 0 {
+      if (is_diagram_start($0)) {
+        for (idx=1; idx<=preamble_count; idx++) {
+          print preamble[idx]
+        }
+        print
+        diagram_started=1
+        next
+      }
+
+      if ($0 ~ /^[[:space:]]*$/ || $0 ~ /^[[:space:]]*%%/) {
+        preamble[++preamble_count]=$0
+      } else {
+        delete preamble
+        preamble_count=0
+      }
+      next
+    }
+
+    /^[[:space:]]*```[[:space:]]*$/ { exit }
+    { print }
+  ' "$file" >"$prepared"
 }
 
 run_validation() {
