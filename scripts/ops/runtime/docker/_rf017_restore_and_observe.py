@@ -339,9 +339,7 @@ def update_final(observation: dict[str, object]) -> None:
             raise ValueError(f"Final cutover artifact must be an object: {FINAL_PATH}")
         final = cast(dict[str, Any], final_raw)
     else:
-        final: dict[str, Any] = {
-            "contract": "docker_dashboard_cutover_final_v1"
-        }
+        final: dict[str, Any] = {"contract": "docker_dashboard_cutover_final_v1"}
     final["status"] = "observation_in_progress"
     final["generated_at"] = datetime.now(UTC).isoformat()
     gates = final.setdefault("gates", {})

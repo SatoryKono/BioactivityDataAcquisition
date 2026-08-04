@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2434 |
+| Doc-like files | 2435 |
 | Tracked doc-like files | 2434 |
-| Ignored local docs/reports files | 0 |
+| Ignored local docs/reports files | 1 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
 | Generated routes | 69 |
@@ -18,6 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
+| ignored_local | 1 |
 | tracked | 2434 |
 
 ## Lifecycle Counts
@@ -61,7 +62,7 @@
 | Archived | 141 |
 | Canonical | 73 |
 | Generated | 861 |
-| Working | 497 |
+| Working | 498 |
 
 ## Surface Families
 
@@ -71,14 +72,14 @@
 | archive | 141 |
 | canonical | 73 |
 | generated | 861 |
-| working | 497 |
+| working | 498 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 86 |
+| archive-after-migration | 87 |
 | generate-automatically | 861 |
 | keep | 1171 |
 | reconcile-with-github-state | 4 |
@@ -167,7 +168,6 @@
 | `reports/semantic_pipeline_audit/critical_inconsistencies_2026-07-01.md` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/recommended_canonical_fields_2026-07-01.csv` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/semantic_cluster_registry_2026-07-01.json` | Working | 0 | archive-after-migration |
-| `reports/semantic_pipeline_audit/semantic_pair_matrix_2026-07-01.csv` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

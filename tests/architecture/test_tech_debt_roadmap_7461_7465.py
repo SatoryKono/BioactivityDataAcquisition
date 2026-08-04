@@ -46,7 +46,9 @@ DEBT_PLAYBOOK = (
 REFRESH_MODULE = (
     ROOT / "scripts" / "engineering" / "qa" / "refresh_governance_artifacts.py"
 )
-GATES_MODULE = ROOT / "scripts" / "engineering" / "qa" / "report_debt_governance_gates.py"
+GATES_MODULE = (
+    ROOT / "scripts" / "engineering" / "qa" / "report_debt_governance_gates.py"
+)
 
 pytestmark = pytest.mark.architecture
 
@@ -124,7 +126,9 @@ def test_closeout_fold_progress_and_live_residual_closeout_program() -> None:
     assert isinstance(program, dict)
     assert progress["linked_issue"] == "#7464"
     assert progress["parent_issue"] == "#6891"
-    assert progress["snapshot_artifact"] == "reports/quality/live-residual-snapshot.json"
+    assert (
+        progress["snapshot_artifact"] == "reports/quality/live-residual-snapshot.json"
+    )
 
     arch = ROOT / "tests" / "architecture"
     live_closeout_files = len(list(arch.glob("test_tech_debt*closeout*.py")))
