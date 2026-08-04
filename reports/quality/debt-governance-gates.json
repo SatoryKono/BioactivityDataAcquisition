@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "a2acdb989591f91a352884a1c261d37cabdf7765a31c27715a4f376cb0aca426",
-      "limit": "a2acdb989591f91a352884a1c261d37cabdf7765a31c27715a4f376cb0aca426",
+      "current": "fa7fca1db1d19c16b22cc0795b766f579c4ced33402df185674d174412fb64cc",
+      "limit": "fa7fca1db1d19c16b22cc0795b766f579c4ced33402df185674d174412fb64cc",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2314,
-        "source_tree_sha256": "a2acdb989591f91a352884a1c261d37cabdf7765a31c27715a4f376cb0aca426",
+        "source_tree_sha256": "fa7fca1db1d19c16b22cc0795b766f579c4ced33402df185674d174412fb64cc",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2314,
-        "source_tree_sha256": "a2acdb989591f91a352884a1c261d37cabdf7765a31c27715a4f376cb0aca426",
+        "source_tree_sha256": "fa7fca1db1d19c16b22cc0795b766f579c4ced33402df185674d174412fb64cc",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -425,6 +425,25 @@
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
+  "input_artifacts": [
+    "configs/quality/debt_scorecard.yaml",
+    "configs/quality/scripts_inventory_manifest.json",
+    "reports/quality/architecture-quality-scorecard.json",
+    "reports/quality/hotspot-family-baseline.json",
+    "reports/quality/module-coverage-inventory.json",
+    "reports/quality/config-surface-backlog.json",
+    "reports/quality/architecture-debt-remote-main-baseline.json",
+    "reports/quality/adr-enforcement-matrix.json",
+    "reports/quality/compatibility-importer-census.json",
+    "reports/quality/flaky-test-burndown-review.json",
+    "reports/quality/dead-code-inventory.json"
+  ],
+  "linked_issue_refresh_policy": "#7465",
+  "refresh_commands": [
+    "python -m scripts.engineering.qa.refresh_governance_artifacts",
+    "python -m scripts.engineering.qa report-debt-governance-gates --update",
+    "python -m scripts.engineering.qa report-debt-governance-gates --check"
+  ],
   "schema_version": 1,
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
