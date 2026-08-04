@@ -147,33 +147,3 @@ sequenceDiagram
     Pipeline-->>CLI: Pipeline execution result
 
     Note over CLI, Cleanup: End of Pipeline Execution Sequence
-```
-
-## Key Components
-
-### CLI Phase
-- **CLI Router**: Parses arguments and routes to appropriate pipeline
-- **Config Loader**: Validates YAML schemas and loads configuration
-- **Bootstrap Service**: Initializes DI container and observability
-
-### Pipeline Phase
-- **Pipeline Service**: Orchestrates the complete pipeline lifecycle
-- **Lock Service**: Manages lock acquisition for idempotent execution
-- **Transformer**: Applies business logic and transformations
-- **Storage Writer**: Handles Silver/Gold writes with DQ validation
-
-### Observability
-- **Metrics/Tracing**: Provides structured logging, metrics, and distributed tracing
-- **Error Handling**: Comprehensive error classification and reporting
-
-### Cleanup
-- **Cleanup Service**: Ensures proper resource cleanup and shutdown
-
-## ADR References
-
-- **ADR-010**: Local-Only Deployment — no external orchestration required
-- **ADR-015**: Pipeline Services Lifecycle — service instantiation and management
-- **ADR-018**: Gold Strict Validation — mandatory validation before Gold writes
-- **ADR-023**: Entity Type Patterns — standardized entity naming and structure
-- **ADR-032**: UnifiedHTTP Client — consistent HTTP client usage
-- **ADR-040**: Diagram Governance — diagram metadata and quality standards
