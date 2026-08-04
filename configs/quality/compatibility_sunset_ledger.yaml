@@ -3,69 +3,76 @@ policy_scope: compatibility_behavior_sunset
 source_of_truth:
   matrix_path: configs/quality/test_matrix.yaml
   evidence_path: reports/quality/test-governance-current.json
-backlog_reference: docs/05-engineering/compatibility-test-files-reduction-plan.md
+backlog_reference: docs/99-archive/engineering/compatibility-test-files-reduction-plan.md
 sunset_policy:
-  linked_issue: '#5977'
+  linked_issue: "#5977"
   default_action: retain_until_replacement
-  owner: '@bioetl-platform'
+  owner: "@bioetl-platform"
   required_evidence:
-  - replacement_surface_exists
-  - behavior_contract_preserved
-  - migration_path_documented
+    - replacement_surface_exists
+    - behavior_contract_preserved
+    - migration_path_documented
   forbidden_basis:
-  - filename_age_only
-  - legacy_label_only
-  - no_active_caller_audit
+    - filename_age_only
+    - legacy_label_only
+    - no_active_caller_audit
   canonical_checks:
-  - tests/architecture/test_test_governance_audit.py
-  - scripts/engineering/qa/report_test_governance_audit.py
+    - tests/architecture/test_test_governance_audit.py
+    - scripts/engineering/qa/report_test_governance_audit.py
 entries:
-- test_pattern: '*compat*'
-  sunset_criteria:
-  - has_replacement_in_domain_tests
-  - behavior_covered_by_contract_tests
-  - no_unique_behavior
-  status: closed_no_remaining_filename_matches
-  owner: '@bioetl-platform'
-  notes: 'Filename-pattern sunset inventory closed: zero remaining governed compatibility/legacy/deprecated
-    test files under the test-governance scanner. Reopen only if new matching test_*.py paths reappear.'
-  reviewed_on: '2026-07-23'
-  next_review_by: '2026-10-21'
-  evidence: reports/quality/test-governance-current.json (compatibility_test_files=0); no tests/**/test_*.py
-    paths match the governance compatibility filename regex; helper tests/helpers/compat_shim_guards.py
-    is a guard utility, not a sunset-target compatibility behavior suite.
-- test_pattern: '*legacy*'
-  sunset_criteria:
-  - has_replacement_in_domain_tests
-  - behavior_covered_by_contract_tests
-  - no_unique_behavior
-  status: closed_no_remaining_filename_matches
-  owner: '@bioetl-platform'
-  notes: 'Filename-pattern sunset inventory closed: zero remaining governed compatibility/legacy/deprecated
-    test files under the test-governance scanner. Reopen only if new matching test_*.py paths reappear.'
-  reviewed_on: '2026-07-23'
-  next_review_by: '2026-10-21'
-  evidence: reports/quality/test-governance-current.json (compatibility_test_files=0); no tests/**/test_*.py
-    paths match the governance compatibility filename regex; helper tests/helpers/compat_shim_guards.py
-    is a guard utility, not a sunset-target compatibility behavior suite.
-- test_pattern: '*deprecated*'
-  sunset_criteria:
-  - has_replacement_in_domain_tests
-  - behavior_covered_by_contract_tests
-  - no_unique_behavior
-  status: closed_no_remaining_filename_matches
-  owner: '@bioetl-platform'
-  notes: 'Filename-pattern sunset inventory closed: zero remaining governed compatibility/legacy/deprecated
-    test files under the test-governance scanner. Reopen only if new matching test_*.py paths reappear.'
-  reviewed_on: '2026-07-23'
-  next_review_by: '2026-10-21'
-  evidence: reports/quality/test-governance-current.json (compatibility_test_files=0); no tests/**/test_*.py
-    paths match the governance compatibility filename regex; helper tests/helpers/compat_shim_guards.py
-    is a guard utility, not a sunset-target compatibility behavior suite.
+  - test_pattern: "*compat*"
+    sunset_criteria:
+      - has_replacement_in_domain_tests
+      - behavior_covered_by_contract_tests
+      - no_unique_behavior
+    status: closed_no_remaining_filename_matches
+    owner: "@bioetl-platform"
+    notes:
+      "Filename-pattern sunset inventory closed: zero remaining governed compatibility/legacy/deprecated
+      test files under the test-governance scanner. Reopen only if new matching test_*.py paths reappear."
+    reviewed_on: "2026-07-23"
+    next_review_by: "2026-10-21"
+    evidence:
+      reports/quality/test-governance-current.json (compatibility_test_files=0); no tests/**/test_*.py
+      paths match the governance compatibility filename regex; helper tests/helpers/compat_shim_guards.py
+      is a guard utility, not a sunset-target compatibility behavior suite.
+  - test_pattern: "*legacy*"
+    sunset_criteria:
+      - has_replacement_in_domain_tests
+      - behavior_covered_by_contract_tests
+      - no_unique_behavior
+    status: closed_no_remaining_filename_matches
+    owner: "@bioetl-platform"
+    notes:
+      "Filename-pattern sunset inventory closed: zero remaining governed compatibility/legacy/deprecated
+      test files under the test-governance scanner. Reopen only if new matching test_*.py paths reappear."
+    reviewed_on: "2026-07-23"
+    next_review_by: "2026-10-21"
+    evidence:
+      reports/quality/test-governance-current.json (compatibility_test_files=0); no tests/**/test_*.py
+      paths match the governance compatibility filename regex; helper tests/helpers/compat_shim_guards.py
+      is a guard utility, not a sunset-target compatibility behavior suite.
+  - test_pattern: "*deprecated*"
+    sunset_criteria:
+      - has_replacement_in_domain_tests
+      - behavior_covered_by_contract_tests
+      - no_unique_behavior
+    status: closed_no_remaining_filename_matches
+    owner: "@bioetl-platform"
+    notes:
+      "Filename-pattern sunset inventory closed: zero remaining governed compatibility/legacy/deprecated
+      test files under the test-governance scanner. Reopen only if new matching test_*.py paths reappear."
+    reviewed_on: "2026-07-23"
+    next_review_by: "2026-10-21"
+    evidence:
+      reports/quality/test-governance-current.json (compatibility_test_files=0); no tests/**/test_*.py
+      paths match the governance compatibility filename regex; helper tests/helpers/compat_shim_guards.py
+      is a guard utility, not a sunset-target compatibility behavior suite.
 last_hygiene_review:
-  reviewed_on: '2026-07-23'
-  linked_issue: '#6485'
+  reviewed_on: "2026-07-23"
+  linked_issue: "#6485"
   result: closed_no_remaining_filename_matches
-  evidence: reports/quality/test-governance-current.json (compatibility_test_files=0); no tests/**/test_*.py
+  evidence:
+    reports/quality/test-governance-current.json (compatibility_test_files=0); no tests/**/test_*.py
     paths match the governance compatibility filename regex; helper tests/helpers/compat_shim_guards.py
     is a guard utility, not a sunset-target compatibility behavior suite.
