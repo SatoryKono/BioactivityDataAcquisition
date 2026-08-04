@@ -573,6 +573,6 @@
   "normalization_profile": {
     "ref": "chembl.activity",
     "version": "1.0.0",
-    "hash": "480cf80b6a419a2db6b191d0065391d9d23c44bbe547a0e6174eac7a00a1b14e"
+    "hash": "c3afc70ea63d61d224e2f38b5fa26be5841c84c457289ca39fec3da98e4daed3"
   }
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-03T15:07:47.777432+00:00",
+  "generated_at": "2026-08-04T04:57:12.336662+00:00",
   "summary": {
     "total_scripts": 571,
     "status_counts": {
@@ -12,7 +12,7 @@
       "agents": 8,
       "build": 12,
       "ci": 67,
-      "docs": 234,
+      "docs": 233,
       "other": 80,
       "scripts": 453,
       "skills": 18,
@@ -6200,13 +6200,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 233,
+          "line": 234,
           "source_group": "tests",
           "text": "from scripts.diagrams.pipeline_dataflow_ir import _project_fields"
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 245,
+          "line": 246,
           "source_group": "tests",
           "text": "from scripts.diagrams.pipeline_dataflow_ir import _project_fields"
         }
@@ -11598,7 +11598,7 @@
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 129,
+          "line": 152,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -21225,7 +21225,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -21244,12 +21244,6 @@
           "line": 117,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python src/tools/generate_json_field_typing_inventory.py"
-        },
-        {
-          "path": "docs/03-data-model/json-field-typing-inventory.md",
-          "line": 8,
-          "source_group": "docs",
-          "text": "`src/tools/generate_json_field_typing_inventory.py`."
         },
         {
           "path": "tests/architecture/test_non_chembl_json_field_typing_policy.py",
@@ -21386,7 +21380,7 @@
           "path": "src/tools/schema_parity_baseline.json",
           "line": 2,
           "source_group": "scripts",
-          "text": "\"description\": \"Known Silver↔Gold field differences. Only NEW mismatches not in this baseline trigger blocking failures. Update with: python src/tools/verify_schema_parity.py --update-baseline\","
+          "text": "\"description\": \"Known Silver<->Gold field differences. Only NEW mismatches not in this baseline trigger blocking failures. Update with: python src/tools/verify_schema_parity.py --update-baseline\","
         }
       ]
     }

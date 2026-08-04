@@ -396,7 +396,9 @@ CHEMBL_SUBCELLULAR_FRACTION_SCHEMA = pa.schema(
         # === Business fields (alphabetical order) ===
         pa.field("assay_count", pa.int64()),  # Number of assays using this fraction
         pa.field("example_assay_id", pa.string()),  # Example assay ChEMBL ID
-        pa.field("subcellular_fraction", pa.string()),  # Primary key - fraction name
+        pa.field(
+            "subcellular_fraction", pa.string(), nullable=False
+        ),  # Primary key - fraction name
         pa.field("subcellular_fraction_raw", pa.string()),
         # === DQ_FIELDS_SUFFIX ===
         *build_silver_dq_suffix_fields(),

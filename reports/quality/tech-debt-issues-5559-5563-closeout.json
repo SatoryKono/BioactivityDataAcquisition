@@ -1,0 +1,75 @@
+{
+  "schema_version": "tech-debt-issues-5559-5563-closeout-v1",
+  "reviewed_on": "2026-07-02",
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "issues": [
+    {
+      "number": 5559,
+      "title": "governance: align module-coverage gate current values with canonical zero-residual inventory",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/module_coverage_gates.yaml",
+        "reports/quality/module-coverage-inventory.json",
+        "reports/quality/debt-governance-gates.json",
+        "tests/architecture/test_tech_debt_issues_5559_5563_closeout.py"
+      ]
+    },
+    {
+      "number": 5560,
+      "title": "refactor(composite): remove first-party imports from the retained public merge entrypoint",
+      "status": "closed-ready",
+      "evidence": [
+        "src/bioetl/application/composite/merge_service.py",
+        "src/bioetl/application/composite/merger.py",
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "reports/quality/compatibility-importer-census.json"
+      ]
+    },
+    {
+      "number": 5561,
+      "title": "governance(config): make composite config duplication clusters owner-addressable",
+      "status": "closed-ready",
+      "evidence": [
+        "scripts/engineering/qa/report_config_surface_backlog.py",
+        "reports/quality/config-surface-backlog.json",
+        "tests/architecture/test_config_surface_entity_residual_plateau.py"
+      ]
+    },
+    {
+      "number": 5562,
+      "title": "governance(tests): enforce per-entry accountability for reviewed skip inventory",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/test_skip_inventory.yaml",
+        "tests/architecture/test_test_skip_inventory.py"
+      ]
+    },
+    {
+      "number": 5563,
+      "title": "governance(contracts): attach explicit ownership policy to excluded non-Gold contract rows",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/pipeline_contract_exclusion_policy.yaml",
+        "scripts/engineering/qa/report_pipeline_config_contract_ownership.py",
+        "reports/quality/pipeline-config-contract-ownership-map.json",
+        "tests/architecture/test_pipeline_config_contract_ownership_map_integrity.py"
+      ]
+    }
+  ],
+  "metrics": {
+    "module_coverage_unmeasured_current": 0,
+    "module_coverage_unmeasured_max_count": 0,
+    "module_coverage_uncovered_current": 0,
+    "module_coverage_uncovered_max_count": 0,
+    "release_gate_status": "passing",
+    "release_gate_warning_gates": [],
+    "retained_entrypoint_count": 12,
+    "retained_public_export_facade_count": 4,
+    "application_composite_merger_src_importer_count": 0,
+    "config_duplicate_cluster_count": 10,
+    "config_duplicate_occurrence_count": 26,
+    "test_skip_inventory_entry_count": 19,
+    "excluded_non_gold_contract_rows": 9,
+    "excluded_non_gold_contract_rows_with_policy": 9
+  }
+}
