@@ -8,9 +8,13 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
+import pandera.pandas as pandera
+import pyarrow as pa
 import yaml
 
 from bioetl.domain.contracts.gold import (
@@ -69,8 +73,8 @@ class SchemaPair:
     """Silver/Gold schema pair with pipeline config for PK loading."""
 
     name: str
-    silver_schema: object
-    gold_model: type
+    silver_schema: pa.Schema
+    gold_model: type[pandera.DataFrameModel]
     config_path: str
 
 
@@ -297,8 +301,8 @@ def _validate_primary_key(
     *,
     pair: SchemaPair,
     primary_key: str,
-    silver_fields: dict[str, object],
-    gold_columns: dict[str, object],
+    silver_fields: Mapping[str, Any],
+    gold_columns: Mapping[str, Any],
     warnings: list[str],
     blocking: list[str],
 ) -> None:

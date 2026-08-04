@@ -307,7 +307,9 @@ def apply_rows(rows: list[RenameRow], *, apply: bool) -> int:
     total_matches = 0
     modified_files = 0
 
-    for file_path in sorted(file_to_rows):
+    for file_path in sorted(
+        file_to_rows, key=lambda path: path.repo_relative_path.as_posix()
+    ):
         file_matches = _apply_rows_to_file(
             file_path=file_path,
             rows=file_to_rows[file_path],
