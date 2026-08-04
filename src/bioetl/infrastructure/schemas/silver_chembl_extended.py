@@ -14,11 +14,11 @@ CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
         # === System prefix (MUST be first, per RULES.md §2.4) ===
         *build_silver_system_prefix_fields(entity_id_nullable=False),
         # === Business fields (alphabetical order) ===
-        pa.field("publication_id", pa.string()),
+        pa.field("publication_id", pa.string(), nullable=False),
         pa.field("mesh_id", pa.string()),
         pa.field("qualifier", pa.string()),
-        pa.field("term", pa.string()),
-        pa.field("term_type", pa.string()),
+        pa.field("term", pa.string(), nullable=False),
+        pa.field("term_type", pa.string(), nullable=False),
         # === DQ_FIELDS_SUFFIX ===
         *build_silver_dq_suffix_fields(),
     ]

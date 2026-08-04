@@ -1,70 +1,234 @@
 {
-  "description": "Known Silver↔Gold field differences. Only NEW mismatches not in this baseline trigger blocking failures. Update with: python src/tools/verify_schema_parity.py --update-baseline",
+  "description": "Known Silver<->Gold field differences. Only NEW mismatches not in this baseline trigger blocking failures. Update with: python src/tools/verify_schema_parity.py --update-baseline",
   "chembl_activity": {
-    "silver_only": ["_dq_error", "_dq_warn", "manual_curation_flag", "original_activity_id"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id",
+      "_state",
+      "activity_relation",
+      "activity_type",
+      "activity_value"
+    ],
+    "gold_only": [
+      "relation",
+      "type",
+      "value"
+    ]
   },
   "chembl_assay": {
-    "silver_only": ["_dq_error", "_dq_warn"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id",
+      "assay_description",
+      "assay_subcellular_fraction_raw",
+      "bao_format_iri",
+      "bao_format_mapping_status",
+      "bao_ontology_version"
+    ],
+    "gold_only": [
+      "description"
+    ]
   },
   "chembl_assay_parameters": {
-    "silver_only": ["_dq_error", "_dq_warn"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id",
+      "type_raw"
+    ]
   },
   "chembl_cell_line": {
-    "silver_only": ["_dq_error", "_dq_warn"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id",
+      "clo_iri",
+      "clo_mapping_status",
+      "clo_ontology_version",
+      "efo_iri",
+      "efo_mapping_status",
+      "efo_ontology_version"
+    ]
   },
   "chembl_compound_record": {
-    "silver_only": ["_dq_error", "_dq_warn"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id"
+    ]
   },
   "chembl_document": {
-    "silver_only": ["affiliation_list", "author_keys", "author_orcids", "doi", "is_oa", "language", "pmc_id", "pmid", "publication_class", "publication_date", "publication_subclass", "publication_type_unified"],
-    "gold_only": ["publication_doi", "publication_pmc_id", "publication_pmid"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id",
+      "affiliation_list",
+      "author_orcids",
+      "is_oa",
+      "issn_list",
+      "language",
+      "oa_status",
+      "pmc_id",
+      "publication_class",
+      "publication_date",
+      "publication_subclass",
+      "publication_type_raw",
+      "publication_type_unified"
+    ]
   },
   "chembl_document_similarity": {
-    "silver_only": ["_dq_error", "_dq_warn"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id"
+    ]
   },
   "chembl_document_term": {
-    "silver_only": ["_dq_error", "_dq_warn"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id"
+    ]
   },
   "chembl_molecule": {
-    "silver_only": ["_dq_error", "_dq_warn"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id"
+    ]
   },
   "chembl_protein_class": {
-    "silver_only": ["_dq_error", "_dq_warn"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id"
+    ]
   },
   "chembl_target": {
-    "silver_only": ["_dq_error", "_dq_warn", "component_descriptions"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id",
+      "protein_classifications",
+      "target_description"
+    ],
+    "gold_only": [
+      "description"
+    ]
   },
   "chembl_target_component": {
-    "silver_only": ["_dq_error", "_dq_warn"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id"
+    ]
   },
   "chembl_tissue": {
-    "silver_only": ["_dq_error", "_dq_warn", "content_hash", "entity_id"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id",
+      "bto_iri",
+      "bto_mapping_status",
+      "bto_ontology_version",
+      "efo_iri",
+      "efo_mapping_status",
+      "efo_ontology_version",
+      "uberon_iri",
+      "uberon_mapping_status",
+      "uberon_ontology_version"
+    ]
   },
   "chembl_subcellular_fraction": {
-    "silver_only": ["_dq_error", "_dq_warn", "example_assay_id"],
-    "gold_only": ["example_assay_chembl_id"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id",
+      "subcellular_fraction_raw"
+    ]
   },
   "pubchem_compound": {
-    "silver_only": ["_dq_error", "_dq_warn", "complexity", "conformer_count_3d", "conformer_rmsd_3d", "effective_rotor_count_3d", "exact_mass", "feature_acceptor_count_3d", "feature_anion_count_3d", "feature_cation_count_3d", "feature_count_3d", "feature_donor_count_3d", "feature_hydrophobe_count_3d", "feature_ring_count_3d", "monoisotopic_mass", "x_steric_quadrupole_3d", "y_steric_quadrupole_3d", "z_steric_quadrupole_3d"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id"
+    ]
   },
   "pubmed_publication": {
-    "silver_only": ["pub_date", "publication_class", "publication_subclass", "publication_type_unified"],
-    "gold_only": ["mid", "pii", "publisher_id"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id"
+    ],
+    "gold_only": [
+      "issn_list"
+    ]
   },
   "crossref_publication": {
-    "silver_only": ["abstract", "affiliation_list", "pmc_id", "pmid", "publication_class", "publication_subclass", "publication_type_unified"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id",
+      "is_oa"
+    ]
   },
   "openalex_publication": {
-    "silver_only": ["pmc_id", "publication_class", "publication_subclass", "publication_type_unified"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id",
+      "type_crossref"
+    ],
+    "gold_only": [
+      "issn_list"
+    ]
   },
   "semanticscholar_publication": {
-    "silver_only": ["pmc_id", "publication_class", "publication_subclass", "publication_type_unified"],
-    "gold_only": ["authors"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id"
+    ],
+    "gold_only": [
+      "issn",
+      "issn_list"
+    ]
   },
   "uniprot_protein": {
-    "silver_only": ["_dq_error", "_dq_warn", "acetylation", "cellular_component", "disulfide_bond", "genus", "glycosylation", "intramembrane", "isoform_ids", "isoform_names", "isoform_synonyms", "lipidation", "modified_residue", "molecular_function", "phosphorylation", "phylum", "propeptide", "reaction_ec_numbers", "reactions", "signal_peptide", "superkingdom", "topology", "transmembrane", "ubiquitination"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id"
+    ]
   },
   "uniprot_idmapping": {
-    "silver_only": ["_dq_error"]
+    "silver_only": [
+      "_ingestion_ts",
+      "_run_id",
+      "_run_type",
+      "_source_batch_id"
+    ]
   }
 }
