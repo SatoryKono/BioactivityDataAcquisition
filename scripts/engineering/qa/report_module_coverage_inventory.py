@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import Any
+from collections.abc import Set
 
 import yaml
 
@@ -579,7 +580,7 @@ def _status_is_measured(status: str) -> bool:
 
 
 def _coverage_status_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
-    status_counts = dict.fromkeys(COVERAGE_STATUSES, 0)
+    status_counts: dict[str, int] = dict.fromkeys(COVERAGE_STATUSES, 0)
     for row in rows:
         status = str(row["coverage_status"])
         status_counts[status] = status_counts.get(status, 0) + 1
@@ -1043,7 +1044,7 @@ def _coverage_gate_modes(gates: dict[str, Any]) -> tuple[float, str, str, set[st
 def _row_coverage_violations(
     row: dict[str, Any],
     *,
-    exempt: set[str],
+    exempt: Set[str],
     min_delta: float,
     baseline_by_path: dict[str, float],
     gates: dict[str, Any],

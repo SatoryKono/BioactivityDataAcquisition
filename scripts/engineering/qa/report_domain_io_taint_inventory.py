@@ -133,9 +133,11 @@ class _DomainIOTaintVisitor(ast.NodeVisitor):
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self._visit_scoped(node, node.name)
 
-    # Shared implementation avoids S4144 duplicate-method findings.
-    visit_FunctionDef = visit_ClassDef
-    visit_AsyncFunctionDef = visit_ClassDef
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._visit_scoped(node, node.name)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._visit_scoped(node, node.name)
 
     def visit_Call(self, node: ast.Call) -> None:
         symbol = _qualified_name(node.func)
@@ -155,7 +157,7 @@ class _DomainIOTaintVisitor(ast.NodeVisitor):
         if reason is not None and kind is not None:
             finding = TaintFinding(
                 path=self.relative_path,
-                line=node.lineno,
+                line=getattr(node, "lineno", 0),
                 symbol=owner,
                 kind=kind,
                 reason=reason,

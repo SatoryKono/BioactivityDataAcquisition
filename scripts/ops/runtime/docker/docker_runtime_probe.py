@@ -235,12 +235,19 @@ def _resource_findings(
 
 
 def _compose_service_limits(compose: Mapping[str, Any]) -> dict[str, dict[str, float]]:
+    services = compose.get("services")
+    if not isinstance(services, Mapping):
+        return {}
+
+    def _number(value: object) -> float:
+        return float(value) if isinstance(value, str | int | float) else 0.0
+
     return {
         str(service): {
-            "cpus": float(config.get("cpus") or 0.0),
-            "pids_limit": float(config.get("pids_limit") or 0.0),
+            "cpus": _number(config.get("cpus")),
+            "pids_limit": _number(config.get("pids_limit")),
         }
-        for service, config in compose.get("services", {}).items()
+        for service, config in services.items()
         if isinstance(config, Mapping)
     }
 

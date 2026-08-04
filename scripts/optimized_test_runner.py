@@ -10,9 +10,18 @@ import argparse
 import subprocess
 import sys
 from pathlib import Path
+from typing import NotRequired, TypedDict
+
+
+class TestCategoryConfig(TypedDict):
+    description: str
+    paths: list[str]
+    markers: NotRequired[list[str]]
+    exclude_markers: NotRequired[list[str]]
+    timeout: int
 
 # Test categories and their typical execution times
-TEST_CATEGORIES = {
+TEST_CATEGORIES: dict[str, TestCategoryConfig] = {
     "unit-fast": {
         "description": "Fastest unit tests (no I/O, no async)",
         "paths": ["tests/unit/domain/", "tests/unit/helpers/"],

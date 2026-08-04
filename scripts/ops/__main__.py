@@ -44,7 +44,7 @@ from scripts.engineering.common.cli_dispatch import (
     shell_command,
 )
 
-COMMAND_SPECS = {
+_PYTHON_COMMAND_PATHS = {
     "salt-rotate": "maintenance/security/salt_rotate.py",
     "check-observability-ports": "observability/check_published_observability_endpoints.py",
     "rerender-grafana": "observability/grafana/rerender_grafana_screenshots.py",
@@ -64,9 +64,11 @@ COMMAND_SPECS = {
     ),
     "wsl-proxy": "runtime/wsl/wsl_proxy.py",
 }
-COMMAND_SPECS = {name: python_command(script) for name, script in COMMAND_SPECS.items()}
+COMMAND_SPECS = {
+    name: python_command(script) for name, script in _PYTHON_COMMAND_PATHS.items()
+}
 
-SHELL_COMMAND_SPECS = {
+_SHELL_COMMAND_PATHS = {
     "codex": "launchers/codex/codex.sh",
     "codex-exec": "launchers/codex/codex-exec.sh",
     "codex-headless": "../ai/codex/headless.sh",
@@ -79,7 +81,7 @@ SHELL_COMMAND_SPECS = {
     "deploy": "runtime/deploy/deploy-bioetl.sh",
 }
 SHELL_COMMAND_SPECS = {
-    name: shell_command(script) for name, script in SHELL_COMMAND_SPECS.items()
+    name: shell_command(script) for name, script in _SHELL_COMMAND_PATHS.items()
 }
 
 _DIR = Path(__file__).parent

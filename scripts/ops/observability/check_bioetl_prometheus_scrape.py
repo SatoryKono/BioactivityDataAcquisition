@@ -34,7 +34,9 @@ def _fetch_targets(prometheus_url: str, timeout: float) -> list[dict[str, object
         payload = json.loads(response.read().decode("utf-8"))
     if not isinstance(payload, dict) or payload.get("status") != "success":
         raise RuntimeError(f"unexpected targets payload: {payload!r}")
-    data = payload.get("data") or {}
+    data = payload.get("data")
+    if not isinstance(data, dict):
+        raise RuntimeError("targets data is not an object")
     active = data.get("activeTargets") or []
     if not isinstance(active, list):
         raise RuntimeError("activeTargets is not a list")
@@ -86,24 +88,25 @@ def main(argv: list[str] | None = None) -> int:
     unhealthy = [
         target for target in bioetl if str(target.get("health", "")).lower() != "up"
     ]
+    target_summaries = [
+        {
+            "scrapeUrl": target.get("scrapeUrl"),
+            "health": target.get("health"),
+            "lastError": target.get("lastError"),
+        }
+        for target in bioetl
+    ]
     summary = {
         "status": "ok" if not unhealthy else "error",
         "job": "bioetl",
         "canonical_target": "bioetl:8000",
         "scrape_interval": "30s",
-        "targets": [
-            {
-                "scrapeUrl": target.get("scrapeUrl"),
-                "health": target.get("health"),
-                "lastError": target.get("lastError"),
-            }
-            for target in bioetl
-        ],
+        "targets": target_summaries,
     }
     if args.json:
         print(json.dumps(summary, indent=2))
     else:
-        for item in summary["targets"]:
+        for item in target_summaries:
             print(f"{item['scrapeUrl']}: {item['health']}")
     return EXIT_OK if not unhealthy else EXIT_TARGET_DOWN
 

@@ -8,8 +8,8 @@
 | Metric | Value |
 | --- | --- |
 | Doc-like files | 2435 |
-| Tracked doc-like files | 2434 |
-| Ignored local docs/reports files | 1 |
+| Tracked doc-like files | 2435 |
+| Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
 | Generated routes | 69 |
@@ -18,8 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1 |
-| tracked | 2434 |
+| tracked | 2435 |
 
 ## Lifecycle Counts
 
@@ -91,6 +90,7 @@
 | `docs/00-project/ai/skills/global/documentation-audit/references/audit-checklist.md` | Working | 0 | archive-after-migration |
 | `docs/00-project/ai/skills/global/documentation-audit/references/report-template.md` | Working | 0 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
+| `docs/filters/migration-plan.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7340-specialized-subsystem-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7348-comprehensive-skills-analysis-20260731.md` | Working | 0 | archive-after-migration |

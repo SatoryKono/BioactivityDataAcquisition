@@ -14,6 +14,7 @@ import sys
 import threading
 import time
 from pathlib import Path
+from typing import cast
 
 _SERVER_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
 _POWERSHELL_EXE = "powershell.exe"
@@ -145,8 +146,8 @@ def _windows_backend_command(
 
 
 class _ForwardHandler(socketserver.BaseRequestHandler):
-    remote_port: int
-    relay_script: str
+    remote_port = 0
+    relay_script = ""
 
     def handle(self) -> None:
         from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
@@ -173,25 +174,26 @@ class _ForwardHandler(socketserver.BaseRequestHandler):
         )
         assert relay.stdin is not None
         assert relay.stdout is not None
+        client_socket = cast(socket.socket, self.request)
         try:
-            sockets = [self.request, relay.stdout]
+            sockets = [client_socket, relay.stdout]
             while True:
                 readable, _, _ = select.select(sockets, [], [], 30)
                 if not readable:
                     continue
                 for source in readable:
                     data = (
-                        source.recv(65536)
-                        if source is self.request
+                        client_socket.recv(65536)
+                        if source is client_socket
                         else source.read(65536)
                     )
                     if not data:
                         return
-                    if source is self.request:
+                    if source is client_socket:
                         relay.stdin.write(data)
                         relay.stdin.flush()
                     else:
-                        self.request.sendall(data)
+                        client_socket.sendall(data)
         finally:
             relay.terminate()
 

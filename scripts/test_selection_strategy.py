@@ -7,6 +7,7 @@ to run appropriate tests based on changed files.
 """
 
 import argparse
+from collections.abc import Mapping
 import json
 import os
 import subprocess
@@ -137,7 +138,7 @@ def _execute_strategy_command(strategy_name: str, cmd: list[str]) -> bool:
 
 
 def _strategy_matches_changed_files(
-    strategy: dict[str, object],
+    strategy: Mapping[str, object],
     changed_files: set[str],
 ) -> bool:
     trigger_files = strategy.get("trigger_files", [])
@@ -171,7 +172,7 @@ def _append_python_strategy_if_needed(
         matched_strategies.append("python_files")
 
 
-def _run_pre_checks(strategy: dict[str, object]) -> bool:
+def _run_pre_checks(strategy: Mapping[str, object]) -> bool:
     pre_checks = strategy.get("pre_check")
     if not isinstance(pre_checks, list):
         return True
@@ -200,7 +201,7 @@ def _run_pre_checks(strategy: dict[str, object]) -> bool:
 
 
 def _build_pytest_command(
-    strategy: dict[str, object],
+    strategy: Mapping[str, object],
     *,
     coverage: bool,
 ) -> list[str]:
