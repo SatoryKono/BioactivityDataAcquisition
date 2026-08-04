@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2428 |
-| Tracked doc-like files | 2428 |
+| Doc-like files | 2430 |
+| Tracked doc-like files | 2430 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2428 |
+| tracked | 2430 |
 
 ## Lifecycle Counts
 
@@ -41,7 +41,7 @@
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 33 |
-| working_report | 88 |
+| working_report | 89 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -57,30 +57,30 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 861 |
+| Active | 862 |
 | Archived | 141 |
 | Canonical | 73 |
 | Generated | 861 |
-| Working | 492 |
+| Working | 493 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 861 |
+| active | 862 |
 | archive | 141 |
 | canonical | 73 |
 | generated | 861 |
-| working | 492 |
+| working | 493 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 82 |
+| archive-after-migration | 83 |
 | generate-automatically | 861 |
-| keep | 1169 |
+| keep | 1170 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -152,6 +152,7 @@
 | `reports/quality/test-support-helper-ownership-map.json` | Working | 0 | archive-after-migration |
 | `reports/quality/test-system-architecture-audit-20260729_FULL.md` | Working | 0 | archive-after-migration |
 | `reports/quality/test-system-audit-2026-07-29-issue-publish.json` | Working | 0 | archive-after-migration |
+| `reports/quality/total-tech-debt-audit-main-2026-06-16.md` | Working | 0 | archive-after-migration |
 | `reports/quality/total-tech-debt-audit-main-current.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1-domain.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1.1-contracts-ports.md` | Working | 0 | archive-after-migration |
@@ -166,7 +167,6 @@
 | `reports/semantic_pipeline_audit/semantic_pair_matrix_2026-07-01.csv` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/semantic_pipeline_audit_2026-07-01.md` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/semantic_pipeline_audit_exhaustive_2026-07-01.md` | Working | 0 | archive-after-migration |
-| `reports/semantic_pipeline_audit/semantic_pipeline_audit_manifest_2026-07-01.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

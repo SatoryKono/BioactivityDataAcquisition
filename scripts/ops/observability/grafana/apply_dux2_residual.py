@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 from copy import deepcopy
 from pathlib import Path
+from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parents[4]
 DASH = ROOT / "grafana" / "dashboards"
@@ -17,19 +18,21 @@ PANEL_RUNTIME_BLOCKERS = "Runtime Blockers"
 PANEL_INSPECT_DQ_CURRENT_REASONS = "Inspect DQ Current Reasons"
 PANEL_CONTROL_PLANE_DQ_HANDOFFS = "Control-plane / DQ handoffs"
 
-
-def load(name: str) -> dict:
-    return json.loads((DASH / name).read_text(encoding="utf-8"))
+type JsonObject = dict[str, Any]
 
 
-def save(name: str, payload: dict) -> None:
+def load(name: str) -> JsonObject:
+    return cast(JsonObject, json.loads((DASH / name).read_text(encoding="utf-8")))
+
+
+def save(name: str, payload: JsonObject) -> None:
     (DASH / name).write_text(
         json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
 
 
-def walk(panels: list) -> list:
-    out: list = []
+def walk(panels: list[JsonObject]) -> list[JsonObject]:
+    out: list[JsonObject] = []
     for p in panels:
         out.append(p)
         nested = p.get("panels")
@@ -38,7 +41,7 @@ def walk(panels: list) -> list:
     return out
 
 
-def by_title(d: dict) -> dict[str, dict]:
+def by_title(d: JsonObject) -> dict[str, JsonObject]:
     return {
         str(p.get("title")): p
         for p in walk(d.get("panels", []))
@@ -47,7 +50,7 @@ def by_title(d: dict) -> dict[str, dict]:
 
 
 def ensure_color_bg_table(
-    panel: dict, *, value_fields: list[str] | None = None
+    panel: JsonObject, *, value_fields: list[str] | None = None
 ) -> None:
     """Prefer color-background cells for status-like table columns."""
     fc = panel.setdefault("fieldConfig", {})
@@ -90,7 +93,7 @@ def ensure_color_bg_table(
             )
 
 
-def append_desc(panel: dict, text: str) -> None:
+def append_desc(panel: JsonObject, text: str) -> None:
     cur = str(panel.get("description") or "")
     if text in cur:
         return
@@ -100,7 +103,7 @@ def append_desc(panel: dict, text: str) -> None:
 def link(
     title: str,
     url: str,
-) -> dict:
+) -> JsonObject:
     return {
         "title": title,
         "url": url,
@@ -122,7 +125,7 @@ def table_panel(
     w: int,
     h: int,
     description: str,
-) -> dict:
+) -> JsonObject:
     return {
         "id": pid,
         "type": "table",

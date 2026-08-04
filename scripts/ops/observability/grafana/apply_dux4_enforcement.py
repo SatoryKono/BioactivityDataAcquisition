@@ -10,13 +10,20 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parents[4]
 DASH = ROOT / "grafana" / "dashboards"
 DOCS = ROOT / "docs" / "03-guides" / "dashboards"
 
+type JsonObject = dict[str, Any]
 
-def walk(panels: list | None, parent_collapsed: bool = False, acc: list | None = None):
+
+def walk(
+    panels: list[JsonObject] | None,
+    parent_collapsed: bool = False,
+    acc: list[tuple[JsonObject, bool]] | None = None,
+) -> list[tuple[JsonObject, bool]]:
     acc = acc if acc is not None else []
     for panel in panels or []:
         collapsed = parent_collapsed or bool(panel.get("collapsed"))
@@ -26,11 +33,11 @@ def walk(panels: list | None, parent_collapsed: bool = False, acc: list | None =
     return acc
 
 
-def load(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+def load(path: Path) -> JsonObject:
+    return cast(JsonObject, json.loads(path.read_text(encoding="utf-8")))
 
 
-def save(path: Path, data: dict) -> None:
+def save(path: Path, data: JsonObject) -> None:
     import os
 
     text = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
@@ -39,7 +46,7 @@ def save(path: Path, data: dict) -> None:
     os.replace(tmp, path)
 
 
-def prepend_description(panel: dict, sentence: str) -> bool:
+def prepend_description(panel: JsonObject, sentence: str) -> bool:
     desc = panel.get("description") or ""
     marker = sentence[:48]
     if marker in desc:
@@ -48,7 +55,7 @@ def prepend_description(panel: dict, sentence: str) -> bool:
     return True
 
 
-def find_row(panels: list | None, substr: str) -> dict | None:
+def find_row(panels: list[JsonObject] | None, substr: str) -> JsonObject | None:
     for panel, _ in walk(panels):
         if (
             panel.get("type") == "row"
@@ -59,7 +66,7 @@ def find_row(panels: list | None, substr: str) -> dict | None:
 
 
 def write_v0_artifacts() -> None:
-    override_rows: list[dict] = []
+    override_rows: list[JsonObject] = []
     for path in sorted(DASH.glob("*.json")):
         data = load(path)
         for panel, collapsed in walk(data.get("panels") or []):
@@ -122,7 +129,7 @@ def write_v0_artifacts() -> None:
     )
     print("override inventory", inv["panel_count"], risk_counts)
 
-    matrix_rows: list[dict] = []
+    matrix_rows: list[JsonObject] = []
     risk_index = {(row["file"], row["panel_id"]): row["risks"] for row in override_rows}
     for path in sorted(DASH.glob("*.json")):
         data = load(path)
@@ -272,7 +279,7 @@ Contracts may match **base titles** via helpers without requiring prefixes today
     )
 
 
-def neutralize_zero_color_thresholds(panel: dict) -> bool:
+def neutralize_zero_color_thresholds(panel: JsonObject) -> bool:
     """Avoid green/red success/failure semantics at value 0 when present."""
     fc = panel.get("fieldConfig") or {}
     defaults = fc.get("defaults") or {}
@@ -308,7 +315,7 @@ def neutralize_zero_color_thresholds(panel: dict) -> bool:
     return changed
 
 
-def shrink_stat(panel: dict, *, max_h: int = 4, max_w: int = 6) -> bool:
+def shrink_stat(panel: JsonObject, *, max_h: int = 4, max_w: int = 6) -> bool:
     if panel.get("type") != "stat":
         return False
     gp = dict(panel.get("gridPos") or {})
@@ -326,7 +333,7 @@ def shrink_stat(panel: dict, *, max_h: int = 4, max_w: int = 6) -> bool:
     return changed
 
 
-def shorten_text_panel(panel: dict, *, max_len: int = 480) -> bool:
+def shorten_text_panel(panel: JsonObject, *, max_len: int = 480) -> bool:
     """Shorten long markdown triage prose only.
 
     Never mid-cut HTML chrome (nav bus id=1000, provenance banners) or any
