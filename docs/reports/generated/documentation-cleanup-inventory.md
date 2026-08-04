@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2435 |
-| Tracked doc-like files | 2435 |
+| Doc-like files | 2437 |
+| Tracked doc-like files | 2437 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2435 |
+| tracked | 2437 |
 
 ## Lifecycle Counts
 
@@ -41,7 +41,7 @@
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 33 |
-| working_report | 92 |
+| working_report | 94 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -61,7 +61,7 @@
 | Archived | 141 |
 | Canonical | 73 |
 | Generated | 861 |
-| Working | 498 |
+| Working | 500 |
 
 ## Surface Families
 
@@ -71,14 +71,14 @@
 | archive | 141 |
 | canonical | 73 |
 | generated | 861 |
-| working | 498 |
+| working | 500 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 87 |
+| archive-after-migration | 89 |
 | generate-automatically | 861 |
 | keep | 1171 |
 | reconcile-with-github-state | 4 |
@@ -94,6 +94,8 @@
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7340-specialized-subsystem-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7348-comprehensive-skills-analysis-20260731.md` | Working | 0 | archive-after-migration |
+| `reports/ai/memory-audit-20260804/FINAL-REPORT.md` | Working | 0 | archive-after-migration |
+| `reports/ai/memory-audit-20260804/execution-ledger.md` | Working | 0 | archive-after-migration |
 | `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/CLOSEOUT.md` | Working | 0 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/grafana-live-snapshot.json` | Working | 0 | archive-after-migration |
@@ -165,8 +167,6 @@
 | `reports/review/S2.2-services-pipelines.md` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/base_config_semantic_coverage_2026-07-01.json` | Working | 0 | archive-after-migration |
 | `reports/semantic_pipeline_audit/critical_inconsistencies_2026-07-01.md` | Working | 0 | archive-after-migration |
-| `reports/semantic_pipeline_audit/recommended_canonical_fields_2026-07-01.csv` | Working | 0 | archive-after-migration |
-| `reports/semantic_pipeline_audit/semantic_cluster_registry_2026-07-01.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
