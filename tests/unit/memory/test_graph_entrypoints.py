@@ -67,9 +67,7 @@ def test_graph_sync_responsibility_modules_expose_owned_surfaces() -> None:
 def test_graph_sync_prefers_canonical_mapping_path() -> None:
     default_root = _sync_symbol("DEFAULT_ROOT")
     mapping_path = _sync_symbol("_memory_mapping_path")(default_root)
-    assert (
-        mapping_path == default_root / _sync_symbol("DEFAULT_MEMORY_MAPPING_PATH")
-    )
+    assert mapping_path == default_root / _sync_symbol("DEFAULT_MEMORY_MAPPING_PATH")
 
 
 def test_graph_ontology_and_mapping_assets_exist() -> None:
