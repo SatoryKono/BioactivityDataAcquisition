@@ -10,7 +10,6 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Integration tests for Grafana dashboard surface-level observability contracts."""
 
-import json
 from pathlib import Path
 
 import pytest
