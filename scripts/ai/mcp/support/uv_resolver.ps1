@@ -18,12 +18,10 @@ function Get-BioetlProxyEnvironmentSnapshot {
         [System.StringComparer]::Ordinal
     )
     foreach ($name in $script:BioetlProxyEnvironmentNames) {
-        $envPath = "Env:$name"
-        $snapshot[$name] = if (Test-Path -LiteralPath $envPath) {
-            (Get-Item -LiteralPath $envPath).Value
-        } else {
-            $null
-        }
+        $snapshot[$name] = [Environment]::GetEnvironmentVariable(
+            $name,
+            [EnvironmentVariableTarget]::Process
+        )
     }
     Write-Output -NoEnumerate $snapshot
 }
@@ -56,7 +54,6 @@ function Restore-BioetlProxyEnvironment {
             $value = $map[$name]
         }
         if ($null -eq $value -or $value -eq "") {
-            Remove-Item -Path "Env:$name" -ErrorAction SilentlyContinue
             [Environment]::SetEnvironmentVariable(
                 $name,
                 $null,
@@ -64,7 +61,6 @@ function Restore-BioetlProxyEnvironment {
             )
         }
         else {
-            Set-Item -Path "Env:$name" -Value ([string]$value)
             [Environment]::SetEnvironmentVariable(
                 $name,
                 [string]$value,
@@ -86,15 +82,22 @@ function Enable-BioetlUvxNetworkBypass {
     if ($env:BIOETL_UVX_DIRECT_NETWORK -ne "1") {
         return
     }
-    $env:NO_PROXY = "*"
-    $env:no_proxy = "*"
+    foreach ($name in @("NO_PROXY", "no_proxy")) {
+        [Environment]::SetEnvironmentVariable(
+            $name,
+            "*",
+            [EnvironmentVariableTarget]::Process
+        )
+    }
     foreach ($name in @(
             "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
             "http_proxy", "https_proxy", "all_proxy"
         )) {
-        if (Test-Path "Env:$name") {
-            Remove-Item "Env:$name" -ErrorAction SilentlyContinue
-        }
+        [Environment]::SetEnvironmentVariable(
+            $name,
+            $null,
+            [EnvironmentVariableTarget]::Process
+        )
     }
 }
 
