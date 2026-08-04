@@ -12,6 +12,8 @@ actor:
   model: null
 created_at: '2026-08-04T12:27:25.831633+00:00'
 source_refs:
+- src/memory/curated/lessons/promote-only-repeatable-knowledge.md
+- src/memory/curated/domain_knowledge/task-aware-retrieval-profiles.md
 - src/memory/curated/incidents/sonar-nosonar.md
 source_hashes: {}
 trust: trusted_repository
