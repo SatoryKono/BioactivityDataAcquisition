@@ -309,6 +309,13 @@ class TestIntegrationVcrPolicy:
         assert "--vcr-record=none" in tests_workflow
         assert "python -m scripts.engineering.qa.vcr check-placement" in tests_workflow
         assert "python -m scripts.engineering.qa.vcr check-naming" in tests_workflow
+        # Fail-closed (#7493): required VCR lanes must not soft-skip when LFS fails.
+        assert "Skip VCR content gates when LFS budget is exhausted" not in tests_workflow
+        assert "Skip control-plane VCR smoke when LFS is unavailable" not in tests_workflow
+        assert re.search(
+            r"id: lfs_pull\n\s+continue-on-error: true",
+            tests_workflow,
+        ) is None
         assert "tests/contract/ -v --tb=short --network" in contract_workflow
         assert (
             "github.repository == "
