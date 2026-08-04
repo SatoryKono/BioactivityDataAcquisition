@@ -57,8 +57,8 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 866 |
-| Archived | 129 |
+| Active | 863 |
+| Archived | 132 |
 | Canonical | 73 |
 | Generated | 861 |
 | Working | 482 |
@@ -67,8 +67,8 @@
 
 | Surface | Count |
 | --- | --- |
-| active | 866 |
-| archive | 129 |
+| active | 863 |
+| archive | 132 |
 | canonical | 73 |
 | generated | 861 |
 | working | 482 |

@@ -1,17 +1,20 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
-Class: published
+Class: repo-only
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-31'
+  Last verified: '2026-08-04'
 
 ______________________________________________________________________
 
 # Test Telemetry Baseline
+
+> **Classification:** repo-only engineering evidence companion (MkDocs
+> `exclude_docs: 05-engineering/**`). Not published navigation SSOT. #7421.
 
 Committed baseline for CI coverage and slow-test telemetry so engineering
 audits do not depend only on ephemeral GitHub artifact retention.
