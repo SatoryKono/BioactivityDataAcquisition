@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-04T11:13:41.754450+00:00",
+  "generated_at": "2026-08-04T11:32:20.135461+00:00",
   "summary": {
     "total_scripts": 571,
     "status_counts": {
@@ -6362,7 +6362,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_regression_workflow.py",
-          "line": 123,
+          "line": 125,
           "source_group": "tests",
           "text": "wrapper = Path(\"scripts/diagrams/render.ps1\")"
         }
@@ -7326,7 +7326,7 @@
           "path": ".github/workflows/docs.yml",
           "line": 199,
           "source_group": "ci",
-          "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json"
+          "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --links --specs --configs --report-json reports/docs-link-check-report.json"
         },
         {
           "path": ".pre-commit-config.yaml",
