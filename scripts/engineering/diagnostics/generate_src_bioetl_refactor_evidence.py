@@ -17,6 +17,7 @@ from collections import Counter, defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 LAYERS = ("application", "composition", "domain", "infrastructure", "interfaces")
 SHARDS = (
@@ -28,6 +29,11 @@ SHARDS = (
     "interfaces",
 )
 TOPIC_ID = "src-bioetl-refactor-facts"
+
+# Evidence rows deliberately combine counters, source identities, nested
+# collections, and typed fact objects.  Keep that heterogeneity within the
+# report-serialization boundary.
+type DynamicPayload = dict[str, Any]
 
 BRANCH_NODES = (
     ast.If,
@@ -48,7 +54,7 @@ class FileFact:
     module: str
     family: str
     facts: tuple[str, ...]
-    metrics: dict[str, object]
+    metrics: DynamicPayload
 
 
 @dataclass(frozen=True)
@@ -61,7 +67,7 @@ class ObjectFact:
     parent: str | None
     kind: str
     facts: tuple[str, ...]
-    metrics: dict[str, object]
+    metrics: DynamicPayload
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -100,13 +106,15 @@ def _shard_for(src_root: Path, path: Path) -> str:
 
 def _family_for(src_root: Path, path: Path) -> str:
     rel = path.relative_to(src_root)
-    if not rel.parts:
+    parts = rel.parts
+    if not parts:
         return "root"
-    if rel.parts[0] not in LAYERS:
+    root_part = next(iter(parts), "root")
+    if root_part not in LAYERS:
         return "root"
-    if len(rel.parts) >= 3:
-        return f"{rel.parts[0]}/{rel.parts[1]}"
-    return rel.parts[0]
+    if len(parts) >= 3:
+        return f"{root_part}/{parts[1]}"
+    return root_part
 
 
 def _slug(value: str) -> str:
@@ -389,7 +397,7 @@ def _object_fact(
                 f"{'yes' if docstring_present else 'no'}."
             ),
         )
-        metrics: dict[str, object] = {
+        metrics: DynamicPayload = {
             "lineno": node.lineno,
             "end_lineno": getattr(node, "end_lineno", node.lineno),
             "span": _node_span(node),
@@ -466,7 +474,7 @@ def _analyze_file(src_root: Path, path: Path) -> tuple[FileFact, list[ObjectFact
     return file_fact, object_facts
 
 
-def _jsonl_dump(path: Path, rows: Iterable[dict[str, object]]) -> None:
+def _jsonl_dump(path: Path, rows: Iterable[DynamicPayload]) -> None:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     path = resolve_output_path(path, root=REPO_ROOT)
@@ -479,7 +487,7 @@ def _jsonl_dump(path: Path, rows: Iterable[dict[str, object]]) -> None:
             handle.write("\n")
 
 
-def _yaml_dump(path: Path, payload: dict[str, object]) -> None:
+def _yaml_dump(path: Path, payload: DynamicPayload) -> None:
     lines: list[str] = []
     for key, value in payload.items():
         lines.extend(_yaml_lines(key, value, 0))
@@ -500,7 +508,9 @@ def _yaml_dict_lines(key: str, value: dict[object, object], indent: int) -> list
     return lines
 
 
-def _yaml_nested_list_item_lines(item: object, indent: int) -> list[str]:
+def _yaml_nested_list_item_lines(
+    item: dict[object, object] | list[object], indent: int
+) -> list[str]:
     prefix = " " * indent
     lines = [f"{prefix}  -"]
     if isinstance(item, dict):
@@ -664,7 +674,7 @@ def _build_parent_pillars(parent_root: Path) -> None:
 
 def _summarise_shard(
     file_facts: list[FileFact], object_facts: list[ObjectFact]
-) -> dict[str, object]:
+) -> DynamicPayload:
     file_count = len(file_facts)
     object_count = len(object_facts)
     family_by_files = Counter(f.family for f in file_facts)
@@ -748,7 +758,7 @@ def _evidence_payload(
     quote: str,
     notes: str,
     tags: list[str],
-) -> dict[str, object]:
+) -> DynamicPayload:
     return {
         "id": evidence_id,
         "pillar": pillar,
@@ -776,13 +786,13 @@ def _write_shard_pack(
     date_str: str,
     file_facts: list[FileFact],
     object_facts: list[ObjectFact],
-) -> dict[str, object]:
+) -> DynamicPayload:
     paths = _shard_paths(parent_root, shard, date_str)
     summary = _summarise_shard(file_facts, object_facts)
-    largest_file: FileFact = summary["largest_file"]  # type: ignore[assignment]
-    densest_file: FileFact = summary["densest_file"]  # type: ignore[assignment]
-    hottest_object: ObjectFact | None = summary["hottest_object"]  # type: ignore[assignment]
-    largest_object: ObjectFact | None = summary["largest_object"]  # type: ignore[assignment]
+    largest_file: FileFact = summary["largest_file"]
+    densest_file: FileFact = summary["densest_file"]
+    hottest_object: ObjectFact | None = summary["hottest_object"]
+    largest_object: ObjectFact | None = summary["largest_object"]
     top_families = _top_n(Counter(summary["family_by_files"]), 5)
     top_object_families = _top_n(Counter(summary["family_by_objects"]), 5)
     if not top_families:
@@ -1094,7 +1104,7 @@ def _write_parent_pack(
     date_str: str,
     file_facts: list[FileFact],
     object_facts: list[ObjectFact],
-    shard_results: dict[str, dict[str, object]],
+    shard_results: dict[str, DynamicPayload],
 ) -> None:
     parent_evidence_root = parent_root / "02-evidence" / topic_id
     parent_evidence_root.mkdir(parents=True, exist_ok=True)
@@ -1370,7 +1380,7 @@ def generate(repo_root: Path, output_root: Path, topic_id: str) -> None:
     )
     _build_parent_pillars(parent_root)
 
-    shard_results: dict[str, dict[str, object]] = {}
+    shard_results: dict[str, DynamicPayload] = {}
     for shard in SHARDS:
         shard_results[shard] = _write_shard_pack(
             parent_root=parent_root,
