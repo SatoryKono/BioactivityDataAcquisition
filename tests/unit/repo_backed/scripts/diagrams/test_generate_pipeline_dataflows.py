@@ -59,7 +59,8 @@ def test_source_date_uses_pr_head_parent_without_merge_commit_entropy(
 
     def _run(args: list[str], **_: object) -> SimpleNamespace:
         calls.append(args)
-        return SimpleNamespace(stdout="2026-07-30\n")
+        # Production uses check=False and inspects returncode before stdout.
+        return SimpleNamespace(returncode=0, stdout="2026-07-30\n", stderr="")
 
     monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
     monkeypatch.setattr(pipeline_dataflow_ir.subprocess, "run", _run)
