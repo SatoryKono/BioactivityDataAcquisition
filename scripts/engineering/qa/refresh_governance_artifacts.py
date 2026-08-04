@@ -205,13 +205,7 @@ def _run_refresh() -> None:
     # 5) Dead-code inventory
     _run([sys.executable, "-m", "scripts.engineering.qa.report_dead_code_inventory"])
 
-    # 6) Debt governance gates rollup
-    _run(
-        [sys.executable, "-m", "scripts.engineering.qa.report_debt_governance_gates"],
-        check=False,
-    )
-
-    # 7) Architecture quality scorecard
+    # 6) Architecture quality scorecard (input to debt gates)
     _run(
         [
             sys.executable,
@@ -221,8 +215,42 @@ def _run_refresh() -> None:
         check=False,
     )
 
+    # 7) Config surface backlog (input to debt gates / residual snapshot)
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_config_surface_backlog",
+        ],
+        check=False,
+    )
+
+    # 8) Live residual snapshot for closeout non-growth freezes (#6891 / #7464)
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_live_residual_snapshot",
+        ],
+        check=False,
+    )
+
+    # 9) Debt governance gates rollup MUST run last (#7465).
+    # Any scorecard/baseline input refresh above invalidates committed gates until
+    # this step rewrites reports/quality/debt-governance-gates.{json,md}.
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_debt_governance_gates",
+            "--update",
+        ],
+        check=False,
+    )
+
     print("REFRESH complete. Recommended verification:")
     print("  python -m scripts.engineering.qa.refresh_governance_artifacts --check")
+    print("  python -m scripts.engineering.qa report-debt-governance-gates --check")
     print(
         "  pytest tests/architecture/test_quality_debt_scorecard.py "
         "tests/architecture/test_hotspot_growth_family_ratchets.py -q --tb=line"

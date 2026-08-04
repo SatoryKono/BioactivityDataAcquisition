@@ -51,6 +51,24 @@ DEFAULT_JSON_OUTPUT = (
 )
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.md"
 RELEASE_REVIEW_MAX_AGE_DAYS = 21
+# Canonical inputs that invalidate committed debt-governance-gates artifacts.
+# When any of these change, operators/CI must re-run:
+#   python -m scripts.engineering.qa report-debt-governance-gates --update
+# Prefer `python -m scripts.engineering.qa.refresh_governance_artifacts` which
+# regenerates gates last (#7465).
+DEBT_GATE_INPUT_ARTIFACTS: tuple[str, ...] = (
+    "configs/quality/debt_scorecard.yaml",
+    "configs/quality/scripts_inventory_manifest.json",
+    "reports/quality/architecture-quality-scorecard.json",
+    "reports/quality/hotspot-family-baseline.json",
+    "reports/quality/module-coverage-inventory.json",
+    "reports/quality/config-surface-backlog.json",
+    "reports/quality/architecture-debt-remote-main-baseline.json",
+    "reports/quality/adr-enforcement-matrix.json",
+    "reports/quality/compatibility-importer-census.json",
+    "reports/quality/flaky-test-burndown-review.json",
+    "reports/quality/dead-code-inventory.json",
+)
 DEBT_SCORECARD_PATH = "configs/quality/debt_scorecard.yaml"
 FLAKY_TEST_REVIEW_PATH = "reports/quality/flaky-test-burndown-review.json"
 # Quality / observability artifact path identities (python:S1192).
@@ -1741,6 +1759,13 @@ def build_payload(
     return {
         "schema_version": 1,
         "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
+        "linked_issue_refresh_policy": "#7465",
+        "input_artifacts": list(DEBT_GATE_INPUT_ARTIFACTS),
+        "refresh_commands": [
+            "python -m scripts.engineering.qa.refresh_governance_artifacts",
+            "python -m scripts.engineering.qa report-debt-governance-gates --update",
+            "python -m scripts.engineering.qa report-debt-governance-gates --check",
+        ],
         "summary": {
             "gate_count": len(gates),
             "pass_count": status_counts["pass"],

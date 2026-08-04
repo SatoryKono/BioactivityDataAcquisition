@@ -1,0 +1,42 @@
+{
+  "schema_version": "closeout-freeze-fold-progress-v1",
+  "linked_issue": "#7464",
+  "parent_issue": "#6891",
+  "parent_epic": "#6890",
+  "related_issues": [
+    "#7400"
+  ],
+  "reviewed_on": "2026-08-04",
+  "owner": "@bioetl-platform",
+  "policy": {
+    "direction": "shrink_only",
+    "tech_debt_budget_growth": "forbidden",
+    "historical_closeout_json_retention": "required"
+  },
+  "snapshot_artifact": "reports/quality/live-residual-snapshot.json",
+  "generator": "python -m scripts.engineering.qa.report_live_residual_snapshot",
+  "check_command": "python -m scripts.engineering.qa.report_live_residual_snapshot --check",
+  "baseline_counts": {
+    "tech_debt_closeout_test_files": 51,
+    "closeout_test_files_using_live_residual_helpers": 2,
+    "notes": "Count measured 2026-08-04 from tests/architecture/test_tech_debt*closeout*.py plus test_live_residual_snapshot.py fold helpers."
+  },
+  "batch_20260804": {
+    "converted_or_folded": [
+      "tests/architecture/test_live_residual_snapshot.py",
+      "tests/architecture/test_tech_debt_issues_5744_5751_closeout.py",
+      "tests/architecture/test_tech_debt_issues_5564_5603_closeout.py"
+    ],
+    "new_snapshot_fields": [
+      "closeout_program.tech_debt_closeout_test_file_count",
+      "closeout_program.retained_public_entrypoint_count",
+      "closeout_program.zero_reference_supporting_script_count"
+    ],
+    "rationale": "Fold numeric residual freezes for hotspot/entrypoints/zero-ref onto live residual snapshot non-growth instead of per-issue literals."
+  },
+  "remaining_work": [
+    "Convert existence-only closeout freezes to thin artifact-presence helpers.",
+    "Move additional numeric freezes into live-residual-snapshot fields when metrics already have generators.",
+    "Keep reports/quality/*closeout*.json as historical evidence."
+  ]
+}
