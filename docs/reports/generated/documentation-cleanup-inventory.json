@@ -62905,6 +62905,62 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/ai/memory-audit-20260804/FINAL-REPORT.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/ai/memory-audit-20260804/execution-ledger.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
       "inbound_links": 2,
       "lifecycle": "working_report",
       "outbound_links": 0,
@@ -68957,11 +69013,11 @@
       "live_issue_mirror": 4,
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 33,
-      "working_report": 92
+      "working_report": 94
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 312,
-      "archive-after-migration": 87,
+      "archive-after-migration": 89,
       "generate-automatically": 861,
       "keep": 1171,
       "reconcile-with-github-state": 4
@@ -68992,7 +69048,7 @@
       "mkdocs.yml": 1,
       "plans": 2,
       "plugins": 4,
-      "reports": 221,
+      "reports": 223,
       "ru": 3,
       "security": 2
     },
@@ -69001,17 +69057,17 @@
       "Archived": 141,
       "Canonical": 73,
       "Generated": 861,
-      "Working": 498
+      "Working": 500
     },
     "by_surface_family": {
       "active": 862,
       "archive": 141,
       "canonical": 73,
       "generated": 861,
-      "working": 498
+      "working": 500
     },
     "by_tracking_state": {
-      "tracked": 2435
+      "tracked": 2437
     },
     "docs_reports_local_count": 30,
     "duplicate_group_count": 6,
@@ -69027,8 +69083,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 2435,
+    "total_doc_like": 2437,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 2435
+    "total_doc_like_tracked": 2437
   }
 }
