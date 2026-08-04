@@ -6,10 +6,38 @@ from typing import Any, cast
 import pytest
 from vcr.request import Request
 
+from tests import conftest as root_conftest
 from tests.helpers.vcr_config import build_base_vcr_config, is_vcr_recording_mode
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_vcr_record_option_is_registered_when_missing() -> None:
+    parser = pytest.Parser()
+
+    root_conftest.pytest_addoption(parser)
+
+    options = {
+        option
+        for group in (*parser._groups, parser._anonymous)
+        for option in group.options
+    }
+    assert "--vcr-record" in options
+
+
+def test_vcr_record_option_is_not_registered_twice() -> None:
+    parser = pytest.Parser()
+    parser.addoption("--vcr-record", action="store")
+
+    root_conftest.pytest_addoption(parser)
+
+    options = [
+        option
+        for group in (*parser._groups, parser._anonymous)
+        for option in group.options
+    ]
+    assert options.count("--vcr-record") == 1
 
 
 def test_is_vcr_recording_mode_uses_env(monkeypatch) -> None:
