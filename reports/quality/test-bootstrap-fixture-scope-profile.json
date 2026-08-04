@@ -1,7 +1,8 @@
 {
   "schema_version": "test-bootstrap-fixture-scope-profile-v1",
-  "issue": 6042,
-  "profiled_on": "2026-07-07",
+  "issue": 6892,
+  "supersedes_issue": 6042,
+  "profiled_on": "2026-08-04",
   "scope": "tests/unit/composition/bootstrap",
   "debt_budget_policy": "flat_or_decreasing_only",
   "command": ".venv/bin/python -m pytest tests/unit/composition/bootstrap -q --durations=10 --tb=short",
@@ -10,7 +11,17 @@
     "test_count": 393,
     "test_file_count": 43,
     "bootstrap_reference_count": 939,
-    "local_conftest_present": false
+    "local_conftest_present": true,
+    "local_conftest_path": "tests/unit/composition/bootstrap/conftest.py",
+    "session_scoped_immutable_fixtures": [
+      "bootstrap_metadata_cache",
+      "cached_bootstrap_metadata"
+    ],
+    "function_scoped_mutable_clones": [
+      "fresh_pipeline_registry",
+      "fresh_provider_registry"
+    ],
+    "isolation_proof": "tests/unit/composition/bootstrap/test_bootstrap_metadata_cache_isolation.py"
   },
   "slowest_durations": [
     {
@@ -43,6 +54,7 @@
     "broad_scope_changes_made": false,
     "session_scope_allowed_without_isolation_proof": false,
     "requires_state_isolation_proof": true,
+    "session_scope_isolation_proven": true,
     "allowed_session_scope_targets": [
       "immutable config payloads",
       "read-only registry metadata",
@@ -57,7 +69,7 @@
   },
   "closeout_decision": {
     "status": "closed-ready",
-    "decision": "profile_before_widening_fixture_scope",
-    "rationale": "The bootstrap lane already passes, but the slowest case builds a runner surface with many mutable collaborators. Fixture scope should not be widened until candidate state is proven immutable or reset between tests."
+    "decision": "session_immutable_catalog_cache_with_per_test_clones",
+    "rationale": "Session-scoped fixtures are limited to immutable bootstrap catalog metadata (BootstrapMetadataCache / CachedBootstrapMetadata). Mutable pipeline/provider registries remain function-scoped clones via fresh_pipeline_registry and fresh_provider_registry. Isolation proof lives in test_bootstrap_metadata_cache_isolation.py."
   }
 }

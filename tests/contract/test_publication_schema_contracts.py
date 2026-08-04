@@ -531,6 +531,75 @@ class TestSchemaVersioning:
             assert "external_breaking_change_required" in entry
             assert "providers" in entry
 
+    def test_inventory_providers_are_canonical_identities(self) -> None:
+        """Provider entries must be flat scalar identities matching SCHEMA_MAP.
+
+        Regression for malformed YAML where field bullets nested under a
+        provider list item collapse into a single plain scalar such as
+        ``chembl - publication_type_raw - publication_doi - ...``.
+        """
+        inventory = _load_semantic_compatibility_inventory()
+        retained_fields = inventory["retained_fields"]
+        assert isinstance(retained_fields, list)
+
+        for entry in retained_fields:
+            providers = entry["providers"]
+            assert isinstance(providers, list), (
+                f"{entry['field_name']}: providers must be a YAML list, got "
+                f"{type(providers).__name__}"
+            )
+            assert providers, f"{entry['field_name']}: providers must be non-empty"
+            for provider in providers:
+                assert isinstance(provider, str), (
+                    f"{entry['field_name']}: provider must be str, got "
+                    f"{type(provider).__name__}: {provider!r}"
+                )
+                assert " " not in provider, (
+                    f"{entry['field_name']}: provider identity must not contain "
+                    f"spaces (malformed nested scalar?): {provider!r}"
+                )
+                assert "-" not in provider or provider in self.SCHEMA_MAP, (
+                    f"{entry['field_name']}: provider identity looks like a "
+                    f"collapsed field list: {provider!r}"
+                )
+                assert provider in self.SCHEMA_MAP, (
+                    f"{entry['field_name']}: unknown provider {provider!r}; "
+                    f"expected subset of {sorted(self.SCHEMA_MAP)}"
+                )
+            assert set(providers) == set(self.SCHEMA_MAP), (
+                f"{entry['field_name']}: providers {sorted(providers)} must equal "
+                f"SCHEMA_MAP keys {sorted(self.SCHEMA_MAP)}"
+            )
+
+    def test_inventory_and_baseline_provider_sets_are_parity_bound(self) -> None:
+        """Inventory retained categories and baseline sections share one provider SSOT."""
+        inventory = _load_semantic_compatibility_inventory()
+        compatibility = _load_compatibility_baseline()
+        retained_fields = inventory["retained_fields"]
+        assert isinstance(retained_fields, list)
+
+        inventory_by_name = {
+            str(entry["field_name"]): entry for entry in retained_fields
+        }
+        assert set(inventory_by_name) == {
+            "deprecated_aliases",
+            "nullable_compatibility_fields",
+        }
+
+        for section_name, entry in inventory_by_name.items():
+            baseline_section = compatibility[section_name]
+            assert isinstance(baseline_section, dict)
+            baseline_providers = baseline_section["providers"]
+            assert isinstance(baseline_providers, dict)
+            inventory_providers = set(entry["providers"])
+            assert inventory_providers == set(baseline_providers) == set(
+                self.SCHEMA_MAP
+            ), (
+                f"{section_name}: inventory providers {sorted(inventory_providers)} "
+                f"must match baseline {sorted(baseline_providers)} and SCHEMA_MAP "
+                f"{sorted(self.SCHEMA_MAP)}"
+            )
+
     def test_inventory_references_baseline_file(self) -> None:
         """Publication baseline must reference the machine-readable inventory."""
         compatibility = _load_compatibility_baseline()
