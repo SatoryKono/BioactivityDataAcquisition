@@ -28,11 +28,11 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `4746568ef10687c8f3bd07652deb0ded564b4531`
+- Source commit: `daa36be9c56214044580d08eb1134de519c7c27f`
 - Source run id: `local-duration-rebuild-2026-07-23`
-- Source tree sha256: `92a1bbe14df0e5b04ac414a934ab8330c6f744f1953512df1761d199babde1d7`
+- Source tree sha256: `883c0c6c4c00a4a77e319063cd86d3a9977e6c7c0fd507d12137fc41c1db81b9`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-08-04T14:44:33.369974+00:00`
+- Refreshed at (UTC): `2026-08-04T14:57:46.207582+00:00`
 
 ## Branch-accurate provenance (#5729)
 

@@ -18,8 +18,10 @@
   "check_command": "python -m scripts.engineering.qa.report_live_residual_snapshot --check",
   "baseline_counts": {
     "tech_debt_closeout_test_files": 51,
-    "closeout_test_files_using_live_residual_helpers": 2,
-    "notes": "Count measured 2026-08-04 from tests/architecture/test_tech_debt*closeout*.py plus test_live_residual_snapshot.py fold helpers."
+    "closeout_test_files_using_live_residual_helpers": 6,
+    "notes": "Count measured 2026-08-04 from tests/architecture/test_tech_debt*closeout*.py plus test_live_residual_snapshot.py fold helpers.",
+    "tech_debt_closeout_test_function_count": 311,
+    "tech_debt_closeout_test_loc": 11325
   },
   "batch_20260804": {
     "converted_or_folded": [
@@ -35,8 +37,34 @@
     "rationale": "Fold numeric residual freezes for hotspot/entrypoints/zero-ref onto live residual snapshot non-growth instead of per-issue literals."
   },
   "remaining_work": [
-    "Convert existence-only closeout freezes to thin artifact-presence helpers.",
-    "Move additional numeric freezes into live-residual-snapshot fields when metrics already have generators.",
+    "Continue converting fold_into_generic issue-specific freezes onto generic JSON + residual helpers.",
+    "Delete per-issue modules only after CI proves equivalent guards.",
     "Keep reports/quality/*closeout*.json as historical evidence."
-  ]
+  ],
+  "batch_20260804b": {
+    "converted_or_folded": [
+      "tests/architecture/test_tech_debt_issues_5553_5558_closeout.py",
+      "tests/architecture/test_tech_debt_issues_5387_5394_closeout.py",
+      "tests/architecture/test_tech_debt_issues_5861_5864_closeout.py",
+      "tests/architecture/test_tech_debt_issues_6032_6034_6037_closeout.py",
+      "tests/architecture/test_closeout_json_artifacts_generic.py",
+      "tests/architecture/test_live_residual_snapshot.py"
+    ],
+    "new_snapshot_fields": [
+      "closeout_program.tech_debt_closeout_test_function_count",
+      "closeout_program.tech_debt_closeout_test_loc",
+      "closeout_program.closeout_files_using_live_residual_helpers",
+      "closeout_program.fold_into_generic_inventory_count"
+    ],
+    "rationale": "Continue #7464 fold: hotspot freezes onto live residual; expand closeout mass metrics; generic closeout JSON pack ratchets.",
+    "measured_closeout_program": {
+      "tech_debt_closeout_test_file_count": 51,
+      "tech_debt_closeout_test_function_count": 311,
+      "tech_debt_closeout_test_loc": 11325,
+      "closeout_files_using_live_residual_helpers": 6,
+      "fold_into_generic_inventory_count": 60,
+      "retained_public_entrypoint_count": 12,
+      "zero_reference_supporting_script_count": 5
+    }
+  }
 }

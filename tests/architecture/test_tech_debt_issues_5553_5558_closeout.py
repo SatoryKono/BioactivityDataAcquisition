@@ -137,10 +137,33 @@ def test_issue_5555_hotspot_reviewed_baselines_capture_current_reductions() -> N
     application_row = _hotspot_row(hotspot, "application_services_control_plane")
     runtime_row = _hotspot_row(hotspot, "composition_runtime_builders")
 
-    assert application_row["files_ge_250_loc"] <= 12
-    assert runtime_row["files"] == 56
-    # ARCH-CONT-07 / ARCH-REF-08 hold: fan-in may only stay flat or decrease from the 4 baseline.
-    assert runtime_row["max_internal_fan_in"] <= 4
+    # Fold numeric freezes onto live residual snapshot non-growth (#7464 / #6891).
+    from tests.architecture._live_residual import (
+        assert_residual_not_grown,
+        hotspot_family,
+        load_live_residual_snapshot,
+    )
+
+    residual = load_live_residual_snapshot()
+    residual_control_plane = hotspot_family(
+        residual, "application_services_control_plane"
+    )
+    residual_runtime = hotspot_family(residual, "composition_runtime_builders")
+    assert_residual_not_grown(
+        metric_name="application_services_control_plane.files_ge_250_loc",
+        live_value=int(application_row["files_ge_250_loc"]),
+        baseline_value=int(residual_control_plane["files_ge_250_loc"]),
+    )
+    assert_residual_not_grown(
+        metric_name="composition_runtime_builders.files",
+        live_value=int(runtime_row["files"]),
+        baseline_value=int(residual_runtime["files"]),
+    )
+    assert_residual_not_grown(
+        metric_name="composition_runtime_builders.max_internal_fan_in",
+        live_value=int(runtime_row["max_internal_fan_in"]),
+        baseline_value=int(residual_runtime["max_internal_fan_in"]),
+    )
     assert (
         application_row["files_ge_250_loc"]
         == scorecard_by_name["application_services_control_plane"]["metrics"][

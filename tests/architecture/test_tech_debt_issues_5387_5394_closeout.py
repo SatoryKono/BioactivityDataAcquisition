@@ -148,10 +148,25 @@ def test_issue_5389_control_plane_use_case_seams_remain_explicit() -> None:
     )
     budgets = family["bounded_growth_budgets"]
     assert family["files_ge_250_loc"] <= budgets["files_ge_250_loc"]
-    assert family["files_ge_250_loc"] <= 16
-    assert budgets["files_ge_250_loc"] <= 16
+    # Fold literal freezes onto live residual snapshot non-growth (#7464 / #6891).
+    from tests.architecture._live_residual import (
+        assert_residual_not_grown,
+        hotspot_family,
+        load_live_residual_snapshot,
+    )
+
+    residual_family = hotspot_family(
+        load_live_residual_snapshot(), "application_services_control_plane"
+    )
+    assert_residual_not_grown(
+        metric_name="application_services_control_plane.files_ge_250_loc",
+        live_value=int(family["files_ge_250_loc"]),
+        baseline_value=int(residual_family["files_ge_250_loc"]),
+    )
+    assert budgets["files_ge_250_loc"] >= family["files_ge_250_loc"]
     assert all(
-        warning != "at_budget:files_ge_250_loc=16/16"
+        not str(warning).startswith("at_budget:files_ge_250_loc=")
+        or "/16" not in str(warning)
         for warning in family["budget_warnings"]
     )
 
