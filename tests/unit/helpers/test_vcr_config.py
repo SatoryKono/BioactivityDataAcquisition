@@ -47,9 +47,7 @@ def test_build_base_vcr_config_sanitizes_request_headers_and_query() -> None:
         filter_headers=["authorization"],
         filter_query_parameters=["api_key"],
     )
-    before_record_request = cast(
-        Callable[[Any], Any], config["before_record_request"]
-    )
+    before_record_request = cast(Callable[[Any], Any], config["before_record_request"])
 
     request = Request(
         "GET",
@@ -73,9 +71,7 @@ def test_build_base_vcr_config_before_record_request_noops_on_unexpected_request
         filter_headers=["authorization"],
         filter_query_parameters=["api_key"],
     )
-    before_record_request = cast(
-        Callable[[Any], Any], config["before_record_request"]
-    )
+    before_record_request = cast(Callable[[Any], Any], config["before_record_request"])
 
     request = "unexpected-request-surface"
 

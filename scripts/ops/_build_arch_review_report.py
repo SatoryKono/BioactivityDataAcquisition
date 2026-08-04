@@ -96,7 +96,10 @@ def _ingest_agent_events(
         if kind == "complete":
             finding_count = obj.get("findings")
             completes.append(
-                (layer_of(current), finding_count if isinstance(finding_count, int) else 0)
+                (
+                    layer_of(current),
+                    finding_count if isinstance(finding_count, int) else 0,
+                )
             )
     return findings, completes
 

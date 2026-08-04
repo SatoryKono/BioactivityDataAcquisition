@@ -1084,20 +1084,28 @@ def _census_summary(
         ),
         "removed_compatibility_surface_count": len(removed_surface_rows),
         "removed_compatibility_surfaces_with_src_importers": sum(
-            1 for row in removed_surface_rows if _int_row_value(row, "src_importer_count") > 0
+            1
+            for row in removed_surface_rows
+            if _int_row_value(row, "src_importer_count") > 0
         ),
         "removed_compatibility_surfaces_with_test_importers": sum(
-            1 for row in removed_surface_rows if _int_row_value(row, "test_importer_count") > 0
+            1
+            for row in removed_surface_rows
+            if _int_row_value(row, "test_importer_count") > 0
         ),
         "removed_compatibility_surfaces_still_present": sum(
             1 for row in removed_surface_rows if row["path_exists"]
         ),
         "twin_pair_count": len(twin_rows),
         "twin_pairs_with_private_src_importers": sum(
-            1 for row in twin_rows if _int_row_value(row, "private_src_importer_count") > 0
+            1
+            for row in twin_rows
+            if _int_row_value(row, "private_src_importer_count") > 0
         ),
         "twin_pairs_without_public_src_importers": sum(
-            1 for row in twin_rows if _int_row_value(row, "public_src_importer_count") == 0
+            1
+            for row in twin_rows
+            if _int_row_value(row, "public_src_importer_count") == 0
         ),
         "tracked_twin_family_count": len(tracked_twin_rows),
         "config_root_symbol_count": len(config_symbol_rows),

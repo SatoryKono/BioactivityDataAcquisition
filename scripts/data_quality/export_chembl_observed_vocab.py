@@ -491,7 +491,9 @@ def build_inventory_payload() -> dict[str, object]:
             fixture_paths=tuple(sorted(_state_string_set(state, "fixture_paths"))),
             raw_field_present=bool(state["raw_field_present"]),
             observed_distinct_count=len(_state_string_set(state, "observed_values")),
-            normalized_distinct_count=len(_state_string_set(state, "normalized_values")),
+            normalized_distinct_count=len(
+                _state_string_set(state, "normalized_values")
+            ),
             observed_examples=tuple(
                 sorted(_state_string_set(state, "observed_values"))[:10]
             ),
