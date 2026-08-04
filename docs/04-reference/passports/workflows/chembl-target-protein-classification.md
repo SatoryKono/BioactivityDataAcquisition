@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:chembl_target_protein_classification`
 - Schema: `1.0.0`
-- Source revision: `e09ee9ab35e5e15e7902d43669eee8677ee5e406`
+- Source revision: `b44143a03ad996f0be3aab44768cadfb05ccde94`
 
 ## Evidence
 
@@ -118,7 +118,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:10f2e7302852ac8372299a8a5cccbea0a59437992ca7a8b0394a6321f996956b",
-    "source_revision": "e09ee9ab35e5e15e7902d43669eee8677ee5e406"
+    "source_revision": "b44143a03ad996f0be3aab44768cadfb05ccde94"
   },
   "source_references": [
     {
