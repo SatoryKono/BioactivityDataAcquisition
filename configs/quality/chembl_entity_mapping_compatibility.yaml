@@ -1,0 +1,35 @@
+schema_version: 1
+policy_scope: chembl_entity_mapping_compatibility
+linked_issue: "#7495"
+reviewed_on: "2026-08-04"
+review_by: "2026-09-30"
+owner: "@bioetl-adapters"
+decision: retain_external_compatibility_zero_first_party_src
+rationale: >-
+  ENTITY_MAPPING is a legacy re-export of build_legacy_entity_mapping() with
+  zero first-party production importers. External consumers are unspecified, so
+  removal is not yet proven safe. Retain with lifecycle metadata and a
+  zero-src-import ratchet until external migration evidence exists.
+new_src_import_policy: fail_fast_review_required
+alias:
+  symbol: ENTITY_MAPPING
+  module: bioetl.infrastructure.adapters.chembl.entity_mapper
+  path: src/bioetl/infrastructure/adapters/chembl/entity_mapper.py
+  lifecycle: retained_external_compatibility
+  consumer_class: external_unspecified
+  canonical_target: >-
+    bioetl.infrastructure.adapters.chembl.entity_mapper.ChemblEntityMapper /
+    bioetl.infrastructure.adapters.chembl._entity_mapping_lookup.build_legacy_entity_mapping
+  max_src_importer_count: 0
+  allowed_src_importers: []
+  external_breaking_change_required: true
+  review_date: "2026-09-30"
+  migration_path: >-
+    Use ChemblEntityMapper.get_resource_url / resolve_resource_name instead of
+    ENTITY_MAPPING[entity] dictionary lookups.
+  exit_criteria: >-
+    Remove only after external importer evidence is empty or a coordinated
+    major-version breaking-change notice is published.
+  owner_tests:
+    - tests/integration/adapters/test_chembl.py
+    - tests/architecture/test_chembl_entity_mapping_lifecycle.py
