@@ -26,6 +26,7 @@ load_dotenv()
 GITHUB_REPO = os.getenv("GITHUB_REPO", "SatoryKono/BioactivityDataAcquisition")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
+
 class TestProblemCategory(TypedDict):
     """Configuration for one generated test-problem issue."""
 
