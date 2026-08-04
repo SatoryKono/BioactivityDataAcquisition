@@ -48,6 +48,8 @@ def main() -> int:
                     "--links",
                     "--specs",
                     "--configs",
+                    "--report-json",
+                    "docs/reports/docs-link-check-report.json",
                 ],
             )
         )
