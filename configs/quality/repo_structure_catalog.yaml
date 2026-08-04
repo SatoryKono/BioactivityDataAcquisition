@@ -37,6 +37,8 @@ docs_code_zones:
 
 root_tooling_roots:
   approved_roots:
+    - path: .claude
+      role: curated_shared_agent_runtime_surface
     - path: .codex
       role: curated_shared_agent_runtime_surface
     - path: .cursor

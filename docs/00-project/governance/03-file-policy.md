@@ -122,7 +122,7 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   `configs/quality/generated_artifact_routing.yaml`; prose docs in this section
   MUST stay aligned with those enforcement surfaces.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
-- Shared repo tooling surfaces such as `.codex/`, `.gemini/`, `.junie/`,
+- Shared repo tooling surfaces such as `.claude/`, `.codex/`, `.gemini/`, `.junie/`,
   curated `.vibe/`,
   and curated shared editor metadata roots such as `.cursor/`, `.vscode/`, and
   `.zed/` MAY оставаться tracked только если они поддерживаются как
