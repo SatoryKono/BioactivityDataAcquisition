@@ -66,13 +66,17 @@ def _source_date() -> str:
             capture_output=True,
             text=True,
         )
-        if result.returncode == 0 and result.stdout.strip():
-            return result.stdout.strip()
+        # CompletedProcess has returncode; unit tests may pass a lightweight
+        # namespace with only stdout. Treat missing returncode as success.
+        returncode = int(getattr(result, "returncode", 0) or 0)
+        stdout = str(getattr(result, "stdout", "") or "").strip()
+        if returncode == 0 and stdout:
+            return stdout
         last_error = subprocess.CalledProcessError(
-            result.returncode,
-            result.args,
-            output=result.stdout,
-            stderr=result.stderr,
+            returncode,
+            getattr(result, "args", ["git", "log"]),
+            output=getattr(result, "stdout", None),
+            stderr=getattr(result, "stderr", None),
         )
     assert last_error is not None
     raise last_error
