@@ -13,31 +13,77 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 import yaml
 
+from scripts.engineering.ci.update_test_telemetry_baseline import (
+    compute_test_telemetry_source_tree_sha256,
+)
 
 pytestmark = pytest.mark.architecture
-REFERENCE_NOW = datetime(2026, 7, 6, tzinfo=UTC)
+
+REFRESH_HINT = (
+    "Refresh with: python -m scripts.engineering.ci.update_test_telemetry_baseline "
+    "--source-commit <sha> --source-run-id <run-id> "
+    "(see docs/05-engineering/test-telemetry-baseline.md)"
+)
 
 
 def _read(path: str) -> str:
     return Path(path).read_text(encoding="utf-8")
 
 
-def test_committed_test_telemetry_baseline_is_populated() -> None:
-    payload = yaml.safe_load(
+def _load_baseline() -> dict:
+    return yaml.safe_load(
         Path("configs/quality/test_telemetry_baseline.yaml").read_text(encoding="utf-8")
     )
+
+
+def _reference_now() -> datetime:
+    """Live UTC by default; inject ISO-8601 via BIOETL_TELEMETRY_REFERENCE_NOW."""
+    raw = os.environ.get("BIOETL_TELEMETRY_REFERENCE_NOW", "").strip()
+    if raw:
+        value = datetime.fromisoformat(raw)
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=UTC)
+        return value.astimezone(UTC)
+    return datetime.now(UTC)
+
+
+def _git_head() -> str:
+    return subprocess.check_output(
+        ["git", "rev-parse", "HEAD"],
+        text=True,
+        stderr=subprocess.DEVNULL,
+    ).strip()
+
+
+def _is_ancestor(commit: str, head: str) -> bool:
+    result = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", commit, head],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0
+
+
+def test_committed_test_telemetry_baseline_is_populated() -> None:
+    payload = _load_baseline()
 
     assert payload["refresh_status"] == "captured"
     assert payload["source_commit"], "Committed baseline must pin a source commit"
     assert payload["source_run_id"], "Committed baseline must pin a source run id"
-    # Skip source_tree_sha256 check during baseline refresh as it changes with each file update
-    # assert payload["source_tree_sha256"] == compute_test_telemetry_source_tree_sha256()
+    live_tree = compute_test_telemetry_source_tree_sha256()
+    assert payload["source_tree_sha256"] == live_tree, (
+        "Committed telemetry source_tree_sha256 drifted from the audited test tree. "
+        f"{REFRESH_HINT}"
+    )
     assert payload["coverage"]["actual_percent"] is not None, (
         "Committed baseline must preserve current coverage telemetry"
     )
@@ -56,16 +102,56 @@ def test_committed_test_telemetry_baseline_is_populated() -> None:
 
 
 def test_committed_test_telemetry_baseline_respects_freshness_guard() -> None:
-    payload = yaml.safe_load(
-        Path("configs/quality/test_telemetry_baseline.yaml").read_text(encoding="utf-8")
-    )
+    payload = _load_baseline()
     refreshed_at = datetime.fromisoformat(payload["refreshed_at_utc"])
-    age = REFERENCE_NOW - refreshed_at
+    if refreshed_at.tzinfo is None:
+        refreshed_at = refreshed_at.replace(tzinfo=UTC)
+    now = _reference_now()
 
-    assert age.days <= int(payload["freshness_guard"]["max_age_days"]), (
-        "Committed telemetry baseline is stale. Refresh with "
-        "python scripts/engineering/ci/update_test_telemetry_baseline.py"
+    assert refreshed_at <= now, (
+        "Committed telemetry refreshed_at_utc is in the future relative to reference "
+        f"now={now.isoformat()} refreshed_at={refreshed_at.isoformat()}. {REFRESH_HINT}"
     )
+    age = now - refreshed_at
+    assert age.total_seconds() >= 0
+    assert age.days <= int(payload["freshness_guard"]["max_age_days"]), (
+        "Committed telemetry baseline is stale. " + REFRESH_HINT
+    )
+
+
+def test_committed_test_telemetry_branch_accurate_source_identity() -> None:
+    """Fail closed when branch-accurate telemetry provenance drifts (#5729)."""
+    payload = _load_baseline()
+    guard = payload.get("branch_accurate_guard") or {}
+    assert guard.get("enforced") is True, (
+        "branch_accurate_guard.enforced must remain true for committed telemetry"
+    )
+    assert guard.get("require_source_tree_match") is True
+
+    head = _git_head()
+    source_commit = str(payload["source_commit"])
+    assert len(source_commit) == 40, "source_commit must be a full 40-char SHA"
+    assert _is_ancestor(source_commit, head) or source_commit == head, (
+        f"source_commit {source_commit} is not reachable from HEAD {head}. "
+        f"{REFRESH_HINT}"
+    )
+
+    live_tree = compute_test_telemetry_source_tree_sha256()
+    assert payload["source_tree_sha256"] == live_tree, (
+        "Branch-accurate telemetry requires source_tree_sha256 to match the audited "
+        f"HEAD test tree. {REFRESH_HINT}"
+    )
+
+    # When strict HEAD equality is requested (CI audit / local override), enforce it.
+    require_head = guard.get("require_source_commit_equals_head") is True
+    env_require = os.environ.get(
+        "BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD", ""
+    ).strip() in {"1", "true", "TRUE", "yes"}
+    if require_head or env_require:
+        assert source_commit == head, (
+            "Branch-accurate telemetry requires source_commit == HEAD. "
+            f"source_commit={source_commit} HEAD={head}. {REFRESH_HINT}"
+        )
 
 
 def test_testing_docs_distinguish_authoritative_baseline_from_historical_rollup() -> (
@@ -80,12 +166,12 @@ def test_testing_docs_distinguish_authoritative_baseline_from_historical_rollup(
     assert "Current Authoritative Baseline" in baseline_doc
     assert "historical `test-health` rollups remain non-blocking" in baseline_doc
     assert "historical lane history" in qa_readme
+    assert "branch_accurate" in baseline_doc or "source_tree_sha256" in baseline_doc
+    assert "update_test_telemetry_baseline" in baseline_doc
 
 
 def test_branch_consumable_test_telemetry_reports_match_committed_baseline() -> None:
-    payload = yaml.safe_load(
-        Path("configs/quality/test_telemetry_baseline.yaml").read_text(encoding="utf-8")
-    )
+    payload = _load_baseline()
     slowest = json.loads(
         Path("reports/test-telemetry/slowest-tests.json").read_text(encoding="utf-8")
     )
@@ -98,6 +184,7 @@ def test_branch_consumable_test_telemetry_reports_match_committed_baseline() -> 
 
     assert slowest["source_commit"] == payload["source_commit"]
     assert slowest["source_run_id"] == payload["source_run_id"]
+    assert slowest["source_tree_sha256"] == payload["source_tree_sha256"]
     assert slowest["total_cases"] == payload["duration_telemetry"]["total_cases"]
     assert slowest["top_slowest"] == payload["duration_telemetry"]["top_slowest"]
     assert (
@@ -110,15 +197,14 @@ def test_branch_consumable_test_telemetry_reports_match_committed_baseline() -> 
     )
     assert coverage["source_commit"] == payload["source_commit"]
     assert coverage["source_run_id"] == payload["source_run_id"]
+    assert coverage["source_tree_sha256"] == payload["source_tree_sha256"]
     assert coverage["coverage"] == payload["coverage"]
     assert "Slowest Tests" in slowest_md
     assert "Top Slow Zones" in slowest_md
 
 
 def test_slow_governance_cache_probe_is_captured_and_isolated() -> None:
-    payload = yaml.safe_load(
-        Path("configs/quality/test_telemetry_baseline.yaml").read_text(encoding="utf-8")
-    )
+    payload = _load_baseline()
     probe = payload["slow_governance_cache_probe"]
     report_probe = probe["probes"][0]
 
@@ -156,9 +242,7 @@ def _module_path_from_telemetry_node(node_id: str) -> Path | None:
 
 def test_duration_telemetry_top_list_only_references_existing_test_modules() -> None:
     """Stale rankings must not advertise deleted or renamed test modules."""
-    payload = yaml.safe_load(
-        Path("configs/quality/test_telemetry_baseline.yaml").read_text(encoding="utf-8")
-    )
+    payload = _load_baseline()
     top_slowest = payload["duration_telemetry"]["top_slowest"]
     assert top_slowest, "Duration telemetry must publish a top-slowest ranking"
 
@@ -175,9 +259,7 @@ def test_duration_telemetry_top_list_only_references_existing_test_modules() -> 
 
 def test_duration_telemetry_execution_context_accounts_for_lane_exclusions() -> None:
     """Full-suite telemetry must either cover lanes or list explicit exclusions."""
-    payload = yaml.safe_load(
-        Path("configs/quality/test_telemetry_baseline.yaml").read_text(encoding="utf-8")
-    )
+    payload = _load_baseline()
     context = payload["duration_telemetry"]["execution_context"]
     exclusions = context["explicit_exclusions"]
     assert isinstance(exclusions, list) and exclusions

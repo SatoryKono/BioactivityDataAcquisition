@@ -1,6 +1,6 @@
 # Slowest Tests
 
-Source commit: `667c3020ce74f87c319f77612c765a5aaf30e6ad`
+Source commit: `96a2cbc9b77c85c3115e18bf9774b28f57f568ba`
 Source run id: `local-duration-rebuild-2026-07-23`
 Refresh status: `captured`
 Collected test cases: `23360`

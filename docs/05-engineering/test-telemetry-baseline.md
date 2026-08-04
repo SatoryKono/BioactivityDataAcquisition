@@ -1,8 +1,8 @@
 ______________________________________________________________________
 
-Version: 1.0.1
+Version: 1.0.0
 Status: active
-Class: repo-only
+Class: published
 Owner: BioETL Team
 Reviewers:
 
@@ -12,9 +12,6 @@ Reviewers:
 ______________________________________________________________________
 
 # Test Telemetry Baseline
-
-> **Classification:** repo-only engineering evidence companion (MkDocs
-> `exclude_docs: 05-engineering/**`). Not published navigation SSOT. #7421.
 
 Committed baseline for CI coverage and slow-test telemetry so engineering
 audits do not depend only on ephemeral GitHub artifact retention.
@@ -31,10 +28,24 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `667c3020ce74f87c319f77612c765a5aaf30e6ad`
+- Source commit: `96a2cbc9b77c85c3115e18bf9774b28f57f568ba`
 - Source run id: `local-duration-rebuild-2026-07-23`
+- Source tree sha256: `34c02d2577360ed91a57b3e162040b6e60c5eda5e206b206d6fd20aef88d0a4f`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-07-31T13:55:33.002896+00:00`
+- Refreshed at (UTC): `2026-08-04T15:05:22.530970+00:00`
+
+## Branch-accurate provenance (#5729)
+
+- Continuous identity is `source_tree_sha256` over `tests/**/*.py`,
+  `pyproject.toml`, `configs/quality/test_matrix.yaml`, and
+  `.github/workflows/tests.yml`.
+- Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)
+  and rejects future/stale `refreshed_at_utc` values.
+- `source_commit` must remain an ancestor of HEAD; exact `source_commit == HEAD`
+  is opt-in via `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD=1`.
+- Refresh command:
+  `python -m scripts.engineering.ci.update_test_telemetry_baseline`
+  `--source-commit <sha> --source-run-id <run-id>`.
 
 ## Coverage
 

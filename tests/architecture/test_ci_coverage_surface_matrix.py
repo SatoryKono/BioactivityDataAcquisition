@@ -191,6 +191,32 @@ class TestCiCoverageSurfaceMatrix:
         assert "junit-contract-confidence.xml" in duration_block
         assert "--suite contracts" in duration_block
 
+    def test_required_vcr_lanes_fail_closed_without_lfs_evidence(self) -> None:
+        """Required VCR/LFS confidence surfaces must not soft-skip on LFS failure (#7493)."""
+        matrix = _load_yaml(MATRIX_PATH)
+        workflow = _read_workflow(ROOT / matrix["workflow_path"])
+
+        for job in ("vcr-preflight", "control-plane-e2e", "governance-preflight"):
+            block = _job_block(workflow, job)
+            assert "continue-on-error: true" not in block, (
+                f"{job} must not continue-on-error for required LFS materialization"
+            )
+            assert "if: steps.lfs_pull.outcome" not in block, (
+                f"{job} must not gate required steps on lfs_pull outcome"
+            )
+            assert "if: steps.governance_lfs_pull.outcome" not in block, (
+                f"{job} must not gate required steps on governance_lfs_pull outcome"
+            )
+            assert "Skip " not in block or "LFS" not in block, (
+                f"{job} must not soft-skip when LFS evidence is unavailable"
+            )
+            assert "Fail-closed (#7493)" in block or job == "control-plane-e2e"
+            if job == "control-plane-e2e":
+                assert "id: lfs_pull" in block
+                assert "if-no-files-found: error" in block
+                assert "::error::" in block
+                assert "materialized (#7493)" in block or "#7493" in block
+
     def test_coverage_shard_python_versions_match_workflow(self) -> None:
         matrix = _load_yaml(MATRIX_PATH)
         workflow = _read_workflow(ROOT / matrix["workflow_path"])

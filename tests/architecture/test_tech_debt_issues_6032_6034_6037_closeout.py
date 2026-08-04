@@ -93,9 +93,21 @@ def test_issue_6032_application_core_fan_in_has_headroom() -> None:
     budgets = row["bounded_growth_budgets"]
     assert isinstance(budgets, dict)
 
-    assert row["max_internal_fan_in"] == 8
+    # Fold literal freezes onto live residual snapshot non-growth (#7464 / #6891).
+    from tests.architecture._live_residual import (
+        assert_residual_not_grown,
+        hotspot_family,
+        load_live_residual_snapshot,
+    )
+
+    residual_core = hotspot_family(load_live_residual_snapshot(), "application_core")
+    assert_residual_not_grown(
+        metric_name="application_core.max_internal_fan_in",
+        live_value=int(row["max_internal_fan_in"]),
+        baseline_value=int(residual_core["max_internal_fan_in"]),
+    )
     assert row["max_internal_fan_in"] < budgets["max_internal_fan_in"]
-    assert budgets["max_internal_fan_in"] == 10
+    assert budgets["max_internal_fan_in"] >= residual_core["budget_max_internal_fan_in"]
     assert (
         row["max_internal_fan_in_module"]
         == "bioetl.application.core.batch_runtime_failure_policy"
@@ -119,14 +131,36 @@ def test_issue_6034_composition_runtime_seams_keep_headroom() -> None:
     assert isinstance(bootstrap_budget, dict)
     assert isinstance(runtime_builder_budget, dict)
 
-    assert bootstrap["max_internal_fan_in"] == 2
-    assert bootstrap["max_internal_fan_in"] < 3
-    assert bootstrap_budget["max_internal_fan_in"] == 3
-    assert not bootstrap["budget_review_notes"]
-    assert _live_family_fan_in("composition_bootstrap_runtime")[0] == 2
+    from tests.architecture._live_residual import (
+        assert_residual_not_grown,
+        hotspot_family,
+        load_live_residual_snapshot,
+    )
 
-    assert runtime_builders["max_internal_fan_in"] <= 4
-    assert runtime_builder_budget["max_internal_fan_in"] == 5
+    residual = load_live_residual_snapshot()
+    residual_bootstrap = hotspot_family(residual, "composition_bootstrap_runtime")
+    residual_runtime = hotspot_family(residual, "composition_runtime_builders")
+    assert_residual_not_grown(
+        metric_name="composition_bootstrap_runtime.max_internal_fan_in",
+        live_value=int(bootstrap["max_internal_fan_in"]),
+        baseline_value=int(residual_bootstrap["max_internal_fan_in"]),
+    )
+    assert bootstrap["max_internal_fan_in"] < bootstrap_budget["max_internal_fan_in"]
+    assert not bootstrap["budget_review_notes"]
+    assert (
+        _live_family_fan_in("composition_bootstrap_runtime")[0]
+        <= residual_bootstrap["max_internal_fan_in"]
+    )
+
+    assert_residual_not_grown(
+        metric_name="composition_runtime_builders.max_internal_fan_in",
+        live_value=int(runtime_builders["max_internal_fan_in"]),
+        baseline_value=int(residual_runtime["max_internal_fan_in"]),
+    )
+    assert (
+        runtime_builder_budget["max_internal_fan_in"]
+        >= residual_runtime["budget_max_internal_fan_in"]
+    )
     assert (
         _runtime_builder_importer_count(
             "bioetl.composition.runtime_builders.run_manifest_support"
