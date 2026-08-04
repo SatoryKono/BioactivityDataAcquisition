@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import pytest
-
 from pathlib import Path
+from typing import Any
 
+import pytest
 import yaml
 
 from memory.graph import __main__ as graph_main
@@ -19,9 +19,14 @@ from memory.graph.sync_pkg import transport as graph_sync_transport
 pytestmark = pytest.mark.unit
 
 
+def _sync_symbol(name: str) -> Any:
+    """Resolve one intentionally dynamic compatibility-facade export."""
+    return getattr(graph_sync, name)
+
+
 def test_graph_sync_facade_exposes_legacy_symbols() -> None:
-    assert graph_sync.DEFAULT_INGEST_WAVE == "repo_sync_v1"
-    assert callable(graph_sync.build_snapshot)
+    assert _sync_symbol("DEFAULT_INGEST_WAVE") == "repo_sync_v1"
+    assert callable(_sync_symbol("build_snapshot"))
 
 
 def test_graph_query_facade_exposes_legacy_symbols() -> None:
@@ -30,15 +35,17 @@ def test_graph_query_facade_exposes_legacy_symbols() -> None:
 
 
 def test_graph_sync_uses_repo_root_from_src_layout() -> None:
-    assert (graph_sync.DEFAULT_ROOT / "src" / "bioetl").exists()
+    assert (_sync_symbol("DEFAULT_ROOT") / "src" / "bioetl").exists()
 
 
 def test_graph_query_uses_native_sync_module() -> None:
-    assert graph_query.resolve_neo4j_connection is graph_sync.resolve_neo4j_connection
+    assert graph_query.resolve_neo4j_connection is _sync_symbol(
+        "resolve_neo4j_connection"
+    )
 
 
 def test_graph_sync_parser_is_exposed_from_native_module() -> None:
-    parser = graph_sync._parser()
+    parser = _sync_symbol("_parser")()
     assert "deterministic BioETL graph" in (parser.description or "")
 
 
@@ -49,18 +56,19 @@ def test_graph_sync_public_module_is_thin_facade() -> None:
 
 
 def test_graph_sync_responsibility_modules_expose_owned_surfaces() -> None:
-    assert graph_sync_transport.Neo4jHttpClient is graph_sync.Neo4jHttpClient
-    assert graph_sync_snapshot.build_snapshot is graph_sync.build_snapshot
+    assert graph_sync_transport.Neo4jHttpClient is _sync_symbol("Neo4jHttpClient")
+    assert graph_sync_snapshot.build_snapshot is _sync_symbol("build_snapshot")
     assert graph_sync_snapshot._walk_repo_zone_file_structure is (
-        graph_sync._walk_repo_zone_file_structure
+        _sync_symbol("_walk_repo_zone_file_structure")
     )
-    assert graph_sync_apply.sync_snapshot is graph_sync.sync_snapshot
+    assert graph_sync_apply.sync_snapshot is _sync_symbol("sync_snapshot")
 
 
 def test_graph_sync_prefers_canonical_mapping_path() -> None:
-    mapping_path = graph_sync._memory_mapping_path(graph_sync.DEFAULT_ROOT)
+    default_root = _sync_symbol("DEFAULT_ROOT")
+    mapping_path = _sync_symbol("_memory_mapping_path")(default_root)
     assert (
-        mapping_path == graph_sync.DEFAULT_ROOT / graph_sync.DEFAULT_MEMORY_MAPPING_PATH
+        mapping_path == default_root / _sync_symbol("DEFAULT_MEMORY_MAPPING_PATH")
     )
 
 

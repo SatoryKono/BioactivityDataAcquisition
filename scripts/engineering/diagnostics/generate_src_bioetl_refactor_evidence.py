@@ -109,11 +109,12 @@ def _family_for(src_root: Path, path: Path) -> str:
     parts = rel.parts
     if not parts:
         return "root"
-    if parts[0] not in LAYERS:
+    root_part = next(iter(parts), "root")
+    if root_part not in LAYERS:
         return "root"
     if len(parts) >= 3:
-        return f"{parts[0]}/{parts[1]}"
-    return parts[0]
+        return f"{root_part}/{parts[1]}"
+    return root_part
 
 
 def _slug(value: str) -> str:
