@@ -468,6 +468,8 @@ scripts/docs/build/**/*.pyc
 !/docs/reports/
 !/docs/reports/README.md
 !/docs/reports/index.md
+!/docs/reports/dashboard-ux-checks/
+!/docs/reports/dashboard-ux-checks/README.md
 !/docs/reports/generated/
 /docs/reports/generated/*
 !/docs/reports/generated/documentation-cleanup-inventory.json
