@@ -6,7 +6,8 @@ import pandera.pandas as panpa
 try:
     import pandera.api.function_dispatch as fd
 
-    original_call = fd.FunctionDispatch.__call__
+    function_dispatch = vars(fd)["FunctionDispatch"]
+    original_call = function_dispatch.__call__
 
     def patched_call(self, *args, **kwargs):
         try:
@@ -24,7 +25,7 @@ try:
                     return self._function_registry[Any](*args, **kwargs)
             raise
 
-    fd.FunctionDispatch.__call__ = patched_call
+    function_dispatch.__call__ = patched_call
     print("FunctionDispatch monkeypatched")
 except Exception as e:
     print(f"Failed to patch FunctionDispatch: {e}")

@@ -4,10 +4,12 @@
 Обеспечивает расширенную функциональность для работы с Grok паттернами.
 """
 
-import sys
-import json
 import argparse
-from pygrok import Grok
+import importlib
+import json
+import sys
+
+Grok = vars(importlib.import_module("pygrok"))["Grok"]
 
 # Устанавливаем UTF-8 кодировку для вывода на Windows
 if sys.platform == "win32":

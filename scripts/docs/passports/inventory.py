@@ -12,10 +12,17 @@ import yaml
 class RegistryEntry(Protocol):
     """Minimal canonical registry entry surface used by docs projection."""
 
-    pipeline_name: str
-    provider: str
-    entity_type: str
-    data_source_provider: str | None
+    @property
+    def pipeline_name(self) -> str: ...
+
+    @property
+    def provider(self) -> str: ...
+
+    @property
+    def entity_type(self) -> str: ...
+
+    @property
+    def data_source_provider(self) -> str | None: ...
 
 
 @dataclass(frozen=True, slots=True)

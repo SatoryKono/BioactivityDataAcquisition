@@ -36,6 +36,7 @@ ADR reference: ADR-040-diagram-governance.md (D6 CI Validation)
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import re
 import sys
@@ -49,7 +50,8 @@ for candidate in (SCRIPT_DIR, REPO_ROOT):
     if candidate_str not in sys.path:
         sys.path.insert(0, candidate_str)
 
-sys.stdout.reconfigure(encoding="utf-8")
+if isinstance(sys.stdout, io.TextIOWrapper):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 try:
     from .diagram_paths import DIAGRAM_ROOT, source_dir

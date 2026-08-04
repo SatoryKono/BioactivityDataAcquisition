@@ -9,10 +9,12 @@ import sys
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[3]
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
+_SRC_ROOT = _ROOT / "src"
+for _import_root in (_ROOT, _SRC_ROOT):
+    if str(_import_root) not in sys.path:
+        sys.path.insert(0, str(_import_root))
 
-from scripts.memory.sync import build_snapshot, snapshot_invariant_issues
+from memory.graph.sync_pkg._core import build_snapshot, snapshot_invariant_issues
 
 
 def _parser() -> argparse.ArgumentParser:

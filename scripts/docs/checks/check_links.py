@@ -1104,7 +1104,7 @@ def _report_path_list_check(
 
 
 def _report_local_skill_nav_classification(
-    rel_paths: list[Path],
+    rel_paths: list[str],
 ) -> int:
     if not rel_paths:
         print(

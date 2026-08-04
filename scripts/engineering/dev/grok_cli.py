@@ -4,9 +4,11 @@ Grok CLI для BioETL проекта.
 Обеспечивает CLI интерфейс для работы с Grok паттернами через pygrok.
 """
 
-import sys
+import importlib
 import json
-from pygrok import Grok
+import sys
+
+Grok = vars(importlib.import_module("pygrok"))["Grok"]
 
 # Устанавливаем UTF-8 кодировку для вывода на Windows
 if sys.platform == "win32":

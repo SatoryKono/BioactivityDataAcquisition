@@ -19,13 +19,15 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import io
 import os
 import re
 import sys
 import tempfile
 from pathlib import Path
 
-sys.stdout.reconfigure(encoding="utf-8")
+if isinstance(sys.stdout, io.TextIOWrapper):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 

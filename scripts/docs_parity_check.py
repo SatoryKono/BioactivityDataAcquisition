@@ -142,14 +142,11 @@ class DocumentationParityChecker:
 
         try:
             if config_path.suffix == ".yaml" or config_path.suffix == ".yml":
-                with open(config_path, "r", encoding="utf-8") as f:
-                    return yaml.safe_load(f) or {}
+                return yaml.safe_load(config_path.read_bytes()) or {}
             elif config_path.suffix == ".toml":
-                with open(config_path, "r", encoding="utf-8") as f:
-                    return toml.load(f)
+                return toml.loads(config_path.read_text(encoding="utf-8"))
             elif config_path.suffix == ".json":
-                with open(config_path, "r", encoding="utf-8") as f:
-                    return json.load(f)
+                return json.loads(config_path.read_text(encoding="utf-8"))
             else:
                 return {}
         except Exception as e:
@@ -399,7 +396,7 @@ class DocumentationParityChecker:
 
         return "\n".join(report)
 
-    def generate_json_report(self, result: ParityResult) -> dict:
+    def generate_json_report(self, result: ParityResult) -> dict[str, object]:
         """Generate a JSON report for CI/CD integration."""
 
         return {

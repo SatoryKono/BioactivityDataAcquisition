@@ -18,7 +18,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from zed_env_doctor import DEFAULT_REQUIRED_MODULES, ensure_ready
+from scripts.engineering.dev.zed_env_doctor import DEFAULT_REQUIRED_MODULES, ensure_ready
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -74,7 +74,7 @@ def main(argv: list[str] | None = None) -> int:
     os.chdir(REPO_ROOT)
 
     if args[0] == "--doctor":
-        from zed_env_doctor import main as doctor_main
+        from scripts.engineering.dev.zed_env_doctor import main as doctor_main
 
         return int(doctor_main(args[1:]))
 

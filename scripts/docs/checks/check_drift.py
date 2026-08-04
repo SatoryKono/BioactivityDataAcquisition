@@ -1195,7 +1195,10 @@ def _check_active_non_canonical_evidence_summary(
 
     try:
         last_verified = date.fromisoformat(str(metadata["last_verified"]))
-        freshness_window_days = int(metadata["freshness_window_days"])
+        raw_window = metadata["freshness_window_days"]
+        if not isinstance(raw_window, (int, str)):
+            raise TypeError
+        freshness_window_days = int(raw_window)
     except (TypeError, ValueError):
         report.add(
             "freshness",

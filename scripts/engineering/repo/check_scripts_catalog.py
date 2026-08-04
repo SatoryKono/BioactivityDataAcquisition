@@ -284,16 +284,18 @@ def _check_registry_entry_coverage(
         if status not in non_active_statuses:
             continue
 
+        raw_entry = entries.get(path) if isinstance(entries, dict) else None
+        entry = raw_entry if isinstance(raw_entry, dict) else None
         _check_non_active_script_entry(
             path=path,
-            entry=entries.get(path) if isinstance(entries, dict) else None,
+            entry=entry,
             required_registry_fields=required_registry_fields,
             deprecated_decisions=deprecated_decisions,
             deprecated_required_fields=deprecated_required_fields,
             violations=violations,
         )
 
-    return manifest_paths
+    return {path for path in manifest_paths if isinstance(path, str)}
 
 
 def _lifecycle_policy_values(

@@ -162,7 +162,7 @@ class AuditResult:
         """SHOULD violations (рекомендации)."""
         return [v for v in self.violations if v.severity == "SHOULD"]
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary for JSON output."""
         return {
             "violations": [v.to_dict() for v in self.violations],

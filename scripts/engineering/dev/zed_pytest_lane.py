@@ -30,7 +30,7 @@ _DEV_DIR = Path(__file__).resolve().parent
 if str(_DEV_DIR) not in sys.path:
     sys.path.insert(0, str(_DEV_DIR))
 
-from zed_env_doctor import ensure_ready
+from scripts.engineering.dev.zed_env_doctor import ensure_ready
 
 # Common local defaults for Zed interactive runs (not merge-gate authority).
 _TB_SHORT = "--tb=short"

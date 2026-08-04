@@ -531,7 +531,9 @@ class DocumentationGovernanceChecker:
 
         return "\n".join(report)
 
-    def generate_json_report(self, result: GovernanceCheckResult) -> dict:
+    def generate_json_report(
+        self, result: GovernanceCheckResult
+    ) -> dict[str, object]:
         """Generate JSON report for CI/CD integration."""
 
         return {
