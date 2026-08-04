@@ -299,11 +299,12 @@ def format_bytes(num_bytes: int) -> str:
     Returns:
         Formatted string (e.g., '1.5 KB', '2.3 MB').
     """
+    size = float(num_bytes)
     for unit in ["B", "KB", "MB", "GB"]:
-        if num_bytes < 1024.0:
-            return f"{num_bytes:.1f} {unit}"
-        num_bytes /= 1024.0
-    return f"{num_bytes:.1f} TB"
+        if size < 1024.0:
+            return f"{size:.1f} {unit}"
+        size /= 1024.0
+    return f"{size:.1f} TB"
 
 
 def print_statistics(
