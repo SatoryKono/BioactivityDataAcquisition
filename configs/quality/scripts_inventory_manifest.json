@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-04T12:49:17.404353+00:00",
+  "generated_at": "2026-08-04T16:08:41.491429+00:00",
   "summary": {
     "total_scripts": 571,
     "status_counts": {
@@ -16,7 +16,7 @@
       "other": 80,
       "scripts": 455,
       "skills": 18,
-      "tests": 361
+      "tests": 362
     }
   },
   "scripts": [
@@ -676,7 +676,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 453,
+          "line": 386,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -1300,13 +1300,13 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5834_5838_closeout.py",
-          "line": 269,
+          "line": 253,
           "source_group": "tests",
           "text": "== \"scripts/ai/codex/setup.ps1\""
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 208,
+          "line": 191,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.ps1\": \"scripts/ai/codex/setup.ps1\","
         }
@@ -4981,7 +4981,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 449,
+          "line": 427,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/data_quality/run_silver_gold_filter_parity.py --check"
         },
@@ -6174,7 +6174,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_issues_6205_6211_closeout.py",
-          "line": 72,
+          "line": 52,
           "source_group": "tests",
           "text": "wrapper = _read(\"scripts/diagrams/mmdc_wrapper.sh\")"
         }
@@ -8864,13 +8864,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 412,
+          "line": 390,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 570,
+          "line": 551,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -9294,7 +9294,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1056,
+          "line": 1037,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -9351,9 +9351,9 @@
         },
         {
           "path": "tests/architecture/test_test_telemetry_governance.py",
-          "line": 67,
+          "line": 24,
           "source_group": "tests",
-          "text": "\"python scripts/engineering/ci/update_test_telemetry_baseline.py\""
+          "text": "from scripts.engineering.ci.update_test_telemetry_baseline import ("
         },
         {
           "path": "tests/unit/scripts/ci/test_update_test_telemetry_baseline.py",
@@ -9405,7 +9405,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py",
-          "line": 153,
+          "line": 141,
           "source_group": "tests",
           "text": "assert \"validate_contract_registry.py\" in contract_workflow"
         },
@@ -11861,7 +11861,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 455,
+          "line": 433,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -12226,17 +12226,17 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 391,
+          "line": 374,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict"
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5700_5706_closeout.py",
-          "line": 104,
+          "line": 88,
           "source_group": "tests",
           "text": "assert \"scripts/engineering/qa/check_test_audit_preflight.py --strict\" in workflow"
         },
@@ -12257,6 +12257,12 @@
           "line": 470,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
+        },
+        {
+          "path": "tests/architecture/test_test_governance_audit.py",
+          "line": 496,
+          "source_group": "tests",
+          "text": "assert \"check_test_audit_preflight.py --strict\" in body"
         }
       ],
       "owner": "@bioetl-platform",
@@ -12915,7 +12921,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 619,
+          "line": 600,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -13508,7 +13514,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-          "line": 211,
+          "line": 189,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py\""
         }
@@ -14003,7 +14009,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-          "line": 214,
+          "line": 192,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_debt_governance_gates.py\""
         },
@@ -14272,8 +14278,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_live_residual_snapshot.py",
+          "line": 117,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.report_live_residual_snapshot import ("
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
@@ -14687,7 +14700,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 390,
+          "line": 404,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
         }
@@ -15049,19 +15062,19 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 157,
+          "line": 155,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 161,
+          "line": 158,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 169,
+          "line": 164,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
@@ -15147,7 +15160,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 157,
+          "line": 155,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -15198,7 +15211,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 161,
+          "line": 158,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
@@ -15255,7 +15268,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 169,
+          "line": 164,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
@@ -15730,7 +15743,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 387,
+          "line": 371,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -15787,7 +15800,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 379,
+          "line": 363,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \\"
         },
@@ -15946,7 +15959,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 172,
+          "line": 155,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"cleanup_root_local_clutter.py\""
         },
@@ -17502,7 +17515,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 165,
+          "line": 161,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check"
         },
@@ -17538,13 +17551,13 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 391,
+          "line": 405,
           "source_group": "tests",
           "text": "\"scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 441,
+          "line": 455,
           "source_group": "tests",
           "text": "assert \"backfill_vcr_metadata_sidecars.py\" in migrations_readme"
         }
@@ -20241,7 +20254,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 446,
+          "line": 424,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema generate-config-matrix --check"
         }
