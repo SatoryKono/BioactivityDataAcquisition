@@ -482,7 +482,7 @@ def test_governance_preflight_uses_fail_closed_lfs_contract() -> None:
         encoding="utf-8"
     )
     match = re.search(
-        r"^    governance-preflight:\n(?P<body>.*?)(?=^    [A-Za-z0-9_-]+:|\Z)",
+        r"^  governance-preflight:\n(?P<body>.*?)(?=^  [A-Za-z0-9_-]+:|\Z)",
         workflow,
         flags=re.MULTILINE | re.DOTALL,
     )
