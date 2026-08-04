@@ -54,11 +54,36 @@ def _rag_max_sources() -> int:
     return WORKFLOW_RAG_MAX_SOURCES
 
 
-def refresh_all(*args: object, **kwargs: object) -> dict[str, Any]:
+def refresh_all(
+    root: Path,
+    output_root: Path,
+    *,
+    include_rag: bool = True,
+    include_timeline: bool = True,
+    include_graph_export: bool = False,
+    include_graph_relations: bool = False,
+    expanded_graph_path: Path | None = None,
+    rag_build_scope: str = "repo",
+    rag_focus_query: str | None = None,
+    rag_max_sources: int | None = None,
+    allow_partial: bool = False,
+) -> dict[str, Any]:
     """Module seam for workflow-time refresh, patchable in integration tests."""
     from memory.tooling.refresh_all import refresh_all as _refresh_all
 
-    return _refresh_all(*args, **kwargs)
+    return _refresh_all(
+        root,
+        output_root,
+        include_rag=include_rag,
+        include_timeline=include_timeline,
+        include_graph_export=include_graph_export,
+        include_graph_relations=include_graph_relations,
+        expanded_graph_path=expanded_graph_path,
+        rag_build_scope=rag_build_scope,
+        rag_focus_query=rag_focus_query,
+        rag_max_sources=rag_max_sources,
+        allow_partial=allow_partial,
+    )
 
 
 def validate_memory_scaffold() -> list[Any]:

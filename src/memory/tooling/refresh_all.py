@@ -7,7 +7,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-from memory.graph import sync as graph_sync
 from memory.graph.importers.expanded_json import (
     default_expanded_graph_path,
     write_expanded_graph_relation_artifacts,
@@ -156,9 +155,11 @@ def _refresh_timeline_artifact(root: Path, output_root: Path) -> dict[str, Any]:
 
 
 def _refresh_graph_export_artifact(root: Path, output_root: Path) -> dict[str, Any]:
+    from memory.graph.sync_pkg import _core as graph_core
+
     graph_export = output_root / "graph" / "exports" / "repo_snapshot.json"
-    snapshot = graph_sync.build_snapshot(root)
-    graph_sync._write_export(graph_export, snapshot)
+    snapshot = graph_core.build_snapshot(root)
+    graph_core._write_export(graph_export, snapshot)
     return {
         "kind": "graph",
         "paths": [str(graph_export)],

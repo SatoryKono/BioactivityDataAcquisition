@@ -16,7 +16,6 @@ __all__ = list(_sync_pkg.__all__)
 # Re-export public sync_pkg symbols without a star-import (python:S2208).
 for _name in __all__:
     globals()[_name] = getattr(_sync_pkg, _name)
-del _name
 
 
 if __name__ == "__main__":
