@@ -40,6 +40,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import AsyncIterator
 import os
+from typing import Any, Protocol
 
 import httpx
 import pytest
@@ -123,8 +124,16 @@ def _format_reachability_error(exc: BaseException) -> str:
     return exc.__class__.__name__
 
 
+class _AsyncRequestClient(Protocol):
+    """Minimal async request surface used by the retry helper."""
+
+    async def request(
+        self, method: str, url: str, **kwargs: Any
+    ) -> httpx.Response: ...
+
+
 async def _request_or_skip(
-    client: httpx.AsyncClient,
+    client: _AsyncRequestClient,
     method: str,
     url: str,
     **kwargs: object,

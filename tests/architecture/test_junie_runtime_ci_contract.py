@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 import yaml
@@ -14,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW_PATH = ROOT / ".github" / "workflows" / "skills-consistency.yml"
 
 
-def _workflow() -> dict[str, object]:
+def _workflow() -> dict[Any, Any]:
     return yaml.safe_load(WORKFLOW_PATH.read_text(encoding="utf-8"))
 
 

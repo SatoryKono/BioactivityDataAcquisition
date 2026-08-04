@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TextIO, cast
 
 import pytest
 
@@ -65,8 +66,8 @@ def test_mounted_worktree_git_grep_avoids_pipe_reader_threads(
 
     def _fake_run(command: list[str], **kwargs: object) -> object:
         captured.update(kwargs)
-        kwargs["stdout"].write("tests/example.py:1:match\n")  # type: ignore[union-attr]
-        kwargs["stderr"].write("")  # type: ignore[union-attr]
+        cast(TextIO, kwargs["stdout"]).write("tests/example.py:1:match\n")
+        cast(TextIO, kwargs["stderr"]).write("")
         return mounted_policy.subprocess.CompletedProcess(command, 0)
 
     monkeypatch.setattr(mounted_policy.subprocess, "run", _fake_run)
@@ -77,4 +78,6 @@ def test_mounted_worktree_git_grep_avoids_pipe_reader_threads(
     assert "capture_output" not in captured
     assert captured["stdout"] is not mounted_policy.subprocess.PIPE
     assert captured["stderr"] is not mounted_policy.subprocess.PIPE
-    assert captured["env"]["GIT_OPTIONAL_LOCKS"] == "0"  # type: ignore[index]
+    env = captured["env"]
+    assert isinstance(env, dict)
+    assert env["GIT_OPTIONAL_LOCKS"] == "0"

@@ -6,7 +6,14 @@ import hashlib
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
+
+from bioetl.composition.providers._models import (
+    AdapterCreatorProtocol,
+    DataSourceCreatorProtocol,
+)
+from bioetl.composition.providers._registry_protocols import ProviderRegistrarProtocol
+from bioetl.domain.ports import PipelineFactoryPort
 
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -44,8 +51,8 @@ class FrozenProviderDefinition:
     requires_http_client: bool
     requires_logger: bool
     default_kwargs: tuple[tuple[str, object], ...]
-    adapter_creator: object | None
-    data_source_creator: object | None
+    adapter_creator: AdapterCreatorProtocol | None
+    data_source_creator: DataSourceCreatorProtocol | None
 
 
 @dataclass(frozen=True)
@@ -127,7 +134,9 @@ def build_provider_metadata() -> tuple[FrozenProviderDefinition, ...]:
     )
 
     registry = create_provider_registry()
-    ensure_provider_registry_ready(registry)
+    ensure_provider_registry_ready(
+        cast(ProviderRegistrarProtocol, cast(object, registry))
+    )
     definitions: list[FrozenProviderDefinition] = []
     for name in registry.list_providers():
         config = registry.get(name)
@@ -161,7 +170,7 @@ def clone_pipeline_registry(metadata: CachedBootstrapMetadata) -> Any:
 
     clone = create_registry()
     for pipeline_name in metadata.pipeline_names:
-        clone.register_factory(get_factory(pipeline_name))
+        clone.register_factory(cast(PipelineFactoryPort, get_factory(pipeline_name)))
     return clone
 
 

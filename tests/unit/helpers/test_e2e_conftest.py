@@ -204,7 +204,7 @@ def test_read_delta_records_timeout_surfaces_harness_context(
                 self._calls = 0
 
             def run_in_executor(
-                self, _executor: object, func: object
+                self, _executor: object, func: Callable[[], object]
             ) -> asyncio.Future[object]:
                 self._calls += 1
                 future = loop.create_future()
@@ -260,7 +260,7 @@ def test_read_delta_records_uses_delta_log_fallback_after_timeout(
                 self._calls = 0
 
             def run_in_executor(
-                self, _executor: object, func: object
+                self, _executor: object, func: Callable[[], object]
             ) -> asyncio.Future[object]:
                 self._calls += 1
                 future = loop.create_future()
@@ -313,7 +313,7 @@ def test_read_delta_records_corrupt_delta_log_is_not_timeout_recovered(
                 self._calls = 0
 
             def run_in_executor(
-                self, _executor: object, func: object
+                self, _executor: object, func: Callable[[], object]
             ) -> asyncio.Future[object]:
                 self._calls += 1
                 future = loop.create_future()
