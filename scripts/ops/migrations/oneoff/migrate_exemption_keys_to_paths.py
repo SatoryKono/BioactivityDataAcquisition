@@ -32,7 +32,7 @@ LAYER_LIMITS = {
     "infrastructure": 650,
     "interfaces": 400,
 }
-_MIGRATION_KEEP_UNMATCHED = False
+_migration_keep_unmatched = False
 
 
 @dataclass(frozen=True)
@@ -232,7 +232,7 @@ def migrate_registry_keys(
         targets, key_warnings = _targets_for_registry_key(
             valid_key,
             by_basename=by_basename,
-            keep_unmatched=_MIGRATION_KEEP_UNMATCHED,
+            keep_unmatched=_migration_keep_unmatched,
         )
         warnings.extend(key_warnings)
 
@@ -250,8 +250,8 @@ def main() -> int:
     args = _parse_args()
     registry_path = Path(args.registry)
     raw = load_exemptions_registry(registry_path)
-    global _MIGRATION_KEEP_UNMATCHED
-    _MIGRATION_KEEP_UNMATCHED = bool(args.keep_unmatched)
+    global _migration_keep_unmatched
+    _migration_keep_unmatched = bool(args.keep_unmatched)
     migrated, warnings = migrate_registry_keys(raw)
 
     old_entries = raw["registries"]["file_size_limits"]

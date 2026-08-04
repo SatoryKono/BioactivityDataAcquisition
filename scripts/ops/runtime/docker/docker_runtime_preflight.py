@@ -506,9 +506,7 @@ def _findings_published_port(
     seen_ports: dict[int, str],
 ) -> list[Finding]:
     findings: list[Finding] = []
-    expected = host_port_contract.get(published) or host_port_contract.get(
-        str(published)
-    )
+    expected = host_port_contract.get(str(published))
     expected_owner = (
         f"{expected.get('stack')}/{expected.get('service')}"
         if isinstance(expected, dict)

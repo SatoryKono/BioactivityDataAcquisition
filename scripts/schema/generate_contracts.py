@@ -137,7 +137,7 @@ def _build_contract(
 
     provider, entity_type = entity.split("_", maxsplit=1)
     profile_identity = resolve_normalization_profile_identity(provider, entity_type)
-    contract_payload = {
+    contract_payload: dict[str, Any] = {
         "$schema": f"{JSON_SCHEMA_DRAFT7_URI}#",
         "$version": version,
         "title": f"{schema_cls.__name__} Contract",
