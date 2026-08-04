@@ -26,7 +26,7 @@ description: |
 %% @type flowchart
 %% @level system
 flowchart TD
-    E[Error observed] --> Cl{Class}
+    E[Error observed] --> Cl&#123;Class&#125;
     Cl -->|Transient HTTP| R[Retry / rate limit / CB]
     Cl -->|Permanent HTTP| F[Fail batch / surface error]
     Cl -->|Schema/DQ| Q[Quarantine + metrics]
