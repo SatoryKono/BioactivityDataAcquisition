@@ -16,6 +16,7 @@ import sys
 import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import Any, cast
 
 # Detection marker only (not a write sink). Built without a "/tmp" literal for S5443.
 _TMP_PATH_MARKER = "".join((chr(0x2F), "tmp", chr(0x2F)))
@@ -297,7 +298,7 @@ def restore_topology() -> dict[str, object]:
 
 def open_observation(topology: dict[str, object]) -> dict[str, object]:
     now = datetime.now(UTC)
-    payload = {
+    payload: dict[str, object] = {
         "contract": "docker_dashboard_cutover_observation_v1",
         "issue": 6311,
         "parent_issue": 6303,
@@ -333,9 +334,14 @@ def open_observation(topology: dict[str, object]) -> dict[str, object]:
 
 def update_final(observation: dict[str, object]) -> None:
     if FINAL_PATH.is_file():
-        final = json.loads(FINAL_PATH.read_text(encoding="utf-8"))
+        final_raw = json.loads(FINAL_PATH.read_text(encoding="utf-8"))
+        if not isinstance(final_raw, dict):
+            raise ValueError(f"Final cutover artifact must be an object: {FINAL_PATH}")
+        final = cast(dict[str, Any], final_raw)
     else:
-        final = {"contract": "docker_dashboard_cutover_final_v1"}
+        final: dict[str, Any] = {
+            "contract": "docker_dashboard_cutover_final_v1"
+        }
     final["status"] = "observation_in_progress"
     final["generated_at"] = datetime.now(UTC).isoformat()
     gates = final.setdefault("gates", {})
@@ -386,8 +392,11 @@ def _validate_no_warp_on_required(snaps: dict[str, object]) -> None:
 
 
 def validate_canonical(topology: dict[str, object]) -> None:
-    projects = topology["compose_projects"]
-    by_name = {str(p.get("Name")): p for p in projects}
+    projects_raw = topology["compose_projects"]
+    if not isinstance(projects_raw, list):
+        raise ValueError("Topology compose_projects must be an array")
+    projects = [item for item in projects_raw if isinstance(item, dict)]
+    by_name = {str(project.get("Name")): project for project in projects}
     mon = by_name.get("bioetl-monitoring", {})
     main = by_name.get("bioetl-main", {})
     mon_files = str(mon.get("ConfigFiles") or "")

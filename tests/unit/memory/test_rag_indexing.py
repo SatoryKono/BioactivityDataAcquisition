@@ -7,6 +7,7 @@ import pytest
 import json
 from datetime import date, datetime
 from pathlib import Path
+from typing import Any
 
 from memory.rag.chunking import (
     infer_domain,
@@ -348,9 +349,24 @@ def test_write_rag_manifests_retries_when_source_changes_during_build(
     original_builder = rag_indexing._build_standard_source_records
     build_calls = 0
 
-    def _build_then_mutate(*args: object, **kwargs: object) -> object:
+    def _build_then_mutate(
+        root: Path,
+        rel_path: Path,
+        *,
+        source_type: str,
+        domain: str,
+        owner: str | None,
+        repo_zone: str | None,
+    ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         nonlocal build_calls
-        result = original_builder(*args, **kwargs)
+        result = original_builder(
+            root,
+            rel_path,
+            source_type=source_type,
+            domain=domain,
+            owner=owner,
+            repo_zone=repo_zone,
+        )
         build_calls += 1
         if build_calls == 1:
             source.write_text("# Overview\nAfter\n", encoding="utf-8")
@@ -386,9 +402,20 @@ def test_source_reconciliation_rebuilds_only_changed_paths(
     def _build_then_mutate(
         root: Path,
         rel_path: Path,
-        **kwargs: object,
-    ) -> object:
-        result = original_builder(root, rel_path, **kwargs)
+        *,
+        source_type: str,
+        domain: str,
+        owner: str | None,
+        repo_zone: str | None,
+    ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        result = original_builder(
+            root,
+            rel_path,
+            source_type=source_type,
+            domain=domain,
+            owner=owner,
+            repo_zone=repo_zone,
+        )
         rel_path_str = rel_path.as_posix()
         build_calls[rel_path_str] = build_calls.get(rel_path_str, 0) + 1
         if rel_path_str.endswith("changing.md") and build_calls[rel_path_str] == 1:
@@ -420,9 +447,24 @@ def test_write_rag_manifests_retries_when_source_disappears_during_build(
     original_builder = rag_indexing._build_standard_source_records
     build_calls = 0
 
-    def _build_then_replace(*args: object, **kwargs: object) -> object:
+    def _build_then_replace(
+        root: Path,
+        rel_path: Path,
+        *,
+        source_type: str,
+        domain: str,
+        owner: str | None,
+        repo_zone: str | None,
+    ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         nonlocal build_calls
-        result = original_builder(*args, **kwargs)
+        result = original_builder(
+            root,
+            rel_path,
+            source_type=source_type,
+            domain=domain,
+            owner=owner,
+            repo_zone=repo_zone,
+        )
         build_calls += 1
         if build_calls == 1:
             source.unlink()
@@ -444,7 +486,7 @@ def test_write_rag_manifests_retries_when_source_disappears_during_build(
 
 def test_build_rag_manifests_fails_on_missing_tracked_source_paths(
     tmp_path: Path,
-    monkeypatch: object,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     (tmp_path / "docs/00-project").mkdir(parents=True)
     existing_doc = tmp_path / "docs/00-project/overview.md"
