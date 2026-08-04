@@ -24,7 +24,9 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
     score_replay_readiness as score_replay_readiness,
 )
 
-_CATEGORY_SCORER_EXPORTS = (
+# Shared public scorer export names — also consumed by run-manifest score-card
+# facade so the export roster is defined once (R0801 residual, issue #7398).
+CATEGORY_SCORER_EXPORTS: tuple[str, ...] = (
     "score_checkpoint_safety",
     "score_determinism",
     "score_idempotency",
@@ -34,4 +36,4 @@ _CATEGORY_SCORER_EXPORTS = (
     "score_run_identity",
 )
 
-__all__ = [*_CATEGORY_SCORER_EXPORTS]
+__all__ = ["CATEGORY_SCORER_EXPORTS", *CATEGORY_SCORER_EXPORTS]

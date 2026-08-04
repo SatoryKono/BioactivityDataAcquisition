@@ -455,6 +455,6 @@
   "normalization_profile": {
     "ref": "chembl.molecule",
     "version": "1.0.0",
-    "hash": "6e164cc96d7ae16bfd2df7e712f5d4f2534cd6e9f7334bd38aec36fa396b1f2b"
+    "hash": "df6a4fa6a47a157164fb6fde9ac9f7b3e16813f02fec005fffc105981f04c880"
   }
 }

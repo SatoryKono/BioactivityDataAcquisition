@@ -24,8 +24,8 @@ result = df.head(10)
 result = df.sample(frac=0.1)
 
 # GOOD: Deterministic
-result = df.sort_values('id').head(10)
-result = df.sort_values('id').sample(frac=0.1, random_state=42)
+result = df.sort_values("id").head(10)
+result = df.sort_values("id").sample(frac=0.1, random_state=42)
 ```
 
 ### Timestamp Handling
@@ -77,12 +77,12 @@ All file system operations must be sorted:
 
 ```python
 # BAD: Non-deterministic
-files = os.listdir('data/')
-files = glob.glob('data/*.csv')
+files = os.listdir("data/")
+files = glob.glob("data/*.csv")
 
 # GOOD: Deterministic
-files = sorted(os.listdir('data/'))
-files = sorted(glob.glob('data/*.csv'))
+files = sorted(os.listdir("data/"))
+files = sorted(glob.glob("data/*.csv"))
 ```
 
 ## I/O Requirements
@@ -93,11 +93,11 @@ All writes must be atomic:
 
 ```python
 # BAD: Non-atomic
-with open('output.json', 'w') as f:
+with open("output.json", "w") as f:
     json.dump(data, f)
 
 # GOOD: Atomic
-write_dataset_atomic(data, 'output.json')
+write_dataset_atomic(data, "output.json")
 ```
 
 ### File Operations
@@ -106,11 +106,11 @@ All file operations must use deterministic ordering:
 
 ```python
 # BAD: Non-deterministic
-for file in os.listdir('data/'):
+for file in os.listdir("data/"):
     process(file)
 
 # GOOD: Deterministic
-for file in sorted(os.listdir('data/')):
+for file in sorted(os.listdir("data/")):
     process(file)
 ```
 

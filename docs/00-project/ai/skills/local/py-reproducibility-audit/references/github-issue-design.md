@@ -136,7 +136,7 @@ Results will vary between runs, breaking replay capability and causing inconsist
 Add stable sorting before head operation:
 
 ```python
-result = df.sort_values('activity_id').head(10)
+result = df.sort_values("activity_id").head(10)
 ```
 
 ### Acceptance Criteria
@@ -218,9 +218,11 @@ def test_fetch_activity_data_success():
     # Test successful fetch
     pass
 
+
 def test_fetch_activity_data_empty():
     # Test empty result
     pass
+
 
 def test_fetch_activity_data_error():
     # Test error handling
