@@ -688,6 +688,12 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
             "lint-imports executable exists but is not runnable in this environment"
         )
         return
+    except OSError as exc:
+        # WinError 193 / equivalent: resolved entrypoint is not a native binary.
+        _handle_import_linter_capability_gap(
+            f"lint-imports executable is not runnable in this environment: {exc}"
+        )
+        return
 
     if result.returncode != 0:
         skip_reason = _import_linter_environment_skip_reason(result)
