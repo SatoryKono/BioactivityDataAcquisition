@@ -96,7 +96,7 @@ class WorkflowCommandOptions:
             repair_steps=cast(str | None, raw.get("repair_steps")),
             incremental=bool(raw.get("incremental", False)),
             ensure_observability_backend=bool(
-                raw.get("ensure_observability_backend", True)
+                raw.get("ensure_observability_backend", False)
             ),
             observability_backend_port=int(
                 raw.get("observability_backend_port", DEFAULT_HEALTH_SERVER_PORT)

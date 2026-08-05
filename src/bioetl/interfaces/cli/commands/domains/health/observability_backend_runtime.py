@@ -121,7 +121,7 @@ def resolve_observability_backend_cli_options(
     ):
         raise TypeError("observability_backend_port must be a numeric CLI value")
     return (
-        bool(options.get("ensure_observability_backend", True)),
+        bool(options.get("ensure_observability_backend", False)),
         int(raw_port),
     )
 

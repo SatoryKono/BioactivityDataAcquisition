@@ -124,11 +124,12 @@ published family default, поэтому этот флаг не является
 guardrails.
 
 HTTP identity helpers for Grafana (`ID` / control-plane selectors) are served by
-the main **`bioetl health server`** (Docker default `:8000`, datasource
-**BioETL Ops HTTP**). The former detached Quarantine Explorer on `:8081` and
-auto-ensure path for `quarantine serve` are **not** part of the default surface
-after 2026-07-23. For opt-out of any remaining observability-backend helpers use
-`--no-ensure-observability-backend` where the CLI still exposes that flag.
+the main **`bioetl health server`** (default **`:8000`**, datasource
+**BioETL Ops HTTP**). CLI default does **not** auto-start any detached
+observability backend (`--ensure-observability-backend` is off). Quarantine
+Explorer / `quarantine serve` on `:8081` is not part of the shipping surface.
+Optional opt-in: `--ensure-observability-backend` starts `bioetl health server`
+on `--observability-backend-port` (default 8000).
 
 Для inspection используются команды:
 

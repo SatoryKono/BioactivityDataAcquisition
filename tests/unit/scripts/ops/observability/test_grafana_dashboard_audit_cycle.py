@@ -39,7 +39,7 @@ pytestmark = pytest.mark.unit
 def _backend_result(
     *,
     backend_available: bool,
-    health_url: str = "http://127.0.0.1:8081/health",
+    health_url: str = "http://127.0.0.1:8000/health",
     message: str = "ok",
     status: str = "started",
 ) -> SimpleNamespace:
@@ -224,8 +224,8 @@ def test_grafana_audit_cycle_parser_exposes_backend_boolean_flag() -> None:
         ]
     )
 
-    assert default_args.ensure_observability_backend is True
-    assert default_args.refresh_observability_backend is True
+    assert default_args.ensure_observability_backend is False
+    assert default_args.refresh_observability_backend is False
     assert default_args.render_filled_only is True
     assert disabled_args.ensure_observability_backend is False
     assert disabled_args.refresh_observability_backend is False
@@ -450,7 +450,7 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
     monkeypatch.setattr(
         audit_subject,
         "_resolve_app_base_url",
-        lambda *_args, **_kwargs: "http://localhost:8081",
+        lambda *_args, **_kwargs: "http://localhost:8000",
     )
     monkeypatch.setattr(
         preflight_subject,
@@ -465,7 +465,7 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
     checks = preflight_subject.run_checks(
         grafana_base_url="http://localhost:3000",
         prometheus_base_url="http://localhost:9090",
-        app_base_url="http://localhost:8081",
+        app_base_url="http://localhost:8000",
         grafana_username="admin",
         grafana_password="changeme",
         timeout_seconds=5.0,
@@ -519,7 +519,7 @@ def test_grafana_audit_preflight_can_skip_screenshot_check(
     monkeypatch.setattr(
         audit_subject,
         "_resolve_app_base_url",
-        lambda *_args, **_kwargs: "http://localhost:8081",
+        lambda *_args, **_kwargs: "http://localhost:8000",
     )
     called = False
 
@@ -543,7 +543,7 @@ def test_grafana_audit_preflight_can_skip_screenshot_check(
     checks = preflight_subject.run_checks(
         grafana_base_url="http://localhost:3000",
         prometheus_base_url="http://localhost:9090",
-        app_base_url="http://localhost:8081",
+        app_base_url="http://localhost:8000",
         grafana_username="admin",
         grafana_password="changeme",
         timeout_seconds=5.0,
@@ -585,13 +585,13 @@ def test_grafana_audit_preflight_can_run_semantic_checks_without_render_runtime(
     monkeypatch.setattr(
         audit_subject,
         "_resolve_app_base_url",
-        lambda *_args, **_kwargs: "http://localhost:8081",
+        lambda *_args, **_kwargs: "http://localhost:8000",
     )
 
     checks = preflight_subject.run_checks(
         grafana_base_url="http://localhost:3000",
         prometheus_base_url="http://localhost:9090",
-        app_base_url="http://localhost:8081",
+        app_base_url="http://localhost:8000",
         grafana_username="admin",
         grafana_password="changeme",
         timeout_seconds=5.0,
@@ -649,7 +649,7 @@ def test_preflight_can_run_render_checks_without_semantic_checks(
     checks = preflight_subject.run_checks(
         grafana_base_url="http://localhost:3000",
         prometheus_base_url="http://localhost:9090",
-        app_base_url="http://localhost:8081",
+        app_base_url="http://localhost:8000",
         grafana_username="admin",
         grafana_password="changeme",
         timeout_seconds=5.0,
@@ -880,9 +880,9 @@ def test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit(
     assert any("render-api" in item for item in calls[2][1])
     assert str(tmp_path) in calls[3][1]
     assert "--screenshot-uids" in calls[4][1]
-    assert "http://127.0.0.1:8081" in calls[0][1]
-    assert "http://127.0.0.1:8081" in calls[1][1]
-    assert "http://127.0.0.1:8081" in calls[4][1]
+    assert "http://127.0.0.1:8000" in calls[0][1]
+    assert "http://127.0.0.1:8000" in calls[1][1]
+    assert "http://127.0.0.1:8000" in calls[4][1]
 
 
 def test_grafana_audit_cycle_exit_code_uses_validated_release_result(
@@ -1045,7 +1045,12 @@ def test_grafana_audit_cycle_skips_semantic_network_when_backend_is_unavailable(
     )
 
     result = cycle_subject.main(
-        ["--screenshot-dir", str(tmp_path), "--no-refresh-observability-backend"]
+        [
+            "--screenshot-dir",
+            str(tmp_path),
+            "--ensure-observability-backend",
+            "--no-refresh-observability-backend",
+        ]
     )
 
     assert result == 1
@@ -1267,11 +1272,16 @@ def test_grafana_audit_cycle_retries_backend_on_fallback_port(
     )
 
     result = cycle_subject.main(
-        ["--screenshot-dir", str(tmp_path), "--no-refresh-observability-backend"]
+        [
+            "--screenshot-dir",
+            str(tmp_path),
+            "--ensure-observability-backend",
+            "--no-refresh-observability-backend",
+        ]
     )
 
     assert result == 0
-    assert ensured_ports == [8081, 18081]
+    assert ensured_ports == [8000, 18081]
     assert "http://127.0.0.1:18081" in calls[0][1]
     assert "http://127.0.0.1:18081" in calls[1][1]
     assert "http://127.0.0.1:18081" in calls[4][1]
@@ -1328,7 +1338,11 @@ def test_grafana_audit_cycle_reuses_existing_backend_when_fallback_start_fails(
         lambda argv: calls.append(("audit", list(argv))) or 0,
     )
 
-    result = cycle_subject.main(["--screenshot-dir", str(tmp_path)])
+    result = cycle_subject.main([
+        "--screenshot-dir", str(tmp_path),
+        "--ensure-observability-backend",
+        "--no-refresh-observability-backend",
+    ])
 
     assert result == 0
     assert [name for name, _argv in calls] == [
@@ -1338,9 +1352,9 @@ def test_grafana_audit_cycle_reuses_existing_backend_when_fallback_start_fails(
         "rerender",
         "preflight",
     ]
-    assert "http://127.0.0.1:8081" in calls[0][1]
-    assert "http://127.0.0.1:8081" in calls[1][1]
-    assert "http://127.0.0.1:8081" in calls[4][1]
+    assert "http://127.0.0.1:8000" in calls[0][1]
+    assert "http://127.0.0.1:8000" in calls[1][1]
+    assert "http://127.0.0.1:8000" in calls[4][1]
 
 
 @pytest.mark.usefixtures("matching_gate_sources")
@@ -1357,7 +1371,7 @@ def test_grafana_audit_cycle_uses_managed_backend_when_detached_backend_fails(
         "ensure_observability_backend_started",
         lambda **_kwargs: _backend_result(
             backend_available=False,
-            health_url="http://127.0.0.1:8081/health",
+            health_url="http://127.0.0.1:8000/health",
             message="Detached backend did not become ready",
             status="failed",
         ),
@@ -1374,7 +1388,7 @@ def test_grafana_audit_cycle_uses_managed_backend_when_detached_backend_fails(
         lambda **_kwargs: cycle_subject.BackendEnsureOutcome(
             result=cycle_subject.ObservabilityBackendEnsureResult(
                 status="started",
-                health_url="http://127.0.0.1:8081/health",
+                health_url="http://127.0.0.1:8000/health",
                 message="Managed backend started.",
             ),
             managed_process=MagicMock(poll=lambda: 0),
@@ -1401,7 +1415,11 @@ def test_grafana_audit_cycle_uses_managed_backend_when_detached_backend_fails(
         lambda argv: calls.append(("audit", list(argv))) or 0,
     )
 
-    result = cycle_subject.main(["--screenshot-dir", str(tmp_path)])
+    result = cycle_subject.main([
+        "--screenshot-dir", str(tmp_path),
+        "--ensure-observability-backend",
+        "--no-refresh-observability-backend",
+    ])
 
     assert result == 0
     assert [name for name, _argv in calls] == [
@@ -1411,7 +1429,7 @@ def test_grafana_audit_cycle_uses_managed_backend_when_detached_backend_fails(
         "rerender",
         "preflight",
     ]
-    assert "http://127.0.0.1:8081" in calls[0][1]
+    assert "http://127.0.0.1:8000" in calls[0][1]
 
 
 @pytest.mark.usefixtures("matching_gate_sources")
@@ -1425,7 +1443,7 @@ def test_grafana_audit_cycle_can_disable_backend_refresh(
         "ensure_observability_backend_started",
         lambda **_kwargs: _backend_result(
             backend_available=True,
-            health_url="http://127.0.0.1:8081/health",
+            health_url="http://127.0.0.1:8000/health",
             message="ok",
             status="reused",
         ),
@@ -1462,7 +1480,7 @@ def test_live_audit_writes_report(
     output_path = tmp_path / "live-panel-audit.json"
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
-        app_base_url="http://localhost:8081",
+        app_base_url="http://localhost:8000",
         loki_base_url="http://localhost:3100",
         tempo_base_url="http://localhost:3200",
         grafana_base_url="http://localhost:3000",

@@ -194,7 +194,7 @@ def health_server_command(host: str, port: int) -> None:
     - GET /ops/quarantine/filter-options - Explorer variable options
 
     Example:
-        bioetl health server --port 8081
+        bioetl health server --port 8000
 
     Args:
         host: IP address to bind the server to (e.g., '127.0.0.1' or '0.0.0.0').

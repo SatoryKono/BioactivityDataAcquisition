@@ -913,11 +913,12 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
     )
 
     assert result == "process-sentinel"
-    assert captured["command"][:4] == [
+    assert captured["command"][:5] == [
         "python-custom",
         "-m",
         "bioetl",
-        "quarantine",
+        "health",
+        "server",
     ]
     assert captured["kwargs"]["env"] == {"PYTHONPATH": "src"}
     assert log_path.exists()

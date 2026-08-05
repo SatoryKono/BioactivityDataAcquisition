@@ -139,7 +139,7 @@ Explorer subset safety, and zero unexplained values.
   - `$pipeline_context` is preserved from source dashboard links
   - `$adapter` is optional detail scope, not required on handoff
 - `bioetl-silver-reject-explorer`
-  - `$pipeline` is required before Quarantine Explorer reads are trustworthy
+  - `$pipeline` is required before BioETL Ops HTTP reads are trustworthy
   - `$reason_code`, `$field`, `$quarantine_run_id`, `$payload_hash` are explorer-only narrowing filters
 - `bioetl-overview-v2`
   - `$workflow`, `$pipeline`, and `$run_type` define the aggregate L0 context

@@ -51,7 +51,7 @@ def _reuse_observability_backend_if_ready[ResultT](
         warning_printer(
             "Observability backend: existing listener on port "
             f"{port} (pid={existing_pid}) is bound but health probes timeout; "
-            "restarting detached Quarantine Explorer backend."
+            "restarting detached BioETL Ops HTTP (health server) backend."
         )
         if drop_stale_backend_fn(port):
             return None
@@ -77,7 +77,8 @@ def _reuse_observability_backend_if_ready[ResultT](
         )
     warning_printer(
         "Observability backend: existing listener is reachable but missing "
-        "required audit capabilities; restarting detached Quarantine Explorer backend."
+        "required audit capabilities; restarting detached BioETL Ops HTTP "
+        "(health server) backend."
     )
     if drop_stale_backend_fn(port):
         return None
@@ -124,9 +125,9 @@ def _start_observability_backend_detached[ResultT](
     except OSError as exc:
         startup_detail = build_startup_failure_detail_fn(startup_log_path)  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
         warning_printer(  # type: ignore[operator]  # pyright: ignore[reportCallIssue]
-            "Observability backend: failed to start detached Quarantine Explorer "
-            f"backend on port {port} ({exc}). {startup_detail} Grafana ID panels "
-            "may remain empty."
+            "Observability backend: failed to start detached BioETL Ops HTTP "
+            f"(health server) backend on port {port} ({exc}). {startup_detail} "
+            "Grafana ID panels may remain empty."
         )
         return result_factory(
             status="failed",
@@ -193,7 +194,7 @@ def _build_started_backend_result[ResultT](
         health_url=health_url,
         pid=getattr(process, "pid", None),
         command=command,
-        message=f"Started detached Quarantine Explorer backend at {health_url}.",
+        message=f"Started detached BioETL Ops HTTP (health server) at {health_url}.",
     )
 
 
@@ -229,8 +230,8 @@ def _build_backend_capability_failure_result[ResultT](
     )
     startup_detail = build_startup_failure_detail_fn(startup_log_path, process=process)
     warning_printer(
-        "Observability backend: detached Quarantine Explorer process did not "
-        "become ready with required audit capabilities at "
+        "Observability backend: detached BioETL Ops HTTP (health server) process "
+        "did not become ready with required audit capabilities at "
         f"{health_url}. {startup_detail} "
         f"{capability_failure_detail or ''} Grafana ID panels may remain empty."
     )
