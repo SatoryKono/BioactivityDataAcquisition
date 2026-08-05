@@ -1011,7 +1011,7 @@ def _classify_http_payload(payload: object) -> tuple[str, str]:
     return ("nonzero_result", "Explorer summary returned non-zero rejects")
 
 
-def _prefixed_cell_value(
+def _display_cell_value(
     row: dict[str, object],
     *,
     parameter: str,
@@ -1019,9 +1019,14 @@ def _prefixed_cell_value(
 ) -> tuple[str | None, str | None]:
     cell = row.get(field)
     if not isinstance(cell, str):
-        return (None, f"{field} must be a prefixed string")
+        return (None, f"{field} must be a string")
+    cell = cell.strip()
+    if not cell:
+        return (None, f"{field} display value is empty")
     prefix, separator, display = cell.partition("|")
-    if separator != "|" or prefix != parameter:
+    if separator != "|":
+        return (cell, None)
+    if prefix != parameter:
         return (None, f"{field} prefix does not match parameter")
     display = display.strip()
     if not display:
@@ -1090,10 +1095,10 @@ def _parse_processed_records_row(
         return (None, False, parameter_error)
     assert parameter is not None
 
-    value, value_error = _prefixed_cell_value(
+    value, value_error = _display_cell_value(
         raw_row, parameter=parameter, field="value"
     )
-    percentage, percentage_error = _prefixed_cell_value(
+    percentage, percentage_error = _display_cell_value(
         raw_row, parameter=parameter, field="percentage"
     )
     if value_error or percentage_error:

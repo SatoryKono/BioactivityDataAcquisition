@@ -41,6 +41,8 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 - **Type:** Table (primary first-screen localization)
 - **Purpose:** Cross-domain ranked suspects (Runtime / Provider / DQ) with domain label and scoped handoff links.
 - **Data sources:** `bioetl_runtime_current_blocker_reason`, `bioetl_provider_current_cause`, `bioetl_dq_current_reason` (merged instant tables)
+- **Visible columns:** Domain, Pipeline, Reason, and Signal. Merge bookkeeping
+  fields (`Time`, `Value`, and Grafana series aliases) are hidden.
 - **Empty:** `VALID_EMPTY — no active suspects across domains`
 
 ### 5b. Domain Suspect Details (collapsed row)
@@ -64,6 +66,8 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 - **Purpose:** Range ALERTS history — same temporal chain as Current Alerts (now);
   not a persistent incident log.
 - **Data sources:** Prometheus `ALERTS` (range)
+- **Presentation:** Full dashboard width with fixed firing/pending colors and no
+  duplicate legend; the wider lane prevents alert-state labels from colliding.
 
 ### 10. Assess Impact & Confidence
 - **Type:** Text

@@ -10,6 +10,11 @@ Where a Counter appears inside `max_over_time()`, the value is Pushgateway
 snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 `increase()`; exact multi-run totals come from RunLedger.
 
+Pipeline, DQ, Control Plane, and provider diagnostic condition panels preserve
+missing Prometheus evidence as `UNKNOWN`. They only show zero when the relevant
+anchor and condition series are present; no terminal synthetic-zero fallback is
+used.
+
 ## Key Panels
 
 ### 1. Navigate Dashboards
@@ -99,6 +104,9 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 - **Type:** Table
 - **Purpose:** Show stage expectedness and anomaly detection.
 - **Data sources:** `bioetl_pipeline_stage_expected`
+- **Visible columns:** Stage, Expected, and Observed Records. Merge timestamps
+  and generic `Count` aliases are hidden; expectedness and observed counts keep
+  separate field semantics.
 
 ### 17. Track Records by Stage / Interval
 - **Type:** Timeseries
@@ -109,6 +117,8 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 - **Type:** Table
 - **Purpose:** Show detailed blocker information.
 - **Data sources:** `bioetl_runtime_current_blocker_reason`
+- **Presentation:** Only operator-facing blocker dimensions and counts are
+  rendered; merge timestamps and intermediate `Value` fields are hidden.
 
 ### 19. Localize Runtime Cause
 - **Type:** Row
@@ -179,6 +189,9 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 - **Type:** Stat
 - **Purpose:** Show provider alert conditions.
 - **Data sources:** `bioetl_runtime_alert_condition_provider_failure`
+- **No-data semantics:** A zero is shown only when the selected provider anchor
+  and diagnostic condition series exist. Missing diagnostic evidence remains
+  `UNKNOWN`; the query does not synthesize a healthy zero.
 
 ### 33. Inspect Global Provider Alert Conditions
 - **Type:** Stat

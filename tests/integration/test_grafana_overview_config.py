@@ -153,6 +153,13 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
         "Review First Action"
     ].get("gridPos", {}).get("y")
     assert panels["Review First Action"].get("gridPos", {}).get("w", 0) >= 8
+    first_action_grid = panels["Review First Action"].get("gridPos", {})
+    domain_status_grid = panels["Review Domain Status"].get("gridPos", {})
+    assert first_action_grid.get("h", 0) >= 8
+    assert domain_status_grid.get("h") == first_action_grid.get("h")
+    assert panels["Review Active Alerts"].get("gridPos", {}).get("y", 0) >= (
+        first_action_grid.get("y", 0) + first_action_grid.get("h", 0) + 1
+    )
     assert panels["Review Domain Status"].get("gridPos", {}).get("w", 0) >= 10
     lazy = {"Review Run Identity": 9300, "Review Processed Records": 9301}
     for title, panel_id in lazy.items():
@@ -229,6 +236,7 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
         for prop in action_override.get("properties", [])
     }
     assert action_props.get("custom.cellOptions", {}).get("type") == "color-text"
+    assert action_props.get("custom.width", 0) >= 180
     links = action_props.get("links") or []
     assert links, "Action column must expose row-aware board links"
     assert any(
@@ -252,6 +260,20 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     exclude = organize.get("options", {}).get("excludeByName", {})
     # Keep action_dashboard_uid for field links; hide via field override instead.
     assert exclude.get("action_dashboard_uid") is not True
+    hidden_route_override = next(
+        (
+            item
+            for item in overrides
+            if item.get("matcher", {}).get("options") == "action_dashboard_uid"
+        ),
+        None,
+    )
+    assert hidden_route_override is not None
+    hidden_route_properties = {
+        property_.get("id"): property_.get("value")
+        for property_ in hidden_route_override.get("properties", [])
+    }
+    assert hidden_route_properties.get("custom.hidden") is True
     assert exclude.get("Value") is not True
 
 

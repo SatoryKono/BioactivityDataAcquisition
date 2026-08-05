@@ -181,11 +181,22 @@ def test_dq_quarantine_count_is_shipped_in_range_evidence_lane() -> None:
         None,
     )
     assert range_lane is not None
+    dashboard_panels = dashboard.get("panels", [])
+    assert isinstance(dashboard_panels, list)
+    if range_lane.get("collapsed"):
+        lane_panels = range_lane.get("panels", [])
+    else:
+        lane_index = dashboard_panels.index(range_lane)
+        lane_panels = []
+        for item in dashboard_panels[lane_index + 1 :]:
+            if isinstance(item, dict) and item.get("type") == "row":
+                break
+            lane_panels.append(item)
     panel = next(
         (
             item
-            for item in range_lane.get("panels", [])
-            if item.get("title") in accepted_titles
+            for item in lane_panels
+            if isinstance(item, dict) and item.get("title") in accepted_titles
         ),
         None,
     )

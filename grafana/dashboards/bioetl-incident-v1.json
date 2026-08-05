@@ -276,15 +276,14 @@
             "excludeByName": {
               "Time": true,
               "Time 1": true,
-              "Time 2": true
+              "Time 2": true,
+              "Value": true,
+              "Value #A": true,
+              "Value #B": true,
+              "Value #C": true
             },
             "indexByName": {},
-            "renameByName": {
-              "Value": "Signal",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
-            }
+            "renameByName": {}
           }
         }
       ],
@@ -441,7 +440,7 @@
       "description": "Do not put full UUIDs into Prometheus labels. Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none",
       "gridPos": {
         "h": 6,
-        "w": 12,
+        "w": 24,
         "x": 0,
         "y": 18
       },
@@ -551,10 +550,10 @@
       "title": "Track Alert State History",
       "description": "Range ALERTS history — not a persistent incident log. Same chain as Current Alerts (now)",
       "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 18
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 24
       },
       "datasource": {
         "type": "prometheus",
@@ -597,12 +596,10 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "inactive",
-                  "color": "green"
+                  "text": "inactive"
                 },
                 "1": {
-                  "text": "active",
-                  "color": "orange"
+                  "text": "active"
                 }
               }
             }
@@ -612,7 +609,7 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": "(?i).*\\bfiring\\b.*"
+              "options": ".*firing.*"
             },
             "properties": [
               {
@@ -627,7 +624,7 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": "(?i).*\\bpending\\b.*"
+              "options": ".*pending.*"
             },
             "properties": [
               {
@@ -649,7 +646,7 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": false
         },
         "tooltip": {
           "mode": "single",
@@ -666,7 +663,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 34
       },
       "options": {
         "mode": "html",
@@ -681,7 +678,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 38
       },
       "collapsed": false,
       "panels": [],
@@ -696,7 +693,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 29
+        "y": 39
       },
       "datasource": {
         "type": "prometheus",
@@ -835,7 +832,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 29
+        "y": 39
       },
       "datasource": {
         "type": "prometheus",
@@ -974,7 +971,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 29
+        "y": 39
       },
       "datasource": {
         "type": "prometheus",

@@ -8,6 +8,11 @@ Dashboard `0. Control Plane` monitors replay safety, manifest/ledger integrity,
 checkpoint freshness, audit activity, and lineage evidence. Shipped dashboard
 JSON is the source of truth.
 
+Diagnostic failure, incompatibility, replay, and lineage panels preserve empty
+Prometheus results as `No data`/`UNKNOWN`; they do not synthesize zero. A visible
+zero is therefore evidence from a present series, not proof inferred from metric
+absence.
+
 ## Variable contract
 
 - All panels inherit the shared shell selectors: `workflow`, `pipeline`,

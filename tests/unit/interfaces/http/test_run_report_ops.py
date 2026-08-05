@@ -98,13 +98,15 @@ def test_table_shape_pipeline_run_report_reconciliation_rows() -> None:
             "reconciliation": {
                 "silver_accounted": 10,
                 "gold_delta": 0,
+                "gold_vs_silver_status": "OK",
             },
             "funnel": [{"stage": "bronze"}],
         }
     )
     assert shaped["reconciliation"] == [
-        {"parameter": "silver_accounted", "value": 10},
-        {"parameter": "gold_delta", "value": 0},
+        {"parameter": "silver_accounted", "value": "10"},
+        {"parameter": "gold_delta", "value": "0"},
+        {"parameter": "gold_vs_silver_status", "value": "OK"},
     ]
     assert shaped["funnel"] == [{"stage": "bronze"}]
 

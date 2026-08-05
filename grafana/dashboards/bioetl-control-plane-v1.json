@@ -33,7 +33,7 @@
         "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"0. Trust (Trust)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">0. Trust (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
       },
       "title": "Navigate Dashboards",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0\u20134: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5\u20136: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light",
       "type": "text",
       "links": [
         {
@@ -117,7 +117,7 @@
       "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN persisted HTTP evidence, TIME RANGE history, and UNKNOWN missing/stale evidence. Pipeline and Run Type affect CURRENT and TIME RANGE evidence; run_id never filters Prometheus. UNKNOWN means missing or stale evidence, never healthy.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div><b>Scope:</b> <b>CURRENT</b> = replay status/reason/action · <b>SELECTED RUN</b> = identity evidence</div><div><b>UNKNOWN</b> = incomplete evidence — not OK</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Can this run be replayed safely?</div><div><b>Scope:</b> <b>CURRENT</b> = replay status/reason/action \u00b7 <b>SELECTED RUN</b> = identity evidence</div><div><b>UNKNOWN</b> = incomplete evidence \u2014 not OK</div></div></div>"
       }
     },
     {
@@ -241,7 +241,7 @@
         "y": 11
       },
       "options": {
-        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;overflow:hidden\"><strong>First recovery action</strong>: 1) Check readiness and replay/checkpoint evidence · 2) For UNKNOWN or INCOMPLETE, verify the Prometheus scrape · 3) Open blocker details · 4) Confirm identity in Run Explorer</div>",
+        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;overflow:hidden\"><strong>First recovery action</strong>: 1) Check readiness and replay/checkpoint evidence \u00b7 2) For UNKNOWN or INCOMPLETE, verify the Prometheus scrape \u00b7 3) Open blocker details \u00b7 4) Confirm identity in Run Explorer</div>",
         "mode": "html",
         "dataLinks": [
           {
@@ -783,7 +783,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round(((\n (sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])))\n+\n (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])))\n+\n (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))\n+\n (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))))) or vector(0))",
+          "expr": "round(((\n (sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])))\n+\n (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])))\n+\n (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))\n+\n (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))))))",
           "instant": true,
           "refId": "A"
         }
@@ -875,7 +875,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -966,7 +966,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -1057,7 +1057,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -1148,7 +1148,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_checkpoint_load_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_checkpoint_load_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -1239,7 +1239,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_checkpoint_save_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_checkpoint_save_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -1330,7 +1330,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_checkpoint_operator_operations_total{status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_checkpoint_operator_operations_total{status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -1343,7 +1343,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows the highest replay lag during the selected range. Below 300s is normal, 300–899s is elevated, and >=900s is critical. No data means lag telemetry is unavailable.",
+      "description": "Shows the highest replay lag during the selected range. Below 300s is normal, 300\u2013899s is elevated, and >=900s is critical. No data means lag telemetry is unavailable.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1944,7 +1944,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -2035,7 +2035,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -2428,7 +2428,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -2519,7 +2519,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "((((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.05) + (((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.10)) or vector(0)",
+          "expr": "((((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.05) + (((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.10))",
           "instant": true,
           "refId": "A"
         }
@@ -2760,7 +2760,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -2851,7 +2851,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -2883,7 +2883,7 @@
               "options": {
                 "match": "null+nan",
                 "result": {
-                  "text": "—",
+                  "text": "\u2014",
                   "color": "transparent",
                   "index": 0
                 }
@@ -3294,7 +3294,7 @@
     },
     {
       "datasource": "BioETL Ops HTTP",
-      "description": "Summarizes the selected run’s identity and replay anchors. Short values are shown in the table; full values remain available for copying. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
+      "description": "Summarizes the selected run\u2019s identity and replay anchors. Short values are shown in the table; full values remain available for copying. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -4026,7 +4026,7 @@
             "inspect": true
           },
           "unit": "none",
-          "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
+          "noValue": "Not resolved \u2014 no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
           "links": [
             {
               "title": "Copy/Open full value (plain text)",
@@ -4183,7 +4183,7 @@
           },
           "decimals": 0,
           "unit": "none",
-          "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
+          "noValue": "Not resolved \u2014 no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
           "links": [
             {
               "title": "Check BioETL Ops HTTP health",
