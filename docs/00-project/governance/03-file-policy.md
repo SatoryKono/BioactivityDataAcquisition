@@ -79,7 +79,7 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   synchronized with `scripts/ai/.mcp.json`. Machine-local absolute MCP paths are
   allowed only in documented generated local runtime surfaces such as
   `~/.codex/config.toml`, local ignored editor/runtime mirrors, or the reviewed
-  `.devin/config.json` runtime surface; see
+  `.devin/mcp_config.json` runtime surface; see
   `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`.
 - Root-level tracked markdown и txt артефакты MUST быть ограничены canonical
   root entrypoints. Операционные quick-reference материалы SHOULD жить в

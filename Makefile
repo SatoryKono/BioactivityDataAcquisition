@@ -1,10 +1,12 @@
 # BioETL local-first Makefile
 
-.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps run-local sync-windsurf-rules
+.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps run-local sync-windsurf-rules devin devin-setup devin-check devin-mcp-start
 .PHONY: docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
 .PHONY: clean clean-all clean-local-artifacts clean-preflight precommit-install qa-arch-fast qa-debt security-check quarantine-inspect quarantine-replay quarantine-purge release-lock
 
 RUN ?= uv run
+DEVIN ?= devin
+DEVIN_ARGS ?=
 PIPELINE ?= chembl_activity
 RUN_ID ?=
 LOCAL_COV_FAIL_UNDER ?= 80
@@ -33,6 +35,9 @@ help:
 	@echo "  make test-profile          Run pytest duration profiling"
 	@echo "  make test-deps             Verify test dependencies import"
 	@echo "  make run-local             Run sample local pipeline"
+	@echo "  make devin                 Launch Devin CLI with BioETL runtime config"
+	@echo "  make devin-check           Validate Devin auth, rules, skills, and MCP config"
+	@echo "  make devin-mcp-start       Start the optional daily shared MCP plane"
 	@echo ""
 	@echo "Local governance:"
 	@echo "  make precommit-install      Install local pre-commit hooks"
@@ -122,6 +127,29 @@ test-profile:
 
 run-local:
 	$(RUN) bioetl run --pipeline $(PIPELINE) --limit 10
+
+# Devin CLI discovers AGENTS.md, .devin/config.json, .devin/agents/, and
+# .devin/mcp_config*.json from the repository working directory.
+devin-setup:
+	PYTHONDONTWRITEBYTECODE=1 python3 scripts/ops/runtime/mcp/apply-shared-to-devin.py
+
+devin-check: devin-setup
+	@command -v $(DEVIN) >/dev/null || { echo "Devin CLI is not installed" >&2; exit 1; }
+	PYTHONDONTWRITEBYTECODE=1 python3 -m json.tool .devin/config.json >/dev/null
+	PYTHONDONTWRITEBYTECODE=1 python3 -m json.tool .devin/mcp_config.json >/dev/null
+	PYTHONDONTWRITEBYTECODE=1 python3 -m json.tool .devin/mcp_config.local.json >/dev/null
+	PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/codex/setup_mcp.py --check
+	$(DEVIN) auth status
+	$(DEVIN) rules list
+	$(DEVIN) skills list
+	$(DEVIN) mcp list
+
+devin-mcp-start:
+	XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily
+	PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily
+
+devin: devin-setup
+	$(DEVIN) $(DEVIN_ARGS)
 
 # Check Docker
 docker-check:

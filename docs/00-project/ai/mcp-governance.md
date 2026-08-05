@@ -137,7 +137,7 @@ biomoltechDocs
 mintlify
 
 These servers are **retired** from the sanctioned portable inventory. Do **not**
-re-enable them in recommended local defaults (`.devin/config.local.json`,
+re-enable them in recommended local defaults (`.devin/mcp_config.local.json`,
 `.codex/settings.json`, `.cursor/mcp.json`, `.vscode/mcp.json`, or generated
 overlays). `scripts/ai/codex/setup_mcp.py` keeps
 `REMOVED_MCP_SERVER_NAMES` and will not emit them into tracked or generated
@@ -159,12 +159,12 @@ tracked MCP configs:
 ## Devin HTTP Header Projection
 
 The canonical MCP server inventory is shared with Devin, but HTTP authentication
-must use Devin-supported configuration. The generated `.devin/config.json`
-projects the `ref` credential as:
+must use Devin-supported configuration. The generated
+`.devin/mcp_config.json` projects the `ref` credential as:
 
 ```json
 "headers": {
-  "x-ref-api-key": "$REF_TOOL_API_KEY"
+  "x-ref-api-key": "${env:REF_TOOL_API_KEY}"
 }
 ```
 

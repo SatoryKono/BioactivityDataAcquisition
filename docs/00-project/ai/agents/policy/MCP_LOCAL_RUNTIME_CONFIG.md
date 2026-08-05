@@ -22,6 +22,8 @@ This policy applies to:
 - `.codex/config-headless.toml`
 - `.gemini/config.toml`
 - `.devin/config.json`
+- `.devin/mcp_config.json`
+- `.devin/mcp_config.local.json`
 
 ## Current Classification
 
@@ -36,7 +38,9 @@ This policy applies to:
 | `.gemini/settings.json` | no | local-only/generated runtime config | may exist in local checkouts; not a tracked runtime source on `main`; may contain machine-local absolute paths |
 | `.codex/config-headless.toml` | no | local-only/untracked runtime config | headless variant; not currently tracked on `main` |
 | `.gemini/config.toml` | no | local-only/untracked runtime config | may exist in local checkouts; not a tracked runtime source on `main` |
-| `.devin/config.json` | yes | tracked active Devin runtime projection | shared-profile servers use localhost HTTP; remaining command paths stay repo-relative |
+| `.devin/config.json` | yes | tracked Devin project settings | contains only current project-level settings (`permissions`, `read_config_from`, optional hooks, and CLI metadata); MCP servers do not live here in Devin CLI `v3000.3+` |
+| `.devin/mcp_config.json` | yes | tracked active Devin MCP projection | full sanctioned inventory; local servers use shared localhost HTTP and remote servers use Devin `${env:VAR}` header expansion |
+| `.devin/mcp_config.local.json` | no | generated machine-local Devin MCP overlay | gitignored daily override; marks optional servers disabled without changing the tracked inventory |
 | `.claude/**` | no | unavailable in current checkout | not an active source for Codex/Gemini behavior in this program |
 
 ## Strategy
@@ -54,18 +58,20 @@ This policy applies to:
    (`$XDG_CACHE_HOME/bioetl-mcp` or `~/.cache/bioetl-mcp`) instead of a
    Windows-mounted workspace path. Tracked portable MCP projections continue
    to use repo-relative `.cache/**` paths.
-1. Treat `.devin/config.json` as a portable tracked Devin projection. The setup
-   generator replaces only `mcpServers` with the canonical repo-relative
-   21-server payload and preserves existing Devin-owned top-level settings such
-   as `version`, `devin`, `shell`, and `theme_mode`.
+1. Treat `.devin/config.json` as portable tracked Devin project settings and
+   `.devin/mcp_config.json` as the portable tracked Devin MCP projection. The
+   setup generator preserves only project keys supported by current Devin CLI
+   and writes the canonical 21-server shared HTTP payload to the dedicated MCP
+   file.
 1. Devin starts repository work in its cloned workspace and root environment
    commands from the repository root. Relative MCP filesystem, cache, memory,
    and wrapper arguments therefore use that repository root as their execution
    precondition. A runtime that changes this working-directory contract must
    materialize a local-only absolute projection instead of committing it.
 1. Contributor docs MUST say whether a config is portable/repo-relative or
-   depends on machine-local absolute paths. `.devin/config.json` is part of the
-   portable tracked set.
+   depends on machine-local absolute paths. `.devin/config.json` and
+   `.devin/mcp_config.json` are part of the portable tracked set;
+   `.devin/mcp_config.local.json` is machine-local and gitignored.
 1. Do not silently rewrite checked-in runtime paths during unrelated work.
 1. If broader portability work is required, introduce an explicit
    template/strategy change instead of implying that all current runtime
@@ -160,8 +166,9 @@ Rules:
 1. Tracked `.mcp.json` / `scripts/ai/.mcp.json` / `.zed/mcp.json` remain the
    portable **full** inventory SSOT unless a separate reviewed change says
    otherwise.
-2. Tracked `.devin/config.json` keeps the **full** sanctioned set (shared HTTP).
-   Profiles filter **local IDE** projections (`.cursor/mcp.json`,
+2. Tracked `.devin/mcp_config.json` keeps the **full** sanctioned set (shared
+   HTTP). `.devin/mcp_config.local.json` may disable optional servers for daily
+   use. Profiles filter **local IDE** projections (`.cursor/mcp.json`,
    `.vscode/mcp.json`, workspace `.codex/settings.json`). Generator defaults
    are **`stable`** profile and **`shared`** transport.
 3. Retired servers in `REMOVED_MCP_SERVER_NAMES` must never reappear.
@@ -226,7 +233,7 @@ When AI docs mention these configs, they SHOULD state:
 - whether the file is a portable workspace manifest or an active local runtime
   config
 - absolute local paths are forbidden in tracked workspace MCP manifests,
-  including the tracked Devin projection, but may be expected in generated
+  including `.devin/mcp_config.json`, but may be expected in generated
   local-only runtime surfaces
 - local verification may be required for local-only runtime settings
 - `.claude/**` is out of scope unless a future task restores and verifies it
@@ -255,12 +262,12 @@ When AI docs mention these configs, they SHOULD state:
 ## Devin HTTP Header Projection
 
 The canonical MCP server inventory is shared with Devin, but HTTP authentication
-must use Devin-supported configuration. The generated `.devin/config.json`
-projects the `ref` credential as:
+must use Devin-supported configuration. The generated
+`.devin/mcp_config.json` projects the `ref` credential as:
 
 ```json
 "headers": {
-  "x-ref-api-key": "$REF_TOOL_API_KEY"
+  "x-ref-api-key": "${env:REF_TOOL_API_KEY}"
 }
 ```
 

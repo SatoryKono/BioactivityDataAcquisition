@@ -2294,8 +2294,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2180,
-      "test_python_file_count": 2411,
+      "test_glob_file_count": 2181,
+      "test_python_file_count": 2412,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2314,7 +2314,6 @@
         "tests/unit/"
       ],
       "top_level_directories_including_pycache": [
-        "tests/__pycache__/",
         "tests/architecture/",
         "tests/benchmarks/",
         "tests/contract/",
@@ -2332,16 +2331,16 @@
         "tests/unit/"
       ],
       "top_level_directory_count": 15,
-      "top_level_directory_count_including_pycache": 16
+      "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2180,
-    "total_test_functions": 23299,
+    "total_test_files": 2181,
+    "total_test_functions": 23304,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "7cc38dd19192028c7f9e00e4ff32982e7d17954031031e1b4777be1a075f0394",
+  "source_tree_sha256": "55d4704a0245556959a877132f150b3df0379ca096763e5639bb1e386843aa83",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 105,
@@ -2361,8 +2360,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2180,
-    "test_python_file_count": 2411,
+    "test_glob_file_count": 2181,
+    "test_python_file_count": 2412,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2381,7 +2380,6 @@
       "tests/unit/"
     ],
     "top_level_directories_including_pycache": [
-      "tests/__pycache__/",
       "tests/architecture/",
       "tests/benchmarks/",
       "tests/contract/",
@@ -2399,11 +2397,11 @@
       "tests/unit/"
     ],
     "top_level_directory_count": 15,
-    "top_level_directory_count_including_pycache": 16
+    "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2180,
-  "total_test_functions": 23299,
+  "total_test_files": 2181,
+  "total_test_functions": 23304,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

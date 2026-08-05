@@ -1,9 +1,12 @@
 {
-  "devin": {
-    "org_id": "bioetl"
+  "version": 1,
+  "permissions": {
+    "ask": [
+      "Read(**/.env*)",
+      "Write(**/.env*)"
+    ]
   },
-  "shell": {
-    "setup_complete": true
-  },
-  "_comment": "BioETL custom subagent profiles available in .devin/agents/: py-audit-bot, py-architecture-debt-bot, py-plan-bot, py-test-bot, py-config-bot, py-debug-bot, py-doc-bot, py-test-swarm, py-review-orchestrator. See .devin/agents/DEVIN-RUNTIME.md for mapping."
+  "read_config_from": {
+    "agents_standard": true
+  }
 }

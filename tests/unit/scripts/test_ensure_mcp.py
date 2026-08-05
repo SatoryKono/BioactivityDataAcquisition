@@ -61,7 +61,7 @@ def _prepare_workspace(root: Path) -> None:
     projections = {
         ".vscode/mcp.json": {"servers": shared},
         ".qodo/mcp.json": {"mcpServers": shared},
-        ".devin/config.json": {"mcpServers": shared},
+        ".devin/mcp_config.json": {"mcpServers": shared},
     }
     for relative_path, payload in projections.items():
         path = root / relative_path
