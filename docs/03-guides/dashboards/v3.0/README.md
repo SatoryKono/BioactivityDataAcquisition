@@ -7,11 +7,15 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-13'
+  Last verified: '2026-08-05'
 
 ______________________________________________________________________
 
 # Dashboards v3.0 Draft Spec
+
+> **Historical draft** — not a shipping contract. Canonical shipped portfolio is
+> **7 dashboards** `0..6` (Trust → Run Explorer). See
+> [dashboard-inventory.md](../dashboard-inventory.md).
 
 This directory defines the draft v3.0 specification line for future BioETL
 dashboards. It is a documentation/spec layer only. It does not replace the
