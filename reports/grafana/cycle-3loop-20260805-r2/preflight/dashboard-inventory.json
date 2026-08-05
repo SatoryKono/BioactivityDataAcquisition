@@ -1,0 +1,254 @@
+[
+  {
+    "uid": "bioetl-control-plane-v1",
+    "title": "0. Trust",
+    "path": "grafana/dashboards/bioetl-control-plane-v1.json",
+    "variables": [
+      "workflow",
+      "pipeline",
+      "run_type",
+      "run_id"
+    ],
+    "time_from": "now-12h",
+    "time_to": "now",
+    "refresh": "60s",
+    "rows": 6,
+    "panels": 52,
+    "collapsed_rows": 6,
+    "repeat_panels": 0,
+    "types": {
+      "text": 7,
+      "stat": 21,
+      "timeseries": 14,
+      "table": 10
+    },
+    "datasources": [],
+    "links": 0,
+    "tags": [
+      "bioetl",
+      "control-plane",
+      "replay-safety",
+      "dashboard",
+      "traceability",
+      "observability",
+      "control-plane-explorer",
+      "dashboard-2.0"
+    ]
+  },
+  {
+    "uid": "bioetl-overview-v2",
+    "title": "1. Overview",
+    "path": "grafana/dashboards/bioetl-overview-v2.json",
+    "variables": [
+      "workflow",
+      "pipeline",
+      "run_type",
+      "run_id"
+    ],
+    "time_from": "now-12h",
+    "time_to": "now",
+    "refresh": "60s",
+    "rows": 5,
+    "panels": 21,
+    "collapsed_rows": 5,
+    "repeat_panels": 0,
+    "types": {
+      "table": 13,
+      "text": 3,
+      "stat": 2,
+      "state-timeline": 3
+    },
+    "datasources": [],
+    "links": 0,
+    "tags": [
+      "bioetl",
+      "overview",
+      "pipeline",
+      "v3-baseline",
+      "hybrid-overview",
+      "answer-first",
+      "fleet",
+      "dashboard-2.0"
+    ]
+  },
+  {
+    "uid": "bioetl-runtime",
+    "title": "2. Pipeline Diagnostics",
+    "path": "grafana/dashboards/bioetl-runtime.json",
+    "variables": [
+      "workflow",
+      "pipeline",
+      "run_type",
+      "run_id",
+      "stage",
+      "provider_hint"
+    ],
+    "time_from": "now-12h",
+    "time_to": "now",
+    "refresh": "60s",
+    "rows": 6,
+    "panels": 36,
+    "collapsed_rows": 6,
+    "repeat_panels": 0,
+    "types": {
+      "text": 6,
+      "stat": 16,
+      "table": 6,
+      "timeseries": 7,
+      "bargauge": 1
+    },
+    "datasources": [],
+    "links": 0,
+    "tags": [
+      "bioetl",
+      "runtime",
+      "ops",
+      "triage",
+      "pipeline-explorer",
+      "dashboard-2.0"
+    ]
+  },
+  {
+    "uid": "bioetl-provider-health-v2",
+    "title": "3. Provider Health",
+    "path": "grafana/dashboards/bioetl-provider-health-v2.json",
+    "variables": [
+      "workflow",
+      "pipeline",
+      "run_type",
+      "run_id",
+      "provider",
+      "pipeline_context",
+      "adapter"
+    ],
+    "time_from": "now-12h",
+    "time_to": "now",
+    "refresh": "60s",
+    "rows": 3,
+    "panels": 28,
+    "collapsed_rows": 3,
+    "repeat_panels": 0,
+    "types": {
+      "text": 3,
+      "stat": 7,
+      "table": 7,
+      "timeseries": 8,
+      "bargauge": 2,
+      "gauge": 1
+    },
+    "datasources": [],
+    "links": 0,
+    "tags": [
+      "bioetl",
+      "provider",
+      "health",
+      "v2",
+      "provider-explorer",
+      "population-first",
+      "dashboard-2.0"
+    ]
+  },
+  {
+    "uid": "bioetl-dq-v2",
+    "title": "4. Data Quality",
+    "path": "grafana/dashboards/bioetl-dq-v2.json",
+    "variables": [
+      "workflow",
+      "pipeline",
+      "run_type",
+      "run_id",
+      "stage"
+    ],
+    "time_from": "now-12h",
+    "time_to": "now",
+    "refresh": "60s",
+    "rows": 4,
+    "panels": 33,
+    "collapsed_rows": 4,
+    "repeat_panels": 0,
+    "types": {
+      "text": 5,
+      "stat": 14,
+      "table": 3,
+      "bargauge": 5,
+      "timeseries": 5,
+      "gauge": 1
+    },
+    "datasources": [
+      "prometheus"
+    ],
+    "links": 0,
+    "tags": [
+      "bioetl",
+      "data-quality",
+      "dq",
+      "validation",
+      "v2",
+      "data-trust",
+      "three-lane",
+      "dashboard-2.0"
+    ]
+  },
+  {
+    "uid": "bioetl-incident-v1",
+    "title": "5. Incident Workspace",
+    "path": "grafana/dashboards/bioetl-incident-v1.json",
+    "variables": [
+      "workflow",
+      "pipeline",
+      "run_type",
+      "run_id",
+      "provider"
+    ],
+    "time_from": "now-12h",
+    "time_to": "now",
+    "refresh": "60s",
+    "rows": 1,
+    "panels": 11,
+    "collapsed_rows": 1,
+    "repeat_panels": 0,
+    "types": {
+      "text": 4,
+      "stat": 1,
+      "table": 5,
+      "state-timeline": 1
+    },
+    "datasources": [],
+    "links": 0,
+    "tags": [
+      "bioetl",
+      "incident",
+      "dashboard-2.0",
+      "phase-2"
+    ]
+  },
+  {
+    "uid": "bioetl-run-explorer-v1",
+    "title": "6. Run Explorer",
+    "path": "grafana/dashboards/bioetl-run-explorer-v1.json",
+    "variables": [
+      "workflow",
+      "pipeline",
+      "run_type",
+      "run_id"
+    ],
+    "time_from": "now-12h",
+    "time_to": "now",
+    "refresh": "60s",
+    "rows": 1,
+    "panels": 12,
+    "collapsed_rows": 1,
+    "repeat_panels": 0,
+    "types": {
+      "text": 5,
+      "table": 7
+    },
+    "datasources": [],
+    "links": 0,
+    "tags": [
+      "bioetl",
+      "run-explorer",
+      "dashboard-2.0"
+    ]
+  }
+]
