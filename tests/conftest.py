@@ -12,6 +12,7 @@ import traceback
 from collections.abc import Callable, Generator
 from functools import cache
 from importlib.metadata import PackageNotFoundError, version
+from importlib.util import find_spec
 from pathlib import Path
 from types import ModuleType
 from typing import Any, cast
@@ -283,17 +284,18 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         help="Enable richer pilot-only live contract suites (equivalent to BIOETL_PILOT_SOAK_TESTS=true).",
     )
     # Workflows may pass --vcr-record=... Prefer VCR_RECORD_MODE when possible.
-    # Register a compatibility flag when no plugin already owns it.
-    with contextlib.suppress(ValueError):
-        parser.addoption(
-            "--vcr-record",
-            action="store",
-            default=None,
-            help=(
-                "VCR record mode compatibility option "
-                "(none|once|new_episodes|all). Prefer VCR_RECORD_MODE env."
-            ),
-        )
+    # Skip registration when pytest-vcr (or another plugin) already owns the flag.
+    if find_spec("pytest_vcr") is None:
+        with contextlib.suppress(ValueError):
+            parser.addoption(
+                "--vcr-record",
+                action="store",
+                default=None,
+                help=(
+                    "VCR record mode compatibility option "
+                    "(none|once|new_episodes|all). Prefer VCR_RECORD_MODE env."
+                ),
+            )
 
 
 def pytest_cmdline_main(config):
