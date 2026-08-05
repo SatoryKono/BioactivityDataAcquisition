@@ -1,7 +1,7 @@
 # Slowest Tests
 
-Source commit: `5271c40811c2420da5ae82fa233f56dfc02f25af`
-Source run id: `github-30999069843-1`
+Source commit: `e40738c3b50324b4fe00eb8ccae529aea2f81a13`
+Source run id: `local-full-suite`
 Refresh status: `captured`
 Collected test cases: `46742`
 Freshness guard: `<=45 days`
