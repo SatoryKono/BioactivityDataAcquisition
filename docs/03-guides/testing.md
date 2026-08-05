@@ -374,8 +374,14 @@ Supported policy slice for issue `#2598`:
   `reports/quality/module-coverage-inventory.json` генерируется из
   `reports/coverage/coverage.xml` через
   `python -m scripts.engineering.qa report-module-coverage --refresh-from-coverage-xml`
-  в lane `coverage-verify`. Локальные drift-проверки без fresh coverage XML
-  должны использовать hash-only режим
+  только в завершившемся green lane `coverage-verify`. Локальный
+  `coverage.xml` не является источником измеренных coverage-строк. Быстрый
+  semantic smoke запускается как
+  `pytest tests/architecture/test_module_coverage_inventory.py -q --tb=short`,
+  а полный обход source tree изолирован в
+  `pytest tests/architecture/test_module_coverage_inventory_freshness.py -q --tb=short`.
+  Локальные drift-проверки без fresh trusted coverage XML должны использовать
+  сохраняющий существующие measurement rows hash-only режим
   `python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml`.
   `unmeasured_module_count=0` и `uncovered_module_count=0` означают, что все
   source modules измерены и имеют хотя бы одну covered executable line; это не
@@ -762,8 +768,13 @@ pytest tests/contract/test_gold_dq_golden_snapshots.py --update-golden
 - **Branch Coverage**: Проверяется автоматически через `pytest-cov`.
 - **Module Coverage Inventory**: `coverage-verify` генерирует
   `reports/quality/module-coverage-inventory.json` после
-  `reports/coverage/coverage.xml`; локальная проверка drift:
-  `uv run python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml`.
+  `reports/coverage/coverage.xml`. Быстрая локальная semantic-проверка:
+  `uv run pytest tests/architecture/test_module_coverage_inventory.py -q --tb=short`;
+  дорогая source-tree freshness-проверка:
+  `uv run pytest tests/architecture/test_module_coverage_inventory_freshness.py -q --tb=short`.
+  Локальный `coverage.xml` не должен перезаписывать committed measurement rows;
+  `--refresh-from-coverage-xml` принадлежит только trusted green
+  `coverage-verify`.
   Per-module gates (`configs/quality/module_coverage_gates.yaml`): lane
   `coverage-verify` также запускает
   `--enforce-module-thresholds block-regression --fail-on-regression`, чтобы
@@ -772,7 +783,7 @@ pytest tests/contract/test_gold_dq_golden_snapshots.py --update-golden
   После изменений в `src/bioetl/**/*.py` обновляй `source_tree_sha256`:
   `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`,
   затем
-  `pytest tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current`.
+  `pytest tests/architecture/test_module_coverage_inventory_freshness.py`.
 - **Architecture Quality Scorecard**:
   `reports/quality/architecture-quality-scorecard.json` фиксирует
   evidence-backed quality trend по слоям, DI, module boundaries, tests,

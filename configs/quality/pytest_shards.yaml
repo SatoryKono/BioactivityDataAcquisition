@@ -249,6 +249,7 @@ shards:
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
+      - --ignore=tests/architecture/test_module_coverage_inventory_freshness.py
       - --ignore=tests/architecture/test_regression_metrics.py
       - --ignore=tests/architecture/test_adr_enforcement_matrix.py
       - --ignore=tests/architecture/test_add_svg_text_fallback.py
@@ -281,6 +282,7 @@ shards:
       - tests/architecture/test_diagram_regression_workflow.py
       - tests/architecture/test_docs_governance_workflow.py
       - tests/architecture/test_lint_terminology_script.py
+      - tests/architecture/test_module_coverage_inventory_freshness.py
       - tests/architecture/test_quality_debt_scorecard.py
       - tests/architecture/test_quality_burndown_priorities.py
       - tests/architecture/test_regression_metrics.py

@@ -202,6 +202,7 @@ def test_subprocess_heavy_architecture_tests_stay_in_slow_governance_shard() -> 
         "tests/architecture/test_contract_coverage_matrix_drift.py",
         "tests/architecture/test_layer_dependencies.py",
         "tests/architecture/test_lint_terminology_script.py",
+        "tests/architecture/test_module_coverage_inventory_freshness.py",
         "tests/architecture/test_regression_metrics.py",
         "tests/architecture/test_scripts_deprecation_backlog.py",
         "tests/architecture/test_scripts_inventory_manifest.py",
