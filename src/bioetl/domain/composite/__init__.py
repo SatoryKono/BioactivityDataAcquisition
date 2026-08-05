@@ -14,13 +14,26 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-from importlib import import_module
-
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
     AggregationFieldSpec,
     AggregationFunction,
     EnricherCardinality,
+)
+from bioetl.domain.composite.config import (
+    ColumnGroupConfig,
+    CompositeConfig,
+    CompositeDQConfig,
+    CrossValidationConfig,
+    DataSchemaConfig,
+    DependencyConfig,
+    DQOverrideConfig,
+    EnricherConfig,
+    ExecutionConfig,
+    LayerColumnConfig,
+    LineageConfig,
+    MergeConfig,
+    SeedConfig,
 )
 from bioetl.domain.composite.cross_validation import (
     ComparisonMethod,
@@ -116,35 +129,3 @@ __all__ = [
     "get_transition_rules",
     "validate_transition",
 ]
-
-_CONFIG_EXPORTS = frozenset(
-    {
-        "ColumnGroupConfig",
-        "CompositeConfig",
-        "CompositeDQConfig",
-        "CrossValidationConfig",
-        "DataSchemaConfig",
-        "DependencyConfig",
-        "DQOverrideConfig",
-        "EnricherConfig",
-        "ExecutionConfig",
-        "LayerColumnConfig",
-        "LineageConfig",
-        "MergeConfig",
-        "SeedConfig",
-    }
-)
-
-
-def __getattr__(name: str) -> object:
-    """Resolve composite config exports through their public facade."""
-    if name not in _CONFIG_EXPORTS:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    value = getattr(import_module("bioetl.domain.composite.config"), name)
-    globals()[name] = value
-    return value
-
-
-def __dir__() -> list[str]:
-    """Return eager and lazy public package exports."""
-    return sorted(set(globals()) | set(__all__))
