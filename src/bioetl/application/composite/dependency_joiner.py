@@ -5,28 +5,9 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.dependency_join_context_builders import (
-    build_composite_join_metadata,
-    build_prepared_dependency_join_context,
-    build_single_key_join_metadata,
-)
-from bioetl.application.composite.dependency_join_execution import (
-    build_composite_join_execution_plan,
-    build_single_key_join_execution_plan,
-    execute_planned_dependency_join,
-    resolve_composite_join_context,
-    resolve_single_key_join_context,
-)
-from bioetl.application.composite.dependency_join_models import (
-    CompositeJoinContext,
-    DependencyJoinExecutionSpec,
-    PreparedDependencyJoinContext,
-    ResolvedCompositeJoinContext,
-    ResolvedSingleKeyJoinContext,
-)
-from bioetl.application.composite.protocols import (
-    JoinExecutorProtocol,
-    JoinKeyResolverProtocol,
+from bioetl.application.composite.dependency_join_service_ops import (
+    apply_composite_key_dependency_join as _apply_composite_key_dependency_join_op,
+    apply_single_key_dependency_join as _apply_single_key_dependency_join_op,
 )
 from bioetl.application.composite.target_protein_classification_summary import (
     TARGET_PROTEIN_CLASSIFICATION_PIPELINE,
@@ -39,6 +20,10 @@ if TYPE_CHECKING:
     from bioetl.application.composite.column_renamer import ColumnRenamer
     from bioetl.application.composite.conflict_resolver import ConflictResolverService
     from bioetl.application.composite.deduplication import EnricherDeduplicatorService
+    from bioetl.application.composite.protocols import (
+        JoinExecutorProtocol,
+        JoinKeyResolverProtocol,
+    )
     from bioetl.domain.composite import DependencyConfig
     from bioetl.domain.ports import LoggerPort
 
@@ -98,22 +83,19 @@ class DependencyJoinerService:
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
         """Join dependency using all configured composite join keys."""
-        metadata = build_composite_join_metadata(
-            dep=dep,
-            seed_pipeline=seed_pipeline,
-        )
-        resolved_context = self._resolve_composite_join_context(
+        return _apply_composite_key_dependency_join_op(
+            deduplicator=self._deduplicator,
+            join_key_resolver=self._join_key_resolver,
+            renamer=self._renamer,
+            logger=self._logger,
+            field_alias_resolver=self._field_alias_resolver,
+            drop_system_columns=self.drop_system_columns,
+            conflict_resolver=self._conflict_resolver,
+            join_executor=self._join_executor,
             merged_df=merged_df,
             dep_df=dep_df,
             dep=dep,
-            metadata=metadata,
-        )
-        if resolved_context is None:
-            return merged_df
-
-        return self._execute_composite_dependency_join(
-            resolved_context=resolved_context,
-            dep=dep,
+            seed_pipeline=seed_pipeline,
         )
 
     def drop_system_columns(self, df: pl.DataFrame) -> pl.DataFrame:
@@ -138,27 +120,19 @@ class DependencyJoinerService:
         dep: DependencyConfig,
         seed_pipeline: str | None,
     ) -> pl.DataFrame:
-        metadata = build_single_key_join_metadata(
-            dep=dep,
-            seed_pipeline=seed_pipeline,
-        )
-        prepared_context = self._prepare_dependency_join_context(
+        return _apply_single_key_dependency_join_op(
+            deduplicator=self._deduplicator,
+            join_key_resolver=self._join_key_resolver,
+            renamer=self._renamer,
+            logger=self._logger,
+            field_alias_resolver=self._field_alias_resolver,
+            drop_system_columns=self.drop_system_columns,
+            conflict_resolver=self._conflict_resolver,
+            join_executor=self._join_executor,
             merged_df=merged_df,
             dep_df=dep_df,
             dep=dep,
-            left_join_keys=metadata.join_keys_list,
-            right_join_keys=metadata.right_keys_list,
             seed_pipeline=seed_pipeline,
-        )
-        resolved_context = resolve_single_key_join_context(
-            join_key_resolver=self._join_key_resolver,
-            metadata=metadata,
-            dependency=dep.pipeline,
-            prepared_context=prepared_context,
-        )
-        return self._execute_single_key_dependency_join(
-            resolved_context=resolved_context,
-            dep=dep,
         )
 
     def _apply_loaded_dependency_join(
@@ -205,96 +179,4 @@ class DependencyJoinerService:
             dep_df=dep_df,
             dep=dep,
             seed_pipeline=seed_pipeline,
-        )
-
-    def _resolve_composite_join_context(
-        self,
-        *,
-        merged_df: pl.DataFrame,
-        dep_df: pl.DataFrame,
-        dep: DependencyConfig,
-        metadata: CompositeJoinContext,
-    ) -> ResolvedCompositeJoinContext | None:
-        prepared_context = self._prepare_dependency_join_context(
-            merged_df=merged_df,
-            dep_df=dep_df,
-            dep=dep,
-            left_join_keys=metadata.join_keys_list,
-            right_join_keys=metadata.join_keys_list,
-            seed_pipeline=metadata.left_pipeline,
-        )
-        return resolve_composite_join_context(
-            join_key_resolver=self._join_key_resolver,
-            logger=self._logger,
-            prepared_context=prepared_context,
-            metadata=metadata,
-            dependency=dep.pipeline,
-        )
-
-    def _prepare_dependency_join_context(
-        self,
-        *,
-        merged_df: pl.DataFrame,
-        dep_df: pl.DataFrame,
-        dep: DependencyConfig,
-        left_join_keys: list[str],
-        right_join_keys: list[str],
-        seed_pipeline: str | None,
-    ) -> PreparedDependencyJoinContext:
-        return build_prepared_dependency_join_context(
-            deduplicator=self._deduplicator,
-            join_key_resolver=self._join_key_resolver,
-            renamer=self._renamer,
-            logger=self._logger,
-            field_alias_resolver=self._field_alias_resolver,
-            drop_system_columns=self.drop_system_columns,
-            merged_df=merged_df,
-            dep_df=dep_df,
-            dep=dep,
-            left_join_keys=left_join_keys,
-            right_join_keys=right_join_keys,
-            seed_pipeline=seed_pipeline,
-        )
-
-    def _execute_prepared_dependency_join(
-        self,
-        *,
-        execution_plan: DependencyJoinExecutionSpec,
-        dep: DependencyConfig,
-    ) -> pl.DataFrame:
-        return execute_planned_dependency_join(
-            conflict_resolver=self._conflict_resolver,
-            logger=self._logger,
-            dependency=dep.pipeline,
-            execution_plan=execution_plan,
-        )
-
-    def _execute_composite_dependency_join(
-        self,
-        *,
-        resolved_context: ResolvedCompositeJoinContext,
-        dep: DependencyConfig,
-    ) -> pl.DataFrame:
-        return self._execute_prepared_dependency_join(
-            execution_plan=build_composite_join_execution_plan(
-                resolved_context=resolved_context,
-                dependency=dep.pipeline,
-                join_executor=self._join_executor.execute_composite_key_join,
-            ),
-            dep=dep,
-        )
-
-    def _execute_single_key_dependency_join(
-        self,
-        *,
-        resolved_context: ResolvedSingleKeyJoinContext,
-        dep: DependencyConfig,
-    ) -> pl.DataFrame:
-        return self._execute_prepared_dependency_join(
-            execution_plan=build_single_key_join_execution_plan(
-                resolved_context=resolved_context,
-                dependency=dep.pipeline,
-                join_executor=self._join_executor.execute_polars_join,
-            ),
-            dep=dep,
         )

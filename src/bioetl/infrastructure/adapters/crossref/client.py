@@ -22,11 +22,14 @@ from bioetl.infrastructure.adapters.common.error_bundles import (
 from bioetl.infrastructure.adapters.crossref._client_fallback_policy import (
     _CrossRefFallbackPolicyMixin,
 )
-from bioetl.infrastructure.adapters.crossref.client_observability_helpers import (
-    build_crossref_source_metadata,
-    clear_crossref_request_collector,
-    get_crossref_request_count,
-    probe_crossref_health,
+from bioetl.infrastructure.adapters.crossref._client_ops import (
+    crossref_clear_request_collector,
+    crossref_fetch,
+    crossref_fetch_filtered,
+    crossref_fetch_filtered_with_fallback,
+    crossref_probe_health,
+    crossref_request_count,
+    crossref_source_metadata,
 )
 from bioetl.infrastructure.adapters.crossref.client_runtime_helpers import (
     build_crossref_fetch_flow,
@@ -158,8 +161,8 @@ class CrossRefAdapter(
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch CrossRef publications by DOI list (FilterableDataSourcePort)."""
-        flow = self._require_fetch_flow()
-        async for publication in flow.fetch_filtered(
+        async for publication in crossref_fetch_filtered(
+            flow=self._require_fetch_flow(),
             entity_type=entity_type,
             filter_ids=filter_ids,
             filter_field=filter_field,
@@ -176,8 +179,8 @@ class CrossRefAdapter(
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch publications by DOI with title-search fallback for misses."""
-        flow = self._require_fetch_flow()
-        async for publication in flow.fetch_filtered_with_fallback(
+        async for publication in crossref_fetch_filtered_with_fallback(
+            flow=self._require_fetch_flow(),
             entity_type=entity_type,
             filter_ids=filter_ids,
             filter_field=filter_field,
@@ -197,8 +200,8 @@ class CrossRefAdapter(
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch CrossRef publications via DOI filters or free-text query."""
         del offset
-        flow = self._require_fetch_flow()
-        async for publication in flow.fetch(
+        async for publication in crossref_fetch(
+            flow=self._require_fetch_flow(),
             entity_type=entity_type,
             limit=limit,
             query=query,
@@ -215,12 +218,8 @@ class CrossRefAdapter(
         return flow
 
     async def _probe_health(self) -> HealthStatus:
-        """Probe CrossRef API health with response-status classification.
-
-        Returns:
-            HealthStatus reflecting the current CrossRef API availability.
-        """
-        return await probe_crossref_health(
+        """Probe CrossRef API health with response-status classification."""
+        return await crossref_probe_health(
             http_client=self.http_client,
             query_builder=self._query_builder,
             response_mapper=self._response_mapper,
@@ -241,12 +240,8 @@ class CrossRefAdapter(
         return "/works"
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Return and clear aggregated API request metadata.
-
-        Returns:
-            SourceMetadata aggregated from all recorded API requests since last clear.
-        """
-        return build_crossref_source_metadata(
+        """Return and clear aggregated API request metadata."""
+        return crossref_source_metadata(
             request_collector=self._request_collector,
             api_base=CROSSREF_API_BASE,
             api_version=api_version,
@@ -254,14 +249,14 @@ class CrossRefAdapter(
 
     def clear_request_collector(self) -> None:
         """Clear the collector without returning metadata."""
-        clear_crossref_request_collector(
+        crossref_clear_request_collector(
             request_collector=self._request_collector,
         )
 
     @property
     def request_count(self) -> int:
         """Number of recorded API requests since last clear."""
-        return get_crossref_request_count(
+        return crossref_request_count(
             request_collector=self._request_collector,
         )
 

@@ -11,7 +11,6 @@ from __future__ import annotations
 
 __all__ = ["ChemblAdapter"]
 
-import urllib.parse
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -21,15 +20,20 @@ from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.chembl.constants import (
-    _NO_PAGINATION_ENTITIES,
-    _SILVER_TO_CHEMBL_API_FIELD,
-    CHEMBL_DTO_MODELS,
-)
-from bioetl.infrastructure.adapters.chembl.deduplication import (
-    compute_composite_key,
-    is_duplicate_record,
-    is_duplicate_record_composite,
+from bioetl.infrastructure.adapters.chembl._client_request_helpers import (
+    batch_ids,
+    build_filter_in_params,
+    build_filter_params,
+    build_request_params,
+    check_duplicate_composite,
+    check_duplicate_record,
+    compute_record_composite_key,
+    get_api_dedup_fields,
+    get_api_pk_field,
+    iter_chembl_as_models,
+    normalize_filter_field,
+    process_chembl_response,
+    projected_url_length,
 )
 from bioetl.infrastructure.adapters.chembl.entity_mapper import (
     ChemblEntityMapper,
@@ -90,18 +94,12 @@ class ChemblAdapter(
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
         self._bootstrap_dataclass_http_adapter()
-        # Resolve configuration: use provided config or domain defaults
-        config = (
-            self.adapter_config if self.adapter_config is not None else AdapterConfig()
-        )
+        config = self.adapter_config if self.adapter_config is not None else AdapterConfig()
         self.adapter_config = config
         self._adapter_config = config
         self._page_size = config.page_size
         self._filter_batch_size = config.batch_size
-
-        # Resolve extraction params
         self._extraction_params = self.extraction_params or ExtractionParams.empty()
-
         if not self._extraction_params.is_empty:
             self._logger.info(
                 "chembl_extraction_params_configured",
@@ -115,92 +113,60 @@ class ChemblAdapter(
         """Get configured page size for API requests."""
         return self._page_size
 
-    def _build_params(
-        self, offset: int, entity_type: str | None = None
-    ) -> JsonDict:  # Any: HTTP query params (str|int|bool values)
+    def _build_params(self, offset: int, entity_type: str | None = None) -> JsonDict:
         """Build API request parameters with health-aware batch size."""
-        params: JsonDict = {  # Any: untyped API JSON record
-            "format": "json"
-        }  # Any: HTTP query params (str|int|bool values)
-
-        # Some endpoints don't support limit/offset pagination
-        if entity_type not in _NO_PAGINATION_ENTITIES:
-            params["limit"] = self._get_effective_batch_size()
-            params["offset"] = offset
-
-        # Extraction-level filtering (ADR-028 §3)
-        if not self._extraction_params.is_empty:
-            params.update(self._extraction_params.to_query_dict())
-
-        return params
+        return build_request_params(
+            offset=offset,
+            entity_type=entity_type,
+            page_size=self._get_effective_batch_size(),
+            extraction_params=self._extraction_params,
+        )
 
     def _process_response(
         self, response: Response, entity_type: str
     ) -> tuple[list[BronzeRecord], bool]:
         """Process API response and return records with pagination flag."""
-        data = response.json()  # Any: untyped ChEMBL API JSON response
-        plural_key = self._mapper.get_plural_key(entity_type)
-        records = data.get(plural_key, [])
-        if entity_type in {"publication", "publication_term"}:
-            for record in records:
-                if "publication_id" not in record and record.get("document_chembl_id"):
-                    record["publication_id"] = record["document_chembl_id"]
-        page_meta = data.get("page_meta", {})
-        has_next = page_meta.get("next") is not None
-        return records, has_next
+        return process_chembl_response(
+            response=response, entity_type=entity_type, mapper=self._mapper
+        )
 
     def _batch_ids(self, ids: list[str], batch_size: int) -> Iterator[list[str]]:
         """Split IDs into batches for API requests."""
-        for i in range(0, len(ids), batch_size):
-            yield ids[i : i + batch_size]
+        return batch_ids(ids, batch_size)
 
     def _build_filter_in_params(self, filters: dict[str, list[str]]) -> dict[str, str]:
         """Build ``__in`` filter parameters for multi-field filtering."""
-        return {
-            f"{filter_field}__in": ",".join(ids)
-            for filter_field, ids in filters.items()
-            if ids
-        }
+        return build_filter_in_params(filters)
 
     def _normalize_filter_field(self, entity_type: str, filter_field: str) -> str:
         """Map Silver field names to ChEMBL API field names."""
-        return _SILVER_TO_CHEMBL_API_FIELD.get(filter_field, filter_field)
+        return normalize_filter_field(entity_type, filter_field)
 
     def _get_api_pk_field(self, entity_type: str) -> str:
         """Get primary key field name as it appears in raw API responses."""
-        pk = self._mapper.get_primary_key_field(entity_type)
-        return _SILVER_TO_CHEMBL_API_FIELD.get(pk, pk)
+        return get_api_pk_field(entity_type=entity_type, mapper=self._mapper)
 
     def _get_api_dedup_fields(self, entity_type: str) -> tuple[str, ...]:
         """Get dedup key fields as they appear in raw API responses."""
-        fields = self._mapper.get_dedup_key_fields(entity_type)
-        return tuple(_SILVER_TO_CHEMBL_API_FIELD.get(f, f) for f in fields)
+        return get_api_dedup_fields(entity_type=entity_type, mapper=self._mapper)
 
     def _build_filter_params(
         self, entity_type: str, filter_field: str, id_batch: list[str]
     ) -> dict[str, str]:
         """Build filter params using API-specific field names."""
-        joined_ids = ",".join(id_batch)
-        api_filter_field = self._normalize_filter_field(entity_type, filter_field)
-        return {f"{api_filter_field}__in": joined_ids}
+        return build_filter_params(
+            entity_type=entity_type, filter_field=filter_field, id_batch=id_batch
+        )
 
-    def _get_projected_url_length(
-        self,
-        url: str,
-        params: JsonDict,  # Any: untyped API JSON record
-    ) -> int:  # Any: HTTP query params (str|int|bool values)
+    def _get_projected_url_length(self, url: str, params: JsonDict) -> int:
         """Estimate length of the final URL with parameters."""
-        # URL-encode parameters to get accurate length (including escaping)
-        query_str = urllib.parse.urlencode(params, doseq=True)
-        return len(url) + 1 + len(query_str)
+        return projected_url_length(url=url, params=params)
 
     def _compute_composite_key(
-        self,
-        record: BronzeRecord,
-        pk_fields: tuple[str, ...],
+        self, record: BronzeRecord, pk_fields: tuple[str, ...]
     ) -> str:
         """Compute composite key string from multiple fields."""
-        return compute_composite_key(record, pk_fields)
+        return compute_record_composite_key(record, pk_fields)
 
     def _is_duplicate_record(
         self,
@@ -210,8 +176,13 @@ class ChemblAdapter(
         entity_type: str,
     ) -> bool:
         """Check if record is duplicate and add to seen set if not."""
-        return is_duplicate_record(
-            record, pk_field, seen_ids, entity_type, self._logger, self._adapter_metrics
+        return check_duplicate_record(
+            record=record,
+            pk_field=pk_field,
+            seen_ids=seen_ids,
+            entity_type=entity_type,
+            logger=self._logger,
+            adapter_metrics=self._adapter_metrics,
         )
 
     def _is_duplicate_record_composite(
@@ -222,13 +193,13 @@ class ChemblAdapter(
         entity_type: str,
     ) -> bool:
         """Check if record is duplicate using composite key."""
-        return is_duplicate_record_composite(
-            record,
-            pk_fields,
-            seen_keys,
-            entity_type,
-            self._logger,
-            self._adapter_metrics,
+        return check_duplicate_composite(
+            record=record,
+            pk_fields=pk_fields,
+            seen_keys=seen_keys,
+            entity_type=entity_type,
+            logger=self._logger,
+            adapter_metrics=self._adapter_metrics,
         )
 
     async def fetch_as_models(
@@ -242,34 +213,23 @@ class ChemblAdapter(
         validate: bool = True,
     ) -> AsyncIterator[BaseModel]:
         """Fetch ChEMBL records as typed DTO models."""
-        model_class = CHEMBL_DTO_MODELS.get(entity_type)
-        if model_class is None:
-            raise ValueError(
-                f"No DTO model for entity_type '{entity_type}'. "
-                f"Supported: {', '.join(CHEMBL_DTO_MODELS.keys())}"
-            )
-
-        async for record in self.fetch(
+        async for model in iter_chembl_as_models(
+            fetch_fn=self.fetch,
             entity_type=entity_type,
             limit=limit,
             query=query,
             filter_ids=filter_ids,
             filter_field=filter_field,
+            validate=validate,
         ):
-            if validate:
-                # Strict validation - will raise on unknown fields
-                yield model_class.model_validate(record)
-            else:
-                # Fast path - skip validation for trusted data
-                yield model_class.model_construct(**record)
+            yield model
 
     async def get_entity_count(self, entity_type: str) -> int:
         """Get total count of entities."""
         url = self._mapper.get_resource_url(entity_type)
-        params = {"limit": 1, "format": "json"}
         with self._adapter_metrics.measure_request(f"/{entity_type}/count"):
-            response = await self.http_client.get(url, params=params)
-        data = response.json()
-        page_meta = data.get("page_meta", {})
-        total_count: int = page_meta.get("total_count", 0)
-        return total_count
+            response = await self.http_client.get(
+                url, params={"limit": 1, "format": "json"}
+            )
+        return int(response.json().get("page_meta", {}).get("total_count", 0))
+

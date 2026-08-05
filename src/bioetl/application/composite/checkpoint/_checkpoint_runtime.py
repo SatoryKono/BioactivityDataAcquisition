@@ -4,14 +4,10 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.exceptions import BioETLError, StorageError
 from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, MetricsPort
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import ClockPort
 
 CHECKPOINT_READ_ERRORS = (
     json.JSONDecodeError,
@@ -202,6 +198,3 @@ __all__ = [
     "warn_if_checkpoint_exists_with_progress",
     "warn_if_checkpoint_stale",
 ]
-
-# Keep TYPE_CHECKING ClockPort referenced for public typing of re-exported helpers.
-_ = ClockPort

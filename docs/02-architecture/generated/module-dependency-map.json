@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 2410,
-    "total_internal_imports": 7380,
+    "scanned_modules": 2435,
+    "total_internal_imports": 7445,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 310,
     "violations": 0,
-    "source_fingerprint": "f9f3027db9fcd7276772e2dd79f055b683d098432034b08ec0528f6c2133092f"
+    "source_fingerprint": "16d4276984c0d1f52072c6dd3919ac42d39378cfff66a590b36d899bbaf6eef9"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1578,
+      "imports": 1600,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 919,
+      "imports": 930,
       "allowed": true
     },
     {
@@ -48,19 +48,19 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1175,
+      "imports": 1176,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 730,
+      "imports": 739,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1118,
+      "imports": 1140,
       "allowed": true
     },
     {
@@ -97,12 +97,12 @@
     {
       "source": "infrastructure.adapters",
       "target": "domain.types",
-      "imports": 106
+      "imports": 113
     },
     {
       "source": "application.composite",
       "target": "domain.composite",
-      "imports": 92
+      "imports": 97
     },
     {
       "source": "application.core",
@@ -132,7 +132,7 @@
     {
       "source": "application.composite",
       "target": "domain.ports",
-      "imports": 47
+      "imports": 50
     },
     {
       "source": "composition.factories",
@@ -172,7 +172,7 @@
     {
       "source": "application.composite",
       "target": "domain.exceptions",
-      "imports": 29
+      "imports": 30
     },
     {
       "source": "interfaces.cli",
@@ -255,6 +255,11 @@
       "imports": 20
     },
     {
+      "source": "infrastructure.adapters",
+      "target": "domain.exceptions",
+      "imports": 20
+    },
+    {
       "source": "interfaces.http",
       "target": "domain.control_plane",
       "imports": 20
@@ -267,11 +272,6 @@
     {
       "source": "composition.runtime_builders",
       "target": "infrastructure.config",
-      "imports": 19
-    },
-    {
-      "source": "infrastructure.adapters",
-      "target": "domain.exceptions",
       "imports": 19
     },
     {

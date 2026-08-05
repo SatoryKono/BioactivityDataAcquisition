@@ -128,6 +128,11 @@ log_test.txt
 !/reports/test-swarm/SWARM-001/flakiness-database.json
 !/reports/quality/
 /reports/quality/*
+!/reports/architecture/
+/reports/architecture/*
+!/reports/architecture/issue-pack-2026-08/
+/reports/architecture/issue-pack-2026-08/*
+!/reports/architecture/issue-pack-2026-08/7701-baseline-evidence.md
 !/reports/quality/documentation-governance-2026-07-28-closeout.md
 !/reports/quality/architecture-coderabbit-2026-07-29-issue-publish.json
 !/reports/quality/architecture-coderabbit-2026-07-29-arch-cr2-closeout.md
@@ -211,6 +216,8 @@ log_test.txt
 !/reports/quality/flaky-test-burndown-review.json
 !/reports/quality/branch-cleanup-7350-closeout-2026-08-03.md
 !/reports/quality/domain-io-taint-inventory.json
+!/reports/quality/domain-ports-inventory.json
+!/reports/quality/domain-ports-inventory.md
 !/reports/quality/config-contract-registry-artifact-duplication.json
 !/reports/quality/config-surface-backlog.json
 !/reports/quality/pipeline-config-contract-ownership-map.json
