@@ -39,7 +39,7 @@ def test_cli_tree_does_not_call_get_default_registry() -> None:
         violations.extend(_calls_get_default_registry(path))
     assert not violations, (
         "CLI production path must use build_cli_registry()/explicit PipelineRegistry; "
-        f"found get_default_registry() calls:\n" + "\n".join(violations)
+        "found get_default_registry() calls:\n" + "\n".join(violations)
     )
 
 

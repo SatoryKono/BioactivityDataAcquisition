@@ -591,3 +591,6 @@ _fail_*.txt
 # ADR-040 / DOC-GOV-02 PNG not tracked
 /docs/02-architecture/diagrams/**/png/
 /docs/02-architecture/diagrams/**/png/**
+
+# Claude Code local/unofficial runtime (not an approved tracked root)
+.claude/
