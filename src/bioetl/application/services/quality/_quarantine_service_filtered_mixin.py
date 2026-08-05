@@ -5,10 +5,16 @@ from __future__ import annotations
 from time import perf_counter
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.application.services.quality._quarantine_service_async_mixin import (
+    QuarantineServiceAsyncMixin,
+)
 from bioetl.application.services.quality._quarantine_service_filtered_helpers import (
     _QUARANTINE_OPERATOR_ERRORS,
     _enrich_filtered_stats_with_bronze_denominator,
     _enrich_filtered_timeseries_with_bronze_denominators,
+)
+from bioetl.application.services.quality._quarantine_service_sync_mixin import (
+    QuarantineServiceSyncMixin,
 )
 from bioetl.domain.types import JsonDict
 
@@ -35,8 +41,15 @@ class _FilteredQuarantineHost(Protocol):
     ) -> None: ...
 
 
-class QuarantineServiceFilteredMixin:
-    """Filtered-record explorer operations for QuarantineService."""
+class QuarantineServiceFilteredMixin(
+    QuarantineServiceAsyncMixin,
+    QuarantineServiceSyncMixin,
+):
+    """Filtered-record explorer + composed sync/async quarantine operators.
+
+    ARCH-REF-04 / #7705: host inherits a single composed mixin instead of three
+    sibling mixins (mixin-depth reduction at the service host).
+    """
 
     async def list_filtered_records(
         self: _FilteredQuarantineHost,

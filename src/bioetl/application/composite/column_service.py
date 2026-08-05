@@ -6,18 +6,16 @@ from collections.abc import Callable, Sequence
 
 import polars as pl
 
-from bioetl.application.composite.column_orderer_group_flow import (
-    apply_renames,
-    filter_columns_by_explicit,
-    filter_columns_by_groups,
-    order_by_yaml_groups,
-)
+from bioetl.application.composite.column_orderer_group_flow import order_by_yaml_groups
 from bioetl.application.composite.column_orderer_semantic import (
     count_groups,
     get_ordered_columns,
     group_columns,
 )
 from bioetl.application.composite.column_priority_orderer import get_enricher_prefix
+from bioetl.application.composite.column_service_layer_filter import (
+    filter_columns_by_layer_config,
+)
 from bioetl.application.composite.column_service_priority import (
     ColumnPriorityOrderingPolicy as ColumnPriorityOrderingPolicy,
 )
@@ -209,39 +207,6 @@ class ColumnOrderService:
         aliases, _, _ = resolve_publication_field_aliases(field_name)
         return aliases
 
-    def _apply_renames(
-        self,
-        columns: list[str],
-        rename_map: dict[str, str],
-    ) -> list[str]:
-        """Apply column renames from rename_fields mapping."""
-        return apply_renames(columns, rename_map)
-
-    def _filter_columns_by_explicit(
-        self,
-        columns: Sequence[str],
-        layer_config: LayerColumnConfig,
-    ) -> list[str]:
-        """Apply explicit include list from layer config."""
-        return filter_columns_by_explicit(
-            columns=columns,
-            layer_config=layer_config,
-        )
-
-    def _filter_columns_by_groups(
-        self,
-        columns: Sequence[str],
-        layer_config: LayerColumnConfig,
-    ) -> list[str]:
-        """Apply include_groups and exclude_fields filtering."""
-        return filter_columns_by_groups(
-            columns=columns,
-            layer_config=layer_config,
-            column_groups=self._column_groups,
-            collect_group_columns=self._collect_group_columns,
-            logger=self._logger,
-        )
-
     def filter_by_layer_config(
         self, columns: Sequence[str], layer_config: LayerColumnConfig
     ) -> list[str]:
@@ -254,20 +219,13 @@ class ColumnOrderService:
         Returns:
             Filtered and renamed column list.
         """
-        # Determine which filtering strategy to use
-        if layer_config.columns:
-            filtered = self._filter_columns_by_explicit(columns, layer_config)
-        elif layer_config.include_groups:
-            filtered = self._filter_columns_by_groups(columns, layer_config)
-        else:
-            # No filtering specified, return all columns
-            filtered = list(columns)
-
-        # Apply renames if specified
-        if layer_config.rename_fields:
-            filtered = self._apply_renames(filtered, layer_config.rename_fields)
-
-        return filtered
+        return filter_columns_by_layer_config(
+            columns=columns,
+            layer_config=layer_config,
+            column_groups=self._column_groups,
+            collect_group_columns=self._collect_group_columns,
+            logger=self._logger,
+        )
 
     @staticmethod
     def get_enricher_prefix(enricher_pipeline: str) -> str:
