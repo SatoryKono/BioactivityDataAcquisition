@@ -509,8 +509,9 @@ The current CLI surface that matters most for packs is:
 - `--incremental` for ordinary offset-driven launches that should advance from
   the latest successful execution rather than replay an old occurrence;
 - `--only-steps` when an operator needs one bounded subset of the pack DAG;
-- `--ensure-observability-backend` and `--observability-backend-port` when the
-  operator wants Grafana ID/detail panels to have a live detached backend.
+- optional `--ensure-observability-backend` and `--observability-backend-port`
+  (default **8000**) when the operator wants Grafana ID/detail panels backed by
+  a detached **BioETL Ops HTTP** / `bioetl health server` (default ensure is off).
 
 #### `chembl_reference_pack`
 
@@ -575,7 +576,7 @@ Canonical examples:
 
 ```bash
 bioetl workflow run uniprot_support_pack --dry-run
-bioetl workflow run uniprot_support_pack --incremental --observability-backend-port 18081
+bioetl workflow run uniprot_support_pack --incremental --ensure-observability-backend
 bioetl workflow run uniprot_support_pack --resume-manifest-id wf-manifest-2026-06-30-001
 ```
 
@@ -583,8 +584,8 @@ Operator notes:
 
 - the small DAG makes it a good bounded smoke target for workflow control-plane
   validation;
-- use a non-default observability backend port when another local BioETL HTTP
-  backend already occupies `8081`.
+- prefer a long-lived `bioetl health server --port 8000` for Grafana Ops HTTP;
+  use `--ensure-observability-backend` only as a short-lived opt-in helper.
 
 ### 3. Canonical ChemblBaseline Workflow
 

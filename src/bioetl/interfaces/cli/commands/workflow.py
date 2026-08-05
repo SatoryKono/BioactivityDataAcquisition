@@ -241,15 +241,22 @@ def workflow() -> None:
 @typed_click_option(
     "--ensure-observability-backend/--no-ensure-observability-backend",
     "ensure_observability_backend",
-    default=True,
-    help="Auto-start a detached Quarantine Explorer backend for Grafana ID/detail panels.",
+    default=False,
+    help=(
+        "Opt-in: auto-start a detached BioETL Ops HTTP backend "
+        "(bioetl health server) for Grafana ID/detail panels. "
+        "Default off; prefer a long-lived health server on :8000."
+    ),
     show_default=True,
 )
 @typed_click_option(
     "--observability-backend-port",
     type=int,
     default=DEFAULT_HEALTH_SERVER_PORT,
-    help="Port for the detached Quarantine Explorer backend used by Grafana ID/detail panels.",
+    help=(
+        "Port for the detached BioETL Ops HTTP / health server backend "
+        "used by Grafana ID/detail panels (default 8000)."
+    ),
     show_default=True,
 )
 @typed_pass_obj

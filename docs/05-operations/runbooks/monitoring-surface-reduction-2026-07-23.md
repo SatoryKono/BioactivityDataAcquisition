@@ -57,6 +57,14 @@ The old Quarantine Explorer port `:8081` is not published by default.
 
 `python -m scripts.ops ensure-quarantine-explorer` is a fail-closed stub (exit 2).
 
+### CLI alignment (follow-up)
+
+- `--ensure-observability-backend` defaults to **off**
+- default health / Ops HTTP port is **8000** (`DEFAULT_HEALTH_SERVER_PORT`)
+- when ensure is explicitly enabled, CLI starts **`bioetl health server`**, not
+  `quarantine serve`
+- Grafana audit cycle defaults match: no auto-ensure; app base URL `:8000`
+
 ## Residual volumes
 
 Legacy volumes `*-loki-data` / `*-tempo-data` may still exist on disk. Do **not**

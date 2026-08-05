@@ -112,7 +112,7 @@ def mock_run_all_runtime_boundaries():
             "bioetl.interfaces.cli.commands.run_all.ensure_observability_backend_started",
             return_value=ObservabilityBackendEnsureResult(
                 status="disabled",
-                health_url="http://127.0.0.1:8081/health",
+                health_url="http://127.0.0.1:8000/health",
             ),
         ),
         patch(

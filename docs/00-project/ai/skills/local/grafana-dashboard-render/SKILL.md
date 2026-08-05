@@ -1,9 +1,3 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source: `.codex/skills/grafana-dashboard-render/SKILL.md`
-> Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
 ---
 name: grafana-dashboard-render
 description: Render, preflight-check, and capture runtime evidence for shipped BioETL Grafana dashboards. Use when the task is to produce reproducible dashboard renders, validate Grafana render/auth readiness, run live reviewed panel audits, or explain why full render is blocked on the current host.
@@ -20,8 +14,8 @@ This skill is for:
 
 - full runtime-render refresh of `grafana/dashboards/*.json`
 - preflight checks before a dashboard audit
-- live reviewed panel validation against Grafana, Prometheus, and Quarantine
-  Explorer
+- live reviewed panel validation against Grafana, Prometheus, and BioETL Ops
+  HTTP (`bioetl health server` on `:8000`)
 - diagnosing render failures such as `401`, missing Playwright runtime, or
   missing Chromium shared libraries
 
@@ -31,17 +25,16 @@ dashboard JSON, queries, navigation, or operator-facing UX.
 ## BioETL Runtime Policy
 
 - Project runtime contract: `../../../AGENTS.md`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Source Of Truth
 
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../../../02-architecture/decisions/`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
-
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Shared Grafana/Prometheus prerequisites: [../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md](../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md)
 - Shipped dashboards: `grafana/dashboards/*.json`
 - Canonical screenshot tooling:
@@ -117,8 +110,8 @@ Interpretation:
 - `grafana-render-auth: ok` means render-sensitive auth is valid
 - `playwright-runtime: ok/error` tells you whether browser fallback can work on
   this host
-- `quarantine-explorer: ok/error` tells you whether HTTP-backed dashboard panels
-  can be audited safely
+- `quarantine-explorer` / Ops HTTP probe: prefer BioETL Ops HTTP health on
+  `:8000` for HTTP-backed identity panels (Explorer UI removed 2026-07-23)
 
 If preflight fails, report the failing check explicitly before attempting more
 render work.
@@ -212,7 +205,7 @@ uv run python -m scripts.ops audit-live-grafana \
   --pipeline <pipeline> \
   --run-type <run_type> \
   --run-id <run_id> \
-  --app-base-url http://127.0.0.1:8081 \
+  --app-base-url http://127.0.0.1:8000 \
   --output /tmp/live-panel-audit.json
 ```
 
@@ -223,7 +216,7 @@ Use this when the user cares about:
 - checkpoint freshness
 - DQ freshness
 - zero-vs-no-data semantics
-- Silver Reject Explorer denominator behavior
+- control-plane identity / Ops HTTP tables
 
 ### 6. Audit only runtime renders
 
@@ -262,8 +255,8 @@ When blocked:
   `GRAFANA_USERNAME` / `GF_SECURITY_ADMIN_USER`). Do not document or commit a
   default password; preflight fails closed when auth material is missing.
 - Service-account auth may be provided through `GRAFANA_SERVICE_ACCOUNT_TOKEN`.
-- Quarantine Explorer-backed dashboards may require a live BioETL HTTP backend
-  on `127.0.0.1:8081`.
+- BioETL Ops HTTP identity panels require a live `bioetl health server` on
+  `127.0.0.1:8000` (not Quarantine Explorer / `:8081`).
 
 ## Validation Checklist
 

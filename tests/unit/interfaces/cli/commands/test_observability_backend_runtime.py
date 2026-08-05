@@ -269,8 +269,8 @@ def test_ensure_backend_restarts_bound_but_unresponsive_listener() -> None:
     )
 
     assert result.status == "started"
-    listener_pid.assert_called_once_with(8081)
-    drop.assert_called_once_with(8081)
+    listener_pid.assert_called_once_with(8000)
+    drop.assert_called_once_with(8000)
     start.assert_called_once()
     assert "health probes timeout" in warning.call_args.args[0]
 
@@ -315,7 +315,7 @@ def test_ensure_backend_restarts_stale_backend_missing_required_paths() -> None:
 
     assert result.status == "started"
     required_probe.assert_called_once()
-    drop.assert_called_once_with(8081)
+    drop.assert_called_once_with(8000)
     start.assert_called_once()
     wait.assert_called_once()
     wait_required.assert_called_once()
@@ -434,7 +434,7 @@ def test_ensure_backend_reuse_uses_required_probe_timeout() -> None:
 
     assert result.status == "reused"
     required_probe.assert_called_once_with(
-        "http://127.0.0.1:8081/health",
+        "http://127.0.0.1:8000/health",
         required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
         timeout_seconds=9.0,
     )
@@ -488,7 +488,7 @@ def test_ensure_backend_failed_startup_appends_process_diagnostics_to_log(
         MagicMock(return_value="Capability probe failed: timeout."),
     )
     probe = MagicMock(return_value=False)
-    process = MagicMock(pid=654, args=["python", "-m", "bioetl", "quarantine", "serve"])
+    process = MagicMock(pid=654, args=["python", "-m", "bioetl", "health", "server"])
     process.poll.return_value = None
 
     result = ensure_observability_backend_started(
@@ -505,7 +505,7 @@ def test_ensure_backend_failed_startup_appends_process_diagnostics_to_log(
     log_text = log_path.read_text(encoding="utf-8")
     assert "BioETL detached backend diagnostics" in log_text
     assert "child_pid=654" in log_text
-    assert "command=python -m bioetl quarantine serve" in log_text
+    assert "command=python -m bioetl health server" in log_text
     assert "Capability probe failed: timeout." in log_text
 
 
@@ -681,7 +681,7 @@ def test_start_detached_quarantine_backend_sets_repo_cwd_and_env() -> None:
 
     start_detached_quarantine_backend(
         bind_host="0.0.0.0",
-        port=8081,
+        port=8000,
         python_executable="python",
         popen_factory=fake_popen,
     )
@@ -691,12 +691,12 @@ def test_start_detached_quarantine_backend_sets_repo_cwd_and_env() -> None:
         "python",
         "-m",
         "bioetl",
-        "quarantine",
-        "serve",
+        "health",
+        "server",
         "--host",
         "0.0.0.0",
         "--port",
-        "8081",
+        "8000",
     ]
     assert isinstance(kwargs, dict)
     backend_cwd = Path(str(kwargs["cwd"]))
@@ -710,7 +710,7 @@ def test_start_detached_quarantine_backend_sets_repo_cwd_and_env() -> None:
     assert "PYTHONPATH" in env
 
 
-def test_start_detached_quarantine_backend_injects_absolute_data_root(
+def test_start_detached_quarantine_backend_ignores_data_root_for_health_server(
     tmp_path: Path,
 ) -> None:
     captured: dict[str, object] = {}
@@ -727,13 +727,15 @@ def test_start_detached_quarantine_backend_injects_absolute_data_root(
         popen_factory=fake_popen,
     )
 
-    assert captured["command"][-2:] == ["--data-root", str(tmp_path.resolve())]
+    # Shipping Ops HTTP backend is health server; data_root is not forwarded.
+    assert "--data-root" not in captured["command"]
+    assert captured["command"][2:5] == ["bioetl", "health", "server"]
 
 
 def test_build_detached_backend_log_path_uses_tempdir_and_port() -> None:
-    path = build_detached_backend_log_path(8081)
+    path = build_detached_backend_log_path(8000)
 
-    assert path.name == "bioetl-quarantine-backend-8081.log"
+    assert path.name == "bioetl-ops-http-backend-8000.log"
     assert path.parent.exists()
 
 

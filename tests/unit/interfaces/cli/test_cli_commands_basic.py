@@ -74,7 +74,7 @@ def ensure_registration():
             "bioetl.interfaces.cli.commands.run.ensure_observability_backend_started",
             return_value=ObservabilityBackendEnsureResult(
                 status="failed",
-                health_url="http://127.0.0.1:8081/health",
+                health_url="http://127.0.0.1:8000/health",
             ),
         ),
         patch(
