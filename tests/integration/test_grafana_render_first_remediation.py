@@ -538,6 +538,11 @@ def test_run_explorer_reconciliation_fits_all_bounded_rows_without_scroll() -> N
     assert reconciliation.get("targets", [{}])[0].get("root_selector") == (
         "reconciliation"
     )
+    assert any(
+        property_ == {"id": "displayName", "value": "Value"}
+        for override in reconciliation.get("fieldConfig", {}).get("overrides", [])
+        for property_ in override.get("properties", [])
+    )
     # REC-01: mixed numeric/status column is Value, not Count.
     value_override = next(
         (
