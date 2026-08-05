@@ -75,27 +75,35 @@ def test_memory_usage_dataframe_creation(memory_tracker: dict[str, int]) -> None
 
 def test_memory_usage_no_leak_in_repeated_operations() -> None:
     """Test that repeated operations don't leak memory."""
-    tracemalloc.start()
-    gc.collect()
-
-    initial_current, initial_peak = tracemalloc.get_traced_memory()
-
-    # Perform operation 100 times
-    for i in range(100):
-        data = {
-            "id": list(range(100)),
-            "value": [float(j) for j in range(100)],
-        }
-        df = pl.DataFrame(data)
-
-        # Do some operation
-        result = df.filter(pl.col("value") > 50)
-
-        del df, result
+    # Hypothesis registers GC callbacks that can stall Polars collect under
+    # full-suite memory pressure on Windows; isolate measurement from those
+    # callbacks without changing the leak-detection contract.
+    saved_gc_callbacks = gc.callbacks[:]
+    gc.callbacks.clear()
+    try:
+        tracemalloc.start()
         gc.collect()
 
-    final_current, final_peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
+        initial_current, initial_peak = tracemalloc.get_traced_memory()
+
+        # Perform operation 100 times
+        for i in range(100):
+            data = {
+                "id": list(range(100)),
+                "value": [float(j) for j in range(100)],
+            }
+            df = pl.DataFrame(data)
+
+            # Do some operation
+            result = df.filter(pl.col("value") > 50)
+
+            del df, result
+            gc.collect()
+
+        final_current, final_peak = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+    finally:
+        gc.callbacks[:] = saved_gc_callbacks
 
     # Memory should not grow significantly (allow 10x tolerance for overhead)
     current_growth = (final_current - initial_current) / 1024 / 1024

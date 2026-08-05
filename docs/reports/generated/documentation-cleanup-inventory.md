@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2470 |
-| Tracked doc-like files | 2470 |
-| Ignored local docs/reports files | 0 |
+| Doc-like files | 2473 |
+| Tracked doc-like files | 2472 |
+| Ignored local docs/reports files | 1 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
 | Generated routes | 69 |
@@ -18,7 +18,8 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2470 |
+| ignored_local | 1 |
+| tracked | 2472 |
 
 ## Lifecycle Counts
 
@@ -30,7 +31,7 @@
 | closeout_evidence | 64 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 2 |
-| docs_reports_generated_or_route_owned | 7 |
+| docs_reports_generated_or_route_owned | 8 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
 | generated_skill_reference_mirror | 12 |
@@ -57,20 +58,20 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 851 |
-| Archived | 147 |
+| Active | 845 |
+| Archived | 155 |
 | Canonical | 73 |
-| Generated | 863 |
+| Generated | 864 |
 | Working | 536 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 851 |
-| archive | 147 |
+| active | 845 |
+| archive | 155 |
 | canonical | 73 |
-| generated | 863 |
+| generated | 864 |
 | working | 536 |
 
 ## Recommended Actions
@@ -79,8 +80,8 @@
 | --- | --- |
 | archive-after-github-state-check | 312 |
 | archive-after-migration | 112 |
-| generate-automatically | 863 |
-| keep | 1179 |
+| generate-automatically | 864 |
+| keep | 1181 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -328,6 +329,7 @@
 | `docs/reports/evidence/technical-debt/complexity-hotspots/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/generated/chembl_matrix_structural_contract_v1.json` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/config-discrepancies-report.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
+| `docs/reports/generated/docs-audit-10cycle-closeout-2026-08-05.md` | ignored_local | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/documentation-cleanup-inventory.json` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/documentation-cleanup-inventory.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/non_chembl_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |

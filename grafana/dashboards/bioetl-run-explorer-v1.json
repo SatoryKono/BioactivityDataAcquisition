@@ -784,7 +784,7 @@
           "id": 3015,
           "type": "table",
           "title": "Inspect Reconciliation",
-          "description": "Reconciliation metrics from pipeline_run_report_v1 as parameter/value rows (stable silver→gold order). Status cells are color-text mapped (OK/FAIL). Empty is VALID when run_id is unresolved, report is missing, or recon block is absent. Unexpected empty: verify /health/live and Browse Recent Runs.",
+          "description": "Reconciliation metrics from pipeline_run_report_v1 as parameter/value rows (stable silver→gold order). Status cells are color-text mapped (OK/FAIL). Empty is VALID when run_id is unresolved, report is missing, or recon block is absent. Unexpected empty: verify /health/live and Browse Recent Runs. Backend unavailable or datasource error: verify /health/live and run_id selection.",
           "gridPos": {
             "h": 8,
             "w": 24,

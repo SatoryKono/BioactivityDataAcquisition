@@ -40,14 +40,12 @@ from tests.helpers import assert_router_python_command
 
 pytestmark = pytest.mark.repo_backed
 
-
 def test_live_audit_router_exposes_command() -> None:
     assert_router_python_command(
         ops_router,
         "audit-live-grafana",
         expected_target="observability/grafana/audit_live_grafana_panels.py",
     )
-
 
 def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None:
     covered = {
@@ -78,7 +76,6 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
     assert covered[("bioetl-provider-health-v2", 9403)] == "Processed Records"
     assert ("bioetl-workflow-overview", 9403) not in covered
 
-
 def test_live_audit_classifies_prometheus_zero_and_nonzero_results() -> None:
     zero_payload = {
         "status": "success",
@@ -94,7 +91,6 @@ def test_live_audit_classifies_prometheus_zero_and_nonzero_results() -> None:
         audit_subject._classify_prometheus_payload(nonzero_payload)[0]
         == "nonzero_result"
     )
-
 
 @pytest.mark.parametrize(
     ("panel_id", "title", "expr"),
@@ -157,11 +153,9 @@ def test_live_audit_treats_missing_freshness_as_explicit_telemetry_gap(
     assert result.classification == "telemetry_missing"
     assert "UNKNOWN" in result.detail
 
-
 def test_live_audit_default_timeout_covers_bounded_loki_range_queries() -> None:
     assert audit_subject.DEFAULT_REQUEST_TIMEOUT_SECONDS == 15.0
     assert audit_subject.MAX_LOKI_RANGE_HOURS == 1
-
 
 def test_live_audit_treats_checkpoint_freshness_unknown_as_valid_unknown_state(
     monkeypatch: Any,
@@ -210,7 +204,6 @@ def test_live_audit_treats_checkpoint_freshness_unknown_as_valid_unknown_state(
     assert result.classification == "unknown_result"
     assert result.status == "ok"
 
-
 def test_live_audit_classifies_http_zero_state_and_nonzero() -> None:
     zero_payload = {"total": 0, "bronze_records": 0, "reject_ratio": 0.0}
     nonzero_payload = {"total": 2, "bronze_records": 10, "reject_ratio": 0.2}
@@ -220,7 +213,6 @@ def test_live_audit_classifies_http_zero_state_and_nonzero() -> None:
         == "zero_state_unknown_denominator"
     )
     assert audit_subject._classify_http_payload(nonzero_payload)[0] == "nonzero_result"
-
 
 @pytest.mark.parametrize(
     ("value", "percentage"),
@@ -248,7 +240,6 @@ def test_live_audit_accepts_plain_and_legacy_processed_record_cells(
     assert missing is False
     assert error is None
 
-
 @pytest.mark.parametrize(
     ("value", "percentage", "expected_error"),
     [
@@ -275,7 +266,6 @@ def test_live_audit_rejects_malformed_processed_record_cells(
 
     assert error is not None
     assert expected_error in error
-
 
 def test_semantic_gate_maps_unknown_denominator_to_review_required(
     monkeypatch: Any,
@@ -311,7 +301,6 @@ def test_semantic_gate_maps_unknown_denominator_to_review_required(
     )
     assert evidence["panel_outcomes"][0]["decision"] == "review"
 
-
 def test_semantic_gate_treats_unregistered_classification_as_review_required(
     monkeypatch: Any,
 ) -> None:
@@ -344,7 +333,6 @@ def test_semantic_gate_treats_unregistered_classification_as_review_required(
     assert evidence["unregistered_classification_policy"] == "review_required"
     assert evidence["panel_outcomes"][0]["decision"] == "review"
 
-
 def test_live_audit_classifies_http_freshness_zero_and_empty() -> None:
     zero_payload = {"status": "OK", "age_seconds": 0.0}
     empty_payload = {"status": "UNKNOWN", "age_seconds": None}
@@ -356,7 +344,6 @@ def test_live_audit_classifies_http_freshness_zero_and_empty() -> None:
         audit_subject._classify_http_freshness_payload(empty_payload)[0]
         == "unknown_result"
     )
-
 
 def test_live_audit_parse_args_uses_grafana_env_defaults(
     monkeypatch: Any, tmp_path: Path
@@ -384,7 +371,6 @@ def test_live_audit_parse_args_uses_grafana_env_defaults(
     assert config.grafana_password == "secret"
     assert config.workflow == "chembl_target"
     assert config.run_id == "run-123"
-
 
 def test_live_audit_substitutes_workflow_and_run_id_tokens() -> None:
     config = audit_subject.AuditConfig(
@@ -414,7 +400,6 @@ def test_live_audit_substitutes_workflow_and_run_id_tokens() -> None:
     assert "run_type=backfill" in rendered
     assert "run_id=run-123" in rendered
 
-
 def test_live_audit_substitutes_grafana_rate_interval() -> None:
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
@@ -441,7 +426,6 @@ def test_live_audit_substitutes_grafana_rate_interval() -> None:
     assert "$__rate_interval" not in rendered
     assert "${__rate_interval}" not in rendered
     assert rendered == "rate(metric_bucket[5m]) or rate(metric_bucket[5m])"
-
 
 def test_live_audit_substitutes_hidden_workflow_context_tokens() -> None:
     config = audit_subject.AuditConfig(
@@ -477,7 +461,6 @@ def test_live_audit_substitutes_hidden_workflow_context_tokens() -> None:
     assert 'step_kind=~".*"' in rendered
     assert 'status=~".*"' in rendered
 
-
 def test_live_audit_scopes_silver_reject_explorer_to_target_run_id() -> None:
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
@@ -504,7 +487,6 @@ def test_live_audit_scopes_silver_reject_explorer_to_target_run_id() -> None:
     assert "run_id=run-123" in rendered
     assert "${quarantine_run_id}" not in rendered
 
-
 def test_live_audit_classifies_empty_filtered_records_by_row_count() -> None:
     classification, detail = audit_subject._classify_http_records_payload(
         {"items": [], "total": 0, "limit": 50, "offset": 0}
@@ -512,7 +494,6 @@ def test_live_audit_classifies_empty_filtered_records_by_row_count() -> None:
 
     assert classification == "zero_result"
     assert "zero rows" in detail
-
 
 def test_live_audit_classifies_nonempty_filtered_records_by_row_count() -> None:
     classification, detail = audit_subject._classify_http_records_payload(
@@ -522,7 +503,6 @@ def test_live_audit_classifies_nonempty_filtered_records_by_row_count() -> None:
     assert classification == "nonempty_result"
     assert "returned rows" in detail
 
-
 def test_live_audit_rejects_filtered_records_total_items_drift() -> None:
     classification, detail = audit_subject._classify_http_records_payload(
         {"items": [], "total": 1, "limit": 50, "offset": 0}
@@ -530,7 +510,6 @@ def test_live_audit_rejects_filtered_records_total_items_drift() -> None:
 
     assert classification == "invalid_shape"
     assert "disagree" in detail
-
 
 def test_live_audit_loki_panel_uses_query_range(monkeypatch: Any) -> None:
     config = audit_subject.AuditConfig(
@@ -604,7 +583,6 @@ def test_live_audit_loki_panel_uses_query_range(monkeypatch: Any) -> None:
     ]
     assert readiness_sleeps == [audit_subject.LOKI_READINESS_POLL_INTERVAL_SECONDS]
 
-
 def test_live_audit_loki_instant_panel_uses_bounded_query_endpoint(
     monkeypatch: Any,
 ) -> None:
@@ -669,7 +647,6 @@ def test_live_audit_loki_instant_panel_uses_bounded_query_endpoint(
     assert result.classification == "nonempty_result"
     assert "endpoint=query" in result.detail
 
-
 @pytest.mark.parametrize("fetch_fails", [False, True])
 def test_live_audit_loki_panel_fails_when_total_latency_exceeds_budget(
     monkeypatch: Any,
@@ -722,7 +699,6 @@ def test_live_audit_loki_panel_fails_when_total_latency_exceeds_budget(
     if fetch_fails:
         assert "last_readiness=OSError: late transport failure" in result.detail
 
-
 def test_live_audit_loki_panel_fails_when_readiness_polling_exhausts_budget(
     monkeypatch: Any,
 ) -> None:
@@ -774,7 +750,6 @@ def test_live_audit_loki_panel_fails_when_readiness_polling_exhausts_budget(
     assert "readiness polling" in result.detail
     assert "last_readiness=unexpected /ready response" in result.detail
     assert readiness_sleeps == [pytest.approx(0.1)]
-
 
 def test_live_audit_loki_fixtures_execute_positive_and_empty_paths(
     monkeypatch: Any,
@@ -866,7 +841,6 @@ def test_live_audit_loki_fixtures_execute_positive_and_empty_paths(
         assert result.status == "ok"
         assert result.classification == "expected_empty"
 
-
 def test_live_audit_effective_specs_include_generated_loki_and_tempo_coverage() -> None:
     specs = audit_subject.effective_panel_specs()
     source_kinds = {spec.source_kind for spec in specs}
@@ -880,7 +854,6 @@ def test_live_audit_effective_specs_include_generated_loki_and_tempo_coverage() 
         for spec in specs
     )
 
-
 def test_live_audit_requires_curated_runtime_loki_panels() -> None:
     required_loki_panel_ids = {
         spec.panel_id
@@ -893,7 +866,6 @@ def test_live_audit_requires_curated_runtime_loki_panels() -> None:
     # Runtime Loki log-hygiene panels were removed from the shipped dashboard.
     assert required_loki_panel_ids == set()
 
-
 def test_live_audit_required_reviewed_specs_use_concrete_target_refs() -> None:
     missing_refs = [
         f"{spec.dashboard_uid}#{spec.panel_id}"
@@ -905,12 +877,10 @@ def test_live_audit_required_reviewed_specs_use_concrete_target_refs() -> None:
 
     assert missing_refs == []
 
-
 def test_dashboard_json_has_no_backup_artifacts_in_active_dashboard_tree() -> None:
     backup_files = sorted(Path("grafana/dashboards").glob("*.backup"))
 
     assert backup_files == []
-
 
 def test_alerts_slo_dashboard_is_first_class_shipped_surface() -> None:
     dashboard_path = Path("grafana/dashboards/bioetl-alerts-slo.json")
@@ -926,7 +896,6 @@ def test_alerts_slo_dashboard_is_first_class_shipped_surface() -> None:
     assert {"workflow", "pipeline", "run_type"}.issubset(variables)
     assert "run_id" not in variables
     assert "ALERTS" in json.dumps(dashboard)
-
 
 def test_silver_reject_explorer_keeps_shared_shell_context_outside_forensic_scope() -> (
     None
@@ -947,7 +916,6 @@ def test_silver_reject_explorer_keeps_shared_shell_context_outside_forensic_scop
     assert "var-run_id=$run_id" not in serialized
     assert "var-quarantine_run_id=$run_id" not in serialized
     assert "quarantine_run_id remains the forensic row filter" in serialized
-
 
 def test_silver_reject_explorer_generic_links_do_not_receive_primary_run_context() -> (
     None
@@ -982,7 +950,6 @@ def test_silver_reject_explorer_generic_links_do_not_receive_primary_run_context
 
         walk(dashboard)
 
-
 def test_runtime_log_hygiene_trend_uses_aggregated_loki_range_queries() -> None:
     dashboard = json.loads(
         Path("grafana/dashboards/bioetl-runtime.json").read_text(encoding="utf-8")
@@ -1011,7 +978,6 @@ def test_runtime_log_hygiene_trend_uses_aggregated_loki_range_queries() -> None:
     assert expressions["B"].startswith("sum(count_over_time(")
     assert "No data means" in panel["description"]
 
-
 def test_prometheus_dashboard_panels_do_not_filter_on_run_id_labels() -> None:
     for path in Path("grafana/dashboards").glob("*.json"):
         dashboard = json.loads(path.read_text(encoding="utf-8"))
@@ -1034,7 +1000,6 @@ def test_prometheus_dashboard_panels_do_not_filter_on_run_id_labels() -> None:
                     f"{path}:{panel.get('id')} must keep run_id out of "
                     "Prometheus/LogQL metric labels"
                 )
-
 
 def test_run_id_independent_metric_panels_disclose_scope() -> None:
     scope_terms = (
@@ -1081,7 +1046,6 @@ def test_run_id_independent_metric_panels_disclose_scope() -> None:
 
     assert missing_scope == []
 
-
 def test_workflow_status_titles_make_selected_range_scope_visible() -> None:
     dashboard_path = Path("grafana/dashboards/bioetl-workflow-overview.json")
     if not dashboard_path.is_file():
@@ -1093,7 +1057,6 @@ def test_workflow_status_titles_make_selected_range_scope_visible() -> None:
 
     assert titles[9401] == "Status"
     assert titles[9404] == "Pipeline Status"
-
 
 def test_live_audit_isolates_non_required_panel_execution_failures(
     monkeypatch: Any,
@@ -1137,13 +1100,11 @@ def test_live_audit_isolates_non_required_panel_execution_failures(
     assert results[0].status == "ok"
     assert results[0].classification == "blocked_unavailable"
 
-
 def test_live_audit_normalizes_docker_gateway_to_localhost() -> None:
     assert (
         audit_subject._normalize_host_access_url("http://host.docker.internal:8081")
         == "http://localhost:8081"
     )
-
 
 def test_live_audit_adds_zero_bind_fallback_for_localhost() -> None:
     assert (
@@ -1155,7 +1116,6 @@ def test_live_audit_adds_zero_bind_fallback_for_localhost() -> None:
         == "http://0.0.0.0:8081"
     )
     assert audit_subject._zero_bind_access_url("http://example.test:8081") is None
-
 
 def test_live_audit_resolves_http_backend_from_datasource_candidates(
     monkeypatch: Any,
@@ -1191,7 +1151,6 @@ def test_live_audit_resolves_http_backend_from_datasource_candidates(
     monkeypatch.setattr(audit_subject, "_fetch_json", fake_fetch_json)
 
     assert audit_subject._resolve_app_base_url(config) == "http://localhost:8081"
-
 
 def test_live_audit_resolves_http_backend_through_grafana_datasource_proxy(
     monkeypatch: Any,
@@ -1241,7 +1200,6 @@ def test_live_audit_resolves_http_backend_through_grafana_datasource_proxy(
         "/api/datasources/proxy/uid/quarantine-explorer/health/live"
     )
     assert captured["auth_header"].startswith("Basic ")
-
 
 def test_live_audit_strips_userinfo_before_authenticated_proxy_request(
     monkeypatch: Any,

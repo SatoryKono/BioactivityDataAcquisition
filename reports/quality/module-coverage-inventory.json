@@ -22813,7 +22813,7 @@
       "missing_lines": 5,
       "module": "bioetl.interfaces.http._health_server_observability_routing",
       "path": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
-      "source_lines": 386
+      "source_lines": 336
     },
     {
       "coverage_percent": 100.0,
@@ -22834,6 +22834,16 @@
       "module": "bioetl.interfaces.http._health_server_routing_support",
       "path": "src/bioetl/interfaces/http/_health_server_routing_support.py",
       "source_lines": 367
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.interfaces.http._pipeline_run_report_table",
+      "path": "src/bioetl/interfaces/http/_pipeline_run_report_table.py",
+      "source_lines": 115
     },
     {
       "coverage_percent": null,
@@ -45955,7 +45965,7 @@
       "missing_lines": 5,
       "module": "bioetl.interfaces.http._health_server_observability_routing",
       "path": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
-      "source_lines": 386
+      "source_lines": 336
     },
     {
       "coverage_percent": 100.0,
@@ -45976,6 +45986,16 @@
       "module": "bioetl.interfaces.http._health_server_routing_support",
       "path": "src/bioetl/interfaces/http/_health_server_routing_support.py",
       "source_lines": 367
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.interfaces.http._pipeline_run_report_table",
+      "path": "src/bioetl/interfaces/http/_pipeline_run_report_table.py",
+      "source_lines": 115
     },
     {
       "coverage_percent": null,
@@ -46290,7 +46310,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-28",
-  "source_tree_sha256": "dc8da09a73c81817f66625540e28839f1f7f0654b4b897f87f4e546891b1a212",
+  "source_tree_sha256": "f07625165dc74fa07e8ba25c74b36360b0dab0f4ec5c5a50570f373be35a5b03",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -46445,11 +46465,11 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2314,
+    "source_module_count": 2315,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1476,
-      "no_executable_lines": 94,
+      "no_executable_lines": 95,
       "partially_covered": 744,
       "uncovered": 0,
       "unmeasured": 0
