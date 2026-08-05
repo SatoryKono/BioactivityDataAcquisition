@@ -1102,6 +1102,58 @@ def test_dashboard_links_do_not_use_all_for_pipeline_or_provider() -> None:
             assert "var-provider=All" not in url
 
 
+def test_nav_bus_never_uses_literal_stage_unknown() -> None:
+    """Portfolio nav bus must not reintroduce stage=unknown after #7721/#7725.
+
+    Stage is multi/includeAll on Runtime and DQ. Literal unknown is not a stage
+    label and empties stage-scoped evidence on drill-down.
+    """
+    operator_uids = {
+        "bioetl-control-plane-v1",
+        "bioetl-overview-v2",
+        "bioetl-runtime",
+        "bioetl-provider-health-v2",
+        "bioetl-dq-v2",
+        "bioetl-incident-v1",
+        "bioetl-run-explorer-v1",
+    }
+    for uid in sorted(operator_uids):
+        dashboard = load_dashboard(Path("grafana/dashboards") / f"{uid}.json")
+        nav = next(
+            (
+                panel
+                for panel in get_dashboard_panels(dashboard)
+                if panel.get("id") == 1000
+            ),
+            None,
+        )
+        assert nav is not None, f"{uid} missing navigation panel id=1000"
+        content = str((nav.get("options") or {}).get("content") or "")
+        assert "var-stage=unknown" not in content, (
+            f"{uid} nav HTML must not hardcode var-stage=unknown"
+        )
+        for link in nav.get("links") or []:
+            url = str(link.get("url") or "")
+            assert "var-stage=unknown" not in url, (
+                f"{uid} nav link {link.get('title')!r} must not use var-stage=unknown"
+            )
+            target = _extract_dashboard_uid(url)
+            if target in {"bioetl-runtime", "bioetl-dq-v2"}:
+                assert "var-stage=$__all" in url, (
+                    f"{uid} → {target} must pass var-stage=$__all"
+                )
+
+    from scripts.ops.observability.grafana.render_nav_bus import _url_for
+
+    for target_uid in ("bioetl-runtime", "bioetl-dq-v2"):
+        url = _url_for(
+            {"uid": target_uid, "path": target_uid, "title": "x"},
+            source_uid="bioetl-overview-v2",
+        )
+        assert "var-stage=unknown" not in url
+        assert "var-stage=$__all" in url
+
+
 def test_provider_health_first_action_cta_contract() -> None:
     """bioetl-provider-health-v2 First Action panel (9002) must have exactly 3 CTAs."""
     dashboard = load_dashboard(
