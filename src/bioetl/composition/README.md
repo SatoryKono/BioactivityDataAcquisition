@@ -51,6 +51,22 @@ composition/
     └── versioning.py           # Version info assembly
 ```
 
+## Production run path (single story, #7606)
+
+Prefer this production wiring path:
+
+1. **CLI** builds an **explicit** `PipelineRegistry` via
+   `interfaces/cli/registry_helpers.build_cli_registry()` (create +
+   `register_all_pipelines(registry=…)`).
+2. CLI orchestration resolves `PipelineRunnerService` through
+   `composition.execution_service_access` / `_services.get_pipeline_runner_service`.
+3. Direct library callers use `composition.entrypoints.run_pipeline()` /
+   `create_pipeline_runner()` with an explicit registry when possible.
+
+`get_default_registry()` remains a **compatibility / test** shared-default
+export. Production CLI must not call it as the primary path (guarded by
+`tests/architecture/test_cli_registry_explicit_path.py`).
+
 ## Key Entry Points
 
 | What you want to do                             | Start here                                                                                                                           |

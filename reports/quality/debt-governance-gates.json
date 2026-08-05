@@ -235,7 +235,7 @@
       "status": "pass"
     },
     {
-      "current": 4,
+      "current": 6,
       "limit": 15,
       "metric": "zero_reference_supporting_script_count",
       "name": "supporting_scripts_zero_reference_count",
@@ -406,7 +406,7 @@
       "status": "pass"
     },
     {
-      "current": "7226e1858ef320b48cc6cce789a288e075392438a028676c0747b161c17f0eb3",
+      "current": "87727ec651625f6994e04f6750868de4eb119a28910b0cc35062310764d8a981",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",

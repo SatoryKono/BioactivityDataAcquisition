@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
-Version: 6.1.4
-Last verified: 2026-07-23
+Version: 6.1.7
+Last verified: 2026-08-05
 Status: active
 Class: published
 Owner: BioETL Team

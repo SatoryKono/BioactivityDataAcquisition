@@ -1,5 +1,5 @@
 schema_version: 1
-linked_issue: '#5161'
+linked_issue: "#5161"
 enforcement:
   # Phase B (current): block coverage regressions vs committed inventory; tier gaps warn only.
   default_mode: block-regression
@@ -11,14 +11,20 @@ branch_coverage:
   # check-branch-coverage.
   measurement: enabled
   policy: blocking
-  decision_date: '2026-07-06'
+  decision_date: "2026-07-06"
   source: reports/coverage/coverage.xml#branch-rate
   hard_gate_threshold_percent: 85
+  # Soft target after #7611: keep headroom so tiny branch regressions do not
+  # immediately fail CI. Hard gate remains 85.0 until three consecutive
+  # coverage-verify runs clear the target margin.
+  advisory_target_percent: 85.2
+  linked_issue: "7611"
   enforcement_command: python -m scripts.engineering.qa check-branch-coverage --coverage-xml reports/coverage/coverage.xml --min-percent 85
   promotion_criteria:
     - branch-rate remains at or above 85% for three consecutive coverage-verify runs
     - no module is unmeasured or uncovered in module-coverage-inventory
     - top-ranked low-tail modules have focused branch/error-path owner tests
+    - prefer maintaining >= 85.2% branch rate (advisory margin; #7611)
 coverage_tail:
   ranked_targets:
     - rank: 1
@@ -64,11 +70,11 @@ coverage_tail:
         - tests/unit/infrastructure/observability/test_tracing.py
       status: focused_owner_tests_added
 aggregate_residual_ratchets:
-  linked_issue: '#5559'
+  linked_issue: "#5559"
   mode: fail-fast-current-inventory
   live_source: reports/quality/module-coverage-inventory.json#summary
   historical_baseline:
-    linked_issue: '#5553'
+    linked_issue: "#5553"
     unmeasured_module_count: 36
     uncovered_module_count: 1611
   unmeasured_module_count:
@@ -76,7 +82,7 @@ aggregate_residual_ratchets:
   uncovered_module_count:
     max_count: 0
 replay_sensitive_coverage_floors:
-  linked_issue: '#5844'
+  linked_issue: "#5844"
   mode: fail-fast
   authoritative_artifact: reports/quality/module-coverage-inventory.json
   modules:

@@ -28,9 +28,22 @@
   moving an existing root module into a subdomain or documenting an intentional
   permanent root entry with owner.
 - Prefer extracting collaborators under the closest subdomain package above.
+- Machine ratchet: `configs/quality/application_services_root_ratchet.yaml`
+  (`tests/architecture/test_application_services_root_ratchet.py`).
+
+## Cross-context import policy (#7608)
+
+- Subdomain packages (`control_plane/`, `dq/`, `execution/`, …) **SHOULD**
+  depend on `domain/*` and `application/core/*`, not on sibling service
+  subdomains, unless the collaboration is intentional and reviewed.
+- Machine ownership inventory:
+  `configs/quality/application_services_ownership.yaml`.
+- New permanent cross-subdomain edges require an architecture note in the PR
+  and an update to that ownership inventory when hard bans are introduced.
 
 ## Related
 
 - Hotspot family: `application_services_control_plane` in
   `reports/quality/hotspot-family-baseline.json`
 - Layer rules: `docs/00-project/RULES.md` §1
+- Epic: #7605
