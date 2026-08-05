@@ -70,7 +70,14 @@ def main() -> None:
                 }
                 results.append(item)
                 flag = "OK" if status in (200, 204) else "BAD"
-                print(flag, path.name, panel.get("id"), panel.get("title"), status, resolve(url)[:100])
+                print(
+                    flag,
+                    path.name,
+                    panel.get("id"),
+                    panel.get("title"),
+                    status,
+                    resolve(url)[:100],
+                )
 
     bad = [r for r in results if r["status"] not in (200, 204)]
     out = (
