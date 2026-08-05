@@ -185,7 +185,7 @@ def test_dq_reject_row_orders_trust_then_causes_then_scope_distribution() -> Non
         None,
     )
     assert row is not None
-    assert row.get("collapsed") is True
+    assert row.get("collapsed") is False
     nested = {
         panel.get("title"): panel
         for panel in get_row_child_panels(
@@ -239,7 +239,7 @@ def test_dq_validation_diagnostics_groups_failures_then_runtime_then_trends() ->
         None,
     )
     assert row is not None
-    assert row.get("collapsed") is True
+    assert row.get("collapsed") is False
     nested = {
         panel.get("title"): panel
         for panel in get_row_child_panels(

@@ -794,7 +794,7 @@
       "type": "stat"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "description": "Selected-provider latency, retry, network, throttling, and adapter evidence. Expand after choosing a provider or when fleet triage identifies a provider-specific cause.",
       "gridPos": {
         "h": 1,
@@ -805,1952 +805,1949 @@
       "id": 91,
       "title": "Selected Provider Details",
       "type": "row",
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "fixed",
-                "fixedColor": "red"
-              },
-              "custom": {
-                "axisLabel": "Checks / interval",
-                "axisPlacement": "auto",
-                "drawStyle": "line",
-                "fillOpacity": 20,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 24,
-            "x": 0,
-            "y": 45
-          },
-          "id": 106,
-          "options": {
-            "legend": {
-              "calcs": [
-                "sum"
-              ],
-              "displayMode": "list",
-              "placement": "bottom"
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            },
-            "dataLinks": [
-              {
-                "targetBlank": true,
-                "title": "Open Provider Incident Runbook",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
-              }
-            ]
-          },
-          "targets": [
-            {
-              "expr": "round(sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__interval])))",
-              "legendFormat": "failures {{ provider }}",
-              "refId": "A"
-            },
-            {
-              "expr": "round(sum by (provider) (increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__interval])))",
-              "legendFormat": "degraded {{ provider }}",
-              "refId": "B"
-            }
-          ],
-          "title": "Track Health Failures & Degradation",
-          "type": "timeseries",
-          "description": "Selected-range evidence: failure/degraded probe trend over the active Grafana interval",
-          "maxDataPoints": 400,
-          "interval": "1m"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "continuous-GrYlRd"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null+nan",
-                    "result": {
-                      "text": "—",
-                      "color": "transparent",
-                      "index": 0
-                    }
-                  }
-                }
-              ],
-              "max": 100,
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 10
-                  },
-                  {
-                    "color": "red",
-                    "value": 30
-                  }
-                ]
-              },
-              "unit": "percent"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 24,
-            "x": 0,
-            "y": 51
-          },
-          "id": 107,
-          "options": {
-            "displayMode": "gradient",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showUnfilled": true
-          },
-          "targets": [
-            {
-              "expr": "(100 * sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) / clamp_min(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])), 1))",
-              "legendFormat": "{{ provider }}",
-              "refId": "A"
-            }
-          ],
-          "title": "Track Failure Share",
-          "type": "bargauge",
-          "description": "Selected-range evidence: provider share of failed probes in the active Grafana range. The full share chart is collapsed by default and should be expanded only when total failures are non-zero"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "auto",
-                "displayMode": "auto"
-              },
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null+nan",
-                    "result": {
-                      "text": "—",
-                      "color": "transparent",
-                      "index": 0
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 3
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 24,
-            "x": 0,
-            "y": 57
-          },
-          "id": 108,
-          "options": {
-            "footer": {
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "showHeader": true
-          },
-          "targets": [
-            {
-              "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])))",
-              "format": "table",
-              "instant": true,
-              "legendFormat": "{{ provider }} {{ operation }}",
-              "refId": "A"
-            }
-          ],
-          "title": "Inspect Exhausted Retries",
-          "type": "table",
-          "description": "Do not put full UUIDs into Prometheus labels. Selected-range evidence: retries exhausted by provider and operation in the active Grafana range. Non-zero rows identify where retry budgets were consumed, not raw provider-health enum state"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisLabel": "Exhaustions / interval",
-                "axisPlacement": "auto",
-                "drawStyle": "line",
-                "fillOpacity": 20,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 3
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 24,
-            "x": 0,
-            "y": 64
-          },
-          "id": 109,
-          "options": {
-            "legend": {
-              "calcs": [
-                "sum"
-              ],
-              "displayMode": "list",
-              "placement": "bottom"
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "targets": [
-            {
-              "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__interval])))",
-              "legendFormat": "{{ provider }} {{ operation }}",
-              "refId": "A"
-            }
-          ],
-          "title": "Track Exhausted Retries",
-          "type": "timeseries",
-          "description": "Selected-range evidence: retry exhaustion trend by provider and operation over the active Grafana interval. Rising non-zero series point to persistent retry-budget pressure",
-          "maxDataPoints": 400,
-          "interval": "1m"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 3,
-              "max": 10,
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 0.5
-                  },
-                  {
-                    "color": "orange",
-                    "value": 2
-                  },
-                  {
-                    "color": "red",
-                    "value": 5
-                  }
-                ]
-              },
-              "unit": "s",
-              "noValue": "No optional health-check latency samples in range; not a provider verdict.",
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 0,
-            "y": 71
-          },
-          "id": 102,
-          "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
-          },
-          "targets": [
-            {
-              "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))",
-              "legendFormat": "{{ provider }}",
-              "refId": "A"
-            }
-          ],
-          "title": "Inspect Health-Check Latency p95",
-          "type": "gauge",
-          "description": "Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 0.5
-                  },
-                  {
-                    "color": "orange",
-                    "value": 2
-                  },
-                  {
-                    "color": "red",
-                    "value": 5
-                  }
-                ]
-              },
-              "unit": "s",
-              "noValue": "No optional adapter latency samples in range; not a provider verdict.",
-              "links": [
-                {
-                  "targetBlank": false,
-                  "title": "Open 2. Runtime",
-                  "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-                  "includeVars": false
-                },
-                {
-                  "targetBlank": false,
-                  "title": "Open 0. Control Plane",
-                  "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-                  "includeVars": false
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 12,
-            "y": 71
-          },
-          "id": 110,
-          "options": {
-            "legend": {
-              "calcs": [
-                "max"
-              ],
-              "displayMode": "hidden",
-              "placement": "bottom"
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "targets": [
-            {
-              "expr": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
-              "legendFormat": "{{ provider }} {{ endpoint }} p95",
-              "refId": "A"
-            }
-          ],
-          "title": "Track Request Latency p95",
-          "type": "timeseries",
-          "description": "Compact optional selected-range evidence: p95 adapter request latency by endpoint for the selected provider scope. Provider-global selected-range only; for backfill-specific stage latency open 2. Runtime with preserved pipeline/run_type/run_id scope. No data remains diagnostic and means no endpoint latency samples in range; it does not refute current provider severity",
-          "maxDataPoints": 400,
-          "interval": "1m"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "fixed",
-                "fixedColor": "red"
-              },
-              "custom": {
-                "axisLabel": "Errors / interval",
-                "axisPlacement": "auto",
-                "drawStyle": "line",
-                "fillOpacity": 20,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 5
-                  }
-                ]
-              },
-              "unit": "short",
-              "noValue": "No optional rate-limit error samples in range; not a provider verdict."
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 0,
-            "y": 76
-          },
-          "id": 111,
-          "options": {
-            "legend": {
-              "calcs": [
-                "sum"
-              ],
-              "displayMode": "hidden",
-              "placement": "bottom"
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "targets": [
-            {
-              "expr": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(rate.?limit|429|thrott).*\"}[$__interval]))) or vector(0))",
-              "legendFormat": "{{ provider }} {{ method }} {{ error_type }}",
-              "refId": "A"
-            }
-          ],
-          "title": "Track Rate-Limit Errors",
-          "type": "timeseries",
-          "description": "Compact optional selected-range rate-limit pressure from HTTP errors where error_type indicates throttling/rate-limit classes. Empty samples stay diagnostic and do not refute current provider severity. Use alongside Monitor Rate Limiter Wait p95 for provider-global scope",
-          "maxDataPoints": 400,
-          "interval": "1m"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "fixed",
-                "fixedColor": "red"
-              },
-              "custom": {
-                "axisLabel": "Errors",
-                "axisPlacement": "auto",
-                "drawStyle": "bars",
-                "fillOpacity": 50,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "normal"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "noValue": "No optional timeout/network samples in range; not a provider verdict."
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 12,
-            "y": 76
-          },
-          "id": 115,
-          "options": {
-            "legend": {
-              "calcs": [
-                "sum"
-              ],
-              "displayMode": "hidden",
-              "placement": "bottom"
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "targets": [
-            {
-              "expr": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(timeout|timed.?out|network).*\"}[$__interval]))) or vector(0))",
-              "legendFormat": "{{ provider }} {{ method }} {{ error_type }}",
-              "refId": "A"
-            }
-          ],
-          "title": "Track Network & Timeout Errors",
-          "type": "timeseries",
-          "description": "Compact optional selected-range network/timeout failures separated from rate-limit pressure. Empty samples stay diagnostic and do not refute current provider severity. Provider-global scope; correlate with Runtime stage errors when pipeline handoff context is set",
-          "maxDataPoints": 400,
-          "interval": "1m"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisLabel": "Wait (seconds)",
-                "axisPlacement": "auto",
-                "drawStyle": "line",
-                "fillOpacity": 20,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 0.5
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "s",
-              "noValue": "No optional rate-limiter wait samples in range; not a provider verdict."
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 0,
-            "y": 81
-          },
-          "id": 112,
-          "options": {
-            "legend": {
-              "calcs": [
-                "max"
-              ],
-              "displayMode": "hidden",
-              "placement": "bottom"
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "targets": [
-            {
-              "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
-              "legendFormat": "{{ provider }} p95",
-              "refId": "A"
-            }
-          ],
-          "title": "Track Rate-Limiter Wait p95",
-          "type": "timeseries",
-          "description": "Compact optional selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection",
-          "maxDataPoints": 400,
-          "interval": "1m"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "continuous-BlYlRd"
-              },
-              "decimals": 2,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "noValue": "No rate-limiter token samples in range. This remains diagnostic and does not disprove provider pressure.",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "red",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 1
-                  },
-                  {
-                    "color": "green",
-                    "value": 5
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 12,
-            "y": 81
-          },
-          "id": 113,
-          "options": {
-            "displayMode": "gradient",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showUnfilled": true
-          },
-          "targets": [
-            {
-              "expr": "min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available{provider=~\"$provider\"}[$__range]))",
-              "legendFormat": "{{ provider }}",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Available Rate-Limit Tokens",
-          "type": "bargauge",
-          "description": "Compact optional selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range. This optional telemetry can stay empty even when current provider severity is non-OK"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "noValue": "No circuit-breaker state samples in range. Adapter-scoped telemetry is optional and does not imply CLOSED.",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 0,
-            "y": 86
-          },
-          "id": 31,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "max(max_over_time(bioetl_circuit_breaker_state{adapter=~\"$adapter\"}[$__range]))",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Circuit-Breaker State",
-          "type": "stat",
-          "description": "Compact cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state. This adapter-scoped telemetry can stay empty even when current provider severity is non-OK"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisLabel": "Trips",
-                "axisPlacement": "auto",
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "noValue": "No circuit-breaker trip samples in range. Adapter-scoped telemetry is optional and remains diagnostic.",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 12,
-            "y": 86
-          },
-          "id": 32,
-          "options": {
-            "legend": {
-              "calcs": [
-                "sum",
-                "max"
-              ],
-              "displayMode": "hidden",
-              "placement": "bottom"
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "targets": [
-            {
-              "expr": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}[$__interval]))",
-              "legendFormat": "{{adapter}}",
-              "refId": "A"
-            }
-          ],
-          "title": "Track Circuit-Breaker Trips",
-          "type": "timeseries",
-          "description": "Compact cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows. Empty adapter telemetry does not refute current provider severity on its own",
-          "maxDataPoints": 400,
-          "interval": "1m"
-        }
-      ]
+      "panels": []
     },
     {
-      "type": "row",
-      "title": "Range & Debug Evidence",
-      "collapsed": true,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "red"
+          },
+          "custom": {
+            "axisLabel": "Checks / interval",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
       "gridPos": {
-        "h": 1,
+        "h": 6,
         "w": 24,
         "x": 0,
         "y": 20
       },
-      "id": 9404,
-      "panels": [
+      "id": 106,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Open Provider Incident Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
+          }
+        ]
+      },
+      "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
+          "expr": "round(sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__interval])))",
+          "legendFormat": "failures {{ provider }}",
+          "refId": "A"
+        },
+        {
+          "expr": "round(sum by (provider) (increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__interval])))",
+          "legendFormat": "degraded {{ provider }}",
+          "refId": "B"
+        }
+      ],
+      "title": "Track Health Failures & Degradation",
+      "type": "timeseries",
+      "description": "Selected-range evidence: failure/degraded probe trend over the active Grafana interval",
+      "maxDataPoints": 400,
+      "interval": "1m"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
           },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "nan",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                },
-                {
-                  "options": {
-                    "0": {
-                      "color": "red",
-                      "index": 0,
-                      "text": "UNHEALTHY"
-                    },
-                    "1": {
-                      "color": "yellow",
-                      "index": 1,
-                      "text": "DEGRADED"
-                    },
-                    "2": {
-                      "color": "green",
-                      "index": 2,
-                      "text": "HEALTHY"
-                    }
-                  },
-                  "type": "value"
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "—",
+                  "color": "transparent",
+                  "index": 0
                 }
-              ],
-              "max": 2,
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "red",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 1
-                  },
-                  {
-                    "color": "green",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": [
+              }
+            }
+          ],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
-                  }
-                ]
+                "color": "gray",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 30
               }
             ]
           },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 0,
-            "y": 30
-          },
-          "id": 114,
-          "options": {
-            "footer": {
-              "fields": "",
-              "reducer": [
-                "max"
-              ],
-              "show": false
-            },
-            "dataLinks": [
-              {
-                "targetBlank": true,
-                "title": "Open Provider Incident Runbook",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
-              }
-            ],
-            "showHeader": true
-          },
-          "targets": [
-            {
-              "expr": "max by (provider) (max_over_time(bioetl_provider_health_status{provider=~\"$provider\"}[${__range_s}s])) or ((max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s]) * 0) / (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s]) * 0))",
-              "format": "table",
-              "instant": true,
-              "legendFormat": "{{ provider }}",
-              "refId": "A"
-            }
-          ],
-          "title": "Inspect Raw Health Status",
-          "type": "table",
-          "description": "Do not put full UUIDs into Prometheus labels. Raw provider health enum evidence for the current first-screen scope (instant), not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY (or dashboard-local mapping). null/NaN=UNKNOWN when raw status is absent (mapping fallback), not healthy. When raw status is absent the mapped status is unknown (fail-closed), never synthetic healthy"
+          "unit": "percent"
         },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisLabel": "Duration (seconds)",
-                "axisPlacement": "auto",
-                "drawStyle": "bars",
-                "fillOpacity": 50,
-                "gradientMode": "none",
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "normal"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "s",
-              "noValue": "No provider latency samples in range. This optional telemetry is neutral; use severity, freshness, and raw enum panels for provider verdict."
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 12,
-            "x": 12,
-            "y": 30
-          },
-          "id": 1,
-          "options": {
-            "legend": {
-              "calcs": [
-                "sum",
-                "mean"
-              ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": false
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "targets": [
-            {
-              "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
-              "legendFormat": "{{ provider }} p95",
-              "refId": "A"
-            }
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 107,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
           ],
-          "title": "Track Health-Check Latency p95",
-          "type": "timeseries",
-          "description": "Selected-range evidence: p95 provider health-check latency over the active Grafana interval. Current provider severity is owned by the GLOBAL Provider Severity Matrix",
-          "maxDataPoints": 400,
-          "interval": "1m"
+          "fields": "",
+          "values": false
         },
+        "showUnfilled": true
+      },
+      "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "noValue": "N/A"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 12,
-            "x": 0,
-            "y": 36
-          },
-          "id": 2,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "round(sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0))",
-              "legendFormat": "{{ provider }}",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Healthy Checks",
-          "type": "stat",
-          "description": "Number of HEALTHY checks completed in the selected range. `0` means none were observed or checks have not started; it is supporting evidence, not proof of current provider health."
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "noValue": "None observed"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 12,
-            "y": 36
-          },
-          "id": 105,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "round((sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range]))) or vector(0))",
-              "legendFormat": "{{ provider }}",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Degraded Checks",
-          "type": "stat",
-          "description": "Selected-range evidence: completed DEGRADED probes in the active Grafana range. This panel is not a current-health source, so non-zero counts remain neutral evidence rather than WARN/CRIT by themselves"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "max": 1,
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 0.05
-                  },
-                  {
-                    "color": "red",
-                    "value": 0.2
-                  }
-                ]
-              },
-              "unit": "percentunit",
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "noValue": "N/A"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 0,
-            "y": 42
-          },
-          "id": 104,
-          "options": {
-            "colorMode": "value",
-            "dataLinks": [
-              {
-                "targetBlank": true,
-                "title": "Open Provider Incident Runbook",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
-              }
-            ],
-            "graphMode": "none",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "((sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range]))) / clamp_min((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range]))), 1)) or vector(0)",
-              "legendFormat": "failure_rate",
-              "refId": "A"
-            }
-          ],
-          "title": "Track Failure Rate",
-          "type": "stat",
-          "description": "Failed checks divided by all completed checks in the selected range. Warning starts at 5%; critical starts at 20%. A zero denominator is N/A rather than success. Current provider status comes from the canonical status telemetry."
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "noValue": "N/A"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 4,
-            "w": 12,
-            "x": 0,
-            "y": 47
-          },
-          "id": 7,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "round((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)))",
-              "legendFormat": "{{ provider }}",
-              "refId": "A"
-            }
-          ],
-          "title": "Monitor Health Checks",
-          "type": "stat",
-          "description": "Total HEALTHY, DEGRADED, and failed checks completed in the selected range. `0` means no completed checks were observed or checking has not started; it is not a health verdict."
+          "expr": "(100 * sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) / clamp_min(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])), 1))",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Track Failure Share",
+      "type": "bargauge",
+      "description": "Selected-range evidence: provider share of failed probes in the active Grafana range. The full share chart is collapsed by default and should be expanded only when total failures are non-zero"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "—",
+                  "color": "transparent",
+                  "index": 0
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Count"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "id": 108,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])))",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ provider }} {{ operation }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Inspect Exhausted Retries",
+      "type": "table",
+      "description": "Do not put full UUIDs into Prometheus labels. Selected-range evidence: retries exhausted by provider and operation in the active Grafana range. Non-zero rows identify where retry budgets were consumed, not raw provider-health enum state"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Exhaustions / interval",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 39
+      },
+      "id": 109,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__interval])))",
+          "legendFormat": "{{ provider }} {{ operation }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Track Exhausted Retries",
+      "type": "timeseries",
+      "description": "Selected-range evidence: retry exhaustion trend by provider and operation over the active Grafana interval. Rising non-zero series point to persistent retry-budget pressure",
+      "maxDataPoints": 400,
+      "interval": "1m"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 3,
+          "max": 10,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
+                "color": "orange",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "s",
+          "noValue": "No optional health-check latency samples in range; not a provider verdict.",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 46
+      },
+      "id": 102,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Inspect Health-Check Latency p95",
+      "type": "gauge",
+      "description": "Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
+                "color": "orange",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "s",
+          "noValue": "No optional adapter latency samples in range; not a provider verdict.",
+          "links": [
+            {
+              "targetBlank": false,
+              "title": "Open 2. Runtime",
+              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+              "includeVars": false
+            },
+            {
+              "targetBlank": false,
+              "title": "Open 0. Control Plane",
+              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+              "includeVars": false
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 46
+      },
+      "id": 110,
+      "options": {
+        "legend": {
+          "calcs": [
+            "max"
+          ],
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+          "legendFormat": "{{ provider }} {{ endpoint }} p95",
+          "refId": "A"
+        }
+      ],
+      "title": "Track Request Latency p95",
+      "type": "timeseries",
+      "description": "Compact optional selected-range evidence: p95 adapter request latency by endpoint for the selected provider scope. Provider-global selected-range only; for backfill-specific stage latency open 2. Runtime with preserved pipeline/run_type/run_id scope. No data remains diagnostic and means no endpoint latency samples in range; it does not refute current provider severity",
+      "maxDataPoints": 400,
+      "interval": "1m"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "red"
+          },
+          "custom": {
+            "axisLabel": "Errors / interval",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short",
+          "noValue": "No optional rate-limit error samples in range; not a provider verdict."
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 51
+      },
+      "id": 111,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(rate.?limit|429|thrott).*\"}[$__interval]))) or vector(0))",
+          "legendFormat": "{{ provider }} {{ method }} {{ error_type }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Track Rate-Limit Errors",
+      "type": "timeseries",
+      "description": "Compact optional selected-range rate-limit pressure from HTTP errors where error_type indicates throttling/rate-limit classes. Empty samples stay diagnostic and do not refute current provider severity. Use alongside Monitor Rate Limiter Wait p95 for provider-global scope",
+      "maxDataPoints": 400,
+      "interval": "1m"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "red"
+          },
+          "custom": {
+            "axisLabel": "Errors",
+            "axisPlacement": "auto",
+            "drawStyle": "bars",
+            "fillOpacity": 50,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short",
+          "noValue": "No optional timeout/network samples in range; not a provider verdict."
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 51
+      },
+      "id": 115,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(timeout|timed.?out|network).*\"}[$__interval]))) or vector(0))",
+          "legendFormat": "{{ provider }} {{ method }} {{ error_type }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Track Network & Timeout Errors",
+      "type": "timeseries",
+      "description": "Compact optional selected-range network/timeout failures separated from rate-limit pressure. Empty samples stay diagnostic and do not refute current provider severity. Provider-global scope; correlate with Runtime stage errors when pipeline handoff context is set",
+      "maxDataPoints": 400,
+      "interval": "1m"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Wait (seconds)",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "s",
+          "noValue": "No optional rate-limiter wait samples in range; not a provider verdict."
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 56
+      },
+      "id": 112,
+      "options": {
+        "legend": {
+          "calcs": [
+            "max"
+          ],
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+          "legendFormat": "{{ provider }} p95",
+          "refId": "A"
+        }
+      ],
+      "title": "Track Rate-Limiter Wait p95",
+      "type": "timeseries",
+      "description": "Compact optional selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection",
+      "maxDataPoints": 400,
+      "interval": "1m"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "decimals": 2,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "No rate-limiter token samples in range. This remains diagnostic and does not disprove provider pressure.",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "green",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 56
+      },
+      "id": 113,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available{provider=~\"$provider\"}[$__range]))",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Monitor Available Rate-Limit Tokens",
+      "type": "bargauge",
+      "description": "Compact optional selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range. This optional telemetry can stay empty even when current provider severity is non-OK"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "No circuit-breaker state samples in range. Adapter-scoped telemetry is optional and does not imply CLOSED.",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 61
+      },
+      "id": 31,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "max(max_over_time(bioetl_circuit_breaker_state{adapter=~\"$adapter\"}[$__range]))",
+          "refId": "A"
+        }
+      ],
+      "title": "Monitor Circuit-Breaker State",
+      "type": "stat",
+      "description": "Compact cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state. This adapter-scoped telemetry can stay empty even when current provider severity is non-OK"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Trips",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "noValue": "No circuit-breaker trip samples in range. Adapter-scoped telemetry is optional and remains diagnostic.",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 61
+      },
+      "id": 32,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum",
+            "max"
+          ],
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}[$__interval]))",
+          "legendFormat": "{{adapter}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Track Circuit-Breaker Trips",
+      "type": "timeseries",
+      "description": "Compact cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows. Empty adapter telemetry does not refute current provider severity on its own",
+      "maxDataPoints": 400,
+      "interval": "1m"
     },
     {
       "type": "row",
-      "title": "Run Context",
-      "collapsed": true,
+      "title": "Range & Debug Evidence",
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 66
       },
-      "id": 9405,
-      "panels": [
-        {
-          "id": 9402,
-          "type": "table",
-          "title": "Inspect Run Identity",
-          "gridPos": {
-            "h": 6,
-            "w": 12,
-            "x": 0,
-            "y": 0
+      "id": 9404,
+      "panels": []
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
           },
-          "datasource": "BioETL Ops HTTP",
-          "description": "Do not put full UUIDs into Prometheus labels. Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto"
-                },
-                "inspect": true
-              },
-              "unit": "none",
-              "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
-              "links": [
-                {
-                  "title": "Copy/Open full value (plain text)",
-                  "url": "data:text/plain,${__value.raw}",
-                  "targetBlank": true,
-                  "includeVars": false
-                },
-                {
-                  "title": "Check BioETL Ops HTTP health",
-                  "url": "http://localhost:8000/health/live",
-                  "targetBlank": true
-                },
-                {
-                  "title": "Open monitoring backend setup docs",
-                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
-                  "targetBlank": true
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
-              ]
+              }
             },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "parameter"
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "UNHEALTHY"
                 },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 165
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto"
-                    }
-                  }
-                ]
+                "1": {
+                  "color": "yellow",
+                  "index": 1,
+                  "text": "DEGRADED"
+                },
+                "2": {
+                  "color": "green",
+                  "index": 2,
+                  "text": "HEALTHY"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "max": 2,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
               },
               {
-                "matcher": {
-                  "id": "byName",
-                  "options": "value"
-                },
-                "properties": [
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto"
-                    }
-                  },
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Copy/Open full value (plain text)",
-                        "url": "data:text/plain,${__value.raw}",
-                        "targetBlank": true,
-                        "includeVars": false
-                      }
-                    ]
-                  }
-                ]
+                "color": "yellow",
+                "value": 1
               },
               {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "value"
-                  }
-                ]
+                "color": "green",
+                "value": 2
               }
             ]
           },
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
             },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "rows",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              },
-              "expr": ""
-            }
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Count"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 67
+      },
+      "id": 114,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "max"
           ],
-          "transformations": [
+          "show": false
+        },
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Open Provider Incident Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
+          }
+        ],
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "expr": "max by (provider) (max_over_time(bioetl_provider_health_status{provider=~\"$provider\"}[${__range_s}s])) or ((max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s]) * 0) / (max_over_time(bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"}[${__range_s}s]) * 0))",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Inspect Raw Health Status",
+      "type": "table",
+      "description": "Do not put full UUIDs into Prometheus labels. Raw provider health enum evidence for the current first-screen scope (instant), not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY (or dashboard-local mapping). null/NaN=UNKNOWN when raw status is absent (mapping fallback), not healthy. When raw status is absent the mapped status is unknown (fail-closed), never synthetic healthy"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Duration (seconds)",
+            "axisPlacement": "auto",
+            "drawStyle": "bars",
+            "fillOpacity": 50,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s",
+          "noValue": "No provider latency samples in range. This optional telemetry is neutral; use severity, freshness, and raw enum panels for provider verdict."
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 67
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum",
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+          "legendFormat": "{{ provider }} p95",
+          "refId": "A"
+        }
+      ],
+      "title": "Track Health-Check Latency p95",
+      "type": "timeseries",
+      "description": "Selected-range evidence: p95 provider health-check latency over the active Grafana interval. Current provider severity is owned by the GLOBAL Provider Severity Matrix",
+      "maxDataPoints": 400,
+      "interval": "1m"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
             {
-              "id": "organize",
+              "type": "special",
               "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "__name__": true,
-                  "Value": true
-                },
-                "indexByName": {
-                  "parameter": 0,
-                  "value": 1
-                },
-                "renameByName": {
-                  "parameter": "parameter",
-                  "value": "value",
-                  "Value": "value",
-                  "Value #A": "Series A",
-                  "Value #B": "Series B",
-                  "Value #C": "Series C"
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short",
+          "noValue": "N/A"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 73
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Monitor Healthy Checks",
+      "type": "stat",
+      "description": "Number of HEALTHY checks completed in the selected range. `0` means none were observed or checks have not started; it is supporting evidence, not proof of current provider health."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "None observed"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 73
+      },
+      "id": 105,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round((sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range]))) or vector(0))",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Monitor Degraded Checks",
+      "type": "stat",
+      "description": "Selected-range evidence: completed DEGRADED probes in the active Grafana range. This panel is not a current-health source, so non-zero counts remain neutral evidence rather than WARN/CRIT by themselves"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.05
+              },
+              {
+                "color": "red",
+                "value": 0.2
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "N/A"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 79
+      },
+      "id": 104,
+      "options": {
+        "colorMode": "value",
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Open Provider Incident Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
+          }
+        ],
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "((sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range]))) / clamp_min((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range]))), 1)) or vector(0)",
+          "legendFormat": "failure_rate",
+          "refId": "A"
+        }
+      ],
+      "title": "Track Failure Rate",
+      "type": "stat",
+      "description": "Failed checks divided by all completed checks in the selected range. Warning starts at 5%; critical starts at 20%. A zero denominator is N/A rather than success. Current provider status comes from the canonical status telemetry."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "N/A"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 84
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)))",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Monitor Health Checks",
+      "type": "stat",
+      "description": "Total HEALTHY, DEGRADED, and failed checks completed in the selected range. `0` means no completed checks were observed or checking has not started; it is not a health verdict."
+    },
+    {
+      "type": "row",
+      "title": "Run Context",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 88
+      },
+      "id": 9405,
+      "panels": [],
+      "description": "Canonical ID/Processed Records hub is Run Explorer"
+    },
+    {
+      "id": 9402,
+      "type": "table",
+      "title": "Inspect Run Identity",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 89
+      },
+      "datasource": "BioETL Ops HTTP",
+      "description": "Do not put full UUIDs into Prometheus labels. Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": true
+          },
+          "unit": "none",
+          "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
+          "links": [
+            {
+              "title": "Copy/Open full value (plain text)",
+              "url": "data:text/plain,${__value.raw}",
+              "targetBlank": true,
+              "includeVars": false
+            },
+            {
+              "title": "Check BioETL Ops HTTP health",
+              "url": "http://localhost:8000/health/live",
+              "targetBlank": true
+            },
+            {
+              "title": "Open monitoring backend setup docs",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+              "targetBlank": true
             }
           ]
         },
-        {
-          "id": 9403,
-          "type": "table",
-          "title": "Inspect Processed Records",
-          "gridPos": {
-            "h": 6,
-            "w": 12,
-            "x": 12,
-            "y": 0
-          },
-          "datasource": "BioETL Ops HTTP",
-          "description": "Do not put full UUIDs into Prometheus labels. Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto"
-                },
-                "inspect": false
-              },
-              "decimals": 0,
-              "unit": "none",
-              "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
-              "links": [
-                {
-                  "title": "Check BioETL Ops HTTP health",
-                  "url": "http://localhost:8000/health/live",
-                  "targetBlank": true
-                },
-                {
-                  "title": "Open monitoring backend setup docs",
-                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
-                  "targetBlank": true
-                }
-              ]
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "parameter"
             },
-            "overrides": [
+            "properties": [
               {
-                "matcher": {
-                  "id": "byName",
-                  "options": "parameter"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "01 bronze_records": {
-                            "text": "bronze [total]",
-                            "color": "#cd7f32"
-                          },
-                          "02 silver_valid_records": {
-                            "text": "silver [valid]",
-                            "color": "#c0c0c0"
-                          },
-                          "03 silver_filtered_out_records": {
-                            "text": "silver [filtered out]"
-                          },
-                          "04 silver_quarantined_records": {
-                            "text": "silver [quarantined]"
-                          },
-                          "05 silver_skipped_records": {
-                            "text": "silver [skipped]"
-                          },
-                          "06 silver_deduplicated_records": {
-                            "text": "silver [deduplicated]"
-                          },
-                          "07 gold_written_records": {
-                            "text": "gold [valid]",
-                            "color": "#d4af37"
-                          },
-                          "08 gold_excluded_by_contract_records": {
-                            "text": "gold [excluded]"
-                          },
-                          "09 gold_quarantined_records": {
-                            "text": "gold [quarantined]"
-                          },
-                          "10 gold_skipped_records": {
-                            "text": "gold [skipped]"
-                          },
-                          "11 gold_deduplicated_records": {
-                            "text": "gold [deduplicated]"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 165
-                  }
-                ]
+                "id": "custom.width",
+                "value": 165
               },
               {
-                "matcher": {
-                  "id": "byName",
-                  "options": "value"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 70
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  }
-                ]
+                "id": "custom.align",
+                "value": "left"
               },
               {
-                "matcher": {
-                  "id": "byName",
-                  "options": "percentage"
-                },
-                "properties": [
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  }
-                ]
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "left"
               },
               {
-                "matcher": {
-                  "id": "byName",
-                  "options": "row_status"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": ""
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 1
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "center"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-background",
-                      "applyToRow": true
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "silver_deficit": {
-                            "text": "",
-                            "color": "red"
-                          },
-                          "gold_deficit": {
-                            "text": "",
-                            "color": "red"
-                          },
-                          "": {
-                            "text": "",
-                            "color": "rgba(0,0,0,0)"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
               },
               {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
+                "id": "links",
+                "value": [
                   {
-                    "id": "displayName",
-                    "value": "count"
+                    "title": "Copy/Open full value (plain text)",
+                    "url": "data:text/plain,${__value.raw}",
+                    "targetBlank": true,
+                    "includeVars": false
                   }
                 ]
               }
             ]
           },
-          "options": {
-            "showHeader": true,
-            "sortBy": [
-              {
-                "desc": false,
-                "displayName": "parameter"
-              }
-            ],
-            "footer": {
-              "show": false
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
             },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "rows",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              },
-              "expr": ""
-            }
-          ],
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "percentage": true,
-                  "row_status": true,
-                  "percintage": true
-                },
-                "indexByName": {
-                  "parameter": 0,
-                  "value": 1,
-                  "row_status": 3,
-                  "percentage": 2
-                },
-                "renameByName": {
-                  "parameter": "parameter",
-                  "value": "value",
-                  "row_status": "",
-                  "Value": "count",
-                  "Value #A": "Series A",
-                  "Value #B": "Series B",
-                  "Value #C": "Series C",
-                  "percentage": "percentage"
-                }
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "value"
               }
-            }
-          ]
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        },
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "rows",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
         }
       ],
-      "description": "Canonical ID/Processed Records hub is Run Explorer"
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "Value": true
+            },
+            "indexByName": {
+              "parameter": 0,
+              "value": 1
+            },
+            "renameByName": {
+              "parameter": "parameter",
+              "value": "value",
+              "Value": "value",
+              "Value #A": "Series A",
+              "Value #B": "Series B",
+              "Value #C": "Series C"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 9403,
+      "type": "table",
+      "title": "Inspect Processed Records",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 89
+      },
+      "datasource": "BioETL Ops HTTP",
+      "description": "Do not put full UUIDs into Prometheus labels. Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "decimals": 0,
+          "unit": "none",
+          "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
+          "links": [
+            {
+              "title": "Check BioETL Ops HTTP health",
+              "url": "http://localhost:8000/health/live",
+              "targetBlank": true
+            },
+            {
+              "title": "Open monitoring backend setup docs",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+              "targetBlank": true
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "parameter"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "01 bronze_records": {
+                        "text": "bronze [total]",
+                        "color": "#cd7f32"
+                      },
+                      "02 silver_valid_records": {
+                        "text": "silver [valid]",
+                        "color": "#c0c0c0"
+                      },
+                      "03 silver_filtered_out_records": {
+                        "text": "silver [filtered out]"
+                      },
+                      "04 silver_quarantined_records": {
+                        "text": "silver [quarantined]"
+                      },
+                      "05 silver_skipped_records": {
+                        "text": "silver [skipped]"
+                      },
+                      "06 silver_deduplicated_records": {
+                        "text": "silver [deduplicated]"
+                      },
+                      "07 gold_written_records": {
+                        "text": "gold [valid]",
+                        "color": "#d4af37"
+                      },
+                      "08 gold_excluded_by_contract_records": {
+                        "text": "gold [excluded]"
+                      },
+                      "09 gold_quarantined_records": {
+                        "text": "gold [quarantined]"
+                      },
+                      "10 gold_skipped_records": {
+                        "text": "gold [skipped]"
+                      },
+                      "11 gold_deduplicated_records": {
+                        "text": "gold [deduplicated]"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 165
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 70
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "percentage"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "row_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": ""
+              },
+              {
+                "id": "custom.width",
+                "value": 1
+              },
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "applyToRow": true
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "silver_deficit": {
+                        "text": "",
+                        "color": "red"
+                      },
+                      "gold_deficit": {
+                        "text": "",
+                        "color": "red"
+                      },
+                      "": {
+                        "text": "",
+                        "color": "rgba(0,0,0,0)"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "count"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "parameter"
+          }
+        ],
+        "footer": {
+          "show": false
+        },
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "rows",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "percentage": true,
+              "row_status": true,
+              "percintage": true
+            },
+            "indexByName": {
+              "parameter": 0,
+              "value": 1,
+              "row_status": 3,
+              "percentage": 2
+            },
+            "renameByName": {
+              "parameter": "parameter",
+              "value": "value",
+              "row_status": "",
+              "Value": "count",
+              "Value #A": "Series A",
+              "Value #B": "Series B",
+              "Value #C": "Series C",
+              "percentage": "percentage"
+            }
+          }
+        }
+      ]
     }
   ],
   "refresh": "60s",
