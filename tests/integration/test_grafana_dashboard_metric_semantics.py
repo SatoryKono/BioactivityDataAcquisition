@@ -1899,10 +1899,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert excluded_fields.get("percintage") is True
     assert "percintage" not in organize_options.get("indexByName", {})
     assert "percintage" not in organize_options.get("renameByName", {})
-    if processed.get("title") == "Inspect Processed Records":
-        assert excluded_fields.get("percentage") is True
-    else:
-        assert excluded_fields.get("percentage") is not True
+    assert excluded_fields.get("percentage") is not True
 
     parameter_overrides = [
         override
@@ -1969,7 +1966,8 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         prop.get("id"): prop.get("value")
         for prop in percentage_overrides[0].get("properties", [])
     }
-    assert percentage_properties["custom.align"] == "left"
+    assert percentage_properties["custom.align"] == "right"
+    assert percentage_properties["custom.width"] == 110
     assert percentage_properties["custom.cellOptions"] == {"type": "color-text"}
     # PFILL-01: plain percentage text — no pipe-token regex mappings required.
     assert percentage_properties.get("mappings", []) == []

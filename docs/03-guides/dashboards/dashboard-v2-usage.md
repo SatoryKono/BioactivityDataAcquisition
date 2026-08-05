@@ -189,16 +189,16 @@ exact-run RunLedger evidence when `$run_id` is selected, otherwise over
 `bioetl_processed_records_*` recording rules and canonical
 `bioetl_stage_records_total` outcomes. It intentionally omits reconciliation
 status, accounted subtotal, and delta rows; missing aggregate accounting series
-are diagnostic no-data/instrumentation gaps, not green zero. Panels titled
-`Inspect Processed Records` display `parameter` and `value`; panels titled
-`Review Processed Records` additionally display the canonical formatted
-`percentage`: Bronze is always `100%`; `silver [valid]` and `gold [valid]`
+are diagnostic no-data/instrumentation gaps, not green zero. Every panel titled
+`Inspect Processed Records` or `Review Processed Records` displays `parameter`,
+`value`, and canonical formatted `percentage`: Bronze is always `100%`;
+`silver [valid]` and `gold [valid]`
 render one decimal (`91.0%`, `90.1%`); secondary Silver and Gold outcomes render
 up to three decimals with trailing zeroes trimmed (`8.51%`, `0.47%`).
 Zero-valued outcome rows remain visible in the compact table. Silver and Gold
 outcome percentages use Bronze total as denominator. The table formats `value`
 with a space as the thousands separator, left-pads shorter values to the
-displayed `bronze [total]` width, and right-aligns the `value` column. The
+displayed `bronze [total]` width, and right-aligns both numeric columns. The
 internal `row_status` field is hidden; the payload exposes canonical
 `percentage` only. It does not replace the dashboard-specific `Status` or
 `First Action` route.

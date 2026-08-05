@@ -498,39 +498,20 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
-                  "mode": "basic"
+                  "type": "auto"
                 }
               },
               {
-                "id": "color",
-                "value": {
-                  "mode": "thresholds"
-                }
+                "id": "custom.align",
+                "value": "right"
               },
               {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "orange",
-                      "value": 1
-                    },
-                    {
-                      "color": "red",
-                      "value": 2
-                    }
-                  ]
-                }
+                "id": "custom.width",
+                "value": 120
               },
               {
                 "id": "displayName",
-                "value": "Severity"
+                "value": "Active Alerts"
               }
             ]
           }
@@ -985,6 +966,27 @@
           "refId": "A"
         }
       ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "pipeline": 0,
+              "reason": 1,
+              "Value": 2
+            },
+            "renameByName": {
+              "pipeline": "Pipeline",
+              "reason": "Reason",
+              "Value": "Signal"
+            }
+          }
+        }
+      ],
       "fieldConfig": {
         "defaults": {
           "noValue": "None observed",
@@ -1045,8 +1047,32 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value)$"
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 300
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Signal"
             },
             "properties": [
               {
@@ -1089,6 +1115,14 @@
               {
                 "id": "displayName",
                 "value": "Signal"
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "custom.width",
+                "value": 88
               }
             ]
           }

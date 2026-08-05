@@ -62,8 +62,8 @@ accounting table from `/ops/observability/processed-records`. Exact `$run_id`
 scopes resolve from RunLedger artifact/metrics evidence; aggregate scopes are
 backed by `bioetl_processed_records_*` recording rules with `value` and
 formatted canonical `percentage` fields, including zero-valued outcome rows.
-`Inspect Processed Records` displays only `parameter` and `value`; `Review
-Processed Records` also displays `percentage`. Internal `row_status` is hidden,
+Every `Inspect`/`Review Processed Records` table displays `parameter`, `value`,
+and canonical `percentage`; both numeric columns are right-aligned. Internal `row_status` is hidden,
 the payload uses canonical `percentage` only, and the table does not act as a
 `$__range` throughput summary.
 All **seven** shipped dashboards share one theme-safe navigation panel: numbered

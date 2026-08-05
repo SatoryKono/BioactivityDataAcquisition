@@ -42,7 +42,7 @@ used.
 
 ### 5. Inspect Processed Records
 - **Type:** Table
-- **Purpose:** Show records processed by stage for selected runs.
+- **Purpose:** Show Bronze/Silver/Gold counts and denominator-explicit percentages for selected runs; both numeric columns are right-aligned.
 - **Data sources:** BioETL Ops HTTP
   `/ops/observability/processed-records`; this is not a Prometheus panel.
 

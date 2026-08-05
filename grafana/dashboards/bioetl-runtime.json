@@ -3207,7 +3207,11 @@
             "properties": [
               {
                 "id": "custom.align",
-                "value": "left"
+                "value": "right"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               },
               {
                 "id": "custom.cellOptions",
@@ -3314,7 +3318,6 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "percentage": true,
               "row_status": true,
               "percintage": true
             },

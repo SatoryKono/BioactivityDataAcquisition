@@ -977,7 +977,7 @@ Common context panels on primary dashboards outside Overview:
 | `Inspect Scope & Evidence` | `9400` | Visible operator question plus plain-language evidence-scope definitions; selector details stay in the panel tooltip/description. |
 | `Status` | `9401` | Role-specific compact status; no Prometheus `$run_id` filtering. |
 | `ID` | `9402` | BioETL Ops HTTP identity table for `pipeline/run_type/run_id`. |
-| `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`; exact `$run_id` scopes resolve from RunLedger evidence, while aggregate scopes use `bioetl_processed_records_*` recording rules. `Inspect Processed Records` displays `parameter` and `value` only; `Review Processed Records` also displays `percentage`. Zero-valued outcome rows remain visible and missing accounting series are UNKNOWN/no-data, not OK. |
+| `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`; exact `$run_id` scopes resolve from RunLedger evidence, while aggregate scopes use `bioetl_processed_records_*` recording rules. Every `Inspect`/`Review Processed Records` table displays `parameter`, right-aligned `value`, and right-aligned canonical `percentage`. Zero-valued outcome rows remain visible and missing accounting series are UNKNOWN/no-data, not OK. |
 | `Identity Data Unavailable` | `9410` | Control Plane-only neutral fallback text shown below the identity table when the selected scope returns no visible rows. |
 | `Record Counts Unavailable` | `9411` | Control Plane-only neutral fallback text shown below the accounting table when the selected scope returns no visible rows. |
 
