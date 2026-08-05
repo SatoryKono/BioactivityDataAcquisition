@@ -28,12 +28,6 @@ from bioetl.application.composite.runner_pkg.runner_lifecycle_flow import (
     mark_finished,
     start_run_lifecycle,
 )
-from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
-    CompositeRunnerMergeStageMixin,
-)
-from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
-    CompositeRunnerObservabilityMixin,
-)
 from bioetl.application.composite.runner_pkg.runner_runtime_helpers import (
     bind_runner_dependencies,
     initialize_runner_runtime_state,
@@ -72,11 +66,13 @@ __all__ = ["CompositePipelineRunner"]
 class CompositePipelineRunner(
     CompositeRunnerControlPlaneMixin,
     CompositeRunnerSupportMixin,
-    CompositeRunnerObservabilityMixin,
     CompositeRunnerStageMixin,
-    CompositeRunnerMergeStageMixin,
 ):
-    """Facade/orchestrator for composite pipeline lifecycle."""
+    """Facade/orchestrator for composite pipeline lifecycle.
+
+    ARCH-REF-R2 / #7729: host direct bases reduced to 3 (merge+obs composed into
+    stage/support mixins).
+    """
 
     _lock: LockPort  # pyright: ignore[reportUninitializedInstanceVariable]
     _clock: ClockPort | None

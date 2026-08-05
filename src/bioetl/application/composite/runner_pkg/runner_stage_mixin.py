@@ -27,6 +27,9 @@ from bioetl.application.composite.runner_pkg.runner_stage_dependency_state_flow 
     handle_dependencies_phase_exception,
     start_dependencies_phase,
 )
+from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
+    CompositeRunnerMergeStageMixin,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_enrichment_mixin import (
     _CompositeRunnerStageEnrichmentMixin,
 )
@@ -54,10 +57,11 @@ __all__ = ["CompositeRunnerStageMixin"]
 
 
 class CompositeRunnerStageMixin(
+    CompositeRunnerMergeStageMixin,
     _CompositeRunnerStageEnrichmentMixin,
     _CompositeRunnerStageSupportMixin,
 ):
-    """Mixin with seed/dependencies/enrichment stage orchestration."""
+    """Stage orchestration composed with merge helpers (ARCH-REF-R2 / #7729)."""
 
     async def _execute_seed_phase(
         self: _CompositeRunnerStageHostProtocol,
