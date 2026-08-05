@@ -1899,7 +1899,10 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert excluded_fields.get("percintage") is True
     assert "percintage" not in organize_options.get("indexByName", {})
     assert "percintage" not in organize_options.get("renameByName", {})
-    assert excluded_fields.get("percentage") is not True
+    if processed.get("title") == "Inspect Processed Records":
+        assert excluded_fields.get("percentage") is True
+    else:
+        assert excluded_fields.get("percentage") is not True
 
     parameter_overrides = [
         override
