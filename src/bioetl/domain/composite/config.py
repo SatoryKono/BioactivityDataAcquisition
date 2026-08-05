@@ -1,29 +1,32 @@
-"""Canonical public entrypoint for composite configuration domain models."""
+"""Canonical public entrypoint for composite configuration domain models.
+
+The package root owns the eager domain export set. This narrower facade reuses
+those bindings so both public seams expose identical class objects without a
+second dependency on the split ``config_*`` implementation modules.
+"""
 
 from __future__ import annotations
 
-from bioetl.domain.composite.aggregation import (
+from bioetl.domain.composite import (
     AggregationConfig,
     AggregationFieldSpec,
     AggregationFunction,
-    EnricherCardinality,
-)
-from bioetl.domain.composite.config_merge import ColumnGroupConfig
-from bioetl.domain.composite.config_models import (
+    ColumnGroupConfig,
     CompositeConfig,
     CompositeDQConfig,
     CrossValidationConfig,
     DataSchemaConfig,
     DependencyConfig,
     DQOverrideConfig,
+    EnricherCardinality,
     EnricherConfig,
+    EnricherFieldPairing,
     ExecutionConfig,
     LayerColumnConfig,
     LineageConfig,
     MergeConfig,
     SeedConfig,
 )
-from bioetl.domain.composite.cross_validation import EnricherFieldPairing
 
 __all__ = [
     "AggregationConfig",
