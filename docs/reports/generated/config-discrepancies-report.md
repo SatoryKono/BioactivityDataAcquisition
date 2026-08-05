@@ -1,3 +1,16 @@
+______________________________________________________________________
+
+Status: generated
+Class: repo-only
+Owner: BioETL Team
+Last verified: '2026-08-05'
+
+______________________________________________________________________
+
+> **Generated artifact** (not human SSOT). Produced by
+> `python -m scripts.schema.generate_config_matrix` (or project wrapper).
+> Do not hand-edit; regenerate after config-surface changes.
+
 # Config Discrepancies Report
 
 Total configs: 27

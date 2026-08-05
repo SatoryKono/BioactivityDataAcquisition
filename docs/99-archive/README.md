@@ -37,6 +37,7 @@ current documentation.
   relocated from `docs/fixes/` (docs audit cycle 1 / #7420).
 - [Archived Refactoring Plans](refactoring_plans/) — completed naming/refactor
   plans relocated from `docs/refactoring_plans/` (#7420).
+- [Archived Guides](guides/) — obsolete dashboard working drafts and GitHub setup plan relocated from `docs/03-guides/` (docs audit cycles 2–3).
 - [Archived Filters Migration Prose](filters/) — historical silver→gold
   migration plan and retired draft relocated from `docs/filters/` (#7428).
 - [Archived Tools](tools/) — obsolete pygrok CLI notes (#7432).
