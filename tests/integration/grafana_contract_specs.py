@@ -35,11 +35,6 @@ CONTROL_PLANE_GLOBAL_READ_PANEL_TITLES = {
 SUMMARY_ZERO_FALLBACK_EXPECTATIONS = {
     "bioetl-runtime.json": {
         "Track Records by Stage / Interval": "or vector(0)",
-        "Monitor Pipeline Alert Conditions": "or vector(0)",
-        "Inspect DQ Alert Conditions": "or vector(0)",
-        "Inspect Control Plane Alert Conditions": "or vector(0)",
-        "Inspect Provider Alert Conditions": "or vector(0)",
-        "Inspect Global Provider Alert Conditions": "or vector(0)",
         "Track Global Shutdown Starts": "or vector(0)",
         "Track Global Shutdown Completions": "or vector(0)",
         "Track Failed Workflow Runs": "or vector(0)",
@@ -47,40 +42,47 @@ SUMMARY_ZERO_FALLBACK_EXPECTATIONS = {
     },
     "bioetl-provider-health-v2.json": {
         "Monitor Healthy Checks": "or vector(0)",
-        "Monitor Degraded Checks": "or vector(0)",
-        "Track Failure Rate": "or vector(0)",
         "Monitor Health Checks": "or vector(0)",
-        "Track Rate-Limit Errors": "or vector(0)",
-        "Track Network & Timeout Errors": "or vector(0)",
-    },
-    "bioetl-dq-v2.json": {
-        "Monitor Quarantined Records": "or vector(0)",
-        "Monitor Silver Filter Rejects": "or vector(0)",
-        "Monitor Silver Validation Failures": "or vector(0)",
-        "Monitor Gold Validation Failures": "or vector(0)",
     },
     "bioetl-control-plane-v1.json": {
-        "Track Manifest Write Failures": "or vector(0)",
-        "Track Ledger Append Failures": "or vector(0)",
-        "Track Checkpoint Incompatibilities": "or vector(0)",
-        "Track Global Read Failures": "or vector(0)",
-        "Monitor Global Read Failures (30m)": "or vector(0)",
-        "Track Checkpoint Load Failures": "or vector(0)",
-        "Track Checkpoint Save Failures": "or vector(0)",
-        "Track Global Checkpoint Admin Failures": "or vector(0)",
-        "Track Unreconstructable Replays": "or vector(0)",
-        "Track Replay Drift": "or vector(0)",
-        "Track Replay Blockers": "or vector(0)",
         "Compare Global Audit Write Outcomes": "or vector(0)",
         "Compare Global Audit Query Outcomes": "or vector(0)",
-        "Track Lineage Persistence Failures": "or vector(0)",
-        "Track Missing Lineage References": "or vector(0)",
     },
-    # retired
-    "bioetl-workflow-overview.json_RETIRED": {
-        "Failed Workflow Runs / Range": "or vector(0)",
-        "Failed Pipeline Steps / Range": "or vector(0)",
-        "Failed Transform Steps / Range": "or vector(0)",
-        "Skipped Step Events / Range": "or vector(0)",
+}
+
+DIAGNOSTIC_NO_ZERO_FALLBACK_EXPECTATIONS = {
+    "bioetl-runtime.json": {
+        "Monitor Pipeline Alert Conditions",
+        "Inspect DQ Alert Conditions",
+        "Inspect Control Plane Alert Conditions",
+        "Inspect Provider Alert Conditions",
+        "Inspect Global Provider Alert Conditions",
+    },
+    "bioetl-provider-health-v2.json": {
+        "Monitor Degraded Checks",
+        "Track Failure Rate",
+        "Track Rate-Limit Errors",
+        "Track Network & Timeout Errors",
+    },
+    "bioetl-dq-v2.json": {
+        "Monitor Quarantined Records",
+        "Monitor Silver Filter Rejects",
+        "Monitor Silver Validation Failures",
+        "Monitor Gold Validation Failures",
+    },
+    "bioetl-control-plane-v1.json": {
+        "Track Manifest Write Failures",
+        "Track Ledger Append Failures",
+        "Track Checkpoint Incompatibilities",
+        "Track Global Read Failures",
+        "Monitor Global Read Failures (30m)",
+        "Track Checkpoint Load Failures",
+        "Track Checkpoint Save Failures",
+        "Track Global Checkpoint Admin Failures",
+        "Track Unreconstructable Replays",
+        "Track Replay Drift",
+        "Track Replay Blockers",
+        "Track Lineage Persistence Failures",
+        "Track Missing Lineage References",
     },
 }
