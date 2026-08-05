@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Iterable
 from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
@@ -89,6 +89,22 @@ from tests.helpers.control_plane import (
     InMemoryWorkflowManifestStore,
 )
 from tests.helpers.clock import fixed_test_clock
+
+
+def _run_ids_by_started_at_desc(manifests: Iterable[RunManifest]) -> list[str]:
+    """Mirror the selector's deterministic manifest fallback ordering."""
+    return [
+        str(manifest.run_id)
+        for manifest in sorted(
+            manifests,
+            key=lambda manifest: (
+                manifest.created_at,
+                manifest.manifest_id,
+                str(manifest.run_id),
+            ),
+            reverse=True,
+        )
+    ]
 
 
 pytestmark = pytest.mark.unit
@@ -1031,11 +1047,11 @@ class TestHealthServerControlPlaneSelector:
         """Grafana All run_type should not collapse the selector to an empty scope."""
         server, manifest_store = running_server_with_run_catalog
         port = self._get_server_port(server)
-        expected_run_ids = [
-            str(manifest.run_id)
+        expected_run_ids = _run_ids_by_started_at_desc(
+            manifest
             for manifest in manifest_store.list_all()
             if manifest.pipeline_name == "chembl_activity"
-        ]
+        )
 
         status_code, _, body = await self._send_request(
             port,
@@ -1058,11 +1074,11 @@ class TestHealthServerControlPlaneSelector:
         """Grafana All pipeline should expose aggregate run IDs for exact-run handoff."""
         server, manifest_store = running_server_with_run_catalog
         port = self._get_server_port(server)
-        expected_incremental_ids = [
-            str(manifest.run_id)
+        expected_incremental_ids = _run_ids_by_started_at_desc(
+            manifest
             for manifest in manifest_store.list_all()
             if manifest.run_type == RunType.INCREMENTAL
-        ]
+        )
 
         status_code, _, body = await self._send_request(
             port,
@@ -1085,11 +1101,11 @@ class TestHealthServerControlPlaneSelector:
         """Variable queries may request a plain list wrapper for Infinity parsing."""
         server, manifest_store = running_server_with_run_catalog
         port = self._get_server_port(server)
-        expected_run_ids = [
-            str(manifest.run_id)
+        expected_run_ids = _run_ids_by_started_at_desc(
+            manifest
             for manifest in manifest_store.list_all()
             if manifest.pipeline_name == "chembl_activity"
-        ]
+        )
 
         status_code, _, body = await self._send_request(
             port,
@@ -1139,12 +1155,12 @@ class TestHealthServerControlPlaneSelector:
         """Grafana brace-expanded All scope should still resolve run IDs."""
         server, manifest_store = running_server_with_run_catalog
         port = self._get_server_port(server)
-        expected_run_ids = [
-            str(manifest.run_id)
+        expected_run_ids = _run_ids_by_started_at_desc(
+            manifest
             for manifest in manifest_store.list_all()
             if manifest.pipeline_name in {"chembl_activity", "pubchem_compound"}
             and manifest.run_type == RunType.INCREMENTAL
-        ]
+        )
 
         status_code, _, body = await self._send_request(
             port,
