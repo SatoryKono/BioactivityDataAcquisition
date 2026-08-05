@@ -1,287 +1,270 @@
 version: 1
 policy_scope: test_skip_inventory
-owner: '@bioetl-platform'
+owner: "@bioetl-platform"
 linked_issue: 5007
 source_of_truth:
   integration_vcr_policy_path: configs/quality/integration_vcr_policy.yaml
   contract_root: tests/contract/
   integration_root: tests/integration/
 allowed_categories:
-- conditional_environment_guard
-- git_diff_scope_guard
-- live_endpoint_unavailability
-- live_network_opt_in_guard
-- optional_local_fixture_absence
-- replay_fixture_pointer_guard
-- snapshot_refresh_write_mode
-- temporary_known_failure
+  - conditional_environment_guard
+  - git_diff_scope_guard
+  - live_endpoint_unavailability
+  - live_network_opt_in_guard
+  - optional_local_fixture_absence
+  - replay_fixture_pointer_guard
+  - snapshot_refresh_write_mode
+  - temporary_known_failure
 entries:
-- path: tests/contract/_gold_schema_snapshot_registry.py
-  suite: contract
-  category: snapshot_refresh_write_mode
-  owner: '@bioetl-contracts'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 1
-  vcr_related: false
-  review_date: '2026-06-02'
-  rationale: Gold schema snapshot refresh runs in explicit update mode and should skip after writing the reviewed artifact.
-- path: tests/contract/_provider_contract_drift.py
-  suite: contract
-  category: snapshot_refresh_write_mode
-  owner: '@bioetl-contracts'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 1
-  vcr_related: false
-  review_date: '2026-06-02'
-  rationale: Provider contract snapshot refresh runs in explicit update mode and should skip after rewriting the governed
-    snapshot.
-- path: tests/contract/_provider_contract_replay.py
-  suite: contract
-  category: replay_fixture_pointer_guard
-  owner: '@bioetl-contracts'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 1
-  vcr_related: true
-  review_date: '2026-06-02'
-  rationale: Replay contract tests must skip closed when the cassette remains a Git LFS pointer instead of hydrated replay
-    evidence.
-- path: tests/contract/conftest.py
-  suite: contract
-  category: live_network_opt_in_guard
-  owner: '@bioetl-contracts'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 2
-  vcr_related: false
-  review_date: '2026-06-02'
-  rationale: Network-marked contract tests are intentionally opt-in and must skip when outbound connectivity or explicit enablement
-    is absent.
-- path: tests/contract/silver_schemas/conftest.py
-  suite: contract
-  category: snapshot_refresh_write_mode
-  owner: '@bioetl-contracts'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 2
-  vcr_related: false
-  review_date: '2026-06-02'
-  rationale: Silver schema snapshot creation and refresh should skip after writing the reviewed fixture artifact.
-- path: tests/contract/test_chembl_contract.py
-  suite: contract
-  category: live_endpoint_unavailability
-  owner: '@bioetl-contracts'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 4
-  vcr_related: false
-  review_date: '2026-06-02'
-  rationale: ChEMBL live canary tests tolerate transient transport and server outages by skipping closed after bounded retries.
-- path: tests/contract/test_crossref_contract.py
-  suite: contract
-  category: live_endpoint_unavailability
-  owner: '@bioetl-contracts'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 2
-  vcr_related: false
-  review_date: '2026-06-02'
-  rationale: Crossref live contract tests may skip on endpoint unavailability or transient 5xx failures.
-- path: tests/contract/test_openalex_contract.py
-  suite: contract
-  category: live_endpoint_unavailability
-  owner: '@bioetl-contracts'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 2
-  vcr_related: false
-  review_date: '2026-06-02'
-  rationale: OpenAlex live contract tests may skip on endpoint unavailability or transient 5xx failures.
-- path: tests/contract/test_pubchem_contract.py
-  suite: contract
-  category: live_endpoint_unavailability
-  owner: '@bioetl-contracts'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 2
-  vcr_related: false
-  review_date: '2026-06-02'
-  rationale: PubChem live contract tests may skip on endpoint unavailability or transient 5xx failures.
-- path: tests/contract/test_pubmed_contract.py
-  suite: contract
-  category: live_endpoint_unavailability
-  owner: '@bioetl-contracts'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 2
-  vcr_related: false
-  review_date: '2026-07-22'
-  rationale: PubMed/NCBI contract tests may skip on ConnectError/timeouts or temporary provider 5xx via _request_or_skip (aligned
-    with Crossref/OpenAlex).
-- path: tests/contract/test_uniprot_contract.py
-  suite: contract
-  category: live_endpoint_unavailability
-  owner: '@bioetl-contracts'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 2
-  vcr_related: false
-  review_date: '2026-06-02'
-  rationale: UniProt live contract tests may skip on endpoint unavailability or transient 5xx failures.
-- path: tests/integration/config/test_dq_config_loading.py
-  suite: integration
-  category: optional_local_fixture_absence
-  owner: '@bioetl-config'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 2
-  vcr_related: false
-  review_date: '2026-06-02'
-  rationale: Config loading checks may skip when optional provider/entity directories are absent in a reduced local checkout.
-- path: tests/integration/test_dashboard_ux_report_freshness.py
-  suite: integration
-  category: git_diff_scope_guard
-  owner: '@bioetl-observability'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 1
-  vcr_related: false
-  review_date: '2026-06-02'
-  rationale: Dashboard UX freshness validation is only meaningful when Grafana dashboard JSON changed in the current diff
-    scope.
-- path: tests/integration/test_dashboard_variable_dependencies.py
-  suite: integration
-  category: optional_local_fixture_absence
-  owner: '@bioetl-observability'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 1
-  vcr_related: false
-  review_date: '2026-07-23'
-  rationale: Silver Reject Explorer dashboard was removed; remaining variable-dependency assertions skip the retired surface.
-- path: tests/integration/test_grafana_config.py
-  suite: integration
-  category: live_endpoint_unavailability
-  owner: '@bioetl-observability'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 1
-  vcr_related: false
-  review_date: '2026-07-27'
-  rationale: Reviewed skip/importorskip surface tracked for governance.
-- path: tests/integration/test_grafana_workflow_descriptions.py
-  suite: integration
-  category: live_endpoint_unavailability
-  owner: '@bioetl-observability'
-  linked_issue: '#6570'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 1
-  vcr_related: false
-  review_date: '2026-07-29'
-  rationale: Workflow dashboard description contracts skip when the dashboard is retired from the shipped Grafana surface.
-- path: tests/integration/test_grafana_dashboard_cta_links.py
-  suite: integration
-  category: optional_local_fixture_absence
-  owner: '@bioetl-observability'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 5
-  vcr_related: false
-  review_date: '2026-07-23'
-  rationale: CTA link assertions for Silver Reject Explorer skip because that dashboard was removed from the shipping path.
-- path: tests/integration/test_grafana_dashboard_metric_semantics.py
-  suite: integration
-  category: optional_local_fixture_absence
-  owner: '@bioetl-observability'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 2
-  vcr_related: false
-  review_date: '2026-07-23'
-  rationale: Metric semantics checks for Silver Reject Explorer skip after that dashboard was removed.
-- path: tests/integration/test_grafana_silver_reject_config.py
-  suite: integration
-  category: optional_local_fixture_absence
-  owner: '@bioetl-observability'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 11
-  vcr_related: false
-  review_date: '2026-07-23'
-  rationale: Silver Reject Explorer config integration tests skip the retired dashboard surface pending full retirement of
-    residual fixtures.
-- path: tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
-  suite: integration
-  category: conditional_environment_guard
-  owner: '@bioetl-platform'
-  linked_issue: '#7249'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 1
-  vcr_related: false
-  review_date: '2026-07-30'
-  rationale: Control-plane replay linkage is skipped on WSL where asyncio teardown on cloud-mounted storage is not reliable.
-- path: tests/integration/infrastructure/storage/test_atomic.py
-  suite: integration
-  category: conditional_environment_guard
-  owner: '@bioetl-storage'
-  linked_issue: '#7249'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 2
-  vcr_related: false
-  review_date: '2026-07-30'
-  rationale: Windows lock-stress contracts are meaningful only on Windows and remain explicitly platform-conditional.
-- path: tests/integration/test_docker_compose_smoke.py
-  suite: integration
-  category: conditional_environment_guard
-  owner: '@bioetl-platform'
-  linked_issue: '#7249'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 1
-  vcr_related: false
-  review_date: '2026-07-30'
-  rationale: Destructive Docker lifecycle smoke remains opt-in through explicit environment scheduling.
-- path: tests/integration/test_grafana_dashboard_links.py
-  suite: integration
-  category: temporary_known_failure
-  owner: '@bioetl-observability'
-  linked_issue: '#6647'
-  lifecycle: temporary_debt
-  expires_on: '2026-08-31'
-  reviewed_skip_calls: 8
-  vcr_related: false
-  review_date: '2026-07-30'
-  rationale: Residual Loki and Tempo navigation contracts remain skipped while retired-surface helpers are removed.
-- path: tests/integration/test_grafana_layout_and_metadata.py
-  suite: integration
-  category: temporary_known_failure
-  owner: '@bioetl-observability'
-  linked_issue: '#6647'
-  lifecycle: temporary_debt
-  expires_on: '2026-08-31'
-  reviewed_skip_calls: 2
-  vcr_related: false
-  review_date: '2026-07-30'
-  rationale: Residual Loki and Tempo layout contracts remain skipped while retired-surface helpers are removed.
-- path: tests/integration/test_grafana_surface_contracts.py
-  suite: integration
-  category: temporary_known_failure
-  owner: '@bioetl-observability'
-  linked_issue: '#6647'
-  lifecycle: temporary_debt
-  expires_on: '2026-08-31'
-  reviewed_skip_calls: 2
-  vcr_related: false
-  review_date: '2026-07-30'
-  rationale: Residual Loki log-hygiene contracts remain skipped while retired-surface helpers are removed.
-- path: tests/integration/test_grafana_variable_reference.py
-  suite: integration
-  category: live_endpoint_unavailability
-  owner: '@bioetl-observability'
-  linked_issue: '#5562'
-  lifecycle: permanent_policy
-  reviewed_skip_calls: 1
-  vcr_related: false
-  review_date: '2026-07-27'
-  rationale: Reviewed skip/importorskip surface tracked for governance.
+  - path: tests/contract/_gold_schema_snapshot_registry.py
+    suite: contract
+    category: snapshot_refresh_write_mode
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-06-02"
+    rationale: Gold schema snapshot refresh runs in explicit update mode and should skip after writing the reviewed artifact.
+  - path: tests/contract/_provider_contract_drift.py
+    suite: contract
+    category: snapshot_refresh_write_mode
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-06-02"
+    rationale:
+      Provider contract snapshot refresh runs in explicit update mode and should skip after rewriting the governed
+      snapshot.
+  - path: tests/contract/_provider_contract_replay.py
+    suite: contract
+    category: replay_fixture_pointer_guard
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: true
+    review_date: "2026-06-02"
+    rationale:
+      Replay contract tests must skip closed when the cassette remains a Git LFS pointer instead of hydrated replay
+      evidence.
+  - path: tests/contract/conftest.py
+    suite: contract
+    category: live_network_opt_in_guard
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-06-02"
+    rationale:
+      Network-marked contract tests are intentionally opt-in and must skip when outbound connectivity or explicit enablement
+      is absent.
+  - path: tests/contract/silver_schemas/conftest.py
+    suite: contract
+    category: snapshot_refresh_write_mode
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-06-02"
+    rationale: Silver schema snapshot creation and refresh should skip after writing the reviewed fixture artifact.
+  - path: tests/contract/test_chembl_contract.py
+    suite: contract
+    category: live_endpoint_unavailability
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 4
+    vcr_related: false
+    review_date: "2026-06-02"
+    rationale: ChEMBL live canary tests tolerate transient transport and server outages by skipping closed after bounded retries.
+  - path: tests/contract/test_crossref_contract.py
+    suite: contract
+    category: live_endpoint_unavailability
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-06-02"
+    rationale: Crossref live contract tests may skip on endpoint unavailability or transient 5xx failures.
+  - path: tests/contract/test_openalex_contract.py
+    suite: contract
+    category: live_endpoint_unavailability
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-06-02"
+    rationale: OpenAlex live contract tests may skip on endpoint unavailability or transient 5xx failures.
+  - path: tests/contract/test_pubchem_contract.py
+    suite: contract
+    category: live_endpoint_unavailability
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-06-02"
+    rationale: PubChem live contract tests may skip on endpoint unavailability or transient 5xx failures.
+  - path: tests/contract/test_pubmed_contract.py
+    suite: contract
+    category: live_endpoint_unavailability
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-07-22"
+    rationale:
+      PubMed/NCBI contract tests may skip on ConnectError/timeouts or temporary provider 5xx via _request_or_skip (aligned
+      with Crossref/OpenAlex).
+  - path: tests/contract/test_uniprot_contract.py
+    suite: contract
+    category: live_endpoint_unavailability
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-06-02"
+    rationale: UniProt live contract tests may skip on endpoint unavailability or transient 5xx failures.
+  - path: tests/integration/config/test_dq_config_loading.py
+    suite: integration
+    category: optional_local_fixture_absence
+    owner: "@bioetl-config"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-06-02"
+    rationale: Config loading checks may skip when optional provider/entity directories are absent in a reduced local checkout.
+  - path: tests/integration/test_dashboard_ux_report_freshness.py
+    suite: integration
+    category: git_diff_scope_guard
+    owner: "@bioetl-observability"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-06-02"
+    rationale:
+      Dashboard UX freshness validation is only meaningful when Grafana dashboard JSON changed in the current diff
+      scope.
+  - path: tests/integration/test_dashboard_variable_dependencies.py
+    suite: integration
+    category: optional_local_fixture_absence
+    owner: "@bioetl-observability"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-07-23"
+    rationale: Silver Reject Explorer dashboard was removed; remaining variable-dependency assertions skip the retired surface.
+  - path: tests/integration/test_grafana_config.py
+    suite: integration
+    category: live_endpoint_unavailability
+    owner: "@bioetl-observability"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-07-27"
+    rationale: Reviewed skip/importorskip surface tracked for governance.
+  - path: tests/integration/test_grafana_workflow_descriptions.py
+    suite: integration
+    category: live_endpoint_unavailability
+    owner: "@bioetl-observability"
+    linked_issue: "#6570"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-07-29"
+    rationale: Workflow dashboard description contracts skip when the dashboard is retired from the shipped Grafana surface.
+  - path: tests/integration/test_grafana_dashboard_cta_links.py
+    suite: integration
+    category: optional_local_fixture_absence
+    owner: "@bioetl-observability"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 5
+    vcr_related: false
+    review_date: "2026-07-23"
+    rationale: CTA link assertions for Silver Reject Explorer skip because that dashboard was removed from the shipping path.
+  - path: tests/integration/test_grafana_dashboard_metric_semantics.py
+    suite: integration
+    category: optional_local_fixture_absence
+    owner: "@bioetl-observability"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-07-23"
+    rationale: Metric semantics checks for Silver Reject Explorer skip after that dashboard was removed.
+  - path: tests/integration/test_grafana_silver_reject_config.py
+    suite: integration
+    category: optional_local_fixture_absence
+    owner: "@bioetl-observability"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 11
+    vcr_related: false
+    review_date: "2026-07-23"
+    rationale:
+      Silver Reject Explorer config integration tests skip the retired dashboard surface pending full retirement of
+      residual fixtures.
+  - path: tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#7249"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-07-30"
+    rationale: Control-plane replay linkage is skipped on WSL where asyncio teardown on cloud-mounted storage is not reliable.
+  - path: tests/integration/infrastructure/storage/test_atomic.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-storage"
+    linked_issue: "#7249"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-07-30"
+    rationale: Windows lock-stress contracts are meaningful only on Windows and remain explicitly platform-conditional.
+  - path: tests/integration/test_docker_compose_smoke.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#7249"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-07-30"
+    rationale: Destructive Docker lifecycle smoke remains opt-in through explicit environment scheduling.
+  - path: tests/integration/test_grafana_no_data_contract.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-observability"
+    linked_issue: "#6576"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-08-05"
+    rationale: Conditional skip when a retired dashboard JSON is absent (Phase 4 surface cleanup).
+  - path: tests/integration/test_grafana_variable_reference.py
+    suite: integration
+    category: live_endpoint_unavailability
+    owner: "@bioetl-observability"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-07-27"
+    rationale: Reviewed skip/importorskip surface tracked for governance.

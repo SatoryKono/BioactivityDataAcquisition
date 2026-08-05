@@ -594,7 +594,6 @@ class TestSchemaVersioning:
             inventory_providers = set(entry["providers"])
             assert inventory_providers == set(baseline_providers) == set(
                 self.SCHEMA_MAP
-            )
             ), (
                 f"{section_name}: inventory providers {sorted(inventory_providers)} "
                 f"must match baseline {sorted(baseline_providers)} and SCHEMA_MAP "
