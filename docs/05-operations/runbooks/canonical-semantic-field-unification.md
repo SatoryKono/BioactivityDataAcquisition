@@ -13,6 +13,30 @@ ______________________________________________________________________
 
 # Migration Runbook: Canonical Semantic Field Unification
 
+## Trigger
+
+Use this runbook when a reviewed semantic-field cluster must be migrated to
+canonical internal names, or when a drift guard detects a legacy internal
+field name in config, composite joins, DQ rules, or Gold contracts.
+
+## Impact
+
+Incorrect sequencing can break filters, composite joins, or strict Gold
+validation. The migration therefore proceeds by bounded field clusters and
+keeps provider-native names only at external ingestion boundaries.
+
+## Preconditions
+
+- Confirm the affected cluster in the canonical registry and published matrix.
+- Identify every entity config, composite config, transformer, DQ rule, and
+  Gold contract that consumes the field.
+- Prepare a work branch and rollback path before changing runtime mappings.
+
+## Procedure
+
+Follow the decision anchors and source artifacts below, then execute the
+branch, pull-request, merge, and deployment sequence for one reviewed cluster.
+
 > Relocated from root `docs/migration.md` during documentation architecture
 > audit cycle 1 (#7421). Canonical path is now under published operations
 > runbooks.
@@ -41,7 +65,7 @@ staging and prod.
 - Runtime surface changes: `feature/rename-<cluster>`
 - Composite adjustments: `feature/update-composite-joins`
 
-## CI/QA
+## Verification
 
 Run at minimum:
 
@@ -94,8 +118,18 @@ Runtime rename rollback:
 3. rerun targeted provider/composite tests
 4. deploy reverted config set through the same dev -> staging -> prod path
 
-## Notes
+## Compliance
+
+- Internal names must remain canonical under ADR-039, ADR-026, ADR-018, and
+  ADR-045.
+- Gold strict validation and DQ enforcement must not be weakened during a
+  rename.
+- Technical-debt budgets and compatibility allowlists must not increase.
+
+## Post-incident
 
 - Existing BioETL runtime already uses canonical internal fields for the
   clusters listed in the registry. This runbook therefore governs drift
   prevention and future cluster waves, not a first-time bulk rename.
+- Record the affected cluster IDs, verification results, rollback decision,
+  and any follow-up compatibility removal in the issue or PR closeout.

@@ -127,8 +127,18 @@ Rollback is manual:
 - reinstall original version to prior location if required by business continuity,
 - restore only user data from backup.
 
-## Notes
+## Compliance
+
+- Execute only explicitly approved application and data-root moves.
+- Docker, WSL, VM, Hyper-V, repository `.env` files, and unlisted system
+  resources remain out of scope.
+- Do not delete backups or legacy locations until the retention and validation
+  criteria have been met.
+
+## Post-incident
 
 - This runbook intentionally avoids destructive automation. It provides a
   guard-railed execution template and traceable command list.
 - For script source, see `scripts/ops/migrations/windows_disk_to_d_migration.ps1`.
+- Retain the migration log, validation results, rollback actions, and unresolved
+  path inventory with the workstation change record.
