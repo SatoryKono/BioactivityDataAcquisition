@@ -682,7 +682,17 @@ Variable handoff policy for dashboard links remains strict and bounded:
 ## Важные пороги (из JSON)
 
 - `overview.id=214 (Status)`: `CRIT` при runtime blocker `>0`, DQ hard fail `>0`, blocking data-validation lifecycle или control-plane blocker `>0`; `WARN` при non-fatal warning-only сигналах; `UNKNOWN` при no recent samples. Panel links route directly to Runtime / Control Plane / Data Quality / Provider Health / Workflow with the current time range.
-- `overview.id=215 (First Action)`: priority order `Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor`. If the selected scope is missing from `bioetl_overview_pipeline_run_type_universe` (aliased from the runtime pipeline/run_type universe), the panel falls back to `NO_ROUTE` instead of rendering empty. Next action: open the first non-OK surface via the matching panel link. Runtime / Control Plane / DQ / Workflow handoffs preserve `workflow/pipeline/run_type/run_id`; Provider Health fail-closes to `provider=unknown` while preserving `pipeline_context`; workflow-only state filters are not propagated.
+- `overview.id=215 (Review First Action)`: table shows up to **four** routes via
+  `topk(4, bioetl_l0_next_action_route{…} or NO_ROUTE fallback)`. Priority order
+  `Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor`.
+  Priority column uses **text color** (not fill). Primary CTA is the Action cell
+  link using `action_dashboard_uid` + row `pipeline`; secondary panel links remain
+  domain shortcuts. Missing/empty scope falls back to `NO_ROUTE` /
+  `selected_scope_not_present` instead of a blank panel. Runtime / Control Plane /
+  DQ handoffs preserve `workflow/pipeline/run_type/run_id`; Provider Health
+  fail-closes to `provider=unknown` while preserving `pipeline_context`. When
+  Priority is MONITOR and Fleet Health is OK, continue monitoring rather than
+  escalating.
 - `overview` first-screen selected-scope cards normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading `bioetl_l0_*` / `bioetl_l1_*` summary recording rules. For example, `workflow_chembl_assay` resolves to the same current-state summary rows as `chembl_assay`.
 - `dq.id=2 (DQ Score Snapshot)`: no-data остается `UNKNOWN`, не `0`; hard-fail signals блокируют promotion, warning-only означает drift. Next action: hard-fail -> reject/quarantine diagnostics; warning-only -> trend + top reasons.
 - `overview.id=9002 (Inputs)`: использует `max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"})`. Это compact projected selected-scope surface: first-screen таблица держит одну worst-status строку на operator input, чтобы не требовать scroll на default `Workflow=All/Pipeline=All/Run Type=All`.
