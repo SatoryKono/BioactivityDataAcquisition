@@ -20,18 +20,6 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
     EnricherCardinality,
 )
-from bioetl.domain.composite.config_dq import DQOverrideConfig
-from bioetl.domain.composite.config_merge import ColumnGroupConfig, MergeConfig
-from bioetl.domain.composite.config_models import (
-    CompositeConfig,
-    CompositeDQConfig,
-    CrossValidationConfig,
-    DependencyConfig,
-    EnricherConfig,
-    SeedConfig,
-)
-from bioetl.domain.composite.config_runtime import ExecutionConfig, LineageConfig
-from bioetl.domain.composite.config_schema import DataSchemaConfig, LayerColumnConfig
 from bioetl.domain.composite.cross_validation import (
     ComparisonMethod,
     CrossValidationStats,
@@ -74,6 +62,22 @@ from bioetl.domain.composite.strategy import (
     ConflictResolution,
     FallbackStrategy,
     MergeStrategy,
+)
+
+from .config import (
+    ColumnGroupConfig,
+    CompositeConfig,
+    CompositeDQConfig,
+    CrossValidationConfig,
+    DataSchemaConfig,
+    DependencyConfig,
+    DQOverrideConfig,
+    EnricherConfig,
+    ExecutionConfig,
+    LayerColumnConfig,
+    LineageConfig,
+    MergeConfig,
+    SeedConfig,
 )
 
 __all__ = [

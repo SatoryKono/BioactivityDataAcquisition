@@ -56,7 +56,7 @@ from bioetl.domain.behavior.organism_classification_service import (
     ClassificationStats,
     OrganismClassifier,
 )
-from bioetl.domain.composite.config_schema import LayerColumnConfig
+from bioetl.domain.composite import LayerColumnConfig
 from bioetl.domain.composite.result_composite import CompositeResult
 from bioetl.domain.composite.result_seed_dependency import (
     DependencyResult,

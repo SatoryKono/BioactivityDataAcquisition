@@ -7,7 +7,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from bioetl.domain.composite.config_schema import DataSchemaConfig
+from bioetl.domain.composite import DataSchemaConfig
 from bioetl.domain.constants import DEFAULT_CHECKPOINT_INTERVAL
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.composite_config import ColumnGroupSchema

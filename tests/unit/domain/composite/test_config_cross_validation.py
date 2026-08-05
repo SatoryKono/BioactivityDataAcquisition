@@ -30,7 +30,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.composite.config_cross_validation import CrossValidationConfig
+from bioetl.domain.composite import CrossValidationConfig
 from bioetl.domain.composite.cross_validation import (
     ComparisonMethod,
     EnricherFieldPairing,
