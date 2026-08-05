@@ -23,7 +23,9 @@ def walk(panels: list | None):
 
 def pquery(expr: str) -> list:
     q = urllib.parse.urlencode({"query": expr})
-    with urllib.request.urlopen(f"http://127.0.0.1:9090/api/v1/query?{q}", timeout=30) as resp:
+    with urllib.request.urlopen(
+        f"http://127.0.0.1:9090/api/v1/query?{q}", timeout=30
+    ) as resp:
         payload = json.loads(resp.read().decode())
     return payload.get("data", {}).get("result", [])
 
@@ -94,7 +96,7 @@ def main() -> None:
                     }
                 )
 
-            defaults = ((panel.get("fieldConfig") or {}).get("defaults") or {})
+            defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
             steps = (defaults.get("thresholds") or {}).get("steps") or []
             for step in steps:
                 color = str(step.get("color") or "").lower().replace(" ", "")
@@ -201,7 +203,9 @@ def main() -> None:
                 for transform in panel.get("transformations") or []:
                     if transform.get("id") != "organize":
                         continue
-                    exclude = (transform.get("options") or {}).get("excludeByName") or {}
+                    exclude = (transform.get("options") or {}).get(
+                        "excludeByName"
+                    ) or {}
                     if not exclude.get("percintage"):
                         findings.append(
                             {
@@ -359,13 +363,19 @@ def main() -> None:
         )
 
     # dashboard exclude still present
-    overview = json.loads((dash_dir / "bioetl-overview-v2.json").read_text(encoding="utf-8"))
+    overview = json.loads(
+        (dash_dir / "bioetl-overview-v2.json").read_text(encoding="utf-8")
+    )
     for panel in walk(overview.get("panels")):
         if "Processed Records" in str(panel.get("title") or ""):
             for transform in panel.get("transformations") or []:
                 if transform.get("id") == "organize":
-                    exclude = (transform.get("options") or {}).get("excludeByName") or {}
-                    live["overview_percintage_excluded"] = bool(exclude.get("percintage"))
+                    exclude = (transform.get("options") or {}).get(
+                        "excludeByName"
+                    ) or {}
+                    live["overview_percintage_excluded"] = bool(
+                        exclude.get("percintage")
+                    )
 
     registry = {
         "iteration": int(iteration),
