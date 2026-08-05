@@ -109,17 +109,20 @@ def _url_for(target: dict[str, str], *, source_uid: str) -> str:
     base = f"/d/{target['uid']}/{target['path']}"
     uid = target["uid"]
     if uid == "bioetl-runtime":
+        # Stage is multi/includeAll on Runtime + DQ; $__all preserves all-stage
+        # evidence. Literal "unknown" is not a stage label and empties panels.
         return (
             f"{base}?var-pipeline={pipe}&var-run_type={dollar}run_type"
-            f"&var-stage=unknown&{dollar}{{__url_time_range}}"
+            f"&var-stage={dollar}__all&{dollar}{{__url_time_range}}"
             f"&var-workflow={dollar}workflow&var-run_id={dollar}run_id"
         )
     if uid == "bioetl-dq-v2":
         return (
             f"{base}?var-pipeline={pipe}&var-run_type={dollar}run_type"
-            f"&var-stage=unknown&{dollar}{{__url_time_range}}"
+            f"&var-stage={dollar}__all&{dollar}{{__url_time_range}}"
             f"&var-workflow={dollar}workflow&var-run_id={dollar}run_id"
         )
+
     if uid == "bioetl-provider-health-v2":
         # Fail-closed context mapping from non-provider sources.
         return (
