@@ -2,13 +2,13 @@
 
 Lifecycle status: current
 
-Audit date: 2026-08-03
+Audit date: 2026-08-05
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `14bcbfbd8054292fff9f55837da508a80ceaaeea`
+Audited commit SHA: `26ad7ad98e14f1435ffec01c4d41ee6c6664cd8d`
 
 Evidence surface SHA-256: `c3d3a78546f1b36133c961ed370e34912b99a3db3b1eddb2922fc5a1726acad6`
 
@@ -17,7 +17,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
-  "audited_commit_sha": "14bcbfbd8054292fff9f55837da508a80ceaaeea",
+  "audited_commit_sha": "26ad7ad98e14f1435ffec01c4d41ee6c6664cd8d",
   "evidence_surface_sha256": "c3d3a78546f1b36133c961ed370e34912b99a3db3b1eddb2922fc5a1726acad6",
   "metrics": {
     "architecture_integral_score": 9.41,
@@ -44,9 +44,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: #7038 refresh the debt audit, compatibility census, dead-code
-inventory, and registry pin from one consistent evidence snapshot. No debt
-budget growth.
+Refresh reason: #7715 re-pin audited_commit_sha to current main HEAD `26ad7ad98e14f1435ffec01c4d41ee6c6664cd8d` without budget growth. Evidence surface hash revalidated.
 
 ## Executive summary
 
