@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-05T06:29:32.504574+00:00",
+  "generated_at": "2026-08-05T06:46:22.504309+00:00",
   "summary": {
-    "total_scripts": 578,
+    "total_scripts": 580,
     "status_counts": {
       "active": 341,
-      "supporting": 232,
+      "supporting": 234,
       "temporary_diagnostic": 5
     },
     "reference_group_coverage": {
@@ -18454,6 +18454,30 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as the matrix orchestration backend invoked through the canonical scripts.ops command surface; keep the implementation module supporting so the active script inventory does not duplicate the dispatcher entrypoint."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/scan_gra_3cycle_r2.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded GRA 3-cycle scanner for auditability; retire after the campaign is verified (scripts/ops/observability/grafana/scan_gra_3cycle_r2.py)."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/scan_gra_3cycle_r2_deep.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded GRA 3-cycle scanner for auditability; retire after the campaign is verified (scripts/ops/observability/grafana/scan_gra_3cycle_r2_deep.py)."
     },
     {
       "path": "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1",
