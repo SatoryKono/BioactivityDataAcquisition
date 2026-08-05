@@ -21,8 +21,6 @@ import pytest
 import yaml
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
-    _iter_source_modules,
-    compute_source_tree_sha256,
     main as module_coverage_inventory_main,
 )
 from tests.architecture import _module_coverage_inventory_support as inventory_support
@@ -127,32 +125,6 @@ def _expected_hotspot_threshold_status(family_row: dict[str, object]) -> str:
     ):
         threshold_status = "fail"
     return threshold_status
-
-
-def _skip_if_source_tree_is_dirty() -> None:
-    """Committed inventory assertions require a clean source tree."""
-    try:
-        result = subprocess.run(
-            ["git", "status", "--short", "--", "src/bioetl"],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=15,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        pytest.skip(
-            "Committed module-coverage inventory dirty-tree guard is not "
-            "authoritative on this checkout."
-        )
-    dirty_entries = [
-        line.strip() for line in result.stdout.splitlines() if line.strip()
-    ]
-    if dirty_entries:
-        pytest.skip(
-            "Committed module-coverage inventory is only authoritative for a clean "
-            "src/bioetl tree. Dirty entries: " + ", ".join(dirty_entries[:20])
-        )
 
 
 def _write_minimal_coverage_xml(
@@ -261,37 +233,6 @@ def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
             family_row["allowlisted_unmeasured_module_count"]
             + family_row["unexpected_unmeasured_module_count"]
         )
-
-
-@pytest.mark.architecture
-def test_module_coverage_inventory_covers_every_source_module() -> None:
-    _skip_if_source_tree_is_dirty()
-    committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
-    inventory_paths = {str(row["path"]) for row in committed["modules"]}
-    expected_paths = {
-        path.relative_to(ROOT).as_posix() for path in _iter_source_modules(ROOT)
-    }
-
-    assert inventory_paths == expected_paths
-
-
-@pytest.mark.architecture
-def test_module_coverage_inventory_source_tree_hash_is_current() -> None:
-    # Skip on WSL and Windows due to filesystem performance causing hash computation timeout
-    import sys
-
-    if sys.platform.startswith("win"):
-        pytest.skip("Skipped on Windows due to filesystem performance")
-    try:
-        with open("/proc/version") as f:
-            if "microsoft" in f.read().lower():
-                pytest.skip("Skipped on WSL due to filesystem performance")
-    except OSError:
-        pass
-
-    committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
-    assert committed["source_tree_sha256"] == compute_source_tree_sha256(repo_root=ROOT)
-    assert "source_tree_sha256" not in committed["summary"]
 
 
 @pytest.mark.architecture
@@ -548,7 +489,7 @@ def test_existing_inventory_refresh_preserves_rows_unless_xml_refresh_is_explici
 
 
 @pytest.mark.architecture
-def test_existing_inventory_refresh_reconciles_source_module_paths(
+def test_existing_inventory_refresh_does_not_fabricate_source_module_evidence(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -588,6 +529,7 @@ def test_existing_inventory_refresh_reconciles_source_module_paths(
         ]
     )
     assert create_exit == 0
+    committed = json.loads(json_out.read_text(encoding="utf-8"))
 
     (source_root / "added.py").write_text(
         "def added() -> int:\n    return 2\n",
@@ -611,12 +553,13 @@ def test_existing_inventory_refresh_reconciles_source_module_paths(
     assert refresh_exit == 0
 
     refreshed = json.loads(json_out.read_text(encoding="utf-8"))
-    paths = {str(row["path"]) for row in refreshed["modules"]}
-    assert paths == {"src/bioetl/added.py", "src/bioetl/example.py"}
-    added_row = next(
-        row for row in refreshed["modules"] if row["path"] == "src/bioetl/added.py"
-    )
-    assert added_row["coverage_status"] == "no_executable_lines"
+    assert refreshed["source_tree_sha256"] != committed["source_tree_sha256"]
+    assert refreshed["modules"] == committed["modules"]
+    assert refreshed["rows"] == committed["rows"]
+    assert refreshed["summary"] == committed["summary"]
+    assert {str(row["path"]) for row in refreshed["modules"]} == {
+        "src/bioetl/example.py"
+    }
 
 
 @pytest.mark.architecture
@@ -800,6 +743,9 @@ def test_coverage_verify_workflow_generates_module_coverage_inventory() -> None:
     assert "check-branch-coverage" in workflow
     assert "report-module-coverage" in workflow
     assert "reports/quality/module-coverage-inventory.json" in workflow
+    assert "reports/quality/module-coverage-inventory.candidate.json" in workflow
+    assert "--baseline-json reports/quality/module-coverage-inventory.json" in workflow
+    assert "cmp --silent" in workflow
     assert "--refresh-from-coverage-xml" in workflow
 
 
@@ -856,6 +802,17 @@ def test_test_matrix_declares_module_coverage_inventory_contract() -> None:
     assert (
         inventory["committed_artifact_refresh_policy"]
         == "green_coverage_verify_run_only"
+    )
+    assert inventory["local_semantic_check"] == (
+        "pytest tests/architecture/test_module_coverage_inventory.py -q --tb=short"
+    )
+    assert inventory["source_tree_freshness_check"] == (
+        "pytest tests/architecture/test_module_coverage_inventory_freshness.py "
+        "-q --tb=short"
+    )
+    assert inventory["local_source_tree_refresh"] == (
+        "python -m scripts.engineering.qa report-module-coverage "
+        "--allow-missing-coverage-xml"
     )
     assert inventory["artifact"] == "reports/quality/module-coverage-inventory.json"
     assert inventory["coverage_xml"] == "reports/coverage/coverage.xml"

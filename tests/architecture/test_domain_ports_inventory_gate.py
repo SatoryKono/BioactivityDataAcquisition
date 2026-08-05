@@ -18,6 +18,8 @@ from scripts.engineering.qa.report_domain_ports_inventory import (
     render_markdown,
 )
 
+pytestmark = pytest.mark.architecture
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 RULES_PATH = PROJECT_ROOT / "docs" / "00-project" / "RULES.md"
 JSON_PATH = PROJECT_ROOT / "reports" / "quality" / "domain-ports-inventory.json"

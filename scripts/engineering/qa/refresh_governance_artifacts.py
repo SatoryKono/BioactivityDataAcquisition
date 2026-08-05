@@ -165,7 +165,7 @@ def _run_check_only() -> None:
             sys.executable,
             "-m",
             "pytest",
-            "tests/architecture/test_module_coverage_inventory.py::"
+            "tests/architecture/test_module_coverage_inventory_freshness.py::"
             "test_module_coverage_inventory_source_tree_hash_is_current",
             "tests/architecture/test_quality_debt_scorecard.py::"
             "test_debt_scorecard_hotspot_family_metrics_match_committed_baseline",

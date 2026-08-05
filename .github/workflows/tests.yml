@@ -1054,20 +1054,21 @@ jobs:
             --min-percent 85
           uv run --frozen --no-build python -m scripts.engineering.qa report-module-coverage \
             --coverage-xml reports/coverage/coverage.xml \
-            --json-out reports/quality/module-coverage-inventory.json \
+            --json-out reports/quality/module-coverage-inventory.candidate.json \
+            --baseline-json reports/quality/module-coverage-inventory.json \
             --refresh-from-coverage-xml \
             --enforce-module-thresholds block-regression \
             --fail-on-regression
 
       - name: Verify committed module coverage inventory is current
         run: |
-          uv run --frozen --no-build python -m scripts.engineering.qa report-module-coverage \
-            --coverage-xml reports/coverage/coverage.xml \
-            --json-out reports/quality/module-coverage-inventory.json \
-            --refresh-from-coverage-xml \
-            --check \
-            --enforce-module-thresholds block-regression \
-            --fail-on-regression
+          if ! cmp --silent \
+            reports/quality/module-coverage-inventory.json \
+            reports/quality/module-coverage-inventory.candidate.json; then
+            echo "Committed module coverage inventory is stale."
+            echo "Download module-coverage-inventory.candidate.json from this trusted green coverage run."
+            exit 1
+          fi
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
@@ -1077,6 +1078,7 @@ jobs:
           path: |
             reports/coverage/coverage.xml
             reports/quality/module-coverage-inventory.json
+            reports/quality/module-coverage-inventory.candidate.json
           retention-days: 30
 
   duration-telemetry:

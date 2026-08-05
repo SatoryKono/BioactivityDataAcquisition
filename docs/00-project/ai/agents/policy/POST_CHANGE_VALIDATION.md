@@ -81,7 +81,7 @@ Verify changes against the current normative stack:
     generator from `scripts/engineering/qa/report_module_coverage_inventory.py`
     against `reports/coverage/coverage.xml`
   - verify:
-    `pytest tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current`
+    `pytest tests/architecture/test_module_coverage_inventory_freshness.py`
   - on cloud-synced checkouts (for example Google Drive), wait for sync to finish
     before computing or verifying the hash to avoid transient drift
 

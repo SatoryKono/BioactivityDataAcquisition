@@ -1189,140 +1189,16 @@ def _report_gate_violations(
     return 0
 
 
-def _source_tree_only_row(
-    source_snapshot: _SourceModuleSnapshot, repo_root: Path
-) -> dict[str, Any]:
-    return {
-        "module": _module_name(source_snapshot.path, repo_root),
-        "path": source_snapshot.repo_path,
-        "source_lines": source_snapshot.source_lines,
-        "coverage_status": "no_executable_lines",
-        "coverage_percent": None,
-        "executable_lines": 0,
-        "covered_lines": 0,
-        "missing_lines": 0,
-    }
-
-
-def _coverage_entry_from_existing_row(
-    row: dict[str, Any],
-) -> dict[str, int] | None:
-    """Rebuild a coverage entry dict from persisted inventory row fields."""
-    if not isinstance(row.get("executable_lines"), int) or not isinstance(
-        row.get("covered_lines"), int
-    ):
-        return None
-    return {
-        "executable_lines": int(row["executable_lines"]),
-        "covered_lines": int(row["covered_lines"]),
-        "missing_lines": int(row.get("missing_lines") or 0),
-    }
-
-
-def _apply_coverage_entry_to_row(
-    row: dict[str, Any],
-    *,
-    coverage_entry: dict[str, int],
-    coverage_xml_present: bool,
-) -> None:
-    """Mutate a refreshed row with status/percent/line counts from coverage_entry."""
-    row["coverage_status"] = _coverage_status(
-        coverage_xml_exists=coverage_xml_present,
-        coverage_entry=coverage_entry,
-    )
-    row["coverage_percent"] = _coverage_percent(coverage_entry)
-    row["executable_lines"] = coverage_entry["executable_lines"]
-    row["covered_lines"] = coverage_entry["covered_lines"]
-    row["missing_lines"] = coverage_entry["missing_lines"]
-
-
-def _refresh_one_inventory_row(
-    source_snapshot: _SourceModuleSnapshot,
-    *,
-    existing: dict[str, Any] | None,
-    repo_root: Path,
-    coverage_xml_present: bool,
-) -> dict[str, Any]:
-    """Refresh one inventory row from a live source-tree snapshot."""
-    if existing is None:
-        row = _source_tree_only_row(source_snapshot, repo_root)
-    else:
-        row = dict(existing)
-        coverage_entry = _declaration_only_coverage_entry(
-            source_snapshot,
-            _coverage_entry_from_existing_row(row),
-        )
-        if coverage_entry is not None:
-            _apply_coverage_entry_to_row(
-                row,
-                coverage_entry=coverage_entry,
-                coverage_xml_present=coverage_xml_present,
-            )
-    row["module"] = _module_name(source_snapshot.path, repo_root)
-    row["path"] = source_snapshot.repo_path
-    row["source_lines"] = source_snapshot.source_lines
-    return row
-
-
 def _refresh_existing_inventory_source_tree(
     payload: dict[str, Any],
     *,
     repo_root: Path,
 ) -> dict[str, Any]:
-    source_snapshots, source_tree_sha256 = _read_stable_source_module_snapshots(
-        repo_root
-    )
-    rows = payload.get("modules", [])
-    rows_by_path = {
-        str(row.get("path")): row
-        for row in rows
-        if isinstance(row, dict) and isinstance(row.get("path"), str)
-    }
-    coverage_xml_present = bool(
-        payload.get("summary", {}).get("coverage_xml_present", True)
-    )
-
-    refreshed_rows = [
-        _refresh_one_inventory_row(
-            source_snapshot,
-            existing=rows_by_path.get(source_snapshot.repo_path),
-            repo_root=repo_root,
-            coverage_xml_present=coverage_xml_present,
-        )
-        for source_snapshot in source_snapshots
-    ]
-
-    unmeasured_modules = _modules_with_status(
-        refreshed_rows,
-        status="unmeasured",
-        reason="coverage_xml_has_no_class_entry",
-    )
-    uncovered_modules = _modules_with_status(
-        refreshed_rows,
-        status="uncovered",
-        reason="coverage_xml_reports_zero_executed_lines",
-    )
-
+    _, source_tree_sha256 = _read_stable_source_module_snapshots(repo_root)
     refreshed = dict(payload)
-    summary = dict(refreshed.get("summary", {}))
-    summary.pop("source_tree_sha256", None)
-    summary.update(
-        {
-            "source_module_count": len(refreshed_rows),
-            "status_counts": _coverage_status_counts(refreshed_rows),
-            "unmeasured_module_count": len(unmeasured_modules),
-            "unmeasured_modules": unmeasured_modules,
-            "uncovered_module_count": len(uncovered_modules),
-            "uncovered_modules": uncovered_modules,
-            "hotspot_family_coverage": _build_hotspot_family_coverage(
-                refreshed_rows,
-                repo_root=repo_root,
-            ),
-        }
-    )
-    refreshed["modules"] = refreshed_rows
-    refreshed["rows"] = refreshed_rows
-    refreshed["summary"] = summary
+    # Without an explicit trusted coverage-verify refresh, every coverage-derived
+    # field is immutable. In particular, do not invent rows or statuses for paths
+    # that are absent from the last authoritative coverage XML.
     refreshed["source_tree_sha256"] = source_tree_sha256
     return refreshed
 
