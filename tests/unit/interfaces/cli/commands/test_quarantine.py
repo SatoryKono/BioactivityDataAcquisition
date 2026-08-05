@@ -101,7 +101,7 @@ class TestQuarantineGroup:
         assert "--port" in result.output
         assert "--data-root" in result.output
         assert "0.0.0.0" in result.output
-        assert "8081" in result.output
+        assert "8000" in result.output
 
     @patch(
         "bioetl.interfaces.cli.commands.quarantine.run_long_lived_quarantine_backend_command"
@@ -140,7 +140,7 @@ class TestQuarantineGroup:
         assert result.exit_code == ExitCode.OK.value
         mock_run_quarantine_backend_command.assert_called_once_with(
             host="0.0.0.0",
-            port=8081,
+            port=8000,
             data_root=tmp_path.resolve(),
         )
 
