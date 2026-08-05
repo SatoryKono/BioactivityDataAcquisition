@@ -19,61 +19,70 @@ from tests.integration._grafana_test_support import load_dashboard
 pytestmark = pytest.mark.integration
 
 
-def test_runtime_variable_dependencies():
-    """bioetl-runtime: $run_type depends on $pipeline, $stage depends on runtime-selected scope."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    variables = {
+def _templating_map(path: str) -> dict[str, dict]:
+    dashboard = load_dashboard(Path(path))
+    return {
         v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])
     }
 
-    # Check that pipeline and run_type exist
+
+def test_runtime_variable_dependencies():
+    """bioetl-runtime: $run_type depends on $pipeline, $stage defaults to All."""
+    variables = _templating_map("grafana/dashboards/bioetl-runtime.json")
+
     assert "pipeline" in variables, "bioetl-runtime must have $pipeline variable"
     assert "run_type" in variables, "bioetl-runtime must have $run_type variable"
-
-    # Check that stage exists (optional for runtime)
-    if "stage" in variables:
-        stage_var = variables["stage"]
-        # Stage should depend on pipeline context
-        # This is a basic check - actual dependency chain is complex
-        assert stage_var, "stage variable must be defined"
+    assert "stage" in variables, "bioetl-runtime must have $stage variable"
+    stage_var = variables["stage"]
+    assert stage_var.get("includeAll") is True
+    assert stage_var.get("current", {}).get("value") == "$__all"
+    assert stage_var.get("current", {}).get("text") == "All"
 
 
 def test_dq_variable_dependencies():
-    """bioetl-dq-v2: $run_type depends on $pipeline, $stage depends on $pipeline and $run_type."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    variables = {
-        v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])
-    }
+    """bioetl-dq-v2: $stage depends on pipeline/run_type and defaults to All."""
+    variables = _templating_map("grafana/dashboards/bioetl-dq-v2.json")
 
-    # Check that pipeline and run_type exist
     assert "pipeline" in variables, "bioetl-dq-v2 must have $pipeline variable"
     assert "run_type" in variables, "bioetl-dq-v2 must have $run_type variable"
     assert "stage" in variables, "bioetl-dq-v2 must have $stage variable"
+    stage_var = variables["stage"]
+    assert stage_var.get("includeAll") is True
+    assert stage_var.get("current", {}).get("value") == "$__all"
+    assert stage_var.get("current", {}).get("text") == "All"
 
 
 def test_provider_health_variable_dependencies():
-    """bioetl-provider-health-v2: has provider selector and hidden pipeline_context."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    variables = {
-        v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])
-    }
+    """bioetl-provider-health-v2: provider derives from pipeline/workflow."""
+    variables = _templating_map("grafana/dashboards/bioetl-provider-health-v2.json")
 
-    # Check that provider exists (visible selector)
     assert "provider" in variables, (
         "bioetl-provider-health-v2 must have $provider variable"
     )
+    provider = variables["provider"]
+    query = str(provider.get("definition") or "")
+    assert "query_result(" in query
+    assert "${pipeline}" in query and "${workflow}" in query
+    assert provider.get("current", {}).get("value") == "unknown"
 
-    # Check that pipeline_context exists (hidden context selector)
     assert "pipeline_context" in variables, (
         "bioetl-provider-health-v2 must have $pipeline_context variable"
     )
-
-    # pipeline_context should be hidden (hide can be True or 2 in Grafana)
     pipeline_context = variables["pipeline_context"]
     hide_value = pipeline_context.get("hide")
     assert hide_value is True or hide_value == 2, "$pipeline_context should be hidden"
+
+
+def test_incident_provider_derives_from_pipeline_or_workflow():
+    """bioetl-incident-v1: provider derives from pipeline/workflow, else unknown."""
+    variables = _templating_map("grafana/dashboards/bioetl-incident-v1.json")
+    provider = variables["provider"]
+    query = str(provider.get("definition") or "")
+    assert "query_result(" in query
+    assert "${pipeline}" in query and "${workflow}" in query
+    assert provider.get("current", {}).get("value") == "unknown"
+    assert provider.get("includeAll") is False
+    assert provider.get("multi") is False
 
 
 def test_silver_reject_explorer_variable_dependencies():

@@ -131,8 +131,17 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert provider["provider"].get("multi") is False
     assert provider["provider"].get("includeAll") is False
     assert provider["provider"].get("current", {}).get("value") == "unknown"
+    provider_query = str(provider["provider"].get("definition") or "")
+    assert "query_result(" in provider_query
+    assert "${pipeline}" in provider_query and "${workflow}" in provider_query
     assert provider["pipeline_context"].get("hide") == 2
     assert provider["pipeline_context"].get("current", {}).get("value") == "unknown"
+
+    for stage_dashboard in ("bioetl-runtime.json", "bioetl-dq-v2.json"):
+        stage = _variables(stage_dashboard)["stage"]
+        assert stage.get("includeAll") is True
+        assert stage.get("current", {}).get("value") == "$__all"
+        assert stage.get("current", {}).get("text") == "All"
 
     workflow_path = Path("grafana/dashboards/bioetl-workflow-overview.json")
     if not workflow_path.exists():
