@@ -443,7 +443,15 @@ def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:
     exclude = organize.get("options", {}).get("excludeByName", {})
 
     assert len(suspects.get("targets", [])) == 3
-    for field in ("Time", "Time 1", "Time 2", "Value", "Value #A", "Value #B", "Value #C"):
+    for field in (
+        "Time",
+        "Time 1",
+        "Time 2",
+        "Value",
+        "Value #A",
+        "Value #B",
+        "Value #C",
+    ):
         assert exclude.get(field) is True
     assert not {
         value
@@ -470,8 +478,7 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert "ALERTS" in str(history.get("targets", [{}])[0].get("expr", ""))
     color_overrides = {
         override.get("matcher", {}).get("options"): {
-            prop.get("id"): prop.get("value")
-            for prop in override.get("properties", [])
+            prop.get("id"): prop.get("value") for prop in override.get("properties", [])
         }
         for override in history.get("fieldConfig", {}).get("overrides", [])
     }
@@ -495,9 +502,7 @@ def test_runtime_multi_query_tables_expose_semantic_fields_only() -> None:
         for transform in blocker_detail.get("transformations", [])
         if transform.get("id") == "organize"
     )
-    blocker_exclude = blocker_organize.get("options", {}).get(
-        "excludeByName", {}
-    )
+    blocker_exclude = blocker_organize.get("options", {}).get("excludeByName", {})
     for ref_id in {target.get("refId") for target in blocker_detail.get("targets", [])}:
         assert blocker_exclude.get(f"Value #{ref_id}") is True
     assert blocker_exclude.get("Value") is True
