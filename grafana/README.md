@@ -254,7 +254,7 @@ ______________________________________________________________________
 > readiness now waits for both `/health` and required audit capability routes,
 > with a longer startup budget for slower Windows hosts. By default it also
 > reuses or auto-starts the detached
-> `bioetl quarantine serve` backend on port `8000` before the first preflight,
+> `bioetl health server` backend on port `8000` before the first preflight,
 > so `BioETL Ops HTTP`-backed panels can be validated without a separate
 > manual backend bootstrap step.
 > The detached backend reads Prometheus through `BIOETL_PROMETHEUS_URL` when
@@ -262,7 +262,7 @@ ______________________________________________________________________
 > Grafana container: host/WSL backends usually use `http://127.0.0.1:9090`,
 > while Docker-adjacent backends may need `http://host.docker.internal:9090`.
 > `localhost:9090` is therefore only correct for topologies where Prometheus is
-> actually bound on the same network namespace as `bioetl quarantine serve`.
+> actually bound on the same network namespace as `bioetl health server`.
 >
 > Operator state vocabulary is explicit: `OK/WARN/CRIT`, trust-gate
 > `INCOMPLETE`, no-verdict `UNKNOWN`, explicit `ERROR`, and neutral terminal
@@ -1008,13 +1008,14 @@ setting it tries `http://localhost:9090`, then the Docker-local fallbacks
 `http://prometheus:9090` and `http://host.docker.internal:9090`.
 For detached dashboard audits this is a backend reachability contract, not a
 Grafana datasource contract: set `BIOETL_PROMETHEUS_URL` to the Prometheus URL
-reachable by the `bioetl quarantine serve` process that owns HTTP panels such
-as `ID`, `Processed Records`, and checkpoint freshness. In mixed Docker plus
-host/WSL setups, prefer an explicit value over assuming `localhost:9090`.
+reachable by the `bioetl health server` (BioETL Ops HTTP) process that owns
+HTTP panels such as `ID`, `Processed Records`, and checkpoint freshness. In
+mixed Docker plus host/WSL setups, prefer an explicit value over assuming
+`localhost:9090`. Do **not** use retired `bioetl quarantine serve` / Explorer.
 
 ### 6.1 `$pipeline`
 
-- **Определение:** dashboard-bounded query family. Overview/DQ/Provider/Workflow/Alerts
+- **Определение:** dashboard-bounded query family. Overview/DQ/Provider/Incident
   use `bioetl_overview_pipeline_run_type_universe`; Runtime uses
   `bioetl_runtime_pipeline_run_type_universe`; Control Plane uses
   `bioetl_control_plane_run_type_universe`.
