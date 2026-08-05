@@ -417,9 +417,10 @@ class TestRunCompositeCommand:
     def test_run_composite_ensures_observability_backend_with_catalog_probe(
         self, cli_runner: CliRunner
     ) -> None:
+        """#7564: ensure backend defaults off; default Ops HTTP port 8000."""
         backend_result = ObservabilityBackendEnsureResult(
             status="reused",
-            health_url="http://127.0.0.1:8081/health",
+            health_url="http://127.0.0.1:8000/health",
         )
         with (
             patch(
@@ -438,8 +439,8 @@ class TestRunCompositeCommand:
 
         assert result.exit_code == ExitCode.OK.value
         mock_ensure_backend.assert_called_once_with(
-            enabled=True,
-            port=8081,
+            enabled=False,
+            port=8000,
             required_probe_paths=("/ops/control-plane/ready",),
         )
 

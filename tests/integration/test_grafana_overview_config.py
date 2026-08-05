@@ -191,9 +191,12 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     assert 'run_type=~"$run_type"' in next_action_expr
     assert "$__range" not in next_action_expr
     assert "NO_ROUTE" in description or "no_route" in next_action_expr
-    assert "selected_scope_not_present" in next_action_expr
-    # Allow NO_ROUTE label_replace fallback in expr (RFA-P0).
-    assert len(next_action_expr) <= 320
+    # #6574: compact recording-rule fallback (preferred) or legacy label_replace.
+    assert (
+        "bioetl_l0_next_action_no_route" in next_action_expr
+        or "selected_scope_not_present" in next_action_expr
+    )
+    assert len(next_action_expr) <= 200
 
     # Priority column uses text color; Action carries row-aware board link.
     overrides = next_action.get("fieldConfig", {}).get("overrides", [])
@@ -297,8 +300,8 @@ def test_selected_scope_cards_normalize_workflow_pipeline_aliases() -> None:
     ):
         expr = _panel_expr(_panels_by_title()[title])
         assert 'pipeline=~"$pipeline"' in expr
-        # Review First Action may include compact NO_ROUTE label_replace fallback (RFA-P0).
-        max_len = 320 if title == "Review First Action" else 200
+        # Review First Action uses recording-rule NO_ROUTE fallback (#6574 diet).
+        max_len = 200
         assert len(expr) <= max_len, f"{title} expr length {len(expr)} > {max_len}"
         assert "$__range" not in expr
 
