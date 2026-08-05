@@ -541,7 +541,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
+              "expr": "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
               "refId": "A"
             }
           ],
@@ -1786,7 +1786,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval])) or vector(0)))",
+              "expr": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__interval]))) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval]))))",
               "legendFormat": "threshold events",
               "range": true,
               "refId": "A"
@@ -2287,7 +2287,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "round((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0)) + (sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)))",
+              "expr": "round((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))) + (sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))))",
               "legendFormat": "blocked records",
               "range": true,
               "refId": "A"
@@ -2373,7 +2373,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
+              "expr": "round(sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
               "legendFormat": "Quarantined",
               "refId": "A"
             }
@@ -2451,7 +2451,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
+              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])))",
               "instant": true,
               "legendFormat": "Filtered Out",
               "refId": "A"

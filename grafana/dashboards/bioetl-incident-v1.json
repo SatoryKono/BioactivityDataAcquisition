@@ -306,7 +306,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "transparent",
+                "color": "gray",
                 "value": null
               },
               {
@@ -389,7 +389,7 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "transparent",
+                      "color": "gray",
                       "value": null
                     },
                     {
@@ -726,7 +726,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "transparent",
+                    "color": "gray",
                     "value": null
                   },
                   {
@@ -791,7 +791,7 @@
                       "mode": "absolute",
                       "steps": [
                         {
-                          "color": "transparent",
+                          "color": "gray",
                           "value": null
                         },
                         {
@@ -865,7 +865,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "transparent",
+                    "color": "gray",
                     "value": null
                   },
                   {
@@ -930,7 +930,7 @@
                       "mode": "absolute",
                       "steps": [
                         {
-                          "color": "transparent",
+                          "color": "gray",
                           "value": null
                         },
                         {
@@ -1004,7 +1004,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "transparent",
+                    "color": "gray",
                     "value": null
                   },
                   {
@@ -1069,7 +1069,7 @@
                       "mode": "absolute",
                       "steps": [
                         {
-                          "color": "transparent",
+                          "color": "gray",
                           "value": null
                         },
                         {

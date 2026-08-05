@@ -1060,7 +1060,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+              "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])))",
               "format": "table",
               "instant": true,
               "legendFormat": "{{ provider }} {{ operation }}",
@@ -1144,7 +1144,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__interval])) or vector(0))",
+              "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__interval])))",
               "legendFormat": "{{ provider }} {{ operation }}",
               "refId": "A"
             }
