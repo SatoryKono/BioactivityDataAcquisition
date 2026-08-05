@@ -654,322 +654,389 @@
       "id": 3099,
       "type": "row",
       "title": "Selected Run Details",
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 20
       },
-      "panels": [],
-      "description": ""
-    },
-    {
-      "id": 3011,
-      "type": "table",
-      "title": "Inspect Stage Funnel",
-      "description": "Stage funnel from pipeline_run_report_v1. Exact run_id required. An empty funnel is VALID EMPTY when no stage rows exist; an unexpected empty may mean backend unavailable, so verify /health/live. Not a waterfall (no start/end chronology)",
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 21
-      },
-      "datasource": "BioETL Ops HTTP",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "left",
-            "inspect": false
+      "panels": [
+        {
+          "id": 3011,
+          "type": "table",
+          "title": "Inspect Stage Funnel",
+          "description": "Stage funnel from pipeline_run_report_v1. Exact run_id required. An empty funnel is VALID EMPTY when no stage rows exist; an unexpected empty may mean backend unavailable, so verify /health/live. Not a waterfall (no start/end chronology)",
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 21
           },
-          "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+          "datasource": "BioETL Ops HTTP",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "inspect": false
+              },
+              "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
             },
-            "properties": [
+            "overrides": [
               {
-                "id": "displayName",
-                "value": "Count"
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
-          }
-        ]
-      },
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "cellHeight": "sm"
-      },
-      "targets": [
-        {
-          "format": "table",
-          "parser": "backend",
-          "refId": "A",
-          "root_selector": "funnel",
-          "source": "url",
-          "type": "json",
-          "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
-          "url_options": {
-            "data": "",
-            "method": "GET"
           },
-          "expr": ""
-        }
-      ]
-    },
-    {
-      "id": 3012,
-      "type": "table",
-      "title": "Inspect Top Run Reasons",
-      "description": "Top removal/reason codes from pipeline_run_report_v1. An empty result is VALID EMPTY when no reasons exist; an unexpected empty may mean backend unavailable, so verify /health/live",
-      "gridPos": {
-        "h": 5,
-        "w": 24,
-        "x": 0,
-        "y": 27
-      },
-      "datasource": "BioETL Ops HTTP",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "left",
-            "inspect": false
-          },
-          "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
             },
-            "properties": [
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "funnel",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "expr": ""
+            }
+          ]
+        },
+        {
+          "id": 3012,
+          "type": "table",
+          "title": "Inspect Top Run Reasons",
+          "description": "Top removal/reason codes from pipeline_run_report_v1. An empty result is VALID EMPTY when no reasons exist; an unexpected empty may mean backend unavailable, so verify /health/live",
+          "gridPos": {
+            "h": 5,
+            "w": 24,
+            "x": 0,
+            "y": 27
+          },
+          "datasource": "BioETL Ops HTTP",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "inspect": false
+              },
+              "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
+            },
+            "overrides": [
               {
-                "id": "displayName",
-                "value": "Count"
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
-          }
-        ]
-      },
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "cellHeight": "sm"
-      },
-      "targets": [
-        {
-          "format": "table",
-          "parser": "backend",
-          "refId": "A",
-          "root_selector": "reasons_top_n",
-          "source": "url",
-          "type": "json",
-          "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
-          "url_options": {
-            "data": "",
-            "method": "GET"
           },
-          "expr": ""
-        }
-      ]
-    },
-    {
-      "id": 3015,
-      "type": "table",
-      "title": "Inspect Reconciliation",
-      "description": "Reconciliation metrics from pipeline_run_report_v1 as parameter/value rows. An empty result is VALID EMPTY when reconciliation evidence is absent or run_id is unresolved. An unexpected empty may mean backend unavailable — verify /health/live.",
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 32
-      },
-      "datasource": "BioETL Ops HTTP",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "left",
-            "inspect": false
-          },
-          "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
             },
-            "properties": [
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "reasons_top_n",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "expr": ""
+            }
+          ]
+        },
+        {
+          "id": 3015,
+          "type": "table",
+          "title": "Inspect Reconciliation",
+          "description": "Reconciliation metrics from pipeline_run_report_v1 as parameter/value rows (stable silver→gold order). Status cells are color-text mapped (OK/FAIL). Empty is VALID when run_id is unresolved, report is missing, or recon block is absent. Unexpected empty: verify /health/live and Browse Recent Runs.",
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 32
+          },
+          "datasource": "BioETL Ops HTTP",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "inspect": false
+              },
+              "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
+            },
+            "overrides": [
               {
-                "id": "displayName",
-                "value": "Value"
+                "matcher": {
+                  "id": "byName",
+                  "options": "value"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Value"
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "left"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "OK": {
+                            "text": "OK",
+                            "color": "green"
+                          },
+                          "ok": {
+                            "text": "OK",
+                            "color": "green"
+                          },
+                          "FAIL": {
+                            "text": "FAIL",
+                            "color": "red"
+                          },
+                          "fail": {
+                            "text": "FAIL",
+                            "color": "red"
+                          },
+                          "MISMATCH": {
+                            "text": "MISMATCH",
+                            "color": "orange"
+                          },
+                          "mismatch": {
+                            "text": "MISMATCH",
+                            "color": "orange"
+                          },
+                          "WARN": {
+                            "text": "WARN",
+                            "color": "orange"
+                          },
+                          "warn": {
+                            "text": "WARN",
+                            "color": "orange"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
-          }
-        ]
-      },
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "cellHeight": "sm"
-      },
-      "targets": [
-        {
-          "format": "table",
-          "parser": "backend",
-          "refId": "A",
-          "root_selector": "reconciliation",
-          "source": "url",
-          "type": "json",
-          "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
-          "url_options": {
-            "data": "",
-            "method": "GET"
           },
-          "expr": ""
-        }
-      ]
-    },
-    {
-      "id": 3016,
-      "type": "text",
-      "title": "Inspect Layer Accounting",
-      "description": "Layer counts live on pipeline_run_report_v1.layers and Processed Records panel",
-      "gridPos": {
-        "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 40
-      },
-      "options": {
-        "mode": "html",
-        "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Layer accounting:</strong> use Processed Records for the compact view and <code>pipeline_run_report_v1.layers</code> for exact counts.<br>Actions: Open JSON · Open Markdown · inspect reconciliation before escalation.</div>"
-      }
-    },
-    {
-      "id": 3013,
-      "type": "table",
-      "title": "Inspect Run Artifacts",
-      "description": "Artifact refs from pipeline_run_report_v1. An empty result is VALID EMPTY when no artifacts exist; an unexpected empty may mean backend unavailable, so verify /health/live",
-      "gridPos": {
-        "h": 5,
-        "w": 24,
-        "x": 0,
-        "y": 43
-      },
-      "datasource": "BioETL Ops HTTP",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "left",
-            "inspect": false
-          },
-          "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
             },
-            "properties": [
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "reconciliation",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "expr": ""
+            }
+          ],
+          "links": [
+            {
+              "title": "Open Processed Records",
+              "url": "/d/bioetl-run-explorer-v1/6-run-explorer?viewPanel=9403&var-pipeline=&var-run_type=&var-run_id=&var-workflow=&",
+              "targetBlank": false,
+              "includeVars": false
+            },
+            {
+              "title": "Open Trust",
+              "url": "/d/bioetl-control-plane-v1/0-trust?var-pipeline=&var-run_type=&var-run_id=&var-workflow=&",
+              "targetBlank": false,
+              "includeVars": false
+            }
+          ]
+        },
+        {
+          "id": 3016,
+          "type": "text",
+          "title": "Inspect Layer Accounting",
+          "description": "Layer counts live on pipeline_run_report_v1.layers and Processed Records panel",
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 40
+          },
+          "options": {
+            "mode": "html",
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Layer accounting:</strong> use Processed Records for the compact view and <code>pipeline_run_report_v1.layers</code> for exact counts.<br>Actions: Open JSON · Open Markdown · inspect reconciliation before escalation.</div>"
+          }
+        },
+        {
+          "id": 3013,
+          "type": "table",
+          "title": "Inspect Run Artifacts",
+          "description": "Artifact refs from pipeline_run_report_v1. An empty result is VALID EMPTY when no artifacts exist; an unexpected empty may mean backend unavailable, so verify /health/live",
+          "gridPos": {
+            "h": 5,
+            "w": 24,
+            "x": 0,
+            "y": 43
+          },
+          "datasource": "BioETL Ops HTTP",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "inspect": false
+              },
+              "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
+            },
+            "overrides": [
               {
-                "id": "displayName",
-                "value": "Count"
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
               }
             ]
-          }
-        ]
-      },
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "cellHeight": "sm"
-      },
-      "targets": [
-        {
-          "format": "table",
-          "parser": "backend",
-          "refId": "A",
-          "root_selector": "artifacts",
-          "source": "url",
-          "type": "json",
-          "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
-          "url_options": {
-            "data": "",
-            "method": "GET"
           },
-          "expr": ""
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
+            },
+            "cellHeight": "sm"
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "artifacts",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "expr": ""
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "json_path": true,
+                  "markdown_path": true,
+                  "path": true,
+                  "report_path": true,
+                  "artifact_path": true
+                },
+                "renameByName": {
+                  "completed_at": "Completed",
+                  "run_id": "Run",
+                  "pipeline": "Pipeline",
+                  "status": "Status",
+                  "kind": "Artifact",
+                  "name": "Artifact"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": 3014,
+          "type": "text",
+          "title": "Inspect Timings & Failure",
+          "description": "stage_timings and failure blocks are optional on pipeline_run_report_v1",
+          "gridPos": {
+            "h": 4,
+            "w": 24,
+            "x": 0,
+            "y": 48
+          },
+          "options": {
+            "mode": "html",
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Stage timing / failure:</strong> optional blocks appear only when the selected run report recorded them.<br>Empty means not recorded for this run, not zero duration or successful execution. Open JSON or Markdown for exact evidence.</div>"
+          }
+        },
+        {
+          "id": 3001,
+          "type": "text",
+          "title": "Continue Run Investigation",
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 52
+          },
+          "options": {
+            "mode": "html",
+            "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;overflow:hidden\"><strong>Next actions (≤4)</strong> — 1) Pick recent run · 2) Verify ID + Processed Records · 3) Expand funnel/reasons/artifacts · 4) Use Trust Review First Recovery Action for resume/replay</div>"
+          },
+          "links": [],
+          "description": "DSA-08 decision rail for empty/selected modes"
         }
       ],
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "json_path": true,
-              "markdown_path": true,
-              "path": true,
-              "report_path": true,
-              "artifact_path": true
-            },
-            "renameByName": {
-              "completed_at": "Completed",
-              "run_id": "Run",
-              "pipeline": "Pipeline",
-              "status": "Status",
-              "kind": "Artifact",
-              "name": "Artifact"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": 3014,
-      "type": "text",
-      "title": "Inspect Timings & Failure",
-      "description": "stage_timings and failure blocks are optional on pipeline_run_report_v1",
-      "gridPos": {
-        "h": 4,
-        "w": 24,
-        "x": 0,
-        "y": 48
-      },
-      "options": {
-        "mode": "html",
-        "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Stage timing / failure:</strong> optional blocks appear only when the selected run report recorded them.<br>Empty means not recorded for this run, not zero duration or successful execution. Open JSON or Markdown for exact evidence.</div>"
-      }
-    },
-    {
-      "id": 3001,
-      "type": "text",
-      "title": "Continue Run Investigation",
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 52
-      },
-      "options": {
-        "mode": "html",
-        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;overflow:hidden\"><strong>Next actions (≤4)</strong> — 1) Pick recent run · 2) Verify ID + Processed Records · 3) Expand funnel/reasons/artifacts · 4) Use Trust Review First Recovery Action for resume/replay</div>"
-      },
-      "links": [],
-      "description": "DSA-08 decision rail for empty/selected modes"
+      "description": ""
     }
   ],
   "refresh": "60s",
