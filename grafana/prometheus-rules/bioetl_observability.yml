@@ -376,6 +376,14 @@ groups:
           action_reason: no_recent_activity_or_unknown_state
           action_dashboard_uid: bioetl-overview-v2
         expr: bioetl_overview_pipeline_run_type_universe * 5
+      # Compact NO_ROUTE fallback for Overview First Action (#6574) — keeps
+      # first-screen PromQL under the 200-char diet without multi-label_replace.
+      - record: bioetl_l0_next_action_no_route
+        labels:
+          action_target: no_route
+          action_reason: selected_scope_not_present
+          action_dashboard_uid: bioetl-overview-v2
+        expr: vector(0)
       - record: bioetl_l1_runtime_blocker_status
         expr: bioetl_l0_input_status_selected{input="runtime"}
       - record: bioetl_l1_dq_status
