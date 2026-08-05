@@ -83,7 +83,8 @@ def _table_shape_pipeline_run_report(
         return payload
     shaped = dict(payload)
     shaped["reconciliation"] = [
-        {"parameter": str(key), "value": str(value)} for key, value in recon.items()
+        {"parameter": str(key), "value": str(value)}
+        for key, value in sorted(recon.items(), key=lambda item: str(item[0]))
     ]
     return shaped
 
