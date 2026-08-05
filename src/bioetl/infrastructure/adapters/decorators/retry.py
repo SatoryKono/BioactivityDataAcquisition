@@ -34,9 +34,6 @@ from dataclasses import dataclass, field
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
-from bioetl.domain.exceptions import (
-    CircuitBreakerOpenError,
-)
 from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters.decorators._data_source_delegation import (
@@ -45,14 +42,10 @@ from bioetl.infrastructure.adapters.decorators._data_source_delegation import (
     delegated_provider_name,
     enter_delegated_data_source,
     exit_delegated_data_source,
-    iter_delegated_fetch,
 )
-from bioetl.infrastructure.adapters.decorators._retry_support import (
-    calculate_and_wait_retry_delay,
-    log_retry_attempt,
-    raise_retry_exhausted,
-    record_retry_metrics,
-    retryable_exception_types,
+from bioetl.infrastructure.adapters.decorators._retry_operations import (
+    retry_fetch_records,
+    retry_health_check,
 )
 
 if TYPE_CHECKING:
@@ -143,8 +136,6 @@ class RetryingDataSourceDecorator:
         offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
         """Fetch records with retry logic."""
-        last_error: Exception | None = None
-        retries = 0
         request = DataSourceFetchRequest(
             entity_type,
             limit,
@@ -153,107 +144,24 @@ class RetryingDataSourceDecorator:
             filter_field,
             offset,
         )
-
-        for attempt in range(self._retry_config.max_attempts):
-            try:
-                async for record in self._fetch_once(request):
-                    yield record
-                record_retry_metrics(
-                    self._metrics,
-                    provider_name=self.provider_name,
-                    operation="fetch",
-                    retries=retries,
-                )
-                return
-
-            except CircuitBreakerOpenError:
-                raise
-            except retryable_exception_types(self._retry_config) as exc:
-                last_error = exc
-                if self._retry_config.is_last_attempt(attempt):
-                    break
-                wait_seconds = await calculate_and_wait_retry_delay(
-                    self._retry_config,
-                    attempt=attempt,
-                    url=f"fetch:{entity_type}",
-                )
-                log_retry_attempt(
-                    self._logger,
-                    provider_name=self.provider_name,
-                    retry_config=self._retry_config,
-                    operation="fetch",
-                    attempt=attempt,
-                    wait_seconds=wait_seconds,
-                    error=exc,
-                )
-                retries += 1
-
-        raise_retry_exhausted(
+        async for record in retry_fetch_records(
+            data_source=self._data_source,
+            retry_config=self._retry_config,
+            logger=self._logger,
             metrics=self._metrics,
             provider_name=self.provider_name,
-            operation="fetch",
-            retries=retries,
-            target=request.entity_type,
-            max_attempts=self._retry_config.max_attempts,
-            last_error=last_error,
-        )
-
-    async def _fetch_once(
-        self,
-        request: DataSourceFetchRequest,
-    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Run one fetch attempt against the wrapped data source."""
-        async for record in iter_delegated_fetch(self._data_source, request):
+            request=request,
+        ):
             yield record
 
     async def health_check(self) -> HealthStatus:
         """Check health with retry logic."""
-        last_error: Exception | None = None
-        retries = 0
-
-        for attempt in range(self._retry_config.max_attempts):
-            try:
-                result = await self._data_source.health_check()
-                record_retry_metrics(
-                    self._metrics,
-                    provider_name=self.provider_name,
-                    operation="health_check",
-                    retries=retries,
-                )
-                return result
-
-            except CircuitBreakerOpenError:
-                raise
-            except retryable_exception_types(self._retry_config) as exc:
-                last_error = exc
-
-                if self._retry_config.is_last_attempt(attempt):
-                    break
-
-                wait_seconds = await calculate_and_wait_retry_delay(
-                    self._retry_config,
-                    attempt=attempt,
-                    url="health_check",
-                )
-                log_retry_attempt(
-                    self._logger,
-                    provider_name=self.provider_name,
-                    retry_config=self._retry_config,
-                    operation="health_check",
-                    attempt=attempt,
-                    wait_seconds=wait_seconds,
-                    error=exc,
-                )
-                retries += 1
-
-        raise_retry_exhausted(
+        return await retry_health_check(
+            health_check_fn=self._data_source.health_check,
+            retry_config=self._retry_config,
+            logger=self._logger,
             metrics=self._metrics,
             provider_name=self.provider_name,
-            operation="health_check",
-            retries=retries,
-            target="health_check",
-            max_attempts=self._retry_config.max_attempts,
-            last_error=last_error,
         )
 
     async def aclose(self) -> None:

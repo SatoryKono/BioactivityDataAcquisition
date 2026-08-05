@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 2313,
-    "total_internal_imports": 7217,
+    "scanned_modules": 2410,
+    "total_internal_imports": 7380,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 310,
     "violations": 0,
-    "source_fingerprint": "ec069e7d439eb0614cf3f979377e8e31bf02fcf47b019b96376ff25b2c2097d2"
+    "source_fingerprint": "f9f3027db9fcd7276772e2dd79f055b683d098432034b08ec0528f6c2133092f"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1435,
+      "imports": 1578,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 912,
+      "imports": 919,
       "allowed": true
     },
     {
@@ -48,19 +48,19 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1168,
+      "imports": 1175,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 728,
+      "imports": 730,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1114,
+      "imports": 1118,
       "allowed": true
     },
     {
@@ -97,12 +97,12 @@
     {
       "source": "infrastructure.adapters",
       "target": "domain.types",
-      "imports": 104
+      "imports": 106
     },
     {
       "source": "application.composite",
       "target": "domain.composite",
-      "imports": 91
+      "imports": 92
     },
     {
       "source": "application.core",
@@ -130,14 +130,14 @@
       "imports": 58
     },
     {
+      "source": "application.composite",
+      "target": "domain.ports",
+      "imports": 47
+    },
+    {
       "source": "composition.factories",
       "target": "application.core",
       "imports": 46
-    },
-    {
-      "source": "application.composite",
-      "target": "domain.ports",
-      "imports": 44
     },
     {
       "source": "infrastructure.storage",
@@ -170,6 +170,11 @@
       "imports": 31
     },
     {
+      "source": "application.composite",
+      "target": "domain.exceptions",
+      "imports": 29
+    },
+    {
       "source": "interfaces.cli",
       "target": "application.services",
       "imports": 29
@@ -183,11 +188,6 @@
       "source": "composition.bootstrap",
       "target": "domain.ports",
       "imports": 28
-    },
-    {
-      "source": "application.composite",
-      "target": "domain.exceptions",
-      "imports": 27
     },
     {
       "source": "composition.factories",
