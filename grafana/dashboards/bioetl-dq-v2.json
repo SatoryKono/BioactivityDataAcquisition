@@ -2874,8 +2874,8 @@
               "id": "organize",
               "options": {
                 "excludeByName": {
-                  "row_status": true,
-                  "percintage": true
+                  "percentage": true,
+                  "row_status": true
                 },
                 "indexByName": {
                   "parameter": 0,
