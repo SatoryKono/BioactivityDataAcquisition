@@ -28,7 +28,9 @@ def walk(panels: list | None):
 
 def pquery(expr: str) -> list:
     q = urllib.parse.urlencode({"query": expr})
-    with urllib.request.urlopen(f"http://127.0.0.1:9090/api/v1/query?{q}", timeout=30) as resp:
+    with urllib.request.urlopen(
+        f"http://127.0.0.1:9090/api/v1/query?{q}", timeout=30
+    ) as resp:
         payload = json.loads(resp.read().decode())
     return payload.get("data", {}).get("result", [])
 
@@ -60,12 +62,9 @@ def scan(iteration_dir: Path) -> dict:
             title = str(panel.get("title") or "")
             panel_id = panel.get("id")
             panel_type = panel.get("type")
-            steps = (
-                ((panel.get("fieldConfig") or {}).get("defaults") or {})
-                .get("thresholds", {})
-                .get("steps")
-                or []
-            )
+            steps = ((panel.get("fieldConfig") or {}).get("defaults") or {}).get(
+                "thresholds", {}
+            ).get("steps") or []
             for step in steps:
                 color = str(step.get("color") or "").lower().replace(" ", "")
                 if color in {"transparent", "rgba(0,0,0,0)"}:
@@ -124,10 +123,8 @@ def scan(iteration_dir: Path) -> dict:
                             }
                         )
             if panel_type == "stat":
-                no_value = (
-                    ((panel.get("fieldConfig") or {}).get("defaults") or {}).get(
-                        "noValue"
-                    )
+                no_value = ((panel.get("fieldConfig") or {}).get("defaults") or {}).get(
+                    "noValue"
                 )
                 if no_value is None:
                     findings.append(
@@ -145,7 +142,9 @@ def scan(iteration_dir: Path) -> dict:
                 for transform in panel.get("transformations") or []:
                     if transform.get("id") != "organize":
                         continue
-                    exclude = (transform.get("options") or {}).get("excludeByName") or {}
+                    exclude = (transform.get("options") or {}).get(
+                        "excludeByName"
+                    ) or {}
                     if not exclude.get("percintage"):
                         findings.append(
                             {
