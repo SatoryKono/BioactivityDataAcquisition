@@ -683,23 +683,27 @@
                 "value": [
                   {
                     "title": "Open Runtime",
-                    "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=${__data.fields.pipeline}&var-run_type=${run_type:csv}&var-stage=unknown&var-workflow=${workflow}&var-run_id=${run_id}&${__url_time_range}",
-                    "targetBlank": false
+                    "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=${__data.fields.pipeline}&var-run_type=$run_type&var-stage=unknown&var-workflow=$workflow&var-run_id=$run_id&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
                   },
                   {
                     "title": "Open Control Plane",
-                    "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=${__data.fields.pipeline}&var-run_type=${run_type:csv}&var-workflow=${workflow}&var-run_id=${run_id}&${__url_time_range}",
-                    "targetBlank": false
+                    "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=${__data.fields.pipeline}&var-run_type=$run_type&var-workflow=$workflow&var-run_id=$run_id&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
                   },
                   {
                     "title": "Open Data Quality",
-                    "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=${__data.fields.pipeline}&var-run_type=${run_type:csv}&var-stage=unknown&var-workflow=${workflow}&var-run_id=${run_id}&${__url_time_range}",
-                    "targetBlank": false
+                    "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=${__data.fields.pipeline}&var-run_type=$run_type&var-stage=unknown&var-workflow=$workflow&var-run_id=$run_id&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
                   },
                   {
                     "title": "Open Provider Health",
-                    "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=${__data.fields.pipeline}&var-adapter=unknown&var-pipeline=${__data.fields.pipeline}&var-run_type=${run_type:csv}&var-workflow=${workflow}&var-run_id=${run_id}&${__url_time_range}",
-                    "targetBlank": false
+                    "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=${__data.fields.pipeline}&var-adapter=unknown&var-pipeline=${__data.fields.pipeline}&var-run_type=$run_type&var-workflow=$workflow&var-run_id=$run_id&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
                   }
                 ]
               }

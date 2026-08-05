@@ -131,6 +131,7 @@ def main() -> None:
                     # Fixed target UIDs keep navigation contracts valid; pipeline is
                     # row-aware via ${__data.fields.pipeline}. Operators pick the
                     # board matching Action text (action_dashboard_uid remains hidden).
+                    # Use $var form (not ${var}) so link allowlists accept handoffs.
                     "id": "links",
                     "value": [
                         {
@@ -138,38 +139,41 @@ def main() -> None:
                             "url": (
                                 "/d/bioetl-runtime/bioetl-runtime"
                                 "?var-pipeline=${__data.fields.pipeline}"
-                                "&var-run_type=${run_type:csv}"
+                                "&var-run_type=$run_type"
                                 "&var-stage=unknown"
-                                "&var-workflow=${workflow}"
-                                "&var-run_id=${run_id}"
+                                "&var-workflow=$workflow"
+                                "&var-run_id=$run_id"
                                 "&${__url_time_range}"
                             ),
                             "targetBlank": False,
+                            "includeVars": False,
                         },
                         {
                             "title": "Open Control Plane",
                             "url": (
                                 "/d/bioetl-control-plane-v1/bioetl-control-plane-v1"
                                 "?var-pipeline=${__data.fields.pipeline}"
-                                "&var-run_type=${run_type:csv}"
-                                "&var-workflow=${workflow}"
-                                "&var-run_id=${run_id}"
+                                "&var-run_type=$run_type"
+                                "&var-workflow=$workflow"
+                                "&var-run_id=$run_id"
                                 "&${__url_time_range}"
                             ),
                             "targetBlank": False,
+                            "includeVars": False,
                         },
                         {
                             "title": "Open Data Quality",
                             "url": (
                                 "/d/bioetl-dq-v2/bioetl-dq-v2"
                                 "?var-pipeline=${__data.fields.pipeline}"
-                                "&var-run_type=${run_type:csv}"
+                                "&var-run_type=$run_type"
                                 "&var-stage=unknown"
-                                "&var-workflow=${workflow}"
-                                "&var-run_id=${run_id}"
+                                "&var-workflow=$workflow"
+                                "&var-run_id=$run_id"
                                 "&${__url_time_range}"
                             ),
                             "targetBlank": False,
+                            "includeVars": False,
                         },
                         {
                             "title": "Open Provider Health",
@@ -179,12 +183,13 @@ def main() -> None:
                                 "&var-pipeline_context=${__data.fields.pipeline}"
                                 "&var-adapter=unknown"
                                 "&var-pipeline=${__data.fields.pipeline}"
-                                "&var-run_type=${run_type:csv}"
-                                "&var-workflow=${workflow}"
-                                "&var-run_id=${run_id}"
+                                "&var-run_type=$run_type"
+                                "&var-workflow=$workflow"
+                                "&var-run_id=$run_id"
                                 "&${__url_time_range}"
                             ),
                             "targetBlank": False,
+                            "includeVars": False,
                         },
                     ],
                 },
