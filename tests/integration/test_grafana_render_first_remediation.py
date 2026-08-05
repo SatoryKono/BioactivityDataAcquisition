@@ -494,8 +494,12 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     assert _panel(overview, 9601).get("type") == "table"
 
     runtime = _load("bioetl-runtime.json")
+    # Pipeline Diagnostics secondary evidence stays collapsed with nested panels
+    # (progressive disclosure). Do not re-expand solely for first-path density.
     for row_id in (252, 253, 254):
-        assert _panel(runtime, row_id).get("collapsed") is False
+        row = _panel(runtime, row_id)
+        assert row.get("collapsed") is True
+        assert len(row.get("panels") or []) > 0
 
 
 def test_rf007_counts_and_dense_legends_are_bounded() -> None:

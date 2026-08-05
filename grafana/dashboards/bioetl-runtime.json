@@ -3171,7 +3171,7 @@
                   }
                 }
               ],
-              "noValue": "0",
+              "noValue": "No workflow failure samples in range — telemetry absent or no matching series; not proof of zero failures without scrape coverage",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -3217,7 +3217,7 @@
           },
           "targets": [
             {
-              "expr": "round((sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0))",
+              "expr": "round((sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))))",
               "refId": "A"
             }
           ],
@@ -3246,7 +3246,7 @@
                   }
                 }
               ],
-              "noValue": "0",
+              "noValue": "No workflow failure samples in range — telemetry absent or no matching series; not proof of zero failures without scrape coverage",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -3292,7 +3292,7 @@
           },
           "targets": [
             {
-              "expr": "round((sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0))",
+              "expr": "round((sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))))",
               "refId": "A"
             }
           ],
