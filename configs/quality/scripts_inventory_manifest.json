@@ -1,12 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-05T06:00:28.240054+00:00",
+  "generated_at": "2026-08-05T06:02:39.130661+00:00",
   "summary": {
     "total_scripts": 576,
     "status_counts": {
       "active": 341,
-      "orphan": 1,
-      "supporting": 229,
+      "supporting": 230,
       "temporary_diagnostic": 5
     },
     "reference_group_coverage": {
@@ -10054,7 +10053,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 37,
+      "reference_count": 36,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -10113,7 +10112,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 37,
+      "reference_count": 36,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -10229,7 +10228,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 60,
+      "reference_count": 59,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -10289,7 +10288,7 @@
         "py-test-bot",
         "py-test-swarm"
       ],
-      "reference_count": 74,
+      "reference_count": 73,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -10538,7 +10537,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 49,
+      "reference_count": 48,
       "references": [
         {
           "path": ".zed/README.md",
@@ -10595,7 +10594,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 33,
+      "reference_count": 32,
       "references": [
         {
           "path": ".zed/README.md",
@@ -11438,7 +11437,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 297,
+      "reference_count": 287,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -15637,25 +15636,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
           "line": 293,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
-        },
-        {
-          "path": "docs/03-guides/github-setup-plan.md",
-          "line": 631,
-          "source_group": "docs",
-          "text": "- Проверка через `check_github_actions_runtime_policy.py`"
-        },
-        {
-          "path": "docs/03-guides/github-setup-plan.md",
-          "line": 636,
-          "source_group": "docs",
-          "text": "uv run python scripts/engineering/repo/check_github_actions_runtime_policy.py"
         },
         {
           "path": "docs/05-operations/runbooks/incident-response.md",
@@ -18333,10 +18320,14 @@
     {
       "path": "scripts/ops/observability/grafana/rfa_first_action_mutator.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
-      "references": []
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off Review First Action (RFA-00) panel mutator for auditability; retire it after the RFA panel migration is verified and the shipped dashboard JSON becomes the durable record."
     },
     {
       "path": "scripts/ops/observability/grafana/run_dux7_live_residual.py",
