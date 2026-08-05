@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-05T14:21:44.684649+00:00",
+  "generated_at": "2026-08-05T14:51:29.459937+00:00",
   "summary": {
     "total_scripts": 575,
     "status_counts": {
@@ -17658,7 +17658,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/windows-c-to-d-migration.md",
-          "line": 134,
+          "line": 142,
           "source_group": "docs",
           "text": "- For script source, see `scripts/ops/migrations/windows_disk_to_d_migration.ps1`."
         },
@@ -17980,7 +17980,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
@@ -18025,8 +18025,8 @@
           "text": "Path(\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\"),"
         },
         {
-          "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py",
-          "line": 38,
+          "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_http_records.py",
+          "line": 7,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import audit_live_grafana_panels as audit_subject"
         }
@@ -18519,7 +18519,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md",
-          "line": 60,
+          "line": 96,
           "source_group": "docs",
           "text": "`scripts/ops/observability/grafana/start_quarantine_explorer.ps1` delegates to"
         }
