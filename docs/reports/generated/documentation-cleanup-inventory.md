@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2473 |
-| Tracked doc-like files | 2472 |
-| Ignored local docs/reports files | 1 |
+| Doc-like files | 2478 |
+| Tracked doc-like files | 2478 |
+| Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
 | Generated routes | 69 |
@@ -18,8 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1 |
-| tracked | 2472 |
+| tracked | 2478 |
 
 ## Lifecycle Counts
 
@@ -27,22 +26,22 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 264 |
-| active_quality_baseline | 44 |
+| active_quality_baseline | 47 |
 | closeout_evidence | 64 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 2 |
-| docs_reports_generated_or_route_owned | 8 |
+| docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
 | generated_skill_reference_mirror | 12 |
 | generated_test_run_evidence | 4 |
 | guide | 4 |
 | index | 4 |
-| issue_pack | 48 |
+| issue_pack | 49 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 33 |
-| working_report | 117 |
+| working_report | 119 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -51,7 +50,7 @@
 | active_draft | 264 |
 | guide | 4 |
 | index | 4 |
-| issue_pack | 48 |
+| issue_pack | 49 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
@@ -61,8 +60,8 @@
 | Active | 845 |
 | Archived | 155 |
 | Canonical | 73 |
-| Generated | 864 |
-| Working | 536 |
+| Generated | 863 |
+| Working | 542 |
 
 ## Surface Families
 
@@ -71,17 +70,17 @@
 | active | 845 |
 | archive | 155 |
 | canonical | 73 |
-| generated | 864 |
-| working | 536 |
+| generated | 863 |
+| working | 542 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 312 |
-| archive-after-migration | 112 |
-| generate-automatically | 864 |
-| keep | 1181 |
+| archive-after-github-state-check | 313 |
+| archive-after-migration | 114 |
+| generate-automatically | 863 |
+| keep | 1184 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -136,6 +135,8 @@
 | `reports/quality/branch-coverage-gap-report.json` | Working | 0 | archive-after-migration |
 | `reports/quality/branch-coverage-gap-report.md` | Working | 0 | archive-after-migration |
 | `reports/quality/branch-coverage-gate-evidence.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260805/00-preflight.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260805/01-scope-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/compatibility-importer-census.json` | Working | 0 | archive-after-migration |
 | `reports/quality/compatibility-importer-census.md` | Working | 0 | archive-after-migration |
 | `reports/quality/config-compatibility-legacy-taxonomy-review.json` | Working | 0 | archive-after-migration |
@@ -166,8 +167,6 @@
 | `reports/quality/runtime-builders-duplication.json` | Working | 0 | archive-after-migration |
 | `reports/quality/runtime-builders-duplication.md` | Working | 0 | archive-after-migration |
 | `reports/quality/scripts_deprecation_backlog.md` | Working | 0 | archive-after-migration |
-| `reports/quality/semantic-ddd-use-case-audit-2026-06-17.md` | Working | 0 | archive-after-migration |
-| `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -296,8 +295,8 @@
 | `.github/ISSUES/CHEMBL-020-Expand-Observed-Value-Inventory-For-Weakly-Covered-ChEMBL-Reference-Pipelines.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-021-Sync-ChEMBL-Provider-Docs-With-Active-Normalization-Surfaces.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-ISSUES-INDEX.md` | index |  | keep |
+| `.github/ISSUES/CODERABBIT-FULL-2026-08-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/CODERABBIT-REAUDIT-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/CREATION_GUIDE.md` | guide |  | keep |
 
 ## Docs Reports Evidence Examples
 
@@ -329,7 +328,6 @@
 | `docs/reports/evidence/technical-debt/complexity-hotspots/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/generated/chembl_matrix_structural_contract_v1.json` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/config-discrepancies-report.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
-| `docs/reports/generated/docs-audit-10cycle-closeout-2026-08-05.md` | ignored_local | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/documentation-cleanup-inventory.json` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/documentation-cleanup-inventory.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/non_chembl_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
