@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2438 |
-| Tracked doc-like files | 2438 |
+| Doc-like files | 2443 |
+| Tracked doc-like files | 2443 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2438 |
+| tracked | 2443 |
 
 ## Lifecycle Counts
 
@@ -26,7 +26,7 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 264 |
-| active_quality_baseline | 31 |
+| active_quality_baseline | 32 |
 | closeout_evidence | 64 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 1 |
@@ -41,7 +41,7 @@
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 33 |
-| working_report | 95 |
+| working_report | 99 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -61,7 +61,7 @@
 | Archived | 141 |
 | Canonical | 73 |
 | Generated | 861 |
-| Working | 501 |
+| Working | 506 |
 
 ## Surface Families
 
@@ -71,16 +71,16 @@
 | archive | 141 |
 | canonical | 73 |
 | generated | 861 |
-| working | 501 |
+| working | 506 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 90 |
+| archive-after-migration | 94 |
 | generate-automatically | 861 |
-| keep | 1171 |
+| keep | 1172 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -113,7 +113,10 @@
 | `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-refactoring-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-residual-2026-07-27-issue-publish.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-26-15-51.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-07-12-12-34.json` | Working | 0 | archive-after-migration |
 | `reports/quality/branch-coverage-gap-report.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-gap-report.md` | Working | 0 | archive-after-migration |
 | `reports/quality/branch-coverage-gate-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/quality/compatibility-importer-census.json` | Working | 0 | archive-after-migration |
 | `reports/quality/compatibility-importer-census.md` | Working | 0 | archive-after-migration |
@@ -152,6 +155,7 @@
 | `reports/quality/sonar/live-snapshot-20260728-postmerge-summary.json` | Working | 0 | archive-after-migration |
 | `reports/quality/sonar/live-snapshot-20260728-summary.json` | Working | 0 | archive-after-migration |
 | `reports/quality/tasks_architecture_metric_exemptions_2026-06-26-15-51.json` | Working | 0 | archive-after-migration |
+| `reports/quality/tasks_architecture_metric_exemptions_2026-07-12-12-33.json` | Working | 0 | archive-after-migration |
 | `reports/quality/test-bootstrap-fixture-scope-profile.json` | Working | 0 | archive-after-migration |
 | `reports/quality/test-support-helper-ownership-map.json` | Working | 0 | archive-after-migration |
 | `reports/quality/test-system-architecture-audit-20260729_FULL.md` | Working | 0 | archive-after-migration |
@@ -163,10 +167,6 @@
 | `reports/review/S1-domain.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1.1-contracts-ports.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1.2-logic-models.md` | Working | 0 | archive-after-migration |
-| `reports/review/S2-application.md` | Working | 0 | archive-after-migration |
-| `reports/review/S2.1-core-composite.md` | Working | 0 | archive-after-migration |
-| `reports/review/S2.2-services-pipelines.md` | Working | 0 | archive-after-migration |
-| `reports/semantic_pipeline_audit/base_config_semantic_coverage_2026-07-01.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

@@ -4,13 +4,13 @@
   "authoritative_surface": "grafana/dashboards/*.json",
   "route_contract_sha256": "88b420a39e5db86b1c5ca6df94822b4c4bedf41ac6f34e93956d4cd8fab174a4",
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "623fdcae77218aa758cf26b4ccd52eef7ffc0210b77e3606ec69f4503082fe52",
-    "bioetl-dq-v2": "8ec6fdc3233046315fd688214e58eb9b220d32c3113674552a8a74871db74628",
-    "bioetl-incident-v1": "265a4c6b1d1e197ad312890b887f9c635ce64ad791940903de845441845e3049",
-    "bioetl-overview-v2": "1565683306597e540a54067bc558a7faf44b0c8026a1f46647806c7b33bd5b38",
-    "bioetl-provider-health-v2": "2c0db08efd4f8dc0a847ca53c0e17fc337ff3fbda10c598c4a9f550428635120",
-    "bioetl-run-explorer-v1": "38f1f96267ff0bd271f88ad9b8c57f059d84432a138012bd85d1353f106bd898",
-    "bioetl-runtime": "cdf143b741a8d6bfa038ed356bc5493cef8c9cd1f5b116916e86f5227bbdb1d7"
+    "bioetl-control-plane-v1": "7b50a877c105d11da56af4cf82ee6e63c48768dd670fd9f578439c702a99caec",
+    "bioetl-dq-v2": "8e1b69fe4fb1eb2ebc63183300ef2eb5fa659ea8042ba1add71f15e331234840",
+    "bioetl-incident-v1": "7155e034b8c56e5a40a1f432b795965c9a77358208c9cdcfccc0ca6284b013fe",
+    "bioetl-overview-v2": "0555890e41d158c43a059747528d461cf42a2bf14973c01dc62fed6029ef1321",
+    "bioetl-provider-health-v2": "a5dd6a293b061d139faf3335a52b154ae41e9df4e0e8be0af65255fe2890ce85",
+    "bioetl-run-explorer-v1": "52376ec4cd5b2012b899922db1c9ac13ea67f1daefaabf023d36e26029543a90",
+    "bioetl-runtime": "66589cf1d786eb06fb2a6b3c6af8875e6ec86388cd6ac9ad58211cc3de70af43"
   },
   "summary": {
     "route_count": 6,
@@ -1298,7 +1298,7 @@
     {
       "dashboard_uid": "bioetl-dq-v2",
       "panel_id": 7,
-      "panel_title": "Monitor Silver Validation Failures",
+      "panel_title": "Monitor Silver Validation Failures (range composite)",
       "route": "data-trust-recovery",
       "component": "JSON fallback",
       "disposition": "advanced-evidence",
@@ -1307,7 +1307,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))"
+          "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)))"
         ]
       },
       "basis": "preserved-from-json",
