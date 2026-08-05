@@ -88,64 +88,59 @@ notes. Если prose ниже расходится с JSON, править ну
 
 ## Проверенные дашборды
 
-- `bioetl-overview-v2`
-- `bioetl-control-plane-v1`
-- `bioetl-dq-v2`
-- `bioetl-provider-health-v2`
-- `bioetl-runtime`
-- `CLI quarantine inspect`
-- `bioetl-workflow-overview`
+- `bioetl-control-plane-v1` (0. Trust)
+- `bioetl-overview-v2` (1. Overview)
+- `bioetl-runtime` (2. Pipeline Diagnostics)
+- `bioetl-provider-health-v2` (3. Provider Health)
+- `bioetl-dq-v2` (4. Data Quality)
+- `bioetl-incident-v1` (5. Incident Workspace)
+- `bioetl-run-explorer-v1` (6. Run Explorer)
+
+**Retired (not shipped JSON):** `bioetl-workflow-overview`, `bioetl-alerts-slo`,
+`bioetl-silver-reject-explorer` — use Runtime workflow band, Overview Alert/SLO
+row, and CLI `bioetl quarantine inspect` respectively.
 
 ## Current shipped baseline
 
-- Все primary operator dashboards `0..5` используют `refresh: 60s` и
-  `time.from=now-12h`.
-- `CLI quarantine inspect` остаётся forensic exception с `refresh: 1m`
-  и `time.from=now-24h`.
-- Primary dashboards `0..5` используют shared context shell
-  `$workflow`, `$pipeline`, `$run_type`, `$run_id`.
-- `$workflow` теперь single-select with Include All на всех primary
-  dashboards, включая `bioetl-workflow-overview`.
-- `$pipeline` остаётся single-select; `bioetl-overview-v2` intentionally
-  defaults to `All`, остальные pipeline-scoped dashboards fail-close к
-  `unknown`.
-- `$run_type` остаётся multi-select with Include All.
-- `$run_id` остаётся HTTP-backed identity context через
-  `/ops/control-plane/filter-options`; это не Prometheus label и не Silver
-  forensic selector.
-- `bioetl-workflow-overview` добавляет visible `$status`, `$step_status`,
-  `$step_kind` и hidden handoff vars `$pipeline_context`, `$run_type_context`,
-  `$provider_context`.
-- `CLI quarantine inspect` остаётся единственным shipped dashboard с
-  exact forensic narrowing selectors `$quarantine_run_id` и `$payload_hash`.
+- All **7** shipped dashboards use `refresh: 60s` and typically
+  `time.from=now-12h` (see live JSON for exact time defaults).
+- Shared context shell on all 7: `$workflow`, `$pipeline`, `$run_type`,
+  `$run_id`.
+- `$workflow` is single-select with Include All on all shipped boards.
+- `$pipeline` is single-select; `bioetl-overview-v2` intentionally defaults to
+  `All`; other boards fail-close to `unknown`.
+- `$run_type` is multi-select with Include All (Overview default `All`; others
+  default `backfill`).
+- `$run_id` is HTTP-backed identity context via
+  `/ops/control-plane/filter-options`; not a Prometheus label.
+- Role extensions: `$stage` (Runtime, DQ; default All), `$provider` (Provider
+  Health, Incident; default unknown), hidden `$pipeline_context`/`$adapter`
+  (Provider Health), hidden `$provider_hint` (Runtime).
+- Forensic reject narrowing is **CLI** (`bioetl quarantine inspect`), not a
+  Grafana board.
 
 ## Navigation contract now in force
 
-- Каноническая top-level шина — text navigation panel `id=1000`.
-- Dashboard-to-dashboard links используют `includeVars=false` и передают только
+- Canonical top-level bus is text navigation panel `id=1000` with links
+  `0..6` only (Trust → Run Explorer).
+- Dashboard-to-dashboard links use `includeVars=false` and pass only
   allowlisted `var-*` target scope.
-- Same-tab navigation остаётся обязательной для shipped dashboard handoff.
-- Все восемь shipped navigation panels `id=1000` после bus `0..6` содержат
-  global adjunct links `Silver Reject Explorer`, `Explore Logs`,
-  `Explore Traces`.
-- Текущий dashboard остаётся видимым как disabled theme-safe item; шина
-  переносится на `1024px` и сохраняет контраст в dark/light themes.
-- `Explore Traces` uses the explicit search-first Tempo route with the active
-  dashboard range (`from=${__from}`, `to=${__to}`), `var-ds=tempo`,
-  `var-groupBy=resource.service.name`, and stable low-cardinality TraceQL
-  scope.
+- Same-tab navigation remains required for shipped dashboard handoff.
+- **Do not** reintroduce bus adjuncts `Silver Reject Explorer`, `Explore Logs`,
+  or `Explore Traces` on the default shipping surface (Loki/Tempo/Explorer
+  removed 2026-07-23).
+- The current dashboard remains visible as a disabled theme-safe item; the bus
+  preserves contrast in dark/light themes.
 
 ## First-screen / panel-title updates
 
 - `bioetl-overview-v2` canonical CTA panel title = `First Action`
   (`id=215`).
-- `bioetl-workflow-overview` removed the old `Workflow Scope` banner and now
-  uses `First Action` (`id=9`) as the single justified first-screen
-  dashboard-handoff CTA.
-- Workflow selected-range evidence moved to `bioetl-runtime` workflow band:
-  `Track Failed Workflow Runs`, `Track Failed Workflow Steps`. These panels
-  use zero-valid fallback for empty selected ranges and render neutral evidence
-  instead of colored verdicts when scrape/rule health is degraded.
+- ~~`bioetl-workflow-overview`~~ (**retired**): historically used `First Action`
+  (`id=9`) as first-screen handoff CTA.
+- Workflow selected-range evidence lives on `bioetl-runtime` workflow band:
+  `Track Failed Workflow Runs`, `Track Failed Workflow Steps` (PromQL must not
+  mask absence with `or vector(0)`).
 - `bioetl-runtime` keeps `Metrics Evidence` as a first-screen datasource
   trust marker and now reserves readable dashboard width for that panel.
   `Status` / `Runtime Status` are trust-gated by this marker, and compact
@@ -166,9 +161,9 @@ notes. Если prose ниже расходится с JSON, править ну
 - `bioetl-dq-v2`: `id=9400..9403`, `9100..9103`, `1`, `121`, `153..155`
 - `bioetl-provider-health-v2`: `id=9400..9403`, `9002`, `9100..9103`,
   `1`, `2`, `7`, `31`, `32`, `102`, `104..114`
-- `bioetl-workflow-overview`: `id=9400..9403`, `1..9`,
-  collapsed `Step Diagnostics (collapsed)`
-- `CLI quarantine inspect`: `id=1..10`
+- `bioetl-incident-v1`: triage panels under shared shell + `$provider`
+- `bioetl-run-explorer-v1`: Browse Recent Runs + canonical ID/Processed hub
+- ~~`bioetl-workflow-overview`~~ (**retired** — historical panel ids only)
 
 ## 2026-05-19 remediation set
 
