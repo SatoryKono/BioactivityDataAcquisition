@@ -4,13 +4,13 @@
   "authoritative_surface": "grafana/dashboards/*.json",
   "route_contract_sha256": "88b420a39e5db86b1c5ca6df94822b4c4bedf41ac6f34e93956d4cd8fab174a4",
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "7b903ba0b322b71f36c4004a335dd932c0e20f009f8310ac340c33f8f4f4eef3",
-    "bioetl-dq-v2": "e4a0556db2ae792c31554b3ef3539a23b5654e1892af0c26dfbbfa9c2c348a7c",
+    "bioetl-control-plane-v1": "914698cb64e1ff4349398a0fe6b3b5599ae6e8ebc9c5f3854de27fe61c104298",
+    "bioetl-dq-v2": "268641e42950bb5da6ae8d8f7d7e8ade7eb906491ab07a0ee0c96568157040d6",
     "bioetl-incident-v1": "92e56213711a55e6ad4d462e257584b5e7b0301eb2896b4f8645f2f0124391d0",
-    "bioetl-overview-v2": "55e5ad42a05f2f9842bd3fef4fcf9c47ebfa573df0a9456e013e1e86d06d42c8",
-    "bioetl-provider-health-v2": "c7eb29d89678c6ccdeece7e14b4d4a3fb92198e40286ac3bef5359927dabad4e",
-    "bioetl-run-explorer-v1": "2c91d4ecb291e5b5c1c599712a9086c73850c8be59527603e927ca934172b97a",
-    "bioetl-runtime": "9d2d25eaedd610fa0d73d6cfd457f452ccb65ca1df8420f859c6a60bba88a33b"
+    "bioetl-overview-v2": "9eeeccdfcc21befe47875e6801c5fd8dc74bd7594acd767d0bb51babf2ccc668",
+    "bioetl-provider-health-v2": "be70b7f5ed4b532a9905c1770378665b4bc8ad455ed2f542921ed6c82ade0448",
+    "bioetl-run-explorer-v1": "46db837e8f84bebdefb9059c74a44b011f3b6fe0ba4fdbc88c4b51512aca0f69",
+    "bioetl-runtime": "c84b5296f6ddfa3a680b5d75ad98258b873238e52b83ab778beda163c76dd87a"
   },
   "summary": {
     "route_count": 6,
@@ -224,7 +224,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "round((\n  (sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))\n))"
+          "round((\n (sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])))\n+\n (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])))\n+\n (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))\n+\n (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])))))"
         ]
       },
       "basis": "preserved-from-json",
@@ -243,7 +243,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0))"
+          "round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])))"
         ]
       },
       "basis": "preserved-from-json",
@@ -262,7 +262,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "round(sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])) or vector(0))"
+          "round(sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])))"
         ]
       },
       "basis": "preserved-from-json",
@@ -281,7 +281,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "round(sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))"
+          "round(sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))"
         ]
       },
       "basis": "preserved-from-json",
@@ -1153,7 +1153,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))"
+          "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))"
         ]
       },
       "basis": "preserved-from-json",
@@ -1440,7 +1440,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval])) or vector(0)))"
+          "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__interval]))) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval]))))"
         ]
       },
       "basis": "preserved-from-json",
@@ -1569,7 +1569,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "round((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0)) + (sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)))"
+          "round((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))) + (sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))))"
         ]
       },
       "basis": "preserved-from-json",
@@ -1588,7 +1588,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "round(sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))"
+          "round(sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))"
         ]
       },
       "basis": "preserved-from-json",
@@ -1607,7 +1607,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))"
+          "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])))"
         ]
       },
       "basis": "preserved-from-json",
@@ -1939,7 +1939,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "topk(1, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
+          "topk(4, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or label_replace(label_replace(label_replace(vector(0), \"action_target\", \"no_route\", \"\", \"\"), \"action_reason\", \"selected_scope_not_present\", \"\", \"\"), \"action_dashboard_uid\", \"bioetl-overview-v2\", \"\", \"\"))"
         ]
       },
       "basis": "preserved-from-json",
@@ -2072,8 +2072,8 @@
         "datasource_type": "prometheus",
         "target_count": 2,
         "expressions": [
-          "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0))",
-          "(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0)) / clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range])) or vector(0)), 1)"
+          "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])))",
+          "(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range]))) / clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range]))), 1)"
         ]
       },
       "basis": "preserved-from-json",
@@ -2446,7 +2446,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])) or vector(0))"
+          "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])))"
         ]
       },
       "basis": "preserved-from-json",
@@ -2465,7 +2465,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__interval])) or vector(0))"
+          "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__interval])))"
         ]
       },
       "basis": "preserved-from-json",
@@ -3335,7 +3335,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "(((sum(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_runtime_error_rate_high_30m{pipeline=~\"$pipeline\"}) or vector(0))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0))"
+          "(((sum(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_runtime_error_rate_high_30m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0))"
         ]
       },
       "basis": "preserved-from-json",
@@ -3409,7 +3409,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "(((sum(bioetl_runtime_alert_condition_dq_soft_threshold_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_dq_hard_fail_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_dq_critical_anomaly_30m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_silver_validation_failures_30m{pipeline=~\"$pipeline\"}) or vector(0))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}) > bool 0))"
+          "(((sum(bioetl_runtime_alert_condition_dq_soft_threshold_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_hard_fail_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_critical_anomaly_30m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_silver_validation_failures_30m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}) > bool 0))"
         ]
       },
       "basis": "preserved-from-json",
@@ -3428,7 +3428,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "(((sum(bioetl_runtime_alert_condition_manifest_write_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_ledger_append_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_checkpoint_incompatible_30m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_replay_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_replay_drift_detected_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_lineage_refs_missing_15m{pipeline=~\"$pipeline\"}) or vector(0))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0))"
+          "(((sum(bioetl_runtime_alert_condition_manifest_write_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_ledger_append_failed_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_checkpoint_incompatible_30m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_replay_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_replay_drift_detected_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_lineage_refs_missing_15m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0))"
         ]
       },
       "basis": "preserved-from-json",
@@ -3447,7 +3447,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "(((sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m{provider=~\"$provider_hint\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h{provider=~\"$provider_hint\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_http_error_rate_high_15m{provider=~\"$provider_hint\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m{provider=~\"$provider_hint\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m{provider=~\"$provider_hint\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m{provider=~\"$provider_hint\"}) or vector(0))) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0))"
+          "(((sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_http_error_rate_high_15m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m{provider=~\"$provider_hint\"}))) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0))"
         ]
       },
       "basis": "preserved-from-json",
@@ -3466,7 +3466,7 @@
         "datasource_type": "prometheus",
         "target_count": 1,
         "expressions": [
-          "((sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m) or vector(0))) and on() (count(bioetl_provider_current_status) > bool 0)"
+          "((sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m))) and on() (count(bioetl_provider_current_status) > bool 0)"
         ]
       },
       "basis": "preserved-from-json",
