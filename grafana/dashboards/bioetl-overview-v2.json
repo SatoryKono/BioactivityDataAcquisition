@@ -557,6 +557,62 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Priority"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Priority"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "action_target"
             },
             "properties": [
@@ -571,25 +627,32 @@
                     "type": "value",
                     "options": {
                       "control_plane": {
-                        "text": "Open Control Plane"
+                        "text": "Open Control Plane",
+                        "color": "red"
                       },
                       "dq": {
-                        "text": "Open DQ"
+                        "text": "Open DQ",
+                        "color": "orange"
                       },
                       "monitor": {
-                        "text": "Monitor"
+                        "text": "Monitor / no urgent action",
+                        "color": "gray"
                       },
                       "no_route": {
-                        "text": "No route"
+                        "text": "No route — check selectors",
+                        "color": "gray"
                       },
                       "provider": {
-                        "text": "Open Provider"
+                        "text": "Open Provider",
+                        "color": "orange"
                       },
                       "runtime": {
-                        "text": "Open Runtime"
+                        "text": "Open Runtime",
+                        "color": "red"
                       },
                       "workflow": {
-                        "text": "Open Workflow"
+                        "text": "Open Runtime (workflow)",
+                        "color": "green"
                       }
                     }
                   }
@@ -597,7 +660,29 @@
               },
               {
                 "id": "custom.width",
-                "value": 128
+                "value": 150
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open recommended board",
+                    "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?var-pipeline=${__data.fields.pipeline}&var-run_type=${run_type:csv}&var-workflow=${workflow}&var-run_id=${run_id}&var-stage=unknown&var-provider=unknown&var-pipeline_context=${__data.fields.pipeline}&var-adapter=unknown&${__url_time_range}",
+                    "targetBlank": false
+                  }
+                ]
               }
             ]
           },
@@ -647,7 +732,14 @@
               },
               {
                 "id": "custom.width",
-                "value": 84
+                "value": 150
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
               }
             ]
           },
@@ -663,7 +755,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 180
+                "value": 160
               },
               {
                 "id": "custom.cellOptions",
@@ -682,7 +774,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 220
+                "value": 160
               },
               {
                 "id": "custom.cellOptions",
@@ -695,13 +787,25 @@
           },
           {
             "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+              "id": "byName",
+              "options": "action_dashboard_uid"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "Count"
+                "value": ""
+              },
+              {
+                "id": "custom.width",
+                "value": 1
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "tooltip": false,
+                  "viz": true,
+                  "legend": true
+                }
               }
             ]
           }
@@ -709,7 +813,7 @@
       },
       "targets": [
         {
-          "expr": "topk(1, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+          "expr": "topk(4, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or label_replace(label_replace(label_replace(vector(0), \"action_target\", \"no_route\", \"\", \"\"), \"action_reason\", \"selected_scope_not_present\", \"\", \"\"), \"action_dashboard_uid\", \"bioetl-overview-v2\", \"\", \"\"))",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -720,6 +824,13 @@
         "footer": {
           "show": false
         },
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Priority"
+          }
+        ],
         "dataLinks": [
           {
             "title": "Open Runtime",
@@ -744,15 +855,8 @@
             "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
             "targetBlank": false,
             "includeVars": false
-          },
-          {
-            "title": "Open Pipeline Diagnostics",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
           }
-        ],
-        "cellHeight": "lg"
+        ]
       },
       "transformations": [
         {
@@ -761,28 +865,25 @@
             "excludeByName": {
               "Time": true,
               "__name__": true,
-              "Value": true,
-              "action_dashboard_uid": true,
               "bioetl_l0_next_action_route": true,
               "input": true,
               "run_type": true
             },
             "indexByName": {
-              "action_target": 0,
-              "action_reason": 1,
-              "pipeline": 2
+              "Value": 0,
+              "action_target": 1,
+              "action_reason": 2,
+              "pipeline": 3,
+              "action_dashboard_uid": 4
             },
             "renameByName": {
-              "pipeline": "Pipeline",
-              "Value": "Count",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
+              "Value": "Priority",
+              "pipeline": "Pipeline"
             }
           }
         }
       ],
-      "description": "Ranks at most four urgency-ordered actions for the current fleet verdict. Verify missing telemetry first, then open the affected domain, use Incident Workspace for multi-domain impact, or use Run Explorer for exact-run evidence."
+      "description": "Shows up to four highest-priority next actions for the current fleet/selectors (priority: Runtime > Control Plane > Gold lifecycle > DQ > Provider > Workflow > Monitor). Click Action to open the recommended board with the row pipeline preserved. Priority uses text color (not fill). Missing/empty scope falls back to NO_ROUTE. run_id is handoff context only — never a Prometheus label. When Priority is MONITOR and Fleet Health is OK, continue monitoring rather than escalating."
     },
     {
       "id": 9002,
