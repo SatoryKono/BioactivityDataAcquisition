@@ -1,4 +1,40 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+
+- BioETL Team
+  Last verified: '2026-08-05'
+
+______________________________________________________________________
+
 # Monitoring surface reduction (2026-07-23)
+
+## Trigger
+
+Use this runbook when validating, operating, or changing the reduced optional
+monitoring stack introduced on 2026-07-23.
+
+## Impact
+
+Starting retired services or treating monitoring as a mandatory runtime would
+violate the Local-Only deployment contract. Removing the retained quarantine
+storage domain would cause data-loss and replay regressions.
+
+## Preconditions
+
+- Confirm ADR-010 and the current optional-monitoring inventory.
+- Distinguish retired UI/telemetry helpers from retained domain quarantine
+  write/storage and operator CLI commands.
+- Obtain explicit approval before any destructive volume operation.
+
+## Procedure
+
+Apply the decision and operator commands below. Keep the default runtime on the
+main health/metrics surface and start monitoring only when explicitly needed.
 
 ## Decision
 
@@ -89,3 +125,30 @@ Operator/reference surfaces aligned to the reduced stack:
 
 Historical panel guide `docs/03-guides/dashboards/panels/bioetl-silver-reject-explorer-panels.md`
 is marked **REMOVED** and points operators to CLI inspect.
+
+## Verification
+
+- Confirm the default start path does not launch Prometheus, Grafana, Loki,
+  Tempo, or Quarantine Explorer.
+- Confirm the explicit monitoring command starts only the retained optional
+  metrics stack.
+- Confirm quarantine `inspect`, `replay`, and `purge` remain available without
+  a replacement web UI.
+
+## Rollback/Recovery
+
+- Revert an unintended monitoring configuration change through the normal PR
+  path; do not resurrect retired Loki, Tempo, or Quarantine Explorer services.
+- Preserve legacy volumes until an operator explicitly approves their removal.
+
+## Compliance
+
+- ADR-010 Local-Only deployment remains authoritative.
+- Monitoring is optional; quarantine payload immutability and CLI operations
+  remain mandatory.
+- Do not add Docker or external orchestration requirements to the default path.
+
+## Post-incident
+
+Record which surface was inspected, the commands run, whether any legacy
+volume remains, and any follow-up needed to remove stale operator wording.

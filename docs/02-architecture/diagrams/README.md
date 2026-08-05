@@ -514,8 +514,8 @@ Diagrams are validated and rendered automatically in GitHub Actions
 (`.github/workflows/docs.yml`, `.github/workflows/diagram-nightly.yml`).
 **SVG** under `docs/02-architecture/diagrams/**/svg/` is the tracked render
 baseline for PR source-vs-render drift. **PNG** under `**/png/` is **not
-tracked** (gitignored; generate locally or via CI artifacts) — see
-[render-retention.md](governance/render-retention.md). Nightly still renders
+tracked** (gitignored; generate locally or via CI artifacts) under the
+[ADR-040](../decisions/ADR-040-diagram-governance.md) retention policy. Nightly still renders
 first, then runs `--require-png` against the curated
 `manifests/png-compatibility.txt` set (four SVG stems → PNG must exist in the
 job workspace, not in git). CI also uploads freshly rendered SVG/PNG and

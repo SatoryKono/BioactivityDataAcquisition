@@ -21,6 +21,19 @@ Use this procedure when a publication pipeline fails validation or its
 release evidence must be reviewed. Preserve the failed run, manifest, ledger,
 checkpoint, DQ report, and quarantine evidence before attempting recovery.
 
+## Impact
+
+Incorrect recovery can overwrite forensic evidence, weaken strict Gold
+validation, or produce a non-deterministic replay. Treat validation failures as
+data-contract or control-plane incidents until their owner is proven.
+
+## Preconditions
+
+- Capture the failed `pipeline`, `run_id`, manifest, ledger, checkpoint, DQ
+  report, and quarantine references.
+- Use a read-only or copied table path for diagnosis.
+- Confirm the effective entity config and contract versions before replay.
+
 ## Runtime contract
 
 The supported validation surface is the configured pipeline runtime:
@@ -42,6 +55,12 @@ ADR-033's current implementation status is authoritative:
 There are no supported CLI switches that bypass external or semantic
 validation. Do not invent recovery flags from the historical five-level
 design.
+
+## Procedure
+
+Run the read-only diagnosis, classify the failure, apply the owned fix through
+normal review, and use the recovery sequence only after compatibility checks
+pass.
 
 ## Read-only diagnosis
 
@@ -141,3 +160,17 @@ Closure evidence must contain:
 Escalate when replay inputs are unavailable, checkpoint compatibility is
 blocked, the same persisted inputs produce different outputs, or strict Gold
 validation still fails after the owning defect is corrected.
+
+## Compliance
+
+- Gold validation remains strict and fail-closed.
+- Quarantine payloads and original failed-run evidence remain immutable.
+- Replay uses persisted inputs and effective configuration; no hidden wall
+  clock or fresh provider response may change its result.
+- DQ thresholds and technical-debt budgets must not be weakened for recovery.
+
+## Post-incident
+
+Attach the original and replay run identities, verification evidence, root
+cause, owning fix, and any residual replay risk to the incident or issue
+closeout. Retain the failed run's manifest and ledger history.
