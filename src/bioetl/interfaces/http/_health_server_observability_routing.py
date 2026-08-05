@@ -42,6 +42,54 @@ __all__ = (
 _NOT_FOUND_MESSAGE = "Not Found"
 
 
+def _is_unresolved_run_scope(run_id: str) -> bool:
+    """Return True when run_id is a dashboard no-selection sentinel."""
+    token = run_id.strip()
+    return token in _UNRESOLVED_RUN_ID_SENTINELS
+
+
+def _unresolved_pipeline_run_report_shell(
+    *,
+    run_id: str,
+    pipeline: str,
+) -> dict[str, object]:
+    """Empty report shell for Grafana table root_selectors (no QUERY_ERROR)."""
+    return {
+        "status": "unresolved_scope",
+        "message": "run_id not selected; pick a run from Browse Recent Runs",
+        "run_id": run_id,
+        "pipeline": pipeline,
+        # Match pipeline_run_report_v1 keys used by Run Explorer panels.
+        "funnel": [],
+        "reasons_top_n": [],
+        "reconciliation": [],
+        "artifacts": [],
+        "schema_version": "pipeline_run_report_v1",
+    }
+
+
+def _table_shape_pipeline_run_report(
+    payload: dict[str, object],
+) -> dict[str, object]:
+    """Normalize nested report sections for Grafana Infinity table selectors.
+
+    ``reconciliation`` is stored as an object in pipeline_run_report_v1 files.
+    Run Explorer panel 3015 uses root_selector=reconciliation on a table panel,
+    so the HTTP surface exposes a list of {parameter, value} rows. Values are
+    strings because Infinity requires one stable field type when numeric
+    accounting values and textual reconciliation verdicts share the column.
+    """
+    recon = payload.get("reconciliation")
+    if not isinstance(recon, dict):
+        return payload
+    shaped = dict(payload)
+    shaped["reconciliation"] = [
+        {"parameter": str(key), "value": str(value)}
+        for key, value in sorted(recon.items(), key=lambda item: str(item[0]))
+    ]
+    return shaped
+
+
 class _HealthResponseSupport(Protocol):
     async def _send_response(
         self,
