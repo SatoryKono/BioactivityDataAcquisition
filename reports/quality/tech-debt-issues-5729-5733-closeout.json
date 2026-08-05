@@ -72,7 +72,7 @@
     },
     "5732": {
       "assertless_total_candidates": 105,
-      "intentional_no_exception_contract": 90,
+      "intentional_no_exception_contract": 89,
       "target_file_family_counts": {
         "tests/unit/infrastructure/observability/test_unified_logger.py": 10
       }
