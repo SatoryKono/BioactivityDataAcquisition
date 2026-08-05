@@ -46290,7 +46290,13 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-28",
+<<<<<<< HEAD
   "source_tree_sha256": "1dc16e7ca213aaab9c5d7e24a299b1c6b04fd440855d09d2faae5cfd1bcf12fc",
+||||||| fbd4594e67
+  "source_tree_sha256": "fa7fca1db1d19c16b22cc0795b766f579c4ced33402df185674d174412fb64cc",
+=======
+  "source_tree_sha256": "b06bb78e9e7ecee3d6c40f32aa8e23cc6aa42221da2f6a51d481393720fcaf83",
+>>>>>>> feat/codex-native-7507
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
