@@ -37,6 +37,10 @@ pytestmark = pytest.mark.unit
 import json
 from pathlib import Path
 
+from bioetl.interfaces.http._health_server_observability_routing import (
+    _is_unresolved_run_scope,
+    _unresolved_pipeline_run_report_shell,
+)
 from bioetl.interfaces.http.run_report_ops import (
     list_pipeline_run_report_payloads,
     load_pipeline_run_report_payload,
@@ -68,6 +72,22 @@ def test_load_missing_returns_none(tmp_path: Path) -> None:
         load_workflow_run_report_payload(workflow_run_id="missing", root=tmp_path)
         is None
     )
+
+
+def test_unresolved_run_id_sentinel_shell_for_grafana() -> None:
+    """run_id='-' must not 404; empty shell keeps Run Explorer panels query-clean."""
+    assert _is_unresolved_run_scope("-")
+    assert _is_unresolved_run_scope(" $__all ")
+    assert not _is_unresolved_run_scope("2f68f55b-3689-5e8a-9880-19cf8cbb69ad")
+    shell = _unresolved_pipeline_run_report_shell(
+        run_id="-",
+        pipeline="chembl_activity",
+    )
+    assert shell["status"] == "unresolved_scope"
+    assert shell["funnel"] == []
+    assert shell["reasons_top_n"] == []
+    assert shell["artifacts"] == []
+    assert shell["reconciliation"] == {}
 
 
 def test_load_requires_explicit_owner_selector(tmp_path: Path) -> None:
