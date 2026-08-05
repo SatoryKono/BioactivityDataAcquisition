@@ -39,8 +39,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 106 | Track Global Checkpoint Admin Latency |
 | bioetl-control-plane-v1.json | 901 | Inspect Manifest & Ledger Evidence |
 | bioetl-control-plane-v1.json | 908 | Review Terminal Run Outcomes |
-| bioetl-control-plane-v1.json | 1 | Track Manifest Write Failures |
 | bioetl-control-plane-v1.json | 2 | Track Ledger Append Failures |
+| bioetl-control-plane-v1.json | 1 | Track Manifest Write Failures |
 | bioetl-control-plane-v1.json | 131 | Compare Manifest Writes by Status |
 | bioetl-control-plane-v1.json | 7 | Compare Ledger Appends by Type & Status |
 | bioetl-control-plane-v1.json | 132 | Monitor Manifest Failures (30m) |
@@ -60,8 +60,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 110 | Track Global Audit Query Latency |
 | bioetl-control-plane-v1.json | 112 | Compare Lineage Persistence Outcomes |
 | bioetl-control-plane-v1.json | 905 | Inspect Run Identity Evidence |
-| bioetl-control-plane-v1.json | 9407 | Copy Identity Values |
 | bioetl-control-plane-v1.json | 9404 | Review Identity Anchors |
+| bioetl-control-plane-v1.json | 9407 | Copy Identity Values |
 | bioetl-control-plane-v1.json | 9410 | Explain Missing Identity Data |
 | bioetl-control-plane-v1.json | 9411 | Explain Missing Record Counts |
 | bioetl-control-plane-v1.json | 9405 | Review Identity Gaps |
@@ -88,7 +88,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 1 | Track Record Flow by Stage |
 | bioetl-dq-v2.json | 3 | Monitor Bronze Records |
 | bioetl-dq-v2.json | 4 | Monitor Gold Records |
-| bioetl-dq-v2.json | 7 | Monitor Silver Validation Failures (range composite) |
 | bioetl-dq-v2.json | 101 | Inspect Latest Successful Data |
 | bioetl-dq-v2.json | 9 | Inspect Quarantine Error Types |
 | bioetl-dq-v2.json | 12 | Monitor Silver Validation Failures |
@@ -137,13 +136,13 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9011 | Review Recent Terminal Runs |
 | bioetl-overview-v2.json | 9015 | Track Silver Rejects |
 | bioetl-overview-v2.json | 9012 | Inspect Domain Diagnostics |
-| bioetl-overview-v2.json | 9021 | Navigate Diagnostics |
 | bioetl-overview-v2.json | 9006 | Review Control Plane Status |
 | bioetl-overview-v2.json | 9003 | Review Runtime Status |
 | bioetl-overview-v2.json | 9004 | Review Data Quality Status |
 | bioetl-overview-v2.json | 9007 | Review Global Provider Status |
 | bioetl-overview-v2.json | 9005 | Review Data Validation Status |
 | bioetl-overview-v2.json | 9013 | Review Workflow Status |
+| bioetl-overview-v2.json | 9021 | Navigate Diagnostics |
 | bioetl-overview-v2.json | 9602 | Inspect Run Context |
 | bioetl-overview-v2.json | 9300 | Review Run Identity |
 | bioetl-overview-v2.json | 9301 | Review Processed Records |

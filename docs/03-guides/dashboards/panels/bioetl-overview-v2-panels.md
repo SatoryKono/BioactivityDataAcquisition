@@ -32,6 +32,9 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Purpose:** Rank up to four urgency-ordered next actions for the current selectors/fleet and hand off to the recommended board.
 - **Data sources:** `topk(4, bioetl_l0_next_action_route{…} or NO_ROUTE vector fallback)` via recording rule `bioetl_l0_next_action_route`.
 - **Columns:** Priority (score, color-text), Action (row link via `action_dashboard_uid`), Why, Pipeline.
+- **Presentation:** The routing UID remains available to the Action data-link but
+  is hidden from the rendered table; the panel is tall enough to show all four
+  bounded routes without an internal vertical scrollbar.
 - **Priority order:** Runtime > Control Plane > Gold lifecycle > DQ > Provider > Workflow > Monitor.
 - **Empty/OK:** `MONITOR` / `NO_ROUTE` when no higher-priority degradation; continue monitoring when Fleet Health is OK.
 - **Notes:** `run_id` is URL handoff only (never a Prometheus label). Panel `links` are secondary domain shortcuts; primary CTA is the Action field link (RFA-00 / #7569).

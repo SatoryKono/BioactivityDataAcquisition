@@ -31,7 +31,7 @@
         "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a class=\"bioetl-nav-current\" href=\"#bioetl-runtime\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">2. Pipeline Diagnostics (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
       },
       "title": "Navigate Dashboards",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0\u20134: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5\u20136: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light",
       "type": "text",
       "links": [
         {
@@ -115,7 +115,7 @@
       "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN HTTP evidence, and selected-range history for Pipeline and Run Type. Run ID never filters Prometheus; Stage and collection states are context, not delivery proof. UNKNOWN means evidence is incomplete",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is the pipeline progressing, and what is blocking delivery?</div><div><b>Scope:</b> <b>CURRENT</b> = health/phase/blockers · <b>SELECTED RUN</b> = ID/accounting</div><div><b>STAGE</b> = diagnostic context · <b>SCRAPING</b> does not mean delivery OK</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is the pipeline progressing, and what is blocking delivery?</div><div><b>Scope:</b> <b>CURRENT</b> = health/phase/blockers \u00b7 <b>SELECTED RUN</b> = ID/accounting</div><div><b>STAGE</b> = diagnostic context \u00b7 <b>SCRAPING</b> does not mean delivery OK</div></div></div>"
       }
     },
     {
@@ -709,7 +709,7 @@
               "options": {
                 "match": "null+nan",
                 "result": {
-                  "text": "—",
+                  "text": "\u2014",
                   "color": "transparent",
                   "index": 0
                 }
@@ -736,20 +736,7 @@
           "unit": "short",
           "noValue": "No blocker rows. Trust this only when Runtime Status is OK and Telemetry Gap is clean."
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Count"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 6,
@@ -871,6 +858,37 @@
         {
           "id": "merge",
           "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time #A": true,
+              "Time #B": true,
+              "Time #C": true,
+              "Time #D": true,
+              "Time #E": true,
+              "Time #F": true,
+              "Time #G": true,
+              "Time #H": true,
+              "Time #I": true,
+              "Time #J": true,
+              "Value": true,
+              "Value #A": true,
+              "Value #B": true,
+              "Value #C": true,
+              "Value #D": true,
+              "Value #E": true,
+              "Value #F": true,
+              "Value #G": true,
+              "Value #H": true,
+              "Value #I": true,
+              "Value #J": true
+            },
+            "indexByName": {},
+            "renameByName": {}
+          }
         }
       ]
     },
@@ -978,33 +996,13 @@
             },
             "inspect": false
           },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "1": {
-                  "color": "green",
-                  "index": 0,
-                  "text": "expected"
-                },
-                "0": {
-                  "color": "blue",
-                  "index": 1,
-                  "text": "disabled"
-                }
-              }
-            }
-          ],
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "blue",
+                "color": "gray",
                 "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
               }
             ]
           },
@@ -1014,13 +1012,75 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+              "id": "byName",
+              "options": "Expected"
             },
             "properties": [
               {
-                "id": "displayName",
-                "value": "Count"
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "1": {
+                        "color": "green",
+                        "index": 0,
+                        "text": "expected"
+                      },
+                      "0": {
+                        "color": "blue",
+                        "index": 1,
+                        "text": "disabled"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "blue",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Observed Records"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
               }
             ]
           }
@@ -1068,6 +1128,26 @@
         {
           "id": "merge",
           "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time #A": true,
+              "Time #B": true
+            },
+            "indexByName": {
+              "pipeline": 0,
+              "stage": 1,
+              "Value #A": 2,
+              "Value #B": 3
+            },
+            "renameByName": {
+              "Value #A": "Expected",
+              "Value #B": "Observed Records"
+            }
+          }
         }
       ]
     },
@@ -1371,7 +1451,7 @@
               "options": {
                 "match": "null+nan",
                 "result": {
-                  "text": "—",
+                  "text": "\u2014",
                   "color": "transparent",
                   "index": 0
                 }
@@ -1455,7 +1535,7 @@
               "options": {
                 "match": "null+nan",
                 "result": {
-                  "text": "—",
+                  "text": "\u2014",
                   "color": "transparent",
                   "index": 0
                 }
@@ -1508,7 +1588,7 @@
           "expr": "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"run_type\", \"none\", \"\", \"\")",
           "instant": true,
           "refId": "A",
-          "legendFormat": "{{stage}} · {{run_type}}"
+          "legendFormat": "{{stage}} \u00b7 {{run_type}}"
         }
       ],
       "title": "Compare Records by Stage & Run Type",
@@ -1540,7 +1620,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Runtime escalation:</strong> blockers → phase evidence → action.<br>Use Incident Workspace for multi-domain impact; Run Explorer for exact-run proof.</div>"
+        "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Runtime escalation:</strong> blockers \u2192 phase evidence \u2192 action.<br>Use Incident Workspace for multi-domain impact; Run Explorer for exact-run proof.</div>"
       },
       "transparent": true,
       "description": "Contains Runtime-owned failure, no-records, and memory-pressure signals. A zero is conclusive only when Metrics Coverage is complete; otherwise verify telemetry before following the relevant runbook or Run Explorer path"
@@ -1625,7 +1705,7 @@
       },
       "targets": [
         {
-          "expr": "((((sum(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_runtime_error_rate_high_30m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0))) or vector(0)",
+          "expr": "((((sum(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_runtime_error_rate_high_30m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0)))",
           "refId": "A"
         }
       ],
@@ -1829,7 +1909,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:2px 8px;font-size:12px;line-height:1.25;overflow:hidden\"><strong>Cross-domain handoffs</strong> — Provider (deps) · DQ (rejects) · Trust (replay) · Incident (ranked triage). Preserve scope variables.</div>"
+        "content": "<div style=\"padding:2px 8px;font-size:12px;line-height:1.25;overflow:hidden\"><strong>Cross-domain handoffs</strong> \u2014 Provider (deps) \u00b7 DQ (rejects) \u00b7 Trust (replay) \u00b7 Incident (ranked triage). Preserve scope variables.</div>"
       },
       "transparent": true,
       "description": "Contains handoff evidence for Data Quality, Trust, Provider Health, and freshness. These panels do not diagnose the target domain; zero is conclusive only when its telemetry anchor is present"
@@ -1914,7 +1994,7 @@
       },
       "targets": [
         {
-          "expr": "((((sum(bioetl_runtime_alert_condition_dq_soft_threshold_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_hard_fail_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_critical_anomaly_30m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_silver_validation_failures_30m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}) > bool 0))) or vector(0)",
+          "expr": "((((sum(bioetl_runtime_alert_condition_dq_soft_threshold_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_hard_fail_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_critical_anomaly_30m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_silver_validation_failures_30m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}) > bool 0)))",
           "refId": "A"
         }
       ],
@@ -1995,7 +2075,7 @@
       },
       "targets": [
         {
-          "expr": "((((sum(bioetl_runtime_alert_condition_manifest_write_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_ledger_append_failed_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_checkpoint_incompatible_30m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_replay_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_replay_drift_detected_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_lineage_refs_missing_15m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0))) or vector(0)",
+          "expr": "((((sum(bioetl_runtime_alert_condition_manifest_write_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_ledger_append_failed_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_checkpoint_incompatible_30m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_replay_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_replay_drift_detected_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_lineage_refs_missing_15m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0)))",
           "refId": "A"
         }
       ],
@@ -2083,7 +2163,7 @@
       },
       "targets": [
         {
-          "expr": "((((sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_http_error_rate_high_15m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m{provider=~\"$provider_hint\"}))) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0))) or vector(0)",
+          "expr": "(((sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_http_error_rate_high_15m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m{provider=~\"$provider_hint\"}))) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0))",
           "refId": "A"
         }
       ],
@@ -2171,7 +2251,7 @@
       },
       "targets": [
         {
-          "expr": "(((sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m))) and on() (count(bioetl_provider_current_status) > bool 0)) or vector(0)",
+          "expr": "(((sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m))) and on() (count(bioetl_provider_current_status) > bool 0))",
           "refId": "A"
         }
       ],
@@ -2277,7 +2357,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:2px 8px;font-size:12px;line-height:1.25;overflow:hidden\"><strong>Process-level (GLOBAL)</strong> — memory/error process signals are fleet evidence, not selected-run health. Pair with pipeline Status.</div>"
+        "content": "<div style=\"padding:2px 8px;font-size:12px;line-height:1.25;overflow:hidden\"><strong>Process-level (GLOBAL)</strong> \u2014 memory/error process signals are fleet evidence, not selected-run health. Pair with pipeline Status.</div>"
       },
       "transparent": true,
       "description": "Contains selected-range process-level shutdown evidence. Pipeline and Run Type filters do not affect these panels; they provide context and do not determine Pipeline Health"
@@ -2459,7 +2539,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows the worst stage lag over the last 15 minutes for Pipeline and Run Type across all stages. Mapping: <300s=OK, 300–899s=WARN, >=900s=CRIT, null=UNKNOWN. No data is missing lag evidence; inspect stage lag and backlog next",
+      "description": "Shows the worst stage lag over the last 15 minutes for Pipeline and Run Type across all stages. Mapping: <300s=OK, 300\u2013899s=WARN, >=900s=CRIT, null=UNKNOWN. No data is missing lag evidence; inspect stage lag and backlog next",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2732,7 +2812,7 @@
             "inspect": true
           },
           "unit": "none",
-          "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
+          "noValue": "Not resolved \u2014 no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
           "links": [
             {
               "title": "Copy/Open full value (plain text)",
@@ -2889,7 +2969,7 @@
           },
           "decimals": 0,
           "unit": "none",
-          "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
+          "noValue": "Not resolved \u2014 no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
           "links": [
             {
               "title": "Check BioETL Ops HTTP health",
@@ -3162,7 +3242,7 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "0 · valid empty range",
+                  "text": "0 \u00b7 valid empty range",
                   "color": "gray"
                 }
               }
@@ -3237,7 +3317,7 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "0 · valid empty range",
+                  "text": "0 \u00b7 valid empty range",
                   "color": "gray"
                 }
               }

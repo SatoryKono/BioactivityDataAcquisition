@@ -14,6 +14,14 @@ Visible scope vocabulary is strict: headline cards are `CURRENT`, HTTP identity
 is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 `TIME RANGE`. A TIME RANGE value never proves an exact run result.
 
+Silver/Gold validation, quarantine, and filter-reject diagnostic panels preserve
+empty Prometheus results as `No data`/`UNKNOWN`. They do not turn missing series
+into a synthetic healthy zero.
+
+The canonical selected-range Silver validation count is panel `id=12`. The
+former `id=7` range-composite copy was removed because it repeated the same
+query, links, and operator fact.
+
 ## Key Panels
 
 ### 1. Navigate Dashboards
@@ -92,120 +100,115 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Purpose:** Count quarantined records.
 - **Data sources:** `bioetl_dq_records_quarantined_total`
 
-### 16. Monitor Silver Validation Failures (range composite)
-- **Type:** Stat
-- **Purpose:** Count Silver validation failures over the selected range.
-- **Data sources:** `bioetl_silver_validation_failures_total`
-
-### 17. Monitor Worst Freshness Age
+### 16. Monitor Worst Freshness Age
 - **Type:** Gauge
 - **Purpose:** Show worst TIME RANGE freshness age in hours. WARN begins at
   `24h`, CRIT at `72h`; query output, unit, title, and thresholds use hours.
 - **Data sources:** `bioetl_data_freshness_seconds`
 
-### 18. Monitor Blocked Records
+### 17. Monitor Blocked Records
 - **Type:** Stat
 - **Purpose:** Count DQ blocked records.
 - **Data sources:** `bioetl_dq_blocked_records`
 
-### 19. Inspect Latest Successful Data
+### 18. Inspect Latest Successful Data
 - **Type:** Stat
 - **Purpose:** Show latest successful data timestamp.
 - **Data sources:** `bioetl_data_freshness_seconds`
 
-### 20. Monitor Silver Filter Rejects
+### 19. Monitor Silver Filter Rejects
 - **Type:** Stat
 - **Purpose:** Count Silver filter rejects.
 - **Data sources:** `bioetl_silver_filter_rejections_total`
 
-### 21. Reject Evidence
+### 20. Reject Evidence
 - **Type:** Row
 - **Purpose:** Collapsed-by-default reject analysis; expand after current reasons
   or TIME RANGE delivery-impact cards identify a reject path.
 - **Data sources:** `bioetl_silver_filter_rejections_total`, `bioetl_dq_validation_failures_total`
 
-### 22. Monitor Silver Reject Mismatch
+### 21. Monitor Silver Reject Mismatch
 - **Type:** Stat
 - **Purpose:** Detect Silver filter reject accounting mismatch.
 - **Data sources:** `bioetl_silver_filter_reject_total_mismatch_15m`
 
-### 23. Inspect Silver Rejects by Pipeline
+### 22. Inspect Silver Rejects by Pipeline
 - **Type:** Bargauge
 - **Purpose:** Show Silver rejects by pipeline.
 - **Data sources:** `bioetl_silver_filter_rejections_total`
 
-### 24. Inspect: Gold Reject Outcomes by Pipeline
+### 23. Inspect: Gold Reject Outcomes by Pipeline
 - **Type:** Bargauge
 - **Purpose:** Show Gold reject outcomes by pipeline.
 - **Data sources:** `bioetl_processed_records_gold_quarantined_current`, `bioetl_processed_records_gold_excluded_by_contract_current`
 
-### 25. Inspect Top Silver Reject Reasons
+### 24. Inspect Top Silver Reject Reasons
 - **Type:** Bargauge
 - **Purpose:** Show top Silver reject reasons.
 - **Data sources:** `bioetl_silver_filter_reject_reason_total`
 
-### 26. Inspect Top Silver Reject Fields
+### 25. Inspect Top Silver Reject Fields
 - **Type:** Bargauge
 - **Purpose:** Show top Silver reject fields.
 - **Data sources:** `bioetl_silver_filter_reject_field_total`
 
-### 27. Validation Diagnostics
+### 26. Validation Diagnostics
 - **Type:** Row
 - **Purpose:** Collapsed-by-default validation/runtime/trend forensics.
 - **Data sources:** `bioetl_dq_validation_failures_total`, `bioetl_dq_anomaly_detected`
 
-### 28. Inspect Quarantine Error Types
+### 27. Inspect Quarantine Error Types
 - **Type:** Bargauge
 - **Purpose:** Show quarantine by error type.
 - **Data sources:** `bioetl_dq_records_quarantined_total`
 
-### 29. Track DQ Anomalies
+### 28. Track DQ Anomalies
 - **Type:** Timeseries
 - **Purpose:** Show anomaly detection trend.
 - **Data sources:** `bioetl_dq_anomaly_detected`
 
-### 30. Track DQ Check Duration p95
+### 29. Track DQ Check Duration p95
 - **Type:** Timeseries
 - **Purpose:** Show DQ check duration p95.
 - **Data sources:** `bioetl_dq_check_duration_seconds`
 
-### 31. Monitor Silver Validation Failures
+### 30. Monitor Silver Validation Failures
 - **Type:** Stat
 - **Purpose:** Count Silver validation failures.
 - **Data sources:** `bioetl_silver_validation_failures_total`
 
-### 32. Inspect Lineage in Control Plane
+### 31. Inspect Lineage in Control Plane
 - **Type:** Text
 - **Purpose:** Explain lineage handoff to control plane.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 33. Track Volume-Weighted DQ Score
+### 32. Track Volume-Weighted DQ Score
 - **Type:** Timeseries
 - **Purpose:** Show DQ score trend over time on the canonical `0.0-1.0` ratio
   scale.
 - **Data sources:** `bioetl_dq_validation_score`
 
-### 34. Track DQ Threshold Events
+### 33. Track DQ Threshold Events
 - **Type:** Timeseries
 - **Purpose:** Show DQ threshold events trend.
 - **Data sources:** `bioetl_dq_soft_threshold_exceeded`
 
-### 35. Inspect Aggregate Control-Plane Issues
+### 34. Inspect Aggregate Control-Plane Issues
 - **Type:** Text
 - **Purpose:** Explain aggregate control-plane handoff.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 36. Monitor Gold Validation Failures
+### 35. Monitor Gold Validation Failures
 - **Type:** Stat
 - **Purpose:** Count Gold strict validation failures.
 - **Data sources:** `bioetl_dq_validation_failures_total`
 
-### 37. Range & Debug Evidence
+### 36. Range & Debug Evidence
 - **Type:** Row
 - **Purpose:** Group selected-range score, quarantine, and reject evidence.
 - **Data sources:** Prometheus range evidence from the nested panels.
 
-### 38. Run Context
+### 37. Run Context
 - **Type:** Row
 - **Purpose:** Group selected-run identity and processed-record HTTP evidence.
 - **Data sources:** BioETL Ops HTTP.
