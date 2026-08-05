@@ -564,10 +564,11 @@ pipeline-execution
 # Production (OTLP)
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
 
-# Local Tempo over plaintext gRPC
+# Optional BYO Tempo/collector over plaintext gRPC (not part of default shipping stack)
 export OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317
 # OTEL_EXPORTER_OTLP_INSECURE=true выставляется автоматически,
-# если endpoint указывает на локальный Tempo и override не задан.
+# если endpoint указывает на localhost collector/Tempo и override не задан.
+# Note: Grafana Tempo Explore handoffs are removed from shipped dashboards (2026-07-23).
 
 # Development (Console)
 # Настраивается автоматически при отсутствии OTLP endpoint
@@ -737,10 +738,11 @@ successful report generation without relying only on warning logs.
 
 - `bioetl_traced_runs_total` tracks pipeline runs that started with a real tracing implementation.
 
-Use this counter together with `2. Runtime` and Tempo:
+Use this counter together with `2. Pipeline Diagnostics` and your **optional**
+BYO tracing backend (OTLP collector / Tempo — not shipped in default monitoring):
 
-- `Trace-enabled Runs (24h) = 0` means empty Tempo is expected for the selected pipeline/run_type window.
-- `Trace-enabled Runs (24h) > 0` plus empty Tempo usually means a broken tracing/export path rather than an intentionally untraced run.
+- `Trace-enabled Runs (24h) = 0` means empty trace storage is expected for the selected pipeline/run_type window.
+- `Trace-enabled Runs (24h) > 0` plus empty storage usually means a broken tracing/export path rather than an intentionally untraced run.
 
 ### Checkpoint recovery tracing
 
