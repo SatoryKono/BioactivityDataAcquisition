@@ -134,6 +134,50 @@ def test_filter_records_requires_all_selected_dimensions_to_match() -> None:
     ) == (first,)
 
 
+def test_run_id_options_order_by_started_at_desc_independent_of_input_order() -> None:
+    """#7552: filter-options run_id list is newest-start-first, not catalog order."""
+    from bioetl.interfaces.http._control_plane_selector_payloads import (
+        RUN_ID_NO_SELECTION,
+        defaults_payload,
+        options_payload,
+    )
+
+    older = _record(
+        "older",
+        workflow_candidates=("wf-a",),
+        pipeline="chembl_activity",
+        run_type="backfill",
+        run_status="success",
+        completed_offset=1,
+    )
+    newer = _record(
+        "newer",
+        workflow_candidates=("wf-a",),
+        pipeline="chembl_activity",
+        run_type="backfill",
+        run_status="success",
+        completed_offset=10,
+    )
+    middle = _record(
+        "middle",
+        workflow_candidates=("wf-a",),
+        pipeline="chembl_activity",
+        run_type="incremental",
+        run_status="success",
+        completed_offset=5,
+    )
+
+    # Deliberately reverse catalog encounter order.
+    options = options_payload((older, newer, middle))
+    assert options["run_id"] == ["run-newer", "run-middle", "run-older"]
+
+    defaults = defaults_payload()
+    assert defaults["policy"] == "last_run_truthful"
+    assert defaults["run_type_fallback"] == "backfill"
+    assert defaults["run_id_list_order"] == "started_at_desc"
+    assert RUN_ID_NO_SELECTION == "-"
+
+
 def test_latest_record_uses_completed_at_then_manifest_id_tie_breaker() -> None:
     older = _record(
         "a",

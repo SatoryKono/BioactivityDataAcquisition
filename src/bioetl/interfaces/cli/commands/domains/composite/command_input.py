@@ -25,7 +25,8 @@ class CompositeRunCommandInput:
     debug: bool = False
     health_server: bool = True
     health_port: int = DEFAULT_HEALTH_SERVER_PORT
-    ensure_observability_backend: bool = True
+    # Align with workflow/run Click defaults (#7564): opt-in Ops HTTP backend.
+    ensure_observability_backend: bool = False
     observability_backend_port: int = DEFAULT_HEALTH_SERVER_PORT
 
 
@@ -59,7 +60,7 @@ def build_composite_run_command_input(
         health_port=cast(int, options.get("health_port", DEFAULT_HEALTH_SERVER_PORT)),
         ensure_observability_backend=cast(
             bool,
-            options.get("ensure_observability_backend", True),
+            options.get("ensure_observability_backend", False),
         ),
         observability_backend_port=cast(
             int,
