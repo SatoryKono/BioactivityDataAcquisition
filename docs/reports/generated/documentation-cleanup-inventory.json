@@ -17043,7 +17043,7 @@
       "github_issue_url": null,
       "inbound_links": 10,
       "lifecycle": null,
-      "outbound_links": 79,
+      "outbound_links": 82,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/00-overview.md",
       "recommended_action": "keep",
@@ -18973,7 +18973,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 5,
+      "inbound_links": 6,
       "lifecycle": null,
       "outbound_links": 2,
       "owner": "BioETL Team",
@@ -19001,7 +19001,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 5,
+      "inbound_links": 6,
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -19029,7 +19029,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 5,
+      "inbound_links": 6,
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -54772,14 +54772,7 @@
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
-<<<<<<< HEAD
       "commit_policy": "tracked_quality_baseline",
-||||||| fbd4594e67
-      "commit_policy": null,
-      "declared_class": "repo-only",
-=======
-      "commit_policy": null,
->>>>>>> feat/codex-native-7507
       "declared_class": "published",
       "declared_status": "active",
       "diagram_kind": null,
@@ -61477,34 +61470,6 @@
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
-      "extension": ".md",
-      "freshness": "current",
-      "generated_route": null,
-      "generated_route_exception": null,
-      "generator": null,
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 1,
-      "lifecycle": null,
-      "outbound_links": 0,
-      "owner": "BioETL Team",
-      "path": "docs/config-discrepancies-report.md",
-      "recommended_action": "keep",
-      "root_doc_kind": null,
-      "section": "config-discrepancies-report.md",
-      "status": "Active",
-      "surface_family": "active",
-      "tracking_state": "tracked"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
-      "commit_policy": null,
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
       "extension": ".json",
       "freshness": "current",
       "generated_route": null,
@@ -62530,7 +62495,7 @@
       "section": "reports",
       "status": "Generated",
       "surface_family": "generated",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -68841,6 +68806,34 @@
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/root-hygiene/cycle-5loop-20260805/CONSOLIDATED_REPORT.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
       "extension": ".json",
       "freshness": "review-required",
       "generated_route": null,
@@ -70030,32 +70023,13 @@
       "live_issue_mirror": 4,
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 33,
-<<<<<<< HEAD
-      "working_report": 116
-||||||| fbd4594e67
-      "working_report": 94
-=======
-      "working_report": 95
->>>>>>> feat/codex-native-7507
+      "working_report": 117
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 312,
-<<<<<<< HEAD
-      "archive-after-migration": 111,
-      "generate-automatically": 862,
-<<<<<<< HEAD
-      "keep": 1184,
-||||||| 2f71e06c68
-||||||| fbd4594e67
-      "archive-after-migration": 89,
-=======
-      "archive-after-migration": 90,
->>>>>>> feat/codex-native-7507
-      "generate-automatically": 861,
-      "keep": 1183,
-=======
-      "keep": 1183,
->>>>>>> agent/governance-debt-closeout-7516-7521-final
+      "archive-after-migration": 112,
+      "generate-automatically": 863,
+      "keep": 1182,
       "reconcile-with-github-state": 4
     },
     "by_section": {
@@ -70078,66 +70052,31 @@
       "INDEX.md": 1,
       "README.md": 1,
       "best_practices.md": 1,
-      "config-discrepancies-report.md": 1,
       "doc.json": 1,
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
       "plugins": 4,
-<<<<<<< HEAD
-      "reports": 260,
-||||||| fbd4594e67
-      "reports": 223,
-=======
-      "reports": 224,
->>>>>>> feat/codex-native-7507
+      "reports": 261,
       "ru": 3,
       "security": 2
     },
     "by_status": {
-      "Active": 856,
+      "Active": 854,
       "Archived": 147,
       "Canonical": 73,
-<<<<<<< HEAD
-      "Generated": 862,
-      "Working": 535
-||||||| fbd4594e67
-      "Generated": 861,
-      "Working": 500
-=======
-      "Generated": 861,
-      "Working": 501
->>>>>>> feat/codex-native-7507
+      "Generated": 863,
+      "Working": 536
     },
     "by_surface_family": {
-      "active": 856,
+      "active": 854,
       "archive": 147,
       "canonical": 73,
-<<<<<<< HEAD
-      "generated": 862,
-      "working": 535
-||||||| fbd4594e67
-      "generated": 861,
-      "working": 500
-=======
-      "generated": 861,
-      "working": 501
->>>>>>> feat/codex-native-7507
+      "generated": 863,
+      "working": 536
     },
     "by_tracking_state": {
-<<<<<<< HEAD
-<<<<<<< HEAD
-      "ignored_local": 1,
-||||||| 2f71e06c68
-      "tracked": 2471
-=======
->>>>>>> agent/governance-debt-closeout-7516-7521-final
-      "tracked": 2472
-||||||| fbd4594e67
-      "tracked": 2437
-=======
-      "tracked": 2438
->>>>>>> feat/codex-native-7507
+      "tracked": 2473
     },
     "docs_reports_local_count": 32,
     "duplicate_group_count": 6,
@@ -70153,29 +70092,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-<<<<<<< HEAD
-<<<<<<< HEAD
     "total_doc_like": 2473,
-    "total_doc_like_ignored_local": 1,
-||||||| 2f71e06c68
-    "total_doc_like": 2471,
-||||||| fbd4594e67
-    "total_doc_like": 2437,
-=======
-    "total_doc_like": 2438,
->>>>>>> feat/codex-native-7507
     "total_doc_like_ignored_local": 0,
-<<<<<<< HEAD
-    "total_doc_like_tracked": 2471
-=======
-    "total_doc_like": 2472,
-    "total_doc_like_ignored_local": 0,
->>>>>>> agent/governance-debt-closeout-7516-7521-final
-    "total_doc_like_tracked": 2472
-||||||| fbd4594e67
-    "total_doc_like_tracked": 2437
-=======
-    "total_doc_like_tracked": 2438
->>>>>>> feat/codex-native-7507
+    "total_doc_like_tracked": 2473
   }
 }
