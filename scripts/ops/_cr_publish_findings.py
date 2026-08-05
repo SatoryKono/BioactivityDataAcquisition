@@ -83,6 +83,8 @@ def load_wave(artifact_dir: Path, wave: str) -> list[Finding]:
     findings: list[Finding] = []
     for agent in sorted(artifact_dir.glob("review_*.agent.json")):
         leaf = agent.name.removeprefix("review_").removesuffix(".agent.json")
+        if not leaf.startswith(f"{wave}_") and leaf != wave:
+            continue
         findings.extend(parse_agent_ndjson(agent, leaf))
     return findings
 
