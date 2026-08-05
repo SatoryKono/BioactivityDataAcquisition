@@ -112,18 +112,42 @@ def _find_lint_imports_cmd(project_root: Path) -> str | None:
     """Resolve the lint-imports executable from PATH or the local virtualenv."""
     import shutil
 
-    lint_imports_cmd = shutil.which("lint-imports")
-    if lint_imports_cmd is not None:
-        return lint_imports_cmd
+    candidates: list[Path] = []
+    # Prefer native Windows virtualenv entrypoints first to avoid WinError 193
+    # when a Unix `.venv/bin/lint-imports` shebang script is also present.
+    if os.name == "nt":
+        candidates.extend(
+            (
+                project_root / ".venv-win" / "Scripts" / "lint-imports.exe",
+                project_root / ".venv" / "Scripts" / "lint-imports.exe",
+            )
+        )
 
-    candidates = (
-        project_root / ".venv" / "bin" / "lint-imports",
-        project_root / ".venv" / "Scripts" / "lint-imports.exe",
-        project_root / ".venv" / "Scripts" / "lint-imports",
+    which_cmd = shutil.which("lint-imports")
+    if which_cmd is not None:
+        candidates.append(Path(which_cmd))
+
+    candidates.extend(
+        (
+            project_root / ".venv" / "Scripts" / "lint-imports.exe",
+            project_root / ".venv" / "Scripts" / "lint-imports",
+            project_root / ".venv" / "bin" / "lint-imports",
+        )
     )
+
+    seen: set[str] = set()
     for candidate in candidates:
-        if candidate.exists() and os.access(candidate, os.X_OK):
-            return str(candidate)
+        resolved = str(candidate)
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        if not candidate.exists():
+            continue
+        if os.name == "nt" and candidate.suffix.lower() not in {".exe", ".bat", ".cmd"}:
+            # Unix shebang entrypoints are not valid Win32 applications.
+            continue
+        if candidate.suffix.lower() == ".exe" or os.access(candidate, os.X_OK):
+            return resolved
     return None
 
 
