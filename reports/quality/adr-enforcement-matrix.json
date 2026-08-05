@@ -1998,6 +1998,7 @@
       "implementation_owner_paths": [
         "configs/quality/generated_artifact_routing.yaml",
         "docs/00-project/RULES.md",
+        "docs/00-project/rules-summary.md",
         "docs/03-guides/coderabbit-audit-playbook.md",
         "docs/03-guides/dashboards/README.md",
         "docs/03-guides/dashboards/dashboard-system-2.0-phase2-residual.md",
@@ -2057,6 +2058,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/RULES.md",
+        "docs/01-requirements/REQUIREMENTS.md",
         "docs/04-reference/passports/index.md",
         "docs/04-reference/passports/manual/workflows/chembl_baseline.yaml",
         "docs/04-reference/passports/manual/workflows/chembl_core.yaml",

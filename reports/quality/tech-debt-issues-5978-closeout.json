@@ -25,7 +25,8 @@
     "promotion_criteria": [
       "branch-rate remains at or above 85% for three consecutive coverage-verify runs",
       "no module is unmeasured or uncovered in module-coverage-inventory",
-      "top-ranked low-tail modules have focused branch/error-path owner tests"
+      "top-ranked low-tail modules have focused branch/error-path owner tests",
+      "prefer maintaining >= 85.2% branch rate (advisory margin; #7611)"
     ],
     "rationale": "Hard branch gate enforcement is promoted through scripts.engineering.qa check-branch-coverage in the canonical coverage-verify lane after three consecutive passing local branch-gate checks on the refreshed coverage XML."
   },

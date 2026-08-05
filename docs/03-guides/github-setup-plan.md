@@ -10,9 +10,10 @@ ______________________________________________________________________
 
 # GitHub setup plan (archived pointer)
 
-This path is a **stable pointer only**. The long-form setup plan was archived:
+This path is a **stable pointer only**. The long-form setup plan is
+**archived / historical** (not SSOT):
 
-- [docs/99-archive/guides/github-setup-plan.md](../99-archive/guides/github-setup-plan.md)
+- [archived github-setup-plan.md](../99-archive/guides/github-setup-plan.md)
 
 ## Canonical active surfaces
 
