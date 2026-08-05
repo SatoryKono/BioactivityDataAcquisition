@@ -56,6 +56,9 @@ Endpoints live on `bioetl health server` (`/ops/control-plane/*`).
 The old Quarantine Explorer port `:8081` is not published by default.
 
 `python -m scripts.ops ensure-quarantine-explorer` is a fail-closed stub (exit 2).
+The Windows compatibility launcher
+`scripts/ops/observability/grafana/start_quarantine_explorer.ps1` delegates to
+that stub and must not start a replacement backend.
 
 ### CLI alignment (follow-up)
 

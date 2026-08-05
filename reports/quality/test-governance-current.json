@@ -1111,27 +1111,10 @@
     }
   },
   "assertless_total_candidates": 105,
-  "budget_violations": [
-    {
-      "actual": 1,
-      "budget": "compatibility_test_file_max",
-      "expected_max": 0,
-      "metric": "compatibility_test_files"
-    },
-    {
-      "actual": 2,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
-  "compatibility_examples": [
-    "tests/unit/tools/test_pytest_option_compatibility.py"
-  ],
-  "compatibility_files": [
-    "tests/unit/tools/test_pytest_option_compatibility.py"
-  ],
-  "compatibility_test_files": 1,
+  "budget_violations": [],
+  "compatibility_examples": [],
+  "compatibility_files": [],
+  "compatibility_test_files": 0,
   "critical_behavior_envelope_assertion_gap_count": 0,
   "critical_behavior_envelope_count": 6,
   "critical_behavior_envelopes": {
@@ -1302,11 +1285,8 @@
     ]
   },
   "intentional_no_exception_contract": 89,
-  "markerless_examples": [
-    "tests/unit/tools/test_pytest_option_compatibility.py:10",
-    "tests/unit/tools/test_pytest_option_compatibility.py:22"
-  ],
-  "markerless_test_functions": 2,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2123,13 +2103,9 @@
       "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129"
     ],
     "assertless_total_candidates": 105,
-    "compatibility_examples": [
-      "tests/unit/tools/test_pytest_option_compatibility.py"
-    ],
-    "compatibility_files": [
-      "tests/unit/tools/test_pytest_option_compatibility.py"
-    ],
-    "compatibility_test_files": 1,
+    "compatibility_examples": [],
+    "compatibility_files": [],
+    "compatibility_test_files": 0,
     "critical_behavior_envelope_assertion_gap_count": 0,
     "critical_behavior_envelope_count": 6,
     "critical_behavior_envelopes": {
@@ -2299,11 +2275,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/tools/test_pytest_option_compatibility.py:10",
-      "tests/unit/tools/test_pytest_option_compatibility.py:22"
-    ],
-    "markerless_test_functions": 2,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2362,25 +2335,22 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2178,
-    "total_test_functions": 23292,
+    "total_test_functions": 23294,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "d909d5ec7a8ad19ae658cd302158eba993d805f2e87e5801d391e8ae8db8cdd8",
+  "source_tree_sha256": "55672f49c61bb7e48e6064f87bd2825fa2844ab10500c2db5e97c766aecc3fe5",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 105,
-    "compatibility_test_files": 1,
+    "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 89,
-    "markerless_examples": [
-      "tests/unit/tools/test_pytest_option_compatibility.py:10",
-      "tests/unit/tools/test_pytest_option_compatibility.py:22"
-    ],
-    "markerless_test_functions": 2,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2431,7 +2401,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2178,
-  "total_test_functions": 23292,
+  "total_test_functions": 23294,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

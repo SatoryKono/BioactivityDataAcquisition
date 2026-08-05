@@ -34,6 +34,7 @@ import pytest
 
 from pathlib import Path
 
+import bioetl.domain.composite as composite
 from bioetl.domain.composite import config as facade
 from bioetl.domain.composite.config_models import (
     CrossValidationConfig as ModelsCrossValidationConfig,
@@ -63,6 +64,28 @@ def test_config_facade_keeps_model_reexports() -> None:
     assert facade.LayerColumnConfig is ModelsLayerColumnConfig
     assert facade.DataSchemaConfig is ModelsDataSchemaConfig
     assert facade.CrossValidationConfig is ModelsCrossValidationConfig
+
+
+def test_package_root_config_exports_resolve_from_public_facade() -> None:
+    config_exports = {
+        "ColumnGroupConfig",
+        "CompositeConfig",
+        "CompositeDQConfig",
+        "CrossValidationConfig",
+        "DataSchemaConfig",
+        "DependencyConfig",
+        "DQOverrideConfig",
+        "EnricherConfig",
+        "ExecutionConfig",
+        "LayerColumnConfig",
+        "LineageConfig",
+        "MergeConfig",
+        "SeedConfig",
+    }
+
+    assert config_exports <= set(dir(composite))
+    for name in config_exports:
+        assert getattr(composite, name) is getattr(facade, name)
 
 
 def test_config_facade_file_is_thin() -> None:

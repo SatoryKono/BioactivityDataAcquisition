@@ -10593,7 +10593,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.composite",
       "path": "src/bioetl/domain/composite/__init__.py",
-      "source_lines": 132
+      "source_lines": 150
     },
     {
       "coverage_percent": 93.51,
@@ -21993,7 +21993,7 @@
       "missing_lines": 0,
       "module": "bioetl.interfaces.cli.commands.domains.health._observability_backend_startup",
       "path": "src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_startup.py",
-      "source_lines": 306
+      "source_lines": 307
     },
     {
       "coverage_percent": null,
@@ -22073,7 +22073,7 @@
       "missing_lines": 6,
       "module": "bioetl.interfaces.cli.commands.domains.health.observability_backend_process",
       "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py",
-      "source_lines": 293
+      "source_lines": 323
     },
     {
       "coverage_percent": 100.0,
@@ -22463,7 +22463,7 @@
       "missing_lines": 0,
       "module": "bioetl.interfaces.cli.commands.domains.shared.click_options",
       "path": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
-      "source_lines": 263
+      "source_lines": 264
     },
     {
       "coverage_percent": 93.58,
@@ -22573,7 +22573,7 @@
       "missing_lines": 4,
       "module": "bioetl.interfaces.cli.commands.quarantine",
       "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
-      "source_lines": 267
+      "source_lines": 277
     },
     {
       "coverage_percent": null,
@@ -22613,7 +22613,7 @@
       "missing_lines": 1,
       "module": "bioetl.interfaces.cli.commands.run_composite",
       "path": "src/bioetl/interfaces/cli/commands/run_composite.py",
-      "source_lines": 356
+      "source_lines": 362
     },
     {
       "coverage_percent": 90.12,
@@ -22653,7 +22653,7 @@
       "missing_lines": 3,
       "module": "bioetl.interfaces.cli.commands.workflow",
       "path": "src/bioetl/interfaces/cli/commands/workflow.py",
-      "source_lines": 346
+      "source_lines": 353
     },
     {
       "coverage_percent": 100.0,
@@ -22733,7 +22733,7 @@
       "missing_lines": 3,
       "module": "bioetl.interfaces.http._control_plane_selector_records",
       "path": "src/bioetl/interfaces/http/_control_plane_selector_records.py",
-      "source_lines": 265
+      "source_lines": 267
     },
     {
       "coverage_percent": null,
@@ -33735,7 +33735,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.composite",
       "path": "src/bioetl/domain/composite/__init__.py",
-      "source_lines": 132
+      "source_lines": 150
     },
     {
       "coverage_percent": 93.51,
@@ -45135,7 +45135,7 @@
       "missing_lines": 0,
       "module": "bioetl.interfaces.cli.commands.domains.health._observability_backend_startup",
       "path": "src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_startup.py",
-      "source_lines": 306
+      "source_lines": 307
     },
     {
       "coverage_percent": null,
@@ -45215,7 +45215,7 @@
       "missing_lines": 6,
       "module": "bioetl.interfaces.cli.commands.domains.health.observability_backend_process",
       "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py",
-      "source_lines": 293
+      "source_lines": 323
     },
     {
       "coverage_percent": 100.0,
@@ -45605,7 +45605,7 @@
       "missing_lines": 0,
       "module": "bioetl.interfaces.cli.commands.domains.shared.click_options",
       "path": "src/bioetl/interfaces/cli/commands/domains/shared/click_options.py",
-      "source_lines": 263
+      "source_lines": 264
     },
     {
       "coverage_percent": 93.58,
@@ -45715,7 +45715,7 @@
       "missing_lines": 4,
       "module": "bioetl.interfaces.cli.commands.quarantine",
       "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
-      "source_lines": 267
+      "source_lines": 277
     },
     {
       "coverage_percent": null,
@@ -45755,7 +45755,7 @@
       "missing_lines": 1,
       "module": "bioetl.interfaces.cli.commands.run_composite",
       "path": "src/bioetl/interfaces/cli/commands/run_composite.py",
-      "source_lines": 356
+      "source_lines": 362
     },
     {
       "coverage_percent": 90.12,
@@ -45795,7 +45795,7 @@
       "missing_lines": 3,
       "module": "bioetl.interfaces.cli.commands.workflow",
       "path": "src/bioetl/interfaces/cli/commands/workflow.py",
-      "source_lines": 346
+      "source_lines": 353
     },
     {
       "coverage_percent": 100.0,
@@ -45875,7 +45875,7 @@
       "missing_lines": 3,
       "module": "bioetl.interfaces.http._control_plane_selector_records",
       "path": "src/bioetl/interfaces/http/_control_plane_selector_records.py",
-      "source_lines": 265
+      "source_lines": 267
     },
     {
       "coverage_percent": null,
@@ -46290,7 +46290,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-28",
-  "source_tree_sha256": "5e3f5b71ef36b660b6eeaba1d15a51842218dea13fa448205eb3b5ec1eb68ff2",
+  "source_tree_sha256": "d16481673f2b9b318ead9f5a0212016bc732c39ebec88b17eb48fcc98d08dc52",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

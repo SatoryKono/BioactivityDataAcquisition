@@ -1,9 +1,9 @@
 {
   "source_branch": "main",
-  "source_commit": "427718a2101cae45ce4a9db892b042dc655ffa13",
-  "source_run_id": "local-duration-rebuild-2026-07-23",
-  "source_tree_sha256": "3ef18305d4dc748f12a3ce7ba5d56dafc94346e9702dc0ef3f38e4af74ef5156",
-  "refreshed_at_utc": "2026-08-04T18:12:10.346849+00:00",
+  "source_commit": "14bcbfbd8054292fff9f55837da508a80ceaaeea",
+  "source_run_id": "local-governance-closeout-20260805-final",
+  "source_tree_sha256": "fc2817f0416dcd91648e0a594c4bcf75e737bd760cd2c48a57170bcf23db74b7",
+  "refreshed_at_utc": "2026-08-05T06:06:07.843681+00:00",
   "refresh_status": "captured",
   "total_cases": 23360,
   "top_slowest": [

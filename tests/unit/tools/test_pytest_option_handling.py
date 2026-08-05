@@ -1,10 +1,14 @@
-"""Regression tests for compatibility with pytest option metadata APIs."""
+"""Regression tests for supported pytest option metadata API variants."""
 
 from __future__ import annotations
 
 from types import SimpleNamespace
 
+import pytest
+
 from tests import conftest as root_conftest
+
+pytestmark = pytest.mark.unit
 
 
 def test_pytest_option_names_supports_callable_api() -> None:
