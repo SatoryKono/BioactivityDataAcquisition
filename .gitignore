@@ -504,6 +504,7 @@ scripts/docs/build/**/*.pyc
 /docs/reports/generated/*
 !/docs/reports/generated/documentation-cleanup-inventory.json
 !/docs/reports/generated/documentation-cleanup-inventory.md
+!/docs/reports/generated/config-discrepancies-report.md
 !/docs/reports/generated/chembl_matrix_structural_contract_v1.json
 !/docs/reports/generated/pipeline_normalization_field_matrix/
 !/docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md

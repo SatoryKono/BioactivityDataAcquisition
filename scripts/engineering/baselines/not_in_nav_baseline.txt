@@ -172,7 +172,6 @@
 02-architecture/diagrams/descriptions/architecture/47-run-manifest-domain-model-and-serialization-surface.md
 02-architecture/diagrams/descriptions/architecture/48-effective-config-artifact-domain-model.md
 02-architecture/diagrams/descriptions/foundation/35-bootstrap-sequence.md
-02-architecture/diagrams/governance/diagram-expansion-2026-05-12.md
 02-architecture/governance-audit-evidence.md
 03-data-model/json-field-typing-inventory.md
 03-data-model/reference-identifier-families.md
@@ -276,7 +275,6 @@
 03-guides/development/pycharm-baseline.md
 DOCKER_QUICKSTART.md
 DOCKER_SETUP.md
-config-discrepancies-report.md
 filters/README.md
 filters/inventory-baseline.md
 plugins/link_checker/INTEGRATION_GUIDE.md
