@@ -401,7 +401,11 @@ test_lanes:
 
     architecture-fast-boundary:
       suite_name: architecture-fast-boundary
-      description: "Fast architecture boundary lane for local feedback; excludes slow repo-wide governance scans."
+      description: >
+        PR-default architecture boundary lane (#7609 / #7605): import matrix,
+        domain purity, LOC/DI, interfaces↛infra, and ownership ratchets.
+        Excludes slow repo-wide governance scans (use architecture-slow-governance
+        or full architecture lane on CI nightly / full audit).
       runner_backend: run_pytest_sharded
       runner: scripts/engineering/dev/run_pytest_sharded.sh
       runner_options:

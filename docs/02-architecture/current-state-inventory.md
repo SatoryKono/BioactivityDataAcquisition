@@ -27,7 +27,7 @@ truth; existing documentation is evidence only when it matches those sources.
 | Entity data contracts | 27 | `configs/contracts/{chembl,composite,crossref,openalex,pubchem,pubmed,semanticscholar,uniprot}/*.yaml` | One contract per configured entity pipeline surface. |
 | Error catalog | 1 | `configs/contracts/errors/error_catalog.yaml` | Canonical error-code taxonomy; not counted as an entity data contract. |
 | Provider configs | 7 | `configs/providers/*.yaml` | ChEMBL, CrossRef, OpenAlex, PubChem, PubMed, Semantic Scholar, UniProt. |
-| Grafana dashboards | 8 | `grafana/dashboards/*.json` | Overview, runtime, provider health, DQ, workflow, control-plane, alerts/SLO, silver reject explorer. |
+| Grafana dashboards | 7 | `grafana/dashboards/*.json` | Trust/control-plane, overview, runtime, provider health, DQ, incident, run-explorer (Silver Reject Explorer removed 2026-07-23). |
 | Domain port files | 74 | `src/bioetl/domain/ports/**/*.py` | 19 top-level files plus nested config, control-plane, metadata, observability, quality, runtime, and storage packages. |
 
 ## Architecture Quality Evidence

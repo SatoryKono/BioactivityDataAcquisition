@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-30'
+  Last verified: '2026-08-05'
 
 ______________________________________________________________________
 
 # Architecture Overview
 
-*Synced with RULES.md v6.1.4 (2026-07-28)*
+*Synced with RULES.md v6.1.7 (2026-08-05)*
 
 ## Quick Navigation
 
@@ -55,7 +55,7 @@ architecture section focuses on structure, boundaries, and design rationale.
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-52 ADRs documenting key architectural decisions:
+55 ADRs documenting key architectural decisions:
 
 | ADR                                                                | Topic                                     | RULES.md Reference |
 | ------------------------------------------------------------------ | ----------------------------------------- | ------------------ |
@@ -111,6 +111,9 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-050](decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md) | Silver Structural and Gold Semantic Filter Boundary | §2.1, App D |
 | [ADR-051](decisions/ADR-051-quarantine-entry-aggregate-surface.md) | QuarantineEntry aggregate constructor surface | §2.6 |
 | [ADR-052](decisions/ADR-052-infrastructure-config-package-root-public-api.md) | Infrastructure config package root public API | §1, composition |
+| [ADR-053](decisions/ADR-053-optional-grafana-scenes-app-shell.md) | Optional Grafana Scenes app shell (presentation adapter) | §3.2, ADR-010 |
+| [ADR-054](decisions/ADR-054-passport-documentation-projections.md) | Evidence-backed passport documentation projections | §6, DOC-GOV |
+| [ADR-055](decisions/ADR-055-workflow-reconciliation-data-step-ownership.md) | Workflow reconciliation data-step ownership | §2.4, ADR-047 |
 
 ______________________________________________________________________
 
