@@ -2,11 +2,11 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-08-05T06:06:07.843681+00:00'
+refreshed_at_utc: '2026-08-05T11:07:06.501447+00:00'
 refresh_status: captured
-source_commit: 14bcbfbd8054292fff9f55837da508a80ceaaeea
-source_run_id: local-governance-closeout-20260805-final
-source_tree_sha256: fc2817f0416dcd91648e0a594c4bcf75e737bd760cd2c48a57170bcf23db74b7
+source_commit: 5271c40811c2420da5ae82fa233f56dfc02f25af
+source_run_id: github-30999069843-1
+source_tree_sha256: 671ec7f5d8eb2568fd50ae738a716f1c7825f6af5f78db1acf8c9936992f8ef9
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
@@ -21,167 +21,126 @@ coverage:
   actual_percent: 92.44
   threshold_satisfied: true
 duration_telemetry:
-  total_cases: 23360
+  total_cases: 46742
   top_slowest:
-  - source: S7-crosscutting-architecture-c.xml
-    test: tests.architecture.test_naming_ambiguity_classifier::test_build_ambiguity_groups_is_deterministic
-    duration_s: 192.078
-  - source: S7-crosscutting-architecture-c.xml
-    test: tests.architecture.test_provider_registry_decomposition::test_private_default_registry_module_imports_stay_confined_to_sanctioned_seams
-    duration_s: 76.218
-  - source: S7-crosscutting-architecture-a3.xml
-    test: tests.architecture.test_debt_governance_telemetry_reporting::test_debt_governance_snapshot_matches_live_sources
-    duration_s: 64.276
-  - source: S7-crosscutting-architecture-c.xml
-    test: tests.architecture.test_provider_registry_decomposition::test_default_provider_registry_raw_calls_stay_confined_to_known_src_baseline
-    duration_s: 55.574
-  - source: S7-crosscutting-architecture-c.xml
-    test: tests.architecture.test_quality_exemptions_registry::test_exemption_registry_targets_are_live
-    duration_s: 40.649
-  - source: S7-crosscutting-architecture-c.xml
-    test: tests.architecture.test_naming_ambiguity_classifier::test_build_ambiguity_groups_reports_expected_ok_families
-    duration_s: 38.963
-  - source: S7-crosscutting-architecture-c.xml
-    test: tests.architecture.test_mounted_worktree_skip_policy::test_tests_do_not_reintroduce_hardcoded_network_drive_skips
-    duration_s: 37.074
-  - source: S7-crosscutting-architecture-c.xml
-    test: tests.architecture.test_private_module_imports::test_owner_aware_private_module_imports
-    duration_s: 35.843
-  - source: S7-crosscutting-architecture-b.xml
-    test: tests.architecture.test_import_graph_invariants::test_import_graph_respects_layer_matrix
-    duration_s: 35.412
-  - source: S8-crosscutting-governance.xml
-    test: tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path
-    duration_s: 34.348
-  - source: S7-crosscutting-architecture-d.xml
-    test: tests.architecture.test_vcr_metadata_catalog_drift::test_vcr_metadata_catalog_tracks_cassettes_not_sidecars
-    duration_s: 33.691
-  - source: S7-crosscutting-architecture-d.xml
-    test: tests.architecture.test_tech_debt_issues_5670_5675_closeout::test_issue_5674_internal_compatibility_shims_have_current_expiry_guards
-    duration_s: 31.733
-  - source: S7-crosscutting-architecture-d.xml
-    test: tests.architecture.test_value_object_run_manifest_deprecation::test_deprecated_value_object_run_manifest_is_not_used_in_tests
-    duration_s: 30.766
-  - source: S7-crosscutting-architecture-a3.xml
-    test: tests.architecture.test_deterministic_sort_policy_coverage::test_entity_pipeline_sink_sort_policy_coverage_is_full
-    duration_s: 29.077
-  - source: S7-crosscutting-architecture-c.xml
-    test: tests.architecture.test_quality_exemptions_registry::test_exemption_registry_metadata_is_complete
-    duration_s: 29.051
-  - source: S7-crosscutting-architecture-d.xml
-    test: tests.architecture.test_tech_debt_issues_5565_5569_closeout::test_issue_5566_semantic_seams_have_roles_and_no_new_src_callers
-    duration_s: 28.619
-  - source: S7-crosscutting-architecture-c.xml
-    test: tests.architecture.test_naming_package_consistency_gate::test_consistency_gate_script_runs_clean_in_check_mode
-    duration_s: 28.062
-  - source: S2-comp-iface.xml
-    test: tests.unit.composition.bootstrap.test_bootstrap_entrypoints.TestBootstrapPipeline::test_bootstrap_pipeline_creates_runner_without_starting_server
-    duration_s: 26.574
-  - source: S5-infra-adapters.xml
-    test: tests.integration.interfaces.test_cli_shutdown_integration.TestCliGracefulShutdownExitCode::test_shutdown_error_returns_exit_code_130
-    duration_s: 26.306
-  - source: S2-comp-iface.xml
-    test: tests.unit.interfaces.cli.test_cli_main_module.TestCliMainModule::test_module_runnable_with_help
-    duration_s: 26.301
-  - source: S7-crosscutting-architecture-c.xml
-    test: tests.architecture.test_retirement_candidate_triage::test_repo_wide_zero_import_candidate_count_does_not_grow
-    duration_s: 26.227
-  - source: S7-crosscutting-architecture-d.xml
-    test: tests.architecture.test_test_governance_audit::test_test_audit_closeout_2026_06_19_tracks_issue_pack_evidence
-    duration_s: 26.086
-  - source: S1-domain-services.xml
-    test: tests.unit.domain.test_exceptions.TestErrorClassifier::test_classify_unknown_exception
-    duration_s: 25.914
-  - source: S7-crosscutting-architecture-d.xml
-    test: tests.architecture.test_vcr_metadata_catalog_drift::test_vcr_metadata_catalog_drift_check_passes_current_repo
-    duration_s: 25.571
-  - source: S5-infra-adapters.xml
-    test: tests.unit.infrastructure.adapters.common.test_fetch_retry_policy::test_split_filter_ids_for_fallback_partition_property
-    duration_s: 24.535
+  - duration_s: 22.399
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_cli_generate_and_check
+  - duration_s: 11.55
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic
+  - duration_s: 11.315
+    source: junit-fast.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_cli_generate_and_check
+  - duration_s: 10.797
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_subprocess_environment_invariant
+  - duration_s: 10.615
+    source: junit-repo-backed-unit.xml
+    test: tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation
+  - duration_s: 7.251
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_generated_facts_validate_against_published_schemas
+  - duration_s: 6.817
+    source: junit.unit-other.xml
+    test: tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness
+  - duration_s: 6.505
+    source: junit.unit-other.xml
+    test: tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration::test_bootstrapped_service_can_list_pipelines
+  - duration_s: 6.126
+    source: junit-track-d.xml
+    test: tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts
+  - duration_s: 5.529
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv::test_script_runs_without_errors
+  - duration_s: 5.235
+    source: junit-repo-backed-unit.xml
+    test: tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts::test_powershell_fetch_wrapper_executes_resolved_uvx
+  - duration_s: 5.086
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.qa.test_generate_semantic_pipeline_audit::test_build_current_member_facts_exposes_composite_inherited_field_types
+  - duration_s: 4.746
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.test_normalization_governance_cli_smoke::test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke
+  - duration_s: 4.669
+    source: junit-fast.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic
+  - duration_s: 4.285
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified
+  - duration_s: 4.27
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_schema_rejects_unknown_nested_keys_and_incompatible_version
+  - duration_s: 4.258
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_source_refs_exist_and_metric_labels_are_bounded
+  - duration_s: 4.148
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_pipeline_markdown_is_compact_complete_and_not_a_json_dump
+  - duration_s: 4.111
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_writes_deterministic_artifacts
+  - duration_s: 4.083
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_returns_non_zero_when_fallback_business_budget_is_exceeded
+  - duration_s: 4.081
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_accepts_current_fallback_business_budget
+  - duration_s: 4.044
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_duplicate_audit_reports_compaction
+  - duration_s: 4.0
+    source: junit.integration.xml
+    test: tests.integration.interfaces.test_cli_run_dry_run.TestCliRunDryRun::test_dry_run_option_available
+  - duration_s: 4.0
+    source: junit.unit-other.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_representative_pipeline_projection_profiles_are_explicit
+  - duration_s: 3.969
+    source: junit.integration.xml
+    test: tests.integration.interfaces.test_cli_run_incremental.TestCliRunIncremental::test_run_help_displays_options
   top_slowest_zones:
-  - zone: tests.architecture.test_naming_ambiguity_classifier
-    test_count: 2
-    total_duration_s: 231.041
-    max_duration_s: 192.078
-  - zone: tests.architecture.test_provider_registry_decomposition
-    test_count: 2
-    total_duration_s: 131.792
-    max_duration_s: 76.218
-  - zone: tests.architecture.test_quality_exemptions_registry
-    test_count: 2
-    total_duration_s: 69.7
-    max_duration_s: 40.649
-  - zone: tests.architecture.test_debt_governance_telemetry_reporting
+  - zone: tests.unit.scripts.docs.passports.test_passport_projector
+    test_count: 12
+    total_duration_s: 92.986
+    max_duration_s: 22.399
+  - zone: tests.unit.scripts.qa.test_report_normalization_fallback_inventory
+    test_count: 3
+    total_duration_s: 12.275
+    max_duration_s: 4.111
+  - zone: tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery
     test_count: 1
-    total_duration_s: 64.276
-    max_duration_s: 64.276
-  - zone: tests.architecture.test_vcr_metadata_catalog_drift
-    test_count: 2
-    total_duration_s: 59.262
-    max_duration_s: 33.691
-  - zone: tests.architecture.test_mounted_worktree_skip_policy
+    total_duration_s: 10.615
+    max_duration_s: 10.615
+  - zone: tests.unit.composition.factories.pipeline.test_registry
     test_count: 1
-    total_duration_s: 37.074
-    max_duration_s: 37.074
-  - zone: tests.architecture.test_private_module_imports
+    total_duration_s: 6.817
+    max_duration_s: 6.817
+  - zone: tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration
     test_count: 1
-    total_duration_s: 35.843
-    max_duration_s: 35.843
-  - zone: tests.architecture.test_import_graph_invariants
+    total_duration_s: 6.505
+    max_duration_s: 6.505
+  - zone: tests.integration.ci.test_track_d_fixture_control_plane_linkage
     test_count: 1
-    total_duration_s: 35.412
-    max_duration_s: 35.412
-  - zone: tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline
+    total_duration_s: 6.126
+    max_duration_s: 6.126
+  - zone: tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv
     test_count: 1
-    total_duration_s: 34.348
-    max_duration_s: 34.348
-  - zone: tests.architecture.test_tech_debt_issues_5670_5675_closeout
+    total_duration_s: 5.529
+    max_duration_s: 5.529
+  - zone: tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts
     test_count: 1
-    total_duration_s: 31.733
-    max_duration_s: 31.733
+    total_duration_s: 5.235
+    max_duration_s: 5.235
+  - zone: tests.unit.scripts.qa.test_generate_semantic_pipeline_audit
+    test_count: 1
+    total_duration_s: 5.086
+    max_duration_s: 5.086
+  - zone: tests.unit.scripts.test_normalization_governance_cli_smoke
+    test_count: 1
+    total_duration_s: 4.746
+    max_duration_s: 4.746
   execution_context:
-    junit_source_count: 18
-    junit_sources:
-    - coverage-tail-owner-addendum.xml
-    - export-execution-addendum.xml
-    - infrastructure-owner-addendum.xml
-    - repo-backed-storage-addendum.xml
-    - S1-domain-core.xml
-    - S1-domain-services.xml
-    - S2-comp-iface.xml
-    - S3-app-foundation.xml
-    - S4-app-services.xml
-    - S5-infra-adapters.xml
-    - S6-crosscutting-unit.xml
-    - S7-crosscutting-architecture-a.xml
-    - S7-crosscutting-architecture-a2.xml
-    - S7-crosscutting-architecture-a3.xml
-    - S7-crosscutting-architecture-b.xml
-    - S7-crosscutting-architecture-c.xml
-    - S7-crosscutting-architecture-d.xml
-    - S8-crosscutting-governance.xml
-    executed_count: 23360
-    worker_mode: 'mixed: xdist unit/integration; serial contracts/repo-backed/memory'
-    junit_testcase_duration_sum_s: 4543.53
-    lane_wall_time_s:
-      coverage-tail-owner-addendum.xml: 3.648
-      export-execution-addendum.xml: 0.051
-      infrastructure-owner-addendum.xml: 20.994
-      repo-backed-storage-addendum.xml: 178.555
-      S1-domain-core.xml: 274.486
-      S1-domain-services.xml: 35.982
-      S2-comp-iface.xml: 158.724
-      S3-app-foundation.xml: 27.407
-      S4-app-services.xml: 33.052
-      S5-infra-adapters.xml: 136.002
-      S6-crosscutting-unit.xml: 30.191
-      S7-crosscutting-architecture-a.xml: 265.502
-      S7-crosscutting-architecture-a2.xml: 419.688
-      S7-crosscutting-architecture-a3.xml: 553.6
-      S7-crosscutting-architecture-b.xml: 199.806
-      S7-crosscutting-architecture-c.xml: 1261.941
-      S7-crosscutting-architecture-d.xml: 675.427
-      S8-crosscutting-governance.xml: 268.474
+    executed_count: 46742
     explicit_exclusions:
     - lane: live-provider-contracts
       reason: scheduled network-owned workflow
@@ -189,12 +148,44 @@ duration_telemetry:
       reason: benchmark-owned non-blocking workflow
     - lane: manual-e2e
       reason: operator-triggered external-runtime lane
-    - lane: deleted-or-renamed-nodes-filtered
-      reason: dropped 248 timed cases whose owning test modules no longer exist on
-        current HEAD
-    ranking_filter:
-      dropped_deleted_module_cases: 248
-      retained_for_ranking: 23112
+    junit_source_count: 11
+    junit_sources:
+    - junit-contract-confidence.xml
+    - junit-fast.xml
+    - junit-memory.xml
+    - junit-repo-backed-unit.xml
+    - junit-track-d.xml
+    - junit.integration.xml
+    - junit.security.xml
+    - junit.unit-application.xml
+    - junit.unit-domain.xml
+    - junit.unit-infrastructure.xml
+    - junit.unit-other.xml
+    junit_testcase_duration_sum_s:
+      junit-contract-confidence.xml: 20.651
+      junit-fast.xml: 207.964
+      junit-memory.xml: 0.177
+      junit-repo-backed-unit.xml: 65.914
+      junit-track-d.xml: 7.7
+      junit.integration.xml: 93.661
+      junit.security.xml: 8.033
+      junit.unit-application.xml: 36.363
+      junit.unit-domain.xml: 121.194
+      junit.unit-infrastructure.xml: 41.818
+      junit.unit-other.xml: 207.13
+    lane_wall_time_s:
+      junit-contract-confidence.xml: 51.0
+      junit-fast.xml: 209.0
+      junit-memory.xml: 25.0
+      junit-repo-backed-unit.xml: 100.0
+      junit-track-d.xml: 37.0
+      junit.integration.xml: 96.0
+      junit.security.xml: 42.0
+      junit.unit-application.xml: 90.0
+      junit.unit-domain.xml: 122.0
+      junit.unit-infrastructure.xml: 87.0
+      junit.unit-other.xml: 174.0
+    worker_mode: 'mixed: xdist unit/integration; serial contracts/repo-backed/memory'
 slow_governance_cache_probe:
   issue_ref: '#4663'
   refreshed_at_utc: '2026-05-26T04:32:00+00:00'
