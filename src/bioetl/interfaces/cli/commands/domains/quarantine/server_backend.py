@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-DEFAULT_QUARANTINE_SERVER_PORT = 8081
+DEFAULT_QUARANTINE_SERVER_PORT = 8000
 
 __all__ = [
     "DEFAULT_QUARANTINE_SERVER_PORT",
