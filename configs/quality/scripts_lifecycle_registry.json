@@ -1370,6 +1370,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as the bounded DUX7 live residual review runner for auditability; retire it after the review protocol is complete and the generated evidence becomes the durable record."
     },
+    "scripts/ops/observability/grafana/rfa_first_action_mutator.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off Review First Action (RFA-00) panel mutator for auditability; retire it after the RFA panel migration is verified and the shipped dashboard JSON becomes the durable record."
+    },
     "scripts/ops/_build_arch_review_report.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

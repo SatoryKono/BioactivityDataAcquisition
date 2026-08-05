@@ -207,7 +207,8 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     )
     assert value_override is not None
     value_props = {
-        prop.get("id"): prop.get("value") for prop in value_override.get("properties", [])
+        prop.get("id"): prop.get("value")
+        for prop in value_override.get("properties", [])
     }
     assert value_props.get("custom.cellOptions", {}).get("type") == "color-text"
 
@@ -221,7 +222,8 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     )
     assert action_override is not None
     action_props = {
-        prop.get("id"): prop.get("value") for prop in action_override.get("properties", [])
+        prop.get("id"): prop.get("value")
+        for prop in action_override.get("properties", [])
     }
     assert action_props.get("custom.cellOptions", {}).get("type") == "color-text"
     links = action_props.get("links") or []
@@ -231,9 +233,9 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
         and "${__data.fields.pipeline}" in str(link.get("url", ""))
         for link in links
     ), "Action links must pass the row pipeline into target dashboards"
-    assert any(
-        "var-provider=unknown" in str(link.get("url", "")) for link in links
-    ), "Provider Action link must fail-close provider=unknown"
+    assert any("var-provider=unknown" in str(link.get("url", "")) for link in links), (
+        "Provider Action link must fail-close provider=unknown"
+    )
 
     organize = next(
         (

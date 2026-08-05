@@ -1338,11 +1338,14 @@ def test_grafana_audit_cycle_reuses_existing_backend_when_fallback_start_fails(
         lambda argv: calls.append(("audit", list(argv))) or 0,
     )
 
-    result = cycle_subject.main([
-        "--screenshot-dir", str(tmp_path),
-        "--ensure-observability-backend",
-        "--no-refresh-observability-backend",
-    ])
+    result = cycle_subject.main(
+        [
+            "--screenshot-dir",
+            str(tmp_path),
+            "--ensure-observability-backend",
+            "--no-refresh-observability-backend",
+        ]
+    )
 
     assert result == 0
     assert [name for name, _argv in calls] == [
@@ -1415,11 +1418,14 @@ def test_grafana_audit_cycle_uses_managed_backend_when_detached_backend_fails(
         lambda argv: calls.append(("audit", list(argv))) or 0,
     )
 
-    result = cycle_subject.main([
-        "--screenshot-dir", str(tmp_path),
-        "--ensure-observability-backend",
-        "--no-refresh-observability-backend",
-    ])
+    result = cycle_subject.main(
+        [
+            "--screenshot-dir",
+            str(tmp_path),
+            "--ensure-observability-backend",
+            "--no-refresh-observability-backend",
+        ]
+    )
 
     assert result == 0
     assert [name for name, _argv in calls] == [
