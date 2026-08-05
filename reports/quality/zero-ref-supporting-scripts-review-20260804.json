@@ -60,6 +60,17 @@
       "path": "scripts/engineering/qa/report_vcr_cassette_census.py",
       "reference_count": 0,
       "status": "supporting"
+    },
+    {
+      "decision": "promote",
+      "importer_proof": {
+        "active_callers": [],
+        "method": "git_grep_basename",
+        "notes": "Live residual snapshot generator scheduled for promotion."
+      },
+      "path": "scripts/engineering/qa/report_live_residual_snapshot.py",
+      "reference_count": 0,
+      "status": "promote_candidate"
     }
   ],
   "summary": {
@@ -78,8 +89,7 @@
     ],
     "2026-10-15": [
       "scripts/ai/codex/helper/wsl-support.ps1",
-      "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
-      "scripts/ai/mcp/mcp_mermaid_wrapper.ps1"
+      "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1"
     ],
     "2026-10-21": [
       "scripts/engineering/dev/zed_task.ps1"
