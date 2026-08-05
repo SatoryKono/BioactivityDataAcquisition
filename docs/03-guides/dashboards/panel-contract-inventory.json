@@ -2210,7 +2210,7 @@
       "formula": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_quarantined_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
       "kind": "promql",
       "panel_id": 156,
-      "panel_title": "Inspect: Gold Reject Outcomes by Pipeline",
+      "panel_title": "Inspect Gold Reject Outcomes by Pipeline",
       "query": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_quarantined_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
       "query_tokens": [
         "bioetl_processed_records_gold_quarantined_current"
@@ -2237,7 +2237,7 @@
       "formula": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_excluded_by_contract_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
       "kind": "promql",
       "panel_id": 156,
-      "panel_title": "Inspect: Gold Reject Outcomes by Pipeline",
+      "panel_title": "Inspect Gold Reject Outcomes by Pipeline",
       "query": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_excluded_by_contract_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
       "query_tokens": [
         "bioetl_processed_records_gold_excluded_by_contract_current"

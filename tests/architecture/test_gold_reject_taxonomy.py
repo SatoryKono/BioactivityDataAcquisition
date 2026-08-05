@@ -77,7 +77,7 @@ def test_dq_dashboard_gold_reject_panel_is_not_silver_alias_surface() -> None:
         (
             item
             for item in _iter_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect: Gold Reject Outcomes by Pipeline"
+            if item.get("title") == "Inspect Gold Reject Outcomes by Pipeline"
         ),
         None,
     )

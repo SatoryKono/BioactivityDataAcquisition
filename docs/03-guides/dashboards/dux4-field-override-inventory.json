@@ -1693,7 +1693,7 @@
       "uid": "bioetl-dq-v2",
       "file": "bioetl-dq-v2.json",
       "panel_id": 156,
-      "title": "Inspect: Gold Reject Outcomes by Pipeline",
+      "title": "Inspect Gold Reject Outcomes by Pipeline",
       "type": "bargauge",
       "collapsed": true,
       "gridPos": {

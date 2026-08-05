@@ -114,7 +114,7 @@ def test_gold_reject_panel_uses_gold_outcome_recording_rules() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect: Gold Reject Outcomes by Pipeline"
+            if item.get("title") == "Inspect Gold Reject Outcomes by Pipeline"
         ),
         None,
     )
@@ -197,7 +197,7 @@ def test_dq_reject_row_orders_trust_then_causes_then_scope_distribution() -> Non
         "Inspect: Top Silver Reject Reasons (Pareto)",
         "Inspect: Top Silver Reject Fields",
         "Inspect: Silver Filter Rejects by Pipeline",
-        "Inspect: Gold Reject Outcomes by Pipeline",
+        "Inspect Gold Reject Outcomes by Pipeline",
     }
     assert expected_titles.issubset(nested)
     ordering = {
@@ -212,7 +212,7 @@ def test_dq_reject_row_orders_trust_then_causes_then_scope_distribution() -> Non
     assert ordering["Inspect: Top Silver Reject Reasons (Pareto)"] == (6, 0)
     assert ordering["Inspect: Top Silver Reject Fields"] == (6, 12)
     assert ordering["Inspect: Silver Filter Rejects by Pipeline"] == (12, 0)
-    assert ordering["Inspect: Gold Reject Outcomes by Pipeline"] == (12, 12)
+    assert ordering["Inspect Gold Reject Outcomes by Pipeline"] == (12, 12)
     assert (
         nested["Monitor: Silver Filter Reject Accounting Mismatch"]
         .get("gridPos", {})
