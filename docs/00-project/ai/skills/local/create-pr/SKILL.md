@@ -14,7 +14,6 @@ agent: "general-purpose"
 # Create Pull Request
 
 ## Source Of Truth
-
 - Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
