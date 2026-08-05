@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import Any, cast
+from typing import Protocol, cast
 
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
@@ -33,6 +33,13 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.exceptions import BioETLError
 
+
+class _MergerProtocol(Protocol):
+    """Structural interface for merger instances and test doubles."""
+
+    __dict__: dict[str, object]
+
+
 __all__ = [
     "build_merge_inputs",
     "execute_started_merge_phase",
@@ -43,7 +50,7 @@ __all__ = [
 
 
 def get_explicit_merger_method(
-    merger: Any,  # Any: merger may be a protocol-compatible runtime object or test double.
+    merger: _MergerProtocol,
     method_name: str,
 ) -> Callable[..., Awaitable[MergeResult]] | None:
     """Ignore autovivified mock attrs; accept real or explicitly assigned methods."""
