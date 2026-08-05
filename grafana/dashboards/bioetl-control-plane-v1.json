@@ -711,7 +711,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts replay, checkpoint, manifest, ledger, drift, and lineage blockers during the selected time range. Zero means no blocker events were recorded; verify telemetry coverage before treating it as safe.",
+          "description": "Counts replay, checkpoint, manifest, ledger, drift, and lineage blockers during the selected time range. Zero means no blocker events were recorded; verify telemetry coverage before treating it as safe. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1250,7 +1250,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Counts failed checkpoint administration operations across all pipelines during the selected range. Pipeline and Run Type filters do not affect this panel. Zero means no failures were recorded in the selected range; it does not prove telemetry completeness.",
+          "description": "Counts failed checkpoint administration operations across all pipelines during the selected range. Pipeline and Run Type filters do not affect this panel. Zero means no failures were recorded in the selected range; it does not prove telemetry completeness. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
           "fieldConfig": {
             "defaults": {
               "color": {

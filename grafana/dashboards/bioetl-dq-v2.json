@@ -1175,7 +1175,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range count of Silver validation failures. Non-zero means Silver validation blocked or degraded promotion in the active window, and this can drive current CRIT even when filtered_out stays zero. Correlate with current DQ reasons and quarantine evidence before replay",
+          "description": "Selected-range count of Silver validation failures. Non-zero means Silver validation blocked or degraded promotion in the active window, and this can drive current CRIT even when filtered_out stays zero. Correlate with current DQ reasons and quarantine evidence before replay. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1412,7 +1412,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range count of canonical Silver validation failures. Non-zero means Silver validation blocked or degraded promotion and should be correlated with current DQ reasons and reject/quarantine evidence",
+          "description": "Selected-range count of canonical Silver validation failures. Non-zero means Silver validation blocked or degraded promotion and should be correlated with current DQ reasons and reject/quarantine evidence. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1488,7 +1488,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range Gold strict-validation hard-fail count. Non-zero means Gold promotion was blocked. Zero means no hard-fail samples were observed in the selected window; it does not prove Gold validation ran or that Gold output exists",
+          "description": "Selected-range Gold strict-validation hard-fail count. Non-zero means Gold promotion was blocked. Zero means no hard-fail samples were observed in the selected window; it does not prove Gold validation ran or that Gold output exists. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2214,7 +2214,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE delivery impact. Selected-range blocked-record evidence only. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds in Grafana. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for the denominator/magnitude context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State (bioetl_dq_current_* recording rules) for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window",
+          "description": "TIME RANGE delivery impact. Selected-range blocked-record evidence only. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds in Grafana. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for the denominator/magnitude context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State (bioetl_dq_current_* recording rules) for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2301,7 +2301,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE delivery impact. Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. TIME RANGE evidence only — not a peer verdict with Now",
+          "description": "TIME RANGE delivery impact. Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. TIME RANGE evidence only — not a peer verdict with Now. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
