@@ -5,9 +5,16 @@ from __future__ import annotations
 __all__ = ["run_seed", "save_checkpoint_safe"]
 
 import time
-from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.runner_pkg.runner_checkpoint_save_observability import (
+    checkpoint_saved_at_epoch_seconds,
+    close_checkpoint_save_span,
+    emit_checkpoint_save_event,
+    observe_checkpoint_save_duration,
+    set_checkpoint_saved_at,
+    start_checkpoint_save_span,
+)
 from bioetl.application.composite.runner_pkg.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
 )
@@ -21,122 +28,6 @@ from bioetl.application.runtime_timestamps import (
 from bioetl.domain.composite.result import SeedResult
 from bioetl.domain.exceptions import BioETLError
 
-if TYPE_CHECKING:
-    from opentelemetry.trace import Span
-
-    from bioetl.domain.ports import TracingPort
-
-
-_CHECKPOINT_TRACER_NAME = "bioetl.checkpoint"
-
-
-def _emit_checkpoint_save_event(
-    host: _CompositeRunnerSupportHostProtocol,
-    *,
-    operation: str,
-    status: str,
-) -> None:
-    metrics = getattr(host, "_metrics", None)
-    if metrics is None:
-        return
-    metrics.increment_counter(
-        "bioetl_checkpoint_save_events_total",
-        1,
-        {
-            "pipeline": host._config.name,
-            "operation": operation,
-            "status": status,
-        },
-    )
-
-
-def _observe_checkpoint_save_duration(
-    host: _CompositeRunnerSupportHostProtocol,
-    *,
-    operation: str,
-    status: str,
-    duration_seconds: float,
-) -> None:
-    metrics = getattr(host, "_metrics", None)
-    if metrics is None:
-        return
-    metrics.observe_histogram(
-        "bioetl_checkpoint_save_duration_seconds",
-        duration_seconds,
-        {
-            "pipeline": host._config.name,
-            "operation": operation,
-            "status": status,
-        },
-    )
-
-
-def _set_checkpoint_saved_at(
-    host: _CompositeRunnerSupportHostProtocol,
-    checkpoint_saved_at_epoch_seconds: float | None,
-) -> None:
-    metrics = getattr(host, "_metrics", None)
-    if metrics is None or checkpoint_saved_at_epoch_seconds is None:
-        return
-    metrics.set_gauge(
-        "bioetl_checkpoint_saved_at_seconds",
-        checkpoint_saved_at_epoch_seconds,
-        {"pipeline": host._config.name},
-    )
-
-
-def _checkpoint_saved_at_epoch_seconds(
-    host: _CompositeRunnerSupportHostProtocol,
-) -> float | None:
-    clock = getattr(host, "_clock", None)
-    if clock is None:
-        return None
-    return float(clock.now().timestamp())
-
-
-def _start_checkpoint_save_span(
-    host: _CompositeRunnerSupportHostProtocol,
-    *,
-    operation: str,
-) -> Span | None:
-    tracer = cast("TracingPort | None", getattr(host, "_tracing", None))
-    if tracer is None:
-        return None
-    span = cast(
-        "Span",
-        tracer.get_tracer(_CHECKPOINT_TRACER_NAME).start_as_current_span(
-            "checkpoint_save",
-            attributes={
-                "bioetl.pipeline": host._config.name,
-                "bioetl.checkpoint.operation": operation,
-                "bioetl.checkpoint.scope": "composite",
-            },
-        ),
-    )
-    span.__enter__()
-    return span
-
-
-def _close_checkpoint_save_span(
-    host: _CompositeRunnerSupportHostProtocol,
-    span: Span | None,
-    *,
-    status: str,
-    error: BaseException | None = None,
-) -> None:
-    if span is None:
-        return
-    span.set_attribute("bioetl.checkpoint.status", status)
-    if error is not None:
-        span.set_attribute("error", True)
-        span.set_attribute("error.type", type(error).__name__)
-        if isinstance(error, Exception):
-            span.record_exception(error)
-    span.__exit__(None, None, None)
-    tracer = cast("TracingPort | None", getattr(host, "_tracing", None))
-    if tracer is not None:
-        tracer.flush()
-
 
 async def save_checkpoint_safe(
     host: _CompositeRunnerSupportHostProtocol,
@@ -145,23 +36,23 @@ async def save_checkpoint_safe(
 ) -> bool:
     """Save checkpoint with graceful error handling."""
     started_at = time.monotonic()
-    span = _start_checkpoint_save_span(host, operation=operation)
+    span = start_checkpoint_save_span(host, operation=operation)
     try:
         await host._checkpoint_manager.save(state)
         duration_seconds = time.monotonic() - started_at
-        _emit_checkpoint_save_event(
+        emit_checkpoint_save_event(
             host,
             operation=operation,
             status="succeeded",
         )
-        _set_checkpoint_saved_at(host, _checkpoint_saved_at_epoch_seconds(host))
-        _observe_checkpoint_save_duration(
+        set_checkpoint_saved_at(host, checkpoint_saved_at_epoch_seconds(host))
+        observe_checkpoint_save_duration(
             host,
             operation=operation,
             status="succeeded",
             duration_seconds=duration_seconds,
         )
-        _close_checkpoint_save_span(
+        close_checkpoint_save_span(
             host,
             span,
             status="succeeded",
@@ -169,18 +60,18 @@ async def save_checkpoint_safe(
         return True
     except CHECKPOINT_NON_FATAL_ERRORS as error:
         duration_seconds = time.monotonic() - started_at
-        _emit_checkpoint_save_event(
+        emit_checkpoint_save_event(
             host,
             operation=operation,
             status="failed",
         )
-        _observe_checkpoint_save_duration(
+        observe_checkpoint_save_duration(
             host,
             operation=operation,
             status="failed",
             duration_seconds=duration_seconds,
         )
-        _close_checkpoint_save_span(
+        close_checkpoint_save_span(
             host,
             span,
             status="failed",
@@ -198,18 +89,18 @@ async def save_checkpoint_safe(
         return False
     except BioETLError as error:
         duration_seconds = time.monotonic() - started_at
-        _emit_checkpoint_save_event(
+        emit_checkpoint_save_event(
             host,
             operation=operation,
             status="failed",
         )
-        _observe_checkpoint_save_duration(
+        observe_checkpoint_save_duration(
             host,
             operation=operation,
             status="failed",
             duration_seconds=duration_seconds,
         )
-        _close_checkpoint_save_span(
+        close_checkpoint_save_span(
             host,
             span,
             status="failed",
