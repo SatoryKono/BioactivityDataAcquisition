@@ -108,6 +108,9 @@ def test_workflow_run_ensures_observability_backend_before_execution(
                 "chembl_publication",
                 "--limit",
                 "1",
+                "--ensure-observability-backend",
+                "--observability-backend-port",
+                "8081",
             ],
         )
 

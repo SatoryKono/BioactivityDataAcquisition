@@ -32,23 +32,29 @@ CONTROL_PLANE_GLOBAL_READ_PANEL_TITLES = {
     ),
 }
 
-SUMMARY_ZERO_FALLBACK_EXPECTATIONS = {
+# Summary panels must preserve PromQL absence as No data (no masking `or vector(0)`).
+# Display-level empty text (fieldConfig.noValue) may still render operator-facing zeros.
+SUMMARY_NO_VECTOR_ZERO_FALLBACK_PANELS = {
     "bioetl-runtime.json": {
-        "Track Records by Stage / Interval": "or vector(0)",
-        "Track Global Shutdown Starts": "or vector(0)",
-        "Track Global Shutdown Completions": "or vector(0)",
-        "Track Failed Workflow Runs": "or vector(0)",
-        "Track Failed Workflow Steps": "or vector(0)",
+        "Track Records by Stage / Interval",
+        "Track Global Shutdown Starts",
+        "Track Global Shutdown Completions",
+        "Track Failed Workflow Runs",
+        "Track Failed Workflow Steps",
     },
     "bioetl-provider-health-v2.json": {
-        "Monitor Healthy Checks": "or vector(0)",
-        "Monitor Health Checks": "or vector(0)",
+        "Monitor Healthy Checks",
+        "Monitor Health Checks",
     },
     "bioetl-control-plane-v1.json": {
-        "Compare Global Audit Write Outcomes": "or vector(0)",
-        "Compare Global Audit Query Outcomes": "or vector(0)",
+        "Compare Global Audit Write Outcomes",
+        "Compare Global Audit Query Outcomes",
     },
 }
+
+# Deprecated name retained only as an empty map so stale importers fail closed
+# instead of re-introducing masking `or vector(0)` expectations.
+SUMMARY_ZERO_FALLBACK_EXPECTATIONS: dict[str, dict[str, str]] = {}
 
 DIAGNOSTIC_NO_ZERO_FALLBACK_EXPECTATIONS = {
     "bioetl-runtime.json": {

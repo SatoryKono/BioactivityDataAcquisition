@@ -175,12 +175,12 @@ def test_rf001_shared_headline_vocabulary_is_fail_closed() -> None:
 
 def test_rf002_terminal_states_are_explicit() -> None:
     # Workflow overview retired (#6570). Runtime workflow-band counters keep
-    # fail-closed empty semantics via vector(0) and value color mode.
+    # fail-closed PromQL absence (no masking or vector(0)) and value color mode.
     runtime = _load("bioetl-runtime.json")
     for panel_id in (9996, 9997):
         panel = _panel(runtime, panel_id)
         expression = str(panel.get("targets", [{}])[0].get("expr", ""))
-        assert "or vector(0)" in expression
+        assert "or vector(0)" not in expression
         assert panel.get("options", {}).get("colorMode") == "value"
 
     # Silver Reject Explorer terminal-state panels and Loki log-hygiene cards
