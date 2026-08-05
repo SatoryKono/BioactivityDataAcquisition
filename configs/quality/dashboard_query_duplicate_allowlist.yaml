@@ -23,6 +23,19 @@ exact_duplicates:
       panel_refs:
         - "bioetl-overview-v2.json :: Monitor Fleet Health"
         - "bioetl-incident-v1.json :: Monitor Incident Status"
+    - id: dq-silver-validation-failures-stat-and-range-composite
+      owner: "@bioetl-observability"
+      linked_issue: "#7558"
+      normalized_expression: >-
+        round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~"$pipeline"}[$__range]))))
+      rationale: >
+        DQ keeps the selected-range silver-validation failure expression on both
+        the primary stat card and the range-composite companion so operators see
+        identical No-data semantics after removing masking `or vector(0)`
+        fallbacks; divergence would reintroduce false-green zeros.
+      panel_refs:
+        - "bioetl-dq-v2.json :: Monitor Silver Validation Failures"
+        - "bioetl-dq-v2.json :: Monitor Silver Validation Failures (range composite)"
 
 near_duplicates:
   max_count: 5
@@ -32,13 +45,18 @@ near_duplicates:
     Current cross-panel audited baseline is five reviewed near-duplicate
     families. Growth beyond five or a panel-set change requires review.
   reviewed_groups:
-    - id: processed-record-stage-zero-valid-range-variants
+    - id: processed-record-stage-range-variants
       disposition: retain_semantic_variants
-      recording_rule_decision: rejected_distinct_stage_and_zero_valid_semantics
-      rationale: Bronze and Gold selected-range counts intentionally retain different stage semantics and both encode missing event series as zero; pre-recording the dashboard range would be invalid.
+      recording_rule_decision: rejected_distinct_stage_and_range_binding
+      rationale: >
+        Bronze, Gold, and Overview filtered-out selected-range counts share the
+        same shaped range aggregation after label stripping, but intentionally
+        keep distinct stage selectors and preserve missing telemetry as No data
+        instead of synthesizing a healthy zero.
       panel_refs:
-        - "bioetl-dq-v2.json :: Monitor Gold Records"
         - "bioetl-dq-v2.json :: Monitor Bronze Records"
+        - "bioetl-dq-v2.json :: Monitor Gold Records"
+        - "bioetl-overview-v2.json :: Track Silver Rejects"
     - id: silver-filter-reject-no-data-range-variants
       disposition: retain_shared_diagnostic_absence
       recording_rule_decision: rejected_cross_dashboard_range_binding
