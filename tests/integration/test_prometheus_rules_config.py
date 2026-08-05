@@ -1215,6 +1215,62 @@ def test_overview_next_action_routes_use_selected_scope_rows() -> None:
     assert 'bioetl_l0_input_status_selected{input="workflow"}' in expressions
 
 
+def test_overview_next_action_route_priority_scores_are_ordered() -> None:
+    """RFA-P2: Runtime > Control Plane > Gold > DQ > Provider > Workflow > Monitor."""
+    payload = _load_rules()
+    route_rules = _recording_rules_named(payload, "bioetl_l0_next_action_route")
+
+    def _score(rule: dict) -> int:
+        expr = str(rule.get("expr", "")).replace(" ", "")
+        # Patterns like ") * 50" or "universe * 5"
+        for token in ("*50", "*40", "*35", "*30", "*20", "*10", "*5"):
+            if token in expr:
+                return int(token.removeprefix("*"))
+        raise AssertionError(f"No priority score found in expr: {rule.get('expr')}")
+
+    by_reason = {
+        str(rule.get("labels", {}).get("action_reason")): _score(rule)
+        for rule in route_rules
+    }
+    assert by_reason["runtime_blockers_active"] == 50
+    assert by_reason["control_plane_guardrail_active"] == 40
+    assert by_reason["gold_lifecycle_blocking"] == 35
+    assert by_reason["dq_threshold_or_validation_signal"] == 30
+    assert by_reason["provider_global_degradation"] == 20
+    assert by_reason["workflow_scope_requires_review"] == 10
+    assert by_reason["no_recent_activity_or_unknown_state"] == 5
+
+    # Gold lifecycle handoff stays on Runtime board (gold write missing is runtime-owned).
+    gold_rule = next(
+        rule
+        for rule in route_rules
+        if rule.get("labels", {}).get("action_reason") == "gold_lifecycle_blocking"
+    )
+    assert gold_rule.get("labels", {}).get("action_target") == "runtime"
+    assert gold_rule.get("labels", {}).get("action_dashboard_uid") == "bioetl-runtime"
+
+    workflow_rule = next(
+        rule
+        for rule in route_rules
+        if rule.get("labels", {}).get("action_reason")
+        == "workflow_scope_requires_review"
+    )
+    assert workflow_rule.get("labels", {}).get("action_dashboard_uid") == (
+        "bioetl-runtime"
+    )
+
+    provider_rule = next(
+        rule
+        for rule in route_rules
+        if rule.get("labels", {}).get("action_reason") == "provider_global_degradation"
+    )
+    assert provider_rule.get("labels", {}).get("action_dashboard_uid") == (
+        "bioetl-provider-health-v2"
+    )
+    # Provider severity remains global (scalar max); pipeline context is URL-layer only.
+    assert "scalar(" in str(provider_rule.get("expr", ""))
+
+
 def test_overview_runtime_and_dq_inputs_materialize_from_stable_projected_shapes() -> (
     None
 ):

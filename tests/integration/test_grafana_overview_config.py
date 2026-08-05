@@ -185,14 +185,64 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     description = str(next_action.get("description", ""))
     assert next_action.get("type") == "table"
     assert "bioetl_l0_next_action_route" in next_action_expr
-    assert "topk(1" in next_action_expr
+    # RFA-00: up to four urgency-ordered routes; single-pipeline still ranks via topk.
+    assert "topk(4" in next_action_expr
     assert 'pipeline=~"$pipeline"' in next_action_expr
     assert 'run_type=~"$run_type"' in next_action_expr
     assert "$__range" not in next_action_expr
-    assert (
-        "NO_ROUTE" in description or "bioetl_l0_next_action_route" in next_action_expr
+    assert "NO_ROUTE" in description or "no_route" in next_action_expr
+    assert "selected_scope_not_present" in next_action_expr
+    # Allow NO_ROUTE label_replace fallback in expr (RFA-P0).
+    assert len(next_action_expr) <= 320
+
+    # Priority column uses text color; Action carries row-aware board link.
+    overrides = next_action.get("fieldConfig", {}).get("overrides", [])
+    value_override = next(
+        (
+            item
+            for item in overrides
+            if item.get("matcher", {}).get("options") in {"Value", "Priority"}
+        ),
+        None,
     )
-    assert len(next_action_expr) <= 200
+    assert value_override is not None
+    value_props = {
+        prop.get("id"): prop.get("value") for prop in value_override.get("properties", [])
+    }
+    assert value_props.get("custom.cellOptions", {}).get("type") == "color-text"
+
+    action_override = next(
+        (
+            item
+            for item in overrides
+            if item.get("matcher", {}).get("options") == "action_target"
+        ),
+        None,
+    )
+    assert action_override is not None
+    action_props = {
+        prop.get("id"): prop.get("value") for prop in action_override.get("properties", [])
+    }
+    assert action_props.get("custom.cellOptions", {}).get("type") == "color-text"
+    links = action_props.get("links") or []
+    assert links, "Action column must expose row-aware recommended-board link"
+    assert any(
+        "action_dashboard_uid" in str(link.get("url", "")) for link in links
+    ), "Action link must use action_dashboard_uid from the route series"
+
+    organize = next(
+        (
+            transform
+            for transform in next_action.get("transformations", [])
+            if transform.get("id") == "organize"
+        ),
+        None,
+    )
+    assert organize is not None
+    exclude = organize.get("options", {}).get("excludeByName", {})
+    # Keep action_dashboard_uid for field links; hide via field override instead.
+    assert exclude.get("action_dashboard_uid") is not True
+    assert exclude.get("Value") is not True
 
 
 def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> None:
