@@ -1,51 +1,51 @@
 # Slowest Tests
 
-Source commit: `14bcbfbd8054292fff9f55837da508a80ceaaeea`
-Source run id: `local-governance-closeout-20260805-final`
+Source commit: `5271c40811c2420da5ae82fa233f56dfc02f25af`
+Source run id: `github-30999069843-1`
 Refresh status: `captured`
-Collected test cases: `23360`
+Collected test cases: `46742`
 Freshness guard: `<=45 days`
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | 192.078 | `tests.architecture.test_naming_ambiguity_classifier::test_build_ambiguity_groups_is_deterministic` | `S7-crosscutting-architecture-c.xml` |
-| 2 | 76.218 | `tests.architecture.test_provider_registry_decomposition::test_private_default_registry_module_imports_stay_confined_to_sanctioned_seams` | `S7-crosscutting-architecture-c.xml` |
-| 3 | 64.276 | `tests.architecture.test_debt_governance_telemetry_reporting::test_debt_governance_snapshot_matches_live_sources` | `S7-crosscutting-architecture-a3.xml` |
-| 4 | 55.574 | `tests.architecture.test_provider_registry_decomposition::test_default_provider_registry_raw_calls_stay_confined_to_known_src_baseline` | `S7-crosscutting-architecture-c.xml` |
-| 5 | 40.649 | `tests.architecture.test_quality_exemptions_registry::test_exemption_registry_targets_are_live` | `S7-crosscutting-architecture-c.xml` |
-| 6 | 38.963 | `tests.architecture.test_naming_ambiguity_classifier::test_build_ambiguity_groups_reports_expected_ok_families` | `S7-crosscutting-architecture-c.xml` |
-| 7 | 37.074 | `tests.architecture.test_mounted_worktree_skip_policy::test_tests_do_not_reintroduce_hardcoded_network_drive_skips` | `S7-crosscutting-architecture-c.xml` |
-| 8 | 35.843 | `tests.architecture.test_private_module_imports::test_owner_aware_private_module_imports` | `S7-crosscutting-architecture-c.xml` |
-| 9 | 35.412 | `tests.architecture.test_import_graph_invariants::test_import_graph_respects_layer_matrix` | `S7-crosscutting-architecture-b.xml` |
-| 10 | 34.348 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `S8-crosscutting-governance.xml` |
-| 11 | 33.691 | `tests.architecture.test_vcr_metadata_catalog_drift::test_vcr_metadata_catalog_tracks_cassettes_not_sidecars` | `S7-crosscutting-architecture-d.xml` |
-| 12 | 31.733 | `tests.architecture.test_tech_debt_issues_5670_5675_closeout::test_issue_5674_internal_compatibility_shims_have_current_expiry_guards` | `S7-crosscutting-architecture-d.xml` |
-| 13 | 30.766 | `tests.architecture.test_value_object_run_manifest_deprecation::test_deprecated_value_object_run_manifest_is_not_used_in_tests` | `S7-crosscutting-architecture-d.xml` |
-| 14 | 29.077 | `tests.architecture.test_deterministic_sort_policy_coverage::test_entity_pipeline_sink_sort_policy_coverage_is_full` | `S7-crosscutting-architecture-a3.xml` |
-| 15 | 29.051 | `tests.architecture.test_quality_exemptions_registry::test_exemption_registry_metadata_is_complete` | `S7-crosscutting-architecture-c.xml` |
-| 16 | 28.619 | `tests.architecture.test_tech_debt_issues_5565_5569_closeout::test_issue_5566_semantic_seams_have_roles_and_no_new_src_callers` | `S7-crosscutting-architecture-d.xml` |
-| 17 | 28.062 | `tests.architecture.test_naming_package_consistency_gate::test_consistency_gate_script_runs_clean_in_check_mode` | `S7-crosscutting-architecture-c.xml` |
-| 18 | 26.574 | `tests.unit.composition.bootstrap.test_bootstrap_entrypoints.TestBootstrapPipeline::test_bootstrap_pipeline_creates_runner_without_starting_server` | `S2-comp-iface.xml` |
-| 19 | 26.306 | `tests.integration.interfaces.test_cli_shutdown_integration.TestCliGracefulShutdownExitCode::test_shutdown_error_returns_exit_code_130` | `S5-infra-adapters.xml` |
-| 20 | 26.301 | `tests.unit.interfaces.cli.test_cli_main_module.TestCliMainModule::test_module_runnable_with_help` | `S2-comp-iface.xml` |
-| 21 | 26.227 | `tests.architecture.test_retirement_candidate_triage::test_repo_wide_zero_import_candidate_count_does_not_grow` | `S7-crosscutting-architecture-c.xml` |
-| 22 | 26.086 | `tests.architecture.test_test_governance_audit::test_test_audit_closeout_2026_06_19_tracks_issue_pack_evidence` | `S7-crosscutting-architecture-d.xml` |
-| 23 | 25.914 | `tests.unit.domain.test_exceptions.TestErrorClassifier::test_classify_unknown_exception` | `S1-domain-services.xml` |
-| 24 | 25.571 | `tests.architecture.test_vcr_metadata_catalog_drift::test_vcr_metadata_catalog_drift_check_passes_current_repo` | `S7-crosscutting-architecture-d.xml` |
-| 25 | 24.535 | `tests.unit.infrastructure.adapters.common.test_fetch_retry_policy::test_split_filter_ids_for_fallback_partition_property` | `S5-infra-adapters.xml` |
+| 1 | 22.399 | `tests.unit.scripts.docs.passports.test_passport_projector::test_cli_generate_and_check` | `junit.unit-other.xml` |
+| 2 | 11.55 | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic` | `junit.unit-other.xml` |
+| 3 | 11.315 | `tests.unit.scripts.docs.passports.test_passport_projector::test_cli_generate_and_check` | `junit-fast.xml` |
+| 4 | 10.797 | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_subprocess_environment_invariant` | `junit.unit-other.xml` |
+| 5 | 10.615 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.xml` |
+| 6 | 7.251 | `tests.unit.scripts.docs.passports.test_passport_projector::test_generated_facts_validate_against_published_schemas` | `junit.unit-other.xml` |
+| 7 | 6.817 | `tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness` | `junit.unit-other.xml` |
+| 8 | 6.505 | `tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration::test_bootstrapped_service_can_list_pipelines` | `junit.unit-other.xml` |
+| 9 | 6.126 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts` | `junit-track-d.xml` |
+| 10 | 5.529 | `tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv::test_script_runs_without_errors` | `junit.unit-other.xml` |
+| 11 | 5.235 | `tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts::test_powershell_fetch_wrapper_executes_resolved_uvx` | `junit-repo-backed-unit.xml` |
+| 12 | 5.086 | `tests.unit.scripts.qa.test_generate_semantic_pipeline_audit::test_build_current_member_facts_exposes_composite_inherited_field_types` | `junit.unit-other.xml` |
+| 13 | 4.746 | `tests.unit.scripts.test_normalization_governance_cli_smoke::test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke` | `junit.unit-other.xml` |
+| 14 | 4.669 | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic` | `junit-fast.xml` |
+| 15 | 4.285 | `tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified` | `junit.unit-other.xml` |
+| 16 | 4.27 | `tests.unit.scripts.docs.passports.test_passport_projector::test_schema_rejects_unknown_nested_keys_and_incompatible_version` | `junit.unit-other.xml` |
+| 17 | 4.258 | `tests.unit.scripts.docs.passports.test_passport_projector::test_source_refs_exist_and_metric_labels_are_bounded` | `junit.unit-other.xml` |
+| 18 | 4.148 | `tests.unit.scripts.docs.passports.test_passport_projector::test_pipeline_markdown_is_compact_complete_and_not_a_json_dump` | `junit.unit-other.xml` |
+| 19 | 4.111 | `tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_writes_deterministic_artifacts` | `junit.unit-other.xml` |
+| 20 | 4.083 | `tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_returns_non_zero_when_fallback_business_budget_is_exceeded` | `junit.unit-other.xml` |
+| 21 | 4.081 | `tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_accepts_current_fallback_business_budget` | `junit.unit-other.xml` |
+| 22 | 4.044 | `tests.unit.scripts.docs.passports.test_passport_projector::test_duplicate_audit_reports_compaction` | `junit.unit-other.xml` |
+| 23 | 4.0 | `tests.integration.interfaces.test_cli_run_dry_run.TestCliRunDryRun::test_dry_run_option_available` | `junit.integration.xml` |
+| 24 | 4.0 | `tests.unit.scripts.docs.passports.test_passport_projector::test_representative_pipeline_projection_profiles_are_explicit` | `junit.unit-other.xml` |
+| 25 | 3.969 | `tests.integration.interfaces.test_cli_run_incremental.TestCliRunIncremental::test_run_help_displays_options` | `junit.integration.xml` |
 
 ## Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.architecture.test_naming_ambiguity_classifier` | 2 | 231.041 | 192.078 |
-| 2 | `tests.architecture.test_provider_registry_decomposition` | 2 | 131.792 | 76.218 |
-| 3 | `tests.architecture.test_quality_exemptions_registry` | 2 | 69.7 | 40.649 |
-| 4 | `tests.architecture.test_debt_governance_telemetry_reporting` | 1 | 64.276 | 64.276 |
-| 5 | `tests.architecture.test_vcr_metadata_catalog_drift` | 2 | 59.262 | 33.691 |
-| 6 | `tests.architecture.test_mounted_worktree_skip_policy` | 1 | 37.074 | 37.074 |
-| 7 | `tests.architecture.test_private_module_imports` | 1 | 35.843 | 35.843 |
-| 8 | `tests.architecture.test_import_graph_invariants` | 1 | 35.412 | 35.412 |
-| 9 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 34.348 | 34.348 |
-| 10 | `tests.architecture.test_tech_debt_issues_5670_5675_closeout` | 1 | 31.733 | 31.733 |
+| 1 | `tests.unit.scripts.docs.passports.test_passport_projector` | 12 | 92.986 | 22.399 |
+| 2 | `tests.unit.scripts.qa.test_report_normalization_fallback_inventory` | 3 | 12.275 | 4.111 |
+| 3 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 1 | 10.615 | 10.615 |
+| 4 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 6.817 | 6.817 |
+| 5 | `tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration` | 1 | 6.505 | 6.505 |
+| 6 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 1 | 6.126 | 6.126 |
+| 7 | `tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv` | 1 | 5.529 | 5.529 |
+| 8 | `tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts` | 1 | 5.235 | 5.235 |
+| 9 | `tests.unit.scripts.qa.test_generate_semantic_pipeline_audit` | 1 | 5.086 | 5.086 |
+| 10 | `tests.unit.scripts.test_normalization_governance_cli_smoke` | 1 | 4.746 | 4.746 |
 

@@ -28,11 +28,11 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `14bcbfbd8054292fff9f55837da508a80ceaaeea`
-- Source run id: `local-governance-closeout-20260805-final`
-- Source tree sha256: `fc2817f0416dcd91648e0a594c4bcf75e737bd760cd2c48a57170bcf23db74b7`
+- Source commit: `5271c40811c2420da5ae82fa233f56dfc02f25af`
+- Source run id: `github-30999069843-1`
+- Source tree sha256: `671ec7f5d8eb2568fd50ae738a716f1c7825f6af5f78db1acf8c9936992f8ef9`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-08-05T06:06:07.843681+00:00`
+- Refreshed at (UTC): `2026-08-05T11:07:06.501447+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -55,38 +55,38 @@ trend evidence only.
 
 ## Duration Telemetry
 
-- Total collected test cases: `23360`
+- Total collected test cases: `46742`
 - Freshness guard: `<=45 days` via `refreshed_at_utc`
 
 ### Top Slowest Tests
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `192.078` | `tests.architecture.test_naming_ambiguity_classifier::test_build_ambiguity_groups_is_deterministic` | `S7-crosscutting-architecture-c.xml` |
-| 2 | `76.218` | `tests.architecture.test_provider_registry_decomposition::test_private_default_registry_module_imports_stay_confined_to_sanctioned_seams` | `S7-crosscutting-architecture-c.xml` |
-| 3 | `64.276` | `tests.architecture.test_debt_governance_telemetry_reporting::test_debt_governance_snapshot_matches_live_sources` | `S7-crosscutting-architecture-a3.xml` |
-| 4 | `55.574` | `tests.architecture.test_provider_registry_decomposition::test_default_provider_registry_raw_calls_stay_confined_to_known_src_baseline` | `S7-crosscutting-architecture-c.xml` |
-| 5 | `40.649` | `tests.architecture.test_quality_exemptions_registry::test_exemption_registry_targets_are_live` | `S7-crosscutting-architecture-c.xml` |
-| 6 | `38.963` | `tests.architecture.test_naming_ambiguity_classifier::test_build_ambiguity_groups_reports_expected_ok_families` | `S7-crosscutting-architecture-c.xml` |
-| 7 | `37.074` | `tests.architecture.test_mounted_worktree_skip_policy::test_tests_do_not_reintroduce_hardcoded_network_drive_skips` | `S7-crosscutting-architecture-c.xml` |
-| 8 | `35.843` | `tests.architecture.test_private_module_imports::test_owner_aware_private_module_imports` | `S7-crosscutting-architecture-c.xml` |
-| 9 | `35.412` | `tests.architecture.test_import_graph_invariants::test_import_graph_respects_layer_matrix` | `S7-crosscutting-architecture-b.xml` |
-| 10 | `34.348` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `S8-crosscutting-governance.xml` |
+| 1 | `22.399` | `tests.unit.scripts.docs.passports.test_passport_projector::test_cli_generate_and_check` | `junit.unit-other.xml` |
+| 2 | `11.55` | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic` | `junit.unit-other.xml` |
+| 3 | `11.315` | `tests.unit.scripts.docs.passports.test_passport_projector::test_cli_generate_and_check` | `junit-fast.xml` |
+| 4 | `10.797` | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_subprocess_environment_invariant` | `junit.unit-other.xml` |
+| 5 | `10.615` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.xml` |
+| 6 | `7.251` | `tests.unit.scripts.docs.passports.test_passport_projector::test_generated_facts_validate_against_published_schemas` | `junit.unit-other.xml` |
+| 7 | `6.817` | `tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness` | `junit.unit-other.xml` |
+| 8 | `6.505` | `tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration::test_bootstrapped_service_can_list_pipelines` | `junit.unit-other.xml` |
+| 9 | `6.126` | `tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts` | `junit-track-d.xml` |
+| 10 | `5.529` | `tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv::test_script_runs_without_errors` | `junit.unit-other.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.architecture.test_naming_ambiguity_classifier` | 2 | 231.041 | 192.078 |
-| 2 | `tests.architecture.test_provider_registry_decomposition` | 2 | 131.792 | 76.218 |
-| 3 | `tests.architecture.test_quality_exemptions_registry` | 2 | 69.7 | 40.649 |
-| 4 | `tests.architecture.test_debt_governance_telemetry_reporting` | 1 | 64.276 | 64.276 |
-| 5 | `tests.architecture.test_vcr_metadata_catalog_drift` | 2 | 59.262 | 33.691 |
-| 6 | `tests.architecture.test_mounted_worktree_skip_policy` | 1 | 37.074 | 37.074 |
-| 7 | `tests.architecture.test_private_module_imports` | 1 | 35.843 | 35.843 |
-| 8 | `tests.architecture.test_import_graph_invariants` | 1 | 35.412 | 35.412 |
-| 9 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 34.348 | 34.348 |
-| 10 | `tests.architecture.test_tech_debt_issues_5670_5675_closeout` | 1 | 31.733 | 31.733 |
+| 1 | `tests.unit.scripts.docs.passports.test_passport_projector` | 12 | 92.986 | 22.399 |
+| 2 | `tests.unit.scripts.qa.test_report_normalization_fallback_inventory` | 3 | 12.275 | 4.111 |
+| 3 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 1 | 10.615 | 10.615 |
+| 4 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 6.817 | 6.817 |
+| 5 | `tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration` | 1 | 6.505 | 6.505 |
+| 6 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 1 | 6.126 | 6.126 |
+| 7 | `tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv` | 1 | 5.529 | 5.529 |
+| 8 | `tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts` | 1 | 5.235 | 5.235 |
+| 9 | `tests.unit.scripts.qa.test_generate_semantic_pipeline_audit` | 1 | 5.086 | 5.086 |
+| 10 | `tests.unit.scripts.test_normalization_governance_cli_smoke` | 1 | 4.746 | 4.746 |
 
 ## Refresh Procedure
 

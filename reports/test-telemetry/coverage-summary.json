@@ -1,9 +1,9 @@
 {
   "source_branch": "main",
-  "source_commit": "14bcbfbd8054292fff9f55837da508a80ceaaeea",
-  "source_run_id": "local-governance-closeout-20260805-final",
-  "source_tree_sha256": "fc2817f0416dcd91648e0a594c4bcf75e737bd760cd2c48a57170bcf23db74b7",
-  "refreshed_at_utc": "2026-08-05T06:06:07.843681+00:00",
+  "source_commit": "5271c40811c2420da5ae82fa233f56dfc02f25af",
+  "source_run_id": "github-30999069843-1",
+  "source_tree_sha256": "671ec7f5d8eb2568fd50ae738a716f1c7825f6af5f78db1acf8c9936992f8ef9",
+  "refreshed_at_utc": "2026-08-05T11:07:06.501447+00:00",
   "refresh_status": "captured",
   "coverage_percent": 92.44,
   "coverage": {
