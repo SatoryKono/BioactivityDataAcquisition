@@ -70,6 +70,8 @@ FORBIDDEN_LOCAL_ROOT_FILES: frozenset[str] = frozenset(
         "_tmp_panel_inventory.ps1",
         "coverage.xml",
         "mcp-shell.log",
+        "NUL",
+        "nul",
         "Test Results - Pytest_All.xml",
     }
 )
