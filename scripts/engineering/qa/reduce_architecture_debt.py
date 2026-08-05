@@ -9,6 +9,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import cast
 
+from scripts.engineering.common.repo_paths import REPO_ROOT
+
 from bioetl.infrastructure.quality.architecture_debt_reduction import (
     _default_plan_output_path,
     build_architecture_debt_execution_plan,
@@ -17,12 +19,14 @@ from bioetl.infrastructure.quality.architecture_debt_reduction import (
 )
 
 
-def _portable_tasks_path(tasks_path: Path, *, project_root: Path) -> str:
+def _portable_tasks_path(tasks_path: Path, *, project_root: Path = REPO_ROOT) -> str:
     """Return a repository-relative source identity when possible."""
+    resolved_path = tasks_path.resolve(strict=False)
+    resolved_root = project_root.resolve(strict=False)
     try:
-        return tasks_path.relative_to(project_root).as_posix()
+        return resolved_path.relative_to(resolved_root).as_posix()
     except ValueError:
-        return tasks_path.as_posix()
+        return resolved_path.as_posix()
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -42,7 +46,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--project-root",
-        default=".",
+        default=str(REPO_ROOT),
         help="Repository root used to locate tasks and default report path.",
     )
     parser.add_argument(
