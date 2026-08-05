@@ -1970,7 +1970,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         prop.get("id"): prop.get("value")
         for prop in percentage_overrides[0].get("properties", [])
     }
-    assert percentage_properties["custom.align"] == "left"
+    assert percentage_properties["custom.align"] == "right"
     assert percentage_properties["custom.cellOptions"] == {"type": "color-text"}
     # PFILL-01: plain percentage text — no pipe-token regex mappings required.
     assert percentage_properties.get("mappings", []) == []
