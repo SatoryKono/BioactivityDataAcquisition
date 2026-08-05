@@ -684,7 +684,11 @@ def _subprocess_cache_dependency_paths(
             path
             for path in (
                 repo_root / "docs" / "04-reference" / "config_comparison_matrix.csv",
-                repo_root / "docs" / "reports" / "generated" / "config-discrepancies-report.md",
+                repo_root
+                / "docs"
+                / "reports"
+                / "generated"
+                / "config-discrepancies-report.md",
                 repo_root / "reports" / "quality" / "config-discrepancy-baseline.json",
             )
             if path.exists()
