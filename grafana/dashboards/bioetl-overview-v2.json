@@ -3294,7 +3294,7 @@
                   },
                   {
                     "id": "custom.align",
-                    "value": "left"
+                    "value": "right"
                   },
                   {
                     "id": "custom.cellOptions",

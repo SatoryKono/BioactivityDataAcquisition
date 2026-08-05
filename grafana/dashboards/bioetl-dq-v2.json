@@ -1475,7 +1475,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])))",
+              "expr": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range]))) or vector(0))",
               "legendFormat": "Validation Failures",
               "refId": "A"
             }
@@ -1559,7 +1559,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range])))",
+              "expr": "round((sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range]))) or vector(0))",
               "refId": "A"
             }
           ],
@@ -2373,7 +2373,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
+              "expr": "round((sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or vector(0))",
               "legendFormat": "Quarantined",
               "refId": "A"
             }
@@ -2451,7 +2451,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])))",
+              "expr": "round((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))) or vector(0))",
               "instant": true,
               "legendFormat": "Filtered Out",
               "refId": "A"
@@ -2749,7 +2749,7 @@
                   },
                   {
                     "id": "custom.align",
-                    "value": "left"
+                    "value": "right"
                   },
                   {
                     "id": "custom.cellOptions",
