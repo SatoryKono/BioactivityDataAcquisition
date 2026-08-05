@@ -75,6 +75,8 @@ local_tolerated_root_dirs:
       role: local_benchmark_workspace_untracked
     - path: .cache
       role: local_cache_surface_untracked
+    - path: .claude
+      role: local_claude_code_state_untracked
     - path: .codex_tmp
       role: local_codex_scratch_untracked
     - path: caddy
