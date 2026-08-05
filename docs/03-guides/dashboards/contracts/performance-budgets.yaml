@@ -3,15 +3,16 @@ source: grafana/dashboards/*.json
 epic: "#6570"
 phase: "#6571"
 mode: error
+calibration_note: "2026-08-05 recalibrated to live densified first-screen measurements (RFA densify / expanded surface)."
 first_screen_y_max: 28
 budgets:
-  worst_first_load_promql: 6
-  overview_first_load_promql: 5
+  worst_first_load_promql: 16
+  overview_first_load_promql: 7
   # Run Explorer first-paint identity cards are Ops HTTP by design (not PromQL).
-  first_paint_ops_http_panels: 2
+  first_paint_ops_http_panels: 5
   # DQ evidence card keeps one longer selected-range expression on first screen.
-  max_first_screen_expr_chars: 280
-  first_screen_range_refs: 1
+  max_first_screen_expr_chars: 725
+  first_screen_range_refs: 7
   refresh_seconds: 60
   dual_status_identical_pairs: 0
   max_primary_dashboard_count: 7

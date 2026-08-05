@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `14bcbfbd8054292fff9f55837da508a80ceaaeea`
 
-Evidence surface SHA-256: `07a8bc5d748b2647ced0562f50c7e50c65ee8907cc3b50563114c589f3d3d252`
+Evidence surface SHA-256: `858c830b97a9ae1bbf32ae8bfbf76728a8cedfbbc824942f126e921e6212bf43`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -29,10 +29,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1476,
+    "fully_covered_module_count": 0,
     "layer_violation_count": 0,
-    "no_executable_lines_module_count": 94,
-    "partially_covered_module_count": 744,
+    "no_executable_lines_module_count": 0,
+    "partially_covered_module_count": 0,
     "source_module_count": 2314,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,

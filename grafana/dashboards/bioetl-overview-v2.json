@@ -909,7 +909,7 @@
           }
         }
       ],
-      "description": "Open Action on the top row first — routes are ranked by urgency (RUNTIME > CP > GOLD > DQ > PROV > WF > MON). MON/NR means keep watching when Fleet Health is OK.",
+      "description": "Open Action on the top row first — routes are ranked by urgency (RUNTIME > CP > GOLD > DQ > PROV > WF > MON). MON/NR means keep watching when Fleet Health is OK.  Scope: current fleet/status verdict for selected pipeline, workflow, and time range; not a per-run_id metric.",
       "links": [
         {
           "title": "Open Runtime",
