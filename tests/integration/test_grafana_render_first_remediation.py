@@ -502,6 +502,37 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
         assert len(row.get("panels") or []) > 0
 
 
+def test_collapsed_rows_never_ship_empty_nested_panels() -> None:
+    """Collapsed progressive-disclosure rows must retain nested panel payload.
+
+    Host-side expand/collapse WIP previously emptied Runtime nested rows
+    (collapsed=false + panels=[]). Guard all seven operator boards (#7829).
+    """
+    operator_files = (
+        "bioetl-control-plane-v1.json",
+        "bioetl-overview-v2.json",
+        "bioetl-runtime.json",
+        "bioetl-provider-health-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-incident-v1.json",
+        "bioetl-run-explorer-v1.json",
+    )
+    for name in operator_files:
+        dashboard = _load(name)
+        empty: list[tuple[object, object]] = []
+        for panel in _iter_panels(dashboard.get("panels") or []):
+            if panel.get("type") != "row":
+                continue
+            if panel.get("collapsed") is not True:
+                continue
+            nested = panel.get("panels") or []
+            if len(nested) == 0:
+                empty.append((panel.get("id"), panel.get("title")))
+        assert not empty, (
+            f"{name}: collapsed rows must keep nested panels; empty nests={empty}"
+        )
+
+
 def test_rf007_counts_and_dense_legends_are_bounded() -> None:
     runtime = _load("bioetl-runtime.json")
     for panel_id in (240, 241):
