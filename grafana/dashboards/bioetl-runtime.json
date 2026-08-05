@@ -718,7 +718,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "transparent",
+                    "color": "gray",
                     "value": null
                   },
                   {
@@ -1380,7 +1380,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "transparent",
+                    "color": "gray",
                     "value": null
                   },
                   {
@@ -1466,7 +1466,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "transparent",
+                    "color": "gray",
                     "value": null
                   },
                   {
@@ -3215,7 +3215,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range])))",
+              "expr": "round((sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0))",
               "refId": "A"
             }
           ],

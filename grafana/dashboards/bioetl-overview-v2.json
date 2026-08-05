@@ -75,7 +75,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "transparent",
+                    "color": "gray",
                     "value": null
                   },
                   {

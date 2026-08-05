@@ -15,6 +15,14 @@ threshold color without changing queries or operator workflows)
 also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; canonical baseline:
 `docs/reports/dashboard-ux-checks/2026-05-19.md`)
 
+## Run Explorer Completed timestamp format (2026-08-05)
+
+- `Browse Recent Runs` formats `completed_at` with
+  `unit=dateTimeAsIso`, so the `Completed` column uses the canonical
+  dashboard timestamp presentation.
+- The BioETL Ops HTTP query, field value, run-selection flow, navigation, and
+  empty-state semantics are unchanged.
+
 ## Selected-range description sync (2026-07-30)
 
 - Control-plane panels backed by `$__range` now identify the selected range in
