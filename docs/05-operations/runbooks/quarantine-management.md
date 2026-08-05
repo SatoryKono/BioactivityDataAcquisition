@@ -162,7 +162,7 @@ bioetl quarantine purge --pipeline {pipeline-name}
    exact record-level evidence and selected-record context.
 1. Run `bioetl quarantine resolve ...` / `replay` when you need operator action.
 1. For Gold contract/semantic rejects, stay in `4. Data Quality` and inspect
-   `Inspect: Gold Reject Outcomes by Pipeline` plus processed-records surfaces.
+   `Inspect Gold Reject Outcomes by Pipeline` plus processed-records surfaces.
 
 ### Retention
 

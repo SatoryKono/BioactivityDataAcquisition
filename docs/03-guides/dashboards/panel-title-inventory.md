@@ -83,7 +83,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 121 | Inspect Top Silver Reject Reasons |
 | bioetl-dq-v2.json | 122 | Inspect Top Silver Reject Fields |
 | bioetl-dq-v2.json | 118 | Inspect Silver Rejects by Pipeline |
-| bioetl-dq-v2.json | 156 | Inspect: Gold Reject Outcomes by Pipeline |
+| bioetl-dq-v2.json | 156 | Inspect Gold Reject Outcomes by Pipeline |
 | bioetl-dq-v2.json | 221 | Validation Diagnostics |
 | bioetl-dq-v2.json | 1 | Track Record Flow by Stage |
 | bioetl-dq-v2.json | 3 | Monitor Bronze Records |

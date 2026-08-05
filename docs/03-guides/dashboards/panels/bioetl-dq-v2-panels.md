@@ -137,7 +137,7 @@ query, links, and operator fact.
 - **Purpose:** Show Silver rejects by pipeline and expose a neutral `No data` state when the bounded series is absent.
 - **Data sources:** `bioetl_records_processed_total{stage="filtered_out"}`
 
-### 23. Inspect: Gold Reject Outcomes by Pipeline
+### 23. Inspect Gold Reject Outcomes by Pipeline
 - **Type:** Table
 - **Purpose:** Show Gold reject outcomes by pipeline and expose a neutral `No data` state when both bounded series are absent.
 - **Data sources:** `bioetl_processed_records_gold_quarantined_current`, `bioetl_processed_records_gold_excluded_by_contract_current`
