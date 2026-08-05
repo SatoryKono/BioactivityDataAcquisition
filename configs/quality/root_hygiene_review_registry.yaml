@@ -12,17 +12,17 @@ current_live_root_baseline:
     .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py
     --strict-untracked
   note: >-
-    2026-08-04 CI-C1 follow-up: `.agents` promoted to curated root tooling
-    (shared skill adapters from #7529); accidental
+    2026-08-05 RH6 cycles 1-2 on agent/root-hygiene-5cycle-20260805: #7585
+    reclassified tracked .junie to present_curated_root_surface; #7590 registered
+    Windows nul root clutter candidate for cleanup tooling; last_verified 2026-08-05.
+    Tracked root remains 37≡allowlist. 2026-08-04 CI-C1 follow-up: .agents promoted
+    to curated root tooling (shared skill adapters from #7529); accidental
     docker-compose.monitoring.local-override.yml removed from tracked root.
     Prior 2026-07-29 RH5 epic #7015: verified tracked root ≡ allowlist (37≡37).
-    Transient unauthorized root scripts (_cr_one_scope.py, _cr_write_final.py,
-    _publish_arch_cr2_issues.py) are absent from the index; gitignore hardened
-    for /_cr_*.py and /_publish_*.py (RH5-01/#7016, RH5-02/#7017). Registry
-    resync RH5-03/#7018. skills-lock.json retained at exact root (RH5-06/#7023
-    REVIEW: installer contract). Docker adjunct rehome remains owner-gated
-    (#6881/#6797). Further shrink deferred (RH5-05/#7021). Prior RH #6874 /
-    RH4 #6812 / RH3 / RH2 guidance intact.
+    Transient unauthorized root scripts remain banned; gitignore hardened for
+    /_cr_*.py and /_publish_*.py (RH5-01/#7016, RH5-02/#7017). skills-lock.json
+    retained at exact root (RH5-06/#7023). Docker adjunct rehome remains
+    owner-gated (#6881/#6797). Further shrink deferred (RH5-05/#7021).
 
 review_lanes:
   - lane_id: root_env_security
