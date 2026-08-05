@@ -489,36 +489,36 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "NO_ROUTE",
+                  "text": "NR",
                   "color": "gray"
                 },
                 "5": {
-                  "text": "MONITOR",
+                  "text": "MON",
                   "color": "gray"
                 },
                 "10": {
-                  "text": "WORKFLOW",
+                  "text": "WF",
                   "color": "green"
                 },
                 "20": {
-                  "text": "PROVIDER",
+                  "text": "PROV",
                   "color": "orange"
                 },
                 "30": {
                   "text": "DQ",
                   "color": "orange"
                 },
+                "35": {
+                  "text": "GOLD",
+                  "color": "orange"
+                },
                 "40": {
-                  "text": "CONTROL PLANE",
+                  "text": "CP",
                   "color": "red"
                 },
                 "50": {
                   "text": "RUNTIME",
                   "color": "red"
-                },
-                "35": {
-                  "text": "GOLD",
-                  "color": "orange"
                 }
               }
             },
@@ -527,7 +527,7 @@
               "options": {
                 "match": "null",
                 "result": {
-                  "text": "UNKNOWN",
+                  "text": "?",
                   "color": "gray"
                 }
               }
@@ -660,16 +660,16 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 96
+                "value": 88
               },
               {
                 "id": "custom.align",
-                "value": "left"
+                "value": "center"
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-background"
                 }
               },
               {
@@ -692,16 +692,16 @@
               },
               {
                 "id": "custom.width",
-                "value": 96
+                "value": 88
               },
               {
                 "id": "custom.align",
-                "value": "left"
+                "value": "center"
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-background"
                 }
               },
               {
@@ -850,7 +850,7 @@
         "footer": {
           "show": false
         },
-        "cellHeight": "sm",
+        "cellHeight": "md",
         "sortBy": [
           {
             "desc": true,
@@ -909,7 +909,7 @@
           }
         }
       ],
-      "description": "Shows up to four highest-priority next actions for the current fleet/selectors (priority: Runtime > Control Plane > Gold lifecycle > DQ > Provider > Workflow > Monitor). Columns: Action (primary CTA, row pipeline preserved) → Priority (text color) → Why → Pipeline. Missing/empty scope falls back to NO_ROUTE. run_id is handoff context only — never a Prometheus label. When Priority is MONITOR and Fleet Health is OK, continue monitoring rather than escalating.",
+      "description": "Open Action on the top row first — routes are ranked by urgency (RUNTIME > CP > GOLD > DQ > PROV > WF > MON). MON/NR means keep watching when Fleet Health is OK.",
       "links": [
         {
           "title": "Open Runtime",
