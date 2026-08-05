@@ -103,8 +103,8 @@ as a synthetic green zero.
 - **Data sources:** `bioetl_health_check_failures_total`, `bioetl_health_check_degraded_total`
 
 ### 18. Track Failure Share
-- **Type:** Bargauge
-- **Purpose:** Show provider failure share.
+- **Type:** Table
+- **Purpose:** Show provider failure share; an empty vector is a visible neutral `No data` state rather than a blank gauge or measured zero.
 - **Data sources:** `bioetl_health_check_failures_total`
 
 ### 19. Inspect Exhausted Retries

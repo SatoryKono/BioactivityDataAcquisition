@@ -1486,6 +1486,50 @@
                 "value": "Count"
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stage"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "none": {
+                        "text": "VALID EMPTY",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "error_code"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "none": {
+                        "text": "No errors in range",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -1511,8 +1555,30 @@
       "targets": [
         {
           "expr": "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"error_code\", \"none\", \"\", \"\")",
+          "format": "table",
           "instant": true,
           "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "stage": 0,
+              "error_code": 1,
+              "Value": 2
+            },
+            "renameByName": {
+              "stage": "Stage",
+              "error_code": "Error Code",
+              "Value": "Count"
+            }
+          }
         }
       ],
       "title": "Review Errors by Stage & Code",
@@ -1560,7 +1626,52 @@
           "unit": "short",
           "decimals": 0
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stage"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "none": {
+                        "text": "VALID EMPTY",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_type"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "none": {
+                        "text": "No records in range",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 6,
@@ -1570,29 +1681,43 @@
       },
       "id": 241,
       "options": {
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "text": {},
-        "textMode": "auto"
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
       },
       "targets": [
         {
           "expr": "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"run_type\", \"none\", \"\", \"\")",
+          "format": "table",
           "instant": true,
           "refId": "A",
           "legendFormat": "{{stage}} \u00b7 {{run_type}}"
         }
       ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "stage": 0,
+              "run_type": 1,
+              "Value": 2
+            },
+            "renameByName": {
+              "stage": "Stage",
+              "run_type": "Run Type",
+              "Value": "Count"
+            }
+          }
+        }
+      ],
       "title": "Compare Records by Stage & Run Type",
-      "type": "bargauge"
+      "type": "table"
     },
     {
       "id": 254,

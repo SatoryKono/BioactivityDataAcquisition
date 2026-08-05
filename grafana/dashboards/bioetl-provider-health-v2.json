@@ -955,26 +955,41 @@
       },
       "id": 107,
       "options": {
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
       },
       "targets": [
         {
           "expr": "(100 * sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) / clamp_min(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])), 1))",
+          "format": "table",
+          "instant": true,
           "legendFormat": "{{ provider }}",
           "refId": "A"
         }
       ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "provider": 0,
+              "Value": 1
+            },
+            "renameByName": {
+              "provider": "Provider",
+              "Value": "Failure Share"
+            }
+          }
+        }
+      ],
       "title": "Track Failure Share",
-      "type": "bargauge",
+      "type": "table",
       "description": "Selected-range evidence: provider share of failed probes in the active Grafana range. The full share chart is collapsed by default and should be expanded only when total failures are non-zero"
     },
     {

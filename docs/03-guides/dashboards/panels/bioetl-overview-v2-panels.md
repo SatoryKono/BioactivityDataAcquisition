@@ -147,7 +147,7 @@ multiple runs; use RunLedger for exact reconciliation.
 
 ### 25. Review Active Alerts
 - **Type:** Table
-- **Purpose:** Show alert state for triage.
+- **Purpose:** Show alert state for triage. Severity owns severity color; the alert count colors only its own cell and cannot repaint a warning row as critical.
 - **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
 
 ### 26. Inspect Run Context
