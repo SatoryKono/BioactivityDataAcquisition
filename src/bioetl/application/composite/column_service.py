@@ -6,7 +6,10 @@ from collections.abc import Callable, Sequence
 
 import polars as pl
 
-from bioetl.application.composite.column_orderer_group_flow import order_by_yaml_groups
+from bioetl.application.composite.column_orderer_group_flow import (
+    apply_renames,
+    order_by_yaml_groups,
+)
 from bioetl.application.composite.column_orderer_semantic import (
     count_groups,
     get_ordered_columns,
@@ -226,6 +229,14 @@ class ColumnOrderService:
             collect_group_columns=self._collect_group_columns,
             logger=self._logger,
         )
+
+    @staticmethod
+    def _apply_renames(
+        columns: list[str],
+        rename_map: dict[str, str],
+    ) -> list[str]:
+        """Delegate legacy service-level rename calls to the focused helper."""
+        return apply_renames(columns, rename_map)
 
     @staticmethod
     def get_enricher_prefix(enricher_pipeline: str) -> str:
