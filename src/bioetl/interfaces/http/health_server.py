@@ -75,7 +75,7 @@ class HealthServer(
     def __init__(
         self,
         host: str = "127.0.0.1",
-        port: int = 8081,
+        port: int = 8000,
         control_plane: HealthServerControlPlaneDeps | None = None,
         prometheus_base_url: str | None = None,
         logger: LoggerPort | None = None,
@@ -212,7 +212,7 @@ class HealthServer(
 
 async def run_health_server(
     host: str = "0.0.0.0",
-    port: int = 8081,
+    port: int = 8000,
     health_monitor: HealthMonitorPort | None = None,
     quarantine_service: QuarantineService | None = None,
     checkpoint_port: CheckpointPort | None = None,
@@ -230,7 +230,7 @@ async def run_health_server(
 
     Args:
         host: IP address to bind to. Defaults to all interfaces (0.0.0.0).
-        port: TCP port to listen on. Defaults to 8081.
+        port: TCP port to listen on. Defaults to 8000.
         health_monitor: Optional monitor providing provider health states.
             Health endpoints report no provider data when None.
         quarantine_service: Optional read-only quarantine explorer service.

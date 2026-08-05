@@ -107,8 +107,8 @@ class RunCommandInput:
     resume_manifest_id: str | None = None
     exact_replay: bool = False
     required_persistence_profile: str | None = None
-    ensure_observability_backend: bool = True
-    observability_backend_port: int = 8081
+    ensure_observability_backend: bool = False
+    observability_backend_port: int = 8000
 
 
 def prepare_run_request(

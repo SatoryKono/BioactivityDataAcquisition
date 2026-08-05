@@ -49,7 +49,7 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
 
 DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
-DEFAULT_APP_BASE_URL = "http://localhost:8081"
+DEFAULT_APP_BASE_URL = "http://localhost:8000"
 DEFAULT_SCREENSHOT_DIR = Path("reports/observability/grafana/screenshots")
 DEFAULT_GATE_OUTPUT_PATH = Path(
     "reports/observability/grafana/dashboard-release-gates.json"
@@ -153,16 +153,19 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--ensure-observability-backend",
         action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Auto-start or reuse a detached Quarantine Explorer backend before audit.",
+        default=False,
+        help=(
+            "Opt-in: auto-start or reuse a detached BioETL Ops HTTP "
+            "(health server) backend before audit. Default off."
+        ),
     )
     parser.add_argument(
         "--refresh-observability-backend",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=False,
         help=(
-            "Force-refresh the detached Quarantine Explorer backend before audit so "
-            "the cycle does not reuse stale route handlers from an older process."
+            "Force-refresh the detached BioETL Ops HTTP (health server) backend "
+            "before audit so the cycle does not reuse stale route handlers."
         ),
     )
     parser.add_argument(
@@ -178,7 +181,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--observability-backend-port",
         type=int,
         default=DEFAULT_HEALTH_SERVER_PORT,
-        help="Port for the detached Quarantine Explorer backend.",
+        help="Port for the detached BioETL Ops HTTP / health server backend.",
     )
     parser.add_argument("--pipeline", default=DEFAULT_PIPELINE)
     parser.add_argument("--run-type", default=DEFAULT_RUN_TYPE)

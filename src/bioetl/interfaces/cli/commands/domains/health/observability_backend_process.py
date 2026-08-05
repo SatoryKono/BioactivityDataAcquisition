@@ -232,11 +232,16 @@ def _build_detached_backend_env(
 
 
 def build_detached_backend_log_path(port: int) -> Path:
-    """Return the deterministic detached backend startup log path for one port."""
-    return Path(tempfile.gettempdir()) / f"bioetl-quarantine-backend-{port}.log"
+    """Return the deterministic detached Ops HTTP backend startup log path.
+
+    Uses ``bioetl-ops-http-backend-{port}.log``. A legacy
+    ``bioetl-quarantine-backend-{port}.log`` path is accepted as a read alias
+    only by failure-detail helpers when present.
+    """
+    return Path(tempfile.gettempdir()) / f"bioetl-ops-http-backend-{port}.log"
 
 
-def start_detached_quarantine_backend(
+def start_detached_ops_http_backend(
     *,
     bind_host: str = "0.0.0.0",
     port: int = DEFAULT_HEALTH_SERVER_PORT,
@@ -244,22 +249,24 @@ def start_detached_quarantine_backend(
     data_root: Path | None = None,
     popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
 ) -> subprocess.Popen[bytes]:
-    """Launch ``bioetl quarantine serve`` as a detached background process."""
+    """Launch ``bioetl health server`` as a detached Ops HTTP backend process.
+
+    This is the shipping identity surface for Grafana BioETL Ops HTTP panels.
+    ``data_root`` is accepted for call-site compatibility but is not used by
+    the health-server command line.
+    """
+    del data_root  # health server discovers control-plane roots from runtime config
     command = [
         python_executable or sys.executable,
         "-m",
         "bioetl",
-        "quarantine",
-        "serve",
+        "health",
+        "server",
         "--host",
         bind_host,
         "--port",
         str(port),
     ]
-    if data_root is not None:
-        if not data_root.is_absolute():
-            raise ValueError("data_root must be an absolute path")
-        command.extend(("--data-root", str(data_root.resolve(strict=True))))
     kwargs = _build_detached_backend_popen_kwargs()
     kwargs.pop("stdout", None)
     kwargs.pop("stderr", None)
@@ -277,6 +284,28 @@ def start_detached_quarantine_backend(
         )
 
 
+def start_detached_quarantine_backend(
+    *,
+    bind_host: str = "0.0.0.0",
+    port: int = DEFAULT_HEALTH_SERVER_PORT,
+    python_executable: str | None = None,
+    data_root: Path | None = None,
+    popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
+) -> subprocess.Popen[bytes]:
+    """Compatibility alias for :func:`start_detached_ops_http_backend`.
+
+    Historical name retained for tests and import paths. Does **not** start
+    ``quarantine serve``; the shipping backend is ``bioetl health server``.
+    """
+    return start_detached_ops_http_backend(
+        bind_host=bind_host,
+        port=port,
+        python_executable=python_executable,
+        data_root=data_root,
+        popen_factory=popen_factory,
+    )
+
+
 def python_executable_to_tuple(args: object) -> tuple[str, ...]:
     """Normalize subprocess ``args`` into a tuple for stable reporting/tests."""
     if isinstance(args, (list, tuple)):
@@ -289,5 +318,6 @@ __all__ = [
     "drop_listening_backend_on_port",
     "find_listening_backend_pid_by_port",
     "python_executable_to_tuple",
+    "start_detached_ops_http_backend",
     "start_detached_quarantine_backend",
 ]

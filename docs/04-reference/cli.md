@@ -104,8 +104,8 @@ bioetl workflow status <NAME> [OPTIONS]
 | `--force-steps a,b` | Явно форсировать указанные шаги при resume вместо обычного skip поведения |
 | `--repair-steps a,b` | Явно пометить шаги как repair path для destructive ambiguity recovery |
 | `--incremental` | Автоматически продвинуть `start_offset` от последнего успешного workflow execution; несовместим с resume selectors и явным `--start-offset` |
-| `--ensure-observability-backend/--no-ensure-observability-backend` | Legacy flag; default Docker main surface no longer auto-starts Quarantine Explorer (`:8081`). Identity panels use `bioetl health server` / BioETL Ops HTTP on `:8000` |
-| `--observability-backend-port` | Legacy port for detached observability helper (prefer health server `:8000` for Grafana identity) |
+| `--ensure-observability-backend/--no-ensure-observability-backend` | **Default off.** Opt-in auto-start of detached **BioETL Ops HTTP** backend (`bioetl health server`) for Grafana ID/detail panels. Does not start Quarantine Explorer / `:8081`. Prefer a long-lived `bioetl health server --port 8000`. |
+| `--observability-backend-port` | Port for the opt-in detached Ops HTTP / health server backend (**default 8000**) |
 
 **`workflow status` опции:**
 

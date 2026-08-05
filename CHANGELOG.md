@@ -18,6 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **CLI observability backend defaults (#7562–#7565):**
+  `--ensure-observability-backend` now defaults to **off**;
+  `DEFAULT_HEALTH_SERVER_PORT` / Ops HTTP identity surface is **8000**.
+  When ensure is explicitly enabled, the detached backend starts
+  `bioetl health server` (BioETL Ops HTTP), not `quarantine serve`.
+  Grafana dashboard audit cycle defaults match. Operator docs and skills
+  residual Explorer wording aligned to Ops HTTP.
+
 - **Monitoring surface reduction (2026-07-23, strategy A soft + hard removals):**
   Opt-in monitoring stack is Prometheus / Pushgateway / Grafana / image-renderer
   only (`make docker-start-monitoring`). **Removed** from shipping Docker/UI:

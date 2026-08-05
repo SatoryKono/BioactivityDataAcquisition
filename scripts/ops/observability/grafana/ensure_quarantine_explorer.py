@@ -20,6 +20,11 @@ def main(argv: list[str] | None = None) -> int:
         "Domain quarantine write-path is unchanged; only the operator Explorer/HTTP UI was deleted.",
         file=sys.stderr,
     )
+    print(
+        "For Grafana identity panels use: bioetl health server --port 8000 "
+        "(BioETL Ops HTTP).",
+        file=sys.stderr,
+    )
     return 2
 
 

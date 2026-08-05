@@ -14,8 +14,8 @@ This skill is for:
 
 - full runtime-render refresh of `grafana/dashboards/*.json`
 - preflight checks before a dashboard audit
-- live reviewed panel validation against Grafana, Prometheus, and Quarantine
-  Explorer
+- live reviewed panel validation against Grafana, Prometheus, and BioETL Ops
+  HTTP (`bioetl health server` on `:8000`)
 - diagnosing render failures such as `401`, missing Playwright runtime, or
   missing Chromium shared libraries
 
@@ -110,8 +110,8 @@ Interpretation:
 - `grafana-render-auth: ok` means render-sensitive auth is valid
 - `playwright-runtime: ok/error` tells you whether browser fallback can work on
   this host
-- `quarantine-explorer: ok/error` tells you whether HTTP-backed dashboard panels
-  can be audited safely
+- `quarantine-explorer` / Ops HTTP probe: prefer BioETL Ops HTTP health on
+  `:8000` for HTTP-backed identity panels (Explorer UI removed 2026-07-23)
 
 If preflight fails, report the failing check explicitly before attempting more
 render work.
@@ -205,7 +205,7 @@ uv run python -m scripts.ops audit-live-grafana \
   --pipeline <pipeline> \
   --run-type <run_type> \
   --run-id <run_id> \
-  --app-base-url http://127.0.0.1:8081 \
+  --app-base-url http://127.0.0.1:8000 \
   --output /tmp/live-panel-audit.json
 ```
 
@@ -216,7 +216,7 @@ Use this when the user cares about:
 - checkpoint freshness
 - DQ freshness
 - zero-vs-no-data semantics
-- Silver Reject Explorer denominator behavior
+- control-plane identity / Ops HTTP tables
 
 ### 6. Audit only runtime renders
 
@@ -255,8 +255,8 @@ When blocked:
   `GRAFANA_USERNAME` / `GF_SECURITY_ADMIN_USER`). Do not document or commit a
   default password; preflight fails closed when auth material is missing.
 - Service-account auth may be provided through `GRAFANA_SERVICE_ACCOUNT_TOKEN`.
-- Quarantine Explorer-backed dashboards may require a live BioETL HTTP backend
-  on `127.0.0.1:8081`.
+- BioETL Ops HTTP identity panels require a live `bioetl health server` on
+  `127.0.0.1:8000` (not Quarantine Explorer / `:8081`).
 
 ## Validation Checklist
 

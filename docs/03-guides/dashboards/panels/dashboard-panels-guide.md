@@ -23,7 +23,7 @@
 2. **Тип визуализации** - graph, stat, table, heatmap и т.д.
 3. **Назначение** - что показывает панель
 4. **Источники данных** — фактический datasource: Prometheus metric family,
-   Quarantine Explorer HTTP endpoint, Loki или Grafana metadata. HTTP-backed
+   BioETL Ops HTTP HTTP endpoint, Loki или Grafana metadata. HTTP-backed
    identity/forensic panels нельзя документировать как Prometheus panels.
 5. **Формулы/запросы** - PromQL запросы
 6. **Фильтры/переменные** - какие переменные Grafana используются

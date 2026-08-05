@@ -22,7 +22,7 @@ Dashboard `5. Workflow` was retired in epic #6647. Workflow evidence now lives o
   `pipeline_context`, `pipeline_context_exact`, `run_type_context`,
   `run_type_context_exact`, `provider_context`, `provider_context_exact`,
   `step_status`, and `step_kind`.
-- `ID` and `Processed Records` use the detached `Quarantine Explorer`
+- `ID` and `Processed Records` use the detached `BioETL Ops HTTP`
   datasource; the rest of the dashboard is Prometheus-backed.
 
 ## Panel inventory
@@ -35,8 +35,8 @@ Dashboard `5. Workflow` was retired in epic #6647. Workflow evidence now lives o
 | 9400 | Inspect Scope & Evidence | text | Static | Static explanation of selector context, datasource posture, and workflow evidence boundaries. | shared shell | No thresholds; interpretive guidance only. |
 | 9401 | Status | stat | Prometheus | Selected-range workflow severity synthesized from failed workflow runs and skipped/non-success step evidence. | shared shell | `OK` is neutral gray selected-range evidence, not a live-run health claim. |
 | 9404 | Pipeline Status | stat | Prometheus | Supporting workflow pipeline verdict from `bioetl_workflow_pipeline_verdict_status`; no runtime fallback. | shared shell + context selectors | `SUPPORTING OK` is neutral; absent workflow pipeline evidence is `NOT RESOLVED`, never green. |
-| 9402 | ID | table | Quarantine Explorer | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | Forensic handoff table. |
-| 9403 | Processed Records | table | Quarantine Explorer | Processed-record evidence for the selected workflow/pipeline/run scope. | shared shell | Evidence table; no numeric threshold. |
+| 9402 | ID | table | BioETL Ops HTTP | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | Forensic handoff table. |
+| 9403 | Processed Records | table | BioETL Ops HTTP | Processed-record evidence for the selected workflow/pipeline/run scope. | shared shell | Evidence table; no numeric threshold. |
 | 2 | Failed Workflow Runs / Range | stat | Prometheus | Failed workflow-run count over the selected range. | shared shell | Zero maps to neutral `0 · valid empty range`. |
 | 3 | Failed Pipeline Steps / Range | stat | Prometheus | Failed workflow step events with `step_kind="pipeline"`. | shared shell | Zero maps to neutral `0 · valid empty range`. |
 | 9410 | Failed Entity Pipeline Runs / Range | stat | Prometheus | Failed entity pipeline runs over the selected range. | shared shell + context selectors | Count panel. |
