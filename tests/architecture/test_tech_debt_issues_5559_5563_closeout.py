@@ -151,10 +151,11 @@ def test_issue_5562_skip_inventory_entries_are_individually_accountable() -> Non
             assert str(entry.get("expires_on", "")).strip()
         assert str(entry["rationale"]).strip()
 
+    # #6647 temporary Loki/Tempo skip tails removed after Phase 4 surface cleanup (#6576).
     assert entries_by_issue == {
         "#5562": 19,
         "#6570": 1,
-        "#6647": 3,
+        "#6576": 1,
         "#7249": 3,
     }
 
