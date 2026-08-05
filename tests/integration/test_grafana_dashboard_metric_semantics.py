@@ -1887,7 +1887,8 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert organize_options.get("indexByName", {}).get("row_status") == 3
     excluded_fields = organize_options.get("excludeByName", {})
     assert excluded_fields.get("row_status") is True
-    assert "percintage" not in excluded_fields
+    # Legacy typo field may still appear from stale backends; hide it in Grafana.
+    assert excluded_fields.get("percintage") is True
     assert "percintage" not in organize_options.get("indexByName", {})
     assert "percintage" not in organize_options.get("renameByName", {})
     assert excluded_fields.get("percentage") is not True
