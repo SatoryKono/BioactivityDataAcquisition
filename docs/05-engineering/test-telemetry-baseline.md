@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-04'
+  Last verified: '2026-08-05'
 
 ______________________________________________________________________
 
@@ -28,11 +28,11 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `427718a2101cae45ce4a9db892b042dc655ffa13`
-- Source run id: `local-duration-rebuild-2026-07-23`
-- Source tree sha256: `3ef18305d4dc748f12a3ce7ba5d56dafc94346e9702dc0ef3f38e4af74ef5156`
+- Source commit: `14bcbfbd8054292fff9f55837da508a80ceaaeea`
+- Source run id: `local-governance-closeout-20260805-final`
+- Source tree sha256: `fc2817f0416dcd91648e0a594c4bcf75e737bd760cd2c48a57170bcf23db74b7`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-08-04T18:12:10.346849+00:00`
+- Refreshed at (UTC): `2026-08-05T06:06:07.843681+00:00`
 
 ## Branch-accurate provenance (#5729)
 
