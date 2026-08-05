@@ -2743,6 +2743,10 @@
             },
             "properties": [
               {
+                "id": "displayName",
+                "value": "count"
+              },
+              {
                 "id": "custom.width",
                 "value": 70
               },
@@ -2836,6 +2840,28 @@
                 "value": "count"
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "count"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 70
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
           }
         ]
       },
@@ -2873,25 +2899,25 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "percentage": true,
               "row_status": true,
               "percintage": true
             },
             "indexByName": {
               "parameter": 0,
               "value": 1,
-              "row_status": 3,
-              "percentage": 2
+              "count": 1,
+              "percentage": 2,
+              "row_status": 3
             },
             "renameByName": {
               "parameter": "parameter",
-              "value": "value",
+              "value": "count",
+              "percentage": "percentage",
               "row_status": "",
               "Value": "count",
               "Value #A": "Series A",
               "Value #B": "Series B",
-              "Value #C": "Series C",
-              "percentage": "percentage"
+              "Value #C": "Series C"
             }
           }
         }
