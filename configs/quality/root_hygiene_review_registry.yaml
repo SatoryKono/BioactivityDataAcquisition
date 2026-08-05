@@ -485,9 +485,10 @@ review_lanes:
       - rg -n "\\.junie/|\\.qodo/|\\.sonarlint/|\\.windsurf/|caddy/" .gitignore docs scripts .github tests configs
     candidates:
       - path: .junie
-        current_live_state: present_local_only_root_surface
-        canonical_path: null
-        action_if_reintroduced: keep_untracked_or_move_curated_shared_content_to_an_approved_root_surface
+        current_live_state: present_curated_root_surface
+        canonical_path: .junie
+        disposition: must_stay_root
+        action_if_reintroduced: retain_as_tracked_jetbrains_junie_runtime_peer_equal_to_codex_do_not_treat_as_local_only_cache
       - path: caddy
         current_live_state: present_local_only_root_surface
         canonical_path: null
