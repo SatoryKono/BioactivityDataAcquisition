@@ -14,6 +14,8 @@ from typing import Any
 
 import yaml
 
+from scripts.engineering.common.repo_paths import REPO_ROOT
+
 BRANCH_TELEMETRY_DIR = Path("reports/test-telemetry")
 TELEMETRY_FRESHNESS_MAX_AGE_DAYS = 45
 UNKNOWN_LABEL = "<unknown>"
@@ -23,7 +25,7 @@ UNKNOWN_LABEL = "<unknown>"
 type TelemetryPayload = dict[str, Any]
 
 
-def compute_test_telemetry_source_tree_sha256(repo_root: Path = Path(".")) -> str:
+def compute_test_telemetry_source_tree_sha256(repo_root: Path = REPO_ROOT) -> str:
     """Hash maintained test sources and lane policy, excluding generated evidence."""
     paths = list((repo_root / "tests").rglob("*.py"))
     paths.extend(
@@ -257,7 +259,7 @@ def _summarize_slowest_zones(
 def _portable_artifact_path(
     path: Path | None,
     *,
-    repo_root: Path = Path("."),
+    repo_root: Path = REPO_ROOT,
 ) -> str | None:
     """Render in-repository telemetry inputs without machine-local prefixes."""
     if path is None:
