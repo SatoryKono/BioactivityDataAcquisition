@@ -1,7 +1,7 @@
 # DUX3 audit selection notes (#7054)
 
 **Issue:** #7054 (DUX3-01)  
-**Audit:** BIOETL-GRAFANA-UX-AUDIT-20260729-085334  
+**Audit:** `grafana-ux-audit-20260729-085334`
 **Inventory:** `docs/03-guides/dashboards/dux3-first-screen-inventory.json`
 
 ## Reproducible selection (screenshot audit)

@@ -12,7 +12,7 @@ ______________________________________________________________________
 
 Maps issue #6543 required diagram themes to **existing** ADR-040-governed sources under `docs/02-architecture/diagrams/`.
 
-**Policy:** [ADR-040](../decisions/ADR-040-diagram-governance.md) · **Index:** [README.md](README.md) · **Governance:** [governance/policy.md](governance/policy.md)
+**Policy and governance:** [ADR-040](../decisions/ADR-040-diagram-governance.md) · **Index:** [README.md](README.md)
 
 ## ADR-040 requirements (summary)
 
@@ -22,7 +22,7 @@ Maps issue #6543 required diagram themes to **existing** ADR-040-governed source
 | Location | All under `docs/02-architecture/diagrams/` |
 | Lint / quality | `python -m scripts.diagrams lint` · `make render-diagrams` · CI diagram jobs |
 | Rendered baselines | Tracked `svg/` / `png/` next to families |
-| Registry / catalog | [governance/diagram-catalog.md](governance/diagram-catalog.md), [README.md](README.md) |
+| Registry / catalog | [README.md](README.md#architecture-diagrams-48-core) |
 | Views | `views/*.mermaid` presentation slices (not SSOT replacements) |
 
 ## Required themes → canonical sources
@@ -100,4 +100,4 @@ python -m scripts.diagrams  # see scripts.diagrams --help
 
 - [Architecture overview](../00-overview.md)
 - [ADR Decision Matrix](../../03-guides/cheatsheets/adr-matrix.md)
-- [DIAGRAM-WORKFLOW-GUIDE](governance/DIAGRAM-WORKFLOW-GUIDE.md)
+- [Rendering workflow](README.md#rendering)

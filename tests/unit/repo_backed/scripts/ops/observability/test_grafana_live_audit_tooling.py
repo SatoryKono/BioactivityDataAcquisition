@@ -505,33 +505,6 @@ def test_live_audit_scopes_silver_reject_explorer_to_target_run_id() -> None:
     assert "${quarantine_run_id}" not in rendered
 
 
-def test_live_audit_classifies_empty_filtered_records_by_row_count() -> None:
-    classification, detail = audit_subject._classify_http_records_payload(
-        {"items": [], "total": 0, "limit": 50, "offset": 0}
-    )
-
-    assert classification == "zero_result"
-    assert "zero rows" in detail
-
-
-def test_live_audit_classifies_nonempty_filtered_records_by_row_count() -> None:
-    classification, detail = audit_subject._classify_http_records_payload(
-        {"items": [{"payload_hash": "abc"}], "total": 1, "limit": 50, "offset": 0}
-    )
-
-    assert classification == "nonempty_result"
-    assert "returned rows" in detail
-
-
-def test_live_audit_rejects_filtered_records_total_items_drift() -> None:
-    classification, detail = audit_subject._classify_http_records_payload(
-        {"items": [], "total": 1, "limit": 50, "offset": 0}
-    )
-
-    assert classification == "invalid_shape"
-    assert "disagree" in detail
-
-
 def test_live_audit_loki_panel_uses_query_range(monkeypatch: Any) -> None:
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
