@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2479 |
+| Doc-like files | 2478 |
 | Tracked doc-like files | 2478 |
-| Ignored local docs/reports files | 1 |
+| Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
 | Generated routes | 69 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1 |
+| tracked | 2478 |
 | tracked | 2478 |
 
 ## Lifecycle Counts
@@ -31,7 +31,7 @@
 | closeout_evidence | 64 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 2 |
-| docs_reports_generated_or_route_owned | 8 |
+| docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
 | generated_skill_reference_mirror | 12 |
@@ -61,7 +61,7 @@
 | Active | 845 |
 | Archived | 155 |
 | Canonical | 73 |
-| Generated | 864 |
+| Generated | 863 |
 | Working | 542 |
 
 ## Surface Families
@@ -71,7 +71,7 @@
 | active | 845 |
 | archive | 155 |
 | canonical | 73 |
-| generated | 864 |
+| generated | 863 |
 | working | 542 |
 
 ## Recommended Actions
@@ -80,7 +80,7 @@
 | --- | --- |
 | archive-after-github-state-check | 313 |
 | archive-after-migration | 114 |
-| generate-automatically | 864 |
+| generate-automatically | 863 |
 | keep | 1184 |
 | reconcile-with-github-state | 4 |
 
@@ -329,7 +329,6 @@
 | `docs/reports/evidence/technical-debt/complexity-hotspots/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/generated/chembl_matrix_structural_contract_v1.json` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/config-discrepancies-report.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
-| `docs/reports/generated/docs-audit-10cycle-closeout-2026-08-05.md` | ignored_local | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/documentation-cleanup-inventory.json` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/documentation-cleanup-inventory.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/non_chembl_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
