@@ -44,7 +44,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: #7517 Stream B terminal sync — regenerate governance projections and re-pin evidence_surface_sha256 without budget growth.
+Refresh reason: #7517 Stream B terminal sync - re-pin evidence_surface_sha256 without budget growth.
 
 ## Executive summary
 

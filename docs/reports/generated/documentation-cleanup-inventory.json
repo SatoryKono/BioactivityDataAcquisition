@@ -62500,34 +62500,6 @@
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
-      "commit_policy": "tracked_or_local_curated_generated_doc",
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
-      "extension": ".md",
-      "freshness": "regenerate",
-      "generated_route": "docs-reports-generated-curated-misc",
-      "generated_route_exception": null,
-      "generator": "multiple governed docs and quality generators",
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 0,
-      "lifecycle": "docs_reports_generated_or_route_owned",
-      "outbound_links": 0,
-      "owner": "BioETL Team",
-      "path": "docs/reports/generated/docs-audit-10cycle-closeout-2026-08-05.md",
-      "recommended_action": "generate-automatically",
-      "root_doc_kind": null,
-      "section": "reports",
-      "status": "Generated",
-      "surface_family": "generated",
-      "tracking_state": "ignored_local"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
       "commit_policy": "tracked_curated_generated_doc",
       "declared_class": null,
       "declared_status": null,
@@ -70180,7 +70152,7 @@
       "closeout_evidence": 64,
       "docs_reports_curated_entrypoint": 2,
       "docs_reports_curated_or_historical_report": 2,
-      "docs_reports_generated_or_route_owned": 8,
+      "docs_reports_generated_or_route_owned": 7,
       "docs_reports_retention_sensitive_evidence": 21,
       "generated_skill_license_mirror": 5,
       "generated_skill_reference_mirror": 12,
@@ -70196,7 +70168,16 @@
     "by_recommended_action": {
       "archive-after-github-state-check": 313,
       "archive-after-migration": 114,
+<<<<<<< HEAD
       "generate-automatically": 864,
+||||||| bffe42c291
+      "archive-after-github-state-check": 312,
+      "archive-after-migration": 112,
+      "generate-automatically": 864,
+      "keep": 1181,
+=======
+      "generate-automatically": 863,
+>>>>>>> fix/stream-b-docs-root-7517
       "keep": 1184,
       "reconcile-with-github-state": 4
     },
@@ -70225,7 +70206,13 @@
       "mkdocs.yml": 1,
       "plans": 2,
       "plugins": 4,
+<<<<<<< HEAD
       "reports": 267,
+||||||| bffe42c291
+      "reports": 262,
+=======
+      "reports": 266,
+>>>>>>> fix/stream-b-docs-root-7517
       "ru": 3,
       "security": 2
     },
@@ -70233,21 +70220,41 @@
       "Active": 845,
       "Archived": 155,
       "Canonical": 73,
+<<<<<<< HEAD
       "Generated": 864,
+||||||| bffe42c291
+      "Generated": 864,
+      "Working": 536
+=======
+      "Generated": 863,
+>>>>>>> fix/stream-b-docs-root-7517
       "Working": 542
     },
     "by_surface_family": {
       "active": 845,
       "archive": 155,
       "canonical": 73,
+<<<<<<< HEAD
       "generated": 864,
+||||||| bffe42c291
+      "generated": 864,
+      "working": 536
+=======
+      "generated": 863,
+>>>>>>> fix/stream-b-docs-root-7517
       "working": 542
     },
     "by_tracking_state": {
+<<<<<<< HEAD
       "ignored_local": 1,
+||||||| bffe42c291
+      "ignored_local": 1,
+      "tracked": 2472
+=======
+>>>>>>> fix/stream-b-docs-root-7517
       "tracked": 2478
     },
-    "docs_reports_local_count": 33,
+    "docs_reports_local_count": 32,
     "duplicate_group_count": 6,
     "generated_route_count": 69,
     "generated_without_route_count": 217,
@@ -70261,8 +70268,17 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
+<<<<<<< HEAD
     "total_doc_like": 2479,
     "total_doc_like_ignored_local": 1,
+||||||| bffe42c291
+    "total_doc_like": 2473,
+    "total_doc_like_ignored_local": 1,
+    "total_doc_like_tracked": 2472
+=======
+    "total_doc_like": 2478,
+    "total_doc_like_ignored_local": 0,
+>>>>>>> fix/stream-b-docs-root-7517
     "total_doc_like_tracked": 2478
   }
 }
