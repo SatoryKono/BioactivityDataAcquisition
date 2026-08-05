@@ -319,7 +319,6 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
     # Workflow overview + Alerts/SLO retired; ID-card noValue contract remains.
 
 
-
 def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
     overview = _load("bioetl-overview-v2.json")
     assert _panel(overview, 215)["gridPos"]["y"] <= 7
@@ -368,7 +367,6 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     runtime = _load("bioetl-runtime.json")
     for row_id in (252, 253, 254):
         assert _panel(runtime, row_id).get("collapsed") is False
-
 
 
 def test_rf007_counts_and_dense_legends_are_bounded() -> None:

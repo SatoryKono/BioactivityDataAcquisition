@@ -155,7 +155,6 @@ def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
     )
 
 
-
 def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
     """Runtime First Action stays on first paint; ID/Processed Records stay below triage."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
@@ -170,15 +169,20 @@ def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
     assert first_action_grid["w"] >= 8
     assert "Inspect Pipeline Identity" in root_panels
     assert "Inspect Processed Records" in root_panels
-    assert root_panels["Inspect Pipeline Identity"]["gridPos"]["y"] > first_action_grid["y"]
-    assert root_panels["Inspect Processed Records"]["gridPos"]["y"] > first_action_grid["y"]
+    assert (
+        root_panels["Inspect Pipeline Identity"]["gridPos"]["y"]
+        > first_action_grid["y"]
+    )
+    assert (
+        root_panels["Inspect Processed Records"]["gridPos"]["y"]
+        > first_action_grid["y"]
+    )
     assert any(
         panel.get("type") == "row"
         and panel.get("id") == 9993
         and panel.get("collapsed") is False
         for panel in dashboard.get("panels", [])
     )
-
 
 
 def test_runtime_telemetry_gap_panel_keeps_readable_first_screen_width() -> None:
@@ -204,7 +208,6 @@ def test_runtime_telemetry_gap_panel_keeps_readable_first_screen_width() -> None
         and p.get("collapsed") is False
         for p in dashboard.get("panels", [])
     )
-
 
 
 def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping() -> (
@@ -775,7 +778,6 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
     assert detail_row.get("gridPos", {}).get("y", 0) < min(
         int(panel.get("gridPos", {}).get("y", 0)) for panel in child_panels
     )
-
 
 
 def test_dashboard_metadata_policy_invariants() -> None:
