@@ -222,6 +222,61 @@ def test_live_audit_classifies_http_zero_state_and_nonzero() -> None:
     assert audit_subject._classify_http_payload(nonzero_payload)[0] == "nonzero_result"
 
 
+@pytest.mark.parametrize(
+    ("value", "percentage"),
+    [
+        ("1 000", "100%"),
+        ("01 bronze_records|1 000", "01 bronze_records|100%"),
+    ],
+)
+def test_live_audit_accepts_plain_and_legacy_processed_record_cells(
+    value: str,
+    percentage: str,
+) -> None:
+    numeric, missing, error = audit_subject._parse_processed_records_row(
+        {
+            "parameter": "01 bronze_records",
+            "value": value,
+            "percentage": percentage,
+            "row_status": "",
+        },
+        index=0,
+        parameters=set(),
+    )
+
+    assert numeric == 1000.0
+    assert missing is False
+    assert error is None
+
+
+@pytest.mark.parametrize(
+    ("value", "percentage", "expected_error"),
+    [
+        ("not-a-count", "100%", "non-numeric value"),
+        ("1 000", "not-a-percent", "malformed percentage"),
+        ("wrong|1 000", "100%", "prefix does not match parameter"),
+    ],
+)
+def test_live_audit_rejects_malformed_processed_record_cells(
+    value: str,
+    percentage: str,
+    expected_error: str,
+) -> None:
+    _numeric, _missing, error = audit_subject._parse_processed_records_row(
+        {
+            "parameter": "01 bronze_records",
+            "value": value,
+            "percentage": percentage,
+            "row_status": "",
+        },
+        index=0,
+        parameters=set(),
+    )
+
+    assert error is not None
+    assert expected_error in error
+
+
 def test_semantic_gate_maps_unknown_denominator_to_review_required(
     monkeypatch: Any,
 ) -> None:

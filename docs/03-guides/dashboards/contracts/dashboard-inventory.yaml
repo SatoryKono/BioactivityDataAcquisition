@@ -145,7 +145,7 @@ dashboards:
       - Prometheus
       - BioETL Ops HTTP
       - Grafana
-    panel_count: 37
+    panel_count: 36
     key_panels:
       - id: 9401
         title: Monitor Current DQ Status

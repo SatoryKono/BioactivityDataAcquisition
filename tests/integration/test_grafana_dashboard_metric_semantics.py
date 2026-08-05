@@ -1883,10 +1883,12 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         "organize",
     ]
     organize_options = transformations[0].get("options", {})
-    assert organize_options.get("renameByName", {}).get("parameter") == "parameter"
-    assert organize_options.get("renameByName", {}).get("value") == "value"
-    assert organize_options.get("renameByName", {}).get("percentage") == "percentage"
-    assert organize_options.get("renameByName", {}).get("row_status") == ""
+    rename_by_name = organize_options.get("renameByName", {})
+    assert rename_by_name.get("parameter") == "parameter"
+    # API field ``value`` is the record count; operator-facing column is ``count``.
+    assert rename_by_name.get("value") == "count"
+    assert rename_by_name.get("percentage") == "percentage"
+    assert rename_by_name.get("row_status") == ""
     assert organize_options.get("indexByName", {}).get("parameter") == 0
     assert organize_options.get("indexByName", {}).get("value") == 1
     assert organize_options.get("indexByName", {}).get("percentage") == 2
@@ -1897,10 +1899,11 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert excluded_fields.get("percintage") is True
     assert "percintage" not in organize_options.get("indexByName", {})
     assert "percintage" not in organize_options.get("renameByName", {})
-    if processed.get("title") == "Inspect Processed Records":
-        assert excluded_fields.get("percentage") is True
-    else:
-        assert excluded_fields.get("percentage") is not True
+    # All Processed Records tables show parameter + count + percentage.
+    assert excluded_fields.get("percentage") is not True
+    assert excluded_fields.get("parameter") is not True
+    assert excluded_fields.get("value") is not True
+    assert excluded_fields.get("count") is not True
 
     parameter_overrides = [
         override

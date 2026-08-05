@@ -1892,7 +1892,6 @@
     "bioetl_provider_health_check_provider_universe_15m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-incident-v1.json",
       "grafana/dashboards/bioetl-provider-health-v2.json"
     ],
     "bioetl_provider_health_status": [

@@ -63,6 +63,9 @@ Nested titles (must match JSON):
 - **Type:** Table
 - **Purpose:** Reconciliation block from `pipeline_run_report_v1`.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `reconciliation`
+- **Presentation:** All six canonical reconciliation rows fit without internal
+  scrolling. The Ops HTTP adapter serializes the mixed numeric/status `value`
+  field consistently so the Infinity table preserves both deltas and verdicts.
 
 ### 10. Inspect Layer Accounting
 - **Type:** Text

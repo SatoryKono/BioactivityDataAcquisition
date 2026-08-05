@@ -53,7 +53,7 @@
       "coverage_actual_percent": 92.44,
       "coverage_percent": 92.44,
       "refreshed_at_utc": "2026-08-04T18:12:10.346849+00:00",
-      "source_commit": "427718a2101cae45ce4a9db892b042dc655ffa13",
+      "source_commit": "373f798cb0bde4e1f8a45582aa1545f429c3a8d7",
       "source_run_id": "local-duration-rebuild-2026-07-23"
     },
     "5730": {
