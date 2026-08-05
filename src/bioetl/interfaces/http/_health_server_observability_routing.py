@@ -74,14 +74,17 @@ def _table_shape_pipeline_run_report(
 
     ``reconciliation`` is stored as an object in pipeline_run_report_v1 files.
     Run Explorer panel 3015 uses root_selector=reconciliation on a table panel,
-    so the HTTP surface exposes a list of {parameter, value} rows.
+    so the HTTP surface exposes a list of {parameter, value} rows. Values are
+    strings because Infinity requires one stable field type when numeric
+    accounting values and textual reconciliation verdicts share the column.
     """
     recon = payload.get("reconciliation")
     if not isinstance(recon, dict):
         return payload
     shaped = dict(payload)
     shaped["reconciliation"] = [
-        {"parameter": str(key), "value": value} for key, value in recon.items()
+        {"parameter": str(key), "value": str(value)}
+        for key, value in recon.items()
     ]
     return shaped
 

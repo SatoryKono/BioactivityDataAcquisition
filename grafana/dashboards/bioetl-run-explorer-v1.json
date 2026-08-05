@@ -788,7 +788,7 @@
       "title": "Inspect Reconciliation",
       "description": "Reconciliation metrics from pipeline_run_report_v1 as parameter/value rows. An empty result is VALID EMPTY when reconciliation evidence is absent or run_id is unresolved. An unexpected empty may mean backend unavailable — verify /health/live.",
       "gridPos": {
-        "h": 5,
+        "h": 8,
         "w": 24,
         "x": 0,
         "y": 32
@@ -850,7 +850,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 40
       },
       "options": {
         "mode": "html",
@@ -866,7 +866,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 43
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -947,7 +947,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 48
       },
       "options": {
         "mode": "html",
@@ -962,7 +962,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 52
       },
       "options": {
         "mode": "html",

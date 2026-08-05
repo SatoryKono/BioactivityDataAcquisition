@@ -6,6 +6,10 @@
 
 Dashboard `3. Provider Health` monitors provider current status, health-check latency/outcomes, adapter retry exhaustion, HTTP errors, rate limiting, and circuit breaker state. Shipped dashboard JSON is the source of truth.
 
+Failure-rate, degraded-check, network/timeout, and rate-limit diagnostics retain
+empty Prometheus results as `No data`/`UNKNOWN`; metric absence is never rendered
+as a synthetic green zero.
+
 ## Key Panels
 
 ### 1. Navigate Dashboards

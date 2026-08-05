@@ -22813,7 +22813,7 @@
       "missing_lines": 5,
       "module": "bioetl.interfaces.http._health_server_observability_routing",
       "path": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
-      "source_lines": 383
+      "source_lines": 386
     },
     {
       "coverage_percent": 100.0,
@@ -45955,7 +45955,7 @@
       "missing_lines": 5,
       "module": "bioetl.interfaces.http._health_server_observability_routing",
       "path": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
-      "source_lines": 383
+      "source_lines": 386
     },
     {
       "coverage_percent": 100.0,
@@ -46290,7 +46290,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-28",
-  "source_tree_sha256": "8ea780a858a56ddee874aefbde2b0544ce24eace31eb0e9b6e58e0eafb20d5a8",
+  "source_tree_sha256": "dc8da09a73c81817f66625540e28839f1f7f0654b4b897f87f4e546891b1a212",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

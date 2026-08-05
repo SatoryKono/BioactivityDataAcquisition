@@ -187,6 +187,28 @@ def test_rf002_terminal_states_are_explicit() -> None:
     # (runtime ids 250/251/257/258) were removed 2026-07-23.
 
 
+def test_dq_duplicate_validation_fact_is_removed_and_grid_is_compacted() -> None:
+    """DQ keeps one Silver validation fact and closes the removed half-row gap."""
+    dashboard = _load("bioetl-dq-v2.json")
+    panels = {int(panel["id"]): panel for panel in _iter_panels(dashboard["panels"])}
+
+    assert 7 not in panels
+    canonical = panels[12]
+    assert canonical["title"] == "Monitor Silver Validation Failures"
+    assert "or vector(0)" not in canonical["targets"][0]["expr"]
+
+    expected_geometry = {
+        3: {"h": 6, "w": 12, "x": 12, "y": 53},
+        4: {"h": 6, "w": 12, "x": 0, "y": 53},
+        101: {"h": 6, "w": 12, "x": 0, "y": 59},
+        9: {"h": 6, "w": 12, "x": 12, "y": 59},
+        12: {"h": 6, "w": 12, "x": 0, "y": 65},
+        151: {"h": 6, "w": 12, "x": 12, "y": 65},
+    }
+    for panel_id, geometry in expected_geometry.items():
+        assert panels[panel_id]["gridPos"] == geometry
+
+
 def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
     canonical_titles = (
         "0. Trust",
@@ -408,3 +430,106 @@ def test_operator_critical_tables_expose_full_values() -> None:
             assert custom["inspect"] is True
             if dashboard_name != "bioetl-run-explorer-v1.json":
                 assert custom["cellOptions"]["wrapText"] is True
+
+
+def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:
+    incident = _load("bioetl-incident-v1.json")
+    suspects = _panel(incident, 2010)
+    organize = next(
+        transform
+        for transform in suspects.get("transformations", [])
+        if transform.get("id") == "organize"
+    )
+    exclude = organize.get("options", {}).get("excludeByName", {})
+
+    assert len(suspects.get("targets", [])) == 3
+    for field in ("Time", "Time 1", "Time 2", "Value", "Value #A", "Value #B", "Value #C"):
+        assert exclude.get(field) is True
+    assert not {
+        value
+        for value in organize.get("options", {}).get("renameByName", {}).values()
+        if str(value).startswith("Series ")
+    }
+
+
+def test_incident_alert_history_has_readable_full_width_layout() -> None:
+    incident = _load("bioetl-incident-v1.json")
+    current_alerts = _panel(incident, 2005)
+    history = _panel(incident, 2006)
+    impact = _panel(incident, 2007)
+    history_grid = history.get("gridPos", {})
+
+    assert current_alerts.get("gridPos", {}).get("w") == 24
+    assert history_grid.get("x") == 0
+    assert history_grid.get("w") == 24
+    assert history_grid.get("h", 0) >= 10
+    assert history.get("options", {}).get("legend", {}).get("showLegend") is False
+    assert impact.get("gridPos", {}).get("y", 0) >= (
+        history_grid.get("y", 0) + history_grid.get("h", 0)
+    )
+    assert "ALERTS" in str(history.get("targets", [{}])[0].get("expr", ""))
+    color_overrides = {
+        override.get("matcher", {}).get("options"): {
+            prop.get("id"): prop.get("value")
+            for prop in override.get("properties", [])
+        }
+        for override in history.get("fieldConfig", {}).get("overrides", [])
+    }
+    assert color_overrides[".*firing.*"]["color"] == {
+        "mode": "fixed",
+        "fixedColor": "red",
+    }
+    assert color_overrides[".*pending.*"]["color"] == {
+        "mode": "fixed",
+        "fixedColor": "orange",
+    }
+
+
+def test_runtime_multi_query_tables_expose_semantic_fields_only() -> None:
+    runtime = _load("bioetl-runtime.json")
+    blocker_detail = _panel(runtime, 242)
+    expectedness = _panel(runtime, 243)
+
+    blocker_organize = next(
+        transform
+        for transform in blocker_detail.get("transformations", [])
+        if transform.get("id") == "organize"
+    )
+    blocker_exclude = blocker_organize.get("options", {}).get(
+        "excludeByName", {}
+    )
+    for ref_id in {target.get("refId") for target in blocker_detail.get("targets", [])}:
+        assert blocker_exclude.get(f"Value #{ref_id}") is True
+    assert blocker_exclude.get("Value") is True
+    assert blocker_exclude.get("Time") is True
+
+    expectedness_organize = next(
+        transform
+        for transform in expectedness.get("transformations", [])
+        if transform.get("id") == "organize"
+    )
+    rename = expectedness_organize.get("options", {}).get("renameByName", {})
+    assert rename == {
+        "Value #A": "Expected",
+        "Value #B": "Observed Records",
+    }
+    matchers = {
+        override.get("matcher", {}).get("options")
+        for override in expectedness.get("fieldConfig", {}).get("overrides", [])
+    }
+    assert {"Expected", "Observed Records"} <= matchers
+
+
+def test_run_explorer_reconciliation_fits_all_bounded_rows_without_scroll() -> None:
+    explorer = _load("bioetl-run-explorer-v1.json")
+    reconciliation = _panel(explorer, 3015)
+    next_panel = _panel(explorer, 3016)
+    grid = reconciliation.get("gridPos", {})
+
+    assert grid.get("h", 0) >= 8
+    assert next_panel.get("gridPos", {}).get("y", 0) >= (
+        grid.get("y", 0) + grid.get("h", 0)
+    )
+    assert reconciliation.get("targets", [{}])[0].get("root_selector") == (
+        "reconciliation"
+    )
