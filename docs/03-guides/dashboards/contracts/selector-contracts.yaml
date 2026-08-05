@@ -33,15 +33,19 @@ selector_taxonomy:
     - manifest_id
     - execution_fingerprint
   context_hidden:
+    # Verified 2026-08-05 against grafana/dashboards/*.json (7-board portfolio).
     shipped:
-      - workflow_context
       - pipeline_context
+      - adapter
+      - provider_hint
+    # Retired with bioetl-workflow-overview; do not reintroduce on primary boards.
+    retired_workflow_overview:
+      - workflow_context
       - pipeline_context_exact
       - run_type_context
       - run_type_context_exact
       - provider_context
       - provider_context_exact
-      - adapter
     reserved_future:
       - selected_run_id
       - selected_manifest_id
@@ -284,6 +288,7 @@ dashboard_families:
 
       "
   workflow_evidence:
+    status: retired
     uids: []
     allowed_visible_selectors:
       - workflow
@@ -349,6 +354,7 @@ dashboard_families:
       pipeline/run_type selectors use the shared overview universe for browse scope;
       run_id is control-plane catalog identity only."
   forensic_explorer:
+    status: retired
     uids: []
     allowed_visible_selectors:
       - pipeline
@@ -357,35 +363,22 @@ dashboard_families:
       - field
       - quarantine_run_id
       - payload_hash
-    notes: "Silver Reject Explorer is the only shipped forensic explorer. It may
-
-      surface exact reject/run selectors, but those selectors MUST use
-
-      forensic-specific names such as `quarantine_run_id` and MUST NOT leak into
-
-      Prometheus dashboards or generic dashboard-to-dashboard links. The
-
-      backend API parameter can still be `run_id`; the Grafana variable name is
-
-      deliberately not `run_id` to avoid colliding with the Control Plane
-
-      identity shell.
-
-      "
+    notes: >
+      Retired 2026-07-23: bioetl-silver-reject-explorer is not shipped.
+      Use `bioetl quarantine inspect` and DQ reject panels. Forensic selectors
+      MUST NOT reappear on Prometheus primary dashboards.
   alert_triage:
+    status: retired
     uids: []
     allowed_visible_selectors:
       - workflow
       - pipeline
       - run_type
-    notes:
-      "Alerts & SLO is a Prometheus-backed alert-triage surface. It reuses the
+    notes: >
+      Retired: bioetl-alerts-slo is not shipped. Alert/SLO triage lives on
+      Overview. Do not reintroduce a separate Alerts board without architecture
+      review.
 
-      shared workflow/pipeline/run_type context shell for alert evidence only
-
-      and intentionally does not expose `run_id` or forensic selectors.
-
-      "
 shipped_selector_registry:
   bioetl-control-plane-v1:
     family: pipeline_summary

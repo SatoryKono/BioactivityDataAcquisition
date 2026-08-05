@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-16'
+  Last verified: '2026-08-05'
 
 ______________________________________________________________________
 
 # Grafana Selector Architecture
 
-Дата сверки: **2026-05-16**
+Дата сверки: **2026-08-05**
 Источник истины: `grafana/dashboards/*.json`
 
 Machine-readable SSOT:
@@ -52,14 +52,16 @@ on native Grafana semantic variable copying.
 
 ## Dashboard families
 
+Shipped portfolio is **exactly 7 dashboards** (`0..6`). Machine inventory:
+`docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`.
+
 ### Pipeline summary
 
 Dashboards:
 
-- `0. Control Plane`
-- `1. Overview`
-- `2. Runtime`
-- `4. Data Quality`
+- `0. Trust` (`bioetl-control-plane-v1`)
+- `2. Pipeline Diagnostics` (`bioetl-runtime`)
+- `4. Data Quality` (`bioetl-dq-v2`)
 
 These surfaces answer pipeline-scoped operator questions and remain
 Prometheus-first for Status/diagnostic panels. Their shipped top-level
@@ -69,14 +71,24 @@ selectors include the shared context shell and optional role-specific filters:
 - `pipeline`
 - `run_type`
 - `run_id` as preserved HTTP identity context
-- optional `stage`
+- optional `stage` (Runtime + DQ; default **All**)
 - Grafana time range
+
+### Hybrid overview
+
+Dashboard:
+
+- `1. Overview` (`bioetl-overview-v2`)
+
+Hybrid Overview keeps pipeline-summary current-status semantics, exposes the
+shared context shell, and uses `run_id` for Ops HTTP identity / processed-record
+tables without claiming exact-run PromQL filtering for aggregate Status.
 
 ### Provider-first
 
 Dashboard:
 
-- `3. Provider Health`
+- `3. Provider Health` (`bioetl-provider-health-v2`)
 
 This surface is intentionally provider-first, while still exposing the shared
 context shell for provenance, identity, and processed-record evidence:
@@ -84,7 +96,7 @@ context shell for provenance, identity, and processed-record evidence:
 - `workflow` as context/evidence
 - `pipeline` / `run_type` as context shell
 - `run_id` as preserved HTTP identity context
-- visible `provider`
+- visible `provider` (derived from pipeline/workflow when set; else `unknown`)
 - hidden `pipeline_context`
 - hidden detail-only `adapter`
 - Grafana time range
@@ -92,43 +104,36 @@ context shell for provenance, identity, and processed-record evidence:
 `pipeline_context` preserves return-path context and is not a first-class
 provider business selector.
 
-### Workflow evidence
+### Incident triage
 
 Dashboard:
 
-- `5. Workflow`
+- `5. Incident Workspace` (`bioetl-incident-v1`)
 
-This surface is selected-range workflow evidence, not current-state runtime
-triage. It ships the shared context shell plus workflow-local filters:
+Read-only triage board with the shared context shell plus visible `provider`
+(same derivation defaults as Provider Health).
 
-- `workflow`
-- `pipeline` / `run_type` as context shell
-- `run_id` as preserved HTTP identity context
-- `status`
-- `step_status`
-- `step_kind`
-- Grafana time range
-
-### Forensic explorer
+### Exact-run explorer
 
 Dashboard:
 
-- `Silver Reject Explorer`
+- `6. Run Explorer` (`bioetl-run-explorer-v1`)
 
-This surface is API-backed and forensic by design. It ships:
+Canonical hub for Ops HTTP `ID` / `Inspect Processed Records` KPIs under the
+shared context shell. No provider/stage business selectors on the top bar.
 
-- `pipeline`
-- `run_type`
-- `reason_code`
-- `field`
-- `quarantine_run_id`
-- `payload_hash`
-- Grafana time range
+### Retired families (not shipped JSON)
 
-These selectors must stay isolated from Prometheus dashboards. The
-`quarantine_run_id` variable calls the Quarantine API with backend
-`dimension=run_id`, but its Grafana name is intentionally distinct from the
-Control Plane `run_id` identity selector.
+Do **not** document these as active families:
+
+| Retired board | Replacement |
+| --- | --- |
+| `bioetl-workflow-overview` (`5. Workflow`) | Workflow band inside `2. Pipeline Diagnostics` |
+| `bioetl-alerts-slo` | Overview Alert/SLO triage row |
+| `bioetl-silver-reject-explorer` (Silver Reject Explorer) | CLI `bioetl quarantine inspect` + DQ reject panels |
+
+See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md)
+and [dashboard-inventory.md](dashboard-inventory.md).
 
 ## Selector taxonomy
 
@@ -170,16 +175,19 @@ future/local-catalog candidates.
 
 ### Hidden context selectors
 
-Currently shipped:
+Currently shipped (verified against `grafana/dashboards/*.json`):
+
+- `pipeline_context` — Provider Health return-path only
+- `adapter` — Provider Health detail-only
+- `provider_hint` — Pipeline Diagnostics hidden heuristic for provider-scoped
+  alert panels (not a visible operator selector)
+
+Retired with Workflow Overview (do not reintroduce on primary boards):
 
 - `workflow_context`
-- `pipeline_context`
 - `pipeline_context_exact`
-- `run_type_context`
-- `run_type_context_exact`
-- `provider_context`
-- `provider_context_exact`
-- `adapter`
+- `run_type_context` / `run_type_context_exact`
+- `provider_context` / `provider_context_exact`
 
 Future reserved:
 
@@ -189,6 +197,9 @@ Future reserved:
 
 ### Forensic-only selectors
 
+Forensic identifiers remain **CLI / API scoped** after Silver Reject Explorer
+removal. They MUST NOT reappear as Prometheus dashboard label selectors:
+
 - `reason_code`
 - `field`
 - `quarantine_run_id`
@@ -196,26 +207,23 @@ Future reserved:
 - `manifest_id`
 - `execution_fingerprint`
 
-These stay out of Prometheus dashboard label selectors and dashboard-to-dashboard
-handoffs unless an explicit future contract says otherwise.
+Use `bioetl quarantine inspect` for exact reject forensics.
 
 ## Ship-now selector contract
 
-The current shipped selector model is:
+The current shipped selector model (7 dashboards only):
 
+- `0. Trust`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
 - `1. Overview`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
-- `0. Control Plane`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
-- `2. Runtime`: `workflow`, `pipeline`, `run_type`, `run_id`, `stage`, time range
+- `2. Pipeline Diagnostics`: `workflow`, `pipeline`, `run_type`, `run_id`,
+  `stage` (default All), hidden `provider_hint`, time range
 - `3. Provider Health`: `workflow`, `pipeline`, `run_type`, `run_id`,
   `provider`, hidden `pipeline_context`, hidden detail-only `adapter`, time range
-- `4. Data Quality`: `workflow`, `pipeline`, `run_type`, `run_id`, `stage`, time range
-- `5. Workflow`: `workflow`, `pipeline`, `run_type`, `run_id`, `status`,
-  `step_status`, `step_kind`, hidden `workflow_context`,
-  `pipeline_context`/`pipeline_context_exact`,
-  `run_type_context`/`run_type_context_exact`,
-  `provider_context`/`provider_context_exact`, time range
-- `Silver Reject Explorer`: `pipeline`, `run_type`, `reason_code`, `field`,
-  `quarantine_run_id`, `payload_hash`, time range
+- `4. Data Quality`: `workflow`, `pipeline`, `run_type`, `run_id`, `stage`
+  (default All), time range
+- `5. Incident Workspace`: `workflow`, `pipeline`, `run_type`, `run_id`,
+  `provider`, time range
+- `6. Run Explorer`: `workflow`, `pipeline`, `run_type`, `run_id`, time range
 
 This contract is unified by the shared context shell, taxonomy, and family
 rules. It does not force every Status panel to consume every visible selector.
