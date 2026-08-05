@@ -43,7 +43,7 @@ Do not use this template when:
 - the dashboard is provider-first and should remain selected by `provider`;
 - the dashboard is workflow evidence and should remain selected by workflow
   status/step fields;
-- the dashboard is forensic-only, such as Silver Reject Explorer;
+- the dashboard is forensic-only, such as CLI `bioetl quarantine inspect` (Silver Reject Explorer retired);
 - the design requires Prometheus labels for high-cardinality execution IDs.
 
 ## Layout Grammar
@@ -60,7 +60,7 @@ Row 1: Navigation
 
 - navigation panel `id=1000`;
 - top-level bus `0. Control Plane`, `1. Overview`, `2. Runtime`,
-  `3. Provider Health`, `4. Data Quality`, `5. Workflow`;
+  `3. Provider Health`, `4. Data Quality`, `5. Incident Workspace` (retired board name was Workflow);
 - current dashboard visible as disabled item;
 - adjunct links when required by the navigation contract.
 
