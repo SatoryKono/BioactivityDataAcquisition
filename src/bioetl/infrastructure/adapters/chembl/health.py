@@ -10,14 +10,17 @@ __all__ = [
 ]
 
 
-import asyncio
 from typing import TYPE_CHECKING, Any, cast
 
 import httpx
 
 from bioetl.domain.exceptions import CriticalError
 from bioetl.domain.types import HealthStatus, JsonDict
-from bioetl.infrastructure.adapters.chembl.constants import CHEMBL_STATUS_URL
+from bioetl.infrastructure.adapters.chembl._health_probe import (
+    extract_http_status_code,
+    handle_chembl_health_response,
+    probe_chembl_status,
+)
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
@@ -127,42 +130,18 @@ class ChemblHealthMixin:
         Returns:
             HealthStatus from the ChEMBL status endpoint or DEGRADED on transient failures.
         """
-        try:
-            with self._adapter_metrics.measure_request("/status"):
-                response = await asyncio.wait_for(
-                    self.http_client.get_once(CHEMBL_STATUS_URL),
-                    timeout=CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS,
-                )
-            status = self._handle_health_response(response)
-            self._last_probe_health_status = status
-            return status
-        except CHEMBL_HEALTH_ERRORS as exc:
-            status_code = self._extract_http_status_code(exc)
-            if status_code is not None and 500 <= status_code < 600:
-                self._last_probe_health_status = HealthStatus.DEGRADED
-                self._logger.warning(
-                    "health_check_degraded",
-                    provider=self.provider_name,
-                    reason="status_endpoint_5xx",
-                    status_code=status_code,
-                    error_type=type(exc).__name__,
-                    error_message=str(exc),
-                )
-                return HealthStatus.DEGRADED
-            if isinstance(
-                exc,
-                CHEMBL_TRANSIENT_HEALTH_ERRORS,
-            ):
-                self._last_probe_health_status = HealthStatus.DEGRADED
-                self._logger.warning(
-                    "health_check_degraded",
-                    provider=self.provider_name,
-                    reason="transient_network_error",
-                    error_type=type(exc).__name__,
-                    error_message=str(exc),
-                )
-                return HealthStatus.DEGRADED
-            raise
+        status = await probe_chembl_status(
+            http_client=self.http_client,
+            adapter_metrics=self._adapter_metrics,
+            logger=self._logger,
+            provider_name=self.provider_name,
+            timeout_seconds=CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS,
+            health_errors=CHEMBL_HEALTH_ERRORS,
+            transient_errors=CHEMBL_TRANSIENT_HEALTH_ERRORS,
+            handle_response=self._handle_health_response,
+        )
+        self._last_probe_health_status = status
+        return status
 
     def _get_health_status(self) -> HealthStatus:
         """Get health status from circuit breaker state.
@@ -228,39 +207,16 @@ class ChemblHealthMixin:
         Returns:
             HealthStatus.HEALTHY for a 200 UP response, DEGRADED otherwise.
         """
-        if response.status_code == 200:
-            data = response.json()
-            if data.get("status") == "UP":
-                return HealthStatus.HEALTHY
-            else:
-                self._logger.warning(
-                    "health_check_degraded",
-                    provider=self.provider_name,
-                    reason="status_not_up",
-                    api_status=data.get("status"),
-                )
-                return HealthStatus.DEGRADED
-        else:
-            self._logger.warning(
-                "health_check_degraded",
-                provider=self.provider_name,
-                reason="non_200_response",
-                status_code=response.status_code,
-            )
-            return HealthStatus.DEGRADED
+        return handle_chembl_health_response(
+            response=response,
+            provider_name=self.provider_name,
+            logger=self._logger,
+        )
 
     @staticmethod
     def _extract_http_status_code(error: Exception) -> int | None:
-        """Extract HTTP status code from exception response if available.
-
-        Returns:
-            HTTP status code as int if present in the exception, None otherwise.
-        """
-        response = getattr(error, "response", None)
-        if response is None:
-            return None
-        status_code = getattr(response, "status_code", None)
-        return int(status_code) if isinstance(status_code, int) else None
+        """Extract HTTP status code from exception response if available."""
+        return extract_http_status_code(error)
 
     def get_error_stats(self) -> JsonDict:  # Any: untyped API JSON record
         """Get error statistics from circuit breaker for monitoring.

@@ -9,10 +9,12 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.openalex._cursor_lookup import (
+    fetch_works_by_dois,
+    search_works_by_title,
+)
 from bioetl.infrastructure.adapters.openalex.query_builder import (
-    build_openalex_doi_filter_params,
     build_openalex_search_params,
-    build_openalex_title_search_params,
 )
 from bioetl.infrastructure.adapters.openalex.query_execution import (
     OpenAlexQueryExecutor,
@@ -193,77 +195,29 @@ class OpenAlexCursorFlow:
             yield work
 
     async def fetch_by_dois(self, dois: list[str]) -> list[BronzeRecord]:
-        """Resolve DOI batch and return records list.
-
-        Args:
-            dois: List of DOI strings to resolve via filter query.
-
-        Returns:
-            List of BronzeRecord dictionaries resolved from the DOI batch.
-        """
-        normalized = self._normalize_dois(dois)
-        if not normalized:
-            return []
-
-        params = build_openalex_doi_filter_params(
+        """Resolve DOI batch and return records list."""
+        return await fetch_works_by_dois(
+            dois=dois,
             mailto=self.mailto,
             api_key=self.api_key,
-            dois=normalized,
+            normalize_doi=self.normalize_doi,
+            query_executor=self.query_executor,
+            response_mapper=self.response_mapper,
+            logger=self.logger,
         )
-        self.logger.debug("openalex_batch_doi_request", doi_count=len(normalized))
-        payload = await self.query_executor.request_works_payload(params)
-        results = self.response_mapper.extract_results(payload)
-        if len(results) < len(normalized):
-            self.logger.info(
-                "openalex_batch_partial_results",
-                requested=len(normalized),
-                found=len(results),
-                hit_rate=round(len(results) / len(normalized) * 100, 1),
-            )
-        return results
 
     async def search_by_title(self, title: str, limit: int = 3) -> list[BronzeRecord]:
-        """Search by title with in-memory cache and graceful runtime fallback.
-
-        Args:
-            title: Publication title string to search for.
-            limit: Maximum number of results to return per search.
-
-        Returns:
-            List of BronzeRecord dictionaries matching the title search, up to limit results.
-        """
-        normalized_title = title.strip()
-        cache_key = (normalized_title.casefold(), limit)
-        cached = self._title_search_cache.get(cache_key)
-        if cached is not None:
-            return [dict(item) for item in cached]
-
-        params = build_openalex_title_search_params(
+        """Search by title with in-memory cache and graceful runtime fallback."""
+        return await search_works_by_title(
+            title=title,
+            limit=limit,
             mailto=self.mailto,
             api_key=self.api_key,
-            escaped_title=self.escape_title_for_search(normalized_title[:200]),
-            limit=limit,
+            escape_title_for_search=self.escape_title_for_search,
+            query_executor=self.query_executor,
+            response_mapper=self.response_mapper,
+            logger=self.logger,
+            runtime_errors=self.runtime_errors,
+            title_search_cache=self._title_search_cache,
+            title_search_cache_size=self.title_search_cache_size,
         )
-        self.logger.debug("openalex_title_search", title=title[:50])
-        try:
-            payload = await self.query_executor.request_works_payload(params)
-            results = self.response_mapper.extract_results(payload)
-        except self.runtime_errors as error:
-            self.logger.debug(
-                "openalex_title_search_failed",
-                title=title[:50],
-                error=str(error),
-            )
-            self._title_search_cache[cache_key] = []
-            return []
-
-        cached_results = [dict(item) for item in results]
-        self._title_search_cache[cache_key] = cached_results
-        if len(self._title_search_cache) > self.title_search_cache_size:
-            oldest_key = next(iter(self._title_search_cache))
-            del self._title_search_cache[oldest_key]
-        return [dict(item) for item in cached_results]
-
-    def _normalize_dois(self, dois: list[str]) -> list[str]:
-        normalized_raw = [self.normalize_doi(item) for item in dois if item]
-        return [doi for doi in normalized_raw if doi is not None]

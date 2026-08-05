@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import threading
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Literal
-from urllib.parse import SplitResult, parse_qsl, urlsplit
+from urllib.parse import SplitResult, urlsplit
 
 if TYPE_CHECKING:
     import httpx
@@ -16,6 +16,15 @@ from bioetl.domain.models.metadata import (
     SourceMetadata,
 )
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.adapters.common._api_request_sanitize import (
+    normalize_http_method,
+    parse_float_header,
+    parse_int_header,
+    parse_query_params,
+    parse_reset_header,
+    sanitize_base_url,
+    sanitize_params,
+)
 from bioetl.infrastructure.time import SystemClock
 
 
@@ -105,7 +114,6 @@ class APIRequestCollector:
         timestamp: datetime | None = None,
     ) -> None:
         """Record request details from an ``httpx.Response`` object."""
-        # Extract rate limit headers
         rate_limit_remaining = self._parse_int_header(
             response.headers.get("X-RateLimit-Remaining")
         )
@@ -116,11 +124,7 @@ class APIRequestCollector:
             response.headers.get("X-RateLimit-Reset")
         )
         retry_after = self._parse_float_header(response.headers.get("Retry-After"))
-
-        # Calculate response size
         response_size = len(response.content)
-
-        # Get method from request
         method = response.request.method if response.request else "GET"
 
         self.record_request(
@@ -182,94 +186,35 @@ class APIRequestCollector:
         self, query_string: str
     ) -> dict[str, str | int | float | bool | None]:
         """Parse query string into dict."""
-        if not query_string:
-            return {}
-        return dict(parse_qsl(query_string, keep_blank_values=True))
+        return parse_query_params(query_string)
 
     @staticmethod
     def _sanitize_base_url(parsed: SplitResult) -> str:
         """Build a credential-free base URL while preserving host and port."""
-        hostname = parsed.hostname or ""
-        if ":" in hostname and not hostname.startswith("["):
-            hostname = f"[{hostname}]"
-        try:
-            port = parsed.port
-        except ValueError as exc:
-            raise ValueError("Request URL contains an invalid port") from exc
-        netloc = f"{hostname}:{port}" if port is not None else hostname
-        return f"{parsed.scheme}://{netloc}"
+        return sanitize_base_url(parsed)
 
     def _sanitize_params(
         self,
         params: JsonDict,  # Any: untyped API JSON record
     ) -> dict[str, str | int | float | bool | None]:
         """Sanitize query parameters to exclude sensitive data."""
-        sensitive_keys = {
-            "api_key",
-            "apikey",
-            "key",
-            "token",
-            "access_token",
-            "secret",
-            "password",
-            "auth",
-            "authorization",
-            "x_api_key",
-            "bearer",
-        }
-        result: dict[str, str | int | float | bool | None] = {}
-        for key, value in params.items():
-            normalized_key = key.lower().replace("-", "_")
-            if normalized_key in sensitive_keys:
-                result[key] = "[REDACTED]"
-            elif isinstance(value, (str, int, float, bool)) or value is None:
-                result[key] = value
-            else:
-                # Convert other types to string
-                result[key] = str(value)
-        return result
+        return sanitize_params(params)
 
     def _normalize_method(self, method: str) -> Literal["GET", "POST", "HEAD"]:
         """Normalize HTTP method to SourceMetadata-compatible literal."""
-        normalized = method.upper()
-        if normalized == "GET":
-            return "GET"
-        if normalized == "POST":
-            return "POST"
-        if normalized == "HEAD":
-            return "HEAD"
-        return "GET"
+        return normalize_http_method(method)
 
     def _parse_int_header(self, value: str | None) -> int | None:
         """Parse integer header value."""
-        if value is None:
-            return None
-        try:
-            return int(value)
-        except ValueError:
-            return None
+        return parse_int_header(value)
 
     def _parse_float_header(self, value: str | None) -> float | None:
         """Parse float header value."""
-        if value is None:
-            return None
-        try:
-            return float(value)
-        except ValueError:
-            return None
+        return parse_float_header(value)
 
     def _parse_reset_header(self, value: str | None) -> datetime | None:
         """Parse X-RateLimit-Reset header (Unix timestamp or HTTP date)."""
-        if value is None:
-            return None
-        try:
-            # Try Unix timestamp first
-            timestamp = int(value)
-            return datetime.fromtimestamp(timestamp, tz=UTC)
-        except ValueError:
-            pass  # Why: response body not JSON-parseable as Unix timestamp; return None
-        # Could extend to parse HTTP date format if needed
-        return None
+        return parse_reset_header(value)
 
 
 __all__ = ["APIRequestCollector"]

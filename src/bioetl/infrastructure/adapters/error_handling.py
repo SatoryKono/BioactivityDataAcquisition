@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import (
@@ -10,10 +10,14 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.ports import ErrorClassifierPort
 from bioetl.domain.types import ErrorType, JsonDict
+from bioetl.infrastructure.adapters._error_handler_ops import (
+    decide_should_retry,
+    decide_should_retry_status,
+    log_adapter_error,
+    wrap_adapter_error,
+)
 from bioetl.infrastructure.adapters._error_handling_support import (
     AdapterErrorContext,
-    build_adapter_error_context,
-    emit_error_telemetry,
     extract_retry_after,
     safe_optional_str,
 )
@@ -22,10 +26,8 @@ from bioetl.infrastructure.adapters.adapter_error_classifier import (
     ErrorCategory,
 )
 from bioetl.infrastructure.errors import (
-    DomainErrorMappingInput,
     DomainInfraExceptionMapper,
 )
-from bioetl.infrastructure.errors.exception_mapper import InfrastructureSourceError
 
 if TYPE_CHECKING:
     from httpx import Response
@@ -61,36 +63,16 @@ class AdapterErrorHandler:
         status_code: int,
         response: Response | None = None,
     ) -> ErrorCategory:
-        """Classify HTTP error status code into retryability categories.
-
-        Returns:
-            ErrorCategory indicating whether the HTTP error is critical, recoverable, or a data quality issue.
-        """
+        """Classify HTTP error status code into retryability categories."""
         _ = response
         return self._adapter_classifier.classify_http_status(status_code)
 
     def classify_exception(self, error: Exception) -> ErrorCategory:
-        """Classify exception into error category.
-
-        Uses ErrorClassifier to determine ErrorType, then maps to ErrorCategory.
-
-        Args:
-            error: The exception to classify.
-
-        Returns:
-            ErrorCategory based on exception type.
-        """
+        """Classify exception into error category."""
         return self._adapter_classifier.classify_exception(error)
 
     def get_error_type(self, error: Exception) -> ErrorType:
-        """Get ErrorType for an exception.
-
-        Args:
-            error: The exception to classify.
-
-        Returns:
-            ErrorType from ErrorClassifier.
-        """
+        """Get ErrorType for an exception."""
         return self._classifier.classify(error)
 
     def log_error(
@@ -100,37 +82,17 @@ class AdapterErrorHandler:
         error: Exception,
         context: JsonDict | None = None,  # Any: untyped API JSON record
     ) -> AdapterErrorContext:
-        """Log error with unified structured context.
-
-        Returns:
-            AdapterErrorContext with classified error details and telemetry data.
-        """
-        context = context or {}
-        error_type = self.get_error_type(error)
-        status_code = context.get("status_code")
-        error_category = self._resolve_error_category(
-            error=error, status_code=status_code
-        )
-        error_context = build_adapter_error_context(
-            provider=provider,
-            operation=operation,
-            context=context,
-            error_type=error_type,
-            error_category=error_category,
-            status_code=status_code,
-        )
-        emit_error_telemetry(
+        """Log error with unified structured context."""
+        return log_adapter_error(
             logger=self._logger,
             metrics=self._metrics,
+            adapter_classifier=self._adapter_classifier,
+            error_type=self.get_error_type(error),
             provider=provider,
             operation=operation,
             error=error,
-            error_type=error_type,
-            error_category=error_category,
-            error_context=error_context,
-            status_code=status_code,
+            context=context or {},
         )
-        return error_context
 
     def _resolve_error_category(
         self,
@@ -145,54 +107,23 @@ class AdapterErrorHandler:
         )
 
     def should_retry(self, error: Exception) -> bool:
-        """Determine if error should be retried.
-
-        Args:
-            error: The exception to check.
-
-        Returns:
-            True if error is recoverable and should be retried.
-        """
-        error_type = self.get_error_type(error)
-        should_retry = error_type.is_recoverable()
-        self._logger.debug(
-            "retry_decision",
-            error_type=error_type.value,
-            error_class=type(error).__name__,
-            should_retry=should_retry,
-            decision_source="exception_type",
+        """Determine if error should be retried."""
+        return decide_should_retry(
+            logger=self._logger,
+            error_type=self.get_error_type(error),
+            error=error,
         )
-        return bool(should_retry)
 
     def should_retry_status(self, status_code: int) -> bool:
-        """Determine if HTTP status code should be retried.
-
-        Args:
-            status_code: HTTP status code.
-
-        Returns:
-            True if status code indicates recoverable error.
-        """
-        category = self.classify_http_error(status_code)
-        should_retry = category == ErrorCategory.RECOVERABLE
-        self._logger.debug(
-            "retry_decision",
+        """Determine if HTTP status code should be retried."""
+        return decide_should_retry_status(
+            logger=self._logger,
+            category=self.classify_http_error(status_code),
             status_code=status_code,
-            category=category.value,
-            should_retry=should_retry,
-            decision_source="http_status",
         )
-        return bool(should_retry)
 
     def get_retry_after(self, response: Response) -> float | None:
-        """Extract Retry-After header value from response.
-
-        Args:
-            response: HTTP response object.
-
-        Returns:
-            Retry-After value in seconds, or None if not present.
-        """
+        """Extract Retry-After header value from response."""
         retry_after = extract_retry_after(response)
         if retry_after is None:
             return None
@@ -208,23 +139,17 @@ class AdapterErrorHandler:
         pipeline: str | None = None,
         operation: str | None = None,
     ) -> ExternalServiceError:
-        """Wrap exception in appropriate ExternalServiceError.
-
-        Returns:
-            ExternalServiceError wrapping the original exception with provider context.
-        """
-        error_type = self.get_error_type(error)
-        return self._error_mapper.map_to_domain_error(
-            DomainErrorMappingInput(
-                error=cast(InfrastructureSourceError, error),
-                provider=provider,
-                error_type=error_type,
-                status_code=status_code,
-                retry_after=retry_after,
-                entity=entity,
-                pipeline=pipeline,
-                operation=operation,
-            )
+        """Wrap exception in appropriate ExternalServiceError."""
+        return wrap_adapter_error(
+            error_mapper=self._error_mapper,
+            error=error,
+            error_type=self.get_error_type(error),
+            provider=provider,
+            status_code=status_code,
+            retry_after=retry_after,
+            entity=entity,
+            pipeline=pipeline,
+            operation=operation,
         )
 
     def handle_error(
@@ -234,25 +159,9 @@ class AdapterErrorHandler:
         operation: str,
         context: JsonDict | None = None,  # Any: untyped API JSON record
     ) -> ExternalServiceError:
-        """Handle error: log and wrap in one step.
-
-        Convenience method combining log_error and wrap_error.
-
-        Args:
-            error: The exception that occurred.
-            provider: Name of the data provider.
-            operation: Operation that failed.
-            context: Additional context.
-
-        Returns:
-            Wrapped ExternalServiceError.
-
-        Raises:
-            CriticalError: For critical errors.
-        """
+        """Handle error: log and wrap in one step."""
         context = context or {}
         error_context = self.log_error(provider, operation, error, context)
-
         return self.wrap_error(
             error=error,
             provider=provider,

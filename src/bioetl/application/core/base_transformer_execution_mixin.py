@@ -21,6 +21,9 @@ from bioetl.application.core._base_transformer_structural_support import (
 from bioetl.application.core.base_transformer.errors import (
     TransformationError,
 )
+from bioetl.application.core.base_transformer_helpers_mixin import (
+    _BaseTransformerRecordHelpersMixin,
+)
 from bioetl.application.core.pipeline_span_lifecycle import _ClosableSpan
 
 if TYPE_CHECKING:
@@ -29,8 +32,8 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
-class _BaseTransformerExecutionMixin:
-    """Execution lifecycle helpers delegated from BaseTransformer."""
+class _BaseTransformerExecutionMixin(_BaseTransformerRecordHelpersMixin):
+    """Execution lifecycle helpers composed with record helpers (ARCH-REF-04)."""
 
     def _start_transform_span(
         self: TransformerExecutionOwner,

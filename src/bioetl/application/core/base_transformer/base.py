@@ -18,9 +18,6 @@ from bioetl.application.core.base_transformer_dependency_helpers_mixin import (
 from bioetl.application.core.base_transformer_execution_mixin import (
     _BaseTransformerExecutionMixin,
 )
-from bioetl.application.core.base_transformer_helpers_mixin import (
-    _BaseTransformerRecordHelpersMixin,
-)
 from bioetl.domain.behavior import EntityIdentityGenerator
 from bioetl.domain.context import PipelineContext
 
@@ -92,7 +89,6 @@ def _resolve_transformer_dependencies(
 class BaseTransformer(
     _BaseTransformerDependencyHelpersMixin,
     _BaseTransformerExecutionMixin,
-    _BaseTransformerRecordHelpersMixin,
     ABC,
 ):
     """Abstract base class for Bronze -> Silver transformers."""

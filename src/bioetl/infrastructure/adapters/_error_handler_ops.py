@@ -1,4 +1,4 @@
-"""Retry-decision and wrap/handle helpers for AdapterErrorHandler."""
+"""Retry-decision, logging, and wrap helpers for AdapterErrorHandler."""
 
 from __future__ import annotations
 
@@ -8,7 +8,8 @@ from bioetl.domain.exceptions import ExternalServiceError
 from bioetl.domain.types import ErrorType, JsonDict
 from bioetl.infrastructure.adapters._error_handling_support import (
     AdapterErrorContext,
-    safe_optional_str,
+    build_adapter_error_context,
+    emit_error_telemetry,
 )
 from bioetl.infrastructure.adapters.adapter_error_classifier import ErrorCategory
 from bioetl.infrastructure.errors import (
@@ -18,7 +19,7 @@ from bioetl.infrastructure.errors import (
 from bioetl.infrastructure.errors.exception_mapper import InfrastructureSourceError
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.adapter_error_classifier import (
         AdapterErrorClassifier,
     )
@@ -26,9 +27,49 @@ if TYPE_CHECKING:
 __all__ = [
     "decide_should_retry",
     "decide_should_retry_status",
-    "handle_and_wrap_error",
+    "log_adapter_error",
     "wrap_adapter_error",
 ]
+
+
+def log_adapter_error(
+    *,
+    logger: LoggerPort,
+    metrics: MetricsPort | None,
+    adapter_classifier: AdapterErrorClassifier,
+    error_type: ErrorType,
+    provider: str,
+    operation: str,
+    error: Exception,
+    context: JsonDict,
+) -> AdapterErrorContext:
+    """Log error with unified structured context and return error context."""
+    status_code = context.get("status_code")
+    error_category = adapter_classifier.classify(
+        error=error,
+        status_code=status_code,
+    )
+    error_context = build_adapter_error_context(
+        provider=provider,
+        operation=operation,
+        context=context,
+        error_type=error_type,
+        error_category=error_category,
+        status_code=status_code,
+    )
+    emit_error_telemetry(
+        logger=logger,
+        metrics=metrics,
+        provider=provider,
+        operation=operation,
+        error=error,
+        error_type=error_type,
+        error_category=error_category,
+        error_context=error_context,
+        status_code=status_code,
+    )
+    return error_context
+
 
 
 def decide_should_retry(
@@ -91,46 +132,4 @@ def wrap_adapter_error(
             pipeline=pipeline,
             operation=operation,
         )
-    )
-
-
-def handle_and_wrap_error(
-    *,
-    log_error_fn: object,
-    wrap_error_fn: object,
-    error: Exception,
-    provider: str,
-    operation: str,
-    context: JsonDict | None,
-) -> ExternalServiceError:
-    """Handle error: log and wrap in one step.
-
-    ``log_error_fn`` and ``wrap_error_fn`` are bound methods on AdapterErrorHandler
-    (typed as object to avoid circular protocol definitions).
-    """
-    context = context or {}
-    log_error = cast(
-        "callable",  # type: ignore[valid-type]
-        log_error_fn,
-    )
-    wrap_error = cast(
-        "callable",  # type: ignore[valid-type]
-        wrap_error_fn,
-    )
-    # Prefer Protocol-style duck typing via direct calls.
-    error_context = cast(
-        AdapterErrorContext,
-        log_error(provider, operation, error, context),  # type: ignore[operator]
-    )
-    return cast(
-        ExternalServiceError,
-        wrap_error(  # type: ignore[operator]
-            error=error,
-            provider=provider,
-            status_code=error_context.status_code,
-            retry_after=error_context.retry_after,
-            entity=safe_optional_str(context.get("entity")),
-            pipeline=safe_optional_str(context.get("pipeline")),
-            operation=operation,
-        ),
     )
