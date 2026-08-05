@@ -223,9 +223,7 @@ def main() -> None:
                                 "gold_lifecycle_blocking": {
                                     "text": "Gold lifecycle blocked"
                                 },
-                                "runtime_blockers_active": {
-                                    "text": "Runtime blocked"
-                                },
+                                "runtime_blockers_active": {"text": "Runtime blocked"},
                                 "workflow_scope_requires_review": {
                                     "text": "Workflow review"
                                 },
