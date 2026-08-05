@@ -45,7 +45,7 @@ config boundary: active YAML is structural-only at Silver, and semantic Silver
 payloads fail closed before domain conversion.
 
 The retired working draft
-`docs/filters/retired-silver-filters-structural-scope.md` captured the original
+`docs/99-archive/filters/retired-silver-filters-structural-scope.md` captured the original
 rationale, but it is not an accepted ADR and must not be cited as ADR-048.
 Accepted ADR-048 covers the domain schema boundary and Pandera runtime
 compatibility.
@@ -222,7 +222,7 @@ context only.
 
 Implementation and follow-up work must verify:
 
-- `docs/filters/README.md` and `docs/filters/migration-plan.md` cite this ADR
+- `docs/filters/README.md` and `docs/99-archive/filters/migration-plan.md` cite this ADR
   as the normative decision and treat the local ADR-048 filter draft as
   historical context only.
 - Targeted search finds no stale references that cite the retired ADR-048 draft
