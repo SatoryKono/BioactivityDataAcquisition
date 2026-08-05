@@ -173,6 +173,9 @@ Notes:
 - `uv run python -m scripts.ops setup-plugins` configures local pytest and pre-commit tooling.
 - Hook-only reinstall remains available through `bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only`.
 - If you use Codex, GitHub Copilot, or Devin MCP, run `uv run python -m scripts.engineering.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.engineering.dev setup-mcp` is also valid.
+- For Devin CLI `v3000.3+`, run `make devin-check` once and `make devin` to
+  launch from the repository root. Start the optional daily shared MCP plane
+  explicitly with `make devin-mcp-start` when MCP-heavy work requires it.
 - For docs verification and strict site builds, use the published [Docs Verification Guide](docs/03-guides/docs-verification.md).
 
 #### Mixed Windows + WSL Development
@@ -385,7 +388,7 @@ python scripts\ai\codex\setup_mcp.py
 What this script does:
 
 - Writes workspace MCP config for Copilot at `.vscode/mcp.json`.
-- Synchronizes `.mcp.json`, `scripts/ai/.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.qodo/mcp.json`, `.zed/mcp.json`, `.codex/settings.json`, `.gemini/settings.json`, `.devin/config.json`, and the managed MCP block in `~/.codex/config.toml`.
+- Synchronizes `.mcp.json`, `scripts/ai/.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.qodo/mcp.json`, `.zed/mcp.json`, `.codex/settings.json`, `.gemini/settings.json`, Devin project settings in `.devin/config.json`, Devin MCP servers in `.devin/mcp_config.json`, and the managed MCP block in `~/.codex/config.toml`.
 - Registers the current MCP set: `memory`, `filesystem`, `fetch`, `github`, `docker`, `context7`, `ast-grep`, `mcp-code-interpreter`, `prometheus`, `grafana`, `brave-search`, `neo4j-cypher`, `neo4j-memory`, `mermaid`, `deja`, `adr-analysis`, `mutmut`, `code-analyzer`, `github-actions`, `deepwiki`, and `ref`.
 - Runs the pinned `mcp-server-fetch==2025.4.7` through `uvx --python 3.13`; this avoids the known stdio startup hang under CPython 3.14 in WSL while keeping the tracked config portable.
 - Keeps Codex npm/uv runtime caches under the native Linux user cache (`~/.cache/bioetl-mcp`, or `$XDG_CACHE_HOME/bioetl-mcp`) so WSL package installs do not rely on atomic rename/cleanup operations on `WSL-mounted Windows paths`; tracked MCP manifests remain repo-relative.

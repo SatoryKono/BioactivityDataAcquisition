@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Materialize machine-local Devin MCP projection onto the shared HTTP plane.
+"""Materialize the machine-local Devin MCP projection for the shared plane.
 
-Writes only ``.devin/config.local.json`` (gitignored). Tracked
-``.devin/config.json`` stays full portable stdio SSOT.
+Writes only ``.devin/mcp_config.local.json`` (gitignored). Tracked project
+settings remain in ``.devin/config.json`` and the full shared MCP inventory
+remains in ``.devin/mcp_config.json``.
 
 Usage (from repo root)::
 
@@ -20,24 +21,8 @@ from typing import Any, cast
 REPO_ROOT = Path(__file__).resolve().parents[4]
 _DEVIN_DIR = ".devin"
 CATALOG_PATH = REPO_ROOT / "scripts/ops/runtime/mcp/shared-servers.json"
-LOCAL_PATH = REPO_ROOT / _DEVIN_DIR / "config.local.json"
-TRACKED_PATH = REPO_ROOT / _DEVIN_DIR / "config.json"
-
-# Gateway thrash leaders — omit from daily multi-client Devin local projection.
-DAILY_DISABLE = frozenset(
-    {
-        "docker",
-        "mermaid",
-        "dockerhub",
-        "mcp-code-interpreter",
-        "neo4j-cypher",
-        "neo4j-memory",
-        "mutmut",
-        "sonarqube",
-        "needle",
-        "github-actions",
-    }
-)
+LOCAL_PATH = REPO_ROOT / _DEVIN_DIR / "mcp_config.local.json"
+TRACKED_PATH = REPO_ROOT / _DEVIN_DIR / "mcp_config.json"
 
 type JsonObject = dict[str, Any]
 
@@ -54,31 +39,8 @@ def _endpoint(entry: JsonObject) -> str:
     return f"http://127.0.0.1:{int(entry['port'])}{path}"
 
 
-def _http_entry(url: str, *, timeout: int = 60) -> JsonObject:
-    return {
-        "type": "http",
-        "url": url,
-        "startup_timeout_sec": timeout,
-    }
-
-
-def _normalize_tracked_host_entry(entry: JsonObject) -> JsonObject:
-    """Prefer bash wrappers on Linux local for PowerShell-oriented tracked entries."""
-    normalized = dict(entry)
-    args = normalized.get("args")
-    if isinstance(args, list) and args and str(args[0]).endswith(".ps1"):
-        normalized["command"] = "bash"
-        normalized["args"] = [str(args[0]).replace(".ps1", ".sh")]
-    return normalized
-
-
-def _seed_tracked_host_servers(tracked: JsonObject) -> dict[str, JsonObject]:
-    servers: dict[str, JsonObject] = {}
-    for name in ("memory", "filesystem"):
-        entry = tracked.get(name)
-        if isinstance(entry, dict):
-            servers[name] = _normalize_tracked_host_entry(cast(JsonObject, entry))
-    return servers
+def _http_entry(url: str) -> JsonObject:
+    return {"url": url}
 
 
 def _load_tracked_servers() -> JsonObject:
@@ -96,9 +58,11 @@ def build_local_servers(
     include_optional: bool = False,
 ) -> dict[str, JsonObject]:
     catalog = _load_catalog()
-    # Prefer tracked portable inventory for non-catalog host wrappers that
-    # remain useful (memory/filesystem) when present.
-    servers = _seed_tracked_host_servers(_load_tracked_servers())
+    servers = {
+        name: dict(cast(JsonObject, entry))
+        for name, entry in _load_tracked_servers().items()
+        if isinstance(name, str) and isinstance(entry, dict)
+    }
 
     catalog_servers = catalog.get("servers")
     if not isinstance(catalog_servers, dict):
@@ -108,14 +72,11 @@ def build_local_servers(
             continue
         entry = cast(JsonObject, entry_raw)
         is_daily = entry.get("daily", True) is not False
+        rendered = _http_entry(_endpoint(entry))
         if not include_optional and not is_daily:
-            continue
-        if name in DAILY_DISABLE:
-            continue
-        servers[name] = _http_entry(_endpoint(entry))
+            rendered["disabled"] = True
+        servers[name] = rendered
 
-    # Explicitly document disabled thrash leaders so operators see intent.
-    # (Devin may still merge tracked; absence is the daily contract.)
     return servers
 
 
@@ -134,36 +95,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     root = args.root.resolve()
-    local_path = root / _DEVIN_DIR / "config.local.json"
+    local_path = root / _DEVIN_DIR / "mcp_config.local.json"
     local_path.parent.mkdir(parents=True, exist_ok=True)
 
-    existing: JsonObject = {}
-    if local_path.is_file():
-        try:
-            raw_existing = json.loads(local_path.read_text(encoding="utf-8"))
-            existing = (
-                cast(JsonObject, raw_existing) if isinstance(raw_existing, dict) else {}
-            )
-        except json.JSONDecodeError:
-            existing = {}
-
     servers = build_local_servers(include_optional=args.include_optional)
-    # Preserve non-mcp keys (permissions, etc.) from existing local config.
-    payload = dict(existing)
-    payload["mcpServers"] = servers
-    if "permissions" not in payload:
-        payload["permissions"] = {
-            "allow": [
-                "Exec(gh)",
-                "Exec(git)",
-                "Exec(python)",
-                "Exec(python3)",
-                "Exec(pytest)",
-                "Exec(uv run)",
-                "Exec(ls)",
-                "Exec(find)",
-            ]
-        }
+    payload: JsonObject = {"mcpServers": servers}
 
     rendered = json.dumps(payload, indent=2, ensure_ascii=True) + "\n"
     local_path.write_text(rendered, encoding="utf-8")
@@ -172,9 +108,11 @@ def main(argv: list[str] | None = None) -> int:
         n for n, s in servers.items() if s.get("type") == "http" or s.get("url")
     )
     print("HTTP:", ", ".join(http_names) or "(none)")
-    disabled = sorted(DAILY_DISABLE)
-    print("Daily-disabled thrash leaders:", ", ".join(disabled))
-    print("Restart Devin to load config.local.json.")
+    disabled = sorted(
+        name for name, server in servers.items() if server.get("disabled")
+    )
+    print("Daily-disabled optional servers:", ", ".join(disabled) or "(none)")
+    print("Restart Devin to load mcp_config.local.json.")
     return 0
 
 

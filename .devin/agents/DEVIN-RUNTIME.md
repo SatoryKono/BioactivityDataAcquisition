@@ -17,6 +17,27 @@ Read before planning or editing:
 
 Map logical BioETL `py-*` profiles onto the Devin CLI runtime roles using custom subagent profiles. This document provides the Devin-specific adaptation of the Codex runtime mapping.
 
+## Canonical Launch
+
+Run Devin from the repository root so project discovery loads `AGENTS.md`,
+`.devin/config.json`, `.devin/mcp_config.json`, `.devin/agents/**`, and
+`.devin/skills/**`:
+
+```bash
+make devin-check
+make devin
+```
+
+Start the daily shared MCP plane explicitly when the task needs MCP tools:
+
+```bash
+make devin-mcp-start
+```
+
+The default launch never starts Docker or optional monitoring. `make devin`
+materializes only the gitignored `.devin/mcp_config.local.json` daily overlay
+and then invokes the installed `devin` CLI.
+
 ## Response Language
 
 - By default, answer the user in Russian when the user writes in Russian.
@@ -153,6 +174,9 @@ Use for:
 
 ## Related Runtime Surfaces
 
+- `Makefile` (`devin`, `devin-check`, `devin-mcp-start` launch contracts)
+- `.devin/config.json` (tracked project settings)
+- `.devin/mcp_config.json` (tracked full shared MCP inventory)
 - `.devin/agents/ORCHESTRATION.md` (Devin-specific orchestration workflow)
 - `.devin/agents/README.md` (Devin agent catalog)
 - `.codex/agents/CODEX-RUNTIME.md` (Codex reference mapping)

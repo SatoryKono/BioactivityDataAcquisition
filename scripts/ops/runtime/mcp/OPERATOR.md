@@ -29,10 +29,13 @@ python3 scripts/ai/codex/setup_mcp.py \
 # (does not start the plane; do not commit the rewritten local files).
 python3 scripts/ops/runtime/mcp/_materialize_shared_http_configs.py
 # Do NOT commit OS-flipped tracked portable .mcp.json from Linux apply.
-git checkout -- .mcp.json .devin/config.json 2>/dev/null || true
+git checkout -- .mcp.json 2>/dev/null || true
 
 # 3) Devin machine-local HTTP projection (gitignored)
 python3 scripts/ops/runtime/mcp/apply-shared-to-devin.py
+# Equivalent repository launch path:
+# make devin-mcp-start
+# make devin
 
 # 4) Grok (Windows path when applicable)
 # .\scripts\ops\runtime\mcp\apply-shared-to-grok.ps1 -DisableDockerGateways

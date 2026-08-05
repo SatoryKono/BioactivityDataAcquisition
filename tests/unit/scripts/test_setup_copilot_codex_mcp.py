@@ -473,6 +473,9 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     devin_config = json.loads(
         (output_root / ".devin" / "config.json").read_text(encoding="utf-8")
     )
+    devin_mcp = json.loads(
+        (output_root / ".devin" / "mcp_config.json").read_text(encoding="utf-8")
+    )
     gemini_settings = json.loads(
         (output_root / ".gemini" / "settings.json").read_text(encoding="utf-8")
     )
@@ -484,17 +487,20 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     portable_wrapper_suffix = ".sh"
     host_wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
     runtime_servers = codex_settings["mcpServers"]
-    devin_servers = devin_config["mcpServers"]
+    devin_servers = devin_mcp["mcpServers"]
     assert set(servers) == EXPECTED_FULL_PROFILE_SERVERS
     assert set(devin_servers) == set(servers)
-    for server_name, server_config in servers.items():
-        expected_devin = dict(server_config)
-        env_http_headers = expected_devin.pop("env_http_headers", None)
-        if env_http_headers:
-            expected_devin["headers"] = {
-                header: f"${env_name}" for header, env_name in env_http_headers.items()
-            }
-        assert devin_servers[server_name] == expected_devin
+    assert devin_mcp == setup_mcp._render_devin_mcp_payload(workspace_root)
+    assert set(devin_config) <= {
+        "version",
+        "permissions",
+        "read_config_from",
+        "hooks",
+    }
+    assert devin_config["permissions"]["ask"] == [
+        "Read(**/.env*)",
+        "Write(**/.env*)",
+    ]
     # Portable tracked inventory (root/.mcp.json, .zed) stays POSIX/bash.
     # Local IDE projections (qodo) use host-native wrappers on this machine.
     assert zed_payload["mcpServers"] == servers
@@ -523,8 +529,9 @@ def test_main_uses_workspace_root_for_generated_server_paths(
         f"scripts/ai/mcp/mcp_filesystem_wrapper{portable_wrapper_suffix}"
     )
     assert servers["filesystem"]["command"] == "bash"
-    assert devin_servers["filesystem"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_filesystem_wrapper{portable_wrapper_suffix}"
+    assert (
+        devin_servers["filesystem"]["url"]
+        == (setup_mcp.MCP_SHARED_SERVER_ENDPOINTS["filesystem"])
     )
     assert runtime_servers["filesystem"]["args"][0] == str(
         (
@@ -655,7 +662,7 @@ def test_main_recreates_empty_workspace_json_configs(tmp_path: Path) -> None:
     )
     assert (
         json.loads(
-            (output_root / ".devin" / "config.json").read_text(encoding="utf-8")
+            (output_root / ".devin" / "mcp_config.json").read_text(encoding="utf-8")
         )["mcpServers"]["filesystem"]["url"]
         == shared_fs_url
     )
@@ -671,7 +678,7 @@ def test_devin_projection_is_portable_across_workspace_roots(
     tmp_path: Path,
 ) -> None:
     """Tracked Devin MCP data should be stable and preserve Devin-owned settings."""
-    generated: list[dict[str, object]] = []
+    generated: list[tuple[dict[str, object], dict[str, object]]] = []
     for name in ("first-clone", "second-clone"):
         workspace_root = tmp_path / name / "workspace"
         output_root = tmp_path / name / "output"
@@ -682,6 +689,8 @@ def test_devin_projection_is_portable_across_workspace_roots(
             json.dumps(
                 {
                     "version": 2,
+                    "permissions": {"ask": ["Exec(custom)"]},
+                    "hooks": {"PreToolUse": []},
                     "devin": {"org_id": "org-test"},
                     "shell": {"setup_complete": True},
                     "theme_mode": "light",
@@ -705,14 +714,29 @@ def test_devin_projection_is_portable_across_workspace_roots(
             )
             == 0
         )
-        generated.append(json.loads(devin_path.read_text(encoding="utf-8")))
+        generated.append(
+            (
+                json.loads(devin_path.read_text(encoding="utf-8")),
+                json.loads(
+                    (output_root / ".devin" / "mcp_config.json").read_text(
+                        encoding="utf-8"
+                    )
+                ),
+            )
+        )
 
     assert generated[0] == generated[1]
-    assert generated[0]["devin"] == {"org_id": "org-test"}
-    assert generated[0]["shell"] == {"setup_complete": True}
-    assert generated[0]["theme_mode"] == "light"
+    settings, mcp = generated[0]
+    assert settings["version"] == 2
+    assert settings["hooks"] == {"PreToolUse": []}
+    assert settings["permissions"]["ask"] == [
+        "Exec(custom)",
+        "Read(**/.env*)",
+        "Write(**/.env*)",
+    ]
+    assert not ({"devin", "shell", "theme_mode", "mcpServers"} & set(settings))
     assert (
-        generated[0]["mcpServers"]["filesystem"]["url"]
+        mcp["mcpServers"]["filesystem"]["url"]
         == (setup_mcp.MCP_SHARED_SERVER_ENDPOINTS["filesystem"])
     )
 

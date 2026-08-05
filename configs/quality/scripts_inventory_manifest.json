@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-05T08:49:24.328718+00:00",
+  "generated_at": "2026-08-05T09:51:06.574070+00:00",
   "summary": {
     "total_scripts": 575,
     "status_counts": {
@@ -10,13 +10,13 @@
     },
     "reference_group_coverage": {
       "agents": 12,
-      "build": 12,
+      "build": 16,
       "ci": 77,
       "docs": 234,
       "other": 80,
       "scripts": 455,
       "skills": 18,
-      "tests": 363
+      "tests": 364
     }
   },
   "scripts": [
@@ -278,7 +278,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 118,
+          "line": 124,
           "source_group": "docs",
           "text": "python3 scripts/ai/codex/doctor.py static --no-write"
         },
@@ -1082,7 +1082,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 125,
+          "line": 131,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-check --profile stable"
         },
@@ -1322,7 +1322,7 @@
       "agent_usage": [
         "ORCHESTRATION"
       ],
-      "reference_count": 58,
+      "reference_count": 60,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
@@ -2526,7 +2526,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 188,
+          "line": 195,
           "source_group": "docs",
           "text": "`scripts/ai/mcp/export_mcp_env_from_dotenv.ps1` can export already configured"
         },
@@ -2563,7 +2563,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 355,
+          "line": 379,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         },
@@ -2608,7 +2608,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 352,
+          "line": 376,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         },
@@ -3232,13 +3232,13 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 845,
+          "line": 869,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 915,
+          "line": 939,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         }
@@ -3454,7 +3454,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 535,
+          "line": 542,
           "source_group": "tests",
           "text": "assert servers[\"memory\"][\"args\"][0].endswith(\"mcp_memory_wrapper.sh\")"
         }
@@ -4020,7 +4020,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 185,
+          "line": 192,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/load_repo_env.ps1`"
         },
@@ -4170,7 +4170,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 202,
+          "line": 209,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
@@ -4227,7 +4227,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 201,
+          "line": 208,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
@@ -4588,7 +4588,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 201,
+          "line": 229,
           "source_group": "build",
           "text": "$(RUN) python scripts/ai/sync_windsurf_rules.py"
         },
@@ -5766,7 +5766,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 257,
+          "line": 285,
           "source_group": "build",
           "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
         },
@@ -6435,7 +6435,7 @@
         },
         {
           "path": "Makefile",
-          "line": 254,
+          "line": 282,
           "source_group": "build",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile pr"
         },
@@ -8899,7 +8899,7 @@
         },
         {
           "path": "Makefile",
-          "line": 221,
+          "line": 249,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.ci quality-gate \\"
         },
@@ -9663,7 +9663,7 @@
         },
         {
           "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 654,
+          "line": 655,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.repo_paths import ("
         },
@@ -10349,7 +10349,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 228,
+          "line": 256,
           "source_group": "build",
           "text": "BIOETL_PYTEST_SHARDED_TEST_HEALTH_SUITE=architecture-fast-boundary bash scripts/engineering/dev/run_pytest_sharded.sh --shard S7-architecture-fast-boundary --stream -- tests/architecture/ -m \"architec"
         },
@@ -11179,19 +11179,19 @@
         },
         {
           "path": "Makefile",
-          "line": 207,
+          "line": 235,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.diagnostics cleanup"
         },
         {
           "path": "Makefile",
-          "line": 210,
+          "line": 238,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.diagnostics cleanup $(if $(DRY_RUN),,--apply) $(if $(PURGE_LOGS),--purge-logs,)"
         },
         {
           "path": "Makefile",
-          "line": 217,
+          "line": 245,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.diagnostics cleanup --apply --purge-logs"
         },
@@ -13826,7 +13826,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 96,
+          "line": 103,
           "source_group": "docs",
           "text": "uv run python scripts/engineering/qa/report_dashboard_inventory.py --json"
         },
@@ -14481,7 +14481,7 @@
         },
         {
           "path": "tests/architecture/test_observability_metric_governance.py",
-          "line": 271,
+          "line": 272,
           "source_group": "tests",
           "text": "== \"scripts/engineering/qa/report_observability_metric_inventory.py\""
         }
@@ -16973,49 +16973,49 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 128,
+          "line": 156,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh check main"
         },
         {
           "path": "Makefile",
-          "line": 140,
+          "line": 168,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh start main"
         },
         {
           "path": "Makefile",
-          "line": 144,
+          "line": 172,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh start-full"
         },
         {
           "path": "Makefile",
-          "line": 148,
+          "line": 176,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh monitoring"
         },
         {
           "path": "Makefile",
-          "line": 151,
+          "line": 179,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh stop monitoring"
         },
         {
           "path": "Makefile",
-          "line": 155,
+          "line": 183,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh stop main"
         },
         {
           "path": "Makefile",
-          "line": 159,
+          "line": 187,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh stop-full"
         },
         {
           "path": "Makefile",
-          "line": 163,
+          "line": 191,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh logs main"
         }
@@ -17336,7 +17336,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 204,
+          "line": 232,
           "source_group": "build",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
@@ -18749,7 +18749,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 153,
+          "line": 159,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
@@ -18786,13 +18786,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 155,
+          "line": 161,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 170,
+          "line": 177,
           "source_group": "docs",
           "text": "after reconnects run `cleanup-mcp-orphans.ps1` or `ensure-stable.ps1`."
         },
@@ -18937,7 +18937,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 170,
+          "line": 177,
           "source_group": "docs",
           "text": "after reconnects run `cleanup-mcp-orphans.ps1` or `ensure-stable.ps1`."
         },
@@ -19165,7 +19165,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 190,
+          "line": 218,
           "source_group": "build",
           "text": "$(RUN) python scripts/ops/runtime/docker/runtime_manager.py clean --stack main --confirm-destructive CLEAN"
         },
@@ -19288,13 +19288,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "Makefile",
+          "line": 134,
+          "source_group": "build",
+          "text": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/ops/runtime/mcp/apply-shared-to-devin.py"
+        },
         {
           "path": "scripts/ops/runtime/mcp/OPERATOR.md",
           "line": 35,
           "source_group": "scripts",
           "text": "python3 scripts/ops/runtime/mcp/apply-shared-to-devin.py"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 338,
+          "source_group": "tests",
+          "text": "root / \"scripts/ops/runtime/mcp/apply-shared-to-devin.py\""
         }
       ]
     },
@@ -19325,7 +19337,7 @@
         },
         {
           "path": "scripts/ops/runtime/mcp/OPERATOR.md",
-          "line": 38,
+          "line": 41,
           "source_group": "scripts",
           "text": "# .\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1 -DisableDockerGateways"
         },
@@ -19397,7 +19409,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -19410,6 +19422,12 @@
           "line": 89,
           "source_group": "ci",
           "text": "- \"scripts/ops/runtime/mcp/health-shared.sh\""
+        },
+        {
+          "path": "Makefile",
+          "line": 149,
+          "source_group": "build",
+          "text": "PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily"
         },
         {
           "path": "scripts/ai/codex/helper/ensure-mcp.sh",
@@ -19456,7 +19474,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 171,
+          "line": 178,
           "source_group": "docs",
           "text": "Alternatively run the **shared HTTP plane** (`start-shared.ps1` +"
         },
@@ -19503,8 +19521,14 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
+        {
+          "path": "Makefile",
+          "line": 148,
+          "source_group": "build",
+          "text": "XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily"
+        },
         {
           "path": "scripts/ai/codex/helper/ensure-mcp.sh",
           "line": 300,
@@ -19531,27 +19555,21 @@
         },
         {
           "path": "scripts/ops/runtime/mcp/OPERATOR.md",
-          "line": 72,
+          "line": 75,
           "source_group": "scripts",
           "text": "| deja | 8814 | **no** | Needs `deja` binary (`go install github.com/vshulcz/deja-vu/cmd/deja@latest`). Start with `./start-shared.sh deja` when installed. |"
         },
         {
           "path": "scripts/ops/runtime/mcp/OPERATOR.md",
-          "line": 73,
+          "line": 76,
           "source_group": "scripts",
           "text": "| docker | 8817 | **no** | Gateway thrash leader. Single proxy: `./start-shared.sh docker`. Keep off daily unless needed; Devin daily still omits. |"
         },
         {
           "path": "scripts/ops/runtime/mcp/OPERATOR.md",
-          "line": 74,
+          "line": 77,
           "source_group": "scripts",
           "text": "| mermaid | 8818 | **no** | Same pattern: `./start-shared.sh mermaid` (or `docker mermaid dockerhub`). |"
-        },
-        {
-          "path": "scripts/ops/runtime/mcp/OPERATOR.md",
-          "line": 75,
-          "source_group": "scripts",
-          "text": "| dockerhub | 8819 | **no** | Same pattern: `./start-shared.sh dockerhub`. |"
         }
       ],
       "owner": "@bioetl-platform",
@@ -19589,7 +19607,7 @@
       "references": [
         {
           "path": "scripts/ops/runtime/mcp/OPERATOR.md",
-          "line": 103,
+          "line": 106,
           "source_group": "scripts",
           "text": "./scripts/ops/runtime/mcp/stop-shared.sh"
         }
@@ -19989,7 +20007,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 184,
+          "line": 191,
           "source_group": "docs",
           "text": "- `scripts/ops/support/load_repo_env.sh`"
         },
@@ -20001,7 +20019,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 252,
+          "line": 259,
           "source_group": "docs",
           "text": "- Repo env bootstrap: `scripts/ops/support/load_repo_env.sh`"
         },

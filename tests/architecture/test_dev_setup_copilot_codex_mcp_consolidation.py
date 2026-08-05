@@ -243,7 +243,7 @@ def test_devin_mcp_servers_are_subset_of_sanctioned_inventory() -> None:
     from scripts.ai.codex import setup_mcp
 
     portable = json.loads((root / ".mcp.json").read_text(encoding="utf-8"))
-    devin = json.loads((root / ".devin/config.json").read_text(encoding="utf-8"))
+    devin = json.loads((root / ".devin/mcp_config.json").read_text(encoding="utf-8"))
     portable_names = set(portable["mcpServers"])
     devin_names = set(devin["mcpServers"])
 
@@ -267,14 +267,19 @@ def test_devin_mcp_servers_are_subset_of_sanctioned_inventory() -> None:
 
 def test_tracked_mcp_projections_reject_workstation_paths() -> None:
     """Tracked portable MCP projections must be clone-location independent."""
+    from scripts.ai.codex import setup_mcp
+
     root = repo_root()
     workspace_payload = json.loads((root / ".mcp.json").read_text(encoding="utf-8"))
     scripts_payload = json.loads(
         (root / "scripts/ai/.mcp.json").read_text(encoding="utf-8")
     )
     zed_payload = json.loads((root / ".zed/mcp.json").read_text(encoding="utf-8"))
-    devin_payload = json.loads(
+    devin_settings = json.loads(
         (root / ".devin/config.json").read_text(encoding="utf-8")
+    )
+    devin_payload = json.loads(
+        (root / ".devin/mcp_config.json").read_text(encoding="utf-8")
     )
 
     expected_servers = workspace_payload["mcpServers"]
@@ -282,6 +287,7 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
     assert zed_payload["mcpServers"] == expected_servers
     devin_servers = devin_payload["mcpServers"]
     assert set(devin_servers) == set(expected_servers)
+    assert devin_payload == setup_mcp._render_devin_mcp_payload(root)
     shared_catalog = json.loads(
         (root / "scripts/ops/runtime/mcp/shared-servers.json").read_text(
             encoding="utf-8"
@@ -289,38 +295,56 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
     )["servers"]
     for server_name, entry in shared_catalog.items():
         server = devin_servers[server_name]
-        assert server["type"] == "http"
         assert server["url"] == f"http://127.0.0.1:{entry['port']}{entry['path']}"
-        # Shared-plane Devin projection uses startup_timeout_sec (not request_timeout_sec).
-        assert set(server) == {"type", "url", "startup_timeout_sec"}
-        assert isinstance(server["startup_timeout_sec"], int)
-        assert server["startup_timeout_sec"] > 0
-        portable = expected_servers.get(server_name, {})
-        portable_timeout = portable.get("startup_timeout_sec")
-        if isinstance(portable_timeout, int):
-            assert server["startup_timeout_sec"] == portable_timeout
-    expected_devin_deepwiki = dict(expected_servers["deepwiki"])
-    expected_devin_deepwiki.pop("env_http_headers")
-    expected_devin_deepwiki["headers"] = {
-        "x-deepwiki-api-key": "$DEEPWIKI_API_KEY",
-        "x-deepwiki-organisation-id": "$DEEPWIKI_ORGANISATION_ID",
+        assert set(server) == {"url"}
+    assert devin_servers["deepwiki"]["headers"] == {
+        "x-deepwiki-api-key": "${env:DEEPWIKI_API_KEY}",
+        "x-deepwiki-organisation-id": "${env:DEEPWIKI_ORGANISATION_ID}",
     }
-    assert devin_servers["deepwiki"] == expected_devin_deepwiki
-    expected_devin_ref = dict(expected_servers["ref"])
-    expected_devin_ref.pop("env_http_headers")
-    expected_devin_ref["headers"] = {
-        "x-ref-api-key": "$REF_TOOL_API_KEY",
+    assert devin_servers["ref"]["headers"] == {
+        "x-ref-api-key": "${env:REF_TOOL_API_KEY}"
     }
-    assert devin_servers["ref"] == expected_devin_ref
     assert set(devin_payload["mcpServers"]) == EXPECTED_MCP_SERVERS
-    assert devin_payload["devin"]["org_id"]
-    assert devin_payload["shell"] == {"setup_complete": True}
+    assert set(devin_settings) <= {
+        "version",
+        "permissions",
+        "read_config_from",
+        "hooks",
+    }
+    assert devin_settings["permissions"]["ask"] == [
+        "Read(**/.env*)",
+        "Write(**/.env*)",
+    ]
+    assert devin_settings["read_config_from"]["agents_standard"] is True
 
     absolute_path = re.compile(r"^(?:/|[A-Za-z]:[\\/])")
-    for payload in (workspace_payload, scripts_payload, zed_payload, devin_payload):
+    for payload in (
+        workspace_payload,
+        scripts_payload,
+        zed_payload,
+        devin_settings,
+        devin_payload,
+    ):
         assert not [
             value for value in _all_string_values(payload) if absolute_path.match(value)
         ]
+
+
+def test_devin_launch_contract_uses_project_discovery() -> None:
+    """The maintained launcher must use current project config discovery."""
+    root = repo_root()
+    makefile = (root / "Makefile").read_text(encoding="utf-8")
+    materializer = (
+        root / "scripts/ops/runtime/mcp/apply-shared-to-devin.py"
+    ).read_text(encoding="utf-8")
+
+    assert "devin: devin-setup" in makefile
+    assert "devin-check: devin-setup" in makefile
+    assert "devin-mcp-start:" in makefile
+    assert "$(DEVIN) $(DEVIN_ARGS)" in makefile
+    assert "--config .devin/config.json" not in makefile
+    assert '"mcp_config.local.json"' in materializer
+    assert '"config.local.json"' not in materializer
 
 
 def test_setup_router_is_the_supported_public_entrypoint() -> None:

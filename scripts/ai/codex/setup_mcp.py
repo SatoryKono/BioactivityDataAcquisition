@@ -24,6 +24,7 @@ if _REPO_ROOT_STR not in sys.path:
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 MCP_JSON_FILENAME = "mcp.json"
+DEVIN_MCP_CONFIG_FILENAME = "mcp_config.json"
 CACHE_DIR_NAME = ".cache"
 CODEX_RUNTIME_CACHE_DIR_NAME = "bioetl-mcp"
 DEEPWIKI_API_KEY_ENV_VAR = "DEEPWIKI_API_KEY"
@@ -724,40 +725,36 @@ def _write_devin_config(
     profile: str = "full",
     transport_mode: str = "stdio",
 ) -> Path:
-    """Write the portable Devin projection for the selected local runtime."""
+    """Write current Devin project settings and its dedicated MCP inventory."""
     settings_path = output_root / ".devin" / "config.json"
     settings_path.parent.mkdir(parents=True, exist_ok=True)
 
     existing = _load_existing_json_object(settings_path, label="Devin workspace config")
-    if not isinstance(existing.get("devin"), dict):
-        existing["devin"] = {"org_id": "bioetl"}
-    else:
-        existing["devin"].setdefault("org_id", "bioetl")
+    supported_keys = {"version", "permissions", "read_config_from", "hooks"}
+    settings = {
+        key: deepcopy(value) for key, value in existing.items() if key in supported_keys
+    }
+    settings.setdefault("version", 1)
+    permissions = settings.setdefault("permissions", {})
+    if not isinstance(permissions, dict):
+        raise ValueError("Devin project permissions must be a JSON object")
+    ask = permissions.setdefault("ask", [])
+    if not isinstance(ask, list):
+        raise ValueError("Devin project permissions.ask must be a JSON array")
+    for rule in ("Read(**/.env*)", "Write(**/.env*)"):
+        if rule not in ask:
+            ask.append(rule)
+    settings.setdefault("read_config_from", {"agents_standard": True})
+    _write_json(settings_path, settings, allowed_root=output_root)
 
-    if not isinstance(existing.get("shell"), dict):
-        existing["shell"] = {"setup_complete": True}
-    else:
-        existing["shell"].setdefault("setup_complete", True)
-
-    # Membership always full for tracked Devin projection.
-    del profile
-    servers = _apply_shared_transport(
-        _canonical_servers(
-            workspace_root,
-            portable_workspace_paths=True,
-            profile=DEVIN_TRACKED_PROFILE,
-            wrapper_platform="posix",
-        ),
-        transport_mode=transport_mode,
+    # Devin CLI >=3000.3 reads MCP servers from a dedicated project file.
+    del profile, transport_mode
+    mcp_path = output_root / ".devin" / DEVIN_MCP_CONFIG_FILENAME
+    _write_json(
+        mcp_path,
+        _render_devin_mcp_payload(workspace_root),
+        allowed_root=output_root,
     )
-    for server in servers.values():
-        env_http_headers = server.pop("env_http_headers", None)
-        if isinstance(env_http_headers, dict):
-            server["headers"] = {
-                header: f"${env_name}" for header, env_name in env_http_headers.items()
-            }
-    existing["mcpServers"] = servers
-    _write_json(settings_path, existing, allowed_root=output_root)
     return settings_path
 
 
@@ -1058,7 +1055,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         default=REPO_ROOT,
         help=(
             "Directory where .mcp.json, .vscode/mcp.json, .cursor/mcp.json, "
-            ".qodo/mcp.json, .zed/mcp.json, .codex/settings.json, and .devin/config.json "
+            ".qodo/mcp.json, .zed/mcp.json, .codex/settings.json, "
+            ".devin/config.json, and .devin/mcp_config.json "
             "should be written."
         ),
     )
@@ -1109,7 +1107,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "projections (stable|shared|core|ops|graph|full). "
             f"Default: {DEFAULT_LOCAL_PROFILE} (daily least-privilege local IDE). "
             "Tracked portable inventory (.mcp.json, scripts/ai/.mcp.json, "
-            ".zed/mcp.json) and tracked .devin/config.json always stay full. "
+            ".zed/mcp.json) and tracked .devin/mcp_config.json always stay full. "
             "Use --profile shared|graph|full when multi-client heavy tools are needed. "
             "Default transport remains shared HTTP for multi-client localhost plane."
         ),
@@ -1195,6 +1193,29 @@ def _render_portable_mcp_payload(workspace_root: Path) -> dict[str, Any]:
     return {"mcpServers": deepcopy(full_servers)}
 
 
+def _render_devin_mcp_payload(workspace_root: Path) -> dict[str, Any]:
+    """Canonical full Devin inventory using shared HTTP and Devin env syntax."""
+    servers = _apply_shared_transport(
+        _canonical_servers(
+            workspace_root,
+            portable_workspace_paths=True,
+            profile=DEVIN_TRACKED_PROFILE,
+            wrapper_platform="posix",
+        ),
+        transport_mode="shared",
+    )
+    for server in servers.values():
+        server.pop("type", None)
+        server.pop("startup_timeout_sec", None)
+        env_http_headers = server.pop("env_http_headers", None)
+        if isinstance(env_http_headers, dict):
+            server["headers"] = {
+                header: f"${{env:{env_name}}}"
+                for header, env_name in env_http_headers.items()
+            }
+    return {"mcpServers": servers}
+
+
 def _check_tracked_portable_projections(
     output_root: Path,
     workspace_root: Path,
@@ -1251,6 +1272,42 @@ def _check_tracked_portable_projections(
                 detail_parts.append(f"server_drift={shared_drift[:12]}")
             mismatches.append("; ".join(detail_parts))
 
+    devin_relative = Path(".devin") / DEVIN_MCP_CONFIG_FILENAME
+    devin_path = output_root / devin_relative
+    devin_expected_text = (
+        json.dumps(
+            _render_devin_mcp_payload(workspace_root),
+            indent=2,
+            ensure_ascii=True,
+        )
+        + "\n"
+    )
+    if not devin_path.is_file():
+        mismatches.append(f"missing: {devin_relative.as_posix()}")
+    elif devin_path.read_text(encoding="utf-8") != devin_expected_text:
+        mismatches.append(
+            f"stale: {devin_relative.as_posix()}; dedicated Devin MCP projection drift"
+        )
+
+    devin_settings_relative = Path(".devin") / "config.json"
+    devin_settings_path = output_root / devin_settings_relative
+    if not devin_settings_path.is_file():
+        mismatches.append(f"missing: {devin_settings_relative.as_posix()}")
+    else:
+        devin_settings = json.loads(devin_settings_path.read_text(encoding="utf-8"))
+        unsupported_keys = sorted(
+            set(devin_settings)
+            - {"version", "permissions", "read_config_from", "hooks"}
+        )
+        if unsupported_keys:
+            mismatches.append(
+                f"unsupported Devin project config keys: {unsupported_keys}"
+            )
+        if "mcpServers" in devin_settings:
+            mismatches.append(
+                "legacy Devin mcpServers must live in .devin/mcp_config.json"
+            )
+
     if not mismatches:
         print(
             "[setup_mcp --check] ok: tracked portable MCP projections match "
@@ -1258,6 +1315,8 @@ def _check_tracked_portable_projections(
         )
         for relative in relative_paths:
             print(f"  ok {relative.as_posix()}")
+        print(f"  ok {devin_settings_relative.as_posix()}")
+        print(f"  ok {devin_relative.as_posix()}")
         return 0
 
     print("[setup_mcp --check] FAIL: tracked portable MCP projections are stale")
@@ -1294,6 +1353,8 @@ def _print_written_mcp_paths(
         for path in optional_paths:
             if path is not None:
                 print(f"Wrote {path}")
+        if devin_config_path is not None:
+            print(f"Wrote {devin_config_path.with_name(DEVIN_MCP_CONFIG_FILENAME)}")
     print(f"Wrote {qodo_path}")
 
 

@@ -339,7 +339,7 @@ current_config_is_ready() {
         fi
         check_workspace_mcp_config "${REPO_ROOT}/.qodo/mcp.json"
         check_workspace_mcp_config "${REPO_ROOT}/.zed/mcp.json"
-        check_workspace_mcp_config "${REPO_ROOT}/.devin/config.json"
+        check_workspace_mcp_config "${REPO_ROOT}/.devin/mcp_config.json"
         check_codex_config
     ) >/dev/null 2>&1
 }
@@ -420,7 +420,7 @@ if [[ -f "${REPO_ROOT}/.cursor/mcp.json" ]]; then
 fi
 check_workspace_mcp_config "${REPO_ROOT}/.qodo/mcp.json"
 check_workspace_mcp_config "${REPO_ROOT}/.zed/mcp.json"
-check_workspace_mcp_config "${REPO_ROOT}/.devin/config.json"
+check_workspace_mcp_config "${REPO_ROOT}/.devin/mcp_config.json"
 check_codex_config
 if [[ "${MODE}" == "ensure" || "${MODE}" == "refresh" ]]; then
     ensure_shared_plane

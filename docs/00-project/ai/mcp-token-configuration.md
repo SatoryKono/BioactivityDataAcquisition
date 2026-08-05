@@ -138,14 +138,14 @@ operator validation.
 ## Devin HTTP Header Projection
 
 The canonical MCP server inventory is shared with Devin, but HTTP authentication
-must use Devin-supported configuration. The generated `.devin/config.json`
-projects DeepWiki and Ref credentials as:
+must use Devin-supported configuration. The generated
+`.devin/mcp_config.json` projects DeepWiki and Ref credentials as:
 
 ```json
 "headers": {
-  "x-deepwiki-api-key": "$DEEPWIKI_API_KEY",
-  "x-deepwiki-organisation-id": "$DEEPWIKI_ORGANISATION_ID",
-  "x-ref-api-key": "$REF_TOOL_API_KEY"
+  "x-deepwiki-api-key": "${env:DEEPWIKI_API_KEY}",
+  "x-deepwiki-organisation-id": "${env:DEEPWIKI_ORGANISATION_ID}",
+  "x-ref-api-key": "${env:REF_TOOL_API_KEY}"
 }
 ```
 

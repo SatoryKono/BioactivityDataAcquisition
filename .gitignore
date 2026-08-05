@@ -279,6 +279,7 @@ log_test.txt
 !.codex/skills/*/agents/
 !.codex/skills/*/agents/openai.yaml
 .devin/config.local.json
+.devin/mcp_config.local.json
 .gemini/
 .jules/
 # .junie/ â€” JetBrains Junie runtime surface. Tracked as equal-peer runtime to
