@@ -47,15 +47,28 @@ def _is_unresolved_run_scope(run_id: str) -> bool:
     return token in _UNRESOLVED_RUN_ID_SENTINELS
 
 
-def _unresolved_pipeline_run_report_shell(
+# Canonical reconciliation key order for Run Explorer panel 3015 (REC-04).
+_RECONCILIATION_ROW_ORDER: tuple[str, ...] = (
+    "silver_accounted",
+    "silver_delta",
+    "silver_vs_bronze_status",
+    "gold_accounted",
+    "gold_delta",
+    "gold_vs_silver_status",
+)
+
+
+def _empty_pipeline_run_report_shell(
     *,
     run_id: str,
     pipeline: str,
+    status: str,
+    message: str,
 ) -> dict[str, object]:
     """Empty report shell for Grafana table root_selectors (no QUERY_ERROR)."""
     return {
-        "status": "unresolved_scope",
-        "message": "run_id not selected; pick a run from Browse Recent Runs",
+        "status": status,
+        "message": message,
         "run_id": run_id,
         "pipeline": pipeline,
         # Match pipeline_run_report_v1 keys used by Run Explorer panels.
@@ -65,6 +78,38 @@ def _unresolved_pipeline_run_report_shell(
         "artifacts": [],
         "schema_version": "pipeline_run_report_v1",
     }
+
+
+def _unresolved_pipeline_run_report_shell(
+    *,
+    run_id: str,
+    pipeline: str,
+) -> dict[str, object]:
+    """Empty shell when Grafana run_id is a no-selection sentinel."""
+    return _empty_pipeline_run_report_shell(
+        run_id=run_id,
+        pipeline=pipeline,
+        status="unresolved_scope",
+        message="run_id not selected; pick a run from Browse Recent Runs",
+    )
+
+
+def _not_found_pipeline_run_report_shell(
+    *,
+    run_id: str,
+    pipeline: str,
+) -> dict[str, object]:
+    """Empty shell for missing report artifacts (HTTP 200, not 404).
+
+    Infinity/Grafana treats HTTP 404 as QUERY_ERROR on table panels; operator
+    No data is preferred (#7650 / REC-02).
+    """
+    return _empty_pipeline_run_report_shell(
+        run_id=run_id,
+        pipeline=pipeline,
+        status="not_found",
+        message="pipeline run report not found",
+    )
 
 
 def _table_shape_pipeline_run_report(
@@ -82,8 +127,11 @@ def _table_shape_pipeline_run_report(
     if not isinstance(recon, dict):
         return payload
     shaped = dict(payload)
+    ordered_keys = [
+        key for key in _RECONCILIATION_ROW_ORDER if key in recon
+    ] + sorted(key for key in recon if key not in _RECONCILIATION_ROW_ORDER)
     shaped["reconciliation"] = [
-        {"parameter": str(key), "value": str(value)} for key, value in recon.items()
+        {"parameter": str(key), "value": str(recon[key])} for key in ordered_keys
     ]
     return shaped
 
@@ -192,15 +240,12 @@ async def handle_pipeline_run_report(
         )
         return
     if payload is None:
+        # Prefer HTTP 200 empty shell over 404 so Grafana tables show No data
+        # instead of QUERY_ERROR (#7650).
         await host._send_payload_response(
             writer,
-            404,
-            {
-                "status": "not_found",
-                "message": "pipeline run report not found",
-                "run_id": run_id,
-                "pipeline": pipeline,
-            },
+            200,
+            _not_found_pipeline_run_report_shell(run_id=run_id, pipeline=pipeline),
         )
         return
     await host._send_payload_response(

@@ -39,6 +39,7 @@ from pathlib import Path
 
 from bioetl.interfaces.http._health_server_observability_routing import (
     _is_unresolved_run_scope,
+    _not_found_pipeline_run_report_shell,
     _table_shape_pipeline_run_report,
     _unresolved_pipeline_run_report_shell,
 )
@@ -96,19 +97,38 @@ def test_table_shape_pipeline_run_report_reconciliation_rows() -> None:
         {
             "schema_version": "pipeline_run_report_v1",
             "reconciliation": {
-                "silver_accounted": 10,
-                "gold_delta": 0,
+                # Deliberately reverse key insertion order (REC-04 stable order).
                 "gold_vs_silver_status": "OK",
+                "gold_delta": 0,
+                "gold_accounted": 1000,
+                "silver_vs_bronze_status": "OK",
+                "silver_delta": 0,
+                "silver_accounted": 10,
             },
             "funnel": [{"stage": "bronze"}],
         }
     )
     assert shaped["reconciliation"] == [
         {"parameter": "silver_accounted", "value": "10"},
+        {"parameter": "silver_delta", "value": "0"},
+        {"parameter": "silver_vs_bronze_status", "value": "OK"},
+        {"parameter": "gold_accounted", "value": "1000"},
         {"parameter": "gold_delta", "value": "0"},
         {"parameter": "gold_vs_silver_status", "value": "OK"},
     ]
     assert shaped["funnel"] == [{"stage": "bronze"}]
+
+
+def test_not_found_pipeline_run_report_shell_for_grafana() -> None:
+    """Missing report must stay HTTP-200-friendly for Infinity tables (#7650)."""
+    shell = _not_found_pipeline_run_report_shell(
+        run_id="missing-run",
+        pipeline="chembl_assay",
+    )
+    assert shell["status"] == "not_found"
+    assert shell["reconciliation"] == []
+    assert shell["funnel"] == []
+    assert shell["artifacts"] == []
 
 
 def test_load_requires_explicit_owner_selector(tmp_path: Path) -> None:
