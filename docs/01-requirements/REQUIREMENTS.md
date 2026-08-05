@@ -2,7 +2,7 @@
 
 Version: 1.12
 Status: active
-Aligned with: RULES.md v6.1.4 ([source](../00-project/RULES.md); ARCH-CR-07 SSOT check 2026-07-28)
+Aligned with: RULES.md v6.1.7 ([source](../00-project/RULES.md); architecture stamp re-check 2026-08-05)
 Last verified: 2026-07-27
 
 ## Purpose and authority
@@ -112,7 +112,7 @@ increased as a documentation remedy.
 
 - v1.12.1 (2026-07-28): ADR coverage extended through ADR-052 (ARCH-REF-07).
 - v1.12 (2026-07-23): restored the requirements entry point and explicit
-  traceability to all 168 crosswalk rows, `RULES.md` v6.1.4, ADR-001…ADR-050,
+  traceability to all 168 crosswalk rows, `RULES.md` v6.1.7, ADR-001…ADR-055,
   runtime/configuration surfaces, and executable evidence.
 - v6.1 (historical compact catalog): listed selected ADRs but did not provide
   complete requirement-to-evidence traceability.
