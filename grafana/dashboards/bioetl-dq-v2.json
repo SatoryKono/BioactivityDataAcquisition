@@ -1244,7 +1244,7 @@
           },
           "targets": [
             {
-              "expr": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)))",
+              "expr": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range]))))",
               "legendFormat": "Validation Failures",
               "refId": "A"
             }
@@ -1475,7 +1475,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
+              "expr": "round(sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])))",
               "legendFormat": "Validation Failures",
               "refId": "A"
             }
@@ -1559,7 +1559,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range])) or vector(0))",
+              "expr": "round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range])))",
               "refId": "A"
             }
           ],
