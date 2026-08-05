@@ -209,6 +209,113 @@ def test_dq_duplicate_validation_fact_is_removed_and_grid_is_compacted() -> None
         assert panels[panel_id]["gridPos"] == geometry
 
 
+def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
+    """Alert count and alert severity remain independent visual channels."""
+    panel = _panel(_load("bioetl-overview-v2.json"), 9601)
+    overrides = panel["fieldConfig"]["overrides"]
+    by_name = {
+        override["matcher"]["options"]: override
+        for override in overrides
+        if override["matcher"]["id"] == "byName"
+    }
+
+    count_properties = {
+        prop["id"]: prop["value"] for prop in by_name["Value"]["properties"]
+    }
+    assert count_properties["displayName"] == "Active Alerts"
+    assert count_properties["custom.cellOptions"] == {
+        "type": "color-background",
+        "applyToRow": False,
+    }
+
+    severity_properties = {
+        prop["id"]: prop["value"] for prop in by_name["severity"]["properties"]
+    }
+    mappings = severity_properties["mappings"]
+    assert [mapping["options"]["result"]["text"] for mapping in mappings] == [
+        "CRITICAL",
+        "WARNING",
+    ]
+    assert not any(override["matcher"]["id"] == "byRegexp" for override in overrides)
+
+
+def test_iteration_2_runtime_valid_empty_frames_are_semantic_tables() -> None:
+    """Bounded Runtime fallbacks expose semantic labels instead of raw frames."""
+    dashboard = _load("bioetl-runtime.json")
+    expected = {
+        241: ("run_type", "No records in range"),
+        256: ("error_code", "No errors in range"),
+    }
+    for panel_id, (detail_field, detail_text) in expected.items():
+        panel = _panel(dashboard, panel_id)
+        assert panel["type"] == "table"
+        assert panel["targets"][0]["format"] == "table"
+        assert "label_replace(label_replace(vector(0)" in panel["targets"][0]["expr"]
+        organize = panel["transformations"][-1]
+        assert organize["id"] == "organize"
+        assert organize["options"]["excludeByName"]["Time"] is True
+        assert organize["options"]["renameByName"]["Value"] == "Count"
+
+        overrides = {
+            override["matcher"]["options"]: override
+            for override in panel["fieldConfig"]["overrides"]
+            if override["matcher"]["id"] == "byName"
+        }
+        assert (
+            overrides["stage"]["properties"][0]["value"][0]["options"]["none"]["text"]
+            == "VALID EMPTY"
+        )
+        assert (
+            overrides[detail_field]["properties"][0]["value"][0]["options"]["none"][
+                "text"
+            ]
+            == detail_text
+        )
+
+
+def test_iteration_2_empty_distributions_use_no_data_capable_tables() -> None:
+    """Empty categorical vectors remain visibly unknown without synthetic data."""
+    scoped_panels = (
+        ("bioetl-dq-v2.json", 118),
+        ("bioetl-dq-v2.json", 121),
+        ("bioetl-dq-v2.json", 122),
+        ("bioetl-dq-v2.json", 156),
+        ("bioetl-provider-health-v2.json", 107),
+    )
+    expected_exprs = {
+        (
+            "bioetl-dq-v2.json",
+            118,
+        ): 'sum by (pipeline) (max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type", stage="filtered_out"}[$__range]))',
+        (
+            "bioetl-dq-v2.json",
+            121,
+        ): 'topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])))',
+        (
+            "bioetl-dq-v2.json",
+            122,
+        ): 'topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])))',
+        (
+            "bioetl-dq-v2.json",
+            156,
+        ): 'sum by (pipeline) (max_over_time(bioetl_processed_records_gold_quarantined_current{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range]))',
+        (
+            "bioetl-provider-health-v2.json",
+            107,
+        ): '(100 * sum by (provider) (increase(bioetl_health_check_failures_total{provider=~"$provider"}[$__range])) / clamp_min(sum(increase(bioetl_health_check_failures_total{provider=~"$provider"}[$__range])), 1))',
+    }
+
+    for dashboard_name, panel_id in scoped_panels:
+        panel = _panel(_load(dashboard_name), panel_id)
+        assert panel["type"] == "table"
+        assert all(target["format"] == "table" for target in panel["targets"])
+        assert all(target["instant"] is True for target in panel["targets"])
+        assert panel["targets"][0]["expr"] == expected_exprs[(dashboard_name, panel_id)]
+        assert all("or vector(0)" not in target["expr"] for target in panel["targets"])
+        assert panel["transformations"][-1]["id"] == "organize"
+        assert "run_id" not in str(panel["targets"])
+
+
 def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
     canonical_titles = (
         "0. Trust",
@@ -341,7 +448,6 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
     # Workflow overview + Alerts/SLO retired; ID-card noValue contract remains.
 
 
-
 def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
     overview = _load("bioetl-overview-v2.json")
     assert _panel(overview, 215)["gridPos"]["y"] <= 7
@@ -390,7 +496,6 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     runtime = _load("bioetl-runtime.json")
     for row_id in (252, 253, 254):
         assert _panel(runtime, row_id).get("collapsed") is False
-
 
 
 def test_rf007_counts_and_dense_legends_are_bounded() -> None:
@@ -445,7 +550,15 @@ def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:
     exclude = organize.get("options", {}).get("excludeByName", {})
 
     assert len(suspects.get("targets", [])) == 3
-    for field in ("Time", "Time 1", "Time 2", "Value", "Value #A", "Value #B", "Value #C"):
+    for field in (
+        "Time",
+        "Time 1",
+        "Time 2",
+        "Value",
+        "Value #A",
+        "Value #B",
+        "Value #C",
+    ):
         assert exclude.get(field) is True
     assert not {
         value
@@ -472,8 +585,7 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert "ALERTS" in str(history.get("targets", [{}])[0].get("expr", ""))
     color_overrides = {
         override.get("matcher", {}).get("options"): {
-            prop.get("id"): prop.get("value")
-            for prop in override.get("properties", [])
+            prop.get("id"): prop.get("value") for prop in override.get("properties", [])
         }
         for override in history.get("fieldConfig", {}).get("overrides", [])
     }
@@ -497,9 +609,7 @@ def test_runtime_multi_query_tables_expose_semantic_fields_only() -> None:
         for transform in blocker_detail.get("transformations", [])
         if transform.get("id") == "organize"
     )
-    blocker_exclude = blocker_organize.get("options", {}).get(
-        "excludeByName", {}
-    )
+    blocker_exclude = blocker_organize.get("options", {}).get("excludeByName", {})
     for ref_id in {target.get("refId") for target in blocker_detail.get("targets", [])}:
         assert blocker_exclude.get(f"Value #{ref_id}") is True
     assert blocker_exclude.get("Value") is True
