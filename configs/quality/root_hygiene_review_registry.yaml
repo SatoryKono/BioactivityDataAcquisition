@@ -1,7 +1,7 @@
 version: 1.0.0
 status: active
 owner: Engineering / Architecture
-last_verified: "2026-08-04"
+last_verified: "2026-08-05"
 
 current_live_root_baseline:
   tracked_root_audit_status: pass
@@ -194,6 +194,14 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: remove_root_mcp_shell_log_or_route_retained_runtime_logs_to_reports_logs
+      - path: nul
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: delete_windows_device_name_root_artifact_do_not_track
+      - path: NUL
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: delete_windows_device_name_root_artifact_do_not_track
       - path: _tmp_panel_inventory.mjs
         current_live_state: absent_from_root_baseline
         canonical_path: null
