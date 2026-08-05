@@ -1086,7 +1086,7 @@
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
-      "next_step": "Retain only as the one-off RFA-00 Review First Action dashboard mutator for auditability; retire it after the dashboard migration is verified and the generated dashboard/contracts become the durable record."
+      "next_step": "Retain only as a one-off Review First Action (RFA-00) panel mutator for auditability; retire it after the RFA panel migration is verified and the shipped dashboard JSON becomes the durable record."
     },
     "scripts/ops/observability/grafana/run_grafana_render_matrix.py": {
       "owner": "@bioetl-platform",
@@ -1376,12 +1376,6 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as the bounded DUX7 live residual review runner for auditability; retire it after the review protocol is complete and the generated evidence becomes the durable record."
     },
-    "scripts/ops/observability/grafana/rfa_first_action_mutator.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a one-off Review First Action (RFA-00) panel mutator for auditability; retire it after the RFA panel migration is verified and the shipped dashboard JSON becomes the durable record."
-    },
     "scripts/ops/_build_arch_review_report.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -1417,6 +1411,18 @@
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the context-aware Neo4j audit connection helper while deployment and live-audit runbooks still reference src/tools/neo4j_audit.py; fold it into a broader canonical ops helper surface only if the audit workflow is consolidated."
+    },
+    "scripts/ops/observability/grafana/fix_gra_3c_i1.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded one-off utility for auditability; classify or retire after the owning workflow is verified (scripts/ops/observability/grafana/fix_gra_3c_i1.py)."
+    },
+    "scripts/ops/observability/grafana/fix_gra_3c_i1b.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded one-off utility for auditability; classify or retire after the owning workflow is verified (scripts/ops/observability/grafana/fix_gra_3c_i1b.py)."
     }
   }
 }

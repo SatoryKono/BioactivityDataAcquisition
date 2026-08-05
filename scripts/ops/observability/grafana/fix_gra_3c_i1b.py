@@ -56,7 +56,10 @@ def fix_value_align() -> None:
                 if override.get("matcher", {}).get("options") != "value":
                     continue
                 for prop in override.get("properties") or []:
-                    if prop.get("id") == "custom.align" and prop.get("value") != "right":
+                    if (
+                        prop.get("id") == "custom.align"
+                        and prop.get("value") != "right"
+                    ):
                         print(path.name, "align", prop.get("value"), "-> right")
                         prop["value"] = "right"
                         changed = True
