@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2443 |
-| Tracked doc-like files | 2443 |
+| Doc-like files | 2452 |
+| Tracked doc-like files | 2452 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2443 |
+| tracked | 2452 |
 
 ## Lifecycle Counts
 
@@ -26,7 +26,7 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 264 |
-| active_quality_baseline | 32 |
+| active_quality_baseline | 36 |
 | closeout_evidence | 64 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 1 |
@@ -41,7 +41,7 @@
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 33 |
-| working_report | 99 |
+| working_report | 104 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -61,7 +61,7 @@
 | Archived | 141 |
 | Canonical | 73 |
 | Generated | 861 |
-| Working | 506 |
+| Working | 515 |
 
 ## Surface Families
 
@@ -71,16 +71,16 @@
 | archive | 141 |
 | canonical | 73 |
 | generated | 861 |
-| working | 506 |
+| working | 515 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 94 |
+| archive-after-migration | 99 |
 | generate-automatically | 861 |
-| keep | 1172 |
+| keep | 1176 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -97,6 +97,11 @@
 | `reports/ai/memory-audit-20260804/FINAL-REPORT.md` | Working | 0 | archive-after-migration |
 | `reports/ai/memory-audit-20260804/execution-ledger.md` | Working | 0 | archive-after-migration |
 | `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260804/CONSOLIDATED_REPORT.md` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260804/iteration-3/dashboards-after/render-manifest.json` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260804/iteration-3/dashboards/render-manifest.json` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260804/iteration-3/reports/iteration-3-report.md` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260804/traceability.json` | Working | 0 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/CLOSEOUT.md` | Working | 0 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/grafana-live-snapshot.json` | Working | 0 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/live-validation-matrix.json` | Working | 0 | archive-after-migration |
@@ -162,11 +167,6 @@
 | `reports/quality/test-system-audit-2026-07-29-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/total-tech-debt-audit-main-2026-06-16.md` | Working | 0 | archive-after-migration |
 | `reports/quality/total-tech-debt-audit-main-current.md` | Working | 0 | archive-after-migration |
-| `reports/quality/vcr-fixture-pruning-report-20260804.json` | Working | 0 | archive-after-migration |
-| `reports/quality/zero-ref-supporting-scripts-review-20260804.json` | Working | 0 | archive-after-migration |
-| `reports/review/S1-domain.md` | Working | 0 | archive-after-migration |
-| `reports/review/S1.1-contracts-ports.md` | Working | 0 | archive-after-migration |
-| `reports/review/S1.2-logic-models.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
