@@ -54772,7 +54772,14 @@
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
+<<<<<<< HEAD
       "commit_policy": "tracked_quality_baseline",
+||||||| fbd4594e67
+      "commit_policy": null,
+      "declared_class": "repo-only",
+=======
+      "commit_policy": null,
+>>>>>>> feat/codex-native-7507
       "declared_class": "published",
       "declared_status": "active",
       "diagram_kind": null,
@@ -70023,15 +70030,27 @@
       "live_issue_mirror": 4,
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 33,
+<<<<<<< HEAD
       "working_report": 116
+||||||| fbd4594e67
+      "working_report": 94
+=======
+      "working_report": 95
+>>>>>>> feat/codex-native-7507
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 312,
+<<<<<<< HEAD
       "archive-after-migration": 111,
       "generate-automatically": 862,
 <<<<<<< HEAD
       "keep": 1184,
 ||||||| 2f71e06c68
+||||||| fbd4594e67
+      "archive-after-migration": 89,
+=======
+      "archive-after-migration": 90,
+>>>>>>> feat/codex-native-7507
       "generate-automatically": 861,
       "keep": 1183,
 =======
@@ -70065,7 +70084,13 @@
       "mkdocs.yml": 1,
       "plans": 2,
       "plugins": 4,
+<<<<<<< HEAD
       "reports": 260,
+||||||| fbd4594e67
+      "reports": 223,
+=======
+      "reports": 224,
+>>>>>>> feat/codex-native-7507
       "ru": 3,
       "security": 2
     },
@@ -70073,17 +70098,34 @@
       "Active": 856,
       "Archived": 147,
       "Canonical": 73,
+<<<<<<< HEAD
       "Generated": 862,
       "Working": 535
+||||||| fbd4594e67
+      "Generated": 861,
+      "Working": 500
+=======
+      "Generated": 861,
+      "Working": 501
+>>>>>>> feat/codex-native-7507
     },
     "by_surface_family": {
       "active": 856,
       "archive": 147,
       "canonical": 73,
+<<<<<<< HEAD
       "generated": 862,
       "working": 535
+||||||| fbd4594e67
+      "generated": 861,
+      "working": 500
+=======
+      "generated": 861,
+      "working": 501
+>>>>>>> feat/codex-native-7507
     },
     "by_tracking_state": {
+<<<<<<< HEAD
 <<<<<<< HEAD
       "ignored_local": 1,
 ||||||| 2f71e06c68
@@ -70091,6 +70133,11 @@
 =======
 >>>>>>> agent/governance-debt-closeout-7516-7521-final
       "tracked": 2472
+||||||| fbd4594e67
+      "tracked": 2437
+=======
+      "tracked": 2438
+>>>>>>> feat/codex-native-7507
     },
     "docs_reports_local_count": 32,
     "duplicate_group_count": 6,
@@ -70107,16 +70154,28 @@
     "scan_error_count": 0,
     "scan_errors": [],
 <<<<<<< HEAD
+<<<<<<< HEAD
     "total_doc_like": 2473,
     "total_doc_like_ignored_local": 1,
 ||||||| 2f71e06c68
     "total_doc_like": 2471,
+||||||| fbd4594e67
+    "total_doc_like": 2437,
+=======
+    "total_doc_like": 2438,
+>>>>>>> feat/codex-native-7507
     "total_doc_like_ignored_local": 0,
+<<<<<<< HEAD
     "total_doc_like_tracked": 2471
 =======
     "total_doc_like": 2472,
     "total_doc_like_ignored_local": 0,
 >>>>>>> agent/governance-debt-closeout-7516-7521-final
     "total_doc_like_tracked": 2472
+||||||| fbd4594e67
+    "total_doc_like_tracked": 2437
+=======
+    "total_doc_like_tracked": 2438
+>>>>>>> feat/codex-native-7507
   }
 }
