@@ -1087,8 +1087,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
-                  "mode": "basic"
+                  "type": "color-text"
                 }
               },
               {
@@ -1112,8 +1111,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text",
-                  "mode": "basic"
+                  "type": "color-text"
                 }
               },
               {
@@ -1978,8 +1976,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "applyToRow": true
+                      "type": "color-text"
                     }
                   }
                 ]
@@ -1997,8 +1994,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "applyToRow": true
+                      "type": "color-text"
                     }
                   }
                 ]
@@ -2169,8 +2165,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "applyToRow": true
+                      "type": "color-text"
                     }
                   }
                 ]
@@ -2188,8 +2183,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "applyToRow": true
+                      "type": "color-text"
                     }
                   }
                 ]
@@ -2360,8 +2354,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "applyToRow": true
+                      "type": "color-text"
                     }
                   }
                 ]
@@ -2379,8 +2372,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "applyToRow": true
+                      "type": "color-text"
                     }
                   }
                 ]
@@ -2551,8 +2543,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "applyToRow": true
+                      "type": "color-text"
                     }
                   }
                 ]
@@ -2570,8 +2561,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "applyToRow": true
+                      "type": "color-text"
                     }
                   }
                 ]
@@ -2742,8 +2732,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "applyToRow": true
+                      "type": "color-text"
                     }
                   }
                 ]
@@ -2761,8 +2750,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "applyToRow": true
+                      "type": "color-text"
                     }
                   }
                 ]
@@ -2933,8 +2921,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "applyToRow": true
+                      "type": "color-text"
                     }
                   }
                 ]
@@ -2952,8 +2939,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-background",
-                      "applyToRow": true
+                      "type": "color-text"
                     }
                   }
                 ]

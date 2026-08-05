@@ -485,6 +485,8 @@ scripts/docs/build/**/*.pyc
 !/docs/99-archive/refactoring_plans/**
 !/docs/99-archive/filters/
 !/docs/99-archive/filters/**
+!/docs/99-archive/guides/
+!/docs/99-archive/guides/**
 !/docs/99-archive/tools/
 !/docs/99-archive/tools/**
 !/docs/99-archive/reports/dashboard-ux-checks/
