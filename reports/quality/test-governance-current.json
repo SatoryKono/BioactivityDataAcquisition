@@ -1111,10 +1111,21 @@
     }
   },
   "assertless_total_candidates": 105,
-  "budget_violations": [],
-  "compatibility_examples": [],
-  "compatibility_files": [],
-  "compatibility_test_files": 0,
+  "budget_violations": [
+    {
+      "actual": 1,
+      "budget": "compatibility_test_file_max",
+      "expected_max": 0,
+      "metric": "compatibility_test_files"
+    },
+  ],
+  "compatibility_examples": [
+    "tests/unit/tools/test_pytest_option_compatibility.py"
+  ],
+  "compatibility_files": [
+    "tests/unit/tools/test_pytest_option_compatibility.py"
+  ],
+  "compatibility_test_files": 1,
   "critical_behavior_envelope_assertion_gap_count": 0,
   "critical_behavior_envelope_count": 6,
   "critical_behavior_envelopes": {
@@ -1287,12 +1298,7 @@
   "intentional_no_exception_contract": 89,
   "markerless_examples": [],
   "markerless_test_functions": 0,
-  "parse_errors": [
-    {
-      "error": "invalid decimal literal (tests/integration/test_grafana_dashboard_metric_semantics.py, line 1915)",
-      "path": "tests/integration/test_grafana_dashboard_metric_semantics.py"
-    }
-  ],
+  "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
@@ -2282,12 +2288,7 @@
     },
     "markerless_examples": [],
     "markerless_test_functions": 0,
-    "parse_errors": [
-      {
-        "error": "invalid decimal literal (tests/integration/test_grafana_dashboard_metric_semantics.py, line 1915)",
-        "path": "tests/integration/test_grafana_dashboard_metric_semantics.py"
-      }
-    ],
+    "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
