@@ -538,8 +538,32 @@ def test_run_explorer_reconciliation_fits_all_bounded_rows_without_scroll() -> N
     assert reconciliation.get("targets", [{}])[0].get("root_selector") == (
         "reconciliation"
     )
-    assert any(
-        property_ == {"id": "displayName", "value": "Value"}
-        for override in reconciliation.get("fieldConfig", {}).get("overrides", [])
-        for property_ in override.get("properties", [])
+    # REC-01: mixed numeric/status column is Value, not Count.
+    value_override = next(
+        (
+            override
+            for override in reconciliation.get("fieldConfig", {}).get("overrides", [])
+            if override.get("matcher", {}).get("options") == "value"
+        ),
+        None,
     )
+    assert value_override is not None
+    props = {
+        prop.get("id"): prop.get("value")
+        for prop in value_override.get("properties", [])
+    }
+    assert props.get("displayName") == "Value"
+    assert props.get("custom.cellOptions") == {"type": "color-text"}
+
+
+def test_run_explorer_selected_run_details_row_nests_forensics() -> None:
+    """REC-03: Selected Run Details must collapse nested forensic panels."""
+    explorer = _load("bioetl-run-explorer-v1.json")
+    row = next(panel for panel in explorer.get("panels", []) if panel.get("id") == 3099)
+    assert row.get("type") == "row"
+    assert row.get("collapsed") is True
+    nested_ids = {panel.get("id") for panel in row.get("panels") or []}
+    assert {3011, 3012, 3015, 3016, 3013, 3014, 3001} <= nested_ids
+    # Forensics must not remain as root siblings.
+    root_ids = {panel.get("id") for panel in explorer.get("panels") or []}
+    assert 3015 not in root_ids

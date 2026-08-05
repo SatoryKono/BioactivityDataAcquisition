@@ -127,9 +127,9 @@ def _table_shape_pipeline_run_report(
     if not isinstance(recon, dict):
         return payload
     shaped = dict(payload)
-    ordered_keys = [
-        key for key in _RECONCILIATION_ROW_ORDER if key in recon
-    ] + sorted(key for key in recon if key not in _RECONCILIATION_ROW_ORDER)
+    ordered_keys = [key for key in _RECONCILIATION_ROW_ORDER if key in recon] + sorted(
+        key for key in recon if key not in _RECONCILIATION_ROW_ORDER
+    )
     shaped["reconciliation"] = [
         {"parameter": str(key), "value": str(recon[key])} for key in ordered_keys
     ]
