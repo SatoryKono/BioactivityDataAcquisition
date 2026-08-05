@@ -93,20 +93,27 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert overview["run_id"].get("multi") is False
     assert overview["run_id"].get("includeAll") is False
     assert overview["run_id"].get("current", {}).get("value") == "-"
+    assert overview["run_id"].get("sort") == 0
 
     for dashboard_name in (
         "bioetl-control-plane-v1.json",
         "bioetl-runtime.json",
         "bioetl-dq-v2.json",
+        "bioetl-incident-v1.json",
+        "bioetl-run-explorer-v1.json",
     ):
         variables = _variables(dashboard_name)
         pipeline = variables["pipeline"]
         run_type = variables["run_type"]
+        run_id = variables["run_id"]
         assert pipeline.get("multi") is False
         assert pipeline.get("includeAll") is False
         assert pipeline.get("current", {}).get("value") == "unknown"
         assert run_type.get("includeAll") is True
-        assert run_type.get("current", {}).get("value") == "$__all"
+        # SEL-P0/P2: non-Overview native default is backfill (fallback policy).
+        assert run_type.get("current", {}).get("value") == "backfill"
+        assert run_id.get("sort") == 0
+        assert run_id.get("current", {}).get("value") == "-"
 
     provider = _variables("bioetl-provider-health-v2.json")
     assert provider["workflow"].get("multi") is False
@@ -116,10 +123,11 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert provider["pipeline"].get("includeAll") is False
     assert provider["pipeline"].get("current", {}).get("value") == "unknown"
     assert provider["run_type"].get("includeAll") is True
-    assert provider["run_type"].get("current", {}).get("value") == "$__all"
+    assert provider["run_type"].get("current", {}).get("value") == "backfill"
     assert provider["run_id"].get("multi") is False
     assert provider["run_id"].get("includeAll") is False
     assert provider["run_id"].get("current", {}).get("value") == "-"
+    assert provider["run_id"].get("sort") == 0
     assert provider["provider"].get("multi") is False
     assert provider["provider"].get("includeAll") is False
     assert provider["provider"].get("current", {}).get("value") == "unknown"

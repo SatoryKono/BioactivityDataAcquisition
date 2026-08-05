@@ -60,19 +60,18 @@ export const SimplePanel: React.FC<Props> = ({ options, replaceVariables }) => {
   );
 
   useEffect(() => {
-    const runId = current.runId;
-    if (!hasExactRunSelection(runId)) {
-      setPayload(null);
-      setError('');
-      setIsLoading(false);
-      return;
-    }
-
     const controller = new AbortController();
     setIsLoading(true);
     setError('');
 
-    fetch(buildSelectorContextUrl(mergedOptions.selectorContextPath, runId), {
+    const url = buildSelectorContextUrl(mergedOptions.selectorContextPath, {
+      runId: current.runId,
+      workflow: current.workflow,
+      pipeline: current.pipeline,
+      runType: current.runType,
+    });
+
+    fetch(url, {
       credentials: 'same-origin',
       signal: controller.signal,
     })
@@ -83,10 +82,18 @@ export const SimplePanel: React.FC<Props> = ({ options, replaceVariables }) => {
         const nextPayload = (await response.json()) as SelectorContextPayload;
         setPayload(nextPayload);
 
-        if (!mergedOptions.autoApplyExactRunContext) {
+        const nextUpdate = buildNextShellUpdate(current, nextPayload, {
+          applyRunId: hasExactRunSelection(current.runId),
+          allowLastRunDefaults: mergedOptions.autoApplyLastRunDefaults,
+        });
+
+        // Exact-run path also requires autoApplyExactRunContext.
+        if (
+          nextPayload.resolved_via === 'selected_run_id' &&
+          !mergedOptions.autoApplyExactRunContext
+        ) {
           return;
         }
-        const nextUpdate = buildNextShellUpdate(current, nextPayload);
         if (nextUpdate == null) {
           return;
         }
@@ -111,52 +118,51 @@ export const SimplePanel: React.FC<Props> = ({ options, replaceVariables }) => {
       });
 
     return () => controller.abort();
-  }, [current, mergedOptions.autoApplyExactRunContext, mergedOptions.selectorContextPath]);
+  }, [
+    current,
+    mergedOptions.autoApplyExactRunContext,
+    mergedOptions.autoApplyLastRunDefaults,
+    mergedOptions.selectorContextPath,
+  ]);
 
   const resolvedText = summarizeSyncState(current, payload);
+
+  const onManualApply = () => {
+    if (payload == null) {
+      return;
+    }
+    const nextUpdate = buildNextShellUpdate(current, payload, {
+      applyRunId: true,
+      allowLastRunDefaults: true,
+    });
+    if (nextUpdate == null) {
+      return;
+    }
+    appliedSignatureRef.current = JSON.stringify(nextUpdate);
+    locationService.partial(nextUpdate, true);
+  };
 
   return (
     <div className={styles.wrapper}>
       <Stack direction="column" gap={0.5}>
         <Text variant="bodySmall" color="secondary">
-          Visible shell
+          BioETL selector shell
         </Text>
-        <div className={styles.code}>
-          {`workflow=${current.workflow}\npipeline=${current.pipeline}\nrun_type=${current.runType}\nrun_id=${current.runId}`}
-        </div>
-      </Stack>
-
-      <Stack direction="column" gap={0.5}>
-        <Text variant="bodySmall" color="secondary">
-          Exact-run sync
-        </Text>
-        <Text variant="bodySmall">{resolvedText}</Text>
-        {isLoading && <Text variant="bodySmall">Loading selector-context…</Text>}
-        {error !== '' && <Text variant="bodySmall">Error: {error}</Text>}
-      </Stack>
-
-      {!mergedOptions.autoApplyExactRunContext && hasExactRunSelection(current.runId) && payload && (
-        <Button
-          size="sm"
-          onClick={() => {
-            const nextUpdate = buildNextShellUpdate(current, payload);
-            if (nextUpdate != null) {
-              locationService.partial(nextUpdate, true);
-            }
-          }}
-        >
-          Apply exact run context
-        </Button>
-      )}
-
-      {mergedOptions.showDebugDetails && payload && (
-        <Stack direction="column" gap={0.5}>
-          <Text variant="bodySmall" color="secondary">
-            selector-context payload
+        <Text variant="body">{isLoading ? 'Syncing…' : resolvedText}</Text>
+        {error ? (
+          <Text variant="bodySmall" color="error">
+            {error}
           </Text>
-          <div className={styles.code}>{JSON.stringify(payload, null, 2)}</div>
-        </Stack>
-      )}
+        ) : null}
+        {!mergedOptions.autoApplyExactRunContext || !mergedOptions.autoApplyLastRunDefaults ? (
+          <Button size="sm" variant="secondary" onClick={onManualApply} disabled={payload == null}>
+            Apply selector context
+          </Button>
+        ) : null}
+        {mergedOptions.showDebugDetails && payload != null ? (
+          <pre className={styles.code}>{JSON.stringify(payload, null, 2)}</pre>
+        ) : null}
+      </Stack>
     </div>
   );
 };

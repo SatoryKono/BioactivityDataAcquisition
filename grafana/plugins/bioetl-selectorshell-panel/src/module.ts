@@ -21,6 +21,13 @@ export const plugin = new PanelPlugin<SelectorShellOptions>(SimplePanel)
         defaultValue: defaultOptions.autoApplyExactRunContext,
       })
       .addBooleanSwitch({
+        path: 'autoApplyLastRunDefaults',
+        name: 'Auto-apply last-run defaults',
+        description:
+          'When enabled and the shell is unset (All/unknown/-), apply coherent last-run defaults from selector-context, with run_type fallback backfill.',
+        defaultValue: defaultOptions.autoApplyLastRunDefaults,
+      })
+      .addBooleanSwitch({
         path: 'showDebugDetails',
         name: 'Show debug payload',
         description: 'Render the raw selector-context payload for debugging.',

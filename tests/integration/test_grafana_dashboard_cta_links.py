@@ -970,7 +970,10 @@ def test_dashboard_links_do_not_default_run_type_to_unknown() -> None:
 
 
 def test_run_type_variables_default_to_all_not_unknown() -> None:
-    """Run Type dashboard variables must default to All."""
+    """Run Type defaults: Overview keeps All; other boards default to backfill (SEL-P0).
+
+    Missing context must never use run_type=unknown.
+    """
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         variables = dashboard.get("templating", {}).get("list", [])
@@ -980,12 +983,25 @@ def test_run_type_variables_default_to_all_not_unknown() -> None:
             if not isinstance(variable, dict) or variable.get("name") != "run_type":
                 continue
             current = variable.get("current", {})
-            assert current.get("text") == "All", (
-                f"{dashboard_path.name} run_type current text must be All"
+            text = current.get("text")
+            value = current.get("value")
+            assert text != "unknown" and value != "unknown", (
+                f"{dashboard_path.name} run_type must not default to unknown"
             )
-            assert current.get("value") == "$__all", (
-                f"{dashboard_path.name} run_type current value must be $__all"
-            )
+            if dashboard_path.name == "bioetl-overview-v2.json":
+                assert text == "All", (
+                    f"{dashboard_path.name} run_type current text must be All"
+                )
+                assert value == "$__all", (
+                    f"{dashboard_path.name} run_type current value must be $__all"
+                )
+            else:
+                assert text == "backfill", (
+                    f"{dashboard_path.name} run_type current text must be backfill"
+                )
+                assert value == "backfill", (
+                    f"{dashboard_path.name} run_type current value must be backfill"
+                )
 
 
 def test_pipeline_and_provider_variables_are_single_select_unknown_default() -> None:

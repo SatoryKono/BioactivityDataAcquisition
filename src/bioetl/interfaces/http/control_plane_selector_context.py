@@ -11,6 +11,7 @@ from bioetl.interfaces.http._control_plane_selector_payloads import (
     RUN_ID_NO_SELECTION,
     SELECTOR_CONTEXT_CONTRACT,
     UNKNOWN_SCOPE,
+    defaults_payload,
     exact_run_only_fallback_values,
     options_payload,
     resolved_via,
@@ -67,11 +68,13 @@ def build_selector_context_payload(
         selected_run_id=selected_run_id,
     )
     selected = latest_record(candidates)
+    option_records = candidates if candidates else records
     return {
         "contract": SELECTOR_CONTEXT_CONTRACT,
         "resolved_via": resolved_via(selected, selected_run_id),
         "selected": selected_payload(selected),
-        "options": options_payload(candidates if candidates else records),
+        "options": options_payload(option_records),
+        "defaults": defaults_payload(),
     }
 
 

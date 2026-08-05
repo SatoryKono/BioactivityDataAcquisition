@@ -315,12 +315,14 @@ def test_selector_payload_helpers_cover_empty_selected_and_ordering_edges() -> N
     assert selector_payloads.selected_payload(None) == {
         "workflow": "All",
         "pipeline": "unknown",
-        "run_type": "All",
+        "run_type": "backfill",
         "run_id": "-",
         "run_status": "unknown",
         "provider": "unknown",
         "entity": "unknown",
         "manifest_id": "",
+        "started_at": "",
+        "started_at_source": "none",
         "completed_at": "",
         "completed_at_source": "none",
         "terminal_event_type": "",
@@ -329,17 +331,22 @@ def test_selector_payload_helpers_cover_empty_selected_and_ordering_edges() -> N
     assert payload["workflow"] == "wf-a"
     assert payload["terminal_event_type"] == RUN_FINISHED_EVENT
     assert payload["completed_at"] == terminal.occurred_at.isoformat()
+    assert payload["started_at"] == first.created_at.isoformat()
+    assert payload["started_at_source"] == "manifest_created_at_fallback"
 
     options = selector_payloads.options_payload(
         (first_record, second_record, duplicate_record)
     )
     assert options["workflow"] == ["wf-a", "wf-b"]
+    # Newest started_at first (manifest suffix minutes 3, 2, 1).
     assert options["run_id"] == [
-        str(first.run_id),
-        str(second.run_id),
         str(newer_duplicate.run_id),
+        str(second.run_id),
+        str(first.run_id),
     ]
     assert options["run_status"] == ["unknown", "success"]
+    assert selector_payloads.defaults_payload()["run_type_fallback"] == "backfill"
+    assert selector_payloads.defaults_payload()["run_id_list_order"] == "started_at_desc"
 
     assert selector_payloads.exact_run_only_fallback_values(None) == []
     assert selector_payloads.exact_run_only_fallback_values("  ") == []
@@ -359,7 +366,7 @@ def test_selector_payload_helpers_cover_empty_selected_and_ordering_edges() -> N
     assert selector_payloads._manifest_ordered_values(
         (first_record, first_record, second_record),
         lambda record: record.run_id,
-    ) == [first_record.run_id, second_record.run_id]
+    ) == [second_record.run_id, first_record.run_id]
 
 
 def test_identity_payload_helpers_cover_validation_rows_and_summary_edges() -> None:

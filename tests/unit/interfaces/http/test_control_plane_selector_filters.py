@@ -50,6 +50,9 @@ def _record(
     run_status: str,
     completed_offset: int,
 ) -> SelectorRecord:
+    stamp = datetime(2026, 7, 7, 9, 0, tzinfo=UTC) + timedelta(
+        minutes=completed_offset
+    )
     return SelectorRecord(
         manifest=cast(Any, None),
         workflow=workflow_candidates[0],
@@ -60,8 +63,9 @@ def _record(
         provider=pipeline.split("_", 1)[0],
         entity=pipeline.split("_", 1)[-1],
         manifest_id=f"manifest-{suffix}",
-        completed_at=datetime(2026, 7, 7, 9, 0, tzinfo=UTC)
-        + timedelta(minutes=completed_offset),
+        started_at=stamp,
+        started_at_source="test",
+        completed_at=stamp,
         completed_at_source="test",
         run_status=run_status,
         terminal_event_type=None,
