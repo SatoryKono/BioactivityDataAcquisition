@@ -14,7 +14,7 @@ JSON is the source of truth.
   `run_type`, `run_id`.
 - Prometheus summary panels normalize the selected `pipeline` when the metric
   family stores workflow-prefixed pipeline labels.
-- `Quarantine Explorer` table/stat panels depend on the detached HTTP control
+- `BioETL Ops HTTP` table/stat panels depend on the detached HTTP control
   plane backend rather than Prometheus.
 
 ## Panel inventory
@@ -26,12 +26,12 @@ JSON is the source of truth.
 | 1000 | Navigate Dashboards | text | Static | Static navigation handoff into related dashboards and incident paths. | shared shell | No thresholds; operator routing only. |
 | 9400 | Inspect Scope & Evidence | text | Static | Replay-safety question plus plain-language definitions of current, selected-run, and unknown evidence. | shared shell | No thresholds; interpretive guidance only. |
 | 9401 | Monitor Replay Readiness | stat | Prometheus | Evidence-aware replay/resume verdict from `bioetl_control_plane_current_status_trusted`; gates replay blockers, checkpoint freshness/presence, and required telemetry. | shared shell | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. `INCOMPLETE` blocks replay/resume approval. |
-| 9402 | Review Run Summary | table | Quarantine Explorer | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | No numeric threshold; forensic handoff table. |
-| 9403 | Review Processed Records | table | Quarantine Explorer | Current processed-record evidence for the selected run scope. | shared shell | No numeric threshold; read-path evidence table. |
+| 9402 | Review Run Summary | table | BioETL Ops HTTP | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | No numeric threshold; forensic handoff table. |
+| 9403 | Review Processed Records | table | BioETL Ops HTTP | Current processed-record evidence for the selected run scope. | shared shell | No numeric threshold; read-path evidence table. |
 | 9410 | Explain Missing Identity Data | text | Static | Neutral visible fallback when the Control Plane identity table returns no visible rows. | shared shell | No thresholds; prevents blank first-screen identity space. |
 | 9411 | Explain Missing Record Counts | text | Static | Neutral visible fallback when the Control Plane accounting table returns no visible rows. | shared shell | No thresholds; distinguishes missing accounting evidence from zero records. |
 | 891 | Monitor Replay Safety | stat | Prometheus | Replay-safety blocker state for the selected scope. | shared shell | Severity/value mapping. |
-| 892 | Monitor Checkpoint Age | stat | Quarantine Explorer | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
+| 892 | Monitor Checkpoint Age | stat | BioETL Ops HTTP | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
 | 893 | Monitor Manifest & Ledger Failures | stat | Prometheus | Current manifest/ledger failure state from `bioetl_manifest_ledger_failures_15m`. | shared shell | Severity/value mapping. |
 | 907 | Monitor Telemetry Coverage | stat | Prometheus | Missing-control-plane-telemetry signal from `bioetl_control_plane_telemetry_missing_5m`. | shared shell | Value mapping distinguishes no-data vs telemetry-missing. |
 | 906 | Review Recovery Action | text | Static | Static operator next-step guidance for replay/control-plane incidents. | shared shell | Drilldown router into the replay-safety row below. |
@@ -97,13 +97,13 @@ JSON is the source of truth.
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 905 | Inspect Run Identity Evidence | row | Static | Collapsed identity-evidence and handoff section; the copyable identity anchor panels `9404` and `9407` remain above it on the first path. | shared shell | Groups remaining Quarantine Explorer evidence without replacing the first-screen replay/resume summary. |
-| 9404 | Review Identity Anchors | table | Quarantine Explorer | Compact forensic identity anchors for the selected scope; use after ID, Replay Safety, Checkpoint Freshness, Manifest/Ledger, and Telemetry summary cards. | shared shell | Forensic handoff table. |
-| 9405 | Review Identity Gaps | table | Quarantine Explorer | Compact missing identity surface inventory for the selected scope. | shared shell | Gap table; no numeric threshold. |
-| 9406 | Compare Checkpoint Anchors | table | Quarantine Explorer | Compact side-by-side checkpoint anchor comparison. | shared shell | Comparison table; operator drilldown surface. |
-| 9407 | Copy Identity Values | table | Quarantine Explorer | Compact copy-ready IDs/anchors for incident handoff. | shared shell | Handoff table only. |
-| 9408 | Review Required Replay Anchors | table | Quarantine Explorer | Compact priority replay/evidence anchors for first-line investigation. | shared shell | Incident handoff table. |
-| 9409 | Review Additional Forensic Anchors | table | Quarantine Explorer | Compact secondary forensic anchors for deeper analysis. | shared shell | Incident handoff table. |
+| 905 | Inspect Run Identity Evidence | row | Static | Collapsed identity-evidence and handoff section; the copyable identity anchor panels `9404` and `9407` remain above it on the first path. | shared shell | Groups remaining BioETL Ops HTTP evidence without replacing the first-screen replay/resume summary. |
+| 9404 | Review Identity Anchors | table | BioETL Ops HTTP | Compact forensic identity anchors for the selected scope; use after ID, Replay Safety, Checkpoint Freshness, Manifest/Ledger, and Telemetry summary cards. | shared shell | Forensic handoff table. |
+| 9405 | Review Identity Gaps | table | BioETL Ops HTTP | Compact missing identity surface inventory for the selected scope. | shared shell | Gap table; no numeric threshold. |
+| 9406 | Compare Checkpoint Anchors | table | BioETL Ops HTTP | Compact side-by-side checkpoint anchor comparison. | shared shell | Comparison table; operator drilldown surface. |
+| 9407 | Copy Identity Values | table | BioETL Ops HTTP | Compact copy-ready IDs/anchors for incident handoff. | shared shell | Handoff table only. |
+| 9408 | Review Required Replay Anchors | table | BioETL Ops HTTP | Compact priority replay/evidence anchors for first-line investigation. | shared shell | Incident handoff table. |
+| 9409 | Review Additional Forensic Anchors | table | BioETL Ops HTTP | Compact secondary forensic anchors for deeper analysis. | shared shell | Incident handoff table. |
 | 139 | Review Uncovered Replay Signals | text | Static | Static reminder of residual replay-safety signals to inspect after core blockers. | shared shell | No thresholds; review checklist only. |
 
 ### Run context (thin) -> Run Explorer hub
@@ -172,7 +172,7 @@ panels; HTTP-backed identity panels are documented in the inventory above.
   so replay blockers cannot render green when checkpoint evidence is missing or
   stale (`>=900s` WARN, `>=3600s` CRIT) or required telemetry is incomplete.
 - `Checkpoint Freshness Lag`, `ID`, `Processed Records`, and the identity
-  evidence tables are HTTP-backed `Quarantine Explorer` surfaces rather than
+  evidence tables are HTTP-backed `BioETL Ops HTTP` surfaces rather than
   Prometheus metric panels.
 - Thresholds and value mappings not spelled out above should be taken from the
   shipped panel JSON; this page documents the panel inventory, datasource

@@ -172,7 +172,7 @@ def test_run_prepared_request_async_uses_compat_runtime_path():
         pipeline="chembl_activity",
         options=options,
         health_server=False,
-        health_port=8081,
+        health_port=8000,
     )
     expected = RunResult(
         status=PipelineRunResult.SUCCESS,
@@ -195,7 +195,7 @@ def test_run_prepared_request_async_uses_compat_runtime_path():
         "chembl_activity",
         options,
         health_server_enabled=False,
-        health_port=8081,
+        health_port=8000,
         registry=registry,
     )
 
@@ -337,7 +337,7 @@ def test_run_command_with_cli_policy_wires_registry_and_cli_seams() -> None:
         vacuum_retention_days=None,
         debug=False,
         health_server=True,
-        health_port=8081,
+        health_port=8000,
         enable_tracing=True,
         use_cached_bronze=False,
         cached_bronze_date=None,
@@ -365,8 +365,8 @@ def test_run_command_with_cli_policy_wires_registry_and_cli_seams() -> None:
 
     mock_resolve_registry.assert_called_once_with(ctx)
     mock_ensure_backend.assert_called_once_with(
-        enabled=True,
-        port=8081,
+        enabled=False,
+        port=8000,
         required_probe_paths=("/ops/control-plane/ready",),
     )
     mock_disable_transient.assert_called_once()
@@ -414,15 +414,17 @@ def test_run_command_with_cli_policy_disables_transient_health_server_on_live_ba
         vacuum_retention_days=None,
         debug=False,
         health_server=True,
-        health_port=8081,
+        health_port=8000,
         enable_tracing=True,
         use_cached_bronze=False,
         cached_bronze_date=None,
         cached_bronze_path=None,
+        ensure_observability_backend=True,
+        observability_backend_port=8000,
     )
     backend_result = ObservabilityBackendEnsureResult(
         status="reused",
-        health_url="http://127.0.0.1:8081/health",
+        health_url="http://127.0.0.1:8000/health",
     )
 
     with (
@@ -447,13 +449,13 @@ def test_run_command_with_cli_policy_disables_transient_health_server_on_live_ba
 
     mock_ensure_backend.assert_called_once_with(
         enabled=True,
-        port=8081,
+        port=8000,
         required_probe_paths=("/ops/control-plane/ready",),
     )
     mock_disable_transient.assert_called_once_with(
         health_server_enabled=True,
-        health_port=8081,
-        observability_backend_port=8081,
+        health_port=8000,
+        observability_backend_port=8000,
         backend_result=backend_result,
     )
     kwargs = mock_run_command_flow.call_args.kwargs
@@ -500,7 +502,7 @@ def test_run_callback_delegates_to_input_builder_and_cli_policy() -> None:
             vacuum_retention_days=None,
             debug=False,
             health_server=True,
-            health_port=8081,
+            health_port=8000,
             enable_tracing=True,
             use_cached_bronze=False,
             cached_bronze_date=None,
@@ -530,7 +532,7 @@ def test_run_callback_delegates_to_input_builder_and_cli_policy() -> None:
             vacuum_retention_days=None,
             debug=False,
             health_server=True,
-            health_port=8081,
+            health_port=8000,
             enable_tracing=True,
             use_cached_bronze=False,
             cached_bronze_date=None,
@@ -569,7 +571,7 @@ def test_run_all_with_cli_policy_wires_registry_and_cli_seams() -> None:
         list_only=False,
         debug=False,
         health_server=True,
-        health_port=8081,
+        health_port=8000,
     )
 
     with (
@@ -622,11 +624,13 @@ def test_run_all_callback_ensures_observability_backend_with_catalog_probe() -> 
         list_only=False,
         debug=False,
         health_server=True,
-        health_port=8081,
+        health_port=8000,
+        ensure_observability_backend=True,
+        observability_backend_port=8000,
     )
     backend_result = ObservabilityBackendEnsureResult(
         status="reused",
-        health_url="http://127.0.0.1:8081/health",
+        health_url="http://127.0.0.1:8000/health",
     )
 
     with (
@@ -659,20 +663,20 @@ def test_run_all_callback_ensures_observability_backend_with_catalog_probe() -> 
             list_only=False,
             debug=False,
             health_server=True,
-            health_port=8081,
+            health_port=8000,
             ensure_observability_backend=True,
-            observability_backend_port=8081,
+            observability_backend_port=8000,
         )
 
     mock_ensure_backend.assert_called_once_with(
         enabled=True,
-        port=8081,
+        port=8000,
         required_probe_paths=("/ops/control-plane/ready",),
     )
     mock_disable_transient.assert_called_once_with(
         health_server_enabled=True,
-        health_port=8081,
-        observability_backend_port=8081,
+        health_port=8000,
+        observability_backend_port=8000,
         backend_result=backend_result,
     )
     mock_dispatch.assert_called_once()

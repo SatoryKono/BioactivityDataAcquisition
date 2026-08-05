@@ -142,7 +142,7 @@ def _mock_workflow_observability_backend(monkeypatch: Any) -> None:
         "ensure_observability_backend_started",
         lambda **_: ObservabilityBackendEnsureResult(
             status="started",
-            health_url="http://127.0.0.1:8081/health",
+            health_url="http://127.0.0.1:8000/health",
         ),
         raising=True,
     )

@@ -241,8 +241,8 @@ def with_observability_backend_options[**CommandParams, CommandReturn](
                 type=int,
                 default=default_backend_port,
                 help=(
-                    "Port for the detached Quarantine Explorer backend used by "
-                    "Grafana ID/detail panels."
+                    "Port for the detached BioETL Ops HTTP / health server "
+                    "backend used by Grafana ID/detail panels (default 8000)."
                 ),
                 show_default=True,
             )(func)
@@ -251,10 +251,11 @@ def with_observability_backend_options[**CommandParams, CommandReturn](
             click.option(
                 "--ensure-observability-backend/--no-ensure-observability-backend",
                 "ensure_observability_backend",
-                default=True,
+                default=False,
                 help=(
-                    "Auto-start a detached Quarantine Explorer backend for "
-                    "Grafana ID/detail panels."
+                    "Opt-in: auto-start a detached BioETL Ops HTTP backend "
+                    "(bioetl health server) for Grafana ID/detail panels. "
+                    "Default off."
                 ),
                 show_default=True,
             )(func)

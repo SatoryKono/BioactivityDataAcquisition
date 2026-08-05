@@ -75,7 +75,10 @@ def quarantine() -> None:
 @typed_click_option(
     "--host",
     default="0.0.0.0",
-    help="Host to bind the Quarantine Explorer backend to.",
+    help=(
+        "Host to bind the legacy quarantine serve backend to. "
+        "Prefer `bioetl health server` on :8000 for Grafana Ops HTTP."
+    ),
     show_default=True,
 )
 @typed_click_option(
@@ -83,7 +86,10 @@ def quarantine() -> None:
     "-p",
     default=DEFAULT_QUARANTINE_SERVER_PORT,
     type=int,
-    help="Port for the long-lived Quarantine Explorer backend.",
+    help=(
+        "Port for the legacy quarantine serve backend (not the shipping "
+        "Grafana Ops HTTP surface; use health server :8000)."
+    ),
     show_default=True,
 )
 @typed_click_option(
@@ -95,7 +101,11 @@ def quarantine() -> None:
     ),
 )
 def quarantine_serve(host: str, port: int, data_root: Path | None) -> None:
-    """Start the backend used by Grafana Silver structural Reject Explorer."""
+    """Legacy long-lived HTTP helper (retired Grafana Explorer path).
+
+    Shipping Grafana identity panels use ``bioetl health server`` / BioETL Ops
+    HTTP on :8000. Domain quarantine inspect/replay/purge remain supported.
+    """
     if data_root is not None and not data_root.is_absolute():
         raise click.BadParameter(
             "must be an absolute directory path",
