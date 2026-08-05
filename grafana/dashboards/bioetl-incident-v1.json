@@ -306,8 +306,12 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "transparent",
                 "value": null
+              },
+              {
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "orange",
@@ -344,6 +348,19 @@
               "targetBlank": false,
               "includeVars": false
             }
+          ],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "—",
+                  "color": "transparent",
+                  "index": 0
+                }
+              }
+            }
           ]
         },
         "overrides": [
@@ -372,8 +389,12 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green",
+                      "color": "transparent",
                       "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
                     },
                     {
                       "color": "orange",
@@ -705,8 +726,12 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "transparent",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "orange",
@@ -724,6 +749,19 @@
                   "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}&var-run_id=$run_id",
                   "targetBlank": false,
                   "includeVars": false
+                }
+              ],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "—",
+                      "color": "transparent",
+                      "index": 0
+                    }
+                  }
                 }
               ]
             },
@@ -753,8 +791,12 @@
                       "mode": "absolute",
                       "steps": [
                         {
-                          "color": "green",
+                          "color": "transparent",
                           "value": null
+                        },
+                        {
+                          "color": "green",
+                          "value": 0
                         },
                         {
                           "color": "orange",
@@ -823,8 +865,12 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "transparent",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "orange",
@@ -842,6 +888,19 @@
                   "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=$pipeline&var-pipeline_context=$pipeline&var-run_type=$run_type&var-provider=${__data.fields.provider:percentencode}&var-run_id=$run_id",
                   "targetBlank": false,
                   "includeVars": false
+                }
+              ],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "—",
+                      "color": "transparent",
+                      "index": 0
+                    }
+                  }
                 }
               ]
             },
@@ -871,8 +930,12 @@
                       "mode": "absolute",
                       "steps": [
                         {
-                          "color": "green",
+                          "color": "transparent",
                           "value": null
+                        },
+                        {
+                          "color": "green",
+                          "value": 0
                         },
                         {
                           "color": "orange",
@@ -941,8 +1004,12 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "transparent",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "orange",
@@ -960,6 +1027,19 @@
                   "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}&var-run_id=$run_id",
                   "targetBlank": false,
                   "includeVars": false
+                }
+              ],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "—",
+                      "color": "transparent",
+                      "index": 0
+                    }
+                  }
                 }
               ]
             },
@@ -989,8 +1069,12 @@
                       "mode": "absolute",
                       "steps": [
                         {
-                          "color": "green",
+                          "color": "transparent",
                           "value": null
+                        },
+                        {
+                          "color": "green",
+                          "value": 0
                         },
                         {
                           "color": "orange",
