@@ -576,12 +576,21 @@ def _assert_provider_health_provider_var(
         f"Dashboard {dashboard_path.name} must define 'provider' variable"
     )
     _assert_prom_datasource_object(dashboard_path, "provider", provider_var)
-    assert "bioetl_provider_health_check_provider_universe_15m" in _query_text(
-        provider_var
-    ), (
-        f"Dashboard {dashboard_path.name} 'provider' query must use "
-        "the canonical provider-universe recording rule"
+    query_text = _query_text(provider_var)
+    assert "query_result(" in query_text, (
+        f"Dashboard {dashboard_path.name} 'provider' query must derive from "
+        "pipeline/workflow via query_result(label_replace(...))"
     )
+    assert "${pipeline}" in query_text and "${workflow}" in query_text, (
+        f"Dashboard {dashboard_path.name} 'provider' derivation must read "
+        "pipeline and workflow template vars"
+    )
+    assert provider_var.get("current", {}).get("value") == "unknown", (
+        f"Dashboard {dashboard_path.name} 'provider' default must be fail-closed "
+        "unknown when pipeline/workflow are unset"
+    )
+    assert provider_var.get("includeAll") is False
+    assert provider_var.get("multi") is False
 
 
 def _assert_provider_health_adapter_var(

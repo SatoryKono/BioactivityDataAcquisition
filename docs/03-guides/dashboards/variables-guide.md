@@ -58,6 +58,13 @@ ______________________________________________________________________
   PromQL must not add a `run_id` label. The 12h UNKNOWN-vs-OK contract uses
   provider telemetry: `bioetl_provider_current_status` plus
   `bioetl_provider_range_operational_ok` in the active Grafana range.
+- `$stage` defaults to **All** on Pipeline Diagnostics (`bioetl-runtime`) and
+  Data Quality (`bioetl-dq-v2`). Cross-dashboard handoffs pass
+  `var-stage=$__all` instead of forcing `unknown`.
+- `$provider` on Provider Health and Incident Workspace is **derived**: first
+  name segment of `$pipeline` when pipeline is set (same heuristic as runtime
+  `$provider_hint`); else first segment of `$workflow` when workflow is set;
+  else fail-closed `unknown` when neither is set.
 
 ## UID → Variables (inventory parity reference)
 
