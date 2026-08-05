@@ -11,6 +11,7 @@ from bioetl.domain.control_plane.run_ledger import (
     RUN_FAILED_EVENT,
     RUN_FINISHED_EVENT,
     RUN_SHUTDOWN_EVENT,
+    RUN_STARTED_EVENT,
 )
 from bioetl.domain.types import RunID
 
@@ -37,6 +38,8 @@ class SelectorRecord:
     provider: str
     entity: str
     manifest_id: str
+    started_at: datetime
+    started_at_source: str
     completed_at: datetime
     completed_at_source: str
     run_status: str
@@ -143,8 +146,10 @@ def _build_selector_record(
     ledger_port: RunLedgerLookup | None,
     workflow_aliases: WorkflowAliasMap | None,
 ) -> SelectorRecord:
+    started_entry = _latest_started_entry(manifest.run_id, ledger_port)
     terminal_entry = _latest_terminal_entry(manifest.run_id, ledger_port)
     workflow_candidates = _workflow_candidates(manifest, workflow_aliases)
+    started_at = started_entry.occurred_at if started_entry else manifest.created_at
     completed_at = terminal_entry.occurred_at if terminal_entry else manifest.created_at
     return SelectorRecord(
         manifest=manifest,
@@ -156,6 +161,10 @@ def _build_selector_record(
         provider=manifest.provider,
         entity=manifest.entity,
         manifest_id=manifest.manifest_id,
+        started_at=started_at,
+        started_at_source=(
+            "run_ledger_started_event" if started_entry else "manifest_created_at_fallback"
+        ),
         completed_at=completed_at,
         completed_at_source=(
             "run_ledger_terminal_event"
@@ -167,6 +176,22 @@ def _build_selector_record(
         else "unknown",
         terminal_event_type=terminal_entry.event_type if terminal_entry else None,
     )
+
+
+def _latest_started_entry(
+    run_id: RunID,
+    ledger_port: RunLedgerLookup | None,
+) -> RunLedgerEntry | None:
+    if ledger_port is None:
+        return None
+    started_entries = [
+        entry
+        for entry in ledger_port.list_entries_by_run_id(run_id)
+        if entry.event_type == RUN_STARTED_EVENT
+    ]
+    if not started_entries:
+        return None
+    return min(started_entries, key=lambda entry: (entry.occurred_at, entry.entry_id))
 
 
 def _latest_terminal_entry(

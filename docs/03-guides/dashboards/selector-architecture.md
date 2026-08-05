@@ -298,12 +298,20 @@ Not allowed:
 - mapping primary `run_id` into Silver `quarantine_run_id` on generic links
 
 Native Grafana query variables can consume resolver option lists, but they
-cannot safely auto-write sibling visible selectors. Full bidirectional
-auto-selection requires a custom selector shell/plugin or another UI surface
-that calls `/ops/control-plane/selector-context` and writes all variables as one
-transaction. The repo now includes an optional local pilot panel plugin at
-`grafana/plugins/bioetl-selectorshell-panel` for that purpose, but primary
-dashboard JSON does not reference it by default yet.
+cannot safely auto-write sibling visible selectors. Full last-run defaults and
+bidirectional auto-selection require a custom selector shell/plugin that calls
+`/ops/control-plane/selector-context` and writes variables as one transaction.
+The repo ships that plugin at `grafana/plugins/bioetl-selectorshell-panel`
+(`autoApplyLastRunDefaults` + exact-run sync). Primary dashboard JSON does not
+embed the unsigned panel by default; local Grafana must allow the plugin id.
+
+**Default selection policy (SEL-P0 / #7550):**
+
+- Overview fleet landing: `All/All/All/-`
+- Non-Overview native `run_type` default: `backfill`
+- `run_id` list order: `started_at` desc with `-` first; Grafana `sort=0`
+- URL `var-*` handoffs win over auto-default
+- Prom Status stays pipeline/run_type scoped; exact `run_id` is HTTP identity only
 
 ## Future execution selector model
 

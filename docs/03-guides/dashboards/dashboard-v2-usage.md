@@ -113,15 +113,21 @@ mention `6. Alerts & SLO` / Explore Logs / Explore Traces as removed surfaces.
   own the shared `$workflow` / `$run_id` shell
 - `bioetl-alerts-slo`: `$workflow`, `$pipeline`, `$run_type`
 - `bioetl-overview-v2` intentionally ships with `Workflow=All`,
-  `Pipeline=All`, `Run Type=All`, and `Run ID=-` как default entry scope.
-- Primary dashboards `0..5` now expose the shared context shell
+  `Pipeline=All`, `Run Type=All`, and `Run ID=-` as fleet L0 entry scope (SEL-P0 O2).
+- Non-Overview primary boards default `Run Type=backfill` (majority operator case)
+  while keeping Include All; `pipeline` remains fail-closed `unknown` until set.
+- Primary dashboards `0..6` expose the shared context shell
   `$workflow/$pipeline/$run_type/$run_id`. `$workflow` is context/evidence
   unless the panel explicitly documents truthful intersection semantics.
 - `$run_id` options on primary dashboards are loaded from
   `/ops/control-plane/filter-options` using the visible
-  `$workflow/$pipeline/$run_type` context. `/ops/control-plane/selector-context`
-  can resolve one coherent local selector tuple for selector-shell clients, but
-  native Grafana variables do not auto-write sibling selector values.
+  `$workflow/$pipeline/$run_type` context and are ordered by **start time
+  descending** (Grafana `sort=0`). `/ops/control-plane/selector-context`
+  resolves one coherent local selector tuple (plus `defaults` policy) for
+  selector-shell clients. Native Grafana variables do not auto-write sibling
+  selector values; optional local plugin
+  `grafana/plugins/bioetl-selectorshell-panel` applies last-run defaults and
+  exact-run sibling sync when enabled.
 - `bioetl-workflow-overview` uses additional hidden
   `$workflow_context/$pipeline_context_exact/$run_type_context_exact/$provider_context_exact`
   variables backed by `/ops/control-plane/filter-options?exact_run_only=1` so

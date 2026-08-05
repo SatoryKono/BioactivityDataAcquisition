@@ -1,30 +1,30 @@
 # BioETL Selector Shell Panel
 
-Local Grafana panel plugin for one specific BioETL gap:
+Local Grafana panel plugin for operator context shell synchronization:
 
-- a user selects exact `Run ID`
-- the plugin resolves authoritative `workflow/pipeline/run_type` from
-  `/ops/control-plane/selector-context`
-- the plugin writes those values back into visible dashboard variables via
-  `locationService.partial({ 'var-*': ... }, true)`
+1. **Exact Run ID** → resolve authoritative `workflow/pipeline/run_type` from
+   `/ops/control-plane/selector-context` and write sibling variables.
+2. **Last-run defaults** → when the shell is unset (`workflow=All`,
+   `pipeline=unknown|All`, `run_id=-`), resolve the latest catalog run and apply
+   a coherent tuple (with `run_type` fallback `backfill` when the catalog is empty).
 
-This is the supported Grafana mechanism for plugin-side variable updates.
+Writes use `locationService.partial({ 'var-*': ... }, true)`.
 
 ## Scope
 
-The plugin is intentionally narrow:
-
-- it does not replace the shipped native selector shell
-- it does not change Prometheus query semantics
-- it exists to synchronize visible dashboard selectors when exact `run_id`
-  identity is selected
+- Does not replace native Grafana dropdowns.
+- Does not change Prometheus query semantics (`run_id` stays HTTP identity only).
+- Requires local unsigned plugin loading for activation.
 
 ## Current rollout status
 
-The plugin is implemented as a local repo surface and can be built/tested
-independently. It is **not yet wired into shipped dashboard JSON** by default,
-because production activation also requires local Grafana plugin loading for
-unsigned plugins.
+Plugin logic ships in-repo (`autoApplyExactRunContext` +
+`autoApplyLastRunDefaults`). Shipped dashboard JSON does **not** embed the panel
+by default so provisioned Grafana without the unsigned plugin does not show a
+missing-panel error. Local operators enable the plugin and optionally add a
+small panel (or use Explore/manual apply) for full cascade UX.
+
+Related issues: #7550 (epic), #7555 (plugin phase).
 
 ## Local build
 
@@ -36,28 +36,29 @@ npm run test:ci
 npm run build
 ```
 
-## Expected placement
+## Grafana loading
 
-Grafana scans plugin directories for folders containing `plugin.json`. If the
-folder contains a `dist/` subdirectory, Grafana mounts `dist/` instead of the
-source folder.
-
-For local BioETL environments, point Grafana plugin loading at this plugin
-folder or copy its built `dist/` output into the local Grafana plugin
-directory, then allow the unsigned plugin id:
+Point Grafana plugins path at this folder (or its `dist/`) and allow:
 
 - `bioetl-selectorshell-panel`
 
-## Panel behavior
+Example env:
 
-- If `run_id = "-"`, the panel stays idle.
-- If exact `run_id` is selected, it fetches
-  `/ops/control-plane/selector-context?run_id=<id>`.
-- If the resolved `workflow/pipeline/run_type` differs from the visible shell,
-  it updates `var-workflow`, `var-pipeline`, and `var-run_type` in place.
-- If auto-apply is disabled, the panel renders an explicit apply button.
+```bash
+GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=bioetl-selectorshell-panel
+```
+
+## Behavior
+
+| Condition | Action |
+| --- | --- |
+| Exact `run_id` selected | Fetch `?run_id=…`; write workflow/pipeline/run_type |
+| Shell unset (`All`/`unknown`/`-`) | Fetch last-run context; write full shell including `run_id` |
+| Catalog empty | Prefer `run_type=backfill` fallback |
+| URL already carries intentional vars | Operator should open with set pipeline/run_id; panel only auto-fills when shell looks unset |
 
 ## References
 
-- Grafana plugin basics: https://grafana.com/docs/grafana/latest/developers/plugins/create-a-grafana-plugin/develop-a-plugin/build-a-panel-plugin/
-- Grafana variable updates from plugins: https://grafana.com/developers/plugin-tools/how-to-guides/data-source-plugins/add-support-for-variables
+- Backend: `/ops/control-plane/selector-context`, `/ops/control-plane/filter-options`
+- Contract: `docs/03-guides/dashboards/contracts/selector-contracts.yaml`
+- Grafana plugin variable updates: https://grafana.com/developers/plugin-tools/how-to-guides/data-source-plugins/add-support-for-variables

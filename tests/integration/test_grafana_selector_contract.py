@@ -472,12 +472,33 @@ def test_control_plane_selector_context_contract_is_local_only() -> None:
         resolver.get("filter_options_endpoint") == "/ops/control-plane/filter-options"
     )
     assert resolver.get("local_only") is True
+    defaults = resolver.get("defaults_payload")
+    assert isinstance(defaults, dict)
+    assert defaults.get("policy") == "last_run_truthful"
+    assert defaults.get("run_type_fallback") == "backfill"
+    assert defaults.get("run_id_list_order") == "started_at_desc"
+    run_id_order = resolver.get("run_id_option_order")
+    assert isinstance(run_id_order, dict)
+    assert run_id_order.get("key") == "started_at_desc"
+    assert run_id_order.get("grafana_variable_sort") == 0
 
     forbidden = set(resolver.get("forbidden", []))
     assert "prometheus_run_id_labels" in forbidden
     assert "blanket_includevars_run_id_handoff" in forbidden
     assert "run_id_handoff_to_forensic_explorer" in forbidden
     assert "cyclic_grafana_variable_dependencies" in forbidden
+
+
+def test_default_selection_policy_is_normative() -> None:
+    policy = _SELECTOR_CONTRACT.get("default_selection_policy")
+    assert isinstance(policy, dict)
+    assert policy.get("status") == "shipped"
+    decisions = policy.get("decisions")
+    assert isinstance(decisions, dict)
+    assert decisions.get("overview_landing") == "fleet_all"
+    assert decisions.get("run_type_native_default_non_overview") == "backfill"
+    assert decisions.get("run_id_list_order") == "started_at_desc"
+    assert decisions.get("url_var_precedence") == "url_wins_over_auto_default"
 
 
 def test_current_dashboards_do_not_ship_future_execution_selectors() -> None:

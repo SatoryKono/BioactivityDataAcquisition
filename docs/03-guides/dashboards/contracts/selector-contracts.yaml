@@ -615,6 +615,42 @@ hidden_handoff_contract:
     - Hidden vars preserve navigation or detail-only scope and do not automatically
       become visible top-level selectors.
     - Visible selectors MUST NOT be propagated implicitly with blanket includeVars semantics.
+default_selection_policy:
+  status: shipped
+  epic: "#7550"
+  decisions:
+    overview_landing: fleet_all
+    overview_landing_detail:
+      "O2: bioetl-overview-v2 keeps native defaults workflow=All, pipeline=All,
+
+      run_type=All, run_id=- for fleet L0 landing. Last-run auto-defaults are
+
+      for boards 0,2–6 via selector-shell plugin / operator action, not Overview
+
+      native JSON defaults.
+
+      "
+    run_type_policy: last_run_truthful_with_backfill_fallback
+    run_type_native_default_non_overview: backfill
+    run_type_multi_include_all: retained
+    run_id_default_native: dash_no_exact_run
+    run_id_default_via_shell_plugin: exact_last_catalog_run
+    run_id_list_order: started_at_desc
+    latest_resolution_key: terminal_completed_at_for_selected_tuple
+    list_order_key: started_at_or_manifest_created_at
+    url_var_precedence: url_wins_over_auto_default
+    promql_applicability:
+      "Status/diagnostic PromQL remains pipeline/run_type scoped. Exact run_id
+
+      affects only HTTP identity surfaces (ID, Processed Records, control-plane
+
+      evidence). run_id MUST NOT appear as a Prometheus label.
+
+      "
+  cascade:
+    option_lists: filter_options_scope_filtered
+    sibling_value_rewrite: selector_shell_plugin_only
+    exact_run_id_locks_shell: true
 control_plane_selector_context_contract:
   status: shipped
   endpoint: /ops/control-plane/selector-context
@@ -623,14 +659,27 @@ control_plane_selector_context_contract:
   source_priority:
     - run_manifest_catalog
     - run_ledger_terminal_events
+    - run_ledger_started_events
   visible_selector_resolution:
     selected_run_id: exact_run_identity_wins
     workflow_pipeline_run_type: latest_terminal_run_for_scope
+  defaults_payload:
+    policy: last_run_truthful
+    run_type_fallback: backfill
+    overview_landing: fleet_all
+    run_id_list_order: started_at_desc
+    url_var_precedence: url_wins
+  run_id_option_order:
+    key: started_at_desc
+    sentinel_first: "-"
+    grafana_variable_sort: 0
   fallback_rules:
     - run_id_default_dash_means_no_exact_run_selected
     - terminal_time_uses_run_ledger_event_when_present
-    - manifest_created_at_is_fallback_only
+    - started_at_uses_run_ledger_started_event_when_present
+    - manifest_created_at_is_fallback_for_started_and_completed
     - filter_options_run_id_includes_dash_default
+    - empty_catalog_run_type_fallback_backfill
   forbidden:
     - prometheus_run_id_labels
     - blanket_includevars_run_id_handoff
@@ -651,19 +700,25 @@ control_plane_selector_context_contract:
 
     downstream dashboard links without rewriting the visible selector shell.
 
-    The repo also ships an optional local pilot panel plugin at
+    The repo ships an optional local panel plugin at
 
-    `grafana/plugins/bioetl-selectorshell-panel` for same-dashboard visible
+    `grafana/plugins/bioetl-selectorshell-panel` for same-dashboard last-run
 
-    selector synchronization, but shipped dashboard JSON does not depend on
+    defaults and exact-run sibling synchronization. Shipped dashboard JSON does
 
-    that unsigned plugin yet.
+    not embed the unsigned plugin by default (local enable required).
 
     Primary-dashboard links preserve selected `run_id` only as HTTP identity
 
     context. Current-status PromQL remains selected-scope, not exact run-id
 
     scoped.
+
+    filter-options dimension=run_id returns items ordered by started_at
+
+    descending with `-` first; Grafana variables MUST set sort=0 so backend
+
+    order is preserved.
 
     "
 run_catalog_future_contract:

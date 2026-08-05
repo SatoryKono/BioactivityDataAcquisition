@@ -43,15 +43,22 @@ Machine-readable selector SSOT:
   available.
 - Pipeline-scoped operator dashboards use single-select `$pipeline`, except
   Overview where intentional landing default = `All`.
-- `$run_type` always uses include-all fallback. Missing context is represented as
-  `All`, not `unknown`.
+- `$run_type` always uses include-all fallback. Overview landing default is
+  `All`. Non-Overview primary boards default to `backfill` (SEL-P0 fallback);
+  missing context must never be represented as `unknown`.
 - `$run_id` in primary operator dashboards is HTTP-backed control-plane
   identity context. It feeds the shared `ID` panel, is preserved between
   primary dashboards that expose `$run_id`, and MUST NOT leak into Prometheus
   label filtering or Silver forensic selectors.
   Its option list is constrained by the current `workflow`, `pipeline`, and
-  `run_type` shell context through `/ops/control-plane/filter-options`; this
-  does not make current-status PromQL exact-run scoped.
+  `run_type` shell context through `/ops/control-plane/filter-options` and is
+  ordered by **start time descending** (Grafana variable `sort=0` so backend
+  order is preserved). This does not make current-status PromQL exact-run scoped.
+- Last-run coherent defaults (workflow/pipeline/run_type/run_id as one tuple)
+  are applied by the optional local plugin
+  `grafana/plugins/bioetl-selectorshell-panel` via
+  `/ops/control-plane/selector-context`; URL `var-*` handoffs win over
+  auto-default.
 - Exact forensic identifiers (`$quarantine_run_id`, `$payload_hash`) in
   `bioetl-silver-reject-explorer` remain explorer-only narrowing filters.
 - Hidden context variables are allowed only when they preserve return-path,
@@ -65,8 +72,8 @@ Machine-readable selector SSOT:
 | --- | --- | --- | --- | --- | --- |
 | `$workflow` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, `bioetl-workflow-overview`, `bioetl-alerts-slo` | Prometheus `label_values(bioetl_workflow_universe, workflow)` for query-backed dashboards; Alerts uses a textbox | Single-select with Include All | `All` / `$__all` | Context/evidence selector in the shared operator shell. The universe includes terminal `bioetl_workflow_runs_total` outcomes and started workflows from `bioetl_workflow_expected`, so a launched workflow can appear before terminal outcome metrics are written. Silver Reject Explorer intentionally does not own this selector. |
 | `$pipeline` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, `bioetl-workflow-overview`, `bioetl-silver-reject-explorer`, `bioetl-alerts-slo` | Prometheus label query from each dashboard's bounded universe: Overview/DQ/Provider/Workflow/Alerts use `bioetl_overview_pipeline_run_type_universe`; Runtime uses its exact alias source `bioetl_runtime_pipeline_run_type_universe`; Control Plane uses the role-local manifest/planned universe `bioetl_control_plane_run_type_universe`; Explorer uses the concrete processed-row subset for Quarantine API | Single-select | `All` on Overview; otherwise fail-closed `unknown` | Canonical pipeline context. Control Plane may both omit data-plane-only scopes and include provenance-backed manifest-only scopes; Explorer remains a strict processed-row subset and requires one concrete pipeline. The normative relations live in `contracts/selector-contracts.yaml#pipeline_universe_contract`. Provider/Workflow/Alerts expose `$pipeline` as context shell, not as their primary business selector. |
-| `$run_type` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, `bioetl-workflow-overview`, `bioetl-silver-reject-explorer`, `bioetl-alerts-slo` | Prometheus label query from the same bounded universe as `$pipeline`, or explorer API context | Multi-select with Include All | `All` / `$__all` | Cross-dashboard links MUST NOT pass `run_type=unknown`. |
-| `$run_id` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, `bioetl-workflow-overview` | Quarantine Explorer HTTP `/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}` | Single-select, no Include All | `-` | Preserved identity context for shared HTTP `ID`/details panels and primary-dashboard handoffs; not a Prometheus label. Generic inbound links to Silver Reject Explorer must not map this value into `$quarantine_run_id`; outbound explorer/alert links do not export primary `$run_id`. |
+| `$run_type` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, `bioetl-workflow-overview`, `bioetl-silver-reject-explorer`, `bioetl-alerts-slo` | Prometheus label query from the same bounded universe as `$pipeline`, or explorer API context | Multi-select with Include All | Overview: `All`; other primary boards: `backfill` | Include All retained for aggregate diagnostics. Cross-dashboard links MUST NOT pass `run_type=unknown`. |
+| `$run_id` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, `bioetl-workflow-overview` | BioETL Ops HTTP `/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}` | Single-select, no Include All | `-` | Options ordered by start time desc (`sort=0`). Preserved identity context for shared HTTP `ID`/details panels and primary-dashboard handoffs; not a Prometheus label. Generic inbound links to Silver Reject Explorer must not map this value into `$quarantine_run_id`; outbound explorer/alert links do not export primary `$run_id`. |
 | `$stage` | `bioetl-runtime`, `bioetl-dq-v2` | Runtime: `bioetl_pipeline_stage_expected`; DQ: `bioetl_records_processed_total` | Multi-select with Include All | Dynamic Grafana selection | Bounded stage breakdown filter, not a forensic identifier. |
 
 Live selector audits are rebuild-only runtime evidence under
