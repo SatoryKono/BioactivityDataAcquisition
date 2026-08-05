@@ -50,6 +50,13 @@ Config: [`.coderabbit.yaml`](../../.coderabbit.yaml) (`profile: assertive`).
 
 ---
 
+## Leaf scope matrix (campaign)
+
+For residual CLI waves, use the published leaf matrix (≤300 files each):
+
+- `reports/quality/coderabbit/20260805/01-scope-matrix.md` (#7714)
+- Operator WSL/env runbook: [development/coderabbit-local-reviews.md](development/coderabbit-local-reviews.md) (#7716)
+
 ## File-count preflight
 
 ```bash
