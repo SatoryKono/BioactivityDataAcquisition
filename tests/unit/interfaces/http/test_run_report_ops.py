@@ -39,6 +39,7 @@ from pathlib import Path
 
 from bioetl.interfaces.http._health_server_observability_routing import (
     _is_unresolved_run_scope,
+    _table_shape_pipeline_run_report,
     _unresolved_pipeline_run_report_shell,
 )
 from bioetl.interfaces.http.run_report_ops import (
@@ -87,7 +88,25 @@ def test_unresolved_run_id_sentinel_shell_for_grafana() -> None:
     assert shell["funnel"] == []
     assert shell["reasons_top_n"] == []
     assert shell["artifacts"] == []
-    assert shell["reconciliation"] == {}
+    assert shell["reconciliation"] == []
+
+
+def test_table_shape_pipeline_run_report_reconciliation_rows() -> None:
+    shaped = _table_shape_pipeline_run_report(
+        {
+            "schema_version": "pipeline_run_report_v1",
+            "reconciliation": {
+                "silver_accounted": 10,
+                "gold_delta": 0,
+            },
+            "funnel": [{"stage": "bronze"}],
+        }
+    )
+    assert shaped["reconciliation"] == [
+        {"parameter": "silver_accounted", "value": 10},
+        {"parameter": "gold_delta", "value": 0},
+    ]
+    assert shaped["funnel"] == [{"stage": "bronze"}]
 
 
 def test_load_requires_explicit_owner_selector(tmp_path: Path) -> None:
