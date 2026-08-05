@@ -146,8 +146,13 @@ def _build_selector_record(
     ledger_port: RunLedgerLookup | None,
     workflow_aliases: WorkflowAliasMap | None,
 ) -> SelectorRecord:
-    started_entry = _latest_started_entry(manifest.run_id, ledger_port)
-    terminal_entry = _latest_terminal_entry(manifest.run_id, ledger_port)
+    ledger_entries = (
+        tuple(ledger_port.list_entries_by_run_id(manifest.run_id))
+        if ledger_port is not None
+        else ()
+    )
+    started_entry = _latest_started_entry(ledger_entries)
+    terminal_entry = _latest_terminal_entry(ledger_entries)
     workflow_candidates = _workflow_candidates(manifest, workflow_aliases)
     started_at = started_entry.occurred_at if started_entry else manifest.created_at
     completed_at = terminal_entry.occurred_at if terminal_entry else manifest.created_at
@@ -181,15 +186,10 @@ def _build_selector_record(
 
 
 def _latest_started_entry(
-    run_id: RunID,
-    ledger_port: RunLedgerLookup | None,
+    ledger_entries: tuple[RunLedgerEntry, ...],
 ) -> RunLedgerEntry | None:
-    if ledger_port is None:
-        return None
     started_entries = [
-        entry
-        for entry in ledger_port.list_entries_by_run_id(run_id)
-        if entry.event_type == RUN_STARTED_EVENT
+        entry for entry in ledger_entries if entry.event_type == RUN_STARTED_EVENT
     ]
     if not started_entries:
         return None
@@ -197,15 +197,10 @@ def _latest_started_entry(
 
 
 def _latest_terminal_entry(
-    run_id: RunID,
-    ledger_port: RunLedgerLookup | None,
+    ledger_entries: tuple[RunLedgerEntry, ...],
 ) -> RunLedgerEntry | None:
-    if ledger_port is None:
-        return None
     terminal_entries = [
-        entry
-        for entry in ledger_port.list_entries_by_run_id(run_id)
-        if entry.event_type in _TERMINAL_EVENT_TYPES
+        entry for entry in ledger_entries if entry.event_type in _TERMINAL_EVENT_TYPES
     ]
     if not terminal_entries:
         return None
