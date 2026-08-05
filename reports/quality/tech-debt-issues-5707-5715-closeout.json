@@ -140,9 +140,9 @@
         "second_duration_s": 0.001,
         "improvement_factor": 34900.14
       },
-      "refreshed_at_utc": "2026-08-05T15:04:00.773472+00:00",
+      "refreshed_at_utc": "2026-08-05T15:38:19.131300+00:00",
       "slow_governance_lane": "S7-architecture-slow-governance",
-      "telemetry_source_commit": "dee95612a82c6dd8f40a93379630fee5d1e5ce37",
+      "telemetry_source_commit": "51c6bd2f3fc64c0932df915674ec2c11dea9bc00",
       "telemetry_source_run_id": "local-duration-rebuild-2026-07-23"
     },
     "5711": {
