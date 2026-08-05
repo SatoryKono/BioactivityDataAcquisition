@@ -206,6 +206,36 @@ def test_build_baseline_payload_captures_artifact_metrics(tmp_path: Path) -> Non
     ]
 
 
+def test_build_baseline_payload_keeps_repo_inputs_portable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Committed provenance must not contain checkout-specific absolute paths."""
+    monkeypatch.chdir(tmp_path)
+    coverage_xml = tmp_path / "reports/coverage/coverage.xml"
+    slowest_json = tmp_path / "reports/test-telemetry/slowest-tests.json"
+
+    payload = build_baseline_payload(
+        coverage_xml_path=coverage_xml,
+        coverage_percent=92.44,
+        coverage_log_path=None,
+        slowest_json_path=slowest_json,
+        junit_paths=[],
+        source_branch="main",
+        source_commit="abc123",
+        source_run_id="run-42",
+        coverage_threshold=85.0,
+    )
+
+    assert payload["artifact_inputs"] == {
+        "coverage_xml": "reports/coverage/coverage.xml",
+        "coverage_log": None,
+        "coverage_percent_fallback": 92.44,
+        "slowest_tests_json": "reports/test-telemetry/slowest-tests.json",
+        "junit_inputs": [],
+    }
+
+
 def test_render_and_write_baseline_outputs(tmp_path: Path) -> None:
     payload = {
         "version": 1,
