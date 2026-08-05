@@ -1,15 +1,75 @@
 {
-  "schema_version": "zero-ref-supporting-scripts-review-v1",
   "linked_issue": "#7463",
+  "owner": "@bioetl-platform",
+  "policy": {
+    "delete_only_with_importer_proof": true,
+    "inventory_reference_count_zero_is_not_sufficient_for_delete": true,
+    "zero_ref_count_budget_growth": "forbidden"
+  },
   "related_issues": [
     "#7455"
   ],
   "reviewed_on": "2026-08-04",
-  "owner": "@bioetl-platform",
-  "policy": {
-    "delete_only_with_importer_proof": true,
-    "zero_ref_count_budget_growth": "forbidden",
-    "inventory_reference_count_zero_is_not_sufficient_for_delete": true
+  "schema_version": "zero-ref-supporting-scripts-review-v1",
+  "scripts": [
+    {
+      "decision": "retain",
+      "importer_proof": {
+        "active_callers": [
+          "scripts/ai/codex/diagnose_wsl.ps1",
+          "scripts/ai/codex/headless.ps1",
+          "scripts/ai/codex/run-codex.ps1"
+        ],
+        "method": "git_grep_basename",
+        "notes": "Inventory undercounts PowerShell Join-Path helper imports; live callers prove retention."
+      },
+      "path": "scripts/ai/codex/helper/wsl-support.ps1",
+      "reference_count": 0,
+      "status": "supporting"
+    },
+    {
+      "decision": "retain",
+      "importer_proof": {
+        "active_callers": [],
+        "companion_canonical": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
+        "method": "git_grep_basename",
+        "notes": "Windows companion for Linux/WSL .sh wrapper still required for dual-platform MCP operators; no delete without Windows MCP config promotion."
+      },
+      "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
+      "reference_count": 0,
+      "status": "supporting"
+    },
+    {
+      "decision": "retain",
+      "importer_proof": {
+        "active_callers": [],
+        "method": "git_grep_basename",
+        "notes": "Manual operator utility; no tracked importer. Eligible for delete only after operator confirm at review_by."
+      },
+      "path": "scripts/engineering/dev/zed_task.ps1",
+      "reference_count": 0,
+      "status": "supporting"
+    },
+    {
+      "decision": "retain",
+      "importer_proof": {
+        "active_callers": [],
+        "method": "git_grep_basename",
+        "notes": "Manual QA census utility retained for VCR inventory campaigns; delete only after replacement generator is registered."
+      },
+      "path": "scripts/engineering/qa/report_vcr_cassette_census.py",
+      "reference_count": 0,
+      "status": "supporting"
+    }
+  ],
+  "summary": {
+    "delete_count": 0,
+    "promote_candidates": [
+      "scripts/engineering/qa/report_live_residual_snapshot.py"
+    ],
+    "retain_count": 4,
+    "script_count": 5,
+    "zero_reference_supporting_script_count": 4
   },
   "wave_schedule": {
     "2026-09-30": [
@@ -23,94 +83,6 @@
     ],
     "2026-10-21": [
       "scripts/engineering/dev/zed_task.ps1"
-    ]
-  },
-  "scripts": [
-    {
-      "path": "scripts/ai/codex/helper/wsl-support.ps1",
-      "inventory_reference_count": 0,
-      "decision": "retain",
-      "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-10-15",
-      "last_reviewed_on": "2026-08-04",
-      "importer_proof": {
-        "method": "git_grep_basename",
-        "active_callers": [
-          "scripts/ai/codex/diagnose_wsl.ps1",
-          "scripts/ai/codex/headless.ps1",
-          "scripts/ai/codex/run-codex.ps1"
-        ],
-        "notes": "Inventory undercounts PowerShell Join-Path helper imports; live callers prove retention."
-      },
-      "next_step": "Retain; consider promoting inventory reference_count when scanner supports .ps1 Join-Path edges."
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
-      "inventory_reference_count": 0,
-      "decision": "retain",
-      "lifecycle_decision": "windows_compatibility_wrapper",
-      "review_by": "2026-10-15",
-      "last_reviewed_on": "2026-08-04",
-      "importer_proof": {
-        "method": "git_grep_basename",
-        "active_callers": [],
-        "companion_canonical": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh",
-        "notes": "Windows companion for Linux/WSL .sh wrapper still required for dual-platform MCP operators; no delete without Windows MCP config promotion."
-      },
-      "next_step": "Retain until Windows MCP configs are first-class tracked entrypoints or wrapper is proven unused on Windows."
-    },
-    {
-      "path": "scripts/engineering/dev/zed_task.ps1",
-      "inventory_reference_count": 0,
-      "decision": "retain",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-10-21",
-      "last_reviewed_on": "2026-08-04",
-      "importer_proof": {
-        "method": "git_grep_basename",
-        "active_callers": [],
-        "notes": "Manual operator utility; no tracked importer. Eligible for delete only after operator confirm at review_by."
-      },
-      "next_step": "2026-10-21: either delete with explicit owner ack or promote to documented active tooling entry."
-    },
-    {
-      "path": "scripts/engineering/qa/report_live_residual_snapshot.py",
-      "inventory_reference_count": 0,
-      "decision": "retain",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "last_reviewed_on": "2026-08-04",
-      "importer_proof": {
-        "method": "module_entry_and_architecture_tests",
-        "active_callers": [
-          "tests/architecture/test_live_residual_snapshot.py",
-          "python -m scripts.engineering.qa.report_live_residual_snapshot"
-        ],
-        "notes": "Canonical generator for live residual snapshot (#6891/#7464). Inventory status supporting/zero-ref is misleading; module is active governance tooling."
-      },
-      "next_step": "Promote lifecycle to active_generator in inventory/lifecycle registry at next inventory refresh; do not delete."
-    },
-    {
-      "path": "scripts/engineering/qa/report_vcr_cassette_census.py",
-      "inventory_reference_count": 0,
-      "decision": "retain",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "last_reviewed_on": "2026-08-04",
-      "importer_proof": {
-        "method": "git_grep_basename",
-        "active_callers": [],
-        "notes": "Manual QA census utility retained for VCR inventory campaigns; delete only after replacement generator is registered."
-      },
-      "next_step": "2026-09-30: confirm replacement or keep as manual supporting utility with updated review_by."
-    }
-  ],
-  "summary": {
-    "script_count": 5,
-    "retain_count": 5,
-    "delete_count": 0,
-    "promote_candidates": [
-      "scripts/engineering/qa/report_live_residual_snapshot.py"
     ]
   }
 }

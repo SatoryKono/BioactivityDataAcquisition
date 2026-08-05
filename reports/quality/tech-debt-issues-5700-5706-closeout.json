@@ -93,15 +93,15 @@
       "coverage_actual_percent": 92.44,
       "coverage_percent_fallback_used": true,
       "coverage_xml_present": false,
-      "refreshed_at_utc": "2026-07-31T13:55:33.002896+00:00",
+      "refreshed_at_utc": "2026-08-04T18:12:10.346849+00:00",
       "slowest_total_cases": 23360,
       "source_commit": "427718a2101cae45ce4a9db892b042dc655ffa13",
       "source_run_id": "local-duration-rebuild-2026-07-23",
       "top_slow_zone": {
-        "zone": "tests.architecture.test_naming_ambiguity_classifier",
+        "max_duration_s": 192.078,
         "test_count": 2,
         "total_duration_s": 231.041,
-        "max_duration_s": 192.078
+        "zone": "tests.architecture.test_naming_ambiguity_classifier"
       }
     },
     "5702": {
