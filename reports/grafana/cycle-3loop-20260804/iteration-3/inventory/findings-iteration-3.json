@@ -1,0 +1,148 @@
+{
+  "iteration": 3,
+  "total_findings": 5,
+  "scope_findings": 5,
+  "issue": 7551,
+  "findings": [
+    {
+      "id": "bioetl-dq-v2-p121-green-null",
+      "dashboard_uid": "bioetl-dq-v2",
+      "panel_id": 121,
+      "panel_title": "Inspect Top Silver Reject Reasons",
+      "severity": "P2",
+      "category": "ux",
+      "evidence": "FACT DASHBOARD_JSON+RESIDUAL: type=bargauge green base without null mapping; steps_before=[{'color': 'green', 'value': None}]",
+      "expected": "null/no-data = transparent, not green healthy",
+      "acceptance": "Null values render neutral not green",
+      "status": "fixed",
+      "confidence": "FACT",
+      "evidence_source": "DASHBOARD_JSON",
+      "issue": 7551,
+      "fix": {
+        "new_steps": [
+          {
+            "color": "transparent",
+            "value": null
+          },
+          {
+            "color": "green",
+            "value": 0
+          }
+        ],
+        "mappings_added": "null+nan -> transparent"
+      }
+    },
+    {
+      "id": "bioetl-dq-v2-p122-green-null",
+      "dashboard_uid": "bioetl-dq-v2",
+      "panel_id": 122,
+      "panel_title": "Inspect Top Silver Reject Fields",
+      "severity": "P2",
+      "category": "ux",
+      "evidence": "FACT DASHBOARD_JSON+RESIDUAL: type=bargauge green base without null mapping; steps_before=[{'color': 'green', 'value': None}]",
+      "expected": "null/no-data = transparent, not green healthy",
+      "acceptance": "Null values render neutral not green",
+      "status": "fixed",
+      "confidence": "FACT",
+      "evidence_source": "DASHBOARD_JSON",
+      "issue": 7551,
+      "fix": {
+        "new_steps": [
+          {
+            "color": "transparent",
+            "value": null
+          },
+          {
+            "color": "green",
+            "value": 0
+          }
+        ],
+        "mappings_added": "null+nan -> transparent"
+      }
+    },
+    {
+      "id": "bioetl-dq-v2-p118-green-null",
+      "dashboard_uid": "bioetl-dq-v2",
+      "panel_id": 118,
+      "panel_title": "Inspect Silver Rejects by Pipeline",
+      "severity": "P2",
+      "category": "ux",
+      "evidence": "FACT DASHBOARD_JSON+RESIDUAL: type=bargauge green base without null mapping; steps_before=[{'color': 'green', 'value': None}]",
+      "expected": "null/no-data = transparent, not green healthy",
+      "acceptance": "Null values render neutral not green",
+      "status": "fixed",
+      "confidence": "FACT",
+      "evidence_source": "DASHBOARD_JSON",
+      "issue": 7551,
+      "fix": {
+        "new_steps": [
+          {
+            "color": "transparent",
+            "value": null
+          },
+          {
+            "color": "green",
+            "value": 0
+          }
+        ],
+        "mappings_added": "null+nan -> transparent"
+      }
+    },
+    {
+      "id": "bioetl-dq-v2-p156-green-null",
+      "dashboard_uid": "bioetl-dq-v2",
+      "panel_id": 156,
+      "panel_title": "Inspect: Gold Reject Outcomes by Pipeline",
+      "severity": "P2",
+      "category": "ux",
+      "evidence": "FACT DASHBOARD_JSON+RESIDUAL: type=bargauge green base without null mapping; steps_before=[{'color': 'green', 'value': None}]",
+      "expected": "null/no-data = transparent, not green healthy",
+      "acceptance": "Null values render neutral not green",
+      "status": "fixed",
+      "confidence": "FACT",
+      "evidence_source": "DASHBOARD_JSON",
+      "issue": 7551,
+      "fix": {
+        "new_steps": [
+          {
+            "color": "transparent",
+            "value": null
+          },
+          {
+            "color": "green",
+            "value": 0
+          }
+        ],
+        "mappings_added": "null+nan -> transparent"
+      }
+    },
+    {
+      "id": "bioetl-runtime-p241-green-null",
+      "dashboard_uid": "bioetl-runtime",
+      "panel_id": 241,
+      "panel_title": "Compare Records by Stage & Run Type",
+      "severity": "P2",
+      "category": "ux",
+      "evidence": "FACT DASHBOARD_JSON+RESIDUAL: type=bargauge green base without null mapping; steps_before=[{'color': 'green', 'value': None}]",
+      "expected": "null/no-data = transparent, not green healthy",
+      "acceptance": "Null values render neutral not green",
+      "status": "fixed",
+      "confidence": "FACT",
+      "evidence_source": "DASHBOARD_JSON",
+      "issue": 7551,
+      "fix": {
+        "new_steps": [
+          {
+            "color": "transparent",
+            "value": null
+          },
+          {
+            "color": "green",
+            "value": 0
+          }
+        ],
+        "mappings_added": "null+nan -> transparent"
+      }
+    }
+  ]
+}

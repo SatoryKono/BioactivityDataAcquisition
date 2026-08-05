@@ -577,14 +577,30 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "—",
+                      "color": "transparent",
+                      "index": 0
+                    }
+                  }
+                }
+              ],
               "noValue": "No reject reason samples in range",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "transparent",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -654,14 +670,30 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "—",
+                      "color": "transparent",
+                      "index": 0
+                    }
+                  }
+                }
+              ],
               "noValue": "No reject field samples in range",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "transparent",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -732,14 +764,30 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "—",
+                      "color": "transparent",
+                      "index": 0
+                    }
+                  }
+                }
+              ],
               "noValue": "No filtered-out samples in range",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "transparent",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -809,14 +857,30 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "—",
+                      "color": "transparent",
+                      "index": 0
+                    }
+                  }
+                }
+              ],
               "noValue": "No Gold reject samples in range",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "transparent",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
