@@ -54,9 +54,7 @@ Dashboard System 2.0 checklist: [operator-ux-v2.md](operator-ux-v2.md).
 
 ### Навигация
 
-- Top-level шина: `0. Control Plane` / `1. Overview` / `2. Runtime` /
-  `3. Provider Health` / `4. Data Quality` / `5. Workflow` /
-  `6. Alerts & SLO`.
+- Top-level шина: `0. Trust` / `1. Overview` / `2. Pipeline Diagnostics` / `3. Provider Health` / `4. Data Quality` / `5. Incident Workspace` / `6. Run Explorer`.
 - На текущей странице текущий dashboard остаётся видимым в navigation panel
   `id=1000` как disabled theme-safe item; machine-readable `panel.links`
   по-прежнему не содержат self-link. Полная навигация читаема в dark/light
