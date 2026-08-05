@@ -28,6 +28,7 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `master20260805-10`
+- Source branch: `master20260805-10`
 - Source commit: `8b9ac1e7401e5dd172adf89e1f2626483b111265`
 - Source run id: `local-duration-rebuild-2026-07-23`
 - Source tree sha256: `60ced8b0287445144288a1ad3a18882a0552e9e864217a13140543073b7089b8`
