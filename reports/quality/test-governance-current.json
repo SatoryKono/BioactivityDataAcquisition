@@ -1287,7 +1287,12 @@
   "intentional_no_exception_contract": 89,
   "markerless_examples": [],
   "markerless_test_functions": 0,
-  "parse_errors": [],
+  "parse_errors": [
+    {
+      "error": "invalid decimal literal (tests/integration/test_grafana_dashboard_metric_semantics.py, line 1915)",
+      "path": "tests/integration/test_grafana_dashboard_metric_semantics.py"
+    }
+  ],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
@@ -2277,7 +2282,12 @@
     },
     "markerless_examples": [],
     "markerless_test_functions": 0,
-    "parse_errors": [],
+    "parse_errors": [
+      {
+        "error": "invalid decimal literal (tests/integration/test_grafana_dashboard_metric_semantics.py, line 1915)",
+        "path": "tests/integration/test_grafana_dashboard_metric_semantics.py"
+      }
+    ],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
@@ -2336,12 +2346,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2181,
-    "total_test_functions": 23314,
+    "total_test_functions": 23277,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "043b372cd7afd7ad2235969af10c6e4abfdb776b4b0ce892daa6ab7c6d15647f",
+  "source_tree_sha256": "59e99e6e7bd8a4f99ac007d97b5cf3f3187f1f63c80bfa7140333df5c487faa8",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 105,
@@ -2403,7 +2413,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2181,
-  "total_test_functions": 23314,
+  "total_test_functions": 23277,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
