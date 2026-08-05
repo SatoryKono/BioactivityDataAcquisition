@@ -16,7 +16,6 @@ description: "Execute the full BioETL architecture-debt reduction workflow: gene
 Run the role-specific workflow as defined in the py-architecture-debt-bot profile.
 
 ## Source Of Truth
-
 - Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
