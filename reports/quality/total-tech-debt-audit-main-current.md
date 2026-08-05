@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `14bcbfbd8054292fff9f55837da508a80ceaaeea`
 
-Evidence surface SHA-256: `3493a8b5e2d2e04662bca9f68cd19ff1ddb0a822d3e1320a1c220fc0f1652808`
+Evidence surface SHA-256: `c3d3a78546f1b36133c961ed370e34912b99a3db3b1eddb2922fc5a1726acad6`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,15 +18,15 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
   "audited_commit_sha": "14bcbfbd8054292fff9f55837da508a80ceaaeea",
-  "evidence_surface_sha256": "3493a8b5e2d2e04662bca9f68cd19ff1ddb0a822d3e1320a1c220fc0f1652808",
+  "evidence_surface_sha256": "c3d3a78546f1b36133c961ed370e34912b99a3db3b1eddb2922fc5a1726acad6",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
-    "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 45,
+    "debt_gate_fail_count": 1,
+    "debt_gate_pass_count": 44,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 1476,
@@ -50,7 +50,7 @@ budget growth.
 
 ## Executive summary
 
-1. Debt-governance gates: **45 pass / 0 fail** (`45/45` debt-governance gates passing).
+1. Debt-governance gates: **44 pass / 1 fail** (`45/45` debt-governance gates passing).
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
    - source_module_count: **2315**
