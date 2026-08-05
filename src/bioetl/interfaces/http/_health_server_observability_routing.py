@@ -26,6 +26,45 @@ from bioetl.interfaces.http.run_report_ops import (
 )
 
 _NOT_FOUND_MESSAGE = "Not Found"
+# Grafana selector sentinels for "no concrete run selected" (never a real run_id).
+_UNRESOLVED_RUN_ID_SENTINELS = frozenset(
+    {
+        "",
+        "-",
+        "all",
+        "All",
+        "$__all",
+        "unknown",
+        "None",
+        "null",
+    }
+)
+
+
+def _is_unresolved_run_scope(run_id: str) -> bool:
+    """Return True when run_id is a dashboard no-selection sentinel."""
+    token = run_id.strip()
+    return token in _UNRESOLVED_RUN_ID_SENTINELS
+
+
+def _unresolved_pipeline_run_report_shell(
+    *,
+    run_id: str,
+    pipeline: str,
+) -> dict[str, object]:
+    """Empty report shell for Grafana table root_selectors (no QUERY_ERROR)."""
+    return {
+        "status": "unresolved_scope",
+        "message": "run_id not selected; pick a run from Browse Recent Runs",
+        "run_id": run_id,
+        "pipeline": pipeline,
+        # Match pipeline_run_report_v1 keys used by Run Explorer panels.
+        "funnel": [],
+        "reasons_top_n": [],
+        "reconciliation": {},
+        "artifacts": [],
+        "schema_version": "pipeline_run_report_v1",
+    }
 
 
 class _HealthResponseSupport(Protocol):
@@ -103,6 +142,15 @@ async def handle_pipeline_run_report(
     """Serve stored pipeline_run_report_v1 JSON for a completed run."""
     run_id = host._read_required_param(query, "run_id")
     pipeline = host._read_required_param(query, "pipeline")
+    if _is_unresolved_run_scope(run_id):
+        # Default Grafana run_id is "-" — return empty shell (HTTP 200) so
+        # Run Explorer detail tables show No data, not QUERY_ERROR/404.
+        await host._send_payload_response(
+            writer,
+            200,
+            _unresolved_pipeline_run_report_shell(run_id=run_id, pipeline=pipeline),
+        )
+        return
     try:
         payload = await run_bounded_forensic_operation(
             limiter=host._forensic_endpoint_limiter,
