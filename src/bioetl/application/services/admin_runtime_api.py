@@ -1,22 +1,8 @@
-"""Stable application-services seam for composition-owned admin bootstrap.
+"""Compatibility re-export — implementation lives in `bioetl.application.services.ops.admin_runtime_api`.
 
-This module re-exports low-level administrative services that CLI/bootstrap
-code needs for checkpoint, quarantine, and cleanup operations without
-importing ``application.core`` modules directly.
+ARCH-REF-03 / #7704: root path kept for stable imports.
 """
-
 from __future__ import annotations
 
-from bioetl.application.core.lifecycle.checkpoint_manager import (
-    CheckpointRuntimeService,
-)
-from bioetl.application.core.lifecycle.cleanup_service import CleanupService
-from bioetl.application.core.quarantine_manager import (
-    QuarantineRuntimeService,
-)
-
-__all__ = [
-    "CheckpointRuntimeService",
-    "CleanupService",
-    "QuarantineRuntimeService",
-]
+from bioetl.application.services.ops.admin_runtime_api import *  # noqa: F403
+from bioetl.application.services.ops.admin_runtime_api import __all__ as __all__

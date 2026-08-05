@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import replace
 from datetime import datetime
 
-from bioetl.application.services.workflow_runner_service import (
+from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowStepExecutionResult,
 )
 from bioetl.domain.control_plane import WorkflowExecutionState, WorkflowStepState

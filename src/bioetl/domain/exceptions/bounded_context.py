@@ -10,7 +10,7 @@ from bioetl.domain.exceptions.base import (
     RecoverableError,
 )
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
-from bioetl.domain.exceptions.infrastructure import InfrastructureError, StorageError
+from bioetl.domain.exceptions.storage import InfrastructureError, StorageError
 from bioetl.domain.exceptions.internal import (
     CheckpointConflictError,
     InvalidStateError,

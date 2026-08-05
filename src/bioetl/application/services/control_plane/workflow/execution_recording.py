@@ -24,7 +24,7 @@ from bioetl.application.services.control_plane.workflow.execution_recording_stat
     _record_step_state,
     _remove_step_ids,
 )
-from bioetl.application.services.workflow_runner_service import (
+from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
     WorkflowTransformDestructiveCommit,

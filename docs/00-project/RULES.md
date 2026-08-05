@@ -83,8 +83,20 @@ ______________________________________________________________________
 
   Остальные порты (`LoggerPort`, `MetricsPort`, `TracingPort` и т.д.) **MAY** не иметь `@runtime-checkable`.
 
-  > **Текущее состояние:** Все 84 порт декорированы `@runtime-checkable` (100% coverage).
-  > Минимальное требование — 4 критических порта выше; остальные декорированы для единообразия.
+  > **Текущее состояние (live inventory, 2026-08-05):** see generator
+  > `python -m scripts.engineering.qa report-domain-ports-inventory`
+  > → `reports/quality/domain-ports-inventory.{json,md}`.
+  > Definitions: **port_protocol_classes** = Protocol classes named `*Port`
+  > under `src/bioetl/domain/ports/**`; **port_module_files** = `*.py` excluding
+  > `__init__.py`; **runtime_checkable_port_count** = those classes with
+  > `@runtime_checkable`. Live snapshot at last inventory refresh:
+  > **85** `port_protocol_classes`, **85** `runtime_checkable_port_count`
+  > (100% of `*Port` Protocols), **66** `port_module_files`, **75** scanned
+  > Python files including `__init__.py`. Raw `@runtime_checkable` decorator
+  > tokens may exceed the port class count when non-`*Port` Protocols in the
+  > same tree are also decorated. Minimum requirement remains the critical
+  > ports listed above; remaining ports are decorated for uniformity.
+  > Architecture gate: `tests/architecture/test_domain_ports_inventory_gate.py`.
 
 - **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Это правило относится и к runtime-oriented контрактам (`LoggerPort`, `RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`): они по проектной политике остаются в `domain.ports` как чистые cross-layer abstractions, а не считаются infrastructure leakage. Проверяется архитектурным тестом.
 

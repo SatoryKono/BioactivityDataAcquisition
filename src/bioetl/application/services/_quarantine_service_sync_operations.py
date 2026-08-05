@@ -1,15 +1,8 @@
-"""Re-export facade for sync quarantine admin helpers."""
+"""Compatibility re-export — implementation lives in `bioetl.application.services.quality._quarantine_service_sync_operations`.
 
+ARCH-REF-03 / #7704: root path kept for stable imports.
+"""
 from __future__ import annotations
 
-from bioetl.application.services._quarantine_service_replay_purge_sync import (
-    QuarantineServiceReplayPurgeSyncMixin,
-)
-from bioetl.application.services._quarantine_service_status_sync import (
-    QuarantineServiceStatusSyncMixin,
-)
-
-__all__ = [
-    "QuarantineServiceReplayPurgeSyncMixin",
-    "QuarantineServiceStatusSyncMixin",
-]
+from bioetl.application.services.quality._quarantine_service_sync_operations import *  # noqa: F403
+from bioetl.application.services.quality._quarantine_service_sync_operations import __all__ as __all__

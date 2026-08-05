@@ -25,7 +25,7 @@ from bioetl.application.services.control_plane.workflow.execution_recording impo
 from bioetl.application.services.control_plane.workflow.ledger_service import (
     WorkflowLedgerService,
 )
-from bioetl.application.services.workflow_runner_service import (
+from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowRunExecutionResult,
     WorkflowRunnerService,
 )

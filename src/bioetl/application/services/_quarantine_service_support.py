@@ -1,7 +1,5 @@
-"""Shared support constants for quarantine service helpers."""
-
+"""Compatibility re-export — implementation lives in `bioetl.application.services.quality._quarantine_service_support`.
+"""
 from __future__ import annotations
 
-_QUARANTINE_OPERATOR_DURATION_METRIC = "bioetl_quarantine_operator_duration_seconds"
-_QUARANTINE_OPERATOR_OPERATIONS_METRIC = "bioetl_quarantine_operator_operations_total"
-_QUARANTINE_OPERATOR_ERRORS = (OSError, RuntimeError, TypeError, ValueError)
+from bioetl.application.services.quality._quarantine_service_support import *  # noqa: F403
