@@ -41,6 +41,26 @@ python -m scripts.engineering.dev migrate-deprecated-names src/
 roots and group ownership. If you add or relocate script domains, update the
 catalog and rerun the repo governance checks.
 
+## Scripts inventory policy (hold flat)
+
+`configs/quality/scripts_inventory_manifest.json` is the machine inventory for
+`scripts/**` (status classes: **active**, **supporting**, **temporary_diagnostic**).
+Snapshot reference (2026-08-05): total **575** — active **341**, supporting
+**229**, temporary_diagnostic **5**.
+
+When adding or renaming a script:
+
+1. Register it in the inventory with an explicit class (`active` /
+   `supporting` / `temporary_diagnostic`) via
+   `python -m scripts.engineering.repo sync-inventory` (or the equivalent
+   check/update path) so CI drift stays green.
+2. Prefer a single canonical entrypoint (`python -m scripts...` or one
+   language-native runner). Dual `.sh` / `.ps1` wrappers are allowed **only**
+   when an operator transport truly requires both; do not pair wrappers by
+   default.
+3. Do not mass-delete scripts without ownership review and non-use evidence.
+   Hold the surface flat-or-down (issue #7711).
+
 ## Compatibility Policy
 
 - Historical root-level wrappers have been consolidated into canonical domain packages.

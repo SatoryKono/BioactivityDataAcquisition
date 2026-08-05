@@ -1,18 +1,8 @@
-"""Shared service-model seams for checkpoint administration surfaces."""
+"""Compatibility re-export — implementation lives in `bioetl.application.services.checkpoint.checkpoint_models`.
 
+ARCH-REF-03 / #7704: root path kept for stable imports.
+"""
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-from bioetl.domain.types import JsonDict
-
-__all__ = ["CheckpointInfo"]
-
-
-@dataclass(frozen=True, slots=True)
-class CheckpointInfo:
-    """Bounded checkpoint evidence exposed by application services."""
-
-    pipeline_name: str
-    run_id: str | None
-    metadata: JsonDict
+from bioetl.application.services.checkpoint.checkpoint_models import *  # noqa: F403
+from bioetl.application.services.checkpoint.checkpoint_models import __all__ as __all__

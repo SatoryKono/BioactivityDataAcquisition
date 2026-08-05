@@ -137,6 +137,41 @@ StorageFactory
 - **Bounded module-level state only** — sanctioned process-local state is limited to the default pipeline/provider registry caches and narrow synchronization locks such as `_WORKFLOW_MEMORY_LOCK`; new globals require an explicit governance update.
 - **Workflow time is explicit** — control-plane workflow services are wired with `ClockPort`/`SystemClock`, not ad hoc wall-clock calls inside composition.
 
+## Primary API → factory / builder map
+
+Package-root public seams only. Nested `factories/*` modules are implementation
+detail unless re-exported here. **Freeze:** do not add a new package-root
+`*_api.py` (or expand the sanctioned CLI `public-entrypoint` inventory past
+scorecard `sanctioned_public_entrypoint_governance.public_entrypoint_count`,
+currently **12**) without an explicit scorecard / inventory review
+(`tests/architecture/test_composition_public_entrypoint_freeze.py`, issue #7708).
+
+| Public seam | Primary symbols / role | Factories / builders / internal owners |
+| --- | --- | --- |
+| `execution_api` | `run_pipeline`, `create_pipeline_runner`, `build_pipeline_context`, metrics server helpers | `_pipeline_execution` → `bootstrap/runtime/pipeline.bootstrap_pipeline_runner`, `bootstrap/runtime/pipeline_context_builder`, `factories/pipeline/runner.create_metrics_extractor`, `_services.get_pipeline_runner_service`, `bootstrap/runtime/observability.maybe_start_metrics_server` |
+| `entrypoints` | Stable execution-first re-export of `execution_api` + composite bootstrap | Lazy targets: `execution_api`, `composite_api` (no extra factories) |
+| `composite_api` | `load_composite_config`, `bootstrap_composite_runner`, `list_configured_pipeline_names` | `bootstrap/runtime/composite` (+ plan/support helpers), `infrastructure.config.composite_config_api` / `pipeline_config_api` |
+| `registry_api` | `PipelineRegistry`, `create_registry`, `get_default_registry`, `register_all_pipelines` | `factories/pipeline/registry_core`, `factories/pipeline/registry` |
+| `control_plane_api` | Workflow / forensic / ADR / config / export / lock / manifest services | `_services` and `_workflow_services` bootstrap facades → `bootstrap/cli/*` (config, lock, run_manifest, checkpoint, storage), `bootstrap/cli` lifecycle store, `config_catalog` |
+| `health_api` | Health server deps, health/quarantine services, quarantine port | `_services` → `bootstrap/cli/health`, `bootstrap/assembly/checkpoint` (quarantine adapter), `_resource_management` for runtime quarantine |
+| `maintenance_api` | Bronze cleanup, vacuum, contract migration | `_services` → `bootstrap/cli/storage` (cleanup / vacuum / migration bootstraps) |
+| `resources_api` | Archive/vacuum table, lifecycle, checkpoint/quarantine inspect | `_resource_management`, `_pipeline_execution` option types |
+| `observability_api` | Metrics gateway, audit/checkpoint/metrics/lineage/health inspection bundle | `_services` + `bootstrap/cli/{metrics,checkpoint,health}`, `runtime_builders` / observability bootstrap as needed |
+
+Supporting (not package-root freezes, still composition-owned):
+
+| Area | Use for | Typical owners |
+| --- | --- | --- |
+| `factories/datasource/*` | HTTP adapters / data sources | `DataSourceFactory`, `HttpClientFactory`, provider helpers |
+| `factories/storage/*` | Bronze/Silver/Gold/Merged writers | `StorageFactory` mixins + `bundle.StorageBundle` |
+| `factories/dq/*` | DQ service wiring | `DQServicesFactory` |
+| `factories/pipeline/*` | Full pipeline + runner assembly | `GenericPipelineFactory` / `PipelineAssembler`, `runner` assembly |
+| `factories/services/*` | Port/service bundles | `BaseServicesFactory`, `port_factories` |
+| `providers/*` | ProviderRegistry adapter creation | `registration_bio` / `registration_biblio` |
+| `runtime_builders/*` | Late runner inputs, run manifest, observability bundle | `RunnerBuilder`, `inputs_resolver`, `observability_builder`, run-manifest builders |
+| `bootstrap/runtime/*` | Pipeline/composite/observability runtime assembly | `pipeline`, `runner`, `composite*`, `*_bootstrap` |
+| `bootstrap/cli/*` | CLI command service construction | one module per concern (config, health, lock, metrics, …) |
+
 ## Retained Entrypoint Policy
 
 - `composition.entrypoints` is a sanctioned public seam with execution-focused `__all__`.
@@ -146,6 +181,7 @@ StorageFactory
 - Administrative and inspection helpers should come from
   `composition.control_plane_api`.
 - Resource helpers should come from `composition.resources_api`.
+- Observability helpers should come from `composition.observability_api`.
 - Registry consumers should use `composition.registry_api` instead of importing
   the `composition` package root.
 - Interfaces must not import the retired `composition.registry` module;

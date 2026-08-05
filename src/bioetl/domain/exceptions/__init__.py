@@ -23,7 +23,7 @@ if TYPE_CHECKING:
         get_domain_exception_context,
     )
     from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
-    from bioetl.domain.exceptions.infrastructure import (
+    from bioetl.domain.exceptions.storage import (
         BronzeValidationError,
         BucketNotFoundError,
         CachedBronzeEmptyError,
@@ -121,7 +121,7 @@ __all__ = [
 _BASE_MODULE = "bioetl.domain.exceptions.base"
 _BOUNDED_CONTEXT_MODULE = "bioetl.domain.exceptions.bounded_context"
 _DATA_QUALITY_MODULE = "bioetl.domain.exceptions.data_quality"
-_INFRASTRUCTURE_MODULE = "bioetl.domain.exceptions.infrastructure"
+_INFRASTRUCTURE_MODULE = "bioetl.domain.exceptions.storage"
 _INTERNAL_MODULE = "bioetl.domain.exceptions.internal"
 _NETWORK_MODULE = "bioetl.domain.exceptions.network"
 _PIPELINE_SHUTDOWN_MODULE = "bioetl.domain.exceptions.pipeline_shutdown"

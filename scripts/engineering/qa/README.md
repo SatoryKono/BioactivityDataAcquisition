@@ -30,6 +30,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `check-vcr-replay-preflight`     | `vcr/check_replay_preflight.py`                       | Fail fast on unresolved replay VCR pointers and cheap catalog drift                                |
 | `report-provider-contract-drift` | `report_provider_contract_drift.py`                   | Generate provider contract drift diagnostics from replay cassettes                                |
 | `report-domain-io-taint-inventory` | `report_domain_io_taint_inventory.py`               | Generate/check semantic Domain I/O taint evidence                                                  |
+| `report-domain-ports-inventory`  | `report_domain_ports_inventory.py`                    | Generate/check domain `*Port` Protocol inventory and `@runtime_checkable` coverage                 |
 | `check-prometheus-rules`         | `check_prometheus_rules.py`                           | Run deterministic promtool syntax and rule-vector validation                                      |
 | `report-dashboard-inventory`     | `report_dashboard_inventory.py`                       | Generate/check dashboard inventory parity, provisioning drift, deployed drift, and local health   |
 | `report-dashboard-panel-audit-matrix` | `report_dashboard_panel_audit_matrix.py`         | Generate/check the dashboard panel audit matrix mirror                                            |

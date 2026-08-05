@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-24'
+  Last verified: '2026-08-05'
 
 ______________________________________________________________________
 
@@ -35,9 +35,12 @@ Evidence anchors:
   `configs/entities/**/*.yaml`, `configs/composites/*.yaml`,
   entity data contracts under `configs/contracts/{provider}/*.yaml`, and the
   separate error catalog at `configs/contracts/errors/error_catalog.yaml`.
-- Observability:
-  `src/bioetl/infrastructure/observability/`, `grafana/dashboards/*.json`,
-  `grafana/prometheus-rules/*.yml`.
+- Observability (optional local stack per ADR-010 / ADR-053):
+  `src/bioetl/infrastructure/observability/`, optional
+  `grafana/dashboards/*.json`, optional `grafana/prometheus-rules/*.yml`.
+  Default BioETL remains local-only; Prometheus/Grafana are **not** required.
+  Loki, Tempo, and Quarantine Explorer UI are **not** part of the current
+  default shipping surface (historical / retired from main Docker compose).
 
 ## C4 Context
 
@@ -52,7 +55,7 @@ C4Context
     System_Ext(pubchem, "PubChem API", "Compound data")
     System_Ext(uniprot, "UniProt API", "Protein and ID mapping data")
     System_Ext(publication, "Publication APIs", "PubMed, CrossRef, OpenAlex, Semantic Scholar")
-    System_Ext(grafana, "Grafana / Prometheus", "Local observability stack")
+    System_Ext(grafana, "Grafana / Prometheus (optional)", "Optional local metrics UI per ADR-010/ADR-053")
     System_Ext(files, "Local filesystem", "Data, checkpoints, manifests, ledgers, config artifacts")
 
     Rel(operator, bioetl, "Runs CLI commands and diagnostics")
@@ -61,7 +64,7 @@ C4Context
     Rel(bioetl, uniprot, "Fetches proteins and mappings")
     Rel(bioetl, publication, "Enriches publication metadata")
     Rel(bioetl, files, "Writes medallion data and control-plane artifacts")
-    Rel(grafana, bioetl, "Scrapes / queries metrics and local explorer endpoints")
+    Rel(grafana, bioetl, "Optionally scrapes metrics when monitoring is enabled")
 ```
 
 ## C4 Container
@@ -81,7 +84,7 @@ C4Container
         ContainerDb(localdata, "Local Data Root", "Filesystem/Delta/JSONL", "Bronze/Silver/Gold, checkpoints, manifests, ledgers")
     }
     System_Ext(providers, "External Provider APIs")
-    System_Ext(obs, "Prometheus/Grafana/Loki/Tempo")
+    System_Ext(obs, "Prometheus/Grafana (optional)")
 
     Rel(operator, cli, "Runs bioetl commands")
     Rel(cli, composition, "Requests configured runtime objects")
@@ -91,7 +94,7 @@ C4Container
     Rel(infra, domain, "Implements domain ports")
     Rel(infra, providers, "HTTP/API calls")
     Rel(infra, localdata, "Reads/writes local artifacts")
-    Rel(obs, infra, "Scrapes metrics and queries explorer endpoints")
+    Rel(obs, infra, "Optionally scrapes metrics when monitoring is enabled")
 ```
 
 ## Layer Diagram
@@ -129,7 +132,7 @@ flowchart TB
         Adapters["Provider adapters"]
         Storage["Bronze/Silver/Gold/checkpoint/quarantine storage"]
         Config["Config and schema loaders"]
-        Obs["Prometheus/tracing/logging adapters"]
+        Obs["Metrics/tracing/logging adapters (optional Prometheus)"]
         Stores["File control-plane stores"]
     end
 
