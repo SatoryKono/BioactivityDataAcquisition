@@ -18136,14 +18136,14 @@
     {
       "path": "scripts/ops/observability/grafana/fix_gra_3c_i1b.py",
       "type": "py",
-      "status": "supporting",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": [],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded one-off utility for auditability; classify or retire after the owning workflow is verified (scripts/ops/observability/grafana/fix_gra_3c_i1b.py)."
+      "next_step": "Retain only as a bounded temporary diagnostic for auditability; retire after the owning workflow is verified (scripts/ops/observability/grafana/fix_gra_3c_i1b.py)."
     },
     {
       "path": "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",

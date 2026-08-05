@@ -1420,9 +1420,9 @@
     },
     "scripts/ops/observability/grafana/fix_gra_3c_i1b.py": {
       "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
+      "decision": "temporary_diagnostic",
       "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded one-off utility for auditability; classify or retire after the owning workflow is verified (scripts/ops/observability/grafana/fix_gra_3c_i1b.py)."
+      "next_step": "Retain only as a bounded temporary diagnostic for auditability; retire after the owning workflow is verified (scripts/ops/observability/grafana/fix_gra_3c_i1b.py)."
     }
   }
 }
