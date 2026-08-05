@@ -59,7 +59,7 @@ promoting every specialist page into the primary MkDocs navigation.
 
 ## Repository support documents
 
-- [Configuration discrepancies](../config-discrepancies-report.md)
+- [Configuration discrepancies](../reports/generated/config-discrepancies-report.md)
 - [PyCharm baseline](../03-guides/development/pycharm-baseline.md)
 - [Filter inventory pointer](../filters/README.md)
 - [Filter inventory baseline](../filters/inventory-baseline.md)
