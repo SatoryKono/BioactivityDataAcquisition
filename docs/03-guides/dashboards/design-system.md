@@ -557,7 +557,7 @@ allowed.
 - `bioetl-overview-v2` является dashboard-routing-first surface. Panel-level
   CTA здесь MAY оставаться dashboard-only и по умолчанию не требует прямых
   runbook links.
-- ~~`bioetl-workflow-overview`~~ (**retired**; evidence lives in Runtime workflow band). Исторически это был selected-range evidence surface. Его
+- ~~`bioetl-workflow-overview`~~ (**retired**; evidence lives in Runtime workflow band). Исторически это был selected-range evidence surface.
   четыре summary counters selected-range evidence не требуют panel-level
   runbook links; shipped `First Action` остаётся единственным
   оправданным dashboard-handoff CTA exception на этой странице.
