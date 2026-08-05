@@ -16,6 +16,7 @@ description: "Execute BioETL hierarchical code review orchestration (L1/L2/L3) a
 Run the role-specific workflow as defined in the py-review-orchestrator profile.
 
 ## Source Of Truth
+
 - Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`

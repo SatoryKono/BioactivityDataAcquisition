@@ -1,3 +1,9 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source: `.codex/skills/grafana-dashboard-render/SKILL.md`
+> Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
+> Edit the runtime source first, then refresh this mirror.
+______________________________________________________________________
+
 ---
 name: grafana-dashboard-render
 description: Render, preflight-check, and capture runtime evidence for shipped BioETL Grafana dashboards. Use when the task is to produce reproducible dashboard renders, validate Grafana render/auth readiness, run live reviewed panel audits, or explain why full render is blocked on the current host.
@@ -25,16 +31,17 @@ dashboard JSON, queries, navigation, or operator-facing UX.
 ## BioETL Runtime Policy
 
 - Project runtime contract: `../../../AGENTS.md`
-- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Source Of Truth
 
-- Root runtime contract: `../../../AGENTS.md`
-- Project rules: `../../../docs/00-project/RULES.md`
-- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../docs/02-architecture/decisions`
-- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
+
 - Shared Grafana/Prometheus prerequisites: [../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md](../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md)
 - Shipped dashboards: `grafana/dashboards/*.json`
 - Canonical screenshot tooling:
