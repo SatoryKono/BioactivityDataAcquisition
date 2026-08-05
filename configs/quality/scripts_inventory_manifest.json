@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-05T17:18:58.976452+00:00",
+  "generated_at": "2026-08-05T18:22:38.312530+00:00",
   "summary": {
     "total_scripts": 576,
     "status_counts": {
-      "active": 342,
-      "supporting": 229,
+      "active": 341,
+      "supporting": 230,
       "temporary_diagnostic": 5
     },
     "reference_group_coverage": {
@@ -10367,31 +10367,31 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 795,
+          "line": 806,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 814,
+          "line": 825,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 905,
+          "line": 916,
           "source_group": "docs",
           "text": "| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | Выполнить ускоренный coverage/sharded прогон |"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 906,
+          "line": 917,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 943,
+          "line": 954,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded"
         }
@@ -11437,7 +11437,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 296,
+      "reference_count": 297,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -14096,7 +14096,7 @@
     {
       "path": "scripts/engineering/qa/report_domain_ports_inventory.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -14118,7 +14118,11 @@
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_domain_ports_inventory import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation behind the canonical scripts.engineering.qa report-domain-ports-inventory command; keep the module supporting while the QA router remains the active entrypoint."
     },
     {
       "path": "scripts/engineering/qa/report_duplication_baseline.py",
@@ -14347,7 +14351,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
@@ -14387,13 +14391,13 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 195,
+          "line": 167,
           "source_group": "tests",
           "text": "assert committed[\"generated_by\"].endswith(\"report_module_coverage_inventory.py\")"
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 849,
+          "line": 795,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -15246,7 +15250,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 847,
+          "line": 858,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         }
@@ -15297,7 +15301,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 848,
+          "line": 859,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -15330,7 +15334,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 853,
+          "line": 864,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90`"
         },
@@ -18237,7 +18241,7 @@
       "agent_usage": [
         "grafana-dashboard-extension"
       ],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-extension/SKILL.md",
@@ -18673,13 +18677,13 @@
         },
         {
           "path": "docs/03-guides/development/coderabbit-local-reviews.md",
-          "line": 55,
+          "line": 56,
           "source_group": "docs",
           "text": "./scripts/ops/run-coderabbit-reviews.sh architecture-boundaries --base origin/main"
         },
         {
           "path": "docs/03-guides/development/coderabbit-local-reviews.md",
-          "line": 56,
+          "line": 57,
           "source_group": "docs",
           "text": "./scripts/ops/run-coderabbit-reviews.sh all --coderabbit-only --base origin/main"
         },

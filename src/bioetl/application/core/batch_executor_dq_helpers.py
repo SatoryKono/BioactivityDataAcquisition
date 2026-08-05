@@ -20,7 +20,7 @@ from bioetl.application.runtime_clock import current_utc_time
 
 if TYPE_CHECKING:
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
-    from bioetl.application.services.dq_report_service import DQReportContext
+    from bioetl.application.services.quality.dq_report_service import DQReportContext
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.domain.types import BronzeRecord, GoldRecord
@@ -170,7 +170,7 @@ def build_dq_report_context(
     ],
 ) -> DQReportContext:
     """Build DQ report context from accumulated execution samples."""
-    from bioetl.application.services.dq_report_service import DQReportContext
+    from bioetl.application.services.quality.dq_report_service import DQReportContext
 
     silver_data = build_dataframe(silver_records, "silver")
     gold_data = build_dataframe(gold_records, "gold")

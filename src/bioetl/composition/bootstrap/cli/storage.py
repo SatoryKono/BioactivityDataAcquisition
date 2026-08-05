@@ -19,17 +19,17 @@ from typing import TYPE_CHECKING, cast
 from uuid import NAMESPACE_URL, uuid5
 
 from bioetl.application.core.lifecycle.cleanup_service import CleanupStorageProtocol
-from bioetl.application.services.admin_runtime_api import CleanupService
-from bioetl.application.services.bronze_cleanup_service import BronzeCleanupService
-from bioetl.application.services.contract_migration_service import (
+from bioetl.application.services.ops.admin_runtime_api import CleanupService
+from bioetl.application.services.ops.bronze_cleanup_service import BronzeCleanupService
+from bioetl.application.services.contract.contract_migration_service import (
     ContractMigrationService,
 )
-from bioetl.application.services.export_service import ExportService
+from bioetl.application.services.export_lineage.export_service import ExportService
 from bioetl.application.services.medallion.medallion_lifecycle import (
     MedallionLifecycleService,
     MedallionStorageProtocol,
 )
-from bioetl.application.services.vacuum_service import VacuumService
+from bioetl.application.services.ops.vacuum_service import VacuumService
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.cli.config import bootstrap_config_service
 from bioetl.composition.bootstrap.cli.noop import (

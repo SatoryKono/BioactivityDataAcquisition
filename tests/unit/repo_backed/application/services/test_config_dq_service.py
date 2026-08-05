@@ -60,6 +60,7 @@ def _load_config_dq_service_module() -> object:
         / "bioetl"
         / "application"
         / "services"
+        / "quality"
         / "config_dq_service.py"
     )
     spec = importlib.util.spec_from_file_location(

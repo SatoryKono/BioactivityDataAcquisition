@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.checkpoint_compatibility_telemetry import (
+from bioetl.application.services.checkpoint.checkpoint_compatibility_telemetry import (
     emit_checkpoint_compatibility_metric,
     log_lenient_checkpoint_compatibility_result,
     log_strict_checkpoint_compatibility_result,

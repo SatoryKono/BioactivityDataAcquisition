@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 # Re-export from new location for backward compatibility
-from bioetl.application.services.shutdown_service import (
+from bioetl.application.services.ops.shutdown_service import (
     PipelineShutdownError,
     ShutdownReason,
     ShutdownService,

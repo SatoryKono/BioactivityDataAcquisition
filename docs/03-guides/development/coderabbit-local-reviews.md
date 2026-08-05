@@ -22,7 +22,7 @@ PR reviews still use the CodeRabbit **GitHub App** + `.coderabbit.yaml`.
 2. API key available as env var **or** prior login cache:
    - Env: `export CODERABBIT_API_KEY=...` (from secret store; never commit).
    - Cache: `~/.coderabbit/auth.json` after `coderabbit auth login`.
-3. Repo checkout on Linux filesystem or `/mnt/...` path with clean git status.
+3. Repository checkout visible from WSL with clean git status.
 4. Leaf scopes from `reports/quality/coderabbit/YYYYMMDD/01-scope-matrix.md` (≤300 files).
 
 ### Auth from host env into WSL
@@ -41,7 +41,8 @@ If `coderabbit auth status` already shows `Account: API key`, re-login is option
 
 ```bash
 wsl -e bash -lc 'export PATH="$HOME/.local/bin:$PATH"
-  cd /mnt/e/github/BioactivityDataAcquisition   # adjust path
+  repo_root="$(git rev-parse --show-toplevel)"
+  cd "$repo_root"
   coderabbit review --base main --dir src/bioetl/composition --plain     | tee reports/quality/coderabbit/$(date -u +%Y%m%d)/review_S09-composition.log'
 ```
 

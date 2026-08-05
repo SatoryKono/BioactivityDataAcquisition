@@ -39,7 +39,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from bioetl.application.services.export_models import (
+from bioetl.application.services.export_lineage.export_models import (
     ExportOptions,
     ExportResult,
     TableInfo,

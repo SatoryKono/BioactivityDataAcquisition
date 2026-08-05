@@ -11,7 +11,7 @@ from bioetl.application.core.wiring.runtime import (
     RecordProcessor,
     RecordProcessorConfig,
 )
-from bioetl.application.services.debug_export_service import DebugExportConfig
+from bioetl.application.services.export_lineage.debug_export_service import DebugExportConfig
 from bioetl.composition.factories.services._builder_record_processor_support import (
     _RecordProcessorBuildRequest,
 )

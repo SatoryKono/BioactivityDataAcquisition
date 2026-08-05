@@ -40,11 +40,11 @@ from bioetl.application.services.control_plane.workflow import execution_recordi
 from bioetl.application.services.control_plane.workflow.execution_recording import (
     WorkflowExecutionRecorder,
 )
-from bioetl.application.services.workflow_runner_models import (
+from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
 )
-from bioetl.application.services.workflow_transform_service import (
+from bioetl.application.services.workflow.workflow_transform_service import (
     WorkflowTransformDestructiveCommit,
     WorkflowTransformExecutionResult,
 )

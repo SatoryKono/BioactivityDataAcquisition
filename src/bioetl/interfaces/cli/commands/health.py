@@ -34,8 +34,8 @@ from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 if TYPE_CHECKING:
-    from bioetl.application.services.health_service import HealthService
-    from bioetl.application.services.quarantine_service import QuarantineService
+    from bioetl.application.services.ops.health_service import HealthService
+    from bioetl.application.services.quality.quarantine_service import QuarantineService
     from bioetl.composition.health_service_access import HealthServerDependencies
 
 _HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"

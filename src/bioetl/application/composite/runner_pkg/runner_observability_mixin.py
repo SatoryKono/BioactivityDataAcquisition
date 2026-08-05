@@ -13,7 +13,7 @@ from bioetl.application.composite.runner_pkg.runner_observability_helpers import
     CompositeRunnerObservabilityHostProtocol,
     generate_dq_reports,
 )
-from bioetl.application.services.dq_report_service import DQReportService
+from bioetl.application.services.quality.dq_report_service import DQReportService
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.composite.result import MergeResult
 from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort

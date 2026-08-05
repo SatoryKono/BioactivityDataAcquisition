@@ -9,7 +9,6 @@ import polars as pl
 
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointState,
-    apply_recovery_checkpoint_transition,
 )
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
@@ -31,6 +30,11 @@ from bioetl.application.composite.runner_pkg.runner_stage_dependency_state_flow 
 from bioetl.application.composite.runner_pkg.runner_stage_enrichment_mixin import (
     _CompositeRunnerStageEnrichmentMixin,
 )
+from bioetl.application.composite.runner_pkg.runner_stage_seed_flow import (
+    execute_seed_phase,
+    resume_seed_phase,
+    run_seed_with_fsm,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_support_mixin import (
     _CompositeRunnerStageSupportMixin,
 )
@@ -43,7 +47,6 @@ from bioetl.domain.composite.result import (
     DependencyResult,
     SeedResult,
 )
-from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import BioETLError, InvalidStateError
 from bioetl.domain.ports import ExecutionMetricsRunnerPort
 
@@ -61,52 +64,21 @@ class CompositeRunnerStageMixin(
         state: CompositeCheckpointState,
     ) -> tuple[CompositeCheckpointState, SeedResult]:
         """Execute the seed phase or resume from checkpoint."""
-        if not state.seed_completed:
-            return await self._run_seed_with_fsm(state)
-
-        state = self._resume_seed_phase(state)
-        return state, SeedResult(pipeline_name=self._config.seed.pipeline, resumed=True)
+        return await execute_seed_phase(self, state)
 
     def _resume_seed_phase(
         self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Normalize resumed seed state and emit resume logging."""
-        self._logger.info(
-            "Seed already completed, resuming from checkpoint",
-            composite=self._config.name,
-            run_id=self._run_id_str,
-        )
-        if state.state != CompositePipelineState.SEED_COMPLETED:
-            previous_state = state.state
-            state = apply_recovery_checkpoint_transition(
-                state,
-                CompositePipelineState.SEED_COMPLETED,
-                reason="seed_resume_completed_checkpoint",
-                clock=getattr(self, "_clock", None),
-            )
-            self._fsm.log_fsm_transition(
-                from_state=previous_state,
-                to_state=CompositePipelineState.SEED_COMPLETED,
-                stage="seed_resume",
-            )
-        return state
+        return resume_seed_phase(self, state)
 
     async def _run_seed_with_fsm(
         self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> tuple[CompositeCheckpointState, SeedResult]:
         """Run seed pipeline with FSM state transitions."""
-        state = await self._start_seed_phase(state)
-
-        try:
-            seed_result = await self._call_run_seed()
-        except (*PIPELINE_EXECUTION_ERRORS, BioETLError) as error:
-            await self._handle_seed_phase_exception(state, error)
-            raise
-
-        state = await self._complete_seed_phase(state, seed_result)
-        return state, seed_result
+        return await run_seed_with_fsm(self, state)
 
     async def _execute_dependencies_phase(
         self: _CompositeRunnerStageHostProtocol,

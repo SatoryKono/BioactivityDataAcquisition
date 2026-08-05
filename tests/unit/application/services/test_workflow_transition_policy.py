@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.workflow_transition_policy import (
+from bioetl.application.services.workflow.workflow_transition_policy import (
     apply_step_result_transition,
     resolve_step_transition_policy,
     step_kind_for_config,

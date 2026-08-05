@@ -20,7 +20,7 @@ import pyarrow as pa
 import pytest
 from pandera.pandas import Column, DataFrameSchema
 
-from bioetl.application.services.workflow_transform_service import (
+from bioetl.application.services.workflow.workflow_transform_service import (
     WorkflowTransformService,
 )
 from bioetl.application.workflow.transforms import WorkflowTransformRegistry

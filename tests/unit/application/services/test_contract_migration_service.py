@@ -34,8 +34,8 @@ import pytest
 from dataclasses import dataclass
 from unittest.mock import MagicMock
 
-from bioetl.application.services.config_service import PipelineInfo
-from bioetl.application.services.contract_migration_service import (
+from bioetl.application.services.ops.config_service import PipelineInfo
+from bioetl.application.services.contract.contract_migration_service import (
     ContractMigrationService,
 )
 

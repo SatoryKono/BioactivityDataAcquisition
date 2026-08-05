@@ -6,7 +6,7 @@ from functools import partial
 from pathlib import Path
 from typing import cast
 
-from bioetl.application.services.config_service import ConfigService
+from bioetl.application.services.ops.config_service import ConfigService
 from bioetl.application.services.control_plane.effective_config.service import (
     create_effective_config_service,
 )
@@ -46,7 +46,7 @@ def bootstrap_config_service(
     pipeline_config_loader = create_pipeline_config_loader(resolved_configs_root)
     dq_config_loader = create_dq_config_loader(resolved_configs_root)
 
-    from bioetl.application.services.config_dq_service import DQConfigLoaderProtocol
+    from bioetl.application.services.quality.config_dq_service import DQConfigLoaderProtocol
 
     return build_cli_config_service(
         registry=create_registered_pipeline_registry(registry),

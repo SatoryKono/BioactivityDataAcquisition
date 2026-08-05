@@ -19,7 +19,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.services.checkpoint_compatibility_service import (
+from bioetl.application.services.checkpoint.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
 )
 from bioetl.application.services.control_plane.manifest.inspection_service import (

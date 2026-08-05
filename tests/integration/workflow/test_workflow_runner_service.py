@@ -22,8 +22,8 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
 )
-from bioetl.application.services.workflow_runner_service import WorkflowRunnerService
-from bioetl.application.services.workflow_transform_service import (
+from bioetl.application.services.workflow.workflow_runner_service import WorkflowRunnerService
+from bioetl.application.services.workflow.workflow_transform_service import (
     WorkflowTransformExecutionResult,
     WorkflowTransformService,
 )

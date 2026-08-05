@@ -45,8 +45,8 @@ if TYPE_CHECKING:
     from bioetl.application.core.postrun.metadata_write_service import (
         PostrunMetadataWriteService,
     )
-    from bioetl.application.services.data_quality_service import DataQualityService
-    from bioetl.application.services.dq_report_service import (
+    from bioetl.application.services.quality.data_quality_service import DataQualityService
+    from bioetl.application.services.quality.dq_report_service import (
         DQReportContext,
         DQReportResult,
     )

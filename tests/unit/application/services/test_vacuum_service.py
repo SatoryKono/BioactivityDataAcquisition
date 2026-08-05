@@ -36,7 +36,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.services.vacuum_service import (
+from bioetl.application.services.ops.vacuum_service import (
     TableVacuumResult,
     VacuumAllResult,
     VacuumService,

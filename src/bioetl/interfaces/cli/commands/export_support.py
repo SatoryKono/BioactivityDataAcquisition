@@ -7,7 +7,7 @@ from collections.abc import Callable, Coroutine
 from pathlib import Path
 from typing import Literal, Protocol, cast
 
-from bioetl.application.services.export_models import (
+from bioetl.application.services.export_lineage.export_models import (
     ExportOptions,
     ExportRedactionProfile,
     ExportResult,
