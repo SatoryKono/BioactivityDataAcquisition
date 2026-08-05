@@ -992,6 +992,27 @@
           "refId": "A"
         }
       ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "pipeline": 0,
+              "reason": 1,
+              "Value": 2
+            },
+            "renameByName": {
+              "pipeline": "Pipeline",
+              "reason": "Reason",
+              "Value": "Signal"
+            }
+          }
+        }
+      ],
       "fieldConfig": {
         "defaults": {
           "noValue": "None observed",
@@ -1052,8 +1073,32 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value)$"
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 300
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Signal"
             },
             "properties": [
               {
@@ -1096,6 +1141,14 @@
               {
                 "id": "displayName",
                 "value": "Signal"
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "custom.width",
+                "value": 88
               }
             ]
           },

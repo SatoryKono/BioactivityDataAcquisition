@@ -142,7 +142,7 @@ multiple runs; use RunLedger for exact reconciliation.
 
 ### 23. Review Processed Records
 - **Type:** Table
-- **Purpose:** Show records processed by stage.
+- **Purpose:** Show Bronze/Silver/Gold counts and denominator-explicit percentages; both numeric columns are right-aligned.
 - **Data sources:** BioETL Ops HTTP
   `/ops/observability/processed-records`; this is not a Prometheus panel.
 
@@ -155,7 +155,7 @@ multiple runs; use RunLedger for exact reconciliation.
 
 ### 25. Review Active Alerts
 - **Type:** Table
-- **Purpose:** Show alert state for triage.
+- **Purpose:** Show alert state for triage. Severity owns severity color; the alert count colors only its own cell and cannot repaint a warning row as critical.
 - **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
 
 ### 26. Inspect Run Context
