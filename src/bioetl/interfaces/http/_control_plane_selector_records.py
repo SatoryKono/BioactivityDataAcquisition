@@ -163,7 +163,9 @@ def _build_selector_record(
         manifest_id=manifest.manifest_id,
         started_at=started_at,
         started_at_source=(
-            "run_ledger_started_event" if started_entry else "manifest_created_at_fallback"
+            "run_ledger_started_event"
+            if started_entry
+            else "manifest_created_at_fallback"
         ),
         completed_at=completed_at,
         completed_at_source=(
