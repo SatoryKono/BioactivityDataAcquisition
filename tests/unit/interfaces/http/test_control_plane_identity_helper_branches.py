@@ -346,7 +346,9 @@ def test_selector_payload_helpers_cover_empty_selected_and_ordering_edges() -> N
     ]
     assert options["run_status"] == ["unknown", "success"]
     assert selector_payloads.defaults_payload()["run_type_fallback"] == "backfill"
-    assert selector_payloads.defaults_payload()["run_id_list_order"] == "started_at_desc"
+    assert (
+        selector_payloads.defaults_payload()["run_id_list_order"] == "started_at_desc"
+    )
 
     assert selector_payloads.exact_run_only_fallback_values(None) == []
     assert selector_payloads.exact_run_only_fallback_values("  ") == []
