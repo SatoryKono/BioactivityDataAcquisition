@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `26ad7ad98e14f1435ffec01c4d41ee6c6664cd8d`
 
-Evidence surface SHA-256: `c3d3a78546f1b36133c961ed370e34912b99a3db3b1eddb2922fc5a1726acad6`
+Evidence surface SHA-256: `4a22743f4ec27670572afa85a13474e6a288b29d1b530b3e98add27becd35d8f`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-07-27-r1",
   "audited_commit_sha": "26ad7ad98e14f1435ffec01c4d41ee6c6664cd8d",
-  "evidence_surface_sha256": "c3d3a78546f1b36133c961ed370e34912b99a3db3b1eddb2922fc5a1726acad6",
+  "evidence_surface_sha256": "4a22743f4ec27670572afa85a13474e6a288b29d1b530b3e98add27becd35d8f",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -44,7 +44,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: #7715 re-pin audited_commit_sha to current main HEAD `26ad7ad98e14f1435ffec01c4d41ee6c6664cd8d` without budget growth. Evidence surface hash revalidated.
+Refresh reason: #7517 Stream B terminal sync — regenerate governance projections and re-pin evidence_surface_sha256 without budget growth.
 
 ## Executive summary
 
