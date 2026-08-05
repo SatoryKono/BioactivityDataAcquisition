@@ -1700,38 +1700,35 @@ processed records are different states. Treat generic `No data` as
 `UNKNOWN` until `/health/live` and the scoped endpoint respond.
 
 ```powershell
-# Windows: поднять или переиспользовать backend
-powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/start_quarantine_explorer.ps1
-
-# или
+# Host: BioETL Ops HTTP identity backend (shipping surface after 2026-07-23)
+# Quarantine Explorer / :8081 / ensure-quarantine-explorer are retired.
 $env:PYTHONPATH = "src"
-python -m scripts.ops ensure-quarantine-explorer
+python -m bioetl health server --host 0.0.0.0 --port 8000
 
 # Проверка
-curl http://127.0.0.1:8081/health/live
-curl http://127.0.0.1:8081/metrics
-curl "http://127.0.0.1:8081/ops/control-plane/identity-table?pipeline=chembl_target&run_type=backfill&run_id=<run-id>"
+curl http://127.0.0.1:8000/health/live
+curl http://127.0.0.1:8000/metrics
+curl "http://127.0.0.1:8000/ops/control-plane/identity-table?pipeline=chembl_target&run_type=backfill&run_id=<run-id>"
 ```
 
-Docker monitoring stack (устойчивый `:8000` с `restart: unless-stopped`):
+Docker main stack (health/metrics on `:8000`) + opt-in monitoring:
 
 ```bash
-docker compose -f docker-compose.monitoring.yml up -d quarantine-explorer
-docker compose -f docker-compose.monitoring.yml restart grafana
+python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeout 180
+python scripts/ops/runtime/docker/runtime_manager.py start --stack monitoring --timeout 180
+# or: make docker-start-monitoring
 ```
 
-Grafana из Docker по умолчанию обращается к `http://bioetl:8000`
-(см. `BIOETL_OPS_HTTP_URL`); compose surfaces должны держать этот
-network alias на monitoring network даже при container name
-`bioetl-quarantine-explorer`. Если backend запускается вручную на host,
-переопредели переменную на `http://host.docker.internal:8000`; такой backend
-должен слушать `0.0.0.0:8081`, не только `127.0.0.1`.
-Не публикуй BioETL Ops HTTP на host `:8000`: этот порт зарезервирован для
-BioETL `/metrics`. Canonical Prometheus scrape is `bioetl:8000` on the monitoring
-compose network (job interval 30s). Host-side override `host.docker.internal:8000`
-is optional only when metrics run on the Docker host.
-BioETL Ops HTTP Prometheus target использует `/metrics`; не возвращай
-`metrics_path` на `/health/live`, потому что этот endpoint отдаёт JSON.
+Grafana from Docker uses **BioETL Ops HTTP** → `http://bioetl:8000`
+(env `BIOETL_OPS_HTTP_URL`). There is **no** `quarantine-explorer` service in
+`docker-compose.monitoring.yml`. If health server runs on the host instead of
+main compose, set `BIOETL_OPS_HTTP_URL=http://host.docker.internal:8000` and
+bind the server to `0.0.0.0:8000` (not only `127.0.0.1`).
+
+Canonical Prometheus scrape is `bioetl:8000` on the monitoring network
+(job interval 30s). Ops HTTP Prometheus target uses `/metrics`; do not point
+`metrics_path` at `/health/live` (JSON). See
+`docs/05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md`.
 
 ### 15.2 Prometheus Target DOWN
 

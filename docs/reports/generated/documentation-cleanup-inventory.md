@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2452 |
-| Tracked doc-like files | 2452 |
+| Doc-like files | 2471 |
+| Tracked doc-like files | 2471 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 6 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 2452 |
+| tracked | 2471 |
 
 ## Lifecycle Counts
 
@@ -26,10 +26,10 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 264 |
-| active_quality_baseline | 36 |
+| active_quality_baseline | 44 |
 | closeout_evidence | 64 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 1 |
+| docs_reports_curated_or_historical_report | 2 |
 | docs_reports_generated_or_route_owned | 6 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
@@ -41,7 +41,7 @@
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 33 |
-| working_report | 104 |
+| working_report | 116 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -57,30 +57,30 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 862 |
+| Active | 861 |
 | Archived | 141 |
 | Canonical | 73 |
 | Generated | 861 |
-| Working | 515 |
+| Working | 535 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 862 |
+| active | 861 |
 | archive | 141 |
 | canonical | 73 |
 | generated | 861 |
-| working | 515 |
+| working | 535 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 312 |
-| archive-after-migration | 99 |
+| archive-after-migration | 111 |
 | generate-automatically | 861 |
-| keep | 1176 |
+| keep | 1183 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -90,7 +90,7 @@
 | `docs/00-project/ai/skills/global/documentation-audit/references/audit-checklist.md` | Working | 0 | archive-after-migration |
 | `docs/00-project/ai/skills/global/documentation-audit/references/report-template.md` | Working | 0 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
-| `docs/filters/migration-plan.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7340-specialized-subsystem-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/ai/issue-7348-comprehensive-skills-analysis-20260731.md` | Working | 0 | archive-after-migration |
@@ -102,9 +102,21 @@
 | `reports/grafana/cycle-3loop-20260804/iteration-3/dashboards/render-manifest.json` | Working | 0 | archive-after-migration |
 | `reports/grafana/cycle-3loop-20260804/iteration-3/reports/iteration-3-report.md` | Working | 0 | archive-after-migration |
 | `reports/grafana/cycle-3loop-20260804/traceability.json` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260805-r2/CONSOLIDATED_REPORT.md` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260805-r2/iteration-1/dashboards-after/render-manifest.json` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260805-r2/iteration-1/dashboards/render-manifest.json` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260805-r2/iteration-1/reports/iteration-1-report.md` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260805-r2/iteration-2/dashboards-after/render-manifest.json` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260805-r2/iteration-2/dashboards/render-manifest.json` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260805-r2/iteration-2/reports/iteration-2-report.md` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260805-r2/iteration-3/dashboards-after/render-manifest.json` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260805-r2/iteration-3/dashboards/render-manifest.json` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260805-r2/iteration-3/reports/iteration-3-report.md` | Working | 0 | archive-after-migration |
+| `reports/grafana/cycle-3loop-20260805-r2/traceability.json` | Working | 0 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/CLOSEOUT.md` | Working | 0 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/grafana-live-snapshot.json` | Working | 0 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/live-validation-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/observability/grafana/rfa-00-20260805/CLOSEOUT.md` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/selector-audit-2026-07-20/selector-audit-report.md` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_allowlist_review_5574.json` | Working | 0 | archive-after-migration |
@@ -155,18 +167,6 @@
 | `reports/quality/scripts_deprecation_backlog.md` | Working | 0 | archive-after-migration |
 | `reports/quality/semantic-ddd-use-case-audit-2026-06-17.md` | Working | 0 | archive-after-migration |
 | `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
-| `reports/quality/sonar/live-issues-20260728-manifest.json` | Working | 0 | archive-after-migration |
-| `reports/quality/sonar/live-issues-20260728-postmerge-full.json` | Working | 0 | archive-after-migration |
-| `reports/quality/sonar/live-snapshot-20260728-postmerge-summary.json` | Working | 0 | archive-after-migration |
-| `reports/quality/sonar/live-snapshot-20260728-summary.json` | Working | 0 | archive-after-migration |
-| `reports/quality/tasks_architecture_metric_exemptions_2026-06-26-15-51.json` | Working | 0 | archive-after-migration |
-| `reports/quality/tasks_architecture_metric_exemptions_2026-07-12-12-33.json` | Working | 0 | archive-after-migration |
-| `reports/quality/test-bootstrap-fixture-scope-profile.json` | Working | 0 | archive-after-migration |
-| `reports/quality/test-support-helper-ownership-map.json` | Working | 0 | archive-after-migration |
-| `reports/quality/test-system-architecture-audit-20260729_FULL.md` | Working | 0 | archive-after-migration |
-| `reports/quality/test-system-audit-2026-07-29-issue-publish.json` | Working | 0 | archive-after-migration |
-| `reports/quality/total-tech-debt-audit-main-2026-06-16.md` | Working | 0 | archive-after-migration |
-| `reports/quality/total-tech-debt-audit-main-current.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -303,6 +303,7 @@
 | Path | Tracking | Lifecycle | Action |
 | --- | --- | --- | --- |
 | `docs/reports/README.md` | tracked | docs_reports_curated_entrypoint | keep |
+| `docs/reports/dashboard-ux-checks/2026-08-05.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/evidence/INDEX.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/README.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
