@@ -50,9 +50,7 @@ def _record(
     run_status: str,
     completed_offset: int,
 ) -> SelectorRecord:
-    stamp = datetime(2026, 7, 7, 9, 0, tzinfo=UTC) + timedelta(
-        minutes=completed_offset
-    )
+    stamp = datetime(2026, 7, 7, 9, 0, tzinfo=UTC) + timedelta(minutes=completed_offset)
     return SelectorRecord(
         manifest=cast(Any, None),
         workflow=workflow_candidates[0],
