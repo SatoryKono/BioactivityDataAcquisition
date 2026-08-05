@@ -20,8 +20,8 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
     EnricherCardinality,
 )
-from bioetl.domain.composite.config import (
-    ColumnGroupConfig,
+from bioetl.domain.composite.config_merge import ColumnGroupConfig
+from bioetl.domain.composite.config_models import (
     CompositeConfig,
     CompositeDQConfig,
     CrossValidationConfig,

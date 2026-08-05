@@ -1,6 +1,6 @@
 # Сводка evidence: project-package-topology
 
-Дата: 2026-07-31
+Дата: 2026-08-05
 Статус: refreshed
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see
@@ -15,15 +15,15 @@ module-coverage producer. The inventory retains its `2026-07-28` coverage-data
 snapshot date because no newer canonical coverage run was substituted for the
 tracked coverage measurements.
 
-Current-baseline note (2026-07-31): architectural planning and GitHub issues
+Current-baseline note (2026-08-05): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
 `source_module_count=2314` with
-`source_tree_sha256=7c89fc409ddfbb569b1f3375e16311dffe0d557ba77ec1fd8f27a366da4e8dfb`.
+`source_tree_sha256=8ea780a858a56ddee874aefbde2b0544ce24eace31eb0e9b6e58e0eafb20d5a8`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
-evidence. Refresh (2026-07-24) followed run-reports domain/application surface
-additions and related module-coverage inventory hash-only reconcile.
+evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
+and related module-coverage inventory hash-only reconcile.
 
 Pandera bootstrap ownership remains reconciled with the current runtime:
 `apply_runtime_compatibility_patches` is a no-op compatibility seam, while the
