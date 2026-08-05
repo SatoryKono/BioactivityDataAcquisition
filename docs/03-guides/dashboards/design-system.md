@@ -229,12 +229,12 @@ Normative rules:
 
 The shared shell is derived from `1. Overview` and applies to primary
 dashboards `0. Control Plane`, `2. Runtime`, `3. Provider Health`,
-`4. Data Quality`, and `5. Workflow`.
+`4. Data Quality`, `5. Incident Workspace`, and `6. Run Explorer`.
 
 | Panel | Canonical ID | Role | Data contract |
 | --- | ---:| --- | --- |
 | `Inspect Scope & Evidence` | `9400` | Question and evidence-scope banner | Visible text contains the primary dashboard question and short plain-language definitions of the evidence scopes used on the page. Selector values and datasource details stay in the panel tooltip/description. |
-| `Status` | `9401` | Compact dashboard verdict | Prometheus status for the dashboard role; no `$run_id` Prometheus filtering. `5. Workflow` is selected-range evidence and must say so. |
+| `Status` | `9401` | Compact dashboard verdict | Prometheus status for the dashboard role; no `$run_id` Prometheus filtering. Workflow band on `2. Pipeline Diagnostics` is selected-range evidence and must say so. |
 | `ID` | `9402` | Local control-plane identity | HTTP/Infinity `BioETL Ops HTTP` table from `/ops/control-plane/identity-table`; exact `run_id` is preserved HTTP identity context across primary dashboards. The two visible columns are `parameter` and `value`; rows cover run/manifest IDs, Provider.Entity version, contract schema, execution flags, replay capability/mode, checkpoint anchors, optional composite run, and identity health. |
 | `Processed Records` | `9403` | Current stage/outcome accounting evidence | HTTP/Infinity table from `/ops/observability/processed-records`, backed by compact `bioetl_processed_records_*` recording rules and canonical `bioetl_stage_records_total` outcomes. It shows non-zero Bronze, Silver outcome, and Gold outcome rows only. `Inspect Processed Records` displays `parameter` and `value`; `Review Processed Records` also displays the canonical formatted `percentage`. Internal `row_status` is hidden. `value` uses a space as the thousands separator, is left-padded to the displayed `bronze [total]` width, and is right-aligned in the table. Bronze is `100%`; `silver [valid]` and `gold [valid]` use one decimal; secondary outcomes use up to three decimals with trailing zeroes trimmed. Silver and Gold percentages use Bronze total. Status, accounted subtotal, and delta rows stay out of the compact table. Missing accounting series are no-data/instrumentation gaps, not OK. |
 
@@ -279,7 +279,7 @@ same answer-first reading order.
 | --- | --- | --- | --- |
 | L0 answer-first hub | `bioetl-overview-v2` | current answer, next route, bounded mirrors | historical context, routing aids, collapsed-by-default diagnostics |
 | L1/L2 triage | `bioetl-runtime`, `bioetl-control-plane-v1`, `bioetl-provider-health-v2`, `bioetl-dq-v2` | current verdict, first action, causes, trust markers | selected-range evidence, collapsed-by-default diagnostics |
-| Selected-range operational evidence | `bioetl-workflow-overview` | selected-range operational verdict and immediate fallout | lower evidence bands, optional collapsed-by-default diagnostics |
+| Selected-range operational evidence | `bioetl-runtime` workflow band (retired: `bioetl-workflow-overview`) | selected-range operational verdict and immediate fallout | lower evidence bands, optional collapsed-by-default diagnostics |
 | Forensic explorer | `bioetl-silver-reject-explorer` | scope semantics, no-data guidance, bounded summary | row-level browsing, record details, forensic tables |
 
 Normative rules:
@@ -506,7 +506,7 @@ Implementation guardrails:
 Источник фиксированного словаря для `links[].title`: `docs/03-guides/dashboards/navigation-contract.md`.
 
 Правила:
-- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract (например: `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`, `Silver Reject Explorer`).
+- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract (например: `0. Trust`, `1. Overview`, `2. Pipeline Diagnostics`, `3. Provider Health`, `4. Data Quality`, `5. Incident Workspace`, `6. Run Explorer`, `Silver Reject Explorer`).
 - Explore-ссылки MUST использовать короткие названия: `Explore Logs` и `Explore Traces`.
 - Формулировки вида `Back to Overview`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`, `Next Recommended Drilldown` считаются legacy-лексикой и не допускаются в shipped top navigation.
 
@@ -557,7 +557,7 @@ allowed.
 - `bioetl-overview-v2` является dashboard-routing-first surface. Panel-level
   CTA здесь MAY оставаться dashboard-only и по умолчанию не требует прямых
   runbook links.
-- `bioetl-workflow-overview` является selected-range evidence surface. Его
+- ~~`bioetl-workflow-overview`~~ (**retired**; evidence lives in Runtime workflow band). Исторически это был selected-range evidence surface. Его
   четыре summary counters selected-range evidence не требуют panel-level
   runbook links; shipped `First Action` остаётся единственным
   оправданным dashboard-handoff CTA exception на этой странице.

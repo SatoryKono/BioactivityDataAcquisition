@@ -148,8 +148,7 @@ shadow review. The seven JSON UIDs remain authoritative and reachable. See
 
 Текущая навигационная модель:
 
-- `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
-  `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO` образуют единую
+- `0. Trust`, `1. Overview`, `2. Pipeline Diagnostics`, `3. Provider Health`, `4. Data Quality`, `5. Incident Workspace`, `6. Run Explorer` образуют единую
   numbered top-level шину `0..6`.
 - На всех восьми shipped dashboards navigation panel `id=1000` визуально
   показывает bus `0..6`, затем `Silver Reject Explorer`, `Explore Logs` и
@@ -189,7 +188,7 @@ shadow review. The seven JSON UIDs remain authoritative and reachable. See
   parameters; primary dashboard links preserve the shared
   `workflow/pipeline/run_type` shell and primary `run_id` only between
   dashboards that expose that selector.
-- `bioetl-workflow-overview` additionally ships hidden exact-run handoff vars
+- ~~`bioetl-workflow-overview`~~ (**retired**) historically shipped hidden exact-run handoff vars
   (`workflow_context`, `pipeline_context_exact`, `run_type_context_exact`,
   `provider_context_exact`) so selected `run_id` can narrow downstream links
   without changing the visible selector shell on the same dashboard.
@@ -301,7 +300,7 @@ secondary mirrors только как локальный контекст. Mirro
 | Inputs | `1. Overview` | `2. Runtime`, `4. Data Quality`, `0. Control Plane` |
 | Data Validation | `1. Overview` | `2. Runtime`, `0. Control Plane` |
 | Provider | `1. Overview` | `3. Provider Health` |
-| Workflow | `1. Overview` | `5. Workflow` |
+| Workflow evidence | `1. Overview` | `2. Pipeline Diagnostics` (workflow band) |
 | Replay Safety State | `0. Control Plane` | `1. Overview`, `2. Runtime` |
 | Checkpoint Freshness Lag | `0. Control Plane` | `2. Runtime` |
 | Ledger/Manifest Consistency | `0. Control Plane` | `2. Runtime` |
