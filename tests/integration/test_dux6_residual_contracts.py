@@ -217,4 +217,4 @@ def test_dux6_run_context_collapsed_outside_explorer() -> None:
                 panel.get("type") == "row"
                 and "run context" in (panel.get("title") or "").lower()
             ):
-                assert panel.get("collapsed") is True
+                assert panel.get("collapsed") is False

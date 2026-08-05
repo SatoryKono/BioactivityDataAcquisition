@@ -783,7 +783,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round(((\n (sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])))\n+\n (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])))\n+\n (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))\n+\n (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))))) or vector(0))",
+          "expr": "round(((\n (sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])))\n+\n (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])))\n+\n (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))\n+\n (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))))))",
           "instant": true,
           "refId": "A"
         }
@@ -875,7 +875,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -966,7 +966,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -1057,7 +1057,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -1148,7 +1148,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_checkpoint_load_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_checkpoint_load_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -1239,7 +1239,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_checkpoint_save_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_checkpoint_save_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -1330,7 +1330,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_checkpoint_operator_operations_total{status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_checkpoint_operator_operations_total{status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -1944,7 +1944,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -2035,7 +2035,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -2428,7 +2428,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -2519,7 +2519,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "((((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.05) + (((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.10)) or vector(0)",
+          "expr": "((((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.05) + (((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.10))",
           "instant": true,
           "refId": "A"
         }
@@ -2760,7 +2760,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -2851,7 +2851,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
           "instant": true,
           "refId": "A"
         }
@@ -3000,7 +3000,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum by (layer, operation, status) (increase(bioetl_audit_write_events_total[$__interval])) or vector(0))",
+          "expr": "round(sum by (layer, operation, status) (increase(bioetl_audit_write_events_total[$__interval])))",
           "legendFormat": "{{layer}} / {{operation}} / {{status}}",
           "refId": "A"
         }
@@ -3053,7 +3053,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum by (layer_filter, status) (increase(bioetl_audit_query_events_total[$__interval])) or vector(0))",
+          "expr": "round(sum by (layer_filter, status) (increase(bioetl_audit_query_events_total[$__interval])))",
           "legendFormat": "{{layer_filter}} / {{status}}",
           "refId": "A"
         }

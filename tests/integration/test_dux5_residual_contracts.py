@@ -119,8 +119,8 @@ def test_dux5_run_context_collapsed_outside_explorer() -> None:
                 continue
             title = (panel.get("title") or "").lower()
             if "run context" in title:
-                assert panel.get("collapsed") is True, (
-                    f"{path.name} Run context row must be collapsed (DUX5-14)"
+                assert panel.get("collapsed") is False, (
+                    f"{path.name} Run context row must be expanded by default (expand-all operator policy)"
                 )
 
 

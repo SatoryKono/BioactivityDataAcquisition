@@ -1091,7 +1091,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0))",
+          "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])))",
           "instant": true,
           "legendFormat": "Bronze",
           "refId": "A"
@@ -1161,7 +1161,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])) or vector(0))",
+          "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])))",
           "instant": true,
           "legendFormat": "Gold",
           "refId": "A"
@@ -1475,7 +1475,7 @@
       },
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range]))))",
           "legendFormat": "Validation Failures",
           "refId": "A"
         }
@@ -1559,7 +1559,7 @@
       },
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range]))))",
           "refId": "A"
         }
       ],
@@ -2372,7 +2372,7 @@
       },
       "targets": [
         {
-          "expr": "round((sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))))",
           "legendFormat": "Quarantined",
           "refId": "A"
         }
@@ -2450,7 +2450,7 @@
       },
       "targets": [
         {
-          "expr": "round((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))) or vector(0))",
+          "expr": "round((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))))",
           "instant": true,
           "legendFormat": "Filtered Out",
           "refId": "A"
