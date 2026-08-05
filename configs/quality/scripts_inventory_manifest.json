@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-05T04:56:13.731514+00:00",
+  "generated_at": "2026-08-05T05:21:46.056109+00:00",
   "summary": {
     "total_scripts": 575,
     "status_counts": {
@@ -2742,19 +2742,19 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 266,
+          "line": 265,
           "source_group": "tests",
           "text": "\"mcp_brave_search_wrapper.ps1\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 278,
+          "line": 277,
           "source_group": "tests",
           "text": "not in sources[\"mcp_brave_search_wrapper.ps1\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 286,
+          "line": 285,
           "source_group": "tests",
           "text": "assert '\"BRAVE_API_KEY\"' in sources[\"mcp_brave_search_wrapper.ps1\"]"
         }
@@ -2803,19 +2803,19 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 265,
+          "line": 264,
           "source_group": "tests",
           "text": "\"mcp_brave_search_wrapper.sh\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 274,
+          "line": 273,
           "source_group": "tests",
           "text": "not in sources[\"mcp_brave_search_wrapper.sh\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 285,
+          "line": 284,
           "source_group": "tests",
           "text": "assert \"-e BRAVE_API_KEY\" in sources[\"mcp_brave_search_wrapper.sh\"]"
         }
@@ -3232,13 +3232,13 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 846,
+          "line": 845,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 916,
+          "line": 915,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         }
@@ -3309,19 +3309,19 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 268,
+          "line": 267,
           "source_group": "tests",
           "text": "\"mcp_grafana_wrapper.ps1\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 293,
+          "line": 292,
           "source_group": "tests",
           "text": "'@(\"-e\", \"GRAFANA_SERVICE_ACCOUNT_TOKEN\")' in sources[\"mcp_grafana_wrapper.ps1\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 295,
+          "line": 294,
           "source_group": "tests",
           "text": "assert '@(\"-e\", \"GRAFANA_PASSWORD\")' in sources[\"mcp_grafana_wrapper.ps1\"]"
         }
@@ -3370,19 +3370,19 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 267,
+          "line": 266,
           "source_group": "tests",
           "text": "\"mcp_grafana_wrapper.sh\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 289,
+          "line": 288,
           "source_group": "tests",
           "text": "in sources[\"mcp_grafana_wrapper.sh\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 291,
+          "line": 290,
           "source_group": "tests",
           "text": "assert \"docker_args+=(-e GRAFANA_PASSWORD)\" in sources[\"mcp_grafana_wrapper.sh\"]"
         }
@@ -3454,7 +3454,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 536,
+          "line": 535,
           "source_group": "tests",
           "text": "assert servers[\"memory\"][\"args\"][0].endswith(\"mcp_memory_wrapper.sh\")"
         }
@@ -9681,7 +9681,7 @@
         },
         {
           "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 655,
+          "line": 654,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.repo_paths import ("
         },
@@ -19301,7 +19301,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 299,
+          "line": 298,
           "source_group": "tests",
           "text": "from scripts.ops.runtime.mcp import _materialize_shared_http_configs as materialize"
         }
