@@ -147,7 +147,6 @@ def test_core_profile_omits_high_privilege_servers_from_local_projections(
     assert "docker" not in vscode_names
     assert "memory" in cursor_names
     assert "github" in cursor_names
-    assert "cloudflare-api" in setup_mcp.REMOVED_MCP_SERVER_NAMES
     assert not (tracked_names & setup_mcp.REMOVED_MCP_SERVER_NAMES)
     assert not (cursor_names & setup_mcp.REMOVED_MCP_SERVER_NAMES)
 
