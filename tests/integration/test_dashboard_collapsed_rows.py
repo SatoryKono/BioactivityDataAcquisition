@@ -21,82 +21,33 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 
-PROGRESSIVE_DISCLOSURE_ROWS = {
-    (
-        "bioetl-control-plane-v1.json",
-        "Inspect Run Identity Evidence",
-    ),
-    (
-        "bioetl-control-plane-v1.json",
-        "Inspect Audit & Lineage Evidence",
-    ),
-    (
-        "bioetl-control-plane-v1.json",
-        "Inspect Global Store Reliability",
-    ),
-    ("bioetl-control-plane-v1.json", "Inspect Manifest & Ledger Evidence"),
-    (
-        "bioetl-control-plane-v1.json",
-        "Inspect Replay & Checkpoint Evidence",
-    ),
-    ("bioetl-control-plane-v1.json", "Inspect Run Details"),
-    ("bioetl-dq-v2.json", "Range & Debug Evidence"),
-    ("bioetl-dq-v2.json", "Run Context"),
-    ("bioetl-dq-v2.json", "Reject Evidence"),
-    ("bioetl-dq-v2.json", "Validation Diagnostics"),
-    ("bioetl-incident-v1.json", "Domain Suspect Details"),
-    ("bioetl-overview-v2.json", "Inspect Alerts"),
-    ("bioetl-overview-v2.json", "Inspect Domain Diagnostics"),
-    ("bioetl-overview-v2.json", "Inspect Historical Trends"),
-    ("bioetl-overview-v2.json", "Inspect Range Evidence"),
-    ("bioetl-overview-v2.json", "Inspect Run Context"),
-    ("bioetl-provider-health-v2.json", "Range & Debug Evidence"),
-    ("bioetl-provider-health-v2.json", "Run Context"),
-    ("bioetl-provider-health-v2.json", "Selected Provider Details"),
-    ("bioetl-runtime.json", "Inspect Detection Signals"),
-    ("bioetl-runtime.json", "Review Escalation Paths"),
-    ("bioetl-runtime.json", "Localize Runtime Cause"),
-    ("bioetl-runtime.json", "Inspect Run Context"),
-    (
-        "bioetl-runtime.json",
-        "Inspect Secondary Runtime Indicators",
-    ),
-    ("bioetl-runtime.json", "Inspect Workflow Evidence"),
-    ("bioetl-run-explorer-v1.json", "Selected Run Details"),
-}
-
-
-def test_dashboard_rows_follow_progressive_disclosure_policy():
-    """Decision rows stay open; forensic/detail rows are one expand action away."""
+def test_dashboard_rows_are_expanded_by_default() -> None:
+    """Operator policy: all panel groups ship expanded (no collapsed rows)."""
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         for panel in get_dashboard_panels(dashboard):
-            if panel.get("type") == "row":
-                title = panel.get("title", "")
-                row_key = (dashboard_path.name, title)
-                if row_key in PROGRESSIVE_DISCLOSURE_ROWS:
-                    assert panel.get("collapsed") is True, (
-                        f"{dashboard_path.name}: detail row {title!r} must stay "
-                        "collapsed by default"
-                    )
-                    assert panel.get("panels"), (
-                        f"{dashboard_path.name}: collapsed row {title!r} must keep "
-                        "its child panels nested under row.panels"
-                    )
-                else:
-                    assert panel.get("collapsed") is False, (
-                        f"{dashboard_path.name}: row {title!r} must be expanded "
-                        "by default"
-                    )
+            if panel.get("type") != "row":
+                continue
+            title = panel.get("title", "")
+            assert panel.get("collapsed") is False, (
+                f"{dashboard_path.name}: row {title!r} must be expanded by default"
+            )
+            nested = panel.get("panels") or []
+            assert len(nested) == 0, (
+                f"{dashboard_path.name}: expanded row {title!r} must not nest "
+                "child panels under row.panels (children live at root)"
+            )
 
 
-def test_all_declared_progressive_disclosure_rows_exist() -> None:
-    observed: set[tuple[str, str]] = set()
+def test_every_dashboard_has_at_least_one_row() -> None:
+    observed = 0
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
-        observed.update(
-            (dashboard_path.name, str(panel.get("title")))
+        rows = [
+            panel
             for panel in get_dashboard_panels(dashboard)
-            if panel.get("type") == "row" and panel.get("collapsed") is True
-        )
-    assert observed == PROGRESSIVE_DISCLOSURE_ROWS
+            if panel.get("type") == "row"
+        ]
+        assert rows, f"{dashboard_path.name} must declare at least one row group"
+        observed += len(rows)
+    assert observed >= 20

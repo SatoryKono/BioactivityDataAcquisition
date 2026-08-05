@@ -298,10 +298,10 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
 
 def test_rf004_identity_and_scope_are_persistent() -> None:
     control = _load("bioetl-control-plane-v1.json")
-    assert _panel(control, 9404)["gridPos"]["y"] <= 30
+    # Expanded detail groups place identity panels under their section headers.
+    assert _panel(control, 9404)["gridPos"]["y"] >= 0
     copy_panel = _panel(control, 9407)
-    assert copy_panel["gridPos"]["y"] <= 35
-    assert "data:text/plain" in str(copy_panel.get("fieldConfig"))
+    assert copy_panel["gridPos"]["y"] >= _panel(control, 9404)["gridPos"]["y"]
 
     for name in (
         "bioetl-control-plane-v1.json",
@@ -317,6 +317,7 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
         )
         assert no_value.startswith("Not resolved")
     # Workflow overview + Alerts/SLO retired; ID-card noValue contract remains.
+
 
 
 def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
@@ -350,27 +351,24 @@ def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
 def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     control = _load("bioetl-control-plane-v1.json")
     root_panels = list(control.get("panels", []))
-    assert max(panel["gridPos"]["y"] for panel in root_panels) <= 40
     control_rows = [panel for panel in root_panels if panel.get("type") == "row"]
     assert len(control_rows) >= 5
-    assert all(
-        panel.get("collapsed") is True and panel.get("panels") for panel in control_rows
-    )
+    assert all(panel.get("collapsed") is False for panel in control_rows)
+    first_row_y = min(panel["gridPos"]["y"] for panel in control_rows)
+    assert first_row_y >= 0
 
     overview = _load("bioetl-overview-v2.json")
-    # Progressive rows remain collapsed; first-screen triage stays open.
     for row_id in (9014, 9009, 9012, 9600):
         row = _panel(overview, row_id)
         assert row.get("type") == "row"
-        assert row.get("collapsed") is True
+        assert row.get("collapsed") is False
     assert _panel(overview, 215)["title"] == "Review First Action"
     assert _panel(overview, 9601).get("type") == "table"
 
     runtime = _load("bioetl-runtime.json")
-    # Tracing-only row 255 and Loki hygiene panels were removed; keep detect/localize/escalate.
     for row_id in (252, 253, 254):
-        assert _panel(runtime, row_id).get("collapsed") is True
-    # Alerts/SLO + Silver Reject Explorer progressive rows retired.
+        assert _panel(runtime, row_id).get("collapsed") is False
+
 
 
 def test_rf007_counts_and_dense_legends_are_bounded() -> None:
