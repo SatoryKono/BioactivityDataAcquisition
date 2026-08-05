@@ -5,7 +5,7 @@ audits:
   status: current
   report_path: reports/quality/total-tech-debt-audit-main-current.md
   audited_commit_sha: 26ad7ad98e14f1435ffec01c4d41ee6c6664cd8d
-  evidence_surface_sha256: c3d3a78546f1b36133c961ed370e34912b99a3db3b1eddb2922fc5a1726acad6
+  evidence_surface_sha256: 4a22743f4ec27670572afa85a13474e6a288b29d1b530b3e98add27becd35d8f
   evidence_paths:
   - configs/quality/compatibility_facade_inventory.yaml
   - configs/quality/constructor_waivers.yaml
@@ -18,7 +18,7 @@ audits:
   - reports/quality/module-coverage-inventory.json
   - reports/quality/test-governance-current.json
   reviewed_on: '2026-08-05'
-  linked_issue: '#7715'
+  linked_issue: '#7517'
 - id: total-tech-debt-main-2026-07-27
   status: superseded
   report_path: docs/99-archive/reports/quality/total-tech-debt-audit-main-2026-07-27.md
