@@ -811,7 +811,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Count"
+                "value": "Value"
               }
             ]
           }
