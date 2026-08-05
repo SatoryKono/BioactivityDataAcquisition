@@ -93,9 +93,9 @@
       "coverage_actual_percent": 92.44,
       "coverage_percent_fallback_used": true,
       "coverage_xml_present": false,
-      "refreshed_at_utc": "2026-08-05T15:04:00.773472+00:00",
+      "refreshed_at_utc": "2026-08-05T15:39:37.466507+00:00",
       "slowest_total_cases": 46742,
-      "source_commit": "dee95612a82c6dd8f40a93379630fee5d1e5ce37",
+      "source_commit": "8b9ac1e7401e5dd172adf89e1f2626483b111265",
       "source_run_id": "local-duration-rebuild-2026-07-23",
       "top_slow_zone": {
         "zone": "tests.unit.scripts.docs.passports.test_passport_projector",
