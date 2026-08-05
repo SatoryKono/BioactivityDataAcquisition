@@ -31,7 +31,10 @@ def fix_percentage_align() -> list[dict]:
                 if override.get("matcher", {}).get("options") != "percentage":
                     continue
                 for prop in override.get("properties") or []:
-                    if prop.get("id") == "custom.align" and prop.get("value") != "right":
+                    if (
+                        prop.get("id") == "custom.align"
+                        and prop.get("value") != "right"
+                    ):
                         old = prop.get("value")
                         prop["value"] = "right"
                         dirty = True
