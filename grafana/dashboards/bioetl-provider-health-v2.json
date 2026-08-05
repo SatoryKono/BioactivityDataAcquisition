@@ -1396,7 +1396,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(rate.?limit|429|thrott).*\"}[$__interval])))",
+              "expr": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(rate.?limit|429|thrott).*\"}[$__interval]))) or vector(0))",
               "legendFormat": "{{ provider }} {{ method }} {{ error_type }}",
               "refId": "A"
             }
@@ -1474,7 +1474,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(timeout|timed.?out|network).*\"}[$__interval])))",
+              "expr": "round((sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(timeout|timed.?out|network).*\"}[$__interval]))) or vector(0))",
               "legendFormat": "{{ provider }} {{ method }} {{ error_type }}",
               "refId": "A"
             }
@@ -2149,7 +2149,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])))",
+              "expr": "round((sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range]))) or vector(0))",
               "legendFormat": "{{ provider }}",
               "refId": "A"
             }
@@ -2234,7 +2234,7 @@
           },
           "targets": [
             {
-              "expr": "(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range]))) / clamp_min((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range]))), 1)",
+              "expr": "((sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range]))) / clamp_min((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range]))), 1)) or vector(0)",
               "legendFormat": "failure_rate",
               "refId": "A"
             }
@@ -2600,7 +2600,7 @@
                   },
                   {
                     "id": "custom.align",
-                    "value": "left"
+                    "value": "right"
                   },
                   {
                     "id": "custom.cellOptions",
