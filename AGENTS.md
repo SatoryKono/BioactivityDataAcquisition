@@ -70,9 +70,11 @@ Minimum expectation:
 
 ## Guardrails
 
-- **Root scratch ban (RH5):** do not create root-level `_tmp_*.py`, `/_cr_*.py`,
-  `/_publish_*.py`, or ad-hoc `test_*.py`. Prefer `scripts/**` or `reports/**`.
-  Tracked root must stay ≡ `.github/root-allowlist.txt` (37 files). See
+- **Root scratch ban (RH5/RH6):** do not create root-level `_tmp_*.py`, `/_cr_*.py`,
+  `/_publish_*.py`, ad-hoc `test_*.py`, or Windows device-name files such as
+  `nul` / `NUL`. Prefer `scripts/**` or `reports/**`. Tracked root must stay
+  ≡ `.github/root-allowlist.txt` (37 files). Local clutter: registry +
+  `scripts/engineering/repo/cleanup_root_local_clutter.py`. See
   `docs/00-project/governance/root-local-clutter-cleanup.md`.
 - BioETL remains local-only by default; do not introduce Docker, Redis, or
   external orchestration requirements unless the task explicitly requires them.
