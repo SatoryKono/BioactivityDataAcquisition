@@ -18,9 +18,7 @@ pytestmark = pytest.mark.integration
 
 # Active SSOT only — archived dashboard drafts (#7588) must not be treated as
 # current normative surfaces for query-policy assertions.
-_QUERY_POLICY_DOCS = (
-    Path("docs/03-guides/dashboards/design-system.md"),
-)
+_QUERY_POLICY_DOCS = (Path("docs/03-guides/dashboards/design-system.md"),)
 
 
 def test_design_system_documents_query_duplication_policy() -> None:
