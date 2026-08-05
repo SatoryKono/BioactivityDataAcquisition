@@ -65,7 +65,10 @@ def test_issue_5978_branch_coverage_is_promoted_to_hard_gate() -> None:
     gate_reqs = closeout["branch_coverage_gate_requirements"]
     assert gate_reqs["hard_gate_threshold_percent"] == 85
     assert gate_reqs["current_policy"] == "blocking"
-    assert len(gate_reqs["promotion_criteria"]) == 3
+    # Keep parity with module_coverage_gates.yaml (includes #7611 advisory margin).
+    assert len(gate_reqs["promotion_criteria"]) == len(
+        _load_yaml(MODULE_COVERAGE_GATES)["branch_coverage"]["promotion_criteria"]
+    )
 
     stability = closeout["stability_evidence"]
     assert stability["status"] == "passed"
