@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.metrics_service import MetricsService
+from bioetl.application.services.ops.metrics_service import MetricsService
 from bioetl.infrastructure.observability.metrics_publisher_adapter import (
     MetricsPublisherAdapter,
 )

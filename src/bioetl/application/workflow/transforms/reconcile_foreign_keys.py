@@ -7,7 +7,7 @@ import asyncio
 from collections.abc import Mapping
 from typing import Any, cast
 
-from bioetl.application.services.workflow_transform_artifacts import (
+from bioetl.application.services.workflow.workflow_transform_artifacts import (
     WorkflowTransformArtifactContext,
     artifact_refs_as_dicts,
 )

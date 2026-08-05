@@ -34,12 +34,12 @@ from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
-from bioetl.application.services.audit_inspection_service import AuditInspectionResult
-from bioetl.application.services.checkpoint_service import CheckpointInfo
-from bioetl.application.services.observability_workflow_service import (
+from bioetl.application.services.export_lineage.audit_inspection_service import AuditInspectionResult
+from bioetl.application.services.checkpoint.checkpoint_service import CheckpointInfo
+from bioetl.application.services.workflow.observability_workflow_service import (
     ObservabilityWorkflowService,
 )
-from bioetl.application.services._observability_workflow_lookup_support import (
+from bioetl.application.services.workflow._observability_workflow_lookup_support import (
     resolve_checkpoint_for_run,
     resolve_lineage_for_run,
     resolve_pipeline_name,

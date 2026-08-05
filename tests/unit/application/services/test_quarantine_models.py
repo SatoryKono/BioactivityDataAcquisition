@@ -33,7 +33,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from bioetl.application.services._quarantine_models import QuarantineRecord
+from bioetl.application.services.quality._quarantine_models import QuarantineRecord
 
 pytestmark = pytest.mark.unit
 

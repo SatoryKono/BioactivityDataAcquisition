@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Protocol, cast
 from bioetl.application.composite.runner_pkg.runner_constants import (
     DQ_REPORT_NON_FATAL_ERRORS,
 )
-from bioetl.application.services.dq_report_service import DQReportService
+from bioetl.application.services.quality.dq_report_service import DQReportService
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.composite.result import MergeResult
 from bioetl.domain.exceptions import BioETLError
@@ -125,7 +125,7 @@ async def generate_dq_reports(
         return
 
     try:
-        from bioetl.application.services.dq_report_service import DQReportContext
+        from bioetl.application.services.quality.dq_report_service import DQReportContext
 
         cached_bronze_date = cast(
             str | None,

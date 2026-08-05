@@ -35,7 +35,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.application.services.debug_export_service import DebugExportConfig
+from bioetl.application.services.export_lineage.debug_export_service import DebugExportConfig
 from bioetl.application.core.wiring.runtime import BasePipeline
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.services.pipeline_builder import (

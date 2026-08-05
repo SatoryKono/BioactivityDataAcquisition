@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services._observability_workflow_checkpoint_support import (
+from bioetl.application.services.workflow._observability_workflow_checkpoint_support import (
     _replay_context,
 )
 from bioetl.application.services.control_plane.manifest.identity_graph_assembly import (

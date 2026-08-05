@@ -51,7 +51,7 @@ from bioetl.application.services.control_plane.workflow.execution_recording_payl
 from bioetl.application.services.control_plane.workflow.execution_recording_state import (
     _apply_completed_step_state,
 )
-from bioetl.application.services.workflow_runner_service import (
+from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowRunExecutionResult,
     WorkflowTransformDestructiveCommit,
     WorkflowStepExecutionResult,

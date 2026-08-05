@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.metrics_service import MetricsService
+from bioetl.application.services.ops.metrics_service import MetricsService
 from bioetl.composition.bootstrap.assembly.metrics_service import (
     create_metrics_service,
 )

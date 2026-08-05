@@ -5,7 +5,7 @@ Contains bootstrap functions for lock service used by CLI operations.
 
 from __future__ import annotations
 
-from bioetl.application.services.lock_service import LockService
+from bioetl.application.services.ops.lock_service import LockService
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 

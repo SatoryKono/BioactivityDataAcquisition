@@ -34,7 +34,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from bioetl.application.services._observability_trace_support import (
+from bioetl.application.services.workflow._observability_trace_support import (
     _explicit_trace_ids,
     _generated_trace_ids,
     build_trace_ids,

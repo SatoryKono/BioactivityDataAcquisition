@@ -33,7 +33,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.services.config_service import (
+from bioetl.application.services.ops.config_service import (
     ConfigService,
     PipelineInfo,
     SettingsInfo,

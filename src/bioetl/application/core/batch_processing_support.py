@@ -46,7 +46,7 @@ if TYPE_CHECKING:
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterProtocol,
     )
-    from bioetl.application.services.debug_export_service import DebugExportService
+    from bioetl.application.services.export_lineage.debug_export_service import DebugExportService
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 

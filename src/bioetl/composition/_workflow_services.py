@@ -28,10 +28,10 @@ if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
-    from bioetl.application.services.workflow_runner_service import (
+    from bioetl.application.services.workflow.workflow_runner_service import (
         WorkflowRunnerService,
     )
-    from bioetl.application.services.workflow_transform_artifacts import (
+    from bioetl.application.services.workflow.workflow_transform_artifacts import (
         WorkflowTransformArtifactSinkProtocol,
     )
     from bioetl.application.workflow.transforms import WorkflowTransformRegistry
@@ -197,10 +197,10 @@ def get_workflow_runner_service(
     | None = None,
 ) -> WorkflowRunnerService:
     """Build the baseline declarative workflow runner through composition seams."""
-    from bioetl.application.services.workflow_runner_service import (
+    from bioetl.application.services.workflow.workflow_runner_service import (
         WorkflowRunnerService,
     )
-    from bioetl.application.services.workflow_transform_service import (
+    from bioetl.application.services.workflow.workflow_transform_service import (
         WorkflowTransformService,
     )
     from bioetl.infrastructure.control_plane import FileWorkflowTransformArtifactStore

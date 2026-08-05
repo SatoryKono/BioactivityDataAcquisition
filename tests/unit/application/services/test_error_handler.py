@@ -36,7 +36,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.error_handler import ErrorHandler
+from bioetl.application.services.ops.error_handler import ErrorHandler
 from bioetl.domain.exceptions.base_exceptions import (
     BioETLDomainError,
     BioETLIntegrationError,

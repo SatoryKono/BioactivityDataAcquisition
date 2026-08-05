@@ -30,7 +30,7 @@ from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecord
 from bioetl.application.services.control_plane.effective_config.service import (
     EffectiveConfigService,
 )
-from bioetl.application.services.checkpoint_compatibility_service import (
+from bioetl.application.services.checkpoint.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
 )
 from bioetl.application.services.control_plane.forensic import ForensicRunDiffService

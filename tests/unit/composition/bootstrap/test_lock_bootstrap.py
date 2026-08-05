@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.lock_service import LockService
+from bioetl.application.services.ops.lock_service import LockService
 from bioetl.composition.bootstrap.cli.lock import bootstrap_lock_service
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger

@@ -9,19 +9,19 @@ from bioetl.application.core.lifecycle import (
     CheckpointCompatibilityService,
     CheckpointRuntimeService,
 )
-from bioetl.application.services.admin_runtime_api import QuarantineRuntimeService
-from bioetl.application.services.audit_inspection_service import AuditInspectionService
-from bioetl.application.services.checkpoint_service import CheckpointService
-from bioetl.application.services.config_dq_service import (
+from bioetl.application.services.ops.admin_runtime_api import QuarantineRuntimeService
+from bioetl.application.services.export_lineage.audit_inspection_service import AuditInspectionService
+from bioetl.application.services.checkpoint.checkpoint_service import CheckpointService
+from bioetl.application.services.quality.config_dq_service import (
     ConfigDQService,
     DQConfigLoaderProtocol,
     PipelineYamlConfigGetterProtocol,
 )
-from bioetl.application.services.config_service import ConfigService
-from bioetl.application.services.observability_workflow_service import (
+from bioetl.application.services.ops.config_service import ConfigService
+from bioetl.application.services.workflow.observability_workflow_service import (
     ObservabilityWorkflowService,
 )
-from bioetl.application.services.quarantine_service import QuarantineService
+from bioetl.application.services.quality.quarantine_service import QuarantineService
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     build_effective_config_source_refs,
 )
