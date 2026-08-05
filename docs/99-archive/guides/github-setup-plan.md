@@ -10,6 +10,8 @@ Last verified: '2026-06-02'
 
 ______________________________________________________________________
 
+> **ARCHIVED (docs audit cycle 2, 2026-08-05):** historical working draft. Not an active SSOT. See published dashboard/GitHub guides under `docs/03-guides/`.
+
 # План настройки работы с GitHub репозиторием BioETL
 
 *Комплексное руководство по настройке и оптимизации GitHub workflow для проекта BioETL.*
