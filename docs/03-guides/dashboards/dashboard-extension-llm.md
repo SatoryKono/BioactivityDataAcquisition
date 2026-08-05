@@ -89,9 +89,9 @@ Grafana dashboards в BioETL.
   When `$run_id` is selected, the HTTP endpoint resolves exact-run rows from
   RunLedger artifact/metrics evidence; otherwise it falls back to
   `bioetl_processed_records_*` recording rules with `value` and formatted
-  canonical `percentage` fields. Panels titled `Inspect Processed Records`
-  display only `parameter` and `value`; panels titled `Review Processed Records`
-  also display `percentage`. All variants include zero-valued outcome rows,
+  canonical `percentage` fields. Every `Inspect`/`Review Processed Records`
+  panel displays `parameter`, `value`, and `percentage`; both numeric evidence
+  columns are right-aligned. All variants include zero-valued outcome rows,
   hide internal `row_status`, and intentionally omit status, accounted
   subtotal, and delta rows; they never introduce `run_id` Prometheus labels or
   replace the dashboard-specific `Status` / `First Action` decision path.

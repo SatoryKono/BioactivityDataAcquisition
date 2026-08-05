@@ -599,6 +599,65 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     }
 
 
+def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> None:
+    incident = _load("bioetl-incident-v1.json")
+    current_alerts = _panel(incident, 2005)
+    dq_suspects = _panel(incident, 2004)
+
+    assert current_alerts.get("targets", [{}])[0].get("expr") == (
+        'count by (alertname, alertstate) (ALERTS{alertstate=~"firing|pending"})'
+    )
+    count_override = next(
+        override
+        for override in current_alerts["fieldConfig"]["overrides"]
+        if override.get("matcher", {}).get("options")
+        == r"^(Value|#Value|Value \(.*\)|value)$"
+    )
+    count_properties = {
+        property_["id"]: property_["value"]
+        for property_ in count_override["properties"]
+    }
+    assert count_properties == {
+        "custom.cellOptions": {"type": "auto"},
+        "custom.align": "right",
+        "custom.width": 120,
+        "displayName": "Active Alerts",
+    }
+
+    assert dq_suspects.get("targets", [{}])[0].get("expr") == (
+        "topk(10, max by (pipeline, reason) (bioetl_dq_current_reason) > 0)"
+    )
+    organize = dq_suspects.get("transformations", [])[0]
+    assert organize.get("id") == "organize"
+    options = organize.get("options", {})
+    assert options.get("excludeByName", {}).get("Time") is True
+    assert options.get("indexByName") == {
+        "pipeline": 0,
+        "reason": 1,
+        "Value": 2,
+    }
+    assert options.get("renameByName") == {
+        "pipeline": "Pipeline",
+        "reason": "Reason",
+        "Value": "Signal",
+    }
+    overrides = {
+        override.get("matcher", {}).get("options"): {
+            property_["id"]: property_["value"]
+            for property_ in override.get("properties", [])
+        }
+        for override in dq_suspects["fieldConfig"]["overrides"]
+    }
+    assert overrides["Pipeline"]["custom.width"] == 160
+    assert overrides["Reason"]["custom.width"] == 300
+    assert overrides["Signal"]["custom.align"] == "right"
+    assert overrides["Signal"]["custom.width"] == 88
+    assert overrides["Signal"]["custom.cellOptions"] == {
+        "type": "color-background",
+        "mode": "basic",
+    }
+
+
 def test_runtime_multi_query_tables_expose_semantic_fields_only() -> None:
     runtime = _load("bioetl-runtime.json")
     blocker_detail = _panel(runtime, 242)
