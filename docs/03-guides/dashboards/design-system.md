@@ -557,10 +557,11 @@ allowed.
 - `bioetl-overview-v2` является dashboard-routing-first surface. Panel-level
   CTA здесь MAY оставаться dashboard-only и по умолчанию не требует прямых
   runbook links.
-- ~~`bioetl-workflow-overview`~~ (**retired**; evidence lives in Runtime workflow band). Исторически это был selected-range evidence surface.
-  четыре summary counters selected-range evidence не требуют panel-level
-  runbook links; shipped `First Action` остаётся единственным
-  оправданным dashboard-handoff CTA exception на этой странице.
+- `bioetl-workflow-overview` является selected-range evidence surface
+  (**retired** as a standalone UID; evidence now lives in the Runtime workflow
+  band on `bioetl-runtime`). Four summary counters as selected-range evidence
+  do not require panel-level runbook links; shipped `First Action` remains the
+  only justified dashboard-handoff CTA exception for that role.
 - Если используется runbook link, URL MUST follow canonical GitHub blob pattern:
   `https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/<name>.md`
 - Названия runbook links SHOULD оставаться domain-specific (`Open Runtime
