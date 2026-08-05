@@ -495,42 +495,10 @@
               "options": "^(Value|#Value|Value \\(.*\\)|value)$"
             },
             "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "basic"
-                }
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "thresholds"
-                }
-              },
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "orange",
-                      "value": 1
-                    },
-                    {
-                      "color": "red",
-                      "value": 2
-                    }
-                  ]
-                }
-              },
+              {"id": "custom.cellOptions", "value": {"type": "auto"}},
               {
                 "id": "displayName",
-                "value": "Severity"
+                "value": "Count"
               }
             ]
           }
