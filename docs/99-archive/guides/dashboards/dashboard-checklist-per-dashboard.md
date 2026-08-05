@@ -1,3 +1,5 @@
+> **ARCHIVED (docs audit cycle 2, 2026-08-05):** historical working draft. Not an active SSOT. See published dashboard/GitHub guides under `docs/03-guides/`.
+
 # Чек-лист проверок для дашбордов BioETL
 
 > **Removed 2026-07-23:** Silver Reject Explorer dashboard, Loki/Tempo Explore adjuncts, Quarantine Explorer datasource (replaced by BioETL Ops HTTP on :8000).

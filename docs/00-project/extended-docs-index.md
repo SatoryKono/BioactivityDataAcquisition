@@ -13,10 +13,10 @@ promoting every specialist page into the primary MkDocs navigation.
 
 ## Guides
 
-- [Dashboard audit checklist](../03-guides/dashboards/dashboard-audit-checklist.md)
-- [Per-dashboard checklist](../03-guides/dashboards/dashboard-checklist-per-dashboard.md)
-- [Dashboard requirements](../03-guides/dashboards/dashboard-requirements-comprehensive.md)
-- [Dashboard test proposals](../03-guides/dashboards/dashboard-test-proposals.md)
+- [Dashboard audit checklist](../99-archive/guides/dashboards/dashboard-audit-checklist.md)
+- [Per-dashboard checklist](../99-archive/guides/dashboards/dashboard-checklist-per-dashboard.md)
+- [Dashboard requirements](../99-archive/guides/dashboards/dashboard-requirements-comprehensive.md)
+- [Dashboard test proposals](../99-archive/guides/dashboards/dashboard-test-proposals.md)
 - [Dashboard design system](../03-guides/dashboards/design-system.md)
 - [Dashboard navigation contract](../03-guides/dashboards/navigation-contract.md)
 - [Panel title inventory](../03-guides/dashboards/panel-title-inventory.md)
