@@ -20,6 +20,10 @@ from bioetl.application.composite._preflight_orchestration import (
 from bioetl.application.composite._preflight_reporting import (
     PreflightValidationReportingMixin,
 )
+from bioetl.application.composite._preflight_type_and_aggregation import (
+    check_type_compatibility,
+    validate_aggregation_ordering,
+)
 from bioetl.application.composite._preflight_types import (
     FieldInfo,
     PreflightValidationError,
@@ -29,7 +33,6 @@ from bioetl.application.composite._preflight_types import (
     ValidationIssue,
 )
 from bioetl.domain.composite import CompositeConfig
-from bioetl.domain.composite.aggregation import AggregationFunction
 from bioetl.domain.ports import LoggerPort
 
 __all__ = [
@@ -47,23 +50,6 @@ class CompositePreflightValidationService(
     PreflightSchemaOrchestrationMixin,
 ):
     """Validates composite pipeline configuration before execution."""
-
-    _COMPATIBLE_TYPES: tuple[frozenset[str], ...] = (
-        frozenset({"str", "object", "String"}),
-        frozenset(
-            {"int", "Int64", "int64", "Int64Dtype", "float", "Float64", "float64"}
-        ),
-        frozenset({"bool", "boolean"}),
-        frozenset({"date", "datetime", "datetime64"}),
-    )
-    _ORDER_SENSITIVE_AGGREGATIONS = frozenset(
-        {
-            AggregationFunction.COLLECT_LIST,
-            AggregationFunction.COLLECT_SET,
-            AggregationFunction.FIRST,
-            AggregationFunction.CONCAT_STR,
-        }
-    )
 
     def __init__(self, logger: LoggerPort) -> None:
         self._logger = logger
@@ -125,7 +111,7 @@ class CompositePreflightValidationService(
             issues.append(missing_from_all_sources_issue(field_name, priorities))
 
         if len(scan.field_dtypes) > 1:
-            type_issue = self._check_type_compatibility(field_name, scan.field_dtypes)
+            type_issue = check_type_compatibility(field_name, scan.field_dtypes)
             if type_issue:
                 issues.append(type_issue)
 
@@ -139,63 +125,6 @@ class CompositePreflightValidationService(
             issues.append(profile_issue)
 
         return issues, scan.resolved_source
-
-    def _check_type_compatibility(
-        self, field_name: str, field_dtypes: dict[str, str]
-    ) -> ValidationIssue | None:
-        """Check if field types are compatible across sources."""
-        dtypes = list(field_dtypes.values())
-        sources = list(field_dtypes.keys())
-
-        for compat_group in self._COMPATIBLE_TYPES:
-            if all(self._dtype_in_group(dtype, compat_group) for dtype in dtypes):
-                return None
-
-        return ValidationIssue(
-            field=field_name,
-            source=",".join(sources),
-            issue_type="type_mismatch",
-            message=f"Incompatible types for '{field_name}': "
-            f"{dict(zip(sources, dtypes, strict=False))}",
-            severity="error",
-        )
-
-    def _dtype_in_group(self, dtype: str, group: frozenset[str]) -> bool:
-        """Check if a dtype belongs to a compatibility group."""
-        dtype_lower = dtype.lower()
-        return dtype_lower in {entry.lower() for entry in group}
-
-    def _validate_aggregation_ordering(
-        self,
-        config: CompositeConfig,
-    ) -> list[ValidationIssue]:
-        """Return preflight issues for many-to-one aggregation without order_by."""
-        issues: list[ValidationIssue] = []
-        for enricher in config.enrichers:
-            aggregation = enricher.aggregation
-            if not enricher.is_many_to_one or aggregation is None:
-                continue
-            order_sensitive_fields = [
-                field.effective_output_field
-                for field in aggregation.fields
-                if field.agg_function in self._ORDER_SENSITIVE_AGGREGATIONS
-            ]
-            if not order_sensitive_fields or aggregation.order_by:
-                continue
-            issues.append(
-                ValidationIssue(
-                    field="aggregation.order_by",
-                    source=enricher.pipeline,
-                    issue_type="missing_deterministic_order",
-                    message=(
-                        f"Enricher '{enricher.pipeline}' many-to-one aggregation "
-                        "must declare aggregation.order_by for deterministic "
-                        f"fields: {sorted(order_sensitive_fields)}"
-                    ),
-                    severity="error",
-                )
-            )
-        return issues
 
     def validate(
         self,
@@ -239,7 +168,7 @@ class CompositePreflightValidationService(
             if resolved_source:
                 resolved_fields[field_name] = resolved_source
 
-        issues.extend(self._validate_aggregation_ordering(config))
+        issues.extend(validate_aggregation_ordering(config))
 
         is_valid = all(issue.severity != "error" for issue in issues)
         result = PreflightValidationResult(

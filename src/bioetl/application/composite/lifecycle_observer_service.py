@@ -9,6 +9,10 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 
+from bioetl.application.composite._lifecycle_observer_terminal_emit import (
+    emit_run_failed,
+    emit_run_shutdown,
+)
 from bioetl.application.composite._lifecycle_observer_tracing_helpers import (
     _CompositeSpanHandleProtocol,
 )
@@ -73,42 +77,14 @@ class CompositeLifecycleObserverService(CompositeLifecycleTracingMixin):
         stage: str | None = None,
     ) -> None:
         """Emit the canonical composite run failure event."""
-        log_kwargs: dict[str, object] = {
-            "phase": "cleanup",
-            "composite": composite_name,
-            "error": str(error),
-            "error_type": type(error).__name__,
-            "reason_code": reason_code,
-        }
-        duration_seconds = self._resolve_run_duration(run_id)
-        if duration_seconds is not None:
-            log_kwargs["duration_seconds"] = round(duration_seconds, 4)
-        if stage is not None:
-            log_kwargs["stage"] = stage
-        self._emit_contract_event(
-            PipelineEvent.FAILED,
+        emit_run_failed(
+            self,
             composite_name=composite_name,
             run_id=run_id,
-            severity="error",
-            **log_kwargs,
-        )
-        self._record_pipeline_terminal_metrics(
-            composite_name=composite_name,
-            duration_seconds=duration_seconds,
-            status="failed",
-        )
-        self._close_active_phase_spans_for_run(
-            run_id=run_id,
-            status="failed",
             error=error,
+            reason_code=reason_code,
+            stage=stage,
         )
-        self._close_run_span(
-            run_id=run_id,
-            status="failed",
-            duration_seconds=duration_seconds,
-            error=error,
-        )
-        self._clear_run_state(run_id)
 
     def emit_run_shutdown(
         self,
@@ -120,41 +96,14 @@ class CompositeLifecycleObserverService(CompositeLifecycleTracingMixin):
         reason_code: str,
     ) -> None:
         """Emit the canonical composite shutdown event."""
-        duration_seconds = self._resolve_run_duration(run_id)
-        log_kwargs: dict[str, object] = {
-            "phase": "cleanup",
-            "composite": composite_name,
-            "error": str(error),
-            "error_type": type(error).__name__,
-            "reason": reason,
-            "reason_code": reason_code,
-        }
-        if duration_seconds is not None:
-            log_kwargs["duration_seconds"] = round(duration_seconds, 4)
-        self._emit_contract_event(
-            PipelineEvent.SHUTDOWN,
+        emit_run_shutdown(
+            self,
             composite_name=composite_name,
             run_id=run_id,
-            severity="warning",
-            **log_kwargs,
-        )
-        self._record_pipeline_terminal_metrics(
-            composite_name=composite_name,
-            duration_seconds=duration_seconds,
-            status="shutdown",
-        )
-        self._close_active_phase_spans_for_run(
-            run_id=run_id,
-            status="shutdown",
             error=error,
+            reason=reason,
+            reason_code=reason_code,
         )
-        self._close_run_span(
-            run_id=run_id,
-            status="shutdown",
-            duration_seconds=duration_seconds,
-            error=error,
-        )
-        self._clear_run_state(run_id)
 
     def emit_phase_started(
         self,
