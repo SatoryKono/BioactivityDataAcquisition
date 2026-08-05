@@ -204,7 +204,7 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     )
     assert len(next_action_expr) <= 200
 
-    # Priority column uses text color; Action carries row-aware board link.
+    # Phase 2: Priority is a short color-background badge; Action is sole color-text CTA.
     overrides = next_action.get("fieldConfig", {}).get("overrides", [])
     value_override = next(
         (
@@ -219,7 +219,32 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
         prop.get("id"): prop.get("value")
         for prop in value_override.get("properties", [])
     }
-    assert value_props.get("custom.cellOptions", {}).get("type") == "color-text"
+    priority_cell = value_props.get("custom.cellOptions", {})
+    assert priority_cell.get("type") == "color-background"
+    assert priority_cell.get("applyToRow") is not True, (
+        "Priority badge must not paint the whole row (verdict-ontology anti-pattern)"
+    )
+
+    # Short Priority badges (RUNTIME/CP/DQ/…) live on field defaults mappings.
+    priority_maps = {}
+    for mapping in (
+        next_action.get("fieldConfig", {}).get("defaults", {}).get("mappings") or []
+    ):
+        if mapping.get("type") == "value":
+            priority_maps.update(mapping.get("options") or {})
+    for score, badge in {
+        "0": "NR",
+        "5": "MON",
+        "10": "WF",
+        "20": "PROV",
+        "30": "DQ",
+        "35": "GOLD",
+        "40": "CP",
+        "50": "RUNTIME",
+    }.items():
+        assert score in priority_maps, f"missing Priority map for score {score}"
+        assert priority_maps[score].get("text") == badge
+        assert len(str(priority_maps[score].get("text") or "")) <= 8
 
     action_override = next(
         (
@@ -235,6 +260,7 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
         for prop in action_override.get("properties", [])
     }
     assert action_props.get("custom.cellOptions", {}).get("type") == "color-text"
+    assert next_action.get("options", {}).get("cellHeight") == "md"
     assert int(action_props.get("custom.width") or 0) >= 180, (
         "Action column must be wide enough to avoid truncation at default density"
     )

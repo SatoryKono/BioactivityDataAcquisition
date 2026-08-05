@@ -496,6 +496,7 @@ navigation_transition_contract:
         - "Priority order: Runtime > Control Plane > Gold lifecycle > DQ > Provider > Workflow > Monitor"
         - "Query uses topk(4, …) with NO_ROUTE vector fallback when no matching series"
         - "Column order Action → Priority → Why → Pipeline; short Action labels; panel dataLinks keep Open* titles"
+        - "Priority badges RUNTIME/CP/GOLD/DQ/PROV/WF/MON/NR with column-only color-background; Action sole color-text CTA"
         - "Provider handoff fail-closes provider=unknown and preserves pipeline_context"
     bioetl-runtime:
       panel_id: 9991
