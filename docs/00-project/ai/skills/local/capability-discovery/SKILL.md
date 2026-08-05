@@ -19,6 +19,7 @@ agent: "Explore"
 # Capability Discovery
 
 ## Source Of Truth
+
 - Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
