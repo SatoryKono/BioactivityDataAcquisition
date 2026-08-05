@@ -58,6 +58,7 @@ def test_reduce_architecture_debt_script_writes_plan(tmp_path: Path) -> None:
     payload = json.loads(output_path.read_text(encoding="utf-8"))
     assert payload["summary"]["total_tasks"] == 1
     assert payload["batches"][0]["category"] == "STALE_EXEMPTION"
+    assert payload["source_tasks_file"] == tasks_path.name
 
 
 def test_reduce_architecture_debt_discovers_latest_tasks_under_reports_quality(
@@ -94,5 +95,7 @@ def test_reduce_architecture_debt_discovers_latest_tasks_under_reports_quality(
 
     assert rc == 0
     plan = json.loads(output_path.read_text(encoding="utf-8"))
-    assert plan["source_tasks_file"].endswith(latest.as_posix())
+    assert plan["source_tasks_file"] == (
+        "reports/quality/tasks_architecture_metric_exemptions_2026-04-04-10-30.json"
+    )
     assert plan["summary"]["total_tasks"] == 1
