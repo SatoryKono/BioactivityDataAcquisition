@@ -90,5 +90,5 @@ uv run python -m scripts.diagrams check-quality-gates --manifest docs/02-archite
 
 ## 2026-05-12 Expansion Batch
 
-- Planning artifact: [diagram-expansion-2026-05-12.md](diagram-expansion-2026-05-12.md)
+- Historical planning artifact (archived): [diagram-expansion-2026-05-12.md](../../../99-archive/plans/diagram-expansion-2026-05-12.md)
 - Added 25 new canonical architecture diagrams focused on control-plane, composite preflight, provider-specific runtime flows, and config/traceability surfaces.

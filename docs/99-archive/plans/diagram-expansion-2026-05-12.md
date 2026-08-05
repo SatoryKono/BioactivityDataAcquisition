@@ -1,3 +1,5 @@
+> **ARCHIVED (docs audit cycle 3, 2026-08-05):** historical diagram expansion proposal. Active SSOT: ADR-040, `diagrams/governance/policy.md`, `diagrams-index.md`.
+
 # Diagram Expansion Plan — 2026-05-12
 
 ## Baseline Notes
