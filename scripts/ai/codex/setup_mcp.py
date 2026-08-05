@@ -31,7 +31,6 @@ DEEPWIKI_ORGANISATION_ID_ENV_VAR = "DEEPWIKI_ORGANISATION_ID"
 REF_API_KEY_ENV_VAR = "REF_TOOL_API_KEY"
 REMOVED_MCP_SERVER_NAMES = frozenset(
     {
-        "cloudflare-api",
         "sonarqube",
         "chembl",
         "pubchem",
