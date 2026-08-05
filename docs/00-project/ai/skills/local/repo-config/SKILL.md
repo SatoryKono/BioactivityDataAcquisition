@@ -17,6 +17,7 @@ agent: "Explore"
 # Repository Configuration
 
 ## Source Of Truth
+
 - Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`

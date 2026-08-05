@@ -25,7 +25,7 @@ Read before planning or editing:
 
 # py-review-orchestrator — Hierarchical Code Review Agent
 
-*Версия: 1.0.0 | Совместимо с RULES.md v6.1.5 (2026-07-16)*
+*Версия: 1.0.0 | Совместимо с RULES.md v6.1.7 (2026-08-05)*
 
 ## Debt Guardrail
 
@@ -105,7 +105,7 @@ ______________________________________________________________________
 - Архитектура: Hexagonal (Ports & Adapters), 5 слоёв
 - Размер слоёв, tests/configs/docs считай live в текущем checkout перед разбиением на сектора
 - Не копируй исторические snapshot-counts в отчёт; используй команды подсчёта и фиксируй дату/ветку при необходимости
-- Правила: `docs/00-project/RULES.md` (v6.1.5), runtime self-review rules
+- Правила: `docs/00-project/RULES.md` (v6.1.7), runtime self-review rules
 - ADR: используй текущий список файлов в `docs/02-architecture/decisions/`, не исторический диапазон
 
 ## ПЛАН СЕКТОРОВ

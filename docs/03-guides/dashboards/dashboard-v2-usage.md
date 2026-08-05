@@ -694,10 +694,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   DQ handoffs preserve `workflow/pipeline/run_type/run_id`; Provider Health
   fail-closes to `provider=unknown` while preserving `pipeline_context`. When
   Priority is MONITOR and Fleet Health is OK, continue monitoring rather than
-  escalating. The RFA-00 migration was applied via a retired one-off mutator
-  (historical only; removed after verification). Do not reintroduce dashboard
-  mutators under `scripts/ops/observability/grafana/` — edit shipped
-  `grafana/dashboards/*.json` through reviewable PR changes.
+  escalating. The shipped dashboard JSON and its contracts are the durable record for the RFA-00 migration; the retired one-off mutator was historical only and should not be reintroduced under `scripts/ops/observability/grafana/` — edit shipped `grafana/dashboards/*.json` through reviewable PR changes.
 - `overview` first-screen selected-scope cards normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading `bioetl_l0_*` / `bioetl_l1_*` summary recording rules. For example, `workflow_chembl_assay` resolves to the same current-state summary rows as `chembl_assay`.
 - `dq.id=2 (DQ Score Snapshot)`: no-data остается `UNKNOWN`, не `0`; hard-fail signals блокируют promotion, warning-only означает drift. Next action: hard-fail -> reject/quarantine diagnostics; warning-only -> trend + top reasons.
 - `overview.id=9002 (Inputs)`: использует `max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"})`. Это compact projected selected-scope surface: first-screen таблица держит одну worst-status строку на operator input, чтобы не требовать scroll на default `Workflow=All/Pipeline=All/Run Type=All`.
