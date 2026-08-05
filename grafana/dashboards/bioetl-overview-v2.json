@@ -1662,13 +1662,13 @@
           },
           "targets": [
             {
-              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0))",
+              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])))",
               "refId": "A",
               "legendFormat": "Reject Count",
               "instant": true
             },
             {
-              "expr": "(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0)) / clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range])) or vector(0)), 1)",
+              "expr": "(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range]))) / clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range]))), 1)",
               "refId": "B",
               "legendFormat": "Reject Rate",
               "instant": true

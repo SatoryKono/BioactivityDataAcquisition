@@ -1,0 +1,135 @@
+[
+  {
+    "uid": "bioetl-control-plane-v1",
+    "panels": [
+      {
+        "id": 130,
+        "title": "Track Replay Blockers",
+        "before": "round((\n  (sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))\n))",
+        "after": "round((\n (sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))\n+\n (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])))\n+\n (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])))\n+\n (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))\n+\n (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])))))"
+      },
+      {
+        "id": 3,
+        "title": "Track Checkpoint Incompatibilities",
+        "before": "round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])))"
+      },
+      {
+        "id": 104,
+        "title": "Track Unreconstructable Replays",
+        "before": "round(sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])))"
+      },
+      {
+        "id": 120,
+        "title": "Track Replay Drift",
+        "before": "round(sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))"
+      }
+    ]
+  },
+  {
+    "uid": "bioetl-dq-v2",
+    "panels": [
+      {
+        "id": 152,
+        "title": "Monitor Silver Reject Mismatch",
+        "before": "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
+        "after": "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))"
+      },
+      {
+        "id": 155,
+        "title": "Track DQ Threshold Events",
+        "before": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval])) or vector(0)))",
+        "after": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__interval]))) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval]))))"
+      },
+      {
+        "id": 154,
+        "title": "Monitor Blocked Records",
+        "before": "round((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0)) + (sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)))",
+        "after": "round((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))) + (sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))))"
+      },
+      {
+        "id": 6,
+        "title": "Monitor Quarantined Records",
+        "before": "round(sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
+        "after": "round(sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))"
+      },
+      {
+        "id": 117,
+        "title": "Monitor Silver Filter Rejects",
+        "before": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
+        "after": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])))"
+      }
+    ]
+  },
+  {
+    "uid": "bioetl-overview-v2",
+    "panels": [
+      {
+        "id": 9015,
+        "title": "Track Silver Rejects",
+        "before": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0))",
+        "after": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])))"
+      },
+      {
+        "id": 9015,
+        "title": "Track Silver Rejects",
+        "before": "(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0)) / clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range])) or vector(0)), 1)",
+        "after": "(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range]))) / clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range]))), 1)"
+      }
+    ]
+  },
+  {
+    "uid": "bioetl-provider-health-v2",
+    "panels": [
+      {
+        "id": 108,
+        "title": "Inspect Exhausted Retries",
+        "before": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+        "after": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])))"
+      },
+      {
+        "id": 109,
+        "title": "Track Exhausted Retries",
+        "before": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__interval])) or vector(0))",
+        "after": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__interval])))"
+      }
+    ]
+  },
+  {
+    "uid": "bioetl-runtime",
+    "panels": [
+      {
+        "id": 230,
+        "title": "Monitor Pipeline Alert Conditions",
+        "before": "(((sum(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_runtime_error_rate_high_30m{pipeline=~\"$pipeline\"}) or vector(0))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0))",
+        "after": "(((sum(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_runtime_error_rate_high_30m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0))"
+      },
+      {
+        "id": 4,
+        "title": "Inspect DQ Alert Conditions",
+        "before": "(((sum(bioetl_runtime_alert_condition_dq_soft_threshold_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_dq_hard_fail_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_dq_critical_anomaly_30m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_silver_validation_failures_30m{pipeline=~\"$pipeline\"}) or vector(0))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}) > bool 0))",
+        "after": "(((sum(bioetl_runtime_alert_condition_dq_soft_threshold_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_hard_fail_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_critical_anomaly_30m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_silver_validation_failures_30m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}) > bool 0))"
+      },
+      {
+        "id": 5,
+        "title": "Inspect Control Plane Alert Conditions",
+        "before": "(((sum(bioetl_runtime_alert_condition_manifest_write_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_ledger_append_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_checkpoint_incompatible_30m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_replay_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_replay_drift_detected_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_lineage_refs_missing_15m{pipeline=~\"$pipeline\"}) or vector(0))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0))",
+        "after": "(((sum(bioetl_runtime_alert_condition_manifest_write_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_ledger_append_failed_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_checkpoint_incompatible_30m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_replay_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_replay_drift_detected_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})) + (sum(bioetl_runtime_alert_condition_lineage_refs_missing_15m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0))"
+      },
+      {
+        "id": 6,
+        "title": "Inspect Provider Alert Conditions",
+        "before": "(((sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m{provider=~\"$provider_hint\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h{provider=~\"$provider_hint\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_http_error_rate_high_15m{provider=~\"$provider_hint\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m{provider=~\"$provider_hint\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m{provider=~\"$provider_hint\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m{provider=~\"$provider_hint\"}) or vector(0))) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0))",
+        "after": "(((sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_http_error_rate_high_15m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m{provider=~\"$provider_hint\"})) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m{provider=~\"$provider_hint\"}))) and on() (count(bioetl_provider_current_status{provider=~\"$provider_hint\"}) > bool 0))"
+      },
+      {
+        "id": 259,
+        "title": "Inspect Global Provider Alert Conditions",
+        "before": "((sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m) or vector(0))) and on() (count(bioetl_provider_current_status) > bool 0)",
+        "after": "((sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m))) and on() (count(bioetl_provider_current_status) > bool 0)"
+      }
+    ]
+  }
+]
