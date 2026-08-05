@@ -2314,6 +2314,7 @@
         "tests/unit/"
       ],
       "top_level_directories_including_pycache": [
+        "tests/__pycache__/",
         "tests/architecture/",
         "tests/benchmarks/",
         "tests/contract/",
@@ -2331,7 +2332,7 @@
         "tests/unit/"
       ],
       "top_level_directory_count": 15,
-      "top_level_directory_count_including_pycache": 15
+      "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2180,
@@ -2380,6 +2381,7 @@
       "tests/unit/"
     ],
     "top_level_directories_including_pycache": [
+      "tests/__pycache__/",
       "tests/architecture/",
       "tests/benchmarks/",
       "tests/contract/",
@@ -2397,7 +2399,7 @@
       "tests/unit/"
     ],
     "top_level_directory_count": 15,
-    "top_level_directory_count_including_pycache": 15
+    "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2180,
