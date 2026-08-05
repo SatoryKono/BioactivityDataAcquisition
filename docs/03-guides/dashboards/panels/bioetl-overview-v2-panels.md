@@ -31,10 +31,11 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Type:** Table (`id=215`)
 - **Purpose:** Rank up to four urgency-ordered next actions for the current selectors/fleet and hand off to the recommended board.
 - **Data sources:** `topk(4, bioetl_l0_next_action_route{…} or NO_ROUTE vector fallback)` via recording rule `bioetl_l0_next_action_route`.
-- **Layout:** first-screen width `w=12` (paired with Review Domain Status `w=12`).
-- **Columns (left→right):** Action (primary CTA, short labels, row link via `action_dashboard_uid`) → Priority (score, color-text) → Why → Pipeline.
+- **Layout:** first-screen width `w=12` (paired with Review Domain Status `w=12`); `cellHeight: md`.
+- **Columns (left→right):** Action (primary CTA, short labels, color-text + row link via `action_dashboard_uid`) → Priority (short badge `RUNTIME`/`CP`/`GOLD`/`DQ`/`PROV`/`WF`/`MON`/`NR`, color-background, not row-wide) → Why → Pipeline.
+- **Visual hierarchy:** Action is the sole color-text CTA emphasis; Priority is a secondary urgency badge. Table sorted by Priority desc so top row is first click.
 - **Priority order:** Runtime > Control Plane > Gold lifecycle > DQ > Provider > Workflow > Monitor.
-- **Empty/OK:** `MONITOR` / `NO_ROUTE` when no higher-priority degradation; continue monitoring when Fleet Health is OK.
+- **Empty/OK:** `MON` / `NR` (MONITOR / NO_ROUTE scores) with muted gray Action; continue monitoring when Fleet Health is OK.
 - **Notes:** `run_id` is URL handoff only (never a Prometheus label). Panel `links` / `dataLinks` remain full domain shortcuts (`Open Runtime`, …); primary CTA is the Action field link (RFA-00 / #7569).
 
 ### 5. Review Domain Status
