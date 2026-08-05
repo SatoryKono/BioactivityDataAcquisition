@@ -28,11 +28,11 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `373f798cb0bde4e1f8a45582aa1545f429c3a8d7`
-- Source run id: `local-full-suite`
-- Source tree sha256: `1faf8dc6d77f92d4794a3ba984e0e5ac90df6ea288a1b6834461793782ad5ea2`
+- Source commit: `dff988dfbf4be2ac6d27ff25a6eafd3d0e4bf211`
+- Source run id: `local-duration-rebuild-2026-07-23`
+- Source tree sha256: `e2f9394cf167eff3a8795273babc81877ceb19c83a54cf9b56edac89f885545a`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-08-05T12:06:10.623181+00:00`
+- Refreshed at (UTC): `2026-08-05T12:16:35.594584+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -50,7 +50,7 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `95.24%`
+- Actual coverage: `92.44%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry

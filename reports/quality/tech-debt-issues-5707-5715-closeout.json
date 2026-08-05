@@ -135,20 +135,20 @@
     "5710": {
       "architecture_runner_backend": "run_pytest_sharded",
       "cache_probe": {
-        "first_duration_s": 28.676,
-        "improvement_factor": 34900.14,
         "name": "collect_test_governance_report",
-        "second_duration_s": 0.001
+        "first_duration_s": 28.676,
+        "second_duration_s": 0.001,
+        "improvement_factor": 34900.14
       },
-      "refreshed_at_utc": "2026-08-04T18:12:10.346849+00:00",
+      "refreshed_at_utc": "2026-08-05T12:16:35.594584+00:00",
       "slow_governance_lane": "S7-architecture-slow-governance",
-      "telemetry_source_commit": "373f798cb0bde4e1f8a45582aa1545f429c3a8d7",
+      "telemetry_source_commit": "dff988dfbf4be2ac6d27ff25a6eafd3d0e4bf211",
       "telemetry_source_run_id": "local-duration-rebuild-2026-07-23"
     },
     "5711": {
       "no_executable_line_modules": 22,
       "source_module_count": 2279,
-      "source_tree_sha256": "91e6e684dfd66223b0e0a752535d7d9815d4a7f74669c9d646d1eae357e37a36",
+      "source_tree_sha256": "e2f9394cf167eff3a8795273babc81877ceb19c83a54cf9b56edac89f885545a",
       "uncovered_module_count": 0,
       "under70_module_count_after": 9,
       "under70_module_count_before": 18,

@@ -77,3 +77,9 @@ Collected: `6`
 - Historical raw evidence files under this evidence pack still carry older
   snapshots; refresh those raw files before using them for line-item topology
   decisions.
+
+## Source tree stamp
+
+- source_tree_sha256: `dc8da09a73c81817f66625540e28839f1f7f0654b4b897f87f4e546891b1a212`
+
+`source_module_count=2314`
