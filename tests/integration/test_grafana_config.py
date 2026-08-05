@@ -701,7 +701,7 @@ _WORKFLOW_STEP_DIAGNOSTIC_TITLES = (
 def _assert_workflow_step_diagnostics_row(row_panel: dict | None) -> dict:
     assert row_panel is not None, "Workflow dashboard must expose step diagnostics row"
     assert row_panel.get("type") == "row"
-    assert row_panel.get("collapsed") is True
+    assert row_panel.get("collapsed") is False
     return row_panel
 
 
