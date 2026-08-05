@@ -135,8 +135,8 @@ def _read_coverage_percent(path: Path) -> float | None:
         return None
 
 
-def _read_coverage_percent_from_log(path: Path) -> float | None:
-    if not path.exists():
+def _read_coverage_percent_from_log(path: Path | None) -> float | None:
+    if path is None or not path.is_file():
         return None
     # Linear TOTAL coverage line (S8786: avoid reluctant .*?).
     pattern = re.compile(r"^TOTAL(?:\s+\S+)+\s+(\d+(?:\.\d+)?)%$", re.MULTILINE)
@@ -254,11 +254,27 @@ def _summarize_slowest_zones(
     )[:limit]
 
 
+def _portable_artifact_path(
+    path: Path | None,
+    *,
+    repo_root: Path = Path("."),
+) -> str | None:
+    """Render in-repository telemetry inputs without machine-local prefixes."""
+    if path is None:
+        return None
+    resolved_path = path.resolve(strict=False)
+    resolved_root = repo_root.resolve(strict=False)
+    try:
+        return resolved_path.relative_to(resolved_root).as_posix()
+    except ValueError:
+        return str(path)
+
+
 def build_baseline_payload(
     *,
     coverage_xml_path: Path,
     coverage_percent: float | None,
-    coverage_log_path: Path,
+    coverage_log_path: Path | None,
     slowest_json_path: Path,
     junit_paths: list[Path],
     source_branch: str,
@@ -301,13 +317,13 @@ def build_baseline_payload(
             "max_age_days": TELEMETRY_FRESHNESS_MAX_AGE_DAYS,
         },
         "artifact_inputs": {
-            "coverage_xml": str(coverage_xml_path),
-            "coverage_log": str(coverage_log_path) if str(coverage_log_path) else None,
+            "coverage_xml": _portable_artifact_path(coverage_xml_path),
+            "coverage_log": _portable_artifact_path(coverage_log_path),
             "coverage_percent_fallback": resolved_coverage_percent
             if not coverage_xml_path.exists()
             else None,
-            "slowest_tests_json": str(slowest_json_path),
-            "junit_inputs": [str(path) for path in junit_paths],
+            "slowest_tests_json": _portable_artifact_path(slowest_json_path),
+            "junit_inputs": [_portable_artifact_path(path) for path in junit_paths],
         },
         "coverage": {
             "threshold_percent": coverage_threshold,
@@ -625,7 +641,9 @@ def main() -> int:
 
     args = _parse_args()
     coverage_xml_path = resolve_output_path(args.coverage_xml)
-    coverage_log_path = resolve_output_path(args.coverage_log)
+    coverage_log_path = (
+        resolve_output_path(args.coverage_log) if args.coverage_log else None
+    )
     slowest_json_path = resolve_output_path(args.slowest_json)
     junit_paths = [resolve_output_path(path) for path in args.junit]
     output_yaml_path = resolve_output_path(args.output_yaml)

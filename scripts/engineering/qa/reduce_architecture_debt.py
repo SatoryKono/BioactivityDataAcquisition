@@ -17,6 +17,14 @@ from bioetl.infrastructure.quality.architecture_debt_reduction import (
 )
 
 
+def _portable_tasks_path(tasks_path: Path, *, project_root: Path) -> str:
+    """Return a repository-relative source identity when possible."""
+    try:
+        return tasks_path.relative_to(project_root).as_posix()
+    except ValueError:
+        return tasks_path.as_posix()
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
@@ -70,7 +78,10 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     payload = load_architecture_debt_tasks(tasks_path)
-    payload["source_tasks_file"] = tasks_path.as_posix()
+    payload["source_tasks_file"] = _portable_tasks_path(
+        tasks_path,
+        project_root=project_root,
+    )
     generated_at = datetime.now(UTC)
     plan = build_architecture_debt_execution_plan(payload, generated_at=generated_at)
     output_path = (

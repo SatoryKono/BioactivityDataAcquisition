@@ -10,6 +10,9 @@ description: >
 allowed_output_roots:
   working_reports:
     - reports/
+  tracked_quality_baselines:
+    - configs/quality/test_telemetry_baseline.yaml
+    - docs/05-engineering/test-telemetry-baseline.md
   curated_generated_docs:
     - docs/reports/generated/
     - docs/reports/dictionaries/
@@ -509,6 +512,8 @@ routes:
     output_kind: test_report
     commit_policy: tracked_quality_baseline
     outputs:
+      - configs/quality/test_telemetry_baseline.yaml
+      - docs/05-engineering/test-telemetry-baseline.md
       - reports/test-telemetry/coverage-summary.json
       - reports/test-telemetry/slowest-tests.json
       - reports/test-telemetry/slowest-tests.md

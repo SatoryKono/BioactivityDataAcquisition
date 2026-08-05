@@ -1082,6 +1082,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded manual dashboard JSON regeneration helper while navigation-bus generation remains owned by the Grafana dashboard extension workflow; keep it supporting until it is exposed through a canonical governed command surface."
     },
+    "scripts/ops/observability/grafana/rfa_first_action_mutator.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the one-off RFA-00 Review First Action dashboard mutator for auditability; retire it after the dashboard migration is verified and the generated dashboard/contracts become the durable record."
+    },
     "scripts/ops/observability/grafana/run_grafana_render_matrix.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

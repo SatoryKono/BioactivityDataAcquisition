@@ -103,8 +103,7 @@ def test_issue_6015_local_full_coverage_attempt_is_not_overstated() -> None:
 
     assert attempt["result"] == "timed_out"
     log_rel = str(attempt["log"]).replace("\\", "/")
-    # Durable claim lives in closeout JSON. The local parallel.log is under
-    # gitignored reports/pytest/** and is not available on CI (CI-C1-004 / #7518).
+    # CI uses durable JSON because reports/pytest/** is gitignored (#7518).
     assert log_rel.startswith("reports/pytest/"), log_rel
     log_path = ROOT / log_rel
     if log_path.is_file():

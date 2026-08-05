@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "generated_at": "2026-08-04T05:06:31.573942+00:00",
-  "source_tasks_file": "E:/github/BioactivityDataAcquisition/reports/quality/tasks_architecture_metric_exemptions_2026-06-26-15-51.json",
+  "source_tasks_file": "reports/quality/tasks_architecture_metric_exemptions_2026-06-26-15-51.json",
   "summary": {
     "total_tasks": 11,
     "actionable_tasks": 11,
