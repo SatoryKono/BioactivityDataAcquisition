@@ -1,0 +1,160 @@
+[
+  {
+    "uid": "bioetl-control-plane-v1",
+    "panels": [
+      {
+        "id": 101,
+        "title": "Track Checkpoint Load Failures",
+        "before": "round(sum(increase(bioetl_checkpoint_load_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_checkpoint_load_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))"
+      },
+      {
+        "id": 102,
+        "title": "Track Checkpoint Save Failures",
+        "before": "round(sum(increase(bioetl_checkpoint_save_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_checkpoint_save_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))"
+      },
+      {
+        "id": 103,
+        "title": "Track Global Checkpoint Admin Failures",
+        "before": "round(sum(increase(bioetl_checkpoint_operator_operations_total{status=\"failed\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_checkpoint_operator_operations_total{status=\"failed\"}[$__range])))"
+      },
+      {
+        "id": 1,
+        "title": "Track Manifest Write Failures",
+        "before": "round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])))"
+      },
+      {
+        "id": 2,
+        "title": "Track Ledger Append Failures",
+        "before": "round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))"
+      },
+      {
+        "id": 132,
+        "title": "Monitor Manifest Failures (30m)",
+        "before": "(((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[30m])) or vector(0)), 1)) > bool 0) + (((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[30m])) or vector(0)), 1)) > bool 0.1)",
+        "after": "(((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[30m]))), 1)) > bool 0) + (((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[30m]))), 1)) > bool 0.1)"
+      },
+      {
+        "id": 133,
+        "title": "Monitor Ledger Failures (30m)",
+        "before": "(((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[30m])) or vector(0)), 1)) > bool 0) + (((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[30m])) or vector(0)), 1)) > bool 0.1)",
+        "after": "(((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[30m]))), 1)) > bool 0) + (((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[30m]))), 1)) > bool 0.1)"
+      },
+      {
+        "id": 4,
+        "title": "Track Global Read Failures",
+        "before": "round(sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[$__range])))"
+      },
+      {
+        "id": 136,
+        "title": "Monitor Global Read Failures (30m)",
+        "before": "(((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m])) or vector(0)), 1)) > bool 0.05) + (((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m])) or vector(0)), 1)) > bool 0.10)",
+        "after": "(((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.05) + (((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.10)"
+      },
+      {
+        "id": 122,
+        "title": "Track Missing Lineage References",
+        "before": "round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])))"
+      },
+      {
+        "id": 137,
+        "title": "Track Lineage Persistence Failures",
+        "before": "round(sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))"
+      }
+    ]
+  },
+  {
+    "uid": "bioetl-dq-v2",
+    "panels": [
+      {
+        "id": 7,
+        "title": "Monitor Silver Validation Failures (range composite)",
+        "before": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)))",
+        "after": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range]))))"
+      },
+      {
+        "id": 12,
+        "title": "Monitor Silver Validation Failures",
+        "before": "round(sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])))"
+      },
+      {
+        "id": 151,
+        "title": "Monitor Gold Validation Failures",
+        "before": "round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range])))"
+      }
+    ]
+  },
+  {
+    "uid": "bioetl-provider-health-v2",
+    "panels": [
+      {
+        "id": 106,
+        "title": "Track Health Failures & Degradation",
+        "before": "round(sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__interval])) or vector(0))",
+        "after": "round(sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__interval])))"
+      },
+      {
+        "id": 106,
+        "title": "Track Health Failures & Degradation",
+        "before": "round(sum by (provider) (increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__interval])) or vector(0))",
+        "after": "round(sum by (provider) (increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__interval])))"
+      },
+      {
+        "id": 107,
+        "title": "Track Failure Share",
+        "before": "(100 * sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) / clamp_min(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])), 1)) or vector(0)",
+        "after": "(100 * sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) / clamp_min(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])), 1))"
+      },
+      {
+        "id": 111,
+        "title": "Track Rate-Limit Errors",
+        "before": "round(sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(rate.?limit|429|thrott).*\"}[$__interval])) or vector(0))",
+        "after": "round(sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(rate.?limit|429|thrott).*\"}[$__interval])))"
+      },
+      {
+        "id": 115,
+        "title": "Track Network & Timeout Errors",
+        "before": "round(sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(timeout|timed.?out|network).*\"}[$__interval])) or vector(0))",
+        "after": "round(sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(timeout|timed.?out|network).*\"}[$__interval])))"
+      },
+      {
+        "id": 105,
+        "title": "Monitor Degraded Checks",
+        "before": "round(sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+        "after": "round(sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])))"
+      },
+      {
+        "id": 104,
+        "title": "Track Failure Rate",
+        "before": "(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)) / clamp_min((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)), 1)",
+        "after": "(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range]))) / clamp_min((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range]))) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range]))), 1)"
+      }
+    ]
+  },
+  {
+    "uid": "bioetl-runtime",
+    "panels": [
+      {
+        "id": 9996,
+        "title": "Track Failed Workflow Runs",
+        "before": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0)",
+        "after": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range])))"
+      },
+      {
+        "id": 9997,
+        "title": "Track Failed Workflow Steps",
+        "before": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
+        "after": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range])))"
+      }
+    ]
+  }
+]
