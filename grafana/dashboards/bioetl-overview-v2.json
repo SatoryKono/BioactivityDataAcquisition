@@ -58,13 +58,29 @@
                 },
                 "inspect": false
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "—",
+                      "color": "transparent",
+                      "index": 0
+                    }
+                  }
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "transparent",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "orange",

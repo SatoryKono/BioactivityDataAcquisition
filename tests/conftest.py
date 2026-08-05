@@ -254,6 +254,14 @@ def _restore_runtime_bootstrap_pipeline_after_repo_backed_tests(
 pytest_plugins = ("tests.integration.chembl.extraction_params_support",)
 
 
+def _pytest_option_names(option: object) -> tuple[str, ...]:
+    """Return option spellings across callable and iterable pytest APIs."""
+    names = getattr(option, "names", ())
+    if callable(names):
+        names = names()
+    return tuple(names)
+
+
 def pytest_addoption(parser: pytest.Parser) -> None:
     """Register global test options."""
     parser.addoption(
@@ -283,7 +291,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         name.lstrip("-").replace("-", "_")
         for group in parser._groups  # noqa: SLF001
         for opt in getattr(group, "options", [])
-        for name in getattr(opt, "names", ())
+        for name in _pytest_option_names(opt)
     )
     if "vcr_record" not in option_names:
         parser.addoption(
