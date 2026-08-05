@@ -38,8 +38,7 @@ Grafana dashboards в BioETL.
 
 ## 2. Текущая модель shipped dashboards
 
-- `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
-  `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO` — единая top-level
+- `0. Trust`, `1. Overview`, `2. Pipeline Diagnostics`, `3. Provider Health`, `4. Data Quality`, `5. Incident Workspace`, `6. Run Explorer` — единая top-level
   шина.
 - На каждой из восьми shipped страниц navigation panel `id=1000` визуально
   показывает полный bus `0..6`; текущий dashboard рендерится как disabled
