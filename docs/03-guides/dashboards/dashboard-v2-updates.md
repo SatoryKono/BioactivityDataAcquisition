@@ -7,7 +7,10 @@ ______________________________________________________________________
 `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
 
 Latest dashboard UX artifact for current shipped JSON changes:
-`docs/reports/dashboard-ux-checks/2026-07-30.md`
+`docs/reports/dashboard-ux-checks/2026-08-05.md`
+(prior: `docs/reports/dashboard-ux-checks/2026-07-30.md`;
+threshold-only repair: shipped dashboards now use the canonical gray base
+threshold color without changing queries or operator workflows)
 (prior: `docs/reports/dashboard-ux-checks/2026-07-28-drmr.md`;
 also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; canonical baseline:
 `docs/reports/dashboard-ux-checks/2026-05-19.md`)
