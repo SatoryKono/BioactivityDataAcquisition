@@ -269,6 +269,7 @@ class TestSourceValidation:
             for check in field_info.checks
         )
         assert any("semanticscholar" in str(check) for check in field_info.checks)
+        assert any("semanticscholar" in str(check) for check in field_info.checks)
 
 
 class TestSchemaFieldDefinitions:
@@ -321,22 +322,10 @@ class TestSchemaFieldDefinitions:
     def test_optional_fields_nullable(self) -> None:
         schema = SemanticScholarPublicationSchema.to_schema()
         nullable_fields = [
-            "doi",
-            "pmid",
-            "dblp_id",
-            "title",
-            "abstract",
-            "tldr",
-            "publication_date",
-            "journal",
-            "volume",
-            "page_range",
-            "open_access_url",
-            "oa_status",
-            "subject_fields",
-            "publication_type",
-            "publication_types",
-            "authors",
+            "doi", "pmid", "dblp_id", "title", "abstract", "tldr",
+            "publication_date", "journal", "volume", "page_range",
+            "open_access_url", "oa_status", "subject_fields",
+            "publication_type", "publication_types", "authors",
         ]
         for field in nullable_fields:
             col = schema.columns.get(field)
