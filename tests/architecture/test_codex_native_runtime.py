@@ -12,6 +12,7 @@ import tomllib
 from pathlib import Path
 
 import pytest
+import yaml
 
 
 pytestmark = pytest.mark.architecture
@@ -80,6 +81,24 @@ def test_native_skill_projection_is_exact_and_platform_neutral() -> None:
     }
     assert discovered == set(canonical)
     assert all(not path.is_symlink() for path in (ROOT / ".agents/skills").rglob("*"))
+
+
+def test_native_skill_projection_root_is_tracked_tooling() -> None:
+    catalog = yaml.safe_load(
+        (ROOT / "configs/quality/repo_structure_catalog.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    tracked = {
+        entry["path"] for entry in catalog["root_tooling_roots"]["approved_roots"]
+    }
+    local_only = {
+        entry["path"]
+        for entry in catalog["local_tolerated_root_dirs"]["approved_roots"]
+    }
+
+    assert ".agents" in tracked
+    assert ".agents" not in local_only
 
 
 def test_skill_negative_fixture_identifies_adapter_drift(tmp_path: Path) -> None:
