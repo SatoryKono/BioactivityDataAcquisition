@@ -61,10 +61,29 @@ def _unresolved_pipeline_run_report_shell(
         # Match pipeline_run_report_v1 keys used by Run Explorer panels.
         "funnel": [],
         "reasons_top_n": [],
-        "reconciliation": {},
+        "reconciliation": [],
         "artifacts": [],
         "schema_version": "pipeline_run_report_v1",
     }
+
+
+def _table_shape_pipeline_run_report(
+    payload: dict[str, object],
+) -> dict[str, object]:
+    """Normalize nested report sections for Grafana Infinity table selectors.
+
+    ``reconciliation`` is stored as an object in pipeline_run_report_v1 files.
+    Run Explorer panel 3015 uses root_selector=reconciliation on a table panel,
+    so the HTTP surface exposes a list of {parameter, value} rows.
+    """
+    recon = payload.get("reconciliation")
+    if not isinstance(recon, dict):
+        return payload
+    shaped = dict(payload)
+    shaped["reconciliation"] = [
+        {"parameter": str(key), "value": value} for key, value in recon.items()
+    ]
+    return shaped
 
 
 class _HealthResponseSupport(Protocol):
@@ -182,7 +201,11 @@ async def handle_pipeline_run_report(
             },
         )
         return
-    await host._send_payload_response(writer, 200, payload)
+    await host._send_payload_response(
+        writer,
+        200,
+        _table_shape_pipeline_run_report(payload),
+    )
 
 
 async def handle_workflow_run_report(

@@ -757,7 +757,7 @@
           "id": 3015,
           "type": "table",
           "title": "Inspect Reconciliation",
-          "description": "Reconciliation block from pipeline_run_report_v1 (object may need backend table shape). An empty result is VALID EMPTY when reconciliation evidence is absent. UNRESOLVED_SCOPE when run_id is not selected; an unexpected empty may mean backend unavailable, so verify /health/live",
+          "description": "Reconciliation metrics from pipeline_run_report_v1 as parameter/value rows. An empty result is VALID EMPTY when reconciliation evidence is absent or run_id is unresolved. An unexpected empty may mean backend unavailable — verify /health/live.",
           "gridPos": {
             "h": 5,
             "w": 24,
