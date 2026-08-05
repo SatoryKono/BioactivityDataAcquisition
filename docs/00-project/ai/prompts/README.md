@@ -49,3 +49,8 @@ BioETL.
 - Root-level prompt files are the preferred local reference surface for working
   and historical prompts; `collected/` is reserved for unique archive-only
   artifacts that do not have a maintained root-level twin.
+
+## Archived drafts
+
+Historical typo-named dashboard correction prompts live under
+[`docs/99-archive/guides/stale-ai-prompts/`](../../../99-archive/guides/stale-ai-prompts/).
