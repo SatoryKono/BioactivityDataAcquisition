@@ -1,0 +1,32 @@
+[
+  [
+    "green-null",
+    "bioetl-dq-v2",
+    121,
+    "Inspect Top Silver Reject Reasons"
+  ],
+  [
+    "green-null",
+    "bioetl-dq-v2",
+    122,
+    "Inspect Top Silver Reject Fields"
+  ],
+  [
+    "green-null",
+    "bioetl-dq-v2",
+    118,
+    "Inspect Silver Rejects by Pipeline"
+  ],
+  [
+    "green-null",
+    "bioetl-dq-v2",
+    156,
+    "Inspect: Gold Reject Outcomes by Pipeline"
+  ],
+  [
+    "green-null",
+    "bioetl-runtime",
+    241,
+    "Compare Records by Stage & Run Type"
+  ]
+]
