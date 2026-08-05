@@ -1420,33 +1420,9 @@
     },
     "scripts/ops/observability/grafana/fix_gra_3c_i1b.py": {
       "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
+      "decision": "temporary_diagnostic",
       "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded one-off utility for auditability; classify or retire after the owning workflow is verified (scripts/ops/observability/grafana/fix_gra_3c_i1b.py)."
-    },
-    "scripts/ops/observability/grafana/scan_gra_3cycle_r2.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded GRA 3-cycle scanner for auditability; retire after the campaign is verified (scripts/ops/observability/grafana/scan_gra_3cycle_r2.py)."
-    },
-    "scripts/ops/observability/grafana/scan_gra_3cycle_r2_deep.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded GRA 3-cycle scanner for auditability; retire after the campaign is verified (scripts/ops/observability/grafana/scan_gra_3cycle_r2_deep.py)."
-    },
-    "scripts/ops/observability/grafana/fix_gra_3c_r2_i1.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as bounded one-off utility for auditability; retire after owning workflow is verified (scripts/ops/observability/grafana/fix_gra_3c_r2_i1.py)."
-    },
-    "scripts/ops/observability/grafana/probe_ops_http_panels.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as bounded one-off utility for auditability; retire after owning workflow is verified (scripts/ops/observability/grafana/probe_ops_http_panels.py)."
+      "next_step": "Retain only as a bounded temporary diagnostic for auditability; retire after the owning workflow is verified (scripts/ops/observability/grafana/fix_gra_3c_i1b.py)."
     }
   }
 }
