@@ -498,7 +498,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--report-output",
         type=Path,
-        default=Path("docs/config-discrepancies-report.md"),
+        default=Path("docs/reports/generated/config-discrepancies-report.md"),
         help="Markdown discrepancy report output path.",
     )
     parser.add_argument(
