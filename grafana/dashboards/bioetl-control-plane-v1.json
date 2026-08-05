@@ -1146,7 +1146,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_checkpoint_load_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))",
+              "expr": "round(sum(increase(bioetl_checkpoint_load_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))",
               "instant": true,
               "refId": "A"
             }
@@ -1237,7 +1237,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_checkpoint_save_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))",
+              "expr": "round(sum(increase(bioetl_checkpoint_save_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))",
               "instant": true,
               "refId": "A"
             }
@@ -1328,7 +1328,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_checkpoint_operator_operations_total{status=\"failed\"}[$__range])) or vector(0))",
+              "expr": "round(sum(increase(bioetl_checkpoint_operator_operations_total{status=\"failed\"}[$__range])))",
               "instant": true,
               "refId": "A"
             }
@@ -1943,7 +1943,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0))",
+              "expr": "round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])))",
               "instant": true,
               "refId": "A"
             }
@@ -2034,7 +2034,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))",
+              "expr": "round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))",
               "instant": true,
               "refId": "A"
             }
@@ -2231,7 +2231,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "(((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[30m])) or vector(0)), 1)) > bool 0) + (((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[30m])) or vector(0)), 1)) > bool 0.1)",
+              "expr": "(((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[30m]))), 1)) > bool 0) + (((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[30m]))), 1)) > bool 0.1)",
               "instant": true,
               "refId": "A"
             }
@@ -2322,7 +2322,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "(((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[30m])) or vector(0)), 1)) > bool 0) + (((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[30m])) or vector(0)), 1)) > bool 0.1)",
+              "expr": "(((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[30m]))), 1)) > bool 0) + (((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[30m]))), 1)) > bool 0.1)",
               "instant": true,
               "refId": "A"
             }
@@ -2428,7 +2428,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[$__range])) or vector(0))",
+              "expr": "round(sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[$__range])))",
               "instant": true,
               "refId": "A"
             }
@@ -2519,7 +2519,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "(((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m])) or vector(0)), 1)) > bool 0.05) + (((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m])) or vector(0)), 1)) > bool 0.10)",
+              "expr": "(((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.05) + (((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.10)",
               "instant": true,
               "refId": "A"
             }
@@ -2761,7 +2761,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
+              "expr": "round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])))",
               "instant": true,
               "refId": "A"
             }
@@ -2852,7 +2852,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))",
+              "expr": "round(sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))",
               "instant": true,
               "refId": "A"
             }

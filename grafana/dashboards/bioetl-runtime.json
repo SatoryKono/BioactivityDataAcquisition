@@ -3214,7 +3214,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0)",
+              "expr": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range])))",
               "refId": "A"
             }
           ],
@@ -3289,7 +3289,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
+              "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range])))",
               "refId": "A"
             }
           ],
