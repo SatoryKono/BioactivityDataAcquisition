@@ -506,7 +506,7 @@ def test_collapsed_rows_never_ship_empty_nested_panels() -> None:
     """Collapsed progressive-disclosure rows must retain nested panel payload.
 
     Host-side expand/collapse WIP previously emptied Runtime nested rows
-    (collapsed=false + panels=[]). Guard all seven operator boards (#7829).
+    (collapsed=true + panels=[]). Guard all seven operator boards (#7829).
     """
     operator_files = (
         "bioetl-control-plane-v1.json",
@@ -526,6 +526,7 @@ def test_collapsed_rows_never_ship_empty_nested_panels() -> None:
             if panel.get("collapsed") is not True:
                 continue
             nested = panel.get("panels") or []
+            assert isinstance(nested, list)
             if len(nested) == 0:
                 empty.append((panel.get("id"), panel.get("title")))
         assert not empty, (
