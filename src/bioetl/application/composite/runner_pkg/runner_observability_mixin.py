@@ -6,10 +6,12 @@ from __future__ import annotations
 
 from typing import Any, cast
 
+from bioetl.application.composite.runner_pkg.runner_cv_quarantine_helpers import (
+    write_cv_quarantine,
+)
 from bioetl.application.composite.runner_pkg.runner_observability_helpers import (
     CompositeRunnerObservabilityHostProtocol,
     generate_dq_reports,
-    write_cv_quarantine,
 )
 from bioetl.application.services.dq_report_service import DQReportService
 from bioetl.domain.composite import CompositeConfig

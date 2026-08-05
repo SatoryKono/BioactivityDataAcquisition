@@ -16,5 +16,5 @@ hosts:
     notes: Lifecycle + gateway mixins after ARCH-REF-04 merge
   - name: BaseTransformer
     module: bioetl.application.core.base_transformer.base
-    max_direct_mixin_bases: 4
-    notes: Tracked; further collaborator extraction is follow-up
+    max_direct_mixin_bases: 3
+    notes: Dependency + Execution(composed record helpers) + ABC after ARCH-REF-04

@@ -22,6 +22,7 @@ from bioetl.application.composite._preflight_reporting import (
 )
 from bioetl.application.composite._preflight_type_and_aggregation import (
     check_type_compatibility,
+    dtype_in_group,
     validate_aggregation_ordering,
 )
 from bioetl.application.composite._preflight_types import (
@@ -125,6 +126,16 @@ class CompositePreflightValidationService(
             issues.append(profile_issue)
 
         return issues, scan.resolved_source
+
+    def _check_type_compatibility(
+        self, field_name: str, field_dtypes: dict[str, str]
+    ) -> ValidationIssue | None:
+        """Check if field types are compatible across sources."""
+        return check_type_compatibility(field_name, field_dtypes)
+
+    def _dtype_in_group(self, dtype: str, group: frozenset[str]) -> bool:
+        """Check if a dtype belongs to a compatibility group."""
+        return dtype_in_group(dtype, group)
 
     def validate(
         self,

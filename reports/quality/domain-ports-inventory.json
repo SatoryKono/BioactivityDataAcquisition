@@ -1,0 +1,532 @@
+{
+  "definitions": {
+    "port_module_files": "*.py under domain/ports excluding __init__.py",
+    "port_protocol_classes": "Protocol classes named *Port under domain/ports/**/*.py",
+    "runtime_checkable_decorator_count": "raw @runtime_checkable occurrences in scanned *.py bodies (may include non-*Port Protocols)",
+    "runtime_checkable_port_count": "port_protocol_classes decorated with @runtime_checkable",
+    "scanned_python_files": "all *.py under domain/ports including __init__.py"
+  },
+  "generated_by": "scripts.engineering.qa.report_domain_ports_inventory",
+  "ports": [
+    {
+      "line": 60,
+      "name": "AdrServicePort",
+      "path": "src/bioetl/domain/ports/adr.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 103,
+      "name": "AuditPort",
+      "path": "src/bioetl/domain/ports/audit.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 27,
+      "name": "SettingsLoaderPort",
+      "path": "src/bioetl/domain/ports/config/config_loader_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 36,
+      "name": "PipelineConfigLoaderPort",
+      "path": "src/bioetl/domain/ports/config/config_loader_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 45,
+      "name": "DomainConfigMapperPort",
+      "path": "src/bioetl/domain/ports/config/config_loader_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 22,
+      "name": "PipelineSettingsPort",
+      "path": "src/bioetl/domain/ports/config/config_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 37,
+      "name": "SettingsPort",
+      "path": "src/bioetl/domain/ports/config/config_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 110,
+      "name": "PipelineYamlConfigPort",
+      "path": "src/bioetl/domain/ports/config/config_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 15,
+      "name": "PublicationVocabularyPort",
+      "path": "src/bioetl/domain/ports/config/publication_vocabulary_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 12,
+      "name": "ArtifactByteComparisonPort",
+      "path": "src/bioetl/domain/ports/control_plane/artifact_byte_comparison.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 13,
+      "name": "EffectiveConfigArtifactStorePort",
+      "path": "src/bioetl/domain/ports/control_plane/effective_config_artifact.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 14,
+      "name": "LineageStorePort",
+      "path": "src/bioetl/domain/ports/control_plane/lineage.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 14,
+      "name": "RunLedgerPort",
+      "path": "src/bioetl/domain/ports/control_plane/run_ledger.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 14,
+      "name": "RunManifestPort",
+      "path": "src/bioetl/domain/ports/control_plane/run_manifest.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 14,
+      "name": "WorkflowExecutionStatePort",
+      "path": "src/bioetl/domain/ports/control_plane/workflow_execution_state.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 14,
+      "name": "WorkflowLedgerPort",
+      "path": "src/bioetl/domain/ports/control_plane/workflow_ledger.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 14,
+      "name": "WorkflowManifestPort",
+      "path": "src/bioetl/domain/ports/control_plane/workflow_manifest.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 32,
+      "name": "DataNormalizationPort",
+      "path": "src/bioetl/domain/ports/data_normalization.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 23,
+      "name": "DataSourcePort",
+      "path": "src/bioetl/domain/ports/data_source.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 98,
+      "name": "FilterableDataSourcePort",
+      "path": "src/bioetl/domain/ports/data_source.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 203,
+      "name": "DataSourceFactoryPort",
+      "path": "src/bioetl/domain/ports/data_source.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 17,
+      "name": "DeltaReaderPort",
+      "path": "src/bioetl/domain/ports/delta_reader.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 58,
+      "name": "ExportCatalogPort",
+      "path": "src/bioetl/domain/ports/export.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 82,
+      "name": "ExportWriterPort",
+      "path": "src/bioetl/domain/ports/export.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 23,
+      "name": "InputFilterPort",
+      "path": "src/bioetl/domain/ports/filtering.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 114,
+      "name": "HealthCheckPort",
+      "path": "src/bioetl/domain/ports/health_check.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 161,
+      "name": "HealthStatePort",
+      "path": "src/bioetl/domain/ports/health_check.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 179,
+      "name": "HealthMonitorPort",
+      "path": "src/bioetl/domain/ports/health_check.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 22,
+      "name": "IDMappingPort",
+      "path": "src/bioetl/domain/ports/idmapping.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 86,
+      "name": "IDMappingSourceReaderPort",
+      "path": "src/bioetl/domain/ports/idmapping.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 17,
+      "name": "LoggerPort",
+      "path": "src/bioetl/domain/ports/logger_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 213,
+      "name": "MetadataCoordinatorPort",
+      "path": "src/bioetl/domain/ports/metadata/coordinator.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 30,
+      "name": "MetadataWriterPort",
+      "path": "src/bioetl/domain/ports/metadata/writer.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 13,
+      "name": "DQMonitorPort",
+      "path": "src/bioetl/domain/ports/observability/dq_monitor.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 9,
+      "name": "LoggerPort",
+      "path": "src/bioetl/domain/ports/observability/logging.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 27,
+      "name": "MetricsPort",
+      "path": "src/bioetl/domain/ports/observability/metrics.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 81,
+      "name": "ExecutorMetricsPort",
+      "path": "src/bioetl/domain/ports/observability/metrics.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 102,
+      "name": "MetricsServerPort",
+      "path": "src/bioetl/domain/ports/observability/metrics.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 145,
+      "name": "MetricsPublisherPort",
+      "path": "src/bioetl/domain/ports/observability/metrics.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 171,
+      "name": "HealthMetricsExpositionPort",
+      "path": "src/bioetl/domain/ports/observability/metrics.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 9,
+      "name": "TracingPort",
+      "path": "src/bioetl/domain/ports/observability/tracing.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 20,
+      "name": "PiiHasherPort",
+      "path": "src/bioetl/domain/ports/pii.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 15,
+      "name": "ProteinClassificationPort",
+      "path": "src/bioetl/domain/ports/protein_classification.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 24,
+      "name": "BronzeDQConfigPort",
+      "path": "src/bioetl/domain/ports/quality/dq_config.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 59,
+      "name": "SilverDQConfigPort",
+      "path": "src/bioetl/domain/ports/quality/dq_config.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 94,
+      "name": "GoldDQConfigPort",
+      "path": "src/bioetl/domain/ports/quality/dq_config.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 44,
+      "name": "BronzeDQAnalyzerPort",
+      "path": "src/bioetl/domain/ports/quality/dq_report.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 80,
+      "name": "SilverDQAnalyzerPort",
+      "path": "src/bioetl/domain/ports/quality/dq_report.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 120,
+      "name": "GoldDQAnalyzerPort",
+      "path": "src/bioetl/domain/ports/quality/dq_report.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 170,
+      "name": "DQReportWriterPort",
+      "path": "src/bioetl/domain/ports/quality/dq_report.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 13,
+      "name": "ErrorClassifierPort",
+      "path": "src/bioetl/domain/ports/quality/error_classifier.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 14,
+      "name": "ErrorHandlerPort",
+      "path": "src/bioetl/domain/ports/quality/error_handler.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 14,
+      "name": "FallbackPolicyPort",
+      "path": "src/bioetl/domain/ports/quality/fallback_policy.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 45,
+      "name": "QuarantinePort",
+      "path": "src/bioetl/domain/ports/quality/quarantine.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 22,
+      "name": "SilverValidatorPort",
+      "path": "src/bioetl/domain/ports/quality/validation.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 49,
+      "name": "GoldValidatorPort",
+      "path": "src/bioetl/domain/ports/quality/validation.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 29,
+      "name": "RateLimiterPort",
+      "path": "src/bioetl/domain/ports/resilience.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 76,
+      "name": "CircuitBreakerPort",
+      "path": "src/bioetl/domain/ports/resilience.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 14,
+      "name": "BatchIdGeneratorPort",
+      "path": "src/bioetl/domain/ports/runtime/batch_id.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 19,
+      "name": "CheckpointPort",
+      "path": "src/bioetl/domain/ports/runtime/checkpoint.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 10,
+      "name": "ClockPort",
+      "path": "src/bioetl/domain/ports/runtime/clock.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 13,
+      "name": "CompositeCheckpointPort",
+      "path": "src/bioetl/domain/ports/runtime/composite_checkpoint.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 25,
+      "name": "LockPort",
+      "path": "src/bioetl/domain/ports/runtime/locking.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 82,
+      "name": "MemoryMonitorPort",
+      "path": "src/bioetl/domain/ports/runtime/memory.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 91,
+      "name": "PipelineDebugPort",
+      "path": "src/bioetl/domain/ports/runtime/pipeline_debug.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 18,
+      "name": "PipelineRegistryPort",
+      "path": "src/bioetl/domain/ports/runtime/registry_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 31,
+      "name": "RegistryAccessorPort",
+      "path": "src/bioetl/domain/ports/runtime/registry_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 42,
+      "name": "RunnablePort",
+      "path": "src/bioetl/domain/ports/runtime/runner.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 68,
+      "name": "ExecutionMetricsReadablePort",
+      "path": "src/bioetl/domain/ports/runtime/runner.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 87,
+      "name": "ExecutionMetricsRunnerPort",
+      "path": "src/bioetl/domain/ports/runtime/runner.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 96,
+      "name": "ExecutionObservabilityPort",
+      "path": "src/bioetl/domain/ports/runtime/runner.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 137,
+      "name": "RunnerFactoryPort",
+      "path": "src/bioetl/domain/ports/runtime/runner.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 185,
+      "name": "MetricsExtractorPort",
+      "path": "src/bioetl/domain/ports/runtime/runner.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 252,
+      "name": "PipelineFactoryPort",
+      "path": "src/bioetl/domain/ports/runtime/runner.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 13,
+      "name": "ShutdownPort",
+      "path": "src/bioetl/domain/ports/runtime/shutdown.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 23,
+      "name": "JsonEncoderPort",
+      "path": "src/bioetl/domain/ports/serialization.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 12,
+      "name": "StageAccountingPort",
+      "path": "src/bioetl/domain/ports/stage_accounting.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 19,
+      "name": "BronzeStoragePort",
+      "path": "src/bioetl/domain/ports/storage/bronze_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 14,
+      "name": "GoldStoragePort",
+      "path": "src/bioetl/domain/ports/storage/gold_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 13,
+      "name": "StorageLifecyclePort",
+      "path": "src/bioetl/domain/ports/storage/lifecycle_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 14,
+      "name": "MergedStoragePort",
+      "path": "src/bioetl/domain/ports/storage/merged_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 192,
+      "name": "SilverStoragePort",
+      "path": "src/bioetl/domain/ports/storage/silver_port.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 11,
+      "name": "StorageMaintenancePort",
+      "path": "src/bioetl/domain/ports/storage_maintenance.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 243,
+      "name": "ForeignKeyReconciliationPort",
+      "path": "src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py",
+      "runtime_checkable": true
+    },
+    {
+      "line": 215,
+      "name": "RowReconciliationPort",
+      "path": "src/bioetl/domain/ports/workflow_row_reconciliation.py",
+      "runtime_checkable": true
+    }
+  ],
+  "ports_root": "src/bioetl/domain/ports",
+  "schema_version": 1,
+  "summary": {
+    "port_module_files": 66,
+    "port_protocol_classes": 85,
+    "runtime_checkable_coverage_pct": 100.0,
+    "runtime_checkable_decorator_count": 89,
+    "runtime_checkable_port_count": 85,
+    "scanned_python_files": 75
+  }
+}

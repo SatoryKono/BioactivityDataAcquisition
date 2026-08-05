@@ -185,3 +185,8 @@ class EnrichmentCrossValidator:
             df=df,
             detail=detail,
         )
+
+    @staticmethod
+    def _parse_pipeline(pipeline: str) -> tuple[str, str]:
+        """Parse 'provider_entity' into (provider, entity)."""
+        return parse_pipeline_name(pipeline)

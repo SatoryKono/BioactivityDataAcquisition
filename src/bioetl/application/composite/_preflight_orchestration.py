@@ -3,11 +3,17 @@
 
 from __future__ import annotations
 
-from importlib import import_module
 from typing import Any, cast
 
 from bioetl.application.composite._preflight_schema_field_extraction import (
+    extract_dtype_from_annotation,
+    extract_fields_from_annotations,
     extract_fields_from_schema,
+    simplify_dtype,
+)
+from bioetl.application.composite._preflight_schema_registry import (
+    find_schema_class as _find_schema_class,
+    load_schema_registry,
 )
 from bioetl.application.composite._preflight_types import (
     ProfileInfo,
@@ -16,21 +22,6 @@ from bioetl.application.composite._preflight_types import (
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.normalization.profiles import resolve_normalization_profile
 from bioetl.domain.ports import LoggerPort
-
-
-def _find_schema_class(module: object) -> type | None:
-    """Return the first exported generated schema class from a module."""
-    for exported in getattr(module, "__all__", ()):
-        candidate = (
-            getattr(module, exported, None) if isinstance(exported, str) else exported
-        )
-        if isinstance(candidate, type) and hasattr(candidate, "to_schema"):
-            return candidate
-
-    for candidate in vars(module).values():
-        if isinstance(candidate, type) and hasattr(candidate, "to_schema"):
-            return candidate
-    return None
 
 
 class PreflightSchemaOrchestrationMixin:
@@ -163,9 +154,29 @@ class PreflightSchemaOrchestrationMixin:
             )
             return None
 
-        return extract_fields_from_schema(
-            self, schema_class, source=f"{provider}.{entity}"
+        return self._extract_fields_from_schema(
+            schema_class, source=f"{provider}.{entity}"
         )
+
+    def _extract_fields_from_schema(
+        self, schema_class: type, source: str
+    ) -> SchemaFields:
+        """Extract field information from a Pandera schema class."""
+        return extract_fields_from_schema(self, schema_class, source)
+
+    def _extract_fields_from_annotations(
+        self, schema_class: type, source: str
+    ) -> SchemaFields:
+        """Fallback: extract fields from class annotations."""
+        return extract_fields_from_annotations(schema_class, source)
+
+    def _extract_dtype_from_annotation(self, annotation: object) -> str:
+        """Extract dtype string from a type annotation."""
+        return extract_dtype_from_annotation(annotation)
+
+    def _simplify_dtype(self, dtype_str: str) -> str:
+        """Simplify a dtype string for comparison."""
+        return simplify_dtype(dtype_str)
 
     def _load_pipeline_profile(self, pipeline_name: str) -> ProfileInfo | None:
         """Load deterministic profile metadata for one pipeline."""
@@ -202,29 +213,5 @@ class PreflightSchemaOrchestrationMixin:
         """Get or create the schema registry keyed by ``provider_entity``."""
         if cls._SCHEMA_REGISTRY is not None:
             return cls._SCHEMA_REGISTRY
-
-        module_aliases: dict[tuple[str, str], str] = {
-            ("chembl", "protein_class"): "protein_classification",
-        }
-        registry: dict[str, type] = {}
-
-        from bioetl.domain.schemas.generated.registry import CANONICAL_SCHEMA_REGISTRY
-
-        for entry in CANONICAL_SCHEMA_REGISTRY:
-            provider = entry.provider.lower()
-            entity = entry.entity.lower()
-            module_entity = module_aliases.get((provider, entity), entity)
-            module_name = f"bioetl.domain.schemas.{provider}.{module_entity}"
-            pipeline_key = f"{provider}_{entity}"
-
-            try:
-                module = import_module(module_name)
-            except ImportError:
-                continue
-
-            schema_class = _find_schema_class(module)
-            if schema_class is not None:
-                registry[pipeline_key] = schema_class
-
-        cls._SCHEMA_REGISTRY = registry
-        return registry
+        cls._SCHEMA_REGISTRY = load_schema_registry()
+        return cls._SCHEMA_REGISTRY
