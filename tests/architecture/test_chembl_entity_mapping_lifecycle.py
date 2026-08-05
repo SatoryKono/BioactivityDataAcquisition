@@ -85,7 +85,8 @@ def test_entity_mapping_module_lifecycle_matches_inventory() -> None:
 def test_entity_mapping_has_zero_first_party_src_importers() -> None:
     importers = _src_entity_mapping_importers()
     assert importers == [], (
-        f"ENTITY_MAPPING must keep zero first-party src importers; found: {importers}"
+        "ENTITY_MAPPING must keep zero first-party src importers; "
+        f"found: {importers}"
     )
 
 
