@@ -36,7 +36,7 @@ def _require_dashboard(name: str) -> Path:
 
 
 from tests.integration.grafana_contract_specs import (
-    SUMMARY_ZERO_FALLBACK_EXPECTATIONS,
+    SUMMARY_NO_VECTOR_ZERO_FALLBACK_PANELS,
 )
 
 pytestmark = pytest.mark.integration
@@ -178,18 +178,16 @@ def test_design_system_documents_missing_data_panel_class_contract() -> None:
     )
 
 
-def test_summary_queries_use_zero_fallbacks() -> None:
-    """Count summaries may synthesize zero only where absence means no events."""
-    expected_panel_snippets = SUMMARY_ZERO_FALLBACK_EXPECTATIONS
-
-    for dashboard_name, panel_expectations in expected_panel_snippets.items():
+def test_summary_queries_do_not_mask_absence_with_vector_zero() -> None:
+    """Count summaries must not hide missing telemetry behind PromQL `or vector(0)`."""
+    for dashboard_name, panel_titles in SUMMARY_NO_VECTOR_ZERO_FALLBACK_PANELS.items():
         dashboard = load_dashboard(_require_dashboard(dashboard_name))
         panels = {
             panel.get("title"): panel
             for panel in get_dashboard_panels(dashboard)
             if panel.get("title")
         }
-        for panel_title, expected_snippet in panel_expectations.items():
+        for panel_title in panel_titles:
             panel = panels.get(panel_title)
             assert panel is not None, (
                 f"Dashboard {dashboard_name} missing panel {panel_title!r}"
@@ -202,14 +200,14 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             assert expressions, (
                 f"Dashboard {dashboard_name} panel {panel_title!r} has no expressions"
             )
-            assert any(expected_snippet in expr for expr in expressions), (
-                f"Dashboard {dashboard_name} panel {panel_title!r} must include "
-                f"{expected_snippet!r} to render zero instead of no-data"
+            assert all("or vector(0)" not in expr for expr in expressions), (
+                f"Dashboard {dashboard_name} panel {panel_title!r} must not mask "
+                "absence with 'or vector(0)' (preserve No data)"
             )
 
 
 def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
-    """Workflow summary cards intentionally render empty selected ranges as zero events."""
+    """Workflow cards use selected-range deltas; display zero via noValue, not PromQL."""
     dashboard = load_dashboard(_require_dashboard("bioetl-runtime.json"))
     expected_panels = {
         "Track Failed Workflow Runs",
@@ -235,8 +233,8 @@ def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
         assert all("max_over_time(" not in expr for expr in expressions), (
             f"{panel_title} counts counter events and must not use max_over_time()"
         )
-        assert any("or vector(0)" in expr for expr in expressions), (
-            f"{panel_title} must keep zero-valid fallback for empty selected ranges"
+        assert all("or vector(0)" not in expr for expr in expressions), (
+            f"{panel_title} must not mask absence with PromQL 'or vector(0)'"
         )
         defaults = panel.get("fieldConfig", {}).get("defaults", {})
         assert defaults.get("noValue") == "0", (

@@ -261,13 +261,23 @@ def _portable_artifact_path(
     *,
     repo_root: Path = REPO_ROOT,
 ) -> str | None:
-    """Render in-repository telemetry inputs without machine-local prefixes."""
+    """Render telemetry inputs without machine-local absolute prefixes.
+
+    Prefer paths relative to the repository root. When the input lives outside
+    the repo (for example a tmp checkout used by unit tests that chdir), fall
+    back to a path relative to the current working directory before emitting an
+    absolute string.
+    """
     if path is None:
         return None
     resolved_path = path.resolve(strict=False)
     resolved_root = repo_root.resolve(strict=False)
     try:
         return resolved_path.relative_to(resolved_root).as_posix()
+    except ValueError:
+        pass
+    try:
+        return resolved_path.relative_to(Path.cwd().resolve(strict=False)).as_posix()
     except ValueError:
         return str(path)
 
