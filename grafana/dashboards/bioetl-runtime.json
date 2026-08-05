@@ -3112,7 +3112,8 @@
               "options": {
                 "excludeByName": {
                   "percentage": true,
-                  "row_status": true
+                  "row_status": true,
+                  "percintage": true
                 },
                 "indexByName": {
                   "parameter": 0,
