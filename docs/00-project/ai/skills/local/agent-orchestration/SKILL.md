@@ -16,6 +16,7 @@ description: "Coordinate BioETL multi-agent workflow across py-\\* profiles usin
 Coordinate complex tasks across agent profiles (`py-*`) with clear handoffs and artifacts.
 
 ## Source Of Truth
+
 - Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`

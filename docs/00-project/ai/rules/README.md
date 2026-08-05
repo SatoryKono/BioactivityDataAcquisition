@@ -28,7 +28,7 @@ docs/00-project/ai/rules/
 └── [скопировать в .cursor/rules/ и .windsurf/]
 ```
 
-Источник канонических правил: `docs/00-project/NORMATIVE_SOURCES.md` → `docs/00-project/RULES.md` (v6.1.4)
+Источник канонических правил: `docs/00-project/NORMATIVE_SOURCES.md` → `docs/00-project/RULES.md` (v6.1.7)
 Текущую canonical version всегда сверяйте по `Version:` header в `RULES.md`.
 
 Этот каталог является condensed AI guidance surface. Он **не заменяет**
