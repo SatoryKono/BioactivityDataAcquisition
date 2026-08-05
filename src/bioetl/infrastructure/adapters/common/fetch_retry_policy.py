@@ -11,8 +11,9 @@ __all__ = [
 ]
 
 
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass
+from typing import cast
 
 from bioetl.domain.exceptions import RetryExhaustedError
 from bioetl.domain.ports import FallbackPolicyPort
@@ -67,9 +68,6 @@ def is_retry_exhausted_error(error: Exception) -> bool:
 
     Args:
         error: Exception to check for RetryExhaustedError in the chain.
-
-    Returns:
-        True if RetryExhaustedError is found anywhere in the exception chain, False otherwise.
     """
     seen: set[int] = set()
     current: Exception | None = error
@@ -158,9 +156,6 @@ async def _yield_phase_records(
     finally:
         aclose = getattr(records, "aclose", None)
         if callable(aclose):
-            from collections.abc import Awaitable, Callable
-            from typing import cast
-
             aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
             await aclose_fn()
 

@@ -829,7 +829,7 @@ removable_complexity_family_ratchets:
         - src/bioetl/infrastructure/adapters/
       family_budgets:
         # Measured residual after zone merges (#7521 / CI-C1-006); shrink-only from here.
-        files_ge_250_loc: 23
+        files_ge_250_loc: 22
         max_internal_fan_in: 31
       tracked_seams:
         - path: src/bioetl/infrastructure/adapters/http/_health_monitor_support.py
