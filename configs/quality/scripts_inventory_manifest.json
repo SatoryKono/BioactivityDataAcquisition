@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-05T06:46:22.504309+00:00",
+  "generated_at": "2026-08-05T07:10:59.672083+00:00",
   "summary": {
-    "total_scripts": 580,
+    "total_scripts": 582,
     "status_counts": {
       "active": 341,
-      "supporting": 234,
+      "supporting": 236,
       "temporary_diagnostic": 5
     },
     "reference_group_coverage": {
-      "agents": 11,
+      "agents": 12,
       "build": 12,
       "ci": 77,
       "docs": 235,
@@ -15948,8 +15948,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": "AGENTS.md",
+          "line": 77,
+          "source_group": "agents",
+          "text": "`scripts/engineering/repo/cleanup_root_local_clutter.py`. See"
+        },
         {
           "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
           "line": 61,
@@ -18146,6 +18152,18 @@
       "next_step": "Retain only as a bounded one-off utility for auditability; classify or retire after the owning workflow is verified (scripts/ops/observability/grafana/fix_gra_3c_i1b.py)."
     },
     {
+      "path": "scripts/ops/observability/grafana/fix_gra_3c_r2_i1.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as bounded one-off utility for auditability; retire after owning workflow is verified (scripts/ops/observability/grafana/fix_gra_3c_r2_i1.py)."
+    },
+    {
       "path": "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
       "type": "py",
       "status": "supporting",
@@ -18201,6 +18219,18 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded DUX6 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/probe_ops_http_panels.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as bounded one-off utility for auditability; retire after owning workflow is verified (scripts/ops/observability/grafana/probe_ops_http_panels.py)."
     },
     {
       "path": "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1",
