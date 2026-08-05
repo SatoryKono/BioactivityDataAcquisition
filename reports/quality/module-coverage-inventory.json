@@ -10613,7 +10613,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.composite.config",
       "path": "src/bioetl/domain/composite/config.py",
-      "source_lines": 47
+      "source_lines": 50
     },
     {
       "coverage_percent": null,
@@ -33755,7 +33755,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.composite.config",
       "path": "src/bioetl/domain/composite/config.py",
-      "source_lines": 47
+      "source_lines": 50
     },
     {
       "coverage_percent": null,
@@ -46290,7 +46290,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-28",
-  "source_tree_sha256": "8af7dd77b92ca842a7b6b77211adb3ec47b2e036f7d0a68ec1fec8cd2f936804",
+  "source_tree_sha256": "8ea780a858a56ddee874aefbde2b0544ce24eace31eb0e9b6e58e0eafb20d5a8",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
