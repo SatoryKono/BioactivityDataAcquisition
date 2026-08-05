@@ -814,7 +814,8 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "palette-classic"
+                "mode": "fixed",
+                "fixedColor": "red"
               },
               "custom": {
                 "axisLabel": "Checks / interval",
@@ -905,15 +906,31 @@
                 "mode": "continuous-GrYlRd"
               },
               "decimals": 0,
-              "mappings": [],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "—",
+                      "color": "transparent",
+                      "index": 0
+                    }
+                  }
+                }
+              ],
               "max": 100,
               "min": 0,
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "transparent",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "yellow",
@@ -967,19 +984,35 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "palette-classic"
+                "mode": "thresholds"
               },
               "custom": {
                 "align": "auto",
                 "displayMode": "auto"
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "—",
+                      "color": "transparent",
+                      "index": 0
+                    }
+                  }
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "transparent",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "yellow",
@@ -1296,7 +1329,8 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "palette-classic"
+                "mode": "fixed",
+                "fixedColor": "red"
               },
               "custom": {
                 "axisLabel": "Errors / interval",
@@ -1381,7 +1415,8 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "palette-classic"
+                "mode": "fixed",
+                "fixedColor": "red"
               },
               "custom": {
                 "axisLabel": "Errors",
