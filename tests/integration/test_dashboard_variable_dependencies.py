@@ -21,9 +21,7 @@ pytestmark = pytest.mark.integration
 
 def _templating_map(path: str) -> dict[str, dict]:
     dashboard = load_dashboard(Path(path))
-    return {
-        v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])
-    }
+    return {v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])}
 
 
 def test_runtime_variable_dependencies():
