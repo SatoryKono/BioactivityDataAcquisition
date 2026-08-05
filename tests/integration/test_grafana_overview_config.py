@@ -225,10 +225,15 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     }
     assert action_props.get("custom.cellOptions", {}).get("type") == "color-text"
     links = action_props.get("links") or []
-    assert links, "Action column must expose row-aware recommended-board link"
+    assert links, "Action column must expose row-aware board links"
     assert any(
-        "action_dashboard_uid" in str(link.get("url", "")) for link in links
-    ), "Action link must use action_dashboard_uid from the route series"
+        "bioetl-runtime" in str(link.get("url", ""))
+        and "${__data.fields.pipeline}" in str(link.get("url", ""))
+        for link in links
+    ), "Action links must pass the row pipeline into target dashboards"
+    assert any(
+        "var-provider=unknown" in str(link.get("url", "")) for link in links
+    ), "Provider Action link must fail-close provider=unknown"
 
     organize = next(
         (
@@ -290,7 +295,9 @@ def test_selected_scope_cards_normalize_workflow_pipeline_aliases() -> None:
     ):
         expr = _panel_expr(_panels_by_title()[title])
         assert 'pipeline=~"$pipeline"' in expr
-        assert len(expr) <= 200
+        # Review First Action may include compact NO_ROUTE label_replace fallback (RFA-P0).
+        max_len = 320 if title == "Review First Action" else 200
+        assert len(expr) <= max_len, f"{title} expr length {len(expr)} > {max_len}"
         assert "$__range" not in expr
 
 
