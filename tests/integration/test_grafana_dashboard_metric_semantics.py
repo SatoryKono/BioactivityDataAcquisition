@@ -127,6 +127,36 @@ def _expected_processed_records_row_status_mappings() -> list[dict[str, object]]
     ]
 
 
+def _assert_processed_records_target_contract(processed: dict[str, object]) -> None:
+    """Assert the HTTP target and absence semantics for Processed Records."""
+    targets = processed.get("targets")
+    assert isinstance(targets, list)
+    assert len(targets) == 1
+    assert targets[0] == {
+        "format": "table",
+        "parser": "backend",
+        "refId": "A",
+        "root_selector": "rows",
+        "source": "url",
+        "type": "json",
+        "url": (
+            "/ops/observability/processed-records?"
+            "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+        ),
+        "url_options": {"data": "", "method": "GET"},
+        "expr": "",
+    }
+
+    processed_json = json.dumps(processed, sort_keys=True)
+    assert 'run_id="' not in processed_json
+    assert "run_id=~" not in processed_json
+    assert "$__range" not in processed_json
+    assert "or vector(0)" not in processed_json
+    assert "__zero" not in processed_json
+    for removed_label in _PROCESSED_RECORDS_REMOVED_PARAMETER_LABELS:
+        assert removed_label not in processed_json
+
+
 def test_design_system_documents_missing_data_panel_class_contract() -> None:
     """Design docs must preserve missing-data semantics by panel class."""
     text = Path("docs/03-guides/dashboards/design-system.md").read_text(
@@ -1825,32 +1855,10 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         if isinstance(cell_options, dict)
     )
 
-    targets = processed.get("targets", [])
     assert processed.get("datasource") == "BioETL Ops HTTP"
-    assert len(targets) == 1
-    assert targets[0] == {
-        "format": "table",
-        "parser": "backend",
-        "refId": "A",
-        "root_selector": "rows",
-        "source": "url",
-        "type": "json",
-        "url": (
-            "/ops/observability/processed-records?"
-            "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
-        ),
-        "url_options": {"data": "", "method": "GET"},
-        "expr": "",
-    }
+    _assert_processed_records_target_contract(processed)
 
     processed_json = json.dumps(processed, sort_keys=True)
-    assert 'run_id="' not in processed_json
-    assert "run_id=~" not in processed_json
-    assert "$__range" not in processed_json
-    assert "or vector(0)" not in processed_json
-    assert "__zero" not in processed_json
-    for removed_label in _PROCESSED_RECORDS_REMOVED_PARAMETER_LABELS:
-        assert removed_label not in processed_json
 
     for stale_label in (
         "0 reconciliation_status",

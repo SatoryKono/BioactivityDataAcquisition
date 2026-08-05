@@ -24,7 +24,7 @@ def test_pytest_option_names_supports_callable_api() -> None:
 
 
 def test_pytest_option_names_supports_iterable_api() -> None:
-    """Retain compatibility with option objects exposing iterable names."""
+    """Retain support for option objects exposing iterable names."""
     option = SimpleNamespace(names=("--vcr-record", "--vcr_record"))
 
     assert root_conftest._pytest_option_names(option) == (

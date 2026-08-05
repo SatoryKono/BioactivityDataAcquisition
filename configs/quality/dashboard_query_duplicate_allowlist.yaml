@@ -32,23 +32,20 @@ near_duplicates:
     Current cross-panel audited baseline is five reviewed near-duplicate
     families. Growth beyond five or a panel-set change requires review.
   reviewed_groups:
-    - id: processed-record-stage-range-variants
+    - id: processed-record-stage-zero-valid-range-variants
       disposition: retain_semantic_variants
-      recording_rule_decision: rejected_distinct_stage_and_range_semantics
-      rationale: Bronze, Gold, and filtered-out views intentionally retain different stage semantics; pre-recording the dashboard range would be invalid.
+      recording_rule_decision: rejected_distinct_stage_and_zero_valid_semantics
+      rationale: Bronze and Gold selected-range counts intentionally retain different stage semantics and both encode missing event series as zero; pre-recording the dashboard range would be invalid.
       panel_refs:
         - "bioetl-dq-v2.json :: Monitor Gold Records"
-        - "bioetl-dq-v2.json :: Monitor Silver Filter Rejects"
         - "bioetl-dq-v2.json :: Monitor Bronze Records"
-        - "bioetl-overview-v2.json :: Track Silver Rejects"
-    - id: workflow-step-outcome-range-variants
-      disposition: retain_semantic_variants
-      recording_rule_decision: rejected_distinct_step_predicates
-      rationale: Pipeline failure, transform failure, and skipped-event predicates answer different workflow questions and are inexpensive bounded counters.
+    - id: silver-filter-reject-no-data-range-variants
+      disposition: retain_shared_diagnostic_absence
+      recording_rule_decision: rejected_cross_dashboard_range_binding
+      rationale: DQ and Overview show the same selected-range filtered-out evidence and intentionally preserve missing telemetry as No data instead of synthesizing a healthy zero.
       panel_refs:
-        - "bioetl-workflow-overview.json :: Failed Pipeline Steps / Range"
-        - "bioetl-workflow-overview.json :: Failed Transform Steps / Range"
-        - "bioetl-workflow-overview.json :: Skipped Step Events / Range"
+        - "bioetl-dq-v2.json :: Monitor Silver Filter Rejects"
+        - "bioetl-overview-v2.json :: Track Silver Rejects"
     - id: provider-http-error-class-variants
       disposition: retain_semantic_variants
       recording_rule_decision: rejected_distinct_error_taxonomy
