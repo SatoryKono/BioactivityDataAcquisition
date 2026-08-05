@@ -31,14 +31,7 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 - **Purpose:** Bronze/Silver/Gold stage/outcome accounting (first paint).
 - **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).
 
-### 5. Selected Run Details
-- **Type:** Row (collapsed by default)
-- **Purpose:** Progressive disclosure for recent runs, funnel, reasons, reconciliation, artifacts, timings, CTA.
-- **Data sources:** Nested panels below.
-
-Nested titles (must match JSON):
-
-### 6. Browse Recent Runs
+### 5. Browse Recent Runs
 - **Type:** Table (first-screen empty-selection utility)
 - **Purpose:** Index of recent `pipeline_run_report_v1` files to pick `run_id`.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
@@ -48,6 +41,14 @@ Nested titles (must match JSON):
   artifacts. HTTP `200` with `status=ok`, `count=0`, and `items=[]` means no
   artifacts exist for that pipeline; `504` with
   `contract=forensic_endpoint_error_v1` means the forensic endpoint timed out.
+
+### 6. Selected Run Details
+- **Type:** Row (**collapsed by default**, `id=3099`)
+- **Purpose:** Progressive disclosure for funnel, reasons, reconciliation,
+  layer accounting, artifacts, timings, and next-step CTA.
+- **Data sources:** Nested panels below (expand row to load).
+
+Nested titles (must match JSON):
 
 ### 7. Inspect Stage Funnel
 - **Type:** Table
@@ -60,12 +61,13 @@ Nested titles (must match JSON):
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `reasons_top_n`
 
 ### 9. Inspect Reconciliation
-- **Type:** Table
+- **Type:** Table (`id=3015`)
 - **Purpose:** Reconciliation block from `pipeline_run_report_v1`.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `reconciliation`
-- **Presentation:** All six canonical reconciliation rows fit without internal
-  scrolling. The Ops HTTP adapter serializes the mixed numeric/status `value`
-  field consistently so the Infinity table preserves both deltas and verdicts.
+- **Presentation:** Six canonical rows in stable silver→gold order; `value`
+  column labeled **Value** (not Count) with color-text for status tokens
+  (`OK`/`FAIL`/…). HTTP missing-report path returns empty shell (200), not 404.
+  Panel links: Processed Records + Trust.
 
 ### 10. Inspect Layer Accounting
 - **Type:** Text
