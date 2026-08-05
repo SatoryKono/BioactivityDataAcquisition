@@ -198,10 +198,6 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: delete_windows_device_name_root_artifact_do_not_track
-      - path: NUL
-        current_live_state: absent_from_root_baseline
-        canonical_path: null
-        action_if_reintroduced: delete_windows_device_name_root_artifact_do_not_track
       - path: _tmp_panel_inventory.mjs
         current_live_state: absent_from_root_baseline
         canonical_path: null
