@@ -48,6 +48,8 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 ### 5b. Domain Suspect Details (collapsed row)
 - **Runtime / Provider / DQ tables** remain as forensic detail under a collapsed row (not peer first-screen verdicts).
 - Each domain table keeps a data link to its workspace.
+- `Inspect DQ Suspects` hides the instant-query Time field and reserves width for
+  the complete `Reason`; visible fields are `Pipeline`, `Reason`, and `Signal`.
 
 | ID | Panel title |
 | --- | --- |
@@ -58,7 +60,8 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 
 ### 8. Monitor Current Alerts
 - **Type:** Table
-- **Purpose:** Instant ALERTS snapshot (firing|pending). Not a range timeline.
+- **Purpose:** Instant ALERTS snapshot (firing|pending). `Active Alerts` is a
+  neutral multiplicity count, never an inferred severity. Not a range timeline.
 - **Data sources:** Prometheus `ALERTS` (instant)
 
 ### 9. Track Alert State History

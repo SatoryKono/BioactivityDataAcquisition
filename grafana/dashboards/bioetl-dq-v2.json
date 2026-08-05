@@ -619,27 +619,41 @@
       },
       "id": 121,
       "options": {
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
       },
       "targets": [
         {
           "expr": "topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
+          "format": "table",
           "instant": true,
           "legendFormat": "{{reason_code}}",
           "refId": "A"
         }
       ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "reason_code": 0,
+              "Value": 1
+            },
+            "renameByName": {
+              "reason_code": "Reject Reason",
+              "Value": "Rejects"
+            }
+          }
+        }
+      ],
       "title": "Inspect Top Silver Reject Reasons",
-      "type": "bargauge",
+      "type": "table",
       "description": "Silver structural reject reasons ranked by count in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded reason samples were observed; it must not create a synthetic reason. For record-level evidence run `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only` with the relevant run/reason filters."
     },
     {
@@ -712,27 +726,41 @@
       },
       "id": 122,
       "options": {
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
       },
       "targets": [
         {
           "expr": "topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
+          "format": "table",
           "instant": true,
           "legendFormat": "{{field}}",
           "refId": "A"
         }
       ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "field": 0,
+              "Value": 1
+            },
+            "renameByName": {
+              "field": "Reject Field",
+              "Value": "Rejects"
+            }
+          }
+        }
+      ],
       "title": "Inspect Top Silver Reject Fields",
-      "type": "bargauge",
+      "type": "table",
       "description": "Silver structural rejects grouped by schema field in the selected range. Gold contract and semantic rejects are excluded. No data means no bounded field samples were observed. For record-level evidence use `bioetl quarantine inspect` with the relevant pipeline, run, and field filters."
     },
     {
@@ -806,27 +834,41 @@
       },
       "id": 118,
       "options": {
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
       },
       "targets": [
         {
           "expr": "sum by (pipeline) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))",
+          "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}}",
           "refId": "A"
         }
       ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "pipeline": 0,
+              "Value": 1
+            },
+            "renameByName": {
+              "pipeline": "Pipeline",
+              "Value": "Silver Rejects"
+            }
+          }
+        }
+      ],
       "title": "Inspect Silver Rejects by Pipeline",
-      "type": "bargauge"
+      "type": "table"
     },
     {
       "datasource": {
@@ -906,33 +948,57 @@
             "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md?pipeline=${pipeline:queryparam}&${__url_time_range}"
           }
         ],
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
       },
       "targets": [
         {
           "expr": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_quarantined_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
+          "format": "table",
           "instant": true,
           "legendFormat": "gold_quarantined {{pipeline}}",
           "refId": "A"
         },
         {
           "expr": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_excluded_by_contract_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
+          "format": "table",
           "instant": true,
           "legendFormat": "gold_excluded_by_contract {{pipeline}}",
           "refId": "B"
         }
       ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "pipeline": 0,
+              "Value #A": 1,
+              "Value #B": 2
+            },
+            "renameByName": {
+              "pipeline": "Pipeline",
+              "Value": "Gold Rejects",
+              "Value #A": "Gold Quarantined",
+              "Value #B": "Gold Excluded by Contract"
+            }
+          }
+        }
+      ],
       "title": "Inspect: Gold Reject Outcomes by Pipeline",
-      "type": "bargauge"
+      "type": "table"
     },
     {
       "collapsed": false,
@@ -2689,6 +2755,10 @@
               {
                 "id": "custom.align",
                 "value": "right"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               },
               {
                 "id": "custom.cellOptions",

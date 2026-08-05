@@ -2186,11 +2186,9 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_silver_filter_reject_field_total": [
-      "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_silver_filter_reject_reason_total": [
-      "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_silver_filter_reject_total_mismatch_15m": [

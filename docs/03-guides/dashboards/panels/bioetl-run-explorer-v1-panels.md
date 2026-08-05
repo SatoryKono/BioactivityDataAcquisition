@@ -28,7 +28,7 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 
 ### 4. Inspect Processed Records
 - **Type:** Table
-- **Purpose:** Bronze/Silver/Gold stage/outcome accounting (first paint).
+- **Purpose:** Bronze/Silver/Gold count and denominator-explicit percentage accounting (first paint); both numeric columns are right-aligned.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).
 
 ### 5. Browse Recent Runs

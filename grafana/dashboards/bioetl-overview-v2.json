@@ -115,7 +115,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-background",
-                  "applyToRow": true
+                  "applyToRow": false
                 }
               }
             ]
@@ -134,7 +134,7 @@
                     "options": {
                       "pattern": "^(critical|page|p0|p1)$",
                       "result": {
-                        "text": "$1 · CRITICAL",
+                        "text": "CRITICAL",
                         "color": "red"
                       }
                     }
@@ -144,7 +144,7 @@
                     "options": {
                       "pattern": "^(warning|warn)$",
                       "result": {
-                        "text": "$1 · WARNING",
+                        "text": "WARNING",
                         "color": "orange"
                       }
                     }
@@ -156,18 +156,6 @@
                 "value": {
                   "type": "color-background"
                 }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Severity"
               }
             ]
           }
@@ -3319,6 +3307,10 @@
               {
                 "id": "custom.align",
                 "value": "right"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               },
               {
                 "id": "custom.cellOptions",

@@ -4315,6 +4315,10 @@
                 "value": "right"
               },
               {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text"

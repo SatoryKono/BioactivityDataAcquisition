@@ -42,7 +42,7 @@ used.
 
 ### 5. Inspect Processed Records
 - **Type:** Table
-- **Purpose:** Show records processed by stage for selected runs.
+- **Purpose:** Show Bronze/Silver/Gold counts and denominator-explicit percentages for selected runs; both numeric columns are right-aligned.
 - **Data sources:** BioETL Ops HTTP
   `/ops/observability/processed-records`; this is not a Prometheus panel.
 
@@ -137,12 +137,12 @@ used.
 
 ### 22. Review Errors by Stage & Code
 - **Type:** Table
-- **Purpose:** Show error breakdown by stage and error code.
+- **Purpose:** Show error breakdown by stage and error code; the bounded fallback is labeled `VALID EMPTY` / `No errors in range` instead of exposing raw frame tokens.
 - **Data sources:** `bioetl_errors_total`
 
 ### 23. Compare Records by Stage & Run Type
-- **Type:** Bargauge
-- **Purpose:** Show record distribution by stage and run type.
+- **Type:** Table
+- **Purpose:** Show record distribution by stage and run type; the bounded fallback is labeled `VALID EMPTY` / `No records in range`.
 - **Data sources:** `bioetl_records_processed_total`
 
 ### 24. Review Escalation Paths

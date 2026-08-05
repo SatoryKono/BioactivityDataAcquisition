@@ -47,7 +47,7 @@ query, links, and operator fact.
 
 ### 5. Inspect Processed Records
 - **Type:** Table
-- **Purpose:** Show records processed by stage.
+- **Purpose:** Show Bronze/Silver/Gold counts and denominator-explicit percentages; both numeric columns are right-aligned.
 - **Data sources:** BioETL Ops HTTP
   `/ops/observability/processed-records`; this is not a Prometheus panel.
 
@@ -133,24 +133,24 @@ query, links, and operator fact.
 - **Data sources:** `bioetl_silver_filter_reject_total_mismatch_15m`
 
 ### 22. Inspect Silver Rejects by Pipeline
-- **Type:** Bargauge
-- **Purpose:** Show Silver rejects by pipeline.
-- **Data sources:** `bioetl_silver_filter_rejections_total`
+- **Type:** Table
+- **Purpose:** Show Silver rejects by pipeline and expose a neutral `No data` state when the bounded series is absent.
+- **Data sources:** `bioetl_records_processed_total{stage="filtered_out"}`
 
 ### 23. Inspect: Gold Reject Outcomes by Pipeline
-- **Type:** Bargauge
-- **Purpose:** Show Gold reject outcomes by pipeline.
+- **Type:** Table
+- **Purpose:** Show Gold reject outcomes by pipeline and expose a neutral `No data` state when both bounded series are absent.
 - **Data sources:** `bioetl_processed_records_gold_quarantined_current`, `bioetl_processed_records_gold_excluded_by_contract_current`
 
 ### 24. Inspect Top Silver Reject Reasons
-- **Type:** Bargauge
-- **Purpose:** Show top Silver reject reasons.
-- **Data sources:** `bioetl_silver_filter_reject_reason_total`
+- **Type:** Table
+- **Purpose:** Show top Silver reject reasons; an empty vector remains visible as neutral `No data` and never invents a reason.
+- **Data sources:** `bioetl_silver_filter_rejections_total{reason_code=...}`
 
 ### 25. Inspect Top Silver Reject Fields
-- **Type:** Bargauge
-- **Purpose:** Show top Silver reject fields.
-- **Data sources:** `bioetl_silver_filter_reject_field_total`
+- **Type:** Table
+- **Purpose:** Show top Silver reject fields; an empty vector remains visible as neutral `No data` and never invents a field.
+- **Data sources:** `bioetl_silver_filter_rejections_total{field=...}`
 
 ### 26. Validation Diagnostics
 - **Type:** Row
