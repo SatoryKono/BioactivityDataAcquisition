@@ -299,7 +299,7 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
         }
         for row in disclosure_rows.values():
             assert row.get("type") == "row"
-            assert row.get("collapsed") is True
+            assert row.get("collapsed") is False
             assert row.get("gridPos", {}).get("y", 0) > max_first_answer_y
         for panel_title, row_title in disclosure_by_panel.items():
             assert panel_title in disclosure_children[row_title]

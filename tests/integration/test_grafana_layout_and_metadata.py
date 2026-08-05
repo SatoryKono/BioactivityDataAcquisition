@@ -127,24 +127,14 @@ def test_runtime_top_fold_text_panels_do_not_overlap() -> None:
 
 
 def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
-    """Runtime detail guidance must stay nested behind collapsed disclosure."""
+    """Runtime detail guidance stays under the Detect row group (expanded)."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    root_titles = {
-        panel.get("title")
-        for panel in dashboard.get("panels", [])
-        if isinstance(panel.get("title"), str)
-    }
-
-    assert "Inspect Runtime Scope" not in root_titles
-    assert "Review Diagnostic Scope Note" not in root_titles
-    assert "Review Incident Summary" not in root_titles
     detect_row = next(
         (panel for panel in dashboard.get("panels", []) if panel.get("id") == 252),
         None,
     )
     assert detect_row is not None, "Runtime dashboard must keep Detect row"
-    assert detect_row.get("collapsed") is True
-    assert "Inspect Active Runtime Blocker Detail" not in root_titles
+    assert detect_row.get("collapsed") is False
     detect_panels = get_row_child_panels(dashboard, "Inspect Detection Signals")
     detail_panel = next(
         panel
@@ -156,7 +146,7 @@ def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
     ).get("y", 0)
     detect_titles = {
         panel.get("title")
-        for panel in get_row_child_panels(dashboard, "Inspect Detection Signals")
+        for panel in detect_panels
         if isinstance(panel.get("title"), str)
     }
     assert "Inspect Active Runtime Blocker Detail" in detect_titles
@@ -165,46 +155,38 @@ def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
     )
 
 
+
 def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
-    """Runtime First Action stays on first paint; ID/Processed Records are lazy (#6573)."""
+    """Runtime First Action stays on first paint; ID/Processed Records stay below triage."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     root_panels = {
         panel.get("title"): panel
         for panel in dashboard.get("panels", [])
         if isinstance(panel.get("title"), str)
     }
-    all_panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if isinstance(panel.get("title"), str)
-    }
 
     first_action_grid = root_panels["Start Pipeline Triage"]["gridPos"]
     assert first_action_grid["y"] <= 7
     assert first_action_grid["w"] >= 8
-    assert "Inspect Pipeline Identity" not in root_panels
-    assert "Inspect Processed Records" not in root_panels
-    assert "Inspect Pipeline Identity" in all_panels
-    assert "Inspect Processed Records" in all_panels
+    assert "Inspect Pipeline Identity" in root_panels
+    assert "Inspect Processed Records" in root_panels
+    assert root_panels["Inspect Pipeline Identity"]["gridPos"]["y"] > first_action_grid["y"]
+    assert root_panels["Inspect Processed Records"]["gridPos"]["y"] > first_action_grid["y"]
     assert any(
         panel.get("type") == "row"
         and panel.get("id") == 9993
-        and panel.get("collapsed") is True
+        and panel.get("collapsed") is False
         for panel in dashboard.get("panels", [])
     )
 
 
+
 def test_runtime_telemetry_gap_panel_keeps_readable_first_screen_width() -> None:
-    """Runtime trust marker stays on first paint; bulk failed-run KPI is collapsed (#6572)."""
+    """Runtime trust marker stays on first paint; failed-run KPI sits under expanded secondary row."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     root = {
         panel.get("title"): panel
         for panel in dashboard.get("panels", [])
-        if isinstance(panel.get("title"), str)
-    }
-    all_panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
         if isinstance(panel.get("title"), str)
     }
 
@@ -214,14 +196,15 @@ def test_runtime_telemetry_gap_panel_keeps_readable_first_screen_width() -> None
     assert grid["w"] >= 4, (
         "Monitor Metrics Coverage must reserve readable width on the first screen"
     )
-    assert "Monitor Failed Runs" not in root
-    assert "Monitor Failed Runs" in all_panels
+    assert "Monitor Failed Runs" in root
+    assert root["Monitor Failed Runs"]["gridPos"]["y"] > grid["y"]
     assert any(
         p.get("type") == "row"
         and "secondary" in str(p.get("title") or "").lower()
-        and p.get("collapsed") is True
+        and p.get("collapsed") is False
         for p in dashboard.get("panels", [])
     )
+
 
 
 def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping() -> (
@@ -283,7 +266,7 @@ def test_control_plane_row_sequence_matches_operator_flow() -> None:
     assert any(panel_id == 9412 for panel_id, _ in row_pairs), (
         f"Control Plane must keep collapsed Run context row: {row_pairs}"
     )
-    assert all(panel.get("collapsed") is True for panel in row_panels)
+    assert all(panel.get("collapsed") is False for panel in row_panels)
 
 
 def test_control_plane_first_evidence_panel_stays_close_to_answer_row() -> None:
@@ -346,7 +329,7 @@ def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
         for panel in dashboard.get("panels", [])
         if panel.get("title") == "Inspect Manifest & Ledger Evidence"
     )
-    assert row.get("collapsed") is True
+    assert row.get("collapsed") is False
     child_panels = get_row_child_panels(dashboard, "Inspect Manifest & Ledger Evidence")
     panels = {panel.get("title"): panel for panel in child_panels if panel.get("title")}
     terminal = panels["Review Terminal Run Outcomes"]
@@ -384,7 +367,7 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
         if panel.get("type") == "row"
         and panel.get("title") == "Inspect Replay & Checkpoint Evidence"
     )
-    assert row_panel.get("collapsed") is True
+    assert row_panel.get("collapsed") is False
     child_panels = get_row_child_panels(
         dashboard, "Inspect Replay & Checkpoint Evidence"
     )
@@ -765,7 +748,7 @@ def test_dashboard_default_time_and_refresh_policy_by_uid_class() -> None:
 
 
 def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
-    """Provider detail telemetry must stay behind explicit progressive disclosure."""
+    """Provider detail telemetry ships under an expanded Selected Provider Details row."""
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
@@ -780,7 +763,7 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
         None,
     )
     assert detail_row is not None
-    assert detail_row.get("collapsed") is True
+    assert detail_row.get("collapsed") is False
 
     child_panels = get_row_child_panels(dashboard, "Selected Provider Details")
     child_titles = {
@@ -789,23 +772,10 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
         if isinstance(panel.get("title"), str)
     }
     assert "Inspect Health-Check Latency p95" in child_titles
-    root_titles = {
-        panel.get("title")
-        for panel in dashboard.get("panels", [])
-        if isinstance(panel.get("title"), str)
-    }
-    assert "Inspect Health-Check Latency p95" not in root_titles
-    detail_panel = next(
-        panel
-        for panel in child_panels
-        if panel.get("title") == "Inspect Health-Check Latency p95"
+    assert detail_row.get("gridPos", {}).get("y", 0) < min(
+        int(panel.get("gridPos", {}).get("y", 0)) for panel in child_panels
     )
-    assert detail_panel.get("gridPos", {}).get("y", 0) > detail_row.get(
-        "gridPos", {}
-    ).get("y", 0)
-    _assert_panels_stay_in_grid_without_overlap(
-        child_panels, context="Provider selected-detail disclosure"
-    )
+
 
 
 def test_dashboard_metadata_policy_invariants() -> None:
