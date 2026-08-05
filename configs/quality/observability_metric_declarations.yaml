@@ -16,6 +16,7 @@ recording_rule_metrics:
   - bioetl_l0_input_status
   - bioetl_l0_input_status_selected
   - bioetl_l0_next_action
+  - bioetl_l0_next_action_no_route
   - bioetl_l0_next_action_route
   - bioetl_l0_status
   - bioetl_l1_control_plane_current_status

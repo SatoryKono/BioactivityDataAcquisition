@@ -322,9 +322,6 @@ nav:
               - "Data Quality v2 Panels": 03-guides/dashboards/panels/bioetl-dq-v2-panels.md
               - "Provider Health v2 Panels": 03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md
               - "Runtime Panels": 03-guides/dashboards/panels/bioetl-runtime-panels.md
-              - "Silver Reject Explorer Panels": 03-guides/dashboards/panels/bioetl-silver-reject-explorer-panels.md
-              - "Workflow Overview Panels": 03-guides/dashboards/panels/bioetl-workflow-overview-panels.md
-              - "Alerts SLO Panels": 03-guides/dashboards/panels/bioetl-alerts-slo-panels.md
           - "V3 Draft":
               - "Overview": 03-guides/dashboards/v3.0/README.md
               - "1. Overview": 03-guides/dashboards/v3.0/1-overview.md
