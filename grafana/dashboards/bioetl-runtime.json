@@ -1549,7 +1549,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Summarizes Runtime-owned preflight, infrastructure, failed-run, and error-rate conditions for Pipeline and Run Type. Zero means no condition is firing only when coverage and selected scope exist; UNKNOWN is inconclusive. Review active blocker detail next",
+          "description": "Summarizes Runtime-owned preflight, infrastructure, failed-run, and error-rate conditions for Pipeline and Run Type. Zero means no condition is firing only when coverage and selected scope exist; UNKNOWN is inconclusive. Review active blocker detail next. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1838,7 +1838,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows Data Quality handoff conditions for the selected Pipeline. Zero means no condition is firing only when DQ telemetry is present; UNKNOWN is inconclusive. Open Data Quality for rule, threshold, and Silver reject evidence",
+          "description": "Shows Data Quality handoff conditions for the selected Pipeline. Zero means no condition is firing only when DQ telemetry is present; UNKNOWN is inconclusive. Open Data Quality for rule, threshold, and Silver reject evidence. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2985,7 +2985,7 @@
                   },
                   {
                     "id": "custom.align",
-                    "value": "right"
+                    "value": "left"
                   },
                   {
                     "id": "custom.cellOptions",
@@ -3070,7 +3070,7 @@
                 "properties": [
                   {
                     "id": "displayName",
-                    "value": "Count"
+                    "value": "count"
                   }
                 ]
               }
@@ -3123,7 +3123,7 @@
                   "parameter": "parameter",
                   "value": "value",
                   "row_status": "",
-                  "Value": "Count",
+                  "Value": "count",
                   "Value #A": "Series A",
                   "Value #B": "Series B",
                   "Value #C": "Series C",
@@ -3221,7 +3221,7 @@
           ],
           "title": "Track Failed Workflow Runs",
           "type": "stat",
-          "description": "Counts failed Workflow runs in the selected range for Workflow and Pipeline. Zero means no matching failures, not current Workflow or Pipeline Health; missing telemetry remains UNKNOWN. Use runtime localization or Trust evidence when non-zero"
+          "description": "Counts failed Workflow runs in the selected range for Workflow and Pipeline. Zero means no matching failures, not current Workflow or Pipeline Health; missing telemetry remains UNKNOWN. Use runtime localization or Trust evidence when non-zero. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero."
         },
         {
           "datasource": {
@@ -3296,7 +3296,7 @@
           ],
           "title": "Track Failed Workflow Steps",
           "type": "stat",
-          "description": "Counts failed Workflow pipeline steps in the selected range for Workflow and Pipeline. The metric has no Stage label; zero means no matching failures, not stage success or current Pipeline Health. Use runtime localization or Trust evidence when non-zero"
+          "description": "Counts failed Workflow pipeline steps in the selected range for Workflow and Pipeline. The metric has no Stage label; zero means no matching failures, not stage success or current Pipeline Health. Use runtime localization or Trust evidence when non-zero. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero."
         }
       ],
       "description": "Contains selected-range workflow failure evidence merged into Pipeline Diagnostics. These panels support localization and do not determine current Pipeline Health"

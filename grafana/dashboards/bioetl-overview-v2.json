@@ -557,62 +557,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Value"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Priority"
-              },
-              {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
-                "id": "custom.align",
-                "value": "left"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "thresholds"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Priority"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "thresholds"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "action_target"
             },
             "properties": [
@@ -627,32 +571,25 @@
                     "type": "value",
                     "options": {
                       "control_plane": {
-                        "text": "Open Control Plane",
-                        "color": "red"
+                        "text": "Open Control Plane"
                       },
                       "dq": {
-                        "text": "Open DQ",
-                        "color": "orange"
+                        "text": "Open DQ"
                       },
                       "monitor": {
-                        "text": "Monitor / no urgent action",
-                        "color": "gray"
+                        "text": "Monitor"
                       },
                       "no_route": {
-                        "text": "No route — check selectors",
-                        "color": "gray"
+                        "text": "No route"
                       },
                       "provider": {
-                        "text": "Open Provider",
-                        "color": "orange"
+                        "text": "Open Provider"
                       },
                       "runtime": {
-                        "text": "Open Runtime",
-                        "color": "red"
+                        "text": "Open Runtime"
                       },
                       "workflow": {
-                        "text": "Open Runtime (workflow)",
-                        "color": "green"
+                        "text": "Open Workflow"
                       }
                     }
                   }
@@ -660,29 +597,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 150
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "thresholds"
-                }
-              },
-              {
-                "id": "links",
-                "value": [
-                  {
-                    "title": "Open recommended board",
-                    "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?var-pipeline=${__data.fields.pipeline}&var-run_type=${run_type:csv}&var-workflow=${workflow}&var-run_id=${run_id}&var-stage=unknown&var-provider=unknown&var-pipeline_context=${__data.fields.pipeline}&var-adapter=unknown&${__url_time_range}",
-                    "targetBlank": false
-                  }
-                ]
+                "value": 128
               }
             ]
           },
@@ -732,14 +647,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 150
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
+                "value": 84
               }
             ]
           },
@@ -755,7 +663,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 160
+                "value": 180
               },
               {
                 "id": "custom.cellOptions",
@@ -774,7 +682,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 160
+                "value": 220
               },
               {
                 "id": "custom.cellOptions",
@@ -787,25 +695,13 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "action_dashboard_uid"
+              "id": "byRegexp",
+              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": ""
-              },
-              {
-                "id": "custom.width",
-                "value": 1
-              },
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "tooltip": false,
-                  "viz": true,
-                  "legend": true
-                }
+                "value": "Count"
               }
             ]
           }
@@ -813,7 +709,7 @@
       },
       "targets": [
         {
-          "expr": "topk(4, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or label_replace(label_replace(label_replace(vector(0), \"action_target\", \"no_route\", \"\", \"\"), \"action_reason\", \"selected_scope_not_present\", \"\", \"\"), \"action_dashboard_uid\", \"bioetl-overview-v2\", \"\", \"\"))",
+          "expr": "topk(1, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -824,13 +720,6 @@
         "footer": {
           "show": false
         },
-        "cellHeight": "sm",
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Priority"
-          }
-        ],
         "dataLinks": [
           {
             "title": "Open Runtime",
@@ -855,8 +744,15 @@
             "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
             "targetBlank": false,
             "includeVars": false
+          },
+          {
+            "title": "Open Pipeline Diagnostics",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+            "targetBlank": false,
+            "includeVars": false
           }
-        ]
+        ],
+        "cellHeight": "lg"
       },
       "transformations": [
         {
@@ -865,25 +761,28 @@
             "excludeByName": {
               "Time": true,
               "__name__": true,
+              "Value": true,
+              "action_dashboard_uid": true,
               "bioetl_l0_next_action_route": true,
               "input": true,
               "run_type": true
             },
             "indexByName": {
-              "Value": 0,
-              "action_target": 1,
-              "action_reason": 2,
-              "pipeline": 3,
-              "action_dashboard_uid": 4
+              "action_target": 0,
+              "action_reason": 1,
+              "pipeline": 2
             },
             "renameByName": {
-              "Value": "Priority",
-              "pipeline": "Pipeline"
+              "pipeline": "Pipeline",
+              "Value": "Count",
+              "Value #A": "Series A",
+              "Value #B": "Series B",
+              "Value #C": "Series C"
             }
           }
         }
       ],
-      "description": "Shows up to four highest-priority next actions for the current fleet/selectors (priority: Runtime > Control Plane > Gold lifecycle > DQ > Provider > Workflow > Monitor). Click Action to open the recommended board with the row pipeline preserved. Priority uses text color (not fill). Missing/empty scope falls back to NO_ROUTE. run_id is handoff context only — never a Prometheus label. When Priority is MONITOR and Fleet Health is OK, continue monitoring rather than escalating."
+      "description": "Ranks at most four urgency-ordered actions for the current fleet verdict. Verify missing telemetry first, then open the affected domain, use Incident Workspace for multi-domain impact, or use Run Explorer for exact-run evidence."
     },
     {
       "id": 9002,
@@ -3087,7 +2986,7 @@
                 "properties": [
                   {
                     "id": "displayName",
-                    "value": "Count"
+                    "value": "value"
                   }
                 ]
               }
@@ -3132,7 +3031,7 @@
                 "renameByName": {
                   "parameter": "parameter",
                   "value": "value",
-                  "Value": "Count",
+                  "Value": "value",
                   "Value #A": "Series A",
                   "Value #B": "Series B",
                   "Value #C": "Series C"
@@ -3259,7 +3158,7 @@
                   },
                   {
                     "id": "custom.align",
-                    "value": "right"
+                    "value": "left"
                   },
                   {
                     "id": "custom.cellOptions",
@@ -3344,7 +3243,7 @@
                 "properties": [
                   {
                     "id": "displayName",
-                    "value": "Count"
+                    "value": "count"
                   }
                 ]
               }
@@ -3397,7 +3296,7 @@
                   "parameter": "parameter",
                   "value": "value",
                   "row_status": "",
-                  "Value": "Count",
+                  "Value": "count",
                   "Value #A": "Series A",
                   "Value #B": "Series B",
                   "Value #C": "Series C",

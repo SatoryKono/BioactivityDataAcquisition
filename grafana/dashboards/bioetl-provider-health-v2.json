@@ -2428,7 +2428,7 @@
                 "properties": [
                   {
                     "id": "displayName",
-                    "value": "Count"
+                    "value": "value"
                   }
                 ]
               }
@@ -2473,7 +2473,7 @@
                 "renameByName": {
                   "parameter": "parameter",
                   "value": "value",
-                  "Value": "Count",
+                  "Value": "value",
                   "Value #A": "Series A",
                   "Value #B": "Series B",
                   "Value #C": "Series C"
@@ -2600,7 +2600,7 @@
                   },
                   {
                     "id": "custom.align",
-                    "value": "right"
+                    "value": "left"
                   },
                   {
                     "id": "custom.cellOptions",
@@ -2685,7 +2685,7 @@
                 "properties": [
                   {
                     "id": "displayName",
-                    "value": "Count"
+                    "value": "count"
                   }
                 ]
               }
@@ -2738,7 +2738,7 @@
                   "parameter": "parameter",
                   "value": "value",
                   "row_status": "",
-                  "Value": "Count",
+                  "Value": "count",
                   "Value #A": "Series A",
                   "Value #B": "Series B",
                   "Value #C": "Series C",
