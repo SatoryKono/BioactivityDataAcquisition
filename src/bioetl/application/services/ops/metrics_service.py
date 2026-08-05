@@ -270,12 +270,8 @@ class _MetricsStartMixin(_MetricsTracingMixin):
             return self._handle_start_error(port, addr, e, fail_fast)
 
 
-class _MetricsStatusMixin(_MetricsTracingMixin):
-    """Metrics server status helpers."""
-
-    tracer: TracingPort | None = (
-        None  # Any: host attr default  # Any: host attr default (PD6)
-    )
+class _MetricsLifecycleMixin(_MetricsStartMixin):
+    """Combined start + status lifecycle helpers (ARCH-REF-04 / #7705)."""
 
     def get_status(self: _MetricsStatusHost) -> MetricsServerStatus:
         """Get the current status of the metrics server.
@@ -324,8 +320,7 @@ class _MetricsStatusMixin(_MetricsTracingMixin):
 
 @dataclass
 class MetricsService(
-    _MetricsStartMixin,
-    _MetricsStatusMixin,
+    _MetricsLifecycleMixin,
     _MetricsGatewayMixin,
 ):
     """Service for metrics server operations."""

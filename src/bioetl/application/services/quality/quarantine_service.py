@@ -23,18 +23,12 @@ from bioetl.application.observability.span_attribute_values import (
     coerce_span_attribute_value,
 )
 from bioetl.application.services.quality._quarantine_models import QuarantineRecord
-from bioetl.application.services.quality._quarantine_service_async_mixin import (
-    QuarantineServiceAsyncMixin,
-)
 from bioetl.application.services.quality._quarantine_service_filtered_mixin import (
     QuarantineServiceFilteredMixin,
 )
 from bioetl.application.services.quality._quarantine_service_support import (
     _QUARANTINE_OPERATOR_DURATION_METRIC,
     _QUARANTINE_OPERATOR_OPERATIONS_METRIC,
-)
-from bioetl.application.services.quality._quarantine_service_sync_mixin import (
-    QuarantineServiceSyncMixin,
 )
 
 if TYPE_CHECKING:
@@ -53,11 +47,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class QuarantineService(
-    QuarantineServiceFilteredMixin,
-    QuarantineServiceAsyncMixin,
-    QuarantineServiceSyncMixin,
-):
+class QuarantineService(QuarantineServiceFilteredMixin):
     """Service for administrative quarantine operations.
 
     Provides high-level operations for quarantine management
