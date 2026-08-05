@@ -16,11 +16,10 @@ import pytest
 
 pytestmark = pytest.mark.integration
 
+# Active SSOT only — archived dashboard drafts (#7588) must not be treated as
+# current normative surfaces for query-policy assertions.
 _QUERY_POLICY_DOCS = (
     Path("docs/03-guides/dashboards/design-system.md"),
-    Path("docs/03-guides/dashboards/dashboard-requirements-comprehensive.md"),
-    Path("docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md"),
-    Path("docs/03-guides/dashboards/dashboard-audit-checklist.md"),
 )
 
 
