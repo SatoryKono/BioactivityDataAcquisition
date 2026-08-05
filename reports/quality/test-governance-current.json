@@ -1111,21 +1111,10 @@
     }
   },
   "assertless_total_candidates": 105,
-  "budget_violations": [
-    {
-      "actual": 1,
-      "budget": "compatibility_test_file_max",
-      "expected_max": 0,
-      "metric": "compatibility_test_files"
-    },
-  ],
-  "compatibility_examples": [
-    "tests/unit/tools/test_pytest_option_compatibility.py"
-  ],
-  "compatibility_files": [
-    "tests/unit/tools/test_pytest_option_compatibility.py"
-  ],
-  "compatibility_test_files": 1,
+  "budget_violations": [],
+  "compatibility_examples": [],
+  "compatibility_files": [],
+  "compatibility_test_files": 0,
   "critical_behavior_envelope_assertion_gap_count": 0,
   "critical_behavior_envelope_count": 6,
   "critical_behavior_envelopes": {
@@ -1303,10 +1292,10 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 50,
+    "marked_test_files": 51,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 50,
+    "test_files": 51,
     "unmarked_test_files": []
   },
   "report": {
@@ -2293,10 +2282,10 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 50,
+      "marked_test_files": 51,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 50,
+      "test_files": 51,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -2305,8 +2294,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2181,
-      "test_python_file_count": 2412,
+      "test_glob_file_count": 2182,
+      "test_python_file_count": 2413,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2346,13 +2335,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2181,
-    "total_test_functions": 23277,
+    "total_test_files": 2182,
+    "total_test_functions": 23318,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "59e99e6e7bd8a4f99ac007d97b5cf3f3187f1f63c80bfa7140333df5c487faa8",
+  "source_tree_sha256": "603ba7b6c5012e8c013b0911f5f9e5ac5f94a472b10d23417600711ba9c666cb",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 105,
@@ -2372,8 +2361,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2181,
-    "test_python_file_count": 2412,
+    "test_glob_file_count": 2182,
+    "test_python_file_count": 2413,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2413,8 +2402,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2181,
-  "total_test_functions": 23277,
+  "total_test_files": 2182,
+  "total_test_functions": 23318,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

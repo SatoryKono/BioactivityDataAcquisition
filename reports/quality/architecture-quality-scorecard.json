@@ -240,7 +240,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "fb530e62125256526d43fb0d095621adf2b13e79b827d80b8c96882853368011",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "f07625165dc74fa07e8ba25c74b36360b0dab0f4ec5c5a50570f373be35a5b03"
+      "source_tree_sha256": "572d3bcc49153db19106c780ff23b482be53d70630f6fd2d12f8abdabd750deb"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
@@ -248,7 +248,7 @@
       "path": "reports/observability/runtime_cardinality_inventory.json"
     },
     "test_governance_report": {
-      "compatibility_test_files": 1,
+      "compatibility_test_files": 0,
       "path": "reports/quality/test-governance-current.json"
     }
   },
