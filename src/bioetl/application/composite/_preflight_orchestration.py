@@ -6,13 +6,14 @@ from __future__ import annotations
 from importlib import import_module
 from typing import Any, cast
 
+from bioetl.application.composite._preflight_schema_field_extraction import (
+    extract_fields_from_schema,
+)
 from bioetl.application.composite._preflight_types import (
-    FieldInfo,
     ProfileInfo,
     SchemaFields,
 )
 from bioetl.domain.composite import CompositeConfig
-from bioetl.domain.exceptions import BioETLError, DataQualityError
 from bioetl.domain.normalization.profiles import resolve_normalization_profile
 from bioetl.domain.ports import LoggerPort
 
@@ -162,8 +163,8 @@ class PreflightSchemaOrchestrationMixin:
             )
             return None
 
-        return self._extract_fields_from_schema(
-            schema_class, source=f"{provider}.{entity}"
+        return extract_fields_from_schema(
+            self, schema_class, source=f"{provider}.{entity}"
         )
 
     def _load_pipeline_profile(self, pipeline_name: str) -> ProfileInfo | None:
@@ -195,105 +196,6 @@ class PreflightSchemaOrchestrationMixin:
                 if rule_identity is not None
             },
         )
-
-    def _extract_fields_from_schema(
-        self, schema_class: type, source: str
-    ) -> SchemaFields:
-        """Extract field information from a Pandera schema class."""
-        fields: SchemaFields = {}
-
-        try:
-            schema_instance = schema_class.to_schema()  # type: ignore[attr-defined]
-            for col_name, col_info in schema_instance.columns.items():
-                dtype_str = str(col_info.dtype) if col_info.dtype else "object"
-                dtype_str = self._simplify_dtype(dtype_str)
-                fields[col_name] = FieldInfo(
-                    name=col_name,
-                    dtype=dtype_str,
-                    nullable=col_info.nullable
-                    if col_info.nullable is not None
-                    else True,
-                    source=source,
-                )
-        except (ValueError, TypeError, RuntimeError, DataQualityError) as error:
-            self._logger.warning(
-                "Failed to extract fields from schema",
-                schema=schema_class.__name__,
-                error=str(error),
-                error_type=type(error).__name__,
-                reason_code="schema_field_extraction_failed",
-            )
-            fields = self._extract_fields_from_annotations(schema_class, source)
-        except BioETLError as error:
-            self._logger.warning(
-                "Failed to extract fields from schema",
-                schema=schema_class.__name__,
-                error=str(error),
-                error_type=type(error).__name__,
-                reason_code="schema_field_extraction_failed",
-            )
-            fields = self._extract_fields_from_annotations(schema_class, source)
-
-        return fields
-
-    def _extract_fields_from_annotations(
-        self, schema_class: type, source: str
-    ) -> SchemaFields:
-        """Fallback: extract fields from class annotations."""
-        fields: SchemaFields = {}
-
-        for klass in schema_class.__mro__:
-            if not hasattr(klass, "__annotations__"):
-                continue
-            for field_name, field_type in klass.__annotations__.items():
-                if field_name.startswith("_") and field_name not in (
-                    "_source",
-                    "_dq_warn",
-                    "_dq_error",
-                ):
-                    continue
-                if field_name in fields:
-                    continue
-
-                dtype_str = self._extract_dtype_from_annotation(field_type)
-                fields[field_name] = FieldInfo(
-                    name=field_name,
-                    dtype=dtype_str,
-                    nullable=True,
-                    source=source,
-                )
-
-        return fields
-
-    def _extract_dtype_from_annotation(self, annotation: object) -> str:
-        """Extract dtype string from a type annotation."""
-        ann_str = str(annotation)
-        if "Series[" in ann_str:
-            inner = ann_str.split("Series[", 1)[1].rstrip("]")
-            return self._simplify_dtype(inner)
-        return self._simplify_dtype(ann_str)
-
-    def _simplify_dtype(self, dtype_str: str) -> str:
-        """Simplify a dtype string for comparison."""
-        normalized = dtype_str.strip()
-        for prefix in ("pandas.core.arrays.integer.", "pandas.", "pandera."):
-            if normalized.startswith(prefix):
-                normalized = normalized[len(prefix) :]
-
-        simplifications = {
-            "Int64Dtype()": "int",
-            "Int64Dtype": "int",
-            "Int64": "int",
-            "int64": "int",
-            "Float64": "float",
-            "float64": "float",
-            "object": "str",
-            "string": "str",
-            "String": "str",
-            "boolean": "bool",
-            "datetime64[ns]": "datetime",
-        }
-        return simplifications.get(normalized, normalized)
 
     @classmethod
     def _get_schema_registry(cls) -> dict[str, type]:
