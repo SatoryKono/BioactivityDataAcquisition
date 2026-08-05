@@ -321,11 +321,7 @@ def test_finalize_pre_silver_projects_malformed_json_findings_to_dq_warning() ->
             "publication_type": "PUBLICATION",
             "affiliation_list": "not-json",
         },
-        build_silver_record=lambda _context,
-        entity_id,
-        content_hash,
-        _index,
-        business: {
+        build_silver_record=lambda _context, entity_id, content_hash, _index, business: {
             "entity_id": entity_id,
             "content_hash": content_hash,
             **business,
