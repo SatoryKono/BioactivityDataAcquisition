@@ -152,8 +152,14 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     assert panels["Review Domain Status"].get("gridPos", {}).get("y") == panels[
         "Review First Action"
     ].get("gridPos", {}).get("y")
-    assert panels["Review First Action"].get("gridPos", {}).get("w", 0) >= 8
-    assert panels["Review Domain Status"].get("gridPos", {}).get("w", 0) >= 10
+    # RFA Phase 1: equal first-screen split so Action column is not squeezed.
+    assert panels["Review First Action"].get("gridPos", {}).get("w", 0) >= 12
+    assert panels["Review Domain Status"].get("gridPos", {}).get("w", 0) >= 12
+    assert panels["Review Domain Status"].get("gridPos", {}).get("x") == panels[
+        "Review First Action"
+    ].get("gridPos", {}).get("x", 0) + panels["Review First Action"].get(
+        "gridPos", {}
+    ).get("w", 0)
     lazy = {"Review Run Identity": 9300, "Review Processed Records": 9301}
     for title, panel_id in lazy.items():
         panel = panels[title]
@@ -229,6 +235,26 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
         for prop in action_override.get("properties", [])
     }
     assert action_props.get("custom.cellOptions", {}).get("type") == "color-text"
+    assert int(action_props.get("custom.width") or 0) >= 180, (
+        "Action column must be wide enough to avoid truncation at default density"
+    )
+    # Short operator labels (panel dataLinks keep full Open* CTA titles).
+    action_maps = {}
+    for mapping in action_props.get("mappings") or []:
+        if mapping.get("type") == "value":
+            action_maps.update(mapping.get("options") or {})
+    for key, text in {
+        "runtime": "Runtime",
+        "control_plane": "Control Plane",
+        "dq": "DQ",
+        "provider": "Provider",
+        "monitor": "Monitor",
+        "no_route": "No route",
+        "workflow": "Runtime (wf)",
+    }.items():
+        assert key in action_maps, f"missing Action map for {key}"
+        assert action_maps[key].get("text") == text
+        assert len(str(action_maps[key].get("text") or "")) <= 16
     links = action_props.get("links") or []
     assert links, "Action column must expose row-aware board links"
     assert any(
@@ -253,6 +279,12 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     # Keep action_dashboard_uid for field links; hide via field override instead.
     assert exclude.get("action_dashboard_uid") is not True
     assert exclude.get("Value") is not True
+    # Action-first hierarchy: Action → Priority → Why → Pipeline.
+    index_by_name = organize.get("options", {}).get("indexByName", {})
+    assert index_by_name.get("action_target") == 0
+    assert index_by_name.get("Value") == 1
+    assert index_by_name.get("action_reason") == 2
+    assert index_by_name.get("pipeline") == 3
 
 
 def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> None:

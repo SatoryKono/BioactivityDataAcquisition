@@ -464,7 +464,7 @@
       "title": "Review First Action",
       "gridPos": {
         "h": 7,
-        "w": 10,
+        "w": 12,
         "x": 0,
         "y": 7
       },
@@ -560,62 +560,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Value"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Priority"
-              },
-              {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
-                "id": "custom.align",
-                "value": "left"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "thresholds"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Priority"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 110
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "thresholds"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "action_target"
             },
             "properties": [
@@ -630,31 +574,31 @@
                     "type": "value",
                     "options": {
                       "control_plane": {
-                        "text": "Open Control Plane",
+                        "text": "Control Plane",
                         "color": "red"
                       },
                       "dq": {
-                        "text": "Open DQ",
+                        "text": "DQ",
                         "color": "orange"
                       },
                       "monitor": {
-                        "text": "Monitor / no urgent action",
+                        "text": "Monitor",
                         "color": "gray"
                       },
                       "no_route": {
-                        "text": "No route — check selectors",
+                        "text": "No route",
                         "color": "gray"
                       },
                       "provider": {
-                        "text": "Open Provider",
+                        "text": "Provider",
                         "color": "orange"
                       },
                       "runtime": {
-                        "text": "Open Runtime",
+                        "text": "Runtime",
                         "color": "red"
                       },
                       "workflow": {
-                        "text": "Open Runtime (workflow)",
+                        "text": "Runtime (wf)",
                         "color": "green"
                       }
                     }
@@ -663,7 +607,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 150
+                "value": 180
               },
               {
                 "id": "custom.cellOptions",
@@ -705,6 +649,66 @@
                     "includeVars": false
                   }
                 ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Priority"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 96
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Priority"
+              },
+              {
+                "id": "custom.width",
+                "value": 96
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
               }
             ]
           },
@@ -754,6 +758,25 @@
               },
               {
                 "id": "custom.width",
+                "value": 140
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
                 "value": 150
               },
               {
@@ -777,26 +800,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 160
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Pipeline"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 160
+                "value": 150
               },
               {
                 "id": "custom.cellOptions",
@@ -892,8 +896,8 @@
               "run_type": true
             },
             "indexByName": {
-              "Value": 0,
-              "action_target": 1,
+              "action_target": 0,
+              "Value": 1,
               "action_reason": 2,
               "pipeline": 3,
               "action_dashboard_uid": 4
@@ -905,7 +909,7 @@
           }
         }
       ],
-      "description": "Shows up to four highest-priority next actions for the current fleet/selectors (priority: Runtime > Control Plane > Gold lifecycle > DQ > Provider > Workflow > Monitor). Click Action to open the recommended board with the row pipeline preserved. Priority uses text color (not fill). Missing/empty scope falls back to NO_ROUTE. run_id is handoff context only — never a Prometheus label. When Priority is MONITOR and Fleet Health is OK, continue monitoring rather than escalating.",
+      "description": "Shows up to four highest-priority next actions for the current fleet/selectors (priority: Runtime > Control Plane > Gold lifecycle > DQ > Provider > Workflow > Monitor). Columns: Action (primary CTA, row pipeline preserved) → Priority (text color) → Why → Pipeline. Missing/empty scope falls back to NO_ROUTE. run_id is handoff context only — never a Prometheus label. When Priority is MONITOR and Fleet Health is OK, continue monitoring rather than escalating.",
       "links": [
         {
           "title": "Open Runtime",
@@ -939,8 +943,8 @@
       "title": "Review Domain Status",
       "gridPos": {
         "h": 7,
-        "w": 14,
-        "x": 10,
+        "w": 12,
+        "x": 12,
         "y": 7
       },
       "datasource": {
