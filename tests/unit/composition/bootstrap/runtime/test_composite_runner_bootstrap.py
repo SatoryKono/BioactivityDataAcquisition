@@ -198,7 +198,7 @@ def test_create_dq_report_service_builds_writer_and_service() -> None:
             "bioetl.infrastructure.export.dq_report_writer.DQReportWriter"
         ) as mock_writer,
         patch(
-            "bioetl.application.services.dq_report_service.DQReportService"
+            "bioetl.application.services.quality.dq_report_service.DQReportService"
         ) as mock_service,
     ):
         writer_instance = MagicMock()
