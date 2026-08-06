@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,
@@ -20,6 +20,7 @@ from bioetl.application.composite.runner_pkg.runner_key_flow import (
     extract_enrichment_keys,
 )
 from bioetl.application.composite.runner_pkg.runner_lifecycle_flow import (
+    _RunnerLifecycleHost,
     complete_successful_run,
     emit_failed_run,
     handle_bioetl_failure,
@@ -83,10 +84,10 @@ class CompositePipelineRunner(
     _tracing: TracingPort | None
     # Lifecycle host surface (initialized by initialize_runner_runtime_state).
     _run_id_str: str
-    _finished: bool
-    _final_state: CompositePipelineState | None
-    _started_at: datetime | None
-    _start_time: float | None
+    _finished: bool = False
+    _final_state: CompositePipelineState | None = None
+    _started_at: datetime | None = None
+    _start_time: float | None = None
 
     def __init__(
         self,
@@ -106,9 +107,13 @@ class CompositePipelineRunner(
         """Return current run ID."""
         return self._run_id_str
 
+    def _as_lifecycle_host(self) -> _RunnerLifecycleHost:
+        """Narrow self to the lifecycle host protocol for helper modules."""
+        return cast(_RunnerLifecycleHost, self)
+
     def _mark_finished(self, final_state: CompositePipelineState) -> None:
         """Persist terminal runner state for re-entry guards and diagnostics."""
-        mark_finished(self, final_state)
+        mark_finished(self._as_lifecycle_host(), final_state)
 
     @property
     def config(self) -> CompositeConfig:
@@ -123,23 +128,25 @@ class CompositePipelineRunner(
         stage: str | None = None,
     ) -> None:
         """Emit the canonical runner failure event through the observer seam."""
-        emit_failed_run(self, error, reason_code=reason_code, stage=stage)
+        emit_failed_run(
+            self._as_lifecycle_host(), error, reason_code=reason_code, stage=stage
+        )
 
     def _handle_pipeline_execution_failure(self, error: Exception) -> None:
         """Map execution-phase failures to canonical runner diagnostics."""
-        handle_pipeline_execution_failure(self, error)
+        handle_pipeline_execution_failure(self._as_lifecycle_host(), error)
 
     def _handle_bioetl_failure(self, error: BioETLError) -> None:
         """Map unexpected BioETL failures to canonical runner diagnostics."""
-        handle_bioetl_failure(self, error)
+        handle_bioetl_failure(self._as_lifecycle_host(), error)
 
     def _handle_shutdown(self, error: PipelineShutdownError) -> None:
         """Map graceful shutdown to canonical terminal ledger/log semantics."""
-        handle_shutdown(self, error)
+        handle_shutdown(self._as_lifecycle_host(), error)
 
     def _start_run_lifecycle(self) -> None:
         """Validate and log the start of one composite runner execution."""
-        start_run_lifecycle(self)
+        start_run_lifecycle(self._as_lifecycle_host())
 
     async def run(self) -> CompositeResult:
         """Execute full composite pipeline under runtime lock."""
@@ -227,7 +234,9 @@ class CompositePipelineRunner(
         execution_context: CompositeExecutionContext,
     ) -> CompositeResult:
         """Finalize state and emit canonical terminal success artifacts."""
-        return await complete_successful_run(self, state, execution_context)
+        return await complete_successful_run(
+            self._as_lifecycle_host(), state, execution_context
+        )
 
     async def _run_with_lock(self) -> CompositeResult:
         """Execute pipeline stages while lock is held."""

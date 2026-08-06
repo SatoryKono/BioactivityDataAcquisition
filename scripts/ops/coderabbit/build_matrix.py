@@ -31,7 +31,7 @@ def write_list(name: str, files: list[str]) -> Path:
 
 
 def main() -> None:
-    leaves: list[dict] = []
+    leaves: list[dict[str, object]] = []
 
     def add_dir(leaf_id: str, wave: str, rel: str, note: str = "") -> None:
         files = git_ls(rel)
@@ -281,7 +281,7 @@ def main() -> None:
     except Exception as exc:  # noqa: BLE001
         cr_ver = f"error: {exc}"
 
-    over = [L for L in leaves if not L.get("under_cap")]
+    over = [leaf for leaf in leaves if not leaf.get("under_cap")]
     matrix = {
         "campaign": "CR-FULL-20260806-full",
         "base_sha": sha,
@@ -289,7 +289,9 @@ def main() -> None:
         "coderabbit": cr_ver,
         "cap": CAP,
         "leaf_count": len(leaves),
-        "total_files_assigned": sum(L["files"] for L in leaves),
+        "total_files_assigned": sum(
+            int(leaf["files"]) if isinstance(leaf["files"], int) else 0 for leaf in leaves
+        ),
         "leaves": leaves,
     }
     (OUT / "01-scope-matrix.json").write_text(
@@ -303,23 +305,25 @@ def main() -> None:
         f"**CodeRabbit:** {cr_ver}",
         f"**Cap:** ≤{CAP} files per leaf",
         f"**Leaves:** {len(leaves)} (non-empty)",
-        f"**Sum file assignments:** {sum(L['files'] for L in leaves)}",
+        f"**Sum file assignments:** {sum(int(leaf['files']) if isinstance(leaf['files'], int) else 0 for leaf in leaves)}",
         "",
         "| id | wave | files | under_cap | dir / selection |",
         "|----|------|------:|-----------|-----------------|",
     ]
-    for L in sorted(leaves, key=lambda x: (x["wave"], x["id"])):
-        sel = L.get("dir") or (
-            Path(L["use_file_list"]).name if L.get("use_file_list") else ",".join(L["globs"])[:60]
+    for leaf in sorted(leaves, key=lambda x: (x["wave"], x["id"])):
+        sel = leaf.get("dir") or (
+            Path(str(leaf["use_file_list"])).name
+            if leaf.get("use_file_list")
+            else ",".join(str(g) for g in list(leaf.get("globs") or [])[:60])
         )
         lines.append(
-            f"| `{L['id']}` | {L['wave']} | {L['files']} | {L['under_cap']} | `{sel}` |"
+            f"| `{leaf['id']}` | {leaf['wave']} | {leaf['files']} | {leaf['under_cap']} | `{sel}` |"
         )
     lines.append("")
     if over:
         lines.append("## OVER_CAP")
-        for L in over:
-            lines.append(f"- {L['id']}: {L['files']}")
+        for leaf in over:
+            lines.append(f"- {leaf['id']}: {leaf['files']}")
         lines.append("")
     (OUT / "01-scope-matrix.md").write_text("\n".join(lines), encoding="utf-8")
 
@@ -345,13 +349,16 @@ Phase 1: sequential coderabbit review per leaf
 """
     (OUT / "00-preflight.md").write_text(pre, encoding="utf-8")
 
-    print(f"leaves={len(leaves)} over_cap={len(over)} sum={sum(L['files'] for L in leaves)}")
-    for w, n in sorted(Counter(L["wave"] for L in leaves).items()):
+    print(
+        f"leaves={len(leaves)} over_cap={len(over)} "
+        f"sum={sum(int(leaf['files']) if isinstance(leaf['files'], int) else 0 for leaf in leaves)}"
+    )
+    for w, n in sorted(Counter(str(leaf["wave"]) for leaf in leaves).items()):
         print(f"  wave {w}: {n}")
     if over:
         print("OVER:")
-        for L in over:
-            print(f"  {L['id']} {L['files']}")
+        for leaf in over:
+            print(f"  {leaf['id']} {leaf['files']}")
 
 
 if __name__ == "__main__":

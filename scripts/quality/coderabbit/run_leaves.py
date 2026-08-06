@@ -9,6 +9,38 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import TypedDict, cast
+
+
+class Leaf(TypedDict, total=False):
+    id: str
+    wave: str
+    files: str
+    dir: str
+    use_file_list: str
+
+
+class LeafResult(TypedDict, total=False):
+    id: str
+    status: str
+    reason: str
+    log: str
+    exit_code: int
+    elapsed_s: float
+    bytes: int
+    cmd: list[str]
+    common_dir: str
+    expanded_files: int
+
+
+class Progress(TypedDict, total=False):
+    started: str
+    updated: str
+    results: dict[str, LeafResult]
+    completed: list[str]
+    failed: list[str]
+    skipped: list[str]
+
 
 OUT = Path("reports/quality/coderabbit/20260806-full")
 MATRIX = OUT / "01-scope-matrix.json"
@@ -24,40 +56,43 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def load_progress() -> dict:
+def load_progress() -> Progress:
     if PROGRESS.exists():
-        return json.loads(PROGRESS.read_text(encoding="utf-8"))
+        return cast(Progress, json.loads(PROGRESS.read_text(encoding="utf-8")))
     return {"started": now(), "results": {}, "completed": [], "failed": [], "skipped": []}
 
 
-def save_progress(p: dict) -> None:
+def save_progress(p: Progress) -> None:
     p["updated"] = now()
     PROGRESS.write_text(json.dumps(p, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
-def run_leaf(leaf: dict, base: str = "main") -> dict:
-    lid = leaf["id"]
+def run_leaf(leaf: Leaf, base: str = "main") -> LeafResult:
+    lid = str(leaf.get("id") or "")
     log_path = LOG_DIR / f"review_{lid}.log"
     cmd: list[str]
     env = os.environ.copy()
+    # Prefer local WSL/Linux coderabbit install when present
     env["PATH"] = f"/home/fedor/.local/bin:{env.get('PATH', '')}"
     env["NO_COLOR"] = "1"
     env["TERM"] = "dumb"
 
-    if leaf.get("dir"):
+    leaf_dir = leaf.get("dir")
+    leaf_file_list = leaf.get("use_file_list")
+    if leaf_dir:
         cmd = [
             CODERABBIT,
             "review",
             "--base",
             base,
             "--dir",
-            leaf["dir"],
+            leaf_dir,
             "--plain",
         ]
-    elif leaf.get("use_file_list"):
+    elif leaf_file_list:
         # CodeRabbit CLI may not accept arbitrary file lists; try --dir parent if single root
         # Fallback: use first common directory prefix
-        files = Path(leaf["use_file_list"]).read_text(encoding="utf-8").splitlines()
+        files = Path(leaf_file_list).read_text(encoding="utf-8").splitlines()
         files = [f for f in files if f.strip()]
         if not files:
             return {
@@ -171,8 +206,9 @@ def run_leaf(leaf: dict, base: str = "main") -> dict:
 
 
 def main() -> int:
-    matrix = json.loads(MATRIX.read_text(encoding="utf-8"))
-    leaves = matrix["leaves"]
+    matrix = cast(dict[str, object], json.loads(MATRIX.read_text(encoding="utf-8")))
+    raw_leaves = cast(list[object], matrix.get("leaves", []))
+    leaves = [cast(Leaf, item) for item in raw_leaves]
     # optional filters
     only_wave = os.environ.get("CR_WAVE")  # e.g. A
     only_ids = os.environ.get("CR_LEAVES")  # comma ids
@@ -180,13 +216,19 @@ def main() -> int:
     sleep_s = float(os.environ.get("CR_SLEEP", "5"))
 
     if only_wave:
-        leaves = [L for L in leaves if L["wave"] == only_wave]
+        leaves = [leaf for leaf in leaves if leaf.get("wave") == only_wave]
     if only_ids:
         want = set(only_ids.split(","))
-        leaves = [L for L in leaves if L["id"] in want]
+        leaves = [leaf for leaf in leaves if leaf.get("id") in want]
     # stable order: wave then id
     wave_order = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "R": 6}
-    leaves = sorted(leaves, key=lambda L: (wave_order.get(L["wave"], 9), L["id"]))
+    leaves = sorted(
+        leaves,
+        key=lambda leaf: (
+            wave_order.get(str(leaf.get("wave") or ""), 9),
+            str(leaf.get("id") or ""),
+        ),
+    )
     if max_leaves > 0:
         leaves = leaves[:max_leaves]
 
@@ -197,18 +239,22 @@ def main() -> int:
     rate_limit_hits = 0
 
     for i, leaf in enumerate(leaves, 1):
-        lid = leaf["id"]
-        if lid in done and progress.get("results", {}).get(lid, {}).get("status") in {
+        lid = str(leaf.get("id") or "")
+        prev = progress.get("results", {}).get(lid, {})
+        if lid in done and prev.get("status") in {
             "ok",
             "ignored",
             "skipped",
         }:
             print(f"[{i}/{len(leaves)}] SKIP done {lid}")
             continue
-        print(f"[{i}/{len(leaves)}] RUN {lid} wave={leaf['wave']} files={leaf['files']} dir={leaf.get('dir')}")
+        print(
+            f"[{i}/{len(leaves)}] RUN {lid} wave={leaf.get('wave')} "
+            f"files={leaf.get('files')} dir={leaf.get('dir')}"
+        )
         result = run_leaf(leaf)
         progress.setdefault("results", {})[lid] = result
-        st = result["status"]
+        st = str(result.get("status") or "")
         if st == "ok":
             progress.setdefault("completed", []).append(lid)
         elif st in {"skipped", "ignored"}:
@@ -216,7 +262,10 @@ def main() -> int:
         else:
             progress.setdefault("failed", []).append(lid)
         save_progress(progress)
-        print(f"  -> {st} {result.get('reason','')} log={result.get('log')} bytes={result.get('bytes')}")
+        print(
+            f"  -> {st} {result.get('reason', '')} "
+            f"log={result.get('log')} bytes={result.get('bytes')}"
+        )
 
         if st == "rate_limit":
             rate_limit_hits += 1
@@ -226,12 +275,12 @@ def main() -> int:
             # retry once
             print(f"  RETRY {lid}")
             result = run_leaf(leaf)
-            progress["results"][lid] = result
-            if result["status"] == "ok":
+            progress.setdefault("results", {})[lid] = result
+            if result.get("status") == "ok":
                 progress.setdefault("completed", []).append(lid)
             save_progress(progress)
-            print(f"  -> retry {result['status']}")
-            if result["status"] == "rate_limit":
+            print(f"  -> retry {result.get('status')}")
+            if result.get("status") == "rate_limit":
                 print("  hard rate_limit — stop batch; resume later")
                 break
         elif st == "auth_error":
@@ -244,7 +293,8 @@ def main() -> int:
     results = progress.get("results", {})
     counts: dict[str, int] = {}
     for r in results.values():
-        counts[r["status"]] = counts.get(r["status"], 0) + 1
+        status = str(r.get("status") or "unknown")
+        counts[status] = counts.get(status, 0) + 1
     print("SUMMARY", counts)
     (OUT / "run_summary.json").write_text(
         json.dumps({"counts": counts, "results": results}, indent=2), encoding="utf-8"

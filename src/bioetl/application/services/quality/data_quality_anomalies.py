@@ -171,6 +171,8 @@ class DataQualityAnomalyMixin(DataQualityMetricsMixin):
     ) -> DQResult:
         """Run anomaly detection, update baselines, and return results."""
         assert self._dq_monitor is not None
+        # Timestamp is optional: DQMonitorPort accepts None; adapters must not
+        # invent wall-clock time when the caller omits it (see port contract).
 
         start_time = time.monotonic()
         anomalies = self._dq_monitor.check_quality(metrics, canonical_dq_timestamp)

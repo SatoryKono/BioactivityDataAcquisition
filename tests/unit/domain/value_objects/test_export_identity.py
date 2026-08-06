@@ -15,31 +15,48 @@ pytestmark = pytest.mark.unit
 
 
 def test_dataset_bundle_id_is_deterministic() -> None:
-    kwargs = {
-        "table_name": "activity",
-        "layer": "gold",
-        "export_format": "parquet",
-        "row_count": 10,
-        "columns": ("a", "b"),
-        "providers": ("chembl",),
-        "data_sha256": "abc",
-    }
-    assert dataset_bundle_id(**kwargs) == dataset_bundle_id(**kwargs)
-    assert dataset_bundle_id(**kwargs).startswith("bioetl-export-")
+    first = dataset_bundle_id(
+        table_name="activity",
+        layer="gold",
+        export_format="parquet",
+        row_count=10,
+        columns=("a", "b"),
+        providers=("chembl",),
+        data_sha256="abc",
+    )
+    second = dataset_bundle_id(
+        table_name="activity",
+        layer="gold",
+        export_format="parquet",
+        row_count=10,
+        columns=("a", "b"),
+        providers=("chembl",),
+        data_sha256="abc",
+    )
+    assert first == second
+    assert first.startswith("bioetl-export-")
 
 
 def test_dataset_bundle_id_changes_with_payload() -> None:
-    base = {
-        "table_name": "activity",
-        "layer": "gold",
-        "export_format": "parquet",
-        "row_count": 10,
-        "columns": ("a", "b"),
-        "providers": ("chembl",),
-        "data_sha256": "abc",
-    }
-    other = {**base, "row_count": 11}
-    assert dataset_bundle_id(**base) != dataset_bundle_id(**other)
+    base = dataset_bundle_id(
+        table_name="activity",
+        layer="gold",
+        export_format="parquet",
+        row_count=10,
+        columns=("a", "b"),
+        providers=("chembl",),
+        data_sha256="abc",
+    )
+    other = dataset_bundle_id(
+        table_name="activity",
+        layer="gold",
+        export_format="parquet",
+        row_count=11,
+        columns=("a", "b"),
+        providers=("chembl",),
+        data_sha256="abc",
+    )
+    assert base != other
 
 
 def test_format_utc_second_granularity() -> None:
