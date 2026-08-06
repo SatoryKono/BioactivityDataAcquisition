@@ -163,3 +163,15 @@ class TestPipelineServicesAclose:
         mock_services.lock.aclose.assert_called_once()
         mock_services.checkpoint.aclose.assert_called_once()
         mock_services.quarantine.aclose.assert_called_once()
+
+    async def test_aclose_reraises_cancelled_error_after_logging(self, mock_services):
+        """#7844: CancelledError from gather is logged then re-raised."""
+        import asyncio
+
+        mock_services.storage.aclose.side_effect = asyncio.CancelledError()
+
+        with pytest.raises(asyncio.CancelledError):
+            await mock_services.aclose()
+
+        mock_services.logger.error.assert_called()
+        mock_services.data_source.aclose.assert_called_once()
