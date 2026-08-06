@@ -56,7 +56,10 @@ def main() -> None:
 
     streams: dict[str, list[dict[str, object]]] = defaultdict(list)
     for m in maj:
-        streams[stream_of(m["path"])].append(m)
+        if not isinstance(m, dict):
+            continue
+        path = m.get("path", "")
+        streams[stream_of(str(path))].append(m)
 
     order = [
         "S1 app-lifecycle-runner",

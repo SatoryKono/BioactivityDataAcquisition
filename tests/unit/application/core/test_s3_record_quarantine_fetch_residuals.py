@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import collections.abc
 from dataclasses import dataclass, field
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
@@ -62,15 +63,15 @@ class _FetchState:
 class _AsyncRecords:
     def __init__(self, rows: list[dict[str, object]]) -> None:
         self._rows = rows
-        self._iter: object = iter(())
+        self._iter: collections.abc.Iterator[dict[str, object]] = iter(())
 
-    def __aiter__(self):
+    def __aiter__(self) -> _AsyncRecords:
         self._iter = iter(self._rows)
         return self
 
-    async def __anext__(self):
+    async def __anext__(self) -> dict[str, object]:
         try:
-            return next(self._iter)  # type: ignore[call-overload]
+            return next(self._iter)
         except StopIteration as exc:
             raise StopAsyncIteration from exc
 

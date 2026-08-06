@@ -193,7 +193,9 @@ def run_mcp(
         for name in _as_str_list(plan.get("remote_or_external")):
             print(f"[SKIP] {name} remote/auth-managed; inspect with 'codex mcp list'")
         print(
-            f"Summary: failed={failed} warned={warned} skipped={len(plan['remote_or_external'])}"
+            "Summary: failed="
+            f"{failed} warned={warned} skipped="
+            f"{len(_as_str_list(plan.get('remote_or_external')))}"
         )
     return 1 if failed else 0
 

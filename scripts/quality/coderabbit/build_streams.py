@@ -148,9 +148,10 @@ def main() -> None:
 
     cm: list[tuple[str, int, str]] = []
     for n, it in by.items():
-        s = sev_of(str(it.get("title", "")))
+        title = str(it.get("title", ""))
+        s = sev_of(title)
         if s in ("critical", "major"):
-            cm.append((s, n, it.get("title", "")))
+            cm.append((s, n, title))
 
     resolved: dict[int, tuple[str, str, str]] = {}
     need_body: list[int] = []
@@ -164,13 +165,13 @@ def main() -> None:
     print(f"CM={len(cm)} need_body={need_body}")
     for n in need_body:
         data = gh_issue(n)
-        s = sev_of(data.get("title", "")) or "?"
-        p = path_from_body(data.get("body", "")) or path_from_title(
-            data.get("title", "")
-        )
+        title = str(data.get("title", ""))
+        body = str(data.get("body", ""))
+        s = sev_of(title) or "?"
+        p = path_from_body(body) or path_from_title(title)
         if not p:
             p = "(unknown)"
-        resolved[n] = (s, p, data.get("title", ""))
+        resolved[n] = (s, p, title)
         print(f"  resolved #{n} -> {p}")
 
     streams: dict[str, list[tuple[int, str, str, str]]] = defaultdict(list)
