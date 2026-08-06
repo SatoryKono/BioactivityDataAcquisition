@@ -21,6 +21,9 @@ from bioetl.application.core.normalization_fallbacks import (
     normalize_special_fallback_field,
 )
 from bioetl.domain.normalization.json import serialize_json_canonical
+from bioetl.domain.normalization.profiles.base import (
+    _normalizer_accepts_record_context as _profile_rule_accepts_record_context,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.core._record_normalization_hash_support import (
@@ -160,10 +163,6 @@ class RecordNormalizationMappingMixin:
         normalized = dict(record)
         for field_name in tuple(normalized.keys()):
             rule = self._profile_rule(field_name)
-            from bioetl.domain.normalization.profiles.base import (
-                _normalizer_accepts_record_context as _profile_rule_accepts_record_context,
-            )
-
             if rule is None or not _profile_rule_accepts_record_context(
                 rule.normalizer
             ):

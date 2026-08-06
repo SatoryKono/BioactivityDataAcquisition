@@ -85,7 +85,9 @@ class HeartbeatTask:
         """
         if self._task:
             self._task.cancel()
-            with contextlib.suppress(asyncio.CancelledError):
+            # CancelledError is expected after cancel(); PipelineShutdownError must not
+            # surface from a completed lock-loss path when stop() races the loop.
+            with contextlib.suppress(asyncio.CancelledError, PipelineShutdownError):
                 await self._task
             self._task = None
 
@@ -96,8 +98,9 @@ class HeartbeatTask:
 
     async def _heartbeat_loop(self) -> None:
         """Background loop that sends periodic heartbeats.
-        Raises:
-            PipelineShutdownError: If lock is lost during heartbeat.
+
+        On lock loss, request shutdown and return immediately so the background
+        task completes cleanly without failing with PipelineShutdownError.
         """
         while not self._shutdown_signal.is_requested:
             await asyncio.sleep(self._interval)
@@ -107,7 +110,7 @@ class HeartbeatTask:
             if not success:
                 self._logger.error("Lost lock during execution!")
                 self._shutdown_signal.request()
-                raise PipelineShutdownError("Lock lost")
+                return
 
 
 __all__ = ["HeartbeatTask"]

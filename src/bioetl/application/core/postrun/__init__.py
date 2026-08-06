@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.application.core.postrun._failure_policy import (
+    DEFAULT_METADATA_VERSION_ALLOWLIST,
+    DEFAULT_POSTRUN_WARNING_ALLOWLIST,
+)
 from bioetl.application.core.postrun.cleanup_orchestrator import PostrunCleanupService
 from bioetl.application.core.postrun.compact_orchestrator import (
     CompactionResult,
@@ -24,6 +28,8 @@ from bioetl.application.core.postrun.service import (
 
 __all__ = [
     "CompactionResult",
+    "DEFAULT_METADATA_VERSION_ALLOWLIST",
+    "DEFAULT_POSTRUN_WARNING_ALLOWLIST",
     "PostrunCleanupService",
     "PostrunCompactService",
     "PostrunDQReportService",

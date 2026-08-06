@@ -16,7 +16,6 @@ import json
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from bioetl.application.runtime_clock import current_utc_time
 
 if TYPE_CHECKING:
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
@@ -139,18 +138,21 @@ def get_dq_thresholds(config: RecordProcessorConfig) -> tuple[float, float]:
 
 
 def extract_dq_entity(config: RecordProcessorConfig) -> str:
-    """Derive entity name for report naming from silver table naming."""
+    """Derive entity name for report naming from silver table naming.
+
+    Strip schema qualifiers first, then optional ``silver_`` layer prefixes,
+    so entity names that contain underscores remain intact.
+    """
     table_config = config.table_config
     silver_table = table_config.silver_table
     entity_type = config.entity_type
-    if silver_table and "_" in silver_table:
-        underscore_entity: str = silver_table.split("_", 1)[1]
-        return underscore_entity
-    if silver_table and "." in silver_table:
-        dotted_entity: str = silver_table.split(".")[-1]
-        return dotted_entity
-    resolved_entity: str = silver_table or entity_type
-    return resolved_entity
+    if not silver_table:
+        return entity_type
+    # schema.entity -> entity (preserve underscores in entity segment)
+    name = silver_table.rsplit(".", 1)[-1]
+    if name.startswith("silver_"):
+        return name.removeprefix("silver_")
+    return name
 
 
 def build_dq_report_context(
@@ -188,9 +190,9 @@ def build_dq_report_context(
             for rule in dq_config.key_nullability_rules
         ]
     replay_timestamp_anchor = getattr(context, "replay_timestamp_anchor", None)
-    started_at = getattr(context, "started_at", None)
+    started_at = context.started_at
     if started_at is None:
-        started_at = current_utc_time()
+        raise ValueError("PipelineContext.started_at is required for DQ report context")
     dq_timestamp = replay_timestamp_anchor or started_at
     current_date_str = dq_timestamp.strftime("%Y-%m-%d")
     dq_entity = extract_dq_entity(config)

@@ -104,6 +104,10 @@ class BatchWriterIOMixin:
         except _WRITE_SPAN_ERRORS as error:
             self._end_span(span, error)
             raise
+        except BaseException:
+            # asyncio.CancelledError (BaseException) must still close the span.
+            self._end_span(span)
+            raise
 
     async def write_silver(
         self,
@@ -168,6 +172,9 @@ class BatchWriterIOMixin:
         except _WRITE_SPAN_ERRORS as error:
             self._end_span(span, error)
             raise
+        except BaseException:
+            self._end_span(span)
+            raise
 
     async def write_gold(
         self,
@@ -184,28 +191,28 @@ class BatchWriterIOMixin:
         span = self._start_span("write_gold", "gold", len(records))
 
         try:
-            schema_payload: object = self._gold_schema
             if should_defer_gold_validation_to_storage(self):
                 available_cols = self._collect_record_columns(records)
-                schema_payload = self._gold_schema_policy_by_version
+                schema_payload: object = self._gold_schema_policy_by_version
             else:
-                available_cols = list(
-                    self._get_schema_columns(self._gold_schema) or ()
-                ) or self._collect_record_columns(records)
-                column_order, rename_map = self._resolve_layer_columns(
+                records, available_cols = prepare_gold_records(self, records)
+                validate_gold_records(self, records)
+                column_order_preview, _rename_preview = self._resolve_layer_columns(
                     "gold", available_cols
                 )
                 schema_payload = self._project_schema_for_layer(
                     "gold",
                     self._gold_schema,
-                    column_order,
+                    column_order_preview,
                 )
-                records, available_cols = prepare_gold_records(
-                    self,
-                    records,
-                    schema=schema_payload,
-                )
-                validate_gold_records(self, records, schema=schema_payload)
+                # Re-project/validate against the layer-projected schema when available.
+                if schema_payload is not None and schema_payload is not self._gold_schema:
+                    records, available_cols = prepare_gold_records(
+                        self,
+                        records,
+                        schema=schema_payload,
+                    )
+                    validate_gold_records(self, records, schema=schema_payload)
 
             column_order, rename_map = self._resolve_layer_columns(
                 "gold", available_cols
@@ -228,6 +235,9 @@ class BatchWriterIOMixin:
             self._end_span(span)
         except _WRITE_SPAN_ERRORS as error:
             self._end_span(span, error)
+            raise
+        except BaseException:
+            self._end_span(span)
             raise
 
     def _prepare_gold_records(

@@ -59,6 +59,10 @@ class BasePanderaValidator:
         self._schema = schema
         self._strict = strict
 
+    def rebind_schema(self, schema: pa.DataFrameSchema | None) -> BasePanderaValidator:
+        """Return a same-class validator bound to ``schema`` without private attrs."""
+        return type(self)(schema=schema, strict=self._strict)
+
     def validate(
         self,
         records: list[

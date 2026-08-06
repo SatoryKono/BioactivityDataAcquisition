@@ -57,13 +57,11 @@ def _validate_layer_idempotency_contract(
     if mode == "append":
         if contract in APPEND_SAFE_IDEMPOTENCY_CONTRACTS:
             return []
+        append_safe = ", ".join(sorted(APPEND_SAFE_IDEMPOTENCY_CONTRACTS))
         return [
             ConfigValidationError(
                 field=field,
-                expected=(
-                    "one of: append_log, occurrence_only, "
-                    "partition_append_with_stable_partition_key"
-                ),
+                expected=f"one of: {append_safe}",
                 actual=contract,
                 rule="RULES §2.1: append-mode semantic outputs require append-safe idempotency_contract",
             )

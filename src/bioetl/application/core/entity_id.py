@@ -15,18 +15,18 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_title,
 )
 from bioetl.domain.schemas.constants import (
-    PUBLICATION_TERM_TYPES,
     SUBCELLULAR_FRACTIONS,
 )
 
 
 def _normalize_publication_term_identity_component(value: str) -> str:
-    """Canonicalize publication-term identity components before hashing."""
-    normalized = value.strip()
-    upper_value = normalized.upper()
-    if upper_value in PUBLICATION_TERM_TYPES:
-        return upper_value
-    return normalized
+    """Canonicalize publication-term identity components before hashing.
+
+    Always return the trimmed uppercased value so identity hashing is case-stable
+    for known and unknown term types alike. Vocabulary membership remains a
+    validation concern outside entity-id construction.
+    """
+    return value.strip().upper()
 
 
 def _normalize_publication_id(value: str) -> str:

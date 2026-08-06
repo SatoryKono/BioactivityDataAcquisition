@@ -57,7 +57,8 @@ async def test_build_final_metadata_write_coroutines_builds_silver_only() -> Non
     """Silver metadata finalization should remain executable after extraction."""
     storage = MagicMock()
     storage.get_table_path = MagicMock(return_value="test-output/test_silver")
-    storage.is_table_initialized = MagicMock(return_value=False)
+    # Silver finalization requires an initialized table (parity with gold gate).
+    storage.is_table_initialized = MagicMock(return_value=True)
 
     metadata_coordinator = MagicMock()
     metadata_writer = MagicMock()

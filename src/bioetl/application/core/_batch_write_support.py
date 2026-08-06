@@ -28,11 +28,25 @@ if TYPE_CHECKING:
 def emit_domain_event(
     emitter: DomainEventEmitterProtocol | None,
     event: DomainEvent,
+    *,
+    logger: LoggerPort | None = None,
 ) -> None:
-    """Best-effort publish of one typed domain event."""
+    """Best-effort publish of one typed domain event.
+
+    Emitter failures must not break the write path; log when a logger is available.
+    """
     if emitter is None:
         return
-    emitter.emit_domain_event(event)
+    try:
+        emitter.emit_domain_event(event)
+    except Exception as error:
+        if logger is not None:
+            logger.warning(
+                "domain_event_emit_failed",
+                error=str(error),
+                error_type=type(error).__name__,
+                event_type=type(event).__name__,
+            )
 
 
 def emit_batch_written(
@@ -43,6 +57,7 @@ def emit_batch_written(
     layer: str,
     record_count: int,
     occurred_at: datetime,
+    logger: LoggerPort | None = None,
 ) -> None:
     """Publish a typed ``BatchWritten`` event when run context exists."""
     if run_id is None:
@@ -56,6 +71,7 @@ def emit_batch_written(
             layer=Layer(layer),
             record_count=record_count,
         ),
+        logger=logger,
     )
 
 
@@ -67,6 +83,7 @@ def emit_batch_failed(
     layer: str,
     error: Exception,
     occurred_at: datetime,
+    logger: LoggerPort | None = None,
 ) -> None:
     """Publish a typed ``BatchFailed`` event before bubbling the error."""
     if run_id is None:
@@ -81,6 +98,7 @@ def emit_batch_failed(
             error=str(error),
             error_type=type(error).__name__,
         ),
+        logger=logger,
     )
 
 
@@ -151,7 +169,7 @@ async def safe_write_layer(
             bronze_refs=bronze_refs,
             silver_refs=silver_refs,
         )
-        writer._batch_metrics.track_batch_written(stage=layer, count=len(records))
+        writer.track_batch_written(stage=layer, count=len(records))
         emit_batch_written(
             emitter=domain_event_emitter,
             run_id=run_id,
@@ -159,6 +177,7 @@ async def safe_write_layer(
             layer=layer,
             record_count=len(records),
             occurred_at=ingestion_ts,
+            logger=logger,
         )
         return write_result
     except SchemaViolationError as error:
@@ -177,7 +196,7 @@ async def safe_write_layer(
         return None
     except operation_errors as error:
         if isinstance(error, Exception):
-            writer._batch_metrics.track_batch_failed(stage=layer, count=len(records))
+            writer.track_batch_failed(stage=layer, count=len(records))
             emit_batch_failed(
                 emitter=domain_event_emitter,
                 run_id=run_id,
@@ -185,6 +204,7 @@ async def safe_write_layer(
                 layer=layer,
                 error=error,
                 occurred_at=ingestion_ts,
+                logger=logger,
             )
         raise
 
@@ -203,7 +223,7 @@ async def _quarantine_schema_violation(
     error: SchemaViolationError,
 ) -> None:
     """Track failure metrics and quarantine schema-invalid records."""
-    writer._batch_metrics.track_batch_failed(stage=layer, count=len(records))
+    writer.track_batch_failed(stage=layer, count=len(records))
     emit_batch_failed(
         emitter=domain_event_emitter,
         run_id=run_id,
@@ -211,6 +231,7 @@ async def _quarantine_schema_violation(
         layer=layer,
         error=error,
         occurred_at=ingestion_ts,
+        logger=logger,
     )
     logger.warning(
         "schema_violation_quarantined",

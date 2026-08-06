@@ -178,28 +178,32 @@ def create_pubchem_adapter(
         metrics=metrics,
     )
     thread_pool = ThreadPoolExecutor(max_workers=max_workers)
-    runtime_dependencies = _build_runtime_dependencies(
-        logger=logger,
-        metrics=metrics,
-        rate_limiter=rate_limiter,
-        circuit_breaker=circuit_breaker,
-        thread_pool=thread_pool,
-        error_handler=error_handler,
-        request_collector=request_collector,
-        entity_mapper=entity_mapper,
-        fetch_strategies=fetch_strategies,
-    )
-
-    return PubChemAdapter(
-        logger=logger,
-        rate_limiter=rate_limiter,
-        circuit_breaker=circuit_breaker,
-        thread_pool=thread_pool,
-        owns_thread_pool=True,
-        strict_error_handling=strict_error_handling,
-        dependency_context=runtime_dependencies.dependency_context,
-        error_handler=runtime_dependencies.error_handler,
-        request_collector=runtime_dependencies.request_collector,
-        entity_mapper=runtime_dependencies.entity_mapper,
-        fetch_strategies=runtime_dependencies.fetch_strategies,
-    )
+    try:
+        runtime_dependencies = _build_runtime_dependencies(
+            logger=logger,
+            metrics=metrics,
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            thread_pool=thread_pool,
+            error_handler=error_handler,
+            request_collector=request_collector,
+            entity_mapper=entity_mapper,
+            fetch_strategies=fetch_strategies,
+        )
+        return PubChemAdapter(
+            logger=logger,
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            thread_pool=thread_pool,
+            owns_thread_pool=True,
+            strict_error_handling=strict_error_handling,
+            dependency_context=runtime_dependencies.dependency_context,
+            error_handler=runtime_dependencies.error_handler,
+            request_collector=runtime_dependencies.request_collector,
+            entity_mapper=runtime_dependencies.entity_mapper,
+            fetch_strategies=runtime_dependencies.fetch_strategies,
+        )
+    except Exception:
+        # Composition owns the pool until the adapter is successfully constructed.
+        thread_pool.shutdown(wait=False, cancel_futures=True)
+        raise

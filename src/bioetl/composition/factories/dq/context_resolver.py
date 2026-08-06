@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
 from bioetl.composition.factories.dq._context_resolver_support import (
+    DQServiceBundle,
     create_dq_services_impl,
     extract_dq_configs_impl,
     extract_dq_output_paths_impl,
@@ -38,11 +39,11 @@ if TYPE_CHECKING:
         SilverDQAnalyzerPort,
         SilverDQConfigPort,
     )
-    from bioetl.domain.types import JsonDict
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
+    "DQServiceBundle",
     "create_dq_services",
     "extract_dq_configs",
     "extract_dq_output_paths",
@@ -158,7 +159,7 @@ def create_dq_services(
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     metrics: MetricsPort | None = None,
-) -> JsonDict:  # Any: heterogeneous DQ service instances
+) -> DQServiceBundle:
     """Create DQ analyzers, report writer, and report service."""
     return create_dq_services_impl(
         settings,

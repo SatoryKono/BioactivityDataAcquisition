@@ -44,7 +44,7 @@ class BatchWriterColumnsMixin:
             if callable(select_columns):
                 return cast(object, select_columns(list(column_order)))
         except _SCHEMA_EXTRACTION_ERRORS:
-            return schema
+            return None
         return None
 
     def _project_via_select_columns(
@@ -59,7 +59,7 @@ class BatchWriterColumnsMixin:
         try:
             return cast(object, select_columns(list(column_order)))
         except _SCHEMA_EXTRACTION_ERRORS:
-            return schema
+            return None
 
     def _project_pyarrow_schema(
         self,
@@ -84,7 +84,7 @@ class BatchWriterColumnsMixin:
                 pa.schema(projected_fields, metadata=getattr(schema, "metadata", None)),
             )
         except (ImportError, AttributeError, TypeError, ValueError):
-            return schema
+            return None
 
     def _get_schema_columns(
         self,

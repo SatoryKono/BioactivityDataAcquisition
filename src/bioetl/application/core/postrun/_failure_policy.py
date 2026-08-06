@@ -6,8 +6,26 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.domain.exceptions import BioETLError
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
+
+# Application-owned default exception allowlists for postrun collaborators.
+# Composition factories MUST import these rather than redefine policy tuples.
+DEFAULT_POSTRUN_WARNING_ALLOWLIST: tuple[type[BaseException], ...] = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    TimeoutError,
+    ValueError,
+)
+DEFAULT_METADATA_VERSION_ALLOWLIST: tuple[type[BaseException], ...] = (
+    FileNotFoundError,
+    OSError,
+    RuntimeError,
+    ValueError,
+)
 
 
 @dataclass(frozen=True, slots=True)
