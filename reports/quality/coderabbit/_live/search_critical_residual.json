@@ -1,0 +1,136 @@
+[1;38m{[m
+  [1;34m"total_count"[m[1;38m:[m 1[1;38m,[m
+  [1;34m"incomplete_results"[m[1;38m:[m [33mfalse[m[1;38m,[m
+  [1;34m"items"[m[1;38m:[m [1;38m[[m
+    [1;38m{[m
+      [1;34m"url"[m[1;38m:[m [32m"https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/7688"[m[1;38m,[m
+      [1;34m"repository_url"[m[1;38m:[m [32m"https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition"[m[1;38m,[m
+      [1;34m"labels_url"[m[1;38m:[m [32m"https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/7688/labels{/name}"[m[1;38m,[m
+      [1;34m"comments_url"[m[1;38m:[m [32m"https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/7688/comments"[m[1;38m,[m
+      [1;34m"events_url"[m[1;38m:[m [32m"https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/7688/events"[m[1;38m,[m
+      [1;34m"html_url"[m[1;38m:[m [32m"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7688"[m[1;38m,[m
+      [1;34m"id"[m[1;38m:[m 5072506840[1;38m,[m
+      [1;34m"node_id"[m[1;38m:[m [32m"I_kwDOQgiqDs8AAAABLlhP2A"[m[1;38m,[m
+      [1;34m"number"[m[1;38m:[m 7688[1;38m,[m
+      [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][meta] Exhaustive CodeRabbit residual audit campaign (2026-08)"[m[1;38m,[m
+      [1;34m"user"[m[1;38m:[m [1;38m{[m
+        [1;34m"login"[m[1;38m:[m [32m"SatoryKono"[m[1;38m,[m
+        [1;34m"id"[m[1;38m:[m 13055362[1;38m,[m
+        [1;34m"node_id"[m[1;38m:[m [32m"MDQ6VXNlcjEzMDU1MzYy"[m[1;38m,[m
+        [1;34m"avatar_url"[m[1;38m:[m [32m"https://avatars.githubusercontent.com/u/13055362?v=4"[m[1;38m,[m
+        [1;34m"gravatar_id"[m[1;38m:[m [32m""[m[1;38m,[m
+        [1;34m"url"[m[1;38m:[m [32m"https://api.github.com/users/SatoryKono"[m[1;38m,[m
+        [1;34m"html_url"[m[1;38m:[m [32m"https://github.com/SatoryKono"[m[1;38m,[m
+        [1;34m"followers_url"[m[1;38m:[m [32m"https://api.github.com/users/SatoryKono/followers"[m[1;38m,[m
+        [1;34m"following_url"[m[1;38m:[m [32m"https://api.github.com/users/SatoryKono/following{/other_user}"[m[1;38m,[m
+        [1;34m"gists_url"[m[1;38m:[m [32m"https://api.github.com/users/SatoryKono/gists{/gist_id}"[m[1;38m,[m
+        [1;34m"starred_url"[m[1;38m:[m [32m"https://api.github.com/users/SatoryKono/starred{/owner}{/repo}"[m[1;38m,[m
+        [1;34m"subscriptions_url"[m[1;38m:[m [32m"https://api.github.com/users/SatoryKono/subscriptions"[m[1;38m,[m
+        [1;34m"organizations_url"[m[1;38m:[m [32m"https://api.github.com/users/SatoryKono/orgs"[m[1;38m,[m
+        [1;34m"repos_url"[m[1;38m:[m [32m"https://api.github.com/users/SatoryKono/repos"[m[1;38m,[m
+        [1;34m"events_url"[m[1;38m:[m [32m"https://api.github.com/users/SatoryKono/events{/privacy}"[m[1;38m,[m
+        [1;34m"received_events_url"[m[1;38m:[m [32m"https://api.github.com/users/SatoryKono/received_events"[m[1;38m,[m
+        [1;34m"type"[m[1;38m:[m [32m"User"[m[1;38m,[m
+        [1;34m"user_view_type"[m[1;38m:[m [32m"public"[m[1;38m,[m
+        [1;34m"site_admin"[m[1;38m:[m [33mfalse[m
+      [1;38m}[m[1;38m,[m
+      [1;34m"labels"[m[1;38m:[m [1;38m[[m
+        [1;38m{[m
+          [1;34m"id"[m[1;38m:[m 9750657973[1;38m,[m
+          [1;34m"node_id"[m[1;38m:[m [32m"LA_kwDOQgiqDs8AAAACRS87tQ"[m[1;38m,[m
+          [1;34m"url"[m[1;38m:[m [32m"https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/labels/enhancement"[m[1;38m,[m
+          [1;34m"name"[m[1;38m:[m [32m"enhancement"[m[1;38m,[m
+          [1;34m"color"[m[1;38m:[m [32m"a2eeef"[m[1;38m,[m
+          [1;34m"default"[m[1;38m:[m [33mtrue[m[1;38m,[m
+          [1;34m"description"[m[1;38m:[m [32m"New feature or request"[m
+        [1;38m}[m[1;38m,[m
+        [1;38m{[m
+          [1;34m"id"[m[1;38m:[m 10270603501[1;38m,[m
+          [1;34m"node_id"[m[1;38m:[m [32m"LA_kwDOQgiqDs8AAAACZCz47Q"[m[1;38m,[m
+          [1;34m"url"[m[1;38m:[m [32m"https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/labels/priority:high"[m[1;38m,[m
+          [1;34m"name"[m[1;38m:[m [32m"priority:high"[m[1;38m,[m
+          [1;34m"color"[m[1;38m:[m [32m"D93F0B"[m[1;38m,[m
+          [1;34m"default"[m[1;38m:[m [33mfalse[m[1;38m,[m
+          [1;34m"description"[m[1;38m:[m [32m"Should fix soon"[m
+        [1;38m}[m[1;38m,[m
+        [1;38m{[m
+          [1;34m"id"[m[1;38m:[m 10678546410[1;38m,[m
+          [1;34m"node_id"[m[1;38m:[m [32m"LA_kwDOQgiqDs8AAAACfH2v6g"[m[1;38m,[m
+          [1;34m"url"[m[1;38m:[m [32m"https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/labels/architecture"[m[1;38m,[m
+          [1;34m"name"[m[1;38m:[m [32m"architecture"[m[1;38m,[m
+          [1;34m"color"[m[1;38m:[m [32m"ededed"[m[1;38m,[m
+          [1;34m"default"[m[1;38m:[m [33mfalse[m[1;38m,[m
+          [1;34m"description"[m[1;38m:[m [36mnull[m
+        [1;38m}[m[1;38m,[m
+        [1;38m{[m
+          [1;34m"id"[m[1;38m:[m 10728096531[1;38m,[m
+          [1;34m"node_id"[m[1;38m:[m [32m"LA_kwDOQgiqDs8AAAACf3HDEw"[m[1;38m,[m
+          [1;34m"url"[m[1;38m:[m [32m"https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/labels/quality"[m[1;38m,[m
+          [1;34m"name"[m[1;38m:[m [32m"quality"[m[1;38m,[m
+          [1;34m"color"[m[1;38m:[m [32m"ededed"[m[1;38m,[m
+          [1;34m"default"[m[1;38m:[m [33mfalse[m[1;38m,[m
+          [1;34m"description"[m[1;38m:[m [36mnull[m
+        [1;38m}[m[1;38m,[m
+        [1;38m{[m
+          [1;34m"id"[m[1;38m:[m 10844785116[1;38m,[m
+          [1;34m"node_id"[m[1;38m:[m [32m"LA_kwDOQgiqDs8AAAAChmZJ3A"[m[1;38m,[m
+          [1;34m"url"[m[1;38m:[m [32m"https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/labels/governance"[m[1;38m,[m
+          [1;34m"name"[m[1;38m:[m [32m"governance"[m[1;38m,[m
+          [1;34m"color"[m[1;38m:[m [32m"5319E7"[m[1;38m,[m
+          [1;34m"default"[m[1;38m:[m [33mfalse[m[1;38m,[m
+          [1;34m"description"[m[1;38m:[m [32m"Governance / policy / registries"[m
+        [1;38m}[m[1;38m,[m
+        [1;38m{[m
+          [1;34m"id"[m[1;38m:[m 10844785159[1;38m,[m
+          [1;34m"node_id"[m[1;38m:[m [32m"LA_kwDOQgiqDs8AAAAChmZKBw"[m[1;38m,[m
+          [1;34m"url"[m[1;38m:[m [32m"https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/labels/technical-debt"[m[1;38m,[m
+          [1;34m"name"[m[1;38m:[m [32m"technical-debt"[m[1;38m,[m
+          [1;34m"color"[m[1;38m:[m [32m"D93F0B"[m[1;38m,[m
+          [1;34m"default"[m[1;38m:[m [33mfalse[m[1;38m,[m
+          [1;34m"description"[m[1;38m:[m [32m"Tech debt / refactor"[m
+        [1;38m}[m
+      [1;38m][m[1;38m,[m
+      [1;34m"state"[m[1;38m:[m [32m"open"[m[1;38m,[m
+      [1;34m"locked"[m[1;38m:[m [33mfalse[m[1;38m,[m
+      [1;34m"assignees"[m[1;38m:[m [1;38m[[m[1;38m][m[1;38m,[m
+      [1;34m"milestone"[m[1;38m:[m [36mnull[m[1;38m,[m
+      [1;34m"comments"[m[1;38m:[m 6[1;38m,[m
+      [1;34m"created_at"[m[1;38m:[m [32m"2026-08-05T15:27:03Z"[m[1;38m,[m
+      [1;34m"updated_at"[m[1;38m:[m [32m"2026-08-05T22:04:33Z"[m[1;38m,[m
+      [1;34m"closed_at"[m[1;38m:[m [36mnull[m[1;38m,[m
+      [1;34m"assignee"[m[1;38m:[m [36mnull[m[1;38m,[m
+      [1;34m"author_association"[m[1;38m:[m [32m"OWNER"[m[1;38m,[m
+      [1;34m"active_lock_reason"[m[1;38m:[m [36mnull[m[1;38m,[m
+      [1;34m"sub_issues_summary"[m[1;38m:[m [1;38m{[m
+        [1;34m"total"[m[1;38m:[m 0[1;38m,[m
+        [1;34m"completed"[m[1;38m:[m 0[1;38m,[m
+        [1;34m"percent_completed"[m[1;38m:[m 0
+      [1;38m}[m[1;38m,[m
+      [1;34m"issue_dependencies_summary"[m[1;38m:[m [1;38m{[m
+        [1;34m"blocked_by"[m[1;38m:[m 0[1;38m,[m
+        [1;34m"total_blocked_by"[m[1;38m:[m 0[1;38m,[m
+        [1;34m"blocking"[m[1;38m:[m 0[1;38m,[m
+        [1;34m"total_blocking"[m[1;38m:[m 0
+      [1;38m}[m[1;38m,[m
+      [1;34m"body"[m[1;38m:[m [32m"## Summary\n\nMeta-epic for an **exhaustive residual CodeRabbit campaign** on BioETL, complementary to continuous PR App reviews.\n\nCodeRabbit is **not** sole SSOT (see `docs/03-guides/coderabbit-audit-playbook.md`):\n\n1. Code / contracts / config  \n2. ADRs + RULES  \n3. Architecture tests / quality gates  \n4. CodeRabbit findings (must map to evidence)\n\n**Do not increase tech-debt budgets** to silence findings.\n\n## Baseline (at epic open)\n\n- Target: `main` @ `62a8c94ecf4614250bc8e470089361fe7223e8cd` (refresh at CR-FULL-00)\n- Config: `.coderabbit.yaml` (`profile: assertive`)\n- CI CLI: `.github/workflows/coderabbit.yml`\n- Playbook: `docs/03-guides/coderabbit-audit-playbook.md`\n- Launcher: `scripts/ops/run-coderabbit-reviews.sh`\n\n## Child issues\n\n| Code | Pri | Issue | Title |\n|------|-----|------:|-------|\n| CR-FULL-00 | P0 | #7689 | Preflight: freeze baseline, tools, ground-truth gates |\n| CR-FULL-01 | P1 | #7690 | Wave A: architecture residual |\n| CR-FULL-02 | P1 | #7691 | Wave B: data plane |\n| CR-FULL-03 | P1 | #7692 | Wave C: adapters / resilience |\n| CR-FULL-04 | P1 | #7693 | Wave D: security |\n| CR-FULL-05 | P2 | #7694 | Wave E: contracts / docs / Grafana |\n| CR-FULL-06 | P2 | #7695 | Wave F: test honesty |\n| CR-FULL-07 | P1 | #7696 | Normalize FINDINGS + triage + pack |\n| CR-FULL-08 | P2 | #7697 | Closeout re-audit + FINAL.md |\n| CR-FULL-09 | P2 | #7698 | CLI secret + workflow health |\n\n### Checklist\n- [ ] #7689 Preflight  \n- [ ] #7690 Wave A  \n- [ ] #7691 Wave B  \n- [ ] #7692 Wave C  \n- [ ] #7693 Wave D  \n- [ ] #7694 Wave E  \n- [ ] #7695 Wave F  \n- [ ] #7696 FINDINGS triage  \n- [ ] #7697 Closeout  \n- [ ] #7698 Secret/workflow  \n\n## Execution order\n```text\n#7689 → (#7690 ‖ #7691 ‖ #7692 ‖ #7693 ‖ #7694 ‖ #7695 sequential CLI)\n→ #7696 → implement P0/P1 → #7697\n#7698 can run in parallel with #7689\n```\n\n## Hard constraints\n- ≤~300 files per CLI run  \n- Sequential scopes (rate limits)  \n- WSL/Linux for CLI on Windows hosts  \n- Artifacts: `reports/quality/coderabbit/`  \n- Prefer PR App continuous; CLI residual  \n\n## Acceptance (epic)\n- [ ] Waves run or skipped with reason  \n- [ ] FINDINGS.md + severity counts  \n- [ ] P0/P1 fixed or tracked  \n- [ ] Re-audit fixed scopes  \n- [ ] FINAL.md + no budget growth  \n\n## Pack\n`.github/ISSUES/CODERABBIT-FULL-2026-08-ISSUE-PACK.md`"[m[1;38m,[m
+      [1;34m"reactions"[m[1;38m:[m [1;38m{[m
+        [1;34m"url"[m[1;38m:[m [32m"https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/7688/reactions"[m[1;38m,[m
+        [1;34m"total_count"[m[1;38m:[m 0[1;38m,[m
+        [1;34m"+1"[m[1;38m:[m 0[1;38m,[m
+        [1;34m"-1"[m[1;38m:[m 0[1;38m,[m
+        [1;34m"laugh"[m[1;38m:[m 0[1;38m,[m
+        [1;34m"hooray"[m[1;38m:[m 0[1;38m,[m
+        [1;34m"confused"[m[1;38m:[m 0[1;38m,[m
+        [1;34m"heart"[m[1;38m:[m 0[1;38m,[m
+        [1;34m"rocket"[m[1;38m:[m 0[1;38m,[m
+        [1;34m"eyes"[m[1;38m:[m 0
+      [1;38m}[m[1;38m,[m
+      [1;34m"timeline_url"[m[1;38m:[m [32m"https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/7688/timeline"[m[1;38m,[m
+      [1;34m"performed_via_github_app"[m[1;38m:[m [36mnull[m[1;38m,[m
+      [1;34m"state_reason"[m[1;38m:[m [36mnull[m[1;38m,[m
+      [1;34m"pinned_comment"[m[1;38m:[m [36mnull[m[1;38m,[m
+      [1;34m"score"[m[1;38m:[m 1.0
+    [1;38m}[m
+  [1;38m][m[1;38m,[m
+  [1;34m"search_type"[m[1;38m:[m [32m"lexical"[m
+[1;38m}[m
