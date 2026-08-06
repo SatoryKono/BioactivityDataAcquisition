@@ -898,6 +898,60 @@ batch_size: 100
 
 ______________________________________________________________________
 
+## Pipeline Dataflow Documentation Generation
+
+BioETL автоматически генерирует детальную документацию dataflow для пайплайнов на основе конфигурации и схем. Эта документация обеспечивает прозрачность и помогает понять, как данные преобразуются на каждом этапе.
+
+### Генерируемые артефакты
+
+Для каждого пайплайна генерируются:
+
+1. **Pipeline Passport**: Комплексный документ с описанием dataflow, включая:
+   - Source profile и query criteria
+   - Silver и Gold filtering rules
+   - DQ policy и validation rules
+   - Output field specifications
+   - Ссылки на связанные диаграммы
+
+2. **Dataflow Diagrams**: Шесть Mermaid диаграмм визуализирующих:
+   - Общий dataflow через этапы
+   - Filter criteria для source queries
+   - Field mappings и transformations (2 диаграммы для Silver)
+   - Final output field structure (2 диаграммы для Gold)
+
+3. **Machine-Readable Artifacts**:
+   - IR JSON для программного доступа
+   - Field CSV для табличного анализа
+
+### Регенерация документации
+
+```bash
+# Регенерировать все пайплайны
+python scripts/diagrams/generate_pipeline_dataflows.py
+
+# Регенерировать конкретный пайплайн
+python scripts/diagrams/generate_pipeline-dataflows.py --pipeline chembl_activity
+
+# Проверить на drift без регенерации
+python scripts/diagrams/generate_pipeline_dataflows.py --check-drift
+```
+
+### CI Integration
+
+Pipeline dataflow documentation интегрирована в CI для предотвращения drift:
+
+```yaml
+# Пример CI check
+- name: Check pipeline dataflow drift
+  run: python scripts/diagrams/generate_pipeline_dataflows.py --check-drift
+```
+
+Если изменения конфигурации повлияли на dataflow без соответствующего обновления документации, CI упадёт, обеспечивая синхронизацию.
+
+### Использование pipeline dataflow documentation
+
+Подробное руководство по использованию pipeline dataflow documentation см. в [Pipeline Dataflow Documentation Guide](pipeline-dataflow-documentation.md).
+
 ## Troubleshooting
 
 ### Ошибка валидации конфига
@@ -936,6 +990,7 @@ ______________________________________________________________________
 ## См. также
 
 - [Running Pipelines](running-pipelines.md) — запуск пайплайнов
+- [Pipeline Dataflow Documentation](pipeline-dataflow-documentation.md) — документация dataflow пайплайнов
 - [CLI Reference](../04-reference/cli.md) — команды CLI
 - [DQ Configuration](dq-configuration.md) — детальная настройка DQ
 - [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md) — sort-by requirement
