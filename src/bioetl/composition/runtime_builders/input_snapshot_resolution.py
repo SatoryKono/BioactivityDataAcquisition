@@ -117,7 +117,11 @@ def _load_manifest(
         base_path=control_plane_root(settings, "run_manifest"),
     )
     if manifest_id:
-        return store.get(manifest_id)
+        manifest = store.get(manifest_id)
+        if manifest is not None:
+            return manifest
+        # Fall through to run_id lookup when the id key misses but a run_id is
+        # available. Read/corruption errors from the store still propagate.
     if not run_id:
         return None
     try:
