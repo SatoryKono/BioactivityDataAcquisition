@@ -9,36 +9,6 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TypedDict, cast
-
-
-class Leaf(TypedDict, total=False):
-    id: str
-    wave: str
-    files: str
-    dir: str
-    use_file_list: str
-
-
-class LeafResult(TypedDict, total=False):
-    id: str
-    status: str
-    reason: str
-    log: str
-    exit_code: int
-    elapsed_s: float
-    bytes: int
-    cmd: list[str]
-
-
-class Progress(TypedDict, total=False):
-    started: str
-    updated: str
-    results: dict[str, LeafResult]
-    completed: list[str]
-    failed: list[str]
-    skipped: list[str]
-
 
 OUT = Path("reports/quality/coderabbit/20260806-full")
 MATRIX = OUT / "01-scope-matrix.json"
@@ -54,22 +24,23 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def load_progress() -> Progress:
+def load_progress() -> dict:
     if PROGRESS.exists():
-        return cast(Progress, json.loads(PROGRESS.read_text(encoding="utf-8")))
+        return json.loads(PROGRESS.read_text(encoding="utf-8"))
     return {"started": now(), "results": {}, "completed": [], "failed": [], "skipped": []}
 
 
-def save_progress(p: Progress) -> None:
+def save_progress(p: dict) -> None:
     p["updated"] = now()
     PROGRESS.write_text(json.dumps(p, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
-def run_leaf(leaf: Leaf, base: str = "main") -> LeafResult:
+def run_leaf(leaf: dict, base: str = "main") -> dict:
     lid = leaf["id"]
     log_path = LOG_DIR / f"review_{lid}.log"
     cmd: list[str]
     env = os.environ.copy()
+    env["PATH"] = f"/home/fedor/.local/bin:{env.get('PATH', '')}"
     env["NO_COLOR"] = "1"
     env["TERM"] = "dumb"
 
