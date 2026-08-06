@@ -104,3 +104,13 @@ reports/quality/coderabbit/YYYYMMDD/
 `priority:high` / `priority:medium`, `audit-tooling`, `testing`,
 `architecture-tests`, `documentation`, `docs-drift`, `observability`,
 `data-quality`, `reproducibility`, `security`, `ci`
+
+## Residual FINDINGS pack (#7696)
+
+Post-campaign de-dupe pack: [CODERABBIT-FULL-2026-08-FINDINGS-PACK.md](CODERABBIT-FULL-2026-08-FINDINGS-PACK.md)
+
+- Canonical open residual issues: **220**
+- Duplicates closed: **48**
+- Agent findings total: **1468** (critical 22, major 736)
+- Artifacts: `reports/quality/coderabbit/20260806/`
+
