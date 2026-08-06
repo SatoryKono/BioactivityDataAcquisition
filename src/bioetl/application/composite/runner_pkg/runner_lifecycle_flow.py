@@ -10,8 +10,14 @@ from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
+    from bioetl.application.composite.checkpoint import CompositeCheckpointState
     from bioetl.application.composite.lifecycle_observer_service import (
         CompositeLifecycleObserverService,
+    )
+    from bioetl.application.composite.runner_pkg.runner_result_types import (
+        _PreparedCompositeResultContext,
     )
     from bioetl.application.composite.runtime_models import (
         CompositeExecutionContext,
@@ -42,8 +48,8 @@ class _RunnerLifecycleHost(Protocol):
     _run_id_str: str
     _finished: bool
     _final_state: CompositePipelineState | None
-    _started_at: object
-    _start_time: object
+    _started_at: datetime | None
+    _start_time: float | None
 
     def _validate_config_consistency(self) -> None: ...
 
@@ -57,15 +63,19 @@ class _RunnerLifecycleHost(Protocol):
 
     def _record_run_finished(self, execution_context: CompositeExecutionContext) -> None: ...
 
-    async def _finalize_pipeline(self, state: object) -> None: ...
+    async def _finalize_pipeline(self, state: CompositeCheckpointState) -> None: ...
 
     def _prepare_composite_result_context(
         self, execution_context: CompositeExecutionContext
-    ) -> object: ...
+    ) -> _PreparedCompositeResultContext: ...
 
-    def _log_composite_completion(self, completion_context: object) -> None: ...
+    def _log_composite_completion(
+        self, completion_context: _PreparedCompositeResultContext
+    ) -> None: ...
 
-    def _finalize_composite_result(self, completion_context: object) -> CompositeResult: ...
+    def _finalize_composite_result(
+        self, completion_context: _PreparedCompositeResultContext
+    ) -> CompositeResult: ...
 
 
 def mark_finished(
@@ -145,7 +155,7 @@ def start_run_lifecycle(host: _RunnerLifecycleHost) -> None:
 
 async def complete_successful_run(
     host: _RunnerLifecycleHost,
-    state: object,
+    state: CompositeCheckpointState,
     execution_context: CompositeExecutionContext,
 ) -> CompositeResult:
     """Finalize state and emit canonical terminal success artifacts."""

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import Any, cast, TYPE_CHECKING, Protocol, cast
 
 from bioetl.composition.factories.dq._context_resolver_support import DQServiceBundle
 from bioetl.composition.factories.services.port_factories import (
@@ -234,9 +234,9 @@ def assemble_pipeline_service(
         dq_monitor=dq_monitor,
         metadata_coordinator=metadata_coordinator,
         metadata_writer=metadata_writer,
-        bronze_dq_analyzer=dq_services.bronze_analyzer,
-        silver_dq_analyzer=dq_services.silver_analyzer,
-        gold_dq_analyzer=dq_services.gold_analyzer,
-        dq_report_writer=dq_services.report_writer,
-        dq_report_service=dq_services.report_service,
+        bronze_dq_analyzer=cast(Any, dq_services.bronze_analyzer),
+        silver_dq_analyzer=cast(Any, dq_services.silver_analyzer),
+        gold_dq_analyzer=cast(Any, dq_services.gold_analyzer),
+        dq_report_writer=cast(Any, dq_services.report_writer),
+        dq_report_service=cast(Any, dq_services.report_service),
     )

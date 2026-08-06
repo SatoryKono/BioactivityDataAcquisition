@@ -73,6 +73,55 @@ class HealthServer(
 
     _server_close_timeout_seconds: float = 1.0
 
+
+    _LEGACY_CONTROL_PLANE_KEYS = frozenset({
+        "health_monitor",
+        "quarantine_service",
+        "checkpoint_port",
+        "run_manifest_port",
+        "run_ledger_port",
+        "workflow_manifest_port",
+        "metrics_exposition",
+        "runtime_source_id",
+    })
+
+    @classmethod
+    def _recognized_legacy_ports(
+        cls, legacy_ports: dict[str, object]
+    ) -> dict[str, object]:
+        """Validate and filter legacy port kwargs; raise on unknown names."""
+        if not legacy_ports:
+            return {}
+        unknown = set(legacy_ports) - cls._LEGACY_CONTROL_PLANE_KEYS
+        if unknown:
+            raise TypeError(
+                "HealthServer() got unexpected keyword argument(s): "
+                + ", ".join(sorted(str(k) for k in unknown))
+            )
+        return {
+            k: legacy_ports[k]
+            for k in cls._LEGACY_CONTROL_PLANE_KEYS
+            if k in legacy_ports
+        }
+
+    @staticmethod
+    def _resolve_control_plane_deps(
+        control_plane: HealthServerControlPlaneDeps | None,
+        legacy_ports: dict[str, object],
+    ) -> HealthServerControlPlaneDeps:
+        """Fold legacy port kwargs into control_plane collaborator bag."""
+        recognized = HealthServer._recognized_legacy_ports(legacy_ports)
+        if control_plane is not None and recognized:
+            raise TypeError(
+                "HealthServer() accepts either control_plane or legacy port "
+                "kwargs, not both"
+            )
+        if control_plane is None and recognized:
+            control_plane = HealthServerControlPlaneDeps(
+                **recognized  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+            )
+        return control_plane or HealthServerControlPlaneDeps()
+
     def __init__(
         self,
         host: str = "127.0.0.1",
@@ -87,36 +136,9 @@ class HealthServer(
         Prefer ``control_plane``. Transitional/unit callers may still pass the
         individual port kwargs, which are folded into the collaborator bag.
         """
-        allowed = {
-            "health_monitor",
-            "quarantine_service",
-            "checkpoint_port",
-            "run_manifest_port",
-            "run_ledger_port",
-            "workflow_manifest_port",
-            "metrics_exposition",
-            "runtime_source_id",
-        }
         # Always validate legacy kwargs so unknown names fail closed even when
         # control_plane is also supplied.
-        if legacy_ports:
-            unknown = set(legacy_ports) - allowed
-            if unknown:
-                raise TypeError(
-                    "HealthServer() got unexpected keyword argument(s): "
-                    + ", ".join(sorted(str(k) for k in unknown))
-                )
-            recognized = {k: legacy_ports[k] for k in allowed if k in legacy_ports}
-            if control_plane is not None and recognized:
-                raise TypeError(
-                    "HealthServer() accepts either control_plane or legacy port "
-                    "kwargs, not both"
-                )
-            if control_plane is None and recognized:
-                control_plane = HealthServerControlPlaneDeps(
-                    **recognized  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-                )
-        deps = control_plane or HealthServerControlPlaneDeps()
+        deps = self._resolve_control_plane_deps(control_plane, legacy_ports)
         self.host = host
         self.port = port
         self._health_monitor = deps.health_monitor

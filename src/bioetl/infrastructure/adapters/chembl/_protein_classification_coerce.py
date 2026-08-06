@@ -101,7 +101,7 @@ def validated_class_level(
         raise ProteinClassificationResolutionError(
             f"class_level {level} exceeds supported provider range for protein_class_id={protein_class_id}"
         )
-    return level
+    return int(level)
 
 
 def validate_contiguous_levels(

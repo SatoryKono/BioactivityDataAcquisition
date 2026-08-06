@@ -69,7 +69,7 @@ def _install_workflow_runner_service_dependencies(
     workflow_runner_module.WorkflowRunnerService = _WorkflowRunnerService
     monkeypatch.setitem(
         sys.modules,
-        "bioetl.application.services.workflow_runner_service",
+        "bioetl.application.services.workflow.workflow_runner_service",
         workflow_runner_module,
     )
 
@@ -82,7 +82,7 @@ def _install_workflow_runner_service_dependencies(
     transform_service_module.WorkflowTransformService = _WorkflowTransformService
     monkeypatch.setitem(
         sys.modules,
-        "bioetl.application.services.workflow_transform_service",
+        "bioetl.application.services.workflow.workflow_transform_service",
         transform_service_module,
     )
 
@@ -648,11 +648,11 @@ def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
         "_prepare_private_runtime_dir",
         lambda path: (
             (_ for _ in ()).throw(OSError("no-cache"))
-            if "bioetl-data" in str(path)
+            if ".cache" in str(path)
             else path
         ),
     )
-    assert data_roots._private_fallback_data_root_mode() == "tmp"
+    assert data_roots._private_fallback_data_root_with_mode()[1] == "tmp"
     assert data_roots._artifact_path_string(PureWindowsPath(r"a\b")) == "a/b"
 
     monkeypatch.setattr(
@@ -663,7 +663,7 @@ def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
         ),
     )
     monkeypatch.setattr(
-        data_roots, "_private_fallback_data_root_mode", lambda: "private_cache"
+        data_roots, "_private_fallback_data_root_with_mode", lambda: (Path("/tmp/x"), "private_cache")
     )
     assert (
         data_roots.resolve_data_root_mode(SimpleNamespace(data_dir=None))
@@ -674,7 +674,7 @@ def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
         data_roots.Path, "mkdir", lambda self, parents=True, exist_ok=True: None
     )
     monkeypatch.setattr(data_roots.os, "access", lambda path, mode: False)
-    monkeypatch.setattr(data_roots, "_private_fallback_data_root_mode", lambda: "tmp")
+    monkeypatch.setattr(data_roots, "_private_fallback_data_root_with_mode", lambda: (Path("/tmp/y"), "tmp"))
     assert data_roots.resolve_data_root_mode(SimpleNamespace(data_dir=None)) == "tmp"
 
 
@@ -788,6 +788,13 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
         "chmod",
         lambda self, mode: chmod_calls.append((self, mode)),
     )
+    monkeypatch.setattr(data_roots.Path, "is_dir", lambda self: True)
+    monkeypatch.setattr(
+        data_roots.Path,
+        "stat",
+        lambda self: type("S", (), {"st_uid": 0, "st_mode": 0o700})(),
+    )
+    monkeypatch.setattr(data_roots.os, "getuid", lambda: 0, raising=False)
     prepared_path = data_roots._prepare_private_runtime_dir(Path("/tmp/private-cache"))
     assert prepared_path == Path("/tmp/private-cache")
     assert chmod_calls == [(Path("/tmp/private-cache"), 0o700)]

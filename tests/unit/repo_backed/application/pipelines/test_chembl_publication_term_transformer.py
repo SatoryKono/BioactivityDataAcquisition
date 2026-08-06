@@ -435,7 +435,7 @@ class TestPublicationTermTransformer:
         heading = next(t for t in terms if t["term_type"] == "MESH_HEADING")
         assert heading["term"] == "Aspirin"
         assert heading["mesh_id"] == "D001241"
-        assert heading["qualifier"] == "  pharmacology  "
+        assert heading["qualifier"] == "pharmacology"
         qualifier = next(t for t in terms if t["term_type"] == "MESH_QUALIFIER")
         assert qualifier["term"] == "pharmacology"
         assert qualifier["mesh_id"] == "D001241"

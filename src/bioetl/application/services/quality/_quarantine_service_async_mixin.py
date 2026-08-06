@@ -15,7 +15,7 @@ from bioetl.application.services.quality._quarantine_service_support import (
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from opentelemetry.trace import Span
+    from bioetl.domain.ports.observability.tracing import SpanHandle
 
     from bioetl.domain.ports import LoggerPort, QuarantinePort, TracingPort
 
@@ -46,7 +46,7 @@ class _QuarantineAsyncHost(Protocol):
 
     def _set_trace_result(
         self,
-        span: Span,
+        span: SpanHandle,
         *,
         success: bool,
         **extra: object,

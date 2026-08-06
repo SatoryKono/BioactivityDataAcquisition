@@ -1381,7 +1381,7 @@
         "_lookup_method": {
           "description": "",
           "dtype": "str",
-          "nullable": true
+          "nullable": false
         },
         "_original_id": {
           "description": "",
@@ -2210,7 +2210,7 @@
           "nullable": false
         },
         "bto_id": {
-          "description": "BRENDA Tissue Ontology ID",
+          "description": "BRENDA Tissue Ontology ID (underscore form, e.g. BTO_0000001)",
           "dtype": "str",
           "nullable": true
         },
@@ -2225,7 +2225,7 @@
           "nullable": false
         },
         "efo_id": {
-          "description": "Experimental Factor Ontology ID",
+          "description": "Experimental Factor Ontology ID (underscore form)",
           "dtype": "str",
           "nullable": true
         },
@@ -2245,7 +2245,7 @@
           "nullable": false
         },
         "uberon_id": {
-          "description": "Uberon Ontology ID",
+          "description": "Uberon Ontology ID (underscore form)",
           "dtype": "str",
           "nullable": true
         }
@@ -2329,7 +2329,7 @@
         },
         "record_id": {
           "description": "ChEMBL compound record identifier retained as source-scoped lineage.",
-          "dtype": "int64",
+          "dtype": "float64",
           "nullable": true
         },
         "relation": {
@@ -2339,7 +2339,7 @@
         },
         "src_id": {
           "description": "Provider source identifier retained as source-scoped lineage metadata.",
-          "dtype": "int64",
+          "dtype": "float64",
           "nullable": true
         },
         "target_id": {
@@ -2349,7 +2349,7 @@
         },
         "taxonomy_id": {
           "description": "NCBI taxonomy identifier retained as inherited target lineage metadata.",
-          "dtype": "int64",
+          "dtype": "float64",
           "nullable": true
         },
         "type": {
@@ -2447,7 +2447,7 @@
         },
         "src_id": {
           "description": "Provider source identifier retained as source-scoped lineage metadata.",
-          "dtype": "int64",
+          "dtype": "float64",
           "nullable": true
         },
         "target_id": {
@@ -2598,7 +2598,7 @@
         },
         "src_id": {
           "description": "Provider source identifier retained as source-scoped lineage metadata.",
-          "dtype": "int64",
+          "dtype": "float64",
           "nullable": true
         },
         "title": {
@@ -2806,7 +2806,7 @@
         },
         "taxonomy_id": {
           "description": "NCBI taxonomy identifier retained as organism lineage metadata.",
-          "dtype": "int64",
+          "dtype": "float64",
           "nullable": true
         },
         "top_level_count": {
@@ -4011,7 +4011,7 @@
         },
         "corpus_id": {
           "description": "",
-          "dtype": "float64",
+          "dtype": "str",
           "nullable": true
         },
         "dblp_id": {

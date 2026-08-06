@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 
 from bioetl.domain.exceptions import SchemaViolationError
 
@@ -11,15 +11,35 @@ if TYPE_CHECKING:
     from bioetl.domain.types import GoldRecord
 
 
+class _GoldValidationResult(Protocol):
+    valid: bool
+    errors: list[str]
+
+
 @runtime_checkable
 class _GoldValidatorRebindProtocol(Protocol):
     """Validators that can rebind to a projected Gold schema."""
 
-    def rebind_schema(self, schema: object) -> object: ...
+    def rebind_schema(self, schema: object) -> _GoldValidatorRebindProtocol: ...
+
+    def validate(self, records: object) -> _GoldValidationResult: ...
+
+
+
+@runtime_checkable
+class _GoldWriterHost(Protocol):
+    """Minimal BatchWriter surface for Gold prepare/validate helpers."""
+
+    _gold_schema: object
+    _gold_validator: object
+
+    def _get_schema_columns(self, schema: object) -> list[str]: ...
+
+    def _collect_record_columns(self, records: list[GoldRecord]) -> list[str]: ...
 
 
 def prepare_gold_records(
-    writer: object,
+    writer: _GoldWriterHost,
     records: list[GoldRecord],
     *,
     schema: object | None = None,
@@ -43,16 +63,19 @@ def prepare_gold_records(
 
 
 def validate_gold_records(
-    writer: object,
+    writer: _GoldWriterHost,
     records: list[GoldRecord],
     *,
     schema: object | None = None,
 ) -> None:
     """Validate Gold records against schema contract."""
-    validator = writer._gold_validator
+    validator = cast(_GoldValidatorRebindProtocol, writer._gold_validator)
     target_schema = schema if schema is not None else writer._gold_schema
     if schema is not None:
-        validator = rebind_gold_validator_schema(validator, target_schema)
+        validator = cast(
+            _GoldValidatorRebindProtocol,
+            rebind_gold_validator_schema(validator, target_schema),
+        )
 
     result = validator.validate(records)
     if not result.valid:

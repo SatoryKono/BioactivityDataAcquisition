@@ -270,6 +270,28 @@ class ArrowDataConverter:
             logger=self._logger,
         )
 
+
+    def _sanitize_single_null_column(
+        self,
+        col: pa.Array,
+        field_type: pa.DataType,
+        new_type: pa.DataType,
+    ) -> tuple[pa.Array, pa.DataType]:
+        """Sanitize one Arrow column; return (column, effective_type)."""
+        if pa.types.is_null(field_type):
+            return pa.array([None] * len(col), type=pa.string()), pa.string()
+        if new_type == field_type:
+            return col, new_type
+        try:
+            return col.cast(new_type), new_type
+        except (pa.ArrowInvalid, pa.ArrowNotImplementedError):
+            fallback_type = new_type if new_type is not None else pa.string()
+            values = [str(v) if v is not None else None for v in col.to_pylist()]
+            try:
+                return pa.array(values, type=fallback_type), fallback_type
+            except (pa.ArrowInvalid, pa.ArrowNotImplementedError, TypeError):
+                return pa.array(values, type=pa.string()), pa.string()
+
     def _sanitize_null_columns(self, arrow_data: pa.Table) -> pa.Table:
         """Sanitize null-typed columns in Arrow table.
 
@@ -289,43 +311,11 @@ class ArrowDataConverter:
         for i, field in enumerate(arrow_data.schema):
             col = arrow_data.column(i)
             new_type = self.sanitize_type_for_delta(field.type)
-
-            if pa.types.is_null(field.type):
-                # Create string array with all nulls
-                new_col = pa.array([None] * len(col), type=pa.string())
-                new_columns.append(new_col)
-            elif new_type != field.type:
-                # Try to cast for nested types
-                try:
-                    new_columns.append(col.cast(new_type))
-                except (pa.ArrowInvalid, pa.ArrowNotImplementedError):
-                    # If cast fails, fall back to an array typed as new_schema field.
-                    fallback_type = new_type if new_type is not None else pa.string()
-                    try:
-                        new_columns.append(
-                            pa.array(
-                                [
-                                    str(v) if v is not None else None
-                                    for v in col.to_pylist()
-                                ],
-                                type=fallback_type,
-                            )
-                        )
-                    except (pa.ArrowInvalid, pa.ArrowNotImplementedError, TypeError):
-                        new_columns.append(
-                            pa.array(
-                                [
-                                    str(v) if v is not None else None
-                                    for v in col.to_pylist()
-                                ],
-                                type=pa.string(),
-                            )
-                        )
-                        new_type = pa.string()
-            else:
-                new_columns.append(col)
-
-            new_fields.append(pa.field(field.name, new_type, field.nullable))
+            new_col, effective_type = self._sanitize_single_null_column(
+                col, field.type, new_type
+            )
+            new_columns.append(new_col)
+            new_fields.append(pa.field(field.name, effective_type, field.nullable))
 
         new_schema = pa.schema(new_fields)
         return pa.Table.from_arrays(new_columns, schema=new_schema)

@@ -49,7 +49,7 @@ class _CrossRefPortSurfaceMixin:
         http_client: UnifiedHTTPClient
         _logger: LoggerPort
         _adapter_metrics: AdapterMetricsRecorder
-        _request_collector: APIRequestCollector | None
+        _request_collector: APIRequestCollector
         _query_builder: CrossRefQueryPlanner
         _response_mapper: CrossRefResponseMapper
         _fetch_flow: CrossRefFetchFlow | None
@@ -129,7 +129,7 @@ class _CrossRefPortSurfaceMixin:
             query_builder=self._query_builder,
             response_mapper=self._response_mapper,
             adapter_metrics=self._adapter_metrics,
-            headers_provider=cast("Callable[[], dict[str, str]]", self._build_headers),
+            headers_provider=self._build_headers,
             logger=self._logger,
             health_errors=self.CROSSREF_HEALTH_ERRORS,
         )

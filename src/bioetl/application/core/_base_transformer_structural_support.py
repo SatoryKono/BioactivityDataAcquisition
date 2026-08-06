@@ -153,6 +153,24 @@ def record_structural_policy_metrics(
         )
 
 
+def _log_structural_policy_events(
+    owner: TransformerExecutionOwner,
+    context: PipelineContext,
+    index: int,
+    events: object,
+) -> None:
+    """Emit per-event structural-policy log lines from policy outcome."""
+    for event in events:  # type: ignore[attr-defined]
+        log_method = getattr(context.logger, event.level)
+        log_method(
+            event.event,
+            provider=owner.provider,
+            entity_type=owner.entity_type,
+            record_index=index,
+            **event.details,
+        )
+
+
 def apply_structural_policy(
     owner: TransformerExecutionOwner,
     context: PipelineContext,
@@ -187,15 +205,7 @@ def apply_structural_policy(
         shadow_comparison=shadow_comparison,
     )
 
-    for event in outcome.events:
-        log_method = getattr(context.logger, event.level)
-        log_method(
-            event.event,
-            provider=owner.provider,
-            entity_type=owner.entity_type,
-            record_index=index,
-            **event.details,
-        )
+    _log_structural_policy_events(owner, context, index, outcome.events)
 
     if not outcome.should_quarantine:
         # Reuse the single evaluation for real enforcement (no second evaluate).

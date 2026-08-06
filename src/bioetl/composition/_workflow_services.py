@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import Any, cast, TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.composition.occurrence_identity import (
     create_runtime_occurrence_id,
@@ -177,7 +177,7 @@ def _build_workflow_transform_registry(
             quarantine=reconciliation_quarantine,
             quarantine_pipeline_name="workflow_transforms",
             gold_writer=transform_gold_storage,
-            artifact_sink=artifact_sink,
+            artifact_sink=cast(Any, artifact_sink),
         ),
         row_reconciliation_port=StorageRowReconciliationAdapter(
             silver_reader=transform_storage,
