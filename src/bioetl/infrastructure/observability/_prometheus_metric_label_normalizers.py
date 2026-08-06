@@ -44,7 +44,11 @@ from bioetl.infrastructure.observability._prometheus_metric_label_vocab import (
 
 
 def normalize_adapter_endpoint_label(endpoint: str) -> str:
-    """Normalize adapter endpoint labels to bounded route-template form."""
+    """Normalize adapter endpoint labels to bounded route-template form.
+
+    Only recognized static segments and braced dynamic templates are preserved.
+    Arbitrary free-form segments collapse to ``{param}`` so cardinality stays bounded.
+    """
     stripped = endpoint.strip()
     if not stripped:
         return "/unknown"
@@ -56,6 +60,9 @@ def normalize_adapter_endpoint_label(endpoint: str) -> str:
         normalized_segments.append(_normalize_endpoint_segment(segment))
     if not normalized_segments:
         return "/"
+    # Cap path depth to limit combinatorial explosion of route templates.
+    if len(normalized_segments) > 8:
+        normalized_segments = normalized_segments[:7] + ["{param}"]
     return "/" + "/".join(normalized_segments)
 
 

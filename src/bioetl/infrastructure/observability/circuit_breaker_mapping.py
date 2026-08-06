@@ -6,7 +6,7 @@ so emitters, metric definitions, and dashboards stay consistent.
 
 from __future__ import annotations
 
-__all__ = ["CIRCUIT_BREAKER_STATE_DESCRIPTION"]
+__all__ = ["CIRCUIT_BREAKER_STATE_DESCRIPTION", "CIRCUIT_BREAKER_STATE_VALUES"]
 
 
 from bioetl.domain.types import CircuitBreakerState

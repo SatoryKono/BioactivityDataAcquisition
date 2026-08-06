@@ -90,6 +90,11 @@ class StructlogLogger:
     def __init__(self, logger: structlog.stdlib.BoundLogger) -> None:
         """Initialize with a structlog BoundLogger.
 
+        Preferred construction path is ``create_logger()``, which binds the
+        mandatory ``run_id`` / ``pipeline`` correlation context. Direct
+        construction is retained for tests and advanced wiring that already
+        hold a BoundLogger.
+
         Args:
             logger: The underlying structlog logger instance.
         """

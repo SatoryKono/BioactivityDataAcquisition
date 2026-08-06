@@ -49,6 +49,35 @@ class _FakeCounter:
         self.increments.append(amount)
 
 
+class _FakeMetricsPort:
+    def __init__(self) -> None:
+        self.counter_calls: list[tuple[str, float, dict[str, str]]] = []
+
+    def increment_counter(
+        self,
+        name: str,
+        value: float = 1,
+        labels: dict[str, str] | None = None,
+    ) -> None:
+        self.counter_calls.append((name, float(value), dict(labels or {})))
+
+    def observe_histogram(
+        self,
+        name: str,
+        value: float,
+        labels: dict[str, str] | None = None,
+    ) -> None:
+        del name, value, labels
+
+    def set_gauge(
+        self,
+        name: str,
+        value: float,
+        labels: dict[str, str] | None = None,
+    ) -> None:
+        del name, value, labels
+
+
 class _FakeMetric:
     def __init__(self) -> None:
         self.label_calls: list[dict[str, Any]] = []
@@ -73,63 +102,85 @@ def test_metrics_collector_initialization_retains_pipeline_context() -> None:
 
 
 def test_record_processed_increments_counter_with_public_labels() -> None:
-    """Public collector facade must increment the processed counter."""
-    collector = MetricsCollector(pipeline_name="observability-root-processed")
-    labels = {
-        "pipeline": collector.pipeline_name,
-        "stage": "bronze",
-        "run_type": "incremental",
-    }
-    counter = metrics_module.RECORDS_PROCESSED_TOTAL.labels(**labels)
-    before = counter._value.get()
+    """Public collector facade must increment via MetricsPort."""
+    metrics = _FakeMetricsPort()
+    collector = MetricsCollector(
+        pipeline_name="observability-root-processed",
+        metrics=metrics,
+    )
 
     collector.record_processed(layer="bronze", count=3)
 
-    assert counter._value.get() == before + 3
+    assert metrics.counter_calls == [
+        (
+            "bioetl_records_processed_total",
+            3.0,
+            {
+                "pipeline": "observability-root-processed",
+                "stage": "bronze",
+                "run_type": "incremental",
+            },
+        )
+    ]
 
 
 def test_record_error_increments_error_counter_with_public_labels() -> None:
-    """Public collector facade must increment the error counter."""
-    collector = MetricsCollector(pipeline_name="observability-root-errors")
-    labels = {
-        "pipeline": collector.pipeline_name,
-        "stage": "processing",
-        "error_code": "VALIDATION_ERROR",
-    }
-    counter = metrics_module.ERRORS_TOTAL.labels(**labels)
-    before = counter._value.get()
+    """Public collector facade must increment errors via MetricsPort."""
+    metrics = _FakeMetricsPort()
+    collector = MetricsCollector(
+        pipeline_name="observability-root-errors",
+        metrics=metrics,
+    )
 
     collector.record_error(error_code="VALIDATION_ERROR")
 
-    assert counter._value.get() == before + 1
+    assert metrics.counter_calls == [
+        (
+            "bioetl_errors_total",
+            1.0,
+            {
+                "pipeline": "observability-root-errors",
+                "stage": "processing",
+                "error_code": "VALIDATION_ERROR",
+            },
+        )
+    ]
 
 
-def test_record_processed_uses_only_public_low_cardinality_labels(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    metric = _FakeMetric()
-    monkeypatch.setattr(collector_module, "RECORDS_PROCESSED_TOTAL", metric)
-    collector = MetricsCollector(pipeline_name="pipeline-a", registry=object())
+def test_record_processed_uses_only_public_low_cardinality_labels() -> None:
+    metrics = _FakeMetricsPort()
+    collector = MetricsCollector(
+        pipeline_name="pipeline-a",
+        metrics=metrics,
+        registry=object(),
+    )
 
     collector.record_processed(layer="silver", count=7, run_type="full")
 
-    assert metric.label_calls == [
-        {"pipeline": "pipeline-a", "stage": "silver", "run_type": "full"}
+    assert metrics.counter_calls == [
+        (
+            "bioetl_records_processed_total",
+            7.0,
+            {"pipeline": "pipeline-a", "stage": "silver", "run_type": "full"},
+        )
     ]
-    assert metric.counter.increments == [7]
     assert collector.registry is not None
 
 
-def test_record_error_uses_error_taxonomy_and_stage_labels(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    metric = _FakeMetric()
-    monkeypatch.setattr(collector_module, "ERRORS_TOTAL", metric)
-    collector = MetricsCollector(pipeline_name="pipeline-b")
+def test_record_error_uses_error_taxonomy_and_stage_labels() -> None:
+    metrics = _FakeMetricsPort()
+    collector = MetricsCollector(pipeline_name="pipeline-b", metrics=metrics)
 
     collector.record_error(error_code="SCHEMA_DRIFT", stage="gold")
 
-    assert metric.label_calls == [
-        {"pipeline": "pipeline-b", "stage": "gold", "error_code": "SCHEMA_DRIFT"}
+    assert metrics.counter_calls == [
+        (
+            "bioetl_errors_total",
+            1.0,
+            {
+                "pipeline": "pipeline-b",
+                "stage": "gold",
+                "error_code": "SCHEMA_DRIFT",
+            },
+        )
     ]
-    assert metric.counter.increments == [None]

@@ -79,10 +79,12 @@ class ZScoreDetector(DetectorStrategy):
             Z-score float if calculable, None if standard deviation is zero and deviation is below threshold.
         """
         if stddev == 0:
-            if mean == 0:
+            # Constant baseline: any value differing from the constant mean is an
+            # anomaly. Use a documented high severity score (maps to CRITICAL via
+            # get_severity thresholds > 5).
+            if value == mean:
                 return None
-            deviation_pct = abs(value - mean) / abs(mean)
-            return deviation_pct * 2 if deviation_pct >= 0.5 else None
+            return 10.0
         return abs(value - mean) / stddev
 
     def _create_anomaly(
