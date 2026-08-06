@@ -1,1 +1,642 @@
-[]
+[
+  {
+    "file": "docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"quarter\" for class \"object\"\n  Attribute \"quarter\" is unknown",
+    "range": {
+      "start": {
+        "line": 459,
+        "character": 28
+      },
+      "end": {
+        "line": 459,
+        "character": 35
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"integral_score\" for class \"object\"\n  Attribute \"integral_score\" is unknown",
+    "range": {
+      "start": {
+        "line": 459,
+        "character": 53
+      },
+      "end": {
+        "line": 459,
+        "character": 67
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"total_exemptions\" for class \"object\"\n  Attribute \"total_exemptions\" is unknown",
+    "range": {
+      "start": {
+        "line": 460,
+        "character": 25
+      },
+      "end": {
+        "line": 460,
+        "character": 41
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"total_budget\" for class \"object\"\n  Attribute \"total_budget\" is unknown",
+    "range": {
+      "start": {
+        "line": 460,
+        "character": 52
+      },
+      "end": {
+        "line": 460,
+        "character": 64
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"by_registry\" for class \"object\"\n  Attribute \"by_registry\" is unknown",
+    "range": {
+      "start": {
+        "line": 463,
+        "character": 40
+      },
+      "end": {
+        "line": 463,
+        "character": 51
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"by_owner\" for class \"object\"\n  Attribute \"by_owner\" is unknown",
+    "range": {
+      "start": {
+        "line": 466,
+        "character": 32
+      },
+      "end": {
+        "line": 466,
+        "character": 40
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"by_expiry_quarter\" for class \"object\"\n  Attribute \"by_expiry_quarter\" is unknown",
+    "range": {
+      "start": {
+        "line": 469,
+        "character": 34
+      },
+      "end": {
+        "line": 469,
+        "character": 51
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"active_grace_windows\" for class \"object\"\n  Attribute \"active_grace_windows\" is unknown",
+    "range": {
+      "start": {
+        "line": 471,
+        "character": 15
+      },
+      "end": {
+        "line": 471,
+        "character": 35
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"active_grace_windows\" for class \"object\"\n  Attribute \"active_grace_windows\" is unknown",
+    "range": {
+      "start": {
+        "line": 474,
+        "character": 32
+      },
+      "end": {
+        "line": 474,
+        "character": 52
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"quarter\" for class \"object\"\n  Attribute \"quarter\" is unknown",
+    "range": {
+      "start": {
+        "line": 479,
+        "character": 36
+      },
+      "end": {
+        "line": 479,
+        "character": 43
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"by_registry\" for class \"object\"\n  Attribute \"by_registry\" is unknown",
+    "range": {
+      "start": {
+        "line": 480,
+        "character": 40
+      },
+      "end": {
+        "line": 480,
+        "character": 51
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "docs/00-project/ai/skills/global/.system/skill-creator/scripts/generate_openai_yaml.py",
+    "severity": "error",
+    "message": "Object of type \"None\" cannot be used as iterable value",
+    "range": {
+      "start": {
+        "line": 182,
+        "character": 15
+      },
+      "end": {
+        "line": 182,
+        "character": 29
+      }
+    },
+    "rule": "reportOptionalIterable"
+  },
+  {
+    "file": "docs/00-project/ai/skills/global/.system/skill-creator/scripts/init_skill.py",
+    "severity": "error",
+    "message": "Import from `generate_openai_yaml` is implicitly relative and will not work if this file is imported as a module\n  Use a relative import from `.generate_openai_yaml` instead\n  or specify the full module path: `docs.00-project.ai.skills.global..system.skill-creator.scripts.generate_openai_yaml`",
+    "range": {
+      "start": {
+        "line": 21,
+        "character": 5
+      },
+      "end": {
+        "line": 21,
+        "character": 25
+      }
+    },
+    "rule": "reportImplicitRelativeImport"
+  },
+  {
+    "file": "docs/00-project/ai/skills/global/.system/skill-installer/scripts/install-skill-from-github.py",
+    "severity": "error",
+    "message": "Import from `github_utils` is implicitly relative and will not work if this file is imported as a module\n  Use a relative import from `.github_utils` instead\n  or specify the full module path: `docs.00-project.ai.skills.global..system.skill-installer.scripts.github_utils`",
+    "range": {
+      "start": {
+        "line": 16,
+        "character": 5
+      },
+      "end": {
+        "line": 16,
+        "character": 17
+      }
+    },
+    "rule": "reportImplicitRelativeImport"
+  },
+  {
+    "file": "docs/00-project/ai/skills/global/.system/skill-installer/scripts/list-skills.py",
+    "severity": "error",
+    "message": "Import from `github_utils` is implicitly relative and will not work if this file is imported as a module\n  Use a relative import from `.github_utils` instead\n  or specify the full module path: `docs.00-project.ai.skills.global..system.skill-installer.scripts.github_utils`",
+    "range": {
+      "start": {
+        "line": 11,
+        "character": 5
+      },
+      "end": {
+        "line": 11,
+        "character": 17
+      }
+    },
+    "rule": "reportImplicitRelativeImport"
+  },
+  {
+    "file": "docs/00-project/ai/skills/global/.system/skill-installer/scripts/list-skills.py",
+    "severity": "error",
+    "message": "Instance variable \"repo\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 23,
+        "character": 4
+      },
+      "end": {
+        "line": 23,
+        "character": 8
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "docs/00-project/ai/skills/global/.system/skill-installer/scripts/list-skills.py",
+    "severity": "error",
+    "message": "Instance variable \"path\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 24,
+        "character": 4
+      },
+      "end": {
+        "line": 24,
+        "character": 8
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "docs/00-project/ai/skills/global/.system/skill-installer/scripts/list-skills.py",
+    "severity": "error",
+    "message": "Instance variable \"ref\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 25,
+        "character": 4
+      },
+      "end": {
+        "line": 25,
+        "character": 7
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "docs/00-project/ai/skills/global/.system/skill-installer/scripts/list-skills.py",
+    "severity": "error",
+    "message": "Instance variable \"format\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 26,
+        "character": 4
+      },
+      "end": {
+        "line": 26,
+        "character": 10
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "docs/plugins/link_checker/plugin.py",
+    "severity": "error",
+    "message": "Import \"mkdocs.plugins\" could not be resolved",
+    "range": {
+      "start": {
+        "line": 18,
+        "character": 5
+      },
+      "end": {
+        "line": 18,
+        "character": 19
+      }
+    },
+    "rule": "reportMissingImports"
+  },
+  {
+    "file": "docs/plugins/link_checker/plugin.py",
+    "severity": "error",
+    "message": "Method \"__init__\" does not call the method of the same name in parent class",
+    "range": {
+      "start": {
+        "line": 46,
+        "character": 8
+      },
+      "end": {
+        "line": 46,
+        "character": 16
+      }
+    },
+    "rule": "reportMissingSuperCall"
+  },
+  {
+    "file": "docs/plugins/link_checker/plugin.py",
+    "severity": "error",
+    "message": "Expected type arguments for generic class \"dict\"",
+    "range": {
+      "start": {
+        "line": 117,
+        "character": 14
+      },
+      "end": {
+        "line": 117,
+        "character": 18
+      }
+    },
+    "rule": "reportMissingTypeArgument"
+  },
+  {
+    "file": "docs/plugins/link_checker/plugin.py",
+    "severity": "error",
+    "message": "Argument of type \"_AttributeValue\" cannot be assigned to parameter \"href\" of type \"str\" in function \"_check_link\"\n  Type \"_AttributeValue\" is not assignable to type \"str\"\n    \"AttributeValueList\" is not assignable to \"str\"",
+    "range": {
+      "start": {
+        "line": 132,
+        "character": 42
+      },
+      "end": {
+        "line": 132,
+        "character": 46
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "docs/plugins/link_checker/plugin.py",
+    "severity": "error",
+    "message": "Expected type arguments for generic class \"dict\"",
+    "range": {
+      "start": {
+        "line": 153,
+        "character": 9
+      },
+      "end": {
+        "line": 153,
+        "character": 13
+      }
+    },
+    "rule": "reportMissingTypeArgument"
+  },
+  {
+    "file": "docs/plugins/link_checker/plugin.py",
+    "severity": "error",
+    "message": "Expected type arguments for generic class \"dict\"",
+    "range": {
+      "start": {
+        "line": 212,
+        "character": 48
+      },
+      "end": {
+        "line": 212,
+        "character": 52
+      }
+    },
+    "rule": "reportMissingTypeArgument"
+  },
+  {
+    "file": "docs/plugins/link_checker/plugin.py",
+    "severity": "error",
+    "message": "Argument of type \"int\" cannot be assigned to parameter \"value\" of type \"list[Unknown] | None\" in function \"__setitem__\"\n  Type \"int\" is not assignable to type \"list[Unknown] | None\"\n    \"int\" is not assignable to \"None\"\n    \"int\" is not assignable to \"list[Unknown]\"",
+    "range": {
+      "start": {
+        "line": 227,
+        "character": 12
+      },
+      "end": {
+        "line": 227,
+        "character": 31
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "docs/plugins/link_checker/plugin.py",
+    "severity": "error",
+    "message": "Argument of type \"Literal['redirect']\" cannot be assigned to parameter \"value\" of type \"list[Unknown] | None\" in function \"__setitem__\"\n  Type \"Literal['redirect']\" is not assignable to type \"list[Unknown] | None\"\n    \"Literal['redirect']\" is not assignable to \"None\"\n    \"Literal['redirect']\" is not assignable to \"list[Unknown]\"",
+    "range": {
+      "start": {
+        "line": 234,
+        "character": 16
+      },
+      "end": {
+        "line": 234,
+        "character": 32
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "docs/plugins/link_checker/plugin.py",
+    "severity": "error",
+    "message": "Argument of type \"Literal['valid']\" cannot be assigned to parameter \"value\" of type \"list[Unknown] | None\" in function \"__setitem__\"\n  Type \"Literal['valid']\" is not assignable to type \"list[Unknown] | None\"\n    \"Literal['valid']\" is not assignable to \"None\"\n    \"Literal['valid']\" is not assignable to \"list[Unknown]\"",
+    "range": {
+      "start": {
+        "line": 236,
+        "character": 16
+      },
+      "end": {
+        "line": 236,
+        "character": 32
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "docs/plugins/link_checker/plugin.py",
+    "severity": "error",
+    "message": "Argument of type \"Literal['broken']\" cannot be assigned to parameter \"value\" of type \"list[Unknown] | None\" in function \"__setitem__\"\n  Type \"Literal['broken']\" is not assignable to type \"list[Unknown] | None\"\n    \"Literal['broken']\" is not assignable to \"None\"\n    \"Literal['broken']\" is not assignable to \"list[Unknown]\"",
+    "range": {
+      "start": {
+        "line": 238,
+        "character": 16
+      },
+      "end": {
+        "line": 238,
+        "character": 32
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "docs/plugins/link_checker/plugin.py",
+    "severity": "error",
+    "message": "Argument of type \"Literal['broken']\" cannot be assigned to parameter \"value\" of type \"list[Unknown] | None\" in function \"__setitem__\"\n  Type \"Literal['broken']\" is not assignable to type \"list[Unknown] | None\"\n    \"Literal['broken']\" is not assignable to \"None\"\n    \"Literal['broken']\" is not assignable to \"list[Unknown]\"",
+    "range": {
+      "start": {
+        "line": 241,
+        "character": 12
+      },
+      "end": {
+        "line": 241,
+        "character": 28
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "docs/plugins/link_checker/plugin.py",
+    "severity": "error",
+    "message": "Argument of type \"str\" cannot be assigned to parameter \"value\" of type \"list[Unknown] | None\" in function \"__setitem__\"\n  Type \"str\" is not assignable to type \"list[Unknown] | None\"\n    \"str\" is not assignable to \"None\"\n    \"str\" is not assignable to \"list[Unknown]\"",
+    "range": {
+      "start": {
+        "line": 242,
+        "character": 12
+      },
+      "end": {
+        "line": 242,
+        "character": 27
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "docs/plugins/link_checker/plugin.py",
+    "severity": "error",
+    "message": "Expected type arguments for generic class \"dict\"",
+    "range": {
+      "start": {
+        "line": 273,
+        "character": 39
+      },
+      "end": {
+        "line": 273,
+        "character": 43
+      }
+    },
+    "rule": "reportMissingTypeArgument"
+  },
+  {
+    "file": "docs/plugins/link_checker/test_basic.py",
+    "severity": "error",
+    "message": "Import from `plugin` is implicitly relative and will not work if this file is imported as a module\n  Use a relative import from `.plugin` instead\n  or specify the full module path: `docs.plugins.link_checker.plugin`",
+    "range": {
+      "start": {
+        "line": 21,
+        "character": 13
+      },
+      "end": {
+        "line": 21,
+        "character": 19
+      }
+    },
+    "rule": "reportImplicitRelativeImport"
+  },
+  {
+    "file": "docs/plugins/link_checker/test_basic.py",
+    "severity": "error",
+    "message": "Import \"mkdocs.plugins\" could not be resolved",
+    "range": {
+      "start": {
+        "line": 28,
+        "character": 13
+      },
+      "end": {
+        "line": 28,
+        "character": 27
+      }
+    },
+    "rule": "reportMissingImports"
+  },
+  {
+    "file": "docs/plugins/link_checker/test_basic.py",
+    "severity": "error",
+    "message": "Import from `plugin` is implicitly relative and will not work if this file is imported as a module\n  Use a relative import from `.plugin` instead\n  or specify the full module path: `docs.plugins.link_checker.plugin`",
+    "range": {
+      "start": {
+        "line": 85,
+        "character": 13
+      },
+      "end": {
+        "line": 85,
+        "character": 19
+      }
+    },
+    "rule": "reportImplicitRelativeImport"
+  },
+  {
+    "file": "docs/plugins/link_checker/test_basic.py",
+    "severity": "error",
+    "message": "Import from `plugin` is implicitly relative and will not work if this file is imported as a module\n  Use a relative import from `.plugin` instead\n  or specify the full module path: `docs.plugins.link_checker.plugin`",
+    "range": {
+      "start": {
+        "line": 119,
+        "character": 13
+      },
+      "end": {
+        "line": 119,
+        "character": 19
+      }
+    },
+    "rule": "reportImplicitRelativeImport"
+  },
+  {
+    "file": "docs/plugins/link_checker/test_basic.py",
+    "severity": "error",
+    "message": "Import from `plugin` is implicitly relative and will not work if this file is imported as a module\n  Use a relative import from `.plugin` instead\n  or specify the full module path: `docs.plugins.link_checker.plugin`",
+    "range": {
+      "start": {
+        "line": 161,
+        "character": 13
+      },
+      "end": {
+        "line": 161,
+        "character": 19
+      }
+    },
+    "rule": "reportImplicitRelativeImport"
+  },
+  {
+    "file": "docs/plugins/link_checker/tests/test_plugin.py",
+    "severity": "error",
+    "message": "Instance variable \"plugin\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 20,
+        "character": 13
+      },
+      "end": {
+        "line": 20,
+        "character": 19
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "src/bioetl/interfaces/cli/commands/report.py",
+    "severity": "error",
+    "message": "\"DEFAULT_REPORT_ROOT\" is not defined",
+    "range": {
+      "start": {
+        "line": 145,
+        "character": 26
+      },
+      "end": {
+        "line": 145,
+        "character": 45
+      }
+    },
+    "rule": "reportUndefinedVariable"
+  },
+  {
+    "file": "src/bioetl/interfaces/cli/commands/report.py",
+    "severity": "error",
+    "message": "\"DEFAULT_REPORT_ROOT\" is not defined",
+    "range": {
+      "start": {
+        "line": 192,
+        "character": 21
+      },
+      "end": {
+        "line": 192,
+        "character": 40
+      }
+    },
+    "rule": "reportUndefinedVariable"
+  }
+]
