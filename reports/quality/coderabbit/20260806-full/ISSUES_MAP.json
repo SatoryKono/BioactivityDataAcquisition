@@ -1,84 +1,102 @@
 [
   {
-    "finding_id": "S01-domain-value_objects:02c80a807abc",
-    "issue": 8096,
+    "finding_id": "S01-domain-lineage:d2389f1f6b0f",
+    "issue": 8167,
     "action": "created",
     "severity": "major",
+    "path": "src/bioetl/domain/lineage/_shared.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8167",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/lineage/_shared.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "finding_id": "S01-domain-lineage:8a13de16cb0a",
+    "issue": 8168,
+    "action": "created",
+    "severity": "major",
+    "path": "src/bioetl/domain/lineage/refs.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8168",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/lineage/refs.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "finding_id": "S01-domain-lineage:d9f644022c6e",
+    "issue": 8169,
+    "action": "created",
+    "severity": "major",
+    "path": "src/bioetl/domain/lineage/metadata_bundle.py",
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8169",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/lineage/metadata_bundle.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "finding_id": "S01-domain-value_objects:02c80a807abc",
+    "issue": 8096,
+    "action": "linked_existing",
+    "severity": "major",
     "path": "src/bioetl/domain/value_objects/activity.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8096",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/activity.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8096"
   },
   {
     "finding_id": "S01-domain-value_objects:60e1964b8a63",
     "issue": 8097,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "minor",
     "path": "src/bioetl/domain/value_objects/activity_confidence.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8097",
-    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/value_objects/activity_confidence.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8097"
   },
   {
     "finding_id": "S01-domain-value_objects:fca00186539a",
     "issue": 8098,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/value_objects/inchi.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8098",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/inchi.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8098"
   },
   {
     "finding_id": "S01-domain-value_objects:c35c60029064",
     "issue": 8099,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/value_objects/_molecular_weight.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8099",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/_molecular_weight.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8099"
   },
   {
     "finding_id": "S01-domain-value_objects:faedb864fb30",
     "issue": 8100,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/publication_field_group_types.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8100",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/publication_field_group_types.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8100"
   },
   {
     "finding_id": "S01-domain-value_objects:2b4d114afe9a",
     "issue": 8101,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/dq_report_results_core.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8101",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/dq_report_results_core.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8101"
   },
   {
     "finding_id": "S01-domain-value_objects:4ffa50520bfc",
     "issue": 8102,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/value_objects/dq_report_builder.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8102",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/dq_report_builder.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8102"
   },
   {
     "finding_id": "S01-domain-value_objects:7a54b38c8c6d",
     "issue": 8103,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/base.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8103",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/base.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8103"
   },
   {
     "finding_id": "S01-domain-value_objects:d9b38083d482",
     "issue": 8104,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/_publication_year.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8104",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/_publication_year.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8104"
   },
   {
     "finding_id": "S01-domain-value_objects:42d5d7ce7934",
@@ -91,101 +109,90 @@
   {
     "finding_id": "S01-domain-value_objects:61480d2de70f",
     "issue": 8105,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/publications.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8105",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/publications.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8105"
   },
   {
     "finding_id": "S01-domain-value_objects:bac678987cf8",
     "issue": 8106,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/pchembl_value.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8106",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/pchembl_value.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8106"
   },
   {
     "finding_id": "S01-domain-value_objects:8fe588b1632c",
     "issue": 8107,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/column_qualifier.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8107",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/column_qualifier.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8107"
   },
   {
     "finding_id": "S01-domain-value_objects:4367b33b2142",
     "issue": 8108,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/value_objects/column_order.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8108",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/column_order.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8108"
   },
   {
     "finding_id": "S01-domain-value_objects:e7220136e0bb",
     "issue": 8109,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/value_objects/dq_report_results_quality.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8109",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/dq_report_results_quality.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8109"
   },
   {
     "finding_id": "S01-domain-value_objects:d6c05e7ff80c",
     "issue": 8111,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/value_objects/dq_result.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8111",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/dq_result.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8111"
   },
   {
     "finding_id": "S01-domain-value_objects:603ab709a6f0",
     "issue": 8113,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "minor",
     "path": "src/bioetl/domain/value_objects/dq_metrics_calculations.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8113",
-    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/value_objects/dq_metrics_calculations.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8113"
   },
   {
     "finding_id": "S01-domain-value_objects:79221f21c342",
     "issue": 8114,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/protein_class_hierarchy.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8114",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/protein_class_hierarchy.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8114"
   },
   {
     "finding_id": "S01-domain-value_objects:456e6a2e1797",
     "issue": 8115,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/molecular_descriptors.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8115",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/molecular_descriptors.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8115"
   },
   {
     "finding_id": "S01-domain-value_objects:b77e32a66c9b",
     "issue": 8116,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/value_objects/_publication_field_group_config.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8116",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/_publication_field_group_config.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8116"
   },
   {
     "finding_id": "S01-domain-value_objects:829c7fc54554",
     "issue": 8118,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/identifiers.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8118",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/identifiers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8118"
   },
   {
     "finding_id": "S01-domain-value_objects:c2af41ae9fbe",
@@ -197,30 +204,27 @@
   },
   {
     "finding_id": "S01-domain-value_objects:f705c1c3d58b",
-    "issue": 8119,
-    "action": "created",
+    "issue": 8120,
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/value_objects/activity_concentration.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8119",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/activity_concentration.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8120"
   },
   {
     "finding_id": "S01-domain-value_objects:041f1f609873",
     "issue": 8120,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/activity_concentration.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8120",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/activity_concentration.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8120"
   },
   {
     "finding_id": "S01-domain-value_objects:7454f65062d4",
     "issue": 8122,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/_chemical_identifiers.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8122",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/_chemical_identifiers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8122"
   },
   {
     "finding_id": "S01-domain-value_objects:933f87913231",
@@ -233,38 +237,34 @@
   {
     "finding_id": "S01-domain-value_objects:45e6c826690b",
     "issue": 8123,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/academic_ids.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8123",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/academic_ids.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8123"
   },
   {
     "finding_id": "S01-domain-value_objects:85734eefb834",
-    "issue": 8124,
-    "action": "created",
+    "issue": 8126,
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/value_objects/bronze_result.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8124",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/bronze_result.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8126"
   },
   {
     "finding_id": "S01-domain-value_objects:9398d145619c",
     "issue": 8126,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "critical",
     "path": "src/bioetl/domain/value_objects/bronze_result.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8126",
-    "title": "[CR-FULL][critical] residual in `src/bioetl/domain/value_objects/bronze_result.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8126"
   },
   {
     "finding_id": "S01-domain-value_objects:5de9a4be9c66",
     "issue": 8127,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "minor",
     "path": "src/bioetl/domain/value_objects/taxonomy_id.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8127",
-    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/value_objects/taxonomy_id.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8127"
   },
   {
     "finding_id": "S01-domain-value_objects:ac90d7f50536",
@@ -277,11 +277,10 @@
   {
     "finding_id": "S01-domain-value_objects:a35379169d9e",
     "issue": 8128,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/compound_ids.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8128",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/compound_ids.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8128"
   },
   {
     "finding_id": "S01-domain-value_objects:d61b327f6c49",
@@ -301,183 +300,163 @@
   },
   {
     "finding_id": "S01-domain-value_objects:a7c9589711e3",
-    "issue": 8129,
-    "action": "created",
+    "issue": 8130,
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/value_objects/dq_metrics.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8129",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/dq_metrics.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8130"
   },
   {
     "finding_id": "S01-domain-value_objects:7ccf28894292",
     "issue": 8130,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/value_objects/dq_metrics.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8130",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/dq_metrics.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8130"
   },
   {
     "finding_id": "S01-domain-entities:a26b6192f132",
     "issue": 8131,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/_chembl_activity_target_models.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8131",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/_chembl_activity_target_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8131"
   },
   {
     "finding_id": "S01-domain-entities:bac1303d4453",
     "issue": 8132,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "minor",
     "path": "src/bioetl/domain/entities/chembl_tissue.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8132",
-    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/entities/chembl_tissue.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8132"
   },
   {
     "finding_id": "S01-domain-entities:2f9a3d3bdf61",
     "issue": 8133,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/base.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8133",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/base.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8133"
   },
   {
     "finding_id": "S01-domain-entities:6ffb7c928a50",
     "issue": 8134,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/pubmed.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8134",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/pubmed.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8134"
   },
   {
     "finding_id": "S01-domain-entities:e1d5422e4e4f",
     "issue": 8135,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/bioactivity/__init__.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8135",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/bioactivity/__init__.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8135"
   },
   {
     "finding_id": "S01-domain-entities:000962169fda",
     "issue": 8136,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/bioactivity/_entity.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8136",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/bioactivity/_entity.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8136"
   },
   {
     "finding_id": "S01-domain-entities:e65024731235",
     "issue": 8137,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/chembl.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8137",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/chembl.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8137"
   },
   {
     "finding_id": "S01-domain-entities:bf9ae75fc9aa",
     "issue": 8138,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/entities/_chembl_reference_models.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8138",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/_chembl_reference_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8138"
   },
   {
     "finding_id": "S01-domain-entities:d7ef7dbfd4e7",
     "issue": 8139,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/entities/__init__.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8139",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/__init__.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8139"
   },
   {
     "finding_id": "S01-domain-entities:4fd6874fd25b",
     "issue": 8140,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/bioactivity/_converters.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8140",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/bioactivity/_converters.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8140"
   },
   {
     "finding_id": "S01-domain-entities:309f867a9d7f",
     "issue": 8141,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/entities/crossref.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8141",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/crossref.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8141"
   },
   {
     "finding_id": "S01-domain-entities:d9a41654b64e",
     "issue": 8142,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/chembl_structures_foundation.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8142",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/chembl_structures_foundation.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8142"
   },
   {
     "finding_id": "S01-domain-entities:300c6f233834",
     "issue": 8143,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/entities/openalex.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8143",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/openalex.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8143"
   },
   {
     "finding_id": "S01-domain-entities:da1c37f8af24",
     "issue": 8144,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/entities/pubchem.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8144",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/pubchem.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8144"
   },
   {
     "finding_id": "S01-domain-entities:1fbf04ba5622",
     "issue": 8145,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/_chembl_activity_assay_models.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8145",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/_chembl_activity_assay_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8145"
   },
   {
     "finding_id": "S01-domain-entities:65fc9ad608c9",
     "issue": 8146,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/publication_base.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8146",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/publication_base.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8146"
   },
   {
     "finding_id": "S01-domain-entities:ff6d6c5f35cb",
     "issue": 8147,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/entities/bioactivity/_extractors.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8147",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/bioactivity/_extractors.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8147"
   },
   {
     "finding_id": "S01-domain-entities:3ffd66d1971e",
     "issue": 8148,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "minor",
     "path": "src/bioetl/domain/entities/chembl_activity.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8148",
-    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/entities/chembl_activity.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8148"
   },
   {
     "finding_id": "S01-domain-entities:6463691b9a9d",
@@ -506,11 +485,10 @@
   {
     "finding_id": "S01-domain-entities:4307df01ee92",
     "issue": 8149,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/entities/chembl_compound_record.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8149",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/entities/chembl_compound_record.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8149"
   },
   {
     "finding_id": "S01-domain-entities:ae57f12000ca",
@@ -523,146 +501,130 @@
   {
     "finding_id": "S01-domain-entities:99eea39c79d8",
     "issue": 8150,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/uniprot.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8150",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/uniprot.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8150"
   },
   {
     "finding_id": "S01-domain-entities:67f62c133aba",
     "issue": 8151,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/semanticscholar.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8151",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/semanticscholar.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8151"
   },
   {
     "finding_id": "S01-domain-entities:71136e3c3173",
     "issue": 8152,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/_chembl_molecule_target_models.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8152",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/_chembl_molecule_target_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8152"
   },
   {
     "finding_id": "S01-domain-entities:d25b788b6f55",
-    "issue": 8153,
-    "action": "created",
+    "issue": 8154,
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/entities/_chembl_additional_models.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8153",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/entities/_chembl_additional_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8154"
   },
   {
     "finding_id": "S01-domain-entities:bdf4d4f705a4",
     "issue": 8154,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "minor",
     "path": "src/bioetl/domain/entities/_chembl_additional_models.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8154",
-    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/entities/_chembl_additional_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8154"
   },
   {
     "finding_id": "S01-domain-exceptions:458eeedb9398",
     "issue": 8155,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/exceptions/_redaction.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8155",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/_redaction.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8155"
   },
   {
     "finding_id": "S01-domain-exceptions:40b9ba819256",
     "issue": 8156,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/exceptions/base.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8156",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/base.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8156"
   },
   {
     "finding_id": "S01-domain-exceptions:a672d1854d5e",
     "issue": 8157,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "minor",
     "path": "src/bioetl/domain/exceptions/storage/_delta.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8157",
-    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/exceptions/storage/_delta.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8157"
   },
   {
     "finding_id": "S01-domain-exceptions:cc24048e0ce9",
     "issue": 8158,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "minor",
     "path": "src/bioetl/domain/exceptions/validation.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8158",
-    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/exceptions/validation.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8158"
   },
   {
     "finding_id": "S01-domain-exceptions:eac6dbe3db6d",
     "issue": 8159,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "trivial",
     "path": "src/bioetl/domain/exceptions/network_rate_limit_helpers.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8159",
-    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/exceptions/network_rate_limit_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8159"
   },
   {
     "finding_id": "S01-domain-exceptions:7f867ab7fddd",
     "issue": 8160,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "minor",
     "path": "src/bioetl/domain/exceptions/storage/__init__.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8160",
-    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/exceptions/storage/__init__.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8160"
   },
   {
     "finding_id": "S01-domain-exceptions:ded96e88e03b",
     "issue": 8161,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/exceptions/storage/_storage.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8161",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/storage/_storage.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8161"
   },
   {
     "finding_id": "S01-domain-exceptions:e4d55dc2cd9d",
     "issue": 8162,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/exceptions/network/service.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8162",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/network/service.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8162"
   },
   {
     "finding_id": "S01-domain-exceptions:72d757c5f762",
     "issue": 8163,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/exceptions/__init__.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8163",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/__init__.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8163"
   },
   {
     "finding_id": "S01-domain-exceptions:c2a455f5ad38",
     "issue": 8164,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/exceptions/infrastructure/_storage.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8164",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/infrastructure/_storage.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8164"
   },
   {
     "finding_id": "S01-domain-exceptions:f95fb3c8b795",
     "issue": 8165,
-    "action": "created",
+    "action": "linked_existing",
     "severity": "major",
     "path": "src/bioetl/domain/exceptions/base_exceptions.py",
-    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8165",
-    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/base_exceptions.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8165"
   },
   {
     "finding_id": "S01-domain-exceptions:712700ae678f",
