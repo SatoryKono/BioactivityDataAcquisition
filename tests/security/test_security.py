@@ -123,8 +123,10 @@ class TestVCRCassetteSanitization:
         """Verify cassettes don't contain real authorization headers."""
         violations = []
         header_lower = header_name.lower()
+        # Escape quantifier braces so the pattern requires >=20 token chars
+        # (plain {(20,)} is f-string tuple interpolation, not a regex quantifier).
         compiled = re.compile(
-            rf"{header_name}:\s*['\"]?[A-Za-z0-9+/=\-_.]{(20,)}['\"]?",
+            rf"{header_name}:\s*['\"]?[A-Za-z0-9+/=\-_.]{{20,}}['\"]?",
             re.IGNORECASE,
         )
         for name, content in cassette_contents:
@@ -419,6 +421,7 @@ class TestPIIHandling:
             "_search.py",  # PubMed adapter (NCBI required email)
             "_fetch.py",  # PubMed adapter (NCBI required email)
             "_state.py",  # PubMed adapter state mixin (NCBI required email)
+            "_adapter_factory.py",  # PubMed factory resolves NCBI contact email (EXC-010)
             "pipeline_config.py",  # NCBI API source config
             "client.py",  # User-Agent header identification
             "source_config.py",  # NCBI API default_email for PubMed
@@ -580,28 +583,34 @@ class TestInputValidation:
 
         assert not violations, "SQL injection risks found:\n" + "\n".join(violations)
 
+    # Explicit allowlist for reviewed internal-only pickle usage (ratchet: no growth).
+    _PICKLE_ALLOWLIST = frozenset(
+        {
+            # Keep empty unless a reviewed internal serialization path is approved.
+        }
+    )
+
     def test_no_pickle_with_untrusted_data(
         self, source_contents: list[tuple[Path, str]]
     ) -> None:
-        """Verify no pickle.loads on untrusted data."""
+        """Verify pickle usage is limited to the reviewed allowlist."""
         violations = []
-        # Check for pickle usage (which should be reviewed for untrusted input)
         pickle_pattern = r"pickle\.(?:loads?|Unpickler)"
 
         for py_file, content in source_contents:
             if re.search(pickle_pattern, content):
-                # Check if it's in a context that might be dangerous
-                # (loading from network, user input, etc.)
                 rel_path = py_file.relative_to(PROJECT_ROOT)
+                rel_posix = rel_path.as_posix()
+                if rel_posix in self._PICKLE_ALLOWLIST:
+                    continue
                 violations.append(
-                    f"{rel_path}: Uses pickle (review for untrusted input)"
+                    f"{rel_path}: Uses pickle outside reviewed allowlist"
                 )
 
-        # Informational - pickle may be OK for internal serialization
-        if violations:
-            pytest.skip("Review pickle usage:\n" + "\n".join(violations))
-
-        assert not violations
+        assert not violations, (
+            "Unreviewed pickle usage (add to allowlist only after security review):\n"
+            + "\n".join(violations)
+        )
 
 
 @pytest.mark.timeout(120)  # File scanning needs more time
@@ -689,17 +698,21 @@ class TestSecurityHeaders:
             "X-Auth-Token",
         ]
 
-        log_pattern = r"(?:logger?\.(?:info|debug|warning|error)|print)\s*\("
+        # DOTALL + non-greedy so multi-line logger(... headers.get(...)) is covered.
+        log_call_pattern = re.compile(
+            r"(?:logger?\.(?:info|debug|warning|error)|print)\s*\((?:[^()]|\([^()]*\))*\)",
+            re.IGNORECASE | re.DOTALL,
+        )
 
         for py_file, content in source_contents:
-            if re.search(log_pattern, content):
+            for match in log_call_pattern.finditer(content):
+                call_text = match.group(0)
                 for header in sensitive_headers:
-                    # Check if header name appears near logging statements
-                    combined_pattern = (
-                        rf"(?:logger?\.(?:info|debug|warning|error)|print)\s*\([^)]*"
-                        rf"{header}[^)]*(?:request\.headers|response\.headers)"
-                    )
-                    if re.search(combined_pattern, content, re.IGNORECASE):
+                    if re.search(header, call_text, re.IGNORECASE) and re.search(
+                        r"(?:request|response)\.headers|\.headers\.get",
+                        call_text,
+                        re.IGNORECASE,
+                    ):
                         rel_path = py_file.relative_to(PROJECT_ROOT)
                         violations.append(f"{rel_path}: Logs {header} header")
 
@@ -748,25 +761,34 @@ class TestCryptographyUsage:
 
         assert not violations, "Weak hash algorithms:\n" + "\n".join(violations)
 
+    # Reviewed non-security random usage (jitter, sampling); ratchet: no growth.
+    _RANDOM_SECURITY_ALLOWLIST = frozenset(
+        {
+            # Populate only after review that random is not used for secrets.
+        }
+    )
+
     def test_random_uses_secrets_module(
         self, source_contents: list[tuple[Path, str]]
     ) -> None:
         """Verify security-sensitive randomness uses secrets module."""
-        # For tokens, keys, etc. - random module is not cryptographically secure
         violations = []
         random_pattern = r"random\.(?:choice|randint|random|sample)\s*\("
 
         for py_file, content in source_contents:
-            if re.search(random_pattern, content):
-                # Check if it's for security-sensitive purposes
-                if re.search(
-                    r"(?:token|key|secret|password|salt)", content, re.IGNORECASE
-                ):
-                    rel_path = py_file.relative_to(PROJECT_ROOT)
-                    violations.append(f"{rel_path}: random module for security purpose")
+            if not re.search(random_pattern, content):
+                continue
+            if not re.search(
+                r"(?:token|key|secret|password|salt)", content, re.IGNORECASE
+            ):
+                continue
+            rel_path = py_file.relative_to(PROJECT_ROOT)
+            rel_posix = rel_path.as_posix()
+            if rel_posix in self._RANDOM_SECURITY_ALLOWLIST:
+                continue
+            violations.append(f"{rel_path}: random module for security purpose")
 
-        # Informational - random may be OK for non-security uses
-        if violations:
-            pytest.skip("Review random usage:\n" + "\n".join(violations))
-
-        assert not violations
+        assert not violations, (
+            "random used near security terms (prefer secrets module):\n"
+            + "\n".join(violations)
+        )

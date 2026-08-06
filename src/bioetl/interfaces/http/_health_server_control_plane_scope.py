@@ -129,7 +129,10 @@ def resolve_control_plane_identity_scope(
     host: _ControlPlaneScopeHost,
     query: dict[str, str],
 ) -> _IdentityScope:
-    assert host._run_manifest_port is not None
+    if host._run_manifest_port is None:
+        raise RuntimeError(
+            "run_manifest_port is required for control-plane identity scope resolution"
+        )
     requested_pipeline = host._read_required_param(query, "pipeline")
     selected_pipelines = host._read_scope_csv_param(query, "pipeline")
     selected_run_types = host._read_scope_csv_param(query, "run_type")
@@ -162,6 +165,16 @@ def resolve_control_plane_identity_scope(
                 resolved_manifest=resolved_manifest,
                 resolved_via="selected_run_id",
             )
+        # Explicit unresolved scope when a concrete run_id was selected but no
+        # matching manifest exists (do not silently fall through to latest).
+        return _identity_scope(
+            requested_pipeline=requested_pipeline,
+            selected_pipelines=selected_pipelines,
+            selected_run_types=selected_run_types,
+            selected_run_id=selected_run_id,
+            resolved_manifest=None,
+            resolved_via="selected_run_id_not_found",
+        )
 
     return _resolve_latest_manifest_scope(
         manifest_port=host._run_manifest_port,

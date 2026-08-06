@@ -49,6 +49,20 @@ class TestTokenBucket:
     """Tests for TokenBucketRateLimiter rate limiter."""
 
     @pytest.mark.unit
+    def test_rejects_non_positive_rate(self) -> None:
+        with pytest.raises(ValueError, match="rate must be strictly positive"):
+            TokenBucketRateLimiter(rate=0.0, capacity=10)
+        with pytest.raises(ValueError, match="rate must be strictly positive"):
+            TokenBucketRateLimiter(rate=-1.0, capacity=10)
+
+    @pytest.mark.unit
+    def test_rejects_non_positive_capacity(self) -> None:
+        with pytest.raises(ValueError, match="capacity must be strictly positive"):
+            TokenBucketRateLimiter(rate=5.0, capacity=0)
+        with pytest.raises(ValueError, match="capacity must be strictly positive"):
+            TokenBucketRateLimiter(rate=5.0, capacity=-3)
+
+    @pytest.mark.unit
     def test_initial_capacity(self) -> None:
         """Bucket should start at full capacity."""
         bucket = TokenBucketRateLimiter(rate=5.0, capacity=10)
