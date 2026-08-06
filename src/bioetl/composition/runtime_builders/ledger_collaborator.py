@@ -152,7 +152,23 @@ def _collect_metadata_writer_candidates(services: object) -> list[object]:
         writer = getattr(storage, writer_name, None)
         if writer is None:
             continue
-        writer_metadata = getattr(writer, "_metadata_writer", None)
+        # Prefer public contract accessors over private `_metadata_writer`.
+        writer_metadata = None
+        for accessor_name in (
+            "metadata_writer",
+            "get_metadata_writer",
+            "metadata",
+        ):
+            accessor = getattr(writer, accessor_name, None)
+            if callable(accessor) and accessor_name.startswith("get_"):
+                try:
+                    writer_metadata = accessor()
+                except (AttributeError, RuntimeError, TypeError, ValueError):
+                    writer_metadata = None
+            elif accessor is not None and not callable(accessor):
+                writer_metadata = accessor
+            if writer_metadata is not None:
+                break
         if writer_metadata is not None:
             candidates.append(writer_metadata)
     return candidates

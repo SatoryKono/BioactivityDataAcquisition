@@ -1196,16 +1196,8 @@ def test_replay_reconstructability_metric_marks_strict_runs_not_reconstructable(
             ),
         ]
     )
-    metrics.set_gauge.assert_called_once_with(
-        "bioetl_replay_lag_seconds",
-        value=0.0,
-        labels={
-            "pipeline": "chembl_activity",
-            "run_type": "incremental",
-            "replay_capability": "resume_only",
-            "status": "blocked",
-        },
-    )
+    # Blocked without measured lag must not invent a 0.0 lag reading.
+    metrics.set_gauge.assert_not_called()
 
 
 @pytest.mark.unit

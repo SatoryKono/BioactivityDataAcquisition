@@ -105,9 +105,10 @@ def assemble_manifest_create_spec(
     ctx = request_inputs.ctx
     inputs = request_inputs.inputs
     runtime_config = to_serializable_mapping(inputs.runtime_config)
-    runtime_config.setdefault(
-        "silver_filter_compatibility_mode",
-        current_silver_filter_compatibility_mode(),
+    # Authoritative: always stamp the current compatibility mode rather than
+    # preserving a stale caller-supplied value via setdefault.
+    runtime_config["silver_filter_compatibility_mode"] = (
+        current_silver_filter_compatibility_mode()
     )
     contract_identity = request_inputs.contract_identity
     provider = request_inputs.provider
