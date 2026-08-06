@@ -70,8 +70,10 @@ class ChemblAdapter(
 ):
     """ChEMBL REST adapter with pagination, filtering, and resilience helpers."""
 
-    http_client: UnifiedHTTPClient
-    logger: LoggerPort
+    # Explicit ``field()`` declarations prevent dataclasses from treating
+    # same-named class attributes on mixins as inherited defaults.
+    http_client: UnifiedHTTPClient = field()
+    logger: LoggerPort = field()
     adapter_config: AdapterConfig | None = None
     thread_pool: ThreadPoolExecutor | None = None
     metrics: MetricsPort | None = None
@@ -232,4 +234,3 @@ class ChemblAdapter(
                 url, params={"limit": 1, "format": "json"}
             )
         return int(response.json().get("page_meta", {}).get("total_count", 0))
-
