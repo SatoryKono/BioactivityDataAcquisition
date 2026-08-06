@@ -178,6 +178,6 @@ class OpenAlexAdapter(  # pyright: ignore[reportUnsafeMultipleInheritance]
         self._fallback_orchestrator.configure_policy(policy)
 
 
-from bioetl.infrastructure.adapters.openalex._client_factory import (  # noqa: E402
+from bioetl.infrastructure.adapters.openalex._client_support import (  # noqa: E402
     _create_openalex_adapter,
 )

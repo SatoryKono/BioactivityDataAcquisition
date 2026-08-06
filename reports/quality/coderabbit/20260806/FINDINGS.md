@@ -281,4 +281,3 @@
 | #7979 | #7745 | `src/bioetl/composition/bootstrap/assembly` | B/major → A/major |
 | #7980 | #7826 | `src/bioetl/infrastructure/adapters/pubmed` | B/major → A/major |
 | #7981 | #7904 | `src/bioetl/domain/ports/control_plane` | B/major → A/major |
-

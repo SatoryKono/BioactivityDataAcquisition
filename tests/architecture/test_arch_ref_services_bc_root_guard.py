@@ -22,7 +22,7 @@ REQUIRED_BC_PACKAGES = frozenset(
         "export_lineage",
         "workflow",
         "checkpoint",
-        "contract",
+        "contracts",
     }
 )
 

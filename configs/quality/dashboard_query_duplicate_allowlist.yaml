@@ -23,20 +23,6 @@ exact_duplicates:
       panel_refs:
         - "bioetl-overview-v2.json :: Monitor Fleet Health"
         - "bioetl-incident-v1.json :: Monitor Incident Status"
-    - id: dq-silver-validation-failures-stat-and-range-composite
-      owner: "@bioetl-observability"
-      linked_issue: "#7558"
-      normalized_expression: >-
-        round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~"$pipeline"}[$__range]))))
-      rationale: >
-        DQ keeps the selected-range silver-validation failure expression on both
-        the primary stat card and the range-composite companion so operators see
-        identical No-data semantics after removing masking `or vector(0)`
-        fallbacks; divergence would reintroduce false-green zeros.
-      panel_refs:
-        - "bioetl-dq-v2.json :: Monitor Silver Validation Failures"
-        - "bioetl-dq-v2.json :: Monitor Silver Validation Failures (range composite)"
-
 near_duplicates:
   max_count: 5
   owner: "@bioetl-observability"

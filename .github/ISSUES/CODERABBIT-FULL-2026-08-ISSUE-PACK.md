@@ -116,4 +116,3 @@ Post-campaign de-dupe pack: [CODERABBIT-FULL-2026-08-FINDINGS-PACK.md](CODERABBI
 - Artifacts: `reports/quality/coderabbit/20260806/` (`FINDINGS.md`, `TRIAGE.md`, `DE_DUPE_MAP.json`)
 - Canonical open residual path-cluster issues after de-dupe: see findings pack
 - Wave B mis-tags / path twins de-dupe mapping: `DE_DUPE_MAP.json`
-

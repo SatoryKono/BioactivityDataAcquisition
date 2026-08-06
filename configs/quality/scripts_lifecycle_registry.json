@@ -1142,18 +1142,6 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as an RF-017 Docker restore observation helper; keep private underscore modules supporting and do not promote them to public ops commands."
     },
-    "scripts/ops/runtime/docker/_rf017_recreate_once.py": {
-      "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as an RF-017 one-shot stack recreate helper; keep private underscore modules supporting and do not promote them to public ops commands."
-    },
-    "scripts/ops/runtime/docker/_rf017_restore_and_observe.py": {
-      "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as an RF-017 restore-and-observe helper; keep private underscore modules supporting and do not promote them to public ops commands."
-    },
     "scripts/ops/runtime/docker/apply-docker-stable-mcp.ps1": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",

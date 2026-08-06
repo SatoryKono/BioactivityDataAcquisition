@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.ops.bronze_cleanup_service import (
         BronzeCleanupService,
     )
-    from bioetl.application.services.contract.contract_migration_service import (
+    from bioetl.application.services.contracts.contract_migration_service import (
         ContractMigrationService,
     )
     from bioetl.application.services.ops.vacuum_service import VacuumService

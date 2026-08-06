@@ -4163,7 +4163,7 @@
       "src/bioetl/infrastructure/storage/bronze_writer.py"
     ],
     "bioetl_checkpoint_compatibility_events_total": [
-      "src/bioetl/application/services/checkpoint_compatibility_telemetry.py"
+      "src/bioetl/application/services/checkpoint/checkpoint_compatibility_telemetry.py"
     ],
     "bioetl_checkpoint_load_events_total": [
       "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py",
@@ -4171,23 +4171,23 @@
       "src/bioetl/application/core/lifecycle/checkpoint_manager.py"
     ],
     "bioetl_checkpoint_operator_duration_seconds": [
-      "src/bioetl/application/services/checkpoint_service.py"
+      "src/bioetl/application/services/checkpoint/checkpoint_service.py"
     ],
     "bioetl_checkpoint_operator_operations_total": [
-      "src/bioetl/application/services/checkpoint_service.py"
+      "src/bioetl/application/services/checkpoint/checkpoint_service.py"
     ],
     "bioetl_checkpoint_save_duration_seconds": [
-      "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py",
+      "src/bioetl/application/composite/runner_pkg/runner_checkpoint_save_observability.py",
       "src/bioetl/application/core/batch_checkpoint_recovery_service.py"
     ],
     "bioetl_checkpoint_save_events_total": [
-      "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py",
+      "src/bioetl/application/composite/runner_pkg/runner_checkpoint_save_observability.py",
       "src/bioetl/application/core/batch_checkpoint_recovery_service.py"
     ],
     "bioetl_checkpoint_saved_at_seconds": [
       "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py",
       "src/bioetl/application/composite/checkpoint/persistence_service.py",
-      "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py",
+      "src/bioetl/application/composite/runner_pkg/runner_checkpoint_save_observability.py",
       "src/bioetl/application/core/lifecycle/checkpoint_saved_at.py"
     ],
     "bioetl_composite_phase_errors_total": [
@@ -4236,7 +4236,7 @@
       "src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py"
     ],
     "bioetl_data_freshness_seconds": [
-      "src/bioetl/application/services/data_quality_anomalies.py"
+      "src/bioetl/application/services/quality/data_quality_anomalies.py"
     ],
     "bioetl_data_source_retries_total": [
       "src/bioetl/infrastructure/adapters/decorators/_retry_support.py"
@@ -4246,19 +4246,19 @@
     ],
     "bioetl_dq_anomaly_detected": [
       "src/bioetl/application/observability/observer_postrun_mixin.py",
-      "src/bioetl/application/services/data_quality_anomalies.py"
+      "src/bioetl/application/services/quality/data_quality_anomalies.py"
     ],
     "bioetl_dq_baseline_samples": [
-      "src/bioetl/application/services/data_quality_anomalies.py"
+      "src/bioetl/application/services/quality/data_quality_anomalies.py"
     ],
     "bioetl_dq_baseline_updated": [
-      "src/bioetl/application/services/data_quality_anomalies.py"
+      "src/bioetl/application/services/quality/data_quality_anomalies.py"
     ],
     "bioetl_dq_check_duration_ms": [
-      "src/bioetl/application/services/data_quality_anomalies.py"
+      "src/bioetl/application/services/quality/data_quality_anomalies.py"
     ],
     "bioetl_dq_check_failures_total": [
-      "src/bioetl/application/services/dq_report_generation_mixin.py"
+      "src/bioetl/application/services/quality/dq_report_generation_mixin.py"
     ],
     "bioetl_dq_context_build_failures_total": [
       "src/bioetl/application/core/batch_executor_dq_helpers.py"
@@ -4267,32 +4267,32 @@
       "src/bioetl/application/observability/pipeline_metrics.py"
     ],
     "bioetl_dq_monitor_disabled_total": [
-      "src/bioetl/application/services/data_quality_anomalies.py"
+      "src/bioetl/application/services/quality/data_quality_anomalies.py"
     ],
     "bioetl_dq_monitor_enabled": [
-      "src/bioetl/application/services/data_quality_anomalies.py"
+      "src/bioetl/application/services/quality/data_quality_anomalies.py"
     ],
     "bioetl_dq_records_quarantined_total": [
       "src/bioetl/application/core/_quarantine_metrics_support.py",
       "src/bioetl/application/core/batch_metrics.py"
     ],
     "bioetl_dq_report_generated_total": [
-      "src/bioetl/application/services/dq_report_generation_mixin.py"
+      "src/bioetl/application/services/quality/dq_report_generation_mixin.py"
     ],
     "bioetl_dq_report_skipped_total": [
-      "src/bioetl/application/services/dq_report_generation_mixin.py"
+      "src/bioetl/application/services/quality/dq_report_generation_mixin.py"
     ],
     "bioetl_dq_soft_threshold_exceeded": [
-      "src/bioetl/application/services/data_quality_thresholds.py"
+      "src/bioetl/application/services/quality/data_quality_thresholds.py"
     ],
     "bioetl_dq_validation_failures_total": [
       "src/bioetl/application/observability/pipeline_metrics.py"
     ],
     "bioetl_dq_validation_record_count": [
-      "src/bioetl/application/services/data_quality_anomalies.py"
+      "src/bioetl/application/services/quality/data_quality_anomalies.py"
     ],
     "bioetl_dq_validation_score": [
-      "src/bioetl/application/services/data_quality_anomalies.py"
+      "src/bioetl/application/services/quality/data_quality_anomalies.py"
     ],
     "bioetl_errors_total": [
       "src/bioetl/application/core/batch_metrics.py"
@@ -4438,10 +4438,10 @@
       "src/bioetl/application/pipelines/common/publication_vocab_observability.py"
     ],
     "bioetl_quarantine_operator_duration_seconds": [
-      "src/bioetl/application/services/quarantine_service.py"
+      "src/bioetl/application/services/quality/quarantine_service.py"
     ],
     "bioetl_quarantine_operator_operations_total": [
-      "src/bioetl/application/services/quarantine_service.py"
+      "src/bioetl/application/services/quality/quarantine_service.py"
     ],
     "bioetl_quarantine_records_total": [
       "src/bioetl/application/observability/pipeline_metrics.py"
@@ -4472,10 +4472,10 @@
       "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
     ],
     "bioetl_shutdown_completed": [
-      "src/bioetl/application/services/shutdown_service.py"
+      "src/bioetl/application/services/ops/shutdown_service.py"
     ],
     "bioetl_shutdown_initiated": [
-      "src/bioetl/application/services/shutdown_service.py"
+      "src/bioetl/application/services/ops/shutdown_service.py"
     ],
     "bioetl_silver_csv_export_failures_total": [
       "src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py"
@@ -4545,13 +4545,13 @@
       "src/bioetl/application/observability/observer_postrun_mixin.py"
     ],
     "bioetl_workflow_current_status": [
-      "src/bioetl/application/services/workflow_runner_support.py"
+      "src/bioetl/application/services/workflow/workflow_runner_support.py"
     ],
     "bioetl_workflow_expected": [
-      "src/bioetl/application/services/workflow_runner_support.py"
+      "src/bioetl/application/services/workflow/workflow_runner_support.py"
     ],
     "bioetl_workflow_pipeline_expected": [
-      "src/bioetl/application/services/workflow_runner_support.py"
+      "src/bioetl/application/services/workflow/workflow_runner_support.py"
     ],
     "bioetl_workflow_reconciliation_rows_deleted_total": [
       "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py"
@@ -4575,15 +4575,15 @@
       "src/bioetl/infrastructure/storage/workflow_row_reconciliation.py"
     ],
     "bioetl_workflow_runs_total": [
-      "src/bioetl/application/services/workflow_runner_support.py"
+      "src/bioetl/application/services/workflow/workflow_runner_support.py"
     ],
     "bioetl_workflow_step_duration_seconds": [
-      "src/bioetl/application/services/workflow_runner_support.py",
-      "src/bioetl/application/services/workflow_transform_service.py"
+      "src/bioetl/application/services/workflow/workflow_runner_support.py",
+      "src/bioetl/application/services/workflow/workflow_transform_service.py"
     ],
     "bioetl_workflow_step_events_total": [
-      "src/bioetl/application/services/workflow_runner_support.py",
-      "src/bioetl/application/services/workflow_transform_service.py"
+      "src/bioetl/application/services/workflow/workflow_runner_support.py",
+      "src/bioetl/application/services/workflow/workflow_transform_service.py"
     ]
   },
   "runtime_label_contract_unresolved": [],

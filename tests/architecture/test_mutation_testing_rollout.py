@@ -50,8 +50,14 @@ class TestMutationTestingRollout:
         assert "paths_to_mutate: src/bioetl/domain/" in workflow
         assert "src/bioetl/application/services/control_plane/" in workflow
         assert "tests/unit/application/services/control_plane/" in workflow
-        assert "src/bioetl/application/services/export_manifests.py" in workflow
-        assert "src/bioetl/application/services/workflow_runner_support.py" in workflow
+        assert (
+            "src/bioetl/application/services/export_lineage/export_manifests.py"
+            in workflow
+        )
+        assert (
+            "src/bioetl/application/services/workflow/workflow_runner_support.py"
+            in workflow
+        )
         assert "tests/unit/application/services/" in workflow
         assert "MUTATION_SCORE_THRESHOLD" in workflow
         assert 'config["source_paths"]' in workflow

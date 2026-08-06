@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.ops.config_service import (
         ConfigService as ConfigService,
     )
-    from bioetl.application.services.contract.contract_migration_service import (
+    from bioetl.application.services.contracts.contract_migration_service import (
         ContractMigrationService as ContractMigrationService,
     )
     from bioetl.application.services.control_plane.forensic import (

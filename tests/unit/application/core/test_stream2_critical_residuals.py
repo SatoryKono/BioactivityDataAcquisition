@@ -19,6 +19,8 @@ from bioetl.infrastructure.storage.support.retention_dedup import (
     primary_key_tuple,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_coerce_integer_rejects_non_finite_decimal_strings() -> None:
     assert _coerce_integer_from_string("NaN", allow_string_coercion=True) is None

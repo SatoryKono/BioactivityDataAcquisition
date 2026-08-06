@@ -46,7 +46,7 @@ surfaces:
           - bioetl.checkpoint.scope
           - bioetl.checkpoint.records_processed
           - bioetl.checkpoint.status
-      - path: src/bioetl/application/services/checkpoint_service.py
+      - path: src/bioetl/application/services/checkpoint/checkpoint_service.py
         required_terms:
           - TRACER_NAME = "bioetl.checkpoint_admin"
           - checkpoint.list
@@ -58,27 +58,27 @@ surfaces:
   quarantine:
     description: Quarantine admin workflows are traced; record explorers remain excluded.
     files:
-      - path: src/bioetl/application/services/_quarantine_service_async_mixin.py
+      - path: src/bioetl/application/services/quality/_quarantine_service_async_mixin.py
         required_terms:
           - traced_async_operation
           - quarantine.inspect
           - quarantine.stats
           - bioetl.has_error_code_filter
           - bioetl.record_count
-      - path: src/bioetl/application/services/_quarantine_service_sync_support.py
+      - path: src/bioetl/application/services/quality/_quarantine_service_sync_support.py
         required_terms:
           - _run_traced_sync_operation
           - traced_operation
           - tracer_name=host.TRACER_NAME
-      - path: src/bioetl/application/services/_quarantine_service_replay_purge_sync.py
+      - path: src/bioetl/application/services/quality/_quarantine_service_replay_purge_sync.py
         required_terms:
           - quarantine.replay
           - quarantine.purge
-      - path: src/bioetl/application/services/_quarantine_service_status_sync.py
+      - path: src/bioetl/application/services/quality/_quarantine_service_status_sync.py
         required_terms:
           - quarantine.mark_reprocessed
           - quarantine.update_status
-      - path: src/bioetl/application/services/_quarantine_service_filtered_mixin.py
+      - path: src/bioetl/application/services/quality/_quarantine_service_filtered_mixin.py
         forbidden_terms:
           - traced_async_operation
           - traced_operation
