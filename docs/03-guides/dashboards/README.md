@@ -105,6 +105,11 @@ is `6. Run Explorer` and alert triage lives in Incident Workspace.
 - `python -m scripts.ops check-grafana-audit-preflight` must report
   `expanded-row-capture: ok`; when a screenshot directory is supplied, its
   manifest must also prove matching viewport/theme and terminal-state success.
+  The canonical `render-manifest.json` must be byte-identical to its immutable
+  `render-manifest--<full-set|selected-subset>--<capture_id>.json` occurrence
+  file. Preflight rejects an extra/missing PNG, a file-count mismatch, reused
+  capture IDs, source JSON SHA/version drift, missing commit SHA, or absent
+  time-range/variable/row-state provenance.
 - `python -m scripts.ops run-grafana-audit-cycle` writes independent
   `dashboard_semantic_gate` and `dashboard_render_gate` outcomes to
   `reports/observability/grafana/dashboard-release-gates.json`. Semantic

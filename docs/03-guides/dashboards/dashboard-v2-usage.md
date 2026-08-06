@@ -273,9 +273,10 @@ Explorer health probe and monitoring setup docs for that reason.
    (`Review Raw Provider Health Enum`) остаётся raw source enum
    (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже first screen как evidence.
   `Monitor Provider Telemetry Freshness` отделяет empty severity matrix от
-  telemetry gap: если в активном Grafana range нет ни
-  `bioetl_provider_current_status`, ни
-  `bioetl_provider_range_operational_ok`, это не healthy state.
+  telemetry gap: `max(bioetl_provider_current_status) * 0` emits `PRESENT`
+  only while a selected-provider current-status series exists. Missing or stale
+  evidence remains fail-closed `UNKNOWN`; it is never converted to green by a
+  boolean-zero fallback.
   `bioetl_provider_range_operational_ok` является 12h operational-evidence
   projection: successful provider activity in range can move `Status` to `OK`
   without claiming that the selected pipeline run succeeded. Provider Health
@@ -300,7 +301,7 @@ Explorer health probe and monitoring setup docs for that reason.
    расследование нужно продолжать по severity matrix и optional provider
    diagnostics, а не трактовать пустую таблицу как отсутствие инцидента.
    Optional latency, adapter, rate-limit, and circuit-breaker panels remain
-   collapsed under `Selected Provider Detail`; no-data
+   collapsed under `Selected Provider Details`; no-data
    in those panels does not refute current provider severity and should not
    dominate the first-screen verdict path.
    `First Action` is the bounded CTA surface for this dashboard: review the
@@ -312,8 +313,12 @@ Explorer health probe and monitoring setup docs for that reason.
    отвечают на вопрос «DQ сейчас OK/WARN/CRIT/UNKNOWN и какое действие
    первое». `Status` is the compact shared-shell verdict; `Monitor DQ Current
    Status` is an expanded first-screen mirror beside threshold/reason
-   explainability, not an independent second signal. Сразу под answer row
-   расположен compact band labelled as TIME RANGE:
+   explainability, not an independent second signal. All three current panels
+   use one instant snapshot. If status is WARN/CRIT while the bounded current
+   reason projection is absent, `Inspect Current DQ Reasons` emits the explicit
+   `reason_evidence_unavailable` / `verify_dq_reason_rules` row; absence is not
+   interpreted as healthy. Selected-run and selected-range evidence is grouped
+   into collapsed, non-peer lanes below the answer row:
    `Monitor: Data Quality Score (Volume-weighted)`,
    `Monitor: Worst-Entity DQ Score`, `Time Range · Worst Freshness Age (hours;
    SLA 24/72)`, `Range · Records Quarantined`, `Track: Silver Filter
@@ -324,8 +329,8 @@ Explorer health probe and monitoring setup docs for that reason.
    pipeline-wide snapshot; `$run_type` and stage filters below control only
    selected-range evidence.
    `Review: First Action` stays the canonical DQ CTA: review current status,
-   inspect current reasons, or open `Silver Reject Explorer` without leaking
-   unsupported workflow/provider scope.
+   inspect current reasons, then expand the relevant selected-run/range lane or
+   use the documented quarantine CLI without leaking unsupported scope.
 1. `bioetl-overview-v2`, routing and evidence rows:
    `Control Plane`, `Runtime`, `Data Quality`, `Provider`,
    `Data Validation`, `Inputs`, и `Workflow` показывают current-only operator
