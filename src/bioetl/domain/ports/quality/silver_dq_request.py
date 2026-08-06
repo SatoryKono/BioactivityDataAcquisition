@@ -46,12 +46,15 @@ def _silver_dq_field_meta() -> tuple[tuple[str, ...], tuple[str, ...], dict[str,
     defaults: dict[str, object] = {}
     for field in fields(SilverDQAnalyzeRequest):
         positional.append(field.name)
-        if field.default is MISSING and field.default_factory is MISSING:
+        default = field.default
+        default_factory = field.default_factory
+        if default is MISSING and default_factory is MISSING:
             required.append(field.name)
-        elif field.default is not MISSING:
-            defaults[field.name] = field.default
+        elif default is not MISSING:
+            defaults[field.name] = default
         else:
-            defaults[field.name] = field.default_factory()  # type: ignore[misc]
+            # default_factory is a real factory here (not the MISSING sentinel).
+            defaults[field.name] = default_factory()  # type: ignore[misc]
     return tuple(positional), tuple(required), defaults, frozenset(positional)
 
 

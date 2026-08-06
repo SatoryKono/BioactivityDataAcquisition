@@ -273,10 +273,10 @@ class ArrowDataConverter:
 
     def _sanitize_single_null_column(
         self,
-        col: pa.Array,
+        col: pa.Array | pa.ChunkedArray,
         field_type: pa.DataType,
         new_type: pa.DataType,
-    ) -> tuple[pa.Array, pa.DataType]:
+    ) -> tuple[pa.Array | pa.ChunkedArray, pa.DataType]:
         """Sanitize one Arrow column; return (column, effective_type)."""
         if pa.types.is_null(field_type):
             return pa.array([None] * len(col), type=pa.string()), pa.string()

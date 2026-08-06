@@ -8,7 +8,8 @@ import tempfile
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path, PurePath
-from typing import TYPE_CHECKING, Literal
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Literal, cast
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
@@ -119,16 +120,17 @@ def _assert_private_runtime_dir(path: Path) -> None:
     except OSError as exc:
         raise OSError(f"unable to stat private runtime path: {path}") from exc
 
-    getuid = getattr(os, "getuid", None)
-    if callable(getuid):
+    getuid = cast("Callable[[], int] | None", getattr(os, "getuid", None))
+    if getuid is not None:
         try:
-            uid = int(getuid())
+            uid = getuid()
         except (TypeError, ValueError, OSError):
             uid = None
-        if uid is not None and st.st_uid != uid:
-            raise OSError(
-                f"private runtime path is not owned by current user: {path}"
-            )
+        else:
+            if st.st_uid != uid:
+                raise OSError(
+                    f"private runtime path is not owned by current user: {path}"
+                )
 
     # Windows reports broad mode bits even for private dirs; skip mode gate.
     if os.name == "nt":
