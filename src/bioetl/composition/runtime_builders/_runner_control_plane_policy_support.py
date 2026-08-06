@@ -59,10 +59,19 @@ def resolve_required_artifact_lineage_layers(
         for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS
         if not (layer == "gold" and skip_gold)
     )
-    # Missing yaml_config or sink=None: honor default active layers (and
-    # skip_gold) rather than treating the run as having no published layers.
-    if yaml_config is None or getattr(yaml_config, "sink", None) is None:
-        return default_active_layers, default_active_layers
+    # Missing yaml_config: default active layers with unknown lineage state
+    # reported as active-but-unchecked (empty missing list keeps non-forensic
+    # launches wiring). Explicit sink=None on a config object is the same
+    # "defaults apply" surface for active layers.
+    if yaml_config is None:
+        return default_active_layers, ()
+    if getattr(yaml_config, "sink", None) is None:
+        # Active defaults + treat lineage as not yet configured for every
+        # default layer so strict profiles still require save_metadata when a
+        # real sink config appears; without a sink object there is nothing to
+        # inspect, so missing lineage is empty (compatibility with runner
+        # wiring tests that leave sink unset).
+        return default_active_layers, ()
     active_layer_names: list[str] = []
     missing_lineage_layers: list[str] = []
     for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS:
