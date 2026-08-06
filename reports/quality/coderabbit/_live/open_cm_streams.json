@@ -1,0 +1,557 @@
+{
+  "critical": [],
+  "major": [
+    {
+      "number": 7760,
+      "path": "src/bioetl/application/core/postrun",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/postrun` (3 findings)"
+    },
+    {
+      "number": 7762,
+      "path": "src/bioetl/application/core/publication_term_extraction_mixin.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/publication_term_extraction_mixin.py` (2 findings)"
+    },
+    {
+      "number": 7763,
+      "path": "src/bioetl/application/core/wiring",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/wiring` (2 findings)"
+    },
+    {
+      "number": 7772,
+      "path": "src/bioetl/application/core/_quarantine_metrics_support.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/_quarantine_metrics_support.py` (2 findings)"
+    },
+    {
+      "number": 7773,
+      "path": "src/bioetl/application/core/_record_normalization_mapping.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/_record_normalization_mapping.py` (2 findings)"
+    },
+    {
+      "number": 7777,
+      "path": "src/bioetl/application/core/entity_id.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/entity_id.py` (2 findings)"
+    },
+    {
+      "number": 7783,
+      "path": "src/bioetl/application/core/lifecycle",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/lifecycle` (2 findings)"
+    },
+    {
+      "number": 7784,
+      "path": "src/bioetl/application/core/pre_silver_finalization_flow.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/pre_silver_finalization_flow.py` (2 findings)"
+    },
+    {
+      "number": 7785,
+      "path": "src/bioetl/application/core/preflight",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/preflight` (2 findings)"
+    },
+    {
+      "number": 7786,
+      "path": "src/bioetl/application/core/runner.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/runner.py` (2 findings)"
+    },
+    {
+      "number": 7787,
+      "path": "src/bioetl/application/core/subcellular_fraction_support.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/subcellular_fraction_support.py` (2 findings)"
+    },
+    {
+      "number": 7795,
+      "path": "src/bioetl/application/core/_base_transformer_structural_support.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/_base_transformer_structural_support.py` (1 findings)"
+    },
+    {
+      "number": 7797,
+      "path": "src/bioetl/application/core/_fetch_forwarding.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/_fetch_forwarding.py` (1 findings)"
+    },
+    {
+      "number": 7798,
+      "path": "src/bioetl/application/core/_filtered_data_source_fetch_support.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/_filtered_data_source_fetch_support.py` (1 findings)"
+    },
+    {
+      "number": 7799,
+      "path": "src/bioetl/application/core/_filtered_data_source_support.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/_filtered_data_source_support.py` (1 findings)"
+    },
+    {
+      "number": 7800,
+      "path": "src/bioetl/application/core/_quarantine_support.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/_quarantine_support.py` (1 findings)"
+    },
+    {
+      "number": 7801,
+      "path": "src/bioetl/application/core/_quarantine_write_support.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/_quarantine_write_support.py` (1 findings)"
+    },
+    {
+      "number": 7802,
+      "path": "src/bioetl/application/core/_record_normalization_hash_support.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/_record_normalization_hash_support.py` (1 findings)"
+    },
+    {
+      "number": 7803,
+      "path": "src/bioetl/application/core/_record_processor_span_support.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/_record_processor_span_support.py` (1 findings)"
+    },
+    {
+      "number": 7811,
+      "path": "src/bioetl/application/core/base_transformer_dependency_helpers_mixin.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/base_transformer_dependency_helpers_mixin.py` (1 fi..."
+    },
+    {
+      "number": 7812,
+      "path": "src/bioetl/application/core/base_transformer_execution_mixin.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/base_transformer_execution_mixin.py` (1 findings)"
+    },
+    {
+      "number": 7841,
+      "path": "src/bioetl/application/core/config.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/config.py` (1 findings)"
+    },
+    {
+      "number": 7842,
+      "path": "src/bioetl/application/core/data_sources",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/data_sources` (1 findings)"
+    },
+    {
+      "number": 7843,
+      "path": "src/bioetl/application/core/normalization_fallbacks.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/normalization_fallbacks.py` (1 findings)"
+    },
+    {
+      "number": 7844,
+      "path": "src/bioetl/application/core/pipeline_services.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/pipeline_services.py` (1 findings)"
+    },
+    {
+      "number": 7845,
+      "path": "src/bioetl/application/core/publication_term_filtering_mixin.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/publication_term_filtering_mixin.py` (1 findings)"
+    },
+    {
+      "number": 7846,
+      "path": "src/bioetl/application/core/publication_term_runtime.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/publication_term_runtime.py` (1 findings)"
+    },
+    {
+      "number": 7847,
+      "path": "src/bioetl/application/core/record_processor.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/record_processor.py` (1 findings)"
+    },
+    {
+      "number": 7848,
+      "path": "src/bioetl/application/core/runner_flow_metrics.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/application/core/runner_flow_metrics.py` (1 findings)"
+    },
+    {
+      "number": 7904,
+      "path": "src/bioetl/domain/ports/control_plane",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/domain/ports/control_plane` (1 findings)"
+    },
+    {
+      "number": 7920,
+      "path": "src/bioetl/domain/ports/audit.py",
+      "title": "[CR-FULL][Wave A][major] residual in `src/bioetl/domain/ports/audit.py` (1 findings)"
+    },
+    {
+      "number": 8007,
+      "path": "src/bioetl/infrastructure/observability/_metrics_defs_pipeline.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/_metrics_defs_pipeline.py` (2 findings)"
+    },
+    {
+      "number": 8008,
+      "path": "src/bioetl/infrastructure/observability/_metrics_gateway_publication.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/_metrics_gateway_publication.py` (2 fin..."
+    },
+    {
+      "number": 8009,
+      "path": "src/bioetl/infrastructure/observability/_metrics_server_state.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/_metrics_server_state.py` (1 findings)"
+    },
+    {
+      "number": 8010,
+      "path": "src/bioetl/infrastructure/observability/debug_adapters.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/debug_adapters.py` (1 findings)"
+    },
+    {
+      "number": 8011,
+      "path": "src/bioetl/infrastructure/observability/metrics_collector.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/metrics_collector.py` (1 findings)"
+    },
+    {
+      "number": 8012,
+      "path": "src/bioetl/infrastructure/observability/anomaly",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/anomaly` (3 findings)"
+    },
+    {
+      "number": 8013,
+      "path": "src/bioetl/infrastructure/observability/_metrics_defs_adapter.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/_metrics_defs_adapter.py` (2 findings)"
+    },
+    {
+      "number": 8014,
+      "path": "src/bioetl/infrastructure/observability/logging_config.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/logging_config.py` (2 findings)"
+    },
+    {
+      "number": 8015,
+      "path": "src/bioetl/infrastructure/observability/prometheus_metric_registries.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/prometheus_metric_registries.py` (2 fin..."
+    },
+    {
+      "number": 8016,
+      "path": "src/bioetl/infrastructure/observability/tracing.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/tracing.py` (2 findings)"
+    },
+    {
+      "number": 8017,
+      "path": "src/bioetl/infrastructure/observability/__init__.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/__init__.py` (1 findings)"
+    },
+    {
+      "number": 8018,
+      "path": "src/bioetl/infrastructure/observability/_metrics_defs_core.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/_metrics_defs_core.py` (1 findings)"
+    },
+    {
+      "number": 8019,
+      "path": "src/bioetl/infrastructure/observability/_metrics_defs_pipeline_checkpoint.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/_metrics_defs_pipeline_checkpoint.py` (..."
+    },
+    {
+      "number": 8020,
+      "path": "src/bioetl/infrastructure/observability/_metrics_defs_storage.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/_metrics_defs_storage.py` (1 findings)"
+    },
+    {
+      "number": 8021,
+      "path": "src/bioetl/infrastructure/observability/_prometheus_metric_label_normalizers.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/_prometheus_metric_label_normalizers.py..."
+    },
+    {
+      "number": 8022,
+      "path": "src/bioetl/infrastructure/observability/_prometheus_metric_label_vocab_publication.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/_prometheus_metric_label_vocab_publicat..."
+    },
+    {
+      "number": 8023,
+      "path": "src/bioetl/infrastructure/observability/circuit_breaker_mapping.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/circuit_breaker_mapping.py` (1 findings)"
+    },
+    {
+      "number": 8024,
+      "path": "src/bioetl/infrastructure/observability/logging.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/logging.py` (1 findings)"
+    },
+    {
+      "number": 8025,
+      "path": "src/bioetl/infrastructure/observability/logging_helpers.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/logging_helpers.py` (1 findings)"
+    },
+    {
+      "number": 8026,
+      "path": "src/bioetl/infrastructure/observability/metrics_definitions.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/metrics_definitions.py` (1 findings)"
+    },
+    {
+      "number": 8027,
+      "path": "src/bioetl/infrastructure/observability/prometheus_metric_label_dispatch.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/prometheus_metric_label_dispatch.py` (1..."
+    },
+    {
+      "number": 8028,
+      "path": "src/bioetl/infrastructure/observability/server.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/server.py` (1 findings)"
+    },
+    {
+      "number": 8029,
+      "path": "src/bioetl/infrastructure/observability/unified_logger.py",
+      "title": "[CR-FULL][Wave C][major] residual in `src/bioetl/infrastructure/observability/unified_logger.py` (1 findings)"
+    }
+  ],
+  "streams": {
+    "S1 app-lifecycle-runner": [
+      {
+        "number": 7760,
+        "severity": "major",
+        "path": "src/bioetl/application/core/postrun"
+      },
+      {
+        "number": 7763,
+        "severity": "major",
+        "path": "src/bioetl/application/core/wiring"
+      },
+      {
+        "number": 7777,
+        "severity": "major",
+        "path": "src/bioetl/application/core/entity_id.py"
+      },
+      {
+        "number": 7783,
+        "severity": "major",
+        "path": "src/bioetl/application/core/lifecycle"
+      },
+      {
+        "number": 7784,
+        "severity": "major",
+        "path": "src/bioetl/application/core/pre_silver_finalization_flow.py"
+      },
+      {
+        "number": 7785,
+        "severity": "major",
+        "path": "src/bioetl/application/core/preflight"
+      },
+      {
+        "number": 7786,
+        "severity": "major",
+        "path": "src/bioetl/application/core/runner.py"
+      },
+      {
+        "number": 7787,
+        "severity": "major",
+        "path": "src/bioetl/application/core/subcellular_fraction_support.py"
+      },
+      {
+        "number": 7841,
+        "severity": "major",
+        "path": "src/bioetl/application/core/config.py"
+      },
+      {
+        "number": 7844,
+        "severity": "major",
+        "path": "src/bioetl/application/core/pipeline_services.py"
+      },
+      {
+        "number": 7848,
+        "severity": "major",
+        "path": "src/bioetl/application/core/runner_flow_metrics.py"
+      }
+    ],
+    "S2 app-record-transform": [
+      {
+        "number": 7762,
+        "severity": "major",
+        "path": "src/bioetl/application/core/publication_term_extraction_mixin.py"
+      },
+      {
+        "number": 7772,
+        "severity": "major",
+        "path": "src/bioetl/application/core/_quarantine_metrics_support.py"
+      },
+      {
+        "number": 7773,
+        "severity": "major",
+        "path": "src/bioetl/application/core/_record_normalization_mapping.py"
+      },
+      {
+        "number": 7795,
+        "severity": "major",
+        "path": "src/bioetl/application/core/_base_transformer_structural_support.py"
+      },
+      {
+        "number": 7797,
+        "severity": "major",
+        "path": "src/bioetl/application/core/_fetch_forwarding.py"
+      },
+      {
+        "number": 7798,
+        "severity": "major",
+        "path": "src/bioetl/application/core/_filtered_data_source_fetch_support.py"
+      },
+      {
+        "number": 7799,
+        "severity": "major",
+        "path": "src/bioetl/application/core/_filtered_data_source_support.py"
+      },
+      {
+        "number": 7800,
+        "severity": "major",
+        "path": "src/bioetl/application/core/_quarantine_support.py"
+      },
+      {
+        "number": 7801,
+        "severity": "major",
+        "path": "src/bioetl/application/core/_quarantine_write_support.py"
+      },
+      {
+        "number": 7802,
+        "severity": "major",
+        "path": "src/bioetl/application/core/_record_normalization_hash_support.py"
+      },
+      {
+        "number": 7803,
+        "severity": "major",
+        "path": "src/bioetl/application/core/_record_processor_span_support.py"
+      },
+      {
+        "number": 7811,
+        "severity": "major",
+        "path": "src/bioetl/application/core/base_transformer_dependency_helpers_mixin.py"
+      },
+      {
+        "number": 7812,
+        "severity": "major",
+        "path": "src/bioetl/application/core/base_transformer_execution_mixin.py"
+      },
+      {
+        "number": 7842,
+        "severity": "major",
+        "path": "src/bioetl/application/core/data_sources"
+      },
+      {
+        "number": 7843,
+        "severity": "major",
+        "path": "src/bioetl/application/core/normalization_fallbacks.py"
+      },
+      {
+        "number": 7845,
+        "severity": "major",
+        "path": "src/bioetl/application/core/publication_term_filtering_mixin.py"
+      },
+      {
+        "number": 7846,
+        "severity": "major",
+        "path": "src/bioetl/application/core/publication_term_runtime.py"
+      },
+      {
+        "number": 7847,
+        "severity": "major",
+        "path": "src/bioetl/application/core/record_processor.py"
+      }
+    ],
+    "S3 obs-metrics": [
+      {
+        "number": 8007,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/_metrics_defs_pipeline.py"
+      },
+      {
+        "number": 8008,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/_metrics_gateway_publication.py"
+      },
+      {
+        "number": 8009,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/_metrics_server_state.py"
+      },
+      {
+        "number": 8011,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/metrics_collector.py"
+      },
+      {
+        "number": 8012,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/anomaly"
+      },
+      {
+        "number": 8013,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/_metrics_defs_adapter.py"
+      },
+      {
+        "number": 8015,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/prometheus_metric_registries.py"
+      },
+      {
+        "number": 8017,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/__init__.py"
+      },
+      {
+        "number": 8018,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/_metrics_defs_core.py"
+      },
+      {
+        "number": 8019,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/_metrics_defs_pipeline_checkpoint.py"
+      },
+      {
+        "number": 8020,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/_metrics_defs_storage.py"
+      },
+      {
+        "number": 8021,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/_prometheus_metric_label_normalizers.py"
+      },
+      {
+        "number": 8022,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/_prometheus_metric_label_vocab_publication.py"
+      },
+      {
+        "number": 8026,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/metrics_definitions.py"
+      },
+      {
+        "number": 8027,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/prometheus_metric_label_dispatch.py"
+      },
+      {
+        "number": 8028,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/server.py"
+      }
+    ],
+    "S4 obs-logging-tracing": [
+      {
+        "number": 8010,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/debug_adapters.py"
+      },
+      {
+        "number": 8014,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/logging_config.py"
+      },
+      {
+        "number": 8016,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/tracing.py"
+      },
+      {
+        "number": 8023,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/circuit_breaker_mapping.py"
+      },
+      {
+        "number": 8024,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/logging.py"
+      },
+      {
+        "number": 8025,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/logging_helpers.py"
+      },
+      {
+        "number": 8029,
+        "severity": "major",
+        "path": "src/bioetl/infrastructure/observability/unified_logger.py"
+      }
+    ],
+    "S5 domain": [
+      {
+        "number": 7904,
+        "severity": "major",
+        "path": "src/bioetl/domain/ports/control_plane"
+      },
+      {
+        "number": 7920,
+        "severity": "major",
+        "path": "src/bioetl/domain/ports/audit.py"
+      }
+    ]
+  }
+}
