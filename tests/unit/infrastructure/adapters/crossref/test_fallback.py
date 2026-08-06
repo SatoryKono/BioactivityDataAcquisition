@@ -97,11 +97,10 @@ class TestTitlesMatch:
         )
 
     def test_empty_strings(self):
-        """Test empty string handling."""
-        assert titles_match("", "")  # Both empty = match
-        # Empty string is substring of any string, so this returns True
-        assert titles_match("Title", "")  # Empty is substring of "title"
-        assert titles_match("", "Title")  # Empty is substring of "title"
+        """Empty titles never match (fail-closed for fallback quality)."""
+        assert titles_match("", "") is False
+        assert titles_match("Title", "") is False
+        assert titles_match("", "Title") is False
 
 
 # =============================================================================
