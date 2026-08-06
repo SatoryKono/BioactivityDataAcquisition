@@ -518,6 +518,118 @@
     "rule": "reportReturnType"
   },
   {
+    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
+    "severity": "error",
+    "message": "Instance variable \"http_client\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 48,
+        "character": 8
+      },
+      "end": {
+        "line": 48,
+        "character": 19
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
+    "severity": "error",
+    "message": "Instance variable \"_logger\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 49,
+        "character": 8
+      },
+      "end": {
+        "line": 49,
+        "character": 15
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
+    "severity": "error",
+    "message": "Instance variable \"_adapter_metrics\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 50,
+        "character": 8
+      },
+      "end": {
+        "line": 50,
+        "character": 24
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
+    "severity": "error",
+    "message": "Instance variable \"_request_collector\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 51,
+        "character": 8
+      },
+      "end": {
+        "line": 51,
+        "character": 26
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
+    "severity": "error",
+    "message": "Instance variable \"_query_builder\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 52,
+        "character": 8
+      },
+      "end": {
+        "line": 52,
+        "character": 22
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
+    "severity": "error",
+    "message": "Instance variable \"_response_mapper\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 53,
+        "character": 8
+      },
+      "end": {
+        "line": 53,
+        "character": 24
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
+    "severity": "error",
+    "message": "Instance variable \"_fetch_flow\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 54,
+        "character": 8
+      },
+      "end": {
+        "line": 54,
+        "character": 19
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
     "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\decorators\\_circuit_breaker_support.py",
     "severity": "error",
     "message": "Argument of type \"object\" cannot be assigned to parameter \"x\" of type \"ConvertibleToFloat\" in function \"__new__\"\n\u00a0\u00a0Type \"object\" is not assignable to type \"ConvertibleToFloat\"\n\u00a0\u00a0\u00a0\u00a0\"object\" is not assignable to \"str\"\n\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"Buffer\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__buffer__\" is not present\n\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsFloat\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__float__\" is not present\n\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsIndex\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__index__\" is not present",
