@@ -209,6 +209,7 @@ def build_delta_write_request(
         partition_cols=ctx.partition_cols,
         schema_mode=payload.schema_mode,
         merge_schema=payload.merge_schema,
+        operation_id=f"{payload.table_path}:{payload.validated_mode.value}",
     )
 
 

@@ -84,26 +84,30 @@ class StorageRowReconciliationAdapter(RowReconciliationPort):
         *,
         side: str,
     ) -> list[dict[str, object]]:
+        max_rows = getattr(config, "max_rows", None)
         if RowReconciliationLayer(config.layer) is RowReconciliationLayer.SILVER:
             return await self._call_reader(
                 self.silver_reader,
                 "read_silver",
                 config.left_table if side == "left" else config.right_table,
+                max_rows=max_rows if isinstance(max_rows, int) else None,
                 columns=None,
             )
         return await self._call_reader(
             self.gold_reader,
             "read_gold",
             config.left_table if side == "left" else config.right_table,
+            max_rows=max_rows if isinstance(max_rows, int) else None,
             columns=None,
             current_only=True,
         )
-
     async def _call_reader(
         self,
         reader: object,
         method_name: str,
         table_name: str,
+        *,
+        max_rows: int | None = None,
         **kwargs: object,
     ) -> list[dict[str, object]]:
         method = getattr(reader, method_name, None)
@@ -112,7 +116,10 @@ class StorageRowReconciliationAdapter(RowReconciliationPort):
                 f"Configured {method_name} reader does not expose {method_name}()"
             )
         try:
-            value = method(table_name, **_supported_kwargs(method, kwargs))
+            call_kwargs = dict(kwargs)
+            if max_rows is not None:
+                call_kwargs.setdefault("limit", max_rows)
+            value = method(table_name, **_supported_kwargs(method, call_kwargs))
             if inspect.isawaitable(value):
                 value = await value
             from collections.abc import Iterable
@@ -122,7 +129,15 @@ class StorageRowReconciliationAdapter(RowReconciliationPort):
                 Iterable[Any],  # Any: storage result is dynamically dispatched.
                 value,
             )
-            return [dict(row) for row in rows]
+            materialized: list[dict[str, object]] = []
+            for row in rows:
+                materialized.append(dict(row))
+                if max_rows is not None and len(materialized) > max_rows:
+                    raise RowReconciliationExecutionError(
+                        f"Row reconciliation exceeded max_rows={max_rows} "
+                        f"while reading {method_name}({table_name!r})"
+                    )
+            return materialized
         except RowReconciliationError:
             raise
         except (AttributeError, LookupError, TypeError, ValueError) as exc:

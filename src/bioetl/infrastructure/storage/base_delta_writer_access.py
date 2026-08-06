@@ -67,7 +67,8 @@ class BaseDeltaWriterTableAccessMixin:
         if dt is None:
             raise FileNotFoundError(f"Table not found: {table_name}")
 
-        return _base._read_delta_records(dt, columns)
+        # Offload blocking record materialization off the event loop.
+        return await asyncio.to_thread(_base._read_delta_records, dt, columns)
 
     def clear(self, table_name: str | None = None, dry_run: bool = False) -> int:
         """Clear one Delta table or every Delta table under ``base_path``."""
