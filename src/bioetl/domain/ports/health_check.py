@@ -9,7 +9,6 @@ with detailed health status information including latency and error tracking.
 from __future__ import annotations
 
 import math
-
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
