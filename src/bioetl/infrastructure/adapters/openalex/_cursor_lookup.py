@@ -107,7 +107,7 @@ async def search_works_by_title(
             title=title[:50],
             error=str(error),
         )
-        title_search_cache[cache_key] = []
+        # Do not cache failures as empty results — allow later retries.
         return []
 
     cached_results = [dict(item) for item in results]
