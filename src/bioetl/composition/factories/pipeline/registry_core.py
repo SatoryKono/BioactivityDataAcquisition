@@ -121,12 +121,17 @@ def create_registry() -> PipelineRegistry:
 
 
 _compat_default_registry: PipelineRegistry | None = None
+_compat_default_registry_lock = threading.RLock()
 
 
 def get_default_registry() -> PipelineRegistry:
-    """Return the retained compatibility registry instance."""
+    """Return the retained compatibility registry instance (thread-safe)."""
     global _compat_default_registry
-    if _compat_default_registry is None:
-        _compat_default_registry = create_registry()
-        _compat_default_registry._bioetl_shared_default_registry = True
-    return _compat_default_registry
+    if _compat_default_registry is not None:
+        return _compat_default_registry
+    with _compat_default_registry_lock:
+        if _compat_default_registry is None:
+            registry = create_registry()
+            registry._bioetl_shared_default_registry = True
+            _compat_default_registry = registry
+        return _compat_default_registry

@@ -10,7 +10,21 @@ from bioetl.composition.factories.pipeline.registry_manifest import PIPELINE_CON
 
 __all__ = ["LazyFactoryCatalog", "list_pipeline_names"]
 
-_CONFIGS_BY_NAME = {config.pipeline_name: config for config in PIPELINE_CONFIGS}
+
+def _build_configs_by_name() -> dict[str, object]:
+    """Index pipeline configs by name; fail closed on duplicate pipeline_name."""
+    by_name: dict[str, object] = {}
+    for config in PIPELINE_CONFIGS:
+        name = config.pipeline_name
+        if name in by_name:
+            raise RuntimeError(
+                f"Duplicate pipeline_name in PIPELINE_CONFIGS: {name!r}"
+            )
+        by_name[name] = config
+    return by_name
+
+
+_CONFIGS_BY_NAME = _build_configs_by_name()
 
 
 class LazyFactoryCatalog(Mapping[str, object]):

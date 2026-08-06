@@ -122,8 +122,18 @@ def build_pipeline_create_runner_request_from_kwargs(
 
 
 def extract_entity_type(pipeline_name: str) -> str | None:
-    """Extract trailing entity token from `<provider>_<entity>` pipeline names."""
-    return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
+    """Extract entity suffix from ``<provider>_<entity...>`` pipeline names.
+
+    Preserves the full multi-token entity after the first underscore so
+    ``chembl_target_protein_classification`` yields
+    ``target_protein_classification`` (not only ``classification``).
+    """
+    text = pipeline_name.strip()
+    if not text or "_" not in text:
+        return None
+    _provider, entity = text.split("_", 1)
+    entity = entity.strip()
+    return entity or None
 
 
 def resolve_data_source_creator(

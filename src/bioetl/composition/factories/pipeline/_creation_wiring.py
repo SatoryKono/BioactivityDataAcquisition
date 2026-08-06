@@ -166,7 +166,7 @@ def _build_metadata_coordinator(
             ),
             dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
             effective_config_artifact_id=request.effective_config_artifact_id,
-            exact_replay=bool(getattr(request.runtime, "exact_replay", False)),
+            exact_replay=bool(request.runtime.exact_replay),
             replay_of_run_id=request.replay_of_run_id,
             replay_of_manifest_id=request.replay_of_manifest_id,
             input_snapshot_fingerprint=request.input_snapshot_fingerprint,
