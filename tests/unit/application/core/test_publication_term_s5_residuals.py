@@ -37,11 +37,13 @@ def test_resolve_target_fallback_upstream_limit_treats_zero_as_zero() -> None:
             raise AssertionError("upstream fetch must not run for pure limit math")
 
     wrapper = PublicationTermDataSource(data_source=_Src())  # type: ignore[arg-type]
-    assert wrapper._resolve_target_fallback_upstream_limit(0) == 0
-    assert wrapper._resolve_target_fallback_upstream_limit(2) == (
+    resolve_limit = getattr(wrapper, "_resolve_target_fallback_upstream_limit")
+    assert callable(resolve_limit)
+    assert resolve_limit(0) == 0
+    assert resolve_limit(2) == (
         2 * PublicationTermDataSource.PUBLICATION_LIMIT_MULTIPLIER
     )
-    assert wrapper._resolve_target_fallback_upstream_limit(None) is None
+    assert resolve_limit(None) is None
 
 
 @pytest.mark.asyncio

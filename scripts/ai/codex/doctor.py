@@ -8,14 +8,32 @@ import concurrent.futures
 import json
 import os
 import socket
+import sys
 import time
 import urllib.request
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
-import setup_mcp  # pyright: ignore[reportImplicitRelativeImport]
-from mcp_profile_contract import  # pyright: ignore[reportImplicitRelativeImport] profile_plan, validate_profile_matrix
-from native_runtime_contract import  # pyright: ignore[reportImplicitRelativeImport] Finding, REPO_ROOT, validate_native_runtime
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+import setup_mcp  # noqa: E402  # pyright: ignore[reportImplicitRelativeImport]
+from mcp_profile_contract import (  # noqa: E402  # pyright: ignore[reportImplicitRelativeImport]
+    profile_plan,
+    validate_profile_matrix,
+)
+from native_runtime_contract import (  # noqa: E402  # pyright: ignore[reportImplicitRelativeImport]
+    Finding,
+    REPO_ROOT,
+    validate_native_runtime,
+)
+
+
+def _as_str_list(value: object) -> list[str]:
+    if isinstance(value, (list, tuple, set)):
+        return [str(item) for item in value]
+    return []
 
 
 WINDOWS_STREAMING_MODES = {"windows_docker_streaming", "windows_npx_streaming"}
@@ -71,7 +89,13 @@ def _probe(name: str, entry: dict[str, Any], timeout: float) -> dict[str, Any]:
     try:
         with socket.create_connection(("127.0.0.1", port), timeout=timeout):
             port_open = True
-        if entry.get("launch_mode") in WINDOWS_STREAMING_MODES:
+        if entry.get("launch_mode") in def _as_str_list(value: object) -> list[str]:
+    if isinstance(value, (list, tuple, set)):
+        return [str(item) for item in value]
+    return []
+
+
+WINDOWS_STREAMING_MODES:
             ping_ok = True
             detail = "listener ready; streaming bridge has no /ping requirement"
         else:
@@ -106,7 +130,7 @@ def run_mcp(
     catalog_path = repo_root / "scripts/ops/runtime/mcp/shared-servers.json"
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))["servers"]
     required = set(_as_str_list(plan.get("required_local")))
-    selected_local = sorted(required | set(plan["optional_local"]))
+    selected_local = sorted(required | set(_as_str_list(plan.get("optional_local"))))
     results: list[dict[str, Any]] = []
 
     pool = concurrent.futures.ThreadPoolExecutor(
@@ -179,7 +203,7 @@ def run_mcp(
             print(
                 f"[{item['status']}] {item['server']} {scope} {item['url']} — {item['detail']}"
             )
-        for name in plan["remote_or_external"]:
+        for name in _as_str_list(plan.get("remote_or_external")):
             print(f"[SKIP] {name} remote/auth-managed; inspect with 'codex mcp list'")
         print(
             f"Summary: failed={failed} warned={warned} skipped={len(plan['remote_or_external'])}"
