@@ -133,20 +133,24 @@ def main() -> None:
     lines.append("")
     lines.append("| Stream | Exclusive paths | Issues | IDs |")
     lines.append("|--------|-----------------|-------:|-----|")
+    def _issue_number(item: dict[str, object]) -> int:
+        value = item.get("number", 0)
+        return value if isinstance(value, int) else 0
+
     for s in order:
-        items = sorted(streams[s], key=lambda x: x["number"])
-        ids = ", ".join(f"#{m['number']}" for m in items[:8])
+        items = sorted(streams[s], key=_issue_number)
+        ids = ", ".join(f"#{m.get('number')}" for m in items[:8])
         if len(items) > 8:
             ids += f", … +{len(items) - 8}"
         lines.append(f"| **{s}** | {roots[s]} | {len(items)} | {ids} |")
     lines.append("")
 
     for s in order:
-        items = sorted(streams[s], key=lambda x: x["number"])
+        items = sorted(streams[s], key=_issue_number)
         lines.append(f"### {s} ({len(items)})")
         lines.append("")
         for m in items:
-            lines.append(f"- **#{m['number']}** `{m['path']}`")
+            lines.append(f"- **#{m.get('number')}** `{m.get('path')}`")
         lines.append("")
 
     lines.append("## Правила параллелизма")
@@ -184,7 +188,7 @@ def main() -> None:
                     "severity": "major",
                     "path": m["path"],
                 }
-                for m in sorted(streams[s], key=lambda x: x["number"])
+                for m in sorted(streams[s], key=_issue_number)
             ]
             for s in order
         },

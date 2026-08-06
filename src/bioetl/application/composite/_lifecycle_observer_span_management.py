@@ -72,7 +72,9 @@ class CompositeLifecycleSpanManagementMixin:
             ),
         )
         span.__enter__()
-        self._run_spans[run_id] = cast(_CompositeSpanHandleProtocol, span)
+        self._run_spans[run_id] = cast(
+            _CompositeSpanHandleProtocol, cast(object, span)
+        )
         if self.metrics is not None:
             self.metrics.increment_counter(
                 "bioetl_traced_runs_total",
@@ -104,7 +106,7 @@ class CompositeLifecycleSpanManagementMixin:
         )
         span.__enter__()
         self._phase_spans[(run_id, phase_name)] = cast(
-            _CompositeSpanHandleProtocol, span
+            _CompositeSpanHandleProtocol, cast(object, span)
         )
 
     def _close_span_safely(

@@ -1,6 +1,9 @@
 # Host attrs/methods provided by concrete CrossRefAdapter composition.
 """Port-facing fetch/health/metadata surface for CrossRefAdapter."""
 
+# Host attrs are set by CrossRefAdapter composition; TYPE_CHECKING-only annotations
+# intentionally avoid dataclass field defaults on the adapter host.
+# pyright: reportUninitializedInstanceVariable=false
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar

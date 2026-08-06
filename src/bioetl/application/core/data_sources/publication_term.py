@@ -40,7 +40,8 @@ class PublicationTermDataSource(
     """Decorator that exposes publication_term by extracting terms from publications."""
 
     SOURCE_ENTITY_TYPE: ClassVar[str] = "publication"
-    TARGET_ENTITY_TYPE: ClassVar[str] = "publication_term"
+    # Instance annotation matches _TargetEntityFetchDelegationMixin host contract.
+    TARGET_ENTITY_TYPE: str = "publication_term"
     PUBLICATION_LIMIT_MULTIPLIER: ClassVar[int] = 50
 
     def __init__(self, data_source: DataSourcePort) -> None:
