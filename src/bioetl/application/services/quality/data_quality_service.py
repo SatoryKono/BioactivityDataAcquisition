@@ -5,7 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
-from bioetl.application.services.quality.data_quality_anomalies import DataQualityAnomalyMixin
+from bioetl.application.services.quality.data_quality_anomalies import (
+    DataQualityAnomalyMixin,
+)
 from bioetl.application.services.quality.data_quality_thresholds import (
     DataQualityThresholdMixin,
 )

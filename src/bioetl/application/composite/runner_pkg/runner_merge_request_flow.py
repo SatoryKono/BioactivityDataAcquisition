@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import Protocol, cast
 
+from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
     build_merge_execution_request,
@@ -21,7 +22,6 @@ from bioetl.application.composite.runner_pkg.runner_merge_stage_runtime import (
     handle_merge_phase_exception,
     handle_merge_success,
 )
-from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_pkg.runner_merge_stage_types import (
     _CompositeRunnerMergeStageHostProtocol,
     _PreparedMergeInputs,

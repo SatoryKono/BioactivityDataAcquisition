@@ -9,7 +9,12 @@ from __future__ import annotations
 
 from importlib import import_module
 
-# Static metadata-only map: package import must never import wiring submodules.
+from bioetl.application.core.wiring._runtime_export_names import (
+    RUNTIME_EXPORT_NAMES,
+)
+
+# Static metadata-only map: avoid importing heavy wiring submodules at package load.
+# `_runtime_export_names` is a pure name tuple (no service imports).
 # Later groups intentionally overwrite shared names (factory -> runtime).
 _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     "bioetl.application.core.wiring.factory": (
@@ -49,40 +54,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "TissueTransformer",
         "UniProtProteinTransformer",
     ),
-    "bioetl.application.core.wiring.runtime": (
-        "BasePipeline",
-        "BatchCheckpointRecoveryService",
-        "BatchExecutionFSM",
-        "BatchExecutionLifecycleService",
-        "BatchExecutionRunService",
-        "BatchExecutionStateService",
-        "BatchExecutor",
-        "BatchExecutorDependencies",
-        "BatchExtractionLoopService",
-        "BatchMemoryManagerService",
-        "BatchMetricsRecorderService",
-        "BatchProcessingComponents",
-        "BatchProcessingService",
-        "BatchProcessingSupportService",
-        "BatchProgressService",
-        "BatchTracingManagerService",
-        "BatchTransformer",
-        "BatchWriter",
-        "BatchWriterOptions",
-        "CheckpointRuntimeService",
-        "ContentHashPolicyByVersion",
-        "ContentHashVersionPolicy",
-        "GoldFilterCallback",
-        "GoldTransformCallback",
-        "PipelineService",
-        "PipelineStorageProtocol",
-        "QuarantineRuntimeService",
-        "RecordNormalizationProcessor",
-        "RecordProcessor",
-        "RecordProcessorConfig",
-        "ShutdownSignal",
-        "TransformCallback",
-    ),
+    "bioetl.application.core.wiring.runtime": RUNTIME_EXPORT_NAMES,
     "bioetl.application.core.wiring.transformer": (
         "BaseTransformer",
         "DefaultContractPolicy",

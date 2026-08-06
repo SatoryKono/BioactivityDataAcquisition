@@ -5,9 +5,11 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from urllib.parse import urlencode
 
-from bioetl.application.services.export_lineage.audit_inspection_service import AuditInspectionResult
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionResult,
+)
+from bioetl.application.services.export_lineage.audit_inspection_service import (
+    AuditInspectionResult,
 )
 
 TRACE_DRILLDOWN_PATH = "/a/grafana-exploretraces-app/"

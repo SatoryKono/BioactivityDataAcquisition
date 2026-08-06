@@ -35,6 +35,26 @@ def normalize_publication_term_limit(limit: int | None) -> int | None:
     return limit
 
 
+def resolve_publication_upstream_limit(
+    limit: int | None,
+    *,
+    multiplier: int,
+) -> tuple[int | None, int | None] | None:
+    """Normalize term limit and derive upstream publication budget.
+
+    Returns:
+        ``None`` when the call must yield zero records (hard limit 0).
+        Otherwise ``(normalized_term_limit, publication_limit)``.
+    """
+    normalized_limit = normalize_publication_term_limit(limit)
+    if normalized_limit == 0:
+        return None
+    publication_limit = (
+        normalized_limit * multiplier if normalized_limit is not None else None
+    )
+    return normalized_limit, publication_limit
+
+
 class PublicationTermExtractionHost(Protocol):
     """Structural host required by publication-term extraction mixins.
 
@@ -108,15 +128,12 @@ class PublicationTermExtractionMixin:
         filter_field: str | None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch publications from wrapped source and yield extracted terms."""
-        normalized_limit = normalize_publication_term_limit(limit)
-        if normalized_limit == 0:
-            return
-
-        publication_limit = (
-            normalized_limit * self.PUBLICATION_LIMIT_MULTIPLIER
-            if normalized_limit is not None
-            else None
+        resolved = resolve_publication_upstream_limit(
+            limit, multiplier=self.PUBLICATION_LIMIT_MULTIPLIER
         )
+        if resolved is None:
+            return
+        normalized_limit, publication_limit = resolved
         publications = self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
             limit=publication_limit,
@@ -174,15 +191,12 @@ class PublicationTermExtractionMixin:
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch filtered publications and yield extracted terms."""
-        normalized_limit = normalize_publication_term_limit(limit)
-        if normalized_limit == 0:
-            return
-
-        publication_limit = (
-            normalized_limit * self.PUBLICATION_LIMIT_MULTIPLIER
-            if normalized_limit is not None
-            else None
+        resolved = resolve_publication_upstream_limit(
+            limit, multiplier=self.PUBLICATION_LIMIT_MULTIPLIER
         )
+        if resolved is None:
+            return
+        normalized_limit, publication_limit = resolved
         publications = filterable.fetch_filtered(
             entity_type=self.SOURCE_ENTITY_TYPE,
             filter_ids=filter_ids,

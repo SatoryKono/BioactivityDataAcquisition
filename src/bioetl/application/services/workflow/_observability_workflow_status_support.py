@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.workflow._observability_workflow_evidence_support import (
-    resolve_required_evidence_profile,
-)
 from bioetl.application.services.checkpoint.checkpoint_models import CheckpointInfo
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionResult,
+)
+from bioetl.application.services.workflow._observability_workflow_evidence_support import (
+    resolve_required_evidence_profile,
 )
 
 if TYPE_CHECKING:
