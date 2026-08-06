@@ -154,16 +154,26 @@ class CrossRefAdapter(
     async def aclose(self) -> None:
         """Close HTTP client only when this adapter holds an entered context.
 
-        Injected clients that were never entered (depth 0) or are nested
-        (depth > 1) are left to their outer owner / UnifiedHTTPClient depth
-        accounting. Depth 1 means this adapter is the sole active enter.
+        Injected clients that were never entered (depth 0) are left to their
+        outer owner. When the client exposes enter-depth tracking and depth
+        is zero, skip close. Clients without depth metadata (or depth >= 1)
+        still close via ``__aexit__`` so sole ownership and legacy mocks work.
         """
         if not self.http_client:
             return
-        enter_depth_fn = getattr(self.http_client, "_enter_depth", None)
+        depth: int | None = None
+        enter_depth_fn = getattr(type(self.http_client), "_enter_depth", None)
         if callable(enter_depth_fn):
-            depth = int(enter_depth_fn())
-        else:
-            depth = int(getattr(self.http_client, "_client_enter_depth", 0) or 0)
-        if depth >= 1:
-            await self.http_client.__aexit__(None, None, None)
+            try:
+                raw = enter_depth_fn(self.http_client)
+            except TypeError:
+                raw = None
+            if isinstance(raw, int | float):
+                depth = int(raw)
+        if depth is None:
+            raw_attr = getattr(self.http_client, "_client_enter_depth", None)
+            if isinstance(raw_attr, int | float):
+                depth = int(raw_attr)
+        if depth == 0:
+            return
+        await self.http_client.__aexit__(None, None, None)
