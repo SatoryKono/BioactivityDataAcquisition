@@ -224,17 +224,19 @@ class BatchMetricsRecorderService:
     ) -> None:
         """Record bounded Silver-filter reject breakdown labels.
         `message` remains display-only and is intentionally ignored here.
+
+        Pipeline accounting always runs; Prometheus emission is skipped only
+        when the metrics port is unset.
         """
-        if not self._metrics:
-            return
         reason_code, rule_type, field = _silver_filter_rejection_labels(details)
-        self._pipeline_metrics.record_silver_filter_rejections(
-            run_type=self._run_type_label,
-            reason_code=reason_code,
-            rule_type=rule_type,
-            field=field,
-            count=count,
-        )
+        if self._metrics is not None:
+            self._pipeline_metrics.record_silver_filter_rejections(
+                run_type=self._run_type_label,
+                reason_code=reason_code,
+                rule_type=rule_type,
+                field=field,
+                count=count,
+            )
         _record_silver_removal_accounting(
             outcome="filtered_out",
             reason_code=reason_code or "FILTERED_OUT_SILVER",

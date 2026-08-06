@@ -170,10 +170,10 @@ class BatchMemoryManagerService:
             )
             return recovered_size
         if current_size < self._initial_batch_size:
-            recovery_size = min(
-                int(current_size * 1.1),
-                self._initial_batch_size,
-            )
+            # Always advance at least by 1 so tiny sizes (e.g. 1) still recover
+            # toward the initial batch size rather than stalling on int(1.1)==1.
+            grown = max(current_size + 1, int(current_size * 1.1))
+            recovery_size = min(grown, self._initial_batch_size)
             self._record_decision(
                 stage="recovery",
                 old_size=current_size,

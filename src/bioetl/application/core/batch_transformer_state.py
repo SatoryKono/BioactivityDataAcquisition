@@ -170,10 +170,14 @@ def apply_stream_transform_result_to_state(
 
 
 def build_transform_result(state: TransformAggregationState) -> TransformResult:
-    """Build public transform result from aggregate state."""
+    """Build public transform result from aggregate state.
+
+    Copies record lists so later mutation of ``state`` cannot alter a published
+    frozen ``TransformResult``.
+    """
     return TransformResult(
-        silver_records=state.silver_records,
-        gold_records=state.gold_records,
+        silver_records=list(state.silver_records),
+        gold_records=list(state.gold_records),
         quarantined_count=state.quarantined_count,
         gold_excluded_by_contract_count=state.gold_excluded_by_contract_count,
         filtered_out_count=state.filtered_out_count,

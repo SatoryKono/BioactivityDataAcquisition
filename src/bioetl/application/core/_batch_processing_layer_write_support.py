@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core._batch_processing_metrics_support import (
     track_storage_write_metrics,
@@ -27,12 +27,22 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
-__all__ = ["write_silver_then_gold"]
+__all__ = ["LayerSpanRunner", "write_silver_then_gold"]
+
+
+class LayerSpanRunner(Protocol):
+    """Span runner used to execute one layer write under tracing."""
+
+    def __call__(
+        self,
+        *args: object,
+        **kwargs: object,
+    ) -> Awaitable[object]: ...
 
 
 async def write_silver_then_gold(
     *,
-    execute_with_span: Callable[..., Awaitable[object]],
+    execute_with_span: LayerSpanRunner,
     writer: BatchWriter,
     quarantine_manager: QuarantineRuntimeService,
     logger: LoggerPort,

@@ -38,9 +38,8 @@ class BatchExecutorRuntimeState:
 class BatchExecutorRuntimeStateMixin:
     """Expose legacy executor state attributes backed by one state object."""
 
-    _runtime_state: BatchExecutorRuntimeState = cast(
-        Any, None
-    )  # Any: host attr default (PD3)
+    # Set in BatchExecutor.__init__ (or test fixtures) before state access.
+    _runtime_state: BatchExecutorRuntimeState
 
     @property
     def records_fetched(self) -> int:
