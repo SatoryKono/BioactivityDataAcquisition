@@ -20,6 +20,12 @@ from typing import Any
 
 import yaml
 
+_REPO_ROOT = Path(__file__).resolve().parents[4]
+if str(_REPO_ROOT) not in sys.path:
+    # Keep the supported direct CLI entrypoint able to import shared script
+    # helpers even though Python otherwise anchors sys.path at this directory.
+    sys.path.insert(0, str(_REPO_ROOT))
+
 DEFAULT_CONTRACT = Path("configs/quality/docker_runtime_contracts.yaml")
 _WSL_EXE = "wsl.exe"
 _DOCKER_FORMAT_JSON = "{{json .}}"
@@ -62,7 +68,7 @@ def _repo_root() -> Path:
     cwd = Path.cwd()
     if (cwd / DEFAULT_CONTRACT).is_file():
         return cwd
-    return Path(__file__).resolve().parents[4]
+    return _REPO_ROOT
 
 
 def _confined_file_bytes(path: Path, *, root: Path) -> bytes:

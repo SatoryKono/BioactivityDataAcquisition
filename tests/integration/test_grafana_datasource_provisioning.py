@@ -61,6 +61,10 @@ def test_ops_http_compose_targets_main_health_server() -> None:
     assert any(
         str(item).startswith("BIOETL_OPS_HTTP_URL=") for item in grafana["environment"]
     )
+    assert any(
+        str(item).startswith("BIOETL_EXPECTED_RUNTIME_SOURCE_ID=")
+        for item in grafana["environment"]
+    )
     assert "host.docker.internal:host-gateway" in grafana["extra_hosts"]
     for name in _REMOVED_MONITORING_SERVICES:
         assert name not in monitoring["services"]
@@ -192,3 +196,14 @@ def test_bootstrap_script_prunes_stale_local_renderer_plugin_in_remote_mode() ->
         in content
     )
     assert 'rm -rf "${STALE_RENDERER_PLUGIN_DIR}"' in content
+
+
+def test_bootstrap_fails_closed_on_ops_http_source_identity_drift() -> None:
+    content = Path("grafana/scripts/bootstrap-datasources.sh").read_text(
+        encoding="utf-8"
+    )
+
+    assert "BIOETL_EXPECTED_RUNTIME_SOURCE_ID" in content
+    assert "/ops/control-plane/ready" in content
+    assert 'if [ "${SOURCE_ID_MATCHED}" -ne 1 ]' in content
+    assert "runtime source identity mismatch" in content

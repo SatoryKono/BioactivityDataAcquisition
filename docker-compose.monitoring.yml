@@ -39,7 +39,7 @@ services:
     restart: unless-stopped
     mem_limit: 10g
     mem_reservation: 512m
-    cpus: 8.0
+    cpus: 2.0
     pids_limit: 2560
     init: true
     stop_grace_period: 120s
@@ -70,7 +70,7 @@ services:
       start_period: 60s
     mem_limit: 2560m
     mem_reservation: 128m
-    cpus: 5.0
+    cpus: 1.0
     pids_limit: 1280
     init: true
     stop_grace_period: 120s
@@ -135,7 +135,7 @@ services:
     restart: unless-stopped
     mem_limit: 7680m
     mem_reservation: 384m
-    cpus: 8.0
+    cpus: 2.0
     pids_limit: 2560
     init: true
     stop_grace_period: 120s
@@ -166,7 +166,7 @@ services:
       start_period: 180s
     mem_limit: 15360m
     mem_reservation: 768m
-    cpus: 8.0
+    cpus: 2.0
     pids_limit: 5120
     init: true
     stop_grace_period: 120s
