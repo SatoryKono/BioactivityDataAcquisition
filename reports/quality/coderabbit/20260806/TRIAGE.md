@@ -1,19 +1,21 @@
 # TRIAGE — CR-FULL #7696
 
-- Generated: 2026-08-06T07:40Z
+- Generated: 2026-08-06T07:45Z
 - Policy: code wins; no tech-debt budget growth
-- De-dupe: one open issue per residual path (prefer earlier Wave A, lower number)
+- De-dupe: one open issue per residual path (prefer Wave A / lower number / higher sev)
 
-## Severity → action
+## Counts
 
-| Sev | Action | Count (canonical) |
-| --- | --- | ---: |
-| critical | P0 implement | 12 |
-| major | P1 path issue | 208 |
-| minor | P2 backlog | 0 |
-| trivial | reject/style drop unless correctness | 0 |
+| Bucket | Count |
+| --- | ---: |
+| Canonical open | 220 |
+| P0 critical | 12 |
+| P1 major | 208 |
+| P2 minor | 0 |
+| trivial open | 0 |
+| Duplicates closed | 48 |
 
-## Agent NDJSON totals (raw, pre-cluster)
+## Agent NDJSON (raw)
 
 | Wave | critical | major | minor | trivial | total |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -23,7 +25,7 @@
 | D | 1 | 4 | 1 | 5 | 11 |
 | **ALL** | 22 | 736 | 253 | 457 | 1468 |
 
-## P0 critical (canonical)
+## P0 critical (canonical open)
 
 - #7738 `src/bioetl/composition/bootstrap/runtime` (34 findings, Wave A)
 - #7750 `src/bioetl/application/services/control_plane` (73 findings, Wave A)
@@ -38,7 +40,7 @@
 - #7993 `src/bioetl/infrastructure/storage/metadata` (3 findings, Wave B)
 - #8030 `tests/security` (5 findings, Wave D)
 
-## P1 major — top by finding_count
+## P1 major — top 30 by findings
 
 - #7739 `src/bioetl/composition/factories/pipeline` (17, Wave A)
 - #7740 `src/bioetl/composition/factories/services` (16, Wave A)
@@ -70,38 +72,29 @@
 - #7760 `src/bioetl/application/core/postrun` (3, Wave A)
 - #7827 `src/bioetl/infrastructure/adapters/semanticscholar` (3, Wave A)
 - #7911 `src/bioetl/domain/ports/runtime` (3, Wave A)
-- #7982 `src/bioetl/application/pipelines/pubchem` (3, Wave B)
-- #7983 `src/bioetl/application/pipelines/semanticscholar` (3, Wave B)
-- #7987 `src/bioetl/infrastructure/storage/support` (3, Wave B)
-- #8012 `src/bioetl/infrastructure/observability/anomaly` (3, Wave C)
-- #7753 `src/bioetl/composition/_workflow_services.py` (2, Wave A)
-- #7754 `src/bioetl/composition/builders.py` (2, Wave A)
-- #7755 `src/bioetl/composition/factories/_observability_wiring.py` (2, Wave A)
-- #7757 `src/bioetl/composition/providers/_config_helpers.py` (2, Wave A)
-- #7758 `src/bioetl/composition/providers/_registration_contracts.py` (2, Wave A)
-- #7759 `src/bioetl/composition/providers/registration.py` (2, Wave A)
-- … +168 more major (see FINDINGS.md)
+- … +178 more in FINDINGS.md
 
-## Reject rules applied
+## Parallel streams
 
-- trivial severity clusters: keep closed only if opened; prefer drop on implement pass
-- style/types-only without basedpyright gate: reject at implement time
-- Wave B mis-tags of Wave A paths: closed as dupes of Wave A canonical
-- E/F residual CLI blocked: #8031 #8032 (not path-cluster residuals)
-- Domain rate-limit backlog: #7946
+| Stream | Paths |
+| --- | --- |
+| 1 Edge | interfaces/http, interfaces/cli, adapters, pipelines, configs/quality |
+| 2 Core | composition, application/core, domain, storage, observability |
 
-## Stream split (for parallel implement)
+## Reject / hold
 
-- Stream 1 edge: interfaces/http|cli, adapters, pipelines, configs/quality
-- Stream 2 core: composition, application/core, domain, storage, observability
-- See major_streams_split.txt / critical stream plan in campaign notes
+- trivial: drop unless correctness risk at implement
+- types-only without basedpyright: reject
+- style without correctness: reject
+- E/F CLI blocked: #8031 #8032
+- Domain rate-limit residual: #7946
 
-## Acceptance (#7696)
+## Acceptance #7696
 
-- [x] FINDINGS.md (de-duped)
+- [x] FINDINGS.md de-duped
 - [x] TRIAGE.md
 - [x] DE_DUPE_MAP.json
-- [ ] Duplicate issues closed on GitHub
+- [x] Duplicate path-cluster issues closed (48)
 - [x] Severity counts
-- [x] Issue pack residual section
+- [x] Findings pack published
 
