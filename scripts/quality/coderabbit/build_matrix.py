@@ -43,6 +43,15 @@ def write_list(name: str, files: list[str]) -> Path:
     return p
 
 
+def _leaf_file_count(leaf: dict[str, object]) -> int:
+    raw = leaf.get("files", 0)
+    if isinstance(raw, int):
+        return raw
+    if isinstance(raw, str) and raw.isdigit():
+        return int(raw)
+    return 0
+
+
 def main() -> None:
     leaves: list[dict[str, object]] = []
 
@@ -302,7 +311,7 @@ def main() -> None:
         "coderabbit": cr_ver,
         "cap": CAP,
         "leaf_count": len(leaves),
-        "total_files_assigned": sum(int(leaf["files"]) for leaf in leaves),  # type: ignore[arg-type]
+        "total_files_assigned": sum(_leaf_file_count(leaf) for leaf in leaves),
         "leaves": leaves,
     }
     atomic_write(
@@ -317,7 +326,7 @@ def main() -> None:
         f"**CodeRabbit:** {cr_ver}",
         f"**Cap:** ≤{CAP} files per leaf",
         f"**Leaves:** {len(leaves)} (non-empty)",
-        f"**Sum file assignments:** {sum(int(leaf['files']) for leaf in leaves)}",  # type: ignore[arg-type]
+        f"**Sum file assignments:** {sum(_leaf_file_count(leaf) for leaf in leaves)}",
         "",
         "| id | wave | files | under_cap | dir / selection |",
         "|----|------|------:|-----------|-----------------|",
@@ -364,7 +373,7 @@ Phase 1: sequential coderabbit review per leaf
 
     print(
         f"leaves={len(leaves)} over_cap={len(over)} "
-        f"sum={sum(int(leaf['files']) for leaf in leaves)}"  # type: ignore[arg-type]
+        f"sum={sum(_leaf_file_count(leaf) for leaf in leaves)}"
     )
     for wave_name, n in sorted(Counter(str(leaf["wave"]) for leaf in leaves).items()):
         print(f"  wave {wave_name}: {n}")
