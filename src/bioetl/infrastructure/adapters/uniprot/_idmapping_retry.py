@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Protocol, cast, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 
 from bioetl.infrastructure.adapters.uniprot._idmapping_errors import (
     IDMappingJobError,
@@ -14,6 +14,7 @@ from bioetl.infrastructure.adapters.uniprot._idmapping_errors import (
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
 @runtime_checkable
@@ -21,7 +22,7 @@ class IDMappingRetryDependencies(Protocol):
     """Host dependency contract for IDMappingRetryMixin."""
 
     logger: LoggerPort
-    http_client: Any  # Any: preserves BaseHttpAdapter-compatible host typing.
+    http_client: UnifiedHTTPClient
     _adapter_metrics: AdapterMetricsRecorder
     POLLING_INTERVAL: float
     MAX_POLL_ATTEMPTS: int
@@ -94,6 +95,10 @@ class IDMappingRetryMixin:
                 continue
 
             result = response.json()
+            if not isinstance(result, dict):
+                raise IDMappingJobError(
+                    f"ID mapping status payload must be a mapping, got {type(result).__name__}"
+                )
             status = self._resolve_job_status(response, result)
 
             if status == "HAS_RESULTS":

@@ -104,6 +104,16 @@ class CircuitBreakerGuard:
         """Return current consecutive failure count."""
         return self._failure_count
 
+    def get_recovery_timeout(self) -> float:
+        """Seconds to wait in OPEN before a HALF_OPEN probe is allowed."""
+        return float(self.recovery_timeout)
+
+    def get_last_failure_time(self) -> float | None:
+        """Monotonic timestamp of the last recorded failure, if any."""
+        if self._last_failure_time <= 0.0:
+            return None
+        return float(self._last_failure_time)
+
     def get_trips_total(self) -> int:
         """Return cumulative OPEN transitions since initialization."""
         return self._trips_total

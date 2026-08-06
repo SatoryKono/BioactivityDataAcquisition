@@ -43,6 +43,7 @@ from bioetl.domain.control_plane import (
     RunSourceRef,
 )
 from bioetl.domain.control_plane.run_ledger import (
+    ARTIFACT_PUBLISHED_EVENT,
     COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
     RUN_FAILED_EVENT,
     RUN_FINISHED_EVENT,
@@ -694,7 +695,20 @@ def test_checkpoint_extractor_helpers_cover_metadata_edges() -> None:
 
 def test_ledger_extractor_helpers_cover_composite_edges() -> None:
     manifest, composite_entry, plain_entry, _, _ = _identity_edge_fixture()
-    assert ledger_extractors.published_artifacts((composite_entry, plain_entry)) == [
+    # published_artifacts only considers ARTIFACT_PUBLISHED_EVENT entries.
+    published_entry = _ledger_entry(
+        manifest,
+        "published",
+        event_type=ARTIFACT_PUBLISHED_EVENT,
+        details={
+            "artifact_ref": "gold/activity",
+            "artifact_path": ["silver/activity", ""],
+            "uri": "ignored/for/component",
+        },
+    )
+    assert ledger_extractors.published_artifacts(
+        (composite_entry, plain_entry, published_entry)
+    ) == [
         "gold/activity",
         "silver/activity",
         "ignored/for/component",
