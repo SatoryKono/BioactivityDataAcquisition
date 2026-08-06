@@ -102,6 +102,8 @@ class DataQualityMonitor:
             return []
 
         anomalies: list[DQAnomaly] = []
+        if timestamp is None:
+            return anomalies
 
         for metric_name, current_value in metrics.items():
             anomaly = self.detector.detect(metric_name, current_value, timestamp)
