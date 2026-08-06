@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable
@@ -110,19 +110,19 @@ class DeltaReader:
 
             scanner = dt.to_pyarrow_dataset().scanner(columns=columns)
             if limit is not None:
-                return scanner.head(limit)
+                return cast(pa.Table, scanner.head(limit))
 
             row_count = _try_native_delta_row_count(dt)
             if row_count is not None:
-                return scanner.head(row_count)
+                return cast(pa.Table, scanner.head(row_count))
             # Unbounded full read: never fall back to a synthetic head limit
             # that would silently truncate when native count is unavailable.
             to_table = getattr(scanner, "to_table", None)
             if callable(to_table):
-                return to_table()
+                return cast(pa.Table, to_table())
             # Last-resort head with the documented full-read ceiling only when
             # the scanner surface lacks an uncapped materialization API.
-            return scanner.head(_FULL_READ_HEAD_LIMIT)
+            return cast(pa.Table, scanner.head(_FULL_READ_HEAD_LIMIT))
 
         self._logger.debug(
             "Reading Delta table",

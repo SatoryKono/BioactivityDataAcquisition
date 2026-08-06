@@ -6,9 +6,10 @@ Used primarily by CLI health operations.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.bootstrap.assembly.health_server import (
     HealthServerDependencies,
@@ -32,7 +33,7 @@ from bioetl.infrastructure.time import SystemClock
 if TYPE_CHECKING:
     from bioetl.application.services.ops.health_service import HealthService
     from bioetl.application.services.quality.quarantine_service import QuarantineService
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
@@ -97,7 +98,10 @@ def bootstrap_health_server_quarantine_service(
         ),
         logger_factory=create_noop_logger,
         metrics_resolver=lambda **_: create_noop_metrics(),
-        tracing_resolver=lambda **_: create_noop_tracing(),
+        tracing_resolver=cast(
+            "Callable[..., TracingPort]",
+            lambda **_: create_noop_tracing(),
+        ),
         run_manifest_service_factory=None,
         clock_factory=SystemClock,
     )
