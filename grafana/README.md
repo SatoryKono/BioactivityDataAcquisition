@@ -195,7 +195,16 @@ ______________________________________________________________________
 > Playwright also validates required non-row panel terminal states. Healthy,
 > explicit error, and valid-empty are terminal; blank, loading, or an error
 > marker combined with `No data` fail the capture. Screenshot preflight verifies
-> the manifest's actual theme/viewport and terminal-state result.
+> the manifest's actual theme/viewport and terminal-state result. Every capture
+> also writes an immutable occurrence file named
+> `render-manifest--<full-set|selected-subset>--<capture_id>.json` beside the
+> compatibility pointer `render-manifest.json`. The two files must be byte-equal;
+> reuse of a capture ID fails closed instead of overwriting evidence. The
+> manifest binds commit SHA, dashboard JSON path/version/SHA-256, requested
+> time range/variables/row state, exact PNG `file_set`/`file_count`, PNG
+> dimensions/bytes/SHA-256, theme, viewport, zoom/kiosk browser state, and
+> terminal panel classifications. Full-set and selected-subset evidence are
+> distinct manifest kinds and cannot be silently merged.
 > `python -m scripts.ops run-grafana-audit-cycle` is the canonical full audit
 > workflow. It reports two independent release outcomes in
 > `reports/observability/grafana/dashboard-release-gates.json`:
