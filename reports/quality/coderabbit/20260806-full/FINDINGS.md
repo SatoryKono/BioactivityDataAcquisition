@@ -1,8 +1,8 @@
 # FINDINGS — CR-FULL-20260806-full
 
-Generated: 2026-08-06T14:59:00.969019+00:00
-Deduped findings: 76
-By severity: {'major': 35, 'minor': 15, 'trivial': 25, 'critical': 1}
+Generated: 2026-08-06T15:08:04.388831+00:00
+Deduped findings: 79
+By severity: {'major': 38, 'minor': 15, 'trivial': 25, 'critical': 1}
 
 - `S01-domain-value_objects:9398d145619c` **critical** `src/bioetl/domain/value_objects/bronze_result.py` — Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate
 - `S01-domain-entities:1fbf04ba5622` **major** `src/bioetl/domain/entities/_chembl_activity_assay_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate
@@ -26,6 +26,9 @@ By severity: {'major': 35, 'minor': 15, 'trivial': 25, 'critical': 1}
 - `S01-domain-exceptions:c2a455f5ad38` **major** `src/bioetl/domain/exceptions/infrastructure/_storage.py` — Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate
 - `S01-domain-exceptions:e4d55dc2cd9d` **major** `src/bioetl/domain/exceptions/network/service.py` — Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate
 - `S01-domain-exceptions:ded96e88e03b` **major** `src/bioetl/domain/exceptions/storage/_storage.py` — Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate
+- `S01-domain-lineage:d2389f1f6b0f` **major** `src/bioetl/domain/lineage/_shared.py` — Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate
+- `S01-domain-lineage:d9f644022c6e` **major** `src/bioetl/domain/lineage/metadata_bundle.py` — Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate
+- `S01-domain-lineage:8a13de16cb0a` **major** `src/bioetl/domain/lineage/refs.py` — Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate
 - `S01-domain-value_objects:c35c60029064` **major** `src/bioetl/domain/value_objects/_molecular_weight.py` — Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate
 - `S01-domain-value_objects:b77e32a66c9b` **major** `src/bioetl/domain/value_objects/_publication_field_group_config.py` — Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate
 - `S01-domain-value_objects:02c80a807abc` **major** `src/bioetl/domain/value_objects/activity.py` — Verify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate
