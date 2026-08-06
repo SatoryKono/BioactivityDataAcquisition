@@ -8,26 +8,19 @@ import concurrent.futures
 import json
 import os
 import socket
-import sys
 import time
 import urllib.request
 from pathlib import Path
 from typing import Any, cast
+import sys
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
 import setup_mcp  # noqa: E402  # pyright: ignore[reportImplicitRelativeImport]
-from mcp_profile_contract import (  # noqa: E402  # pyright: ignore[reportImplicitRelativeImport]
-    profile_plan,
-    validate_profile_matrix,
-)
-from native_runtime_contract import (  # noqa: E402  # pyright: ignore[reportImplicitRelativeImport]
-    Finding,
-    REPO_ROOT,
-    validate_native_runtime,
-)
+from mcp_profile_contract import profile_plan, validate_profile_matrix  # noqa: E402  # pyright: ignore[reportImplicitRelativeImport]
+from native_runtime_contract import Finding, REPO_ROOT, validate_native_runtime  # noqa: E402  # pyright: ignore[reportImplicitRelativeImport]
 
 
 def _as_str_list(value: object) -> list[str]:
@@ -89,13 +82,7 @@ def _probe(name: str, entry: dict[str, Any], timeout: float) -> dict[str, Any]:
     try:
         with socket.create_connection(("127.0.0.1", port), timeout=timeout):
             port_open = True
-        if entry.get("launch_mode") in def _as_str_list(value: object) -> list[str]:
-    if isinstance(value, (list, tuple, set)):
-        return [str(item) for item in value]
-    return []
-
-
-WINDOWS_STREAMING_MODES:
+        if entry.get("launch_mode") in WINDOWS_STREAMING_MODES:
             ping_ok = True
             detail = "listener ready; streaming bridge has no /ping requirement"
         else:
@@ -128,7 +115,7 @@ def run_mcp(
 ) -> int:
     plan = profile_plan(profile, repo_root)
     catalog_path = repo_root / "scripts/ops/runtime/mcp/shared-servers.json"
-    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))["servers"]
+    catalog = cast(dict[str, Any], json.loads(catalog_path.read_text(encoding="utf-8"))["servers"])
     required = set(_as_str_list(plan.get("required_local")))
     selected_local = sorted(required | set(_as_str_list(plan.get("optional_local"))))
     results: list[dict[str, Any]] = []
@@ -174,7 +161,7 @@ def run_mcp(
         "profile": profile,
         "failed": failed,
         "warned": warned,
-        "remote_or_external_skipped": plan["remote_or_external"],
+        "remote_or_external_skipped": _as_str_list(plan.get("remote_or_external")),
         "migration_hint": (
             None
             if profile in DAILY_PROFILES
