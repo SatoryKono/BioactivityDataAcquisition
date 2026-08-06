@@ -31,13 +31,26 @@ if __package__ in {None, ""}:
 
 from scripts.engineering.repo._root_governance import load_root_governance_policy
 
-# Configure logging for CLI output
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)],
-)
-logger = logging.getLogger(__name__)
+# Configure logging for CLI output (Windows consoles may be cp1252).
+def _configure_cli_logging() -> logging.Logger:
+    stream = sys.stdout
+    reconfigure = getattr(stream, "reconfigure", None)
+    if callable(reconfigure):
+        try:
+            reconfigure(encoding="utf-8", errors="replace")
+        except (OSError, ValueError, TypeError):
+            pass
+    handler = logging.StreamHandler(stream)
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    root_logger = logging.getLogger(__name__)
+    root_logger.handlers.clear()
+    root_logger.addHandler(handler)
+    root_logger.setLevel(logging.INFO)
+    root_logger.propagate = False
+    return root_logger
+
+
+logger = _configure_cli_logging()
 
 # =============================================================================
 # Configuration: Allowed directories and paths
@@ -542,7 +555,7 @@ def log_text_report(result: AuditResult) -> None:
         logger.info("")
         for v in result.must_violations:
             logger.info("  [%s] %s", v.category, v.path)
-            logger.info("    → %s", v.message)
+            logger.info("    -> %s", v.message)
         logger.info("")
 
     if result.should_violations:
@@ -552,11 +565,11 @@ def log_text_report(result: AuditResult) -> None:
         logger.info("")
         for v in result.should_violations:
             logger.info("  [%s] %s", v.category, v.path)
-            logger.info("    → %s", v.message)
+            logger.info("    -> %s", v.message)
         logger.info("")
 
     if not result.violations:
-        logger.info("✓ Структура проекта соответствует File Policy")
+        logger.info("[OK] Project structure matches File Policy")
         logger.info("")
 
     logger.info("=" * 70)
