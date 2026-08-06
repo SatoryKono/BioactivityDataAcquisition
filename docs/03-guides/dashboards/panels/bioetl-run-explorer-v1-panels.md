@@ -23,12 +23,18 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 
 ### 3. Inspect Run Identity
 - **Type:** Table
-- **Purpose:** Run/manifest identity for selected scope (first paint).
+- **Purpose:** Run/manifest identity for selected scope (first paint). Before a
+  concrete selection the returned rows request an exact Run ID; after selection
+  an empty section is `VALID EMPTY`, while datasource/backend failure renders
+  as `QUERY ERROR`.
 - **Data sources:** BioETL Ops HTTP `/ops/control-plane/identity-table` (not Prometheus).
 
 ### 4. Inspect Processed Records
 - **Type:** Table
-- **Purpose:** Bronze/Silver/Gold count and denominator-explicit percentage accounting (first paint); both numeric columns are right-aligned.
+- **Purpose:** Bronze/Silver/Gold count and denominator-explicit percentage
+  accounting (first paint); the panel owns 14/24 grid columns so labels and
+  values remain readable. Recorded zero, `VALID EMPTY`, and `QUERY ERROR` are
+  distinct operator states.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).
 
 ### 5. Browse Recent Runs
