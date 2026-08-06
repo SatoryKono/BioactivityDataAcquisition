@@ -266,8 +266,7 @@ def main() -> int:
     )
     lines.append(
         "- Helper scripts: `scripts/ops/_run_cr_arch_review_wsl.sh`, "
-        "`scripts/ops/_run_cr_arch_review_remaining.sh`, "
-        "`scripts/ops/_cr_publish_findings.py`, `scripts/ops/_cr_seed_published.py`"
+        "`scripts/ops/_run_cr_arch_review_remaining.sh`"
     )
     lines.append("")
 
