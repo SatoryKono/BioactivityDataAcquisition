@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import stat
 import tempfile
 from contextlib import suppress
 from importlib import import_module
@@ -33,27 +34,6 @@ def build_planned_artifacts(*args: object, **kwargs: object) -> object:
     return import_module(module).build_planned_artifacts(*args, **kwargs)
 
 
-def __getattr__(name: str) -> object:  # pragma: no cover
-    """Lazily expose legacy path helpers without static facade fan-in."""
-    if TYPE_CHECKING:
-        raise AttributeError
-    if name == "control_plane_root":
-        return getattr(
-            import_module(
-                "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
-            ),
-            name,
-        )
-    if name == "build_planned_artifacts":
-        return getattr(
-            import_module(
-                "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
-            ),
-            name,
-        )
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
 def is_explicit_data_root_configured(settings: Settings) -> bool:
     """Return ``True`` when settings declare an explicit non-empty data root."""
     configured_root = getattr(settings, "data_dir", None)
@@ -61,22 +41,37 @@ def is_explicit_data_root_configured(settings: Settings) -> bool:
 
 
 def resolve_data_root_mode(settings: Settings) -> DataRootMode:
-    """Classify which data-root strategy would be used in the current runtime."""
+    """Classify which data-root strategy would be used in the current runtime.
+
+    Derives mode from the same resolution path as ``_resolve_data_root`` so
+    branch logic is not duplicated.
+    """
     if is_explicit_data_root_configured(settings):
         return "explicit"
-
-    candidate = Path("data")
+    resolved = _resolve_data_root(settings)
+    preferred_private = Path.home() / ".cache" / "bioetl-data"
     try:
-        candidate.mkdir(parents=True, exist_ok=True)
+        if resolved.resolve() == preferred_private.resolve():
+            return "private_cache"
     except OSError:
-        return _private_fallback_data_root_mode()
-    if not os.access(candidate, os.W_OK):
-        return _private_fallback_data_root_mode()
-    return "repo_default"
+        pass
+    if resolved == Path("data") or resolved.name == "data":
+        # Repo-default candidate succeeded.
+        try:
+            if resolved.resolve() == Path("data").resolve():
+                return "repo_default"
+        except OSError:
+            return "repo_default"
+        return "repo_default"
+    # Temporary fallback under system temp.
+    return "tmp"
 
 
 def _resolve_data_root(settings: Settings) -> Path:
-    """Resolve a writable data root for legacy run-manifest facade callers."""
+    """Resolve a writable data root for legacy run-manifest facade callers.
+
+    Single source of truth for data-root selection.
+    """
     configured_root = getattr(settings, "data_dir", None)
     if configured_root and str(configured_root).strip():
         return Path(configured_root)
@@ -91,16 +86,6 @@ def _resolve_data_root(settings: Settings) -> Path:
     return candidate
 
 
-def _private_fallback_data_root_mode() -> DataRootMode:
-    """Classify which private fallback would be used when checkout is read-only."""
-    preferred = Path.home() / ".cache" / "bioetl-data"
-    try:
-        _prepare_private_runtime_dir(preferred)
-    except OSError:
-        return "tmp"
-    return "private_cache"
-
-
 def _private_fallback_data_root() -> Path:
     """Return a user-private fallback data root for legacy facade callers."""
     preferred = Path.home() / ".cache" / "bioetl-data"
@@ -113,11 +98,49 @@ def _private_fallback_data_root() -> Path:
 
 
 def _prepare_private_runtime_dir(path: Path) -> Path:
-    """Create a private runtime directory and normalize its permissions."""
+    """Create a private runtime directory owned by the current user.
+
+    Rejects fallbacks that cannot be restricted to owner-only access.
+    """
     path.mkdir(parents=True, exist_ok=True, mode=0o700)
     with suppress(OSError):
         path.chmod(0o700)
+    _assert_private_runtime_dir(path)
     return path
+
+
+def _assert_private_runtime_dir(path: Path) -> None:
+    """Fail closed when the private runtime directory is not owner-private."""
+    if not path.is_dir():
+        raise OSError(f"private runtime path is not a directory: {path}")
+    try:
+        st = path.stat()
+    except OSError as exc:
+        raise OSError(f"unable to stat private runtime path: {path}") from exc
+
+    getuid = getattr(os, "getuid", None)
+    if callable(getuid):
+        try:
+            uid = int(getuid())
+        except (TypeError, ValueError, OSError):
+            uid = None
+        if uid is not None and st.st_uid != uid:
+            raise OSError(
+                f"private runtime path is not owned by current user: {path}"
+            )
+
+    mode = stat.S_IMODE(st.st_mode)
+    # Owner-only: no group/other read/write/execute.
+    if mode & 0o077:
+        # Best-effort re-harden then re-check.
+        with suppress(OSError):
+            path.chmod(0o700)
+            st = path.stat()
+            mode = stat.S_IMODE(st.st_mode)
+        if mode & 0o077:
+            raise OSError(
+                f"private runtime path is not owner-private (mode={oct(mode)}): {path}"
+            )
 
 
 def _artifact_path_string(path: PurePath) -> str:

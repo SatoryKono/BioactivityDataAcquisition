@@ -17,6 +17,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     assess_reproducibility_policy,
     is_critical_reproducibility_runtime,
+    is_degraded_opt_down_eligible,
     normalize_required_persistence_profile,
     resolve_effective_required_persistence_profile,
 )
@@ -61,9 +62,11 @@ def resolve_code_revision_for_manifest(
         and code_revision.dependency_lock_hash is not None
     ):
         return code_revision
+    # Synthetic test fallback is explicitly non-clean so consumers do not
+    # treat it as a verified clean workspace revision.
     return CodeRevisionProvenance(
         git_commit=f"test-{resolved_config_hash[:12]}",
-        source_revision_state="clean",
+        source_revision_state="test_synthetic",
         dependency_lock_hash=f"sha256:test-lock-{resolved_config_hash[:12]}",
     )
 
@@ -100,11 +103,13 @@ def resolve_manifest_reproducibility_context(
         runtime_environment=getattr(inputs.settings, "env", None),
         debug_mode=getattr(inputs.settings, "debug", False),
     )
-    degraded_opt_down_requested = (
-        bool(getattr(ctx, "required_persistence_profile_opt_down", False))
-        and configured_required_profile == "degraded_observable"
-        and not bool(getattr(ctx, "exact_replay", False))
-        and not critical_runtime
+    degraded_opt_down_requested = is_degraded_opt_down_eligible(
+        opt_down_requested=bool(
+            getattr(ctx, "required_persistence_profile_opt_down", False)
+        ),
+        configured_required_profile=configured_required_profile,
+        exact_replay_requested=bool(getattr(ctx, "exact_replay", False)),
+        critical_runtime=critical_runtime,
     )
     required_persistence_profile = resolve_effective_required_persistence_profile(
         configured_required_profile=configured_required_profile,
