@@ -3,10 +3,18 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
+from enum import Enum
 
 from bioetl.domain.types import JsonDict
 
-_UNSET_FETCH_ARG = object()
+
+class _FetchArgSentinel(Enum):
+    """Single-member sentinel for omitted optional fetch kwargs."""
+
+    UNSET = "UNSET"
+
+
+_UNSET_FETCH_ARG = _FetchArgSentinel.UNSET
 
 
 def build_forwarded_fetch_kwargs(
@@ -14,8 +22,8 @@ def build_forwarded_fetch_kwargs(
     entity_type: str,
     limit: int | None = None,
     query: str | None = None,
-    filter_ids: list[str] | object | None = _UNSET_FETCH_ARG,
-    filter_field: str | object | None = _UNSET_FETCH_ARG,
+    filter_ids: list[str] | None | _FetchArgSentinel = _UNSET_FETCH_ARG,
+    filter_field: str | None | _FetchArgSentinel = _UNSET_FETCH_ARG,
     offset: int | None = None,
 ) -> dict[str, object | None]:
     """Build the canonical kwargs payload for forwarded fetch calls."""
@@ -26,9 +34,9 @@ def build_forwarded_fetch_kwargs(
         "offset": offset,
     }
     if filter_ids is not _UNSET_FETCH_ARG:
-        fetch_kwargs["filter_ids"] = filter_ids
+        fetch_kwargs["filter_ids"] = filter_ids  # type: ignore[assignment]
     if filter_field is not _UNSET_FETCH_ARG:
-        fetch_kwargs["filter_field"] = filter_field
+        fetch_kwargs["filter_field"] = filter_field  # type: ignore[assignment]
     return fetch_kwargs
 
 
@@ -37,8 +45,8 @@ async def forward_fetch_records(
     entity_type: str,
     limit: int | None = None,
     query: str | None = None,
-    filter_ids: list[str] | object | None = _UNSET_FETCH_ARG,
-    filter_field: str | object | None = _UNSET_FETCH_ARG,
+    filter_ids: list[str] | None | _FetchArgSentinel = _UNSET_FETCH_ARG,
+    filter_field: str | None | _FetchArgSentinel = _UNSET_FETCH_ARG,
     offset: int | None = None,
 ) -> AsyncIterator[JsonDict]:
     """Forward fetch arguments into a callable and yield the resulting records."""
@@ -54,3 +62,9 @@ async def forward_fetch_records(
     )
     async for record in iterator:
         yield record
+
+
+__all__ = [
+    "build_forwarded_fetch_kwargs",
+    "forward_fetch_records",
+]

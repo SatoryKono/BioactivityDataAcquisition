@@ -223,14 +223,7 @@ class TestQuarantineManagerBulkWrites:
 
         quarantine_port.write.assert_awaited_once()
         assert quarantine_port.write.await_args.kwargs["run_id"] == run_id
-        metrics.track_quarantined_records.assert_called_once_with(
-            ErrorType.INVALID_DATA,
-            1,
-        )
-        metrics.track_processed_records.assert_called_once_with(
-            "quarantined",
-            1,
-        )
+        # MetricsPort emits counters directly (track_* lives on batch_metrics).
         metrics.increment_counter.assert_any_call(
             "bioetl_dq_records_quarantined_total",
             1,

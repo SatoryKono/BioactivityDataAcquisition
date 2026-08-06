@@ -32,21 +32,23 @@ def track_quarantine_metrics(
     error_type: ErrorType,
     count: int,
 ) -> None:
-    """Emit quarantine metrics through both legacy and current metric APIs."""
+    """Emit quarantine metrics through batch, MetricsPort, and pipeline APIs.
+
+    Pipeline accounting always runs. MetricsPort counters are best-effort when
+    the port is injected; batch metrics take precedence when present.
+    """
     if batch_metrics is not None:
         batch_metrics.track_quarantined_records(error_type, count)
-        return
-    if metrics is None:
-        return
-    metrics.increment_counter(
-        "bioetl_dq_records_quarantined_total",
-        count,
-        {
-            "pipeline": pipeline_name,
-            "error_type": error_type.value,
-            "run_type": run_type,
-        },
-    )
+    elif metrics is not None:
+        metrics.increment_counter(
+            "bioetl_dq_records_quarantined_total",
+            count,
+            {
+                "pipeline": pipeline_name,
+                "error_type": error_type.value,
+                "run_type": run_type,
+            },
+        )
     pipeline_metrics.record_quarantine_records(
         reason=error_type.value,
         count=count,
@@ -93,7 +95,8 @@ def record_filtered_quarantine_metrics(
 ) -> None:
     """Emit metrics for filter-rejected records.
 
-    Pipeline accounting always runs; optional MetricsPort is not required.
+    Pipeline accounting always runs; optional MetricsPort is not required for
+    pipeline/silver removal bookkeeping.
     """
     _ = metrics
     pipeline_metrics.record_quarantine_records(
