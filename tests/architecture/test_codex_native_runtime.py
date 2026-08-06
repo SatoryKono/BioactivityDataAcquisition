@@ -20,9 +20,11 @@ ROOT = Path(__file__).resolve().parents[2]
 CODEX_SCRIPTS = ROOT / "scripts/ai/codex"
 sys.path.insert(0, str(CODEX_SCRIPTS))
 
-import doctor
-import mcp_profile_contract
-import native_runtime_contract
+import importlib
+
+doctor = importlib.import_module("doctor")
+mcp_profile_contract = importlib.import_module("mcp_profile_contract")
+native_runtime_contract = importlib.import_module("native_runtime_contract")
 
 
 def test_project_config_is_minimal_portable_toml() -> None:
