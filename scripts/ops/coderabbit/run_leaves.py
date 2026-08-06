@@ -180,13 +180,13 @@ def main() -> int:
     sleep_s = float(os.environ.get("CR_SLEEP", "5"))
 
     if only_wave:
-        leaves = [L for L in leaves if L["wave"] == only_wave]
+        leaves = [leaf for leaf in leaves if leaf["wave"] == only_wave]
     if only_ids:
         want = set(only_ids.split(","))
-        leaves = [L for L in leaves if L["id"] in want]
+        leaves = [leaf for leaf in leaves if leaf["id"] in want]
     # stable order: wave then id
     wave_order = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "R": 6}
-    leaves = sorted(leaves, key=lambda L: (wave_order.get(L["wave"], 9), L["id"]))
+    leaves = sorted(leaves, key=lambda L: (wave_order.get(leaf["wave"], 9), leaf["id"]))
     if max_leaves > 0:
         leaves = leaves[:max_leaves]
 
