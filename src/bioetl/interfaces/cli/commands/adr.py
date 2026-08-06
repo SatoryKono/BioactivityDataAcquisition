@@ -130,18 +130,23 @@ def validate_command(as_json: bool) -> None:
             ],
         }
         echo_info(json.dumps(payload, indent=2, ensure_ascii=False))
-        return
+    else:
+        status = "OK" if report.valid else "FAILED"
+        echo_info(f"ADR validation: {status}")
+        echo_info(f"  Total: {report.total}")
+        echo_info(f"  Errors: {report.errors}")
+        echo_info(f"  Warnings: {report.warnings}")
+        if report.issues:
+            echo_info("Issues:")
+            for i in report.issues:
+                num = f"ADR-{i.number:03d}" if i.number is not None else "ADR-???"
+                echo_info(
+                    f"  - [{i.severity.upper()}] {num} @ {i.path}: {i.message}"
+                )
+    if not report.valid:
+        from bioetl.interfaces.cli.exit_codes import ExitCode
 
-    status = "OK" if report.valid else "FAILED"
-    echo_info(f"ADR validation: {status}")
-    echo_info(f"  Total: {report.total}")
-    echo_info(f"  Errors: {report.errors}")
-    echo_info(f"  Warnings: {report.warnings}")
-    if report.issues:
-        echo_info("Issues:")
-        for i in report.issues:
-            num = f"ADR-{i.number:03d}" if i.number is not None else "ADR-???"
-            echo_info(f"  - [{i.severity.upper()}] {num} @ {i.path}: {i.message}")
+        raise SystemExit(int(ExitCode.CONFIG_ERROR))
 
 
 # Explicit command collection to mark usage for tooling.

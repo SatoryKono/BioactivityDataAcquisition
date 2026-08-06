@@ -316,7 +316,15 @@ def diagnostics_quarantine(
 ) -> None:
     """Inspect quarantine statistics from the unified operator entrypoint."""
     run_quarantine_stats_command(
-        locals(),
+        {
+            "pipeline": pipeline,
+            "output_json": output_json,
+            "error_code": error_code,
+            "run_id": run_id,
+            "silver_filter_only": silver_filter_only,
+            "group_by": group_by,
+            "top": top,
+        },
         show_stats_for_pipeline=_show_quarantine_stats_for_pipeline_cli_options,
         get_runtime_service=get_quarantine_runtime_service,
         get_manifest_service=lambda: (

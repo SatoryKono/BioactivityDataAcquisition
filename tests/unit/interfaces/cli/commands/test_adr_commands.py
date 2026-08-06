@@ -358,7 +358,8 @@ class TestAdrValidateCommand:
 
         result = cli_runner.invoke(cli, ["adr", "validate"])
 
-        assert result.exit_code == 0
+        # Invalid ADR repo must fail closed with nonzero exit (CONFIG_ERROR=80).
+        assert result.exit_code == 80
         assert "FAILED" in result.output
         assert "Errors: 2" in result.output
         assert "Warnings: 1" in result.output
@@ -373,7 +374,7 @@ class TestAdrValidateCommand:
 
         result = cli_runner.invoke(cli, ["adr", "validate"])
 
-        assert result.exit_code == 0
+        assert result.exit_code == 80
         assert "ADR-005" in result.output
 
     def test_validate_failed_formats_unknown_adr_number(
@@ -384,7 +385,7 @@ class TestAdrValidateCommand:
 
         result = cli_runner.invoke(cli, ["adr", "validate"])
 
-        assert result.exit_code == 0
+        assert result.exit_code == 80
         assert "ADR-???" in result.output
 
     def test_validate_json_valid_output_structure(
@@ -415,7 +416,7 @@ class TestAdrValidateCommand:
 
         result = cli_runner.invoke(cli, ["adr", "validate", "--json"])
 
-        assert result.exit_code == 0
+        assert result.exit_code == 80
         data = json.loads(result.output)
         assert data["valid"] is False
         assert data["errors"] == 2
@@ -438,7 +439,7 @@ class TestAdrValidateCommand:
 
         result = cli_runner.invoke(cli, ["adr", "validate", "--json"])
 
-        assert result.exit_code == 0
+        assert result.exit_code == 80
         data = json.loads(result.output)
         issues_with_none = [i for i in data["issues"] if i["number"] is None]
         assert len(issues_with_none) == 1

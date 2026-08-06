@@ -195,8 +195,21 @@ def show_settings_command(output_format: str) -> None:
     }
 
     # Add additional settings (with sensitive values masked)
+    _sensitive_tokens = (
+        "api_key",
+        "apikey",
+        "password",
+        "passwd",
+        "token",
+        "access_token",
+        "secret",
+        "client_secret",
+        "credential",
+        "private_key",
+    )
     for key, value in settings_info.additional.items():
-        if "api_key" in key.lower() or "password" in key.lower():
+        key_lower = key.lower()
+        if any(token in key_lower for token in _sensitive_tokens):
             settings_dict[key] = "***MASKED***"
         else:
             settings_dict[key] = value
