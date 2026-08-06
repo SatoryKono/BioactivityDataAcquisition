@@ -144,7 +144,11 @@ def _target_classification_entity_id(record: JsonDict) -> str:
     status = str(record["classification_status"])
     component_id = _optional_int(record.get("component_id"))
     leaf_id = _optional_int(record.get("leaf_id"))
-    if status == "resolved" and component_id is not None and leaf_id is not None:
+    if status == "resolved":
+        if component_id is None or leaf_id is None:
+            raise ValueError(
+                "resolved classification requires component_id and leaf_id"
+            )
         return f"{target_id}:{component_id}:{leaf_id}"
     return f"{target_id}:{status}"
 

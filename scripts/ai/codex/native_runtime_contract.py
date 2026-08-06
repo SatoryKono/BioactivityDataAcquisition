@@ -140,14 +140,23 @@ def validate_project_config(repo_root: Path = REPO_ROOT) -> list[Finding]:
             )
         )
     agents = parsed.get("agents", {})
-    if (
-        not isinstance(agents, dict)
-        or agents.get("max_concurrent_threads_per_session") != 3
-    ):
+    # Codex CLI 0.118 accepts legacy `max_threads` under [agents] and rejects the
+    # newer documented alias `max_concurrent_threads_per_session` (AgentRoleToml
+    # parse error). Keep the portable project config on the key that ships.
+    if not isinstance(agents, dict) or agents.get("max_threads") != 3:
         findings.append(
             Finding(
                 "config.agents",
-                "agents.max_concurrent_threads_per_session must equal 3",
+                "agents.max_threads must equal 3",
+                str(path),
+            )
+        )
+    if "max_concurrent_threads_per_session" in agents:
+        findings.append(
+            Finding(
+                "config.agents",
+                "use agents.max_threads (Codex 0.118 rejects "
+                "max_concurrent_threads_per_session)",
                 str(path),
             )
         )

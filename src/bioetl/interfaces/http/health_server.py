@@ -87,26 +87,35 @@ class HealthServer(
         Prefer ``control_plane``. Transitional/unit callers may still pass the
         individual port kwargs, which are folded into the collaborator bag.
         """
-        if control_plane is None and legacy_ports:
-            allowed = {
-                "health_monitor",
-                "quarantine_service",
-                "checkpoint_port",
-                "run_manifest_port",
-                "run_ledger_port",
-                "workflow_manifest_port",
-                "metrics_exposition",
-                "runtime_source_id",
-            }
+        allowed = {
+            "health_monitor",
+            "quarantine_service",
+            "checkpoint_port",
+            "run_manifest_port",
+            "run_ledger_port",
+            "workflow_manifest_port",
+            "metrics_exposition",
+            "runtime_source_id",
+        }
+        # Always validate legacy kwargs so unknown names fail closed even when
+        # control_plane is also supplied.
+        if legacy_ports:
             unknown = set(legacy_ports) - allowed
             if unknown:
                 raise TypeError(
                     "HealthServer() got unexpected keyword argument(s): "
                     + ", ".join(sorted(str(k) for k in unknown))
                 )
-            control_plane = HealthServerControlPlaneDeps(
-                **{k: legacy_ports.get(k) for k in allowed}  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-            )
+            recognized = {k: legacy_ports[k] for k in allowed if k in legacy_ports}
+            if control_plane is not None and recognized:
+                raise TypeError(
+                    "HealthServer() accepts either control_plane or legacy port "
+                    "kwargs, not both"
+                )
+            if control_plane is None and recognized:
+                control_plane = HealthServerControlPlaneDeps(
+                    **recognized  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+                )
         deps = control_plane or HealthServerControlPlaneDeps()
         self.host = host
         self.port = port
@@ -214,7 +223,7 @@ class HealthServer(
 
 
 async def run_health_server(
-    host: str = "0.0.0.0",
+    host: str = "127.0.0.1",
     port: int = 8000,
     health_monitor: HealthMonitorPort | None = None,
     quarantine_service: QuarantineService | None = None,
@@ -232,7 +241,8 @@ async def run_health_server(
     (e.g., via asyncio.CancelledError from a task group or signal handler).
 
     Args:
-        host: IP address to bind to. Defaults to all interfaces (0.0.0.0).
+        host: IP address to bind to. Defaults to loopback (127.0.0.1);
+            wider binding requires explicit opt-in.
         port: TCP port to listen on. Defaults to 8000.
         health_monitor: Optional monitor providing provider health states.
             Health endpoints report no provider data when None.

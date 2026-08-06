@@ -5,6 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+import httpx
+
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.uniprot.query_builder import (
     build_uniprot_health_probe_params,
@@ -31,10 +33,23 @@ async def probe_uniprot_health(
         HealthStatus reflecting the current UniProt API availability and response status.
     """
     params = build_uniprot_health_probe_params()
-    with adapter_metrics.measure_request("/health"):
-        response = await http_client.get_once(
-            f"{base_url}/uniprotkb/search", params=params
+    try:
+        with adapter_metrics.measure_request("/health"):
+            response = await http_client.get_once(
+                f"{base_url}/uniprotkb/search", params=params
+            )
+    except Exception as exc:
+        # Health probes must not raise: transport, status, or unexpected
+        # connection failures degrade status for operators.
+        status_code = getattr(getattr(exc, "response", None), "status_code", None)
+        logger.warning(
+            "health_check_degraded",
+            provider=provider_name,
+            reason="request_error",
+            status_code=status_code,
+            error_type=type(exc).__name__,
         )
+        return HealthStatus.DEGRADED
 
     if response.status_code != 200:
         logger.warning(

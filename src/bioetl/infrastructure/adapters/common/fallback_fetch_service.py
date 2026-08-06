@@ -20,6 +20,19 @@ from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
 if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 
+# Shared lookup-method meta field key and fallback-phase values.
+LOOKUP_METHOD_KEY = "_lookup_method"
+LOOKUP_METHOD_TITLE_FALLBACK = "title_fallback"
+LOOKUP_METHOD_TITLE_ONLY = "title_only"
+LOOKUP_METHOD_TITLE = "title"
+LOOKUP_METHOD_FALLBACK_VALUES = frozenset(
+    {
+        LOOKUP_METHOD_TITLE_FALLBACK,
+        LOOKUP_METHOD_TITLE_ONLY,
+        LOOKUP_METHOD_TITLE,
+    }
+)
+
 
 class PrimaryRecordFetchProtocol(Protocol):
     """Provider hook that yields phase-1 primary lookup records."""
@@ -197,13 +210,13 @@ class FallbackFetchOrchestrator:
                 primary_lookup_method=request.primary_lookup_method,
                 phase1_summary_logger=request.phase1_summary_logger,
             ):
-                lookup_method = str(record.get("_lookup_method", ""))
+                lookup_method = str(record.get(LOOKUP_METHOD_KEY, ""))
                 if (
                     request.primary_lookup_method
                     and lookup_method == request.primary_lookup_method
                 ):
                     primary_resolved += 1
-                elif lookup_method in {"title_fallback", "title_only", "title"}:
+                elif lookup_method in LOOKUP_METHOD_FALLBACK_VALUES:
                     fallback_hits += 1
                 yield record
         finally:

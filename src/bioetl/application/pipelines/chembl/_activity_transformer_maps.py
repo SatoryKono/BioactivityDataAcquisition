@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from types import MappingProxyType
+from typing import Mapping
+
 from bioetl.application.core.field_specs import (
     FieldGroup,
     FieldSpec,
@@ -11,35 +14,40 @@ from bioetl.application.core.field_specs import (
     standard_value_fields,
 )
 from bioetl.domain.transformations import safe_float
-from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.taxonomy_id import validate_taxonomy_id
 
-_LIGAND_EFFICIENCY_FIELDS: JsonDict = {
-    "bei": safe_float,
-    "le": safe_float,
-    "lle": safe_float,
-    "sei": safe_float,
-}
+_LIGAND_EFFICIENCY_FIELDS: Mapping[str, object] = MappingProxyType(
+    {
+        "bei": safe_float,
+        "le": safe_float,
+        "lle": safe_float,
+        "sei": safe_float,
+    }
+)
 
-_ACTION_TYPE_FIELDS: JsonDict = {
-    "action_type": None,
-    "description": None,
-    "parent_type": None,
-}
+_ACTION_TYPE_FIELDS: Mapping[str, object] = MappingProxyType(
+    {
+        "action_type": None,
+        "description": None,
+        "parent_type": None,
+    }
+)
 
-_ONTOLOGY_COMPANION_DEFAULTS: JsonDict = {
-    "bao_endpoint_iri": None,
-    "bao_endpoint_mapping_status": None,
-    "bao_format_iri": None,
-    "bao_format_mapping_status": None,
-    "bao_ontology_version": None,
-    "uo_unit_iri": None,
-    "uo_unit_mapping_status": None,
-    "uo_ontology_version": None,
-    "qudt_unit_iri": None,
-    "qudt_unit_mapping_status": None,
-    "qudt_ontology_version": None,
-}
+_ONTOLOGY_COMPANION_DEFAULTS: Mapping[str, object] = MappingProxyType(
+    {
+        "bao_endpoint_iri": None,
+        "bao_endpoint_mapping_status": None,
+        "bao_format_iri": None,
+        "bao_format_mapping_status": None,
+        "bao_ontology_version": None,
+        "uo_unit_iri": None,
+        "uo_unit_mapping_status": None,
+        "uo_ontology_version": None,
+        "qudt_unit_iri": None,
+        "qudt_unit_mapping_status": None,
+        "qudt_ontology_version": None,
+    }
+)
 
 _IDENTIFIERS = FieldGroup(
     name="identifiers",
