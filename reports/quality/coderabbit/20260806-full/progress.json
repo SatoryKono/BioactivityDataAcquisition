@@ -1,0 +1,45 @@
+{
+  "results": {
+    "S01-domain-lineage": {
+      "id": "S01-domain-lineage",
+      "wave": "A",
+      "status": "ok",
+      "reason": "",
+      "findings": 3,
+      "files": 6,
+      "log": "/tmp/bioetl-cr-artifacts/20260806-full/logs/review_S01-domain-lineage.jsonl",
+      "elapsed_s": 84.3
+    },
+    "S01-domain-aggregates": {
+      "id": "S01-domain-aggregates",
+      "wave": "A",
+      "status": "ok",
+      "reason": "",
+      "findings": 8,
+      "files": 19,
+      "log": "/tmp/bioetl-cr-artifacts/20260806-full/logs/review_S01-domain-aggregates.jsonl",
+      "elapsed_s": 426.9
+    },
+    "S01-domain-behavior": {
+      "id": "S01-domain-behavior",
+      "wave": "A",
+      "status": "ok",
+      "reason": "",
+      "findings": 51,
+      "files": 52,
+      "log": "/tmp/bioetl-cr-artifacts/20260806-full/logs/review_S01-domain-behavior.jsonl",
+      "elapsed_s": 462.1
+    },
+    "S01-domain-composite": {
+      "id": "S01-domain-composite",
+      "wave": "A",
+      "status": "rate_limit",
+      "reason": "rate_limit",
+      "findings": 0,
+      "files": 26,
+      "log": "/tmp/bioetl-cr-artifacts/20260806-full/logs/review_S01-domain-composite.jsonl",
+      "elapsed_s": 4.5
+    }
+  },
+  "updated": "2026-08-06T15:26:20.958315+00:00"
+}

@@ -27,7 +27,7 @@
       "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
       "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
     ],
-    "scanned_test_count": 352,
+    "scanned_test_count": 353,
     "unreviewed_count": 0
   },
   "assertion_branch_reachability_percent": 100.0,
@@ -216,7 +216,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "305",
+      "line": "321",
       "path": "tests/unit/application/pipelines/crossref/test_crossref_transformer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_pre_extract_validation_accepts_valid_doi"
@@ -377,7 +377,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "465",
+      "line": "466",
       "path": "tests/unit/infrastructure/audit/test_file_audit.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_file_audit_adapter__aclose_is_idempotent__cb75761c"
@@ -545,7 +545,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1547",
+      "line": "1556",
       "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_merged_empty_records_returns"
@@ -720,21 +720,21 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1082",
+      "line": "1083",
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_handle_request_error_without_logger"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1125",
+      "line": "1126",
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_close_writer_handles_exceptions"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1209",
+      "line": "1210",
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_consume_headers"
@@ -1111,7 +1111,32 @@
     }
   },
   "assertless_total_candidates": 105,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 2,
+      "budget": "duplicate_test_names_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_names"
+    },
+    {
+      "actual": 4,
+      "budget": "duplicate_test_name_occurrences_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_name_occurrences"
+    },
+    {
+      "actual": 1,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    },
+    {
+      "actual": 2,
+      "budget": "uuid4_call_sites_max",
+      "expected_max": 0,
+      "metric": "uuid4_call_sites"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1188,7 +1213,7 @@
       "test_count": 9
     },
     "pipeline_run_fsm": {
-      "assertion_backed_tests": 80,
+      "assertion_backed_tests": 81,
       "assertion_examples": [
         "tests/unit/application/core/test_batch_transformer.py:73",
         "tests/unit/application/core/test_batch_transformer.py:91",
@@ -1209,7 +1234,7 @@
         "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
         "tests/unit/application/core/test_batch_transformer.py"
       ],
-      "test_count": 80
+      "test_count": 81
     },
     "quarantine_replay": {
       "assertion_backed_tests": 44,
@@ -1256,16 +1281,43 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [],
+  "duplicate_test_name_inventory": [
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/core/test_publication_term_runtime.py:143",
+        "tests/unit/application/core/test_publication_term_s5_residuals.py:97"
+      ],
+      "name": "test_create_term_record_normalizes_mesh_id_and_qualifier",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/core/test_publication_term_runtime.py:97",
+        "tests/unit/application/core/test_publication_term_s5_residuals.py:65"
+      ],
+      "name": "test_extract_mesh_rejects_non_string_and_blank_fields",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    }
+  ],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 0,
-    "duplicate_occurrences": 0,
+    "cross_file_groups": 2,
+    "duplicate_occurrences": 4,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 0
+    "total_duplicate_names": 2
   },
-  "duplicate_test_name_occurrences": 0,
-  "duplicate_test_names": 0,
+  "duplicate_test_name_occurrences": 4,
+  "duplicate_test_names": 2,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1285,8 +1337,10 @@
     ]
   },
   "intentional_no_exception_contract": 89,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "markerless_examples": [
+    "tests/unit/application/core/test_batch_execution_lifecycle.py:52"
+  ],
+  "markerless_test_functions": 1,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1327,7 +1381,7 @@
         "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
-      "scanned_test_count": 352,
+      "scanned_test_count": 353,
       "unreviewed_count": 0
     },
     "assertion_branch_reachability_percent": 100.0,
@@ -1516,7 +1570,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "305",
+        "line": "321",
         "path": "tests/unit/application/pipelines/crossref/test_crossref_transformer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_pre_extract_validation_accepts_valid_doi"
@@ -1677,7 +1731,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "465",
+        "line": "466",
         "path": "tests/unit/infrastructure/audit/test_file_audit.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_file_audit_adapter__aclose_is_idempotent__cb75761c"
@@ -1845,7 +1899,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1547",
+        "line": "1556",
         "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_merged_empty_records_returns"
@@ -2020,21 +2074,21 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1082",
+        "line": "1083",
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_handle_request_error_without_logger"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1125",
+        "line": "1126",
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_close_writer_handles_exceptions"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1209",
+        "line": "1210",
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_consume_headers"
@@ -2179,7 +2233,7 @@
         "test_count": 9
       },
       "pipeline_run_fsm": {
-        "assertion_backed_tests": 80,
+        "assertion_backed_tests": 81,
         "assertion_examples": [
           "tests/unit/application/core/test_batch_transformer.py:73",
           "tests/unit/application/core/test_batch_transformer.py:91",
@@ -2200,7 +2254,7 @@
           "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
           "tests/unit/application/core/test_batch_transformer.py"
         ],
-        "test_count": 80
+        "test_count": 81
       },
       "quarantine_replay": {
         "assertion_backed_tests": 44,
@@ -2247,16 +2301,43 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [],
+    "duplicate_test_name_inventory": [
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/core/test_publication_term_runtime.py:143",
+          "tests/unit/application/core/test_publication_term_s5_residuals.py:97"
+        ],
+        "name": "test_create_term_record_normalizes_mesh_id_and_qualifier",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/core/test_publication_term_runtime.py:97",
+          "tests/unit/application/core/test_publication_term_s5_residuals.py:65"
+        ],
+        "name": "test_extract_mesh_rejects_non_string_and_blank_fields",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      }
+    ],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 0,
-      "duplicate_occurrences": 0,
+      "cross_file_groups": 2,
+      "duplicate_occurrences": 4,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 0
+      "total_duplicate_names": 2
     },
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 4,
+    "duplicate_test_names": 2,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2275,8 +2356,10 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/application/core/test_batch_execution_lifecycle.py:52"
+    ],
+    "markerless_test_functions": 1,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2294,8 +2377,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2191,
-      "test_python_file_count": 2422,
+      "test_glob_file_count": 2205,
+      "test_python_file_count": 2436,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2314,6 +2397,7 @@
         "tests/unit/"
       ],
       "top_level_directories_including_pycache": [
+        "tests/__pycache__/",
         "tests/architecture/",
         "tests/benchmarks/",
         "tests/contract/",
@@ -2331,37 +2415,56 @@
         "tests/unit/"
       ],
       "top_level_directory_count": 15,
-      "top_level_directory_count_including_pycache": 15
+      "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [],
-    "total_test_files": 2191,
-    "total_test_functions": 23354,
+    "top_duplicate_test_names": [
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/core/test_publication_term_runtime.py:143",
+          "tests/unit/application/core/test_publication_term_s5_residuals.py:97"
+        ],
+        "name": "test_create_term_record_normalizes_mesh_id_and_qualifier"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/core/test_publication_term_runtime.py:97",
+          "tests/unit/application/core/test_publication_term_s5_residuals.py:65"
+        ],
+        "name": "test_extract_mesh_rejects_non_string_and_blank_fields"
+      }
+    ],
+    "total_test_files": 2205,
+    "total_test_functions": 23455,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 0
+    "uuid4_call_sites": 2
   },
   "root": ".",
-  "source_tree_sha256": "b07756e1cfebfedabb49531821ea7045fc6a302fa8d07cc2a00424ee872496c7",
+  "source_tree_sha256": "7a7d981c7d8f8149779ff9aa0c112d55c39b231567fd598fdf32e31e3ee7e9b8",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 4,
+    "duplicate_test_names": 2,
     "intentional_no_exception_contract": 89,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/application/core/test_batch_execution_lifecycle.py:52"
+    ],
+    "markerless_test_functions": 1,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 0
+    "uuid4_call_sites": 2
   },
   "test_file_inventory": {
     "pytest_python_files": [
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2191,
-    "test_python_file_count": 2422,
+    "test_glob_file_count": 2205,
+    "test_python_file_count": 2436,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2380,6 +2483,7 @@
       "tests/unit/"
     ],
     "top_level_directories_including_pycache": [
+      "tests/__pycache__/",
       "tests/architecture/",
       "tests/benchmarks/",
       "tests/contract/",
@@ -2397,11 +2501,28 @@
       "tests/unit/"
     ],
     "top_level_directory_count": 15,
-    "top_level_directory_count_including_pycache": 15
+    "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [],
-  "total_test_files": 2191,
-  "total_test_functions": 23354,
+  "top_duplicate_test_names": [
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/core/test_publication_term_runtime.py:143",
+        "tests/unit/application/core/test_publication_term_s5_residuals.py:97"
+      ],
+      "name": "test_create_term_record_normalizes_mesh_id_and_qualifier"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/core/test_publication_term_runtime.py:97",
+        "tests/unit/application/core/test_publication_term_s5_residuals.py:65"
+      ],
+      "name": "test_extract_mesh_rejects_non_string_and_blank_fields"
+    }
+  ],
+  "total_test_files": 2205,
+  "total_test_functions": 23455,
   "unreviewed_assertion_bypass_count": 0,
-  "uuid4_call_sites": 0
+  "uuid4_call_sites": 2
 }
