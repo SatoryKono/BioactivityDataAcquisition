@@ -45,8 +45,11 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 - **Empty state:** Browse requires written
   `reports/run-reports/pipeline/<pipeline>/<run_id>/pipeline-run-report.json`
   artifacts. HTTP `200` with `status=ok`, `count=0`, and `items=[]` means no
-  artifacts exist for that pipeline; `504` with
+  artifacts exist for that pipeline **or** the Ops container is bound to a
+  different/empty reports tree (check `marker_status` on the list payload and
+  `/health/ready` → `checks.report_root`). `504` with
   `contract=forensic_endpoint_error_v1` means the forensic endpoint timed out.
+  Operator verify: `python scripts/ops/runtime/docker/verify_report_bind.py`.
 
 ### 6. Selected Run Details
 - **Type:** Row (**collapsed by default**, `id=3099`)

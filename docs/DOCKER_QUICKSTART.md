@@ -48,6 +48,17 @@ python scripts/ops/runtime/docker/runtime_manager.py status --stack main
 
 Readiness: `http://127.0.0.1:8000/health/ready`
 
+Readiness includes `checks.report_root` (bind-identity marker
+`reports/.bioetl-report-root`). With `BIOETL_ENFORCE_REPORT_ROOT_MARKER=1`
+(default in `docker-compose.yml`), a missing marker makes ready **unhealthy**
+so Grafana Browse Recent Runs cannot silently read an empty stale bind.
+
+Verify host vs container report trees:
+
+```bash
+python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay
+```
+
 `runtime_manager.py` also binds this checkout's exact `data/` and `reports/`
 directories and injects a managed `BIOETL_RUNTIME_SOURCE_ID`. Check the
 dashboard data-plane identity with:

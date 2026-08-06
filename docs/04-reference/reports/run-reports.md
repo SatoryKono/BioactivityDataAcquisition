@@ -102,6 +102,37 @@ Missing artifact → structured 404 (`status=not_found`), not invented zeros.
 An empty list is a successful artifact-index response
 (`status=ok`, `count=0`, `items=[]`); it is distinct from the bounded forensic
 endpoint timeout response (`504`, `contract=forensic_endpoint_error_v1`).
+List responses also expose `report_root`, `marker`, and `marker_status` so
+operators can distinguish “no runs yet” from a stale Docker bind.
+
+## Report root and Docker bind
+
+| Concept | Path / env |
+|---------|------------|
+| Run-reports root (writers + Ops HTTP) | `reports/run-reports` (default) or `BIOETL_REPORT_ROOT` |
+| Dashboard bind mount (Compose) | host `BIOETL_DASHBOARD_REPORT_ROOT` → container `/app/reports` |
+| Bind-identity marker | `reports/.bioetl-report-root` (token `bioetl-report-root-v1`) |
+| Fail-closed readiness | `BIOETL_ENFORCE_REPORT_ROOT_MARKER=1` (default in `docker-compose.yml`) |
+
+Inside the main `bioetl` container the effective root is
+`/app/reports/run-reports`. Host CLI runs and container Ops HTTP **must** see
+the same tree. Stale Docker Desktop bind caches that mount an empty path make
+Grafana **Browse Recent Runs** show empty while host `bioetl report list`
+still finds artifacts.
+
+Verify:
+
+```bash
+python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay
+curl -s http://127.0.0.1:8000/health/ready | jq .checks.report_root
+```
+
+If verification fails, recreate the main stack from the canonical checkout
+(not a Desktop hash worktree path):
+
+```bash
+python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeout 180
+```
 
 ## Conservation
 
