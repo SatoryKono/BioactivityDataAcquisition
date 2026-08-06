@@ -150,6 +150,26 @@ def is_degraded_observable_profile_requested(
     return normalize_required_persistence_profile(profile_text) == "degraded_observable"
 
 
+def is_degraded_opt_down_eligible(
+    *,
+    opt_down_requested: bool,
+    configured_required_profile: object,
+    exact_replay_requested: bool,
+    critical_runtime: bool,
+) -> bool:
+    """Return whether a launch may opt down to the degraded_observable floor.
+
+    Eligibility requires an explicit opt-down flag, a degraded_observable
+    configured profile, no exact-replay request, and a non-critical runtime.
+    """
+    return (
+        bool(opt_down_requested)
+        and is_degraded_observable_profile_requested(configured_required_profile)
+        and not bool(exact_replay_requested)
+        and not bool(critical_runtime)
+    )
+
+
 def assess_reproducibility_policy(
     *,
     source_refs: tuple[RunSourceRef, ...],
@@ -219,6 +239,7 @@ __all__ = [
     "build_snapshot_envelope_status",
     "is_critical_reproducibility_runtime",
     "is_degraded_observable_profile_requested",
+    "is_degraded_opt_down_eligible",
     "normalize_required_persistence_profile",
     "resolve_effective_required_persistence_profile",
     "resolve_replay_capability",
