@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
-from typing import TYPE_CHECKING, Any, cast
+from collections.abc import Mapping
+from typing import TYPE_CHECKING
 
 import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.application.services.control_plane.manifest import RunManifestCreateSpec
@@ -33,6 +33,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
 )
+from bioetl.domain.ports import MetricsPort
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.ledger import (
@@ -110,29 +111,12 @@ def emit_replay_reconstructability_metric(
     *,
     request: RunManifestCreateSpec,
     strict_exact_replay_supported: bool,
-    metrics: object,
+    metrics: MetricsPort | None,
 ) -> None:
     """Emit replay reconstructability metrics for one manifest request."""
-    increment_counter_obj = _read_attr(metrics, "increment_counter", None)
-    if not callable(increment_counter_obj):
+    if metrics is None:
         return
-    # Cast after callable() narrows for Sonar S5864 (object-not-callable).
-    increment_counter = cast(
-        Callable[..., Any],  # Any: MetricsPort method bound as object
-        increment_counter_obj,
-    )
-    set_gauge_obj = _read_attr(metrics, "set_gauge", None)
-    # Bind under the inventory-scanned helper name (set_gauge), same pattern as
-    # increment_counter above. Calling cast(...)(obj)(...) hides the helper
-    # method name from the observability inventory AST scan.
-    set_gauge: Callable[..., Any] | None = (  # Any: MetricsPort method bound as object
-        cast(
-            Callable[..., Any],  # Any: MetricsPort method bound as object
-            set_gauge_obj,
-        )
-        if callable(set_gauge_obj)
-        else None
-    )
+
     launch_context = request.launch_context
     strict_replay_requested = bool(
         launch_context.get("exact_replay", False)
@@ -147,20 +131,46 @@ def emit_replay_reconstructability_metric(
         )
         or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
     )
+    # Prefer assessment already attached to launch_context when present so we
+    # do not recompute reproducibility decisions independently.
+    precomputed = None
+    if isinstance(launch_context, Mapping):
+        precomputed = launch_context.get("reproducibility_policy_assessment")
     strict_requirement = (
         strict_replay_requested
         or required_persistence_profile in STRICT_PERSISTENCE_PROFILES
     )
-    status = "reconstructable"
-    if strict_requirement and (
-        not strict_exact_replay_supported
-        or request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
-    ):
-        status = "not_reconstructable"
+    if isinstance(precomputed, Mapping):
+        strict_requirement = bool(
+            precomputed.get("strict_requirement_requested", strict_requirement)
+        )
+        assessment_capability = precomputed.get("replay_capability")
+        if isinstance(assessment_capability, str):
+            capability_value = assessment_capability
+        else:
+            capability_value = request.replay_capability.value
+        supported = bool(
+            precomputed.get(
+                "strict_exact_replay_supported", strict_exact_replay_supported
+            )
+        )
+        status = "reconstructable"
+        if strict_requirement and (
+            not supported
+            or capability_value != ReplayCapability.EXACT_REPLAY_SUPPORTED.value
+        ):
+            status = "not_reconstructable"
+    else:
+        status = "reconstructable"
+        if strict_requirement and (
+            not strict_exact_replay_supported
+            or request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
+        ):
+            status = "not_reconstructable"
     raw_run_type = _read_attr(request.run_type, "value", request.run_type)
     run_type = str(raw_run_type or "unknown").strip().lower().replace(" ", "_")
     bounded_run_type = run_type or "unknown"
-    increment_counter(
+    metrics.increment_counter(
         "bioetl_replay_reconstructability_events_total",
         value=1,
         labels={
@@ -180,15 +190,19 @@ def emit_replay_reconstructability_metric(
         "run_type": bounded_run_type,
         "replay_capability": request.replay_capability.value,
     }
-    if set_gauge is not None:
-        set_gauge(
+    lag_seconds = _resolve_replay_lag_seconds(
+        launch_context=launch_context,
+        lag_status=lag_status,
+    )
+    if lag_seconds is not None:
+        metrics.set_gauge(
             "bioetl_replay_lag_seconds",
-            value=0.0,
+            value=float(lag_seconds),
             labels={**replay_labels, "status": lag_status},
         )
 
     if status == "not_reconstructable":
-        increment_counter(
+        metrics.increment_counter(
             "bioetl_replay_drift_events_total",
             value=1,
             labels={
@@ -197,6 +211,30 @@ def emit_replay_reconstructability_metric(
                 "status": "detected",
             },
         )
+
+
+def _resolve_replay_lag_seconds(
+    *,
+    launch_context: object,
+    lag_status: str,
+) -> float | None:
+    """Return measured replay lag seconds when available; never invent 0 for blocked."""
+    raw: object | None = None
+    if isinstance(launch_context, Mapping):
+        raw = launch_context.get("replay_lag_seconds")
+        if raw is None:
+            raw = launch_context.get("parent_run_age_seconds")
+    else:
+        raw = _read_attr(launch_context, "replay_lag_seconds", None)
+        if raw is None:
+            raw = _read_attr(launch_context, "parent_run_age_seconds", None)
+    if isinstance(raw, int | float) and float(raw) >= 0.0:
+        return float(raw)
+    # Ready / not_requested with no measured lag: zero lag is meaningful.
+    if lag_status in {"ready", "not_requested"}:
+        return 0.0
+    # Blocked without measured lag: omit gauge rather than report a fake 0.0.
+    return None
 
 
 def create_ledger_service(inputs: RunnerInputs, ctx: Context) -> Ledger | None:
