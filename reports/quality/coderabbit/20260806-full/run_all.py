@@ -199,6 +199,10 @@ def run_leaf(leaf: dict, tip: str) -> dict:
     if "all files ignored" in low:
         status = "ignored"
         reason = "all_files_ignored"
+    if "connection failed" in low or "websocket" in low or "recoverable" in low:
+        if status != "rate_limit":
+            status = "connection_error"
+            reason = "connection_failed"
     if not out.strip() and status == "ok":
         status = "error"
         reason = "empty_output"
@@ -249,8 +253,10 @@ def main() -> None:
             f"  -> {res['status']} findings={res.get('findings')} "
             f"reason={res.get('reason')} elapsed={res.get('elapsed_s')}"
         )
-        if res["status"] == "rate_limit":
-            time.sleep(180)
+        if res["status"] in {"rate_limit", "connection_error", "timeout", "error"}:
+            backoff = 120 if res["status"] == "rate_limit" else 30
+            log(f"  backoff {backoff}s then retry ({res['status']})")
+            time.sleep(backoff)
             res = run_leaf(leaf, tip)
             results[lid] = res
             save_progress(prog)

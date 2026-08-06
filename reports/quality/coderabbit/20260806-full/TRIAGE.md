@@ -2,6 +2,9 @@
 
 Default: CONFIRM all non-empty findings.
 
+- CONFIRM `S01-domain-lineage:d2389f1f6b0f` major `src/bioetl/domain/lineage/_shared.py`
+- CONFIRM `S01-domain-lineage:8a13de16cb0a` major `src/bioetl/domain/lineage/refs.py`
+- CONFIRM `S01-domain-lineage:d9f644022c6e` major `src/bioetl/domain/lineage/metadata_bundle.py`
 - CONFIRM `S01-domain-value_objects:02c80a807abc` major `src/bioetl/domain/value_objects/activity.py`
 - CONFIRM `S01-domain-value_objects:60e1964b8a63` minor `src/bioetl/domain/value_objects/activity_confidence.py`
 - CONFIRM `S01-domain-value_objects:fca00186539a` major `src/bioetl/domain/value_objects/inchi.py`
