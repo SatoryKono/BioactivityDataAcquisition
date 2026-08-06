@@ -8,8 +8,10 @@ a substitute for the project constitution.
 Read these before planning or editing (in precedence order from `AGENTS.md`):
 
 - `AGENTS.md`
+- active equal-peer runtime maps: `.codex/agents/CODEX-RUNTIME.md` and
+  `.junie/agents/JUNIE-RUNTIME.md` (with `.junie/guidelines.md`); use Devin
+  maps under `.devin/agents/**` only in Devin sessions
 - `docs/00-project/NORMATIVE_SOURCES.md`
-- `.codex/agents/CODEX-RUNTIME.md`
 - `docs/00-project/RULES.md`
 - `docs/01-requirements/REQUIREMENTS.md`
 - accepted ADRs in `docs/02-architecture/decisions/`

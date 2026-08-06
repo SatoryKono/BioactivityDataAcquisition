@@ -25,7 +25,7 @@ Quick index of accepted architecture decisions and their operational impact.
 
 | Domain | ADRs |
 | --- | --- |
-| Deployment & operations | ADR-010 Local-Only, ADR-003 In-memory locking, ADR-008 Graceful shutdown, ADR-013 Async storage cleanup |
+| Deployment & operations | ADR-010 Local-Only, ADR-003 In-memory locking (historical), ADR-008 Graceful shutdown (historical), ADR-013 Async storage cleanup |
 | Data / medallion | ADR-001 Delta vs Parquet, ADR-002 Medallion, ADR-014 Deterministic writes, ADR-018 Gold strict validation, ADR-012 Clear contract |
 | Pipeline architecture | ADR-015 Services lifecycle, ADR-020 BasePipeline decomposition, ADR-026 Composite, ADR-031 Loading strategy, ADR-047 Workflow control plane |
 | Configuration | ADR-025 Pipeline config unification, ADR-027 DQ externalization, ADR-028 Filter externalization, ADR-039 Entity config format, ADR-029 Output metadata unification |
