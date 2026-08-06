@@ -8843,6 +8843,10 @@
       "status": "orphan",
       "agent_usage": [],
       "reference_count": 0,
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "orphaned_audit_script",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a historical S1 remediation artifact; remove it after confirming its fixes are represented in the canonical configuration and audit record.",
       "references": []
     },
     {
@@ -8851,6 +8855,10 @@
       "status": "orphan",
       "agent_usage": [],
       "reference_count": 0,
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "orphaned_audit_script",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a historical S1 remediation artifact; remove it after confirming its fixes are represented in the canonical configuration and audit record.",
       "references": []
     },
     {
@@ -20311,6 +20319,10 @@
       "status": "orphan",
       "agent_usage": [],
       "reference_count": 0,
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "orphaned_audit_script",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a historical CodeRabbit stream-balancing artifact; remove it after confirming its audit outputs are preserved in the durable review record.",
       "references": []
     },
     {
@@ -20319,6 +20331,10 @@
       "status": "orphan",
       "agent_usage": [],
       "reference_count": 0,
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "orphaned_audit_script",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a historical CodeRabbit inventory artifact; remove it after confirming its audit outputs are preserved in the durable review record.",
       "references": []
     },
     {
@@ -20327,6 +20343,10 @@
       "status": "orphan",
       "agent_usage": [],
       "reference_count": 0,
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "orphaned_audit_script",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a historical CodeRabbit stream-balancing artifact; remove it after confirming its audit outputs are preserved in the durable review record.",
       "references": []
     },
     {
