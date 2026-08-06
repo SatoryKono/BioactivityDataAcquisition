@@ -1111,32 +1111,7 @@
     }
   },
   "assertless_total_candidates": 105,
-  "budget_violations": [
-    {
-      "actual": 2,
-      "budget": "duplicate_test_names_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_names"
-    },
-    {
-      "actual": 4,
-      "budget": "duplicate_test_name_occurrences_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_name_occurrences"
-    },
-    {
-      "actual": 1,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    },
-    {
-      "actual": 2,
-      "budget": "uuid4_call_sites_max",
-      "expected_max": 0,
-      "metric": "uuid4_call_sites"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1281,43 +1256,16 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/application/core/test_publication_term_runtime.py:143",
-        "tests/unit/application/core/test_publication_term_s5_residuals.py:97"
-      ],
-      "name": "test_create_term_record_normalizes_mesh_id_and_qualifier",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/application/core/test_publication_term_runtime.py:97",
-        "tests/unit/application/core/test_publication_term_s5_residuals.py:65"
-      ],
-      "name": "test_extract_mesh_rejects_non_string_and_blank_fields",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    }
-  ],
+  "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 2,
-    "duplicate_occurrences": 4,
+    "cross_file_groups": 0,
+    "duplicate_occurrences": 0,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 2
+    "total_duplicate_names": 0
   },
-  "duplicate_test_name_occurrences": 4,
-  "duplicate_test_names": 2,
+  "duplicate_test_name_occurrences": 0,
+  "duplicate_test_names": 0,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1337,10 +1285,8 @@
     ]
   },
   "intentional_no_exception_contract": 89,
-  "markerless_examples": [
-    "tests/unit/application/core/test_batch_execution_lifecycle.py:52"
-  ],
-  "markerless_test_functions": 1,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2301,43 +2247,16 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/application/core/test_publication_term_runtime.py:143",
-          "tests/unit/application/core/test_publication_term_s5_residuals.py:97"
-        ],
-        "name": "test_create_term_record_normalizes_mesh_id_and_qualifier",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/application/core/test_publication_term_runtime.py:97",
-          "tests/unit/application/core/test_publication_term_s5_residuals.py:65"
-        ],
-        "name": "test_extract_mesh_rejects_non_string_and_blank_fields",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      }
-    ],
+    "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 2,
-      "duplicate_occurrences": 4,
+      "cross_file_groups": 0,
+      "duplicate_occurrences": 0,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 2
+      "total_duplicate_names": 0
     },
-    "duplicate_test_name_occurrences": 4,
-    "duplicate_test_names": 2,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2356,10 +2275,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/application/core/test_batch_execution_lifecycle.py:52"
-    ],
-    "markerless_test_functions": 1,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2397,7 +2314,6 @@
         "tests/unit/"
       ],
       "top_level_directories_including_pycache": [
-        "tests/__pycache__/",
         "tests/architecture/",
         "tests/benchmarks/",
         "tests/contract/",
@@ -2415,48 +2331,29 @@
         "tests/unit/"
       ],
       "top_level_directory_count": 15,
-      "top_level_directory_count_including_pycache": 16
+      "top_level_directory_count_including_pycache": 15
     },
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/application/core/test_publication_term_runtime.py:143",
-          "tests/unit/application/core/test_publication_term_s5_residuals.py:97"
-        ],
-        "name": "test_create_term_record_normalizes_mesh_id_and_qualifier"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/application/core/test_publication_term_runtime.py:97",
-          "tests/unit/application/core/test_publication_term_s5_residuals.py:65"
-        ],
-        "name": "test_extract_mesh_rejects_non_string_and_blank_fields"
-      }
-    ],
+    "top_duplicate_test_names": [],
     "total_test_files": 2205,
-    "total_test_functions": 23455,
+    "total_test_functions": 23456,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 2
+    "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "7a7d981c7d8f8149779ff9aa0c112d55c39b231567fd598fdf32e31e3ee7e9b8",
+  "source_tree_sha256": "801799c31433bb3666e9a47f61d5c1ff8206a58f6fe3c7ebef71c4fbf024f7ad",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 4,
-    "duplicate_test_names": 2,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "intentional_no_exception_contract": 89,
-    "markerless_examples": [
-      "tests/unit/application/core/test_batch_execution_lifecycle.py:52"
-    ],
-    "markerless_test_functions": 1,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 2
+    "uuid4_call_sites": 0
   },
   "test_file_inventory": {
     "pytest_python_files": [
@@ -2483,7 +2380,6 @@
       "tests/unit/"
     ],
     "top_level_directories_including_pycache": [
-      "tests/__pycache__/",
       "tests/architecture/",
       "tests/benchmarks/",
       "tests/contract/",
@@ -2501,28 +2397,11 @@
       "tests/unit/"
     ],
     "top_level_directory_count": 15,
-    "top_level_directory_count_including_pycache": 16
+    "top_level_directory_count_including_pycache": 15
   },
-  "top_duplicate_test_names": [
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/application/core/test_publication_term_runtime.py:143",
-        "tests/unit/application/core/test_publication_term_s5_residuals.py:97"
-      ],
-      "name": "test_create_term_record_normalizes_mesh_id_and_qualifier"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/application/core/test_publication_term_runtime.py:97",
-        "tests/unit/application/core/test_publication_term_s5_residuals.py:65"
-      ],
-      "name": "test_extract_mesh_rejects_non_string_and_blank_fields"
-    }
-  ],
+  "top_duplicate_test_names": [],
   "total_test_files": 2205,
-  "total_test_functions": 23455,
+  "total_test_functions": 23456,
   "unreviewed_assertion_bypass_count": 0,
-  "uuid4_call_sites": 2
+  "uuid4_call_sites": 0
 }
