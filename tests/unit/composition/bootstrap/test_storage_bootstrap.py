@@ -215,7 +215,7 @@ class TestBootstrapBronzeCleanupService:
 
         result = bootstrap_bronze_cleanup_service()
 
-        from bioetl.application.services.bronze_cleanup_service import (
+        from bioetl.application.services.ops.bronze_cleanup_service import (
             BronzeCleanupService,
         )
 
@@ -249,7 +249,7 @@ class TestBootstrapVacuumService:
 
         result = bootstrap_vacuum_service()
 
-        from bioetl.application.services.vacuum_service import VacuumService
+        from bioetl.application.services.ops.vacuum_service import VacuumService
 
         assert isinstance(result, VacuumService)
 

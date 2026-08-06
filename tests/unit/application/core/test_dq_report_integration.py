@@ -52,7 +52,7 @@ from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
 )
 from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
-from bioetl.application.services.dq_report_service import (
+from bioetl.application.services.quality.dq_report_service import (
     DQReportContext,
     DQReportResult,
 )

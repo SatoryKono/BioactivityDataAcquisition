@@ -7,11 +7,14 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from urllib import error, request
+
+import yaml
 
 if __package__ in {None, ""}:
     repo_root = Path(__file__).resolve().parents[4]
@@ -23,9 +26,11 @@ from scripts.ops.observability.grafana import audit_live_grafana_panels as live_
 from scripts.ops.observability.grafana import (
     rerender_grafana_screenshots as rerender_screenshots,
 )
+from scripts.ops.runtime.docker import docker_runtime_preflight as runtime_preflight
 
 DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
+DEFAULT_OPS_HTTP_BASE_URL = "http://localhost:8000"
 DEFAULT_APP_BASE_URL = "http://localhost:8081"
 DEFAULT_GRAFANA_USERNAME = "admin"
 # Never ship a default password. Prefer env / service-account token.
@@ -48,7 +53,9 @@ EXIT_QUARANTINE = 7
 EXIT_SCREENSHOTS = 8
 EXIT_CREDENTIALS = 9
 EXIT_BIOETL_TARGET = 10
+EXIT_BIOETL_SOURCE = 11
 QUARANTINE_EXPLORER_UID = "bioetl-silver-reject-explorer"
+_RUNTIME_SOURCE_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 
 @dataclass(frozen=True)
@@ -84,6 +91,26 @@ def _resolve_grafana_username() -> str:
         if value:
             return value
     return DEFAULT_GRAFANA_USERNAME
+
+
+def _resolve_expected_runtime_source_id() -> str:
+    """Resolve the expected opaque identity without reading any `.env` file."""
+    configured = _read_env("BIOETL_RUNTIME_SOURCE_ID").lower()
+    if _RUNTIME_SOURCE_ID_PATTERN.fullmatch(configured):
+        return configured
+    root = Path(__file__).resolve().parents[4]
+    contract_path = root / "configs/quality/docker_runtime_contracts.yaml"
+    payload = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return ""
+    environment = runtime_preflight.dashboard_source_environment(root, payload)
+    identity_contract = payload.get("dashboard_data_plane", {}).get(
+        "source_identity", {}
+    )
+    if not isinstance(identity_contract, dict):
+        return ""
+    environment_name = str(identity_contract.get("environment_name") or "")
+    return environment.get(environment_name, "")
 
 
 def _has_grafana_auth_material(*, username: str, password: str) -> bool:
@@ -867,6 +894,11 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Prometheus base URL. Default: http://localhost:9090",
     )
     parser.add_argument(
+        "--ops-http-base-url",
+        default=DEFAULT_OPS_HTTP_BASE_URL,
+        help="BioETL Ops HTTP base URL. Default: http://localhost:8000",
+    )
+    parser.add_argument(
         "--app-base-url",
         default=DEFAULT_APP_BASE_URL,
         help="Preferred Quarantine Explorer base URL. Default: http://localhost:8081",
@@ -941,6 +973,11 @@ def _exit_code_for_checks(checks: list[PreflightCheck]) -> int:
         return EXIT_EXPANDED_ROW
     if by_name.get("prometheus", PreflightCheck("", "ok", "")).status != "ok":
         return EXIT_PROMETHEUS
+    if (
+        by_name.get("bioetl-control-plane-source", PreflightCheck("", "ok", "")).status
+        != "ok"
+    ):
+        return EXIT_BIOETL_SOURCE
     if (
         by_name.get("bioetl-prometheus-target", PreflightCheck("", "ok", "")).status
         != "ok"
@@ -1028,6 +1065,57 @@ def _check_bioetl_prometheus_target(
     )
 
 
+def _check_bioetl_control_plane_source(
+    *,
+    ops_http_base_url: str,
+    expected_runtime_source_id: str,
+    timeout_seconds: float,
+) -> PreflightCheck:
+    """Fail closed when Ops HTTP serves a different runtime/data origin."""
+    url = f"{ops_http_base_url.rstrip('/')}/ops/control-plane/ready"
+    if not _RUNTIME_SOURCE_ID_PATTERN.fullmatch(expected_runtime_source_id):
+        return PreflightCheck(
+            name="bioetl-control-plane-source",
+            status="error",
+            detail="expected runtime source identity is missing or unmanaged",
+        )
+    try:
+        payload = _fetch_json(url, timeout_seconds)
+    except error.HTTPError as exc:
+        return PreflightCheck(
+            name="bioetl-control-plane-source",
+            status="error",
+            detail=f"{url} returned HTTP {exc.code}",
+        )
+    except Exception as exc:  # pragma: no cover - exercised by callers
+        return PreflightCheck(
+            name="bioetl-control-plane-source",
+            status="error",
+            detail=f"{url} failed: {exc}",
+        )
+    if not isinstance(payload, dict):
+        return PreflightCheck(
+            name="bioetl-control-plane-source",
+            status="error",
+            detail=f"{url} did not return a JSON object",
+        )
+    actual_identity = str(payload.get("runtime_source_id") or "")
+    if actual_identity != expected_runtime_source_id:
+        return PreflightCheck(
+            name="bioetl-control-plane-source",
+            status="error",
+            detail=(
+                "Ops HTTP runtime source identity mismatch; the backend may be "
+                "serving another checkout or stale artifact mounts"
+            ),
+        )
+    return PreflightCheck(
+        name="bioetl-control-plane-source",
+        status="ok",
+        detail="Ops HTTP runtime source identity matches the selected runtime root",
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
@@ -1070,6 +1158,13 @@ def main(argv: list[str] | None = None) -> int:
         screenshot_uids=tuple(str(uid) for uid in args.screenshot_uids),
     )
     if not args.skip_semantic_checks:
+        checks.append(
+            _check_bioetl_control_plane_source(
+                ops_http_base_url=args.ops_http_base_url,
+                expected_runtime_source_id=_resolve_expected_runtime_source_id(),
+                timeout_seconds=args.timeout_seconds,
+            )
+        )
         checks.append(
             _check_bioetl_prometheus_target(
                 prometheus_base_url=args.prometheus_base_url,

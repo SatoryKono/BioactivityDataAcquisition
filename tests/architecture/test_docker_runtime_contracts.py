@@ -313,6 +313,108 @@ def test_live_project_origin_and_foreign_port_are_gate_errors(tmp_path: Path) ->
     assert not preflight._is_discouraged_bind_source("/home/user/repo", ("/mnt/e",))
 
 
+def test_dashboard_data_plane_rejects_healthy_producer_from_stale_checkout(
+    tmp_path: Path,
+) -> None:
+    preflight = _load_preflight()
+    contract = {
+        "dashboard_data_plane": {
+            "producer_stack": "main",
+            "producer_service": "bioetl",
+            "required_bind_mounts": {
+                "/app/data": {
+                    "relative_source": "data",
+                    "environment_name": "BIOETL_DASHBOARD_DATA_ROOT",
+                },
+                "/app/reports": {
+                    "relative_source": "reports",
+                    "environment_name": "BIOETL_DASHBOARD_REPORT_ROOT",
+                },
+            },
+            "source_identity": {
+                "schema_version": "bioetl-dashboard-source-v1",
+                "environment_name": "BIOETL_RUNTIME_SOURCE_ID",
+                "label_name": "io.bioetl.dashboard-source-id",
+                "unmanaged_value": "unmanaged",
+            },
+        }
+    }
+    expected_environment = preflight.dashboard_source_environment(tmp_path, contract)
+    containers = [
+        {
+            "project": "bioetl-main",
+            "service": "bioetl",
+            "dashboard_source_id": "unmanaged",
+            "mounts": [
+                {
+                    "Type": "bind",
+                    "Source": (
+                        r"E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data"
+                    ),
+                    "Destination": "/app/data",
+                },
+                {
+                    "Type": "bind",
+                    "Source": (
+                        "/run/desktop/mnt/host/e/g-drive/05_AI/github/"
+                        "BioactivityDataAcquisition2/reports"
+                    ),
+                    "Destination": "/app/reports",
+                },
+            ],
+        }
+    ]
+
+    findings = preflight._dashboard_source_findings(
+        tmp_path,
+        containers,
+        contract=contract,
+        project_to_stack={"bioetl-main": "main"},
+    )
+
+    assert {finding.code for finding in findings} == {
+        "DASHBOARD_SOURCE_IDENTITY",
+        "DASHBOARD_SOURCE_MOUNT",
+    }
+    assert sum(finding.code == "DASHBOARD_SOURCE_MOUNT" for finding in findings) == 2
+    assert len(expected_environment["BIOETL_RUNTIME_SOURCE_ID"]) == 64
+
+
+def test_dashboard_data_plane_accepts_exact_managed_mounts(tmp_path: Path) -> None:
+    preflight = _load_preflight()
+    contract = _load_yaml(CONTRACT_PATH)
+    environment = preflight.dashboard_source_environment(tmp_path, contract)
+    containers = [
+        {
+            "project": "bioetl-main",
+            "service": "bioetl",
+            "dashboard_source_id": environment["BIOETL_RUNTIME_SOURCE_ID"],
+            "mounts": [
+                {
+                    "Type": "bind",
+                    "Source": str(tmp_path / "data"),
+                    "Destination": "/app/data",
+                },
+                {
+                    "Type": "bind",
+                    "Source": str(tmp_path / "reports"),
+                    "Destination": "/app/reports",
+                },
+            ],
+        }
+    ]
+
+    assert (
+        preflight._dashboard_source_findings(
+            tmp_path,
+            containers,
+            contract=contract,
+            project_to_stack={"bioetl-main": "main"},
+        )
+        == []
+    )
+
+
 def test_neo4j_helpers_delegate_to_the_single_compose_owner() -> None:
     helper_paths = [
         ROOT / "scripts/ops/runtime/neo4j/neo4j_quick_start.sh",

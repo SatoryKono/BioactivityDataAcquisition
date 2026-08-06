@@ -357,7 +357,7 @@ class TestPostrunServiceSpan:
 
     def _build_postrun_service(self, tracer: object | None) -> PostrunService:
         """Build a PostrunService with mocked dependencies."""
-        from bioetl.application.services.data_quality_service import DataQualityService
+        from bioetl.application.services.quality.data_quality_service import DataQualityService
         from bioetl.application.core.postrun.compact_orchestrator import (
             CompactionResult,
         )

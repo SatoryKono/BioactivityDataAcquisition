@@ -1,12 +1,12 @@
-# ARCH-REF-02 / #6825 — no-growth ratchet for application/services root modules.
+# ARCH-REF-R2 / #7728 — no-growth ratchet for application/services root modules.
 # Policy: new services land in subdomain packages, not package root.
 # Ratchet may only stay flat or decrease.
 
 schema_version: 1
 path: src/bioetl/application/services
 root_module_count:
-  current: 82
-  max: 82
+  current: 1
+  max: 1
   owner: "@bioetl-architecture"
-  linked_issue: "6825"
+  linked_issue: "7728"
   ratchet_policy: fail on growth; may only decrease after rehome evidence

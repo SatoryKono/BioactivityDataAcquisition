@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runtime_wiring_api import (
         CompositeCheckpointService,
     )
-    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.application.services.quality.dq_report_service import DQReportService
     from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.ports import (
         ClockPort,

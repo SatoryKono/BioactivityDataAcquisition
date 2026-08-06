@@ -16,12 +16,17 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass
-from datetime import datetime
 from typing import TYPE_CHECKING
 
 import polars as pl
 
+from bioetl.application.composite.coordinator_execution import (
+    complete_enricher_execution,
+    handle_enricher_execution_error,
+    handle_enricher_timeout,
+    run_enricher_with_timeout,
+    start_enricher_execution,
+)
 from bioetl.application.composite.coordinator_planning import (
     apply_enricher_filter,
     build_enricher_tasks,
@@ -31,10 +36,6 @@ from bioetl.application.composite.coordinator_result_mixin import (
     EnrichmentCoordinatorResultMixin,
 )
 from bioetl.application.runtime_clock import resolve_runtime_clock
-from bioetl.application.runtime_timestamps import (
-    capture_runtime_timing_anchor,
-    derive_completion_timestamp,
-)
 from bioetl.domain.composite import CompositeDQConfig, EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult
 from bioetl.domain.exceptions import (
@@ -66,16 +67,6 @@ _ENRICHER_EXECUTION_ERRORS = (
 )
 
 __all__ = ["EnrichmentCoordinatorService"]
-
-
-@dataclass(frozen=True, slots=True)
-class _EnricherExecutionContext:
-    """Per-enricher execution context shared across policy branches."""
-
-    enricher: EnricherConfig
-    records_input: int
-    started_at: datetime
-    started_monotonic_at: float
 
 
 class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
@@ -185,140 +176,35 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
     ) -> EnrichmentResult:
         """Run a single enricher with timeout and error handling."""
         async with self._semaphore:
-            execution_context = self._start_enricher_execution(enricher, keys)
+            execution_context = start_enricher_execution(self, enricher, keys)
 
             try:
-                runner, completed_at, duration = await self._run_with_timeout(
+                runner, completed_at, duration = await run_enricher_with_timeout(
                     enricher=enricher,
                     keys=keys,
                     runner_factory=runner_factory,
                     started_at=execution_context.started_at,
                     started_monotonic_at=execution_context.started_monotonic_at,
                 )
-                return self._complete_enricher_execution(
+                return complete_enricher_execution(
+                    self,
                     execution_context=execution_context,
                     runner=runner,
                     completed_at=completed_at,
                     duration=duration,
                 )
             except TimeoutError:
-                return self._handle_enricher_timeout(execution_context)
+                return handle_enricher_timeout(self, execution_context)
             except _ENRICHER_EXECUTION_ERRORS as e:
-                return self._handle_enricher_execution_error(
+                return handle_enricher_execution_error(
+                    self,
                     e,
                     execution_context=execution_context,
                 )
             except BioETLError as e:
-                return self._handle_enricher_execution_error(
+                return handle_enricher_execution_error(
+                    self,
                     e,
                     execution_context=execution_context,
                     reason_code="unexpected_bioetl_error",
                 )
-
-    def _start_enricher_execution(
-        self,
-        enricher: EnricherConfig,
-        keys: pl.DataFrame,
-    ) -> _EnricherExecutionContext:
-        """Create the canonical execution context and start log for one enricher."""
-        started_at, started_monotonic_at = capture_runtime_timing_anchor(
-            clock=self._clock
-        )
-        execution_context = _EnricherExecutionContext(
-            enricher=enricher,
-            records_input=len(keys),
-            started_at=started_at,
-            started_monotonic_at=started_monotonic_at,
-        )
-        self._log_enricher_start(enricher, execution_context.records_input)
-        return execution_context
-
-    def _complete_enricher_execution(
-        self,
-        *,
-        execution_context: _EnricherExecutionContext,
-        runner: ExecutionMetricsRunnerPort,
-        completed_at: datetime,
-        duration: float,
-    ) -> EnrichmentResult:
-        """Map a successful enricher execution into the canonical result shape."""
-        return self._build_enricher_result(
-            enricher=execution_context.enricher,
-            runner=runner,
-            records_input=execution_context.records_input,
-            started_at=execution_context.started_at,
-            completed_at=completed_at,
-            duration=duration,
-        )
-
-    def _handle_enricher_timeout(
-        self,
-        execution_context: _EnricherExecutionContext,
-    ) -> EnrichmentResult:
-        """Apply timeout policy, re-raising for required enrichers only."""
-        enricher = execution_context.enricher
-        completed_at, duration = derive_completion_timestamp(
-            started_at=execution_context.started_at,
-            started_monotonic=execution_context.started_monotonic_at,
-        )
-        if enricher.required:
-            self._logger.error(
-                "Required enricher timed out",
-                enricher=enricher.pipeline,
-                timeout_seconds=enricher.timeout_seconds,
-                duration_seconds=duration,
-            )
-            raise
-        return self._build_timeout_result(
-            enricher,
-            execution_context.records_input,
-            execution_context.started_at,
-            completed_at,
-            duration,
-        )
-
-    def _handle_enricher_execution_error(
-        self,
-        error: Exception,
-        *,
-        execution_context: _EnricherExecutionContext,
-        reason_code: str | None = None,
-    ) -> EnrichmentResult:
-        """Apply canonical error mapping for enricher execution failures."""
-        return self._handle_enricher_error(
-            error,
-            execution_context.enricher,
-            execution_context.records_input,
-            execution_context.started_at,
-            *derive_completion_timestamp(
-                started_at=execution_context.started_at,
-                started_monotonic=execution_context.started_monotonic_at,
-            ),
-            reason_code=reason_code,
-        )
-
-    def _log_enricher_start(self, enricher: EnricherConfig, records_input: int) -> None:
-        self._logger.info(
-            "Starting enricher",
-            enricher=enricher.pipeline,
-            records_input=records_input,
-            timeout_seconds=enricher.timeout_seconds,
-        )
-
-    async def _run_with_timeout(
-        self,
-        *,
-        enricher: EnricherConfig,
-        keys: pl.DataFrame,
-        runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
-        started_at: datetime,
-        started_monotonic_at: float,
-    ) -> tuple[ExecutionMetricsRunnerPort, datetime, float]:
-        async with asyncio.timeout(enricher.timeout_seconds):
-            runner = runner_factory(enricher.pipeline, keys)
-            await runner.run()
-        completed_at, duration = derive_completion_timestamp(
-            started_at=started_at,
-            started_monotonic=started_monotonic_at,
-        )
-        return runner, completed_at, duration

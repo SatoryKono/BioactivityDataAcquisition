@@ -33,7 +33,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.services.checkpoint_service import (
+from bioetl.application.services.checkpoint.checkpoint_service import (
     CheckpointInfo,
     CheckpointService,
 )

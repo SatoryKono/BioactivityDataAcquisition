@@ -166,7 +166,7 @@ class TestHealthCheckLogging:
         error_handler = MagicMock()
 
         with patch(
-            "bioetl.infrastructure.adapters.base.create_default_error_handler",
+            "bioetl.infrastructure.adapters._base_runtime.create_default_error_handler",
             return_value=error_handler,
         ) as factory:
             adapter = StubHttpAdapter(
@@ -190,15 +190,15 @@ class TestHealthCheckLogging:
 
         with (
             patch(
-                "bioetl.infrastructure.adapters.base.create_default_error_handler",
+                "bioetl.infrastructure.adapters._base_runtime.create_default_error_handler",
                 return_value=MagicMock(),
             ),
             patch(
-                "bioetl.infrastructure.adapters.base.create_default_adapter_metrics",
+                "bioetl.infrastructure.adapters._base_runtime.create_default_adapter_metrics",
                 return_value=adapter_metrics,
             ) as metrics_factory,
             patch(
-                "bioetl.infrastructure.adapters.base.create_default_request_collector",
+                "bioetl.infrastructure.adapters._base_runtime.create_default_request_collector",
                 return_value=request_collector,
             ) as collector_factory,
         ):
@@ -232,13 +232,13 @@ class TestHealthCheckLogging:
 
         with (
             patch(
-                "bioetl.infrastructure.adapters.base.create_default_error_handler",
+                "bioetl.infrastructure.adapters._base_runtime.create_default_error_handler",
             ) as error_factory,
             patch(
-                "bioetl.infrastructure.adapters.base.create_default_adapter_metrics",
+                "bioetl.infrastructure.adapters._base_runtime.create_default_adapter_metrics",
             ) as metrics_factory,
             patch(
-                "bioetl.infrastructure.adapters.base.create_default_request_collector",
+                "bioetl.infrastructure.adapters._base_runtime.create_default_request_collector",
             ) as collector_factory,
         ):
             adapter = StubHttpAdapter(

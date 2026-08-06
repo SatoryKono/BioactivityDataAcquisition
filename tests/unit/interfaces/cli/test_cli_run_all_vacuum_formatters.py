@@ -46,7 +46,7 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
 )
-from bioetl.application.services.vacuum_service import (
+from bioetl.application.services.ops.vacuum_service import (
     TableVacuumResult,
     VacuumAllResult,
 )

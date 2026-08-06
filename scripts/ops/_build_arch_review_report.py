@@ -265,7 +265,9 @@ def main() -> int:
         "- Layered summary MD: `reports/quality/coderabbit/architecture-layered_20260723_101412.md`"
     )
     lines.append(
-        "- Helper scripts: `scripts/ops/_run_cr_arch_review_wsl.sh`, `scripts/ops/_run_cr_arch_review_remaining.sh`"
+        "- Helper scripts: `scripts/ops/_run_cr_arch_review_wsl.sh`, "
+        "`scripts/ops/_run_cr_arch_review_remaining.sh`, "
+        "`scripts/ops/_cr_publish_findings.py`, `scripts/ops/_cr_seed_published.py`"
     )
     lines.append("")
 

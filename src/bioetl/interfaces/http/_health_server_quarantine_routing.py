@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Protocol
 from urllib.parse import unquote
 
 if TYPE_CHECKING:
-    from bioetl.application.services.quarantine_service import QuarantineService
+    from bioetl.application.services.quality.quarantine_service import QuarantineService
 
 from bioetl.interfaces.http._forensic_request_budget import (
     ForensicEndpointUnavailable,

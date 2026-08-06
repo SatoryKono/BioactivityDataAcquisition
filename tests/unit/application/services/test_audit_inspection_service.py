@@ -33,7 +33,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.services.audit_inspection_service import (
+from bioetl.application.services.export_lineage.audit_inspection_service import (
     AuditInspectionService,
 )
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation

@@ -239,6 +239,14 @@ class ColumnOrderService:
         )
 
     @staticmethod
+    def _apply_renames(
+        columns: list[str],
+        rename_map: dict[str, str],
+    ) -> list[str]:
+        """Delegate legacy service-level rename calls to the focused helper."""
+        return apply_renames(columns, rename_map)
+
+    @staticmethod
     def get_enricher_prefix(enricher_pipeline: str) -> str:
         """Get enricher prefix with trailing separator."""
         return get_enricher_prefix(enricher_pipeline)

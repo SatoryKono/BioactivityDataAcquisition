@@ -30,8 +30,8 @@ from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
-    from bioetl.application.services.health_service import HealthService
-    from bioetl.application.services.quarantine_service import QuarantineService
+    from bioetl.application.services.ops.health_service import HealthService
+    from bioetl.application.services.quality.quarantine_service import QuarantineService
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.config.settings_api import Settings
 

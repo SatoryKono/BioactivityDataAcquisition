@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.services.checkpoint_compatibility_service import (
+from bioetl.application.services.checkpoint.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
 )
 from bioetl.application.services.medallion.medallion_lifecycle import (

@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from bioetl.application.services.bronze_cleanup_service import (
+    from bioetl.application.services.ops.bronze_cleanup_service import (
         BronzeCleanupResult,
     )
     from bioetl.domain.ports import (

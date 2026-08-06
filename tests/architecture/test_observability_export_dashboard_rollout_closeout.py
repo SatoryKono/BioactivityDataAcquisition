@@ -20,7 +20,7 @@ from typing import Any
 import pytest
 import yaml
 
-from bioetl.application.services.export_models import ExportOptions, ExportResult
+from bioetl.application.services.export_lineage.export_models import ExportOptions, ExportResult
 from bioetl.domain.ports.export import (
     ExportJobStatus,
     ExportRedactionProfile,

@@ -23,7 +23,7 @@ if TYPE_CHECKING:
         RecordProcessorConfig,
         TransformCallback,
     )
-    from bioetl.application.services.debug_export_service import DebugExportConfig
+    from bioetl.application.services.export_lineage.debug_export_service import DebugExportConfig
     from bioetl.domain.composite import ColumnGroupConfig, DataSchemaConfig
     from bioetl.domain.config import DQConfig
     from bioetl.domain.context import PipelineContext

@@ -39,15 +39,15 @@ import yaml
 from bioetl.application.core.lifecycle.checkpoint_runtime import (
     enrich_metadata_with_execution_identity,
 )
-from bioetl.application.services._checkpoint_execution_identity_payload import (
+from bioetl.application.services.checkpoint._checkpoint_execution_identity_payload import (
     build_checkpoint_execution_identity_payload,
     has_canonical_checkpoint_execution_identity_fields,
 )
-from bioetl.application.services._checkpoint_compatibility_runtime_identity_details import (
+from bioetl.application.services.checkpoint._checkpoint_compatibility_runtime_identity_details import (
     IdentityDetailsSpec,
     build_identity_details,
 )
-from bioetl.application.services.checkpoint_compatibility_service import (
+from bioetl.application.services.checkpoint.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
 )
 from bioetl.domain.normalization import (

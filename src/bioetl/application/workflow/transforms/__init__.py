@@ -6,7 +6,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from bioetl.application.services.workflow_transform_artifacts import (
+from bioetl.application.services.workflow.workflow_transform_artifacts import (
     WorkflowTransformArtifactSinkProtocol,
 )
 

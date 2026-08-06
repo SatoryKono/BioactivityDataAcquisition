@@ -824,13 +824,13 @@ removable_complexity_family_ratchets:
   families:
     - name: adapter_layer
       owner: "@bioetl-platform"
-      linked_issue: "7702"
+      linked_issue: "7730"
       path_prefixes:
         - src/bioetl/infrastructure/adapters/
       family_budgets:
-        # Measured residual after #7702 cohesive helper extractions; shrink-only from here.
-        # 2026-08-05 #7702: files_ge_250_loc 22->9 via private sibling modules; fan_in 31->19.
-        files_ge_250_loc: 9
+        # Measured residual after #7730 cohesive helper extractions; shrink-only from here.
+        # 2026-08-05 #7730: files_ge_250_loc 9->2 via private sibling modules; fan_in stays 19.
+        files_ge_250_loc: 2
         max_internal_fan_in: 19
       tracked_seams:
         - path: src/bioetl/infrastructure/adapters/http/_health_monitor_support.py
@@ -840,12 +840,12 @@ removable_complexity_family_ratchets:
             - bioetl.infrastructure.adapters.http._health_monitor_transitions
     - name: composite_layer
       owner: "@bioetl-architecture"
-      linked_issue: "7703"
+      linked_issue: "7731"
       path_prefixes:
         - src/bioetl/application/composite/
       family_budgets:
-        # Measured residual after #7703 collaborator extractions; shrink-only from 21/25.
-        files_ge_250_loc: 6
+        # Measured residual after #7731 Phase B collaborator extractions; shrink-only from 6/17.
+        files_ge_250_loc: 1
         max_internal_fan_in: 17
       tracked_seams:
         - path: src/bioetl/application/composite/runner_pkg/runner_summary_helpers.py

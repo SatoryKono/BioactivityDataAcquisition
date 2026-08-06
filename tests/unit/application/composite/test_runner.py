@@ -153,7 +153,7 @@ class TestFSMSeedStateTransitions:
         runner._observer.emit_run_started = MagicMock()
 
         with patch(
-            "bioetl.application.composite.runner_pkg.runner.capture_runtime_timing_anchor",
+            "bioetl.application.composite.runner_pkg.runner_lifecycle_flow.capture_runtime_timing_anchor",
             return_value=(started_at, 42.0),
         ):
             runner._start_run_lifecycle()
