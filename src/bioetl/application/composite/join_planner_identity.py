@@ -18,19 +18,19 @@ __all__ = [
 
 
 @dataclass(frozen=True, slots=True)
-class PipelineIdentity:
+class PipelineIdentityRecord:
     """Parsed ``provider_entity`` identity used by helper-level resolvers."""
 
     provider: str
     entity: str
 
 
-def try_parse_pipeline_identity(pipeline: str) -> PipelineIdentity | None:
+def try_parse_pipeline_identity(pipeline: str) -> PipelineIdentityRecord | None:
     """Return parsed pipeline identity or ``None`` when format is invalid."""
     if "_" not in pipeline:
         return None
     provider, entity = pipeline.split("_", 1)
-    return PipelineIdentity(provider=provider, entity=entity)
+    return PipelineIdentityRecord(provider=provider, entity=entity)
 
 
 def resolve_field_aliases_from_registry(pipeline: str) -> dict[str, str] | None:

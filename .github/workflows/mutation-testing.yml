@@ -53,7 +53,7 @@ jobs:
             # mutmut 3.x intentionally skips decorated classes. Target the
             # workflow runner's canonical, undecorated policy helpers so this
             # lane exercises real mutants instead of a zero-mutant dataclass.
-            paths_to_mutate: src/bioetl/application/services/workflow_runner_support.py
+            paths_to_mutate: src/bioetl/application/services/workflow/workflow_runner_support.py
             tests_dir: tests/unit/repo_backed/application/services/test_workflow_runner_service.py
             threshold: "60.0"
 

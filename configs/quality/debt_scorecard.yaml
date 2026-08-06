@@ -724,7 +724,7 @@ oversized_source_module_inventory:
       lines: 174
       owner: "@bioetl-control-plane"
       target_split: separate file IO, record serialization, and query helpers
-    - path: src/bioetl/application/services/data_quality_service.py
+    - path: src/bioetl/application/services/quality/data_quality_service.py
       lines: 133
       owner: "@bioetl-dq"
       target_split: split DQ orchestration from anomaly and severity policy helpers

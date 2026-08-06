@@ -49,7 +49,6 @@ if TYPE_CHECKING:
         HttpAdapterDependencyContext,
     )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.config.settings_api import Settings
 
 # Mapping from entity_type to DTO model class
 PUBMED_DTO_MODELS: dict[str, type[BaseModel]] = {
@@ -177,7 +176,7 @@ class PubMedAdapter(  # pyright: ignore[reportUnsafeMultipleInheritance]
         await self._close_http_client_context()
 
 
-from bioetl.infrastructure.adapters.pubmed._adapter_factory import (  # noqa: E402
+from bioetl.infrastructure.adapters.pubmed._adapter_support import (  # noqa: E402
     _create_pubmed_adapter,
 )
 

@@ -242,11 +242,11 @@ def test_checkpoint_quarantine_runtime_admin_family_is_role_driven() -> None:
         ),
         (
             "CheckpointService",
-            "src/bioetl/application/services/checkpoint_service.py",
+            "src/bioetl/application/services/checkpoint/checkpoint_service.py",
         ),
         (
             "QuarantineService",
-            "src/bioetl/application/services/quarantine_service.py",
+            "src/bioetl/application/services/quality/quarantine_service.py",
         ),
     }
 
@@ -270,7 +270,7 @@ def test_lock_runtime_admin_family_is_role_driven() -> None:
         ),
         (
             "LockService",
-            "src/bioetl/application/services/lock_service.py",
+            "src/bioetl/application/services/ops/lock_service.py",
         ),
     }
     assert "LockCoordinator" in rule.match_regex
