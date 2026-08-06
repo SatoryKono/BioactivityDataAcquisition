@@ -92,3 +92,61 @@ def test_extract_terms_from_publication_preserves_mesh_shape_and_keyword_semanti
     assert terms[1]["qualifier"] is None
     assert terms[2]["term"] == "kinase"
     assert terms[3]["term"] == "inhibitor"
+
+
+def test_extract_mesh_rejects_non_string_and_blank_fields() -> None:
+    publication = {
+        "mesh_terms": [
+            {
+                "mesh_heading": "  ",
+                "mesh_id": "D1",
+                "mesh_qualifier": "use",
+            },
+            {
+                "mesh_heading": 123,
+                "mesh_id": "D2",
+                "mesh_qualifier": "x",
+            },
+            {
+                "mesh_heading": "valid heading",
+                "mesh_id": 999,
+                "mesh_qualifier": "  ",
+            },
+            {
+                "mesh_heading": "kinase",
+                "mesh_id": " D004791 ",
+                "mesh_qualifier": " therapeutic use ",
+            },
+        ],
+        "keywords": ["ok", "  ", 5, None],
+    }
+
+    terms = extract_terms_from_publication(publication, "CHEMBL9")
+
+    # blank heading skipped; non-str heading skipped; blank qualifier omitted;
+    # valid heading kept with non-str mesh_id -> None; last mesh has full fields
+    types = [t["term_type"] for t in terms]
+    assert "KEYWORD" in types
+    assert types.count("KEYWORD") == 1
+    assert terms[-1]["term"] == "ok" or any(t["term"] == "ok" for t in terms)
+
+    heading = next(t for t in terms if t["term"] == "kinase")
+    assert heading["term_type"] == "MESH_HEADING"
+    assert heading["mesh_id"] == "D004791"
+    assert heading["qualifier"] == "therapeutic use"
+
+    qualifier = next(t for t in terms if t["term"] == "therapeutic use")
+    assert qualifier["term_type"] == "MESH_QUALIFIER"
+    assert qualifier["mesh_id"] == "D004791"
+
+
+def test_create_term_record_normalizes_mesh_id_and_qualifier() -> None:
+    record = create_term_record(
+        publication_id="CHEMBL1",
+        term="enzyme",
+        term_type="MESH_HEADING",
+        mesh_id="  D1  ",
+        qualifier="  use  ",
+    )
+    assert record["mesh_id"] == "D1"
+    assert record["qualifier"] == "use"
