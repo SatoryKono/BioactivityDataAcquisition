@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from typing import Any, cast
 
 from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.ports import CircuitBreakerPort, LoggerPort
@@ -30,20 +31,27 @@ def _snapshot_from_port(circuit_breaker: CircuitBreakerPort) -> CircuitBreakerSn
 
     recovery_timeout_getter = getattr(circuit_breaker, "get_recovery_timeout", None)
     if callable(recovery_timeout_getter):
-        recovery_timeout = float(recovery_timeout_getter())
+        recovery_timeout = float(cast(Any, recovery_timeout_getter()))
     else:
-        recovery_timeout = float(getattr(circuit_breaker, "recovery_timeout", 60.0))
+        recovery_timeout = float(cast(Any, getattr(circuit_breaker, "recovery_timeout", 60.0)))
 
     last_failure_getter = getattr(circuit_breaker, "get_last_failure_time", None)
     if callable(last_failure_getter):
-        last_failure_time = last_failure_getter()
+        raw_lft = last_failure_getter()
+        last_failure_time = (
+            float(raw_lft)
+            if isinstance(raw_lft, int | float) and not isinstance(raw_lft, bool) and raw_lft > 0
+            else None
+        )
     else:
         raw_last_failure_time = getattr(circuit_breaker, "last_failure_time", None)
         if raw_last_failure_time is None:
             raw_last_failure_time = getattr(circuit_breaker, "_last_failure_time", None)
         last_failure_time = (
             float(raw_last_failure_time)
-            if isinstance(raw_last_failure_time, int | float) and raw_last_failure_time > 0
+            if isinstance(raw_last_failure_time, int | float)
+            and not isinstance(raw_last_failure_time, bool)
+            and raw_last_failure_time > 0
             else None
         )
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-06T17:41:22.379739+00:00",
+  "generated_at": "2026-08-06T18:25:01.903986+00:00",
   "summary": {
     "total_scripts": 583,
     "status_counts": {
@@ -18607,13 +18607,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1237,
+          "line": 1233,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1324,
+          "line": 1320,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
