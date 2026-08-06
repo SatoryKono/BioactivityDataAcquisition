@@ -10,10 +10,10 @@
 | --- | --- |
 | Workflow | .github/workflows/coderabbit.yml — push to main/master + workflow_dispatch only |
 | Untrusted PR | Does **not** run with CODERABBIT_API_KEY |
-| Secret in repo Actions | gh api actions/secrets total_count 0 (none set / not readable) |
-| CI CLI without secret | Job **succeeds**, skip warning, App-only fallback |
-| Local CLI | Operator API key only (never committed); WSL binary historically 0.7.x |
-| PR App + .coderabbit.yaml | profile assertive; continuous PR residual |
+| Secret in repo Actions | `gh api .../actions/secrets` **total_count 0** (re-checked 2026-08-06T13:45Z) |
+| CI CLI without secret | Job **succeeds**, skip warning, App-only fallback (recent push runs still skip) |
+| Local CLI | Operator API key only (never committed); WSL CLI 0.7.2; `coderabbit auth status` = API key |
+| PR App + .coderabbit.yaml | profile assertive; App comments observed on PR #8057 (rate-limit notice proves install) |
 
 ## Acceptance mapping
 

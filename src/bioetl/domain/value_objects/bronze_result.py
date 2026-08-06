@@ -108,9 +108,10 @@ class BronzeWriteResult:
         """Calculate compression ratio (uncompressed / compressed).
 
         Returns:
-            Compression ratio, or 1.0 if uncompressed_size is 0.
+            Compression ratio, or 1.0 when either size is zero so callers never
+            hit ZeroDivisionError on empty or pre-compression artifacts.
         """
-        if self.uncompressed_size == 0:
+        if self.uncompressed_size == 0 or self.compressed_size == 0:
             return 1.0
         return self.uncompressed_size / self.compressed_size
 
