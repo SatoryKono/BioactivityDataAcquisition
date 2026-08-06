@@ -157,7 +157,9 @@ class TestBatchingPerformance:
         now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         if sys.platform.startswith("win"):
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            policy_cls = getattr(asyncio, "WindowsSelectorEventLoopPolicy", None)
+            if policy_cls is not None:
+                asyncio.set_event_loop_policy(policy_cls())
 
         start = time.perf_counter()
         asyncio.run(
@@ -204,7 +206,9 @@ class TestBatchingPerformance:
             records.append(record)
 
         if sys.platform.startswith("win"):
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            policy_cls = getattr(asyncio, "WindowsSelectorEventLoopPolicy", None)
+            if policy_cls is not None:
+                asyncio.set_event_loop_policy(policy_cls())
 
         start = time.perf_counter()
         asyncio.run(
@@ -329,7 +333,9 @@ class TestBatchingPerformance:
         now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         if sys.platform.startswith("win"):
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            policy_cls = getattr(asyncio, "WindowsSelectorEventLoopPolicy", None)
+            if policy_cls is not None:
+                asyncio.set_event_loop_policy(policy_cls())
 
         asyncio.run(
             bronze_writer.write_bronze(
@@ -383,7 +389,9 @@ class TestScalabilityPerformance:
         )
 
         if sys.platform.startswith("win"):
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            policy_cls = getattr(asyncio, "WindowsSelectorEventLoopPolicy", None)
+            if policy_cls is not None:
+                asyncio.set_event_loop_policy(policy_cls())
 
         start_1k = time.perf_counter()
         asyncio.run(
@@ -407,7 +415,9 @@ class TestScalabilityPerformance:
         )
 
         if sys.platform.startswith("win"):
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            policy_cls = getattr(asyncio, "WindowsSelectorEventLoopPolicy", None)
+            if policy_cls is not None:
+                asyncio.set_event_loop_policy(policy_cls())
 
         start_5k = time.perf_counter()
         asyncio.run(

@@ -16,11 +16,11 @@ def strip_ansi(raw: bytes) -> str:
     return re.sub(rb"\x1b\[[0-9;]*m", b"", raw).decode("utf-8", errors="replace").strip()
 
 
-def load_search(path: Path) -> list[dict]:
+def load_search(path: Path) -> list[dict[str, object]]:
     text = strip_ansi(path.read_bytes())
     dec = json.JSONDecoder()
     idx = 0
-    items: list[dict] = []
+    items: list[dict[str, object]] = []
     while idx < len(text):
         while idx < len(text) and text[idx].isspace():
             idx += 1

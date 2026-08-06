@@ -82,6 +82,23 @@ reports/quality/coderabbit/YYYYMMDD/
   FINAL.md
 ```
 
+## Bounded campaign helpers
+
+The following non-canonical utilities are retained only as audit evidence and
+helpers for this campaign. They are not general project entry points:
+
+- `scripts/quality/coderabbit/build_matrix.py`
+- `scripts/quality/coderabbit/build_streams.py`
+- `scripts/quality/coderabbit/inventory_cm.py`
+- `scripts/quality/coderabbit/rebalance_streams.py`
+- `scripts/quality/coderabbit/run_leaves.py`
+
+The one-shot remediation patchers
+`scripts/engineering/apply_s1_c2_fixes.py` and
+`scripts/engineering/apply_s1_c3c6_fixes.py` are retained for closeout
+auditability only. Do not re-run them after their source changes have landed;
+remove them once the corresponding regression coverage is durable.
+
 ## Hard constraints
 
 1. Do not CLI-review entire monorepo in one shot.  

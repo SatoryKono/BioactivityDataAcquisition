@@ -1178,6 +1178,18 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a Docker runtime manager helper for container lifecycle management; keep it supporting unless it becomes a governed CI workflow or first-class ops entrypoint."
     },
+    "scripts/ops/coderabbit/build_matrix.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the documented matrix builder for the bounded 2026-08 CodeRabbit campaign; remove it after campaign closeout or consolidate it into a canonical quality command if the workflow becomes recurring."
+    },
+    "scripts/ops/coderabbit/run_leaves.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the documented sequential runner for the bounded 2026-08 CodeRabbit campaign; remove it after campaign closeout and keep its API-dependent execution outside ordinary local workflows."
+    },
     "scripts/ops/runtime/mcp/apply-shared-to-grok.ps1": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
