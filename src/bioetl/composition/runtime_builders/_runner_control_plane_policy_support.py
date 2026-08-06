@@ -54,15 +54,15 @@ def resolve_required_artifact_lineage_layers(
     skip_gold: bool = False,
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     """Return active sink layers and layers missing metadata sidecars."""
-    if yaml_config is None:
-        default_active_layers = tuple(
-            layer
-            for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS
-            if not (layer == "gold" and skip_gold)
-        )
+    default_active_layers = tuple(
+        layer
+        for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS
+        if not (layer == "gold" and skip_gold)
+    )
+    # Missing yaml_config or sink=None: honor default active layers (and
+    # skip_gold) rather than treating the run as having no published layers.
+    if yaml_config is None or getattr(yaml_config, "sink", None) is None:
         return default_active_layers, default_active_layers
-    if getattr(yaml_config, "sink", None) is None:
-        return (), ()
     active_layer_names: list[str] = []
     missing_lineage_layers: list[str] = []
     for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS:

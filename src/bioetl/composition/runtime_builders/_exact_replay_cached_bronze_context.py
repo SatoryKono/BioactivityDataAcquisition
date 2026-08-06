@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import is_dataclass, replace
 from pathlib import Path, PurePosixPath
-from types import SimpleNamespace
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -60,15 +59,32 @@ def bind_cached_bronze_context(
     ctx: PipelineRunContext,
     cached_bronze: CachedBronzeContext,
 ) -> PipelineRunContext:
-    """Return context with resolved cached Bronze replay inputs attached."""
+    """Return context with resolved cached Bronze replay inputs attached.
+
+    Preserves the concrete ``PipelineRunContext`` type. Non-dataclass hosts
+    must support ``cached_bronze`` assignment (``object.__setattr__`` for
+    frozen hosts, or direct attribute write).
+    """
     current = getattr(ctx, "cached_bronze", None)
     if current == cached_bronze:
         return ctx
     if is_dataclass(ctx):
         return replace(ctx, cached_bronze=cached_bronze)
-    payload = dict(vars(ctx))
-    payload["cached_bronze"] = cached_bronze
-    return SimpleNamespace(**payload)
+    # Prefer in-place binding over SimpleNamespace conversion so callers
+    # retain the original PipelineRunContext type and methods.
+    try:
+        object.__setattr__(ctx, "cached_bronze", cached_bronze)
+        return ctx
+    except (AttributeError, TypeError):
+        pass
+    try:
+        setattr(ctx, "cached_bronze", cached_bronze)
+        return ctx
+    except (AttributeError, TypeError) as exc:
+        raise TypeError(
+            "PipelineRunContext does not support cached_bronze binding; "
+            "use a dataclass or mutable context host"
+        ) from exc
 
 
 def _resolve_replay_parent_manifest(

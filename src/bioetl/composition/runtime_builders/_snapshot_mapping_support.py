@@ -3,15 +3,28 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import asdict, is_dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 from uuid import UUID
 
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
 
 __all__ = ["normalize_snapshot", "to_serializable_mapping"]
+
+
+@runtime_checkable
+class _ModelDumpHost(Protocol):
+    def model_dump(
+        self, *, mode: str = "python", exclude_none: bool = False
+    ) -> Mapping[str, object]: ...
+
+
+@runtime_checkable
+class _DictHost(Protocol):
+    def dict(self, *, exclude_none: bool = False) -> Mapping[str, object]: ...
 
 
 def normalize_snapshot(value: object) -> object:
@@ -35,12 +48,11 @@ def normalize_snapshot(value: object) -> object:
 
 def to_serializable_mapping(value: object) -> dict[str, object]:
     """Return a normalized mapping for manifest payload serialization."""
-    host = cast(Any, value)  # Any: duck-type model_dump/dict on object
-    if hasattr(value, "model_dump"):
-        payload = host.model_dump(mode="json", exclude_none=True)
-    elif hasattr(value, "dict"):
-        payload = host.dict(exclude_none=True)
-    elif hasattr(value, "__dict__"):
+    if isinstance(value, _ModelDumpHost):
+        payload: object = value.model_dump(mode="json", exclude_none=True)
+    elif isinstance(value, _DictHost):
+        payload = value.dict(exclude_none=True)
+    elif hasattr(value, "__dict__") and not isinstance(value, type):
         payload = {
             key: item for key, item in vars(value).items() if not key.startswith("_")
         }
@@ -52,3 +64,4 @@ def to_serializable_mapping(value: object) -> dict[str, object]:
     if not isinstance(normalized, dict):
         raise TypeError("Manifest snapshot normalization must return a mapping")
     return normalized
+
