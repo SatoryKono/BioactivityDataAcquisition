@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from datetime import date
 from typing import TypeVar
 
@@ -18,10 +18,10 @@ T = TypeVar("T")
 def flatten_nested_dict(
     data: JsonDict | None,  # Any: dict values vary by field type
     prefix: str,
-    field_mapping: dict[
+    field_mapping: Mapping[
         str, Callable[[object], object] | None  # object: heterogeneous record values
     ],
-    renames: dict[str, str] | None = None,
+    renames: Mapping[str, str] | None = None,
 ) -> JsonDict:  # Any: dict values vary by field type
     """Flatten one nested mapping into prefixed output fields."""
     # Optimized for speed: Single-pass iteration merging prefixing and renaming.
