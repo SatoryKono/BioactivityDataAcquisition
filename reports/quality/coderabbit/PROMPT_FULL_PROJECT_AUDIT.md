@@ -6,6 +6,9 @@ Copy everything inside the fenced `PROMPT` block into a new agent session
 Do not increase tech-debt budgets. Do not edit `.env*`. Artifacts only under
 `reports/quality/coderabbit/YYYYMMDD/`.
 
+**GH issues:** create one GitHub issue for **every accepted audit problem**
+(all severities: critical / major / minor / trivial), not only P0/P1.
+
 ______________________________________________________________________
 
 ## PROMPT
@@ -15,8 +18,12 @@ ______________________________________________________________________
 Проведи **полный исчерпывающий residual-аудит всего BioETL** через CodeRabbit CLI
 (дополнительно — ground-truth gates репозитория). Цель: не «мнение модели», а
 воспроизводимая кампания: preflight → leaf scopes ≤300 files → CLI waves →
-FINDINGS/TRIAGE → GH path-cluster issues (critical/major) → 3–5 implement streams
-→ re-audit → FINAL.md.
+FINDINGS/TRIAGE → **GH issue на каждую accepted-проблему (все severity)** →
+3–5 implement streams → re-audit → FINAL.md.
+
+**Обязательно:** для **каждой** подтверждённой (accepted/confirmed) проблемы из
+аудита создать отдельный GitHub issue. Без GH issues кампания **не считается
+завершённой**.
 
 Репозиторий: SatoryKono/BioactivityDataAcquisition (локальный checkout).
 Язык отчётов пользователю: **русский**. Код/paths/commands/issue titles — как в репо.
@@ -49,7 +56,11 @@ Root hygiene: никаких ad-hoc `_tmp_*.py` / device-name файлов в к
 4. “All files ignored” / orphan-scope → P2 blocker, **не** выдумывать findings
 5. Артефакты только: `reports/quality/coderabbit/YYYYMMDD/**` (allowlisted)
 6. Secrets: не коммитить ключи; `.env*` не трогать без явного approve
-7. De-dupe: **один open path-cluster issue на path** (canonical = earlier wave при равенстве)
+7. De-dupe issues: **не плодить дубликаты** — один open issue на уникальную
+   проблему (path + claim/fingerprint). Canonical = earlier wave при равенстве.
+   Несколько разных проблем на одном path → **несколько issues** (по одной на проблему).
+8. **Каждая accepted-проблема → GH issue** (critical, major, minor, trivial — без исключений).
+   Rejected/FP → issue **не** создавать; только запись в TRIAGE.
 
 # PHASE 0 — PREFLIGHT (обязательно первым)
 1. `git fetch origin` (если есть сеть) → `BASE_SHA=$(git rev-parse origin/main)` иначе HEAD
@@ -145,34 +156,96 @@ Output for EACH finding (machine-parseable):
 7) confidence: high | medium | low
 
 # PHASE 2 — NORMALIZE + TRIAGE
-После всех волн (или после каждой волны, если user wants incremental):
+После каждой волны (incremental) и итоговый merge после всех волн:
 1. Слей логи → `FINDINGS.md` + machine table `FINDINGS.jsonl`
-   fields: id, wave, leaf, severity, path, claim, fix_class, confidence, status
+   fields: id, wave, leaf, severity, path, claim, fix_class, confidence, status,
+           fingerprint, gh_issue (заполняется в Phase 3)
 2. `TRIAGE.md`: confirm | reject | downgrade | upgrade vs current main (code wins)
-3. `DE_DUPE_MAP.json`: path → canonical issue/finding
+3. `DE_DUPE_MAP.json`: fingerprint → canonical finding id (+ later issue number)
 4. Severity counts: critical/major/minor/trivial (raw vs accepted)
+5. Список **accepted problems** = все findings со status confirm
+   (после upgrade/downgrade severity) — **каждая** пойдёт в GH issue
 
 Triage rules:
-- reject: already fixed / FP / pure style / duplicate path
-- downgrade: docs nit without contract impact
+- reject: already fixed / FP / pure style without risk / exact duplicate fingerprint
+- downgrade: docs nit without contract impact (issue всё равно создаётся, severity=minor/trivial)
 - upgrade: security, data loss, non-determinism, broken gate honesty
+- **Не** отбрасывать minor/trivial «чтобы не шуметь» — они тоже получают GH issues
 
-# PHASE 3 — PUBLISH GH ISSUES (critical + major only)
-Для каждого **accepted** path-cluster severity critical|major:
-- Title: `[CR-FULL][Wave X][severity] residual in \`path\` (N findings)`
-- Body: epic, wave, path, top findings, acceptance checklist,
-        “do not grow tech-debt budgets”, link to FINDINGS id
-- Labels: architecture/quality + priority mapping (critical→priority:critical/high)
-- De-dupe against open issues before create
-- Minor/trivial: только в FINDINGS.md (issues — если user явно просит)
+Fingerprint (для de-dupe): normalize(path) + normalize(claim) [+ optional symbol].
+Разные claims на одном path = разные проблемы = разные issues.
+
+# PHASE 3 — PUBLISH GH ISSUES (**ОБЯЗАТЕЛЬНО: КАЖДАЯ ПРОБЛЕМА**)
+## Правило (жёсткое)
+После triage **для каждой accepted-проблемы** создай **отдельный** GitHub issue.
+Покрыть **все** severity: `critical` | `major` | `minor` | `trivial`.
+Пропуск issue без явного reject в TRIAGE = **провал DoD**.
+
+## Когда создавать
+- Предпочтительно **после каждой волны** (не копить всё до конца), либо
+  батчем сразу после triage волны, чтобы не потерять findings.
+- Blockers (rate_limit, All files ignored) → отдельные P2 issues (тоже GH).
+
+## Перед create (de-dupe)
+1. Поиск open issues: title/body содержат path + claim/fingerprint / CR-FULL residual
+2. Если уже есть open canonical на тот же fingerprint → **не** create; link
+   `gh_issue` к существующему; close/comment duplicates only if truly same problem
+3. Если path совпал, но claim другой → **новый** issue
+
+## Формат issue
+- **Title:**
+  `[CR-FULL][Wave X][severity] residual in \`path\` — <short claim ≤80 chars>`
+  Для blocker:
+  `[CR-FULL][Wave X][P2] blocker: <rate_limit|all_files_ignored|…> <leaf_id>`
+- **Body (обязательные секции):**
+  - Source: epic/campaign id, wave, leaf_id, BASE_SHA, finding id(s)
+  - Severity + confidence + fix_class
+  - Path + symbol (если есть)
+  - Claim (full)
+  - Why it matters (invariant / ADR / RULES)
+  - Suggested fix direction
+  - Acceptance checklist:
+    - [ ] Confirm against current main (code wins)
+    - [ ] Fix or reject with evidence
+    - [ ] Do **not** grow tech-debt / quality budgets
+    - [ ] Tests / arch gate if applicable
+  - Links: FINDINGS.md / log path
+- **Labels (map severity → priority):**
+  - critical → `priority:critical` (или `priority:high` если critical label нет)
+  - major → `priority:high`
+  - minor → `priority:medium`
+  - trivial → `priority:low`
+  - плюс по возможности: `architecture` / `quality` / layer labels
+- **Assignees/projects:** не трогать, если user не просил
+
+## Учёт
+После create обновить:
+- `FINDINGS.jsonl`: поле `gh_issue` = number
+- `ISSUES_MAP.json`: `{ "finding_id": N, "issue": 1234, "severity": "...", "path": "...", "url": "..." }`
+- `ISSUES_CREATED.md`: таблица finding_id | severity | issue | path | title
+- Итоговые счётчики: accepted_findings == issues_created_or_linked (1:1)
+
+## Если нет gh write / auth fail
+1. Сгенерировать готовый pack: `.github/ISSUES/CR-FULL-YYYYMMDD-ISSUE-PACK.md`
+   с телами **всех** issues (по одному section на проблему)
+2. JSONL batch для `gh issue create` / API
+3. В FINAL.md: BLOCKED_PUBLISH + точная команда догоняющей публикации
+4. Как только gh доступен — **сразу** опубликовать весь pack (не оставлять только markdown)
+
+## Запрещено
+- Создавать issues только для critical/major и «забывать» minor/trivial
+- Один mega-issue «все findings leaf X» вместо per-problem issues
+- Создавать issues на rejected/FP
+- Увеличивать debt budgets в issue acceptance как «решение»
 
 # PHASE 4 — STREAM PLAN (3–5 независимых потоков)
-Разбей open critical+major path-clusters на **3–5 streams** с exclusive path ownership:
+Разбей **open** GH issues (в первую очередь critical+major; minor/trivial —
+отдельными micro-streams или хвостом) на **3–5 streams** с exclusive path ownership:
 - нет общих файлов между параллельными worktree
-- critical first
+- critical first, затем major, затем minor/trivial
 - выдай таблицу: Stream | paths | issue # | count
 - предложи worktree commands, но **не** начинай implement без явного “go implement”
-  (если user сказал “полный аудит” — default = audit+plan only, implement optional)
+  (если user сказал “полный аудит” — default = audit + issues + plan; implement optional)
 
 # PHASE 5 — OPTIONAL IMPLEMENT (только по явной команде)
 Если user сказал implement:
@@ -187,11 +260,13 @@ Triage rules:
    - BASE_SHA, tool versions
    - leaves run / skipped / blocked
    - severity counts before/after triage
-   - open critical/major remaining
+   - **issues: accepted_count, created, linked_existing, failed_publish**
+   - open issues remaining by severity
    - stream plan
    - explicit: no tech-debt budget growth
-3. `CAMPAIGN_STATUS.md` one-pager
-4. Итоговый отчёт пользователю на русском: цифры + ссылки на артефакты + next actions
+3. `CAMPAIGN_STATUS.md` one-pager + `ISSUES_CREATED.md` complete
+4. Итоговый отчёт пользователю на русском: цифры findings, **полный список GH issues**,
+   ссылки на артефакты + next actions
 
 # GROUND-TRUTH (дополнительно к CodeRabbit, не вместо)
 Минимум, когда feasible (зафиксируй skip+reason если нет env):
@@ -200,24 +275,29 @@ Triage rules:
 - basedpyright на затронутых пакетах (если принято в репо)
 
 # EXECUTION MODE
-- Работай автономно end-to-end по фазам 0→2→3→4→6
+- Работай автономно end-to-end по фазам 0→1→2→**3**→4→6
+- Phase 3 (GH issues на **каждую** accepted-проблему) — **обязательна**, не optional
 - Phase 5 (implement) — только если user явно просит fix/implement
 - После preflight покажи matrix summary (N leaves, max files, waves) и **сразу продолжай** CLI waves
 - Не останавливайся после первого leaf: цель — **весь matrix**
-- При блокере leaf: document + next leaf (не abort whole campaign)
+- При блокере leaf: document + GH blocker issue + next leaf (не abort whole campaign)
+- После каждой волны: triage → **create/link issues** → обновить ISSUES_MAP
 
 # DEFINITION OF DONE
 - [ ] 00-preflight.md + 01-scope-matrix.md (полный охват проекта)
 - [ ] review_*.log для каждого runnable leaf (или blocker reason)
 - [ ] FINDINGS.md + FINDINGS.jsonl + TRIAGE.md + DE_DUPE_MAP.json
-- [ ] GH issues для accepted critical/major path-clusters (de-duped) ИЛИ dry-run pack если нет gh write
-- [ ] 3–5 stream split table
-- [ ] FINAL.md + user summary in Russian
+- [ ] **GH issue (created or linked) для каждой accepted-проблемы всех severity**
+- [ ] ISSUES_MAP.json + ISSUES_CREATED.md; accepted_findings == issues_created_or_linked
+- [ ] Если publish blocked: issue pack + batch script + запись в FINAL (с догонкой publish)
+- [ ] 3–5 stream split table (по созданным issues)
+- [ ] FINAL.md + user summary in Russian со списком issue numbers
 - [ ] No tech-debt budget growth; no .env edits; no root clutter
 
 # START
 Начни с Phase 0 preflight на текущем origin/main (или HEAD), создай YYYYMMDD artifacts dir,
 построй полную scope matrix по всем частям проекта, затем последовательно гоняй Wave A→F + residual.
+После triage **обязательно** заведи GH issue на каждую accepted-проблему.
 ```
 
 ______________________________________________________________________
