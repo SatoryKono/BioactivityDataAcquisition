@@ -112,6 +112,12 @@ class MockCircuitBreaker:
     def get_failure_count(self) -> int:
         return self._failure_count
 
+    def get_recovery_timeout(self) -> float:
+        return 60.0
+
+    def get_last_failure_time(self) -> float | None:
+        return None
+
     async def call(self, func: Any, *args: Any, **kwargs: Any) -> Any:
         return await func(*args, **kwargs)
 

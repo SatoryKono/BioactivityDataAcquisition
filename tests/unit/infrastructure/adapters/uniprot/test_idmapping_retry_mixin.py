@@ -121,6 +121,29 @@ async def test_poll_until_ready_returns_redirect_url() -> None:
 
 
 @pytest.mark.asyncio
+async def test_poll_until_ready_retries_non_mapping_json_payload(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Non-mapping response.json() payloads are skipped and polled again."""
+    host = _RetryHost()
+    host.MAX_POLL_ATTEMPTS = 2
+    host.http_client.get.side_effect = [
+        _response(payload=["not", "a", "mapping"]),  # type: ignore[arg-type]
+        _response(payload={"jobStatus": "FINISHED"}),
+    ]
+    monkeypatch.setattr(
+        "bioetl.infrastructure.adapters.uniprot._idmapping_retry.asyncio.sleep",
+        AsyncMock(),
+    )
+
+    results_url = await host._poll_until_ready("job-1")
+
+    assert results_url is None
+    host.logger.warning.assert_called()
+    assert host.http_client.get.await_count == 2
+
+
+@pytest.mark.asyncio
 async def test_poll_until_ready_retries_after_status_error_and_finishes() -> None:
     host = _RetryHost()
     host.http_client.get.side_effect = [

@@ -214,7 +214,8 @@ class TestCliDqCommands:
             ["dq", "validate", "chembl_activity", "--config-file", str(config_file)],
         )
 
-        assert result.exit_code == 0  # Command succeeds, but shows error
+        # Invalid DQ config is a CLI failure (#7954 ExitCode on error paths).
+        assert result.exit_code != 0
         assert "[ERROR] DQ configuration is invalid" in result.output
 
     @patch("bioetl.interfaces.cli.commands.config_dq.get_config_service")
@@ -401,12 +402,12 @@ class TestCliDqCommands:
             ["dq", "check-compatibility", str(artifact1_file), str(artifact2_file)],
         )
 
-        assert result.exit_code == 0
+        assert result.exit_code != 0
         assert "[ERROR] Configurations are NOT compatible" in result.output
 
     @patch("bioetl.interfaces.cli.commands.config_dq.get_config_service")
     def test_dq_show_handles_missing_config(self, mock_service, cli_runner: CliRunner):
-        """Test that dq show handles missing config gracefully."""
+        """Test that dq show exits non-zero on missing config."""
         # Mock the config service to raise FileNotFoundError
         mock_config_service = MagicMock()
         mock_config_service.get_dq_config.side_effect = FileNotFoundError(
@@ -416,14 +417,14 @@ class TestCliDqCommands:
 
         result = cli_runner.invoke(_get_cli(), ["dq", "show", "nonexistent_pipeline"])
 
-        assert result.exit_code == 0  # Command succeeds but shows error
+        assert result.exit_code != 0
         assert "Config file not found" in result.output
 
     @patch("bioetl.interfaces.cli.commands.config_dq.get_config_service")
     def test_dq_validate_handles_invalid_config(
         self, mock_service, cli_runner: CliRunner
     ):
-        """Test that dq validate handles invalid config gracefully."""
+        """Test that dq validate exits non-zero on invalid config."""
         # Mock the config service to raise ValueError
         mock_config_service = MagicMock()
         mock_config_service.get_dq_config.side_effect = ValueError("Invalid config")
@@ -431,6 +432,6 @@ class TestCliDqCommands:
 
         result = cli_runner.invoke(_get_cli(), ["dq", "validate", "invalid_pipeline"])
 
-        assert result.exit_code == 0  # Command succeeds but shows error
+        assert result.exit_code != 0
         assert "DQ Configuration invalid" in result.output
         assert "Invalid config" in result.output

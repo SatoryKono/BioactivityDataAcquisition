@@ -17,10 +17,7 @@ from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
     split_filter_ids_for_fallback,
 )
 
-if TYPE_CHECKING:
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
-
-# Shared lookup-method meta field key and fallback-phase values.
+# Shared lookup-method contract for fallback metrics classification.
 LOOKUP_METHOD_KEY = "_lookup_method"
 LOOKUP_METHOD_TITLE_FALLBACK = "title_fallback"
 LOOKUP_METHOD_TITLE_ONLY = "title_only"
@@ -32,6 +29,9 @@ LOOKUP_METHOD_FALLBACK_VALUES = frozenset(
         LOOKUP_METHOD_TITLE,
     }
 )
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 
 
 class PrimaryRecordFetchProtocol(Protocol):
