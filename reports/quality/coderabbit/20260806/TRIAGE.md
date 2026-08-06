@@ -97,4 +97,3 @@
 - [x] Duplicate path-cluster issues closed (48)
 - [x] Severity counts
 - [x] Findings pack published
-

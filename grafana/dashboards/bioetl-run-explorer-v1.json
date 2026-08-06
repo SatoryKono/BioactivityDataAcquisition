@@ -900,12 +900,6 @@
               "url": "/d/bioetl-run-explorer-v1/6-run-explorer?viewPanel=9403&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-workflow=$workflow&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
-            },
-            {
-              "title": "Open Trust",
-              "url": "/d/bioetl-control-plane-v1/0-trust?var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-workflow=$workflow&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
             }
           ]
         },

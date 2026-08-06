@@ -21,7 +21,7 @@ from uuid import NAMESPACE_URL, uuid5
 from bioetl.application.core.lifecycle.cleanup_service import CleanupStorageProtocol
 from bioetl.application.services.ops.admin_runtime_api import CleanupService
 from bioetl.application.services.ops.bronze_cleanup_service import BronzeCleanupService
-from bioetl.application.services.contract.contract_migration_service import (
+from bioetl.application.services.contracts.contract_migration_service import (
     ContractMigrationService,
 )
 from bioetl.application.services.export_lineage.export_service import ExportService

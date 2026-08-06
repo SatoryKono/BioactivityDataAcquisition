@@ -42,18 +42,12 @@ def test_variable_reference_documents_all_shipped_dashboard_variables() -> None:
         "$provider",
         "$pipeline_context",
         "$adapter",
-        "$reason_code",
-        "$field",
         "$run_id",
         "$quarantine_run_id",
         "$payload_hash",
         "$workflow",
         "$workflow_context",
         "$status",
-        "$run_type_context",
-        "$run_type_context_exact",
-        "$provider_context",
-        "$provider_context_exact",
         "$pipeline_context_exact",
         "$step_status",
         "$step_kind",
@@ -201,19 +195,11 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
 def test_variable_reference_explains_role_specific_exceptions() -> None:
     text = _VARIABLE_REFERENCE.read_text(encoding="utf-8")
     required_tokens = {
-        "`bioetl-workflow-overview` exposes the shared context shell",
-        "`$workflow_context` | `bioetl-workflow-overview` | Hidden context var",
-        "`$pipeline_context` | `bioetl-workflow-overview` | Hidden context var",
-        "`$pipeline_context_exact` | `bioetl-workflow-overview` | Hidden exact-run handoff var",
-        "`$run_type_context` | `bioetl-workflow-overview` | Hidden context var",
-        "`$run_type_context_exact` | `bioetl-workflow-overview` | Hidden exact-run handoff var",
-        "`$provider_context` | `bioetl-workflow-overview` | Hidden context var",
-        "`$provider_context_exact` | `bioetl-workflow-overview` | Hidden exact-run handoff var",
-        "run_type` always uses include-all fallback",
-        "Primary operator dashboards `0..5` expose the shared context shell",
+        "Primary operator dashboards expose the shared context shell",
         "single-select with Include All across primary dashboards",
-        "Pipeline-scoped operator dashboards use single-select `$pipeline`, except",
-        "`bioetl-overview-v2` uses control-plane-backed `$run_id=-`",
+        "`$pipeline` is single-select",
+        "`$run_id` is HTTP-backed control-plane identity context",
+        "Retired boards (do not reintroduce)",
     }
     missing = sorted(token for token in required_tokens if token not in text)
     assert not missing, (

@@ -43,7 +43,7 @@ canonical_family_registry:
       - symbol: LockRuntimeService
         path: src/bioetl/application/core/lifecycle/lock_runtime_service.py
       - symbol: LockService
-        path: src/bioetl/application/services/lock_service.py
+        path: src/bioetl/application/services/ops/lock_service.py
     compatibility_symbols:
       - symbol: lock_manager
         path: src/bioetl/composition/factories/pipeline/runner_assembly.py
@@ -240,7 +240,7 @@ family_freeze_rules:
         removal_step: Remove family exception once lock runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical runtime lock collaborator creation seam.
       - symbol: LockService
-        path: src/bioetl/application/services/lock_service.py
+        path: src/bioetl/application/services/ops/lock_service.py
         issue: "#3552"
         owner: "@bioetl-platform"
         expires_on: "2026-12-31"
@@ -273,14 +273,14 @@ family_freeze_rules:
         removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical runtime quarantine write-path collaborator.
       - symbol: CheckpointService
-        path: src/bioetl/application/services/checkpoint_service.py
+        path: src/bioetl/application/services/checkpoint/checkpoint_service.py
         issue: "#3398"
         owner: "@bioetl-platform"
         expires_on: "2026-12-31"
         removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical operator/admin checkpoint service.
       - symbol: QuarantineService
-        path: src/bioetl/application/services/quarantine_service.py
+        path: src/bioetl/application/services/quality/quarantine_service.py
         issue: "#3398"
         owner: "@bioetl-platform"
         expires_on: "2026-12-31"

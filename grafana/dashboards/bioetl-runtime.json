@@ -734,20 +734,7 @@
               "unit": "short",
               "noValue": "No blocker rows. Trust this only when Runtime Status is OK and Telemetry Gap is clean."
             },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
-                  }
-                ]
-              }
-            ]
+            "overrides": []
           },
           "gridPos": {
             "h": 6,
@@ -869,6 +856,37 @@
             {
               "id": "merge",
               "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Time #A": true,
+                  "Time #B": true,
+                  "Time #C": true,
+                  "Time #D": true,
+                  "Time #E": true,
+                  "Time #F": true,
+                  "Time #G": true,
+                  "Time #H": true,
+                  "Time #I": true,
+                  "Time #J": true,
+                  "Value": true,
+                  "Value #A": true,
+                  "Value #B": true,
+                  "Value #C": true,
+                  "Value #D": true,
+                  "Value #E": true,
+                  "Value #F": true,
+                  "Value #G": true,
+                  "Value #H": true,
+                  "Value #I": true,
+                  "Value #J": true
+                },
+                "indexByName": {},
+                "renameByName": {}
+              }
             }
           ]
         },
@@ -1012,13 +1030,75 @@
             "overrides": [
               {
                 "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                  "id": "byName",
+                  "options": "Expected"
                 },
                 "properties": [
                   {
-                    "id": "displayName",
-                    "value": "Count"
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "1": {
+                            "color": "green",
+                            "index": 0,
+                            "text": "expected"
+                          },
+                          "0": {
+                            "color": "blue",
+                            "index": 1,
+                            "text": "disabled"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "thresholds"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "blue",
+                          "value": null
+                        },
+                        {
+                          "color": "green",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Observed Records"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto"
+                    }
                   }
                 ]
               }
@@ -1066,6 +1146,26 @@
             {
               "id": "merge",
               "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Time #A": true,
+                  "Time #B": true
+                },
+                "indexByName": {
+                  "pipeline": 0,
+                  "stage": 1,
+                  "Value #A": 2,
+                  "Value #B": 3
+                },
+                "renameByName": {
+                  "Value #A": "Expected",
+                  "Value #B": "Observed Records"
+                }
+              }
             }
           ]
         },
@@ -1405,6 +1505,50 @@
                     "value": "Count"
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "stage"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "none": {
+                            "text": "VALID EMPTY",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "error_code"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "none": {
+                            "text": "No errors in range",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -1431,11 +1575,33 @@
             {
               "expr": "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"error_code\", \"none\", \"\", \"\")",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "format": "table"
             }
           ],
           "title": "Review Errors by Stage & Code",
-          "type": "table"
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "stage": 0,
+                  "error_code": 1,
+                  "Value": 2
+                },
+                "renameByName": {
+                  "stage": "Stage",
+                  "error_code": "Error Code",
+                  "Value": "Count"
+                }
+              }
+            }
+          ]
         },
         {
           "datasource": {
@@ -1479,7 +1645,52 @@
               "unit": "short",
               "decimals": 0
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "stage"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "none": {
+                            "text": "VALID EMPTY",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "run_type"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "none": {
+                            "text": "No records in range",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 6,
@@ -1489,29 +1700,43 @@
           },
           "id": 241,
           "options": {
-            "displayMode": "gradient",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showUnfilled": true,
-            "text": {},
-            "textMode": "auto"
+            "showHeader": true,
+            "footer": {
+              "show": false
+            }
           },
           "targets": [
             {
               "expr": "sum by(stage, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\",stage!~\"none.*\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"run_type\", \"none\", \"\", \"\")",
               "instant": true,
               "refId": "A",
-              "legendFormat": "{{stage}} · {{run_type}}"
+              "legendFormat": "{{stage}} · {{run_type}}",
+              "format": "table"
             }
           ],
           "title": "Compare Records by Stage & Run Type",
-          "type": "bargauge"
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "stage": 0,
+                  "run_type": 1,
+                  "Value": 2
+                },
+                "renameByName": {
+                  "stage": "Stage",
+                  "run_type": "Run Type",
+                  "Value": "Count"
+                }
+              }
+            }
+          ]
         }
       ],
       "description": "Contains selected-range duration, error, and record evidence used to localize a runtime cause. These panels support but do not independently determine current Pipeline Health"

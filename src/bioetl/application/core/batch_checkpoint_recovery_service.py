@@ -50,8 +50,7 @@ class BatchCheckpointRecoveryService:
         checkpoint_interval: int,
     ) -> None:
         """Save a periodic checkpoint when the interval threshold is reached."""
-        # Guard before modulo: interval/fetched of 0 would ZeroDivisionError or
-        # never match a meaningful threshold.
+        # Guard before modulo: zero would fail or never match a useful threshold.
         if checkpoint_interval <= 0 or records_fetched <= 0:
             return
         if records_fetched % checkpoint_interval != 0:
@@ -120,7 +119,6 @@ class BatchCheckpointRecoveryService:
 
     @staticmethod
     def _total_processed(records_fetched: int, resume_offset: int) -> int:
-        """Calculate total processed records including the resume offset."""
         return resume_offset + records_fetched
 
     def _emit_checkpoint_save_event(self, *, operation: str, status: str) -> None:
@@ -194,9 +192,7 @@ class BatchCheckpointRecoveryService:
             if isinstance(error, Exception):
                 span.record_exception(error)
         span.__exit__(None, None, None)
-        # Do not flush tracer on every periodic checkpoint: flush can block the
-        # event loop with synchronous exporter I/O. Lifecycle/end-of-run paths
-        # own tracer flush.
+        # Lifecycle/end-of-run paths own flush; per-checkpoint flush can block.
 
     async def _save_checkpoint(self, total: int, *, operation: str) -> None:
         started_at = time.monotonic()

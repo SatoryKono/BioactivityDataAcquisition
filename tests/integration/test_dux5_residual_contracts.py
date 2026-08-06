@@ -110,17 +110,22 @@ def test_percent_scores_use_integer_precision() -> None:
 
 
 def test_dux5_run_context_collapsed_outside_explorer() -> None:
+    expected_by_uid = {
+        "bioetl-runtime": True,
+        "bioetl-overview-v2": False,
+    }
     for path in _dashboards():
         data = json.loads(path.read_text(encoding="utf-8"))
-        if data.get("uid") == "bioetl-run-explorer-v1":
+        expected = expected_by_uid.get(data.get("uid"))
+        if expected is None:
             continue
         for panel in _walk(data.get("panels")):
             if panel.get("type") != "row":
                 continue
             title = (panel.get("title") or "").lower()
             if "run context" in title:
-                assert panel.get("collapsed") is False, (
-                    f"{path.name} Run context row must be expanded by default (expand-all operator policy)"
+                assert panel.get("collapsed") is expected, (
+                    f"{path.name} Run context row violates its disclosure policy"
                 )
 
 

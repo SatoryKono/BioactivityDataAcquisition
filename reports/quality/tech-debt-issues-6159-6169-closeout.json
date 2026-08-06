@@ -24,7 +24,7 @@
       "control_plane_reduced_surface_line_count_after_max": 249,
       "control_plane_reduced_surface_line_count_before": 260,
       "debt_type": "application_service_hotspot_reduction",
-      "extracted_helper_owner": "src/bioetl/application/services/data_quality_anomalies.py#DataQualityMetricsMixin._emit_validation_gauges",
+      "extracted_helper_owner": "src/bioetl/application/services/quality/data_quality_anomalies.py#DataQualityMetricsMixin._emit_validation_gauges",
       "line_count_after_max": 157,
       "line_count_before": 178,
       "reduced_surface": "src/bioetl/application/services/data_quality_service.py"

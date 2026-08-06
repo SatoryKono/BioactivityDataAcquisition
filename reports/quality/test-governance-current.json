@@ -370,7 +370,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "220",
+      "line": "234",
       "path": "tests/unit/infrastructure/adapters/decorators/test_circuit_breaker_decorator.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_aclose_delegated"
@@ -1292,10 +1292,10 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 51,
+    "marked_test_files": 52,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 51,
+    "test_files": 52,
     "unmarked_test_files": []
   },
   "report": {
@@ -1670,7 +1670,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "220",
+        "line": "234",
         "path": "tests/unit/infrastructure/adapters/decorators/test_circuit_breaker_decorator.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_delegated"
@@ -2282,10 +2282,10 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 51,
+      "marked_test_files": 52,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 51,
+      "test_files": 52,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -2294,8 +2294,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2187,
-      "test_python_file_count": 2418,
+      "test_glob_file_count": 2191,
+      "test_python_file_count": 2422,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2314,7 +2314,6 @@
         "tests/unit/"
       ],
       "top_level_directories_including_pycache": [
-        "tests/__pycache__/",
         "tests/architecture/",
         "tests/benchmarks/",
         "tests/contract/",
@@ -2332,16 +2331,16 @@
         "tests/unit/"
       ],
       "top_level_directory_count": 15,
-      "top_level_directory_count_including_pycache": 16
+      "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2187,
-    "total_test_functions": 23330,
+    "total_test_files": 2191,
+    "total_test_functions": 23354,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "b878d202220d0af8319001adc37a348cc8c1439df4ea94b0fa27c2426ff7d9e4",
+  "source_tree_sha256": "b07756e1cfebfedabb49531821ea7045fc6a302fa8d07cc2a00424ee872496c7",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 105,
@@ -2361,8 +2360,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2187,
-    "test_python_file_count": 2418,
+    "test_glob_file_count": 2191,
+    "test_python_file_count": 2422,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2381,7 +2380,6 @@
       "tests/unit/"
     ],
     "top_level_directories_including_pycache": [
-      "tests/__pycache__/",
       "tests/architecture/",
       "tests/benchmarks/",
       "tests/contract/",
@@ -2399,11 +2397,11 @@
       "tests/unit/"
     ],
     "top_level_directory_count": 15,
-    "top_level_directory_count_including_pycache": 16
+    "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2187,
-  "total_test_functions": 23330,
+  "total_test_files": 2191,
+  "total_test_functions": 23354,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

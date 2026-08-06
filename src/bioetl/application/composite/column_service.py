@@ -210,6 +210,14 @@ class ColumnOrderService:
         aliases, _, _ = resolve_publication_field_aliases(field_name)
         return aliases
 
+    @staticmethod
+    def _apply_renames(
+        columns: list[str],
+        rename_map: dict[str, str],
+    ) -> list[str]:
+        """Apply configured column renames through the canonical helper."""
+        return apply_renames(columns, rename_map)
+
     def filter_by_layer_config(
         self, columns: Sequence[str], layer_config: LayerColumnConfig
     ) -> list[str]:

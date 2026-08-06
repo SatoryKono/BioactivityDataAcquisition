@@ -22,7 +22,7 @@
 | Entry | Disposition | src importers | Verification |
 | --- | --- | ---: | --- |
 | `cached_bronze_support_active` | `retain_active` | 1 | `satisfied` |
-| `error_handling_support_active` | `retain_active` | 1 | `satisfied` |
+| `error_handling_support_active` | `retain_active` | 2 | `satisfied` |
 | `health_check_observability_active` | `retain_active` | 1 | `satisfied` |
 | `health_check_policy_active` | `retain_active` | 1 | `satisfied` |
 | `preflight_rules_removed` | `removed` | 0 | `not_applicable` |
@@ -36,8 +36,8 @@
 | `runner_support_mixin_active` | `retain_active` | 1 | `satisfied` |
 | `runner_support_policy_active` | `retain_active` | 1 | `satisfied` |
 | `runner_support_runtime_active` | `retain_active` | 1 | `satisfied` |
-| `runner_support_types_active` | `retain_active` | 4 | `satisfied` |
-| `runtime_models_active` | `retain_active` | 38 | `satisfied` |
+| `runner_support_types_active` | `retain_active` | 5 | `satisfied` |
+| `runtime_models_active` | `retain_active` | 39 | `satisfied` |
 | `runtime_wiring_api_active` | `retain_active` | 18 | `satisfied` |
 
 ## Repo-wide Zero-import Candidates

@@ -433,6 +433,12 @@ class TestPIIHandling:
             "constants.py",  # NCBI API docstring mentions Email requirement (EXC-010)
         }
     )
+    KNOWN_TECHNICAL_EMAIL_PATHS = frozenset(
+        {
+            # NCBI-required technical contact resolved by the PubMed adapter factory.
+            "infrastructure/adapters/pubmed/_adapter_support.py",
+        }
+    )
 
     # Files where "address" refers to non-PII context (email address text,
     # network address, etc.) -- not physical/postal address
@@ -455,6 +461,12 @@ class TestPIIHandling:
         pattern_name: str,
     ) -> bool:
         if py_file.name in self.KNOWN_TECHNICAL_EMAIL_FILES:
+            return True
+        if (
+            pattern_name == "email"
+            and py_file.relative_to(SRC_DIR).as_posix()
+            in self.KNOWN_TECHNICAL_EMAIL_PATHS
+        ):
             return True
         return (
             pattern_name == "address"

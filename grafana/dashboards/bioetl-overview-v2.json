@@ -28,7 +28,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "panels": [],
       "description": "Contains selected-range alert evidence for triage. It supports investigation but does not determine current Fleet Health; expand it after the first-screen verdict points to an alert condition."
@@ -41,7 +41,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 16
       },
       "datasource": {
         "type": "prometheus",
@@ -451,7 +451,7 @@
       "type": "table",
       "title": "Review First Action",
       "gridPos": {
-        "h": 7,
+        "h": 8,
         "w": 12,
         "x": 0,
         "y": 7
@@ -814,6 +814,10 @@
                 "value": 1
               },
               {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
                 "id": "custom.hideFrom",
                 "value": {
                   "tooltip": false,
@@ -930,7 +934,7 @@
       "type": "table",
       "title": "Review Domain Status",
       "gridPos": {
-        "h": 7,
+        "h": 8,
         "w": 12,
         "x": 12,
         "y": 7
@@ -1221,7 +1225,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 22
       },
       "collapsed": false,
       "panels": [],
@@ -1235,7 +1239,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 22
+        "y": 23
       },
       "datasource": {
         "type": "prometheus",
@@ -1326,7 +1330,7 @@
         "h": 6,
         "w": 8,
         "x": 8,
-        "y": 22
+        "y": 23
       },
       "datasource": {
         "type": "prometheus",
@@ -1417,7 +1421,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 22
+        "y": 23
       },
       "datasource": {
         "type": "prometheus",
@@ -1514,7 +1518,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 29
       },
       "collapsed": false,
       "panels": [],
@@ -1528,7 +1532,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 29
+        "y": 30
       },
       "datasource": {
         "type": "prometheus",
@@ -1615,7 +1619,7 @@
         "h": 6,
         "w": 8,
         "x": 8,
-        "y": 29
+        "y": 30
       },
       "datasource": {
         "type": "prometheus",
@@ -1718,7 +1722,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 29
+        "y": 30
       },
       "datasource": {
         "type": "prometheus",
@@ -1839,7 +1843,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 36
       },
       "description": "Contains current domain summaries and diagnostic routing. It supports the first-screen verdict and stays collapsed until Domain Status or First Action identifies an affected area.",
       "panels": []
@@ -1852,7 +1856,7 @@
         "h": 5,
         "w": 5,
         "x": 0,
-        "y": 36
+        "y": 37
       },
       "datasource": {
         "type": "prometheus",
@@ -2041,7 +2045,7 @@
         "h": 5,
         "w": 4,
         "x": 5,
-        "y": 36
+        "y": 37
       },
       "datasource": {
         "type": "prometheus",
@@ -2230,7 +2234,7 @@
         "h": 5,
         "w": 5,
         "x": 9,
-        "y": 36
+        "y": 37
       },
       "datasource": {
         "type": "prometheus",
@@ -2419,7 +2423,7 @@
         "h": 5,
         "w": 4,
         "x": 14,
-        "y": 36
+        "y": 37
       },
       "datasource": {
         "type": "prometheus",
@@ -2608,7 +2612,7 @@
         "h": 5,
         "w": 6,
         "x": 18,
-        "y": 36
+        "y": 37
       },
       "datasource": {
         "type": "prometheus",
@@ -2797,7 +2801,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 41
+        "y": 42
       },
       "datasource": {
         "type": "prometheus",
@@ -2987,7 +2991,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 50
       },
       "options": {
         "content": "<div style=\"padding:4px 8px;line-height:1.35;font-size:12px;white-space:normal\"><strong>Raw metric entrypoints</strong><br><code>bioetl_l0_status</code> — current verdict · <code>bioetl_l0_next_action_route</code> — first-action route<br><code>bioetl_l0_input_status_selected</code> — input status. Open Trust, Pipeline Diagnostics, Data Quality, or Provider Health for reasons.</div>",
@@ -3004,7 +3008,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 54
+        "y": 55
       },
       "id": 9602,
       "panels": [],
@@ -3018,7 +3022,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 55
+        "y": 56
       },
       "description": "Shows HTTP-backed identity for an exact Run ID. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live before treating the result as expected. Open Run Explorer for complete run evidence.",
       "datasource": "BioETL Ops HTTP",
@@ -3174,7 +3178,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 55
+        "y": 56
       },
       "description": "Shows HTTP-backed Bronze, Silver, and Gold record counts and outcomes. Zero is a recorded count. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live. Open Run Explorer for complete accounting.",
       "datasource": "BioETL Ops HTTP",

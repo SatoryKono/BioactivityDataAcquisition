@@ -4,10 +4,14 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
+import pytest
+
 from bioetl.domain.value_objects.export_identity import (
     dataset_bundle_id,
     format_utc,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_dataset_bundle_id_is_deterministic() -> None:

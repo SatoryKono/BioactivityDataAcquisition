@@ -1,19 +1,18 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-06T10:02:57.872738+00:00",
+  "generated_at": "2026-08-06T09:17:05.817782+00:00",
   "summary": {
-    "total_scripts": 578,
+    "total_scripts": 574,
     "status_counts": {
       "active": 341,
-      "orphan": 2,
-      "supporting": 230,
+      "supporting": 228,
       "temporary_diagnostic": 5
     },
     "reference_group_coverage": {
       "agents": 12,
       "build": 16,
       "ci": 77,
-      "docs": 233,
+      "docs": 232,
       "other": 81,
       "scripts": 456,
       "skills": 18,
@@ -16648,22 +16647,6 @@
       "next_step": "Retain only as the bounded formatter for ad-hoc CodeRabbit architecture-review evidence; remove it when that review campaign is complete or fold it into a canonical review-report command if the workflow becomes recurring."
     },
     {
-      "path": "scripts/ops/_cr_publish_findings.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ops/_cr_seed_published.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/ops/_run_cr_arch_review_remaining.sh",
       "type": "sh",
       "status": "supporting",
@@ -16672,9 +16655,9 @@
       "references": [
         {
           "path": "scripts/ops/_build_arch_review_report.py",
-          "line": 268,
+          "line": 269,
           "source_group": "scripts",
-          "text": "\"- Helper scripts: `scripts/ops/_run_cr_arch_review_wsl.sh`, `scripts/ops/_run_cr_arch_review_remaining.sh`\""
+          "text": "\"`scripts/ops/_run_cr_arch_review_remaining.sh`\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -18536,7 +18519,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 145,
+          "line": 148,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -18791,30 +18774,6 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as an RF-017 Docker restore observation helper; keep private underscore modules supporting and do not promote them to public ops commands."
-    },
-    {
-      "path": "scripts/ops/runtime/docker/_rf017_recreate_once.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as an RF-017 one-shot stack recreate helper; keep private underscore modules supporting and do not promote them to public ops commands."
-    },
-    {
-      "path": "scripts/ops/runtime/docker/_rf017_restore_and_observe.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as an RF-017 restore-and-observe helper; keep private underscore modules supporting and do not promote them to public ops commands."
     },
     {
       "path": "scripts/ops/runtime/docker/apply-docker-stable-mcp.ps1",

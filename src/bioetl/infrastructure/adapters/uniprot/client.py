@@ -225,7 +225,7 @@ class UniProtAdapter(
 
 
 # Registry factory re-export (tests import from this module).
-from bioetl.infrastructure.adapters.uniprot._client_factory import (  # noqa: E402
+from bioetl.infrastructure.adapters.uniprot._client_support import (  # noqa: E402
     _create_uniprot_adapter,
 )
 

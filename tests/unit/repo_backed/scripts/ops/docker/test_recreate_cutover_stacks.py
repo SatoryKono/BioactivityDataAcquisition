@@ -9,6 +9,8 @@ import pytest
 
 from scripts.ops.runtime.docker import recreate_cutover_stacks as cutover
 
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
+
 
 def test_container_env_falls_back_to_current_container_name(
     monkeypatch: pytest.MonkeyPatch,

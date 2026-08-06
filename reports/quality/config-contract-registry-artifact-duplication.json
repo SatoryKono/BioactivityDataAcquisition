@@ -38,7 +38,7 @@
   "pattern_file_counts": {
     "configs/**/*.csv": 2,
     "configs/**/*.json": 13,
-    "configs/**/*.yaml": 219,
+    "configs/**/*.yaml": 220,
     "docs/04-reference/contracts/**/*.md": 9,
     "reports/quality/*contract*.json": 5,
     "reports/quality/*contract*.md": 3,
@@ -47,7 +47,6 @@
     "reports/quality/*ownership*.json": 2,
     "reports/quality/*ownership*.md": 1,
     "reports/quality/*registry*.json": 3,
-    "reports/quality/*registry*.md": 1,
     "tests/fixtures/contracts/**/*.json": 7,
     "tests/fixtures/contracts/**/*.yaml": 1,
     "tests/fixtures/golden/**/*.json": 30
@@ -56,11 +55,11 @@
   "scan_root": ".",
   "schema_version": 1,
   "scope_file_counts": {
-    "config": 185,
+    "config": 186,
     "contract": 47,
     "golden": 27,
     "quality_report": 9,
-    "registry": 26
+    "registry": 25
   },
   "total_files": 294,
   "tracked_extensions": [

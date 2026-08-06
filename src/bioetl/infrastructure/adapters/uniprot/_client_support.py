@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+    from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
 __all__ = ["_create_uniprot_adapter"]
 
@@ -34,6 +34,8 @@ def _create_uniprot_adapter(
     Raises:
         ValueError: If http_client or logger is None.
     """
+    from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
+
     if http_client is None:
         raise ValueError("UniProt adapter requires http_client")
     if logger is None:
