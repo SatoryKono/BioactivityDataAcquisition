@@ -177,6 +177,23 @@ class CircuitBreakerDataSourceDecorator:
         async for record in self._iterate_with_error_recording(request):
             yield record
 
+    async def _record_fetch_success(self) -> None:
+        """Record a completed fetch success through CircuitBreakerPort.call.
+
+        Async generators cannot be wrapped in ``call()`` end-to-end, so success
+        is recorded after a full successful iteration. This is required for
+        HALF_OPEN recovery (OPEN -> HALF_OPEN probe -> CLOSED on success).
+        """
+
+        async def _mark_success() -> None:
+            return None
+
+        try:
+            await self.circuit_breaker.call(_mark_success)
+        except CircuitBreakerOpenError:
+            # Race: breaker re-opened while fetch completed; do not mask success path.
+            return
+
     async def _iterate_with_error_recording(
         self,
         request: DataSourceFetchRequest,
@@ -185,6 +202,7 @@ class CircuitBreakerDataSourceDecorator:
         try:
             async for record in iter_delegated_fetch(self.data_source, request):
                 yield record
+            await self._record_fetch_success()
         except CircuitBreakerOpenError:
             raise
         except BioETLError as exc:
