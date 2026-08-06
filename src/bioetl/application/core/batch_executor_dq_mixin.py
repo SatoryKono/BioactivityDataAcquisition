@@ -53,7 +53,7 @@ class _BatchExecutorDQMixin:
     _bronze_records_for_dq: list[bytes]  # pyright: ignore[reportUninitializedInstanceVariable]
     _silver_records_for_dq: list[BronzeRecord]  # pyright: ignore[reportUninitializedInstanceVariable]
     _gold_records_for_dq: list[GoldRecord]  # pyright: ignore[reportUninitializedInstanceVariable]
-    _source_batch_ids: list[str]  # pyright: ignore[reportUninitializedInstanceVariable]
+    source_batch_ids: list[str]  # pyright: ignore[reportUninitializedInstanceVariable]
     _last_bronze_path: str | None  # pyright: ignore[reportUninitializedInstanceVariable]
     _dq_total_seen: int  # pyright: ignore[reportUninitializedInstanceVariable]
     _dq_reservoir_ranks: dict[int, list[str]]  # pyright: ignore[reportUninitializedInstanceVariable]
@@ -211,7 +211,7 @@ class _BatchExecutorDQMixin:
             bronze_records=self._bronze_records_for_dq,
             silver_records=self._silver_records_for_dq,
             gold_records=self._gold_records_for_dq,
-            source_batch_ids=self._source_batch_ids,
+            source_batch_ids=self.source_batch_ids,
             last_bronze_path=self._last_bronze_path,
             records_fetched=self.records_fetched,
             records_quarantined=self.records_quarantined,

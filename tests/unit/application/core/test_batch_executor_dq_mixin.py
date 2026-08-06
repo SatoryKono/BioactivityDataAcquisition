@@ -117,9 +117,10 @@ class _BatchExecutorDQHarness(_BatchExecutorDQMixin):
         self._bronze_records_for_dq: list[bytes] = []
         self._silver_records_for_dq: list[dict[str, object]] = []
         self._gold_records_for_dq: list[dict[str, object]] = []
-        self._source_batch_ids: list[str] = ["batch-1"]
+        self.source_batch_ids: list[str] = ["batch-1"]
         self._last_bronze_path: str | None = None
         self._dq_total_seen = 0
+        self._dq_reservoir_ranks: dict[int, list[str]] = {}
         self.records_fetched = 10
         self.records_quarantined = 2
 

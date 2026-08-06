@@ -472,7 +472,7 @@ class TestBatchExecutorDQCollection:
         """get_dq_context should build a real DQReportContext when enabled."""
         executor = self._make_executor(dq_report_service=MagicMock())
         executor._bronze_records_for_dq = [b'{"id": 1}']
-        executor._source_batch_ids = ["batch-001"]
+        executor.source_batch_ids = ["batch-001"]
         executor._last_bronze_path = "bronze/file.jsonl.zst"
         executor.records_fetched = 100
         executor.records_quarantined = 2
@@ -514,7 +514,7 @@ class TestBatchExecutorDQCollection:
         assert result.silver_count == 1
         assert result.gold_count == 0
         assert result.quarantined_count == 2
-        assert executor._source_batch_ids == ["batch-001"]
+        assert executor.source_batch_ids == ["batch-001"]
         assert executor._last_bronze_path == "bronze/file.jsonl.zst"
         assert len(executor._bronze_records_for_dq) == 1
         assert executor._silver_records_for_dq == [{"activity_id": "A1"}]

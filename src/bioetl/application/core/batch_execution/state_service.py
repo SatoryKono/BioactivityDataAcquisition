@@ -4,7 +4,7 @@ from __future__ import annotations
 
 __all__ = ["BatchExecutionStateService"]
 
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_execution.contracts import (
     BatchExecutionStateProtocol,
@@ -24,8 +24,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.types import BronzeRecord
 
-_BatchResultT = TypeVar("_BatchResultT", covariant=True)
-
 
 class BatchExecutionStateService:
     """Pure service applying processed batch outcomes to executor state."""
@@ -37,53 +35,49 @@ class BatchExecutionStateService:
     def commit_successful_batch(
         self,
         *,
-        state: object,
+        state: BatchExecutionStateProtocol,
         records: list[BronzeRecord],
         outcome: BatchProcessingOutcome,
     ) -> None:
         """Apply one successful batch outcome to executor-level state."""
         apply_processed_batch_outcome(
-            state=cast(BatchExecutionStateProtocol, state),
+            state=state,
             outcome=build_processed_batch_outcome(
                 records=records,
                 output=outcome,
             ),
         )
 
-    def build_batch_result(
+    def build_batch_result[BatchResultT](
         self,
         *,
-        state: object,
-        batch_result_type: BatchResultBuilderProtocol[_BatchResultT],
-    ) -> _BatchResultT:
+        state: BatchExecutionStatisticsState,
+        batch_result_type: BatchResultBuilderProtocol[BatchResultT],
+    ) -> BatchResultT:
         """Project current cumulative counters into public batch result."""
-        typed_state = cast(BatchExecutionStatisticsState, state)
-        batch_result = build_batch_result_snapshot(
+        return build_batch_result_snapshot(
             batch_result_type=batch_result_type,
-            records_bronze=typed_state.records_bronze,
-            records_silver=typed_state.records_silver,
-            records_gold=typed_state.records_gold,
-            records_quarantined=typed_state.records_quarantined,
+            records_bronze=state.records_bronze,
+            records_silver=state.records_silver,
+            records_gold=state.records_gold,
+            records_quarantined=state.records_quarantined,
         )
-        return batch_result
 
     def build_run_statistics(
         self,
         *,
-        state: object,
+        state: BatchExecutionStatisticsState,
     ) -> dict[str, int | list[str]]:
         """Project deterministic run statistics from current executor state."""
-        typed_state = cast(BatchExecutionStatisticsState, state)
-        statistics = build_run_statistics(
-            records_fetched=typed_state.records_fetched,
-            records_bronze=typed_state.records_bronze,
-            records_silver=typed_state.records_silver,
-            records_gold=typed_state.records_gold,
+        return build_run_statistics(
+            records_fetched=state.records_fetched,
+            records_bronze=state.records_bronze,
+            records_silver=state.records_silver,
+            records_gold=state.records_gold,
             records_gold_excluded_by_contract=(
-                typed_state.records_gold_excluded_by_contract
+                state.records_gold_excluded_by_contract
             ),
-            records_quarantined=typed_state.records_quarantined,
-            records_filtered_out=typed_state.records_filtered_out,
-            source_batch_ids=typed_state._source_batch_ids,
+            records_quarantined=state.records_quarantined,
+            records_filtered_out=state.records_filtered_out,
+            source_batch_ids=state.source_batch_ids,
         )
-        return statistics

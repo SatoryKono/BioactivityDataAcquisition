@@ -4,6 +4,7 @@ from __future__ import annotations
 
 __all__ = ["BatchExecutionRunService"]
 
+import asyncio
 from collections.abc import Awaitable
 from typing import Protocol
 
@@ -71,34 +72,57 @@ class BatchExecutionRunService:
         execution_state: BatchExecutionCountersSnapshot,
         memory_state: BatchExecutionMemoryState,
     ) -> None:
-        """Finalize success, shutdown, and runtime failure using one policy."""
+        """Finalize success, shutdown, cancel, and runtime failure using one policy."""
         try:
             await run_loop(execution_context)
         except PipelineShutdownError:
-            await self._execution_lifecycle.finalize_execution(
+            await self._finalize(
                 execution_state,
                 lifecycle_context,
-                batch_size_reductions=memory_state.batch_size_reductions,
-                min_batch_size_used=memory_state.min_batch_size_used,
-                memory_decision_trace=memory_state.decision_trace_dicts(),
+                memory_state,
+                shutdown=True,
+            )
+            raise
+        except asyncio.CancelledError:
+            # After start_execution, always finalize so spans/checkpoints close.
+            await self._finalize(
+                execution_state,
+                lifecycle_context,
+                memory_state,
                 shutdown=True,
             )
             raise
         except PIPELINE_EXECUTION_ERRORS as error:
-            await self._execution_lifecycle.finalize_execution(
+            await self._finalize(
                 execution_state,
                 lifecycle_context,
-                batch_size_reductions=memory_state.batch_size_reductions,
-                min_batch_size_used=memory_state.min_batch_size_used,
-                memory_decision_trace=memory_state.decision_trace_dicts(),
+                memory_state,
                 error=error,
             )
             raise
         else:
-            await self._execution_lifecycle.finalize_execution(
+            await self._finalize(
                 execution_state,
                 lifecycle_context,
-                batch_size_reductions=memory_state.batch_size_reductions,
-                min_batch_size_used=memory_state.min_batch_size_used,
-                memory_decision_trace=memory_state.decision_trace_dicts(),
+                memory_state,
             )
+
+    async def _finalize(
+        self,
+        execution_state: BatchExecutionCountersSnapshot,
+        lifecycle_context: BatchExecutionLifecycleContext,
+        memory_state: BatchExecutionMemoryState,
+        *,
+        error: Exception | None = None,
+        shutdown: bool = False,
+    ) -> None:
+        """Delegate finalization with shared memory-state kwargs."""
+        await self._execution_lifecycle.finalize_execution(
+            execution_state,
+            lifecycle_context,
+            batch_size_reductions=memory_state.batch_size_reductions,
+            min_batch_size_used=memory_state.min_batch_size_used,
+            memory_decision_trace=memory_state.decision_trace_dicts(),
+            error=error,
+            shutdown=shutdown,
+        )
