@@ -7,24 +7,14 @@ import argparse
 import shutil
 from pathlib import Path
 
-try:
-    from .native_runtime_contract import (
-        DISCOVERY_SKILLS_DIR,
-        GENERATED_MARKER,
-        REPO_ROOT,
-        canonical_skills,
-        render_skill_adapter,
-        validate_skill_adapters,
-    )
-except ImportError:  # pragma: no cover - direct script execution
-    from native_runtime_contract import (  # type: ignore[no-redef]
-        DISCOVERY_SKILLS_DIR,
-        GENERATED_MARKER,
-        REPO_ROOT,
-        canonical_skills,
-        render_skill_adapter,
-        validate_skill_adapters,
-    )
+from scripts.ai.codex.native_runtime_contract import (
+    DISCOVERY_SKILLS_DIR,
+    GENERATED_MARKER,
+    REPO_ROOT,
+    canonical_skills,
+    render_skill_adapter,
+    validate_skill_adapters,
+)
 
 
 def sync(repo_root: Path) -> None:

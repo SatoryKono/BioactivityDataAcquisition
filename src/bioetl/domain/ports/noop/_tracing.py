@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING
+
+from bioetl.domain.ports.observability.tracing import (
+    SpanHandle,
+    TracerHandle,
+)
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -11,7 +16,7 @@ if TYPE_CHECKING:
 class _NoOpSpan:
     """No-op span that mirrors ``SpanHandle`` / OpenTelemetry span surface."""
 
-    def __enter__(self) -> Self:
+    def __enter__(self) -> SpanHandle:
         """Enter the span context manager and return self."""
         return self
 
@@ -85,7 +90,7 @@ class _NoOpOtelTracer:
         name: str,
         *,
         attributes: dict[str, object] | None = None,
-    ) -> _NoOpSpan:
+    ) -> SpanHandle:
         """Return a no-op span without starting any real tracing context.
 
         Args:
@@ -104,7 +109,7 @@ class NoOpTracing:
 
     is_noop = True
 
-    def get_tracer(self, name: str) -> _NoOpOtelTracer:
+    def get_tracer(self, name: str) -> TracerHandle:
         """Return a no-op OTel-compatible tracer.
 
         Args:

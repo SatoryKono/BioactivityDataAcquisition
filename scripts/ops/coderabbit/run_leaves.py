@@ -24,9 +24,16 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def load_progress() -> dict[str, object]:
+Progress = dict[str, object]
+Leaf = dict[str, object]
+LeafResult = dict[str, object]
+
+
+def load_progress() -> Progress:
     if PROGRESS.exists():
-        return json.loads(PROGRESS.read_text(encoding="utf-8"))
+        loaded = json.loads(PROGRESS.read_text(encoding="utf-8"))
+        if isinstance(loaded, dict):
+            return loaded
     return {
         "started": now(),
         "results": {},
@@ -36,13 +43,33 @@ def load_progress() -> dict[str, object]:
     }
 
 
-def save_progress(p: dict[str, object]) -> None:
+def save_progress(p: Progress) -> None:
     p["updated"] = now()
     PROGRESS.write_text(json.dumps(p, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
-def run_leaf(leaf: dict[str, object], base: str = "main") -> dict[str, object]:
-    lid = leaf["id"]
+def _as_str(value: object, *, default: str = "") -> str:
+    return value if isinstance(value, str) else default
+
+
+def _as_str_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [item for item in value if isinstance(item, str)]
+
+
+def _as_result_map(value: object) -> dict[str, LeafResult]:
+    if not isinstance(value, dict):
+        return {}
+    out: dict[str, LeafResult] = {}
+    for key, item in value.items():
+        if isinstance(key, str) and isinstance(item, dict):
+            out[key] = item
+    return out
+
+
+def run_leaf(leaf: Leaf, base: str = "main") -> LeafResult:
+    lid = _as_str(leaf.get("id"), default="unknown")
     log_path = LOG_DIR / f"review_{lid}.log"
     cmd: list[str]
     env = os.environ.copy()
@@ -50,20 +77,22 @@ def run_leaf(leaf: dict[str, object], base: str = "main") -> dict[str, object]:
     env["NO_COLOR"] = "1"
     env["TERM"] = "dumb"
 
-    if leaf.get("dir"):
+    leaf_dir = leaf.get("dir")
+    use_file_list = leaf.get("use_file_list")
+    if isinstance(leaf_dir, str) and leaf_dir:
         cmd = [
             CODERABBIT,
             "review",
             "--base",
             base,
             "--dir",
-            leaf["dir"],
+            leaf_dir,
             "--plain",
         ]
-    elif leaf.get("use_file_list"):
+    elif isinstance(use_file_list, str) and use_file_list:
         # CodeRabbit CLI may not accept arbitrary file lists; try --dir parent if single root
         # Fallback: use first common directory prefix
-        files = Path(leaf["use_file_list"]).read_text(encoding="utf-8").splitlines()
+        files = Path(use_file_list).read_text(encoding="utf-8").splitlines()
         files = [f for f in files if f.strip()]
         if not files:
             return {
@@ -176,9 +205,30 @@ def run_leaf(leaf: dict[str, object], base: str = "main") -> dict[str, object]:
         }
 
 
+def _progress_results(progress: Progress) -> dict[str, LeafResult]:
+    return _as_result_map(progress.get("results"))
+
+
+def _progress_str_list(progress: Progress, key: str) -> list[str]:
+    return _as_str_list(progress.get(key))
+
+
+def _set_progress_result(progress: Progress, lid: str, result: LeafResult) -> None:
+    results = _progress_results(progress)
+    results[lid] = result
+    progress["results"] = results
+
+
+def _append_progress_list(progress: Progress, key: str, lid: str) -> None:
+    items = _progress_str_list(progress, key)
+    items.append(lid)
+    progress[key] = items
+
+
 def main() -> int:
     matrix = json.loads(MATRIX.read_text(encoding="utf-8"))
-    leaves = matrix["leaves"]
+    raw_leaves = matrix.get("leaves", [])
+    leaves: list[Leaf] = [leaf for leaf in raw_leaves if isinstance(leaf, dict)]
     # optional filters
     only_wave = os.environ.get("CR_WAVE")  # e.g. A
     only_ids = os.environ.get("CR_LEAVES")  # comma ids
@@ -186,43 +236,54 @@ def main() -> int:
     sleep_s = float(os.environ.get("CR_SLEEP", "5"))
 
     if only_wave:
-        leaves = [leaf for leaf in leaves if leaf["wave"] == only_wave]
+        leaves = [leaf for leaf in leaves if leaf.get("wave") == only_wave]
     if only_ids:
         want = set(only_ids.split(","))
-        leaves = [leaf for leaf in leaves if leaf["id"] in want]
+        leaves = [leaf for leaf in leaves if _as_str(leaf.get("id")) in want]
     # stable order: wave then id
     wave_order = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "R": 6}
-    leaves = sorted(leaves, key=lambda L: (wave_order.get(leaf["wave"], 9), leaf["id"]))
+    leaves = sorted(
+        leaves,
+        key=lambda item: (
+            wave_order.get(_as_str(item.get("wave")), 9),
+            _as_str(item.get("id")),
+        ),
+    )
     if max_leaves > 0:
         leaves = leaves[:max_leaves]
 
     progress = load_progress()
-    done = set(progress.get("completed", [])) | set(progress.get("results", {}).keys())
+    done = set(_progress_str_list(progress, "completed")) | set(
+        _progress_results(progress).keys()
+    )
 
     print(f"planned={len(leaves)} already={len(done)} sleep={sleep_s}")
     rate_limit_hits = 0
 
     for i, leaf in enumerate(leaves, 1):
-        lid = leaf["id"]
-        if lid in done and progress.get("results", {}).get(lid, {}).get("status") in {
-            "ok",
-            "ignored",
-            "skipped",
-        }:
+        lid = _as_str(leaf.get("id"), default="unknown")
+        prior = _progress_results(progress).get(lid, {})
+        if lid in done and prior.get("status") in {"ok", "ignored", "skipped"}:
             print(f"[{i}/{len(leaves)}] SKIP done {lid}")
             continue
-        print(f"[{i}/{len(leaves)}] RUN {lid} wave={leaf['wave']} files={leaf['files']} dir={leaf.get('dir')}")
+        print(
+            f"[{i}/{len(leaves)}] RUN {lid} wave={leaf.get('wave')} "
+            f"files={leaf.get('files')} dir={leaf.get('dir')}"
+        )
         result = run_leaf(leaf)
-        progress.setdefault("results", {})[lid] = result
-        st = result["status"]
+        _set_progress_result(progress, lid, result)
+        st = _as_str(result.get("status"))
         if st == "ok":
-            progress.setdefault("completed", []).append(lid)
+            _append_progress_list(progress, "completed", lid)
         elif st in {"skipped", "ignored"}:
-            progress.setdefault("skipped", []).append(lid)
+            _append_progress_list(progress, "skipped", lid)
         else:
-            progress.setdefault("failed", []).append(lid)
+            _append_progress_list(progress, "failed", lid)
         save_progress(progress)
-        print(f"  -> {st} {result.get('reason','')} log={result.get('log')} bytes={result.get('bytes')}")
+        print(
+            f"  -> {st} {result.get('reason', '')} "
+            f"log={result.get('log')} bytes={result.get('bytes')}"
+        )
 
         if st == "rate_limit":
             rate_limit_hits += 1
@@ -232,12 +293,12 @@ def main() -> int:
             # retry once
             print(f"  RETRY {lid}")
             result = run_leaf(leaf)
-            progress["results"][lid] = result
-            if result["status"] == "ok":
-                progress.setdefault("completed", []).append(lid)
+            _set_progress_result(progress, lid, result)
+            if result.get("status") == "ok":
+                _append_progress_list(progress, "completed", lid)
             save_progress(progress)
-            print(f"  -> retry {result['status']}")
-            if result["status"] == "rate_limit":
+            print(f"  -> retry {result.get('status')}")
+            if result.get("status") == "rate_limit":
                 print("  hard rate_limit — stop batch; resume later")
                 break
         elif st == "auth_error":
@@ -247,10 +308,11 @@ def main() -> int:
             time.sleep(sleep_s)
 
     # summary
-    results = progress.get("results", {})
+    results = _progress_results(progress)
     counts: dict[str, int] = {}
-    for r in results.values():
-        counts[r["status"]] = counts.get(r["status"], 0) + 1
+    for item in results.values():
+        status = _as_str(item.get("status"), default="unknown")
+        counts[status] = counts.get(status, 0) + 1
     print("SUMMARY", counts)
     (OUT / "run_summary.json").write_text(
         json.dumps({"counts": counts, "results": results}, indent=2), encoding="utf-8"

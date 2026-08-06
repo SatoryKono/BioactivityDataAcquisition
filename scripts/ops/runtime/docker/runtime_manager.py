@@ -25,10 +25,7 @@ from typing import Any
 
 import yaml
 
-try:
-    from . import docker_runtime_preflight as runtime_preflight
-except ImportError:  # pragma: no cover - direct CLI execution path
-    import docker_runtime_preflight as runtime_preflight  # type: ignore[no-redef]
+from scripts.ops.runtime.docker import docker_runtime_preflight as runtime_preflight
 
 ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_CONTRACT = ROOT / "configs/quality/docker_runtime_contracts.yaml"

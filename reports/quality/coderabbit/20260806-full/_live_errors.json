@@ -1,48 +1,48 @@
 [
   {
-    "file": "scripts/ai/codex/doctor.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"obj\" of type \"Sized\" in function \"len\"\n  \"object\" is incompatible with protocol \"Sized\"\n    \"__len__\" is not present",
-    "range": {
-      "start": {
-        "line": 195,
-        "character": 68
-      },
-      "end": {
-        "line": 195,
-        "character": 94
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
     "file": "scripts/ai/codex/sync_native_skills.py",
     "severity": "error",
     "message": "Import from `native_runtime_contract` is implicitly relative and will not work if this file is imported as a module\n  Use a relative import from `.native_runtime_contract` instead\n  or specify the full module path: `scripts.ai.codex.native_runtime_contract`",
     "range": {
       "start": {
-        "line": 9,
-        "character": 5
+        "line": 19,
+        "character": 9
       },
       "end": {
-        "line": 9,
-        "character": 28
+        "line": 19,
+        "character": 32
       }
     },
     "rule": "reportImplicitRelativeImport"
   },
   {
-    "file": "scripts/ops/coderabbit/build_matrix.py",
+    "file": "scripts/ops/coderabbit/run_leaves.py",
     "severity": "error",
-    "message": "Argument of type \"object | list[_T@list]\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@list]\" in function \"__init__\"\n  Type \"object | list[_T@list]\" is not assignable to type \"Iterable[_T@list]\"\n    \"object\" is incompatible with protocol \"Iterable[_T@list]\"\n      \"__iter__\" is not present",
+    "message": "Type \"list[str | object]\" is not assignable to declared type \"list[str]\"\n  \"object\" is not assignable to \"str\"",
     "range": {
       "start": {
-        "line": 316,
-        "character": 47
+        "line": 59,
+        "character": 12
       },
       "end": {
-        "line": 316,
-        "character": 70
+        "line": 59,
+        "character": 23
+      }
+    },
+    "rule": "reportAssignmentType"
+  },
+  {
+    "file": "scripts/ops/coderabbit/run_leaves.py",
+    "severity": "error",
+    "message": "Argument of type \"object\" cannot be assigned to parameter \"args\" of type \"StrPath\" in function \"__new__\"\n  Type \"object\" is not assignable to type \"StrPath\"\n    \"object\" is not assignable to \"str\"\n    \"object\" is incompatible with protocol \"PathLike[str]\"\n      \"__fspath__\" is not present",
+    "range": {
+      "start": {
+        "line": 65,
+        "character": 21
+      },
+      "end": {
+        "line": 65,
+        "character": 42
       }
     },
     "rule": "reportArgumentType"
@@ -50,114 +50,178 @@
   {
     "file": "scripts/ops/coderabbit/run_leaves.py",
     "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
+    "message": "Argument of type \"object\" cannot be assigned to parameter \"args\" of type \"StrPath\" in function \"__init__\"\n  Type \"object\" is not assignable to type \"StrPath\"\n    \"object\" is not assignable to \"str\"\n    \"object\" is incompatible with protocol \"PathLike[str]\"\n      \"__fspath__\" is not present",
     "range": {
       "start": {
-        "line": 26,
-        "character": 23
-      },
-      "end": {
-        "line": 26,
-        "character": 27
-      }
-    },
-    "rule": "reportMissingTypeArgument"
-  },
-  {
-    "file": "scripts/ops/coderabbit/run_leaves.py",
-    "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
-    "range": {
-      "start": {
-        "line": 32,
+        "line": 65,
         "character": 21
       },
       "end": {
-        "line": 32,
-        "character": 25
+        "line": 65,
+        "character": 42
       }
     },
-    "rule": "reportMissingTypeArgument"
+    "rule": "reportArgumentType"
   },
   {
     "file": "scripts/ops/coderabbit/run_leaves.py",
     "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
+    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@set]\" in function \"__init__\"\n  \"object\" is incompatible with protocol \"Iterable[_T@set]\"\n    \"__iter__\" is not present",
     "range": {
       "start": {
-        "line": 37,
-        "character": 19
+        "line": 199,
+        "character": 15
       },
       "end": {
-        "line": 37,
-        "character": 23
+        "line": 199,
+        "character": 44
       }
     },
-    "rule": "reportMissingTypeArgument"
+    "rule": "reportArgumentType"
   },
   {
     "file": "scripts/ops/coderabbit/run_leaves.py",
     "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
+    "message": "Cannot access attribute \"keys\" for class \"object\"\n  Attribute \"keys\" is unknown",
     "range": {
       "start": {
-        "line": 37,
-        "character": 48
+        "line": 199,
+        "character": 80
       },
       "end": {
-        "line": 37,
+        "line": 199,
+        "character": 84
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "scripts/ops/coderabbit/run_leaves.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"get\" for class \"object\"\n  Attribute \"get\" is unknown",
+    "range": {
+      "start": {
+        "line": 206,
+        "character": 55
+      },
+      "end": {
+        "line": 206,
+        "character": 58
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "scripts/ops/coderabbit/run_leaves.py",
+    "severity": "error",
+    "message": "\"__setitem__\" method not defined on type \"object\"",
+    "range": {
+      "start": {
+        "line": 215,
+        "character": 8
+      },
+      "end": {
+        "line": 215,
+        "character": 42
+      }
+    },
+    "rule": "reportIndexIssue"
+  },
+  {
+    "file": "scripts/ops/coderabbit/run_leaves.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"append\" for class \"object\"\n  Attribute \"append\" is unknown",
+    "range": {
+      "start": {
+        "line": 218,
+        "character": 49
+      },
+      "end": {
+        "line": 218,
+        "character": 55
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "scripts/ops/coderabbit/run_leaves.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"append\" for class \"object\"\n  Attribute \"append\" is unknown",
+    "range": {
+      "start": {
+        "line": 220,
+        "character": 47
+      },
+      "end": {
+        "line": 220,
+        "character": 53
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "scripts/ops/coderabbit/run_leaves.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"append\" for class \"object\"\n  Attribute \"append\" is unknown",
+    "range": {
+      "start": {
+        "line": 222,
+        "character": 46
+      },
+      "end": {
+        "line": 222,
         "character": 52
       }
     },
-    "rule": "reportMissingTypeArgument"
+    "rule": "reportAttributeAccessIssue"
   },
   {
-    "file": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
+    "file": "scripts/ops/coderabbit/run_leaves.py",
     "severity": "error",
-    "message": "Object of type \"None\" is not subscriptable",
+    "message": "\"__setitem__\" method not defined on type \"object\"",
     "range": {
       "start": {
-        "line": 671,
-        "character": 29
+        "line": 234,
+        "character": 12
       },
       "end": {
-        "line": 671,
-        "character": 69
+        "line": 234,
+        "character": 31
       }
     },
-    "rule": "reportOptionalSubscript"
+    "rule": "reportIndexIssue"
   },
   {
-    "file": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
+    "file": "scripts/ops/coderabbit/run_leaves.py",
     "severity": "error",
-    "message": "\"vp\" is unbound",
+    "message": "Cannot access attribute \"append\" for class \"object\"\n  Attribute \"append\" is unknown",
     "range": {
       "start": {
-        "line": 671,
-        "character": 76
+        "line": 236,
+        "character": 53
       },
       "end": {
-        "line": 671,
-        "character": 78
+        "line": 236,
+        "character": 59
       }
     },
-    "rule": "reportUnboundVariable"
+    "rule": "reportAttributeAccessIssue"
   },
   {
-    "file": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
+    "file": "scripts/ops/coderabbit/run_leaves.py",
     "severity": "error",
-    "message": "\"vp\" is possibly unbound",
+    "message": "Cannot access attribute \"values\" for class \"object\"\n  Attribute \"values\" is unknown",
     "range": {
       "start": {
-        "line": 672,
-        "character": 39
+        "line": 251,
+        "character": 21
       },
       "end": {
-        "line": 672,
-        "character": 41
+        "line": 251,
+        "character": 27
       }
     },
-    "rule": "reportPossiblyUnboundVariable"
+    "rule": "reportAttributeAccessIssue"
   },
   {
     "file": "scripts/ops/runtime/docker/recreate_cutover_stacks.py",
@@ -192,49 +256,33 @@
     "rule": "reportImplicitRelativeImport"
   },
   {
-    "file": "scripts/quality/coderabbit/build_streams.py",
+    "file": "scripts/quality/coderabbit/rebalance_streams.py",
     "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
+    "message": "No overloads for \"sorted\" match the provided arguments",
     "range": {
       "start": {
-        "line": 60,
-        "character": 24
+        "line": 136,
+        "character": 16
       },
       "end": {
-        "line": 60,
-        "character": 28
+        "line": 136,
+        "character": 61
       }
     },
-    "rule": "reportMissingTypeArgument"
+    "rule": "reportCallIssue"
   },
   {
-    "file": "scripts/quality/coderabbit/build_streams.py",
+    "file": "scripts/quality/coderabbit/rebalance_streams.py",
     "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
+    "message": "Argument of type \"(x: dict[str, object]) -> object\" cannot be assigned to parameter \"key\" of type \"(_T@sorted) -> SupportsRichComparison\" in function \"sorted\"\n  Type \"(x: dict[str, object]) -> object\" is not assignable to type \"(dict[str, object]) -> SupportsRichComparison\"\n    Function return type \"object\" is incompatible with type \"SupportsRichComparison\"\n      Type \"object\" is not assignable to type \"SupportsRichComparison\"\n        \"object\" is incompatible with protocol \"SupportsDunderLT[Any]\"\n          \"__lt__\" is not present\n        \"object\" is incompatible with protocol \"SupportsDunderGT[Any]\"\n          \"__gt__\" is not present",
     "range": {
       "start": {
-        "line": 139,
-        "character": 18
+        "line": 136,
+        "character": 39
       },
       "end": {
-        "line": 139,
-        "character": 22
-      }
-    },
-    "rule": "reportMissingTypeArgument"
-  },
-  {
-    "file": "scripts/quality/coderabbit/build_streams.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"key\" of type \"int\" in function \"__setitem__\"\n  \"object\" is not assignable to \"int\"",
-    "range": {
-      "start": {
-        "line": 143,
-        "character": 8
-      },
-      "end": {
-        "line": 143,
-        "character": 24
+        "line": 136,
+        "character": 60
       }
     },
     "rule": "reportArgumentType"
@@ -242,149 +290,94 @@
   {
     "file": "scripts/quality/coderabbit/rebalance_streams.py",
     "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
+    "message": "No overloads for \"sorted\" match the provided arguments",
     "range": {
       "start": {
-        "line": 56,
-        "character": 28
+        "line": 144,
+        "character": 16
       },
       "end": {
-        "line": 56,
-        "character": 32
+        "line": 144,
+        "character": 61
       }
     },
-    "rule": "reportMissingTypeArgument"
+    "rule": "reportCallIssue"
   },
   {
-    "file": "src/bioetl/application/composite/_lifecycle_observer_span_management.py",
+    "file": "scripts/quality/coderabbit/rebalance_streams.py",
     "severity": "error",
-    "message": "Argument of type \"SpanHandle\" cannot be assigned to parameter \"value\" of type \"_CompositeSpanHandleProtocol\" in function \"__setitem__\"\n  \"SpanHandle\" is incompatible with protocol \"_CompositeSpanHandleProtocol\"\n    \"__exit__\" is an incompatible type\n      Type \"(exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> (bool | None)\" is not assignable to type \"(exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> (object | None)\"\n        Parameter name mismatch: \"exc_val\" versus \"exc\"\n        Parameter name mismatch: \"exc_tb\" versus \"tb\"",
+    "message": "Argument of type \"(x: dict[str, object]) -> object\" cannot be assigned to parameter \"key\" of type \"(_T@sorted) -> SupportsRichComparison\" in function \"sorted\"\n  Type \"(x: dict[str, object]) -> object\" is not assignable to type \"(dict[str, object]) -> SupportsRichComparison\"\n    Function return type \"object\" is incompatible with type \"SupportsRichComparison\"\n      Type \"object\" is not assignable to type \"SupportsRichComparison\"\n        \"object\" is incompatible with protocol \"SupportsDunderLT[Any]\"\n          \"__lt__\" is not present\n        \"object\" is incompatible with protocol \"SupportsDunderGT[Any]\"\n          \"__gt__\" is not present",
     "range": {
       "start": {
-        "line": 73,
-        "character": 8
-      },
-      "end": {
-        "line": 73,
-        "character": 31
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "src/bioetl/application/composite/_lifecycle_observer_span_management.py",
-    "severity": "error",
-    "message": "Argument of type \"SpanHandle\" cannot be assigned to parameter \"value\" of type \"_CompositeSpanHandleProtocol\" in function \"__setitem__\"\n  \"SpanHandle\" is incompatible with protocol \"_CompositeSpanHandleProtocol\"\n    \"__exit__\" is an incompatible type\n      Type \"(exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> (bool | None)\" is not assignable to type \"(exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> (object | None)\"\n        Parameter name mismatch: \"exc_val\" versus \"exc\"\n        Parameter name mismatch: \"exc_tb\" versus \"tb\"",
-    "range": {
-      "start": {
-        "line": 104,
-        "character": 8
-      },
-      "end": {
-        "line": 104,
-        "character": 47
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py",
-    "severity": "error",
-    "message": "Cycle detected in import chain\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\checkpoint\\_checkpoint_runtime.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\checkpoint\\_checkpoint_warnings.py",
-    "range": null,
-    "rule": "reportImportCycles"
-  },
-  {
-    "file": "src/bioetl/application/composite/runner_pkg/runner.py",
-    "severity": "error",
-    "message": "Conversion of type `Self@CompositePipelineRunner` to type `_RunnerLifecycleHost` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
-    "range": {
-      "start": {
-        "line": 111,
-        "character": 15
-      },
-      "end": {
-        "line": 111,
-        "character": 47
-      }
-    },
-    "rule": "reportInvalidCast"
-  },
-  {
-    "file": "src/bioetl/application/composite/runner_pkg/runner_checkpoint_save_observability.py",
-    "severity": "error",
-    "message": "Conversion of type `SpanHandle` to type `Span` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
-    "range": {
-      "start": {
-        "line": 99,
-        "character": 11
-      },
-      "end": {
-        "line": 109,
-        "character": 5
-      }
-    },
-    "rule": "reportInvalidCast"
-  },
-  {
-    "file": "src/bioetl/application/core/_base_transformer_execution_support.py",
-    "severity": "error",
-    "message": "Conversion of type `SpanHandle` to type `_ClosableSpan` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
-    "range": {
-      "start": {
-        "line": 56,
-        "character": 20
-      },
-      "end": {
-        "line": 56,
-        "character": 45
-      }
-    },
-    "rule": "reportInvalidCast"
-  },
-  {
-    "file": "src/bioetl/application/core/_record_processor_span_support.py",
-    "severity": "error",
-    "message": "Argument of type \"dict[str, str | int]\" cannot be assigned to parameter \"attributes\" of type \"dict[str, object] | None\" in function \"start_as_current_span\"\n  Type \"dict[str, str | int]\" is not assignable to type \"dict[str, object] | None\"\n    \"dict[str, str | int]\" is not assignable to \"dict[str, object]\"\n      Type parameter \"_VT@dict\" is invariant, but \"str | int\" is not the same as \"object\"\n      Consider switching from \"dict\" to \"Mapping\" which is covariant in the value type\n    \"dict[str, str | int]\" is not assignable to \"None\"",
-    "range": {
-      "start": {
-        "line": 103,
-        "character": 23
-      },
-      "end": {
-        "line": 103,
-        "character": 28
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "src/bioetl/application/core/_record_processor_span_support.py",
-    "severity": "error",
-    "message": "Conversion of type `SpanHandle` to type `Span` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
-    "range": {
-      "start": {
-        "line": 105,
-        "character": 21
-      },
-      "end": {
-        "line": 105,
+        "line": 144,
         "character": 39
+      },
+      "end": {
+        "line": 144,
+        "character": 60
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "scripts/quality/coderabbit/rebalance_streams.py",
+    "severity": "error",
+    "message": "No overloads for \"sorted\" match the provided arguments",
+    "range": {
+      "start": {
+        "line": 186,
+        "character": 25
+      },
+      "end": {
+        "line": 186,
+        "character": 70
+      }
+    },
+    "rule": "reportCallIssue"
+  },
+  {
+    "file": "scripts/quality/coderabbit/rebalance_streams.py",
+    "severity": "error",
+    "message": "Argument of type \"(x: dict[str, object]) -> object\" cannot be assigned to parameter \"key\" of type \"(_T@sorted) -> SupportsRichComparison\" in function \"sorted\"\n  Type \"(x: dict[str, object]) -> object\" is not assignable to type \"(dict[str, object]) -> SupportsRichComparison\"\n    Function return type \"object\" is incompatible with type \"SupportsRichComparison\"\n      Type \"object\" is not assignable to type \"SupportsRichComparison\"\n        \"object\" is incompatible with protocol \"SupportsDunderLT[Any]\"\n          \"__lt__\" is not present\n        \"object\" is incompatible with protocol \"SupportsDunderGT[Any]\"\n          \"__gt__\" is not present",
+    "range": {
+      "start": {
+        "line": 186,
+        "character": 48
+      },
+      "end": {
+        "line": 186,
+        "character": 69
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "src/bioetl/application/composite/_lifecycle_observer_span_management.py",
+    "severity": "error",
+    "message": "Conversion of type `SpanHandle` to type `_CompositeSpanHandleProtocol` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
+    "range": {
+      "start": {
+        "line": 74,
+        "character": 34
+      },
+      "end": {
+        "line": 74,
+        "character": 74
       }
     },
     "rule": "reportInvalidCast"
   },
   {
-    "file": "src/bioetl/application/core/batch_checkpoint_recovery_service.py",
+    "file": "src/bioetl/application/composite/_lifecycle_observer_span_management.py",
     "severity": "error",
-    "message": "Conversion of type `SpanHandle` to type `Span` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
+    "message": "Conversion of type `SpanHandle` to type `_CompositeSpanHandleProtocol` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
     "range": {
       "start": {
-        "line": 163,
-        "character": 15
+        "line": 105,
+        "character": 50
       },
       "end": {
-        "line": 174,
+        "line": 107,
         "character": 9
       }
     },
@@ -393,18 +386,18 @@
   {
     "file": "src/bioetl/application/core/data_sources/publication_term.py",
     "severity": "error",
-    "message": "Cannot access attribute \"_fetch_publication_terms\" for class \"PublicationTermDataSource*\"\n  Could not bind method \"_fetch_publication_terms\" because \"Self@PublicationTermDataSource\" is not assignable to parameter \"self\"\n    \"PublicationTermDataSource*\" is incompatible with protocol \"PublicationTermExtractionHost\"\n      \"SOURCE_ENTITY_TYPE\" is invariant because it is mutable\n      \"SOURCE_ENTITY_TYPE\" is an incompatible type\n        \"Literal['publication']\" is not assignable to \"str\"\n      \"PUBLICATION_LIMIT_MULTIPLIER\" is invariant because it is mutable\n      \"PUBLICATION_LIMIT_MULTIPLIER\" is an incompatible type\n        \"Literal[50]\" is not assignable to \"int\"",
+    "message": "Class variable \"TARGET_ENTITY_TYPE\" overrides instance variable of same name in class \"_TargetEntityFetchDelegationMixin\"",
     "range": {
       "start": {
-        "line": 62,
-        "character": 31
+        "line": 42,
+        "character": 4
       },
       "end": {
-        "line": 62,
-        "character": 55
+        "line": 42,
+        "character": 22
       }
     },
-    "rule": "reportAttributeAccessIssue"
+    "rule": "reportIncompatibleVariableOverride"
   },
   {
     "file": "src/bioetl/composition/_workflow_services.py",
@@ -457,22 +450,6 @@
   {
     "file": "src/bioetl/composition/bootstrap/runtime/tracing_bootstrap.py",
     "severity": "error",
-    "message": "Conversion of type `OpenTelemetryTracer` to type `TracingPort` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
-    "range": {
-      "start": {
-        "line": 24,
-        "character": 11
-      },
-      "end": {
-        "line": 24,
-        "character": 78
-      }
-    },
-    "rule": "reportInvalidCast"
-  },
-  {
-    "file": "src/bioetl/composition/bootstrap/runtime/tracing_bootstrap.py",
-    "severity": "error",
     "message": "Type \"NoOpTracing\" is not assignable to return type \"TracingPort\"\n  \"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n    \"get_tracer\" is an incompatible type\n      Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n        Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n          \"_NoOpOtelTracer\" is incompatible with protocol \"TracerHandle\"",
     "range": {
       "start": {
@@ -503,41 +480,116 @@
     "rule": "reportReturnType"
   },
   {
-    "file": "src/bioetl/infrastructure/adapters/http/client_retry_observability.py",
+    "file": "src/bioetl/infrastructure/adapters/crossref/_client_port_surface.py",
     "severity": "error",
-    "message": "Conversion of type `TracerHandle` to type `_OtelTracerLike` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
+    "message": "Instance variable \"http_client\" is not initialized in the class body or __init__ method",
     "range": {
       "start": {
-        "line": 93,
-        "character": 18
+        "line": 51,
+        "character": 8
       },
       "end": {
-        "line": 93,
-        "character": 73
+        "line": 51,
+        "character": 19
       }
     },
-    "rule": "reportInvalidCast"
+    "rule": "reportUninitializedInstanceVariable"
   },
   {
-    "file": "src/bioetl/infrastructure/adapters/openalex/__init__.py",
+    "file": "src/bioetl/infrastructure/adapters/crossref/_client_port_surface.py",
     "severity": "error",
-    "message": "Cycle detected in import chain\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\openalex\\__init__.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\openalex\\client.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\openalex\\_client_support.py",
-    "range": null,
-    "rule": "reportImportCycles"
+    "message": "Instance variable \"_logger\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 52,
+        "character": 8
+      },
+      "end": {
+        "line": 52,
+        "character": 15
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
   },
   {
-    "file": "src/bioetl/infrastructure/adapters/pubmed/_adapter_support.py",
+    "file": "src/bioetl/infrastructure/adapters/crossref/_client_port_surface.py",
     "severity": "error",
-    "message": "Cycle detected in import chain\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\pubmed\\_adapter_support.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\pubmed\\adapter.py",
-    "range": null,
-    "rule": "reportImportCycles"
+    "message": "Instance variable \"_adapter_metrics\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 53,
+        "character": 8
+      },
+      "end": {
+        "line": 53,
+        "character": 24
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
   },
   {
-    "file": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+    "file": "src/bioetl/infrastructure/adapters/crossref/_client_port_surface.py",
     "severity": "error",
-    "message": "Cycle detected in import chain\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\uniprot\\__init__.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\uniprot\\client.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\uniprot\\_client_support.py",
-    "range": null,
-    "rule": "reportImportCycles"
+    "message": "Instance variable \"_request_collector\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 54,
+        "character": 8
+      },
+      "end": {
+        "line": 54,
+        "character": 26
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "src/bioetl/infrastructure/adapters/crossref/_client_port_surface.py",
+    "severity": "error",
+    "message": "Instance variable \"_query_builder\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 55,
+        "character": 8
+      },
+      "end": {
+        "line": 55,
+        "character": 22
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "src/bioetl/infrastructure/adapters/crossref/_client_port_surface.py",
+    "severity": "error",
+    "message": "Instance variable \"_response_mapper\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 56,
+        "character": 8
+      },
+      "end": {
+        "line": 56,
+        "character": 24
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
+  },
+  {
+    "file": "src/bioetl/infrastructure/adapters/crossref/_client_port_surface.py",
+    "severity": "error",
+    "message": "Instance variable \"_fetch_flow\" is not initialized in the class body or __init__ method",
+    "range": {
+      "start": {
+        "line": 57,
+        "character": 8
+      },
+      "end": {
+        "line": 57,
+        "character": 19
+      }
+    },
+    "rule": "reportUninitializedInstanceVariable"
   },
   {
     "file": "src/bioetl/infrastructure/observability/noop_resolution.py",
@@ -554,69 +606,5 @@
       }
     },
     "rule": "reportReturnType"
-  },
-  {
-    "file": "src/bioetl/interfaces/cli/commands/config_dq.py",
-    "severity": "error",
-    "message": "\"dq_config\" is possibly unbound",
-    "range": {
-      "start": {
-        "line": 92,
-        "character": 29
-      },
-      "end": {
-        "line": 92,
-        "character": 38
-      }
-    },
-    "rule": "reportPossiblyUnboundVariable"
-  },
-  {
-    "file": "src/bioetl/interfaces/cli/commands/config_dq.py",
-    "severity": "error",
-    "message": "\"dq_config\" is possibly unbound",
-    "range": {
-      "start": {
-        "line": 94,
-        "character": 28
-      },
-      "end": {
-        "line": 94,
-        "character": 37
-      }
-    },
-    "rule": "reportPossiblyUnboundVariable"
-  },
-  {
-    "file": "tests/conftest.py",
-    "severity": "error",
-    "message": "Argument of type \"object | Any | tuple[()]\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T_co@tuple]\" in function \"__new__\"\n  Type \"object | Any | tuple[()]\" is not assignable to type \"Iterable[_T_co@tuple]\"\n    \"object\" is incompatible with protocol \"Iterable[_T_co@tuple]\"\n      \"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 262,
-        "character": 17
-      },
-      "end": {
-        "line": 262,
-        "character": 22
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "tests/unit/application/core/test_s3_record_quarantine_fetch_residuals.py",
-    "severity": "error",
-    "message": "Instance variable \"_iter\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 66,
-        "character": 13
-      },
-      "end": {
-        "line": 66,
-        "character": 18
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
   }
 ]
