@@ -11,10 +11,25 @@ from collections.abc import Iterable, Mapping, Sequence
 _PROVIDER_ENTITY_RE = re.compile(r"^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$")
 
 
+def _json_stable_default(value: object) -> object:
+    """Normalize non-JSON-native values for deterministic digests."""
+    if isinstance(value, set | frozenset):
+        # Sets are unordered; sort stringified members so equal sets hash equal.
+        return sorted(value, key=lambda item: json.dumps(item, sort_keys=True, default=str))
+    return str(value)
+
+
 def stable_hash(value: object) -> str | None:
     if not is_present(value):
         return None
-    payload = json.dumps(value, sort_keys=True, separators=(",", ":"), default=str)
+    if isinstance(value, set | frozenset):
+        value = _json_stable_default(value)
+    payload = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        default=_json_stable_default,
+    )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -109,12 +124,12 @@ def mapping_value(mapping: Mapping[str, object], *keys: str) -> Mapping[str, obj
 
 
 def validate_run_id_format(value: str) -> bool:
-    """Return whether a run id is UUID-formatted."""
+    """Return whether a run id is a UUID version 4."""
     try:
-        uuid.UUID(str(value))
+        parsed = uuid.UUID(str(value))
     except ValueError:
         return False
-    return True
+    return parsed.version == 4
 
 
 def validate_manifest_id_format(value: str) -> bool:
