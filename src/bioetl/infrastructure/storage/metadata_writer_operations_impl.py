@@ -17,9 +17,9 @@ from bioetl.infrastructure.storage.metadata_artifact_publication import (
 
 from .metadata_writer_helpers import (
     _execute_prepared_metadata_write_operation,
-    _load_existing_metadata_model,
     _record_artifact_publication,
     _resolve_existing_metadata_path,
+    load_existing_metadata_model,
 )
 
 if TYPE_CHECKING:
@@ -91,7 +91,7 @@ class _MetadataWriterOperations:
             provider=provider,
             entity=entity,
         )
-        existing_metadata = _load_existing_metadata_model(
+        existing_metadata = await load_existing_metadata_model(
             metadata_path,
             layer=layer,
         )

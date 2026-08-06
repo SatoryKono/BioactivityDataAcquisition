@@ -61,10 +61,16 @@ def test_is_bronze_write_result_persisted_reports_file_state() -> None:
     file_path = Path("/virtual/batch_abc.jsonl.zst")
     result = _make_result(file_path)
 
-    with patch("pathlib.Path.exists", return_value=False) as exists:
+    with patch(
+        "bioetl.infrastructure.storage.bronze_write_result_helpers.path_exists_bounded",
+        return_value=False,
+    ) as exists:
         assert not is_bronze_write_result_persisted(result)
         exists.assert_called_once()
 
-    with patch("pathlib.Path.exists", return_value=True) as exists:
+    with patch(
+        "bioetl.infrastructure.storage.bronze_write_result_helpers.path_exists_bounded",
+        return_value=True,
+    ) as exists:
         assert is_bronze_write_result_persisted(result)
         exists.assert_called_once()

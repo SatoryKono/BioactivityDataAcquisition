@@ -218,7 +218,10 @@ async def _handle_commit_retry(
             final_reason="commit_conflict_retries_exhausted",
         )
         return None
-    delay = policy.commit_retry.calculate_delay(retry_count)
+    delay = policy.commit_retry.calculate_delay(
+        retry_count,
+        operation_id=table_path,
+    )
     next_retry_count = retry_count + 1
     emit_retry(
         table_path=table_path,
@@ -262,7 +265,10 @@ async def _handle_timeout_retry(
                 f"(timeout_retries={retry_count})"
             ),
         ) from cause
-    delay = policy.timeout_retry.calculate_delay(retry_count)
+    delay = policy.timeout_retry.calculate_delay(
+        retry_count,
+        operation_id=table_path,
+    )
     next_retry_count = retry_count + 1
     emit_retry(
         table_path=table_path,

@@ -106,9 +106,17 @@ def attach_input_snapshot_details(
     ]
 
 
+def _normalize_optional_datetime(value: object) -> object:
+    """Normalize datetime values to ISO-8601; preserve non-datetime contracts."""
+    if isinstance(value, datetime):
+        return value.isoformat()
+    return value
+
+
 def serialize_input_snapshot_ref(snapshot: InputSnapshotRef) -> dict[str, object]:
     """Return the bounded input snapshot evidence persisted in run ledger."""
     captured_at = getattr(snapshot, "captured_at", None)
+    last_modified = getattr(snapshot, "last_modified", None)
     return {
         "snapshot_id": str(snapshot.snapshot_id),
         "content_hash": str(snapshot.content_hash),
@@ -119,10 +127,8 @@ def serialize_input_snapshot_ref(snapshot: InputSnapshotRef) -> dict[str, object
         "object_key": getattr(snapshot, "object_key", None),
         "object_version_id": getattr(snapshot, "object_version_id", None),
         "etag": getattr(snapshot, "etag", None),
-        "last_modified": getattr(snapshot, "last_modified", None),
-        "captured_at": captured_at.isoformat()
-        if isinstance(captured_at, datetime)
-        else None,
+        "last_modified": _normalize_optional_datetime(last_modified),
+        "captured_at": _normalize_optional_datetime(captured_at),
     }
 
 
