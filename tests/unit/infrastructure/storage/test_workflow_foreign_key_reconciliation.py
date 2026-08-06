@@ -247,7 +247,9 @@ async def test_gold_expiry_retries_commit_conflict(
     )
 
     assert writer.merge_attempts == 2
+    # One schema inspection open + two merge retry attempts.
     assert fake_module.table_paths == [
+        "/tmp/chembl/assay",
         "/tmp/chembl/assay",
         "/tmp/chembl/assay",
     ]
