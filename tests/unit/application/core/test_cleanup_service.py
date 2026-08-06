@@ -32,7 +32,7 @@ Tests the unified cleanup service for Silver and Gold layers.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -390,3 +390,30 @@ class TestCleanupServiceIntegration:
         # Should log DRY RUN message
         mock_logger.info.assert_called_once()
         assert "DRY RUN" in str(mock_logger.info.call_args)
+
+
+@pytest.mark.unit
+class TestCleanupServicePreviewThreadOffload:
+    """Regression: preview must not block the event loop on sync FS scans."""
+
+    @pytest.mark.asyncio
+    async def test_preview_offloads_sync_scan_to_thread(
+        self, cleanup_service, mock_storage
+    ) -> None:
+        """preview_cleanup is invoked via asyncio.to_thread."""
+        with patch(
+            "bioetl.application.core.lifecycle.cleanup_service.asyncio.to_thread",
+            new=AsyncMock(side_effect=lambda fn, **kwargs: fn(**kwargs)),
+        ) as to_thread:
+            await cleanup_service.preview(
+                silver_table="test_silver", gold_table="test_gold"
+            )
+        to_thread.assert_awaited_once()
+        call = to_thread.await_args
+        assert call is not None
+        assert call.args[0] is mock_storage.preview_cleanup
+        assert call.kwargs == {
+            "silver_table": "test_silver",
+            "gold_table": "test_gold",
+        }
+

@@ -9,22 +9,90 @@ from __future__ import annotations
 
 from importlib import import_module
 
-_WIRING_SUBMODULES = (
-    "bioetl.application.core.wiring.factory",
-    "bioetl.application.core.wiring.registry",
-    "bioetl.application.core.wiring.runtime",
-    "bioetl.application.core.wiring.transformer",
-)
+# Static metadata-only map: package import must never import wiring submodules.
+# Later groups intentionally overwrite shared names (factory -> runtime).
+_EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
+    "bioetl.application.core.wiring.factory": (
+        "BasePipeline",
+        "BatchExecutor",
+        "CheckpointRuntimeService",
+        "LockRuntimeService",
+        "PipelineRunner",
+        "PipelineRunnerDependencies",
+        "PipelineService",
+        "PostrunService",
+        "PreflightService",
+        "ShutdownSignal",
+    ),
+    "bioetl.application.core.wiring.registry": (
+        "ActivityTransformer",
+        "AssayParametersTransformer",
+        "AssayTransformer",
+        "CellLineTransformer",
+        "CompoundRecordTransformer",
+        "CrossRefPublicationTransformer",
+        "GenericPipeline",
+        "IDMappingTransformer",
+        "MoleculeTransformer",
+        "OpenAlexPublicationTransformer",
+        "ProteinClassTransformer",
+        "PubChemCompoundTransformer",
+        "PubMedPublicationTransformer",
+        "PublicationSimilarityTransformer",
+        "PublicationTermTransformer",
+        "PublicationTransformer",
+        "SemanticScholarPublicationTransformer",
+        "SubcellularFractionTransformer",
+        "TargetComponentTransformer",
+        "TargetProteinClassificationTransformer",
+        "TargetTransformer",
+        "TissueTransformer",
+        "UniProtProteinTransformer",
+    ),
+    "bioetl.application.core.wiring.runtime": (
+        "BasePipeline",
+        "BatchCheckpointRecoveryService",
+        "BatchExecutionFSM",
+        "BatchExecutionLifecycleService",
+        "BatchExecutionRunService",
+        "BatchExecutionStateService",
+        "BatchExecutor",
+        "BatchExecutorDependencies",
+        "BatchExtractionLoopService",
+        "BatchMemoryManagerService",
+        "BatchMetricsRecorderService",
+        "BatchProcessingComponents",
+        "BatchProcessingService",
+        "BatchProcessingSupportService",
+        "BatchProgressService",
+        "BatchTracingManagerService",
+        "BatchTransformer",
+        "BatchWriter",
+        "BatchWriterOptions",
+        "CheckpointRuntimeService",
+        "ContentHashPolicyByVersion",
+        "ContentHashVersionPolicy",
+        "GoldFilterCallback",
+        "GoldTransformCallback",
+        "PipelineService",
+        "PipelineStorageProtocol",
+        "QuarantineRuntimeService",
+        "RecordNormalizationProcessor",
+        "RecordProcessor",
+        "RecordProcessorConfig",
+        "ShutdownSignal",
+        "TransformCallback",
+    ),
+    "bioetl.application.core.wiring.transformer": (
+        "BaseTransformer",
+        "DefaultContractPolicy",
+        "NoOpStructuralPolicy",
+        "StructuralPolicyProtocol",
+        "TransformerDependencyContext",
+        "build_structural_policy",
+    ),
+}
 
-
-def _build_export_groups() -> dict[str, tuple[str, ...]]:
-    return {
-        module_name: tuple(import_module(module_name).__all__)
-        for module_name in _WIRING_SUBMODULES
-    }
-
-
-_EXPORT_GROUPS = _build_export_groups()
 _EXPORT_MODULES = {
     export_name: module_name
     for module_name, export_names in _EXPORT_GROUPS.items()

@@ -231,3 +231,83 @@ class TestHeartbeatTask:
         mock_lock_port.heartbeat.assert_called_with(
             "lock:test_pipeline:exclusive", TEST_RUN_ID, exclusive=True
         )
+
+    async def test_heartbeat_loop_lock_loss_requests_shutdown_without_raising(
+        self,
+        mock_lock_port: AsyncMock,
+        mock_shutdown_signal: Mock,
+        mock_logger: Mock,
+    ) -> None:
+        """Lock loss in the loop must request shutdown and complete cleanly."""
+        call_count = 0
+
+        async def heartbeat(*args: object, **kwargs: object) -> bool:
+            nonlocal call_count
+            call_count += 1
+            # First call is start(); second call is loop body -> fail.
+            return call_count == 1
+
+        mock_lock_port.heartbeat.side_effect = heartbeat
+        mock_shutdown_signal.is_requested = False
+
+        def _request() -> None:
+            mock_shutdown_signal.is_requested = True
+
+        mock_shutdown_signal.request.side_effect = _request
+
+        heartbeat_task = HeartbeatTask(
+            lock_port=mock_lock_port,
+            lock_key="lock:test_pipeline",
+            owner_id=TEST_RUN_ID,
+            exclusive=False,
+            interval=0,
+            shutdown_signal=mock_shutdown_signal,
+            logger=mock_logger,
+        )
+
+        await heartbeat_task.start()
+        assert heartbeat_task._task is not None
+        await asyncio.wait_for(heartbeat_task._task, timeout=1.0)
+
+        mock_shutdown_signal.request.assert_called()
+        mock_logger.error.assert_called()
+        assert heartbeat_task._task.exception() is None
+        await heartbeat_task.stop()
+
+    async def test_stop_suppresses_completed_lock_loss_path(
+        self,
+        mock_lock_port: AsyncMock,
+        mock_shutdown_signal: Mock,
+        mock_logger: Mock,
+    ) -> None:
+        """stop() must not surface errors when the loop already finished on lock loss."""
+        call_count = 0
+
+        async def heartbeat(*args: object, **kwargs: object) -> bool:
+            nonlocal call_count
+            call_count += 1
+            return call_count == 1
+
+        mock_lock_port.heartbeat.side_effect = heartbeat
+        mock_shutdown_signal.is_requested = False
+
+        def _request() -> None:
+            mock_shutdown_signal.is_requested = True
+
+        mock_shutdown_signal.request.side_effect = _request
+
+        heartbeat_task = HeartbeatTask(
+            lock_port=mock_lock_port,
+            lock_key="lock:test_pipeline",
+            owner_id=TEST_RUN_ID,
+            exclusive=False,
+            interval=0,
+            shutdown_signal=mock_shutdown_signal,
+            logger=mock_logger,
+        )
+        await heartbeat_task.start()
+        assert heartbeat_task._task is not None
+        await asyncio.wait_for(heartbeat_task._task, timeout=1.0)
+        await heartbeat_task.stop()
+        assert not heartbeat_task.is_running
+
