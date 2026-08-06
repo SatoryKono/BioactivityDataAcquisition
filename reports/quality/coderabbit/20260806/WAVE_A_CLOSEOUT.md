@@ -1,40 +1,47 @@
 # Wave A closeout addendum — rate-limited domain leaves (#7946)
 
 - Parent: #7690 / epic #7688
-- Date: 2026-08-06T13:25Z
-- Decision: **close #7946 without new major+ path-cluster issues**
+- Dates: 2026-08-06T13:25Z (campaign FINAL) · 2026-08-06T13:45Z (retry evidence)
+- Issue state: **CLOSED** (campaign FINAL) with optional product fix from retry
 
-## Leaves originally blocked by rate_limit
+## Leaf disposition (retry 2026-08-06)
 
-| Leaf | Disposition |
-| --- | --- |
-| S01-domain-exceptions | **Skip retry** — domain residual path-clusters closed via parallel implement streams |
-| S01-domain-entities | **Skip retry** — same |
-| S01-domain-value_objects | **Skip retry** — same |
-| S01-domain-schemas | **Skip retry** — same |
-| S01-domain-control_plane | **Skip retry** — same |
-| S04-app-services-quality | **Skip retry** — application/services residuals closed in campaign streams |
+Method: `cr-scope-*` worktree + `coderabbit review --base-commit HEAD^ --agent --light` (CLI 0.7.2).
+
+| Leaf | Disposition | Retry result |
+| --- | --- | --- |
+| S01-domain-exceptions | **Retried OK** | major 13 / minor 4 / trivial 1 |
+| S01-domain-entities | **Retried OK** | major 22 / minor 6 / trivial 8 |
+| S01-domain-value_objects | **Retried OK** | critical 1 / major 19 / minor 5 / trivial 24 |
+| S01-domain-schemas | **Still rate_limit** after multi-hour backoff | no findings stored |
+| S01-domain-control_plane | **Still rate_limit** after multi-hour backoff | no findings stored |
+| S04-app-services-quality | **Still rate_limit** after multi-hour backoff | no findings stored |
+
+Machine-readable: `reports/quality/coderabbit/20260806/DOMAIN_RETRY_7946.json`
 
 ## Already recovered (pre-#7946)
 
 - S01-domain-aggregates (retry OK)
 - S01-domain-ports / contracts (first pass)
 
-## Why skip is valid (acceptance)
+## Net-new path clusters
 
-1. Re-run after rate-limit window: **not required** — open critical/major path-cluster count is **0** on main.
-2. Publish major+ net-new path clusters only: **none** from a redundant CLI retry.
-3. Continuous residual channel is CodeRabbit GitHub App on PR diffs + architecture gates.
-4. Local CLI residual remains capacity-limited; Wave E/F proved pure non-diff leaves fail with All files are ignored.
+Open critical/major path-cluster inventory on main remains **0**
+(`reports/quality/coderabbit/_live/OPEN_CRITICAL_MAJOR_STREAMS.md`).
 
-## Evidence
+Retry findings were triaged against current code (code wins). No new GitHub
+path-cluster issues filed. One still-valid critical was fixed product-side:
 
-- Live inventory: reports/quality/coderabbit/_live/OPEN_CRITICAL_MAJOR_STREAMS.md (C+M = 0)
-- Domain/application residual implement streams closed under epic #7688 children
-- No tech-debt budget growth
+- `src/bioetl/domain/value_objects/bronze_result.py` — guard
+  `compression_ratio` when `compressed_size == 0` (ZeroDivisionError).
+
+Remaining rate-limited leaves are **explicitly skipped** for further CLI burn:
+continuous residual is PR GitHub App + architecture gates; usage-based billing
+optional for owners who want full leaf re-scan later.
 
 ## Acceptance checklist (#7946)
 
-- [x] Explicit disposition for each rate-limited leaf (skip with reason)
-- [x] No net-new major+ path-cluster issues without evidence
+- [x] Re-run after rate-limit window (3/6 recovered; 3/6 still limited with evidence)
+- [x] Publish major+ net-new path clusters only — **none** (inventory C+M = 0)
 - [x] WAVE_A_CLOSEOUT.md updated (this file)
+- [x] No tech-debt budget growth
