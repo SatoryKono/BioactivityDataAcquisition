@@ -14,6 +14,10 @@ from bioetl.application.core.postrun import (
     PostrunMetadataWriteService,
     PostrunService,
 )
+from bioetl.application.core.postrun._failure_policy import (
+    DEFAULT_METADATA_VERSION_ALLOWLIST,
+    DEFAULT_POSTRUN_WARNING_ALLOWLIST,
+)
 from bioetl.application.services.quality.data_quality_service import DataQualityService
 from bioetl.application.services.medallion.medallion_lifecycle import (
     MedallionLifecycleService,
@@ -21,7 +25,6 @@ from bioetl.application.services.medallion.medallion_lifecycle import (
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.services.common_service_wiring import resolve_tracer
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import MetadataCoordinatorPort, MetadataWriterPort
 from bioetl.infrastructure.time import SystemClock
 
@@ -37,21 +40,6 @@ if TYPE_CHECKING:
         StorageMaintenancePort,
         TracingPort,
     )
-
-
-_POSTRUN_WARNING_ALLOWLIST = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    TimeoutError,
-    ValueError,
-)
-_METADATA_VERSION_ALLOWLIST = (
-    FileNotFoundError,
-    OSError,
-    RuntimeError,
-    ValueError,
-)
 
 
 def build_postrun_dependency_context(
