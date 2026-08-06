@@ -39,8 +39,10 @@ HOTSPOT_BASELINE = ROOT / "reports/quality/hotspot-family-baseline.json"
 DEBT_SCORECARD = ROOT / "configs/quality/debt_scorecard.yaml"
 SCRIPTS_MANIFEST = ROOT / "configs/quality/scripts_inventory_manifest.json"
 SCRIPTS_LIFECYCLE = ROOT / "configs/quality/scripts_lifecycle_registry.json"
-DQ_SERVICE = ROOT / "src/bioetl/application/services/data_quality_service.py"
-DQ_ANOMALIES = ROOT / "src/bioetl/application/services/data_quality_anomalies.py"
+DQ_SERVICE = ROOT / "src/bioetl/application/services/quality/data_quality_service.py"
+DQ_ANOMALIES = (
+    ROOT / "src/bioetl/application/services/quality/data_quality_anomalies.py"
+)
 
 
 def _load_json(path: Path) -> dict[str, Any]:

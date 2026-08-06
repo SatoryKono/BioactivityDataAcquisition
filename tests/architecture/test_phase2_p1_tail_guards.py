@@ -25,7 +25,7 @@ ALLOWED_BROAD_EXCEPTION_POLICIES: dict[str, frozenset[str]] = {
     # Legacy/runtime utility seams that still centralize broad exception handling.
     # Empty reason-code sets mean "tracked exception site" rather than
     # "CLI fallback handler that must carry reason_code markers".
-    "src/bioetl/application/services/error_handler.py": frozenset(),
+    "src/bioetl/application/services/ops/error_handler.py": frozenset(),
     "src/bioetl/infrastructure/storage/silver_writer.py": frozenset(),
     "src/bioetl/infrastructure/storage/delta_reader.py": frozenset(),
     "src/bioetl/infrastructure/storage/silver/support.py": frozenset(),
@@ -37,7 +37,7 @@ ALLOWED_BROAD_EXCEPTION_POLICIES: dict[str, frozenset[str]] = {
     "src/bioetl/interfaces/http/health_server_http_mixin.py": frozenset(),
     "src/bioetl/interfaces/http/health_server_routing_mixin.py": frozenset(),
     # Run-report persistence must not fail the primary pipeline/workflow path.
-    "src/bioetl/application/services/workflow_runner_reports.py": frozenset(),
+    "src/bioetl/application/services/workflow/workflow_runner_reports.py": frozenset(),
     "src/bioetl/application/services/execution/_pipeline_runner_support.py": frozenset(),
 }
 P0_2_CRITICAL_ERROR_MODULES = (

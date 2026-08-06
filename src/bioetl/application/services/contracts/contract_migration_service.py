@@ -19,7 +19,7 @@ __all__ = [
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.contract.contract_migration_models import (
+from bioetl.application.services.contracts.contract_migration_models import (
     ContractMigrationAction,
     ContractMigrationActionRecord,
     ContractMigrationPlan,
@@ -27,7 +27,7 @@ from bioetl.application.services.contract.contract_migration_models import (
     ContractVersionTransition,
     ContractVersionTransitionRecord,
 )
-from bioetl.application.services.contract.contract_migration_ports import (
+from bioetl.application.services.contracts.contract_migration_ports import (
     ContractPolicyLoaderProtocol,
     ContractPolicyProtocol,
     PipelineInfoLoaderProtocol,

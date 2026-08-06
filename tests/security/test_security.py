@@ -433,7 +433,7 @@ class TestPIIHandling:
     KNOWN_TECHNICAL_EMAIL_PATHS = frozenset(
         {
             # NCBI-required technical contact resolved by the PubMed adapter factory.
-            "infrastructure/adapters/pubmed/_adapter_factory.py",
+            "infrastructure/adapters/pubmed/_adapter_support.py",
         }
     )
 
