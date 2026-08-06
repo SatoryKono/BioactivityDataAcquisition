@@ -25,13 +25,11 @@
 00-project/ai/agents/guides/GOVERNANCE_ARTIFACT_REFRESH.md
 00-project/ai/agents/guides/MEMORY_USAGE.md
 00-project/ai/agents/orchestration/ORCHESTRATION.md
-00-project/ai/agents/orchestration/py-team-orchestration.md
 00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md
 00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md
 00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
 00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md
 00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md
-00-project/ai/agents/runtime/orchestration/py-team-orchestration.md
 00-project/ai/audit/observability-issues/OBS-002-metric-to-panel-runtime.md
 00-project/ai/audit/observability-issues/OBS-002-validation-findings.md
 00-project/ai/audit/observability-issues/OBS-003-live-validation.md

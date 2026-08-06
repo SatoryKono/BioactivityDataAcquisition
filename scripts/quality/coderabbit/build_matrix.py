@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
+import tempfile
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -24,9 +26,20 @@ def git_ls(*paths: str) -> list[str]:
     return [x.decode("utf-8", "replace") for x in r.stdout.split(b"\0") if x]
 
 
+def atomic_write(path: Path, content: str) -> None:
+    fd, tmp_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp:
+            tmp.write(content)
+        os.replace(tmp_name, path)
+    except Exception:
+        os.unlink(tmp_name)
+        raise
+
+
 def write_list(name: str, files: list[str]) -> Path:
     p = OUT / name
-    p.write_text("\n".join(files) + ("\n" if files else ""), encoding="utf-8")
+    atomic_write(p, "\n".join(files) + ("\n" if files else ""))
     return p
 
 
@@ -292,8 +305,9 @@ def main() -> None:
         "total_files_assigned": sum(L["files"] for L in leaves),
         "leaves": leaves,
     }
-    (OUT / "01-scope-matrix.json").write_text(
-        json.dumps(matrix, indent=2, ensure_ascii=False), encoding="utf-8"
+    atomic_write(
+        OUT / "01-scope-matrix.json",
+        json.dumps(matrix, indent=2, ensure_ascii=False, sort_keys=True),
     )
 
     lines = [
@@ -321,7 +335,7 @@ def main() -> None:
         for L in over:
             lines.append(f"- {L['id']}: {L['files']}")
         lines.append("")
-    (OUT / "01-scope-matrix.md").write_text("\n".join(lines), encoding="utf-8")
+    atomic_write(OUT / "01-scope-matrix.md", "\n".join(lines))
 
     pre = f"""# CR-FULL preflight — 20260806-full
 
@@ -343,7 +357,7 @@ def main() -> None:
 ## Next
 Phase 1: sequential coderabbit review per leaf
 """
-    (OUT / "00-preflight.md").write_text(pre, encoding="utf-8")
+    atomic_write(OUT / "00-preflight.md", pre)
 
     print(f"leaves={len(leaves)} over_cap={len(over)} sum={sum(L['files'] for L in leaves)}")
     for w, n in sorted(Counter(L["wave"] for L in leaves).items()):

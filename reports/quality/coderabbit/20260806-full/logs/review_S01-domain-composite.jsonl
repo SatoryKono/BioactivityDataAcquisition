@@ -1,0 +1,4 @@
+{"type":"review_context","reviewType":"all","currentBranch":"cr-scope-S01-domain-composite","baseBranch":"main","baseCommit":"22f54711bbc3ab6124acd6538def2ce258331cbc","workingDirectory":"/tmp/bioetl-cr-scopes-full/S01-domain-composite"}
+{"type":"status","phase":"connecting","status":"connecting_to_review_service"}
+{"type":"status","phase":"setup","status":"setting_up"}
+{"type":"error","errorType":"rate_limit","message":"Rate limit exceeded","recoverable":true,"details":{},"metadata":{"isProUser":true,"waitTime":"38 minutes","policyGuidance":"Enable **[usage-based reviews](https://app.coderabbit.ai/settings/billing?tab=usage&orgId=84ef2b43-0fca-452c-8ec8-22f6d0dc500d)** in Billing to review now. Otherwise, wait until the next included review is available.\nYou're only billed for reviews past your plan's rate limits ($0.25/file).","orgAttributed":true,"cliReviewLightRequested":true,"cliReviewPolicyMode":"light"}}

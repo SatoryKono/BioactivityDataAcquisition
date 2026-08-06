@@ -115,8 +115,12 @@ def prepare(
     run(["git", "init"], cwd=wt)
     run(["git", "config", "user.email", "coderabbit-audit@local"], cwd=wt)
     run(["git", "config", "user.name", "CR Residual Audit"], cwd=wt)
+    # CodeRabbit needs a named base branch
+    run(["git", "checkout", "-b", "main"], cwd=wt)
+    run(["git", "config", "coderabbit.baseBranch", "main"], cwd=wt)
     run(["git", "commit", "--allow-empty", "-m", f"empty {leaf_id}"], cwd=wt)
     empty = run(["git", "rev-parse", "HEAD"], cwd=wt).stdout.strip()
+    run(["git", "checkout", "-b", f"cr-scope-{leaf_id}"], cwd=wt)
 
     paths: list[str] = []
     if dir_path:
