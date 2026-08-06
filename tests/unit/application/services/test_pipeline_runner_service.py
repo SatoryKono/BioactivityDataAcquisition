@@ -136,7 +136,7 @@ def mock_metrics_port():
 def mock_audit_port():
     """Create a mock audit port."""
     audit = MagicMock()
-    audit.log_event = MagicMock()
+    audit.log_event = AsyncMock()
     return audit
 
 

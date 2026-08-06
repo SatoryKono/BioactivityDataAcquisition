@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`AuditPort.log_event` is async (#7920):** Aligns the non-write audit
+  lifecycle method with the I/O-bound `AuditPort` contract. Implementations
+  (`NoOpAudit`, `FileAuditAdapter`) and callers (pipeline runner service,
+  Silver maintenance/metadata paths) now `await log_event(...)`. **Migration:**
+  custom `AuditPort` implementers must change `def log_event` to
+  `async def log_event` and await I/O inside. **Rollback:** restore the sync
+  method signature and remove `await` at call sites in the same revert.
+
+- **Control-plane port package public surface (#7904):** Documented
+  `bioetl.domain.ports.control_plane` exports under ADR-044 with migration
+  (prefer package imports; deep module imports remain valid) and rollback
+  guidance; added nominal export-surface unit tests. No behavioral change to
+  port Protocols.
+
 ### Added
 
 - **Generated `chembl_activity` pipeline dataflow documentation:** Added a

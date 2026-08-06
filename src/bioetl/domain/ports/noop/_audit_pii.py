@@ -54,7 +54,7 @@ class NoOpAudit:
         """No-op implementation of aclose — no resources to release."""
         await noop_async_boundary()
 
-    def log_event(
+    async def log_event(
         self,
         event_name: str,
         event_data: dict[str, object] | None = None,
@@ -66,9 +66,10 @@ class NoOpAudit:
         Args:
             event_name: Name of the event to log (ignored).
             event_data: Event data dictionary (ignored).
+            timestamp: Event timestamp (ignored).
         """
         del event_name, event_data, timestamp
-        return None
+        await noop_async_boundary()
 
 
 class NoOpPiiHasher:

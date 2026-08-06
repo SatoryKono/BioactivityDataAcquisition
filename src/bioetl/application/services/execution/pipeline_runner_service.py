@@ -81,7 +81,7 @@ def _record_pipeline_run_metric(
     )
 
 
-def _record_pipeline_audit_event(
+async def _record_pipeline_audit_event(
     audit: AuditPort,
     *,
     event_name: str,
@@ -104,7 +104,7 @@ def _record_pipeline_audit_event(
         event_data["manifest_id"] = manifest_id
     if error_type is not None:
         event_data["error_type"] = error_type
-    audit.log_event(event_name, event_data, timestamp=timestamp)
+    await audit.log_event(event_name, event_data, timestamp=timestamp)
 
 
 def _resolve_effective_run_id(
@@ -186,7 +186,7 @@ class PipelineRunnerService:
             context=context,
             options=effective_options,
         )
-        _record_pipeline_audit_event(
+        await _record_pipeline_audit_event(
             self.audit,
             event_name="PipelineRunStarted",
             pipeline_name=pipeline_name,
@@ -203,7 +203,7 @@ class PipelineRunnerService:
             run_logger=run_logger,
         )
         if dry_run_result is not None:
-            _record_pipeline_audit_event(
+            await _record_pipeline_audit_event(
                 self.audit,
                 event_name="PipelineRunCompleted",
                 pipeline_name=pipeline_name,
@@ -355,7 +355,7 @@ class PipelineRunnerService:
             run_type=run_type,
             status=result.status.value,
         )
-        _record_pipeline_audit_event(
+        await _record_pipeline_audit_event(
             self.audit,
             event_name="PipelineRunCompleted",
             pipeline_name=pipeline_name,

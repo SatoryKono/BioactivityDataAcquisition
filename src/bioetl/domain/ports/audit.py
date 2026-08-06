@@ -146,7 +146,7 @@ class AuditPort(Protocol):
         """
         ...
 
-    def log_event(
+    async def log_event(
         self,
         event_name: str,
         event_data: JsonDict | None = None,
@@ -154,6 +154,8 @@ class AuditPort(Protocol):
         timestamp: datetime,
     ) -> None:
         """Log a non-write audit event to the audit trail.
+
+        Async because implementations may perform I/O (file or external systems).
 
         Args:
             event_name: Stable event name for the audited lifecycle event.

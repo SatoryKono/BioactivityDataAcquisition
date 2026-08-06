@@ -106,12 +106,13 @@ class TestNoOpAudit:
         entries = await audit.get_entries(run_id=run_id)
         assert entries == []
 
-    def test_log_event_is_sync_noop(self) -> None:
-        """log_event uses the sync no-op shape expected by storage helpers."""
+    @pytest.mark.asyncio
+    async def test_log_event_is_async_noop(self) -> None:
+        """log_event is async and discards lifecycle events."""
         audit = NoOpAudit()
 
         assert (
-            audit.log_event(
+            await audit.log_event(
                 "SilverWrite",
                 {"status": "ok"},
                 timestamp=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),

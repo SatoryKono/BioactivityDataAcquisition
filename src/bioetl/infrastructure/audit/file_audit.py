@@ -127,7 +127,7 @@ class FileAuditAdapter(FileAuditIOMixin):
             records_count=entry.records_count,
         )
 
-    def log_event(
+    async def log_event(
         self,
         event_name: str,
         event_data: JsonDict | None = None,
@@ -140,7 +140,12 @@ class FileAuditAdapter(FileAuditIOMixin):
         with self._tracer.start_as_current_span("audit.log_event") as span:
             span.set_attribute("bioetl.audit.event_name", event_name)
             try:
-                self._write_event_sync(event_name, event_data, timestamp)
+                await asyncio.to_thread(
+                    self._write_event_sync,
+                    event_name,
+                    event_data,
+                    timestamp,
+                )
             except OSError as exc:
                 span.set_attribute(_AUDIT_STATUS_ATTRIBUTE, "error")
                 span.record_exception(exc)

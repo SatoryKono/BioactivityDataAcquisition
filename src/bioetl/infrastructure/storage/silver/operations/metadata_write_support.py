@@ -193,7 +193,7 @@ async def _write_silver_metadata(
         table_name=request.table_name,
         table_path=table_path_placeholder,
     )
-    _emit_silver_metadata_write_success(
+    await _emit_silver_metadata_write_success(
         metadata_ops,
         request.table_name,
         request.records,
@@ -203,7 +203,7 @@ async def _write_silver_metadata(
     return result
 
 
-def _emit_silver_metadata_write_success(
+async def _emit_silver_metadata_write_success(
     metadata_ops: _MetadataWriteOps,
     table_name: str,
     records: list[BronzeRecord],
@@ -220,7 +220,7 @@ def _emit_silver_metadata_write_success(
         )
 
     if metadata_ops._audit:
-        metadata_ops._audit.log_event(
+        await metadata_ops._audit.log_event(
             "SilverMetadataWrite",
             {
                 "table": table_name,
