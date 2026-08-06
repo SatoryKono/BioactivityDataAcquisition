@@ -125,6 +125,9 @@ def _git_capture_source() -> dict[str, object]:
             text=True,
             timeout=10,
         ).strip()
+    except (OSError, subprocess.SubprocessError):
+        return {"commit_sha": "UNKNOWN", "working_tree_dirty": None}
+    try:
         dirty = bool(
             subprocess.check_output(
                 ["git", "status", "--porcelain", "--untracked-files=no"],
@@ -134,7 +137,7 @@ def _git_capture_source() -> dict[str, object]:
             ).strip()
         )
     except (OSError, subprocess.SubprocessError):
-        return {"commit_sha": "UNKNOWN", "working_tree_dirty": None}
+        dirty = None
     return {"commit_sha": commit_sha, "working_tree_dirty": dirty}
 
 

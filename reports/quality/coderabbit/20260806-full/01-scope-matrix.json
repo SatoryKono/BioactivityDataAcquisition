@@ -1,0 +1,1327 @@
+{
+  "campaign": "CR-FULL-20260806-full",
+  "base_sha": "aa3e3819d3db56b2ed83bedd285d8935307ca570",
+  "created_utc": "2026-08-06T13:45:21.053300+00:00",
+  "coderabbit": "error: [WinError 2] The system cannot find the file specified",
+  "cap": 300,
+  "leaf_count": 118,
+  "total_files_assigned": 6926,
+  "leaves": [
+    {
+      "id": "S01-domain-aggregates",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/aggregates"
+      ],
+      "files": 19,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/aggregates",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-behavior",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/behavior"
+      ],
+      "files": 52,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/behavior",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-composite",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/composite"
+      ],
+      "files": 26,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/composite",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-config",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/config"
+      ],
+      "files": 12,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/config",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-contracts",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/contracts"
+      ],
+      "files": 23,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/contracts",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-control_plane",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/control_plane"
+      ],
+      "files": 32,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/control_plane",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-entities",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/entities"
+      ],
+      "files": 27,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/entities",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-exceptions",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/exceptions"
+      ],
+      "files": 24,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/exceptions",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-filtering",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/filtering"
+      ],
+      "files": 13,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/filtering",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-lineage",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/lineage"
+      ],
+      "files": 6,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/lineage",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-mapping",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/mapping"
+      ],
+      "files": 15,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/mapping",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-models",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/models"
+      ],
+      "files": 7,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/models",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-normalization",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/normalization"
+      ],
+      "files": 88,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/normalization",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-ports",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/ports"
+      ],
+      "files": 76,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/ports",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-registry",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/registry"
+      ],
+      "files": 6,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/registry",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-run_reports",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/run_reports"
+      ],
+      "files": 10,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/run_reports",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-schemas",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/schemas"
+      ],
+      "files": 49,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/schemas",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-transformations",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/transformations"
+      ],
+      "files": 5,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/transformations",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-types",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/types"
+      ],
+      "files": 24,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/types",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-validation",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/validation"
+      ],
+      "files": 4,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/validation",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-value_objects",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/value_objects"
+      ],
+      "files": 42,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/value_objects",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-workflow",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/domain/workflow"
+      ],
+      "files": 6,
+      "under_cap": true,
+      "dir": "src/bioetl/domain/workflow",
+      "note": ""
+    },
+    {
+      "id": "S01-domain-residual-root",
+      "wave": "A",
+      "globs": [
+        "domain residual root"
+      ],
+      "files": 31,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S01-domain-residual-root.txt",
+      "note": "domain residual root"
+    },
+    {
+      "id": "S02-app-core",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/application/core"
+      ],
+      "files": 192,
+      "under_cap": true,
+      "dir": "src/bioetl/application/core",
+      "note": ""
+    },
+    {
+      "id": "S03-app-control-plane",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/application/services/control_plane"
+      ],
+      "files": 140,
+      "under_cap": true,
+      "dir": "src/bioetl/application/services/control_plane",
+      "note": ""
+    },
+    {
+      "id": "S04-app-services-other",
+      "wave": "A",
+      "globs": [
+        "services excl CP"
+      ],
+      "files": 149,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S04-app-services-other.txt",
+      "note": "services excl CP"
+    },
+    {
+      "id": "S04b-app-residual",
+      "wave": "A",
+      "globs": [
+        "application residual"
+      ],
+      "files": 153,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S04b-app-residual.txt",
+      "note": "application residual"
+    },
+    {
+      "id": "S09-composition",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/composition"
+      ],
+      "files": 283,
+      "under_cap": true,
+      "dir": "src/bioetl/composition",
+      "note": ""
+    },
+    {
+      "id": "S10-interfaces-cli",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/interfaces/cli"
+      ],
+      "files": 104,
+      "under_cap": true,
+      "dir": "src/bioetl/interfaces/cli",
+      "note": ""
+    },
+    {
+      "id": "S11-interfaces-http",
+      "wave": "A",
+      "globs": [
+        "src/bioetl/interfaces/http"
+      ],
+      "files": 46,
+      "under_cap": true,
+      "dir": "src/bioetl/interfaces/http",
+      "note": ""
+    },
+    {
+      "id": "S11b-interfaces-residual",
+      "wave": "A",
+      "globs": [
+        "interfaces residual"
+      ],
+      "files": 2,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S11b-interfaces-residual.txt",
+      "note": "interfaces residual"
+    },
+    {
+      "id": "S05-app-pipelines",
+      "wave": "B",
+      "globs": [
+        "src/bioetl/application/pipelines"
+      ],
+      "files": 99,
+      "under_cap": true,
+      "dir": "src/bioetl/application/pipelines",
+      "note": ""
+    },
+    {
+      "id": "S07-infra-storage",
+      "wave": "B",
+      "globs": [
+        "src/bioetl/infrastructure/storage"
+      ],
+      "files": 144,
+      "under_cap": true,
+      "dir": "src/bioetl/infrastructure/storage",
+      "note": ""
+    },
+    {
+      "id": "S16-configs-quality",
+      "wave": "B",
+      "globs": [
+        "configs/quality"
+      ],
+      "files": 98,
+      "under_cap": true,
+      "dir": "configs/quality",
+      "note": ""
+    },
+    {
+      "id": "S16b-configs-other",
+      "wave": "B",
+      "globs": [
+        "configs excl quality"
+      ],
+      "files": 156,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S16b-configs-other.txt",
+      "note": "configs excl quality"
+    },
+    {
+      "id": "S06-infra-adapters",
+      "wave": "C",
+      "globs": [
+        "src/bioetl/infrastructure/adapters"
+      ],
+      "files": 217,
+      "under_cap": true,
+      "dir": "src/bioetl/infrastructure/adapters",
+      "note": ""
+    },
+    {
+      "id": "S08-infra-observability",
+      "wave": "C",
+      "globs": [
+        "src/bioetl/infrastructure/observability"
+      ],
+      "files": 57,
+      "under_cap": true,
+      "dir": "src/bioetl/infrastructure/observability",
+      "note": ""
+    },
+    {
+      "id": "S08b-infra-residual",
+      "wave": "C",
+      "globs": [
+        "infra residual"
+      ],
+      "files": 203,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S08b-infra-residual.txt",
+      "note": "infra residual"
+    },
+    {
+      "id": "S-D-scripts-ops",
+      "wave": "D",
+      "globs": [
+        "scripts/ops"
+      ],
+      "files": 119,
+      "under_cap": true,
+      "dir": "scripts/ops",
+      "note": ""
+    },
+    {
+      "id": "S17-docs-00-project-ai",
+      "wave": "E",
+      "globs": [
+        "docs/00-project/ai"
+      ],
+      "files": 290,
+      "under_cap": true,
+      "dir": "docs/00-project/ai",
+      "note": "split from S17-docs-00-project"
+    },
+    {
+      "id": "S17-docs-00-project-governance",
+      "wave": "E",
+      "globs": [
+        "docs/00-project/governance"
+      ],
+      "files": 12,
+      "under_cap": true,
+      "dir": "docs/00-project/governance",
+      "note": "split from S17-docs-00-project"
+    },
+    {
+      "id": "S17-docs-00-project-root",
+      "wave": "E",
+      "globs": [
+        "docs/00-project root"
+      ],
+      "files": 9,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S17-docs-00-project-root.txt",
+      "note": "root files of docs/00-project"
+    },
+    {
+      "id": "S17-docs-decisions",
+      "wave": "E",
+      "globs": [
+        "docs/02-architecture/decisions"
+      ],
+      "files": 63,
+      "under_cap": true,
+      "dir": "docs/02-architecture/decisions",
+      "note": ""
+    },
+    {
+      "id": "S18-grafana",
+      "wave": "E",
+      "globs": [
+        "grafana"
+      ],
+      "files": 102,
+      "under_cap": true,
+      "dir": "grafana",
+      "note": ""
+    },
+    {
+      "id": "S19-github-workflows",
+      "wave": "E",
+      "globs": [
+        ".github/workflows"
+      ],
+      "files": 41,
+      "under_cap": true,
+      "dir": ".github/workflows",
+      "note": ""
+    },
+    {
+      "id": "S12-tests-architecture-domain",
+      "wave": "F",
+      "globs": [
+        "tests/architecture/domain"
+      ],
+      "files": 1,
+      "under_cap": true,
+      "dir": "tests/architecture/domain",
+      "note": "split from S12-tests-architecture"
+    },
+    {
+      "id": "S12-tests-architecture-root-1",
+      "wave": "F",
+      "globs": [
+        "tests/architecture root"
+      ],
+      "files": 300,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S12-tests-architecture-root-1.txt",
+      "note": "root files of tests/architecture"
+    },
+    {
+      "id": "S12-tests-architecture-root-2",
+      "wave": "F",
+      "globs": [
+        "tests/architecture root"
+      ],
+      "files": 195,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S12-tests-architecture-root-2.txt",
+      "note": "root files of tests/architecture"
+    },
+    {
+      "id": "S13-tests-unit-domain-aggregates",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/aggregates"
+      ],
+      "files": 14,
+      "under_cap": true,
+      "dir": "tests/unit/domain/aggregates",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-behavior",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/behavior"
+      ],
+      "files": 17,
+      "under_cap": true,
+      "dir": "tests/unit/domain/behavior",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-composite",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/composite"
+      ],
+      "files": 14,
+      "under_cap": true,
+      "dir": "tests/unit/domain/composite",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-config",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/config"
+      ],
+      "files": 7,
+      "under_cap": true,
+      "dir": "tests/unit/domain/config",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-configs",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/configs"
+      ],
+      "files": 5,
+      "under_cap": true,
+      "dir": "tests/unit/domain/configs",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-contracts",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/contracts"
+      ],
+      "files": 1,
+      "under_cap": true,
+      "dir": "tests/unit/domain/contracts",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-control_plane",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/control_plane"
+      ],
+      "files": 15,
+      "under_cap": true,
+      "dir": "tests/unit/domain/control_plane",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-entities",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/entities"
+      ],
+      "files": 14,
+      "under_cap": true,
+      "dir": "tests/unit/domain/entities",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-exceptions",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/exceptions"
+      ],
+      "files": 4,
+      "under_cap": true,
+      "dir": "tests/unit/domain/exceptions",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-filtering",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/filtering"
+      ],
+      "files": 13,
+      "under_cap": true,
+      "dir": "tests/unit/domain/filtering",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-hash_policy",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/hash_policy"
+      ],
+      "files": 5,
+      "under_cap": true,
+      "dir": "tests/unit/domain/hash_policy",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-lineage",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/lineage"
+      ],
+      "files": 1,
+      "under_cap": true,
+      "dir": "tests/unit/domain/lineage",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-mapping",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/mapping"
+      ],
+      "files": 4,
+      "under_cap": true,
+      "dir": "tests/unit/domain/mapping",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-models",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/models"
+      ],
+      "files": 3,
+      "under_cap": true,
+      "dir": "tests/unit/domain/models",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-normalization",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/normalization"
+      ],
+      "files": 43,
+      "under_cap": true,
+      "dir": "tests/unit/domain/normalization",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-ports",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/ports"
+      ],
+      "files": 13,
+      "under_cap": true,
+      "dir": "tests/unit/domain/ports",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-registry",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/registry"
+      ],
+      "files": 5,
+      "under_cap": true,
+      "dir": "tests/unit/domain/registry",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-run_reports",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/run_reports"
+      ],
+      "files": 2,
+      "under_cap": true,
+      "dir": "tests/unit/domain/run_reports",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-schemas",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/schemas"
+      ],
+      "files": 30,
+      "under_cap": true,
+      "dir": "tests/unit/domain/schemas",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-services",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/services"
+      ],
+      "files": 27,
+      "under_cap": true,
+      "dir": "tests/unit/domain/services",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-transformations",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/transformations"
+      ],
+      "files": 2,
+      "under_cap": true,
+      "dir": "tests/unit/domain/transformations",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-types",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/types"
+      ],
+      "files": 11,
+      "under_cap": true,
+      "dir": "tests/unit/domain/types",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-validation",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/validation"
+      ],
+      "files": 4,
+      "under_cap": true,
+      "dir": "tests/unit/domain/validation",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-value_objects",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/value_objects"
+      ],
+      "files": 27,
+      "under_cap": true,
+      "dir": "tests/unit/domain/value_objects",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-workflow",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain/workflow"
+      ],
+      "files": 3,
+      "under_cap": true,
+      "dir": "tests/unit/domain/workflow",
+      "note": "split from S13-tests-unit-domain"
+    },
+    {
+      "id": "S13-tests-unit-domain-root",
+      "wave": "F",
+      "globs": [
+        "tests/unit/domain root"
+      ],
+      "files": 41,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S13-tests-unit-domain-root.txt",
+      "note": "root files of tests/unit/domain"
+    },
+    {
+      "id": "S14-tests-unit-application-composite",
+      "wave": "F",
+      "globs": [
+        "tests/unit/application/composite"
+      ],
+      "files": 82,
+      "under_cap": true,
+      "dir": "tests/unit/application/composite",
+      "note": "split from S14-tests-unit-application"
+    },
+    {
+      "id": "S14-tests-unit-application-core",
+      "wave": "F",
+      "globs": [
+        "tests/unit/application/core"
+      ],
+      "files": 100,
+      "under_cap": true,
+      "dir": "tests/unit/application/core",
+      "note": "split from S14-tests-unit-application"
+    },
+    {
+      "id": "S14-tests-unit-application-observability",
+      "wave": "F",
+      "globs": [
+        "tests/unit/application/observability"
+      ],
+      "files": 6,
+      "under_cap": true,
+      "dir": "tests/unit/application/observability",
+      "note": "split from S14-tests-unit-application"
+    },
+    {
+      "id": "S14-tests-unit-application-pipelines",
+      "wave": "F",
+      "globs": [
+        "tests/unit/application/pipelines"
+      ],
+      "files": 62,
+      "under_cap": true,
+      "dir": "tests/unit/application/pipelines",
+      "note": "split from S14-tests-unit-application"
+    },
+    {
+      "id": "S14-tests-unit-application-services",
+      "wave": "F",
+      "globs": [
+        "tests/unit/application/services"
+      ],
+      "files": 129,
+      "under_cap": true,
+      "dir": "tests/unit/application/services",
+      "note": "split from S14-tests-unit-application"
+    },
+    {
+      "id": "S14-tests-unit-application-workflow",
+      "wave": "F",
+      "globs": [
+        "tests/unit/application/workflow"
+      ],
+      "files": 4,
+      "under_cap": true,
+      "dir": "tests/unit/application/workflow",
+      "note": "split from S14-tests-unit-application"
+    },
+    {
+      "id": "S14-tests-unit-application-root",
+      "wave": "F",
+      "globs": [
+        "tests/unit/application root"
+      ],
+      "files": 3,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S14-tests-unit-application-root.txt",
+      "note": "root files of tests/unit/application"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-adapters",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/adapters"
+      ],
+      "files": 112,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/adapters",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-adr",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/adr"
+      ],
+      "files": 3,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/adr",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-audit",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/audit"
+      ],
+      "files": 2,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/audit",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-checkpoint",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/checkpoint"
+      ],
+      "files": 2,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/checkpoint",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-config",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/config"
+      ],
+      "files": 40,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/config",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-control_plane",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/control_plane"
+      ],
+      "files": 15,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/control_plane",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-errors",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/errors"
+      ],
+      "files": 2,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/errors",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-export",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/export"
+      ],
+      "files": 7,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/export",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-factories",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/factories"
+      ],
+      "files": 3,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/factories",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-locking",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/locking"
+      ],
+      "files": 3,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/locking",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-observability",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/observability"
+      ],
+      "files": 26,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/observability",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-quality",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/quality"
+      ],
+      "files": 21,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/quality",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-quarantine",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/quarantine"
+      ],
+      "files": 5,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/quarantine",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-schemas",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/schemas"
+      ],
+      "files": 14,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/schemas",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-security",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/security"
+      ],
+      "files": 2,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/security",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-serialization",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/serialization"
+      ],
+      "files": 3,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/serialization",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-storage",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/storage"
+      ],
+      "files": 86,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/storage",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-system",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/system"
+      ],
+      "files": 2,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/system",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-time",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/time"
+      ],
+      "files": 1,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/time",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-validation",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure/validation"
+      ],
+      "files": 2,
+      "under_cap": true,
+      "dir": "tests/unit/infrastructure/validation",
+      "note": "split from S14b-tests-unit-infrastructure"
+    },
+    {
+      "id": "S14b-tests-unit-infrastructure-root",
+      "wave": "F",
+      "globs": [
+        "tests/unit/infrastructure root"
+      ],
+      "files": 18,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S14b-tests-unit-infrastructure-root.txt",
+      "note": "root files of tests/unit/infrastructure"
+    },
+    {
+      "id": "S15-tests-integration",
+      "wave": "F",
+      "globs": [
+        "tests/integration"
+      ],
+      "files": 219,
+      "under_cap": true,
+      "dir": "tests/integration",
+      "note": ""
+    },
+    {
+      "id": "S15b-tests-unit-scripts",
+      "wave": "F",
+      "globs": [
+        "tests/unit/scripts"
+      ],
+      "files": 114,
+      "under_cap": true,
+      "dir": "tests/unit/scripts",
+      "note": ""
+    },
+    {
+      "id": "S15c-tests-residual-1",
+      "wave": "F",
+      "globs": [
+        "tests residual"
+      ],
+      "files": 300,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S15c-tests-residual-1.txt",
+      "note": "tests residual"
+    },
+    {
+      "id": "S15c-tests-residual-2",
+      "wave": "F",
+      "globs": [
+        "tests residual"
+      ],
+      "files": 300,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S15c-tests-residual-2.txt",
+      "note": "tests residual"
+    },
+    {
+      "id": "S15c-tests-residual-3",
+      "wave": "F",
+      "globs": [
+        "tests residual"
+      ],
+      "files": 300,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S15c-tests-residual-3.txt",
+      "note": "tests residual"
+    },
+    {
+      "id": "S15c-tests-residual-4",
+      "wave": "F",
+      "globs": [
+        "tests residual"
+      ],
+      "files": 180,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S15c-tests-residual-4.txt",
+      "note": "tests residual"
+    },
+    {
+      "id": "S20-scripts-ai",
+      "wave": "R",
+      "globs": [
+        "scripts/ai"
+      ],
+      "files": 167,
+      "under_cap": true,
+      "dir": "scripts/ai",
+      "note": "split from S20-scripts"
+    },
+    {
+      "id": "S20-scripts-data_quality",
+      "wave": "R",
+      "globs": [
+        "scripts/data_quality"
+      ],
+      "files": 4,
+      "under_cap": true,
+      "dir": "scripts/data_quality",
+      "note": "split from S20-scripts"
+    },
+    {
+      "id": "S20-scripts-diagrams",
+      "wave": "R",
+      "globs": [
+        "scripts/diagrams"
+      ],
+      "files": 41,
+      "under_cap": true,
+      "dir": "scripts/diagrams",
+      "note": "split from S20-scripts"
+    },
+    {
+      "id": "S20-scripts-docs",
+      "wave": "R",
+      "globs": [
+        "scripts/docs"
+      ],
+      "files": 65,
+      "under_cap": true,
+      "dir": "scripts/docs",
+      "note": "split from S20-scripts"
+    },
+    {
+      "id": "S20-scripts-engineering",
+      "wave": "R",
+      "globs": [
+        "scripts/engineering"
+      ],
+      "files": 218,
+      "under_cap": true,
+      "dir": "scripts/engineering",
+      "note": "split from S20-scripts"
+    },
+    {
+      "id": "S20-scripts-memory",
+      "wave": "R",
+      "globs": [
+        "scripts/memory"
+      ],
+      "files": 7,
+      "under_cap": true,
+      "dir": "scripts/memory",
+      "note": "split from S20-scripts"
+    },
+    {
+      "id": "S20-scripts-ops",
+      "wave": "R",
+      "globs": [
+        "scripts/ops"
+      ],
+      "files": 119,
+      "under_cap": true,
+      "dir": "scripts/ops",
+      "note": "split from S20-scripts"
+    },
+    {
+      "id": "S20-scripts-schema",
+      "wave": "R",
+      "globs": [
+        "scripts/schema"
+      ],
+      "files": 20,
+      "under_cap": true,
+      "dir": "scripts/schema",
+      "note": "split from S20-scripts"
+    },
+    {
+      "id": "S20-scripts-root",
+      "wave": "R",
+      "globs": [
+        "scripts root"
+      ],
+      "files": 16,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S20-scripts-root.txt",
+      "note": "root files of scripts"
+    },
+    {
+      "id": "S00-src-bioetl-residual",
+      "wave": "R",
+      "globs": [
+        "src/bioetl residual"
+      ],
+      "files": 4,
+      "under_cap": true,
+      "dir": null,
+      "use_file_list": "E:\\github\\BioactivityDataAcquisition\\reports\\quality\\coderabbit\\20260806-full\\_S00-src-bioetl-residual.txt",
+      "note": "src/bioetl residual"
+    }
+  ]
+}
