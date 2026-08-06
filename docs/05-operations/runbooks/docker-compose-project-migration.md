@@ -190,10 +190,16 @@ following:
 Operator helpers for recreate / restore observation (supporting cutover tools):
 
 ```bash
-python scripts/ops/runtime/docker/recreate_cutover_stacks.py
-python scripts/ops/runtime/docker/_rf017_recreate_once.py
-python scripts/ops/runtime/docker/_rf017_restore_and_observe.py
+python scripts/ops/runtime/docker/recreate_cutover_stacks.py \
+  --runtime /absolute/path/to/BioactivityDataAcquisition
 ```
+
+The runtime path is mandatory; there is no machine-specific default. The
+helper captures required live secrets into process memory, preserves named
+volumes, injects the dashboard source identity, and rebuilds main so the Ops
+HTTP identity contract cannot be served by an image from another checkout.
+The `_rf017_*` scripts are historical one-shot evidence helpers and are not a
+normal lifecycle/cutover entrypoint.
 
 Finalize with:
 

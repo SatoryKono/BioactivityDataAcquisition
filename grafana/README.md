@@ -186,7 +186,8 @@ ______________________________________________________________________
 > gate for full dashboard audits: it verifies Grafana, explicit
 > `frontend/settings` render auth, Prometheus, Playwright browser/runtime
 > availability, canonical BioETL Ops HTTP health probes (`/health/live`
-> before `/health`), and whether local screenshot artifacts are missing or
+> before `/health`), the managed dashboard source identity exposed by
+> `/ops/control-plane/ready`, and whether local screenshot artifacts are missing or
 > stale relative to shipped dashboard JSON. The retired Quarantine Explorer
 > HTTP/UI surface is reported as `not_applicable`, not as a backend failure;
 > domain quarantine write/storage is unchanged. If its retired dashboard UID is
