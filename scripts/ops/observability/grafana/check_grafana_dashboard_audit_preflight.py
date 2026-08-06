@@ -56,6 +56,7 @@ EXIT_BIOETL_TARGET = 10
 EXIT_BIOETL_SOURCE = 11
 QUARANTINE_EXPLORER_UID = "bioetl-silver-reject-explorer"
 _RUNTIME_SOURCE_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+_COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 
 
 @dataclass(frozen=True)
@@ -588,6 +589,126 @@ def _validate_screenshot_evidence(
     return None
 
 
+def _validate_manifest_provenance(
+    manifest: dict[str, object],
+    *,
+    expected_uids: tuple[str, ...],
+    dashboards: dict[str, dict[str, object]],
+    screenshot_dir: Path,
+) -> str | None:
+    expected_uid_set = set(expected_uids)
+    actual_uid_set = set(dashboards)
+    if actual_uid_set != expected_uid_set:
+        return (
+            "render manifest dashboard file-set drift: "
+            f"expected={sorted(expected_uid_set)} actual={sorted(actual_uid_set)}"
+        )
+
+    expected_files = sorted(f"{uid}.png" for uid in expected_uids)
+    manifest_files = manifest.get("file_set")
+    if manifest_files != expected_files:
+        return (
+            "render manifest file_set drift: "
+            f"expected={expected_files} actual={manifest_files!r}"
+        )
+    if manifest.get("file_count") != len(expected_files):
+        return "render manifest file_count drift"
+    actual_files = sorted(path.name for path in screenshot_dir.glob("*.png"))
+    if actual_files != expected_files:
+        return (
+            "render directory PNG file-set drift: "
+            f"expected={expected_files} actual={actual_files}"
+        )
+
+    all_shipped_uids: set[str] = set()
+    for dashboard_path in sorted(_DASHBOARD_DIR.glob("*.json")):
+        try:
+            payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        uid = payload.get("uid")
+        if isinstance(uid, str) and uid:
+            all_shipped_uids.add(uid)
+    expected_kind = (
+        "full-set"
+        if all_shipped_uids and expected_uid_set == all_shipped_uids
+        else "selected-subset"
+    )
+    if manifest.get("manifest_kind") != expected_kind:
+        return (
+            "render manifest kind drift: "
+            f"expected={expected_kind!r} actual={manifest.get('manifest_kind')!r}"
+        )
+
+    capture_id = manifest.get("capture_id")
+    immutable_name = manifest.get("immutable_manifest")
+    if not isinstance(capture_id, str) or not capture_id:
+        return "render manifest lacks capture_id"
+    expected_immutable = f"render-manifest--{expected_kind}--{capture_id}.json"
+    if immutable_name != expected_immutable:
+        return "render manifest immutable filename drift"
+    immutable_path = screenshot_dir / expected_immutable
+    canonical_path = screenshot_dir / "render-manifest.json"
+    try:
+        if immutable_path.read_bytes() != canonical_path.read_bytes():
+            return "render manifest immutable copy drift"
+    except OSError as exc:
+        return f"render manifest immutable copy is unreadable: {exc}"
+
+    source = manifest.get("source")
+    if not isinstance(source, dict):
+        return "render manifest lacks source provenance"
+    commit_sha = source.get("commit_sha")
+    if not isinstance(commit_sha, str) or not _COMMIT_SHA_PATTERN.fullmatch(
+        commit_sha
+    ):
+        return "render manifest commit SHA is missing or invalid"
+    source_dashboards = source.get("dashboards")
+    if not isinstance(source_dashboards, dict):
+        return "render manifest lacks dashboard source provenance"
+    for uid in expected_uids:
+        dashboard_source = dashboards[uid].get("dashboardSource")
+        top_source = source_dashboards.get(uid)
+        if not isinstance(dashboard_source, dict) or dashboard_source != top_source:
+            return f"render manifest dashboard {uid} source provenance drift"
+        source_path = dashboard_source.get("path")
+        source_sha = dashboard_source.get("sha256")
+        version = dashboard_source.get("version")
+        if not isinstance(source_path, str) or not source_path.endswith(".json"):
+            return f"render manifest dashboard {uid} lacks JSON source path"
+        if not isinstance(source_sha, str) or not _RUNTIME_SOURCE_ID_PATTERN.fullmatch(
+            source_sha
+        ):
+            return f"render manifest dashboard {uid} source SHA is invalid"
+        if not isinstance(version, int):
+            return f"render manifest dashboard {uid} version is missing"
+
+    capture_context = manifest.get("capture_context")
+    if not isinstance(capture_context, dict):
+        return "render manifest lacks capture context"
+    time_range = capture_context.get("time_range")
+    variables = capture_context.get("variables")
+    row_state = capture_context.get("row_state")
+    if not isinstance(time_range, dict) or not {
+        "from",
+        "to",
+        "timezone",
+    }.issubset(time_range):
+        return "render manifest lacks time-range provenance"
+    if not isinstance(variables, dict) or not {
+        "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
+    }.issubset(variables):
+        return "render manifest lacks variable provenance"
+    if not isinstance(row_state, dict) or not isinstance(
+        row_state.get("expand_collapsed_rows"), bool
+    ):
+        return "render manifest lacks row-state provenance"
+    return None
+
+
 def _validate_one_dashboard_render(
     uid: str,
     dashboard: dict[str, object],
@@ -661,6 +782,16 @@ def _validate_manifest_render_contract(
     dashboards, index_error = _index_manifest_dashboards(manifest)
     if index_error:
         return index_error
+
+    if screenshot_dir is not None:
+        provenance_error = _validate_manifest_provenance(
+            manifest,
+            expected_uids=expected_uids,
+            dashboards=dashboards,
+            screenshot_dir=screenshot_dir,
+        )
+        if provenance_error:
+            return provenance_error
 
     for uid in expected_uids:
         dashboard = dashboards.get(uid)
