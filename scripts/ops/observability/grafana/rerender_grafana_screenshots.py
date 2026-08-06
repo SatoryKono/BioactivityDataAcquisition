@@ -190,9 +190,7 @@ def _write_exclusive_text(path: Path, text: str) -> None:
 def _finalize_manifest(config: RenderConfig, manifest: dict[str, Any]) -> None:
     """Bind one render occurrence to source, files, variables, and row state."""
     dashboards = [
-        dict(item)
-        for item in manifest.get("dashboards", [])
-        if isinstance(item, dict)
+        dict(item) for item in manifest.get("dashboards", []) if isinstance(item, dict)
     ]
     sources = _dashboard_source_by_uid()
     file_set: list[str] = []
@@ -209,13 +207,9 @@ def _finalize_manifest(config: RenderConfig, manifest: dict[str, Any]) -> None:
     dashboards.sort(key=lambda item: str(item.get("uid", "")))
     file_set = sorted(set(file_set))
     all_uids = set(sources)
-    rendered_uids = {
-        str(item.get("uid", "")) for item in dashboards if item.get("uid")
-    }
+    rendered_uids = {str(item.get("uid", "")) for item in dashboards if item.get("uid")}
     manifest_kind = (
-        "full-set"
-        if all_uids and rendered_uids == all_uids
-        else "selected-subset"
+        "full-set" if all_uids and rendered_uids == all_uids else "selected-subset"
     )
     capture_id = _capture_id(config)
     immutable_name = f"render-manifest--{manifest_kind}--{capture_id}.json"

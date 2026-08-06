@@ -481,7 +481,11 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     root_panels = list(control.get("panels", []))
     control_rows = [panel for panel in root_panels if panel.get("type") == "row"]
     assert len(control_rows) >= 5
-    assert all(panel.get("collapsed") is False for panel in control_rows)
+    assert all(panel.get("collapsed") is True for panel in control_rows)
+    assert all(panel.get("panels") for panel in control_rows)
+    assert [panel["gridPos"]["y"] for panel in control_rows] == list(
+        range(13, 13 + len(control_rows))
+    )
     first_row_y = min(panel["gridPos"]["y"] for panel in control_rows)
     assert first_row_y >= 0
 
@@ -500,6 +504,50 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
         row = _panel(runtime, row_id)
         assert row.get("collapsed") is True
         assert len(row.get("panels") or []) > 0
+
+
+def test_audit_followup_action_first_layout_contracts() -> None:
+    overview = _load("bioetl-overview-v2.json")
+    workflow = _panel(overview, 9013)
+    navigation = _panel(overview, 9021)
+    run_context = _panel(overview, 9602)
+    assert workflow.get("gridPos", {}).get("x") == 0
+    assert workflow.get("gridPos", {}).get("w") == 24
+    assert navigation.get("gridPos", {}).get("h") <= 3
+    assert run_context.get("collapsed") is True
+    assert run_context.get("panels")
+
+    provider = _load("bioetl-provider-health-v2.json")
+    provider_rows = [
+        panel for panel in provider.get("panels", []) if panel.get("type") == "row"
+    ]
+    assert [panel.get("id") for panel in provider_rows] == [91, 9404, 9405]
+    assert [panel.get("gridPos", {}).get("y") for panel in provider_rows] == [
+        19,
+        20,
+        21,
+    ]
+    assert all(panel.get("collapsed") is True for panel in provider_rows)
+    for panel_id in (9101, 9102, 9103):
+        assert _panel(provider, panel_id).get("options", {}).get("sortBy") == [
+            {"desc": True, "displayName": "Severity"}
+        ]
+
+    dq = _load("bioetl-dq-v2.json")
+    dq_rows = [panel for panel in dq.get("panels", []) if panel.get("type") == "row"]
+    assert [panel.get("title") for panel in dq_rows] == [
+        "Selected Run · Identity & Accounting",
+        "Selected Range · Impact & Freshness",
+        "Selected Range · Reject Evidence",
+        "Selected Range · Validation Diagnostics",
+    ]
+    assert [panel.get("gridPos", {}).get("y") for panel in dq_rows] == [
+        14,
+        15,
+        16,
+        17,
+    ]
+    assert all(panel.get("collapsed") is True for panel in dq_rows)
 
 
 def test_collapsed_rows_never_ship_empty_nested_panels() -> None:
@@ -613,12 +661,17 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
     assert current_alerts.get("gridPos", {}).get("w") == 24
     assert history_grid.get("x") == 0
     assert history_grid.get("w") == 24
-    assert history_grid.get("h", 0) >= 10
+    assert history_grid.get("h", 0) >= 14
     assert history.get("options", {}).get("legend", {}).get("showLegend") is False
+    assert history.get("options", {}).get("showValue") == "always"
+    assert history.get("options", {}).get("rowHeight") == 1.0
     assert impact.get("gridPos", {}).get("y", 0) >= (
         history_grid.get("y", 0) + history_grid.get("h", 0)
     )
     assert "ALERTS" in str(history.get("targets", [{}])[0].get("expr", ""))
+    assert str(history.get("targets", [{}])[0].get("legendFormat", "")).startswith(
+        "{{alertstate}}"
+    )
     color_overrides = {
         override.get("matcher", {}).get("options"): {
             prop.get("id"): prop.get("value") for prop in override.get("properties", [])
@@ -629,6 +682,13 @@ def test_incident_alert_history_has_readable_full_width_layout() -> None:
         "mode": "fixed",
         "fixedColor": "red",
     }
+    assert (
+        color_overrides[".*firing.*"]["mappings"][0]["options"]["1"]["text"] == "FIRING"
+    )
+    assert (
+        color_overrides[".*pending.*"]["mappings"][0]["options"]["1"]["text"]
+        == "PENDING"
+    )
     assert color_overrides[".*pending.*"]["color"] == {
         "mode": "fixed",
         "fixedColor": "orange",

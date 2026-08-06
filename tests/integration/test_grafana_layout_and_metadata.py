@@ -269,7 +269,8 @@ def test_control_plane_row_sequence_matches_operator_flow() -> None:
     assert any(panel_id == 9412 for panel_id, _ in row_pairs), (
         f"Control Plane must keep collapsed Run context row: {row_pairs}"
     )
-    assert all(panel.get("collapsed") is False for panel in row_panels)
+    assert all(panel.get("collapsed") is True for panel in row_panels)
+    assert all(panel.get("panels") for panel in row_panels)
 
 
 def test_control_plane_first_evidence_panel_stays_close_to_answer_row() -> None:
@@ -332,17 +333,15 @@ def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
         for panel in dashboard.get("panels", [])
         if panel.get("title") == "Inspect Manifest & Ledger Evidence"
     )
-    assert row.get("collapsed") is False
+    assert row.get("collapsed") is True
     child_panels = get_row_child_panels(dashboard, "Inspect Manifest & Ledger Evidence")
     panels = {panel.get("title"): panel for panel in child_panels if panel.get("title")}
     terminal = panels["Review Terminal Run Outcomes"]
     terminal_grid = terminal.get("gridPos", {})
-    assert terminal_grid == {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": row.get("gridPos", {}).get("y", 0) + 1,
-    }
+    assert terminal_grid.get("h") == 6
+    assert terminal_grid.get("w") == 24
+    assert terminal_grid.get("x") == 0
+    assert terminal_grid.get("y", 0) > row.get("gridPos", {}).get("y", 0)
     failure_panels = [
         panels["Track Manifest Write Failures"],
         panels["Track Ledger Append Failures"],
@@ -370,7 +369,7 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
         if panel.get("type") == "row"
         and panel.get("title") == "Inspect Replay & Checkpoint Evidence"
     )
-    assert row_panel.get("collapsed") is False
+    assert row_panel.get("collapsed") is True
     child_panels = get_row_child_panels(
         dashboard, "Inspect Replay & Checkpoint Evidence"
     )
@@ -421,7 +420,7 @@ def test_control_plane_lineage_top_band_uses_full_row_width() -> None:
     panel = panels[122]
     grid_pos = panel.get("gridPos", {})
     assert grid_pos.get("x") == 0
-    assert grid_pos.get("y") == row_panel.get("gridPos", {}).get("y", 0) + 1
+    assert grid_pos.get("y", 0) > row_panel.get("gridPos", {}).get("y", 0)
     assert grid_pos.get("w") == 24
 
 
@@ -751,7 +750,7 @@ def test_dashboard_default_time_and_refresh_policy_by_uid_class() -> None:
 
 
 def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
-    """Provider detail telemetry ships under an expanded Selected Provider Details row."""
+    """Provider detail telemetry ships under progressive disclosure."""
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
@@ -766,7 +765,7 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
         None,
     )
     assert detail_row is not None
-    assert detail_row.get("collapsed") is False
+    assert detail_row.get("collapsed") is True
 
     child_panels = get_row_child_panels(dashboard, "Selected Provider Details")
     child_titles = {

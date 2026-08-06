@@ -114,7 +114,7 @@
       "title": "Browse Recent Runs",
       "description": "Selected-run narrative (ID/Processed/detail) is the answer path after selection. No-selection utility. Pick a run to set run_id. Ops HTTP index — not Prometheus. Valid empty: no matching recent runs for the selected pipeline. Backend unavailable is distinct; check /health/live",
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 24,
         "x": 0,
         "y": 7
@@ -362,7 +362,7 @@
       "type": "table",
       "title": "Inspect Processed Records",
       "gridPos": {
-        "h": 7,
+        "h": 6,
         "w": 14,
         "x": 10,
         "y": 14

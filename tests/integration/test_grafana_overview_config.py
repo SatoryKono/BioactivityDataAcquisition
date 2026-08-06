@@ -167,7 +167,7 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     assert any(
         panel.get("type") == "row"
         and "Run Context" in str(panel.get("title") or "")
-        and panel.get("collapsed") is False
+        and panel.get("collapsed") is True
         for panel in load_dashboard(
             Path("grafana/dashboards/bioetl-overview-v2.json")
         ).get("panels", [])

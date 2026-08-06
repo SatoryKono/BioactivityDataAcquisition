@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
 
 import pytest
@@ -65,6 +66,60 @@ def _manifest(*, classification: str = "incomplete") -> dict[str, object]:
             }
         ],
     }
+
+
+def _bind_provenance(tmp_path: Path, manifest: dict[str, object]) -> None:
+    source = {
+        "path": "grafana/dashboards/bioetl-runtime.json",
+        "sha256": "b" * 64,
+        "version": 1,
+    }
+    dashboards = manifest["dashboards"]
+    assert isinstance(dashboards, list)
+    dashboard = dashboards[0]
+    assert isinstance(dashboard, dict)
+    dashboard["dashboardSource"] = source
+    dashboard["browserState"] = {
+        "requestedZoom": 100,
+        "cssZoom": "1",
+        "actualKiosk": "off",
+    }
+    requested = manifest["requested"]
+    assert isinstance(requested, dict)
+    requested.update({"browser_zoom": 100, "kiosk_mode": "off"})
+    manifest.update(
+        {
+            "capture_id": "unit-capture",
+            "manifest_kind": "selected-subset",
+            "immutable_manifest": (
+                "render-manifest--selected-subset--unit-capture.json"
+            ),
+            "file_count": 1,
+            "file_set": ["bioetl-runtime.png"],
+            "source": {
+                "commit_sha": "a" * 40,
+                "working_tree_dirty": False,
+                "dashboards": {"bioetl-runtime": source},
+            },
+            "capture_context": {
+                "time_range": {
+                    "from": "now-12h",
+                    "to": "now",
+                    "timezone": "UTC",
+                },
+                "variables": {
+                    "workflow": "",
+                    "pipeline": "",
+                    "run_type": "",
+                    "run_id": "",
+                },
+                "row_state": {"expand_collapsed_rows": True},
+            },
+        }
+    )
+    text = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    (tmp_path / "render-manifest.json").write_text(text, encoding="utf-8")
+    (tmp_path / str(manifest["immutable_manifest"])).write_text(text, encoding="utf-8")
 
 
 @pytest.mark.parametrize(
@@ -122,6 +177,7 @@ def test_manifest_binds_panel_evidence_to_png_hash_and_dimensions(
         "height": 900,
         "sha256": hashlib.sha256(screenshot.read_bytes()).hexdigest(),
     }
+    _bind_provenance(tmp_path, manifest)
 
     error = preflight._validate_manifest_render_contract(
         manifest,
@@ -144,6 +200,53 @@ def test_manifest_binds_panel_evidence_to_png_hash_and_dimensions(
 
     assert hash_error is not None
     assert "sha256 drift" in hash_error
+
+
+def test_immutable_manifest_rejects_occurrence_overwrite(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    config = rerender.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="",
+        service_account_token="",
+        output_dir=tmp_path,
+        width=1024,
+        height=900,
+        timeout_seconds=30,
+        selected_uids=("bioetl-runtime",),
+        fallback="playwright",
+        occurrence_id="same-occurrence",
+    )
+    monkeypatch.setattr(
+        rerender,
+        "_dashboard_source_by_uid",
+        lambda: {
+            "bioetl-runtime": {
+                "path": "grafana/dashboards/bioetl-runtime.json",
+                "sha256": "b" * 64,
+                "version": 1,
+            },
+            "other": {
+                "path": "grafana/dashboards/other.json",
+                "sha256": "c" * 64,
+                "version": 1,
+            },
+        },
+    )
+    monkeypatch.setattr(
+        rerender,
+        "_git_capture_source",
+        lambda: {"commit_sha": "a" * 40, "working_tree_dirty": False},
+    )
+    payload: dict[str, object] = {
+        "dashboards": [{"uid": "bioetl-runtime", "file": "bioetl-runtime.png"}]
+    }
+
+    rerender._finalize_manifest(config, payload)
+    with pytest.raises(FileExistsError):
+        rerender._finalize_manifest(config, payload)
 
 
 def test_playwright_retry_gate_rejects_unbound_or_dimension_drifted_png(
