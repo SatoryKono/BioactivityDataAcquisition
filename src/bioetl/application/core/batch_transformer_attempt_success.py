@@ -80,8 +80,18 @@ def _resolve_gold_filter_details(
     gold_filter: GoldFilterCallback,
     record: dict[str, object],
 ) -> dict[str, object] | None:
+    """Resolve structured Gold-filter exclusion details when available.
+
+    Prefers a bound-method owner that exposes a public ``gold_filters``
+    evaluator (``evaluate`` → ``FilterDecision``). Falls back to the
+    historical ``_gold_filters`` attribute for reverse compatibility.
+    """
     owner = getattr(gold_filter, "__self__", None)
-    gold_filters = getattr(owner, "_gold_filters", None)
+    if owner is None:
+        return None
+    gold_filters = getattr(owner, "gold_filters", None)
+    if gold_filters is None:
+        gold_filters = getattr(owner, "_gold_filters", None)
     evaluate = getattr(gold_filters, "evaluate", None)
     if not callable(evaluate):
         return None

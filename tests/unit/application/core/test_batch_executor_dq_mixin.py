@@ -297,7 +297,7 @@ def test_reservoir_add_respects_max_sample_size(
 
     reservoir: list[int] = []
     for i in range(20):
-        harness._reservoir_add(reservoir, i)
+        harness._reservoir_add("bronze", reservoir, i)
 
     assert len(reservoir) == 3
 
@@ -320,9 +320,9 @@ def test_reservoir_add_is_order_independent_for_same_items(
     ]
 
     for record in records:
-        first_harness._reservoir_add(first_reservoir, record)
+        first_harness._reservoir_add("silver", first_reservoir, record)
     for record in reversed(records):
-        second_harness._reservoir_add(second_reservoir, record)
+        second_harness._reservoir_add("silver", second_reservoir, record)
 
     def normalize(items):
         return sorted(

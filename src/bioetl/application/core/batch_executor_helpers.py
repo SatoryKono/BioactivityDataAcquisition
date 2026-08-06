@@ -116,9 +116,9 @@ def apply_processed_batch_outcome(
         state=state,
         state_update=outcome.state_update,
     )
-    if not state._should_collect_dq_data():
+    if not state.should_collect_dq_data():
         return
-    state._collect_dq_data(
+    state.collect_dq_data(
         records=outcome.records,
         batch_id=outcome.batch_id,
         bronze_result=outcome.bronze_result,

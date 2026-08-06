@@ -56,15 +56,18 @@ class _BatchExecutorDQMixin:
     source_batch_ids: list[str]  # pyright: ignore[reportUninitializedInstanceVariable]
     _last_bronze_path: str | None  # pyright: ignore[reportUninitializedInstanceVariable]
     _dq_total_seen: int  # pyright: ignore[reportUninitializedInstanceVariable]
-    _dq_reservoir_ranks: dict[int, list[str]]  # pyright: ignore[reportUninitializedInstanceVariable]
+    _dq_reservoir_ranks: dict[str, list[str]]  # pyright: ignore[reportUninitializedInstanceVariable]
     records_fetched: int  # pyright: ignore[reportUninitializedInstanceVariable]
     records_quarantined: int  # pyright: ignore[reportUninitializedInstanceVariable]
 
-    def _should_collect_dq_data(self) -> bool:
+    def should_collect_dq_data(self) -> bool:
         """Return True when DQ report service is configured."""
         return self._services.dq_report_service is not None
 
-    def _collect_dq_data(
+    # Compatibility alias for historical private call sites.
+    _should_collect_dq_data = should_collect_dq_data
+
+    def collect_dq_data(
         self,
         records: list[BronzeRecord],
         batch_id: BatchID,
@@ -90,26 +93,29 @@ class _BatchExecutorDQMixin:
                 ).encode("utf-8")
             except (TypeError, ValueError):
                 continue
-            self._reservoir_add(self._bronze_records_for_dq, encoded)
+            self._reservoir_add("bronze", self._bronze_records_for_dq, encoded)
 
         if bronze_result is not None and hasattr(bronze_result, "path"):
             self._last_bronze_path = str(bronze_result.path)  # pyright: ignore[reportAttributeAccessIssue]
 
         for rec in silver_records:
-            self._reservoir_add(self._silver_records_for_dq, rec)
+            self._reservoir_add("silver", self._silver_records_for_dq, rec)
         for rec in gold_records:
-            self._reservoir_add(self._gold_records_for_dq, rec)
+            self._reservoir_add("gold", self._gold_records_for_dq, rec)
+
+    # Compatibility alias for historical private call sites.
+    _collect_dq_data = collect_dq_data
 
     def _reservoir_add(
         self,
+        stage: str,
         reservoir: list[_ReservoirT],
         item: _ReservoirT,
     ) -> None:
         """Add item to a bounded deterministic sample ranked by stable content."""
         self._dq_total_seen += 1
         # Stage-keyed rank map (initialized on BatchExecutorRuntimeState).
-        stage_key = id(reservoir)
-        reservoir_ranks = self._dq_reservoir_ranks.setdefault(stage_key, [])
+        reservoir_ranks = self._dq_reservoir_ranks.setdefault(stage, [])
         item_rank = self._dq_sample_rank(item)
 
         if len(reservoir) < _DQ_MAX_SAMPLE_SIZE:
