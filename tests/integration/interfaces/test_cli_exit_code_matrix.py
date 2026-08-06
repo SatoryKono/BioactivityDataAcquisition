@@ -16,7 +16,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from bioetl.application.services.export_service import (
+from bioetl.application.services.export_lineage.export_service import (
     ExportResult,
 )
 from bioetl.application.services.execution.pipeline_runner_models import (

@@ -19,7 +19,7 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
 if TYPE_CHECKING:
-    from bioetl.application.services.lock_service import LockService
+    from bioetl.application.services.ops.lock_service import LockService
 
 __all__ = [
     "COMMANDS",

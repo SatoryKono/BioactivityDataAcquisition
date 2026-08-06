@@ -36,7 +36,7 @@ from uuid import UUID
 
 import pytest
 
-import bioetl.application.services.debug_export_helpers as helpers
+import bioetl.application.services.export_lineage.debug_export_helpers as helpers
 from bioetl.domain.types import ErrorType
 
 pytestmark = pytest.mark.unit

@@ -34,7 +34,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.application.services.export_manifests import (
+from bioetl.application.services.export_lineage.export_manifests import (
     build_export_checksum_manifest,
     build_export_sidecar_payloads,
 )

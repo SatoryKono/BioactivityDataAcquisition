@@ -43,6 +43,9 @@ from bioetl.application.composite.runner_pkg.runner_support_runtime import (
     run_seed,
     save_checkpoint_safe,
 )
+from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
+    CompositeRunnerObservabilityMixin,
+)
 from bioetl.application.composite.runner_pkg.runner_support_types import (
     _CompositeRunnerSupportHostProtocol,
     _PreparedCompositeResultContext,
@@ -66,8 +69,8 @@ from bioetl.domain.ports import (
 __all__ = ["CompositeRunnerSupportMixin"]
 
 
-class CompositeRunnerSupportMixin:
-    """Mixin with utility and side-effect helpers."""
+class CompositeRunnerSupportMixin(CompositeRunnerObservabilityMixin):
+    """Support helpers composed with observability (ARCH-REF-R2 / #7729)."""
 
     _config: CompositeConfig = cast(Any, None)  # Any: host attr default (PD3)
     _runtime: CompositeRuntimeConfig = cast(Any, None)  # Any: host attr default (PD3)

@@ -20,10 +20,10 @@ from pathlib import Path
 import pytest
 import yaml
 
-from bioetl.application.services.export_manifest_identity import (
+from bioetl.application.services.export_lineage.export_manifest_identity import (
     resolve_generated_at,
 )
-from bioetl.application.services.export_models import ExportOptions
+from bioetl.application.services.export_lineage.export_models import ExportOptions
 from bioetl.domain.control_plane.run_manifest import (
     PRODUCTION_PROVENANCE_REQUIRED_FIELDS,
     RunCodeProvenance,

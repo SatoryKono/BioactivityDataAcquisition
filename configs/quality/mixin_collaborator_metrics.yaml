@@ -1,10 +1,11 @@
 schema_version: 1
-# ARCH-REF-04 / #7705 — mixin-depth / collaborator governance (advisory → blocking path).
+# ARCH-REF-04 / #7705 + ARCH-REF-R2 / #7729 — mixin-depth / collaborator governance.
 policy:
   mode: advisory
   description: >
     Track host-level mixin base counts for known distributed-god services.
     Prefer composed collaborators over sibling multi-mixin hosts.
+    Promote mode to blocking after listed hosts stay green in CI.
 hosts:
   - name: QuarantineService
     module: bioetl.application.services.quality.quarantine_service
@@ -18,3 +19,7 @@ hosts:
     module: bioetl.application.core.base_transformer.base
     max_direct_mixin_bases: 3
     notes: Dependency + Execution(composed record helpers) + ABC after ARCH-REF-04
+  - name: CompositePipelineRunner
+    module: bioetl.application.composite.runner_pkg.runner
+    max_direct_mixin_bases: 3
+    notes: "ARCH-REF-R2 #7729: ControlPlane + Support(obs) + Stage(merge)"

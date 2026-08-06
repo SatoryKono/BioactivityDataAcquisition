@@ -23,6 +23,10 @@ from bioetl.domain.exceptions.storage import (
     StorageQuotaExceededError,
     TableNotFoundError,
     UploadError,
+    _build_schema_error_message,
+    _build_schema_validation_message,
+    _format_column_diff,
+    _format_type_mismatches,
 )
 
 __all__ = [
@@ -39,4 +43,8 @@ __all__ = [
     "StorageQuotaExceededError",
     "TableNotFoundError",
     "UploadError",
+    "_build_schema_error_message",
+    "_build_schema_validation_message",
+    "_format_column_diff",
+    "_format_type_mismatches",
 ]

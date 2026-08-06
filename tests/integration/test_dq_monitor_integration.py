@@ -341,7 +341,7 @@ class TestDataQualityServiceMetricsEmission:
         the service MUST emit the bioetl_dq_soft_threshold_exceeded counter.
         """
         await asyncio.sleep(0)
-        from bioetl.application.services.data_quality_service import DataQualityService
+        from bioetl.application.services.quality.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.domain.value_objects.dq_result import DQEvaluationStatus
 
@@ -394,7 +394,7 @@ class TestDataQualityServiceMetricsEmission:
         the service MUST emit check duration histogram.
         """
         await asyncio.sleep(0)
-        from bioetl.application.services.data_quality_service import DataQualityService
+        from bioetl.application.services.quality.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.infrastructure.observability.anomaly import (
             DataQualityMonitor,
@@ -436,7 +436,7 @@ class TestDataQualityServiceMetricsEmission:
     ) -> None:
         """DQ service should emit score and the matching record-count gauge."""
         await asyncio.sleep(0)
-        from bioetl.application.services.data_quality_service import DataQualityService
+        from bioetl.application.services.quality.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
@@ -507,7 +507,7 @@ class TestDataQualityServiceMetricsEmission:
     ) -> None:
         """Quarantined counts should project into flow, stage, and DQ disposition families."""
         await asyncio.sleep(0)
-        from bioetl.application.services.data_quality_service import DataQualityService
+        from bioetl.application.services.quality.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
@@ -572,7 +572,7 @@ class TestDataQualityServiceMetricsEmission:
         3. Baseline is updated
         """
         await asyncio.sleep(0)
-        from bioetl.application.services.data_quality_service import DataQualityService
+        from bioetl.application.services.quality.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.infrastructure.observability.anomaly import (
             DataQualityMonitor,
@@ -616,7 +616,7 @@ class TestDataQualityServiceMetricsEmission:
     ) -> None:
         """Freshness anchor should drive anomaly timestamps and detection."""
         await asyncio.sleep(0)
-        from bioetl.application.services.data_quality_service import DataQualityService
+        from bioetl.application.services.quality.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.domain.value_objects.dq_anomaly import DQAnomalyType
         from bioetl.infrastructure.observability.anomaly import (
@@ -663,7 +663,7 @@ class TestDataQualityServiceMetricsEmission:
         the service MUST emit baseline update counter for each metric.
         """
         await asyncio.sleep(0)
-        from bioetl.application.services.data_quality_service import DataQualityService
+        from bioetl.application.services.quality.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.infrastructure.observability.anomaly import (
             DataQualityMonitor,
@@ -719,7 +719,7 @@ class TestDataQualityServiceMetricsEmission:
         the service MUST NOT emit bioetl_dq_soft_threshold_exceeded counter.
         """
         await asyncio.sleep(0)
-        from bioetl.application.services.data_quality_service import DataQualityService
+        from bioetl.application.services.quality.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.domain.value_objects.dq_result import DQEvaluationStatus
 
@@ -758,7 +758,7 @@ class TestDataQualityServiceMetricsEmission:
         3. Baseline update counters (via DQ monitor)
         """
         await asyncio.sleep(0)
-        from bioetl.application.services.data_quality_service import DataQualityService
+        from bioetl.application.services.quality.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.infrastructure.observability.anomaly import (
             DataQualityMonitor,

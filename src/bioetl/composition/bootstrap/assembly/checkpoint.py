@@ -28,7 +28,7 @@ from bioetl.infrastructure.storage.support.checkpoint_writer import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.services.checkpoint_compatibility_service import (
+    from bioetl.application.services.checkpoint.checkpoint_compatibility_service import (
         CheckpointCompatibilityService,
     )
 
@@ -134,7 +134,7 @@ def bootstrap_checkpoint_compatibility_service(
     Returns:
         CheckpointCompatibilityService instance.
     """
-    from bioetl.application.services.checkpoint_compatibility_service import (
+    from bioetl.application.services.checkpoint.checkpoint_compatibility_service import (
         CheckpointCompatibilityService,
     )
 

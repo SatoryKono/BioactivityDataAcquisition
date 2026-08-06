@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
-    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.application.services.quality.dq_report_service import DQReportService
     from bioetl.composition.bootstrap.composite_infrastructure_context import (
         CompositeInfrastructureContext,
     )
@@ -224,7 +224,7 @@ def _create_dq_report_service(
     Returns:
         DQReportService ready for composite pipeline DQ report generation.
     """
-    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.application.services.quality.dq_report_service import DQReportService
     from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
 
     reports_base_path = Path(settings.data_dir) / "output" / "reports" / "dq"

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
         CompositeCheckpointService,
         FSMStateHelperService,
     )
-    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.application.services.quality.dq_report_service import DQReportService
     from bioetl.domain.ports import QuarantinePort
 
 

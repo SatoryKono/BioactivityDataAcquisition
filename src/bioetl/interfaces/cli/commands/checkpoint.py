@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointRuntimeService,
     )
-    from bioetl.application.services.observability_workflow_service import (
+    from bioetl.application.services.workflow.observability_workflow_service import (
         ObservabilityWorkflowService,
     )
 

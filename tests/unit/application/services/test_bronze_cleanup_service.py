@@ -37,7 +37,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.services.bronze_cleanup_service import (
+from bioetl.application.services.ops.bronze_cleanup_service import (
     BronzeCleanupResult,
     BronzeCleanupService,
 )

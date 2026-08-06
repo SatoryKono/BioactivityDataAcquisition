@@ -35,7 +35,7 @@ from tests.helpers.deterministic_ids import deterministic_uuid_string_from_calls
 
 import pytest
 
-from bioetl.application.services.dq_report_service import (
+from bioetl.application.services.quality.dq_report_service import (
     DQReportService,
     DQReportContext,
 )

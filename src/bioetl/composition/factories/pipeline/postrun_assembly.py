@@ -14,7 +14,7 @@ from bioetl.application.core.postrun import (
     PostrunMetadataWriteService,
     PostrunService,
 )
-from bioetl.application.services.data_quality_service import DataQualityService
+from bioetl.application.services.quality.data_quality_service import DataQualityService
 from bioetl.application.services.medallion.medallion_lifecycle import (
     MedallionLifecycleService,
 )
@@ -27,7 +27,7 @@ from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
-    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.application.services.quality.dq_report_service import DQReportService
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.ports import (
         BronzeDQConfigPort,

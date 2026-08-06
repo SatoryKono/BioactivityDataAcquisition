@@ -33,7 +33,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.services.pipeline_debug_service import (
+from bioetl.application.services.export_lineage.pipeline_debug_service import (
     DebugAbortError,
     PipelineDebugService,
 )

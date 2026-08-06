@@ -15,6 +15,21 @@ ______________________________________________________________________
 
 *Synced with RULES.md v6.1.7 (2026-08-05)*
 
+## Architecture health scores (do not collapse)
+
+Two different instruments report “architecture health.” They **must not** be
+treated as the same number:
+
+| Instrument | Typical use | Example (2026-08-05) |
+| --- | --- | ---: |
+| **Human maintainability audit** (ARCH-REF / review report) | Density, residual structure, cognitive load, package ownership | **7.82** / 10 |
+| **Machine quality scorecard** (`reports/quality/architecture-quality-scorecard.json`) | Layer violations, coverage floors, hotspot budgets, gate pass rates | **9.41** |
+
+Scorecard green means **gates hold**; it does **not** mean residual package
+sprawl or mixin graphs are finished. Prefer human audit for prioritization of
+structure refactors (ARCH-REF-R2 / #7734). Ports counts come from the generator
+`python -m scripts.engineering.qa report-domain-ports-inventory` (not hand-edited).
+
 ## Quick Navigation
 
 BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Medallion Architecture** for data layers.

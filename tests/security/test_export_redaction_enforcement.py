@@ -5,8 +5,8 @@ from __future__ import annotations
 import pyarrow as pa
 import pytest
 
-from bioetl.application.services.export_execution import apply_redaction_policy
-from bioetl.application.services.export_models import ExportOptions
+from bioetl.application.services.export_lineage.export_execution import apply_redaction_policy
+from bioetl.application.services.export_lineage.export_models import ExportOptions
 
 pytestmark = [pytest.mark.security, pytest.mark.unit]
 

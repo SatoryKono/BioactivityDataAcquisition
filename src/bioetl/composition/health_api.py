@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.composition.lazy_exports import install_cached_public_exports
 
 if TYPE_CHECKING:
-    from bioetl.application.services.health_service import HealthService
-    from bioetl.application.services.quarantine_service import QuarantineService
+    from bioetl.application.services.ops.health_service import HealthService
+    from bioetl.application.services.quality.quarantine_service import QuarantineService
     from bioetl.composition._resource_management import (
         QuarantineRuntimeServiceProtocol,
     )

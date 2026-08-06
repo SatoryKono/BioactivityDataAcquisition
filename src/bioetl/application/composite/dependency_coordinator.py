@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING
 
 import polars as pl
 
+from bioetl.application.composite.dependency_coordinator_execution import (
+    execute_dependency_runner,
+    log_dependencies_batch_start,
+    run_single_dependency,
+)
 from bioetl.application.composite.dependency_key_resolvers import (
     ChainedKeyResolver,
     SeedKeyResolver,
@@ -19,18 +23,7 @@ from bioetl.application.composite.dependency_result_mapper import (
     DependencyResultService,
 )
 from bioetl.application.runtime_clock import resolve_runtime_clock
-from bioetl.application.runtime_timestamps import (
-    capture_runtime_timing_anchor,
-    derive_completion_timestamp,
-)
 from bioetl.domain.composite.result import DependencyResult
-from bioetl.domain.exceptions import (
-    BioETLError,
-    CheckpointConflictError,
-    DataQualityError,
-    NetworkError,
-    StorageError,
-)
 from bioetl.domain.ports import (
     ClockPort,
     DeltaReaderPort,
@@ -42,48 +35,7 @@ if TYPE_CHECKING:
     from bioetl.domain.composite import DependencyConfig
 
 
-_DEPENDENCY_EXECUTION_ERRORS = (
-    BioETLError,
-    NetworkError,
-    StorageError,
-    CheckpointConflictError,
-    DataQualityError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-    OSError,
-)
-
-
 __all__ = ["DependencyCoordinatorService"]
-
-
-def _log_dependencies_batch_start(
-    *,
-    logger: LoggerPort,
-    dependencies: Sequence[DependencyConfig],
-) -> None:
-    """Emit structured start log for dependency batch execution."""
-    logger.info(
-        "Running dependencies",
-        count=len(dependencies),
-        dependencies=[dependency.pipeline for dependency in dependencies],
-    )
-
-
-def _log_dependency_start(
-    *,
-    logger: LoggerPort,
-    dependency: DependencyConfig,
-    keys: pl.DataFrame,
-) -> None:
-    """Emit structured log entry for dependency start."""
-    logger.info(
-        "Starting dependency",
-        dependency=dependency.pipeline,
-        keys_count=len(keys),
-        timeout_seconds=dependency.timeout_seconds,
-    )
 
 
 class DependencyCoordinatorService:
@@ -184,7 +136,7 @@ class DependencyCoordinatorService:
             )
             return results
 
-        _log_dependencies_batch_start(logger=self._logger, dependencies=dependencies)
+        log_dependencies_batch_start(logger=self._logger, dependencies=dependencies)
 
         for dependency in dependencies:
             if self._progress_service.maybe_store_completed_skip(
@@ -265,48 +217,11 @@ class DependencyCoordinatorService:
         Returns:
             DependencyResult with execution outcome.
         """
-        started_at, started_monotonic = capture_runtime_timing_anchor(clock=self._clock)
-        _log_dependency_start(logger=self._logger, dependency=dependency, keys=keys)
-        try:
-            runner = await self._execute_dependency_runner(
-                dependency=dependency,
-                keys=keys,
-                runner_factory=runner_factory,
-            )
-        except TimeoutError:
-            completed_at, duration_seconds = derive_completion_timestamp(
-                started_at=started_at,
-                started_monotonic=started_monotonic,
-            )
-            return self._result_service.build_timeout_result(
-                dependency=dependency,
-                started_at=started_at,
-                completed_at=completed_at,
-                duration_seconds=duration_seconds,
-            )
-        except _DEPENDENCY_EXECUTION_ERRORS as e:
-            completed_at, duration_seconds = derive_completion_timestamp(
-                started_at=started_at,
-                started_monotonic=started_monotonic,
-            )
-            return self._result_service.build_failed_result(
-                dependency=dependency,
-                error=e,
-                started_at=started_at,
-                completed_at=completed_at,
-                duration_seconds=duration_seconds,
-            )
-
-        completed_at, duration = derive_completion_timestamp(
-            started_at=started_at,
-            started_monotonic=started_monotonic,
-        )
-        return self._result_service.build_success_result(
+        return await run_single_dependency(
+            self,
             dependency=dependency,
-            runner=runner,
-            started_at=started_at,
-            completed_at=completed_at,
-            duration_seconds=duration,
+            keys=keys,
+            runner_factory=runner_factory,
         )
 
     async def _execute_dependency_runner(
@@ -316,7 +231,8 @@ class DependencyCoordinatorService:
         runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
     ) -> ExecutionMetricsRunnerPort:
         """Execute dependency runner under timeout guard."""
-        async with asyncio.timeout(dependency.timeout_seconds):
-            runner = runner_factory(dependency.pipeline, keys)
-            await runner.run()
-        return runner
+        return await execute_dependency_runner(
+            dependency=dependency,
+            keys=keys,
+            runner_factory=runner_factory,
+        )

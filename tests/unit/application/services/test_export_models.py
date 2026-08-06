@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.export_models import (
+from bioetl.application.services.export_lineage.export_models import (
     ColumnInfo,
     ExportOptions,
     ExportResult,

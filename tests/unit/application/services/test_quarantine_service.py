@@ -38,7 +38,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.services.quarantine_service import (
+from bioetl.application.services.quality.quarantine_service import (
     QuarantineRecord,
     QuarantineService,
 )

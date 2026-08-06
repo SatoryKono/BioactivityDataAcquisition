@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
     import click
 
-    from bioetl.application.services.health_service import HealthService
+    from bioetl.application.services.ops.health_service import HealthService
     from bioetl.composition.health_service_access import HealthServerDependencies
 
     get_health_server_dependencies: Callable[[], HealthServerDependencies]

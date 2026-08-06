@@ -38,7 +38,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.application.services.config_service import ConfigService
+from bioetl.application.services.ops.config_service import ConfigService
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.bootstrap.cli.config import bootstrap_config_service
 from bioetl.domain.config import DQConfig

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, cast
 from urllib.parse import parse_qs, urlsplit
 
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.application.services.quarantine_service import QuarantineService
+from bioetl.application.services.quality.quarantine_service import QuarantineService
 from bioetl.domain.ports import (
     CheckpointPort,
     ClockPort,
