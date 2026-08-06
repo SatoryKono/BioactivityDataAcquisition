@@ -39,11 +39,13 @@ from bioetl.application.core import _base_transformer_structural_support  # noqa
 pytestmark = pytest.mark.unit
 
 from bioetl.application.core._base_transformer_structural_support import (
+    apply_structural_policy,
     classify_structural_action,
     classify_structural_shadow_comparison,
     evaluate_semantic_shadow_decision,
     record_structural_policy_metrics,
 )
+from bioetl.application.core.base_transformer.errors import FilteredOutError
 from bioetl.domain.filtering import FilterDecision
 
 
@@ -292,3 +294,69 @@ class TestRecordStructuralPolicyMetrics:
         )
 
         mock_owner._metrics.increment_counter.assert_not_called()
+
+
+class TestApplyStructuralPolicySingleFilterEval:
+    """#7795: Silver filter evaluated once for non-quarantined records."""
+
+    def test_kept_record_evaluates_silver_filter_once_and_passes(self) -> None:
+        mock_owner = MagicMock()
+        mock_owner.provider = "chembl"
+        mock_owner.entity_type = "activity"
+        mock_owner._metrics = MagicMock()
+        mock_owner._structural_policy = MagicMock()
+        kept = {"entity_id": "chembl:1", "value": 1.0}
+        outcome = MagicMock()
+        outcome.record = kept
+        outcome.should_quarantine = False
+        outcome.details = None
+        outcome.events = ()
+        mock_owner._structural_policy.apply.return_value = outcome
+
+        decision = FilterDecision(
+            include=True,
+            reason_code="ok",
+            rule_type="always",
+            field=None,
+            message="pass",
+        )
+        mock_owner._silver_filters = MagicMock()
+        mock_owner._silver_filters.is_empty.return_value = False
+        mock_owner._silver_filters.evaluate.return_value = decision
+
+        context = MagicMock()
+        result = apply_structural_policy(mock_owner, context, kept, index=0)
+
+        assert result == kept
+        mock_owner._silver_filters.evaluate.assert_called_once_with(kept)
+
+    def test_kept_record_raises_filtered_out_without_second_evaluate(self) -> None:
+        mock_owner = MagicMock()
+        mock_owner.provider = "chembl"
+        mock_owner.entity_type = "activity"
+        mock_owner._metrics = MagicMock()
+        mock_owner._structural_policy = MagicMock()
+        kept = {"entity_id": "chembl:1", "value": 1.0}
+        outcome = MagicMock()
+        outcome.record = kept
+        outcome.should_quarantine = False
+        outcome.details = None
+        outcome.events = ()
+        mock_owner._structural_policy.apply.return_value = outcome
+
+        decision = FilterDecision(
+            include=False,
+            reason_code="reject",
+            rule_type="value_range",
+            field="value",
+            message="too small",
+        )
+        mock_owner._silver_filters = MagicMock()
+        mock_owner._silver_filters.is_empty.return_value = False
+        mock_owner._silver_filters.evaluate.return_value = decision
+
+        context = MagicMock()
+        with pytest.raises(FilteredOutError, match="too small"):
+            apply_structural_policy(mock_owner, context, kept, index=3)
+
+        mock_owner._silver_filters.evaluate.assert_called_once_with(kept)

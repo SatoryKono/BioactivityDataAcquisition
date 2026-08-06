@@ -55,23 +55,15 @@ def classify_structural_shadow_comparison(
     return f"structural_{structural_state}_silver_filter_{silver_state}"
 
 
-def apply_silver_filter(
+def _raise_if_silver_filtered_out(
     owner: TransformerExecutionOwner,
     context: PipelineContext,
-    result: SilverRecord | None,
     index: int,
+    decision: FilterDecision,
 ) -> None:
-    """Check silver filter and raise FilteredOutError if excluded."""
+    """Raise FilteredOutError when a Silver filter decision rejects the record."""
     from bioetl.application.core.base_transformer.errors import FilteredOutError
 
-    if (
-        result is None
-        or owner._silver_filters is None
-        or owner._silver_filters.is_empty()
-    ):
-        return
-
-    decision = owner._silver_filters.evaluate(cast("GoldRecord", result))  # pyright: ignore[reportInvalidCast]
     if decision.include:
         return
 
@@ -88,6 +80,34 @@ def apply_silver_filter(
         decision.message or "Record excluded by silver filters",
         details={"policy_stage": "structural", **decision.to_dict()},
     )
+
+
+def apply_silver_filter(
+    owner: TransformerExecutionOwner,
+    context: PipelineContext,
+    result: SilverRecord | None,
+    index: int,
+    *,
+    precomputed_decision: FilterDecision | None = None,
+) -> None:
+    """Check silver filter and raise FilteredOutError if excluded.
+
+    When ``precomputed_decision`` is provided (e.g. from the structural-policy
+    shadow evaluation), the filter is not re-evaluated (#7795).
+    """
+    if (
+        result is None
+        or owner._silver_filters is None
+        or owner._silver_filters.is_empty()
+    ):
+        return
+
+    decision = (
+        precomputed_decision
+        if precomputed_decision is not None
+        else owner._silver_filters.evaluate(cast("GoldRecord", result))  # pyright: ignore[reportInvalidCast]
+    )
+    _raise_if_silver_filtered_out(owner, context, index, decision)
 
 
 def evaluate_semantic_shadow_decision(
@@ -146,7 +166,10 @@ def apply_structural_policy(
         return None
 
     outcome = owner._structural_policy.apply(result)
-    silver_filter_shadow_decision = evaluate_semantic_shadow_decision(
+    # Evaluate Silver filters at most once for non-quarantined records (#7795).
+    # For quarantine candidates, shadow uses the pre-policy record; for keep
+    # path, evaluate on the post-policy record and reuse for enforcement.
+    silver_filter_decision = evaluate_semantic_shadow_decision(
         owner,
         outcome.record if not outcome.should_quarantine else result,
     )
@@ -156,7 +179,7 @@ def apply_structural_policy(
     )
     shadow_comparison = classify_structural_shadow_comparison(
         structural_rejected=outcome.should_quarantine,
-        silver_filter_decision=silver_filter_shadow_decision,
+        silver_filter_decision=silver_filter_decision,
     )
     record_structural_policy_metrics(
         owner,
@@ -175,6 +198,14 @@ def apply_structural_policy(
         )
 
     if not outcome.should_quarantine:
+        # Reuse the single evaluation for real enforcement (no second evaluate).
+        if silver_filter_decision is not None:
+            _raise_if_silver_filtered_out(
+                owner,
+                context,
+                index,
+                silver_filter_decision,
+            )
         return outcome.record
 
     details = outcome.details or {}
@@ -188,8 +219,8 @@ def apply_structural_policy(
         action_taken=details.get("action_taken"),
         shadow_comparison=shadow_comparison,
         silver_filter_shadow_reason_code=(
-            silver_filter_shadow_decision.reason_code
-            if silver_filter_shadow_decision is not None
+            silver_filter_decision.reason_code
+            if silver_filter_decision is not None
             else None
         ),
     )
@@ -200,8 +231,8 @@ def apply_structural_policy(
             "policy_stage": "structural",
             "shadow_comparison": shadow_comparison,
             "silver_filter_shadow_reason_code": (
-                silver_filter_shadow_decision.reason_code
-                if silver_filter_shadow_decision is not None
+                silver_filter_decision.reason_code
+                if silver_filter_decision is not None
                 else None
             ),
         },

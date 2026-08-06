@@ -76,6 +76,22 @@ _HASH_SAFE_SCALAR = st.one_of(
 )
 
 
+class TestEntityIdentityGeneratorHashPolicySurface:
+    """Public hash-policy collaborator API (#7811)."""
+
+    def test_has_explicit_content_hash_policy_false_by_default(self) -> None:
+        service = EntityIdentityGenerator()
+        assert service.has_explicit_content_hash_policy() is False
+
+    def test_has_explicit_content_hash_policy_true_with_include(self) -> None:
+        service = EntityIdentityGenerator(content_hash_include_fields={"a"})
+        assert service.has_explicit_content_hash_policy() is True
+
+    def test_has_explicit_content_hash_policy_true_with_exclude(self) -> None:
+        service = EntityIdentityGenerator(content_hash_exclude_fields={"b"})
+        assert service.has_explicit_content_hash_policy() is True
+
+
 class TestEntityIdentityGeneratorDeterminism:
     """Test determinism of content hash generation."""
 
