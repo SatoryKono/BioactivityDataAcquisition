@@ -98,12 +98,15 @@ class RecordProcessorSpanExecutor:
         if not self._tracer:
             return None
         count_key = "bioetl.input_count" if input_count else "bioetl.record_count"
-        attrs = {"bioetl.batch_id": str(batch_id), count_key: count}
+        attrs: dict[str, object] = {
+            "bioetl.batch_id": str(batch_id),
+            count_key: count,
+        }
         span = self._tracer.get_tracer("bioetl.processor").start_as_current_span(
             name,
             attributes=attrs,
         )
-        typed_span = cast("Span", span)
+        typed_span = cast("Span", cast(object, span))
         typed_span.__enter__()
         return typed_span
 

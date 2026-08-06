@@ -257,10 +257,14 @@ pytest_plugins = ("tests.integration.chembl.extraction_params_support",)
 
 def _pytest_option_names(option: object) -> tuple[str, ...]:
     """Return option spellings across callable and iterable pytest APIs."""
-    names = getattr(option, "names", ())
+    names: object = getattr(option, "names", ())
     if callable(names):
         names = names()
-    return tuple(names)
+    if isinstance(names, str):
+        return (names,)
+    if isinstance(names, (list, tuple)):
+        return tuple(str(item) for item in names)
+    return ()
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:

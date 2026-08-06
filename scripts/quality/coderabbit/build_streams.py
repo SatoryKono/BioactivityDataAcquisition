@@ -58,7 +58,7 @@ def path_from_body(body: str) -> str:
     return m.group(1) if m else ""
 
 
-def gh_issue(n: int) -> dict:
+def gh_issue(n: int) -> dict[str, object]:
     env = os.environ.copy()
     env["NO_COLOR"] = "1"
     env["CLICOLOR"] = "0"
@@ -137,15 +137,18 @@ def main() -> None:
         os.environ["GH_TOKEN"] = token
     os.environ["NO_COLOR"] = "1"
 
-    by: dict[int, dict] = {}
+    by: dict[int, dict[str, object]] = {}
     for it in load_search(OUT / "search_residual_title.json") + load_search(
         OUT / "search_cr_residual.json"
     ):
-        by[it["number"]] = it
+        number = it["number"]
+        if not isinstance(number, int):
+            continue
+        by[number] = it
 
     cm: list[tuple[str, int, str]] = []
     for n, it in by.items():
-        s = sev_of(it.get("title", ""))
+        s = sev_of(str(it.get("title", "")))
         if s in ("critical", "major"):
             cm.append((s, n, it.get("title", "")))
 

@@ -662,23 +662,42 @@ def _write_manifest(
             "range_hours": config.range_hours,
         },
         "dashboards": [
-            {
-                **asdict(record),
-                "file": str(path.relative_to(config.output_dir)),
-                "screenshot": str(path.relative_to(config.output_dir)),
-                "screenshotEvidence": {
-                    "file": str(path.relative_to(config.output_dir)),
-                    "bytes": path.stat().st_size,
-                    "width": (vp := actual_viewports.get(record.uid))[0] if vp else None,
-                    "height": vp[1] if vp else None,
-                    "sha256": _sha256_file(path),
-                },
-            }
+            _dashboard_manifest_entry(
+                record=record,
+                path=path,
+                output_dir=config.output_dir,
+                viewport=actual_viewports.get(record.uid),
+            )
             for record, path in rendered
         ],
         "render_results": [asdict(result) for result in render_results],
     }
     _finalize_manifest(config, manifest)
+
+
+def _dashboard_manifest_entry(
+    *,
+    record: DashboardRecord,
+    path: Path,
+    output_dir: Path,
+    viewport: tuple[int, int] | None,
+) -> dict[str, object]:
+    """Build one dashboard row for the render manifest."""
+    rel = str(path.relative_to(output_dir))
+    width = viewport[0] if viewport is not None else None
+    height = viewport[1] if viewport is not None else None
+    return {
+        **asdict(record),
+        "file": rel,
+        "screenshot": rel,
+        "screenshotEvidence": {
+            "file": rel,
+            "bytes": path.stat().st_size,
+            "width": width,
+            "height": height,
+            "sha256": _sha256_file(path),
+        },
+    }
 
 
 def _png_dimensions(path: Path) -> tuple[int, int] | None:

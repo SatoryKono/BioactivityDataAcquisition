@@ -54,7 +54,7 @@ def main() -> None:
     maj = data["major"]
     crit = data.get("critical") or []
 
-    streams: dict[str, list[dict]] = defaultdict(list)
+    streams: dict[str, list[dict[str, object]]] = defaultdict(list)
     for m in maj:
         streams[stream_of(m["path"])].append(m)
 

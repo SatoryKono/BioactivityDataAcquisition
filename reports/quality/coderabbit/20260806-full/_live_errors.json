@@ -1,8 +1,8 @@
 [
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\doctor.py",
+    "file": "scripts/ai/codex/doctor.py",
     "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"obj\" of type \"Sized\" in function \"len\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Sized\"\n\u00a0\u00a0\u00a0\u00a0\"__len__\" is not present",
+    "message": "Argument of type \"object\" cannot be assigned to parameter \"obj\" of type \"Sized\" in function \"len\"\n  \"object\" is incompatible with protocol \"Sized\"\n    \"__len__\" is not present",
     "range": {
       "start": {
         "line": 195,
@@ -16,25 +16,9 @@
     "rule": "reportArgumentType"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\native_runtime_contract.py",
+    "file": "scripts/ai/codex/sync_native_skills.py",
     "severity": "error",
-    "message": "Operator \"-\" not supported for types \"set[Literal['py-architecture-debt-bot', 'py-audit-bot', 'py-config-bot', 'py-debug-bot', 'py-doc-bot', 'py-plan-bot', 'py-review-orchestrator', 'py-test-bot', 'py-test-swarm']]\" and \"set[str]\"",
-    "range": {
-      "start": {
-        "line": 182,
-        "character": 26
-      },
-      "end": {
-        "line": 182,
-        "character": 43
-      }
-    },
-    "rule": "reportOperatorIssue"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\sync_native_skills.py",
-    "severity": "error",
-    "message": "Import from `native_runtime_contract` is implicitly relative and will not work if this file is imported as a module\n\u00a0\u00a0Use a relative import from `.native_runtime_contract` instead\n\u00a0\u00a0or specify the full module path: `scripts.ai.codex.native_runtime_contract`",
+    "message": "Import from `native_runtime_contract` is implicitly relative and will not work if this file is imported as a module\n  Use a relative import from `.native_runtime_contract` instead\n  or specify the full module path: `scripts.ai.codex.native_runtime_contract`",
     "range": {
       "start": {
         "line": 9,
@@ -48,25 +32,9 @@
     "rule": "reportImplicitRelativeImport"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\engineering\\dev\\quarantine_explorer_mock_server.py",
+    "file": "scripts/ops/coderabbit/build_matrix.py",
     "severity": "error",
-    "message": "\"WindowsSelectorEventLoopPolicy\" is not a known attribute of module \"asyncio\"",
-    "range": {
-      "start": {
-        "line": 514,
-        "character": 46
-      },
-      "end": {
-        "line": 514,
-        "character": 76
-      }
-    },
-    "rule": "reportAttributeAccessIssue"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\build_matrix.py",
-    "severity": "error",
-    "message": "Argument of type \"object | list[_T@list]\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@list]\" in function \"__init__\"\n\u00a0\u00a0Type \"object | list[_T@list]\" is not assignable to type \"Iterable[_T@list]\"\n\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@list]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
+    "message": "Argument of type \"object | list[_T@list]\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@list]\" in function \"__init__\"\n  Type \"object | list[_T@list]\" is not assignable to type \"Iterable[_T@list]\"\n    \"object\" is incompatible with protocol \"Iterable[_T@list]\"\n      \"__iter__\" is not present",
     "range": {
       "start": {
         "line": 316,
@@ -80,7 +48,7 @@
     "rule": "reportArgumentType"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\run_leaves.py",
+    "file": "scripts/ops/coderabbit/run_leaves.py",
     "severity": "error",
     "message": "Expected type arguments for generic class \"dict\"",
     "range": {
@@ -96,7 +64,7 @@
     "rule": "reportMissingTypeArgument"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\run_leaves.py",
+    "file": "scripts/ops/coderabbit/run_leaves.py",
     "severity": "error",
     "message": "Expected type arguments for generic class \"dict\"",
     "range": {
@@ -112,7 +80,7 @@
     "rule": "reportMissingTypeArgument"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\run_leaves.py",
+    "file": "scripts/ops/coderabbit/run_leaves.py",
     "severity": "error",
     "message": "Expected type arguments for generic class \"dict\"",
     "range": {
@@ -128,7 +96,7 @@
     "rule": "reportMissingTypeArgument"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\run_leaves.py",
+    "file": "scripts/ops/coderabbit/run_leaves.py",
     "severity": "error",
     "message": "Expected type arguments for generic class \"dict\"",
     "range": {
@@ -144,7 +112,7 @@
     "rule": "reportMissingTypeArgument"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\observability\\grafana\\rerender_grafana_screenshots.py",
+    "file": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
     "severity": "error",
     "message": "Object of type \"None\" is not subscriptable",
     "range": {
@@ -154,31 +122,47 @@
       },
       "end": {
         "line": 671,
-        "character": 57
+        "character": 69
       }
     },
     "rule": "reportOptionalSubscript"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\observability\\grafana\\rerender_grafana_screenshots.py",
+    "file": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
     "severity": "error",
-    "message": "Object of type \"None\" is not subscriptable",
+    "message": "\"vp\" is unbound",
     "range": {
       "start": {
-        "line": 674,
-        "character": 30
+        "line": 671,
+        "character": 76
       },
       "end": {
-        "line": 674,
-        "character": 58
+        "line": 671,
+        "character": 78
       }
     },
-    "rule": "reportOptionalSubscript"
+    "rule": "reportUnboundVariable"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\runtime\\docker\\recreate_cutover_stacks.py",
+    "file": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
     "severity": "error",
-    "message": "Import from `docker_runtime_preflight` is implicitly relative and will not work if this file is imported as a module\n\u00a0\u00a0Use a relative import from `.docker_runtime_preflight` instead\n\u00a0\u00a0or specify the full module path: `scripts.ops.runtime.docker.docker_runtime_preflight`",
+    "message": "\"vp\" is possibly unbound",
+    "range": {
+      "start": {
+        "line": 672,
+        "character": 39
+      },
+      "end": {
+        "line": 672,
+        "character": 41
+      }
+    },
+    "rule": "reportPossiblyUnboundVariable"
+  },
+  {
+    "file": "scripts/ops/runtime/docker/recreate_cutover_stacks.py",
+    "severity": "error",
+    "message": "Import from `docker_runtime_preflight` is implicitly relative and will not work if this file is imported as a module\n  Use a relative import from `.docker_runtime_preflight` instead\n  or specify the full module path: `scripts.ops.runtime.docker.docker_runtime_preflight`",
     "range": {
       "start": {
         "line": 28,
@@ -192,9 +176,9 @@
     "rule": "reportImplicitRelativeImport"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\runtime\\docker\\runtime_manager.py",
+    "file": "scripts/ops/runtime/docker/runtime_manager.py",
     "severity": "error",
-    "message": "Import from `docker_runtime_preflight` is implicitly relative and will not work if this file is imported as a module\n\u00a0\u00a0Use a relative import from `.docker_runtime_preflight` instead\n\u00a0\u00a0or specify the full module path: `scripts.ops.runtime.docker.docker_runtime_preflight`",
+    "message": "Import from `docker_runtime_preflight` is implicitly relative and will not work if this file is imported as a module\n  Use a relative import from `.docker_runtime_preflight` instead\n  or specify the full module path: `scripts.ops.runtime.docker.docker_runtime_preflight`",
     "range": {
       "start": {
         "line": 30,
@@ -208,7 +192,7 @@
     "rule": "reportImplicitRelativeImport"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\build_streams.py",
+    "file": "scripts/quality/coderabbit/build_streams.py",
     "severity": "error",
     "message": "Expected type arguments for generic class \"dict\"",
     "range": {
@@ -224,7 +208,7 @@
     "rule": "reportMissingTypeArgument"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\build_streams.py",
+    "file": "scripts/quality/coderabbit/build_streams.py",
     "severity": "error",
     "message": "Expected type arguments for generic class \"dict\"",
     "range": {
@@ -240,9 +224,9 @@
     "rule": "reportMissingTypeArgument"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\build_streams.py",
+    "file": "scripts/quality/coderabbit/build_streams.py",
     "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"key\" of type \"int\" in function \"__setitem__\"\n\u00a0\u00a0\"object\" is not assignable to \"int\"",
+    "message": "Argument of type \"object\" cannot be assigned to parameter \"key\" of type \"int\" in function \"__setitem__\"\n  \"object\" is not assignable to \"int\"",
     "range": {
       "start": {
         "line": 143,
@@ -256,7 +240,7 @@
     "rule": "reportArgumentType"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\rebalance_streams.py",
+    "file": "scripts/quality/coderabbit/rebalance_streams.py",
     "severity": "error",
     "message": "Expected type arguments for generic class \"dict\"",
     "range": {
@@ -272,9 +256,9 @@
     "rule": "reportMissingTypeArgument"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\_lifecycle_observer_span_management.py",
+    "file": "src/bioetl/application/composite/_lifecycle_observer_span_management.py",
     "severity": "error",
-    "message": "Argument of type \"SpanHandle\" cannot be assigned to parameter \"value\" of type \"_CompositeSpanHandleProtocol\" in function \"__setitem__\"\n\u00a0\u00a0\"SpanHandle\" is incompatible with protocol \"_CompositeSpanHandleProtocol\"\n\u00a0\u00a0\u00a0\u00a0\"__exit__\" is an incompatible type\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"(exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> (bool | None)\" is not assignable to type \"(exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> (object | None)\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Parameter name mismatch: \"exc_val\" versus \"exc\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Parameter name mismatch: \"exc_tb\" versus \"tb\"",
+    "message": "Argument of type \"SpanHandle\" cannot be assigned to parameter \"value\" of type \"_CompositeSpanHandleProtocol\" in function \"__setitem__\"\n  \"SpanHandle\" is incompatible with protocol \"_CompositeSpanHandleProtocol\"\n    \"__exit__\" is an incompatible type\n      Type \"(exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> (bool | None)\" is not assignable to type \"(exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> (object | None)\"\n        Parameter name mismatch: \"exc_val\" versus \"exc\"\n        Parameter name mismatch: \"exc_tb\" versus \"tb\"",
     "range": {
       "start": {
         "line": 73,
@@ -288,9 +272,9 @@
     "rule": "reportArgumentType"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\_lifecycle_observer_span_management.py",
+    "file": "src/bioetl/application/composite/_lifecycle_observer_span_management.py",
     "severity": "error",
-    "message": "Argument of type \"SpanHandle\" cannot be assigned to parameter \"value\" of type \"_CompositeSpanHandleProtocol\" in function \"__setitem__\"\n\u00a0\u00a0\"SpanHandle\" is incompatible with protocol \"_CompositeSpanHandleProtocol\"\n\u00a0\u00a0\u00a0\u00a0\"__exit__\" is an incompatible type\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"(exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> (bool | None)\" is not assignable to type \"(exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> (object | None)\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Parameter name mismatch: \"exc_val\" versus \"exc\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Parameter name mismatch: \"exc_tb\" versus \"tb\"",
+    "message": "Argument of type \"SpanHandle\" cannot be assigned to parameter \"value\" of type \"_CompositeSpanHandleProtocol\" in function \"__setitem__\"\n  \"SpanHandle\" is incompatible with protocol \"_CompositeSpanHandleProtocol\"\n    \"__exit__\" is an incompatible type\n      Type \"(exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> (bool | None)\" is not assignable to type \"(exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> (object | None)\"\n        Parameter name mismatch: \"exc_val\" versus \"exc\"\n        Parameter name mismatch: \"exc_tb\" versus \"tb\"",
     "range": {
       "start": {
         "line": 104,
@@ -304,13 +288,14 @@
     "rule": "reportArgumentType"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\checkpoint\\_checkpoint_runtime.py",
+    "file": "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py",
     "severity": "error",
     "message": "Cycle detected in import chain\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\checkpoint\\_checkpoint_runtime.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\checkpoint\\_checkpoint_warnings.py",
+    "range": null,
     "rule": "reportImportCycles"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\runner_pkg\\runner.py",
+    "file": "src/bioetl/application/composite/runner_pkg/runner.py",
     "severity": "error",
     "message": "Conversion of type `Self@CompositePipelineRunner` to type `_RunnerLifecycleHost` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
     "range": {
@@ -326,7 +311,7 @@
     "rule": "reportInvalidCast"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\runner_pkg\\runner_checkpoint_save_observability.py",
+    "file": "src/bioetl/application/composite/runner_pkg/runner_checkpoint_save_observability.py",
     "severity": "error",
     "message": "Conversion of type `SpanHandle` to type `Span` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
     "range": {
@@ -342,7 +327,7 @@
     "rule": "reportInvalidCast"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\_base_transformer_execution_support.py",
+    "file": "src/bioetl/application/core/_base_transformer_execution_support.py",
     "severity": "error",
     "message": "Conversion of type `SpanHandle` to type `_ClosableSpan` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
     "range": {
@@ -358,9 +343,9 @@
     "rule": "reportInvalidCast"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\_record_processor_span_support.py",
+    "file": "src/bioetl/application/core/_record_processor_span_support.py",
     "severity": "error",
-    "message": "Argument of type \"dict[str, str | int]\" cannot be assigned to parameter \"attributes\" of type \"dict[str, object] | None\" in function \"start_as_current_span\"\n\u00a0\u00a0Type \"dict[str, str | int]\" is not assignable to type \"dict[str, object] | None\"\n\u00a0\u00a0\u00a0\u00a0\"dict[str, str | int]\" is not assignable to \"dict[str, object]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type parameter \"_VT@dict\" is invariant, but \"str | int\" is not the same as \"object\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Consider switching from \"dict\" to \"Mapping\" which is covariant in the value type\n\u00a0\u00a0\u00a0\u00a0\"dict[str, str | int]\" is not assignable to \"None\"",
+    "message": "Argument of type \"dict[str, str | int]\" cannot be assigned to parameter \"attributes\" of type \"dict[str, object] | None\" in function \"start_as_current_span\"\n  Type \"dict[str, str | int]\" is not assignable to type \"dict[str, object] | None\"\n    \"dict[str, str | int]\" is not assignable to \"dict[str, object]\"\n      Type parameter \"_VT@dict\" is invariant, but \"str | int\" is not the same as \"object\"\n      Consider switching from \"dict\" to \"Mapping\" which is covariant in the value type\n    \"dict[str, str | int]\" is not assignable to \"None\"",
     "range": {
       "start": {
         "line": 103,
@@ -374,7 +359,7 @@
     "rule": "reportArgumentType"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\_record_processor_span_support.py",
+    "file": "src/bioetl/application/core/_record_processor_span_support.py",
     "severity": "error",
     "message": "Conversion of type `SpanHandle` to type `Span` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
     "range": {
@@ -390,7 +375,7 @@
     "rule": "reportInvalidCast"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\batch_checkpoint_recovery_service.py",
+    "file": "src/bioetl/application/core/batch_checkpoint_recovery_service.py",
     "severity": "error",
     "message": "Conversion of type `SpanHandle` to type `Span` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
     "range": {
@@ -406,9 +391,9 @@
     "rule": "reportInvalidCast"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\data_sources\\publication_term.py",
+    "file": "src/bioetl/application/core/data_sources/publication_term.py",
     "severity": "error",
-    "message": "Cannot access attribute \"_fetch_publication_terms\" for class \"PublicationTermDataSource*\"\n\u00a0\u00a0Could not bind method \"_fetch_publication_terms\" because \"Self@PublicationTermDataSource\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\"PublicationTermDataSource*\" is incompatible with protocol \"PublicationTermExtractionHost\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"SOURCE_ENTITY_TYPE\" is invariant because it is mutable\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"SOURCE_ENTITY_TYPE\" is an incompatible type\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"Literal['publication']\" is not assignable to \"str\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"PUBLICATION_LIMIT_MULTIPLIER\" is invariant because it is mutable\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"PUBLICATION_LIMIT_MULTIPLIER\" is an incompatible type\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"Literal[50]\" is not assignable to \"int\"",
+    "message": "Cannot access attribute \"_fetch_publication_terms\" for class \"PublicationTermDataSource*\"\n  Could not bind method \"_fetch_publication_terms\" because \"Self@PublicationTermDataSource\" is not assignable to parameter \"self\"\n    \"PublicationTermDataSource*\" is incompatible with protocol \"PublicationTermExtractionHost\"\n      \"SOURCE_ENTITY_TYPE\" is invariant because it is mutable\n      \"SOURCE_ENTITY_TYPE\" is an incompatible type\n        \"Literal['publication']\" is not assignable to \"str\"\n      \"PUBLICATION_LIMIT_MULTIPLIER\" is invariant because it is mutable\n      \"PUBLICATION_LIMIT_MULTIPLIER\" is an incompatible type\n        \"Literal[50]\" is not assignable to \"int\"",
     "range": {
       "start": {
         "line": 62,
@@ -422,9 +407,9 @@
     "rule": "reportAttributeAccessIssue"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\composition\\_workflow_services.py",
+    "file": "src/bioetl/composition/_workflow_services.py",
     "severity": "error",
-    "message": "Argument of type \"NoOpTracing\" cannot be assigned to parameter \"tracing\" of type \"TracingPort | None\" in function \"__init__\"\n\u00a0\u00a0Type \"NoOpTracing\" is not assignable to type \"TracingPort | None\"\n\u00a0\u00a0\u00a0\u00a0\"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"get_tracer\" is an incompatible type\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n\u00a0\u00a0\u00a0\u00a0\"NoOpTracing\" is not assignable to \"None\"",
+    "message": "Argument of type \"NoOpTracing\" cannot be assigned to parameter \"tracing\" of type \"TracingPort | None\" in function \"__init__\"\n  Type \"NoOpTracing\" is not assignable to type \"TracingPort | None\"\n    \"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n      \"get_tracer\" is an incompatible type\n        Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n          Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n    \"NoOpTracing\" is not assignable to \"None\"",
     "range": {
       "start": {
         "line": 128,
@@ -438,9 +423,9 @@
     "rule": "reportArgumentType"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\composition\\_workflow_services.py",
+    "file": "src/bioetl/composition/_workflow_services.py",
     "severity": "error",
-    "message": "Argument of type \"NoOpTracing\" cannot be assigned to parameter \"tracing\" of type \"TracingPort | None\" in function \"__init__\"\n\u00a0\u00a0Type \"NoOpTracing\" is not assignable to type \"TracingPort | None\"\n\u00a0\u00a0\u00a0\u00a0\"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"get_tracer\" is an incompatible type\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n\u00a0\u00a0\u00a0\u00a0\"NoOpTracing\" is not assignable to \"None\"",
+    "message": "Argument of type \"NoOpTracing\" cannot be assigned to parameter \"tracing\" of type \"TracingPort | None\" in function \"__init__\"\n  Type \"NoOpTracing\" is not assignable to type \"TracingPort | None\"\n    \"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n      \"get_tracer\" is an incompatible type\n        Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n          Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n    \"NoOpTracing\" is not assignable to \"None\"",
     "range": {
       "start": {
         "line": 150,
@@ -454,9 +439,9 @@
     "rule": "reportArgumentType"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\composition\\bootstrap\\cli\\storage.py",
+    "file": "src/bioetl/composition/bootstrap/cli/storage.py",
     "severity": "error",
-    "message": "Argument of type \"NoOpTracing\" cannot be assigned to parameter \"tracing\" of type \"TracingPort\" in function \"bootstrap_storage_adapter\"\n\u00a0\u00a0\"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n\u00a0\u00a0\u00a0\u00a0\"get_tracer\" is an incompatible type\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"_NoOpOtelTracer\" is incompatible with protocol \"TracerHandle\"",
+    "message": "Argument of type \"NoOpTracing\" cannot be assigned to parameter \"tracing\" of type \"TracingPort\" in function \"bootstrap_storage_adapter\"\n  \"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n    \"get_tracer\" is an incompatible type\n      Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n        Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n          \"_NoOpOtelTracer\" is incompatible with protocol \"TracerHandle\"",
     "range": {
       "start": {
         "line": 96,
@@ -470,7 +455,7 @@
     "rule": "reportArgumentType"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\composition\\bootstrap\\runtime\\tracing_bootstrap.py",
+    "file": "src/bioetl/composition/bootstrap/runtime/tracing_bootstrap.py",
     "severity": "error",
     "message": "Conversion of type `OpenTelemetryTracer` to type `TracingPort` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
     "range": {
@@ -486,9 +471,9 @@
     "rule": "reportInvalidCast"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\composition\\bootstrap\\runtime\\tracing_bootstrap.py",
+    "file": "src/bioetl/composition/bootstrap/runtime/tracing_bootstrap.py",
     "severity": "error",
-    "message": "Type \"NoOpTracing\" is not assignable to return type \"TracingPort\"\n\u00a0\u00a0\"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n\u00a0\u00a0\u00a0\u00a0\"get_tracer\" is an incompatible type\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"_NoOpOtelTracer\" is incompatible with protocol \"TracerHandle\"",
+    "message": "Type \"NoOpTracing\" is not assignable to return type \"TracingPort\"\n  \"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n    \"get_tracer\" is an incompatible type\n      Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n        Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n          \"_NoOpOtelTracer\" is incompatible with protocol \"TracerHandle\"",
     "range": {
       "start": {
         "line": 49,
@@ -502,9 +487,9 @@
     "rule": "reportReturnType"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\composition\\observability_resolution.py",
+    "file": "src/bioetl/composition/observability_resolution.py",
     "severity": "error",
-    "message": "Type \"NoOpTracing\" is not assignable to return type \"TracingPort\"\n\u00a0\u00a0\"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n\u00a0\u00a0\u00a0\u00a0\"get_tracer\" is an incompatible type\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"_NoOpOtelTracer\" is incompatible with protocol \"TracerHandle\"",
+    "message": "Type \"NoOpTracing\" is not assignable to return type \"TracingPort\"\n  \"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n    \"get_tracer\" is an incompatible type\n      Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n        Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"\n          \"_NoOpOtelTracer\" is incompatible with protocol \"TracerHandle\"",
     "range": {
       "start": {
         "line": 64,
@@ -518,151 +503,7 @@
     "rule": "reportReturnType"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"http_client\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 48,
-        "character": 8
-      },
-      "end": {
-        "line": 48,
-        "character": 19
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"_logger\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 49,
-        "character": 8
-      },
-      "end": {
-        "line": 49,
-        "character": 15
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"_adapter_metrics\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 50,
-        "character": 8
-      },
-      "end": {
-        "line": 50,
-        "character": 24
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"_request_collector\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 51,
-        "character": 8
-      },
-      "end": {
-        "line": 51,
-        "character": 26
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"_query_builder\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 52,
-        "character": 8
-      },
-      "end": {
-        "line": 52,
-        "character": 22
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"_response_mapper\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 53,
-        "character": 8
-      },
-      "end": {
-        "line": 53,
-        "character": 24
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"_fetch_flow\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 54,
-        "character": 8
-      },
-      "end": {
-        "line": 54,
-        "character": 19
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\decorators\\_circuit_breaker_support.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"x\" of type \"ConvertibleToFloat\" in function \"__new__\"\n\u00a0\u00a0Type \"object\" is not assignable to type \"ConvertibleToFloat\"\n\u00a0\u00a0\u00a0\u00a0\"object\" is not assignable to \"str\"\n\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"Buffer\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__buffer__\" is not present\n\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsFloat\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__float__\" is not present\n\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsIndex\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__index__\" is not present",
-    "range": {
-      "start": {
-        "line": 32,
-        "character": 33
-      },
-      "end": {
-        "line": 32,
-        "character": 58
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\decorators\\_circuit_breaker_support.py",
-    "severity": "error",
-    "message": "Argument of type \"object | float | None\" cannot be assigned to parameter \"last_failure_time\" of type \"float | None\" in function \"__init__\"\n\u00a0\u00a0Type \"object | float | None\" is not assignable to type \"float | None\"\n\u00a0\u00a0\u00a0\u00a0Type \"object\" is not assignable to type \"float | None\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is not assignable to \"float\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is not assignable to \"None\"",
-    "range": {
-      "start": {
-        "line": 53,
-        "character": 26
-      },
-      "end": {
-        "line": 53,
-        "character": 43
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\http\\client_retry_observability.py",
+    "file": "src/bioetl/infrastructure/adapters/http/client_retry_observability.py",
     "severity": "error",
     "message": "Conversion of type `TracerHandle` to type `_OtelTracerLike` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
     "range": {
@@ -678,27 +519,30 @@
     "rule": "reportInvalidCast"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\openalex\\__init__.py",
+    "file": "src/bioetl/infrastructure/adapters/openalex/__init__.py",
     "severity": "error",
     "message": "Cycle detected in import chain\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\openalex\\__init__.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\openalex\\client.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\openalex\\_client_support.py",
+    "range": null,
     "rule": "reportImportCycles"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\pubmed\\_adapter_support.py",
+    "file": "src/bioetl/infrastructure/adapters/pubmed/_adapter_support.py",
     "severity": "error",
     "message": "Cycle detected in import chain\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\pubmed\\_adapter_support.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\pubmed\\adapter.py",
+    "range": null,
     "rule": "reportImportCycles"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\uniprot\\__init__.py",
+    "file": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
     "severity": "error",
     "message": "Cycle detected in import chain\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\uniprot\\__init__.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\uniprot\\client.py\n  e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\uniprot\\_client_support.py",
+    "range": null,
     "rule": "reportImportCycles"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\observability\\noop_resolution.py",
+    "file": "src/bioetl/infrastructure/observability/noop_resolution.py",
     "severity": "error",
-    "message": "Type \"tuple[TracingPort | NoOpTracing, MetricsPort | NoOpMetrics]\" is not assignable to return type \"tuple[TracingPort, MetricsPort]\"\n\u00a0\u00a0Type \"TracingPort | NoOpTracing\" is not assignable to type \"TracingPort\"\n\u00a0\u00a0\u00a0\u00a0\"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"get_tracer\" is an incompatible type\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"",
+    "message": "Type \"tuple[TracingPort | NoOpTracing, MetricsPort | NoOpMetrics]\" is not assignable to return type \"tuple[TracingPort, MetricsPort]\"\n  Type \"TracingPort | NoOpTracing\" is not assignable to type \"TracingPort\"\n    \"NoOpTracing\" is incompatible with protocol \"TracingPort\"\n      \"get_tracer\" is an incompatible type\n        Type \"(name: str) -> _NoOpOtelTracer\" is not assignable to type \"(name: str) -> TracerHandle\"\n          Function return type \"_NoOpOtelTracer\" is incompatible with type \"TracerHandle\"",
     "range": {
       "start": {
         "line": 22,
@@ -712,23 +556,7 @@
     "rule": "reportReturnType"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\quality\\exemptions_registry_policy.py",
-    "severity": "error",
-    "message": "Operator \"-\" not supported for types \"set[Literal['file_size_limits', 'function_complexity', 'function_length', 'class_size', 'class_method_count', 'god_object', 'domain_complexity']]\" and \"set[str]\"",
-    "range": {
-      "start": {
-        "line": 100,
-        "character": 21
-      },
-      "end": {
-        "line": 100,
-        "character": 73
-      }
-    },
-    "rule": "reportOperatorIssue"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\interfaces\\cli\\commands\\config_dq.py",
+    "file": "src/bioetl/interfaces/cli/commands/config_dq.py",
     "severity": "error",
     "message": "\"dq_config\" is possibly unbound",
     "range": {
@@ -744,7 +572,7 @@
     "rule": "reportPossiblyUnboundVariable"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\interfaces\\cli\\commands\\config_dq.py",
+    "file": "src/bioetl/interfaces/cli/commands/config_dq.py",
     "severity": "error",
     "message": "\"dq_config\" is possibly unbound",
     "range": {
@@ -760,9 +588,9 @@
     "rule": "reportPossiblyUnboundVariable"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\tests\\conftest.py",
+    "file": "tests/conftest.py",
     "severity": "error",
-    "message": "Argument of type \"object | Any | tuple[()]\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T_co@tuple]\" in function \"__new__\"\n\u00a0\u00a0Type \"object | Any | tuple[()]\" is not assignable to type \"Iterable[_T_co@tuple]\"\n\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T_co@tuple]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
+    "message": "Argument of type \"object | Any | tuple[()]\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T_co@tuple]\" in function \"__new__\"\n  Type \"object | Any | tuple[()]\" is not assignable to type \"Iterable[_T_co@tuple]\"\n    \"object\" is incompatible with protocol \"Iterable[_T_co@tuple]\"\n      \"__iter__\" is not present",
     "range": {
       "start": {
         "line": 262,
@@ -776,53 +604,7 @@
     "rule": "reportArgumentType"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\tests\\conftest.py",
-    "severity": "error",
-    "message": "\"WindowsSelectorEventLoopPolicy\" is not a known attribute of module \"asyncio\"",
-    "range": {
-      "start": {
-        "line": 649,
-        "character": 19
-      },
-      "end": {
-        "line": 649,
-        "character": 49
-      }
-    },
-    "rule": "reportAttributeAccessIssue"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\tests\\performance\\test_hotspot_budgets.py",
-    "severity": "error",
-    "message": "Unexpected indentation",
-    "range": {
-      "start": {
-        "line": 442,
-        "character": 0
-      },
-      "end": {
-        "line": 442,
-        "character": 12
-      }
-    }
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\tests\\performance\\test_hotspot_budgets.py",
-    "severity": "error",
-    "message": "Unexpected indentation",
-    "range": {
-      "start": {
-        "line": 505,
-        "character": 0
-      },
-      "end": {
-        "line": 505,
-        "character": 12
-      }
-    }
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\tests\\unit\\application\\core\\test_s3_record_quarantine_fetch_residuals.py",
+    "file": "tests/unit/application/core/test_s3_record_quarantine_fetch_residuals.py",
     "severity": "error",
     "message": "Instance variable \"_iter\" is not initialized in the class body or __init__ method",
     "range": {

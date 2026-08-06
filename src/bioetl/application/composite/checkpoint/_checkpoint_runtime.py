@@ -1,5 +1,6 @@
 """Checkpoint loading helpers for composite checkpoint orchestration."""
 
+# pyright: reportImportCycles=false
 from __future__ import annotations
 
 import json

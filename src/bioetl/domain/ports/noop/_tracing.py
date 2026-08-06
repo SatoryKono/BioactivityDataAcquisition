@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Self
 
 if TYPE_CHECKING:
     from types import TracebackType
 
 
 class _NoOpSpan:
-    """No-op span that mirrors OpenTelemetry ``Span`` interface."""
+    """No-op span that mirrors ``SpanHandle`` / OpenTelemetry span surface."""
 
     def __enter__(self) -> Self:
         """Enter the span context manager and return self."""
@@ -21,7 +20,7 @@ class _NoOpSpan:
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
-    ) -> None:
+    ) -> bool | None:
         """Exit the span context manager — no-op, does not suppress exceptions.
 
         Args:
@@ -29,6 +28,7 @@ class _NoOpSpan:
             exc_val: Exception instance if an error occurred, otherwise None.
             exc_tb: Traceback if an error occurred, otherwise None.
         """
+        _ = exc_type, exc_val, exc_tb
         return None
 
     def set_attribute(
@@ -56,7 +56,7 @@ class _NoOpSpan:
     def add_event(
         self,
         name: str,
-        attributes: Mapping[str, object] | None = None,
+        attributes: dict[str, object] | None = None,
     ) -> None:
         """No-op implementation — discards span events.
 
@@ -78,22 +78,24 @@ class _NoOpSpan:
 
 
 class _NoOpOtelTracer:
-    """No-op tracer that mirrors OpenTelemetry ``Tracer`` interface."""
+    """No-op tracer that mirrors ``TracerHandle`` / OpenTelemetry tracer surface."""
 
     def start_as_current_span(
         self,
-        *_args: Any,  # Any: OTel signature is intentionally flexible
-        **_kwargs: Any,  # Any: OTel signature is intentionally flexible
+        name: str,
+        *,
+        attributes: dict[str, object] | None = None,
     ) -> _NoOpSpan:
         """Return a no-op span without starting any real tracing context.
 
         Args:
-            *_args: Positional arguments matching the OTel Tracer API (ignored).
-            **_kwargs: Keyword arguments matching the OTel Tracer API (ignored).
+            name: Span name (ignored).
+            attributes: Optional span attributes (ignored).
 
         Returns:
             A new no-op span instance.
         """
+        _ = name, attributes
         return _NoOpSpan()
 
 

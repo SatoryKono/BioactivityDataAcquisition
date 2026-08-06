@@ -3,6 +3,7 @@
 Implements RULES.md Appendix A - UniProt data source.
 """
 
+# pyright: reportImportCycles=false
 from __future__ import annotations
 
 from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter

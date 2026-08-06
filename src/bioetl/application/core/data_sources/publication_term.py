@@ -5,7 +5,7 @@ Transforms publication records from wrapped adapter into publication_term record
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 __all__ = ["PublicationTermDataSource"]
 
@@ -39,9 +39,9 @@ class PublicationTermDataSource(
 ):
     """Decorator that exposes publication_term by extracting terms from publications."""
 
-    SOURCE_ENTITY_TYPE = "publication"
-    TARGET_ENTITY_TYPE = "publication_term"
-    PUBLICATION_LIMIT_MULTIPLIER = 50
+    SOURCE_ENTITY_TYPE: ClassVar[str] = "publication"
+    TARGET_ENTITY_TYPE: ClassVar[str] = "publication_term"
+    PUBLICATION_LIMIT_MULTIPLIER: ClassVar[int] = 50
 
     def __init__(self, data_source: DataSourcePort) -> None:
         self._data_source = data_source
