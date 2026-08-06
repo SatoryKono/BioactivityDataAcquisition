@@ -55,22 +55,22 @@ class PublicationTermFilteringMixin(
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Yield publication-term records from multi-filtered upstream publications."""
-        normalized_limit = normalize_publication_term_limit(limit)
-        if normalized_limit == 0:
+        term_cap = normalize_publication_term_limit(limit)
+        if term_cap == 0:
             return
-        # Treat limit=0 as a hard zero upstream budget (not "unlimited").
-        publication_limit = (
-            normalized_limit * self.PUBLICATION_LIMIT_MULTIPLIER
-            if normalized_limit is not None
-            else None
+        # Scale only when a positive finite term cap is requested.
+        upstream_cap = (
+            None
+            if term_cap is None
+            else term_cap * self.PUBLICATION_LIMIT_MULTIPLIER
         )
         async for record in self._yield_terms_from_publications(
             filterable.fetch_multi_filtered(
                 entity_type=self.SOURCE_ENTITY_TYPE,
                 filters=filters,
-                limit=publication_limit,
+                limit=upstream_cap,
             ),
-            normalized_limit,
+            term_cap,
         ):
             yield record
 

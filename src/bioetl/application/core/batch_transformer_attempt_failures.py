@@ -15,7 +15,9 @@ from bioetl.application.core.quarantine_manager import (
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-    from bioetl.application.services.export_lineage.debug_export_service import DebugExportService
+    from bioetl.application.services.export_lineage.debug_export_service import (
+        DebugExportService,
+    )
     from bioetl.domain.config import DQConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier

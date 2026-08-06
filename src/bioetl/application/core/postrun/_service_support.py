@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator
 from contextlib import AbstractContextManager
 from typing import TYPE_CHECKING, Protocol
 
@@ -45,21 +44,23 @@ if TYPE_CHECKING:
     from bioetl.application.core.postrun.metadata_write_service import (
         PostrunMetadataWriteService,
     )
-    from bioetl.application.services.quality.data_quality_service import DataQualityService
-    from bioetl.application.services.quality.dq_report_service import (
-        DQReportContext,
-        DQReportResult,
-    )
     from bioetl.application.services.medallion.medallion_lifecycle import (
         MedallionLifecycleService,
     )
     from bioetl.application.services.medallion.medallion_types import VacuumResult
+    from bioetl.application.services.quality.data_quality_service import (
+        DataQualityService,
+    )
+    from bioetl.application.services.quality.dq_report_service import (
+        DQReportContext,
+        DQReportResult,
+    )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
 
 
-class PostrunServiceSupportHostProtocol(Protocol):
-    """Typed host contract required by PostrunServiceSupportMixin helpers."""
+class _PostrunHostAttrSurface(Protocol):
+    """Shared attribute surface for postrun host + concrete service."""
 
     _config: PipelineConfig
     _runtime: RuntimeConfig
@@ -72,6 +73,11 @@ class PostrunServiceSupportHostProtocol(Protocol):
     _metadata_write_orchestrator: PostrunMetadataWriteService
     _logger: LoggerPort
     _metrics: MetricsPort
+
+
+class PostrunServiceSupportHostProtocol(_PostrunHostAttrSurface, Protocol):
+    """Typed host contract required by PostrunServiceSupportMixin helpers."""
+
     OPERATION_ERRORS: tuple[type[BaseException], ...]
     METRIC_POSTRUN_PHASE_EVENTS_TOTAL: str
     METRIC_POSTRUN_PHASE_DURATION_SECONDS: str
