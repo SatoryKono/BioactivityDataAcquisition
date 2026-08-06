@@ -16,7 +16,6 @@ import json
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
     from bioetl.application.services.quality.dq_report_service import DQReportContext

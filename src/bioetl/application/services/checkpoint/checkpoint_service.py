@@ -36,9 +36,8 @@ from bioetl.application.services.checkpoint.checkpoint_models import CheckpointI
 from bioetl.domain.types import JsonDict, RunID
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports.observability.tracing import SpanHandle
-
     from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.ports.observability.tracing import SpanHandle
 
 CHECKPOINT_FOUND_ATTR = "bioetl.checkpoint_found"
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from datetime import datetime
-from typing import Any, TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core._batch_processing_layer_write_support import (
     write_silver_then_gold,
@@ -46,7 +46,9 @@ if TYPE_CHECKING:
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterProtocol,
     )
-    from bioetl.application.services.export_lineage.debug_export_service import DebugExportService
+    from bioetl.application.services.export_lineage.debug_export_service import (
+        DebugExportService,
+    )
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
