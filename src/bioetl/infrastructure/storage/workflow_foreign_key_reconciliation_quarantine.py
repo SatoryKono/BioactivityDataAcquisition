@@ -4,6 +4,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+import asyncio
+import logging
+
 import re
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -29,6 +32,8 @@ from bioetl.infrastructure.storage.gold.io_delta_runtime import (
 from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
 from bioetl.infrastructure.storage.gold.io_helpers import load_gold_writer_module
 from bioetl.infrastructure.time.system_clock import current_utc_time
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -146,7 +151,8 @@ async def apply_reconciliation_mutation(
             mode="delete",  # SilverWriteMode.DELETE => overwrite table atomically
         )
     else:
-        host.silver_writer.clear(request.source_table, dry_run=False)
+        await host.silver_writer.clear_silver(request.source_table, dry_run=False)
+
 
     return ReconciliationMutationSummary(
         mutation_mode="silver_rewrite",
@@ -168,7 +174,8 @@ async def expire_gold_orphan_rows(
     gold_writer = _require_gold_writer(host)
     module = load_gold_writer_module()
     table_path = gold_writer._resolve_table_path(request.source_table)
-    table_columns = _delta_table_column_names(module, table_path)
+    table_columns = await _delta_table_column_names(module, table_path)
+
     primary_keys = tuple(
         _require_sql_identifier(key, "primary_keys") for key in request.primary_keys
     )
@@ -274,19 +281,27 @@ def _require_sql_identifier(name: str, field_name: str) -> str:
     return name
 
 
-def _delta_table_column_names(
+async def _delta_table_column_names(
     module: Any,  # Any: gold writer module providing DeltaTable
     table_path: str,
 ) -> frozenset[str] | None:
     """Return Gold table column names from Delta schema when available."""
-    try:
+    def _inspect() -> frozenset[str]:
         delta_table = module.DeltaTable(table_path)
         schema = delta_table.schema()
         arrow_schema = delta_schema_to_pyarrow(schema)
         return frozenset(arrow_schema.names)
+
+    try:
+        return await asyncio.to_thread(_inspect)
     except Exception:
-        # Fall back to orphan-row inspection when schema cannot be loaded
-        # (unit fakes, missing tables, schema API variance).
+        logging.getLogger(__name__).warning(
+            "Unable to inspect Gold Delta schema; falling back to orphan rows "
+            "(table_path=%s)",
+            table_path,
+            exc_info=True,
+        )
+
         return None
 
 
