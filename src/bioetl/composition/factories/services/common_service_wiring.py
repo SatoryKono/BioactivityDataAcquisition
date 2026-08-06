@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, cast
 
@@ -193,6 +193,21 @@ def build_common_service_ports(
     )
 
 
+def _coerce_dq_service_bundle(raw: object) -> DQServiceBundle:
+    """Normalize DQServiceBundle or legacy mapping payloads."""
+    if isinstance(raw, DQServiceBundle):
+        return raw
+    if isinstance(raw, Mapping):
+        return DQServiceBundle(
+            bronze_analyzer=raw.get("bronze_analyzer"),
+            silver_analyzer=raw.get("silver_analyzer"),
+            gold_analyzer=raw.get("gold_analyzer"),
+            report_writer=raw.get("report_writer"),
+            report_service=raw.get("report_service"),
+        )
+    return DQServiceBundle()
+
+
 def assemble_pipeline_service(
     *,
     data_source: DataSourcePort,
@@ -206,6 +221,7 @@ def assemble_pipeline_service(
     from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
     metadata_writer = MetadataWriter(logger=logger)
+    dq_services = _coerce_dq_service_bundle(common_ports.dq_services)
     return PipelineService(
         data_source=data_source,
         storage=cast("PipelineStorageProtocol", common_ports.storage_ctx.adapter),  # pyright: ignore[reportInvalidCast]
@@ -218,9 +234,9 @@ def assemble_pipeline_service(
         dq_monitor=dq_monitor,
         metadata_coordinator=metadata_coordinator,
         metadata_writer=metadata_writer,
-        bronze_dq_analyzer=common_ports.dq_services.bronze_analyzer,
-        silver_dq_analyzer=common_ports.dq_services.silver_analyzer,
-        gold_dq_analyzer=common_ports.dq_services.gold_analyzer,
-        dq_report_writer=common_ports.dq_services.report_writer,
-        dq_report_service=common_ports.dq_services.report_service,
+        bronze_dq_analyzer=dq_services.bronze_analyzer,
+        silver_dq_analyzer=dq_services.silver_analyzer,
+        gold_dq_analyzer=dq_services.gold_analyzer,
+        dq_report_writer=dq_services.report_writer,
+        dq_report_service=dq_services.report_service,
     )

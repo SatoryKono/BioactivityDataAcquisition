@@ -215,11 +215,11 @@ def test_create_metrics_returns_prometheus_when_enabled(
 
 
 @pytest.mark.unit
-def test_get_output_root_uses_bronze_path_when_available() -> None:
-    settings = _make_settings(test_mode=False, data_dir=MagicMock())
+def test_get_output_root_uses_settings_data_dir() -> None:
+    settings = _make_settings(test_mode=False, data_dir="data")
     pipeline_config = _make_pipeline_config(
         sink={
-            "bronze": SimpleNamespace(path="data/output/bronze/chembl/activity"),
+            "bronze": SimpleNamespace(path="elsewhere/bronze/chembl/activity"),
         }
     )
 
@@ -229,10 +229,10 @@ def test_get_output_root_uses_bronze_path_when_available() -> None:
 
 
 @pytest.mark.unit
-def test_get_output_root_falls_back_to_settings_data_dir() -> None:
+def test_get_output_root_is_settings_scoped_not_sink_climbed() -> None:
     settings = _make_settings(
         test_mode=True,
-        data_dir=SimpleNamespace(name="data"),
+        data_dir="managed-data",
     )
     pipeline_config = _make_pipeline_config(
         sink={"bronze": SimpleNamespace(path="x/y/z")}
@@ -240,7 +240,7 @@ def test_get_output_root_falls_back_to_settings_data_dir() -> None:
 
     output_root = BaseServicesFactory._get_output_root(settings, pipeline_config)
 
-    assert output_root is settings.data_dir
+    assert output_root.as_posix().endswith("managed-data/output")
 
 
 @pytest.mark.unit
@@ -256,7 +256,8 @@ def test_create_dq_services_returns_empty_when_disabled() -> None:
         logger=MagicMock(),
     )
 
-    assert result == {}
+    assert not result
+    assert result.report_service is None
 
 
 @pytest.mark.unit
@@ -305,7 +306,10 @@ def test_get_flat_structure_true_when_gold_enabled() -> None:
 
 
 @pytest.mark.unit
-@patch("bioetl.application.services.dq_report_service.DQReportService")
+@patch(
+    "bioetl.composition.factories.dq.context_resolver._create_dq_report_service",
+    return_value="service",
+)
 @patch(
     "bioetl.composition.factories.dq.context_resolver.DQServicesFactory.create_report_writer"
 )
@@ -335,7 +339,7 @@ def test_create_dq_services_builds_enabled_stack(
     mock_silver_analyzer: MagicMock,
     mock_gold_analyzer: MagicMock,
     mock_report_writer: MagicMock,
-    mock_report_service: MagicMock,
+    _mock_report_service: MagicMock,
 ) -> None:
     settings = _make_settings()
     pipeline_config = _make_pipeline_config(sink={})
@@ -345,7 +349,6 @@ def test_create_dq_services_builds_enabled_stack(
     mock_silver_analyzer.return_value = "silver"
     mock_gold_analyzer.return_value = "gold"
     mock_report_writer.return_value = "writer"
-    mock_report_service.return_value = "service"
     mock_output_root.return_value = Path("data/output")
 
     result = BaseServicesFactory._create_dq_services(
@@ -354,11 +357,11 @@ def test_create_dq_services_builds_enabled_stack(
         logger=logger,
     )
 
-    assert result["bronze_analyzer"] == "bronze"
-    assert result["silver_analyzer"] == "silver"
-    assert result["gold_analyzer"] == "gold"
-    assert result["report_writer"] == "writer"
-    assert result["report_service"] == "service"
+    assert result.bronze_analyzer == "bronze"
+    assert result.silver_analyzer == "silver"
+    assert result.gold_analyzer == "gold"
+    assert result.report_writer == "writer"
+    assert result.report_service == "service"
 
 
 @pytest.mark.unit
