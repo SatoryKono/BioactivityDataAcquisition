@@ -28,6 +28,7 @@
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -53,6 +54,85 @@ def _spec(
             else {"bioetl": "bioetl:test@sha256:expected"}
         ),
     )
+
+
+def test_dashboard_runtime_environment_is_scoped_and_managed(tmp_path: Path) -> None:
+    contract = tmp_path / "contract.yml"
+    contract.write_text(
+        yaml.safe_dump(
+            {
+                "dashboard_data_plane": {
+                    "required_bind_mounts": {
+                        "/app/data": {
+                            "relative_source": "data",
+                            "environment_name": "BIOETL_DASHBOARD_DATA_ROOT",
+                        },
+                        "/app/reports": {
+                            "relative_source": "reports",
+                            "environment_name": "BIOETL_DASHBOARD_REPORT_ROOT",
+                        },
+                    },
+                    "source_identity": {
+                        "schema_version": "bioetl-dashboard-source-v1",
+                        "environment_name": "BIOETL_RUNTIME_SOURCE_ID",
+                    },
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    previous = os.environ.pop("BIOETL_RUNTIME_SOURCE_ID", None)
+    try:
+        with runtime_manager._dashboard_runtime_environment(contract) as environment:
+            assert len(environment["BIOETL_RUNTIME_SOURCE_ID"]) == 64
+            assert os.environ["BIOETL_RUNTIME_SOURCE_ID"] == environment[
+                "BIOETL_RUNTIME_SOURCE_ID"
+            ]
+        assert "BIOETL_RUNTIME_SOURCE_ID" not in os.environ
+    finally:
+        if previous is not None:
+            os.environ["BIOETL_RUNTIME_SOURCE_ID"] = previous
+
+
+def test_status_origin_findings_exposes_dashboard_source_drift(
+    tmp_path: Path,
+) -> None:
+    report_path = tmp_path / "preflight.json"
+    report_path.write_text(
+        json.dumps(
+            {
+                "findings": [
+                    {
+                        "code": "DASHBOARD_SOURCE_MOUNT",
+                        "severity": "error",
+                        "message": "wrong root",
+                        "evidence": {"target": "/app/data"},
+                    },
+                    {
+                        "code": "CAPACITY_DISK",
+                        "severity": "error",
+                        "message": "unrelated",
+                        "evidence": {},
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    findings = runtime_manager._status_origin_findings(
+        report_path,
+        runtime_manager.CommandResult(["preflight"], 2),
+    )
+
+    assert findings == [
+        {
+            "cause": "dashboard_source_drift",
+            "code": "DASHBOARD_SOURCE_MOUNT",
+            "message": "wrong root",
+            "evidence": {"target": "/app/data"},
+        }
+    ]
 
 
 def test_readiness_fails_on_restart_oom_and_image_drift() -> None:

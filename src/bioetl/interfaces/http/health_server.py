@@ -61,6 +61,7 @@ class HealthServerControlPlaneDeps:
     run_ledger_port: RunLedgerPort | None = None
     workflow_manifest_port: WorkflowManifestPort | None = None
     metrics_exposition: HealthMetricsExpositionPort | None = None
+    runtime_source_id: str | None = None
 
 
 class HealthServer(
@@ -95,6 +96,7 @@ class HealthServer(
                 "run_ledger_port",
                 "workflow_manifest_port",
                 "metrics_exposition",
+                "runtime_source_id",
             }
             unknown = set(legacy_ports) - allowed
             if unknown:
@@ -114,6 +116,7 @@ class HealthServer(
         self._run_manifest_port = deps.run_manifest_port
         self._run_ledger_port = deps.run_ledger_port
         self._workflow_manifest_port = deps.workflow_manifest_port
+        self._runtime_source_id = deps.runtime_source_id
         self._metrics_exposition: HealthMetricsExpositionPort = (
             deps.metrics_exposition or _StaticHealthMetricsExposition()
         )

@@ -10,18 +10,25 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
 import time
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+if __package__:
+    from . import docker_runtime_preflight as runtime_preflight
+else:  # pragma: no cover - direct CLI execution path
+    import docker_runtime_preflight as runtime_preflight
 
 ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_CONTRACT = ROOT / "configs/quality/docker_runtime_contracts.yaml"
@@ -34,6 +41,25 @@ _SECRET_ASSIGNMENT = re.compile(
     re.I,
 )
 _URI_USERINFO = re.compile(r"(://)[^/@\s:]+:[^/@\s]+@")
+
+
+@contextmanager
+def _dashboard_runtime_environment(
+    contract_path: Path,
+) -> Iterator[dict[str, str]]:
+    """Expose one scoped source identity to Compose without touching `.env`."""
+    contract = _load_contract(contract_path)
+    overrides = runtime_preflight.dashboard_source_environment(ROOT, contract)
+    previous = {name: os.environ.get(name) for name in overrides}
+    os.environ.update(overrides)
+    try:
+        yield overrides
+    finally:
+        for name, value in previous.items():
+            if value is None:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = value
 
 
 @dataclass(frozen=True)
@@ -408,6 +434,7 @@ _CAUSE_PRIORITY = {
     "preflight_failed": 1,
     "compose_render_failed": 2,
     "project_origin_drift": 3,
+    "dashboard_source_drift": 3,
     "network_owner_drift": 3,
     "port_owner_drift": 4,
     "image_identity_drift": 5,
@@ -1407,15 +1434,51 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def main(argv: Sequence[str] | None = None, *, runner: Runner = _run) -> int:
-    args = _parse_args(argv)
-    contract_path = args.contract.resolve()
-    report_dir = args.report_dir.resolve()
+_STATUS_ORIGIN_CODES = frozenset(
+    {
+        "DASHBOARD_SOURCE_IDENTITY",
+        "DASHBOARD_SOURCE_MOUNT",
+        "MOUNT_ORIGIN",
+        "PROJECT_ORIGIN",
+    }
+)
+
+
+def _status_origin_findings(
+    preflight_path: Path,
+    preflight: CommandResult,
+) -> list[dict[str, Any]]:
+    """Extract only origin/data-plane failures for the lightweight status view."""
     try:
-        spec = resolve_stack(contract_path, args.stack)
-    except (KeyError, OSError, ValueError, yaml.YAMLError) as exc:
-        print(json.dumps({"ok": False, "error": type(exc).__name__}))
-        return 2
+        payload = json.loads(preflight_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        if preflight.returncode == 0:
+            return []
+        return [{"cause": "preflight_failed", "stderr": preflight.stderr}]
+    raw_findings = payload.get("findings") or []
+    return [
+        {
+            "cause": "dashboard_source_drift",
+            "code": finding.get("code"),
+            "message": finding.get("message"),
+            "evidence": finding.get("evidence"),
+        }
+        for finding in raw_findings
+        if isinstance(finding, Mapping)
+        and finding.get("severity") == "error"
+        and str(finding.get("code") or "") in _STATUS_ORIGIN_CODES
+    ]
+
+
+def _dispatch_action(
+    args: argparse.Namespace,
+    *,
+    spec: StackSpec,
+    contract_path: Path,
+    report_dir: Path,
+    runner: Runner,
+) -> int:
+    """Dispatch one lifecycle action after source environment activation."""
     if args.action == "check":
         result = _preflight(
             contract_path,
@@ -1468,8 +1531,17 @@ def main(argv: Sequence[str] | None = None, *, runner: Runner = _run) -> int:
         )
         return 0 if not payload["findings"] else 1
     if args.action == "status":
+        preflight_path = report_dir / f"docker-runtime-{spec.name}-preflight.json"
+        preflight = _preflight(
+            contract_path,
+            preflight_path,
+            spec.name,
+            runner=runner,
+            timeout=min(args.timeout, 60.0),
+        )
         snapshots, _ = collect_snapshots(spec, runner=runner, timeout=args.timeout)
         findings = readiness_findings(spec, snapshots)
+        findings.extend(_status_origin_findings(preflight_path, preflight))
         print(
             json.dumps(
                 {
@@ -1489,6 +1561,25 @@ def main(argv: Sequence[str] | None = None, *, runner: Runner = _run) -> int:
     return runner(
         _compose(spec, "down", "--remove-orphans"), ROOT, args.timeout
     ).returncode
+
+
+def main(argv: Sequence[str] | None = None, *, runner: Runner = _run) -> int:
+    args = _parse_args(argv)
+    contract_path = args.contract.resolve()
+    report_dir = args.report_dir.resolve()
+    try:
+        spec = resolve_stack(contract_path, args.stack)
+        with _dashboard_runtime_environment(contract_path):
+            return _dispatch_action(
+                args,
+                spec=spec,
+                contract_path=contract_path,
+                report_dir=report_dir,
+                runner=runner,
+            )
+    except (KeyError, OSError, ValueError, yaml.YAMLError) as exc:
+        print(json.dumps({"ok": False, "error": type(exc).__name__}))
+        return 2
 
 
 if __name__ == "__main__":
