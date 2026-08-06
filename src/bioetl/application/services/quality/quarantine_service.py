@@ -32,7 +32,7 @@ from bioetl.application.services.quality._quarantine_service_support import (
 )
 
 if TYPE_CHECKING:
-    from opentelemetry.trace import Span
+    from bioetl.domain.ports.observability.tracing import SpanHandle
 
     from bioetl.application.services.control_plane.manifest.inspection_service import (
         RunManifestInspectionService,
@@ -92,7 +92,7 @@ class QuarantineService(QuarantineServiceFilteredMixin):
 
     @staticmethod
     def _set_trace_result(
-        span: Span,
+        span: SpanHandle,
         *,
         success: bool,
         **extra: object,

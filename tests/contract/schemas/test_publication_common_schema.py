@@ -95,7 +95,7 @@ def test_publication_common_schema_rejects_invalid_loaded_taxonomy_value() -> No
         PublicationGoldCommonSchema.validate(frame)
 
 
-def test_publication_common_schema_allows_values_when_taxonomy_is_unavailable(
+def test_publication_common_schema_fails_closed_when_taxonomy_is_unavailable(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
@@ -105,5 +105,9 @@ def test_publication_common_schema_allows_values_when_taxonomy_is_unavailable(
     )
     frame = _minimal_publication_common_df()
     frame.loc[0, "publication_type_unified"] = "Provider Specific Type"
+    with pytest.raises(pa.errors.SchemaError):
+        PublicationGoldCommonSchema.validate(frame)
+    # Null classification remains valid when taxonomy is empty.
+    frame.loc[0, "publication_type_unified"] = None
     validated = PublicationGoldCommonSchema.validate(frame)
-    assert validated["publication_type_unified"].iloc[0] == "Provider Specific Type"
+    assert validated["publication_type_unified"].isna().iloc[0]

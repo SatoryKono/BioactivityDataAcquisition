@@ -117,7 +117,7 @@ class DataQualityMonitor:
             timestamp: Mandatory caller-owned timestamp; baseline is not updated
                 when timestamp is missing (defensive for non-typed callers).
         """
-        if timestamp is None:  # type: ignore[comparison-overlap]
+        if timestamp is None:
             self._logger.warning(
                 "Skipping baseline update due to missing timestamp",
             )

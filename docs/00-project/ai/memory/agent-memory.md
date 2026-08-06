@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.16
+Version: 1.0.18
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-24'
+  Last verified: '2026-08-06'
 
 ______________________________________________________________________
 
@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.17 | Дата: 2026-07-24 | Синхронизировано с Codex ORCHESTRATION.md v4.3, RULES.md v6.1.5*
+*Версия: 1.0.18 | Дата: 2026-08-06 | Navigation sync: equal-peer Codex/Junie runtime; RULES version from file header*
 
 > **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; другие runtimes могут сохранять отдельные runtime-specific copies и не обязаны совпадать побайтно с Codex surface.
 
@@ -66,7 +66,7 @@ ______________________________________________________________________
 | Провайдеры      | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.)     |
 | ADR             | Текущий набор в `docs/02-architecture/decisions/`; ADR-008 исторически superseded |
 | Coverage target | ≥85% overall, ≥90% domain                                                         |
-| RULES.md        | v6.1.5 (read `Version:` header in file)                                         |
+| RULES.md        | read `Version:` header in `docs/00-project/RULES.md` (currently 6.1.7)          |
 
 ### Ключевые файлы
 

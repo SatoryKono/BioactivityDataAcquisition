@@ -51,8 +51,8 @@ async def yield_wrapped_fetch_records(
         entity_type,
         limit,
         query,
-        filter_ids,
-        filter_field,
+        cast("Any", filter_ids),
+        cast("Any", filter_field),
         offset,
     ):
         yield cast("RecordT", record)

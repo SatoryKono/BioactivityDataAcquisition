@@ -79,24 +79,14 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
     )
     BRONZE_METADATA_SIDECAR_SUFFIX = ".meta.json"
 
-    def __init__(
-        self,
-        base_path: str | Path,
-        logger: LoggerPort,
-        metrics: MetricsPort,
-        json_export: tuple[bool, str | None] = (False, None),
-        validate_json: bool = True,
-        runtime_services: BronzeWriterRuntimeServices | None = None,
-        flat_structure: bool = False,
-        **legacy_runtime: object,
-    ) -> None:
-        """Initialize Bronze writer.
 
-        ``json_export`` is ``(save_json, json_path)`` packed to keep the public
-        constructor under the Sonar S107 parameter budget. Optional runtime
-        collaborators may also be passed via ``**legacy_runtime`` or a packed
-        ``runtime_services`` object.
-        """
+    @staticmethod
+    def _resolve_bronze_runtime_services(
+        *,
+        runtime_services: BronzeWriterRuntimeServices | None,
+        legacy_runtime: dict[str, object],
+    ) -> BronzeWriterRuntimeServices:
+        """Resolve packed runtime services from constructor kwargs."""
         tracing = legacy_runtime.pop("tracing", None)
         audit = legacy_runtime.pop("audit", None)
         metadata_writer = legacy_runtime.pop("metadata_writer", None)
@@ -127,13 +117,36 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
             from bioetl.domain.ports.noop import NoOpMetadataWriter
 
             metadata_writer = NoOpMetadataWriter()
-        services = runtime_services or BronzeWriterRuntimeServices(
+        return runtime_services or BronzeWriterRuntimeServices(
             tracing=tracing,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             audit=audit,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             metadata_writer=metadata_writer,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             save_metadata=bool(save_metadata),
             metadata_coordinator=metadata_coordinator,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             lineage_store=lineage_store,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        )
+
+    def __init__(
+        self,
+        base_path: str | Path,
+        logger: LoggerPort,
+        metrics: MetricsPort,
+        json_export: tuple[bool, str | None] = (False, None),
+        validate_json: bool = True,
+        runtime_services: BronzeWriterRuntimeServices | None = None,
+        flat_structure: bool = False,
+        **legacy_runtime: object,
+    ) -> None:
+        """Initialize Bronze writer.
+
+        ``json_export`` is ``(save_json, json_path)`` packed to keep the public
+        constructor under the Sonar S107 parameter budget. Optional runtime
+        collaborators may also be passed via ``**legacy_runtime`` or a packed
+        ``runtime_services`` object.
+        """
+        services = self._resolve_bronze_runtime_services(
+            runtime_services=runtime_services,
+            legacy_runtime=legacy_runtime,
         )
 
         save_json, json_path = json_export

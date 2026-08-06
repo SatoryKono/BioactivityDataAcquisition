@@ -26,17 +26,14 @@ def bind_context_fields[ContextT](
     if is_dataclass(context) and not isinstance(context, type):
         # Validate keys against dataclass fields before replace.
         field_names = {
-            field.name for field in context.__dataclass_fields__.values()  # type: ignore[attr-defined]
+            field.name for field in context.__dataclass_fields__.values()
         }
         unknown = sorted(set(updates) - field_names)
         if unknown:
             raise TypeError(
                 f"{unsupported_message}: unknown context fields: {', '.join(unknown)}"
             )
-        return cast(
-            "ContextT",
-            replace(cast("DataclassInstance", context), **updates),
-        )
+        return cast("ContextT", replace(cast("DataclassInstance", context), **updates))
     if hasattr(context, "__dict__") and not isinstance(context, type):
         # Shallow copy via type(context)(**payload) to avoid mutating the input.
         payload = {
@@ -46,11 +43,11 @@ def bind_context_fields[ContextT](
         }
         payload.update(updates)
         try:
-            return cast("ContextT", type(context)(**payload))
+            return type(context)(**payload)
         except TypeError:
             # Fallback: new instance + setattr for hosts that reject **kwargs.
             try:
-                clone = cast("ContextT", object.__new__(type(context)))
+                clone = object.__new__(type(context))
             except TypeError as exc:
                 raise TypeError(unsupported_message) from exc
             for key, value in payload.items():

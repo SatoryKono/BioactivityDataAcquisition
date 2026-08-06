@@ -34,9 +34,9 @@ def build_forwarded_fetch_kwargs(
         "offset": offset,
     }
     if filter_ids is not _UNSET_FETCH_ARG:
-        fetch_kwargs["filter_ids"] = filter_ids  # type: ignore[assignment]
+        fetch_kwargs["filter_ids"] = filter_ids
     if filter_field is not _UNSET_FETCH_ARG:
-        fetch_kwargs["filter_field"] = filter_field  # type: ignore[assignment]
+        fetch_kwargs["filter_field"] = filter_field
     return fetch_kwargs
 
 

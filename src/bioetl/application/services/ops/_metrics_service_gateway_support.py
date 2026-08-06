@@ -14,7 +14,7 @@ from bioetl.application.observability.tracing_operation_helpers import traced_op
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
-    from opentelemetry.trace import Span
+    from bioetl.domain.ports.observability.tracing import SpanHandle
 
     from bioetl.domain.ports import LoggerPort, MetricsPublisherPort, TracingPort
 
@@ -64,7 +64,7 @@ class _MetricsTracingHost(Protocol):
 
     @staticmethod
     def _set_result_attributes(
-        span: Span,
+        span: SpanHandle,
         *,
         success: bool,
         error: str | None = None,
@@ -116,7 +116,7 @@ class _MetricsTracingMixin:
 
     @staticmethod
     def _set_result_attributes(
-        span: Span,
+        span: SpanHandle,
         *,
         success: bool,
         error: str | None = None,
