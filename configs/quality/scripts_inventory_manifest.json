@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-05T17:18:58.976452+00:00",
+  "generated_at": "2026-08-06T06:04:27.346234+00:00",
   "summary": {
-    "total_scripts": 576,
+    "total_scripts": 578,
     "status_counts": {
-      "active": 342,
+      "active": 343,
+      "orphan": 1,
       "supporting": 229,
       "temporary_diagnostic": 5
     },
@@ -14,7 +15,7 @@
       "ci": 77,
       "docs": 234,
       "other": 81,
-      "scripts": 456,
+      "scripts": 457,
       "skills": 18,
       "tests": 365
     }
@@ -10367,31 +10368,31 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 795,
+          "line": 806,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 814,
+          "line": 825,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 905,
+          "line": 916,
           "source_group": "docs",
           "text": "| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | Выполнить ускоренный coverage/sharded прогон |"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 906,
+          "line": 917,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 943,
+          "line": 954,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded"
         }
@@ -14347,7 +14348,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
@@ -14387,13 +14388,13 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 195,
+          "line": 167,
           "source_group": "tests",
           "text": "assert committed[\"generated_by\"].endswith(\"report_module_coverage_inventory.py\")"
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 849,
+          "line": 795,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -15246,7 +15247,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 847,
+          "line": 858,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         }
@@ -15297,7 +15298,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 848,
+          "line": 859,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -15330,7 +15331,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 853,
+          "line": 864,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90`"
         },
@@ -16617,6 +16618,29 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the bounded formatter for ad-hoc CodeRabbit architecture-review evidence; remove it when that review campaign is complete or fold it into a canonical review-report command if the workflow becomes recurring."
+    },
+    {
+      "path": "scripts/ops/_cr_wave_runner.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/_extract_cr_runner.py",
+          "line": 7,
+          "source_group": "scripts",
+          "text": "src = Path(__file__).with_name(\"_cr_wave_runner.py\").read_text(encoding=\"utf-8\")"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/_extract_cr_runner.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ops/_run_cr_arch_review_remaining.sh",
@@ -18237,7 +18261,7 @@
       "agent_usage": [
         "grafana-dashboard-extension"
       ],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-extension/SKILL.md",
