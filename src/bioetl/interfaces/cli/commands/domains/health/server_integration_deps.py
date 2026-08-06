@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import re
 import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -17,6 +19,14 @@ if TYPE_CHECKING:
         QuarantineRuntimeServiceProtocol,
     )
     from bioetl.interfaces.http.health_server import HealthServer
+
+_RUNTIME_SOURCE_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+
+
+def _runtime_source_id_from_environment() -> str | None:
+    """Return a managed opaque source identity without exposing host paths."""
+    value = os.getenv("BIOETL_RUNTIME_SOURCE_ID", "").strip().lower()
+    return value if _RUNTIME_SOURCE_ID_PATTERN.fullmatch(value) else None
 
 
 def get_health_server_dependencies(
@@ -99,6 +109,7 @@ def build_health_server(
             run_ledger_port=deps.run_ledger_port,
             workflow_manifest_port=deps.workflow_manifest_port,
             metrics_exposition=metrics_exposition,
+            runtime_source_id=_runtime_source_id_from_environment(),
         ),
     )
     data_root = getattr(deps, "data_root", None)

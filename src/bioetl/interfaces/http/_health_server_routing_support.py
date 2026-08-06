@@ -78,6 +78,9 @@ class _HealthRoutingHost(_HealthResponseSupport, Protocol):
     @property
     def _data_root(self) -> str | None: ...
 
+    @property
+    def _runtime_source_id(self) -> str | None: ...
+
     def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
 
     @staticmethod
@@ -155,6 +158,7 @@ async def handle_control_plane_ready(
         is not None,
         "checkpoint_port": host._checkpoint_port is not None,
         "data_root": getattr(host, "_data_root", None),
+        "runtime_source_id": getattr(host, "_runtime_source_id", None),
     }
     status_code = 200 if payload["run_manifest_port"] else 503
     await host._send_payload_response(writer, status_code, payload)

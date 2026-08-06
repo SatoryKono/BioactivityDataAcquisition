@@ -56,6 +56,7 @@ class HealthServerRoutingMixin:
     )  # Any: host attr default (PD3)
     _clock: ClockPort | None = cast(Any, None)  # Any: host attr default (PD3)
     _data_root: str | None = cast(Any, None)  # Any: host attr default (PD3)
+    _runtime_source_id: str | None = cast(Any, None)  # Any: host attr default (PD3)
     _prometheus_base_url: str = cast(Any, None)  # Any: host attr default (PD3)
     _forensic_endpoint_limiter: asyncio.Semaphore = cast(
         Any, None
