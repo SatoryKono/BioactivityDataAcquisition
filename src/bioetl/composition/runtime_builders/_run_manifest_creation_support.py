@@ -107,6 +107,48 @@ def build_manifest_create_request(
     return request
 
 
+
+def _launch_context_value(launch_context: object, key: str, default: object = None) -> object:
+    if isinstance(launch_context, Mapping):
+        return launch_context.get(key, default)
+    return _read_attr(launch_context, key, default)
+
+
+def _resolve_replay_reconstructability_status(
+    *,
+    request: RunManifestCreateSpec,
+    strict_exact_replay_supported: bool,
+    strict_requirement: bool,
+    precomputed: Mapping[str, object] | None,
+) -> tuple[str, bool]:
+    """Return (status, effective_strict_requirement)."""
+    if precomputed is not None:
+        strict_requirement = bool(
+            precomputed.get("strict_requirement_requested", strict_requirement)
+        )
+        assessment_capability = precomputed.get("replay_capability")
+        capability_value = (
+            assessment_capability
+            if isinstance(assessment_capability, str)
+            else request.replay_capability.value
+        )
+        supported = bool(
+            precomputed.get(
+                "strict_exact_replay_supported", strict_exact_replay_supported
+            )
+        )
+        not_ok = strict_requirement and (
+            not supported
+            or capability_value != ReplayCapability.EXACT_REPLAY_SUPPORTED.value
+        )
+        return ("not_reconstructable" if not_ok else "reconstructable", strict_requirement)
+    not_ok = strict_requirement and (
+        not strict_exact_replay_supported
+        or request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
+    )
+    return ("not_reconstructable" if not_ok else "reconstructable", strict_requirement)
+
+
 def emit_replay_reconstructability_metric(
     *,
     request: RunManifestCreateSpec,
@@ -119,54 +161,28 @@ def emit_replay_reconstructability_metric(
 
     launch_context = request.launch_context
     strict_replay_requested = bool(
-        launch_context.get("exact_replay", False)
-        if isinstance(launch_context, Mapping)
-        else _read_attr(launch_context, "exact_replay", False)
+        _launch_context_value(launch_context, "exact_replay", False)
     )
     required_persistence_profile = str(
-        (
-            launch_context.get("required_persistence_profile")
-            if isinstance(launch_context, Mapping)
-            else _read_attr(launch_context, "required_persistence_profile")
-        )
+        _launch_context_value(launch_context, "required_persistence_profile")
         or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
     )
     # Prefer assessment already attached to launch_context when present so we
     # do not recompute reproducibility decisions independently.
-    precomputed = None
-    if isinstance(launch_context, Mapping):
-        precomputed = launch_context.get("reproducibility_policy_assessment")
+    precomputed_raw = _launch_context_value(
+        launch_context, "reproducibility_policy_assessment"
+    )
+    precomputed = precomputed_raw if isinstance(precomputed_raw, Mapping) else None
     strict_requirement = (
         strict_replay_requested
         or required_persistence_profile in STRICT_PERSISTENCE_PROFILES
     )
-    if isinstance(precomputed, Mapping):
-        strict_requirement = bool(
-            precomputed.get("strict_requirement_requested", strict_requirement)
-        )
-        assessment_capability = precomputed.get("replay_capability")
-        if isinstance(assessment_capability, str):
-            capability_value = assessment_capability
-        else:
-            capability_value = request.replay_capability.value
-        supported = bool(
-            precomputed.get(
-                "strict_exact_replay_supported", strict_exact_replay_supported
-            )
-        )
-        status = "reconstructable"
-        if strict_requirement and (
-            not supported
-            or capability_value != ReplayCapability.EXACT_REPLAY_SUPPORTED.value
-        ):
-            status = "not_reconstructable"
-    else:
-        status = "reconstructable"
-        if strict_requirement and (
-            not strict_exact_replay_supported
-            or request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
-        ):
-            status = "not_reconstructable"
+    status, strict_requirement = _resolve_replay_reconstructability_status(
+        request=request,
+        strict_exact_replay_supported=strict_exact_replay_supported,
+        strict_requirement=strict_requirement,
+        precomputed=precomputed,
+    )
     raw_run_type = _read_attr(request.run_type, "value", request.run_type)
     run_type = str(raw_run_type or "unknown").strip().lower().replace(" ", "_")
     bounded_run_type = run_type or "unknown"

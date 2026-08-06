@@ -656,6 +656,18 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a top-level repo-identity compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs sync-repo-identity."
     },
+    "scripts/engineering/apply_s1_c2_fixes.py": {
+      "owner": "@bioetl-platform",
+      "decision": "orphaned_audit_script",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a historical S1 remediation artifact; remove it after confirming its fixes are represented in the canonical configuration and audit record."
+    },
+    "scripts/engineering/apply_s1_c3c6_fixes.py": {
+      "owner": "@bioetl-platform",
+      "decision": "orphaned_audit_script",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a historical S1 remediation artifact; remove it after confirming its fixes are represented in the canonical configuration and audit record."
+    },
     "scripts/engineering/ci/_compatibility_registry.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -1369,6 +1381,24 @@
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the bounded formatter for ad-hoc CodeRabbit architecture-review evidence; remove it when that review campaign is complete or fold it into a canonical review-report command if the workflow becomes recurring."
+    },
+    "scripts/quality/coderabbit/build_streams.py": {
+      "owner": "@bioetl-platform",
+      "decision": "orphaned_audit_script",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a historical CodeRabbit stream-balancing artifact; remove it after confirming its audit outputs are preserved in the durable review record."
+    },
+    "scripts/quality/coderabbit/inventory_cm.py": {
+      "owner": "@bioetl-platform",
+      "decision": "orphaned_audit_script",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a historical CodeRabbit inventory artifact; remove it after confirming its audit outputs are preserved in the durable review record."
+    },
+    "scripts/quality/coderabbit/rebalance_streams.py": {
+      "owner": "@bioetl-platform",
+      "decision": "orphaned_audit_script",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a historical CodeRabbit stream-balancing artifact; remove it after confirming its audit outputs are preserved in the durable review record."
     },
     "scripts/ops/_run_cr_arch_review_remaining.sh": {
       "owner": "@bioetl-platform",

@@ -87,7 +87,7 @@ class DataQualityMonitor:
             self.detector.set_threshold(metric_name, min_threshold, max_threshold)
 
     def check_quality(
-        self, metrics: dict[str, float], timestamp: datetime
+        self, metrics: dict[str, float], timestamp: datetime | None = None
     ) -> list[DQAnomaly]:
         """Check metrics for quality issues.
 
@@ -98,7 +98,12 @@ class DataQualityMonitor:
         Returns:
             List of detected domain anomaly DTOs.
         """
+        if timestamp is None:
+            return []
+
         anomalies: list[DQAnomaly] = []
+        if timestamp is None:
+            return anomalies
 
         for metric_name, current_value in metrics.items():
             anomaly = self.detector.detect(metric_name, current_value, timestamp)
@@ -108,7 +113,7 @@ class DataQualityMonitor:
         return anomalies
 
     def update_baseline_from_metrics(
-        self, metrics: dict[str, float], timestamp: datetime
+        self, metrics: dict[str, float], timestamp: datetime | None = None
     ) -> None:
         """Update baseline with current metrics (if no anomalies).
 

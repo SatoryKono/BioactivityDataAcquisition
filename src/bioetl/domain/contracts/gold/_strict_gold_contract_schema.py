@@ -6,7 +6,6 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
-
 # Universal content_hash invariant for Gold entity rows: SHA-256 lowercase hex.
 CONTENT_HASH_HEX64_PATTERN = r"^[0-9a-f]{64}$"
 
