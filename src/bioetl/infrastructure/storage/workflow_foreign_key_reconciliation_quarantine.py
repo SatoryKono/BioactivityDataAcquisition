@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+import re
 from dataclasses import dataclass
 from datetime import date, datetime
 from math import isnan
@@ -18,13 +19,14 @@ from bioetl.domain.ports import (
     QuarantinePort,
     QuarantineWriteRequest,
 )
-from bioetl.domain.types import BatchID, BronzeRecord, MetaDict
+from bioetl.domain.types import BatchID, BronzeRecord, MetaDict, RunID
 from bioetl.infrastructure.storage.gold.io_delta_protocols import (
     GoldWriteRetryModuleProtocol,
 )
 from bioetl.infrastructure.storage.gold.io_delta_runtime import (
     _run_gold_write_with_retry,
 )
+from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
 from bioetl.infrastructure.storage.gold.io_helpers import load_gold_writer_module
 from bioetl.infrastructure.time.system_clock import current_utc_time
 
@@ -37,6 +39,7 @@ FOREIGN_KEY_ORPHAN_QUARANTINE_CATEGORY = "foreign_key_reconciliation"
 FOREIGN_KEY_ORPHAN_PIPELINE_DEFAULT = "workflow_transforms"
 _CURRENT_FLAG_COLUMNS = ("_is_current", "is_current")
 _VALID_TO_COLUMNS = ("_valid_to", "valid_to")
+_SQL_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -131,7 +134,8 @@ async def apply_reconciliation_mutation(
             quarantine_error_code=quarantine_summary.quarantine_error_code,
         )
 
-    host.silver_writer.clear(request.source_table, dry_run=False)
+    # Atomic Silver rewrite: single overwrite write when retained rows remain.
+    # Avoid clear-then-write so a failed write cannot leave an empty table.
     if retained_rows:
         source_schema = pa.Table.from_pylist(retained_rows).schema
         await host.silver_writer.write_silver(
@@ -139,8 +143,10 @@ async def apply_reconciliation_mutation(
             records=retained_rows,
             primary_keys=list(request.primary_keys),
             schema=source_schema,
-            mode="merge",
+            mode="delete",  # SilverWriteMode.DELETE => overwrite table atomically
         )
+    else:
+        host.silver_writer.clear(request.source_table, dry_run=False)
 
     return ReconciliationMutationSummary(
         mutation_mode="silver_rewrite",
@@ -160,16 +166,34 @@ async def expire_gold_orphan_rows(
     if not orphan_rows:
         return
     gold_writer = _require_gold_writer(host)
-    current_flag_col = _resolve_present_column(orphan_rows, _CURRENT_FLAG_COLUMNS)
-    valid_to_col = _resolve_present_column(orphan_rows, _VALID_TO_COLUMNS)
-    key_rows = _build_gold_orphan_key_rows(orphan_rows, request.primary_keys)
+    module = load_gold_writer_module()
+    table_path = gold_writer._resolve_table_path(request.source_table)
+    table_columns = _delta_table_column_names(module, table_path)
+    primary_keys = tuple(
+        _require_sql_identifier(key, "primary_keys") for key in request.primary_keys
+    )
+    current_flag_col = _require_sql_identifier(
+        _resolve_present_column(
+            orphan_rows,
+            _CURRENT_FLAG_COLUMNS,
+            table_columns=table_columns,
+        ),
+        "current_flag_column",
+    )
+    valid_to_col = _require_sql_identifier(
+        _resolve_present_column(
+            orphan_rows,
+            _VALID_TO_COLUMNS,
+            table_columns=table_columns,
+        ),
+        "valid_to_column",
+    )
+    key_rows = _build_gold_orphan_key_rows(orphan_rows, primary_keys)
     if not key_rows:
         return
 
-    module = load_gold_writer_module()
-    table_path = gold_writer._resolve_table_path(request.source_table)
     merge_condition = " AND ".join(
-        f"target.{key} = source.{key}" for key in request.primary_keys
+        f"target.{key} = source.{key}" for key in primary_keys
     )
     merge_condition += f" AND target.{current_flag_col} = true"
     ts_iso = current_utc_time().isoformat()
@@ -241,10 +265,46 @@ def _expire_gold_orphan_rows_once(
     )
 
 
+def _require_sql_identifier(name: str, field_name: str) -> str:
+    """Reject identifiers that are unsafe to interpolate into Delta merge SQL."""
+    if not _SQL_IDENTIFIER_RE.fullmatch(name):
+        raise ValueError(
+            f"{field_name} is not a safe SQL identifier: {name!r}"
+        )
+    return name
+
+
+def _delta_table_column_names(
+    module: Any,  # Any: gold writer module providing DeltaTable
+    table_path: str,
+) -> frozenset[str] | None:
+    """Return Gold table column names from Delta schema when available."""
+    try:
+        delta_table = module.DeltaTable(table_path)
+        schema = delta_table.schema()
+        arrow_schema = delta_schema_to_pyarrow(schema)
+        return frozenset(arrow_schema.names)
+    except Exception:
+        # Fall back to orphan-row inspection when schema cannot be loaded
+        # (unit fakes, missing tables, schema API variance).
+        return None
+
+
 def _resolve_present_column(
     rows: list[dict[str, object]],
     candidates: tuple[str, ...],
+    *,
+    table_columns: frozenset[str] | None = None,
 ) -> str:
+    """Pick the first SCD2 metadata column present on the Gold table schema.
+
+    Prefer the live Delta schema. Fall back to orphan-row keys only when the
+    schema cannot be inspected, so unit fakes and partial environments still work.
+    """
+    if table_columns is not None:
+        for candidate in candidates:
+            if candidate in table_columns:
+                return candidate
     for candidate in candidates:
         if any(candidate in row for row in rows):
             return candidate
@@ -312,7 +372,7 @@ async def quarantine_orphan_rows(
                 "error_code": error_code,
                 "payload": cast("BronzeRecord", row),
                 "bronze_batch_id": batch_id,
-                "run_id": None,
+                "run_id": _coerce_optional_run_id(request.workflow_run_id),
                 "metadata": cast(
                     "MetaDict",
                     {
@@ -324,6 +384,11 @@ async def quarantine_orphan_rows(
                         "source_layer": request.source_layer,
                         "reference_layer": request.reference_layer,
                         "mutation_layer": request.effective_mutation_layer,
+                        "workflow_run_id": request.workflow_run_id,
+                        "workflow_name": request.workflow_name,
+                        "manifest_id": request.manifest_id,
+                        "step_id": request.step_id,
+                        "transform_name": request.transform_name,
                     },
                 ),
                 "ingestion_ts": current_utc_time(),
@@ -337,6 +402,16 @@ async def quarantine_orphan_rows(
         quarantine_rows_written=len(quarantine_rows),
         quarantine_error_code=error_code,
     )
+
+
+def _coerce_optional_run_id(workflow_run_id: str | None) -> RunID | None:
+    """Map request workflow_run_id to typed RunID when it is a UUID."""
+    if workflow_run_id is None:
+        return None
+    try:
+        return RunID(UUID(str(workflow_run_id)))
+    except (TypeError, ValueError, AttributeError):
+        return None
 
 
 def _orphan_error_code(request: ForeignKeyReconciliationRequest) -> str:
