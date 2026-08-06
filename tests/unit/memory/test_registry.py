@@ -35,9 +35,14 @@ def test_registry_rejects_missing_owner_and_duplicate_id() -> None:
 def test_registry_requires_mirror_source_and_marks_unproven_usage() -> None:
     registry = load_memory_registry()
     invalid = deepcopy(registry)
-    invalid["surfaces"][2]["source_of_truth"] = None
-    invalid["surfaces"][2]["runtime_usage_proven"] = False
-    invalid["surfaces"][2]["status"] = "WARN"
+    mirror_idx = next(
+        i
+        for i, surface in enumerate(invalid["surfaces"])
+        if surface.get("canonicality") == "mirror"
+    )
+    invalid["surfaces"][mirror_idx]["source_of_truth"] = None
+    invalid["surfaces"][mirror_idx]["runtime_usage_proven"] = False
+    invalid["surfaces"][mirror_idx]["status"] = "WARN"
 
     messages = [issue.message for issue in validate_memory_registry(invalid)]
 

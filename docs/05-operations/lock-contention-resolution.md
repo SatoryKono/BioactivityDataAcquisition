@@ -18,7 +18,7 @@ ______________________________________________________________________
 
 BioETL default runtime is **single-instance Local-Only**. Locking is in-process
 / local filesystem oriented (MemoryLock). Distributed Redis-style locking from
-superseded ADR-003 is **not** the active model.
+superseded ADR-003 (now ADR-010) is **not** the active model.
 
 ## Symptoms
 
