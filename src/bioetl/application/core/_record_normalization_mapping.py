@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.core._record_normalization_contract import (
     _NormalizationFinding,
@@ -24,6 +24,10 @@ from bioetl.domain.normalization.json import serialize_json_canonical
 from bioetl.domain.normalization.profiles.base import (
     _normalizer_accepts_record_context as _profile_rule_accepts_record_context,
 )
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_passthrough,
+    normalize_profile_smiles,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.core._record_normalization_hash_support import (
@@ -35,15 +39,16 @@ if TYPE_CHECKING:
 
 
 class RecordNormalizationMappingMixin:
-    """Own field-by-field mapping normalization for Silver record payloads."""
+    """Own field-by-field mapping normalization for Silver record payloads.
 
-    provider: str = cast(Any, None)  # Any: host attr default (PD6)
-    entity_type: str | None = cast(Any, None)  # Any: host attr default (PD6)
-    profile: _NormalizationProfileLike | None = cast(
-        Any, None
-    )  # Any: host attr default (PD6)
-    rule_set: NormalizationRulesPolicy = cast(Any, None)  # Any: host attr default (PD6)
-    allow_compatibility_fallback: bool = cast(Any, None)  # Any: host attr default (PD6)
+    Host classes must assign these attributes before mapping runs.
+    """
+
+    provider: str
+    entity_type: str | None
+    profile: _NormalizationProfileLike | None
+    rule_set: NormalizationRulesPolicy
+    allow_compatibility_fallback: bool
 
     def _normalize_mapping(self, record: JsonDict) -> JsonDict:
         object.__setattr__(self, "_normalization_findings", ())
@@ -134,10 +139,6 @@ class RecordNormalizationMappingMixin:
         value: object,
         record: JsonDict,
     ) -> object:
-        from bioetl.domain.normalization.profiles.profile_normalizers import (
-            normalize_profile_passthrough,
-        )
-
         if rule.normalizer is normalize_profile_passthrough:
             return value
         normalized = rule.apply(value, record=record)
@@ -189,10 +190,6 @@ class RecordNormalizationMappingMixin:
         return canonicalize_json_like_string(value)
 
     def _normalize_smiles_field(self, field_name: str, value: object) -> str | None:
-        from bioetl.domain.normalization.profiles.profile_normalizers import (
-            normalize_profile_smiles,
-        )
-
         return normalize_profile_smiles(
             value,
             is_canonical=(field_name == "canonical_smiles"),

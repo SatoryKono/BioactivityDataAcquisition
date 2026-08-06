@@ -85,6 +85,12 @@ async def write_quarantine_requests_with_events(
     ingestion_ts: datetime,
 ) -> None:
     """Write multiple quarantine requests and emit companion events."""
+    if not (len(requests) == len(error_codes) == len(error_messages)):
+        raise ValueError(
+            "quarantine requests, error_codes, and error_messages must have equal "
+            f"lengths; got requests={len(requests)}, error_codes={len(error_codes)}, "
+            f"error_messages={len(error_messages)}"
+        )
     await write_quarantine_requests(quarantine, requests)
     for request, error_code, error_message in zip(
         requests,

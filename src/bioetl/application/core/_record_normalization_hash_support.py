@@ -179,7 +179,7 @@ class RecordNormalizationHashSupportMixin:
         )
         if not self._uses_authoritative_config_hash_policy(policy=policy):
             exclude_source |= set(profile_exclude)
-        exclude_source |= {"entity_id", "content_hash", "_content_hashes_by_version"}
+        exclude_source |= set(self._TECHNICAL_HASH_POLICY_FIELDS)
         self._validate_hash_policy_fields(
             exclude_source,
             policy_kind="exclude_fields",

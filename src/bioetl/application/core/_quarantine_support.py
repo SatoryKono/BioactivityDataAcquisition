@@ -139,6 +139,13 @@ async def persist_dq_quarantine_requests(
             error_type=reason,
             count=count,
         )
+    track_processed_quarantined(
+        metrics=ports.metrics,
+        batch_metrics=ports.batch_metrics,
+        pipeline_name=ports.pipeline_name,
+        run_type=ports.run_type,
+        count=len(requests),
+    )
 
 
 async def persist_filtered_quarantine_request(

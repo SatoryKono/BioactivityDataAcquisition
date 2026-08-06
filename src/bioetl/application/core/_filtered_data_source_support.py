@@ -118,6 +118,14 @@ async def load_csv_filter_ids(state: _FilteredDataSourceState) -> None:
             await _load_multi_column_filter(state, source_path, columns)
         elif state._filter_config.column_name:
             await _load_single_column_filter(state, source_path)
+        elif len(columns) == 1:
+            # One-entry ``columns=`` without top-level column_name: load via the
+            # multi-column path so we do not silently fall through unfiltered.
+            await _load_multi_column_filter(state, source_path, columns)
+        else:
+            raise ValueError(
+                "CSV filter loading requires column_name or a non-empty columns list"
+            )
     except FileNotFoundError:
         log_filter_file_not_found(state, source_path)
 
