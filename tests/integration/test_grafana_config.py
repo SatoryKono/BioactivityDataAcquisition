@@ -1360,7 +1360,7 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     """Review/context cards must fit their grids without hidden clipping."""
     panel_specs = {
         "bioetl-control-plane-v1.json": {139: ("html", 4)},
-        "bioetl-overview-v2.json": {9021: ("html", 5)},
+        "bioetl-overview-v2.json": {9021: ("html", 3)},
         "bioetl-runtime.json": {2541: ("html", 3)},
         "bioetl-provider-health-v2.json": {9400: ("html", 4)},
         "bioetl-incident-v1.json": {2007: ("html", 4)},

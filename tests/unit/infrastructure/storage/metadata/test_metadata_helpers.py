@@ -40,7 +40,7 @@ def test_build_and_validate_metadata_success():
     key = "test_key"
     value = "test_value"
     result = metadata_helpers.build_and_validate_metadata(key, value)
-    assert result == {"key": value}
+    assert result == {key: value}
 
 
 def test_build_and_validate_metadata_failure():

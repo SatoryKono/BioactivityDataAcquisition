@@ -44,6 +44,10 @@ def _matrix_type_from_pyarrow(field_type: object) -> str:
     return {
         "string": "string",
         "int64": "int64",
+        # Gold Pandera contracts intentionally use float compatibility for
+        # nullable integer fields while preserving integer semantics in the
+        # authority registry and published JSON contract (RULES.md §2.6).
+        "float64": "int64",
         "bool": "bool",
     }[str(field_type).strip().lower()]
 

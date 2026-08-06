@@ -153,7 +153,7 @@ async def test_search_by_title_caches_results_and_evicts_oldest() -> None:
 
 
 @pytest.mark.asyncio
-async def test_search_by_title_returns_empty_and_caches_runtime_errors() -> None:
+async def test_search_by_title_returns_empty_without_caching_runtime_errors() -> None:
     flow = _build_flow()
     flow.query_executor.request_works_payload.side_effect = RuntimeError("down")
 
@@ -162,7 +162,7 @@ async def test_search_by_title_returns_empty_and_caches_runtime_errors() -> None
 
     assert first == []
     assert second == []
-    assert flow.query_executor.request_works_payload.await_count == 1
+    assert flow.query_executor.request_works_payload.await_count == 2
     flow.logger.debug.assert_called_with(
         "openalex_title_search_failed",
         title="Gamma",

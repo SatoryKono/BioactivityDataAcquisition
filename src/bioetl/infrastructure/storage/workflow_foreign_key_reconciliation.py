@@ -363,7 +363,6 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         mutation_summary = await apply_reconciliation_mutation(
             cast(Any, self),
             request,
-            retained_rows=retained_rows,
             orphan_rows=orphan_rows,
         )
         self._log(

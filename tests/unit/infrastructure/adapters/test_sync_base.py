@@ -80,7 +80,7 @@ class StubSyncAdapter(BaseSyncAdapter):
             owns_thread_pool=owns_thread_pool,
         )
         self._fail_probe = fail_probe
-        self._probe_error = probe_error or Exception("Probe failed")
+        self._probe_error = probe_error or RuntimeError("Probe failed")
         self._probe_status = probe_status
         self._health_endpoint = health_endpoint
 

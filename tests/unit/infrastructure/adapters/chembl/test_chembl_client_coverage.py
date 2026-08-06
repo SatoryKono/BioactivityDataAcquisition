@@ -216,7 +216,7 @@ async def test_fetch_single_record_direct_success(adapter, mock_http_client):
 @pytest.mark.asyncio
 async def test_fetch_single_record_direct_failure(adapter, mock_http_client):
     """Test failed fallback to direct endpoint."""
-    mock_http_client.get.side_effect = Exception("API Error")
+    mock_http_client.get.side_effect = RuntimeError("API Error")
 
     result = await adapter._fetch_single_record_direct("target", "CHEMBL123")
 

@@ -379,11 +379,14 @@ class TestGoldPublicationSchemaMetadataFields:
 class TestGoldSchemaValidation:
     """Test Gold schema validation with sample data."""
 
-    def test_pubmed_publication_validates_correct_data(self) -> None:
+    def test_pubmed_publication_validates_correct_data(
+        self,
+        publication_type_classification_data: None,
+    ) -> None:
         """PubMedPublicationGoldSchema should validate correct data."""
         valid_record = {
             "entity_id": "pubmed_12345678",
-            "content_hash": "abc123",
+            "content_hash": "a" * 64,
             "pmid": "12345678",
             "doi": "10.1234/test",
             "pmc_id": "PMC1234567",
@@ -466,7 +469,7 @@ class TestGoldSchemaValidation:
         """ChEMBLPublicationGoldSchema should validate correct data."""
         valid_record = {
             "entity_id": "chembl_CHEMBL12345",
-            "content_hash": "xyz789",
+            "content_hash": "b" * 64,
             "publication_id": "CHEMBL12345",
             # Cross-reference IDs (prefixed naming convention)
             "publication_doi": "10.1234/test",

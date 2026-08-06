@@ -3,11 +3,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
 import asyncio
 import logging
-
 import re
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date, datetime
 from math import isnan
@@ -23,14 +22,17 @@ from bioetl.domain.ports import (
     QuarantineWriteRequest,
 )
 from bioetl.domain.types import BatchID, BronzeRecord, MetaDict, RunID
+from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
 from bioetl.infrastructure.storage.gold.io_delta_protocols import (
     GoldWriteRetryModuleProtocol,
 )
 from bioetl.infrastructure.storage.gold.io_delta_runtime import (
     _run_gold_write_with_retry,
 )
-from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
 from bioetl.infrastructure.storage.gold.io_helpers import load_gold_writer_module
+from bioetl.infrastructure.storage.silver.operations.delta_operation_protocols import (
+    _load_deltalake_module,
+)
 from bioetl.infrastructure.time.system_clock import current_utc_time
 
 logger = logging.getLogger(__name__)
@@ -115,7 +117,6 @@ async def apply_reconciliation_mutation(
     host: ReconciliationMutationHost,
     request: ForeignKeyReconciliationRequest,
     *,
-    retained_rows: list[dict[str, object]],
     orphan_rows: list[dict[str, object]],
 ) -> ReconciliationMutationSummary:
     """Quarantine orphan rows and mutate only the requested storage layer."""
@@ -139,26 +140,68 @@ async def apply_reconciliation_mutation(
             quarantine_error_code=quarantine_summary.quarantine_error_code,
         )
 
-    # Atomic Silver rewrite: single overwrite write when retained rows remain.
-    # Avoid clear-then-write so a failed write cannot leave an empty table.
-    if retained_rows:
-        source_schema = pa.Table.from_pylist(retained_rows).schema
-        await host.silver_writer.write_silver(
-            table_name=request.source_table,
-            records=retained_rows,
-            primary_keys=list(request.primary_keys),
-            schema=source_schema,
-            mode="delete",  # SilverWriteMode.DELETE => overwrite table atomically
-        )
-    else:
-        await host.silver_writer.clear_silver(request.source_table, dry_run=False)
-
+    await delete_silver_orphan_rows(host, request, orphan_rows=orphan_rows)
 
     return ReconciliationMutationSummary(
         mutation_mode="silver_rewrite",
         quarantine_batch_id=quarantine_summary.quarantine_batch_id,
         quarantine_rows_written=quarantine_summary.quarantine_rows_written,
         quarantine_error_code=quarantine_summary.quarantine_error_code,
+    )
+
+
+async def delete_silver_orphan_rows(
+    host: ReconciliationMutationHost,
+    request: ForeignKeyReconciliationRequest,
+    *,
+    orphan_rows: list[dict[str, object]],
+) -> None:
+    """Delete Silver orphan keys in one atomic Delta merge transaction."""
+    writer = host.silver_writer
+    module = _load_deltalake_module()
+    table_path = writer._resolve_table_path(request.source_table)
+    primary_keys = tuple(
+        _require_sql_identifier(key, "primary_keys") for key in request.primary_keys
+    )
+    key_rows = _build_orphan_key_rows(
+        orphan_rows,
+        primary_keys,
+        operation="Silver foreign-key reconciliation cannot delete",
+    )
+    merge_condition = " AND ".join(
+        f"target.{key} = source.{key}" for key in primary_keys
+    )
+    await asyncio.to_thread(
+        _delete_silver_orphan_rows_once,
+        module,
+        table_path,
+        key_rows,
+        merge_condition,
+    )
+
+
+def _delete_silver_orphan_rows_once(
+    module: Any,  # Any: module providing the DeltaTable runtime seam
+    table_path: str,
+    key_rows: list[dict[str, object]],
+    merge_condition: str,
+) -> object:
+    """Execute one atomic Silver orphan-key deletion transaction."""
+    delta_table = module.DeltaTable(table_path)
+    source = pa.Table.from_pylist(key_rows)
+    source_reader = pa.RecordBatchReader.from_batches(
+        source.schema,
+        source.to_batches(),
+    )
+    return (
+        delta_table.merge(
+            source=source_reader,
+            predicate=merge_condition,
+            source_alias="source",
+            target_alias="target",
+        )
+        .when_matched_delete()
+        .execute()
     )
 
 
@@ -195,7 +238,11 @@ async def expire_gold_orphan_rows(
         ),
         "valid_to_column",
     )
-    key_rows = _build_gold_orphan_key_rows(orphan_rows, primary_keys)
+    key_rows = _build_orphan_key_rows(
+        orphan_rows,
+        primary_keys,
+        operation="Gold foreign-key reconciliation cannot expire",
+    )
     if not key_rows:
         return
 
@@ -329,9 +376,11 @@ def _resolve_present_column(
     )
 
 
-def _build_gold_orphan_key_rows(
+def _build_orphan_key_rows(
     orphan_rows: list[dict[str, object]],
     primary_keys: tuple[str, ...],
+    *,
+    operation: str,
 ) -> list[dict[str, object]]:
     key_rows: list[dict[str, object]] = []
     seen: set[tuple[object, ...]] = set()
@@ -340,7 +389,7 @@ def _build_gold_orphan_key_rows(
         for primary_key in primary_keys:
             if primary_key not in row or row[primary_key] is None:
                 raise ValueError(
-                    "Gold foreign-key reconciliation cannot expire orphan row "
+                    f"{operation} orphan row "
                     f"without non-null primary key {primary_key}"
                 )
             key_values.append(row[primary_key])
