@@ -171,6 +171,8 @@ class DataQualityAnomalyMixin(DataQualityMetricsMixin):
     ) -> DQResult:
         """Run anomaly detection, update baselines, and return results."""
         assert self._dq_monitor is not None
+        if canonical_dq_timestamp is None:
+            raise ValueError("canonical_dq_timestamp is required for anomaly detection")
 
         start_time = time.monotonic()
         anomalies = self._dq_monitor.check_quality(metrics, canonical_dq_timestamp)
