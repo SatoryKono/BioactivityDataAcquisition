@@ -48,7 +48,10 @@ class TestDQMonitorAnomalyDetection:
 
         # Build baseline with normal values
         for _ in range(5):
-            monitor.update_baseline_from_metrics({"record_count": 1000.0})
+            monitor.update_baseline_from_metrics(
+                {"record_count": 1000.0},
+                timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            )
 
         # Check with spike
         anomalies = monitor.check_quality(
@@ -69,7 +72,10 @@ class TestDQMonitorAnomalyDetection:
 
         # Build baseline with slight variation (required for stddev > 0)
         for value in [980.0, 1000.0, 1020.0, 990.0, 1010.0]:
-            monitor.update_baseline_from_metrics({"record_count": value})
+            monitor.update_baseline_from_metrics(
+                {"record_count": value},
+                timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            )
 
         # Check with significant drop (z-score will be high)
         anomalies = monitor.check_quality(
@@ -98,7 +104,10 @@ class TestDQMonitorAnomalyDetection:
 
         # Build baseline
         for _ in range(5):
-            monitor.update_baseline_from_metrics({"record_count": 1000.0})
+            monitor.update_baseline_from_metrics(
+                {"record_count": 1000.0},
+                timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            )
 
         # Check with value close to baseline
         anomalies = monitor.check_quality(
@@ -107,12 +116,23 @@ class TestDQMonitorAnomalyDetection:
 
         assert len(anomalies) == 0
 
+    def test_check_quality_without_timestamp_returns_no_anomalies(
+        self, mock_logger: MagicMock
+    ) -> None:
+        """Checks without a caller-owned timestamp do not emit anomalies."""
+        monitor = DataQualityMonitor(logger=mock_logger)
+
+        assert monitor.check_quality({"error_rate": 0.25}) == []
+
     def test_dq_monitor_updates_baseline(self, mock_logger: MagicMock) -> None:
         """DQ Monitor should update baseline with new metrics."""
         monitor = DataQualityMonitor(logger=mock_logger)
 
         # Initial update
-        monitor.update_baseline_from_metrics({"record_count": 1000.0})
+        monitor.update_baseline_from_metrics(
+                {"record_count": 1000.0},
+                timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            )
         stats = monitor.get_baseline_stats("record_count")
 
         assert stats is not None
@@ -121,7 +141,10 @@ class TestDQMonitorAnomalyDetection:
         assert mean == pytest.approx(1000.0)
 
         # Second update
-        monitor.update_baseline_from_metrics({"record_count": 2000.0})
+        monitor.update_baseline_from_metrics(
+            {"record_count": 2000.0},
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+        )
         stats = monitor.get_baseline_stats("record_count")
 
         assert stats is not None
@@ -626,7 +649,10 @@ class TestDataQualityServiceMetricsEmission:
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
         dq_monitor = DataQualityMonitor(logger=recording_logger, z_score_threshold=2.0)  # type: ignore
         for value in [980.0, 1000.0, 1020.0, 990.0, 1010.0]:
-            dq_monitor.update_baseline_from_metrics({"record_count": value})
+            dq_monitor.update_baseline_from_metrics(
+                {"record_count": value},
+                timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            )
 
         service = DataQualityService(
             dq_monitor=dq_monitor,
