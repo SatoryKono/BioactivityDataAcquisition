@@ -1,3 +1,5 @@
+# ruff: noqa: F401
+# Re-export seam: imports are part of the public wiring surface via __all__.
 """Stable application-core seam for composition-time runtime wiring."""
 
 from __future__ import annotations
@@ -55,38 +57,8 @@ from bioetl.application.core.record_processor_config import (
     ContentHashVersionPolicy,
     RecordProcessorConfig,
 )
+from bioetl.application.core.wiring._runtime_export_names import (
+    RUNTIME_EXPORT_NAMES,
+)
 
-__all__ = [
-    "BasePipeline",
-    "BatchCheckpointRecoveryService",
-    "BatchExecutionFSM",
-    "BatchExecutionLifecycleService",
-    "BatchExecutionRunService",
-    "BatchExecutionStateService",
-    "BatchExecutor",
-    "BatchExecutorDependencies",
-    "BatchExtractionLoopService",
-    "BatchMemoryManagerService",
-    "BatchMetricsRecorderService",
-    "BatchProcessingComponents",
-    "BatchProcessingService",
-    "BatchProcessingSupportService",
-    "BatchProgressService",
-    "BatchTracingManagerService",
-    "BatchTransformer",
-    "BatchWriter",
-    "BatchWriterOptions",
-    "CheckpointRuntimeService",
-    "ContentHashPolicyByVersion",
-    "ContentHashVersionPolicy",
-    "GoldFilterCallback",
-    "GoldTransformCallback",
-    "PipelineService",
-    "PipelineStorageProtocol",
-    "QuarantineRuntimeService",
-    "RecordNormalizationProcessor",
-    "RecordProcessor",
-    "RecordProcessorConfig",
-    "ShutdownSignal",
-    "TransformCallback",
-]
+__all__ = list(RUNTIME_EXPORT_NAMES)

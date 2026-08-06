@@ -4,6 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.control_plane.manifest.inspection_service import (
+    RunManifestInspectionResult,
+)
+from bioetl.application.services.export_lineage.audit_inspection_service import (
+    AuditInspectionResult,
+)
 from bioetl.application.services.workflow._observability_trace_support import (
     build_trace_ids,
     build_trace_urls,
@@ -16,10 +22,6 @@ from bioetl.application.services.workflow._observability_trace_support import (
 )
 from bioetl.application.services.workflow._observability_workflow_lookup_support import (
     resolve_pipeline_name,
-)
-from bioetl.application.services.export_lineage.audit_inspection_service import AuditInspectionResult
-from bioetl.application.services.control_plane.manifest.inspection_service import (
-    RunManifestInspectionResult,
 )
 
 if TYPE_CHECKING:

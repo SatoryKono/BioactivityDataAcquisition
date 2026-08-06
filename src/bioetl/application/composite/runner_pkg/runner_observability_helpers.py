@@ -125,7 +125,9 @@ async def generate_dq_reports(
         return
 
     try:
-        from bioetl.application.services.quality.dq_report_service import DQReportContext
+        from bioetl.application.services.quality.dq_report_service import (
+            DQReportContext,
+        )
 
         cached_bronze_date = cast(
             str | None,
