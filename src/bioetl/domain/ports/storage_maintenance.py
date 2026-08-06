@@ -104,6 +104,11 @@ class StorageMaintenancePort(Protocol):
         Collapses exact duplicates by content identity and keeps one deterministic
         winner per primary key group without relying on runtime ingestion timestamps.
 
+        Deterministic winner rule: within each primary-key group, retain the row
+        with the **lowest** content-hash identity (lexicographic ascending after
+        total-order ranking of primary-key components). Remaining rows in the
+        group are removed as duplicates.
+
         Args:
             table_name: Logical Silver table name.
             primary_keys: Business key columns for deduplication.

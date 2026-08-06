@@ -17,6 +17,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    CONTENT_HASH_HEX64_PATTERN,
     StrictGoldContractSchema,
 )
 
@@ -32,7 +33,10 @@ class UniProtProteinGoldSchema(StrictGoldContractSchema):
 
     # System fields
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
 
     # Core identifiers
     accession: Series[str] = pa.Field(nullable=False)
@@ -156,7 +160,10 @@ class UniProtIDMappingGoldSchema(StrictGoldContractSchema):
 
     # System fields
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
 
     # Primary key (source identifier)
     target_id: Series[str] = pa.Field(nullable=False)

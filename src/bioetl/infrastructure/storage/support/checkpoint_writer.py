@@ -51,11 +51,11 @@ class FileCompositeCheckpointWriter:
         return False
 
     def list_glob(self, pattern: str) -> list[str]:
-        """List files matching glob, sorted by mtime descending."""
+        """List files matching glob, lexical descending by filename."""
         if not self._checkpoint_dir.exists():
             return []
         matches = list(self._checkpoint_dir.glob(pattern))
-        matches.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+        matches.sort(key=lambda p: p.name, reverse=True)  # deterministic lexical, not mtime
         return [p.name for p in matches]
 
     def exists(self, path: str) -> bool:

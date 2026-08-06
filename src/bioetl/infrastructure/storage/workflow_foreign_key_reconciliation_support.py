@@ -6,6 +6,7 @@ from math import isnan
 from typing import Protocol
 
 from bioetl.domain.ports import (
+    ForeignKeyReconciliationMutationMode,
     ForeignKeyReconciliationRequest,
     ForeignKeyReconciliationResult,
 )
@@ -27,7 +28,7 @@ def build_reconciliation_result(
     orphan_rows_deleted: int,
     mutated: bool,
     would_mutate: bool,
-    mutation_mode: str = "unknown",
+    mutation_mode: ForeignKeyReconciliationMutationMode = "unknown",
     quarantine_batch_id: str | None = None,
     quarantine_rows_written: int = 0,
     quarantine_error_code: str | None = None,

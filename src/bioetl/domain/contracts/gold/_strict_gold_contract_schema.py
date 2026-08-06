@@ -7,8 +7,16 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 
+# Universal content_hash invariant for Gold entity rows: SHA-256 lowercase hex.
+CONTENT_HASH_HEX64_PATTERN = r"^[0-9a-f]{64}$"
+
+
 class StrictGoldContractSchema(pa.DataFrameModel):
-    """Common strict metadata and DQ fields for Gold contracts."""
+    """Common strict metadata and DQ fields for Gold contracts.
+
+    Entity schemas that carry ``content_hash`` SHOULD constrain it with
+    ``CONTENT_HASH_HEX64_PATTERN`` (64-char lowercase hex SHA-256).
+    """
 
     dq_warn: Series[bool] = pa.Field(
         nullable=False,
@@ -30,4 +38,4 @@ class StrictGoldContractSchema(pa.DataFrameModel):
         strict = True
 
 
-__all__ = ["StrictGoldContractSchema"]
+__all__ = ["CONTENT_HASH_HEX64_PATTERN", "StrictGoldContractSchema"]

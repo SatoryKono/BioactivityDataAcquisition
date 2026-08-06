@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from bioetl.domain.ports import AdrValidationIssue
+from bioetl.domain.ports import AdrIssueSeverity, AdrValidationIssue
 
 from ._adr_file_utils import ADR_FILENAME_RE
 from ._adr_metadata_extractors import extract_meta, parse_h1_title
@@ -31,7 +31,7 @@ def validate_filename(
                 number=None,
                 path=str(p),
                 message="Filename does not match ADR-XXX-title.md",
-                severity="error",
+                severity=AdrIssueSeverity.ERROR,
             )
         )
     return m
@@ -57,7 +57,7 @@ def validate_duplicate_number(
                 number=number,
                 path=str(p),
                 message="Duplicate ADR number",
-                severity="error",
+                severity=AdrIssueSeverity.ERROR,
             )
         )
     else:
@@ -90,7 +90,7 @@ def read_adr_text(
                 number=number,
                 path=str(p),
                 message=f"Cannot read file: {exc}",
-                severity="error",
+                severity=AdrIssueSeverity.ERROR,
             )
         )
         return None
@@ -117,7 +117,7 @@ def validate_title(
                 number=number,
                 path=str(p),
                 message="Missing H1 title ('# ...')",
-                severity="error",
+                severity=AdrIssueSeverity.ERROR,
             )
         )
     else:
@@ -128,7 +128,7 @@ def validate_title(
                     number=number,
                     path=str(p),
                     message="ADR number mismatch between filename and H1",
-                    severity="warning",
+                    severity=AdrIssueSeverity.WARNING,
                 )
             )
 
@@ -154,6 +154,6 @@ def validate_status(
                 number=number,
                 path=str(p),
                 message="Missing status metadata (Status/Статус)",
-                severity="warning",
+                severity=AdrIssueSeverity.WARNING,
             )
         )

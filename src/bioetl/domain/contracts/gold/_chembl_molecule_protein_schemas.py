@@ -7,6 +7,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    CONTENT_HASH_HEX64_PATTERN,
     StrictGoldContractSchema,
 )
 
@@ -15,7 +16,10 @@ class ChEMBLMoleculeGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Molecule in Gold layer."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
     molecule_id: Series[str] = pa.Field(nullable=False)
     pref_name: Series[str] = pa.Field(nullable=True)
     molecule_type: Series[str] = pa.Field(nullable=True)
@@ -31,15 +35,15 @@ class ChEMBLMoleculeGoldSchema(StrictGoldContractSchema):
     usan_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     helm_notation: Series[str] = pa.Field(nullable=True)
     molecule_species: Series[str] = pa.Field(nullable=True)
-    oral: Series[bool] = pa.Field(nullable=True)
-    parenteral: Series[bool] = pa.Field(nullable=True)
-    topical: Series[bool] = pa.Field(nullable=True)
+    oral: Series[bool] = pa.Field(nullable=True, coerce=True)
+    parenteral: Series[bool] = pa.Field(nullable=True, coerce=True)
+    topical: Series[bool] = pa.Field(nullable=True, coerce=True)
     black_box_warning: Series[float] = pa.Field(nullable=True, coerce=True)
     natural_product: Series[float] = pa.Field(nullable=True, coerce=True)
     first_in_class: Series[float] = pa.Field(nullable=True, coerce=True)
     prodrug: Series[float] = pa.Field(nullable=True, coerce=True)
-    therapeutic_flag: Series[bool] = pa.Field(nullable=True)
-    withdrawn_flag: Series[bool] = pa.Field(nullable=True)
+    therapeutic_flag: Series[bool] = pa.Field(nullable=True, coerce=True)
+    withdrawn_flag: Series[bool] = pa.Field(nullable=True, coerce=True)
     inorganic_flag: Series[float] = pa.Field(nullable=True, coerce=True)
     polymer_flag: Series[float] = pa.Field(nullable=True, coerce=True)
     molecule_hierarchy: Series[str] = pa.Field(nullable=True)
@@ -80,7 +84,10 @@ class ChEMBLProteinClassGoldSchema(StrictGoldContractSchema):
 
     # System fields
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
 
     # Primary identifier
     protein_class_id: Series[float] = pa.Field(nullable=False, ge=1, coerce=True)

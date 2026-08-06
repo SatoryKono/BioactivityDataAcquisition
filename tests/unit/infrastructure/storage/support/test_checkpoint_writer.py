@@ -57,19 +57,20 @@ def test_checkpoint_writer_read_delete_exists_and_missing_paths(tmp_path: Path) 
     assert writer.read("state.json") is None
 
 
-def test_checkpoint_writer_list_glob_returns_newest_first(tmp_path: Path) -> None:
+def test_checkpoint_writer_list_glob_returns_lexical_descending(tmp_path: Path) -> None:
     writer = FileCompositeCheckpointWriter(tmp_path)
 
     assert writer.list_glob("*.json") == []
 
-    older = tmp_path / "older.json"
-    newer = tmp_path / "newer.json"
-    older.write_text("older", encoding="utf-8")
-    newer.write_text("newer", encoding="utf-8")
-    os.utime(older, (1, 1))
-    os.utime(newer, (2, 2))
+    # Ordering is lexical descending by filename (not mtime).
+    first = tmp_path / "run_001.json"
+    second = tmp_path / "run_002.json"
+    first.write_text("first", encoding="utf-8")
+    second.write_text("second", encoding="utf-8")
+    os.utime(first, (2, 2))
+    os.utime(second, (1, 1))
 
-    assert writer.list_glob("*.json") == ["newer.json", "older.json"]
+    assert writer.list_glob("*.json") == ["run_002.json", "run_001.json"]
 
 
 def test_checkpoint_writer_write_atomic_removes_temp_on_failure(

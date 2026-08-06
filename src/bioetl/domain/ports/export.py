@@ -53,6 +53,17 @@ class ExportFileFingerprint:
     size_bytes: int
     sha256: str
 
+    def __post_init__(self) -> None:
+        if self.size_bytes < 0:
+            raise ValueError(f"size_bytes must be non-negative, got {self.size_bytes!r}")
+        digest = self.sha256.strip().lower()
+        if len(digest) != 64 or any(ch not in "0123456789abcdef" for ch in digest):
+            raise ValueError(
+                f"sha256 must be a 64-character lowercase hex digest, got {self.sha256!r}"
+            )
+        if digest != self.sha256:
+            object.__setattr__(self, "sha256", digest)
+
 
 @runtime_checkable
 class ExportCatalogPort(Protocol):

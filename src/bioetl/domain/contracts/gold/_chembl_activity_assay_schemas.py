@@ -7,6 +7,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    CONTENT_HASH_HEX64_PATTERN,
     StrictGoldContractSchema,
 )
 
@@ -16,7 +17,10 @@ class ChEMBLActivityGoldSchema(StrictGoldContractSchema):
 
     # System fields
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
 
     # Primary identifier
     activity_id: Series[str] = pa.Field(nullable=False)
@@ -126,7 +130,10 @@ class ChEMBLAssayGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Assay in Gold layer."""
 
     entity_id: Series[str] = pa.Field(nullable=False, str_matches=r"^.+$")
-    content_hash: Series[str] = pa.Field(nullable=False, str_matches=r"^[a-f0-9]{64}$")
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
     assay_id: Series[str] = pa.Field(nullable=False, str_matches=r"^.+$")
     target_id: Series[str] = pa.Field(nullable=True)
     publication_id: Series[str] = pa.Field(nullable=True)
@@ -174,7 +181,10 @@ class ChEMBLAssayParametersGoldSchema(StrictGoldContractSchema):
 
     # System fields
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
 
     # Primary identifier (surrogate)
     assay_param_id: Series[float] = pa.Field(

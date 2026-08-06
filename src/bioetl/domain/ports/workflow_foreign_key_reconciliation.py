@@ -6,6 +6,7 @@ from dataclasses import KW_ONLY, dataclass
 from typing import Literal, Protocol, cast, runtime_checkable
 
 __all__ = [
+    "ForeignKeyReconciliationAction",
     "ForeignKeyReconciliationLayer",
     "ForeignKeyReconciliationMutationMode",
     "ForeignKeyReconciliationPort",
@@ -14,11 +15,19 @@ __all__ = [
 ]
 
 ForeignKeyReconciliationLayer = Literal["silver", "gold"]
+ForeignKeyReconciliationAction = Literal["delete_orphans"]
 ForeignKeyReconciliationMutationMode = Literal[
     "unknown",
     "delete_orphans",
     "dry_run",
     "blocked",
+    "no_op",
+    "missing_source",
+    "dry_run_preview",
+    "quarantine_skipped",
+    "gold_scd2_expiry",
+    "silver_rewrite",
+    "quarantine_written",
 ]
 
 
@@ -123,7 +132,7 @@ class ForeignKeyReconciliationRequest:
     source_key: str
     reference_key: str
     primary_keys: tuple[str, ...]
-    action: Literal["delete_orphans"] = "delete_orphans"
+    action: ForeignKeyReconciliationAction = "delete_orphans"
     source_keys: tuple[str, ...] | None = None
     reference_keys: tuple[str, ...] | None = None
     nulls_equal: bool = False
@@ -205,38 +214,56 @@ class ForeignKeyReconciliationResult:
     reference_table: str
     source_key: str
     reference_key: str
-    action: str
+    action: ForeignKeyReconciliationAction
     scanned_rows: int
     retained_rows: int
     orphan_rows_deleted: int
     mutated: bool
     dry_run: bool = False
     would_mutate: bool = False
-    mutation_mode: ForeignKeyReconciliationMutationMode | str = "unknown"
+    mutation_mode: ForeignKeyReconciliationMutationMode = "unknown"
     quarantine_batch_id: str | None = None
     quarantine_rows_written: int = 0
     quarantine_error_code: str | None = None
     _: KW_ONLY
     source_layer: ForeignKeyReconciliationLayer = "silver"
     reference_layer: ForeignKeyReconciliationLayer = "silver"
-    mutation_layer: ForeignKeyReconciliationLayer = "silver"
+    mutation_layer: ForeignKeyReconciliationLayer | None = None
 
     def __post_init__(self) -> None:
-        object.__setattr__(
-            self,
-            "source_layer",
-            _normalize_layer(self.source_layer, "source_layer"),
+        allowed_actions: frozenset[str] = frozenset({"delete_orphans"})
+        if self.action not in allowed_actions:
+            raise ValueError(
+                f"action must be one of {sorted(allowed_actions)}, got {self.action!r}"
+            )
+        allowed_modes: frozenset[str] = frozenset(
+            {
+                "unknown",
+                "delete_orphans",
+                "dry_run",
+                "blocked",
+                "no_op",
+                "missing_source",
+                "dry_run_preview",
+                "quarantine_skipped",
+                "gold_scd2_expiry",
+                "silver_rewrite",
+                "quarantine_written",
+            }
         )
-        object.__setattr__(
-            self,
-            "reference_layer",
-            _normalize_layer(self.reference_layer, "reference_layer"),
-        )
-        object.__setattr__(
-            self,
+        if self.mutation_mode not in allowed_modes:
+            raise ValueError(
+                f"mutation_mode must be one of {sorted(allowed_modes)}, got {self.mutation_mode!r}"
+            )
+        source_layer = _normalize_layer(self.source_layer, "source_layer")
+        reference_layer = _normalize_layer(self.reference_layer, "reference_layer")
+        mutation_layer = _normalize_layer(
+            self.mutation_layer if self.mutation_layer is not None else source_layer,
             "mutation_layer",
-            _normalize_layer(self.mutation_layer, "mutation_layer"),
         )
+        object.__setattr__(self, "source_layer", source_layer)
+        object.__setattr__(self, "reference_layer", reference_layer)
+        object.__setattr__(self, "mutation_layer", mutation_layer)
 
 
 @runtime_checkable

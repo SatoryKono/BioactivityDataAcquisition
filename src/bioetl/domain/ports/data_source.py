@@ -217,7 +217,7 @@ class DataSourceFactoryPort(Protocol):
     def create(
         self,
         provider: str,
-    ) -> Any:  # Any: returns different adapter types per provider
+    ) -> DataSourcePort:
         """Create a data source adapter for the given provider.
 
         Args:
