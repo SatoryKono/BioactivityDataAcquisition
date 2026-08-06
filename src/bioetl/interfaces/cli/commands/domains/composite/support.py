@@ -34,12 +34,15 @@ def push_metrics_to_gateway(
     run_label: str = "bioetl",
     pipeline_name: str | None = None,
 ) -> bool:
-    """Push metrics through composition on demand."""
-    from bioetl.composition.observability_api import (
-        push_metrics_to_gateway as _impl,
+    """Push metrics without turning a completed CLI run into failure."""
+    from bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration import (
+        publish_metrics_safely,
     )
 
-    return bool(_impl(run_label=run_label, pipeline_name=pipeline_name))
+    return publish_metrics_safely(
+        run_label=run_label,
+        pipeline_name=pipeline_name,
+    )
 
 
 def emit_composite_startup(
@@ -119,6 +122,7 @@ def run_composite_with_cli_policy(
     except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
         handler(exc, composite, "CLI_COMPOSITE_UNEXPECTED_ERROR")
     finally:
+        # Best-effort metrics: never replace SystemExit/result from the handler.
         push_metrics_to_gateway(pipeline_name=f"composite_{composite}")
         if getattr(coro, "cr_frame", None) is not None:
             coro.close()

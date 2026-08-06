@@ -70,11 +70,10 @@ async def run_composite_inner(
     except ValueError as exc:
         return False, f"Invalid configuration: {exc}"
 
-    runner = build_runner(config, runtime)
-
     try:
+        runner = build_runner(config, runtime)
         return build_run_composite_result(await runner.run())
-    except (BioETLError, OSError, RuntimeError, ValueError) as exc:
+    except (BioETLError, OSError, RuntimeError, ValueError, TypeError) as exc:
         return (
             False,
             (

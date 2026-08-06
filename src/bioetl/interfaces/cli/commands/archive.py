@@ -63,9 +63,11 @@ def archive_command(table: str, target_path: str, remove_source: bool) -> None:
         target_path: File path for target.
         remove_source: Whether to remove source.
     """
-    lifecycle = get_lifecycle_service()
 
     async def _run() -> None:
+        # Resolve lifecycle inside the async body so composition/bootstrap
+        # failures are covered by the shared CLI failure policy.
+        lifecycle = get_lifecycle_service()
         files_archived = await lifecycle.archive(
             table=table,
             target_path=target_path,
