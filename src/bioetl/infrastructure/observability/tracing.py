@@ -324,15 +324,14 @@ class OpenTelemetryTracer:
         self._provider.add_span_processor(processor)
         self._closed = False
 
-    def get_tracer(self, name: str) -> Any:  # Any: returns OTel Tracer wh...
-        """Get an OpenTelemetry tracer.
+    def get_tracer(self, name: str) -> _TracerAdapter:
+        """Get an OpenTelemetry tracer adapter.
 
         Args:
             name: Name of the tracer.
 
         Returns:
-            OpenTelemetry tracer instance.
-
+            Adapter exposing the supported span API for callers.
         """
         return _TracerAdapter(cast(_TracerProtocol, self._provider.get_tracer(name)))  # pyright: ignore[reportInvalidCast]
 
