@@ -298,17 +298,30 @@ class ArrowDataConverter:
                 # Try to cast for nested types
                 try:
                     new_columns.append(col.cast(new_type))
-                except pa.ArrowInvalid:
-                    # If cast fails, convert to string via Python
-                    new_columns.append(
-                        pa.array(
-                            [
-                                str(v) if v is not None else None
-                                for v in col.to_pylist()
-                            ],
-                            type=pa.string(),
+                except (pa.ArrowInvalid, pa.ArrowNotImplementedError):
+                    # If cast fails, fall back to an array typed as new_schema field.
+                    fallback_type = new_type if new_type is not None else pa.string()
+                    try:
+                        new_columns.append(
+                            pa.array(
+                                [
+                                    str(v) if v is not None else None
+                                    for v in col.to_pylist()
+                                ],
+                                type=fallback_type,
+                            )
                         )
-                    )
+                    except (pa.ArrowInvalid, pa.ArrowNotImplementedError, TypeError):
+                        new_columns.append(
+                            pa.array(
+                                [
+                                    str(v) if v is not None else None
+                                    for v in col.to_pylist()
+                                ],
+                                type=pa.string(),
+                            )
+                        )
+                        new_type = pa.string()
             else:
                 new_columns.append(col)
 

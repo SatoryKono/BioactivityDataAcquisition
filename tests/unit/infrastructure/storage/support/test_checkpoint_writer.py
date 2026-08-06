@@ -89,5 +89,26 @@ def test_checkpoint_writer_write_atomic_removes_temp_on_failure(
     with pytest.raises(OSError, match="replace failed"):
         writer.write_atomic("state.json", "{}")
 
-    assert not (tmp_path / "state.tmp").exists()
+    leftover_temps = list(tmp_path.glob(".state_*.tmp")) + list(tmp_path.glob("state.tmp"))
+    assert leftover_temps == []
     assert not (tmp_path / "state.json").exists()
+
+
+def test_checkpoint_writer_rejects_path_escape(tmp_path: Path) -> None:
+    from bioetl.infrastructure.storage.support.checkpoint_writer import (
+        CheckpointPathError,
+    )
+
+    writer = FileCompositeCheckpointWriter(tmp_path)
+    with pytest.raises(CheckpointPathError):
+        writer.read("../escape.json")
+
+
+def test_checkpoint_writer_rejects_oversized_payload(tmp_path: Path) -> None:
+    from bioetl.infrastructure.storage.support.checkpoint_writer import (
+        CheckpointSizeError,
+    )
+
+    writer = FileCompositeCheckpointWriter(tmp_path, max_checkpoint_bytes=8)
+    with pytest.raises(CheckpointSizeError):
+        writer.write_atomic("state.json", "x" * 16)

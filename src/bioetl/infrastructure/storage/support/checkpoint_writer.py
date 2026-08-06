@@ -7,7 +7,21 @@ to satisfy ARCH-002 (no direct I/O in application/domain).
 
 from __future__ import annotations
 
+import os
+import tempfile
 from pathlib import Path
+
+# Bound checkpoint I/O to protect operators from oversized / runaway listings.
+_DEFAULT_MAX_CHECKPOINT_BYTES = 16 * 1024 * 1024  # 16 MiB
+_DEFAULT_MAX_GLOB_MATCHES = 10_000
+
+
+class CheckpointPathError(ValueError):
+    """Raised when a checkpoint path escapes the configured root."""
+
+
+class CheckpointSizeError(ValueError):
+    """Raised when a checkpoint payload exceeds the configured size budget."""
 
 
 class FileCompositeCheckpointWriter:
@@ -17,34 +31,79 @@ class FileCompositeCheckpointWriter:
     checkpoint JSON files within a configured directory.
     """
 
-    def __init__(self, checkpoint_dir: Path) -> None:
-        self._checkpoint_dir = checkpoint_dir
+    def __init__(
+        self,
+        checkpoint_dir: Path,
+        *,
+        max_checkpoint_bytes: int = _DEFAULT_MAX_CHECKPOINT_BYTES,
+        max_glob_matches: int = _DEFAULT_MAX_GLOB_MATCHES,
+    ) -> None:
+        self._checkpoint_dir = checkpoint_dir.resolve()
+        self._max_checkpoint_bytes = max_checkpoint_bytes
+        self._max_glob_matches = max_glob_matches
+
+    def _resolve_path(self, path: str) -> Path:
+        """Resolve ``path`` under the checkpoint root; reject traversal escapes."""
+        if not path or path.startswith(("/", "\\")) or ":" in path.split("/", 1)[0]:
+            # Reject absolute / drive-qualified inputs (user-supplied relative only).
+            if Path(path).is_absolute():
+                raise CheckpointPathError(
+                    f"Checkpoint path must be relative to checkpoint root: {path!r}"
+                )
+        candidate = (self._checkpoint_dir / path).resolve()
+        if not candidate.is_relative_to(self._checkpoint_dir):
+            raise CheckpointPathError(
+                f"Checkpoint path escapes checkpoint root: {path!r}"
+            )
+        return candidate
 
     def read(self, path: str) -> str | None:
         """Read checkpoint file content.
 
         Returns None if file does not exist or cannot be read.
         """
-        full = self._checkpoint_dir / path
+        full = self._resolve_path(path)
         if not full.exists():
             return None
-        return full.read_text()
+        size = full.stat().st_size
+        if size > self._max_checkpoint_bytes:
+            raise CheckpointSizeError(
+                f"Checkpoint file exceeds max size "
+                f"({size} > {self._max_checkpoint_bytes}): {path!r}"
+            )
+        return full.read_text(encoding="utf-8")
 
     def write_atomic(self, path: str, content: str) -> None:
-        """Write checkpoint file atomically via temp + rename."""
+        """Write checkpoint file atomically via unique temp + rename."""
+        encoded = content.encode("utf-8")
+        if len(encoded) > self._max_checkpoint_bytes:
+            raise CheckpointSizeError(
+                f"Checkpoint payload exceeds max size "
+                f"({len(encoded)} > {self._max_checkpoint_bytes}): {path!r}"
+            )
         self._checkpoint_dir.mkdir(parents=True, exist_ok=True)
-        full = self._checkpoint_dir / path
-        temp = full.with_suffix(".tmp")
+        full = self._resolve_path(path)
+        full.parent.mkdir(parents=True, exist_ok=True)
+        fd, temp_path_str = tempfile.mkstemp(
+            suffix=".tmp",
+            prefix=f".{full.stem}_",
+            dir=full.parent,
+        )
+        temp = Path(temp_path_str)
         try:
-            temp.write_text(content)
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                handle.write(content)
             temp.replace(full)
         finally:
             if temp.exists():
-                temp.unlink()
+                try:
+                    temp.unlink()
+                except OSError:
+                    pass
 
     def delete(self, path: str) -> bool:
         """Delete checkpoint file. Returns True if existed."""
-        full = self._checkpoint_dir / path
+        full = self._resolve_path(path)
         if full.exists():
             full.unlink()
             return True
@@ -54,10 +113,20 @@ class FileCompositeCheckpointWriter:
         """List files matching glob, lexical descending by filename."""
         if not self._checkpoint_dir.exists():
             return []
+        # Reject patterns that would escape via path segments.
+        if ".." in Path(pattern).parts:
+            raise CheckpointPathError(
+                f"Checkpoint glob pattern must not contain '..': {pattern!r}"
+            )
         matches = list(self._checkpoint_dir.glob(pattern))
+        if len(matches) > self._max_glob_matches:
+            raise CheckpointSizeError(
+                f"Checkpoint glob matched {len(matches)} paths "
+                f"(max {self._max_glob_matches}): {pattern!r}"
+            )
         matches.sort(key=lambda p: p.name, reverse=True)  # deterministic lexical, not mtime
         return [p.name for p in matches]
 
     def exists(self, path: str) -> bool:
         """Check if checkpoint file exists."""
-        return (self._checkpoint_dir / path).exists()
+        return self._resolve_path(path).exists()

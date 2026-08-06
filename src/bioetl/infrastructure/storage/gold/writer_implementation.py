@@ -109,12 +109,19 @@ async def _write_dual_targets_impl(
     request: _GoldWriteRequest,
     schema_policy: GoldSchemaPolicyByVersion,
 ) -> None:
-    """Write all versioned Gold targets and fail on the first error."""
+    """Write all versioned Gold targets and fail on the first error.
+
+    Partial dual-write recovery: track successfully committed targets. When a
+    later target fails, surface the committed set in structured logs so operators
+    can compensate without silent split-brain (auto-rollback of Delta commits is
+    intentionally not attempted here — versions may already be visible).
+    """
     assert writer._contract_rollout_policy is not None
 
     write_versions = writer._contract_rollout_policy.write_versions
     validate_write_versions(write_versions)
     write_targets = get_write_targets(request.table_name, write_versions)
+    committed_targets: list[dict[str, str]] = []
 
     for contract_version, physical_table in iterate_write_targets(
         write_versions, write_targets
@@ -143,12 +150,25 @@ async def _write_dual_targets_impl(
         )
         try:
             await writer._write_single_target(request=target_request)
+            committed_targets.append(
+                {
+                    "contract_version": contract_version,
+                    "physical_table": physical_table,
+                }
+            )
         except (BioETLError, OSError, RuntimeError, ValueError):
             writer.logger.error(
                 "gold_dual_write_failed",
                 logical_table=request.table_name,
                 failed_contract_version=contract_version,
                 failed_target_table=physical_table,
+                committed_targets=list(committed_targets),
+                partial_dual_write=bool(committed_targets),
+                recovery_action=(
+                    "operator_compensate_committed_targets"
+                    if committed_targets
+                    else "none"
+                ),
                 active_contract_version=writer._contract_rollout_policy.active_version,
                 write_versions=writer._contract_rollout_policy.write_versions,
             )

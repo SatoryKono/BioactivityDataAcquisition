@@ -159,11 +159,16 @@ def emit_composite_source_selection_metrics(
 
 
 def _has_explicit_member(target: object, member_name: str) -> bool:
-    """Return whether a method/property is explicitly present on instance or class."""
-    return (
-        member_name in vars(target)
-        or getattr(type(target), member_name, None) is not None
-    )
+    """Return whether a method/property is explicitly present on instance or class.
+
+    Guards instances without ``__dict__`` (slots / builtins) so ``vars(target)``
+    cannot raise ``TypeError``.
+    """
+    instance_dict = getattr(target, "__dict__", None)
+    if isinstance(instance_dict, dict) and member_name in instance_dict:
+        return True
+    return getattr(type(target), member_name, None) is not None
+
 
 
 def resolve_metadata_and_lineage_fragment[MetadataT](

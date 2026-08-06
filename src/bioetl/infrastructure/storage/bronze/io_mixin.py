@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import zstandard as zstd
 
+from bioetl.infrastructure.storage.bronze.facade_contracts import BRONZE_WRITE_ERRORS
 from bioetl.infrastructure.storage.bronze.read_cleanup_mixin import (
     BronzeWriterReadCleanupMixin,
 )
@@ -19,14 +20,6 @@ from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_bytes
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.domain.types import BatchID
-
-BRONZE_WRITE_ERRORS = (
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-    zstd.ZstdError,
-)
 
 
 class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
@@ -50,6 +43,8 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         target_path: Path,
     ) -> tuple[int, int]:
         """Stream-compress records to a temp file, then rename atomically."""
+        import os
+
         target_path.parent.mkdir(parents=True, exist_ok=True)
         fd, temp_path_str = tempfile.mkstemp(
             suffix=".tmp",
@@ -57,21 +52,30 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
             dir=target_path.parent,
         )
         temp_path = Path(temp_path_str)
-        compressor = zstd.ZstdCompressor(
-            level=self.COMPRESSION_LEVEL,
-            threads=self.COMPRESSION_THREADS,
-            write_content_size=True,
-        )
+        # Track raw-fd ownership until open() takes over, so setup failures
+        # never leak the mkstemp descriptor.
+        fd_owned = True
         record_count = 0
         uncompressed_size = 0
         chunk_buffer = bytearray()
         try:
+            try:
+                compressor = zstd.ZstdCompressor(
+                    level=self.COMPRESSION_LEVEL,
+                    threads=self.COMPRESSION_THREADS,
+                    write_content_size=True,
+                )
+            except BRONZE_WRITE_ERRORS:
+                os.close(fd)
+                fd_owned = False
+                raise
             with (
                 open(fd, "wb") as f_out,
                 compressor.stream_writer(
                     f_out, closefd=False, write_size=self.COMPRESSION_CHUNK_SIZE
                 ) as writer,
             ):
+                fd_owned = False  # open() now owns the descriptor
                 for record in records:
                     chunk_buffer.extend(record)
                     record_count += 1
@@ -85,25 +89,34 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
                     writer.write(chunk_buffer)
                     chunk_buffer.clear()
             if record_count == 0:
-                temp_path.unlink()
                 raise ValueError("No records to write")
             if target_path.exists():
                 if self._compressed_payload_matches(target_path, temp_path):
-                    temp_path.unlink()
                     return record_count, uncompressed_size
-                temp_path.unlink()
                 raise FileExistsError(
                     f"Bronze target already exists with different payload: {target_path}"
                 )
             temp_path.replace(target_path)
-        except BRONZE_WRITE_ERRORS:
+            return record_count, uncompressed_size
+        finally:
+            if fd_owned:
+                try:
+                    os.close(fd)
+                except OSError:
+                    pass
+            # Drop leftover temp on failure / idempotent-match success.
+            # Successful replace renames the temp away so this is a no-op.
             if temp_path.exists():
-                temp_path.unlink()
-            raise
-        return record_count, uncompressed_size
-
+                try:
+                    temp_path.unlink()
+                except OSError:
+                    pass
     def _compressed_payload_matches(self, left: Path, right: Path) -> bool:
-        """Compare compressed Bronze payloads by decompressed bytes."""
+        """Compare compressed Bronze payloads by full decompressed streams.
+
+        Chunks are concatenated before comparison so differing stream-reader
+        boundaries cannot produce false mismatches.
+        """
         left_dctx = zstd.ZstdDecompressor()
         right_dctx = zstd.ZstdDecompressor()
         with (
@@ -112,13 +125,9 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
             left_dctx.stream_reader(left_file) as left_reader,
             right_dctx.stream_reader(right_file) as right_reader,
         ):
-            while True:
-                left_chunk = left_reader.read(65536)
-                right_chunk = right_reader.read(65536)
-                if left_chunk != right_chunk:
-                    return False
-                if not left_chunk:
-                    return True
+            left_payload = left_reader.read()
+            right_payload = right_reader.read()
+            return left_payload == right_payload
 
     async def _calculate_checksum(self, file_path: Path) -> str:
         """Calculate BLAKE2b checksum of a file asynchronously."""
