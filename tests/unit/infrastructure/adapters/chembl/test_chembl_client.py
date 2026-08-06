@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 from unittest.mock import AsyncMock, MagicMock
 
 import httpx
@@ -82,6 +83,14 @@ def mock_logger():
 @pytest.fixture
 def adapter(mock_http_client, mock_logger):
     return ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+
+
+def test_constructor_requires_injected_http_client_and_logger() -> None:
+    """Mixin attributes must not become dataclass constructor defaults."""
+    parameters = inspect.signature(ChemblAdapter).parameters
+
+    assert parameters["http_client"].default is inspect.Parameter.empty
+    assert parameters["logger"].default is inspect.Parameter.empty
 
 
 def test_post_init_preserves_injected_base_collaborators(
