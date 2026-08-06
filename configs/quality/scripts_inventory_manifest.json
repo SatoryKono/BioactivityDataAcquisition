@@ -13,9 +13,9 @@
       "agents": 12,
       "build": 16,
       "ci": 77,
-      "docs": 233,
+      "docs": 232,
       "other": 81,
-      "scripts": 458,
+      "scripts": 456,
       "skills": 18,
       "tests": 366
     }
@@ -5894,12 +5894,6 @@
       "agent_usage": [],
       "reference_count": 8,
       "references": [
-        {
-          "path": "docs/00-project/governance/documentation-update-plan.md",
-          "line": 34,
-          "source_group": "docs",
-          "text": "- Генератор: `scripts/diagrams/generate_pipeline_dataflows.py`"
-        },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
           "line": 930,
@@ -12649,7 +12643,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 81,
+      "reference_count": 79,
       "references": [
         {
           "path": "docs/00-project/RULES.md",
@@ -16683,36 +16677,6 @@
       "next_step": "Retain only as the bounded resume helper for the current CodeRabbit architecture-review campaign; remove it after the remaining-layer review is complete rather than treating it as a public active script."
     },
     {
-      "path": "scripts/ops/coderabbit/build_matrix.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/coderabbit/README.md",
-          "line": 7,
-          "source_group": "scripts",
-          "text": "| `build_matrix.py` | Build leaf scope matrix (writes under `reports/quality/coderabbit/`) |"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/coderabbit/run_leaves.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/coderabbit/README.md",
-          "line": 8,
-          "source_group": "scripts",
-          "text": "| `run_leaves.py` | Sequential leaf runner (logs under reports; requires API key) |"
-        }
-      ]
-    },
-    {
       "path": "scripts/ops/codex-exec.bat",
       "type": "bat",
       "status": "active",
@@ -18510,7 +18474,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_render_contract.py",
-          "line": 25,
+          "line": 24,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import ("
         }
@@ -18566,7 +18530,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 153,
+          "line": 148,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -18578,13 +18542,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1237,
+          "line": 1075,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1324,
+          "line": 1162,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -19249,7 +19213,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 66,
+      "reference_count": 68,
       "references": [
         {
           "path": "Makefile",
@@ -20119,7 +20083,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 336,
+          "line": 183,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/load_repo_env.sh or pass --username/--password \""
         },
