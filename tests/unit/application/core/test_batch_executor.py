@@ -764,7 +764,7 @@ class TestBatchExecutorProcessBatch:
         batch_executor.records_gold_excluded_by_contract = 1
         batch_executor.records_quarantined = 1
         batch_executor.records_filtered_out = 1
-        batch_executor._source_batch_ids = ["batch-002", "batch-001", "batch-002"]
+        batch_executor.source_batch_ids = ["batch-002", "batch-001", "batch-002"]
 
         stats = batch_executor.get_run_statistics()
 
@@ -1092,7 +1092,7 @@ class TestBatchExecutorHelpers:
             records_gold_excluded_by_contract=2,
             records_quarantined=1,
             records_filtered_out=2,
-            _source_batch_ids=["batch-001"],
+            source_batch_ids=["batch-001"],
         )
 
         apply_batch_execution_state_update(
@@ -1114,7 +1114,7 @@ class TestBatchExecutorHelpers:
         assert state.records_gold_excluded_by_contract == 8
         assert state.records_quarantined == 5
         assert state.records_filtered_out == 7
-        assert state._source_batch_ids == ["batch-001", "batch-002"]
+        assert state.source_batch_ids == ["batch-001", "batch-002"]
 
     def test_apply_processed_batch_outcome_updates_state_and_collects_dq(self) -> None:
         """Processed-outcome helper should update counters and invoke DQ hook."""
@@ -1125,7 +1125,7 @@ class TestBatchExecutorHelpers:
             records_gold_excluded_by_contract=2,
             records_quarantined=1,
             records_filtered_out=2,
-            _source_batch_ids=["batch-001"],
+            source_batch_ids=["batch-001"],
         )
         state._should_collect_dq_data.return_value = True
         outcome = build_processed_batch_outcome(
@@ -1149,7 +1149,7 @@ class TestBatchExecutorHelpers:
         assert state.records_gold_excluded_by_contract == 5
         assert state.records_quarantined == 5
         assert state.records_filtered_out == 7
-        assert state._source_batch_ids == [
+        assert state.source_batch_ids == [
             "batch-001",
             "12345678-1234-5678-1234-567812345678",
         ]
@@ -1170,7 +1170,7 @@ class TestBatchExecutorHelpers:
             records_gold_excluded_by_contract=0,
             records_quarantined=0,
             records_filtered_out=0,
-            _source_batch_ids=[],
+            source_batch_ids=[],
         )
         state._should_collect_dq_data.return_value = False
         outcome = build_processed_batch_outcome(

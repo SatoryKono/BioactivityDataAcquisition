@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, TypeVar
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord, JsonDict
-
-_BatchResultT = TypeVar("_BatchResultT", covariant=True)
 
 
 class BatchExecutionCountersSnapshot(Protocol):
@@ -25,7 +23,7 @@ class BatchExecutionStatisticsState(BatchExecutionCountersSnapshot, Protocol):
     """Extended statistics snapshot used for public batch/run projections."""
 
     records_filtered_out: int
-    _source_batch_ids: list[str]
+    source_batch_ids: list[str]
 
 
 class BatchExecutionMemoryState(Protocol):
@@ -39,7 +37,7 @@ class BatchExecutionMemoryState(Protocol):
         ...
 
 
-class BatchResultBuilderProtocol(Protocol[_BatchResultT]):
+class BatchResultBuilderProtocol[BatchResultT](Protocol):
     """Callable result factory used to project cumulative batch counters."""
 
     def __call__(
@@ -49,7 +47,7 @@ class BatchResultBuilderProtocol(Protocol[_BatchResultT]):
         silver_count: int,
         gold_count: int,
         quarantined_count: int,
-    ) -> _BatchResultT: ...
+    ) -> BatchResultT: ...
 
 
 class BatchExecutionStateProtocol(BatchExecutionStatisticsState, Protocol):

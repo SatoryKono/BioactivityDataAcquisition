@@ -103,7 +103,7 @@ def apply_batch_execution_state_update(
     )
     state.records_quarantined += state_update.quarantined_count
     state.records_filtered_out += state_update.filtered_out_count
-    state._source_batch_ids.append(state_update.source_batch_id)
+    state.source_batch_ids.append(state_update.source_batch_id)
 
 
 def apply_processed_batch_outcome(

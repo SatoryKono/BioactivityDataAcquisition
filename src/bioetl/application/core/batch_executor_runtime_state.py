@@ -139,11 +139,12 @@ class BatchExecutorRuntimeStateMixin:
         self._runtime_state.dq_reservoir_ranks = value
 
     @property
-    def _source_batch_ids(self) -> list[str]:
+    def source_batch_ids(self) -> list[str]:
+        """Public list of source batch IDs accumulated during the run."""
         return self._runtime_state.source_batch_ids
 
-    @_source_batch_ids.setter
-    def _source_batch_ids(self, value: list[str]) -> None:
+    @source_batch_ids.setter
+    def source_batch_ids(self, value: list[str]) -> None:
         self._runtime_state.source_batch_ids = value
 
     @property

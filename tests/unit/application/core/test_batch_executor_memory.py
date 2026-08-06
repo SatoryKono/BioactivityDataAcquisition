@@ -523,7 +523,7 @@ class TestBatchExecutorMemory:
         assert len(executor._bronze_records_for_dq) == 1
         assert len(executor._silver_records_for_dq) == 1
         assert len(executor._gold_records_for_dq) == 1
-        assert len(executor._source_batch_ids) == 1
+        assert len(executor.source_batch_ids) == 1
 
         # Check context generation
         context = executor.get_dq_context()
