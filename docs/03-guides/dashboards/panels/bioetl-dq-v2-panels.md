@@ -36,7 +36,8 @@ query, links, and operator fact.
 
 ### 3. Monitor Current DQ Status
 - **Type:** Stat
-- **Purpose:** Current DQ severity for the selected scope.
+- **Purpose:** Instant current DQ severity for the selected scope; it never
+  reduces a historical range while current reasons use an instant query.
 - **Data sources:** `bioetl_dq_current_status`
 
 ### 4. Inspect Run Identity
@@ -58,12 +59,15 @@ query, links, and operator fact.
 
 ### 8. Monitor DQ Threshold State
 - **Type:** Stat
-- **Purpose:** Show DQ threshold state.
-- **Data sources:** `bioetl_dq_soft_threshold_exceeded`
+- **Purpose:** Show the same instant bounded DQ threshold state as the current
+  reason projection.
+- **Data sources:** `bioetl_dq_current_reason`, `bioetl_dq_current_status`
 
 ### 9. Inspect Current DQ Reasons
 - **Type:** Table
-- **Purpose:** Show DQ failure reasons.
+- **Purpose:** Show bounded current DQ reason, severity, and action rows. A
+  WARN/CRIT status without an active reason emits
+  `reason_evidence_unavailable` with action `verify_dq_reason_rules`.
 - **Data sources:** `bioetl_dq_current_reason`
 
 ### 10. Start DQ Triage

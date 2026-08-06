@@ -69,8 +69,10 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 - **Purpose:** Range ALERTS history — same temporal chain as Current Alerts (now);
   not a persistent incident log.
 - **Data sources:** Prometheus `ALERTS` (range)
-- **Presentation:** Full dashboard width with fixed firing/pending colors and no
-  duplicate legend; the wider lane prevents alert-state labels from colliding.
+- **Presentation:** Full dashboard width, 14 grid rows, state-first row labels,
+  and explicit `FIRING`/`PENDING` text inside every band. Fixed colors are
+  redundant evidence rather than the only state channel; the legend stays
+  hidden and the query preserves the original ALERTS transition series.
 
 ### 10. Assess Impact & Confidence
 - **Type:** Text

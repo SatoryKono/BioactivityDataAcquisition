@@ -43,7 +43,7 @@ as a synthetic green zero.
 
 ### 6. Monitor Fleet Severity
 - **Type:** Table
-- **Purpose:** Show global provider severity matrix.
+- **Purpose:** Show global provider severity matrix, sorted worst-first.
 - **Data sources:** `bioetl_provider_current_status`
 
 ### 7. Inspect Non-OK Providers
@@ -58,8 +58,13 @@ as a synthetic green zero.
 
 ### 9. Monitor Telemetry Freshness
 - **Type:** Stat
-- **Purpose:** Show provider telemetry freshness.
-- **Data sources:** `bioetl_provider_range_operational_ok`
+- **Purpose:** Show `PRESENT` only when current selected-provider telemetry
+  exists; missing/stale evidence is fail-closed `UNKNOWN`, not green zero.
+- **Data sources:** `bioetl_provider_current_status`
+
+Selected-provider, range/debug, and run-context panels ship in three collapsed
+rows. Expand them only after the fleet severity/cause/presence row identifies
+the relevant provider or evidence gap.
 
 ### 10. Start Provider Triage
 - **Type:** Text
