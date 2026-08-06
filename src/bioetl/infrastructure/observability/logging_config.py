@@ -112,7 +112,7 @@ def _mask_secrets(value: Any) -> Any:  # Any: structlog context values of arbitr
         return value
 
     # Preserve UUID-format identifiers (run_id, batch_id, content_hash)
-    if _UUID_PATTERN.match(value):
+    if _UUID_PATTERN.fullmatch(value):
         return value
 
     result = value

@@ -32,10 +32,13 @@ ADAPTER_REQUEST_DURATION_SECONDS = Histogram(
     buckets=[0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0],
 )
 
-# Compatibility alias for older import paths that still expect the removed
-# rolling p95 symbol. Keep the canonical runtime metric surface on the
-# histogram-backed duration metric while avoiding import-time breakage.
-ADAPTER_REQUEST_P95_SECONDS = ADAPTER_REQUEST_DURATION_SECONDS
+# Compatibility surface for older import paths that still expect a p95 gauge.
+# This is intentionally a Gauge (not a Histogram alias) so .set() remains valid.
+ADAPTER_REQUEST_P95_SECONDS = Gauge(
+    "bioetl_adapter_request_p95_seconds",
+    "Rolling p95 adapter request duration in seconds (compatibility gauge)",
+    ["provider", "endpoint"],
+)
 
 ADAPTER_REQUESTS_TOTAL = Counter(
     "bioetl_adapter_requests_total",

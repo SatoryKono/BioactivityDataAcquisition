@@ -10,6 +10,7 @@ from __future__ import annotations
 __all__ = ["InteractiveDebugAdapter", "LoggingDebugAdapter"]
 
 import json
+from collections import deque
 from typing import TYPE_CHECKING
 
 from bioetl.domain.ports import (
@@ -34,6 +35,8 @@ class InteractiveDebugAdapter:
         self,
         enabled_breakpoints: set[StageBreakpoint] | None = None,
         logger: LoggerPort | None = None,
+        *,
+        max_snapshots: int = 100,
     ) -> None:
         """Initialize interactive debugger.
 
@@ -41,10 +44,12 @@ class InteractiveDebugAdapter:
             enabled_breakpoints: Set of breakpoints to pause at.
                 If None, all breakpoints are enabled.
             logger: Optional logger for structured output.
+            max_snapshots: Maximum retained snapshots (bounded ring buffer).
         """
         self._enabled = enabled_breakpoints or set(StageBreakpoint)
         self._logger = logger
-        self._snapshots: list[PipelineSnapshot] = []
+        self._max_snapshots = max(1, max_snapshots)
+        self._snapshots: deque[PipelineSnapshot] = deque(maxlen=self._max_snapshots)
 
     def is_breakpoint_enabled(self, breakpoint: StageBreakpoint) -> bool:
         """Check if breakpoint is in the enabled set."""
@@ -109,16 +114,20 @@ class LoggingDebugAdapter:
         self,
         logger: LoggerPort,
         enabled_breakpoints: set[StageBreakpoint] | None = None,
+        *,
+        max_snapshots: int = 100,
     ) -> None:
         """Initialize logging debugger.
 
         Args:
             logger: Structured logger for snapshot output.
             enabled_breakpoints: Breakpoints to log (None = log all).
+            max_snapshots: Maximum retained snapshots (bounded ring buffer).
         """
         self._logger = logger
         self._enabled = enabled_breakpoints or set(StageBreakpoint)
-        self._snapshots: list[PipelineSnapshot] = []
+        self._max_snapshots = max(1, max_snapshots)
+        self._snapshots: deque[PipelineSnapshot] = deque(maxlen=self._max_snapshots)
 
     def is_breakpoint_enabled(self, breakpoint: StageBreakpoint) -> bool:
         """Check if breakpoint should be logged."""
