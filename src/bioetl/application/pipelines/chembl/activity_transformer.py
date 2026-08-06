@@ -9,7 +9,7 @@ from __future__ import annotations
 __all__ = ["ActivityTransformer"]
 
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING, ClassVar, cast, override
 
 from bioetl.application.core.base_transformer import TransformationError
@@ -74,7 +74,7 @@ class ActivityTransformer(BaseChemblTransformer):
             Flat dictionary with prefixed keys and float-converted values.
         """
         return flatten_nested_dict(
-            le_data, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS
+            le_data, "ligand_efficiency_", cast("dict[str, Callable[[object], object] | None]", _LIGAND_EFFICIENCY_FIELDS)
         )
 
     @staticmethod
@@ -93,7 +93,7 @@ class ActivityTransformer(BaseChemblTransformer):
         return flatten_nested_dict(
             action_data,
             "action_type_",
-            _ACTION_TYPE_FIELDS,
+            cast("dict[str, Callable[[object], object] | None]", _ACTION_TYPE_FIELDS),
             renames={"action_type_action_type": "action_type"},
         )
 

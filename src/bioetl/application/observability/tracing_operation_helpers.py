@@ -19,12 +19,12 @@ __all__ = ["traced_async_operation"]
 
 import sys
 from contextlib import asynccontextmanager, contextmanager
-from typing import TYPE_CHECKING
+from typing import cast, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator, Generator
 
-    from opentelemetry.trace import Span
+    from bioetl.domain.ports.observability.tracing import SpanHandle as Span
 
     from bioetl.domain.ports import TracingPort
 from bioetl.domain.types import JsonDict

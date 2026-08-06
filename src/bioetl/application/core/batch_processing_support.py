@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import Any, TYPE_CHECKING, cast
 
 from bioetl.application.core._batch_processing_layer_write_support import (
     write_silver_then_gold,
@@ -188,7 +188,7 @@ class BatchProcessingSupportService:
         The historical method name is preserved for caller compatibility.
         """
         await write_silver_then_gold(
-            execute_with_span=self._execute_with_span,
+            execute_with_span=cast(Any, self._execute_with_span),
             writer=self._writer,
             quarantine_manager=self._quarantine_manager,
             logger=self._logger,

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.application.observability.tracing_operation_helpers import traced_operation
 
 if TYPE_CHECKING:
-    from opentelemetry.trace import Span
+    from bioetl.domain.ports.observability.tracing import SpanHandle
 
     from bioetl.domain.ports import LoggerPort, QuarantinePort, TracingPort
     from bioetl.domain.types import JsonDict, QuarantineRecordStatus
@@ -52,7 +52,7 @@ class _QuarantineSyncHost(Protocol):
 
     def _set_trace_result(
         self,
-        span: Span,
+        span: SpanHandle,
         *,
         success: bool,
         **extra: object,

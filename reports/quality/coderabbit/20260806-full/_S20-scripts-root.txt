@@ -1,0 +1,16 @@
+scripts/__init__.py
+scripts/check_dq_dsl_parity.py
+scripts/check_entity_config_parity.py
+scripts/ci_check_docs_parity.sh
+scripts/docker-setup.ps1
+scripts/docker-setup.sh
+scripts/docs_parity_check.py
+scripts/documentation_governance_check.py
+scripts/generate_adr_registry.py
+scripts/generate_test_github_issues.py
+scripts/optimized_test_runner.py
+scripts/shutdown.ps1
+scripts/shutdown.sh
+scripts/startup.ps1
+scripts/startup.sh
+scripts/test_selection_strategy.py

@@ -47,6 +47,24 @@ __all__ = [
 ]
 
 
+def _format_author_display_name(author: dict[str, object]) -> str | None:
+    """Return personal or organizational display name for one author dict."""
+    given_raw = author.get("given", "")
+    family_raw = author.get("family", "")
+    given = given_raw.strip() if isinstance(given_raw, str) else ""
+    family = family_raw.strip() if isinstance(family_raw, str) else ""
+    if given and family:
+        return f"{given} {family}"
+    if family:
+        return family
+    if given:
+        return given
+    name_raw = author.get("name", "")
+    if isinstance(name_raw, str) and (name := name_raw.strip()):
+        return name
+    return None
+
+
 def extract_authors(
     publication: JsonDict,  # Any: untyped API JSON record
 ) -> list[str]:  # Any: untyped JSON fragment from Crossref API
@@ -86,21 +104,9 @@ def extract_authors(
     for author in raw_authors:
         if not isinstance(author, dict):
             continue
-        given_raw = author.get("given", "")
-        family_raw = author.get("family", "")
-        given = given_raw.strip() if isinstance(given_raw, str) else ""
-        family = family_raw.strip() if isinstance(family_raw, str) else ""
-        if given and family:
-            authors.append(f"{given} {family}")
-        elif family:
-            authors.append(family)
-        elif given:
-            authors.append(given)
-        else:
-            name_raw = author.get("name", "")
-            if isinstance(name_raw, str) and (name := name_raw.strip()):
-                # Organizational author (e.g., "World Health Organization")
-                authors.append(name)
+        name = _format_author_display_name(author)
+        if name is not None:
+            authors.append(name)
     return authors
 
 

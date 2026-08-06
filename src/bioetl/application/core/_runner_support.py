@@ -5,6 +5,9 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Protocol, cast
+from bioetl.application.core.postrun._service_support import (
+    PostrunServiceSupportHostProtocol,
+)
 
 from bioetl.application.core._runner_dependency_support import load_runner_checkpoint
 from bioetl.application.core.runner_execution_flow import (
@@ -79,7 +82,7 @@ class PipelineRunnerSupportMixin:
 
     async def _cleanup_after_run(self: _PipelineRunnerCleanupHostProtocol) -> None:
         try:
-            await self._postrun_service.cleanup(self._tracer)
+            await cast(Any, self._postrun_service).cleanup(self._tracer)
         finally:
             self._close_metrics()
 
@@ -139,7 +142,7 @@ class PipelineRunnerSupportMixin:
         await prepare_medallion_layers(self)
 
     def _check_data_quality(self: _PipelineRunnerCleanupHostProtocol) -> None:
-        self._postrun_service.run_dq_checks(self._executor)  # pyright: ignore[reportArgumentType]
+        cast(Any, self._postrun_service).run_dq_checks(self._executor)  # pyright: ignore[reportArgumentType]
 
     def _close_metrics(self: _PipelineRunnerCleanupHostProtocol) -> None:
         try:

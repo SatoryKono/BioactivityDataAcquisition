@@ -61,13 +61,13 @@ class BatchTracingManagerService:
             "Span",
             otel_tracer.start_as_current_span(
                 "pipeline_execution",
-                attributes=build_execution_span_attributes(
+                attributes=cast(dict[str, object], build_execution_span_attributes(
                     pipeline_name=self._config.pipeline_name,
                     entity_type=self._config.entity_type,
                     context=self._context,
                     adaptive_batch_sizing_enabled=self._adaptive_sizing_enabled,
                     initial_batch_size=self._initial_batch_size,
-                ),
+                )),
             ),
         )
         span.__enter__()
@@ -82,13 +82,13 @@ class BatchTracingManagerService:
             "Span",
             otel_tracer.start_as_current_span(
                 f"batch_{batch_id}",
-                attributes=build_batch_span_attributes(
+                attributes=cast(dict[str, object], build_batch_span_attributes(
                     batch_id=batch_id,
                     record_count=record_count,
                     run_type=self._context.run_type.value,
                     entity_type=self._config.entity_type,
                     start_index=start_index,
-                ),
+                )),
             ),
         )
         span.__enter__()
@@ -106,11 +106,11 @@ class BatchTracingManagerService:
             "Span",
             self._tracer.get_tracer(self.TRACER_NAME).start_as_current_span(
                 name,
-                attributes=build_layer_span_attributes(
+                attributes=cast(dict[str, object], build_layer_span_attributes(
                     batch_id=batch_id,
                     count=count,
                     input_count=input_count,
-                ),
+                )),
             ),
         )
         span.__enter__()

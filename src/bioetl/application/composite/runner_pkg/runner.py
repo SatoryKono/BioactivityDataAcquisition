@@ -53,6 +53,8 @@ from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     import polars as pl
 
     from bioetl.application.composite.checkpoint import CompositeCheckpointState
@@ -79,6 +81,12 @@ class CompositePipelineRunner(
     _key_extractor: KeyExtractorService  # pyright: ignore[reportUninitializedInstanceVariable]
     _observer: CompositeLifecycleObserverService
     _tracing: TracingPort | None
+    # Lifecycle host surface (initialized by initialize_runner_runtime_state).
+    _run_id_str: str
+    _finished: bool
+    _final_state: CompositePipelineState | None
+    _started_at: datetime | None
+    _start_time: float | None
 
     def __init__(
         self,

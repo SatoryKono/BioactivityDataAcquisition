@@ -135,6 +135,11 @@ class TestBronzeWriteResultProperties:
         result = _make_valid_result(compressed_size=50000, uncompressed_size=0)
         assert result.compression_ratio == pytest.approx(1.0)
 
+    def test_compression_ratio_zero_compressed(self) -> None:
+        """Test compression ratio returns 1.0 when compressed_size is 0."""
+        result = _make_valid_result(compressed_size=0, uncompressed_size=200000)
+        assert result.compression_ratio == pytest.approx(1.0)
+
     def test_exists_method_removed_from_domain_vo(self) -> None:
         """BronzeWriteResult must not perform filesystem I/O in domain layer."""
         result = _make_valid_result(absolute_path="/nonexistent/path/to/file.jsonl.zst")

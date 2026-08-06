@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from bioetl.domain.ports import (
+from bioetl.domain.ports.adr import (
     AdrDocument,
     AdrInfo,
     AdrServicePort,
@@ -141,7 +141,7 @@ class FilesystemAdrCatalog(AdrServicePort):
 
         return self._build_validation_report(
             files=files,
-            issues=tuple(issues),
+            issues=issues,
         )
 
 
