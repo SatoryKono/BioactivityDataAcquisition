@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+import inspect
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -68,6 +69,14 @@ def adapter(mock_http_client, mock_logger):
         settings=None,
         mailto="test@example.com",
     )
+
+
+def test_constructor_requires_injected_http_client_and_logger() -> None:
+    """Mixin attributes must not become dataclass constructor defaults."""
+    parameters = inspect.signature(CrossRefAdapter).parameters
+
+    assert parameters["http_client"].default is inspect.Parameter.empty
+    assert parameters["logger"].default is inspect.Parameter.empty
 
 
 def test_post_init_preserves_injected_crossref_runtime_collaborators(

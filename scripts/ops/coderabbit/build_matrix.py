@@ -311,10 +311,12 @@ def main() -> None:
         "|----|------|------:|-----------|-----------------|",
     ]
     for leaf in sorted(leaves, key=lambda x: (x["wave"], x["id"])):
+        globs_raw = leaf.get("globs")
+        globs_list: list[object] = globs_raw if isinstance(globs_raw, list) else []
         sel = leaf.get("dir") or (
             Path(str(leaf["use_file_list"])).name
             if leaf.get("use_file_list")
-            else ",".join(str(g) for g in list(leaf.get("globs") or [])[:60])
+            else ",".join(str(g) for g in globs_list[:60])
         )
         lines.append(
             f"| `{leaf['id']}` | {leaf['wave']} | {leaf['files']} | {leaf['under_cap']} | `{sel}` |"

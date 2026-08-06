@@ -109,7 +109,7 @@ class CompositePipelineRunner(
 
     def _as_lifecycle_host(self) -> _RunnerLifecycleHost:
         """Narrow self to the lifecycle host protocol for helper modules."""
-        return cast(_RunnerLifecycleHost, self)
+        return cast(_RunnerLifecycleHost, cast(object, self))
 
     def _mark_finished(self, final_state: CompositePipelineState) -> None:
         """Persist terminal runner state for re-entry guards and diagnostics."""

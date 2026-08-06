@@ -1,5 +1,6 @@
 """Factory helpers for PubMed adapter construction."""
 
+# pyright: reportImportCycles=false
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any

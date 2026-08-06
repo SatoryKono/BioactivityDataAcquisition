@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NoReturn
 
 import click
 import yaml
@@ -45,7 +45,9 @@ def get_config_service() -> ConfigService:
     return _impl()
 
 
-def _fail_dq(title: str, detail: str, exit_code: ExitCode = ExitCode.CONFIG_ERROR) -> None:
+def _fail_dq(
+    title: str, detail: str, exit_code: ExitCode = ExitCode.CONFIG_ERROR
+) -> NoReturn:
     """Emit a DQ CLI error and exit non-zero (do not return success)."""
     echo_error(title, detail)
     raise SystemExit(int(exit_code))

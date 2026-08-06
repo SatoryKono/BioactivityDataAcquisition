@@ -62,6 +62,7 @@ class _FetchState:
 class _AsyncRecords:
     def __init__(self, rows: list[dict[str, object]]) -> None:
         self._rows = rows
+        self._iter: object = iter(())
 
     def __aiter__(self):
         self._iter = iter(self._rows)
@@ -69,7 +70,7 @@ class _AsyncRecords:
 
     async def __anext__(self):
         try:
-            return next(self._iter)
+            return next(self._iter)  # type: ignore[call-overload]
         except StopIteration as exc:
             raise StopAsyncIteration from exc
 

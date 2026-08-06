@@ -91,7 +91,7 @@ def start_request_span(
         noop_span = _NoOpSpan()
         noop_span.__enter__()
         return noop_span
-    otel_tracer = cast(_OtelTracerLike, tracer.get_tracer("bioetl.http"))
+    otel_tracer = cast(_OtelTracerLike, cast(object, tracer.get_tracer("bioetl.http")))
     span: SpanLike = otel_tracer.start_as_current_span(
         f"http.{method.lower()}",
         attributes={

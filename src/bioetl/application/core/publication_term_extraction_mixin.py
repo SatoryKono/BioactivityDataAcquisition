@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Awaitable, Callable
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, ClassVar, Protocol, cast
 
 from bioetl.application.core.publication_term_runtime import (
     compute_term_entity_id,
@@ -62,8 +62,8 @@ class PublicationTermExtractionHost(Protocol):
     attributes; mixin methods use the protocol instead of ``self: Any``.
     """
 
-    SOURCE_ENTITY_TYPE: str
-    PUBLICATION_LIMIT_MULTIPLIER: int
+    SOURCE_ENTITY_TYPE: ClassVar[str]
+    PUBLICATION_LIMIT_MULTIPLIER: ClassVar[int]
     _data_source: DataSourcePort
 
     def _extract_terms_from_publication(

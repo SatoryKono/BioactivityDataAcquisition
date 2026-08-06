@@ -163,14 +163,19 @@ class BatchCheckpointRecoveryService:
             return None
         span = cast(
             "Span",
-            self._tracer.get_tracer(self._CHECKPOINT_TRACER_NAME).start_as_current_span(
-                "checkpoint_save",
-                attributes={
-                    "bioetl.pipeline": self._pipeline_name,
-                    "bioetl.checkpoint.operation": operation,
-                    "bioetl.checkpoint.scope": "ordinary",
-                    "bioetl.checkpoint.records_processed": records_processed,
-                },
+            cast(
+                object,
+                self._tracer.get_tracer(
+                    self._CHECKPOINT_TRACER_NAME
+                ).start_as_current_span(
+                    "checkpoint_save",
+                    attributes={
+                        "bioetl.pipeline": self._pipeline_name,
+                        "bioetl.checkpoint.operation": operation,
+                        "bioetl.checkpoint.scope": "ordinary",
+                        "bioetl.checkpoint.records_processed": records_processed,
+                    },
+                ),
             ),
         )
         span.__enter__()

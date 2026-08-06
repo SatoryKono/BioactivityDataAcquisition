@@ -24,18 +24,24 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def load_progress() -> dict:
+def load_progress() -> dict[str, object]:
     if PROGRESS.exists():
         return json.loads(PROGRESS.read_text(encoding="utf-8"))
-    return {"started": now(), "results": {}, "completed": [], "failed": [], "skipped": []}
+    return {
+        "started": now(),
+        "results": {},
+        "completed": [],
+        "failed": [],
+        "skipped": [],
+    }
 
 
-def save_progress(p: dict) -> None:
+def save_progress(p: dict[str, object]) -> None:
     p["updated"] = now()
     PROGRESS.write_text(json.dumps(p, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
-def run_leaf(leaf: dict, base: str = "main") -> dict:
+def run_leaf(leaf: dict[str, object], base: str = "main") -> dict[str, object]:
     lid = leaf["id"]
     log_path = LOG_DIR / f"review_{lid}.log"
     cmd: list[str]

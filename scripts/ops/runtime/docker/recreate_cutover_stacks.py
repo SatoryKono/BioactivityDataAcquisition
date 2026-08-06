@@ -23,10 +23,10 @@ from pathlib import Path
 
 import yaml
 
-if __package__:
+try:
     from . import docker_runtime_preflight as runtime_preflight
-else:  # pragma: no cover - direct operator entrypoint
-    import docker_runtime_preflight as runtime_preflight
+except ImportError:  # pragma: no cover - direct operator entrypoint
+    import docker_runtime_preflight as runtime_preflight  # type: ignore[no-redef]
 
 SECRET_KEY = re.compile(r"(?:password|secret|token|credential|auth|key)", re.I)
 

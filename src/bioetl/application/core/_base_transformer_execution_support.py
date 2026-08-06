@@ -54,7 +54,7 @@ def start_transform_span(
             "bioetl.record_index": index,
         },
     )
-    closable_span = cast(_ClosableSpan, span)
+    closable_span = cast(_ClosableSpan, cast(object, span))
     closable_span.__enter__()
     return closable_span
 

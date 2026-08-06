@@ -99,13 +99,16 @@ def start_checkpoint_save_span(
         return None
     span = cast(
         "Span",
-        tracer.get_tracer(_CHECKPOINT_TRACER_NAME).start_as_current_span(
-            "checkpoint_save",
-            attributes={
-                "bioetl.pipeline": host._config.name,
-                "bioetl.checkpoint.operation": operation,
-                "bioetl.checkpoint.scope": "composite",
-            },
+        cast(
+            object,
+            tracer.get_tracer(_CHECKPOINT_TRACER_NAME).start_as_current_span(
+                "checkpoint_save",
+                attributes={
+                    "bioetl.pipeline": host._config.name,
+                    "bioetl.checkpoint.operation": operation,
+                    "bioetl.checkpoint.scope": "composite",
+                },
+            ),
         ),
     )
     span.__enter__()
