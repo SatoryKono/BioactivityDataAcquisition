@@ -45,7 +45,7 @@ configs/quality/     # governance / contracts / thresholds (not entity runtime Y
 | Entity | `configs/entities/{provider}/{entity}.yaml` | Runnable pipeline identity + sink/schema |
 | Composite | `configs/composites/{entity}.yaml` | seed / enrichers / merge policy |
 
-## Required fields (ADR-039 / ADR-025 historical)
+## Required fields (ADR-025 / ADR-039)
 
 Minimal entity surface (see live examples under `configs/entities/chembl/`):
 

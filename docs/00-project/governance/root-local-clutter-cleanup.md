@@ -1,8 +1,8 @@
 # Root local clutter cleanup (operator guidance)
 
 **Status:** active
-**Linked issues:** #6703 (RH), #6766 (RH2-01), #6798/#6799 (RH3), #6813/#6814/#6816 (RH4), #6876/#6877 (RH 2026-07-28), #7015–#7023 (RH5 2026-07-29), #8060/#8067/#8081/#8082/#8086/#8087/#8089 (RH-5C 2026-08); epics #6700, #6765, #6795, #6812, #6874, #7015
-**Last verified:** 2026-08-06
+**Linked issues:** #6703 (RH), #6766 (RH2-01), #6798/#6799 (RH3), #6813/#6814/#6816 (RH4), #6876/#6877 (RH 2026-07-28), #7015–#7023 (RH5 2026-07-29); epics #6700, #6765, #6795, #6812, #6874, #7015
+**Last verified:** 2026-07-29
 
 This note documents **local-only** cleanup for the repository root. It does not
 redefine runtime behavior. Canonical policy remains
@@ -13,13 +13,6 @@ Tracked root is allowlist-minimal (**37 ≡ allowlist** after RH-01 / #6876;
 re-verified RH5 / #7016). Most live root noise is **recreated by normal tooling**
 (coverage, logs, test dumps). Use the recurring checklist below instead of
 inventing new allowlist entries.
-
-### 2026-08-06 re-verify (RH-5C)
-
-- Tracked root still **37 ≡** `.github/root-allowlist.txt`.
-- Structure audit: 0 MUST (after relocating residual CodeRabbit Python out of `reports/`).
-- Local purge via `python -m scripts.engineering.repo cleanup-root-local-clutter --apply --include-logs` removes `logs/`, `test-output/`, and reviewed caches.
-- Do not recreate root `mcp-shell.log` or Windows `NUL`.
 
 ### Local vs CI (RH-02 / #6877)
 
