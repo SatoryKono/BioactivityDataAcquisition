@@ -152,7 +152,7 @@ def _collect_metadata_writer_candidates(services: object) -> list[object]:
         writer = getattr(storage, writer_name, None)
         if writer is None:
             continue
-        # Prefer public contract accessors over private `_metadata_writer`.
+        # Prefer public contract accessors; fall back to legacy private field.
         writer_metadata = None
         for accessor_name in (
             "metadata_writer",
@@ -169,6 +169,8 @@ def _collect_metadata_writer_candidates(services: object) -> list[object]:
                 writer_metadata = accessor
             if writer_metadata is not None:
                 break
+        if writer_metadata is None:
+            writer_metadata = getattr(writer, "_metadata_writer", None)
         if writer_metadata is not None:
             candidates.append(writer_metadata)
     return candidates

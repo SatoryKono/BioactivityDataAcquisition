@@ -69,6 +69,11 @@ def _resolve_data_root_with_mode(settings: Settings) -> tuple[Path, DataRootMode
     return candidate, "repo_default"
 
 
+def _private_fallback_data_root() -> Path:
+    """Return a user-private fallback data root for legacy facade callers."""
+    return _private_fallback_data_root_with_mode()[0]
+
+
 def _private_fallback_data_root_with_mode() -> tuple[Path, DataRootMode]:
     """Return a user-private fallback data root and its mode class."""
     preferred = Path.home() / ".cache" / "bioetl-data"
@@ -83,7 +88,9 @@ def _private_fallback_data_root_with_mode() -> tuple[Path, DataRootMode]:
 def _prepare_private_runtime_dir(path: Path) -> Path:
     """Create a private runtime directory owned by the current user.
 
-    Rejects fallbacks that cannot be restricted to owner-only access.
+    On POSIX, rejects fallbacks that cannot be restricted to owner-only access.
+    Windows ACLs do not map cleanly to Unix mode bits; there we still create
+    the directory and best-effort chmod without hard-failing on mode 0o777.
     """
     path.mkdir(parents=True, exist_ok=True, mode=0o700)
     with suppress(OSError):
@@ -111,6 +118,10 @@ def _assert_private_runtime_dir(path: Path) -> None:
             raise OSError(
                 f"private runtime path is not owned by current user: {path}"
             )
+
+    # Windows reports broad mode bits even for private dirs; skip mode gate.
+    if os.name == "nt":
+        return
 
     mode = stat.S_IMODE(st.st_mode)
     # Owner-only: no group/other read/write/execute.
