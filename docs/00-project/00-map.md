@@ -46,6 +46,7 @@ ______________________________________________________________________
 | Govern documentation               | [D-01](governance/01-documentation-governance-style-guide.md)                          |
 | Create a new pipeline              | [governance/04-extending-bioetl.md](governance/04-extending-bioetl.md)                 |
 | Review a pipeline                  | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md) |
+| Understand pipeline dataflow       | [pipeline-dataflow-documentation.md](../03-guides/pipeline-dataflow-documentation.md) |
 | Browse published reference docs    | [index.md](../04-reference/index.md)                                                   |
 | Find doc templates                 | [templates/index.md](../04-reference/templates/index.md)                               |
 | Inspect run traceability           | [run-manifest-ledger.md](../04-reference/contracts/run-manifest-ledger.md)             |
