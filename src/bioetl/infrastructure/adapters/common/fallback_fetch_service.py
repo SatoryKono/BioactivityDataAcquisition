@@ -182,36 +182,40 @@ class FallbackFetchOrchestrator:
 
         primary_resolved = 0
         fallback_hits = 0
-        async for record in run_fetch_with_fallback_policy(
-            primary_records=request.primary_record_fetcher(primary_ids, request.limit),
-            primary_ids=primary_ids,
-            title_only_entries=title_only_entries,
-            fallback_mapping=request.fallback_mapping,
-            normalize_id=normalize_id,
-            extract_record_id=extract_record_id,
-            fallback_handler=fallback_handler,
-            limit=request.limit,
-            primary_lookup_method=request.primary_lookup_method,
-            phase1_summary_logger=request.phase1_summary_logger,
-        ):
-            lookup_method = str(record.get("_lookup_method", ""))
-            if (
-                request.primary_lookup_method
-                and lookup_method == request.primary_lookup_method
+        try:
+            async for record in run_fetch_with_fallback_policy(
+                primary_records=request.primary_record_fetcher(
+                    primary_ids, request.limit
+                ),
+                primary_ids=primary_ids,
+                title_only_entries=title_only_entries,
+                fallback_mapping=request.fallback_mapping,
+                normalize_id=normalize_id,
+                extract_record_id=extract_record_id,
+                fallback_handler=fallback_handler,
+                limit=request.limit,
+                primary_lookup_method=request.primary_lookup_method,
+                phase1_summary_logger=request.phase1_summary_logger,
             ):
-                primary_resolved += 1
-            elif lookup_method in {"title_fallback", "title_only", "title"}:
-                fallback_hits += 1
-            yield record
-
-        self._record_fallback_metrics(
-            request=request,
-            primary_ids=primary_ids,
-            title_only_entries=title_only_entries,
-            primary_resolved=primary_resolved,
-            fallback_hits=fallback_hits,
-            fallback_handler=fallback_handler,
-        )
+                lookup_method = str(record.get("_lookup_method", ""))
+                if (
+                    request.primary_lookup_method
+                    and lookup_method == request.primary_lookup_method
+                ):
+                    primary_resolved += 1
+                elif lookup_method in {"title_fallback", "title_only", "title"}:
+                    fallback_hits += 1
+                yield record
+        finally:
+            # Always record metrics on normal completion, early close, or failure.
+            self._record_fallback_metrics(
+                request=request,
+                primary_ids=primary_ids,
+                title_only_entries=title_only_entries,
+                primary_resolved=primary_resolved,
+                fallback_hits=fallback_hits,
+                fallback_handler=fallback_handler,
+            )
 
     def _record_fallback_metrics(
         self,

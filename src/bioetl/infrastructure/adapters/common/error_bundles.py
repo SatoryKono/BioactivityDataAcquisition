@@ -37,6 +37,9 @@ def build_common_network_error_bundle(
     )
 
 
+# Intentionally exclude bare Exception so unexpected programming errors
+# (AttributeError outside controlled paths, etc.) are not swallowed as
+# "resilience" and retried indefinitely.
 COMMON_ADAPTER_FETCH_RESILIENCE_ERRORS = (
     BioETLError,
     ExternalServiceError,
@@ -48,18 +51,15 @@ COMMON_ADAPTER_FETCH_RESILIENCE_ERRORS = (
     RuntimeError,
     KeyError,
     AttributeError,
-    Exception,
 )
 
 COMMON_ADAPTER_HEALTH_ERRORS = build_common_network_error_bundle(
     HTTPStatusError,
-    Exception,
 )
 
 COMMON_ADAPTER_HEALTH_ERRORS_WITH_KEYERROR = build_common_network_error_bundle(
     HTTPStatusError,
     KeyError,
-    Exception,
 )
 
 COMMON_TITLE_FALLBACK_ERRORS = build_common_network_error_bundle(KeyError)

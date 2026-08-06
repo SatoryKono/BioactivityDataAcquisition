@@ -38,13 +38,19 @@ async def retry_fetch_records(
     provider_name: str,
     request: DataSourceFetchRequest,
 ) -> AsyncIterator[JsonDict]:
-    """Yield fetch records with full-generator retry on transient failures."""
+    """Yield fetch records with full-generator retry on transient failures.
+
+    Retries only when no records have been emitted yet. After the first yield,
+    failures propagate so consumers never see restarted partial streams.
+    """
     last_error: Exception | None = None
     retries = 0
+    emitted_any = False
 
     for attempt in range(retry_config.max_attempts):
         try:
             async for record in iter_delegated_fetch(data_source, request):
+                emitted_any = True
                 yield record
             record_retry_metrics(
                 metrics,
@@ -57,6 +63,9 @@ async def retry_fetch_records(
         except CircuitBreakerOpenError:
             raise
         except retryable_exception_types(retry_config) as exc:
+            # Never restart a stream that already produced records.
+            if emitted_any:
+                raise
             last_error = exc
             if retry_config.is_last_attempt(attempt):
                 break

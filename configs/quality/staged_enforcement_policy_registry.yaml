@@ -1,3 +1,4 @@
+schema_version: 1
 policy_scope: staged_enforcement_policy_registry
 linked_issue: "#5813"
 owner: "@bioetl-architecture"
