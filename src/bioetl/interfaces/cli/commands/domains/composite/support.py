@@ -39,6 +39,7 @@ def push_metrics_to_gateway(
         publish_metrics_safely,
     )
 
+    # Best-effort only: never raise into composite finally / SystemExit paths.
     return publish_metrics_safely(
         run_label=run_label,
         pipeline_name=pipeline_name,
