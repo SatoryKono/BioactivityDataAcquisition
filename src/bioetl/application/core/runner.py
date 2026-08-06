@@ -169,9 +169,9 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             await self._run_pipeline_lifecycle()
         except PipelineShutdownError:
             debug_export_status = "shutdown"
-            # Terminal shutdown is recorded only in this outer handler.
+            # Terminal shutdown is recorded only here (not inside lifecycle).
+            # Cooperative shutdown completes run() without re-raising.
             self._record_terminal_shutdown()
-            raise
         except _RUN_FAILURE_EXCEPTIONS as exc:
             debug_export_status = "failed"
             record_run_failed(self, exc)

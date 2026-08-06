@@ -140,8 +140,8 @@ class CleanupService:
         # Offload the synchronous filesystem scan so the event loop stays responsive.
         preview_dict = await asyncio.to_thread(
             self._storage.preview_cleanup,
-            silver_table,
-            gold_table,
+            silver_table=silver_table,
+            gold_table=gold_table,
         )
         silver_parts, gold_parts, total_files = parse_cleanup_preview_parts(
             preview_dict

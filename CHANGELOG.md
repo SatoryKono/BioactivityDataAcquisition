@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   projections. CI now checks the generated artifacts for drift when their
   configuration, schemas, transformer, or generator inputs change.
 
+- **Documentation updates (2026-08-06):** Updated RULES.md to v6.1.8 with refreshed domain ports inventory (85 ports, 100% runtime_checkable); regenerated ADR registry with 55 ADRs (ADR-001 to ADR-055); updated 00-map.md to v1.1.3 with new ADR references; enhanced glossary.md v1.0.2 with control-plane terminology (Run Manifest, Run Ledger, Workflow, Execution Fingerprint, Passport, QuarantineEntry); verified internal links and diagram quality gates.
+
 ### Changed
 
 - **CLI observability backend defaults (#7562–#7565):**
