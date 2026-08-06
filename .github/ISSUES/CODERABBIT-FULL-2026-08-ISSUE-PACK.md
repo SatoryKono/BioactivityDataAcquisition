@@ -105,6 +105,7 @@ reports/quality/coderabbit/YYYYMMDD/
 `architecture-tests`, `documentation`, `docs-drift`, `observability`,
 `data-quality`, `reproducibility`, `security`, `ci`
 
+
 ## Residual FINDINGS pack (#7696)
 
 Post-campaign de-dupe pack: [CODERABBIT-FULL-2026-08-FINDINGS-PACK.md](CODERABBIT-FULL-2026-08-FINDINGS-PACK.md)
