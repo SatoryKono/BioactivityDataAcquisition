@@ -68,7 +68,7 @@ def save_progress(p: Progress) -> None:
 
 
 def run_leaf(leaf: Leaf, base: str = "main") -> LeafResult:
-    lid = leaf["id"]
+    lid = str(leaf.get("id") or "")
     log_path = LOG_DIR / f"review_{lid}.log"
     cmd: list[str]
     env = os.environ.copy()
@@ -77,20 +77,22 @@ def run_leaf(leaf: Leaf, base: str = "main") -> LeafResult:
     env["NO_COLOR"] = "1"
     env["TERM"] = "dumb"
 
-    if leaf.get("dir"):
+    leaf_dir = leaf.get("dir")
+    leaf_file_list = leaf.get("use_file_list")
+    if leaf_dir:
         cmd = [
             CODERABBIT,
             "review",
             "--base",
             base,
             "--dir",
-            leaf["dir"],
+            leaf_dir,
             "--plain",
         ]
-    elif leaf.get("use_file_list"):
+    elif leaf_file_list:
         # CodeRabbit CLI may not accept arbitrary file lists; try --dir parent if single root
         # Fallback: use first common directory prefix
-        files = Path(leaf["use_file_list"]).read_text(encoding="utf-8").splitlines()
+        files = Path(leaf_file_list).read_text(encoding="utf-8").splitlines()
         files = [f for f in files if f.strip()]
         if not files:
             return {
