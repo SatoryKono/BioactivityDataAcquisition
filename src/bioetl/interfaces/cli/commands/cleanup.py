@@ -5,7 +5,9 @@ Implements Bronze layer cleanup per RULES.md retention policy.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
+
+import click
 
 from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
     get_bronze_cleanup_service,
@@ -28,6 +30,17 @@ from bioetl.interfaces.cli.formatters import (
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview
+
+
+def _validate_retention_days(
+    _ctx: click.Context,
+    _param: click.Parameter,
+    value: Any,
+) -> int:
+    """Accept only non-negative integers for --retention-days."""
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        raise click.BadParameter("retention-days must be a non-negative integer")
+    return value
 
 __all__ = [
     "bronze_cleanup_command",
@@ -81,7 +94,9 @@ def _cleanup_policy(
     "-r",
     "--retention-days",
     default=90,
-    help="Remove files older than N days",
+    type=int,
+    callback=_validate_retention_days,
+    help="Remove files older than N days (non-negative integer)",
 )
 @typed_click_option(
     "--dry-run",

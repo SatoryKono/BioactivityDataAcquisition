@@ -46,40 +46,112 @@ class TestSQLInjectionPrevention:
 
         # Pattern to detect string formatting in SQL context
         # This is a heuristic - not perfect but catches common issues
+        # Cover SELECT/INSERT/UPDATE/DELETE and multiline SQL string forms.
+        # Require SQL shape (FROM/INTO/SET) so UI strings like "Would delete {n}"
+        # are not false positives.
         sql_concat_patterns = [
-            # f"SELECT * FROM table WHERE id = {user_input}"
-            (r'["\']SELECT.*\{.*\}.*["\']', "f-string in SQL query"),
-            # "SELECT * FROM table WHERE id = " + user_input
-            (r'["\']SELECT.*["\']\s*\+\s*\w+', "string concatenation in SQL query"),
-            # "SELECT * FROM table WHERE id = %s" % user_input (without parameter binding)
-            (r'["\']SELECT.*%s["\']\s*%', "old-style formatting in SQL query"),
-            # "SELECT * FROM table WHERE id = {}".format(user_input)
-            (r'["\']SELECT.*\.format\(', "format() in SQL query"),
+            (
+                r'["\'].*SELECT\s+.+\s+FROM.*\{.*\}.*["\']',
+                "f-string / interpolation in SELECT",
+            ),
+            (
+                r'["\'].*INSERT\s+INTO.*\{.*\}.*["\']',
+                "f-string / interpolation in INSERT",
+            ),
+            (
+                r'["\'].*UPDATE\s+\w+\s+SET.*\{.*\}.*["\']',
+                "f-string / interpolation in UPDATE",
+            ),
+            (
+                r'["\'].*DELETE\s+FROM.*\{.*\}.*["\']',
+                "f-string / interpolation in DELETE",
+            ),
+            (
+                r'["\'].*SELECT\s+.+\s+FROM.*["\']\s*\+\s*\w+',
+                "string concatenation in SELECT",
+            ),
+            (
+                r'["\'].*INSERT\s+INTO.*["\']\s*\+\s*\w+',
+                "string concatenation in INSERT",
+            ),
+            (
+                r'["\'].*UPDATE\s+\w+\s+SET.*["\']\s*\+\s*\w+',
+                "string concatenation in UPDATE",
+            ),
+            (
+                r'["\'].*DELETE\s+FROM.*["\']\s*\+\s*\w+',
+                "string concatenation in DELETE",
+            ),
+            (
+                r'["\'].*SELECT\s+.+\s+FROM.*%s["\']\s*%',
+                "old-style formatting in SELECT",
+            ),
+            (
+                r'["\'].*INSERT\s+INTO.*%s["\']\s*%',
+                "old-style formatting in INSERT",
+            ),
+            (
+                r'["\'].*UPDATE\s+\w+\s+SET.*%s["\']\s*%',
+                "old-style formatting in UPDATE",
+            ),
+            (
+                r'["\'].*DELETE\s+FROM.*%s["\']\s*%',
+                "old-style formatting in DELETE",
+            ),
+            (
+                r'["\'].*SELECT\s+.+\s+FROM.*\.format\(',
+                "format() in SELECT",
+            ),
+            (
+                r'["\'].*INSERT\s+INTO.*\.format\(',
+                "format() in INSERT",
+            ),
+            (
+                r'["\'].*UPDATE\s+\w+\s+SET.*\.format\(',
+                "format() in UPDATE",
+            ),
+            (
+                r'["\'].*DELETE\s+FROM.*\.format\(',
+                "format() in DELETE",
+            ),
+            # triple-quoted multiline SQL with interpolation
+            (
+                r'["\']{3}[\s\S]*?SELECT\s+[\s\S]+?\s+FROM[\s\S]*?\{[\s\S]*?\}[\s\S]*?["\']{3}',
+                "multiline interpolated SELECT",
+            ),
+            (
+                r'["\']{3}[\s\S]*?INSERT\s+INTO[\s\S]*?\{[\s\S]*?\}[\s\S]*?["\']{3}',
+                "multiline interpolated INSERT",
+            ),
+            (
+                r'["\']{3}[\s\S]*?UPDATE\s+\w+\s+SET[\s\S]*?\{[\s\S]*?\}[\s\S]*?["\']{3}',
+                "multiline interpolated UPDATE",
+            ),
+            (
+                r'["\']{3}[\s\S]*?DELETE\s+FROM[\s\S]*?\{[\s\S]*?\}[\s\S]*?["\']{3}',
+                "multiline interpolated DELETE",
+            ),
         ]
 
         for py_file, content in source_contents:
-            # Skip if file doesn't contain SQL keywords
-            if (
-                "SELECT" not in content
-                and "INSERT" not in content
-                and "UPDATE" not in content
+            upper = content.upper()
+            if not any(
+                keyword in upper
+                for keyword in ("SELECT", "INSERT", "UPDATE", "DELETE")
             ):
                 continue
 
             for pattern, description in sql_concat_patterns:
-                if re.search(pattern, content, re.IGNORECASE):
-                    # Check if it's in a comment or docstring (false positive)
-                    lines = content.split("\n")
-                    for i, line in enumerate(lines, 1):
-                        if re.search(pattern, line, re.IGNORECASE):
-                            # Skip if it's a comment
-                            if line.strip().startswith("#"):
-                                continue
-                            # Skip if it's a docstring
-                            if '"""' in line or "'''" in line:
-                                continue
-                            rel_path = py_file.relative_to(PROJECT_ROOT)
-                            violations.append(f"{rel_path}:{i}: {description}")
+                for match in re.finditer(pattern, content, re.IGNORECASE):
+                    # Approximate line number of match start
+                    line_no = content.count("\n", 0, match.start()) + 1
+                    line = content.split("\n", line_no)[line_no - 1]
+                    if line.strip().startswith("#"):
+                        continue
+                    if '"""' in line or "'''" in line:
+                        continue
+                    rel_path = py_file.relative_to(PROJECT_ROOT)
+                    violations.append(f"{rel_path}:{line_no}: {description}")
 
         # Allow some false positives in test files or known safe contexts
         allowed_files = [

@@ -29,7 +29,7 @@ def test_project_config_is_minimal_portable_toml() -> None:
     path = ROOT / ".codex/config.toml"
     data = tomllib.loads(path.read_text(encoding="utf-8"))
 
-    assert data == {"agents": {"max_concurrent_threads_per_session": 3}}
+    assert data == {"agents": {"max_threads": 3}}
     text = path.read_text(encoding="utf-8")
     assert "OPENAI_API_KEY" not in text
     assert "token" not in text.lower()
@@ -42,7 +42,7 @@ def test_project_config_negative_fixture_reports_nonportable_key(
     config = tmp_path / ".codex/config.toml"
     config.parent.mkdir(parents=True)
     config.write_text(
-        '[agents]\nmax_concurrent_threads_per_session = 3\napi_key = "bad"\n',
+        '[agents]\nmax_threads = 3\napi_key = "bad"\n',
         encoding="utf-8",
     )
 

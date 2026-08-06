@@ -102,6 +102,14 @@ class CircuitBreakerPort(Protocol):
         """
         ...
 
+    def get_recovery_timeout(self) -> float:
+        """Seconds to wait in OPEN before a HALF_OPEN probe is allowed."""
+        ...
+
+    def get_last_failure_time(self) -> float | None:
+        """Monotonic timestamp of the last recorded failure, if any."""
+        ...
+
     async def call(
         self,
         func: Callable[P, Awaitable[T]],

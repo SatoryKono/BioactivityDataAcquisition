@@ -48,6 +48,8 @@ class StreamingBatchProcessor:
             chunk_size: Initial maximum number of records per sub-batch.
             start_index: Absolute record index of the first record for accurate reporting.
         """
+        if chunk_size < 1:
+            raise ValueError(f"chunk_size must be >= 1, got {chunk_size!r}")
         current_chunk_size = chunk_size
         i = 0
         total_records = len(records)
@@ -56,6 +58,8 @@ class StreamingBatchProcessor:
                 current_chunk_size = self._memory_monitor.get_recommended_batch_size(
                     current_chunk_size
                 )
+            if current_chunk_size < 1:
+                current_chunk_size = 1
             batch_slice = records[i : i + current_chunk_size]
             result = await self._transformer.transform_stream(
                 batch_slice, batch_id, start_index + i

@@ -10,9 +10,12 @@ import sys
 import time
 from pathlib import Path
 
-RUNTIME = Path(
-    r"\\wsl$\Ubuntu\home\fedor\.local\share\bioetl-runtime\BioactivityDataAcquisition2"
-)
+_RUNTIME_ORIGIN = os.environ.get("BIOETL_RUNTIME_ORIGIN", "").strip()
+if not _RUNTIME_ORIGIN:
+    raise RuntimeError(
+        "BIOETL_RUNTIME_ORIGIN is required; use runtime_manager.py for normal lifecycle"
+    )
+RUNTIME = Path(_RUNTIME_ORIGIN)
 
 MONITORING_NAMES = [
     "bioetl-grafana",

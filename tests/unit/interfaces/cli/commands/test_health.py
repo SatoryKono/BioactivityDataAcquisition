@@ -79,6 +79,7 @@ class TestHealthServerCommand:
         assert "--host" in result.output
         assert "--port" in result.output
         assert "127.0.0.1" in result.output  # default host (localhost for security)
+        assert "8000" in result.output  # default port
 
     def test_runtime_source_identity_accepts_only_managed_digest(
         self,
@@ -93,7 +94,6 @@ class TestHealthServerCommand:
             server_integration_deps._runtime_source_id_from_environment()
             == source_id
         )
-        assert "8000" in result.output  # default port
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     @patch(

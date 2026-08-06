@@ -43,6 +43,7 @@ from bioetl.domain.control_plane import (
     RunSourceRef,
 )
 from bioetl.domain.control_plane.run_ledger import (
+    ARTIFACT_PUBLISHED_EVENT,
     COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
     RUN_FAILED_EVENT,
     RUN_FINISHED_EVENT,
@@ -181,8 +182,12 @@ def test_identity_formatting_helpers_cover_absent_nested_and_validator_edges() -
     assert formatting.join_non_empty(["", None], " / ") is None
     assert formatting.mapping_value({"a": 1}, "a", "missing") == {}
     assert formatting.mapping_value({"a": {"x": 1}}, "a") == {"x": 1}
-    assert formatting.validate_run_id_format("00000000-0000-0000-0000-000000000000")
+    # UUID v4 only (nil UUID is version 0 and must be rejected).
+    assert formatting.validate_run_id_format("550e8400-e29b-41d4-a716-446655440000")
+    assert not formatting.validate_run_id_format("00000000-0000-0000-0000-000000000000")
     assert not formatting.validate_run_id_format("not-a-uuid")
+    # Equal sets must hash identically regardless of construction order.
+    assert formatting.stable_hash({"a", "b"}) == formatting.stable_hash({"b", "a"})
     assert formatting.validate_manifest_id_format("manifest-1")
     assert not formatting.validate_manifest_id_format("manifest-")
     assert formatting.validate_provider_entity_format("chembl.activity")
@@ -690,7 +695,20 @@ def test_checkpoint_extractor_helpers_cover_metadata_edges() -> None:
 
 def test_ledger_extractor_helpers_cover_composite_edges() -> None:
     manifest, composite_entry, plain_entry, _, _ = _identity_edge_fixture()
-    assert ledger_extractors.published_artifacts((composite_entry, plain_entry)) == [
+    # published_artifacts only considers ARTIFACT_PUBLISHED_EVENT entries.
+    published_entry = _ledger_entry(
+        manifest,
+        "published",
+        event_type=ARTIFACT_PUBLISHED_EVENT,
+        details={
+            "artifact_ref": "gold/activity",
+            "artifact_path": ["silver/activity", ""],
+            "uri": "ignored/for/component",
+        },
+    )
+    assert ledger_extractors.published_artifacts(
+        (composite_entry, plain_entry, published_entry)
+    ) == [
         "gold/activity",
         "silver/activity",
         "ignored/for/component",

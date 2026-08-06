@@ -14,17 +14,13 @@ from bioetl.infrastructure.adapters.circuit_breaker_contract import (
 
 
 def _snapshot_from_port(circuit_breaker: CircuitBreakerPort) -> CircuitBreakerSnapshot:
-    """Build typed state snapshot from a circuit-breaker port."""
-    raw_last_failure_time = getattr(circuit_breaker, "_last_failure_time", None)
-    last_failure_time = (
-        float(raw_last_failure_time)
-        if isinstance(raw_last_failure_time, int | float)
-        else None
-    )
+    """Build typed state snapshot from public circuit-breaker port accessors."""
+    recovery_timeout = float(circuit_breaker.get_recovery_timeout())
+    last_failure_time = circuit_breaker.get_last_failure_time()
     return CircuitBreakerSnapshot(
         state=circuit_breaker.get_state(),
         failure_count=circuit_breaker.get_failure_count(),
-        recovery_timeout=float(getattr(circuit_breaker, "recovery_timeout", 60.0)),
+        recovery_timeout=recovery_timeout,
         last_failure_time=last_failure_time,
     )
 

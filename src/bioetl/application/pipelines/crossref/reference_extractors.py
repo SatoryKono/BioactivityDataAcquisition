@@ -61,7 +61,11 @@ def extract_references(
 
     """
     references: list[JsonDict] = []  # Any: heterogeneous reference field values
-    for ref in publication.get("reference", []):
+    raw_references = publication.get("reference", [])
+    # Crossref ``reference`` is list-only; treat missing/None/non-list as empty.
+    if not isinstance(raw_references, list):
+        return references
+    for ref in raw_references:
         if not isinstance(ref, dict):
             continue
         references.append(

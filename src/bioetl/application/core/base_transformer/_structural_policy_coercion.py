@@ -68,11 +68,15 @@ def _coerce_integer_from_string(
         return None
     try:
         decimal_value = Decimal(normalized)
-    except InvalidOperation:
+        # Reject NaN/Infinity before integrality checks (Decimal('NaN') compares
+        # as unequal to itself and must not become int).
+        if not decimal_value.is_finite():
+            return None
+        if decimal_value != decimal_value.to_integral_value():
+            return None
+        return int(decimal_value)
+    except (InvalidOperation, ValueError, OverflowError):
         return None
-    if decimal_value != decimal_value.to_integral_value():
-        return None
-    return int(decimal_value)
 
 
 def _coerce_float(

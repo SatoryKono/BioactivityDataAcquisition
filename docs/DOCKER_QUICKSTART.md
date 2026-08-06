@@ -48,6 +48,18 @@ python scripts/ops/runtime/docker/runtime_manager.py status --stack main
 
 Readiness: `http://127.0.0.1:8000/health/ready`
 
+`runtime_manager.py` also binds this checkout's exact `data/` and `reports/`
+directories and injects a managed `BIOETL_RUNTIME_SOURCE_ID`. Check the
+dashboard data-plane identity with:
+
+```bash
+curl http://127.0.0.1:8000/ops/control-plane/ready
+```
+
+The returned `runtime_source_id` must be a 64-character SHA-256 value, not
+`null` or `unmanaged`. A raw `docker compose up` does not establish this
+identity and Grafana provisioning therefore fails closed.
+
 ## Monitoring stack (opt-in only)
 
 Do **not** start monitoring unless you explicitly need Grafana screenshots or
@@ -58,6 +70,10 @@ python scripts/ops/runtime/docker/runtime_manager.py check --stack monitoring
 python scripts/ops/runtime/docker/runtime_manager.py start --stack monitoring --timeout 180
 python scripts/ops/runtime/docker/runtime_manager.py status --stack monitoring
 ```
+
+Grafana starts only when the main Ops HTTP endpoint reports the same managed
+source identity. This prevents a healthy container from serving run manifests
+from another checkout.
 
 Stop without deleting volumes:
 

@@ -86,6 +86,19 @@ class HistoricalReplayCorpusService:
         manifest_by_id = {
             manifest.manifest_id: manifest for manifest in self._iter_manifests()
         }
+        # Validate all specs before sorting so missing keys raise explicit
+        # ValueError instead of KeyError during sort key evaluation.
+        for spec in specs:
+            if spec.manifest_id not in manifest_by_id:
+                raise ValueError(
+                    f"Historical replay bulk certification could not find manifest "
+                    f"{spec.manifest_id!r}"
+                )
+            if spec.manifest_id not in status_by_manifest_id:
+                raise ValueError(
+                    f"Historical replay inventory is missing manifest "
+                    f"{spec.manifest_id!r}"
+                )
         ordered_specs = tuple(
             sorted(
                 specs,
@@ -96,18 +109,8 @@ class HistoricalReplayCorpusService:
         )
         records: list[HistoricalReplayBulkCertificationRecord] = []
         for spec in ordered_specs:
-            manifest = manifest_by_id.get(spec.manifest_id)
-            if manifest is None:
-                raise ValueError(
-                    f"Historical replay bulk certification could not find manifest "
-                    f"{spec.manifest_id!r}"
-                )
-            inventory_record = status_by_manifest_id.get(spec.manifest_id)
-            if inventory_record is None:
-                raise ValueError(
-                    f"Historical replay inventory is missing manifest "
-                    f"{spec.manifest_id!r}"
-                )
+            manifest = manifest_by_id[spec.manifest_id]
+            inventory_record = status_by_manifest_id[spec.manifest_id]
             if inventory_record.certification_status == "already_certified":
                 records.append(
                     self._build_skipped_record(

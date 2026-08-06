@@ -70,6 +70,9 @@ def titles_match(
     """
     q = normalize_title(query_title)
     f = normalize_title(found_title)
+    # Empty titles never match (exact/substring/fuzzy).
+    if not q or not f:
+        return False
 
     if method == "exact":
         return q == f

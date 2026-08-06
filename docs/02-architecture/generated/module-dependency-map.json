@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 2372,
-    "total_internal_imports": 7357,
+    "total_internal_imports": 7358,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 310,
     "violations": 0,
-    "source_fingerprint": "93dd36ed2387818b540337b85fc34aae47763a386569ab469e39055d4405e284"
+    "source_fingerprint": "5a294b482d2b37d8760ac8f2b61d520cf08e564de2fd9dac7da1e5e839dcf13c"
   },
   "layer_edges": [
     {
@@ -18,7 +18,7 @@
     {
       "source": "application",
       "target": "domain",
-      "imports": 941,
+      "imports": 940,
       "allowed": true
     },
     {
@@ -60,7 +60,7 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1160,
+      "imports": 1161,
       "allowed": true
     },
     {
@@ -84,7 +84,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 366,
+      "imports": 367,
       "allowed": true
     }
   ],
@@ -127,7 +127,7 @@
     {
       "source": "application.pipelines",
       "target": "domain.types",
-      "imports": 58
+      "imports": 57
     },
     {
       "source": "application.composite",

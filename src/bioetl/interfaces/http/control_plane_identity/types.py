@@ -144,6 +144,9 @@ def _resolve_missing_severity(
     resolved = _coalesce(missing_severity, implementation_status)
     if resolved == "SHIPPED":
         return "INFO"
+    # Legacy implementation_status DEGRADED maps to WARNING severity token.
+    if resolved == "DEGRADED":
+        return "WARNING"
     return resolved
 
 

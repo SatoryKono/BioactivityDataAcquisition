@@ -104,3 +104,12 @@ reports/quality/coderabbit/YYYYMMDD/
 `priority:high` / `priority:medium`, `audit-tooling`, `testing`,
 `architecture-tests`, `documentation`, `docs-drift`, `observability`,
 `data-quality`, `reproducibility`, `security`, `ci`
+
+
+## Residual FINDINGS pack (#7696)
+
+Post-campaign de-dupe pack: [CODERABBIT-FULL-2026-08-FINDINGS-PACK.md](CODERABBIT-FULL-2026-08-FINDINGS-PACK.md)
+
+- Artifacts: `reports/quality/coderabbit/20260806/` (`FINDINGS.md`, `TRIAGE.md`, `DE_DUPE_MAP.json`)
+- Canonical open residual path-cluster issues after de-dupe: see findings pack
+- Duplicates closed (Wave B mis-tags / path twins) mapped in DE_DUPE_MAP.json

@@ -89,7 +89,12 @@ def partition_source_rows(
             request.effective_source_keys,
             nulls_equal=request.nulls_equal,
         )
-        if source_key is not None and source_key in reference_values:
+        if source_key is None:
+            # nulls_equal=False and incomplete FK: SQL-like NULL does not fail the
+            # foreign-key check, so retain the row instead of treating it as orphan.
+            retained_rows.append(row)
+            continue
+        if source_key in reference_values:
             retained_rows.append(row)
             continue
         orphan_rows.append(row)

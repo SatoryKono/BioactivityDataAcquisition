@@ -26,8 +26,8 @@ from .soak import run_soak
 from .stage_support import save_state
 
 ROOT = Path(__file__).resolve().parents[4]
-DEFAULT_RUNTIME_ORIGIN = Path(
-    "/home/fedor/.local/share/bioetl-runtime/BioactivityDataAcquisition2"
+DEFAULT_RUNTIME_ORIGIN = (
+    Path.home() / ".local/share/bioetl-runtime/BioactivityDataAcquisition"
 )
 DEFAULT_CONTRACT = Path("configs/quality/docker_runtime_contracts.yaml")
 CONFIRM_TOKEN = "I_UNDERSTAND_THIS_INTERRUPTS_DOCKER_DESKTOP"
