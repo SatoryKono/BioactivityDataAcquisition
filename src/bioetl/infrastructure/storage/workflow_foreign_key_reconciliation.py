@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import inspect
+from collections.abc import Awaitable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
+from typing import Protocol, cast, runtime_checkable
 
 from bioetl.domain.ports import (
     ForeignKeyReconciliationPort,
@@ -26,8 +28,11 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support i
 )
 
 __all__ = [
+    "GoldReconciliationReaderPort",
+    "ReconcileDebugArtifactSinkPort",
     "SilverForeignKeyReconciliationAdapter",
     "StorageForeignKeyReconciliationAdapter",
+    "filter_current_rows",
 ]
 
 _RECONCILIATION_ROWS_SCANNED_TOTAL = "bioetl_workflow_reconciliation_rows_scanned_total"
@@ -35,6 +40,92 @@ _RECONCILIATION_ROWS_RETAINED_TOTAL = (
     "bioetl_workflow_reconciliation_rows_retained_total"
 )
 _RECONCILIATION_ROWS_DELETED_TOTAL = "bioetl_workflow_reconciliation_rows_deleted_total"
+_CURRENT_FLAG_COLUMNS = ("_is_current", "is_current")
+
+
+@runtime_checkable
+class GoldReconciliationReaderPort(Protocol):
+    """Narrow gold reader seam required by foreign-key reconciliation.
+
+    Implementations may expose a sync or async ``read_gold``; the adapter
+    awaits awaitable results.
+    """
+
+    def read_gold(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+        current_only: bool = True,
+    ) -> (
+        Sequence[Mapping[str, object]] | Awaitable[Sequence[Mapping[str, object]]]
+    ):
+        """Read Gold rows, optionally restricted to current SCD2 versions."""
+        ...
+
+
+@runtime_checkable
+class ReconcileDebugArtifactSinkPort(Protocol):
+    """Narrow debug-artifact sink used by FK reconciliation export path."""
+
+    def write_reconcile_debug_artifacts(
+        self,
+        *,
+        context: object,
+        request: ForeignKeyReconciliationRequest,
+        result: ForeignKeyReconciliationResult,
+        retained_rows: tuple[Mapping[str, object], ...],
+        orphan_rows: tuple[Mapping[str, object], ...],
+    ) -> object:
+        """Persist row-level debug artifacts for one reconcile result."""
+        ...
+
+
+def _current_flag_column(rows: Sequence[Mapping[str, object]]) -> str | None:
+    """Return the SCD current-flag column present in row payloads."""
+    if not rows:
+        return None
+    for candidate in _CURRENT_FLAG_COLUMNS:
+        if any(candidate in row for row in rows):
+            return candidate
+    return None
+
+
+def _is_current_flag_value(value: object) -> bool:
+    """Return True for truthy SCD current flags (bool True / 1 / 'true')."""
+    if value is True:
+        return True
+    if value is False or value is None:
+        return False
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return value == 1
+    if isinstance(value, str):
+        return value.strip().lower() in {"true", "1", "t", "yes"}
+    return False
+
+
+def filter_current_rows(
+    rows: list[dict[str, object]],
+    *,
+    current_only: bool,
+    layer: str,
+) -> list[dict[str, object]]:
+    """Filter rows to current SCD versions when a current-flag column is present.
+
+    Silver is normally a current-state medallion layer without SCD2 flags. When
+    ``current_only`` is requested and no flag column exists, all rows are
+    retained (they are already current-state). When a flag column exists, only
+    rows with a true current flag are retained so Silver cannot silently ignore
+    the flag when present.
+    """
+    del layer  # layer reserved for future layer-specific policies
+    if not current_only or not rows:
+        return rows
+    flag_column = _current_flag_column(rows)
+    if flag_column is None:
+        return rows
+    return [row for row in rows if _is_current_flag_value(row.get(flag_column))]
 
 
 @dataclass(slots=True)
@@ -46,8 +137,8 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
     metrics: MetricsPort | None = None
     quarantine: QuarantinePort | None = None
     quarantine_pipeline_name: str | None = None
-    gold_writer: object | None = None
-    artifact_sink: object | None = None
+    gold_writer: GoldReconciliationReaderPort | None = None
+    artifact_sink: ReconcileDebugArtifactSinkPort | None = None
 
     async def reconcile_foreign_keys(
         self,
@@ -187,26 +278,34 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         current_only: bool,
     ) -> list[dict[str, object]]:
         if layer == "silver":
-            return await self.silver_writer.read_silver(table_name, columns=columns)
+            rows = await self.silver_writer.read_silver(table_name, columns=columns)
+            materialized = [dict(row) for row in rows]
+            return filter_current_rows(
+                materialized,
+                current_only=current_only,
+                layer="silver",
+            )
 
         if self.gold_writer is None:
             raise ValueError(
                 "Gold foreign-key reconciliation requires a configured gold_writer"
             )
-        read_gold = getattr(self.gold_writer, "read_gold", None)
-        if not callable(read_gold):
-            raise ValueError("Configured gold_writer does not expose read_gold()")
-        value = read_gold(table_name, columns=columns, current_only=current_only)
+        value = self.gold_writer.read_gold(
+            table_name,
+            columns=columns,
+            current_only=current_only,
+        )
         if inspect.isawaitable(value):
             value = await value
-        from collections.abc import Iterable
-        from typing import Any, cast
-
-        rows = cast(
-            Iterable[Any],  # Any: storage reader result is a runtime boundary.
-            value,
+        rows = cast(Iterable[Mapping[str, object]], value)
+        materialized = [dict(row) for row in rows]
+        # Gold readers apply current_only internally; re-apply as a safety net when
+        # payloads still carry SCD flags (sync fakes / partial adapters).
+        return filter_current_rows(
+            materialized,
+            current_only=current_only,
+            layer="gold",
         )
-        return [dict(row) for row in rows]
 
     async def _reconcile_loaded_rows(
         self,
@@ -316,10 +415,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             or request.step_id is None
         ):
             return
-        writer = getattr(self.artifact_sink, "write_reconcile_debug_artifacts", None)
-        if not callable(writer):
-            return
-        writer(
+        self.artifact_sink.write_reconcile_debug_artifacts(
             context=request,
             request=request,
             result=result,
