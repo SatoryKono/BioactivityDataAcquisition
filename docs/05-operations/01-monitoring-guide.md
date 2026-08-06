@@ -259,13 +259,24 @@ QA image, rule fixtures, and monitoring-profile pins in one reviewed change.
   1. Action-операции: quarantine CLI (`inspect/resolve/replay/purge`).
 - **Identity / Processed Records cards показывают `No data`**:
   1. Проверьте main health server: `curl http://127.0.0.1:8000/health/live`.
+  1. Проверьте source identity:
+     `curl http://127.0.0.1:8000/ops/control-plane/ready`. Поле
+     `runtime_source_id` должно содержать 64 hex-символа; `null` или
+     `unmanaged` означает неуправляемый/stale runtime.
+  1. Выполните
+     `python scripts/ops/runtime/docker/runtime_manager.py status --stack main`
+     и устраните `DASHBOARD_SOURCE_MOUNT` / `DASHBOARD_SOURCE_IDENTITY`.
+     Эти ошибки означают, что `/app/data` или `/app/reports` читаются из
+     другого checkout.
   1. Убедитесь, что Grafana datasource **BioETL Ops HTTP** указывает на
      `http://bioetl:8000` (или `BIOETL_OPS_HTTP_URL` override).
   1. Infinity plugin must be available for HTTP panels
      (`yesoreyeram-infinity-datasource`).
   1. Если Grafana уходит в restart loop, проверьте `docker logs bioetl-grafana`:
-     shipped bootstrap entrypoint удаляет stale local `grafana-image-renderer`
-     plugin из persistent volume, когда включён remote renderer sidecar.
+     bootstrap намеренно не запускает Grafana при несовпадении managed source
+     identity между monitoring и main; тот же shipped entrypoint удаляет stale
+     local `grafana-image-renderer` plugin из persistent volume, когда включён
+     remote renderer sidecar.
   1. Если Grafana Render API (`/render/...`) возвращает `500`, пересоздайте
      `renderer` и `grafana` из текущего `docker-compose.monitoring.yml`
      (opt-in monitoring stack).
