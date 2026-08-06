@@ -16,7 +16,7 @@ class PubMedPublicationGoldSchema(PublicationGoldCommonSchema):
 
     pmid: Series[str] = pa.Field(nullable=False)
     title: Series[str] = pa.Field(nullable=False)
-    abstract_structured: Series[bool] = pa.Field(nullable=True)
+    abstract_structured: Series[bool] = pa.Field(nullable=True, coerce=True)
     journal_name_short: Series[str] = pa.Field(nullable=True)
     journal_iso_abbrev: Series[str] = pa.Field(nullable=True)
     journal_issn_type: Series[str] = pa.Field(nullable=True)

@@ -87,7 +87,7 @@ class DataQualityMonitor:
             self.detector.set_threshold(metric_name, min_threshold, max_threshold)
 
     def check_quality(
-        self, metrics: dict[str, float], timestamp: datetime | None = None
+        self, metrics: dict[str, float], timestamp: datetime
     ) -> list[DQAnomaly]:
         """Check metrics for quality issues.
 
@@ -108,7 +108,7 @@ class DataQualityMonitor:
         return anomalies
 
     def update_baseline_from_metrics(
-        self, metrics: dict[str, float], timestamp: datetime | None = None
+        self, metrics: dict[str, float], timestamp: datetime
     ) -> None:
         """Update baseline with current metrics (if no anomalies).
 

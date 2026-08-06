@@ -201,7 +201,14 @@ class SilverStoragePort(Protocol):
         *args: object,
         **kwargs: object,
     ) -> SilverWriteResult | None:
-        """Write transformed records to the Silver layer."""
+        """Write transformed records to the Silver layer.
+
+        Canonical path: pass a ``SilverWriteRequest`` as ``request``.
+        Legacy compatibility: ``request`` may be a table name string with
+        remaining fields supplied via ``*args``/``**kwargs`` (see
+        ``coerce_silver_write_request``). New callers must not invent additional
+        keyword-only shapes; prefer the typed request object.
+        """
         ...
 
     async def read_silver(

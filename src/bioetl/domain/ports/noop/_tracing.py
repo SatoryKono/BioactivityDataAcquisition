@@ -33,15 +33,16 @@ class _NoOpSpan:
 
     def set_attribute(
         self,
-        _key: str,
-        _value: object,
+        key: str,
+        value: object,
     ) -> None:
         """No-op implementation — discards the span attribute.
 
         Args:
-            _key: Attribute name (ignored).
-            _value: Attribute value (ignored).
+            key: Attribute name (ignored).
+            value: Attribute value (ignored).
         """
+        _ = key, value
         return None
 
     def set_status(self, _status: object) -> None:
@@ -54,24 +55,25 @@ class _NoOpSpan:
 
     def add_event(
         self,
-        _name: str,
+        name: str,
         attributes: Mapping[str, object] | None = None,
     ) -> None:
         """No-op implementation — discards span events.
 
         Args:
-            _name: Event name (ignored).
+            name: Event name (ignored).
             attributes: Optional event attributes (ignored).
         """
-        _ = attributes
+        _ = name, attributes
         return None
 
-    def record_exception(self, _exception: Exception) -> None:
+    def record_exception(self, exception: BaseException) -> None:
         """No-op implementation — discards the recorded exception.
 
         Args:
-            _exception: Exception to record (ignored).
+            exception: Exception to record (ignored).
         """
+        _ = exception
         return None
 
 

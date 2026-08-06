@@ -19,7 +19,8 @@ class SemanticScholarPublicationGoldSchema(PublicationGoldCommonSchema):
 
     paper_id: Series[str] = pa.Field(nullable=False)
     title: Series[str] = pa.Field(nullable=False)
-    corpus_id: Series[float] = pa.Field(nullable=True, coerce=True)
+    # Preserve exact corpus identifier without float coercion loss.
+    corpus_id: Series[str] = pa.Field(nullable=True)
     tldr: Series[str] = pa.Field(nullable=True)
     page_range: Series[str] = pa.Field(nullable=True)
     citations_received: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)

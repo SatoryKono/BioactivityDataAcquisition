@@ -38,10 +38,13 @@ class DeltaReaderPort(Protocol):
             columns: Optional list of columns to read (projection pushdown).
                     If None, reads all columns.
             limit: Optional maximum number of rows to read.
-                  If None, reads all rows.
+                  If None, reads all rows. Result row order is **unspecified**;
+                  callers that need a deterministic subset must sort after read
+                  (or use a higher-level query contract that defines order).
 
         Returns:
-            Opaque table payload with the requested data.
+            Opaque table payload with the requested data. Ordering of rows is
+            not part of this port contract.
 
         Raises:
             An adapter-defined read error when the table reference is invalid or

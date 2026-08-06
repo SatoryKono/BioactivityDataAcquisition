@@ -33,14 +33,15 @@ class DQMonitorPort(Protocol):
     def check_quality(
         self,
         metrics: dict[str, float],
-        timestamp: datetime | None = None,
+        timestamp: datetime,
     ) -> list[DQAnomaly]:
         """Evaluate metrics against baselines and return detected anomalies.
 
         Args:
             metrics: Mapping of metric name to current observed value.
-            timestamp: Canonical application-owned timestamp for anomaly
-                evaluation and emitted anomaly records.
+            timestamp: Mandatory caller-owned timestamp for anomaly
+                evaluation and emitted anomaly records. Adapters must not
+                synthesize wall-clock time when the caller omits it.
 
         Returns:
             List of domain anomaly DTOs for metrics that deviate from baseline.
@@ -50,14 +51,14 @@ class DQMonitorPort(Protocol):
     def update_baseline_from_metrics(
         self,
         metrics: dict[str, float],
-        timestamp: datetime | None = None,
+        timestamp: datetime,
     ) -> None:
         """Update stored baselines by incorporating new observed metric values.
 
         Args:
             metrics: Mapping of metric name to newly observed value.
-            timestamp: Canonical application-owned timestamp associated with
-                this baseline update decision.
+            timestamp: Mandatory caller-owned timestamp associated with
+                this baseline update decision. Adapters must not invent time.
         """
         ...
 

@@ -15,6 +15,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "AdrDocument",
         "AdrInfo",
         "AdrServicePort",
+        "AdrIssueSeverity",
         "AdrValidationIssue",
         "AdrValidationReport",
     ),
@@ -164,6 +165,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "coerce_silver_write_request",
     ),
     "bioetl.domain.ports.workflow_foreign_key_reconciliation": (
+        "ForeignKeyReconciliationAction",
         "ForeignKeyReconciliationLayer",
         "ForeignKeyReconciliationMutationMode",
         "ForeignKeyReconciliationPort",
@@ -184,11 +186,24 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     ),
 }
 
-_EXPORT_MODULES = {
-    export_name: module_name
-    for module_name, export_names in _EXPORT_GROUPS.items()
-    for export_name in export_names
-}
+def _build_export_modules(
+    export_groups: dict[str, tuple[str, ...]],
+) -> dict[str, str]:
+    """Map export names to modules with fail-fast collision detection."""
+    export_modules: dict[str, str] = {}
+    for module_name, export_names in export_groups.items():
+        for export_name in export_names:
+            existing = export_modules.get(export_name)
+            if existing is not None and existing != module_name:
+                raise RuntimeError(
+                    f"duplicate ports export {export_name!r}: "
+                    f"{existing!r} and {module_name!r}"
+                )
+            export_modules[export_name] = module_name
+    return export_modules
+
+
+_EXPORT_MODULES = _build_export_modules(_EXPORT_GROUPS)
 
 __all__ = [*_EXPORT_MODULES]
 
