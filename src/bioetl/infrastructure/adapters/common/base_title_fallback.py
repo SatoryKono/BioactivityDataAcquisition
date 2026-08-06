@@ -24,6 +24,11 @@ from bioetl.infrastructure.adapters.common._title_fallback_flow import (
     iter_title_only_fallback_records,
     truncate_title,
 )
+from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
+    LOOKUP_METHOD_KEY,
+    LOOKUP_METHOD_TITLE_FALLBACK,
+    LOOKUP_METHOD_TITLE_ONLY,
+)
 
 __all__ = ["BaseTitleFallbackHandler"]
 
@@ -115,7 +120,7 @@ class BaseTitleFallbackHandler(ABC):
         """Process found result before yielding.
 
         Default implementation adds standard metadata fields:
-        - _lookup_method = "title_fallback"
+        - ``LOOKUP_METHOD_KEY`` = ``LOOKUP_METHOD_TITLE_FALLBACK``
         - _original_id = original_doi
 
         Override to customize or extend.
@@ -127,7 +132,7 @@ class BaseTitleFallbackHandler(ABC):
         Returns:
             Processed result with _lookup_method and _original_id added.
         """
-        result["_lookup_method"] = "title_fallback"
+        result[LOOKUP_METHOD_KEY] = LOOKUP_METHOD_TITLE_FALLBACK
         result["_original_id"] = original_doi
         return result
 
@@ -189,7 +194,7 @@ class BaseTitleFallbackHandler(ABC):
         """Process title-only result before yielding.
 
         Override to add metadata like _lookup_method.
-        Default implementation adds _lookup_method = "title_only".
+        Default implementation adds ``LOOKUP_METHOD_KEY`` = ``LOOKUP_METHOD_TITLE_ONLY``.
 
         Args:
             result: The found publication record.
@@ -197,7 +202,7 @@ class BaseTitleFallbackHandler(ABC):
         Returns:
             Processed result with _lookup_method added.
         """
-        result["_lookup_method"] = "title_only"
+        result[LOOKUP_METHOD_KEY] = LOOKUP_METHOD_TITLE_ONLY
         return result
 
     async def process_title_only_entries(

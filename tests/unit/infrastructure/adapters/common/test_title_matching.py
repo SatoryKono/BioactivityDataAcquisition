@@ -165,10 +165,10 @@ class TestTitlesMatchSubstring:
         )
 
     def test_empty_string_handling(self):
-        """Test empty string handling - empty is substring of anything."""
-        assert titles_match("", "")
-        assert titles_match("Title", "")
-        assert titles_match("", "Title")
+        """Empty titles never match (fail-closed for missing titles)."""
+        assert titles_match("", "") is False
+        assert titles_match("Title", "") is False
+        assert titles_match("", "Title") is False
 
 
 # =============================================================================

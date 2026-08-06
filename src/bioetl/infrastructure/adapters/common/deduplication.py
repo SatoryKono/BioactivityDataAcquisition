@@ -129,7 +129,9 @@ def build_record_dedup_key(
     Returns ``None`` when the record does not contain a usable key and should
     therefore remain eligible for downstream handling rather than being dropped.
     """
-    if composite_fields is not None and len(composite_fields) > 1:
+    # One or more composite fields uses the composite path (do not silently
+    # fall back to primary when composite_fields is a one-element tuple).
+    if composite_fields is not None and len(composite_fields) >= 1:
         if composite_key_builder is None:
             composite_key = compute_composite_dedup_key(record, composite_fields)
         else:
@@ -199,7 +201,12 @@ def is_duplicate_record(
     metrics: _DuplicateMetricsPort | None = None,
     log_context: dict[str, object] | None = None,
 ) -> bool:
-    """Return ``True`` when the record is a duplicate for the configured key semantics."""
+    """Return ``True`` when the record is a duplicate for the configured key semantics.
+
+    Side effect: each call registers the record's key into ``seen_keys`` when a
+    usable key is present. Records without a usable key return ``False`` and are
+    not registered (remain eligible for downstream handling).
+    """
     return (
         register_record_dedup_key(
             record=record,
@@ -228,7 +235,11 @@ def is_new_record(
     metrics: _DuplicateMetricsPort | None = None,
     log_context: dict[str, object] | None = None,
 ) -> bool:
-    """Return ``True`` when the record registered as a new dedup key."""
+    """Return ``True`` when the record registered as a new dedup key.
+
+    Side effect: each call mutates ``seen_keys`` by registering the key when
+    present. Records without a usable key return ``False`` and are not added.
+    """
     return (
         register_record_dedup_key(
             record=record,

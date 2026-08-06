@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (
+    ARTIFACT_PUBLISHED_EVENT,
     COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
     COMPOSITE_ENRICHER_COMPLETED_EVENT,
     COMPOSITE_MERGE_COMPLETED_EVENT,
@@ -43,8 +44,11 @@ def artifact_refs(
 
 
 def published_artifacts(ledger_entries: tuple[RunLedgerEntry, ...]) -> list[str]:
+    """Collect artifact refs only from ``artifact_published`` ledger events."""
     values: list[str] = []
     for entry in ledger_entries:
+        if entry.event_type != ARTIFACT_PUBLISHED_EVENT:
+            continue
         details = entry.details or {}
         for key in ("artifact_ref", "artifact_path", "path", "uri"):
             append_value(values, details.get(key))

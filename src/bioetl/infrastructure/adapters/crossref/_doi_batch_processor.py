@@ -50,7 +50,11 @@ class DoiBatchProcessor:
 
     async def fetch_single(self, doi: str) -> BronzeRecord | None:
         """Fetch a single publication by DOI."""
-        normalized_doi = normalize_doi(doi) or ""
+        # Fail closed: never request /works/ with an empty or malformed DOI.
+        normalized_doi = normalize_doi(doi)
+        if not normalized_doi:
+            self._logger.debug("crossref_doi_invalid", doi=doi)
+            return None
         url = f"{self._api_base}/works/{normalized_doi}"
         response: Response | None = None
 
@@ -154,10 +158,12 @@ class DoiBatchProcessor:
         original_dois: list[str],
     ) -> AsyncIterator[BronzeRecord]:
         """Yield batch items or fall back to individual DOI fetches."""
-        if response is None:
-            raise CrossRefApiError("CrossRef batch request returned no response")
-        status_code = getattr(response, "status_code", None)
-        if status_code != 200:
+        status_code = (
+            None if response is None else getattr(response, "status_code", None)
+        )
+        if response is None or status_code != 200:
+            # No response (e.g. swallowed transport error) or non-200: degrade
+            # to per-DOI fetch rather than failing the whole batch hard.
             self._logger.warning(
                 "crossref_batch_fetch_failed",
                 status_code=status_code,
@@ -178,13 +184,10 @@ class DoiBatchProcessor:
         if not normalized_dois:
             return
 
+        # Only swallow transport/runtime errors from the batch request itself.
+        # Failures while iterating yields must propagate to the caller.
         try:
             response = await self._execute_batch_request(normalized_dois)
-            async for publication in self._yield_batch_or_fallback(
-                response=response,
-                original_dois=dois,
-            ):
-                yield publication
         except CROSSREF_RUNTIME_ERRORS as error:
             self._logger.warning(
                 "crossref_batch_fetch_error",
@@ -193,3 +196,10 @@ class DoiBatchProcessor:
             )
             async for publication in self._fallback_individual_fetch(dois):
                 yield publication
+            return
+
+        async for publication in self._yield_batch_or_fallback(
+            response=response,
+            original_dois=dois,
+        ):
+            yield publication

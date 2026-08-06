@@ -54,7 +54,7 @@ async def handle_control_plane_identity_table(
     identity-evidence, with a generous budget so Grafana ID panels do not show
     false ``not available for current scope`` rows on warm control-plane trees.
     """
-    assert host._run_manifest_port is not None
+    _require_run_manifest_port(host)
     try:
         scope = await asyncio.wait_for(
             asyncio.to_thread(resolve_control_plane_identity_scope, host, query),
@@ -97,8 +97,32 @@ async def handle_control_plane_identity_evidence(
     query: dict[str, str],
 ) -> None:
     """Handle dedicated Control Plane identity evidence rows."""
-    assert host._run_manifest_port is not None
-    scope = await asyncio.to_thread(resolve_control_plane_identity_scope, host, query)
+    _require_run_manifest_port(host)
+    # Same resolve SLA as identity-table so evidence does not hang while the
+    # compact table already degrades to an explicit timeout marker.
+    try:
+        scope = await asyncio.wait_for(
+            asyncio.to_thread(resolve_control_plane_identity_scope, host, query),
+            timeout=_IDENTITY_SCOPE_RESOLVE_TIMEOUT_SECONDS,
+        )
+    except TimeoutError:
+        await host._send_payload_response(
+            writer,
+            200,
+            {
+                "status": "scope_resolve_timeout",
+                "message": (
+                    "scope resolve timed out — retry or select exact run_id "
+                    "(control-plane store slow)"
+                ),
+                "rows": [],
+                "summary": {
+                    "status": "timeout",
+                    "reason": "scope_resolve_timeout",
+                },
+            },
+        )
+        return
     view = host._read_optional_param(query, "view") or "anchors"
     priority = host._read_optional_param(query, "priority")
     checkpoint_metadata = await _load_identity_checkpoint_metadata(host, scope)
@@ -119,6 +143,14 @@ async def handle_control_plane_identity_evidence(
             priority=priority,
         ),
     )
+
+
+def _require_run_manifest_port(host: _HealthRoutingHost) -> None:
+    """Typed guard: identity routes require a configured manifest port."""
+    if host._run_manifest_port is None:
+        raise RuntimeError(
+            "run_manifest_port is required for control-plane identity routes"
+        )
 
 
 async def _load_identity_checkpoint_metadata(

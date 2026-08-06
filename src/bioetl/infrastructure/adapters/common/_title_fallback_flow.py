@@ -129,7 +129,8 @@ async def iter_missing_doi_fallback_records(
 
     fetched = resolved.fetched
     for doi in resolved.dois:
-        if resolved.limit and fetched >= resolved.limit:
+        # Distinguish limit=None (unlimited) from limit=0 (emit nothing).
+        if resolved.limit is not None and fetched >= resolved.limit:
             return
 
         normalized_doi = (resolved.normalize_fn(doi) or "").lower()
@@ -187,7 +188,8 @@ async def iter_title_only_fallback_records(
 ) -> AsyncIterator[JsonDict]:
     """Yield title-only fallback records for marker or empty-title entries."""
     for entry in entries:
-        if limit and fetched >= limit:
+        # Distinguish limit=None (unlimited) from limit=0 (emit nothing).
+        if limit is not None and fetched >= limit:
             return
 
         title = fallback_mapping.get(entry, fallback_mapping.get(""))

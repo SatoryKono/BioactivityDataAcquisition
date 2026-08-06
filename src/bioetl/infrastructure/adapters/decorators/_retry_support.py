@@ -26,13 +26,28 @@ def is_retryable_exception(exc: Exception, retry_config: RetryConfig) -> bool:
 def retryable_exception_types(
     retry_config: RetryConfig,
 ) -> tuple[type[Exception], ...]:
-    """Build tuple of retryable exception types for ``except`` clauses."""
-    configured = tuple(
-        exc_type
-        for exc_type in retry_config.retryable_exceptions
-        if exc_type is not Exception
-    )
+    """Build tuple of retryable exception types for ``except`` clauses.
+
+    When ``RetryConfig.retryable_exceptions`` explicitly includes bare
+    ``Exception``, preserve it so classification and the ``except`` clause agree.
+    """
+    configured = tuple(retry_config.retryable_exceptions)
+    if Exception in configured:
+        # Explicit opt-in: keep Exception and skip RecoverableError duplication.
+        return configured
     return (RecoverableError, *configured)
+
+
+def _redact_transport_error_message(message: str) -> str:
+    """Best-effort redact of secret-like tokens from transport error text."""
+    import re
+
+    redacted = re.sub(
+        r"(?i)(api[_-]?key|token|secret|password|authorization|bearer)\s*[:=]\s*\S+",
+        r"\1=<redacted>",
+        message,
+    )
+    return redacted[:500]
 
 
 async def calculate_and_wait_retry_delay(
@@ -69,7 +84,7 @@ def log_retry_attempt(
         max_attempts=retry_config.max_attempts,
         wait_seconds=round(wait_seconds, 3),
         error_type=type(error).__name__,
-        error_message=str(error),
+        error_message=_redact_transport_error_message(str(error)),
         provider=provider_name,
     )
 

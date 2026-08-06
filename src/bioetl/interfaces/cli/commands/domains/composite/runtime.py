@@ -96,6 +96,24 @@ def _build_overridden_cli_input(
     overrides: Mapping[str, object],
 ) -> CompositeRuntimeCliInput:
     """Apply keyword overrides to the typed composite runtime CLI bundle."""
+    allowed = {
+        "resume",
+        "dry_run",
+        "seed_limit",
+        "enrich_only",
+        "required_only",
+        "force_enricher",
+        "use_cached_bronze",
+        "cached_bronze_date",
+        "cached_bronze_path",
+        "cached_bronze_enrichers",
+        "cached_bronze_dependencies",
+    }
+    unknown = sorted(set(overrides) - allowed)
+    if unknown:
+        raise ValueError(
+            "Unknown composite runtime override keys: " + ", ".join(unknown)
+        )
     return CompositeRuntimeCliInput(
         resume=cast(bool, overrides.get("resume", resolved.resume)),
         dry_run=cast(bool, overrides.get("dry_run", resolved.dry_run)),

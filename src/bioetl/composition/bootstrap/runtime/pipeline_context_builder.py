@@ -45,10 +45,19 @@ def _build_input_filter_context(options: RunOptions) -> InputFilterContext:
 
 
 def _build_vacuum_config(options: RunOptions) -> VacuumSettings:
-    """Build vacuum config from CLI overrides while preserving tri-state input."""
+    """Build vacuum config from CLI overrides while preserving tri-state input.
+
+    Explicit ``0`` must be preserved (immediate retention); only ``None``
+    falls back to the default of 7 days.
+    """
+    retention_days = (
+        7
+        if options.vacuum_retention_days is None
+        else options.vacuum_retention_days
+    )
     return VacuumSettings(
         enabled=options.vacuum_after_run,
-        retention_days=options.vacuum_retention_days or 7,
+        retention_days=retention_days,
     )
 
 

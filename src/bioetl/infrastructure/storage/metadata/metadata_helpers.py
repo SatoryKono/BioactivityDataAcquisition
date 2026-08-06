@@ -4,8 +4,13 @@ from __future__ import annotations
 
 
 def _build_metadata(key: str, value: str) -> dict[str, str]:
-    """Build the raw metadata payload before validation."""
-    return {"key": value}
+    """Build the raw metadata payload before validation.
+
+    Uses the caller-supplied ``key`` as the payload key (not a literal
+    ``\"key\"``), so ``build_and_validate_metadata(\"run_id\", \"abc\")`` yields
+    ``{\"run_id\": \"abc\"}``.
+    """
+    return {key: value}
 
 
 def build_and_validate_metadata(key: str, value: str) -> dict[str, str]:

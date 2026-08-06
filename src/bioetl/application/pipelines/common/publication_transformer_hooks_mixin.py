@@ -105,14 +105,17 @@ class PublicationTransformerHooksMixin:
             str, Any  # Any: transformer record has heterogeneous values
         ],  # Any: transformer record has heterogeneous values
     ) -> JsonDict:  # Any: transformer record has heterogeneous values
-        """Apply uniform text cleanup to configured content fields."""
-        for field in as_mixin_host(self)._CONTENT_FIELDS:  # Any: mixin host
-            raw = business_data.get(field)
+        """Apply uniform text cleanup to configured content fields.
+
+        Returns a normalized copy; the caller's mapping is left unchanged.
+        """
+        normalized: dict[str, Any] = dict(business_data)
+        host = as_mixin_host(self)
+        for field in host._CONTENT_FIELDS:  # Any: mixin host
+            raw = normalized.get(field)
             if raw is not None:
-                business_data[field] = as_mixin_host(
-                    self
-                )._data_normalizer.strip_html_tags(raw)  # Any: mixin host
-        return business_data
+                normalized[field] = host._data_normalizer.strip_html_tags(raw)
+        return normalized
 
     def _log_fallback_if_needed(
         self,
