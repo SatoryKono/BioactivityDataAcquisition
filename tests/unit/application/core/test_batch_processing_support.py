@@ -141,20 +141,22 @@ async def test_write_silver_gold_concurrent_orders_layers_and_lineage(
     call_order: list[str] = []
     silver_result = MagicMock(name="silver_result")
 
-    async def write_silver(**kwargs):  # type: ignore[no-untyped-def]
+    async def write_silver(records, batch_id, ingestion_ts, bronze_refs=None):  # type: ignore[no-untyped-def]
+        _ = (records, batch_id, ingestion_ts, bronze_refs)
         call_order.append("silver")
         return silver_result
 
-    async def write_gold(**kwargs):  # type: ignore[no-untyped-def]
+    async def write_gold(records, silver_refs=None):  # type: ignore[no-untyped-def]
+        _ = records
         call_order.append("gold")
-        assert kwargs.get("silver_refs") == [silver_result]
+        assert silver_refs == [silver_result]
 
     writer = MagicMock()
     writer.write_silver = AsyncMock(side_effect=write_silver)
     writer.write_gold = AsyncMock(side_effect=write_gold)
     writer.track_batch_written = MagicMock()
 
-    async def execute_with_span(name, coro, **_kwargs):  # type: ignore[no-untyped-def]
+    async def execute_with_span(name, coro, *_args, **_kwargs):  # type: ignore[no-untyped-def]
         call_order.append(f"span:{name}")
         return await coro
 
@@ -203,7 +205,7 @@ async def test_write_silver_gold_concurrent_stops_on_silver_failure(
     writer.write_gold = AsyncMock()
     writer.track_batch_written = MagicMock()
 
-    async def execute_with_span(_name, coro, **_kwargs):  # type: ignore[no-untyped-def]
+    async def execute_with_span(_name, coro, *_args, **_kwargs):  # type: ignore[no-untyped-def]
         return await coro
 
     support = BatchProcessingSupportService(
