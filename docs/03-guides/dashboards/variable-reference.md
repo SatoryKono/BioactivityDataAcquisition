@@ -34,6 +34,7 @@ Human family guide: [selector-architecture.md](selector-architecture.md)
   hidden `$provider_hint` (Runtime).
 - `$workflow` is context/evidence unless a dashboard explicitly documents a
   truthful current-status intersection.
+- `$workflow` is Single-select with Include All. It remains single-select with Include All across primary dashboards.
 - `$pipeline` is single-select; Overview landing default is `All`; other boards
   fail-close to `unknown`.
 - `$run_type` uses Include All. Overview landing default is `All`. Non-Overview

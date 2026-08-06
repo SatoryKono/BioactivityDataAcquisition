@@ -84,6 +84,9 @@ shadow review. The seven JSON UIDs remain authoritative and reachable. See
   anchors `0` to `bioetl_provider_current_status`, and missing scope remains
   `UNKNOWN`.
 
+Historical `6. Alerts & SLO` is migration terminology only; the current slot 6
+is `6. Run Explorer` and alert triage lives in Incident Workspace.
+
 Текущий reproducible render contract:
 
 - Full-surface dashboard audits use the Playwright screenshot path from

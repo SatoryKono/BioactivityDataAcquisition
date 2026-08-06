@@ -926,6 +926,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded architecture-audit evidence helper consumed by the read-only architecture audit lane; keep it non-active unless it becomes a separately documented public QA command surface."
     },
+    "scripts/engineering/qa/report_domain_ports_inventory.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation behind the canonical scripts.engineering.qa report-domain-ports-inventory command; keep the module supporting while the QA router remains the active entrypoint."
+    },
     "scripts/engineering/qa/report_flaky_test_burndown_review.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

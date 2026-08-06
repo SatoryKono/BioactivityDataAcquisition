@@ -4,12 +4,17 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, cast, runtime_checkable
 
-from bioetl.application.services.export_lineage.export_manifests import write_export_sidecar_manifests
-from bioetl.application.services.export_lineage.export_models import ExportOptions, ExportResult
+from bioetl.application.services.export_lineage.export_manifests import (
+    write_export_sidecar_manifests,
+)
+from bioetl.application.services.export_lineage.export_models import (
+    ExportOptions,
+    ExportResult,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -67,6 +72,7 @@ async def export_existing_table(
     layer: str,
     options: ExportOptions,
     table_path: Path | str,
+    _manifest_writer: Callable[..., tuple[Path, ...]] | None = None,
 ) -> ExportResult:
     """Export an existing table and build success result."""
     logger.info(
@@ -118,6 +124,7 @@ async def export_existing_table(
         row_count=row_count,
         audit_ref=audit_ref,
         redacted_columns=redacted_columns,
+        _manifest_writer=_manifest_writer,
     )
     logger.info(
         "Export completed",
@@ -153,10 +160,12 @@ def write_export_manifests_if_enabled(
     row_count: int,
     audit_ref: str,
     redacted_columns: tuple[str, ...],
+    _manifest_writer: Callable[..., tuple[Path, ...]] | None = None,
 ) -> tuple[Path, ...]:
     if not options.include_manifests:
         return ()
-    return write_export_sidecar_manifests(
+    manifest_writer = _manifest_writer or write_export_sidecar_manifests
+    return manifest_writer(
         writer=writer,
         table=cast(Any, table),  # Any: export port accepts Arrow/table duck-type
         table_name=table_name,
