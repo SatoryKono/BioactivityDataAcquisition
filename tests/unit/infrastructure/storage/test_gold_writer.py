@@ -642,6 +642,14 @@ class TestGoldWriterDualWrite:
             logical_table="test.table",
             failed_contract_version="2.0.0",
             failed_target_table="test.table__v2_0_0",
+            committed_targets=[
+                {
+                    "contract_version": "1.0.0",
+                    "physical_table": "test.table__v1_0_0",
+                }
+            ],
+            partial_dual_write=True,
+            recovery_action="operator_compensate_committed_targets",
             active_contract_version="2.0.0",
             write_versions=("1.0.0", "2.0.0"),
         )
@@ -1153,9 +1161,10 @@ class TestGoldWriterDeterministicBackoff:
         For attempt 1: 0.5 * 2 + 0.05 = 1.05s
         """
         # Simulate failure on first two attempts, success on third
+        # GOLD_WRITE_RETRY_ERRORS is restricted to transient OS/timeout failures.
         mock_write_deltalake.side_effect = [
-            RuntimeError("Transient error 1"),
-            RuntimeError("Transient error 2"),
+            OSError("Transient error 1"),
+            OSError("Transient error 2"),
             None,  # Success on third attempt
         ]
 
@@ -1196,8 +1205,8 @@ class TestGoldWriterDeterministicBackoff:
         # Simulate table not found, then transient errors
         mock_delta_table.side_effect = TableNotFoundError("Not found")
         mock_write_deltalake.side_effect = [
-            RuntimeError("Transient error 1"),
-            RuntimeError("Transient error 2"),
+            OSError("Transient error 1"),
+            OSError("Transient error 2"),
             None,  # Success on third attempt
         ]
 
