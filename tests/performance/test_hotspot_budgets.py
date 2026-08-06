@@ -440,8 +440,8 @@ def test_silver_write_append_budget(
 
     if sys.platform.startswith("win"):
         policy_cls = getattr(asyncio, "WindowsSelectorEventLoopPolicy", None)
-            if policy_cls is not None:
-                asyncio.set_event_loop_policy(policy_cls())
+        if policy_cls is not None:
+            asyncio.set_event_loop_policy(policy_cls())
 
     result = asyncio.run(run())
     _assert_budget(
@@ -503,8 +503,8 @@ def test_silver_write_merge_budget(
 
     if sys.platform.startswith("win"):
         policy_cls = getattr(asyncio, "WindowsSelectorEventLoopPolicy", None)
-            if policy_cls is not None:
-                asyncio.set_event_loop_policy(policy_cls())
+        if policy_cls is not None:
+            asyncio.set_event_loop_policy(policy_cls())
 
     result = asyncio.run(run())
     _assert_budget(

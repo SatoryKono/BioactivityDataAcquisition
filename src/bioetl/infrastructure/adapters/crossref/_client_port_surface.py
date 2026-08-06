@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BronzeRecord, HealthStatus
@@ -45,14 +45,14 @@ class _CrossRefPortSurfaceMixin:
     CROSSREF_API_BASE: ClassVar[str]
     CROSSREF_HEALTH_ERRORS: ClassVar[tuple[type[Exception], ...]]
 
-    if TYPE_CHECKING:
-        http_client: UnifiedHTTPClient
-        _logger: LoggerPort
-        _adapter_metrics: AdapterMetricsRecorder
-        _request_collector: APIRequestCollector
-        _query_builder: CrossRefQueryPlanner
-        _response_mapper: CrossRefResponseMapper
-        _fetch_flow: CrossRefFetchFlow | None
+    # Host attrs set by CrossRefAdapter dataclass / __post_init__ (PD3 defaults).
+    http_client: Any = None
+    _logger: Any = None
+    _adapter_metrics: Any = None
+    _request_collector: Any = None
+    _query_builder: Any = None
+    _response_mapper: Any = None
+    _fetch_flow: Any = None
 
     def _require_fetch_flow(self) -> CrossRefFetchFlow:
         """Return fetch flow after ``__post_init__`` wiring (never None in use)."""

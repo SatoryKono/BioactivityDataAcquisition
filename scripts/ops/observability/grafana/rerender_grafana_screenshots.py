@@ -669,12 +669,8 @@ def _write_manifest(
                 "screenshotEvidence": {
                     "file": str(path.relative_to(config.output_dir)),
                     "bytes": path.stat().st_size,
-                    "width": actual_viewports[record.uid][0]
-                    if actual_viewports[record.uid]
-                    else None,
-                    "height": actual_viewports[record.uid][1]
-                    if actual_viewports[record.uid]
-                    else None,
+                    "width": (vp := actual_viewports.get(record.uid))[0] if vp else None,
+                    "height": vp[1] if vp else None,
                     "sha256": _sha256_file(path),
                 },
             }
