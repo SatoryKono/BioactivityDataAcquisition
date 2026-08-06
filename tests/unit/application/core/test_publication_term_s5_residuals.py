@@ -62,7 +62,7 @@ async def test_fetch_limit_zero_yields_empty_without_upstream_records() -> None:
     assert source.calls == 0
 
 
-def test_extract_mesh_rejects_non_string_and_blank_fields() -> None:
+def test_extract_mesh_rejects_non_string_and_blank_fields_s5_residual() -> None:
     publication = {
         "mesh_terms": [
             {
@@ -94,7 +94,7 @@ def test_extract_mesh_rejects_non_string_and_blank_fields() -> None:
     assert any(t["term"] == "use" and t["term_type"] == "MESH_QUALIFIER" for t in terms)
 
 
-def test_create_term_record_normalizes_mesh_id_and_qualifier() -> None:
+def test_create_term_record_normalizes_mesh_id_and_qualifier_s5_residual() -> None:
     record = create_term_record(
         publication_id="CHEMBL1",
         term="enzyme",

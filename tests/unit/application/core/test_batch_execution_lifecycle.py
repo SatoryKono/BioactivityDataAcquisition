@@ -8,6 +8,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from bioetl.application.core.batch_execution.lifecycle import (
     BatchExecutionContext,
     BatchExecutionLifecycleService,
