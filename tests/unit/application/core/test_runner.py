@@ -316,7 +316,8 @@ def mock_observer(mock_services, mock_logger):
         if exc_val:
             if isinstance(exc_val, PipelineShutdownError):
                 status = "shutdown"
-                suppress_exception = True
+                # Match product PipelineObserver: do not suppress shutdown.
+                suppress_exception = False
             else:
                 status = "failed"
                 mock_logger.error("pipeline_failed", error=str(exc_val))
