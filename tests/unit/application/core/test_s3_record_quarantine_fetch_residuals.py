@@ -20,8 +20,8 @@ from bioetl.application.core._quarantine_write_support import (
 )
 from bioetl.application.core.normalization_fallbacks import __all__ as FALLBACK_ALL
 from bioetl.domain.types import BatchID, RunID
+from tests.helpers.deterministic_ids import deterministic_batch_uuid
 from datetime import datetime, timezone
-from uuid import uuid4
 
 pytestmark = pytest.mark.unit
 
@@ -134,12 +134,12 @@ async def test_write_quarantine_requests_rejects_length_mismatch() -> None:
     with pytest.raises(ValueError, match="equal lengths"):
         await write_quarantine_requests_with_events(
             quarantine=quarantine,
-            requests=[{"pipeline": "p", "error_code": "E", "payload": {}, "bronze_batch_id": BatchID(uuid4()), "ingestion_ts": datetime.now(timezone.utc)}],  # type: ignore[list-item]
+            requests=[{"pipeline": "p", "error_code": "E", "payload": {}, "bronze_batch_id": deterministic_batch_uuid("s3-rqf-residual-1"), "ingestion_ts": datetime.now(timezone.utc)}],  # type: ignore[list-item]
             emitter=None,
             pipeline_name="p",
             error_codes=("E", "E2"),
             error_messages=("m",),
-            batch_id=BatchID(uuid4()),
+            batch_id=deterministic_batch_uuid("s3-rqf-residual-2"),
             run_id=None,
             ingestion_ts=datetime.now(timezone.utc),
         )
