@@ -84,10 +84,10 @@ class CompositePipelineRunner(
     _tracing: TracingPort | None
     # Lifecycle host surface (initialized by initialize_runner_runtime_state).
     _run_id_str: str
-    _finished: bool
-    _final_state: CompositePipelineState | None
-    _started_at: datetime | None
-    _start_time: float | None
+    _finished: bool = False
+    _final_state: CompositePipelineState | None = None
+    _started_at: datetime | None = None
+    _start_time: float | None = None
 
     def __init__(
         self,

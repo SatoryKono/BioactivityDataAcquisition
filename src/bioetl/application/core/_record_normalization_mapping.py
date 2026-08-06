@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core._record_normalization_contract import (
     _NormalizationFinding,
@@ -44,11 +44,11 @@ class RecordNormalizationMappingMixin:
     Host classes must assign these attributes before mapping runs.
     """
 
-    provider: str
-    entity_type: str | None
-    profile: _NormalizationProfileLike | None
-    rule_set: NormalizationRulesPolicy
-    allow_compatibility_fallback: bool
+    provider: str = cast(Any, None)  # Any: host attr default (PD3)
+    entity_type: str | None = cast(Any, None)  # Any: host attr default (PD3)
+    profile: _NormalizationProfileLike | None = cast(Any, None)  # Any: host attr default (PD3)
+    rule_set: NormalizationRulesPolicy = cast(Any, None)  # Any: host attr default (PD3)
+    allow_compatibility_fallback: bool = cast(Any, None)  # Any: host attr default (PD3)
 
     def _normalize_mapping(self, record: JsonDict) -> JsonDict:
         object.__setattr__(self, "_normalization_findings", ())

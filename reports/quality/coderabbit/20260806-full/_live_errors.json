@@ -2,55 +2,101 @@
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\doctor.py",
     "severity": "error",
-    "message": "Import from `setup_mcp` is implicitly relative and will not work if this file is imported as a module\n\u00a0\u00a0Use a relative import from `.setup_mcp` instead\n\u00a0\u00a0or specify the full module path: `scripts.ai.codex.setup_mcp`",
-    "range": {
-      "start": {
-        "line": 15,
-        "character": 7
-      },
-      "end": {
-        "line": 15,
-        "character": 16
-      }
-    },
-    "rule": "reportImplicitRelativeImport"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\doctor.py",
-    "severity": "error",
-    "message": "Import from `mcp_profile_contract` is implicitly relative and will not work if this file is imported as a module\n\u00a0\u00a0Use a relative import from `.mcp_profile_contract` instead\n\u00a0\u00a0or specify the full module path: `scripts.ai.codex.mcp_profile_contract`",
+    "message": "Expected one or more symbol names after \"import\"",
     "range": {
       "start": {
         "line": 16,
-        "character": 5
+        "character": 119
       },
       "end": {
-        "line": 16,
-        "character": 25
+        "line": 17,
+        "character": 0
       }
-    },
-    "rule": "reportImplicitRelativeImport"
+    }
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\doctor.py",
     "severity": "error",
-    "message": "Import from `native_runtime_contract` is implicitly relative and will not work if this file is imported as a module\n\u00a0\u00a0Use a relative import from `.native_runtime_contract` instead\n\u00a0\u00a0or specify the full module path: `scripts.ai.codex.native_runtime_contract`",
+    "message": "Expected one or more symbol names after \"import\"",
     "range": {
       "start": {
         "line": 17,
-        "character": 5
+        "character": 128
       },
       "end": {
-        "line": 17,
-        "character": 28
+        "line": 18,
+        "character": 0
       }
-    },
-    "rule": "reportImplicitRelativeImport"
+    }
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\doctor.py",
     "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@set]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@set]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
+    "message": "\"validate_native_runtime\" is not defined",
+    "range": {
+      "start": {
+        "line": 40,
+        "character": 15
+      },
+      "end": {
+        "line": 40,
+        "character": 38
+      }
+    },
+    "rule": "reportUndefinedVariable"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\doctor.py",
+    "severity": "error",
+    "message": "\"Finding\" is not defined",
+    "range": {
+      "start": {
+        "line": 42,
+        "character": 8
+      },
+      "end": {
+        "line": 42,
+        "character": 15
+      }
+    },
+    "rule": "reportUndefinedVariable"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\doctor.py",
+    "severity": "error",
+    "message": "\"validate_profile_matrix\" is not defined",
+    "range": {
+      "start": {
+        "line": 43,
+        "character": 21
+      },
+      "end": {
+        "line": 43,
+        "character": 44
+      }
+    },
+    "rule": "reportUndefinedVariable"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\doctor.py",
+    "severity": "error",
+    "message": "\"profile_plan\" is not defined",
+    "range": {
+      "start": {
+        "line": 104,
+        "character": 11
+      },
+      "end": {
+        "line": 104,
+        "character": 23
+      }
+    },
+    "rule": "reportUndefinedVariable"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\doctor.py",
+    "severity": "error",
+    "message": "\"_as_str_list\" is not defined",
     "range": {
       "start": {
         "line": 107,
@@ -58,394 +104,26 @@
       },
       "end": {
         "line": 107,
-        "character": 41
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\doctor.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@set]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@set]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 108,
-        "character": 43
-      },
-      "end": {
-        "line": 108,
-        "character": 65
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\doctor.py",
-    "severity": "error",
-    "message": "\"object\" is not iterable\n\u00a0\u00a0\"__iter__\" method not defined",
-    "range": {
-      "start": {
-        "line": 181,
-        "character": 20
-      },
-      "end": {
-        "line": 181,
-        "character": 46
-      }
-    },
-    "rule": "reportGeneralTypeIssues"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\doctor.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"obj\" of type \"Sized\" in function \"len\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Sized\"\n\u00a0\u00a0\u00a0\u00a0\"__len__\" is not present",
-    "range": {
-      "start": {
-        "line": 184,
-        "character": 68
-      },
-      "end": {
-        "line": 184,
-        "character": 94
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Import from `setup_mcp` is implicitly relative and will not work if this file is imported as a module\n\u00a0\u00a0Use a relative import from `.setup_mcp` instead\n\u00a0\u00a0or specify the full module path: `scripts.ai.codex.setup_mcp`",
-    "range": {
-      "start": {
-        "line": 9,
-        "character": 7
-      },
-      "end": {
-        "line": 9,
-        "character": 16
-      }
-    },
-    "rule": "reportImplicitRelativeImport"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@list]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@list]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 40,
-        "character": 25
-      },
-      "end": {
-        "line": 40,
-        "character": 49
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@list]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@list]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 41,
-        "character": 25
-      },
-      "end": {
-        "line": 41,
-        "character": 49
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@list]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@list]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 42,
-        "character": 25
-      },
-      "end": {
-        "line": 42,
-        "character": 49
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@list]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@list]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 43,
         "character": 31
-      },
-      "end": {
-        "line": 43,
-        "character": 61
       }
     },
-    "rule": "reportArgumentType"
+    "rule": "reportUndefinedVariable"
   },
   {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\doctor.py",
     "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@list]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@list]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
+    "message": "\"REPO_ROOT\" is not defined",
     "range": {
       "start": {
-        "line": 44,
-        "character": 31
+        "line": 199,
+        "character": 58
       },
       "end": {
-        "line": 44,
-        "character": 61
+        "line": 199,
+        "character": 67
       }
     },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@list]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@list]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 45,
-        "character": 35
-      },
-      "end": {
-        "line": 45,
-        "character": 69
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@set]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@set]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 57,
-        "character": 23
-      },
-      "end": {
-        "line": 57,
-        "character": 39
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@set]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@set]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 58,
-        "character": 23
-      },
-      "end": {
-        "line": 58,
-        "character": 39
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@set]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@set]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 59,
-        "character": 23
-      },
-      "end": {
-        "line": 59,
-        "character": 39
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@set]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@set]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 65,
-        "character": 26
-      },
-      "end": {
-        "line": 65,
-        "character": 71
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@set]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@set]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 66,
-        "character": 11
-      },
-      "end": {
-        "line": 66,
-        "character": 56
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@set]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@set]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 68,
-        "character": 28
-      },
-      "end": {
-        "line": 68,
-        "character": 71
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@set]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@set]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 70,
-        "character": 24
-      },
-      "end": {
-        "line": 70,
-        "character": 69
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@set]\" in function \"__init__\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@set]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 72,
-        "character": 25
-      },
-      "end": {
-        "line": 72,
-        "character": 69
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "No overloads for \"join\" match the provided arguments",
-    "range": {
-      "start": {
-        "line": 101,
-        "character": 14
-      },
-      "end": {
-        "line": 101,
-        "character": 47
-      }
-    },
-    "rule": "reportCallIssue"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[str]\" in function \"join\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[str]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 101,
-        "character": 24
-      },
-      "end": {
-        "line": 101,
-        "character": 46
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "No overloads for \"join\" match the provided arguments",
-    "range": {
-      "start": {
-        "line": 106,
-        "character": 26
-      },
-      "end": {
-        "line": 106,
-        "character": 52
-      }
-    },
-    "rule": "reportCallIssue"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[str]\" in function \"join\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[str]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 106,
-        "character": 35
-      },
-      "end": {
-        "line": 106,
-        "character": 51
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "No overloads for \"join\" match the provided arguments",
-    "range": {
-      "start": {
-        "line": 107,
-        "character": 26
-      },
-      "end": {
-        "line": 107,
-        "character": 52
-      }
-    },
-    "rule": "reportCallIssue"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\mcp_profile_contract.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[str]\" in function \"join\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[str]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 107,
-        "character": 35
-      },
-      "end": {
-        "line": 107,
-        "character": 51
-      }
-    },
-    "rule": "reportArgumentType"
+    "rule": "reportUndefinedVariable"
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ai\\codex\\native_runtime_contract.py",
@@ -498,175 +176,15 @@
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\build_matrix.py",
     "severity": "error",
-    "message": "\"L\" is not defined",
+    "message": "Argument of type \"object | list[_T@list]\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@list]\" in function \"__init__\"\n\u00a0\u00a0Type \"object | list[_T@list]\" is not assignable to type \"Iterable[_T@list]\"\n\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[_T@list]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
     "range": {
       "start": {
-        "line": 283,
-        "character": 12
+        "line": 316,
+        "character": 47
       },
       "end": {
-        "line": 283,
-        "character": 13
-      }
-    },
-    "rule": "reportUndefinedVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\build_matrix.py",
-    "severity": "error",
-    "message": "No overloads for \"sum\" match the provided arguments",
-    "range": {
-      "start": {
-        "line": 291,
-        "character": 32
-      },
-      "end": {
-        "line": 291,
-        "character": 69
-      }
-    },
-    "rule": "reportCallIssue"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\build_matrix.py",
-    "severity": "error",
-    "message": "Argument of type \"Generator[object, None, None]\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_SupportsSumNoDefaultT@sum]\" in function \"sum\"\n\u00a0\u00a0\"Generator[object, None, None]\" is not assignable to \"Iterable[_SupportsSumNoDefaultT@sum]\"\n\u00a0\u00a0\u00a0\u00a0Type parameter \"_T_co@Iterable\" is covariant, but \"object\" is not a subtype of \"_SupportsSumNoDefaultT@sum\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"object\" is not assignable to type \"_SupportsSumWithNoDefaultGiven\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"_SupportsSumWithNoDefaultGiven\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__add__\" is not present\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__radd__\" is not present",
-    "range": {
-      "start": {
-        "line": 291,
-        "character": 36
-      },
-      "end": {
-        "line": 291,
-        "character": 68
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\build_matrix.py",
-    "severity": "error",
-    "message": "No overloads for \"sum\" match the provided arguments",
-    "range": {
-      "start": {
-        "line": 305,
-        "character": 37
-      },
-      "end": {
-        "line": 305,
-        "character": 74
-      }
-    },
-    "rule": "reportCallIssue"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\build_matrix.py",
-    "severity": "error",
-    "message": "Argument of type \"Generator[object, None, None]\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_SupportsSumNoDefaultT@sum]\" in function \"sum\"\n\u00a0\u00a0\"Generator[object, None, None]\" is not assignable to \"Iterable[_SupportsSumNoDefaultT@sum]\"\n\u00a0\u00a0\u00a0\u00a0Type parameter \"_T_co@Iterable\" is covariant, but \"object\" is not a subtype of \"_SupportsSumNoDefaultT@sum\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"object\" is not assignable to type \"_SupportsSumWithNoDefaultGiven\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"_SupportsSumWithNoDefaultGiven\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__add__\" is not present\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__radd__\" is not present",
-    "range": {
-      "start": {
-        "line": 305,
-        "character": 41
-      },
-      "end": {
-        "line": 305,
-        "character": 73
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\build_matrix.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"args\" of type \"StrPath\" in function \"__new__\"\n\u00a0\u00a0Type \"object\" is not assignable to type \"StrPath\"\n\u00a0\u00a0\u00a0\u00a0\"object\" is not assignable to \"str\"\n\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"PathLike[str]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__fspath__\" is not present",
-    "range": {
-      "start": {
-        "line": 312,
-        "character": 17
-      },
-      "end": {
-        "line": 312,
-        "character": 38
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\build_matrix.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"args\" of type \"StrPath\" in function \"__init__\"\n\u00a0\u00a0Type \"object\" is not assignable to type \"StrPath\"\n\u00a0\u00a0\u00a0\u00a0\"object\" is not assignable to \"str\"\n\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"PathLike[str]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__fspath__\" is not present",
-    "range": {
-      "start": {
-        "line": 312,
-        "character": 17
-      },
-      "end": {
-        "line": 312,
-        "character": 38
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\build_matrix.py",
-    "severity": "error",
-    "message": "No overloads for \"join\" match the provided arguments",
-    "range": {
-      "start": {
-        "line": 312,
-        "character": 79
-      },
-      "end": {
-        "line": 312,
-        "character": 102
-      }
-    },
-    "rule": "reportCallIssue"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\build_matrix.py",
-    "severity": "error",
-    "message": "Argument of type \"object\" cannot be assigned to parameter \"iterable\" of type \"Iterable[str]\" in function \"join\"\n\u00a0\u00a0\"object\" is incompatible with protocol \"Iterable[str]\"\n\u00a0\u00a0\u00a0\u00a0\"__iter__\" is not present",
-    "range": {
-      "start": {
-        "line": 312,
-        "character": 88
-      },
-      "end": {
-        "line": 312,
-        "character": 101
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\build_matrix.py",
-    "severity": "error",
-    "message": "No overloads for \"sum\" match the provided arguments",
-    "range": {
-      "start": {
-        "line": 347,
-        "character": 59
-      },
-      "end": {
-        "line": 347,
-        "character": 96
-      }
-    },
-    "rule": "reportCallIssue"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\build_matrix.py",
-    "severity": "error",
-    "message": "Argument of type \"Generator[object, None, None]\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_SupportsSumNoDefaultT@sum]\" in function \"sum\"\n\u00a0\u00a0\"Generator[object, None, None]\" is not assignable to \"Iterable[_SupportsSumNoDefaultT@sum]\"\n\u00a0\u00a0\u00a0\u00a0Type parameter \"_T_co@Iterable\" is covariant, but \"object\" is not a subtype of \"_SupportsSumNoDefaultT@sum\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"object\" is not assignable to type \"_SupportsSumWithNoDefaultGiven\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"_SupportsSumWithNoDefaultGiven\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__add__\" is not present\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__radd__\" is not present",
-    "range": {
-      "start": {
-        "line": 347,
-        "character": 63
-      },
-      "end": {
-        "line": 347,
-        "character": 95
+        "line": 316,
+        "character": 70
       }
     },
     "rule": "reportArgumentType"
@@ -734,38 +252,6 @@
       }
     },
     "rule": "reportMissingTypeArgument"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\run_leaves.py",
-    "severity": "error",
-    "message": "\"L\" is not defined",
-    "range": {
-      "start": {
-        "line": 182,
-        "character": 18
-      },
-      "end": {
-        "line": 182,
-        "character": 19
-      }
-    },
-    "rule": "reportUndefinedVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\coderabbit\\run_leaves.py",
-    "severity": "error",
-    "message": "\"L\" is not defined",
-    "range": {
-      "start": {
-        "line": 185,
-        "character": 18
-      },
-      "end": {
-        "line": 185,
-        "character": 19
-      }
-    },
-    "rule": "reportUndefinedVariable"
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\ops\\observability\\grafana\\rerender_grafana_screenshots.py",
@@ -882,130 +368,290 @@
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
     "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
+    "message": "Argument of type \"object\" cannot be assigned to parameter \"title\" of type \"str\" in function \"path_of\"\n\u00a0\u00a0\"object\" is not assignable to \"str\"",
     "range": {
       "start": {
-        "line": 15,
-        "character": 36
+        "line": 80,
+        "character": 20
       },
       "end": {
-        "line": 15,
-        "character": 40
+        "line": 80,
+        "character": 25
       }
     },
-    "rule": "reportMissingTypeArgument"
+    "rule": "reportArgumentType"
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
     "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
+    "message": "Cannot access attribute \"lower\" for class \"object\"\n\u00a0\u00a0Attribute \"lower\" is unknown",
     "range": {
       "start": {
-        "line": 19,
+        "line": 81,
+        "character": 30
+      },
+      "end": {
+        "line": 81,
+        "character": 35
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
+    "severity": "error",
+    "message": "Argument of type \"object\" cannot be assigned to parameter \"title\" of type \"str\" in function \"path_of\"\n\u00a0\u00a0\"object\" is not assignable to \"str\"",
+    "range": {
+      "start": {
+        "line": 92,
+        "character": 20
+      },
+      "end": {
+        "line": 92,
+        "character": 25
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
+    "severity": "error",
+    "message": "Cannot access attribute \"lower\" for class \"object\"\n\u00a0\u00a0Attribute \"lower\" is unknown",
+    "range": {
+      "start": {
+        "line": 93,
+        "character": 33
+      },
+      "end": {
+        "line": 93,
+        "character": 38
+      }
+    },
+    "rule": "reportAttributeAccessIssue"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
+    "severity": "error",
+    "message": "Argument of type \"object\" cannot be assigned to parameter \"path\" of type \"str\" in function \"stream_of\"\n\u00a0\u00a0\"object\" is not assignable to \"str\"",
+    "range": {
+      "start": {
+        "line": 100,
+        "character": 26
+      },
+      "end": {
+        "line": 100,
+        "character": 35
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
+    "severity": "error",
+    "message": "Argument of type \"object\" cannot be assigned to parameter \"element\" of type \"int\" in function \"add\"\n\u00a0\u00a0\"object\" is not assignable to \"int\"",
+    "range": {
+      "start": {
+        "line": 135,
+        "character": 17
+      },
+      "end": {
+        "line": 135,
+        "character": 18
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
+    "severity": "error",
+    "message": "No overloads for \"sorted\" match the provided arguments",
+    "range": {
+      "start": {
+        "line": 160,
+        "character": 17
+      },
+      "end": {
+        "line": 160,
+        "character": 59
+      }
+    },
+    "rule": "reportCallIssue"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
+    "severity": "error",
+    "message": "Argument of type \"(x: dict[str, object]) -> object\" cannot be assigned to parameter \"key\" of type \"(_T@sorted) -> SupportsRichComparison\" in function \"sorted\"\n\u00a0\u00a0Type \"(x: dict[str, object]) -> object\" is not assignable to type \"(dict[str, object]) -> SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0Function return type \"object\" is incompatible with type \"SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"object\" is not assignable to type \"SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsDunderLT[Any]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__lt__\" is not present\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsDunderGT[Any]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__gt__\" is not present",
+    "range": {
+      "start": {
+        "line": 160,
+        "character": 37
+      },
+      "end": {
+        "line": 160,
+        "character": 58
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
+    "severity": "error",
+    "message": "No overloads for \"sorted\" match the provided arguments",
+    "range": {
+      "start": {
+        "line": 165,
+        "character": 13
+      },
+      "end": {
+        "line": 165,
+        "character": 59
+      }
+    },
+    "rule": "reportCallIssue"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
+    "severity": "error",
+    "message": "Argument of type \"(x: dict[str, object]) -> object\" cannot be assigned to parameter \"key\" of type \"(_T@sorted) -> SupportsRichComparison\" in function \"sorted\"\n\u00a0\u00a0Type \"(x: dict[str, object]) -> object\" is not assignable to type \"(dict[str, object]) -> SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0Function return type \"object\" is incompatible with type \"SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"object\" is not assignable to type \"SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsDunderLT[Any]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__lt__\" is not present\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsDunderGT[Any]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__gt__\" is not present",
+    "range": {
+      "start": {
+        "line": 165,
+        "character": 39
+      },
+      "end": {
+        "line": 165,
+        "character": 58
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
+    "severity": "error",
+    "message": "No overloads for \"sorted\" match the provided arguments",
+    "range": {
+      "start": {
+        "line": 170,
+        "character": 13
+      },
+      "end": {
+        "line": 170,
+        "character": 56
+      }
+    },
+    "rule": "reportCallIssue"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
+    "severity": "error",
+    "message": "Argument of type \"(x: dict[str, object]) -> object\" cannot be assigned to parameter \"key\" of type \"(_T@sorted) -> SupportsRichComparison\" in function \"sorted\"\n\u00a0\u00a0Type \"(x: dict[str, object]) -> object\" is not assignable to type \"(dict[str, object]) -> SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0Function return type \"object\" is incompatible with type \"SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"object\" is not assignable to type \"SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsDunderLT[Any]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__lt__\" is not present\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsDunderGT[Any]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__gt__\" is not present",
+    "range": {
+      "start": {
+        "line": 170,
+        "character": 34
+      },
+      "end": {
+        "line": 170,
+        "character": 55
+      }
+    },
+    "rule": "reportArgumentType"
+  },
+  {
+    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
+    "severity": "error",
+    "message": "No overloads for \"sorted\" match the provided arguments",
+    "range": {
+      "start": {
+        "line": 193,
         "character": 16
       },
       "end": {
-        "line": 19,
-        "character": 20
+        "line": 193,
+        "character": 61
       }
     },
-    "rule": "reportMissingTypeArgument"
+    "rule": "reportCallIssue"
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
     "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
+    "message": "Argument of type \"(x: dict[str, object]) -> object\" cannot be assigned to parameter \"key\" of type \"(_T@sorted) -> SupportsRichComparison\" in function \"sorted\"\n\u00a0\u00a0Type \"(x: dict[str, object]) -> object\" is not assignable to type \"(dict[str, object]) -> SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0Function return type \"object\" is incompatible with type \"SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"object\" is not assignable to type \"SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsDunderLT[Any]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__lt__\" is not present\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsDunderGT[Any]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__gt__\" is not present",
     "range": {
       "start": {
-        "line": 76,
-        "character": 24
+        "line": 193,
+        "character": 39
       },
       "end": {
-        "line": 76,
-        "character": 28
+        "line": 193,
+        "character": 60
       }
     },
-    "rule": "reportMissingTypeArgument"
+    "rule": "reportArgumentType"
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
     "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
+    "message": "No overloads for \"sorted\" match the provided arguments",
     "range": {
       "start": {
-        "line": 77,
-        "character": 15
+        "line": 200,
+        "character": 16
       },
       "end": {
-        "line": 77,
-        "character": 19
+        "line": 200,
+        "character": 61
       }
     },
-    "rule": "reportMissingTypeArgument"
+    "rule": "reportCallIssue"
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
     "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
+    "message": "Argument of type \"(x: dict[str, object]) -> object\" cannot be assigned to parameter \"key\" of type \"(_T@sorted) -> SupportsRichComparison\" in function \"sorted\"\n\u00a0\u00a0Type \"(x: dict[str, object]) -> object\" is not assignable to type \"(dict[str, object]) -> SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0Function return type \"object\" is incompatible with type \"SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"object\" is not assignable to type \"SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsDunderLT[Any]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__lt__\" is not present\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsDunderGT[Any]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__gt__\" is not present",
     "range": {
       "start": {
-        "line": 88,
-        "character": 18
+        "line": 200,
+        "character": 39
       },
       "end": {
-        "line": 88,
-        "character": 22
+        "line": 200,
+        "character": 60
       }
     },
-    "rule": "reportMissingTypeArgument"
+    "rule": "reportArgumentType"
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
     "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
+    "message": "No overloads for \"sorted\" match the provided arguments",
     "range": {
       "start": {
-        "line": 89,
-        "character": 20
+        "line": 236,
+        "character": 25
       },
       "end": {
-        "line": 89,
-        "character": 24
+        "line": 236,
+        "character": 70
       }
     },
-    "rule": "reportMissingTypeArgument"
+    "rule": "reportCallIssue"
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
     "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
+    "message": "Argument of type \"(x: dict[str, object]) -> object\" cannot be assigned to parameter \"key\" of type \"(_T@sorted) -> SupportsRichComparison\" in function \"sorted\"\n\u00a0\u00a0Type \"(x: dict[str, object]) -> object\" is not assignable to type \"(dict[str, object]) -> SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0Function return type \"object\" is incompatible with type \"SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Type \"object\" is not assignable to type \"SupportsRichComparison\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsDunderLT[Any]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__lt__\" is not present\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"object\" is incompatible with protocol \"SupportsDunderGT[Any]\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"__gt__\" is not present",
     "range": {
       "start": {
-        "line": 98,
-        "character": 28
+        "line": 236,
+        "character": 48
       },
       "end": {
-        "line": 98,
-        "character": 32
+        "line": 236,
+        "character": 69
       }
     },
-    "rule": "reportMissingTypeArgument"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\inventory_cm.py",
-    "severity": "error",
-    "message": "Expected type arguments for generic class \"dict\"",
-    "range": {
-      "start": {
-        "line": 130,
-        "character": 19
-      },
-      "end": {
-        "line": 130,
-        "character": 23
-      }
-    },
-    "rule": "reportMissingTypeArgument"
+    "rule": "reportArgumentType"
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\scripts\\quality\\coderabbit\\rebalance_streams.py",
@@ -1064,146 +710,18 @@
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\runner_pkg\\runner.py",
     "severity": "error",
-    "message": "Instance variable \"_finished\" is not initialized in the class body or __init__ method",
+    "message": "Conversion of type `Self@CompositePipelineRunner` to type `_RunnerLifecycleHost` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
     "range": {
       "start": {
-        "line": 85,
-        "character": 4
+        "line": 111,
+        "character": 15
       },
       "end": {
-        "line": 85,
-        "character": 13
+        "line": 111,
+        "character": 47
       }
     },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\runner_pkg\\runner.py",
-    "severity": "error",
-    "message": "Instance variable \"_final_state\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 86,
-        "character": 4
-      },
-      "end": {
-        "line": 86,
-        "character": 16
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\runner_pkg\\runner.py",
-    "severity": "error",
-    "message": "Argument of type \"Self@CompositePipelineRunner\" cannot be assigned to parameter \"host\" of type \"_RunnerLifecycleHost\" in function \"mark_finished\"\n\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_RunnerLifecycleHost\"\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_validate_config_consistency\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_run_preflight_validation\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0\"_record_run_finished\" is an incompatible type\n  ...",
-    "range": {
-      "start": {
-        "line": 110,
-        "character": 22
-      },
-      "end": {
-        "line": 110,
-        "character": 26
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\runner_pkg\\runner.py",
-    "severity": "error",
-    "message": "Argument of type \"Self@CompositePipelineRunner\" cannot be assigned to parameter \"host\" of type \"_RunnerLifecycleHost\" in function \"emit_failed_run\"\n\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_RunnerLifecycleHost\"\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_validate_config_consistency\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_run_preflight_validation\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0\"_record_run_finished\" is an incompatible type\n  ...",
-    "range": {
-      "start": {
-        "line": 125,
-        "character": 24
-      },
-      "end": {
-        "line": 125,
-        "character": 28
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\runner_pkg\\runner.py",
-    "severity": "error",
-    "message": "Argument of type \"Self@CompositePipelineRunner\" cannot be assigned to parameter \"host\" of type \"_RunnerLifecycleHost\" in function \"handle_pipeline_execution_failure\"\n\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_RunnerLifecycleHost\"\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_validate_config_consistency\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_run_preflight_validation\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0\"_record_run_finished\" is an incompatible type\n  ...",
-    "range": {
-      "start": {
-        "line": 129,
-        "character": 42
-      },
-      "end": {
-        "line": 129,
-        "character": 46
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\runner_pkg\\runner.py",
-    "severity": "error",
-    "message": "Argument of type \"Self@CompositePipelineRunner\" cannot be assigned to parameter \"host\" of type \"_RunnerLifecycleHost\" in function \"handle_bioetl_failure\"\n\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_RunnerLifecycleHost\"\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_validate_config_consistency\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_run_preflight_validation\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0\"_record_run_finished\" is an incompatible type\n  ...",
-    "range": {
-      "start": {
-        "line": 133,
-        "character": 30
-      },
-      "end": {
-        "line": 133,
-        "character": 34
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\runner_pkg\\runner.py",
-    "severity": "error",
-    "message": "Argument of type \"Self@CompositePipelineRunner\" cannot be assigned to parameter \"host\" of type \"_RunnerLifecycleHost\" in function \"handle_shutdown\"\n\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_RunnerLifecycleHost\"\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_validate_config_consistency\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_run_preflight_validation\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0\"_record_run_finished\" is an incompatible type\n  ...",
-    "range": {
-      "start": {
-        "line": 137,
-        "character": 24
-      },
-      "end": {
-        "line": 137,
-        "character": 28
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\runner_pkg\\runner.py",
-    "severity": "error",
-    "message": "Argument of type \"Self@CompositePipelineRunner\" cannot be assigned to parameter \"host\" of type \"_RunnerLifecycleHost\" in function \"start_run_lifecycle\"\n\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_RunnerLifecycleHost\"\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_validate_config_consistency\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_run_preflight_validation\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0\"_record_run_finished\" is an incompatible type\n  ...",
-    "range": {
-      "start": {
-        "line": 141,
-        "character": 28
-      },
-      "end": {
-        "line": 141,
-        "character": 32
-      }
-    },
-    "rule": "reportArgumentType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\runner_pkg\\runner.py",
-    "severity": "error",
-    "message": "Argument of type \"Self@CompositePipelineRunner\" cannot be assigned to parameter \"host\" of type \"_RunnerLifecycleHost\" in function \"complete_successful_run\"\n\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_RunnerLifecycleHost\"\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_validate_config_consistency\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0Could not bind method \"_run_preflight_validation\" because \"Self@CompositePipelineRunner\" is not assignable to parameter \"self\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\"CompositePipelineRunner*\" is incompatible with protocol \"_CompositeRunnerSupportHostProtocol\"\n\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0Could not bind method \"<anonymous>\" because it is missing a \"self\" or \"cls\" parameter\n\u00a0\u00a0\u00a0\u00a0\"_record_run_finished\" is an incompatible type\n  ...",
-    "range": {
-      "start": {
-        "line": 229,
-        "character": 45
-      },
-      "end": {
-        "line": 229,
-        "character": 49
-      }
-    },
-    "rule": "reportArgumentType"
+    "rule": "reportInvalidCast"
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\composite\\runner_pkg\\runner_checkpoint_save_observability.py",
@@ -1236,86 +754,6 @@
       }
     },
     "rule": "reportInvalidCast"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\_record_normalization_mapping.py",
-    "severity": "error",
-    "message": "Instance variable \"provider\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 46,
-        "character": 4
-      },
-      "end": {
-        "line": 46,
-        "character": 12
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\_record_normalization_mapping.py",
-    "severity": "error",
-    "message": "Instance variable \"entity_type\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 47,
-        "character": 4
-      },
-      "end": {
-        "line": 47,
-        "character": 15
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\_record_normalization_mapping.py",
-    "severity": "error",
-    "message": "Instance variable \"profile\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 48,
-        "character": 4
-      },
-      "end": {
-        "line": 48,
-        "character": 11
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\_record_normalization_mapping.py",
-    "severity": "error",
-    "message": "Instance variable \"rule_set\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 49,
-        "character": 4
-      },
-      "end": {
-        "line": 49,
-        "character": 12
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\_record_normalization_mapping.py",
-    "severity": "error",
-    "message": "Instance variable \"allow_compatibility_fallback\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 50,
-        "character": 4
-      },
-      "end": {
-        "line": 50,
-        "character": 32
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\_record_processor_span_support.py",
@@ -1360,54 +798,6 @@
       },
       "end": {
         "line": 174,
-        "character": 9
-      }
-    },
-    "rule": "reportInvalidCast"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\batch_tracing.py",
-    "severity": "error",
-    "message": "Conversion of type `SpanHandle` to type `Span` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
-    "range": {
-      "start": {
-        "line": 59,
-        "character": 15
-      },
-      "end": {
-        "line": 71,
-        "character": 9
-      }
-    },
-    "rule": "reportInvalidCast"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\batch_tracing.py",
-    "severity": "error",
-    "message": "Conversion of type `SpanHandle` to type `Span` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
-    "range": {
-      "start": {
-        "line": 80,
-        "character": 15
-      },
-      "end": {
-        "line": 92,
-        "character": 9
-      }
-    },
-    "rule": "reportInvalidCast"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\batch_tracing.py",
-    "severity": "error",
-    "message": "Conversion of type `SpanHandle` to type `Span` may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to `object` first.",
-    "range": {
-      "start": {
-        "line": 104,
-        "character": 15
-      },
-      "end": {
-        "line": 114,
         "character": 9
       }
     },
@@ -1524,118 +914,6 @@
       }
     },
     "rule": "reportReturnType"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"http_client\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 48,
-        "character": 8
-      },
-      "end": {
-        "line": 48,
-        "character": 19
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"_logger\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 49,
-        "character": 8
-      },
-      "end": {
-        "line": 49,
-        "character": 15
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"_adapter_metrics\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 50,
-        "character": 8
-      },
-      "end": {
-        "line": 50,
-        "character": 24
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"_request_collector\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 51,
-        "character": 8
-      },
-      "end": {
-        "line": 51,
-        "character": 26
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"_query_builder\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 52,
-        "character": 8
-      },
-      "end": {
-        "line": 52,
-        "character": 22
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"_response_mapper\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 53,
-        "character": 8
-      },
-      "end": {
-        "line": 53,
-        "character": 24
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
-  },
-  {
-    "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\crossref\\_client_port_surface.py",
-    "severity": "error",
-    "message": "Instance variable \"_fetch_flow\" is not initialized in the class body or __init__ method",
-    "range": {
-      "start": {
-        "line": 54,
-        "character": 8
-      },
-      "end": {
-        "line": 54,
-        "character": 19
-      }
-    },
-    "rule": "reportUninitializedInstanceVariable"
   },
   {
     "file": "e:\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\adapters\\decorators\\_circuit_breaker_support.py",

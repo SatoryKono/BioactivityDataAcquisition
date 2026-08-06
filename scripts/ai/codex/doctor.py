@@ -13,9 +13,9 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-import setup_mcp
-from mcp_profile_contract import profile_plan, validate_profile_matrix
-from native_runtime_contract import Finding, REPO_ROOT, validate_native_runtime
+import setup_mcp  # pyright: ignore[reportImplicitRelativeImport]
+from mcp_profile_contract import  # pyright: ignore[reportImplicitRelativeImport] profile_plan, validate_profile_matrix
+from native_runtime_contract import  # pyright: ignore[reportImplicitRelativeImport] Finding, REPO_ROOT, validate_native_runtime
 
 
 WINDOWS_STREAMING_MODES = {"windows_docker_streaming", "windows_npx_streaming"}
@@ -105,7 +105,7 @@ def run_mcp(
     plan = profile_plan(profile, repo_root)
     catalog_path = repo_root / "scripts/ops/runtime/mcp/shared-servers.json"
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))["servers"]
-    required = set(plan["required_local"])
+    required = set(_as_str_list(plan.get("required_local")))
     selected_local = sorted(required | set(plan["optional_local"]))
     results: list[dict[str, Any]] = []
 

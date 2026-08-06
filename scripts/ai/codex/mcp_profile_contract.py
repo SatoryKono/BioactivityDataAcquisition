@@ -5,9 +5,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
+from typing import cast
 
-import setup_mcp
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+import setup_mcp  # noqa: E402  # pyright: ignore[reportImplicitRelativeImport]
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -17,20 +23,29 @@ def selected_names(profile: str, repo_root: Path = REPO_ROOT) -> tuple[str, ...]
     return tuple(sorted(setup_mcp._canonical_servers(repo_root, profile=profile)))
 
 
+def _as_str_list(value: object) -> list[str]:
+    if isinstance(value, (list, tuple, set)):
+        return [str(item) for item in value]
+    return []
+
+
 def profile_plan(profile: str, repo_root: Path = REPO_ROOT) -> dict[str, object]:
     selected = selected_names(profile, repo_root)
     required, optional = setup_mcp.mcp_profile_requirements(profile, selected)
     catalog_path = repo_root / "scripts/ops/runtime/mcp/shared-servers.json"
-    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))["servers"]
-    local = set(catalog)
+    catalog_raw = json.loads(catalog_path.read_text(encoding="utf-8"))["servers"]
+    local = set(cast(list[str], list(catalog_raw)))
+    required_list = list(required)
+    optional_list = list(optional)
+    selected_list = list(selected)
     return {
         "profile": profile,
-        "selected": list(selected),
-        "required": list(required),
-        "optional": list(optional),
-        "required_local": sorted(set(required) & local),
-        "optional_local": sorted(set(optional) & local),
-        "remote_or_external": sorted(set(selected) - local),
+        "selected": selected_list,
+        "required": required_list,
+        "optional": optional_list,
+        "required_local": sorted(set(required_list) & local),
+        "optional_local": sorted(set(optional_list) & local),
+        "remote_or_external": sorted(set(selected_list) - local),
     }
 
 
@@ -38,12 +53,12 @@ def _safe_plan_for_json(plan: dict[str, object]) -> dict[str, object]:
     """Return an allowlisted, non-sensitive view of profile plan data."""
     return {
         "profile": str(plan.get("profile", "")),
-        "selected": list(plan.get("selected", [])),
-        "required": list(plan.get("required", [])),
-        "optional": list(plan.get("optional", [])),
-        "required_local": list(plan.get("required_local", [])),
-        "optional_local": list(plan.get("optional_local", [])),
-        "remote_or_external": list(plan.get("remote_or_external", [])),
+        "selected": _as_str_list(plan.get("selected")),
+        "required": _as_str_list(plan.get("required")),
+        "optional": _as_str_list(plan.get("optional")),
+        "required_local": _as_str_list(plan.get("required_local")),
+        "optional_local": _as_str_list(plan.get("optional_local")),
+        "remote_or_external": _as_str_list(plan.get("remote_or_external")),
     }
 
 
@@ -55,22 +70,22 @@ def validate_profile_matrix(repo_root: Path = REPO_ROOT) -> list[str]:
         except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
             errors.append(f"{profile}: {exc}")
             continue
-        selected = set(plan["selected"])
-        required = set(plan["required"])
-        optional = set(plan["optional"])
+        selected = set(_as_str_list(plan["selected"]))
+        required = set(_as_str_list(plan["required"]))
+        optional = set(_as_str_list(plan["optional"]))
         if required & optional:
             errors.append(f"{profile}: required/optional sets overlap")
         if required | optional != selected:
             errors.append(f"{profile}: matrix does not cover selected inventory")
 
-    stable_required = set(profile_plan("stable", repo_root)["required"])
-    if set(profile_plan("shared", repo_root)["required"]) != stable_required:
+    stable_required = set(_as_str_list(profile_plan("stable", repo_root)["required"]))
+    if set(_as_str_list(profile_plan("shared", repo_root)["required"])) != stable_required:
         errors.append("shared: daily required set must match stable")
-    if "mermaid" not in set(profile_plan("core", repo_root)["required"]):
+    if "mermaid" not in set(_as_str_list(profile_plan("core", repo_root)["required"])):
         errors.append("core: mermaid must be required for diagram readiness")
-    if "mermaid" in set(profile_plan("shared", repo_root)["required"]):
+    if "mermaid" in set(_as_str_list(profile_plan("shared", repo_root)["required"])):
         errors.append("shared: mermaid must remain optional")
-    graph_required = set(profile_plan("graph", repo_root)["required"])
+    graph_required = set(_as_str_list(profile_plan("graph", repo_root)["required"]))
     for name in ("neo4j-cypher", "neo4j-memory"):
         if name not in graph_required:
             errors.append(f"graph: {name} must be required")
@@ -99,13 +114,9 @@ def main() -> int:
 
     plan = profile_plan(args.profile)
     if args.required_local:
-        print("\n".join(plan["required_local"]))
-    elif args.json:
-        print(json.dumps(_safe_plan_for_json(plan), indent=2, sort_keys=True))
-    else:
-        print(f"profile={args.profile}")
-        print(f"required={','.join(plan['required'])}")
-        print(f"optional={','.join(plan['optional'])}")
+        print("\n".join(_as_str_list(plan["required_local"])))
+        return 0
+    print(json.dumps(_safe_plan_for_json(plan), indent=2, sort_keys=True))
     return 0
 
 
