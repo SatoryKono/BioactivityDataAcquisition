@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.runtime_clock import current_utc_time
 
@@ -122,7 +122,7 @@ def record_flow_invariants(
 
 def _record_count_flow_invariants(
     *,
-    pipeline_metrics: object,
+    pipeline_metrics: PipelineMetricsRecorder,
     run_type: str,
     fetched: int,
     bronze: int,
@@ -133,8 +133,7 @@ def _record_count_flow_invariants(
     filtered_out: int,
 ) -> None:
     """Record record-count invariant results for one completed run."""
-    typed_pipeline_metrics = cast("PipelineMetricsRecorder", pipeline_metrics)
-    typed_pipeline_metrics.record_flow_invariant(
+    pipeline_metrics.record_flow_invariant(
         run_type=run_type,
         invariant="fetched_equals_bronze",
         status=_equality_invariant_status(
@@ -144,7 +143,7 @@ def _record_count_flow_invariants(
         ),
     )
     partition_total = silver + quarantined + filtered_out
-    typed_pipeline_metrics.record_flow_invariant(
+    pipeline_metrics.record_flow_invariant(
         run_type=run_type,
         invariant="bronze_partitioned",
         status=_equality_invariant_status(
@@ -153,7 +152,7 @@ def _record_count_flow_invariants(
             observed=bronze > 0 or partition_total > 0,
         ),
     )
-    typed_pipeline_metrics.record_flow_invariant(
+    pipeline_metrics.record_flow_invariant(
         run_type=run_type,
         invariant="silver_gold_monotonic",
         status=_monotonic_invariant_status(
@@ -163,7 +162,7 @@ def _record_count_flow_invariants(
         ),
     )
     gold_terminal = gold + gold_excluded_by_contract
-    typed_pipeline_metrics.record_flow_invariant(
+    pipeline_metrics.record_flow_invariant(
         run_type=run_type,
         invariant="silver_gold_terminal_accounted",
         status=_monotonic_invariant_status(
@@ -191,7 +190,7 @@ def _monotonic_invariant_status(*, upper: int, lower: int, observed: bool) -> st
 def _record_stage_lag_gauges(
     *,
     host: _PipelineRunnerFlowHostProtocol,
-    pipeline_metrics: object,
+    pipeline_metrics: PipelineMetricsRecorder,
     run_type: str,
     ingestion_backlog: int,
     validation_backlog: int,
@@ -204,18 +203,17 @@ def _record_stage_lag_gauges(
         lag_seconds = 0.0
     else:
         lag_seconds = max(0.0, (current_time_fn() - started_at).total_seconds())
-    typed_pipeline_metrics = cast("PipelineMetricsRecorder", pipeline_metrics)
-    typed_pipeline_metrics.record_stage_lag_seconds(
+    pipeline_metrics.record_stage_lag_seconds(
         run_type=run_type,
         stage="ingestion",
         seconds=lag_seconds if ingestion_backlog > 0 else 0.0,
     )
-    typed_pipeline_metrics.record_stage_lag_seconds(
+    pipeline_metrics.record_stage_lag_seconds(
         run_type=run_type,
         stage="validation",
         seconds=lag_seconds if validation_backlog > 0 else 0.0,
     )
-    typed_pipeline_metrics.record_stage_lag_seconds(
+    pipeline_metrics.record_stage_lag_seconds(
         run_type=run_type,
         stage="output",
         seconds=lag_seconds if output_backlog > 0 else 0.0,
