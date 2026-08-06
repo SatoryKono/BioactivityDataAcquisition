@@ -2,33 +2,24 @@
 
 from __future__ import annotations
 
-from logging import Logger
-from typing import cast
-
 from bioetl.domain.ports import LoggerPort
 
 
-def log_error(logger: Logger | LoggerPort | object, error: str) -> None:
-    """Log an error message.
+def log_error(logger: LoggerPort, error: str) -> None:
+    """Log an error message through the structured observability port.
 
     Args:
-        logger: Logger instance.
+        logger: LoggerPort instance.
         error: Error message to log.
     """
-    if isinstance(logger, Logger):
-        logger.error("Error occurred: %s", error)
-        return
-    cast(LoggerPort, logger).error("error_occurred", error=error)
+    logger.error("error_occurred", error=error)
 
 
-def log_debug(logger: Logger | LoggerPort | object, details: str) -> None:
-    """Log a debug message.
+def log_debug(logger: LoggerPort, details: str) -> None:
+    """Log a debug message through the structured observability port.
 
     Args:
-        logger: Logger instance.
+        logger: LoggerPort instance.
         details: Debug details to log.
     """
-    if isinstance(logger, Logger):
-        logger.debug("Debug info: %s", details)
-        return
-    cast(LoggerPort, logger).debug("debug_info", details=details)
+    logger.debug("debug_info", details=details)

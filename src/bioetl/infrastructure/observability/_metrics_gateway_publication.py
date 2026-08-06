@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol
 
@@ -52,17 +54,45 @@ def _emit_metrics_publication_event(
     ).inc()
 
 
+def _normalize_grouping_label_value(key: str, value: object) -> str:
+    """Normalize one Pushgateway grouping label to a bounded safe token."""
+    raw = str(value).strip().lower()
+    if not raw:
+        return "unknown"
+    # Bound free-form values: keep alnum/underscore/dash only, max 64 chars.
+    cleaned = re.sub(r"[^a-z0-9_.:-]+", "_", raw)
+    cleaned = cleaned.strip("._-")[:64]
+    if not cleaned:
+        return "unknown"
+    if key in {"pipeline", "provider", "job", "instance", "run_type"}:
+        return cleaned
+    return cleaned
+
+
 def _sanitize_pushgateway_grouping_key(
     grouping_key: dict[str, str] | None,
 ) -> dict[str, str]:
     """Keep Pushgateway grouping labels bounded to aggregate run classes."""
     if not grouping_key:
         return {}
-    return {
-        key: str(value)
-        for key in _PUSHGATEWAY_GROUPING_LABELS
-        if (value := grouping_key.get(key))
-    }
+    sanitized: dict[str, str] = {}
+    for key in _PUSHGATEWAY_GROUPING_LABELS:
+        value = grouping_key.get(key)
+        if value is None or value == "":
+            continue
+        sanitized[key] = _normalize_grouping_label_value(key, value)
+    return sanitized
+
+
+def _redact_gateway_target(gateway: str) -> str:
+    """Redact credentials from gateway URLs for log emission."""
+    # Strip userinfo if present: scheme://user:pass@host -> scheme://***@host
+    return re.sub(r"(://)([^/@]+)@", r"\1***@", gateway)
+
+
+def _redact_grouping_for_log(grouping_key: dict[str, str]) -> dict[str, str]:
+    """Return a log-safe copy of grouping labels (already bounded)."""
+    return {key: value for key, value in grouping_key.items()}
 
 
 def publish_metrics_to_gateway(
@@ -100,9 +130,9 @@ def publish_metrics_to_gateway(
         )
         logger.info(
             "Metrics pushed to gateway",
-            gateway=gateway,
+            gateway=_redact_gateway_target(gateway),
             run_label=effective_run_label,
-            grouping_key=safe_grouping_key,
+            grouping_key=_redact_grouping_for_log(safe_grouping_key),
         )
         _emit_metrics_publication_event(
             grouping_key=safe_grouping_key,
@@ -120,8 +150,8 @@ def publish_metrics_to_gateway(
     ) as e:
         logger.warning(
             "Failed to push metrics to gateway",
-            gateway=gateway,
-            error=str(e),
+            gateway=_redact_gateway_target(gateway),
+            error=type(e).__name__,
         )
         _emit_metrics_publication_event(
             grouping_key=safe_grouping_key,
