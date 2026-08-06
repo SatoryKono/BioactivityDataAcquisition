@@ -1,12 +1,65 @@
 # ISSUES_CREATED
 
-created=3 linked=76 failed=0 total_map=79
+created=43 linked=89 failed=0 total_map=132
 
 | finding | severity | issue | path | action |
 |---------|----------|------:|------|--------|
-| `S01-domain-lineage:d2389f1f6b0f` | major | 8167 | `src/bioetl/domain/lineage/_shared.py` | created |
-| `S01-domain-lineage:8a13de16cb0a` | major | 8168 | `src/bioetl/domain/lineage/refs.py` | created |
-| `S01-domain-lineage:d9f644022c6e` | major | 8169 | `src/bioetl/domain/lineage/metadata_bundle.py` | created |
+| `S01-domain-lineage:d2389f1f6b0f` | major | 8167 | `src/bioetl/domain/lineage/_shared.py` | linked_existing |
+| `S01-domain-lineage:8a13de16cb0a` | major | 8168 | `src/bioetl/domain/lineage/refs.py` | linked_existing |
+| `S01-domain-lineage:d9f644022c6e` | major | 8169 | `src/bioetl/domain/lineage/metadata_bundle.py` | linked_existing |
+| `S01-domain-aggregates:726026178693` | major | 8172 | `src/bioetl/domain/aggregates/pipeline_run_stage_result.py` | created |
+| `S01-domain-aggregates:ea46a84f48ec` | minor | 8173 | `src/bioetl/domain/aggregates/_batch_lifecycle.py` | created |
+| `S01-domain-aggregates:5abb29da4cd7` | minor | 8174 | `src/bioetl/domain/aggregates/_batch_mixins.py` | created |
+| `S01-domain-aggregates:4afdef6471a6` | trivial | 8175 | `src/bioetl/domain/aggregates/_batch_mixins.py` | created |
+| `S01-domain-aggregates:d03287332ccf` | major | 8173 | `src/bioetl/domain/aggregates/_batch_lifecycle.py` | linked_existing |
+| `S01-domain-aggregates:ffb3f7a57f42` | minor | 8176 | `src/bioetl/domain/aggregates/_quarantine_aggregate.py` | created |
+| `S01-domain-aggregates:7b059f48d199` | major | 8176 | `src/bioetl/domain/aggregates/_quarantine_aggregate.py` | linked_existing |
+| `S01-domain-aggregates:7af38e992cf6` | trivial | 8177 | `src/bioetl/domain/aggregates/_quarantine_value_objects.py` | created |
+| `S01-domain-behavior:be3a50b9d004` | trivial | 8178 | `src/bioetl/domain/behavior/_dq_serializer_html/_styles.py` | created |
+| `S01-domain-behavior:6bd8c7de2a9d` | major | 8179 | `src/bioetl/domain/behavior/schema_metadata_extractor.py` | created |
+| `S01-domain-behavior:e258752c91d3` | minor | 8180 | `src/bioetl/domain/behavior/value_validator_rules.py` | created |
+| `S01-domain-behavior:3bb8c2e73d16` | major | 8181 | `src/bioetl/domain/behavior/data_normalization_config.py` | created |
+| `S01-domain-behavior:dceafc80056c` | minor | 8182 | `src/bioetl/domain/behavior/validation_helpers.py` | created |
+| `S01-domain-behavior:6301ff56202a` | major | 8183 | `src/bioetl/domain/behavior/composite_validation_helpers.py` | created |
+| `S01-domain-behavior:87cbfe622909` | major | 8184 | `src/bioetl/domain/behavior/dq_serializer.py` | created |
+| `S01-domain-behavior:ea0648cc292d` | minor | 8185 | `src/bioetl/domain/behavior/organism_classification_service_models.py` | created |
+| `S01-domain-behavior:f47e91b9bf9c` | major | 8186 | `src/bioetl/domain/behavior/dq_metrics_calculator.py` | created |
+| `S01-domain-behavior:999e695d62dd` | major | 8187 | `src/bioetl/domain/behavior/preflight_governance.py` | created |
+| `S01-domain-behavior:c6281812b248` | major | 8188 | `src/bioetl/domain/behavior/normalization_config.py` | created |
+| `S01-domain-behavior:319cab0b0152` | major | 8189 | `src/bioetl/domain/behavior/schema_classifier.py` | created |
+| `S01-domain-behavior:e21f207cf3f5` | major | 8190 | `src/bioetl/domain/behavior/identity_service.py` | created |
+| `S01-domain-behavior:696d19831916` | major | 8191 | `src/bioetl/domain/behavior/cross_validation_validator.py` | created |
+| `S01-domain-behavior:8195c53c2386` | minor | 8192 | `src/bioetl/domain/behavior/cross_validation_helpers.py` | created |
+| `S01-domain-behavior:66c1d85a2c7a` | major | 8193 | `src/bioetl/domain/behavior/value_validator.py` | created |
+| `S01-domain-behavior:269b0b8ef62f` | minor | 8194 | `src/bioetl/domain/behavior/_author_helpers.py` | created |
+| `S01-domain-behavior:15e6c6ac46fa` | minor | 8195 | `src/bioetl/domain/behavior/schema_classifier_helpers.py` | created |
+| `S01-domain-behavior:c2b6673522a5` | major | 8194 | `src/bioetl/domain/behavior/_author_helpers.py` | linked_existing |
+| `S01-domain-behavior:fe8c2fa6bea2` | trivial | 8196 | `src/bioetl/domain/behavior/composite_metadata_cv.py` | created |
+| `S01-domain-behavior:aeefe324f10c` | trivial | 8197 | `src/bioetl/domain/behavior/staged_enforcement.py` | created |
+| `S01-domain-behavior:0095051fc4db` | trivial | 8198 | `src/bioetl/domain/behavior/composite_validation_layer.py` | created |
+| `S01-domain-behavior:1b434afbd35f` | major | 8199 | `src/bioetl/domain/behavior/dq_policy_resolver.py` | created |
+| `S01-domain-behavior:bf921f594345` | critical | 8198 | `src/bioetl/domain/behavior/composite_validation_layer.py` | linked_existing |
+| `S01-domain-behavior:c864c2e3f667` | major | 8200 | `src/bioetl/domain/behavior/author_normalization_service.py` | created |
+| `S01-domain-behavior:c09059c8769d` | major | 8201 | `src/bioetl/domain/behavior/_preflight_governance_types.py` | created |
+| `S01-domain-behavior:bfa4f41bf5c4` | major | 8202 | `src/bioetl/domain/behavior/_preflight_governance_helpers.py` | created |
+| `S01-domain-behavior:c995027d844d` | trivial | 8199 | `src/bioetl/domain/behavior/dq_policy_resolver.py` | linked_existing |
+| `S01-domain-behavior:8a3e62d11142` | critical | 8197 | `src/bioetl/domain/behavior/staged_enforcement.py` | linked_existing |
+| `S01-domain-behavior:f3bd8f770ee6` | minor | 8203 | `src/bioetl/domain/behavior/_dq_serializer_html/__init__.py` | created |
+| `S01-domain-behavior:136cadcd8da7` | trivial | 8200 | `src/bioetl/domain/behavior/author_normalization_service.py` | linked_existing |
+| `S01-domain-behavior:558268f1e854` | trivial | 8204 | `src/bioetl/domain/behavior/aggregation_validator.py` | created |
+| `S01-domain-behavior:12864c553b84` | major | 8205 | `src/bioetl/domain/behavior/activity_aggregator/_aggregator.py` | created |
+| `S01-domain-behavior:f4508ff7849d` | major | 8206 | `src/bioetl/domain/behavior/merged_metadata_explainability.py` | created |
+| `S01-domain-behavior:543d24a31c29` | trivial | 8205 | `src/bioetl/domain/behavior/activity_aggregator/_aggregator.py` | linked_existing |
+| `S01-domain-behavior:0586a351e9f0` | minor | 8207 | `src/bioetl/domain/behavior/merged_metadata_explainability.py` | created |
+| `S01-domain-behavior:63748e5145c9` | major | 8208 | `src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py` | created |
+| `S01-domain-behavior:e6f650974775` | trivial | 8209 | `src/bioetl/domain/behavior/normalization_service.py` | created |
+| `S01-domain-behavior:08641fd8f041` | trivial | 8210 | `src/bioetl/domain/behavior/composite_metadata_helpers.py` | created |
+| `S01-domain-behavior:e350a569d9fb` | major | 8204 | `src/bioetl/domain/behavior/aggregation_validator.py` | linked_existing |
+| `S01-domain-behavior:0793167b1497` | major | 8211 | `src/bioetl/domain/behavior/composite_metadata_helpers.py` | created |
+| `S01-domain-behavior:617ab6d82dc5` | major | 8212 | `src/bioetl/domain/behavior/dq_rule_evaluator.py` | created |
+| `S01-domain-behavior:95d18b0cffac` | major | 8209 | `src/bioetl/domain/behavior/normalization_service.py` | linked_existing |
+| `S01-domain-behavior:5ab9e9650fd8` | minor | 8213 | `src/bioetl/domain/behavior/organism_classification_service_filtering.py` | created |
+| `S01-domain-behavior:b1897908182e` | minor | 8214 | `src/bioetl/domain/behavior/unit_converter.py` | created |
 | `S01-domain-value_objects:02c80a807abc` | major | 8096 | `src/bioetl/domain/value_objects/activity.py` | linked_existing |
 | `S01-domain-value_objects:60e1964b8a63` | minor | 8097 | `src/bioetl/domain/value_objects/activity_confidence.py` | linked_existing |
 | `S01-domain-value_objects:fca00186539a` | major | 8098 | `src/bioetl/domain/value_objects/inchi.py` | linked_existing |

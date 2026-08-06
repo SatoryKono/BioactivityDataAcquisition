@@ -1,0 +1,1 @@
+{"type":"error","errorType":"unknown","message":"Failed to get file changes: Command failed with exit code 128: git diff --name-status 731bc9cc0142d1ca8eb6997c370995c2ef827291...HEAD\n\nfatal: Invalid symmetric difference expression 731bc9cc0142d1ca8eb6997c370995c2ef827291...HEAD","recoverable":false,"details":{"stage":"gitService.getFileChanges"}}
