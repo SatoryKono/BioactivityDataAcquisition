@@ -70,6 +70,8 @@ def run_leaf(leaf: Leaf, base: str = "main") -> LeafResult:
     log_path = LOG_DIR / f"review_{lid}.log"
     cmd: list[str]
     env = os.environ.copy()
+    # Prefer local WSL/Linux coderabbit install when present
+    env["PATH"] = f"/home/fedor/.local/bin:{env.get('PATH', '')}"
     env["NO_COLOR"] = "1"
     env["TERM"] = "dumb"
 
