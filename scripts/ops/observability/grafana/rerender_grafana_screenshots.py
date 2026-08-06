@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import time
+import uuid
 from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
@@ -33,6 +36,7 @@ DEFAULT_HEIGHT = 2200
 DEFAULT_THEME = "dark"
 DEFAULT_TIMEOUT_SECONDS = 120.0
 _RENDER_MANIFEST_JSON = "render-manifest.json"
+_CAPTURE_ID_RE = re.compile(r"[^A-Za-z0-9._-]+")
 
 
 def _default_tool_playwright_paths() -> tuple[Path, Path]:
@@ -99,6 +103,158 @@ class DashboardRenderResult:
 
 class RenderApiFailure(RuntimeError):
     """Raised after writing a partial render manifest for failed dashboards."""
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _git_capture_source() -> dict[str, object]:
+    """Return bounded repository provenance without exposing local paths."""
+    repo_root = _repo_root()
+    if not (repo_root / ".git").exists():
+        return {"commit_sha": "UNKNOWN", "working_tree_dirty": None}
+    try:
+        commit_sha = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=repo_root,
+            text=True,
+            timeout=10,
+        ).strip()
+        dirty = bool(
+            subprocess.check_output(
+                ["git", "status", "--porcelain", "--untracked-files=no"],
+                cwd=repo_root,
+                text=True,
+                timeout=15,
+            ).strip()
+        )
+    except (OSError, subprocess.SubprocessError):
+        return {"commit_sha": "UNKNOWN", "working_tree_dirty": None}
+    return {"commit_sha": commit_sha, "working_tree_dirty": dirty}
+
+
+def _dashboard_source_by_uid() -> dict[str, dict[str, object]]:
+    result: dict[str, dict[str, object]] = {}
+    repo_root = _repo_root()
+    for dashboard_path in sorted(_dashboard_dir().glob("*.json")):
+        try:
+            payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        uid = payload.get("uid")
+        if not isinstance(uid, str) or not uid:
+            continue
+        try:
+            source_path = str(dashboard_path.relative_to(repo_root))
+        except ValueError:
+            source_path = dashboard_path.name
+        result[uid] = {
+            "path": source_path,
+            "sha256": _sha256_file(dashboard_path),
+            "version": payload.get("version"),
+        }
+    return result
+
+
+def _capture_id(config: RenderConfig) -> str:
+    raw = config.occurrence_id.strip()
+    if not raw:
+        timestamp = datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%S%fZ")
+        raw = f"{timestamp}-{uuid.uuid4().hex[:12]}"
+    cleaned = _CAPTURE_ID_RE.sub("-", raw).strip("-._")
+    return cleaned or uuid.uuid4().hex
+
+
+def _write_exclusive_text(path: Path, text: str) -> None:
+    """Create immutable evidence once; a repeated occurrence must fail closed."""
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    descriptor = os.open(path, flags, 0o644)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(text)
+            handle.flush()
+            os.fsync(handle.fileno())
+    except BaseException:
+        try:
+            path.unlink()
+        except OSError:
+            pass
+        raise
+
+
+def _finalize_manifest(config: RenderConfig, manifest: dict[str, Any]) -> None:
+    """Bind one render occurrence to source, files, variables, and row state."""
+    dashboards = [
+        dict(item)
+        for item in manifest.get("dashboards", [])
+        if isinstance(item, dict)
+    ]
+    sources = _dashboard_source_by_uid()
+    file_set: list[str] = []
+    for dashboard in dashboards:
+        uid = str(dashboard.get("uid", ""))
+        file_name = dashboard.get("file") or dashboard.get("screenshot")
+        if isinstance(file_name, str) and file_name:
+            dashboard["file"] = file_name
+            file_set.append(file_name)
+        dashboard["dashboardSource"] = sources.get(
+            uid,
+            {"path": "UNKNOWN", "sha256": "UNKNOWN", "version": None},
+        )
+    dashboards.sort(key=lambda item: str(item.get("uid", "")))
+    file_set = sorted(set(file_set))
+    all_uids = set(sources)
+    rendered_uids = {
+        str(item.get("uid", "")) for item in dashboards if item.get("uid")
+    }
+    manifest_kind = (
+        "full-set"
+        if all_uids and rendered_uids == all_uids
+        else "selected-subset"
+    )
+    capture_id = _capture_id(config)
+    immutable_name = f"render-manifest--{manifest_kind}--{capture_id}.json"
+    manifest.update(
+        {
+            "capture_id": capture_id,
+            "occurrence_id": config.occurrence_id,
+            "manifest_kind": manifest_kind,
+            "immutable_manifest": immutable_name,
+            "file_count": len(file_set),
+            "file_set": file_set,
+            "source": {
+                **_git_capture_source(),
+                "dashboards": {
+                    uid: sources.get(uid, {}) for uid in sorted(rendered_uids)
+                },
+            },
+            "capture_context": {
+                "time_range": {
+                    "from": f"now-{config.range_hours}h",
+                    "to": "now",
+                    "timezone": "UTC",
+                },
+                "variables": {
+                    "workflow": config.workflow,
+                    "pipeline": config.pipeline,
+                    "run_type": config.run_type,
+                    "run_id": config.run_id,
+                },
+                "row_state": {
+                    "expand_collapsed_rows": config.expand_collapsed_rows,
+                },
+            },
+            "dashboards": dashboards,
+        }
+    )
+    text = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    _write_exclusive_text(config.output_dir / immutable_name, text)
+    atomic_write_text(config.output_dir / _RENDER_MANIFEST_JSON, text)
 
 
 def _read_env(name: str, default: str) -> str:
@@ -511,16 +667,25 @@ def _write_manifest(
         "dashboards": [
             {
                 **asdict(record),
+                "file": str(path.relative_to(config.output_dir)),
                 "screenshot": str(path.relative_to(config.output_dir)),
+                "screenshotEvidence": {
+                    "file": str(path.relative_to(config.output_dir)),
+                    "bytes": path.stat().st_size,
+                    "width": actual_viewports[record.uid][0]
+                    if actual_viewports[record.uid]
+                    else None,
+                    "height": actual_viewports[record.uid][1]
+                    if actual_viewports[record.uid]
+                    else None,
+                    "sha256": _sha256_file(path),
+                },
             }
             for record, path in rendered
         ],
         "render_results": [asdict(result) for result in render_results],
     }
-    atomic_write_text(
-        config.output_dir / _RENDER_MANIFEST_JSON,
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
-    )
+    _finalize_manifest(config, manifest)
 
 
 def _png_dimensions(path: Path) -> tuple[int, int] | None:
@@ -887,10 +1052,7 @@ def _write_merged_playwright_manifest(
         },
         "dashboards": dashboards,
     }
-    atomic_write_text(
-        config.output_dir / _RENDER_MANIFEST_JSON,
-        json.dumps(merged, indent=2) + "\n",
-    )
+    _finalize_manifest(config, merged)
 
 
 def _dashboard_render_status_problem(
@@ -1050,8 +1212,11 @@ def _run_playwright_with_retry(
 def _run_playwright_fallback(config: RenderConfig) -> int:
     dashboards = _load_dashboards(config)
     if len(dashboards) <= 1:
-        result, _manifest = _run_playwright_with_retry(config)
-        return result
+        result, manifest = _run_playwright_with_retry(config)
+        if result != 0 or manifest is None:
+            return result or 1
+        _write_merged_playwright_manifest(config, [manifest])
+        return 0
 
     manifests: list[dict[str, Any]] = []
     for dashboard in dashboards:

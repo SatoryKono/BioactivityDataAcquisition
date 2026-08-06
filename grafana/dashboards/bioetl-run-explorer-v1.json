@@ -114,7 +114,7 @@
       "title": "Browse Recent Runs",
       "description": "Selected-run narrative (ID/Processed/detail) is the answer path after selection. No-selection utility. Pick a run to set run_id. Ops HTTP index — not Prometheus. Valid empty: no matching recent runs for the selected pipeline. Backend unavailable is distinct; check /health/live",
       "gridPos": {
-        "h": 7,
+        "h": 6,
         "w": 24,
         "x": 0,
         "y": 7
@@ -207,12 +207,12 @@
       "title": "Inspect Run Identity",
       "gridPos": {
         "h": 6,
-        "w": 12,
+        "w": 10,
         "x": 0,
         "y": 14
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "Do not put full UUIDs into Prometheus labels. DUX4-23/25: Canonical RUN hub — only board with first-class ID/Processed KPIs. Empty until run_id selected. Exact-run identity hub (Ops HTTP). Canonical portfolio hub for ID panels. Valid empty: no matching identity for the selected run. Backend unavailable is distinct; check /health/live",
+      "description": "Exact-run identity from Ops HTTP. Before a Run ID is selected, rows explicitly request one concrete run. A selected run with unavailable identity is VALID EMPTY; datasource/backend failure renders as QUERY ERROR. Full identifiers remain HTTP-backed and never become Prometheus labels.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -223,7 +223,7 @@
             "inspect": true
           },
           "unit": "none",
-          "noValue": "Identity not resolved for scope — select exact run_id or wait for control-plane resolve (see resolved_via). Backend down is different from empty scope.",
+          "noValue": "VALID EMPTY — selected run has no identity rows. If no Run ID is selected, choose one in Browse Recent Runs; backend failure renders as QUERY ERROR.",
           "links": [
             {
               "title": "Copy/Open full value (plain text)",
@@ -362,13 +362,13 @@
       "type": "table",
       "title": "Inspect Processed Records",
       "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 12,
+        "h": 7,
+        "w": 14,
+        "x": 10,
         "y": 14
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "Do not put full UUIDs into Prometheus labels. DUX4-23/25: Canonical RUN hub — only board with first-class ID/Processed KPIs. Expected empty ≠ red failure (DUX3-03). Bronze/Silver/Gold accounting hub (Ops HTTP). Canonical portfolio hub for Processed Records. Valid empty: no matching accounting rows for the selected run. Backend unavailable is distinct; check /health/live",
+      "description": "Bronze/Silver/Gold accounting from Ops HTTP. Zero is a recorded count. A selected run with no accounting rows is VALID EMPTY; datasource/backend failure renders as QUERY ERROR.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -380,7 +380,7 @@
           },
           "decimals": 0,
           "unit": "none",
-          "noValue": "No processed-record rows for scope — check Ops HTTP :8000 and selectors. Zeros mean none observed after successful response, not backend failure.",
+          "noValue": "VALID EMPTY — selected run has no accounting rows. Select a Run ID first; backend failure renders as QUERY ERROR.",
           "links": [
             {
               "title": "Check BioETL Ops HTTP health",
@@ -684,7 +684,7 @@
                 "align": "left",
                 "inspect": false
               },
-              "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
+              "noValue": "VALID EMPTY — selected run report has no stage funnel rows. Backend failure renders as QUERY ERROR."
             },
             "overrides": [
               {
@@ -743,7 +743,7 @@
                 "align": "left",
                 "inspect": false
               },
-              "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
+              "noValue": "VALID EMPTY — selected run report has no reason rows. Backend failure renders as QUERY ERROR."
             },
             "overrides": [
               {
@@ -802,7 +802,7 @@
                 "align": "left",
                 "inspect": false
               },
-              "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
+              "noValue": "VALID EMPTY — selected run report has no reconciliation rows. Backend failure renders as QUERY ERROR."
             },
             "overrides": [
               {
@@ -937,7 +937,7 @@
                 "align": "left",
                 "inspect": false
               },
-              "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
+              "noValue": "VALID EMPTY — selected run report has no artifact rows. Backend failure renders as QUERY ERROR."
             },
             "overrides": [
               {

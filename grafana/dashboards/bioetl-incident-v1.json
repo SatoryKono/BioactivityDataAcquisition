@@ -529,9 +529,9 @@
       "id": 2006,
       "type": "state-timeline",
       "title": "Track Alert State History",
-      "description": "Range ALERTS history — not a persistent incident log. Same chain as Current Alerts (now)",
+      "description": "Range ALERTS history, not a persistent incident log. State is written in every band and row label; color is redundant. Use Current Alerts for the current verdict.",
       "gridPos": {
-        "h": 10,
+        "h": 14,
         "w": 24,
         "x": 0,
         "y": 24
@@ -543,7 +543,7 @@
       "targets": [
         {
           "expr": "ALERTS{alertstate=~\"firing|pending\"}",
-          "legendFormat": "{{alertname}} {{alertstate}}",
+          "legendFormat": "{{alertstate}} · {{alertname}}",
           "refId": "A",
           "instant": false,
           "range": true
@@ -599,6 +599,19 @@
                   "mode": "fixed",
                   "fixedColor": "red"
                 }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "1": {
+                        "text": "FIRING"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -614,6 +627,19 @@
                   "mode": "fixed",
                   "fixedColor": "orange"
                 }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "1": {
+                        "text": "PENDING"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }
@@ -621,9 +647,9 @@
       },
       "options": {
         "mergeValues": true,
-        "showValue": "auto",
+        "showValue": "always",
         "alignValue": "left",
-        "rowHeight": 0.9,
+        "rowHeight": 1.0,
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
@@ -644,7 +670,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 38
       },
       "options": {
         "mode": "html",
@@ -659,7 +685,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 42
       },
       "collapsed": false,
       "panels": [],
@@ -674,7 +700,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 39
+        "y": 43
       },
       "datasource": {
         "type": "prometheus",
@@ -852,7 +878,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 39
+        "y": 43
       },
       "datasource": {
         "type": "prometheus",
@@ -991,7 +1017,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 39
+        "y": 43
       },
       "datasource": {
         "type": "prometheus",

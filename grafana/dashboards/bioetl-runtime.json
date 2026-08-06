@@ -239,7 +239,7 @@
       "id": 9991,
       "type": "text",
       "title": "Start Pipeline Triage",
-      "description": "Prioritizes at most four actions for the current verdict. Verify telemetry gaps first, then inspect runtime blockers, hand off DQ or accounting concerns, or use Run Explorer for an exact run",
+      "description": "States the neutral outcome explicitly and routes non-OK states to the highest-impact bounded evidence.",
       "gridPos": {
         "h": 2,
         "w": 24,
@@ -247,8 +247,8 @@
         "y": 7
       },
       "options": {
-        "content": "**First Action**\n\n1. Read labelled Status + freshness.\n2. Open the highest-impact evidence panel.\n3. Confirm scope (pipeline/run_type/run).\n4. Hand off to Run Explorer or Incident as needed.",
-        "mode": "markdown"
+        "mode": "html",
+        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;white-space:normal\"><strong>First action:</strong> If Pipeline Health is <strong>OK</strong>, Metrics Coverage is <strong>SCRAPING</strong>, and no blocker is listed: <strong>No action required — continue monitoring.</strong> Otherwise open the highest-severity blocker; verify coverage before interpreting an empty blocker table.</div>"
       },
       "links": [
         {
