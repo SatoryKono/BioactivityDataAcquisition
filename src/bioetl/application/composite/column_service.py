@@ -6,7 +6,10 @@ from collections.abc import Callable, Sequence
 
 import polars as pl
 
-from bioetl.application.composite.column_orderer_group_flow import order_by_yaml_groups
+from bioetl.application.composite.column_orderer_group_flow import (
+    apply_renames,
+    order_by_yaml_groups,
+)
 from bioetl.application.composite.column_orderer_semantic import (
     count_groups,
     get_ordered_columns,
@@ -206,6 +209,14 @@ class ColumnOrderService:
         """Return compatibility aliases for evolving field names."""
         aliases, _, _ = resolve_publication_field_aliases(field_name)
         return aliases
+
+    @staticmethod
+    def _apply_renames(
+        columns: list[str],
+        rename_map: dict[str, str],
+    ) -> list[str]:
+        """Apply configured column renames through the canonical helper."""
+        return apply_renames(columns, rename_map)
 
     def filter_by_layer_config(
         self, columns: Sequence[str], layer_config: LayerColumnConfig

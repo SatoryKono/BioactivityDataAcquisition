@@ -208,13 +208,18 @@ def test_primary_status_documents_unknown_class() -> None:
 
 
 def test_dux6_run_context_collapsed_outside_explorer() -> None:
+    expected_by_uid = {
+        "bioetl-runtime": True,
+        "bioetl-overview-v2": False,
+    }
     for path in sorted(DASH.glob("*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
-        if data.get("uid") == "bioetl-run-explorer-v1":
+        expected = expected_by_uid.get(data.get("uid"))
+        if expected is None:
             continue
         for panel in _walk(data.get("panels")):
             if (
                 panel.get("type") == "row"
                 and "run context" in (panel.get("title") or "").lower()
             ):
-                assert panel.get("collapsed") is False
+                assert panel.get("collapsed") is expected

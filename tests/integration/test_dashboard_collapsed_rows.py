@@ -21,22 +21,36 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 
-def test_dashboard_rows_are_expanded_by_default() -> None:
-    """Operator policy: all panel groups ship expanded (no collapsed rows)."""
+def test_dashboard_rows_follow_progressive_disclosure_shape() -> None:
+    """Expanded rows keep children at root; collapsed forensic rows nest them."""
+    collapsed_rows = 0
+    expanded_rows = 0
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         for panel in get_dashboard_panels(dashboard):
             if panel.get("type") != "row":
                 continue
             title = panel.get("title", "")
-            assert panel.get("collapsed") is False, (
-                f"{dashboard_path.name}: row {title!r} must be expanded by default"
+            collapsed = panel.get("collapsed")
+            assert isinstance(collapsed, bool), (
+                f"{dashboard_path.name}: row {title!r} must declare collapsed"
             )
             nested = panel.get("panels") or []
-            assert len(nested) == 0, (
-                f"{dashboard_path.name}: expanded row {title!r} must not nest "
-                "child panels under row.panels (children live at root)"
-            )
+            if collapsed:
+                collapsed_rows += 1
+                assert nested, (
+                    f"{dashboard_path.name}: collapsed row {title!r} must nest "
+                    "its forensic child panels"
+                )
+            else:
+                expanded_rows += 1
+                assert not nested, (
+                    f"{dashboard_path.name}: expanded row {title!r} must not nest "
+                    "child panels under row.panels (children live at root)"
+                )
+
+    assert collapsed_rows > 0
+    assert expanded_rows > 0
 
 
 def test_every_dashboard_has_at_least_one_row() -> None:

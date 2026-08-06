@@ -451,7 +451,7 @@
       "type": "table",
       "title": "Review First Action",
       "gridPos": {
-        "h": 7,
+        "h": 8,
         "w": 12,
         "x": 0,
         "y": 7
@@ -814,6 +814,10 @@
                 "value": 1
               },
               {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
                 "id": "custom.hideFrom",
                 "value": {
                   "tooltip": false,
@@ -930,7 +934,7 @@
       "type": "table",
       "title": "Review Domain Status",
       "gridPos": {
-        "h": 7,
+        "h": 8,
         "w": 12,
         "x": 12,
         "y": 7

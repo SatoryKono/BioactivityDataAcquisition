@@ -495,10 +495,23 @@
               "options": "^(Value|#Value|Value \\(.*\\)|value)$"
             },
             "properties": [
-              {"id": "custom.cellOptions", "value": {"type": "auto"}},
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "custom.width",
+                "value": 120
+              },
               {
                 "id": "displayName",
-                "value": "Count"
+                "value": "Active Alerts"
               }
             ]
           }
