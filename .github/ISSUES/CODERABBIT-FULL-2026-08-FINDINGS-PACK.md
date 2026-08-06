@@ -15,32 +15,18 @@
 | trivial | 457 |
 | **total** | **1468** |
 
-## Path-cluster issue inventory
+## Path-cluster inventory (after de-dupe)
 
 | Metric | Count |
 | --- | ---: |
-| Open residual clusters before de-dupe | 268 |
-| Canonical kept | 220 |
-| Duplicates identified | 48 |
-| Duplicates closed this run | 0 |
-| Canonical critical (P0) | 12 |
-| Canonical major (P1) | 208 |
-| Canonical minor (P2) | 0 |
-| Canonical trivial | 0 |
+| Canonical open residual issues | 220 |
+| Duplicates closed | 48 |
+| P0 critical | 12 |
+| P1 major | 208 |
+| P2 minor | 0 |
+| trivial open | 0 |
 
-## Campaign parent issues
-
-| Code | Issue | Status note |
-| --- | ---: | --- |
-| meta | #7688 | open |
-| CR-FULL-00 | #7689 | preflight done |
-| Wave A–D | #7690–#7693 | closed after residual CLI |
-| Wave E/F | #7694–#7695 | open blocked #8031/#8032 |
-| FINDINGS | #7696 | this pack |
-| Closeout | #7697 | after implement |
-| Secret | #7698 | owner |
-
-## Canonical P0 critical issues
+## Canonical P0 critical
 
 - [#7738](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7738) — `src/bioetl/composition/bootstrap/runtime` (34 findings, Wave A)
 - [#7750](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7750) — `src/bioetl/application/services/control_plane` (73 findings, Wave A)
@@ -57,20 +43,27 @@
 
 ## De-dupe policy
 
-1. One open issue per residual path (normalized).
-2. Prefer Wave A over Wave B when same path (fixes mid-campaign filter mis-tag).
-3. Prefer lower issue number / higher severity when still tied.
-4. Implement only against canonical issue; closed dupes link back.
-5. Do **not** grow tech-debt / quality budgets.
+1. One open issue per residual path.
+2. Prefer Wave A over later waves for same path.
+3. Prefer higher severity, then lower issue number.
+4. Implement only canonical issues.
+5. No tech-debt budget growth.
 
-## Related artifacts
+## Files
 
 - `reports/quality/coderabbit/20260806/FINDINGS.md`
 - `reports/quality/coderabbit/20260806/TRIAGE.md`
 - `reports/quality/coderabbit/20260806/DE_DUPE_MAP.json`
-- Wave raw: `reports/quality/coderabbit/20260805/` (or local `/tmp/bioetl-cr-artifacts/20260805/`)
 
-## Errors during close
+## Campaign parents
 
-- none
+| Issue | Note |
+| ---: | --- |
+| #7688 | epic open |
+| #7690–#7693 | Wave A–D closed after residual CLI |
+| #7694–#7695 | E/F blocked #8031/#8032 |
+| #7696 | this pack (complete) |
+| #7697 | FINAL after implement |
+| #7698 | CI secret owner |
+| #7946 | domain rate-limit retry |
 

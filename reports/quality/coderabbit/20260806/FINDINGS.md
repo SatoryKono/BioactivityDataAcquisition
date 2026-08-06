@@ -1,13 +1,10 @@
 # FINDINGS — CR-FULL residual (de-duped)
 
-- Generated: 2026-08-06T07:40Z
+- Generated: 2026-08-06T07:45Z
 - Epic: #7688 · Task: #7696
-- Open residual clusters before de-dupe: 268
-- Canonical kept: 220
-- Duplicates closed/identified: 48 (dry-run)
-- Agent NDJSON severity totals A–D: {'major': 736, 'trivial': 457, 'minor': 253, 'critical': 22} (sum=1468)
-
-## Columns
+- Canonical open path-clusters: **220**
+- Duplicates closed (recorded): **48**
+- Agent NDJSON severity totals: `{'major': 736, 'trivial': 457, 'minor': 253, 'critical': 22}` (sum=1468)
 
 | id | sev | wave | path | findings | action | issue |
 | --- | --- | --- | --- | ---: | --- | ---: |
@@ -232,9 +229,9 @@
 | CR-C-8028 | major | C | `src/bioetl/infrastructure/observability/server.py` | 1 | P1 | #8028 |
 | CR-C-8029 | major | C | `src/bioetl/infrastructure/observability/unified_logger.py` | 1 | P1 | #8029 |
 
-## Duplicates (closed → canonical)
+## Duplicates closed → canonical
 
-| duplicate | canonical | path | reason |
+| duplicate | canonical | path | waves |
 | ---: | ---: | --- | --- |
 | #7919 | #7911 | `src/bioetl/domain/ports/runtime` | A/major → A/major |
 | #7921 | #7912 | `src/bioetl/domain/ports/noop` | A/major → A/major |
