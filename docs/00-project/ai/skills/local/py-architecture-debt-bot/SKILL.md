@@ -29,8 +29,8 @@ Run the role-specific workflow as defined in the py-architecture-debt-bot profil
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
 - Role-specific memory: `../../../docs/00-project/ai/memory/memory-py-architecture-debt-bot.md`
 - Deterministic helpers:
-  - `python -m scripts.qa generate-debt-tasks`
-  - `python -m scripts.qa reduce-architecture-debt`
+  - `python -m scripts.engineering.qa generate-debt-tasks`
+  - `python -m scripts.engineering.qa reduce-architecture-debt`
 
 ## Workflow
 

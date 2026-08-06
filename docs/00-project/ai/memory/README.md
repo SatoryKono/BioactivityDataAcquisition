@@ -43,8 +43,10 @@ profiles в BioETL.
 
 If a runtime profile is renamed or added, update this matrix and the matching
 tracked runtime profile anchors in the same change set. On the current `main`
-checkout that means `.codex/agents/*.md`; a Gemini agent tree is not tracked on
-`main` today.
+checkout that means equal-peer trees `.codex/agents/*.md` and
+`.junie/agents/*.md` (parity via `scripts/ai/junie/check_junie_mirror.sh`), plus
+`.devin/agents/**` for Devin-specific profiles. A Gemini agent tree
+(`.gemini/agents/**`) is not tracked on `main` today.
 - **Machine-readable memory artifact**:
   `mcp-memory.json`
   — служебный memory snapshot для tooling/integration сценариев, не human

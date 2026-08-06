@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-08-06'
 
 ______________________________________________________________________
 
@@ -170,6 +170,9 @@ ______________________________________________________________________
 - Workflow: `.github/workflows/coderabbit.yml` (CLI on trusted `main` push /
   `workflow_dispatch`; GitHub App on PRs)
 - Config: `.coderabbit.yaml` (assertive profile)
+- Operator residual runners (scope matrix + sequential leaves):
+  `scripts/ops/coderabbit/` (see `scripts/ops/coderabbit/README.md`). Do **not**
+  place Python tooling under `reports/` (structure audit PYTHON_LOCATION).
 - Residual audit report example:
   `reports/grok/review_coderabbit_architecture_audit_20260728_1520_FINAL.md`
 - Issue pack example: `.github/ISSUES/ARCH-CR2-2026-07-29-ISSUE-PACK.md`
