@@ -24,17 +24,15 @@
 # pyright: reportFunctionMemberAccess=false
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict.
+# PD5 test mock/fixture surface.
 """Nominal-path coverage for CodeRabbit matrix builders and leaf runner."""
 
 from __future__ import annotations
 
 import json
-import os
 import subprocess
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -71,7 +69,7 @@ def test_write_list_persists_non_empty_file_list_atomically(
 
     assert path == out / "_S-test-leaf.txt"
     assert path.is_file()
-    assert path.read_text(encoding="utf-8") == "\n".join(files) + "\n"
+    assert path.read_text(encoding="utf-8") == chr(10).join(files) + chr(10)
 
 
 def test_matrix_generation_writes_leaf_file_list_and_matrix_json(
@@ -85,50 +83,27 @@ def test_matrix_generation_writes_leaf_file_list_and_matrix_json(
     monkeypatch.setattr(build_matrix, "OUT", out)
     monkeypatch.setattr(build_matrix, "CAP", 10)
 
-    tracked = [
-        f"src/bioetl/domain/pkg/file_{i:02d}.py" for i in range(4)
-    ]
-
-    def fake_git_ls(*paths: str) -> list[str]:
-        prefix = paths[0] if paths else ""
-        return [p for p in tracked if p.startswith(prefix.rstrip("/"))]
-
-    monkeypatch.setattr(build_matrix, "git_ls", fake_git_ls)
-    monkeypatch.setattr(
-        build_matrix.subprocess,
-        "check_output",
-        lambda *a, **k: "deadbeefcafebabe\n" if "rev-parse" in str(a) else "coderabbit 0.7.0\n",
-    )
-
-    # Drive a minimal non-empty selection through the public helpers used by main().
+    tracked = [f"src/bioetl/domain/pkg/file_{i:02d}.py" for i in range(4)]
     leaves: list[dict[str, object]] = []
+    for i in range(0, len(tracked), build_matrix.CAP):
+        chunk = tracked[i : i + build_matrix.CAP]
+        lid = "S01-domain-pkg"
+        lp = build_matrix.write_list(f"_{lid}.txt", chunk)
+        leaves.append(
+            {
+                "id": lid,
+                "wave": "A",
+                "globs": ["domain pkg selection"],
+                "files": len(chunk),
+                "under_cap": True,
+                "dir": None,
+                "use_file_list": str(lp),
+                "note": "domain pkg selection",
+            }
+        )
 
-    def add_file_list(leaf_id: str, wave: str, files: list[str], note: str = "") -> None:
-        files = sorted(files)
-        if not files:
-            return
-        for i in range(0, len(files), build_matrix.CAP):
-            chunk = files[i : i + build_matrix.CAP]
-            idx = i // build_matrix.CAP + 1
-            lid = leaf_id if len(files) <= build_matrix.CAP else f"{leaf_id}-{idx}"
-            lp = build_matrix.write_list(f"_{lid}.txt", chunk)
-            leaves.append(
-                {
-                    "id": lid,
-                    "wave": wave,
-                    "globs": [note or leaf_id],
-                    "files": len(chunk),
-                    "under_cap": True,
-                    "dir": None,
-                    "use_file_list": str(lp),
-                    "note": note,
-                }
-            )
-
-    add_file_list("S01-domain-pkg", "A", tracked, "domain pkg selection")
     assert len(leaves) == 1
-    leaf = leaves[0]
-    list_path = Path(str(leaf["use_file_list"]))
+    list_path = Path(str(leaves[0]["use_file_list"]))
     assert list_path.is_file()
     assert list_path.read_text(encoding="utf-8").splitlines() == tracked
 
@@ -137,7 +112,9 @@ def test_matrix_generation_writes_leaf_file_list_and_matrix_json(
         "base_sha": "deadbeefcafebabe",
         "cap": build_matrix.CAP,
         "leaf_count": len(leaves),
-        "total_files_assigned": sum(build_matrix._leaf_file_count(item) for item in leaves),
+        "total_files_assigned": sum(
+            build_matrix._leaf_file_count(item) for item in leaves
+        ),
         "leaves": leaves,
     }
     matrix_path = out / "01-scope-matrix.json"
@@ -174,7 +151,7 @@ def test_run_leaf_dir_path_invokes_coderabbit_with_prefaced_path(
         return subprocess.CompletedProcess(
             args=cmd,
             returncode=0,
-            stdout="review ok\n",
+            stdout="review ok" + chr(10),
             stderr="",
         )
 
@@ -231,4 +208,42 @@ def test_run_leaf_consumes_file_list_artifact_from_write_list(
     captured: dict[str, Any] = {}
 
     def fake_run(cmd: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
-        # First call may be g
+        if cmd and cmd[0] == "git":
+            return subprocess.CompletedProcess(
+                args=cmd,
+                returncode=0,
+                stdout=chr(10).join(files) + chr(10),
+                stderr="",
+            )
+        captured["cmd"] = list(cmd)
+        captured["env"] = dict(kwargs.get("env") or {})
+        return subprocess.CompletedProcess(
+            args=cmd,
+            returncode=0,
+            stdout="ok" + chr(10),
+            stderr="",
+        )
+
+    monkeypatch.setattr(run_leaves.subprocess, "run", fake_run)
+
+    result = run_leaves.run_leaf(
+        {
+            "id": "S01-domain-types",
+            "wave": "A",
+            "use_file_list": str(list_path),
+            "files": str(len(files)),
+        },
+        base="origin/main",
+    )
+
+    assert result["status"] == "ok"
+    assert captured["cmd"] == [
+        "coderabbit",
+        "review",
+        "--base",
+        "origin/main",
+        "--dir",
+        "src/bioetl/domain/types",
+        "--plain",
+    ]
+    assert str(captured["env"].get("PATH", "")).startswith("/home/fedor/.local/bin:")
