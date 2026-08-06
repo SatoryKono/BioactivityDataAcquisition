@@ -7,8 +7,10 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    CONTENT_HASH_HEX64_PATTERN,
     StrictGoldContractSchema,
 )
+from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
 
 
 class ChEMBLCellLineGoldSchema(StrictGoldContractSchema):
@@ -16,7 +18,10 @@ class ChEMBLCellLineGoldSchema(StrictGoldContractSchema):
 
     # System fields
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
 
     # Primary identifier
     cell_id: Series[str] = pa.Field(nullable=False)
@@ -45,7 +50,10 @@ class ChEMBLCompoundRecordGoldSchema(StrictGoldContractSchema):
 
     # System fields
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
 
     # Primary identifier
     record_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
@@ -67,7 +75,10 @@ class ChEMBLPublicationGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Document in Gold layer."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
     publication_id: Series[str] = pa.Field(nullable=False)
     # Cross-reference IDs (prefixed, for linking publications across providers)
     publication_doi: Series[str] = pa.Field(nullable=True)
@@ -99,10 +110,12 @@ class ChEMBLPublicationGoldSchema(StrictGoldContractSchema):
     # System field (per SYSTEM_FIELDS_PREFIX)
     source: Series[str] = pa.Field(nullable=True, alias="_source")
 
-    # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup (publication_id for direct)
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    # Lookup metadata (aligned with PublicationGoldCommonSchema)
+    lookup_method: Series[str] = pa.Field(
+        nullable=False,
+        alias="_lookup_method",
+        isin=LOOKUP_METHODS,
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
 
@@ -114,7 +127,10 @@ class ChEMBLPublicationSimilarityGoldSchema(StrictGoldContractSchema):
 
     # System fields
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
 
     # Primary key
     sim_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
@@ -145,7 +161,10 @@ class ChEMBLPublicationTermGoldSchema(StrictGoldContractSchema):
 
     # System fields
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
 
     # Composite key fields
     publication_id: Series[str] = pa.Field(nullable=False)

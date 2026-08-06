@@ -11,6 +11,7 @@ and are wired in the Composition layer.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Protocol, runtime_checkable
 
 
@@ -35,6 +36,14 @@ class AdrDocument:
     date: str | None = None
 
 
+class AdrIssueSeverity(StrEnum):
+    """Severity levels for ADR validation issues."""
+
+    ERROR = "error"
+    WARNING = "warning"
+    INFO = "info"
+
+
 @dataclass(frozen=True, slots=True)
 class AdrValidationIssue:
     """Single validation issue for an ADR document."""
@@ -42,7 +51,7 @@ class AdrValidationIssue:
     number: int | None
     path: str
     message: str
-    severity: str = "error"  # one of: error, warning, info
+    severity: AdrIssueSeverity = AdrIssueSeverity.ERROR
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,7 +62,7 @@ class AdrValidationReport:
     total: int
     errors: int
     warnings: int
-    issues: list[AdrValidationIssue]
+    issues: tuple[AdrValidationIssue, ...]
 
 
 @runtime_checkable

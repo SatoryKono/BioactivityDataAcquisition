@@ -2,7 +2,35 @@
 
 from __future__ import annotations
 
-from typing import Any, Protocol, runtime_checkable
+from types import TracebackType
+from typing import Protocol, runtime_checkable
+
+
+@runtime_checkable
+class SpanHandle(Protocol):
+    """Minimal context-managed span surface required by BioETL callers."""
+
+    def __enter__(self) -> SpanHandle: ...
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
+    ) -> bool | None: ...
+
+    def set_attribute(self, key: str, value: object) -> None: ...
+
+    def add_event(self, name: str, attributes: dict[str, object] | None = None) -> None: ...
+
+    def record_exception(self, exception: BaseException) -> None: ...
+
+
+@runtime_checkable
+class TracerHandle(Protocol):
+    """Minimal tracer surface returned by TracingPort.get_tracer."""
+
+    def start_as_current_span(self, name: str) -> SpanHandle: ...
 
 
 @runtime_checkable
@@ -12,17 +40,16 @@ class TracingPort(Protocol):
     def get_tracer(
         self,
         name: str,
-    ) -> Any:  # Any: OTel Tracer-compatible object
+    ) -> TracerHandle:
         """Return OpenTelemetry-compatible tracer instance.
 
         Args:
             name: Tracer name, typically the instrumented module or component name.
 
         Returns:
-            OTel-compatible Tracer object for creating spans. Context-managed
-            spans returned by the tracer must expose ``set_attribute()``,
-            ``add_event()``, and ``record_exception()`` so NoOp and concrete
-            adapters remain behaviorally interchangeable.
+            Tracer handle that yields context-managed span handles exposing
+            ``set_attribute()``, ``add_event()``, and ``record_exception()`` so
+            NoOp and concrete adapters remain behaviorally interchangeable.
         """
         ...
 

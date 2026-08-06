@@ -8,6 +8,8 @@ with detailed health status information including latency and error tracking.
 
 from __future__ import annotations
 
+import math
+
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
@@ -61,6 +63,16 @@ class HealthCheckResult:
     last_error: str | None = None
     consecutive_failures: int = 0
     checked_at: datetime | None = None
+
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.latency_ms) or self.latency_ms < 0:
+            raise ValueError(
+                f"latency_ms must be finite and non-negative, got {self.latency_ms!r}"
+            )
+        if self.consecutive_failures < 0:
+            raise ValueError(
+                f"consecutive_failures must be non-negative, got {self.consecutive_failures!r}"
+            )
 
     @property
     def is_healthy(self) -> bool:
