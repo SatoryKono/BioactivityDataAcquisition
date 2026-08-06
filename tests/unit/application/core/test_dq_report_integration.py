@@ -410,7 +410,11 @@ class TestBatchExecutorDQCollection:
             flat_structure=False,
             scd_config=None,
         )
-        context = SimpleNamespace(run_id="run-123")
+        context = SimpleNamespace(
+            run_id="run-123",
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            replay_timestamp_anchor=None,
+        )
         batch_processing_service = MagicMock()
         execution_lifecycle_service = BatchExecutionLifecycleService(
             progress_service=MagicMock(),
@@ -484,7 +488,8 @@ class TestBatchExecutorDQCollection:
         assert context.run_id == "run-123"
         assert context.pipeline_name == "chembl_activity"
         assert context.provider == "chembl"
-        assert context.entity == "activity"
+        # extract_dq_entity keeps the table entity segment (underscores intact).
+        assert context.entity == "chembl_activity"
         assert context.bronze_batch_id == "batch-001"
         assert context.bronze_source_file == "bronze/file.jsonl.zst"
         assert context.silver_target_table == "chembl_activity"
