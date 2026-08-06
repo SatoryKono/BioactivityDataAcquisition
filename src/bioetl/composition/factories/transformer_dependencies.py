@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 from bioetl.application.core.wiring.transformer import (
     DefaultContractPolicy,
     NoOpStructuralPolicy,
@@ -35,10 +37,9 @@ def _default_pii_hasher() -> PiiHasherPort:
     Sha256PiiHasher via composition). Unit tests without salt still construct
     transformers safely.
     """
-    try:
-        return Sha256PiiHasher.from_env()
-    except ValueError:
+    if not os.environ.get("BIOETL_PII_SALT_CURRENT", "").strip():
         return NoOpPiiHasher()
+    return Sha256PiiHasher.from_env()
 
 def build_transformer_dependencies(
     *,
