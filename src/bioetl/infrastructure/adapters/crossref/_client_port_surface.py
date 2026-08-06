@@ -21,7 +21,7 @@ from bioetl.infrastructure.adapters.crossref._client_ops import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Callable
+    from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
@@ -29,7 +29,9 @@ if TYPE_CHECKING:
         APIRequestCollector,
     )
     from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
-    from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryPlanner
+    from bioetl.infrastructure.adapters.crossref.query_builder import (
+        CrossRefQueryPlanner,
+    )
     from bioetl.infrastructure.adapters.crossref.response_mapper import (
         CrossRefResponseMapper,
     )

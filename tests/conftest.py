@@ -464,6 +464,7 @@ def _configure_isolated_run_report_root(config: pytest.Config) -> None:
     import tempfile
 
     try:
+        from bioetl.application.services.run_reports import paths as run_report_paths
         from bioetl.application.services.run_reports import writer as run_report_writer
     except Exception:
         # Application package may be unavailable during partial collection setups.
@@ -478,8 +479,11 @@ def _configure_isolated_run_report_root(config: pytest.Config) -> None:
     )
     config.__dict__["_bioetl_run_report_root"] = isolated_root
     config.__dict__["_bioetl_run_report_root_previous"] = (
-        run_report_writer.DEFAULT_REPORT_ROOT
+        run_report_paths.DEFAULT_REPORT_ROOT
     )
+    # Patch the paths module (source of resolve_report_root) and the writer
+    # re-export so both stay aligned for incidental pipeline report writes.
+    run_report_paths.DEFAULT_REPORT_ROOT = isolated_root
     run_report_writer.DEFAULT_REPORT_ROOT = isolated_root
 
 

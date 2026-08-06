@@ -40,7 +40,9 @@ pytestmark = pytest.mark.unit
 from bioetl.application.composite import dependency_join_support
 from bioetl.application.composite._preflight_orchestration import (
     PreflightSchemaOrchestrationMixin,
-    _find_schema_class,
+)
+from bioetl.application.composite._preflight_schema_registry import (
+    find_schema_class,
 )
 from bioetl.application.composite.aggregator import EnricherAggregator
 from bioetl.application.composite.column_priority_orderer import (
@@ -179,8 +181,8 @@ def test_preflight_orchestration_helpers_cover_schema_lookup_aliases_and_annotat
     assert helper._extract_dtype_from_annotation("Series[Int64]") == "int"
     assert helper._simplify_dtype("datetime64[ns]") == "datetime"
 
-    assert _find_schema_class(_SchemaFromAll) is ExportedSchema
-    found = _find_schema_class(_SchemaFromVars)
+    assert find_schema_class(_SchemaFromAll) is ExportedSchema
+    found = find_schema_class(_SchemaFromVars)
     assert found is _SchemaFromVars.LocalSchema
 
 

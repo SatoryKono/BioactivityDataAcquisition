@@ -8,10 +8,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from bioetl.application.services.run_reports.writer import (
-    DEFAULT_REPORT_ROOT,
-    _safe_segment,
-)
+from bioetl.application.services.run_reports.paths import resolve_report_root
+from bioetl.application.services.run_reports.writer import _safe_segment
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,7 +27,7 @@ class ReportIndexEntry:
 
 
 def _root(root: Path | None) -> Path:
-    return root or DEFAULT_REPORT_ROOT
+    return resolve_report_root(root=root)
 
 
 def load_latest_pointer(

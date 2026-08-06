@@ -15,9 +15,34 @@ from bioetl.application.services.run_reports.markdown import (
     render_pipeline_run_report_markdown,
     render_workflow_run_report_markdown,
 )
+from bioetl.application.services.run_reports.paths import (
+    DEFAULT_REPORT_ROOT,
+    REPORT_ROOT_MARKER_NAME,
+    REPORT_ROOT_MARKER_TOKEN,
+    inspect_report_root_marker,
+    report_root_marker_is_healthy,
+    report_root_marker_path,
+    resolve_report_root,
+)
 from bioetl.domain.run_reports.models import PipelineRunReport, WorkflowRunReport
 
-DEFAULT_REPORT_ROOT = Path("reports") / "run-reports"
+# Re-export path helpers so existing imports from writer keep working.
+__all__ = (
+    "DEFAULT_REPORT_ROOT",
+    "REPORT_ROOT_MARKER_NAME",
+    "REPORT_ROOT_MARKER_TOKEN",
+    "RunReportWriteResult",
+    "inspect_report_root_marker",
+    "report_root_marker_is_healthy",
+    "report_root_marker_path",
+    "resolve_pipeline_report_dir",
+    "resolve_report_root",
+    "resolve_workflow_report_dir",
+    "set_report_write_test_mode",
+    "write_json",
+    "write_pipeline_run_report",
+    "write_workflow_run_report",
+)
 
 # Application must not read process env maps or import infrastructure Settings.
 # Tests and composition can inject an explicit override; under pytest the
@@ -61,7 +86,7 @@ def resolve_pipeline_report_dir(
     run_id: str,
     root: Path | None = None,
 ) -> Path:
-    base = root or DEFAULT_REPORT_ROOT
+    base = resolve_report_root(root=root)
     return base / "pipeline" / _safe_segment(pipeline_name) / _safe_segment(run_id)
 
 
@@ -71,7 +96,7 @@ def resolve_workflow_report_dir(
     workflow_run_id: str,
     root: Path | None = None,
 ) -> Path:
-    base = root or DEFAULT_REPORT_ROOT
+    base = resolve_report_root(root=root)
     return (
         base
         / "workflow"

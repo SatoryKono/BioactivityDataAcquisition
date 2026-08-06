@@ -284,21 +284,35 @@ class HealthServerRoutingMixin:
     async def _handle_readiness(self) -> HealthResponse:
         """Handle /health/ready endpoint."""
         await asyncio.sleep(0)
+        from bioetl.interfaces.http.report_root_config import (
+            enforce_report_root_marker,
+            report_root_readiness_check,
+        )
+
+        report_root_check = report_root_readiness_check()
+        checks: JsonDict = {"report_root": report_root_check}
+        status = "healthy"
+        if enforce_report_root_marker() and report_root_check.get("status") != "healthy":
+            status = "unhealthy"
         if not self._health_monitor:
+            if "message" not in checks:
+                checks["message"] = "No health monitor configured"
             return HealthResponse(
-                status="healthy",
+                status=status,
                 timestamp=self._response_timestamp(),
-                checks={"message": "No health monitor configured"},
+                checks=checks,
             )
         provider_statuses = self._get_provider_statuses()
+        checks["providers"] = provider_statuses
         has_unhealthy = any(
             status.get("status") == "unhealthy" for status in provider_statuses.values()
         )
-        status = "unhealthy" if has_unhealthy else "healthy"
+        if has_unhealthy:
+            status = "unhealthy"
         return HealthResponse(
             status=status,
             timestamp=self._response_timestamp(),
-            checks={"providers": provider_statuses},
+            checks=checks,
         )
 
     async def _handle_providers(self) -> HealthResponse:

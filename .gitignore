@@ -116,6 +116,8 @@ log_test.txt
 /.mcp-server-context.md
 /.gitignore~
 /reports/*
+# Bind-identity marker: proves Docker mounts the real checkout reports tree.
+!/reports/.bioetl-report-root
 !/reports/semantic_pipeline_audit/
 /reports/semantic_pipeline_audit/*
 # Track the reviewed canonical semantic audit snapshot used by CI gates and
