@@ -97,6 +97,9 @@ services:
       # value wipes the compose default and provisions Infinity with url="".
       # Omit the var, or set a non-empty URL. Bootstrap also materializes a fallback.
       - BIOETL_OPS_HTTP_URL=${BIOETL_OPS_HTTP_URL:-http://bioetl:8000}
+      # Grafana bootstrap fails closed unless the Ops HTTP backend proves that
+      # it serves the same runtime/data origin selected by runtime_manager.
+      - BIOETL_EXPECTED_RUNTIME_SOURCE_ID=${BIOETL_RUNTIME_SOURCE_ID:-unmanaged}
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning/datasources-core:/etc/bioetl-grafana/datasources-core:ro

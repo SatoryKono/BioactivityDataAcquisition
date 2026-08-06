@@ -16,8 +16,14 @@ services:
       # Published for host readiness probes and optional host-side scrapes.
       - "127.0.0.1:8000:8000"
     volumes:
-      - ./data:/app/data
-      - ./reports:/app/reports
+      - type: bind
+        source: ${BIOETL_DASHBOARD_DATA_ROOT:-./data}
+        target: /app/data
+        read_only: true
+      - type: bind
+        source: ${BIOETL_DASHBOARD_REPORT_ROOT:-./reports}
+        target: /app/reports
+        read_only: true
       - ./logs:/app/logs
       - ./configs:/app/configs:ro
     environment:
@@ -25,6 +31,11 @@ services:
       - NEO4J_USERNAME=${NEO4J_USERNAME:-neo4j}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD:?Set NEO4J_PASSWORD}
       - BIOETL_PROMETHEUS_URL=http://prometheus:9090
+      # runtime_manager replaces the unmanaged sentinel with an opaque identity
+      # derived from the selected repository/data/report roots.
+      - BIOETL_RUNTIME_SOURCE_ID=${BIOETL_RUNTIME_SOURCE_ID:-unmanaged}
+    labels:
+      io.bioetl.dashboard-source-id: ${BIOETL_RUNTIME_SOURCE_ID:-unmanaged}
     healthcheck:
       test:
         - CMD
