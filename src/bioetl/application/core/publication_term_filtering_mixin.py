@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from collections.abc import AsyncIterator
+from typing import Protocol, cast
 
+from bioetl.application.core.publication_term_extraction_mixin import (
+    PublicationTermExtractionHost,
+    normalize_publication_term_limit,
+)
 from bioetl.application.core.target_data_source_mixins import (
     _FallbackFilterableTargetFetchMixin,
     _FilterableTargetDelegationMixin,
@@ -11,8 +16,17 @@ from bioetl.application.core.target_data_source_mixins import (
 from bioetl.domain.ports import FilterableDataSourcePort
 from bioetl.domain.types import BronzeRecord
 
-if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+
+class PublicationTermFilteringHost(PublicationTermExtractionHost, Protocol):
+    """Host surface for filterable publication-term delegation."""
+
+    def _fetch_filtered_publication_terms(
+        self,
+        filterable: FilterableDataSourcePort,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None,
+    ) -> AsyncIterator[BronzeRecord]: ...
 
 
 class PublicationTermFilteringMixin(
@@ -22,7 +36,7 @@ class PublicationTermFilteringMixin(
     """FilterableDataSourcePort-compatible delegation for term extraction wrapper."""
 
     async def _fetch_target_filtered_records(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self: PublicationTermFilteringHost,
         filterable: FilterableDataSourcePort,
         filter_ids: list[str],
         filter_field: str,
@@ -35,37 +49,55 @@ class PublicationTermFilteringMixin(
             yield record
 
     async def _fetch_target_multi_filtered_records(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self: PublicationTermFilteringHost,
         filterable: FilterableDataSourcePort,
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Yield publication-term records from multi-filtered upstream publications."""
-        publication_limit = limit * self.PUBLICATION_LIMIT_MULTIPLIER if limit else None
+        normalized_limit = normalize_publication_term_limit(limit)
+        if normalized_limit == 0:
+            return
+        # Treat limit=0 as a hard zero upstream budget (not "unlimited").
+        publication_limit = (
+            normalized_limit * self.PUBLICATION_LIMIT_MULTIPLIER
+            if normalized_limit is not None
+            else None
+        )
         async for record in self._yield_terms_from_publications(
             filterable.fetch_multi_filtered(
                 entity_type=self.SOURCE_ENTITY_TYPE,
                 filters=filters,
                 limit=publication_limit,
             ),
-            limit,
+            normalized_limit,
         ):
             yield record
 
     def _resolve_target_fallback_upstream_limit(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self: PublicationTermFilteringHost,
         limit: int | None = None,
     ) -> int | None:
-        """Scale upstream publication fetches to account for term expansion."""
-        return limit * self.PUBLICATION_LIMIT_MULTIPLIER if limit else None
+        """Scale upstream publication fetches to account for term expansion.
+
+        ``limit=0`` remains zero (no upstream fetch), rather than being treated
+        as absent/unlimited via truthiness.
+        """
+        normalized_limit = normalize_publication_term_limit(limit)
+        if normalized_limit is None:
+            return None
+        return normalized_limit * self.PUBLICATION_LIMIT_MULTIPLIER
 
     def _yield_target_records_from_fallback_source_records(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self: PublicationTermFilteringHost,
         source_records: AsyncIterator[object],
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
         """Transform fallback-fetched publications into publication-term records."""
         return cast(
             "AsyncIterator[BronzeRecord]",
-            self._yield_terms_from_publications(source_records, limit),
+            self._yield_terms_from_publications(
+                cast("AsyncIterator[BronzeRecord]", source_records),
+                limit,
+            ),
         )
