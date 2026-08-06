@@ -370,7 +370,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "220",
+      "line": "234",
       "path": "tests/unit/infrastructure/adapters/decorators/test_circuit_breaker_decorator.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_aclose_delegated"
@@ -1670,7 +1670,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "220",
+        "line": "234",
         "path": "tests/unit/infrastructure/adapters/decorators/test_circuit_breaker_decorator.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_delegated"
@@ -2335,12 +2335,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2191,
-    "total_test_functions": 23357,
+    "total_test_functions": 23354,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "2b6ddc1ee1de9cccf765845f0e6ba2d68b5629a62451e220e0dc557a1fe17ed2",
+  "source_tree_sha256": "5a6d607cc64794ad76e0040f5a184fdde29b918e990779f756686fd49d9dd564",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 105,
@@ -2401,7 +2401,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2191,
-  "total_test_functions": 23357,
+  "total_test_functions": 23354,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

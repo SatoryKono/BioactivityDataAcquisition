@@ -110,6 +110,9 @@ reports/quality/coderabbit/YYYYMMDD/
 
 Post-campaign de-dupe pack: [CODERABBIT-FULL-2026-08-FINDINGS-PACK.md](CODERABBIT-FULL-2026-08-FINDINGS-PACK.md)
 
+- Canonical open residual issues: **220**
+- Duplicates closed: **48**
+- Agent findings total: **1468** (critical 22, major 736)
 - Artifacts: `reports/quality/coderabbit/20260806/` (`FINDINGS.md`, `TRIAGE.md`, `DE_DUPE_MAP.json`)
 - Canonical open residual path-cluster issues after de-dupe: see findings pack
-- Duplicates closed (Wave B mis-tags / path twins) mapped in DE_DUPE_MAP.json
+- Wave B mis-tags / path twins de-dupe mapping: `DE_DUPE_MAP.json`

@@ -20,6 +20,7 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     typed_click_option,
     typed_group_command,
 )
+from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 if TYPE_CHECKING:
@@ -42,6 +43,12 @@ def get_config_service() -> ConfigService:
     )
 
     return _impl()
+
+
+def _fail_dq(title: str, detail: str, exit_code: ExitCode = ExitCode.CONFIG_ERROR) -> None:
+    """Emit a DQ CLI error and exit non-zero (do not return success)."""
+    echo_error(title, detail)
+    raise SystemExit(int(exit_code))
 
 
 @typed_click_group()
@@ -78,11 +85,9 @@ def show_dq_config_command(pipeline: str, output_format: str) -> None:
     try:
         dq_config = service.get_dq_config(pipeline)
     except ValueError as e:
-        echo_error("DQ Configuration error", str(e))
-        return
+        _fail_dq("DQ Configuration error", str(e))
     except FileNotFoundError as e:
-        echo_error("DQ Config file not found", str(e))
-        return
+        _fail_dq("DQ Config file not found", str(e), ExitCode.EX_NOINPUT)
 
     if output_format == "json":
         echo_info(json.dumps(dq_config, indent=2, default=str))
@@ -120,17 +125,15 @@ def validate_dq_config_command(pipeline: str, config_file: str | None) -> None:
             with Path(config_file).open(encoding="utf-8") as file_obj:
                 loaded = yaml.safe_load(file_obj)
             if not isinstance(loaded, dict):
-                echo_error(
+                _fail_dq(
                     "DQ Configuration invalid",
                     "Config file must contain a mapping at the top level.",
                 )
-                return
             is_valid = service.validate_dq_config(pipeline, loaded)
             if is_valid:
                 echo_info(f"[OK] DQ configuration is valid for {pipeline}")
                 return
-            echo_error(f"[ERROR] DQ configuration is invalid for {pipeline}")
-            return
+            _fail_dq(f"[ERROR] DQ configuration is invalid for {pipeline}", "")
 
         dq_config = service.get_dq_config(pipeline)
         echo_info(f"[OK] DQ configuration is valid for {pipeline}")
@@ -143,11 +146,11 @@ def validate_dq_config_command(pipeline: str, config_file: str | None) -> None:
         )
         echo_info(f"  Strictness Mode: {dq_config.get('strictness_mode', 'N/A')}")
     except ValueError as e:
-        echo_error("DQ Configuration invalid", str(e))
+        _fail_dq("DQ Configuration invalid", str(e))
     except FileNotFoundError as e:
-        echo_error("DQ Config file not found", str(e))
+        _fail_dq("DQ Config file not found", str(e), ExitCode.EX_NOINPUT)
     except (OSError, TypeError, yaml.YAMLError) as e:
-        echo_error("DQ Configuration validation failed", str(e))
+        _fail_dq("DQ Configuration validation failed", str(e), ExitCode.FAIL)
 
 
 @typed_group_command(dq, "show-effective")
@@ -204,11 +207,11 @@ def show_effective_config_command(
             echo_info(yaml.dump(artifact, default_flow_style=False, sort_keys=False))
 
     except ValueError as e:
-        echo_error("Effective config error", str(e))
+        _fail_dq("Effective config error", str(e))
     except FileNotFoundError as e:
-        echo_error("Config file not found", str(e))
+        _fail_dq("Config file not found", str(e), ExitCode.EX_NOINPUT)
     except TypeError as e:
-        echo_error("Failed to create effective config artifact", str(e))
+        _fail_dq("Failed to create effective config artifact", str(e), ExitCode.FAIL)
 
 
 @typed_group_command(dq, "check-compatibility")
@@ -236,8 +239,7 @@ def check_compatibility_command(artifact1_file: str, artifact2_file: str) -> Non
         with Path(artifact2_file).open(encoding="utf-8") as file_two:
             artifact2 = json.load(file_two)
         if not isinstance(artifact1, dict) or not isinstance(artifact2, dict):
-            echo_error("Compatibility check failed", "Artifacts must be JSON objects")
-            return
+            _fail_dq("Compatibility check failed", "Artifacts must be JSON objects")
 
         is_compatible = service.check_config_compatibility(artifact1, artifact2)
 
@@ -258,13 +260,14 @@ def check_compatibility_command(artifact1_file: str, artifact2_file: str) -> Non
             echo_error(f"  Artifact 1: {artifact1.get('artifact_id', 'unknown')}")
             echo_error(f"  Artifact 2: {artifact2.get('artifact_id', 'unknown')}")
             echo_error("  Check DQ contract compatibility and effective config hashes")
+            raise SystemExit(int(ExitCode.FAIL))
 
     except FileNotFoundError as e:
-        echo_error("Artifact file not found", str(e))
+        _fail_dq("Artifact file not found", str(e), ExitCode.EX_NOINPUT)
     except json.JSONDecodeError as e:
-        echo_error("Invalid JSON in artifact file", str(e))
+        _fail_dq("Invalid JSON in artifact file", str(e), ExitCode.EX_DATAERR)
     except (OSError, ValueError, TypeError) as e:
-        echo_error("Compatibility check failed", str(e))
+        _fail_dq("Compatibility check failed", str(e), ExitCode.FAIL)
 
 
 # Explicit command collection to mark usage for tooling.

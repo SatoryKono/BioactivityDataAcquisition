@@ -798,7 +798,14 @@ class TestCircuitBreakerPortContract:
     Implements RULES.md §3.1.4 circuit breaker requirements.
     """
 
-    REQUIRED_METHODS = ["get_state", "get_failure_count", "call", "reset"]
+    REQUIRED_METHODS = [
+        "get_state",
+        "get_failure_count",
+        "get_recovery_timeout",
+        "get_last_failure_time",
+        "call",
+        "reset",
+    ]
 
     @pytest.mark.parametrize("method_name", REQUIRED_METHODS)
     def test_circuit_breaker_port_has_required_methods(self, method_name: str) -> None:

@@ -215,7 +215,12 @@ class HealthServerRoutingMixin:
         raw = self._read_optional_param(query, name)
         if raw is None:
             return default
-        parsed = int(raw)
+        try:
+            parsed = int(raw)
+        except ValueError as exc:
+            raise ValueError(
+                f"Invalid query parameter: {name} must be an integer"
+            ) from exc
         if parsed < minimum:
             raise ValueError(f"Invalid query parameter: {name} must be >= {minimum}")
         return parsed
