@@ -14,9 +14,39 @@ from bioetl.infrastructure.adapters.circuit_breaker_contract import (
 
 
 def _snapshot_from_port(circuit_breaker: CircuitBreakerPort) -> CircuitBreakerSnapshot:
-    """Build typed state snapshot from public circuit-breaker port accessors."""
-    recovery_timeout = float(circuit_breaker.get_recovery_timeout())
-    last_failure_time = circuit_breaker.get_last_failure_time()
+    """Build typed state snapshot from public circuit-breaker port accessors.
+
+    Preference order:
+    1. Optional public ``snapshot()`` when it returns ``CircuitBreakerSnapshot``
+    2. Public port methods ``get_state`` / ``get_failure_count`` /
+       ``get_recovery_timeout`` / ``get_last_failure_time``
+    3. Legacy public attribute / private-field fallbacks for older mocks
+    """
+    snapshot_fn = getattr(circuit_breaker, "snapshot", None)
+    if callable(snapshot_fn):
+        maybe_snapshot = snapshot_fn()
+        if isinstance(maybe_snapshot, CircuitBreakerSnapshot):
+            return maybe_snapshot
+
+    recovery_timeout_getter = getattr(circuit_breaker, "get_recovery_timeout", None)
+    if callable(recovery_timeout_getter):
+        recovery_timeout = float(recovery_timeout_getter())
+    else:
+        recovery_timeout = float(getattr(circuit_breaker, "recovery_timeout", 60.0))
+
+    last_failure_getter = getattr(circuit_breaker, "get_last_failure_time", None)
+    if callable(last_failure_getter):
+        last_failure_time = last_failure_getter()
+    else:
+        raw_last_failure_time = getattr(circuit_breaker, "last_failure_time", None)
+        if raw_last_failure_time is None:
+            raw_last_failure_time = getattr(circuit_breaker, "_last_failure_time", None)
+        last_failure_time = (
+            float(raw_last_failure_time)
+            if isinstance(raw_last_failure_time, int | float) and raw_last_failure_time > 0
+            else None
+        )
+
     return CircuitBreakerSnapshot(
         state=circuit_breaker.get_state(),
         failure_count=circuit_breaker.get_failure_count(),

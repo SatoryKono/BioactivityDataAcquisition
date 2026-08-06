@@ -18,6 +18,7 @@ from bioetl.interfaces.http._health_server_identity_evidence import (
     build_control_plane_identity_evidence_payload,
 )
 from bioetl.interfaces.http._health_server_identity_support import (
+    IDENTITY_UNAVAILABLE_VALUES,
     build_control_plane_identity_payload,
 )
 
@@ -32,11 +33,7 @@ if TYPE_CHECKING:
 _IDENTITY_CHECKPOINT_LOAD_TIMEOUT_SECONDS = 1.5
 _IDENTITY_SCOPE_RESOLVE_TIMEOUT_SECONDS = 12.0
 _IDENTITY_EVIDENCE_BUILD_TIMEOUT_SECONDS = 1.5
-_IDENTITY_UNAVAILABLE_VALUES = {
-    "not available for current scope",
-    "not available in selected manifest",
-    "select one concrete pipeline or exact run_id",
-}
+_IDENTITY_UNAVAILABLE_VALUES = IDENTITY_UNAVAILABLE_VALUES
 
 
 async def handle_control_plane_identity_table(
@@ -127,10 +124,8 @@ async def handle_control_plane_identity_evidence(
     priority = host._read_optional_param(query, "priority")
     checkpoint_metadata = await _load_identity_checkpoint_metadata(host, scope)
 
-    await host._send_payload_response(
-        writer,
-        200,
-        build_control_plane_identity_evidence_payload(
+    def _build_evidence() -> dict[str, object]:
+        return build_control_plane_identity_evidence_payload(
             requested_pipeline=scope.requested_pipeline,
             resolved_manifest=scope.resolved_manifest,
             selected_pipelines=scope.selected_pipelines,
@@ -141,7 +136,35 @@ async def handle_control_plane_identity_evidence(
             checkpoint_metadata=checkpoint_metadata,
             view=view,
             priority=priority,
-        ),
+        )
+
+    try:
+        evidence_payload = await asyncio.wait_for(
+            asyncio.to_thread(_build_evidence),
+            timeout=_IDENTITY_EVIDENCE_BUILD_TIMEOUT_SECONDS,
+        )
+    except TimeoutError:
+        await host._send_payload_response(
+            writer,
+            200,
+            {
+                "status": "evidence_build_timeout",
+                "message": (
+                    "identity evidence build timed out — retry or select exact run_id"
+                ),
+                "rows": [],
+                "summary": {
+                    "status": "timeout",
+                    "reason": "evidence_build_timeout",
+                },
+            },
+        )
+        return
+
+    await host._send_payload_response(
+        writer,
+        200,
+        evidence_payload,
     )
 
 

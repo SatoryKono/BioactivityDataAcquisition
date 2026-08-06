@@ -13,6 +13,18 @@ from bioetl.interfaces.http.control_plane_identity.extractors import (
     is_composite,
 )
 
+# Shared operator-facing unavailability markers for identity table rows.
+IDENTITY_UNAVAILABLE_CURRENT_SCOPE = "not available for current scope"
+IDENTITY_UNAVAILABLE_SELECTED_MANIFEST = "not available in selected manifest"
+IDENTITY_UNAVAILABLE_SELECT_CONCRETE = "select one concrete pipeline or exact run_id"
+IDENTITY_UNAVAILABLE_VALUES = frozenset(
+    {
+        IDENTITY_UNAVAILABLE_CURRENT_SCOPE,
+        IDENTITY_UNAVAILABLE_SELECTED_MANIFEST,
+        IDENTITY_UNAVAILABLE_SELECT_CONCRETE,
+    }
+)
+
 
 def build_control_plane_identity_payload(
     *,
@@ -52,9 +64,9 @@ def _build_identity_rows(
     identity_evidence_summary: dict[str, object] | None,
 ) -> list[dict[str, str]]:
     manifest_unavailable = (
-        "select one concrete pipeline or exact run_id"
+        IDENTITY_UNAVAILABLE_SELECT_CONCRETE
         if len(selected_pipelines) != 1 and resolved_manifest is None
-        else "not available for current scope"
+        else IDENTITY_UNAVAILABLE_CURRENT_SCOPE
     )
     manifest = (
         cast(RunManifest, resolved_manifest) if resolved_manifest is not None else None
@@ -77,12 +89,12 @@ def _build_identity_rows(
                 requested_pipeline=requested_pipeline,
                 values=values,
             ),
-            unavailable="not available for current scope",
+            unavailable=IDENTITY_UNAVAILABLE_CURRENT_SCOPE,
         ),
         _identity_row(
             "Contract [Schema]",
             _contract_schema(values),
-            unavailable="not available in selected manifest",
+            unavailable=IDENTITY_UNAVAILABLE_SELECTED_MANIFEST,
         ),
         _identity_row(
             "Execution [Type|Context|Git]",
@@ -110,7 +122,7 @@ def _build_identity_rows(
             _identity_row(
                 "Composite Run",
                 values.get("composite_run_identity"),
-                unavailable="not available in selected manifest",
+                unavailable=IDENTITY_UNAVAILABLE_SELECTED_MANIFEST,
             )
         )
     rows.append(

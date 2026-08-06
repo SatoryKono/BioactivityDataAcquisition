@@ -6,7 +6,7 @@ Transforms Bronze records to Silver format (AssayParameters entity inflation).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.field_specs import (
     FieldGroup,
@@ -80,9 +80,7 @@ class AssayParametersTransformer(BaseChemblTransformer):
             Dictionary of AssayParameters business fields.
         """
         # Build business data dictionary
-        business_data: dict[
-            str, Any  # Any: transformer record has heterogeneous values
-        ] = {  # Any: transformer record has heterogeneous values
+        business_data: JsonDict = {
             # Primary identifier (integer)
             "assay_param_id": int(primary_id),
             # Foreign key
