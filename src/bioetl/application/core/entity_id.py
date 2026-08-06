@@ -1,8 +1,31 @@
-"""Entity ID computation utilities."""
+"""Entity ID computation utilities.
+
+Identity scheme
+---------------
+``ENTITY_ID_SCHEME_VERSION`` documents the hashing contract for publication-term
+and subcellular-fraction entity IDs. Digests are the first 16 hex characters of
+SHA-256 over a canonical composite string.
+
+**v2 (current)** — publication term:
+
+- ``publication_id``: CHEMBL id via ``normalize_profile_chembl_id``
+- ``term_type``: always ``strip().upper()`` (known and unknown types)
+- ``term``: ``normalize_profile_title``
+- composite: ``{publication_id}:{term_type}:{term}``
+
+**v2 (current)** — subcellular fraction:
+
+- fraction: governed vocabulary with ``preserve_unknown=True``
+- composite: ``subcellular_fraction:{fraction}``
+
+Callers that persist entity IDs must treat scheme version changes as migrations
+(see CHANGELOG), not as silent rehashing of historical rows.
+"""
 
 from __future__ import annotations
 
 __all__ = [
+    "ENTITY_ID_SCHEME_VERSION",
     "compute_publication_term_entity_id",
     "compute_subcellular_fraction_entity_id",
 ]
@@ -17,6 +40,9 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.schemas.constants import (
     SUBCELLULAR_FRACTIONS,
 )
+
+# Explicit scheme marker so identity changes are versioned, not silent (#7777).
+ENTITY_ID_SCHEME_VERSION = "v2"
 
 
 def _normalize_publication_term_identity_component(value: str) -> str:

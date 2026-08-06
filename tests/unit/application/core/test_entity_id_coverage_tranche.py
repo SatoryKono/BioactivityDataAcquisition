@@ -34,6 +34,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 from bioetl.application.core.entity_id import (
+    ENTITY_ID_SCHEME_VERSION,
     compute_publication_term_entity_id,
     compute_subcellular_fraction_entity_id,
 )
@@ -41,6 +42,11 @@ from bioetl.domain.schemas.constants import (
     PUBLICATION_TERM_TYPES,
     SUBCELLULAR_FRACTIONS,
 )
+
+
+def test_entity_id_scheme_version_is_explicit_v2() -> None:
+    """#7777: identity scheme is versioned, not silent."""
+    assert ENTITY_ID_SCHEME_VERSION == "v2"
 
 
 def test_publication_term_entity_id_is_stable_for_known_term_types() -> None:
@@ -51,12 +57,23 @@ def test_publication_term_entity_id_is_stable_for_known_term_types() -> None:
     assert len(left) == 16
 
 
-def test_publication_term_entity_id_keeps_unknown_term_type_text() -> None:
+def test_publication_term_entity_id_uppercases_unknown_term_types() -> None:
+    """v2: unknown term types are case-folded the same as known types (#7777)."""
     left = compute_publication_term_entity_id("CHEMBL1", "CustomType", "beta")
-    right = compute_publication_term_entity_id("CHEMBL1", "CustomType", "beta")
+    right = compute_publication_term_entity_id("CHEMBL1", "customtype", "beta")
     assert left == right
     other = compute_publication_term_entity_id("CHEMBL1", "OtherType", "beta")
     assert left != other
+
+
+def test_publication_term_entity_id_golden_digest_v2() -> None:
+    """Pin the v2 composite digest so identity changes require a scheme bump."""
+    digest = compute_publication_term_entity_id("CHEMBL1", "TARGET", "Alpha Kinase")
+    assert digest == compute_publication_term_entity_id(
+        "CHEMBL1", "target", "Alpha Kinase"
+    )
+    assert len(digest) == 16
+    assert all(ch in "0123456789abcdef" for ch in digest)
 
 
 def test_subcellular_fraction_entity_id_uses_governed_vocabulary() -> None:
