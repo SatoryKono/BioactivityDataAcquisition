@@ -102,6 +102,11 @@ class BatchProcessingSupportService:
         self._domain_event_emitter = domain_event_emitter
         self._debug_export_service = debug_export_service
 
+    @property
+    def debug_export_service(self) -> DebugExportService | None:
+        """Public optional debug-export collaborator for executor wiring."""
+        return self._debug_export_service
+
     def get_source_metadata(self, query_string: str | None) -> SourceMetadata | None:
         return get_source_metadata(
             data_source=self._services.data_source,

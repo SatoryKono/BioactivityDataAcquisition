@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS,
@@ -28,6 +28,13 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
 
+@runtime_checkable
+class SourceMetadataProvider(Protocol):
+    """Optional data-source capability for typed source metadata."""
+
+    def get_source_metadata(self) -> SourceMetadata | None: ...
+
+
 def get_source_metadata(
     *,
     data_source: object,
@@ -36,10 +43,9 @@ def get_source_metadata(
 ) -> SourceMetadata | None:
     """Get source metadata and enrich it with query string when available."""
     source_metadata: SourceMetadata | None = None
-    get_metadata = getattr(data_source, "get_source_metadata", None)
-    if get_metadata is not None and callable(get_metadata):
+    if isinstance(data_source, SourceMetadataProvider):
         try:
-            result = get_metadata()
+            result = data_source.get_source_metadata()
             if isinstance(result, SourceMetadata):
                 source_metadata = result
         except SOURCE_METADATA_ERRORS as metadata_error:

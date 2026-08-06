@@ -27,7 +27,8 @@ class BatchExecutorRuntimeState:
     silver_records_for_dq: list[BronzeRecord] = field(default_factory=list)
     gold_records_for_dq: list[GoldRecord] = field(default_factory=list)
     dq_total_seen: int = 0
-    dq_reservoir_ranks: dict[int, list[str]] = field(default_factory=dict)
+    # Stage-keyed ranks ("bronze"/"silver"/"gold") — not id(list).
+    dq_reservoir_ranks: dict[str, list[str]] = field(default_factory=dict)
     source_batch_ids: list[str] = field(default_factory=list)
     last_bronze_path: str | None = None
     debug_export_result: object | None = None
@@ -130,11 +131,11 @@ class BatchExecutorRuntimeStateMixin:
         self._runtime_state.dq_total_seen = value
 
     @property
-    def _dq_reservoir_ranks(self) -> dict[int, list[str]]:
+    def _dq_reservoir_ranks(self) -> dict[str, list[str]]:
         return self._runtime_state.dq_reservoir_ranks
 
     @_dq_reservoir_ranks.setter
-    def _dq_reservoir_ranks(self, value: dict[int, list[str]]) -> None:
+    def _dq_reservoir_ranks(self, value: dict[str, list[str]]) -> None:
         self._runtime_state.dq_reservoir_ranks = value
 
     @property

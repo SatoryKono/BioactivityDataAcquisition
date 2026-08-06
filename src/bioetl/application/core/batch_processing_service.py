@@ -154,7 +154,7 @@ class BatchProcessingService:
     @property
     def debug_export_service(self) -> object | None:
         """Expose the optional debug export collaborator to the executor."""
-        return getattr(self._support, "_debug_export_service", None)
+        return self._support.debug_export_service
 
     async def _process_batch_work(
         self,

@@ -1127,7 +1127,7 @@ class TestBatchExecutorHelpers:
             records_filtered_out=2,
             source_batch_ids=["batch-001"],
         )
-        state._should_collect_dq_data.return_value = True
+        state.should_collect_dq_data.return_value = True
         outcome = build_processed_batch_outcome(
             records=[{"id": "1"}],
             output=BatchProcessingOutcome(
@@ -1153,7 +1153,7 @@ class TestBatchExecutorHelpers:
             "batch-001",
             "12345678-1234-5678-1234-567812345678",
         ]
-        state._collect_dq_data.assert_called_once_with(
+        state.collect_dq_data.assert_called_once_with(
             records=[{"id": "1"}],
             batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
             bronze_result=outcome.bronze_result,
@@ -1172,7 +1172,7 @@ class TestBatchExecutorHelpers:
             records_filtered_out=0,
             source_batch_ids=[],
         )
-        state._should_collect_dq_data.return_value = False
+        state.should_collect_dq_data.return_value = False
         outcome = build_processed_batch_outcome(
             records=[{"id": "1"}],
             output=BatchProcessingOutcome(
@@ -1187,7 +1187,7 @@ class TestBatchExecutorHelpers:
 
         apply_processed_batch_outcome(state=state, outcome=outcome)
 
-        state._collect_dq_data.assert_not_called()
+        state.collect_dq_data.assert_not_called()
 
     def test_build_batch_result_snapshot_uses_current_counters(self) -> None:
         """Batch-result helper should mirror current cumulative counters."""

@@ -146,14 +146,11 @@ def _resolve_error_count(
     the current batch size produces impossible rates (e.g. 620%) on multi-batch
     runs because earlier transform/write errors remain in the cumulative counter.
     """
+    # Batch-local signals only: run-scoped error_count must not drive
+    # per-batch hard/soft threshold rates (multi-batch inflation).
     batch_error_count = getattr(batch_metrics, "batch_error_count", None)
     if isinstance(batch_error_count, int) and not isinstance(batch_error_count, bool):
         return batch_error_count
-    if state.quarantined_count > 0:
-        return state.quarantined_count
-    error_count = getattr(batch_metrics, "error_count", None)
-    if isinstance(error_count, int) and not isinstance(error_count, bool):
-        return error_count
     return state.quarantined_count
 
 

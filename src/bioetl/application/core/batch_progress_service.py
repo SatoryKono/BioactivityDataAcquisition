@@ -2,18 +2,30 @@
 
 from __future__ import annotations
 
-__all__ = ["BatchProgressService"]
+__all__ = ["BatchProgressService", "TotalRecordsProvider"]
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
+@runtime_checkable
+class TotalRecordsProvider(Protocol):
+    """Optional data-source capability for total-record estimates."""
+
+    async def get_total_records(self) -> int | None: ...
+
+
 class BatchProgressService:
     """Tracks and emits pipeline progress during batch execution."""
 
-    def __init__(self, *, logger: LoggerPort, data_source: object) -> None:
+    def __init__(
+        self,
+        *,
+        logger: LoggerPort,
+        data_source: object | TotalRecordsProvider,
+    ) -> None:
         self._logger = logger
         self._data_source = data_source
         self._total_records: int | None = None
@@ -31,13 +43,8 @@ class BatchProgressService:
         if self._total_records:
             self._set_progress_thresholds()
             return
-        get_total = getattr(self._data_source, "get_total_records", None)
-        if get_total and callable(get_total):
-            from collections.abc import Awaitable, Callable
-            from typing import cast
-
-            get_total_fn = cast(Callable[[], Awaitable[object]], get_total)
-            result = await get_total_fn()
+        if isinstance(self._data_source, TotalRecordsProvider):
+            result = await self._data_source.get_total_records()
             if isinstance(result, int) and result > 0:
                 self._total_records = result
                 self._set_progress_thresholds()

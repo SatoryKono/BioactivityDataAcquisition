@@ -53,10 +53,9 @@ class BatchResultBuilderProtocol[BatchResultT](Protocol):
 class BatchExecutionStateProtocol(BatchExecutionStatisticsState, Protocol):
     """Mutable executor state required to apply processed-batch outcomes."""
 
-    def _should_collect_dq_data(self) -> bool: ...
-    def _collect_dq_data(
+    def should_collect_dq_data(self) -> bool: ...
+    def collect_dq_data(
         self,
-        *,
         records: list[BronzeRecord],
         batch_id: BatchID,
         bronze_result: object,
