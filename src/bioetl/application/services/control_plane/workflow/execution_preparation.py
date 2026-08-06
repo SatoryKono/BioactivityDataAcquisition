@@ -63,9 +63,10 @@ def prepare_workflow_execution(
     incremental: bool = False,
 ) -> WorkflowExecutionPreparationResult:
     """Prepare manifest, execution state, and resume cursor."""
-    # Apply incremental offset before creating request so fingerprint
-    # includes the new start_offset
-    if incremental and not resume_last:
+    # Apply incremental offset only for genuinely new executions (not resume).
+    # Resume paths must keep the stored offset/fingerprint from prior state.
+    is_resume = bool(resume_last or resume_manifest_id or resume_run_id)
+    if incremental and not is_resume:
         config = _apply_incremental_offset(
             config=config,
             workflow_state_port=workflow_state_port,

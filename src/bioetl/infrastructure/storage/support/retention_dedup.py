@@ -61,6 +61,22 @@ def primary_key_tuple(
     return tuple(row.get(key) for key in primary_keys)
 
 
+def _total_order_component(value: object) -> tuple[int, str]:
+    """Map a PK component to a total order for deterministic sorting.
+
+    None and heterogeneous types must not raise TypeError under Python 3
+    rich comparisons during dedup ranking.
+    """
+    if value is None:
+        return (0, "")
+    return (1, f"{type(value).__name__}:{value!s}")
+
+
+def primary_key_sort_key(primary_key: tuple[object, ...]) -> tuple[tuple[int, str], ...]:
+    """Return a total-order sort key for one primary-key tuple."""
+    return tuple(_total_order_component(part) for part in primary_key)
+
+
 def content_identity(row: JsonDict) -> str:
     """Return deterministic content identity for one Delta row."""
     content_hash = row.get("content_hash")
@@ -102,7 +118,7 @@ def deduplicate_delta_rows(
             )
             for row in table.to_pylist()
         ),
-        key=lambda item: (item[0], item[1]),
+        key=lambda item: (primary_key_sort_key(item[0]), item[1]),
     )
 
     seen_exact_keys: set[tuple[tuple[object, ...], str]] = set()

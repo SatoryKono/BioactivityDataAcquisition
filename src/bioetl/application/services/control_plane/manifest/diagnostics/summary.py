@@ -87,6 +87,9 @@ def _build_final_summary(
         exact_replay_anchors=exact_replay_anchors,
         produced_artifact_trace=produced_artifact_trace,
     )
+    latest_status = (
+        request.ledger_entries[-1].status if request.ledger_entries else None
+    )
     persistence_profile, alert_signals, next_steps = _build_runtime_views(
         _RuntimeViewsRequest(
             manifest=request.manifest,
@@ -95,7 +98,7 @@ def _build_final_summary(
             artifact_refs=request.artifact_refs,
             lineage_fragment_ids=request.lineage_fragment_ids,
             missing_link_count=request.missing_link_count,
-            latest_status=request.ledger_entries[-1].status,
+            latest_status=latest_status,
             dq_signal_present=request.dq_details["has_signal"],
             cross_validation_signal_present=request.dq_details[
                 "has_cross_validation_signal"
