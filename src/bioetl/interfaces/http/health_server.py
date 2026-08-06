@@ -10,7 +10,7 @@ import asyncio
 import time
 from dataclasses import dataclass
 
-from bioetl.application.services.quarantine_service import QuarantineService
+from bioetl.application.services.quality.quarantine_service import QuarantineService
 from bioetl.domain.ports import (
     CheckpointPort,
     ClockPort,

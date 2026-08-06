@@ -18,23 +18,23 @@ from bioetl.domain.ports import LoggerPort
 _PUSHGATEWAY_FALLBACK = "localhost:9091"
 
 if TYPE_CHECKING:
-    from bioetl.application.services.audit_inspection_service import (
+    from bioetl.application.services.export_lineage.audit_inspection_service import (
         AuditInspectionService,
     )
-    from bioetl.application.services.checkpoint_service import CheckpointService
+    from bioetl.application.services.checkpoint.checkpoint_service import CheckpointService
     from bioetl.application.services.control_plane.manifest.inspection_service import (
         RunManifestInspectionService,
     )
-    from bioetl.application.services.health_service import HealthService
+    from bioetl.application.services.ops.health_service import HealthService
     from bioetl.application.services.lineage.lineage_inspection_service import (
         LineageInspectionService,
     )
-    from bioetl.application.services.metrics_service import MetricsService
-    from bioetl.application.services.observability_workflow_service import (
+    from bioetl.application.services.ops.metrics_service import MetricsService
+    from bioetl.application.services.workflow.observability_workflow_service import (
         ObservabilityWorkflowService,
         RunForensicDossierResult,
     )
-    from bioetl.application.services.quarantine_service import QuarantineService
+    from bioetl.application.services.quality.quarantine_service import QuarantineService
 
 __all__ = [
     "MetricsOperatorProfile",

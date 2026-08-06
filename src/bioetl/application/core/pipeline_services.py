@@ -29,7 +29,7 @@ from bioetl.domain.ports import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.application.services.quality.dq_report_service import DQReportService
     from bioetl.domain.ports import (
         BronzeDQAnalyzerPort,
         DQReportWriterPort,

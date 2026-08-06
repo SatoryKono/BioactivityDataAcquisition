@@ -38,11 +38,11 @@ from typing import Any
 import pytest
 from click.testing import CliRunner
 
-from bioetl.application.services.workflow_runner_service import (
+from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
 )
-from bioetl.application.services.workflow_transform_service import (
+from bioetl.application.services.workflow.workflow_transform_service import (
     WorkflowTransformExecutionResult,
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (

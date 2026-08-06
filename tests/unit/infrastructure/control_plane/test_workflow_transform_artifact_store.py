@@ -35,7 +35,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from bioetl.application.services.workflow_transform_artifacts import (
+from bioetl.application.services.workflow.workflow_transform_artifacts import (
     WorkflowTransformArtifactContext,
 )
 from bioetl.infrastructure.control_plane.file_workflow_transform_artifact_store import (

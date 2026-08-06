@@ -37,7 +37,7 @@ from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
-from bioetl.application.services.lock_service import (
+from bioetl.application.services.ops.lock_service import (
     LockInfo,
     LockService,
 )

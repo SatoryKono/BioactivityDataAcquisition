@@ -34,7 +34,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.application.services.dq_report_models import DQReportContext, DQReportResult
+from bioetl.application.services.quality.dq_report_models import DQReportContext, DQReportResult
 from bioetl.domain.types import GoldBusinessRuleSpec, ScdConfig
 
 BRONZE_REPORT_PATH = Path("reports/bronze.json")

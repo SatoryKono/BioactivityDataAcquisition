@@ -24,7 +24,7 @@ from bioetl.application.core.postrun._service_collaborators import (
 from bioetl.application.core.postrun._service_support import (
     PostrunServiceSupportMixin,
 )
-from bioetl.application.services.data_quality_service import DataQualityService
+from bioetl.application.services.quality.data_quality_service import DataQualityService
 from bioetl.application.services.medallion.medallion_types import VacuumResult
 from bioetl.domain.ports import ExecutorMetricsPort
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
@@ -48,7 +48,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.postrun.metadata_write_service import (
         PostrunMetadataWriteService,
     )
-    from bioetl.application.services.dq_report_service import (
+    from bioetl.application.services.quality.dq_report_service import (
         DQReportContext,
         DQReportResult,
     )

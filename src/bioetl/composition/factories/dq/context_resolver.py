@@ -138,7 +138,7 @@ def _create_dq_report_service(
     metrics: MetricsPort | None,
 ) -> object:
     """Bridge the DQ report service constructor to the factory protocol."""
-    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.application.services.quality.dq_report_service import DQReportService
 
     return DQReportService(
         logger=logger,

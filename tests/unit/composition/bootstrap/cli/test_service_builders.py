@@ -35,7 +35,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.services.checkpoint_service import CheckpointService
+from bioetl.application.services.checkpoint.checkpoint_service import CheckpointService
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.bootstrap.cli.service_builders import (
     build_cli_checkpoint_runtime_service,

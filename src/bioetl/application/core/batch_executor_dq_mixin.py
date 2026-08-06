@@ -24,7 +24,7 @@ if TYPE_CHECKING:
         PipelineExecutionServicesProtocol,
     )
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
-    from bioetl.application.services.dq_report_service import DQReportContext
+    from bioetl.application.services.quality.dq_report_service import DQReportContext
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort
 

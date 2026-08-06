@@ -11,7 +11,7 @@ from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.services.quarantine_service import QuarantineService
+    from bioetl.application.services.quality.quarantine_service import QuarantineService
     from bioetl.composition.health_service_access import (
         HealthServerDependenciesProtocol,
         QuarantineRuntimeServiceProtocol,

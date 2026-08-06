@@ -144,7 +144,7 @@ detail unless re-exported here. **Freeze:** do not add a new package-root
 `*_api.py` (or expand the sanctioned CLI `public-entrypoint` inventory past
 scorecard `sanctioned_public_entrypoint_governance.public_entrypoint_count`,
 currently **12**) without an explicit scorecard / inventory review
-(`tests/architecture/test_composition_public_entrypoint_freeze.py`, issue #7708).
+(`tests/architecture/test_composition_public_entrypoint_freeze.py`, issues #7708 / #7733).
 
 | Public seam | Primary symbols / role | Factories / builders / internal owners |
 | --- | --- | --- |

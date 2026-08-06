@@ -45,7 +45,7 @@ from bioetl.application.core.postrun.service import (
 from tests.unit.application.core.postrun_test_support import (
     build_test_postrun_service as _make_postrun_service,
 )
-from bioetl.application.services.data_quality_service import DataQualityService
+from bioetl.application.services.quality.data_quality_service import DataQualityService
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
 from bioetl.domain.types import RunType

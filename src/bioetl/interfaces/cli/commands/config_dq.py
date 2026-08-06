@@ -23,7 +23,7 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 if TYPE_CHECKING:
-    from bioetl.application.services.config_service import ConfigService
+    from bioetl.application.services.ops.config_service import ConfigService
 
 __all__ = [
     "COMMANDS",

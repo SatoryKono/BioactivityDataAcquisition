@@ -35,7 +35,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.metrics_service import MetricsService
+from bioetl.application.services.ops.metrics_service import MetricsService
 from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
 from bioetl.domain.ports import TracingPort
 from bioetl.infrastructure.observability.metrics_server_adapter import (

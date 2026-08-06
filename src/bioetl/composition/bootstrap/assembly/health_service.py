@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.services.health_service import HealthService
+from bioetl.application.services.ops.health_service import HealthService
 from bioetl.composition.bootstrap.assembly.health_server import (
     HealthServerDependencies,
     create_health_server_dependencies,
