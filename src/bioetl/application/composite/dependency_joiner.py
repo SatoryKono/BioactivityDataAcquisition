@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.composite.dependency_join_apply_ops import (
     apply_composite_key_dependency_join as _apply_composite_key_dependency_join_op,
+)
+from bioetl.application.composite.dependency_join_apply_ops import (
     apply_single_key_dependency_join as _apply_single_key_dependency_join_op,
 )
 from bioetl.application.composite.target_protein_classification_summary import (

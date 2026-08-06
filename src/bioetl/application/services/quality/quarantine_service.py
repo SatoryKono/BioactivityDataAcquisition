@@ -32,8 +32,6 @@ from bioetl.application.services.quality._quarantine_service_support import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports.observability.tracing import SpanHandle
-
     from bioetl.application.services.control_plane.manifest.inspection_service import (
         RunManifestInspectionService,
     )
@@ -44,6 +42,7 @@ if TYPE_CHECKING:
         QuarantinePort,
         TracingPort,
     )
+    from bioetl.domain.ports.observability.tracing import SpanHandle
 
 
 @dataclass

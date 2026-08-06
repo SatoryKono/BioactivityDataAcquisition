@@ -1,0 +1,38 @@
+"""Static export name tuple for wiring.runtime (no heavy imports)."""
+
+from __future__ import annotations
+
+RUNTIME_EXPORT_NAMES: tuple[str, ...] = (
+    "BasePipeline",
+    "BatchCheckpointRecoveryService",
+    "BatchExecutionFSM",
+    "BatchExecutionLifecycleService",
+    "BatchExecutionRunService",
+    "BatchExecutionStateService",
+    "BatchExecutor",
+    "BatchExecutorDependencies",
+    "BatchExtractionLoopService",
+    "BatchMemoryManagerService",
+    "BatchMetricsRecorderService",
+    "BatchProcessingComponents",
+    "BatchProcessingService",
+    "BatchProcessingSupportService",
+    "BatchProgressService",
+    "BatchTracingManagerService",
+    "BatchTransformer",
+    "BatchWriter",
+    "BatchWriterOptions",
+    "CheckpointRuntimeService",
+    "ContentHashPolicyByVersion",
+    "ContentHashVersionPolicy",
+    "GoldFilterCallback",
+    "GoldTransformCallback",
+    "PipelineService",
+    "PipelineStorageProtocol",
+    "QuarantineRuntimeService",
+    "RecordNormalizationProcessor",
+    "RecordProcessor",
+    "RecordProcessorConfig",
+    "ShutdownSignal",
+    "TransformCallback",
+)

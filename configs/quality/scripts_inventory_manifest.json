@@ -1,11 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-06T14:42:08.128066+00:00",
+  "generated_at": "2026-08-06T09:17:05.817782+00:00",
   "summary": {
-    "total_scripts": 581,
+    "total_scripts": 574,
     "status_counts": {
-      "active": 343,
-      "orphan": 5,
+      "active": 341,
       "supporting": 228,
       "temporary_diagnostic": 5
     },
@@ -13,9 +12,9 @@
       "agents": 12,
       "build": 16,
       "ci": 77,
-      "docs": 233,
+      "docs": 232,
       "other": 81,
-      "scripts": 458,
+      "scripts": 456,
       "skills": 18,
       "tests": 366
     }
@@ -5892,14 +5891,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 13,
       "references": [
-        {
-          "path": "docs/00-project/governance/documentation-update-plan.md",
-          "line": 34,
-          "source_group": "docs",
-          "text": "- Генератор: `scripts/diagrams/generate_pipeline_dataflows.py`"
-        },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
           "line": 930,
@@ -5941,6 +5934,12 @@
           "line": 193,
           "source_group": "docs",
           "text": "python scripts/diagrams/generate_pipeline_dataflows.py --check-drift"
+        },
+        {
+          "path": "docs/03-guides/pipeline-dataflow-documentation.md",
+          "line": 263,
+          "source_group": "docs",
+          "text": "python scripts/diagrams/generate_pipeline_dataflows.py"
         }
       ]
     },
@@ -8836,30 +8835,6 @@
           "text": "from scripts.documentation_governance_check import DocumentationGovernanceChecker"
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/apply_s1_c2_fixes.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "orphaned_audit_script",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a historical S1 remediation artifact; remove it after confirming its fixes are represented in the canonical configuration and audit record.",
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/apply_s1_c3c6_fixes.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "orphaned_audit_script",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a historical S1 remediation artifact; remove it after confirming its fixes are represented in the canonical configuration and audit record.",
-      "references": []
     },
     {
       "path": "scripts/engineering/baselines/__main__.py",
@@ -12657,7 +12632,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 81,
+      "reference_count": 79,
       "references": [
         {
           "path": "docs/00-project/RULES.md",
@@ -16691,36 +16666,6 @@
       "next_step": "Retain only as the bounded resume helper for the current CodeRabbit architecture-review campaign; remove it after the remaining-layer review is complete rather than treating it as a public active script."
     },
     {
-      "path": "scripts/ops/coderabbit/build_matrix.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/coderabbit/README.md",
-          "line": 7,
-          "source_group": "scripts",
-          "text": "| `build_matrix.py` | Build leaf scope matrix (writes under `reports/quality/coderabbit/`) |"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/coderabbit/run_leaves.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/coderabbit/README.md",
-          "line": 8,
-          "source_group": "scripts",
-          "text": "| `run_leaves.py` | Sequential leaf runner (logs under reports; requires API key) |"
-        }
-      ]
-    },
-    {
       "path": "scripts/ops/codex-exec.bat",
       "type": "bat",
       "status": "active",
@@ -18518,7 +18463,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_render_contract.py",
-          "line": 25,
+          "line": 24,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import ("
         }
@@ -18574,7 +18519,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 153,
+          "line": 148,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -18586,13 +18531,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1237,
+          "line": 1075,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1324,
+          "line": 1162,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -19257,7 +19202,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 66,
+      "reference_count": 68,
       "references": [
         {
           "path": "Makefile",
@@ -20127,7 +20072,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 336,
+          "line": 183,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/load_repo_env.sh or pass --username/--password \""
         },
@@ -20312,42 +20257,6 @@
           "text": "\"2. Implement the optimized test runner: python3 scripts/optimized_test_runner.py --list\""
         }
       ]
-    },
-    {
-      "path": "scripts/quality/coderabbit/build_streams.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "orphaned_audit_script",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a historical CodeRabbit stream-balancing artifact; remove it after confirming its audit outputs are preserved in the durable review record.",
-      "references": []
-    },
-    {
-      "path": "scripts/quality/coderabbit/inventory_cm.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "orphaned_audit_script",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a historical CodeRabbit inventory artifact; remove it after confirming its audit outputs are preserved in the durable review record.",
-      "references": []
-    },
-    {
-      "path": "scripts/quality/coderabbit/rebalance_streams.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "orphaned_audit_script",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a historical CodeRabbit stream-balancing artifact; remove it after confirming its audit outputs are preserved in the durable review record.",
-      "references": []
     },
     {
       "path": "scripts/schema/__main__.py",

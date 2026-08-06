@@ -12,7 +12,6 @@ from bioetl.application.composite._preflight_schema_field_extraction import (
     simplify_dtype,
 )
 from bioetl.application.composite._preflight_schema_registry import (
-    find_schema_class as _find_schema_class,
     load_schema_registry,
 )
 from bioetl.application.composite._preflight_types import (

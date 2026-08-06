@@ -27,9 +27,9 @@ from bioetl.application.core.postrun.service import (
 )
 
 __all__ = [
-    "CompactionResult",
     "DEFAULT_METADATA_VERSION_ALLOWLIST",
     "DEFAULT_POSTRUN_WARNING_ALLOWLIST",
+    "CompactionResult",
     "PostrunCleanupService",
     "PostrunCompactService",
     "PostrunDQReportService",
