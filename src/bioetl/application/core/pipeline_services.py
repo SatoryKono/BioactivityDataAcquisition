@@ -152,8 +152,12 @@ class PipelineService:
                 )
                 if isinstance(result, asyncio.CancelledError) and cancelled is None:
                     cancelled = result
-        self.logger.info("Pipeline services closed.", stage="cleanup")
-        if cancelled is not None:
+        if cancelled is None:
+            self.logger.info("Pipeline services closed.", stage="cleanup")
+        else:
+            self.logger.warning(
+                "Pipeline services closing cancelled.", stage="cleanup"
+            )
             raise cancelled
 
 

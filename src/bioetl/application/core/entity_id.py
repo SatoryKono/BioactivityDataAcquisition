@@ -42,7 +42,7 @@ from bioetl.domain.schemas.constants import (
 )
 
 # Explicit scheme marker so identity changes are versioned, not silent (#7777).
-ENTITY_ID_SCHEME_VERSION = "v2"
+ENTITY_ID_SCHEME_VERSION: str = "v2"
 
 
 def _normalize_publication_term_identity_component(value: str) -> str:
