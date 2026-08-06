@@ -407,6 +407,15 @@ class TestMaybeRecover:
         # 10% growth: int(100 * 1.1) = 110
         assert result == 110
 
+    def test_tiny_size_recovery_always_advances_by_at_least_one(self) -> None:
+        """Integer 10% growth must not stall at size 1 (int(1.1)==1)."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=10,
+            memory_config=_make_config(enable_adaptive_sizing=True),
+        )
+        assert manager.maybe_recover(current_size=1) == 2
+        assert manager.maybe_recover(current_size=2) == 3
+
     def test_does_not_exceed_initial_size_on_recovery(self):
         """Recovery never overshoots initial_batch_size."""
         manager = BatchMemoryManagerService(

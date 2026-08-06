@@ -1276,6 +1276,28 @@ class TestBatchExecutorLoopHelpers:
         checkpoint_recovery_service.save_checkpoint_now.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def test_ensure_extraction_not_shutdown_checkpoints_and_raises_when_requested(
+        self,
+    ) -> None:
+        """Shutdown path must persist exact counters then raise PipelineShutdownError."""
+        from bioetl.domain.exceptions import PipelineShutdownError
+
+        checkpoint_recovery_service = AsyncMock()
+
+        with pytest.raises(PipelineShutdownError, match="Shutdown during extraction"):
+            await ensure_extraction_not_shutdown(
+                shutdown_requested=True,
+                checkpoint_recovery_service=checkpoint_recovery_service,
+                records_fetched=42,
+                resume_offset=17,
+            )
+
+        checkpoint_recovery_service.save_checkpoint_now.assert_awaited_once_with(
+            records_fetched=42,
+            resume_offset=17,
+        )
+
+    @pytest.mark.asyncio
     async def test_flush_batch_if_needed_processes_and_resets_batch(self) -> None:
         """Flush helper should process the batch, reset it, and emit progress."""
         process_batch = AsyncMock()

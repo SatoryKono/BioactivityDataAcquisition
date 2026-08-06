@@ -126,3 +126,106 @@ async def test_transform_and_track_metrics_records_gold_excluded_by_contract(
         outcome="excluded_by_contract",
         count=1,
     )
+
+
+@pytest.mark.unit
+async def test_write_silver_gold_concurrent_orders_layers_and_lineage(
+    mock_context: MagicMock,
+    mock_services: MagicMock,
+    mock_batch_metrics: MagicMock,
+    mock_transformer: MagicMock,
+) -> None:
+    """Silver must complete before Gold; Gold receives Silver lineage refs."""
+    from datetime import UTC, datetime
+
+    call_order: list[str] = []
+    silver_result = MagicMock(name="silver_result")
+
+    async def write_silver(**kwargs):  # type: ignore[no-untyped-def]
+        call_order.append("silver")
+        return silver_result
+
+    async def write_gold(**kwargs):  # type: ignore[no-untyped-def]
+        call_order.append("gold")
+        assert kwargs.get("silver_refs") == [silver_result]
+
+    writer = MagicMock()
+    writer.write_silver = AsyncMock(side_effect=write_silver)
+    writer.write_gold = AsyncMock(side_effect=write_gold)
+    writer.track_batch_written = MagicMock()
+
+    async def execute_with_span(name, coro, **_kwargs):  # type: ignore[no-untyped-def]
+        call_order.append(f"span:{name}")
+        return await coro
+
+    tracing = MagicMock()
+    support = BatchProcessingSupportService(
+        services=mock_services,
+        logger=MagicMock(),
+        batch_metrics=mock_batch_metrics,
+        transformer=mock_transformer,
+        writer=writer,
+        tracing=tracing,
+        quarantine_manager=MagicMock(),
+        run_id=mock_context.run_id,
+    )
+    # Drive the span helper through the support method under test.
+    support._execute_with_span = execute_with_span  # type: ignore[method-assign]
+
+    transform_result = _make_transform_result()
+    batch_id = deterministic_batch_uuid_from_callsite(
+        "test_write_silver_gold_concurrent"
+    )
+    await support.write_silver_gold_concurrent(
+        transform_result=transform_result,
+        batch_id=batch_id,
+        ingestion_ts=datetime(2026, 1, 1, tzinfo=UTC),
+        bronze_refs=None,
+    )
+
+    assert call_order.index("silver") < call_order.index("gold")
+    writer.write_silver.assert_awaited_once()
+    writer.write_gold.assert_awaited_once()
+
+
+@pytest.mark.unit
+async def test_write_silver_gold_concurrent_stops_on_silver_failure(
+    mock_context: MagicMock,
+    mock_services: MagicMock,
+    mock_batch_metrics: MagicMock,
+    mock_transformer: MagicMock,
+) -> None:
+    """Silver write failure must not start Gold."""
+    from datetime import UTC, datetime
+
+    writer = MagicMock()
+    writer.write_silver = AsyncMock(side_effect=RuntimeError("silver failed"))
+    writer.write_gold = AsyncMock()
+    writer.track_batch_written = MagicMock()
+
+    async def execute_with_span(_name, coro, **_kwargs):  # type: ignore[no-untyped-def]
+        return await coro
+
+    support = BatchProcessingSupportService(
+        services=mock_services,
+        logger=MagicMock(),
+        batch_metrics=mock_batch_metrics,
+        transformer=mock_transformer,
+        writer=writer,
+        tracing=MagicMock(),
+        quarantine_manager=MagicMock(),
+        run_id=mock_context.run_id,
+    )
+    support._execute_with_span = execute_with_span  # type: ignore[method-assign]
+
+    with pytest.raises(RuntimeError, match="silver failed"):
+        await support.write_silver_gold_concurrent(
+            transform_result=_make_transform_result(),
+            batch_id=deterministic_batch_uuid_from_callsite(
+                "test_write_silver_gold_fail"
+            ),
+            ingestion_ts=datetime(2026, 1, 1, tzinfo=UTC),
+            bronze_refs=None,
+        )
+
+    writer.write_gold.assert_not_awaited()
