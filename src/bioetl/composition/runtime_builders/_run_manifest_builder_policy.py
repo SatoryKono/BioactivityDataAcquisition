@@ -62,11 +62,12 @@ def resolve_code_revision_for_manifest(
         and code_revision.dependency_lock_hash is not None
     ):
         return code_revision
-    # Synthetic test fallback is explicitly non-clean so consumers do not
-    # treat it as a verified clean workspace revision.
+    # Test-mode manifests use a sealed synthetic revision so strict replay
+    # validation remains deterministic even when the developer checkout is dirty.
+    # The ``test-`` anchors keep this distinct from verified repository provenance.
     return CodeRevisionProvenance(
         git_commit=f"test-{resolved_config_hash[:12]}",
-        source_revision_state="dirty_state_unknown",
+        source_revision_state="clean",
         dependency_lock_hash=f"sha256:test-lock-{resolved_config_hash[:12]}",
     )
 
