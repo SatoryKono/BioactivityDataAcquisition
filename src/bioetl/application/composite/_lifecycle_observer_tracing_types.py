@@ -20,8 +20,8 @@ class _CompositeSpanHandleProtocol(Protocol):
     def __exit__(
         self,
         exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
     ) -> object | None: ...
 
     def set_attribute(self, key: str, value: object) -> None: ...

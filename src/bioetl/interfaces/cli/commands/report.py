@@ -17,12 +17,12 @@ from bioetl.application.services.run_reports.query import (
     load_workflow_report,
     prune_reports,
 )
-from bioetl.application.services.run_reports.writer import DEFAULT_REPORT_ROOT
 from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     typed_click_group,
     typed_click_option,
     typed_group_command,
 )
+from bioetl.interfaces.http.report_root_config import configured_report_root
 
 
 @typed_click_group()
@@ -55,7 +55,7 @@ def show_command(
     as_json: bool,
 ) -> None:
     """Show one pipeline or workflow run report."""
-    report_root = root or DEFAULT_REPORT_ROOT
+    report_root = configured_report_root(root=root)
     if pipeline:
         payload = load_pipeline_report(
             pipeline_name=pipeline,
@@ -103,7 +103,7 @@ def list_command(
     root: Path | None,
 ) -> None:
     """List recent run reports."""
-    report_root = root or DEFAULT_REPORT_ROOT
+    report_root = configured_report_root(root=root)
     if workflow and not pipeline:
         entries = list_workflow_reports(
             workflow_name=workflow,
@@ -143,7 +143,7 @@ def diff_command(
     root: Path | None,
 ) -> None:
     """Diff funnel and top reasons between two pipeline runs."""
-    report_root = root or DEFAULT_REPORT_ROOT
+    report_root = configured_report_root(root=root)
     left = load_pipeline_report(
         pipeline_name=pipeline,
         run_id=run_id_a,
@@ -190,7 +190,7 @@ def prune_command(
         max_count=max_count,
         max_age_days=max_age_days,
         now=current_utc_time(),
-        root=root or DEFAULT_REPORT_ROOT,
+        root=configured_report_root(root=root),
         dry_run=not apply,
     )
     mode = "deleted" if apply else "would delete"

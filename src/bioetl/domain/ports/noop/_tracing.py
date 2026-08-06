@@ -23,17 +23,17 @@ class _NoOpSpan:
     def __exit__(
         self,
         exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
     ) -> bool | None:
         """Exit the span context manager — no-op, does not suppress exceptions.
 
         Args:
             exc_type: Exception type if an error occurred, otherwise None.
-            exc_val: Exception instance if an error occurred, otherwise None.
-            exc_tb: Traceback if an error occurred, otherwise None.
+            exc: Exception instance if an error occurred, otherwise None.
+            tb: Traceback if an error occurred, otherwise None.
         """
-        _ = exc_type, exc_val, exc_tb
+        _ = exc_type, exc, tb
         return None
 
     def set_attribute(

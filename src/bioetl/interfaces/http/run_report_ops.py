@@ -6,11 +6,12 @@ import json
 from pathlib import Path
 from typing import Any
 
+from bioetl.application.services.run_reports.paths import inspect_report_root_marker
 from bioetl.application.services.run_reports.query import (
     list_pipeline_reports,
     list_workflow_reports,
 )
-from bioetl.application.services.run_reports.writer import DEFAULT_REPORT_ROOT
+from bioetl.interfaces.http.report_root_config import configured_report_root
 
 
 def _safe_segment(value: str) -> str:
@@ -23,6 +24,10 @@ def _safe_segment(value: str) -> str:
     if cleaned in {".", ".."} or not cleaned:
         raise ValueError(f"invalid path segment: {value!r}")
     return cleaned[:120]
+
+
+def _effective_root(root: Path | None) -> Path:
+    return configured_report_root(root=root)
 
 
 def load_pipeline_run_report_payload(
@@ -39,7 +44,7 @@ def load_pipeline_run_report_payload(
         safe_run_id = _safe_segment(run_id)
     except ValueError:
         return None
-    base = root or DEFAULT_REPORT_ROOT
+    base = _effective_root(root)
     path = (
         base
         / "pipeline"
@@ -64,7 +69,7 @@ def load_workflow_run_report_payload(
         safe_run_id = _safe_segment(workflow_run_id)
     except ValueError:
         return None
-    base = root or DEFAULT_REPORT_ROOT
+    base = _effective_root(root)
     path = (
         base
         / "workflow"
@@ -82,14 +87,19 @@ def list_pipeline_run_report_payloads(
     root: Path | None = None,
 ) -> dict[str, Any]:  # Any: list payload
     """List recent pipeline run reports (index only, not full bodies)."""
+    base = _effective_root(root)
     entries = list_pipeline_reports(
         pipeline_name=pipeline_name,
         limit=limit,
-        root=root,
+        root=base,
     )
+    marker = inspect_report_root_marker(report_root=base)
     return {
         "status": "ok",
         "count": len(entries),
+        "report_root": str(base.as_posix()),
+        "marker": marker.get("marker"),
+        "marker_status": marker.get("status"),
         "items": [
             {
                 "pipeline": item.owner,
@@ -113,14 +123,19 @@ def list_workflow_run_report_payloads(
     root: Path | None = None,
 ) -> dict[str, Any]:  # Any: list payload
     """List recent workflow run reports (index only)."""
+    base = _effective_root(root)
     entries = list_workflow_reports(
         workflow_name=workflow_name,
         limit=limit,
-        root=root,
+        root=base,
     )
+    marker = inspect_report_root_marker(report_root=base)
     return {
         "status": "ok",
         "count": len(entries),
+        "report_root": str(base.as_posix()),
+        "marker": marker.get("marker"),
+        "marker_status": marker.get("status"),
         "items": [
             {
                 "workflow": item.owner,

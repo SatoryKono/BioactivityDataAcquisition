@@ -34,6 +34,12 @@ services:
       # runtime_manager replaces the unmanaged sentinel with an opaque identity
       # derived from the selected repository/data/report roots.
       - BIOETL_RUNTIME_SOURCE_ID=${BIOETL_RUNTIME_SOURCE_ID:-unmanaged}
+      # Single run-reports root shared by Ops HTTP list/load and CLI writers.
+      # Host bind is BIOETL_DASHBOARD_REPORT_ROOT → /app/reports; run reports
+      # live under /app/reports/run-reports. Marker reports/.bioetl-report-root
+      # proves the bind is the real checkout tree (not a stale Desktop cache).
+      - BIOETL_REPORT_ROOT=${BIOETL_REPORT_ROOT:-/app/reports/run-reports}
+      - BIOETL_ENFORCE_REPORT_ROOT_MARKER=${BIOETL_ENFORCE_REPORT_ROOT_MARKER:-1}
     labels:
       io.bioetl.dashboard-source-id: ${BIOETL_RUNTIME_SOURCE_ID:-unmanaged}
     healthcheck:
