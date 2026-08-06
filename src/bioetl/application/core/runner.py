@@ -17,7 +17,9 @@ from bioetl.application.core.pipeline_span_lifecycle import (
     start_current_span,
 )
 from bioetl.application.core.runner_flow import record_run_failed, record_run_started
-from bioetl.application.services.export_lineage.debug_export_service import DebugExportResult
+from bioetl.application.services.export_lineage.debug_export_service import (
+    DebugExportResult,
+)
 from bioetl.domain.exceptions.base import BioETLError
 from bioetl.domain.types import JsonDict
 

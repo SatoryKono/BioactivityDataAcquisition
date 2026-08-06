@@ -44,8 +44,6 @@ generated output, `configs/quality/generated_artifact_routing.yaml`.
 | Forbidden root files/directories | tracked `.env*` except `.env.example`, generated diagnostics, root scratch scripts/tests, local cache/output directories, and ad-hoc root dumps | strict root audit and generated-artifact routing | delete, ignore as local-only where approved, or route retained evidence to `reports/**` |
 | Temporary compatibility surfaces | reviewed non-script exact-root compatibility entrypoints only | `configs/quality/root_hygiene_review_registry.yaml` owner lanes | root `.sh`, `.ps1`, `.py`, and `.bat` compatibility exceptions are closed and MUST NOT be restored |
 
-| Agent skills lockfile | `skills-lock.json` | root allowlist + `root_hygiene_review_registry.yaml` lane `root_tooling_transitions` | **MUST stay exact root** while skill installer / lock tooling emit the documented filename; do not rehome speculatively (RH5-06 / #7023 closed as retain) |
-
 Docker helper dispositions are resolved as follows and MUST stay aligned with
 `docs/05-operations/verification/docker-helper-root-relocation-audit.md`:
 

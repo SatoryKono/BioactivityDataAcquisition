@@ -16,6 +16,9 @@ from bioetl.application.composite.dependency_coordinator import (
 from bioetl.application.composite.runner_pkg.runner_constants import (
     PIPELINE_EXECUTION_ERRORS,
 )
+from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
+    CompositeRunnerMergeStageMixin,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_dependency_flow import (
     build_dependencies_run_context,
     build_dependency_phase_outcome,
@@ -26,9 +29,6 @@ from bioetl.application.composite.runner_pkg.runner_stage_dependency_state_flow 
     complete_dependencies_phase,
     handle_dependencies_phase_exception,
     start_dependencies_phase,
-)
-from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
-    CompositeRunnerMergeStageMixin,
 )
 from bioetl.application.composite.runner_pkg.runner_stage_enrichment_mixin import (
     _CompositeRunnerStageEnrichmentMixin,

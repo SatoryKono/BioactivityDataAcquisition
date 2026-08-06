@@ -5,6 +5,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.checkpoint.checkpoint_service import (
+    CheckpointService,
+)
+from bioetl.application.services.control_plane.manifest.inspection_service import (
+    RunManifestInspectionResult,
+    RunManifestInspectionService,
+)
+from bioetl.application.services.export_lineage.audit_inspection_service import (
+    AuditInspectionResult,
+    AuditInspectionService,
+)
 from bioetl.application.services.workflow._observability_workflow_models import (
     AuditRunWorkflowResult,
     CheckpointAuditWorkflowResult,
@@ -21,17 +32,6 @@ from bioetl.application.services.workflow._observability_workflow_support import
     resolve_quarantine_summary_for_run,
     resolve_run_manifest,
     trace_links_enabled,
-)
-from bioetl.application.services.export_lineage.audit_inspection_service import (
-    AuditInspectionResult,
-    AuditInspectionService,
-)
-from bioetl.application.services.checkpoint.checkpoint_service import (
-    CheckpointService,
-)
-from bioetl.application.services.control_plane.manifest.inspection_service import (
-    RunManifestInspectionResult,
-    RunManifestInspectionService,
 )
 
 if TYPE_CHECKING:

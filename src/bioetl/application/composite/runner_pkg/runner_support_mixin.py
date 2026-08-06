@@ -26,6 +26,9 @@ from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
     log_composite_completion,
     prepare_composite_result_context,
 )
+from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
+    CompositeRunnerObservabilityMixin,
+)
 from bioetl.application.composite.runner_pkg.runner_support_flow import (
     build_correlation_log_context,
     run_preflight_validation,
@@ -42,9 +45,6 @@ from bioetl.application.composite.runner_pkg.runner_support_policy import (
 from bioetl.application.composite.runner_pkg.runner_support_runtime import (
     run_seed,
     save_checkpoint_safe,
-)
-from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
-    CompositeRunnerObservabilityMixin,
 )
 from bioetl.application.composite.runner_pkg.runner_support_types import (
     _CompositeRunnerSupportHostProtocol,

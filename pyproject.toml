@@ -454,6 +454,7 @@ known-first-party = ["bioetl", "tests"]
 # Lazy public facades keep TYPE_CHECKING imports for static analyzers while
 # runtime exports are resolved through __getattr__ tables.
 "src/bioetl/application/core/wiring/__init__.py" = ["F401"]
+"src/bioetl/application/core/wiring/runtime.py" = ["F401"]
 "src/bioetl/composition/bootstrap/__init__.py" = ["F401"]
 "src/bioetl/composition/factories/dq/__init__.py" = ["F401"]
 "src/bioetl/composition/providers/__init__.py" = ["F401"]

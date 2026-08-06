@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from dataclasses import KW_ONLY, dataclass, field
 from typing import TYPE_CHECKING, ClassVar, override
 
@@ -52,6 +53,7 @@ __all__ = [
 ]
 if TYPE_CHECKING:
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
+    from bioetl.domain.types import BronzeRecord
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
@@ -140,6 +142,43 @@ class CrossRefAdapter(
             batch_size=self.batch_size,
             response_mapper=self._response_mapper,
         )
+
+
+    async def fetch_filtered(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None = None,
+    ) -> AsyncIterator[BronzeRecord]:
+        """Facade: FilterableDataSourcePort entrypoint (delegates to port mixin)."""
+        async for publication in _CrossRefPortSurfaceMixin.fetch_filtered(
+            self,
+            entity_type,
+            filter_ids,
+            filter_field,
+            limit,
+        ):
+            yield publication
+
+    async def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ) -> AsyncIterator[BronzeRecord]:
+        """Facade: DOI fetch with title-search fallback (delegates to port mixin)."""
+        async for publication in _CrossRefPortSurfaceMixin.fetch_filtered_with_fallback(
+            self,
+            entity_type,
+            filter_ids,
+            filter_field,
+            fallback_mapping,
+            limit,
+        ):
+            yield publication
 
     @override
     def _fallback_health_status(self) -> HealthStatus:
