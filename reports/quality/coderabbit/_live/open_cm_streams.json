@@ -1,24 +1,7 @@
 {
   "critical_path_clusters": [],
   "major_path_clusters": [],
-  "campaign_open": [
-    {"number": 6988, "title": "obs(DSA-06/P1): Dependency Health residual — freshness-aware fleet matrix"},
-    {"number": 7688, "title": "[CR-FULL][meta] Exhaustive CodeRabbit residual audit campaign (2026-08)"},
-    {"number": 7694, "title": "[CR-FULL-05][P2] Wave E: CodeRabbit contracts, normative docs, Grafana surfaces"},
-    {"number": 7695, "title": "[CR-FULL-06][P2] Wave F: CodeRabbit test honesty residual (architecture + hot unit/integration)"},
-    {"number": 7697, "title": "[CR-FULL-08][P2] CodeRabbit campaign closeout: re-audit fixed scopes + FINAL.md + tag"},
-    {"number": 7698, "title": "[CR-FULL-09][P2] Ensure CodeRabbit CLI secret and trusted workflow health"},
-    {"number": 7946, "title": "[CR-FULL][Wave A][P2] Retry rate-limited domain residual leaves"},
-    {"number": 8031, "title": "[CR-FULL][Wave E][P2] CLI residual blocked: docs/grafana/scripts All files ignored"},
-    {"number": 8032, "title": "[CR-FULL][Wave F][P2] CLI residual blocked: tests All files ignored"}
-  ],
-  "streams": {
-    "C1 Wave E": [7694, 8031],
-    "C2 Wave F": [7695, 8032],
-    "C3 domain retry": [7946],
-    "C4 secret/workflow": [7698],
-    "C5 closeout": [7697],
-    "C0 epic": [7688],
-    "C-extra DSA-06": [6988]
-  }
+  "campaign_open": [],
+  "streams": {},
+  "note": "Path-cluster C+M exhausted; campaign closeout complete."
 }

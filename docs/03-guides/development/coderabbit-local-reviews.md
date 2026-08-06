@@ -67,3 +67,12 @@ Track repo secret setup under #7698.
 
 Write logs under allowlisted `reports/quality/coderabbit/**` (see `.gitignore`).
 Do not raise tech-debt budgets to silence findings.
+
+## Campaign closeout decision (#7698)
+
+For the 2026-08 CR-FULL residual epic (#7688), repository Actions had no
+CODERABBIT_API_KEY secret. Trusted workflow remains skip-safe (exit 0 with
+warning). Continuous residual is the CodeRabbit **GitHub App** + .coderabbit.yaml.
+Optional CLI enablement remains an owner-only secret step (never commit keys).
+Evidence: reports/quality/coderabbit/20260806/CR_CLI_SECRET_AND_WORKFLOW.md.
+
