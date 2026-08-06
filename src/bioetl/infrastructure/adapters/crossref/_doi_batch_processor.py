@@ -158,10 +158,12 @@ class DoiBatchProcessor:
         original_dois: list[str],
     ) -> AsyncIterator[BronzeRecord]:
         """Yield batch items or fall back to individual DOI fetches."""
-        if response is None:
-            raise CrossRefApiError("CrossRef batch request returned no response")
-        status_code = getattr(response, "status_code", None)
-        if status_code != 200:
+        status_code = (
+            None if response is None else getattr(response, "status_code", None)
+        )
+        if response is None or status_code != 200:
+            # No response (e.g. swallowed transport error) or non-200: degrade
+            # to per-DOI fetch rather than failing the whole batch hard.
             self._logger.warning(
                 "crossref_batch_fetch_failed",
                 status_code=status_code,

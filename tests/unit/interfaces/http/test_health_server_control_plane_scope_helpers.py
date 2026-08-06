@@ -150,13 +150,14 @@ def test_control_plane_scope_resolves_unknown_exact_and_latest_paths() -> None:
     assert exact_scope.resolved_via == "selected_run_id"
     assert exact_scope.resolved_manifest is selected
 
-    latest_scope = scope.resolve_control_plane_identity_scope(
+    # Concrete run_id with no matching manifest is fail-closed (not silent latest).
+    missing_run_scope = scope.resolve_control_plane_identity_scope(
         host,
         {"pipeline": "chembl_activity", "run_id": "not-a-uuid"},
     )
-    assert latest_scope.resolved_via == "latest_manifest_for_scope"
-    assert latest_scope.resolved_manifest is later
-    assert latest_scope.selected_run_id == "not-a-uuid"
+    assert missing_run_scope.resolved_via == "selected_run_id_not_found"
+    assert missing_run_scope.resolved_manifest is None
+    assert missing_run_scope.selected_run_id == "not-a-uuid"
 
     fallback_scope = scope.resolve_control_plane_identity_scope(
         host,
