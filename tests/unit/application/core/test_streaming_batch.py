@@ -431,6 +431,22 @@ class TestStreamingBatchProcessor:
         assert len(chunks) == 4
         assert sum(len(c.silver_records) for c in chunks) == 10
 
+    async def test_process_in_chunks_rejects_zero_chunk_size(
+        self, batch_transformer, mock_memory_monitor
+    ):
+        """chunk_size < 1 must fail closed before the streaming loop."""
+        processor = StreamingBatchProcessor(
+            transformer=batch_transformer,
+            memory_monitor=mock_memory_monitor,
+        )
+        records = [{"id": "1"}]
+        batch_id = deterministic_batch_uuid_from_callsite("test_streaming_batch_zero")
+        with pytest.raises(ValueError, match="chunk_size must be >= 1"):
+            async for _ in processor.process_in_chunks(
+                records, batch_id, chunk_size=0
+            ):
+                pass
+
     async def test_process_in_chunks_adapts_size(self, batch_transformer):
         """Test chunk size adapts under memory pressure."""
 

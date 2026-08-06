@@ -14,8 +14,15 @@ from bioetl.application.services.run_reports.writer import DEFAULT_REPORT_ROOT
 
 
 def _safe_segment(value: str) -> str:
-    cleaned = "".join(ch if ch.isalnum() or ch in "._-" else "_" for ch in value)
-    return cleaned[:120] or "unknown"
+    """Sanitize one path segment and reject dot-only traversal tokens."""
+    text = value.strip()
+    # Fail closed on relative/parent segments rather than rewriting them.
+    if text in {".", ".."} or text.startswith(".."):
+        raise ValueError(f"invalid path segment: {value!r}")
+    cleaned = "".join(ch if ch.isalnum() or ch in "._-" else "_" for ch in text)
+    if cleaned in {".", ".."} or not cleaned:
+        raise ValueError(f"invalid path segment: {value!r}")
+    return cleaned[:120]
 
 
 def load_pipeline_run_report_payload(
@@ -27,12 +34,17 @@ def load_pipeline_run_report_payload(
     """Load pipeline-run-report.json from local reports tree."""
     if pipeline_name is None:
         return None
+    try:
+        safe_pipeline = _safe_segment(pipeline_name)
+        safe_run_id = _safe_segment(run_id)
+    except ValueError:
+        return None
     base = root or DEFAULT_REPORT_ROOT
     path = (
         base
         / "pipeline"
-        / _safe_segment(pipeline_name)
-        / _safe_segment(run_id)
+        / safe_pipeline
+        / safe_run_id
         / "pipeline-run-report.json"
     )
     return _load_versioned_payload(path, expected_schema="pipeline_run_report_v1")
@@ -47,12 +59,17 @@ def load_workflow_run_report_payload(
     """Load workflow-run-report.json from local reports tree."""
     if workflow_name is None:
         return None
+    try:
+        safe_workflow = _safe_segment(workflow_name)
+        safe_run_id = _safe_segment(workflow_run_id)
+    except ValueError:
+        return None
     base = root or DEFAULT_REPORT_ROOT
     path = (
         base
         / "workflow"
-        / _safe_segment(workflow_name)
-        / _safe_segment(workflow_run_id)
+        / safe_workflow
+        / safe_run_id
         / "workflow-run-report.json"
     )
     return _load_versioned_payload(path, expected_schema="workflow_run_report_v1")
@@ -128,7 +145,11 @@ def _load_versioned_payload(
     """Load one completed artifact and reject malformed/wrong-version payloads."""
     if not path.is_file():
         return None
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError):
+        # Partial writes / corrupt artifacts must not 500 the ops surface.
+        return None
     if (
         not isinstance(payload, dict)
         or payload.get("schema_version") != expected_schema

@@ -710,7 +710,8 @@ class TestHealthServerQuarantineExplorer:
         )
 
         assert status_code == 400
-        assert status_text == "Missing required query parameter: pipeline"
+        # Status-line reason is canonical HTTP phrase; detail lives in JSON body.
+        assert status_text == "Bad Request"
         assert "Missing required query parameter: pipeline" in body
         service.list_filtered_records.assert_not_awaited()
 
@@ -803,7 +804,7 @@ class TestHealthServerQuarantineExplorer:
         )
 
         assert status_code == 400
-        assert status_text == "Missing required query parameter: pipeline"
+        assert status_text == "Bad Request"
         assert "Missing required query parameter: pipeline" in body
         service.get_filtered_stats.assert_not_awaited()
 
@@ -823,7 +824,7 @@ class TestHealthServerQuarantineExplorer:
         )
 
         assert status_code == 400
-        assert status_text == "Missing required query parameter: pipeline"
+        assert status_text == "Bad Request"
         assert "Missing required query parameter: pipeline" in body
         service.get_filtered_filter_options.assert_not_awaited()
 

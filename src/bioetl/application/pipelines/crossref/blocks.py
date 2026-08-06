@@ -79,9 +79,11 @@ class _CrossRefMetadataBlock:
 
     def extract(self, record: BronzeRecord) -> JsonDict:
         content_domain = extract_content_domain(record)
-        raw_references = extract_references(record)
-        references_raw_json = self.serialize_json(raw_references)
-        references_canonical_json = self.serialize_json(raw_references)
+        # Preserve original CrossRef ``reference`` payload before normalization.
+        original_reference_payload = record.get("reference")
+        references_raw_json = self.serialize_json(original_reference_payload)
+        normalized_references = extract_references(record)
+        references_canonical_json = self.serialize_json(normalized_references)
 
         return {
             **extract_page_info(record),

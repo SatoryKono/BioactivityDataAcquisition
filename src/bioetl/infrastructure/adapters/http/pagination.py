@@ -17,6 +17,9 @@ T = TypeVar("T")
 class PaginatedFetcherMixin:
     """Mixin for implementing standardized pagination logic in HTTP adapters."""
 
+    # Hard ceiling against runaway providers (cursor loops / empty pages).
+    _DEFAULT_MAX_PAGES: int = 10_000
+
     @staticmethod
     def _should_stop_fetching(fetched: int, limit: int | None) -> bool:
         """Check if we've reached the global fetch limit.
@@ -40,6 +43,8 @@ class PaginatedFetcherMixin:
         ],  # Any: cursor type varies per API
         limit: int | None = None,
         initial_cursor: Any | None = None,  # Any: cursor type varies per...
+        *,
+        max_pages: int | None = None,
     ) -> AsyncIterator[T]:
         """Fetch all pages using the provided fetch function.
 
@@ -50,6 +55,7 @@ class PaginatedFetcherMixin:
                         and returns (items, next_cursor).
             limit: Maximum number of items to yield globally across all pages.
             initial_cursor: Starting cursor value (default: None).
+            max_pages: Optional hard page cap (defaults to ``_DEFAULT_MAX_PAGES``).
 
         Yields:
             Items from the pages as they are fetched.
@@ -59,8 +65,19 @@ class PaginatedFetcherMixin:
         """
         fetched = 0
         cursor = initial_cursor
+        page_count = 0
+        seen_cursors: set[object] = set()
+        page_limit = (
+            max_pages if max_pages is not None else self._DEFAULT_MAX_PAGES
+        )
+        if page_limit < 1:
+            raise ValueError(f"max_pages must be >= 1, got {page_limit!r}")
 
         while not self._should_stop_fetching(fetched, limit):
+            if page_count >= page_limit:
+                break
+            page_count += 1
+
             items, next_cursor = await fetch_func(cursor, fetched)
 
             if not items and next_cursor is None:
@@ -74,4 +91,8 @@ class PaginatedFetcherMixin:
 
             if next_cursor is None:
                 break
+            # Terminate on repeated cursor (including empty pages that re-emit).
+            if next_cursor in seen_cursors:
+                break
+            seen_cursors.add(next_cursor)
             cursor = next_cursor

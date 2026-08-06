@@ -29,9 +29,6 @@ from bioetl.application.pipelines.common.blocks import (
     _CrossRefMetadataBlock,
 )
 from bioetl.application.pipelines.common.publication_blocks import ExtractionBlock
-from bioetl.application.pipelines.common.publication_transformer_context import (
-    install_runtime_transformer_init,
-)
 from bioetl.application.pipelines.crossref._business_data_builder import (
     compute_publication_date,
     hash_author_details,
@@ -241,9 +238,5 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
         return silver_record
 
-
-install_runtime_transformer_init(
-    CrossRefPublicationTransformer,
-    CrossRefPublicationTransformer.DEFAULT_PROVIDER,
-    CrossRefPublicationTransformer.DEFAULT_ENTITY_TYPE,
-)
+    # Constructor is inherited from BasePublicationTransformer and uses
+    # DEFAULT_PROVIDER / DEFAULT_ENTITY_TYPE — no import-time __init__ mutation.

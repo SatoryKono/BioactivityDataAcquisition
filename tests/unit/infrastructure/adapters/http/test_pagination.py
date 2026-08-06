@@ -105,10 +105,7 @@ async def test_paginated_fetch_empty():
 
 @pytest.mark.asyncio
 async def test_paginated_fetch_empty_page_with_cursor():
-    """Test empty page but valid cursor (should stop if handled conservatively or continue).
-    Current implementation stops if items are empty AND cursor is None.
-    If items empty but cursor exists, it continues.
-    """
+    """Empty page with a new cursor may continue once to the next page."""
     fetcher = MockFetcher()
 
     count = 0
@@ -130,4 +127,43 @@ async def test_paginated_fetch_empty_page_with_cursor():
     assert results == [1]
 
 
-# Removed test_paginated_fetch_passes_fetched_count as 'fetched' argument is not supported
+@pytest.mark.asyncio
+async def test_paginated_fetch_stops_on_repeated_cursor():
+    """Repeated next_cursor must terminate (loop guard)."""
+    fetcher = MockFetcher()
+    calls = 0
+
+    async def fetch_page(cursor, _):
+        await asyncio.sleep(0)
+        nonlocal calls
+        calls += 1
+        return [calls], "same-cursor"
+
+    results = []
+    async for item in fetcher.paginated_fetch(fetch_page, limit=100):
+        results.append(item)
+
+    # Page 1 yields + records cursor; page 2 still yields once, then repeated
+    # next_cursor terminates the loop (no infinite fetch).
+    assert results == [1, 2]
+    assert calls == 2
+
+
+@pytest.mark.asyncio
+async def test_paginated_fetch_respects_max_pages():
+    """max_pages hard-caps page fetches even without item limit."""
+    fetcher = MockFetcher()
+    calls = 0
+
+    async def fetch_page(cursor, _):
+        await asyncio.sleep(0)
+        nonlocal calls
+        calls += 1
+        return [calls], f"c{calls}"
+
+    results = []
+    async for item in fetcher.paginated_fetch(fetch_page, max_pages=3):
+        results.append(item)
+
+    assert results == [1, 2, 3]
+    assert calls == 3

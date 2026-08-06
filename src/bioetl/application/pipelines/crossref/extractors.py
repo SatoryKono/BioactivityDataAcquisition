@@ -78,19 +78,29 @@ def extract_authors(
         []
 
     """
-    authors = []
-    for author in publication.get("author", []):
-        given = author.get("given", "").strip()
-        family = author.get("family", "").strip()
+    authors: list[str] = []
+    raw_authors = publication.get("author", [])
+    # Match extract_affiliations: only iterate list-of-dict author payloads.
+    if not isinstance(raw_authors, list):
+        return authors
+    for author in raw_authors:
+        if not isinstance(author, dict):
+            continue
+        given_raw = author.get("given", "")
+        family_raw = author.get("family", "")
+        given = given_raw.strip() if isinstance(given_raw, str) else ""
+        family = family_raw.strip() if isinstance(family_raw, str) else ""
         if given and family:
             authors.append(f"{given} {family}")
         elif family:
             authors.append(family)
         elif given:
             authors.append(given)
-        elif name := author.get("name", "").strip():
-            # Organizational author (e.g., "World Health Organization")
-            authors.append(name)
+        else:
+            name_raw = author.get("name", "")
+            if isinstance(name_raw, str) and (name := name_raw.strip()):
+                # Organizational author (e.g., "World Health Organization")
+                authors.append(name)
     return authors
 
 

@@ -152,6 +152,18 @@ class CrossRefAdapter(
         return "/works"
 
     async def aclose(self) -> None:
-        """Close adapter resources via underlying HTTP client context manager."""
-        if self.http_client:
+        """Close HTTP client only when this adapter holds an entered context.
+
+        Injected clients that were never entered (depth 0) or are nested
+        (depth > 1) are left to their outer owner / UnifiedHTTPClient depth
+        accounting. Depth 1 means this adapter is the sole active enter.
+        """
+        if not self.http_client:
+            return
+        enter_depth_fn = getattr(self.http_client, "_enter_depth", None)
+        if callable(enter_depth_fn):
+            depth = int(enter_depth_fn())
+        else:
+            depth = int(getattr(self.http_client, "_client_enter_depth", 0) or 0)
+        if depth >= 1:
             await self.http_client.__aexit__(None, None, None)

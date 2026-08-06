@@ -352,9 +352,10 @@ def build_crossref_business_data(
         dates.get("published_online"),
     )
     raw_year = extract_publication_year_candidate(record)
-    raw_references = extract_references(record)
-    references_raw_json = serialize_json(raw_references)
-    references_canonical_json = serialize_json(raw_references)
+    # Preserve original CrossRef ``reference`` payload before normalization.
+    references_raw_json = serialize_json(record.get("reference"))
+    normalized_references = extract_references(record)
+    references_canonical_json = serialize_json(normalized_references)
 
     return {
         **_build_crossref_identity_fields(
