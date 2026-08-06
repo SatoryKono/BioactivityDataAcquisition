@@ -81,18 +81,26 @@ def partition_source_rows(
     source_rows: list[dict[str, object]],
     reference_values: set[tuple[object, ...]],
 ) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
-    """Partition source rows into retained and orphan rows."""
+    """Partition source rows into retained and orphan rows.
+
+    Rows with any NULL / blank / NaN foreign-key component are always retained.
+    SQL-style foreign-key checks do not treat NULL as a missing parent, so
+    ``delete_orphans`` must never classify incomplete FK rows as orphans.
+    """
     retained_rows: list[dict[str, object]] = []
     orphan_rows: list[dict[str, object]] = []
+    source_keys = request.effective_source_keys
     for row in source_rows:
+        if row_has_null_foreign_key(row, source_keys):
+            retained_rows.append(row)
+            continue
         source_key = normalize_row_key(
             row,
-            request.effective_source_keys,
+            source_keys,
             nulls_equal=request.nulls_equal,
         )
         if source_key is None:
-            # nulls_equal=False and incomplete FK: SQL-like NULL does not fail the
-            # foreign-key check, so retain the row instead of treating it as orphan.
+            # Defensive: incomplete keys after null-component check still retain.
             retained_rows.append(row)
             continue
         if source_key in reference_values:
@@ -172,6 +180,14 @@ def complete_dry_run(
     )
 
 
+def row_has_null_foreign_key(
+    row: dict[str, object],
+    keys: tuple[str, ...],
+) -> bool:
+    """Return True when any foreign-key component is null, blank, or NaN."""
+    return any(normalize_value(row.get(key)) is None for key in keys)
+
+
 def normalize_row_key(
     row: dict[str, object],
     keys: tuple[str, ...],
@@ -192,27 +208,45 @@ def normalize_row_key(
     return tuple(normalized)
 
 
-def normalize_value(value: object) -> str | None:
-    """Normalize one foreign-key value for comparison."""
+def normalize_value(value: object) -> object | None:
+    """Normalize one foreign-key value for comparison.
+
+    Invariants:
+    - ``None``, blank strings, and NaN are null (``None``).
+    - Strings stay distinct from numeric values (``"5"`` != ``5``).
+    - Integral numbers that differ only by float form match (``5`` == ``5.0``).
+    - Booleans are not collapsed into integers.
+    """
     if value is None:
         return None
-    if isinstance(value, float) and isnan(value):
-        return None
+    if isinstance(value, bool):
+        return ("bool", value)
+    if isinstance(value, float):
+        if isnan(value):
+            return None
+        if value.is_integer():
+            return ("int", int(value))
+        return ("float", value)
+    if isinstance(value, int):
+        return ("int", value)
     if isinstance(value, str):
         stripped = value.strip()
         if not stripped:
             return None
-        return stripped
+        return ("str", stripped)
     rendered = str(value).strip()
     if not rendered:
         return None
-    return rendered
+    return ("other", type(value).__name__, rendered)
 
 
 __all__ = [
     "build_reconciliation_result",
     "complete_dry_run",
     "complete_without_mutation",
+    "normalize_row_key",
+    "normalize_value",
     "partition_source_rows",
     "reference_value_set",
+    "row_has_null_foreign_key",
 ]
