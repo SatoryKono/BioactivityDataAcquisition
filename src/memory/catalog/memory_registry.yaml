@@ -51,6 +51,30 @@ surfaces:
     runtime_usage_proven: true
     evidence: [AGENTS.md, .codex/agents/CODEX-RUNTIME.md]
     status: PASS
+  - memory_id: MEM-JUNIE-RUNTIME
+    <<: *surface_defaults
+    agent_or_runtime: junie
+    memory_type: procedural
+    subtype: runtime-instructions-and-skills
+    path_or_backend: .junie
+    format: markdown-yaml
+    scope: repository
+    owner: ai-runtime-governance
+    canonicality: canonical
+    source_of_truth: .junie
+    readers: [junie]
+    writers: [ai-runtime-governance]
+    lifetime: durable
+    retention_policy: git-history
+    cleanup_policy: reviewed-retirement
+    runtime_usage_proven: true
+    evidence:
+      - AGENTS.md
+      - .junie/agents/JUNIE-RUNTIME.md
+      - .junie/guidelines.md
+      - scripts/ai/junie/check_junie_mirror.sh
+      - docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md
+    status: PASS
   - memory_id: MEM-DEVIN-RUNTIME
     <<: *surface_defaults
     agent_or_runtime: devin
@@ -60,16 +84,22 @@ surfaces:
     format: json-markdown
     scope: repository
     owner: ai-runtime-governance
-    canonicality: mirror
-    source_of_truth: .codex
+    # Devin-specific profiles/skills are canonical under .devin/**; shared skill
+    # structure remains governed by the Codex–Devin parity contract.
+    canonicality: canonical
+    source_of_truth: .devin
     readers: [devin]
     writers: [ai-runtime-governance]
     lifetime: durable
     retention_policy: git-history
     cleanup_policy: regenerate-or-retire
     runtime_usage_proven: true
-    evidence: [.devin/config.json, .github/workflows/skills-consistency.yml]
-    status: WARN
+    evidence:
+      - .devin/agents/DEVIN-RUNTIME.md
+      - .devin/config.json
+      - .github/workflows/skills-consistency.yml
+      - docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md
+    status: PASS
   - memory_id: MEM-DOCS-AI-MIRROR
     <<: *surface_defaults
     agent_or_runtime: all
@@ -80,7 +110,7 @@ surfaces:
     scope: repository
     owner: ai-runtime-governance
     canonicality: mirror
-    source_of_truth: .codex
+    source_of_truth: AGENTS.md;.codex;.junie
     readers: [all-agents, contributors]
     writers: [ai-runtime-governance]
     lifetime: durable
@@ -125,7 +155,8 @@ surfaces:
     retention_policy: src/memory/policy/retention.yaml
     cleanup_policy: archive-superseded
     runtime_usage_proven: true
-    evidence: [src/memory/tooling/promote_note.py, src/memory/tooling/review_curated.py]
+    evidence:
+      [src/memory/tooling/promote_note.py, src/memory/tooling/review_curated.py]
     status: PASS
   - memory_id: MEM-EPISODIC
     <<: *surface_defaults
@@ -259,10 +290,11 @@ surfaces:
     status: NOT_PROVEN
   - memory_id: MEM-IDE-LOCAL
     <<: *surface_defaults
-    agent_or_runtime: cursor-gemini-junie-ide
+    # Machine-local IDE/vendor state only. Tracked Junie runtime is MEM-JUNIE-RUNTIME.
+    agent_or_runtime: cursor-gemini-idea
     memory_type: cache
     subtype: vendor-local-state
-    path_or_backend: .cursor;.gemini;.junie;.idea
+    path_or_backend: .cursor;.gemini;.idea
     format: vendor-specific
     scope: user-worktree
     owner: local-user
