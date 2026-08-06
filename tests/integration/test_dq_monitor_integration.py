@@ -102,16 +102,17 @@ class TestDQMonitorAnomalyDetection:
         """DQ Monitor should not detect anomalies for normal values."""
         monitor = DataQualityMonitor(logger=mock_logger, z_score_threshold=2.0)
 
-        # Build baseline
-        for _ in range(5):
+        # Build a normal baseline with non-zero variance. A constant baseline
+        # intentionally treats any deviation as anomalous.
+        for value in [980.0, 1000.0, 1020.0, 990.0, 1010.0]:
             monitor.update_baseline_from_metrics(
-                {"record_count": 1000.0},
+                {"record_count": value},
                 timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             )
 
         # Check with value close to baseline
         anomalies = monitor.check_quality(
-            {"record_count": 1050.0}, timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
+            {"record_count": 1010.0}, timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         )
 
         assert len(anomalies) == 0

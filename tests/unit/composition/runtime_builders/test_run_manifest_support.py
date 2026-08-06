@@ -565,7 +565,7 @@ def test_resolve_code_revision_for_manifest_uses_deterministic_fallback_for_dirt
     )
 
     assert provenance.git_commit == "test-deadbeefdead"
-    assert provenance.source_revision_state == "test_synthetic"
+    assert provenance.source_revision_state == "dirty_state_unknown"
     assert provenance.dependency_lock_hash == "sha256:test-lock-deadbeefdead"
 
 

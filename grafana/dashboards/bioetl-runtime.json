@@ -239,7 +239,7 @@
       "id": 9991,
       "type": "text",
       "title": "Start Pipeline Triage",
-      "description": "States the neutral outcome explicitly and routes non-OK states to the highest-impact bounded evidence.",
+      "description": "States the current verdict and neutral outcome explicitly, then routes non-OK states through runtime blockers, DQ evidence, and Run Explorer.",
       "gridPos": {
         "h": 2,
         "w": 24,

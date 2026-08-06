@@ -114,12 +114,20 @@ async def test_client_coverage__health_degraded__874078aa(adapter, mock_http_cli
 
 @pytest.mark.asyncio
 async def test_probe_health_error(adapter, mock_http_client):
-    """Test health probe raises exception on failure."""
+    """Test health probe degrades instead of raising on request failure."""
 
     mock_http_client.get_once.side_effect = Exception("API Error")
 
-    with pytest.raises(Exception):
-        await adapter._probe_health()
+    status = await adapter._probe_health()
+
+    assert status == HealthStatus.DEGRADED
+    adapter.logger.warning.assert_called_once_with(
+        "health_check_degraded",
+        provider="uniprot",
+        reason="request_error",
+        status_code=None,
+        error_type="Exception",
+    )
 
 
 @pytest.mark.asyncio

@@ -106,7 +106,7 @@ class TestPostrunMetadataWriteService:
         """Configured metadata writer should finalize Silver sidecars."""
         storage = MagicMock()
         storage.get_table_path = MagicMock(return_value="test-output/test_silver")
-        storage.is_table_initialized = MagicMock(return_value=False)
+        storage.is_table_initialized = MagicMock(return_value=True)
 
         metadata_coordinator = MagicMock()
         metadata_writer = MagicMock()
@@ -147,7 +147,7 @@ class TestPostrunMetadataWriteService:
     ) -> None:
         storage = MagicMock()
         storage.get_table_path = MagicMock(return_value="test-output/test_silver")
-        storage.is_table_initialized = MagicMock(return_value=False)
+        storage.is_table_initialized = MagicMock(return_value=True)
 
         metadata_coordinator = MagicMock()
         metadata_writer = MagicMock()

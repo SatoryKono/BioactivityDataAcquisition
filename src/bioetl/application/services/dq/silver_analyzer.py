@@ -141,11 +141,17 @@ class SilverDQAnalyzer:
         Returns:
             SilverDQReport with per-check results, thresholds, and aggregate summary.
         """
-        analyze_request = coerce_silver_dq_analyze_request(
-            request,
-            args=args,
-            kwargs=kwargs,
-        )
+        if request is None and "data" in kwargs:
+            analyze_request = coerce_silver_dq_analyze_request(
+                args=args,
+                kwargs=kwargs,
+            )
+        else:
+            analyze_request = coerce_silver_dq_analyze_request(
+                request,
+                args=args,
+                kwargs=kwargs,
+            )
         df = self._to_polars_dataframe(analyze_request.data)
         enabled_checks = set(analyze_request.config.get_checks_enums())
         checks, passed, failed, warnings = self._check_executor.execute_checks(

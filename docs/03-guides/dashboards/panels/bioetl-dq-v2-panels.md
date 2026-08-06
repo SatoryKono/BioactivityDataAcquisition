@@ -125,7 +125,7 @@ query, links, and operator fact.
 - **Purpose:** Count Silver filter rejects.
 - **Data sources:** `bioetl_silver_filter_rejections_total`
 
-### 20. Reject Evidence
+### 20. Selected Range · Reject Evidence
 - **Type:** Row
 - **Purpose:** Collapsed-by-default reject analysis; expand after current reasons
   or TIME RANGE delivery-impact cards identify a reject path.
@@ -156,7 +156,7 @@ query, links, and operator fact.
 - **Purpose:** Show top Silver reject fields; an empty vector remains visible as neutral `No data` and never invents a field.
 - **Data sources:** `bioetl_silver_filter_rejections_total{field=...}`
 
-### 26. Validation Diagnostics
+### 26. Selected Range · Validation Diagnostics
 - **Type:** Row
 - **Purpose:** Collapsed-by-default validation/runtime/trend forensics.
 - **Data sources:** `bioetl_dq_validation_failures_total`, `bioetl_dq_anomaly_detected`
@@ -207,12 +207,12 @@ query, links, and operator fact.
 - **Purpose:** Count Gold strict validation failures.
 - **Data sources:** `bioetl_dq_validation_failures_total`
 
-### 36. Range & Debug Evidence
+### 36. Selected Range · Impact & Freshness
 - **Type:** Row
 - **Purpose:** Group selected-range score, quarantine, and reject evidence.
 - **Data sources:** Prometheus range evidence from the nested panels.
 
-### 37. Run Context
+### 37. Selected Run · Identity & Accounting
 - **Type:** Row
 - **Purpose:** Group selected-run identity and processed-record HTTP evidence.
 - **Data sources:** BioETL Ops HTTP.

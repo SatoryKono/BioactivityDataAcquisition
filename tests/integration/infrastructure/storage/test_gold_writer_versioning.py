@@ -204,6 +204,14 @@ async def test_gold_writer_dual_write_fails_fast_when_shadow_target_errors(
         logical_table="chembl.activity",
         failed_contract_version="2.0.0",
         failed_target_table="chembl.activity__v2_0_0",
+        committed_targets=[
+            {
+                "contract_version": "1.0.0",
+                "physical_table": "chembl.activity__v1_0_0",
+            }
+        ],
+        partial_dual_write=True,
+        recovery_action="operator_compensate_committed_targets",
         active_contract_version="2.0.0",
         write_versions=("1.0.0", "2.0.0"),
     )

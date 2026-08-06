@@ -66,7 +66,7 @@ def resolve_code_revision_for_manifest(
     # treat it as a verified clean workspace revision.
     return CodeRevisionProvenance(
         git_commit=f"test-{resolved_config_hash[:12]}",
-        source_revision_state="test_synthetic",
+        source_revision_state="dirty_state_unknown",
         dependency_lock_hash=f"sha256:test-lock-{resolved_config_hash[:12]}",
     )
 
