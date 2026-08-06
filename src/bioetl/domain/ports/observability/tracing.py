@@ -30,7 +30,12 @@ class SpanHandle(Protocol):
 class TracerHandle(Protocol):
     """Minimal tracer surface returned by TracingPort.get_tracer."""
 
-    def start_as_current_span(self, name: str) -> SpanHandle: ...
+    def start_as_current_span(
+        self,
+        name: str,
+        *,
+        attributes: dict[str, object] | None = None,
+    ) -> SpanHandle: ...
 
 
 @runtime_checkable
