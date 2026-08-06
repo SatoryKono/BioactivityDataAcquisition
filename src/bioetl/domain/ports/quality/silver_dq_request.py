@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from dataclasses import MISSING, dataclass, fields
+from typing import TYPE_CHECKING, Any, Final
 
 from bioetl.domain.types import JsonDict
 
@@ -15,6 +15,9 @@ if TYPE_CHECKING:
     from bioetl.domain.ports.quality.dq_config import SilverDQConfigPort
 
 DataContainer = Any
+
+# Sentinel distinguishes omitted request from explicit None.
+_REQUEST_OMITTED: Final[object] = object()
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,47 +40,31 @@ class SilverDQAnalyzeRequest:
     key_nullability_rules: list[JsonDict] | None = None
 
 
-_SILVER_DQ_ANALYZE_POSITIONAL_FIELDS = (
-    "data",
-    "run_id",
-    "pipeline",
-    "target_table",
-    "source_batch_ids",
-    "config",
-    "timestamp",
-    "primary_keys",
-    "soft_fail_threshold",
-    "hard_fail_threshold",
-    "input_record_count",
-    "quarantined_count",
-    "previous_schema",
-    "key_nullability_rules",
-)
-_SILVER_DQ_ANALYZE_REQUIRED_FIELDS = (
-    "data",
-    "run_id",
-    "pipeline",
-    "target_table",
-    "source_batch_ids",
-    "config",
-    "timestamp",
-    "primary_keys",
-)
-_SILVER_DQ_ANALYZE_DEFAULTS: dict[str, object] = {
-    "soft_fail_threshold": 0.05,
-    "hard_fail_threshold": 0.20,
-    "input_record_count": None,
-    "quarantined_count": 0,
-    "previous_schema": None,
-    "key_nullability_rules": None,
-}
-_SILVER_DQ_ANALYZE_ALLOWED_FIELDS = frozenset(
-    {*_SILVER_DQ_ANALYZE_POSITIONAL_FIELDS, *tuple(_SILVER_DQ_ANALYZE_DEFAULTS)}
-)
+def _silver_dq_field_meta() -> tuple[tuple[str, ...], tuple[str, ...], dict[str, object], frozenset[str]]:
+    positional: list[str] = []
+    required: list[str] = []
+    defaults: dict[str, object] = {}
+    for field in fields(SilverDQAnalyzeRequest):
+        positional.append(field.name)
+        if field.default is MISSING and field.default_factory is MISSING:
+            required.append(field.name)
+        elif field.default is not MISSING:
+            defaults[field.name] = field.default
+        else:
+            defaults[field.name] = field.default_factory()  # type: ignore[misc]
+    return tuple(positional), tuple(required), defaults, frozenset(positional)
+
+
+(
+    _SILVER_DQ_ANALYZE_POSITIONAL_FIELDS,
+    _SILVER_DQ_ANALYZE_REQUIRED_FIELDS,
+    _SILVER_DQ_ANALYZE_DEFAULTS,
+    _SILVER_DQ_ANALYZE_ALLOWED_FIELDS,
+) = _silver_dq_field_meta()
 
 
 def coerce_silver_dq_analyze_request(
-    request: SilverDQAnalyzeRequest | DataContainer | None = None,
+    request: SilverDQAnalyzeRequest | DataContainer | None | object = _REQUEST_OMITTED,
     *,
     args: tuple[object, ...] = (),
     kwargs: Mapping[str, object] | None = None,
@@ -114,12 +101,16 @@ def coerce_silver_dq_analyze_request(
 
 def _resolve_silver_dq_analyze_kwargs(
     *,
-    request: SilverDQAnalyzeRequest | DataContainer | None,
+    request: SilverDQAnalyzeRequest | DataContainer | None | object,
     args: tuple[object, ...],
     kwargs: Mapping[str, object] | None,
 ) -> dict[str, object]:
     resolved_kwargs = dict(kwargs or {})
-    legacy_values = list(args) if request is None else [request, *args]
+    if request is _REQUEST_OMITTED:
+        legacy_values: list[object] = list(args)
+    else:
+        # Explicit None is preserved as the first positional (data) slot.
+        legacy_values = [request, *args]
     _merge_silver_dq_analyze_legacy_values(resolved_kwargs, legacy_values)
     _raise_on_unexpected_silver_dq_fields(resolved_kwargs)
     _raise_on_missing_silver_dq_fields(resolved_kwargs)

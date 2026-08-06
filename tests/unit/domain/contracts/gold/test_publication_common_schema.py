@@ -46,7 +46,7 @@ pytestmark = pytest.mark.unit
 def _publication_gold_frame(**overrides: object) -> pd.DataFrame:
     record: dict[str, object] = {
         "entity_id": "publication:1",
-        "content_hash": "hash",
+        "content_hash": "a" * 64,
         "doi": "10.1000/example",
         "pmid": None,
         "pmc_id": None,
@@ -131,7 +131,7 @@ def test_publication_gold_contract_rejects_invalid_field_constraints(
         PublicationGoldCommonSchema.validate(_publication_gold_frame(**overrides))
 
 
-def test_publication_gold_contract_allows_any_taxonomy_value_when_not_loaded(
+def test_publication_gold_contract_fails_closed_when_taxonomy_not_loaded(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
@@ -140,14 +140,22 @@ def test_publication_gold_contract_allows_any_taxonomy_value_when_not_loaded(
         lambda field_name: frozenset(),
     )
 
+    # Empty taxonomy must not accept non-null classification values (fail closed).
+    with pytest.raises(pa.errors.SchemaError):
+        PublicationGoldCommonSchema.validate(
+            _publication_gold_frame(
+                publication_type_unified="custom-type",
+                publication_subclass="custom-subclass",
+                publication_class="custom-class",
+            )
+        )
+
+    # Null classification fields remain valid when taxonomy is empty.
     validated = PublicationGoldCommonSchema.validate(
         _publication_gold_frame(
-            publication_type_unified="custom-type",
-            publication_subclass="custom-subclass",
-            publication_class="custom-class",
+            publication_type_unified=None,
+            publication_subclass=None,
+            publication_class=None,
         )
     )
-
-    assert validated["publication_type_unified"].iloc[0] == "custom-type"
-    assert validated["publication_subclass"].iloc[0] == "custom-subclass"
-    assert validated["publication_class"].iloc[0] == "custom-class"
+    assert validated["publication_type_unified"].isna().iloc[0]

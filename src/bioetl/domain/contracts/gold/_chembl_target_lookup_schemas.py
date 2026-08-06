@@ -7,6 +7,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    CONTENT_HASH_HEX64_PATTERN,
     StrictGoldContractSchema,
 )
 
@@ -15,7 +16,10 @@ class ChEMBLTargetGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Target in Gold layer."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
     target_id: Series[str] = pa.Field(nullable=False)
     target_type: Series[str] = pa.Field(nullable=True)
     pref_name: Series[str] = pa.Field(nullable=True)
@@ -53,7 +57,10 @@ class ChEMBLTargetComponentGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Target Component in Gold layer."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
     primary_component_id: Series[float] = pa.Field(
         nullable=False, coerce=True, alias="component_id"
     )  # int64
@@ -77,7 +84,10 @@ class ChEMBLTargetProteinClassificationGoldSchema(StrictGoldContractSchema):
     """Gold schema for ChEMBL target protein classification relation rows."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
     target_id: Series[str] = pa.Field(nullable=False)
     classification_status: Series[str] = pa.Field(
         nullable=False,
@@ -146,7 +156,10 @@ class ChEMBLTissueGoldSchema(StrictGoldContractSchema):
 
     # System fields
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
 
     # Primary key (transformer maps tissue_chembl_id → tissue_id)
     tissue_id: Series[str] = pa.Field(
@@ -163,10 +176,11 @@ class ChEMBLTissueGoldSchema(StrictGoldContractSchema):
     )
 
     # Ontology identifiers (optional)
+    # Underscore form matches domain tissue normalization (colon → underscore).
     bto_id: Series[str] = pa.Field(
         nullable=True,
         str_matches=r"^BTO_\d{7}$",
-        description="BRENDA Tissue Ontology ID",
+        description="BRENDA Tissue Ontology ID (underscore form, e.g. BTO_0000001)",
     )
     caloha_id: Series[str] = pa.Field(
         nullable=True,
@@ -176,12 +190,12 @@ class ChEMBLTissueGoldSchema(StrictGoldContractSchema):
     efo_id: Series[str] = pa.Field(
         nullable=True,
         str_matches=r"^EFO_\d{7}$",
-        description="Experimental Factor Ontology ID",
+        description="Experimental Factor Ontology ID (underscore form)",
     )
     uberon_id: Series[str] = pa.Field(
         nullable=True,
         str_matches=r"^UBERON_\d{7}$",
-        description="Uberon Ontology ID",
+        description="Uberon Ontology ID (underscore form)",
     )
 
 
@@ -200,7 +214,10 @@ class ChEMBLSubcellularFractionGoldSchema(StrictGoldContractSchema):
 
     # System fields
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
 
     # Primary key (normalized subcellular fraction name)
     subcellular_fraction: Series[str] = pa.Field(

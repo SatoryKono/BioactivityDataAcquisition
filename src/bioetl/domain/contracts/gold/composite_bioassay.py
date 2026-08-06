@@ -30,20 +30,23 @@ class CompositeActivityGoldSchema(CompositeLookupLineageSchema):
         nullable=True,
         description="ChEMBL target identifier used as activity-to-target lineage anchor.",
     )
-    taxonomy_id: Series[int] = pa.Field(
+    taxonomy_id: Series[float] = pa.Field(
         nullable=True,
+        coerce=True,
         description="NCBI taxonomy identifier retained as inherited target lineage metadata.",
     )
     publication_id: Series[str] = pa.Field(
         nullable=True,
         description="ChEMBL publication identifier used as activity-to-publication lineage anchor.",
     )
-    record_id: Series[int] = pa.Field(
+    record_id: Series[float] = pa.Field(
         nullable=True,
+        coerce=True,
         description="ChEMBL compound record identifier retained as source-scoped lineage.",
     )
-    src_id: Series[int] = pa.Field(
+    src_id: Series[float] = pa.Field(
         nullable=True,
+        coerce=True,
         description="Provider source identifier retained as source-scoped lineage metadata.",
     )
     canonical_smiles: Series[str] = pa.Field(
@@ -79,8 +82,9 @@ class CompositeAssayGoldSchema(CompositeLookupLineageSchema):
         nullable=True,
         description="ChEMBL publication identifier used as assay-to-publication lineage anchor.",
     )
-    src_id: Series[int] = pa.Field(
+    src_id: Series[float] = pa.Field(
         nullable=True,
+        coerce=True,
         description="Provider source identifier retained as source-scoped lineage metadata.",
     )
     description: Series[str] = pa.Field(
@@ -115,8 +119,9 @@ class CompositeTargetGoldSchema(CompositeLookupLineageSchema):
         nullable=True,
         description="UniProt accession retained as partial cross-source protein lineage anchor.",
     )
-    taxonomy_id: Series[int] = pa.Field(
+    taxonomy_id: Series[float] = pa.Field(
         nullable=True,
+        coerce=True,
         description="NCBI taxonomy identifier retained as organism lineage metadata.",
     )
     description: Series[str] = pa.Field(

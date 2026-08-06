@@ -58,7 +58,9 @@ class CompositeCheckpointPort(Protocol):
             pattern: Glob pattern (e.g. ``composite_publication_*.json``).
 
         Returns:
-            List of matching relative paths, sorted by modification time descending.
+            List of matching relative paths, ordered deterministically by
+            **lexical descending** filename (checkpoint filenames encode run
+            identity). Callers must not rely on filesystem mtime ordering.
         """
         ...
 

@@ -39,7 +39,8 @@ class CompositePublicationGoldSchema(CompositeLookupLineageSchema):
         nullable=False,
         description="Canonical-cleaned publication title retained as fallback join evidence.",
     )
-    src_id: Series[int] = pa.Field(
+    src_id: Series[float] = pa.Field(
         nullable=True,
+        coerce=True,
         description="Provider source identifier retained as source-scoped lineage metadata.",
     )

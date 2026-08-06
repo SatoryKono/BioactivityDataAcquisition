@@ -43,7 +43,11 @@ class LockPort(Protocol):
         Args:
             key: The unique key for the lock.
             owner_id: The ID of the run attempting to acquire the lock.
-            ttl: Time-to-live for the lock in seconds.
+            ttl: Time-to-live for the lock in seconds. When ``ttl`` is ``None``,
+                the adapter does not schedule TTL expiry (lock held until
+                explicit release or process teardown). When ``ttl`` is a positive
+                int, adapters that support TTL expire the lock after that many
+                seconds of wall time.
             wait: If True, wait for the lock to be released if it's already held.
             wait_timeout: Maximum time to wait for the lock in seconds.
             exclusive: If True, acquire an exclusive lock.

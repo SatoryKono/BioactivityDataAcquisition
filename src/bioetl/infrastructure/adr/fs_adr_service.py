@@ -14,6 +14,7 @@ from bioetl.domain.ports import (
     AdrDocument,
     AdrInfo,
     AdrServicePort,
+    AdrIssueSeverity,
     AdrValidationIssue,
     AdrValidationReport,
 )
@@ -115,14 +116,14 @@ class FilesystemAdrCatalog(AdrServicePort):
         issues: list[AdrValidationIssue],
     ) -> AdrValidationReport:
         """Build aggregate validation report from discovered files and issues."""
-        errors = sum(1 for issue in issues if issue.severity == "error")
-        warnings = sum(1 for issue in issues if issue.severity == "warning")
+        errors = sum(1 for issue in issues if issue.severity == AdrIssueSeverity.ERROR)
+        warnings = sum(1 for issue in issues if issue.severity == AdrIssueSeverity.WARNING)
         return AdrValidationReport(
             valid=errors == 0,
             total=len(files),
             errors=errors,
             warnings=warnings,
-            issues=issues,
+            issues=tuple(issues),
         )
 
     def validate(self) -> AdrValidationReport:
@@ -140,7 +141,7 @@ class FilesystemAdrCatalog(AdrServicePort):
 
         return self._build_validation_report(
             files=files,
-            issues=issues,
+            issues=tuple(issues),
         )
 
 

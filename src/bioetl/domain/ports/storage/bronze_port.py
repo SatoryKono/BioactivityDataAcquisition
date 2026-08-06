@@ -37,7 +37,9 @@ class BronzeStoragePort(Protocol):
         """Write raw records to the Bronze layer.
 
         Args:
-            records: An iterable of byte strings, where each string is a raw record.
+            records: A single-pass iterator of raw record byte strings. Callers
+                that may retry write_bronze after failure must re-create the
+                iterator; the port does not buffer or re-materialize records.
             provider: The name of the data provider.
             entity: The type of entity being written.
             date: The datetime for the data partition.

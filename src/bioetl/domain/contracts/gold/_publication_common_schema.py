@@ -9,6 +9,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    CONTENT_HASH_HEX64_PATTERN,
     StrictGoldContractSchema,
 )
 from bioetl.domain.mapping.publication_type_classification import (
@@ -25,7 +26,8 @@ def _check_classification_values(
 ) -> Series[bool]:
     allowed = publication_classification_values(field_name)
     if not allowed:
-        return cast(Series[bool], series.isna() | series.notna())
+        # Fail closed: empty taxonomy must not accept non-null values.
+        return cast(Series[bool], series.isna())
     return cast(Series[bool], series.isna() | series.isin(allowed))
 
 
@@ -33,7 +35,10 @@ class PublicationGoldCommonSchema(StrictGoldContractSchema):
     """Common contract fields shared by provider-specific Gold publication schemas."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
     doi: Series[str] = pa.Field(nullable=True, str_matches=DOI_REGEX_PATTERN)
     pmid: Series[str] = pa.Field(nullable=True)
     pmc_id: Series[str] = pa.Field(nullable=True)

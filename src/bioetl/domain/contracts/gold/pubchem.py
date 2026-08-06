@@ -16,6 +16,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    CONTENT_HASH_HEX64_PATTERN,
     StrictGoldContractSchema,
 )
 
@@ -54,7 +55,10 @@ class PubChemCompoundGoldSchema(StrictGoldContractSchema):
         nullable=True, coerce=True, alias="tpsa"
     )
     iupac_name: Series[str] = pa.Field(nullable=True)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=CONTENT_HASH_HEX64_PATTERN,
+    )
 
     # 3D molecular descriptors
     complexity: Series[float] = pa.Field(nullable=True, coerce=True)
