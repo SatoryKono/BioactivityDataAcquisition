@@ -52,9 +52,8 @@ def _silver_dq_field_meta() -> tuple[tuple[str, ...], tuple[str, ...], dict[str,
             required.append(field.name)
         elif default is not MISSING:
             defaults[field.name] = default
-        else:
-            # default_factory is a real factory here (not the MISSING sentinel).
-            defaults[field.name] = default_factory()  # type: ignore[misc]
+        elif callable(default_factory):
+            defaults[field.name] = default_factory()
     return tuple(positional), tuple(required), defaults, frozenset(positional)
 
 
