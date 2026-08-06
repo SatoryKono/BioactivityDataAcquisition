@@ -113,9 +113,15 @@ class DataQualityMonitor:
         """Update baseline with current metrics (if no anomalies).
 
         Args:
-            metrics: Metrics collector instance.
-            timestamp: Timestamp.
+            metrics: Mapping of metric name to newly observed value.
+            timestamp: Mandatory caller-owned timestamp; baseline is not updated
+                when timestamp is missing (defensive for non-typed callers).
         """
+        if timestamp is None:  # type: ignore[comparison-overlap]
+            self._logger.warning(
+                "Skipping baseline update due to missing timestamp",
+            )
+            return
         anomalies = self.check_quality(metrics, timestamp)
         critical_anomalies = [
             a for a in anomalies if a.severity == DQAnomalySeverity.CRITICAL
