@@ -94,11 +94,17 @@ class IDMappingRetryMixin:
                 await asyncio.sleep(deps.POLLING_INTERVAL)
                 continue
 
-            result = response.json()
-            if not isinstance(result, dict):
-                raise IDMappingJobError(
-                    f"ID mapping status payload must be a mapping, got {type(result).__name__}"
+            raw_payload = response.json()
+            if not isinstance(raw_payload, dict):
+                deps.logger.warning(
+                    "idmapping_status_invalid_payload",
+                    job_id=job_id,
+                    status_code=response.status_code,
+                    payload_type=type(raw_payload).__name__,
                 )
+                await asyncio.sleep(deps.POLLING_INTERVAL)
+                continue
+            result: dict[str, object] = raw_payload
             status = self._resolve_job_status(response, result)
 
             if status == "HAS_RESULTS":

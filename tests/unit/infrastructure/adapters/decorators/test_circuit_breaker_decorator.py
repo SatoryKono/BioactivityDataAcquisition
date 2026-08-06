@@ -133,6 +133,13 @@ class MockCircuitBreaker:
     def get_failure_count(self) -> int:
         return self._failure_count
 
+    def get_recovery_timeout(self) -> float:
+        raw = getattr(self, "recovery_timeout", 60.0)
+        return float(raw) if isinstance(raw, int | float) else 60.0
+
+    def get_last_failure_time(self) -> float | None:
+        return getattr(self, "_last_failure_time", None)
+
     async def call(self, func: Any, *args: Any, **kwargs: Any) -> Any:
         self._call_count += 1
         if self._state == CircuitBreakerState.OPEN:
@@ -144,12 +151,19 @@ class MockCircuitBreaker:
                     "test_provider", self.recovery_timeout - elapsed
                 )
             self._state = CircuitBreakerState.HALF_OPEN
-        return await func(*args, **kwargs)
+        result = await func(*args, **kwargs)
+        # Mirror CircuitBreakerGuard success accounting for HALF_OPEN recovery.
+        if self._state == CircuitBreakerState.HALF_OPEN:
+            self._state = CircuitBreakerState.CLOSED
+            self._failure_count = 0
+            self._last_failure_time = None
+        return result
 
     def reset(self) -> None:
         self._reset_count += 1
         self._state = CircuitBreakerState.CLOSED
         self._failure_count = 0
+        self._last_failure_time = None
 
     def set_state(self, state: CircuitBreakerState) -> None:
         """Helper to set state for testing."""
@@ -294,6 +308,9 @@ class TestCircuitBreakerDecoratorFetch:
         # Should succeed - half-open allows probe requests
         assert len(records) == 2
         assert mock_data_source._fetch_call_count == 1
+        # Successful complete iteration records success via port.call and closes.
+        assert mock_circuit_breaker.get_state() == CircuitBreakerState.CLOSED
+        assert mock_circuit_breaker._call_count >= 1
 
 
 class TestCircuitBreakerDecoratorHealthCheck:

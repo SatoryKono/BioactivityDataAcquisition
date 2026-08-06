@@ -114,6 +114,23 @@ class CircuitBreakerGuard:
             return None
         return float(self._last_failure_time)
 
+    def snapshot(self) -> object:
+        """Return a public typed snapshot of circuit-breaker state.
+
+        Prefer this over reading private fields such as ``_last_failure_time``.
+        Returns a ``CircuitBreakerSnapshot`` instance.
+        """
+        from bioetl.infrastructure.adapters.circuit_breaker_contract import (
+            CircuitBreakerSnapshot,
+        )
+
+        return CircuitBreakerSnapshot(
+            state=self.get_state(),
+            failure_count=self.get_failure_count(),
+            recovery_timeout=self.get_recovery_timeout(),
+            last_failure_time=self.get_last_failure_time(),
+        )
+
     def get_trips_total(self) -> int:
         """Return cumulative OPEN transitions since initialization."""
         return self._trips_total
