@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, cast
 
@@ -19,7 +20,6 @@ if TYPE_CHECKING:
         MetricsPort,
         SilverDQConfigPort,
     )
-    from bioetl.domain.types import JsonDict
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -40,6 +40,21 @@ class DQReportServiceFactory(Protocol):
         metrics: MetricsPort | None,
     ) -> object: ...
 
+
+
+
+@dataclass(frozen=True, slots=True)
+class DQServiceBundle:
+    """Typed DQ service collaborators created by composition factories."""
+
+    bronze_analyzer: object | None = None
+    silver_analyzer: object | None = None
+    gold_analyzer: object | None = None
+    report_writer: object | None = None
+    report_service: object | None = None
+
+    def __bool__(self) -> bool:
+        return self.report_service is not None
 
 def extract_single_dq_config_impl(
     sink: Mapping[str, object],
@@ -214,9 +229,9 @@ def create_dq_services_impl(
     is_dq_report_enabled_fn: Callable[[PipelineYamlConfig], bool],
     get_output_root_fn: Callable[[Settings, PipelineYamlConfig], Path],
     get_flat_structure_fn: Callable[[PipelineYamlConfig], bool],
-) -> JsonDict:
+) -> DQServiceBundle:
     if not is_dq_report_enabled_fn(pipeline_config):
-        return {}
+        return DQServiceBundle()
 
     bronze_analyzer = create_bronze_analyzer_fn()
     silver_analyzer = create_silver_analyzer_fn()
@@ -234,10 +249,10 @@ def create_dq_services_impl(
         report_writer=report_writer,
         metrics=metrics,
     )
-    return {
-        "bronze_analyzer": bronze_analyzer,
-        "silver_analyzer": silver_analyzer,
-        "gold_analyzer": gold_analyzer,
-        "report_writer": report_writer,
-        "report_service": report_service,
-    }
+    return DQServiceBundle(
+        bronze_analyzer=bronze_analyzer,
+        silver_analyzer=silver_analyzer,
+        gold_analyzer=gold_analyzer,
+        report_writer=report_writer,
+        report_service=report_service,
+    )
