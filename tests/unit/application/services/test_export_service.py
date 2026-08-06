@@ -34,8 +34,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.services.export_service import ExportService
-from bioetl.application.services.export_models import ExportOptions
+from bioetl.application.services.export_lineage.export_service import ExportService
+from bioetl.application.services.export_lineage.export_models import ExportOptions
 from bioetl.domain.ports import ExportFileFingerprint
 
 pa = pytest.importorskip("pyarrow")

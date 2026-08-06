@@ -44,8 +44,8 @@ from bioetl.application.core.lifecycle.checkpoint_manager import (
     CheckpointRuntimeService,
 )
 from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
-from bioetl.application.services.checkpoint_service import CheckpointService
-from bioetl.application.services.quarantine_service import QuarantineService
+from bioetl.application.services.checkpoint.checkpoint_service import CheckpointService
+from bioetl.application.services.quality.quarantine_service import QuarantineService
 from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint_adapter,
     bootstrap_composite_checkpoint_writer,

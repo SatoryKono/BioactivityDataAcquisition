@@ -1,9 +1,5 @@
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-# Boundary object/payload typing residual at this module.
-"""Composite pipeline runner facade.
-
-Coordinates high-level execution flow while delegating stage logic to mixins.
-"""
+"""Composite pipeline runner facade coordinating stage mixins."""
 
 from __future__ import annotations
 
@@ -23,11 +19,14 @@ from bioetl.application.composite.runner_pkg.runner_key_flow import (
     CompositeEnrichmentKeyContext,
     extract_enrichment_keys,
 )
-from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
-    CompositeRunnerMergeStageMixin,
-)
-from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
-    CompositeRunnerObservabilityMixin,
+from bioetl.application.composite.runner_pkg.runner_lifecycle_flow import (
+    complete_successful_run,
+    emit_failed_run,
+    handle_bioetl_failure,
+    handle_pipeline_execution_failure,
+    handle_shutdown,
+    mark_finished,
+    start_run_lifecycle,
 )
 from bioetl.application.composite.runner_pkg.runner_runtime_helpers import (
     bind_runner_dependencies,
@@ -48,12 +47,9 @@ from bioetl.application.composite.runtime_models import (
     CompositeRunnerDependencies,
     CompositeRuntimeConfig,
 )
-from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.domain.composite.result import CompositeResult
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.exceptions import (
-    BioETLError,
-)
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 
 if TYPE_CHECKING:
@@ -64,20 +60,19 @@ if TYPE_CHECKING:
     from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.ports import ClockPort, LockPort, TracingPort
 
-
-__all__ = [
-    "CompositePipelineRunner",
-]
+__all__ = ["CompositePipelineRunner"]
 
 
 class CompositePipelineRunner(
     CompositeRunnerControlPlaneMixin,
     CompositeRunnerSupportMixin,
-    CompositeRunnerObservabilityMixin,
     CompositeRunnerStageMixin,
-    CompositeRunnerMergeStageMixin,
 ):
-    """Facade/orchestrator for composite pipeline lifecycle."""
+    """Facade/orchestrator for composite pipeline lifecycle.
+
+    ARCH-REF-R2 / #7729: host direct bases reduced to 3 (merge+obs composed into
+    stage/support mixins).
+    """
 
     _lock: LockPort  # pyright: ignore[reportUninitializedInstanceVariable]
     _clock: ClockPort | None
@@ -92,18 +87,7 @@ class CompositePipelineRunner(
         deps: CompositeRunnerDependencies,
         run_id: str | None = None,
     ) -> None:
-        """Initialize composite pipeline orchestrator with injected dependencies.
-
-        Args:
-            config: Composite pipeline domain configuration, including seed
-                and enricher pipeline names, merge settings, and the
-                runtime lock key.
-            runtime: Run-time flags such as ``resume``, ``run_type``, and
-                ``dry_run`` that control execution behaviour without changing
-                domain configuration.
-            deps: Grouped collaborator services, ports, and factories.
-            run_id: Explicit run identifier supplied by the composition root.
-        """
+        """Initialize composite runner with config, runtime flags, and deps."""
         self._config = config
         self._runtime = runtime
         bind_runner_dependencies(self, deps)
@@ -116,8 +100,7 @@ class CompositePipelineRunner(
 
     def _mark_finished(self, final_state: CompositePipelineState) -> None:
         """Persist terminal runner state for re-entry guards and diagnostics."""
-        self._finished = True  # pyright: ignore[reportUninitializedInstanceVariable]
-        self._final_state = final_state  # pyright: ignore[reportUninitializedInstanceVariable]
+        mark_finished(self, final_state)
 
     @property
     def config(self) -> CompositeConfig:
@@ -132,80 +115,26 @@ class CompositePipelineRunner(
         stage: str | None = None,
     ) -> None:
         """Emit the canonical runner failure event through the observer seam."""
-        self._observer.emit_run_failed(
-            composite_name=self._config.name,
-            run_id=self._run_id_str,
-            error=error,
-            reason_code=reason_code,
-            stage=stage,
-        )
+        emit_failed_run(self, error, reason_code=reason_code, stage=stage)
 
     def _handle_pipeline_execution_failure(self, error: Exception) -> None:
         """Map execution-phase failures to canonical runner diagnostics."""
-        self._mark_finished(CompositePipelineState.FAILED)
-        self._record_run_failed(error)
-        self._emit_failed_run(
-            error,
-            reason_code="composite_pipeline_execution_failed",
-            stage="run_with_lock",
-        )
+        handle_pipeline_execution_failure(self, error)
 
     def _handle_bioetl_failure(self, error: BioETLError) -> None:
         """Map unexpected BioETL failures to canonical runner diagnostics."""
-        self._mark_finished(CompositePipelineState.FAILED)
-        self._record_run_failed(error)
-        self._emit_failed_run(error, reason_code="unexpected_bioetl_error")
+        handle_bioetl_failure(self, error)
 
     def _handle_shutdown(self, error: PipelineShutdownError) -> None:
         """Map graceful shutdown to canonical terminal ledger/log semantics."""
-        self._mark_finished(CompositePipelineState.FAILED)
-        self._record_run_shutdown()
-        self._observer.emit_run_shutdown(
-            composite_name=self._config.name,
-            run_id=self._run_id_str,
-            error=error,
-            reason=str(error.reason.value),
-            reason_code="composite_pipeline_shutdown",
-        )
+        handle_shutdown(self, error)
 
     def _start_run_lifecycle(self) -> None:
         """Validate and log the start of one composite runner execution."""
-        self._validate_config_consistency()  # pyright: ignore[reportAttributeAccessIssue]
-        self._run_preflight_validation()
-        self._started_at, self._start_time = capture_runtime_timing_anchor(
-            clock=self._clock
-        )
-        self._observer.emit_run_started(
-            composite_name=self._config.name,
-            run_id=self._run_id_str,
-        )
-        self._record_run_started()
-
-    async def _run_with_managed_lock(self) -> CompositeResult:
-        """Acquire/release the runtime lock around the canonical run body.
-
-        A background :class:`HeartbeatTask` keeps the lock alive for the
-        entire duration of the composite pipeline execution, preventing TTL
-        expiration for long-running pipelines (>1 hour).
-        """
-        lock_run_result = await run_with_managed_lock(
-            lock_port=self._lock,
-            lock_key=self._config.lock_key,
-            owner_id=self._run_id,
-            lock_ttl_seconds=self._runtime.lock_ttl_seconds,
-            heartbeat_interval_seconds=self._runtime.heartbeat_interval_seconds,
-            logger=self._logger,
-            run_while_locked=self._run_with_lock,
-        )
-        self._mark_finished(CompositePipelineState.COMPLETED)
-        return lock_run_result
+        start_run_lifecycle(self)
 
     async def run(self) -> CompositeResult:
-        """Execute full composite pipeline under runtime lock.
-
-        Returns:
-            CompositeResult summarising seed, enrichment, dependency, and merge outcomes.
-        """
+        """Execute full composite pipeline under runtime lock."""
         validate_runner_can_start(
             finished=self._finished,
             run_id=self._run_id_str,
@@ -230,6 +159,20 @@ class CompositePipelineRunner(
         except BioETLError as error:
             self._handle_bioetl_failure(error)
             raise
+
+    async def _run_with_managed_lock(self) -> CompositeResult:
+        """Acquire/release the runtime lock around the canonical run body."""
+        lock_run_result = await run_with_managed_lock(
+            lock_port=self._lock,
+            lock_key=self._config.lock_key,
+            owner_id=self._run_id,
+            lock_ttl_seconds=self._runtime.lock_ttl_seconds,
+            heartbeat_interval_seconds=self._runtime.heartbeat_interval_seconds,
+            logger=self._logger,
+            run_while_locked=self._run_with_lock,
+        )
+        self._mark_finished(CompositePipelineState.COMPLETED)
+        return lock_run_result
 
     async def _prepare_run_state(self) -> CompositeCheckpointState:
         """Load checkpoint state and apply resume semantics when configured."""
@@ -276,12 +219,7 @@ class CompositePipelineRunner(
         execution_context: CompositeExecutionContext,
     ) -> CompositeResult:
         """Finalize state and emit canonical terminal success artifacts."""
-        await self._finalize_pipeline(state)  # pyright: ignore[reportAttributeAccessIssue]
-        completion_context = self._prepare_composite_result_context(execution_context)  # pyright: ignore[reportAttributeAccessIssue]
-        self._log_composite_completion(completion_context)  # pyright: ignore[reportAttributeAccessIssue]
-        result = self._finalize_composite_result(completion_context)  # pyright: ignore[reportAttributeAccessIssue]
-        self._record_run_finished(execution_context)
-        return result
+        return await complete_successful_run(self, state, execution_context)
 
     async def _run_with_lock(self) -> CompositeResult:
         """Execute pipeline stages while lock is held."""

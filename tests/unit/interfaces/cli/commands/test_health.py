@@ -42,6 +42,7 @@ import pytest
 from click.testing import CliRunner
 
 from bioetl.interfaces.cli import cli
+from bioetl.interfaces.cli.commands.domains.health import server_integration_deps
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from tests.unit.interfaces.cli.commands.conftest import mock_asyncio_run
 
@@ -78,6 +79,20 @@ class TestHealthServerCommand:
         assert "--host" in result.output
         assert "--port" in result.output
         assert "127.0.0.1" in result.output  # default host (localhost for security)
+
+    def test_runtime_source_identity_accepts_only_managed_digest(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setenv("BIOETL_RUNTIME_SOURCE_ID", "unmanaged")
+        assert server_integration_deps._runtime_source_id_from_environment() is None
+
+        source_id = "a" * 64
+        monkeypatch.setenv("BIOETL_RUNTIME_SOURCE_ID", source_id.upper())
+        assert (
+            server_integration_deps._runtime_source_id_from_environment()
+            == source_id
+        )
         assert "8000" in result.output  # default port
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")

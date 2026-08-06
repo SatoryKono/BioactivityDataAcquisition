@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.postrun.metadata_version_resolver import (
         PostrunMetadataVersionResolver,
     )
-    from bioetl.application.services.dq_report_service import DQReportResult
+    from bioetl.application.services.quality.dq_report_service import DQReportResult
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (

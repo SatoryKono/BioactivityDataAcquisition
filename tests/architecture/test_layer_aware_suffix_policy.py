@@ -482,7 +482,13 @@ def test_checkpoint_quarantine_manager_aliases_are_not_exported() -> None:
         / "lifecycle"
         / "checkpoint_manager.py",
         ROOT / "src" / "bioetl" / "application" / "core" / "quarantine_manager.py",
-        ROOT / "src" / "bioetl" / "application" / "services" / "admin_runtime_api.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "services"
+        / "ops"
+        / "admin_runtime_api.py",
     )
     violations = [
         violation

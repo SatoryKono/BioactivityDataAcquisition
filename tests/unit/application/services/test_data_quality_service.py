@@ -35,7 +35,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from bioetl.application.services.data_quality_service import DataQualityService
+from bioetl.application.services.quality.data_quality_service import DataQualityService
 from bioetl.domain.config import DQConfig
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
 from bioetl.domain.value_objects.dq_anomaly import (

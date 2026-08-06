@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
-from bioetl.application.services.workflow_transform_artifacts import (
+from bioetl.application.services.workflow.workflow_transform_artifacts import (
     WorkflowTransformArtifactContext,
     artifact_refs_as_dicts,
 )

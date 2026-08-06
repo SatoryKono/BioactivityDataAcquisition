@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.dependency_join_service_ops import (
+from bioetl.application.composite.dependency_join_apply_ops import (
     apply_composite_key_dependency_join as _apply_composite_key_dependency_join_op,
     apply_single_key_dependency_join as _apply_single_key_dependency_join_op,
 )

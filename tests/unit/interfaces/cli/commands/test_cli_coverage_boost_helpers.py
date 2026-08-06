@@ -45,7 +45,7 @@ from bioetl.application.services.control_plane.manifest.inspection_service impor
 from bioetl.application.services.control_plane.workflow.inspection_service import (
     WorkflowInspectionResult,
 )
-from bioetl.application.services.workflow_runner_models import (
+from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
 )

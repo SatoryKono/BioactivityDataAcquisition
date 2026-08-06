@@ -22,7 +22,7 @@ from bioetl.application.core.wiring.runtime import (
 from bioetl.application.observability.domain_event_emitter import (
     DomainEventEmitterProtocol,
 )
-from bioetl.application.services.checkpoint_compatibility_service import (
+from bioetl.application.services.checkpoint.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
 )
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext

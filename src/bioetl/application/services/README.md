@@ -20,16 +20,22 @@
 | `run_reports/` | Run-report enrichment, markdown, writer | `@bioetl-architecture` |
 | `protein/` | Protein classification hierarchy resolution | `@bioetl-data-model` |
 | `medallion/` | Medallion lifecycle clear/vacuum/prepare orchestration | `@bioetl-architecture` |
-| package root (legacy) | Cross-cutting services not yet rehomed (metrics, quarantine, export, checkpoints, …) | `@bioetl-architecture` |
+| `quality/` | Quarantine + data-quality services | `@bioetl-data-model` |
+| `ops/` | Health, metrics, lock, vacuum, shutdown, config | `@bioetl-platform` |
+| `export_lineage/` | Export + debug export + audit inspection | `@bioetl-architecture` |
+| `workflow/` | Workflow runner + observability workflow | `@bioetl-architecture` |
+| `checkpoint/` | Checkpoint + compatibility | `@bioetl-platform` |
+| `contract/` | Contract migration | `@bioetl-architecture` |
+| package root | **Only** `__init__.py` (ARCH-REF-R2 / #7728) | `@bioetl-architecture` |
 
 ## No-growth rule (root modules)
 
-- Ratchet: do not increase the count of root-level service modules without
-  moving an existing root module into a subdomain or documenting an intentional
-  permanent root entry with owner.
-- Prefer extracting collaborators under the closest subdomain package above.
+- Root is package-first: **only** `__init__.py` is allowed at
+  `application/services/` root after #7728.
+- New services **must** land in a subdomain package above.
 - Machine ratchet: `configs/quality/application_services_root_ratchet.yaml`
-  (`tests/architecture/test_application_services_root_ratchet.py`).
+  (`tests/architecture/test_application_services_root_ratchet.py`,
+  `tests/architecture/test_arch_ref_services_bc_root_guard.py`).
 
 ## Cross-context import policy (#7608)
 

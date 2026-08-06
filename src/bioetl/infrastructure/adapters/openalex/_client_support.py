@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from bioetl.infrastructure.adapters.openalex.client import OpenAlexAdapter
-
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+    from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
     from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
@@ -90,6 +89,8 @@ def _create_openalex_adapter(
         ValueError: If neither api_key nor mailto can be resolved
 
     """
+    from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
+
     api_key = _resolve_openalex_api_key(settings, kwargs)
     mailto = _resolve_openalex_mailto(settings, kwargs)
     if not api_key and not mailto:

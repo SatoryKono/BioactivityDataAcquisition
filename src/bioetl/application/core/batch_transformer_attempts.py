@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.record_normalization_processor import (
         RecordNormalizationProcessor,
     )
-    from bioetl.application.services.debug_export_service import DebugExportService
+    from bioetl.application.services.export_lineage.debug_export_service import DebugExportService
     from bioetl.domain.config import DQConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier

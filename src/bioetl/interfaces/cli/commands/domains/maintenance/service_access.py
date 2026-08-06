@@ -11,13 +11,13 @@ from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview
-    from bioetl.application.services.bronze_cleanup_service import (
+    from bioetl.application.services.ops.bronze_cleanup_service import (
         BronzeCleanupService,
     )
-    from bioetl.application.services.contract_migration_service import (
+    from bioetl.application.services.contracts.contract_migration_service import (
         ContractMigrationService,
     )
-    from bioetl.application.services.vacuum_service import VacuumService
+    from bioetl.application.services.ops.vacuum_service import VacuumService
     from bioetl.composition.maintenance_service_access import (
         MedallionLifecycleServiceProtocol,
     )

@@ -11,7 +11,7 @@ from bioetl.application.core.postrun._failure_policy import (
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
-    from bioetl.application.services.dq_report_service import (
+    from bioetl.application.services.quality.dq_report_service import (
         DQReportContext,
         DQReportResult,
         DQReportService,

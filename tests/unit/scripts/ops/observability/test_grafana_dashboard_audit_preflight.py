@@ -88,6 +88,16 @@ def test_exit_code_mapping_is_distinct_per_failure_class() -> None:
         )
         == preflight.EXIT_BIOETL_TARGET
     )
+    assert (
+        preflight._exit_code_for_checks(
+            [
+                preflight.PreflightCheck(
+                    "bioetl-control-plane-source", "error", "mismatch"
+                )
+            ]
+        )
+        == preflight.EXIT_BIOETL_SOURCE
+    )
 
 
 def test_bioetl_prometheus_target_check_requires_up_health(
@@ -139,4 +149,42 @@ def test_bioetl_prometheus_target_check_passes_when_up(
         prometheus_base_url="http://localhost:9090",
         timeout_seconds=1.0,
     )
+    assert check.status == "ok"
+
+
+def test_bioetl_control_plane_source_rejects_mismatched_identity(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        preflight,
+        "_fetch_json",
+        lambda _url, _timeout: {"runtime_source_id": "b" * 64},
+    )
+
+    check = preflight._check_bioetl_control_plane_source(
+        ops_http_base_url="http://localhost:8000",
+        expected_runtime_source_id="a" * 64,
+        timeout_seconds=1.0,
+    )
+
+    assert check.status == "error"
+    assert "another checkout" in check.detail
+
+
+def test_bioetl_control_plane_source_accepts_matching_identity(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source_id = "a" * 64
+    monkeypatch.setattr(
+        preflight,
+        "_fetch_json",
+        lambda _url, _timeout: {"runtime_source_id": source_id},
+    )
+
+    check = preflight._check_bioetl_control_plane_source(
+        ops_http_base_url="http://localhost:8000",
+        expected_runtime_source_id=source_id,
+        timeout_seconds=1.0,
+    )
+
     assert check.status == "ok"

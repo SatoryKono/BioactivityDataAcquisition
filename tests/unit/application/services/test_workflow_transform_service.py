@@ -34,7 +34,7 @@ from typing import Any
 
 import pytest
 
-from bioetl.application.services.workflow_transform_service import (
+from bioetl.application.services.workflow.workflow_transform_service import (
     WorkflowTransformService,
     should_skip_transform_step,
 )

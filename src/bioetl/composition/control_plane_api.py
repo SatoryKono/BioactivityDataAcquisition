@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointRuntimeService,
     )
-    from bioetl.application.services.config_service import ConfigService
+    from bioetl.application.services.ops.config_service import ConfigService
     from bioetl.application.services.control_plane.forensic import (
         ForensicRunDiffService,
     )
@@ -34,12 +34,12 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.workflow.inspection_service import (
         WorkflowInspectionService,
     )
-    from bioetl.application.services.export_service import ExportService
+    from bioetl.application.services.export_lineage.export_service import ExportService
     from bioetl.application.services.lineage.lineage_inspection_service import (
         LineageInspectionService,
     )
-    from bioetl.application.services.lock_service import LockService
-    from bioetl.application.services.workflow_runner_service import (
+    from bioetl.application.services.ops.lock_service import LockService
+    from bioetl.application.services.workflow.workflow_runner_service import (
         WorkflowRunnerService,
     )
     from bioetl.domain.control_plane import (

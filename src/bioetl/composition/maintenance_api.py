@@ -18,14 +18,14 @@ _SERVICES_MODULE = "bioetl.composition._services"
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
 
-    from bioetl.application.services.bronze_cleanup_service import (
+    from bioetl.application.services.ops.bronze_cleanup_service import (
         BronzeCleanupResult,
         BronzeCleanupService,
     )
-    from bioetl.application.services.contract_migration_service import (
+    from bioetl.application.services.contracts.contract_migration_service import (
         ContractMigrationService,
     )
-    from bioetl.application.services.vacuum_service import VacuumService
+    from bioetl.application.services.ops.vacuum_service import VacuumService
     from bioetl.composition._pipeline_execution import ArchiveOptions, VacuumOptions
     from bioetl.composition._resource_management import (
         CleanupPreviewProtocol,

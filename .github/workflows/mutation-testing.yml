@@ -46,7 +46,7 @@ jobs:
             tests_dir: tests/unit/application/services/control_plane/
             threshold: "60.0"
           - id: application-export-manifests
-            paths_to_mutate: src/bioetl/application/services/export_manifests.py
+            paths_to_mutate: src/bioetl/application/services/export_lineage/export_manifests.py
             tests_dir: tests/unit/application/services/
             threshold: "60.0"
           - id: application-workflow-runner

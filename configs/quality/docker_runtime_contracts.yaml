@@ -82,6 +82,26 @@ path_policy:
     - /mnt/e
   mixed_origin_for_same_project_forbidden: true
 
+dashboard_data_plane:
+  producer_stack: main
+  producer_service: bioetl
+  required_bind_mounts:
+    /app/data:
+      relative_source: data
+      environment_name: BIOETL_DASHBOARD_DATA_ROOT
+    /app/reports:
+      relative_source: reports
+      environment_name: BIOETL_DASHBOARD_REPORT_ROOT
+  source_identity:
+    schema_version: bioetl-dashboard-source-v1
+    environment_name: BIOETL_RUNTIME_SOURCE_ID
+    label_name: io.bioetl.dashboard-source-id
+    unmanaged_value: unmanaged
+  consumers:
+    monitoring:
+      - grafana
+      - prometheus
+
 stacks:
   main:
     compose_file: docker-compose.yml
@@ -94,6 +114,7 @@ stacks:
       - LOG_LEVEL
       - NEO4J_USERNAME
       - NEO4J_PASSWORD
+      - BIOETL_RUNTIME_SOURCE_ID
     required_secret_environment_names:
       - NEO4J_PASSWORD
     readiness:
@@ -119,6 +140,7 @@ stacks:
     required_environment_names:
       - GF_SECURITY_ADMIN_PASSWORD
       - GF_RENDERING_RENDERER_TOKEN
+      - BIOETL_RUNTIME_SOURCE_ID
     required_secret_environment_names:
       - GF_SECURITY_ADMIN_PASSWORD
       - GF_RENDERING_RENDERER_TOKEN

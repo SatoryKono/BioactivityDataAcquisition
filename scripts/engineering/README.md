@@ -59,7 +59,7 @@ When adding or renaming a script:
    when an operator transport truly requires both; do not pair wrappers by
    default.
 3. Do not mass-delete scripts without ownership review and non-use evidence.
-   Hold the surface flat-or-down (issue #7711).
+   Hold the surface flat-or-down (issues #7711 / #7735).
 
 ## Compatibility Policy
 

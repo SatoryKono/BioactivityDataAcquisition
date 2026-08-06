@@ -7,6 +7,7 @@ TARGET_DIR="/etc/grafana/provisioning/datasources"
 CORE_DIR="/etc/bioetl-grafana/datasources-core"
 RENDERING_SERVER_URL="${GF_RENDERING_SERVER_URL:-}"
 STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"
+EXPECTED_RUNTIME_SOURCE_ID="${BIOETL_EXPECTED_RUNTIME_SOURCE_ID:-unmanaged}"
 
 # Empty BIOETL_OPS_HTTP_URL (e.g. from a blank host env export) must NOT wipe
 # the YAML default — treat empty as unset.
@@ -15,6 +16,33 @@ if [ -z "${BIOETL_OPS_HTTP_URL:-}" ]; then
   BIOETL_OPS_HTTP_URL="http://bioetl:8000"  # NOSONAR - docker-internal service URL
 fi
 export BIOETL_OPS_HTTP_URL
+
+# A reachable backend is insufficient: an old checkout can expose a healthy
+# bioetl:8000 while serving stale RunManifest/run-report mounts. Require the
+# opaque identity injected by runtime_manager before provisioning any datasource.
+if [ "${#EXPECTED_RUNTIME_SOURCE_ID}" -ne 64 ] || \
+  printf '%s' "${EXPECTED_RUNTIME_SOURCE_ID}" | grep -Eq '[^0-9a-f]'; then
+  echo "[bioetl-grafana] invalid or unmanaged expected runtime source identity" >&2
+  exit 1
+fi
+
+OPS_READY_URL="${BIOETL_OPS_HTTP_URL%/}/ops/control-plane/ready"
+SOURCE_ID_MATCHED=0
+SOURCE_ID_ATTEMPT=1
+while [ "${SOURCE_ID_ATTEMPT}" -le 30 ]; do
+  READY_PAYLOAD="$(wget -qO- -T 3 "${OPS_READY_URL}" 2>/dev/null || true)"
+  if printf '%s' "${READY_PAYLOAD}" | grep -Eq \
+    "\"runtime_source_id\"[[:space:]]*:[[:space:]]*\"${EXPECTED_RUNTIME_SOURCE_ID}\""; then
+    SOURCE_ID_MATCHED=1
+    break
+  fi
+  SOURCE_ID_ATTEMPT=$((SOURCE_ID_ATTEMPT + 1))
+  sleep 2
+done
+if [ "${SOURCE_ID_MATCHED}" -ne 1 ]; then
+  echo "[bioetl-grafana] Ops HTTP runtime source identity mismatch: ${OPS_READY_URL}" >&2
+  exit 1
+fi
 
 mkdir -p "${TARGET_DIR}"
 rm -f "${TARGET_DIR}"/*.yml

@@ -42,7 +42,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from bioetl.application.services.vacuum_service import (
+from bioetl.application.services.ops.vacuum_service import (
     TableVacuumResult,
     VacuumAllResult,
 )

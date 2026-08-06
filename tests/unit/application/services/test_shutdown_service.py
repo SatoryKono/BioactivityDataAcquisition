@@ -33,7 +33,7 @@ import asyncio
 
 import pytest
 
-from bioetl.application.services.shutdown_service import (
+from bioetl.application.services.ops.shutdown_service import (
     PipelineShutdownError,
     ShutdownReason,
     ShutdownService,

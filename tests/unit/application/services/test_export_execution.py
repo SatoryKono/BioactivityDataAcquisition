@@ -36,8 +36,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-import bioetl.application.services.export_execution as export_execution
-from bioetl.application.services.export_models import ExportOptions
+import bioetl.application.services.export_lineage.export_execution as export_execution
+from bioetl.application.services.export_lineage.export_models import ExportOptions
 
 pytestmark = pytest.mark.unit
 

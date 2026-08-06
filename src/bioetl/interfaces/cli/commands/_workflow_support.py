@@ -7,7 +7,7 @@ from dataclasses import replace
 from bioetl.application.services.control_plane.workflow.inspection_service import (
     WorkflowInspectionResult,
 )
-from bioetl.application.services.workflow_runner_service import (
+from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowRunExecutionResult,
 )
 from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig

@@ -39,7 +39,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.services.dq_report_service import (
+from bioetl.application.services.quality.dq_report_service import (
     DQReportContext,
     DQReportResult,
     DQReportService,

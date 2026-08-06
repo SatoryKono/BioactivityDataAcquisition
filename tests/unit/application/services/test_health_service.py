@@ -38,7 +38,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.services.health_service import (
+from bioetl.application.services.ops.health_service import (
     DataSourceFactoryPort,
     HealthCheckSummary,
     HealthResult,

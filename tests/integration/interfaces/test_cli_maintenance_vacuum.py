@@ -335,7 +335,7 @@ class TestCliMaintenanceVacuumAllExecution:
     @pytest.fixture
     def mock_vacuum_service(self):
         """Create a mock vacuum service."""
-        from bioetl.application.services.vacuum_service import (
+        from bioetl.application.services.ops.vacuum_service import (
             TableVacuumResult,
             VacuumAllResult,
         )
@@ -441,7 +441,7 @@ class TestCliMaintenanceVacuumAllDryRun:
     @pytest.fixture
     def mock_vacuum_service_dry_run(self):
         """Create a mock vacuum service for dry-run."""
-        from bioetl.application.services.vacuum_service import (
+        from bioetl.application.services.ops.vacuum_service import (
             TableVacuumResult,
             VacuumAllResult,
         )
@@ -524,7 +524,7 @@ class TestCliMaintenanceVacuumAllErrors:
     @pytest.fixture
     def mock_vacuum_service_partial_failure(self):
         """Create a mock vacuum service with partial failures."""
-        from bioetl.application.services.vacuum_service import (
+        from bioetl.application.services.ops.vacuum_service import (
             TableVacuumResult,
             VacuumAllResult,
         )
@@ -585,7 +585,7 @@ class TestCliMaintenanceVacuumAllOutput:
     @pytest.fixture
     def mock_vacuum_service_multi(self):
         """Create a mock vacuum service with multiple tables."""
-        from bioetl.application.services.vacuum_service import (
+        from bioetl.application.services.ops.vacuum_service import (
             TableVacuumResult,
             VacuumAllResult,
         )
@@ -646,7 +646,7 @@ class TestCliMaintenanceVacuumAllOutput:
         cli_runner: CliRunner,
     ):
         """Test that dry-run output says 'would remove'."""
-        from bioetl.application.services.vacuum_service import (
+        from bioetl.application.services.ops.vacuum_service import (
             TableVacuumResult,
             VacuumAllResult,
         )

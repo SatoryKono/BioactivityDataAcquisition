@@ -33,14 +33,14 @@ from types import SimpleNamespace
 
 import pytest
 
-from bioetl.application.services._observability_trace_support import (
+from bioetl.application.services.workflow._observability_trace_support import (
     build_trace_ids,
     build_trace_urls,
     resolve_manifest_run_type,
     resolve_primary_composite_run_id,
     trace_links_enabled,
 )
-from bioetl.application.services._observability_workflow_checkpoint_support import (
+from bioetl.application.services.workflow._observability_workflow_checkpoint_support import (
     _checkpoint_capability_taxonomy,
     _checkpoint_taxonomy,
     _configured_checkpoint_taxonomy,
@@ -50,7 +50,7 @@ from bioetl.application.services._observability_workflow_checkpoint_support impo
     _with_compatibility_verdict,
     build_checkpoint_compatibility_section,
 )
-from bioetl.application.services.checkpoint_models import CheckpointInfo
+from bioetl.application.services.checkpoint.checkpoint_models import CheckpointInfo
 
 pytestmark = pytest.mark.unit
 

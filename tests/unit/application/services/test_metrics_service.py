@@ -37,7 +37,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.services.metrics_service import (
+from bioetl.application.services.ops.metrics_service import (
     DeleteResult,
     MetricsServerError,
     MetricsPublisherPort,

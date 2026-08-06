@@ -39,7 +39,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.application.services.health_service import HealthService
+from bioetl.application.services.ops.health_service import HealthService
 from bioetl.composition.bootstrap.cli.health import (
     HealthServerDependencies,
     bootstrap_health_server_dependencies,
