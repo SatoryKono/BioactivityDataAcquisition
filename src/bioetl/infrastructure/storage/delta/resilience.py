@@ -37,18 +37,23 @@ def _is_windows_platform() -> bool:
 def _deterministic_jitter_seconds(
     retry_count: int,
     max_jitter_seconds: float,
+    *,
+    operation_id: str = "",
 ) -> float:
     """Return deterministic jitter value bounded by ``max_jitter_seconds``.
 
     Uses a small repeating phase cycle to avoid random-dependent behavior
-    while still providing bounded per-attempt perturbation.
+    while still providing bounded per-attempt perturbation. When
+    ``operation_id`` is provided, concurrent operations with the same
+    ``retry_count`` desynchronize instead of sharing identical delays.
 
     Returns:
         Jitter float in seconds, bounded by max_jitter_seconds, or 0.0 if max is non-positive.
     """
     if max_jitter_seconds <= 0.0:
         return 0.0
-    phase = (max(0, retry_count) % 4) + 1
+    identity_salt = sum(ord(char) for char in operation_id) if operation_id else 0
+    phase = ((max(0, retry_count) + identity_salt) % 4) + 1
     return float((phase / 4.0) * max_jitter_seconds)
 
 
@@ -76,6 +81,7 @@ class AdaptiveRetryPolicy:
         retry_count: int,
         *,
         jitter_fn: JitterFn | None = None,
+        operation_id: str = "",
     ) -> float:
         """Calculate bounded delay for the given 0-indexed retry number.
 
@@ -101,6 +107,7 @@ class AdaptiveRetryPolicy:
             jitter = _deterministic_jitter_seconds(
                 retry_count=retry_count,
                 max_jitter_seconds=self.jitter_seconds,
+                operation_id=operation_id,
             )
         return float(max(0.0, min(self.max_delay_seconds, bounded_delay + jitter)))
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
@@ -38,8 +39,10 @@ __all__ = [
     "ArtifactPublicationRecorder",
     "_execute_prepared_metadata_write_operation",
     "_get_metadata_filename",
+    "_load_existing_metadata_model",
     "_record_artifact_publication",
     "atomic_write_text",
+    "load_existing_metadata_model",
 ]
 
 
@@ -114,6 +117,18 @@ def _load_existing_metadata_model(
     return gold_metadata
 
 
+async def load_existing_metadata_model(
+    metadata_path: Path,
+    *,
+    layer: str,
+) -> SilverMetadata | GoldMetadata | None:
+    """Async wrapper: offload blocking metadata load/validation from the event loop."""
+    return await asyncio.to_thread(
+        _load_existing_metadata_model,
+        metadata_path,
+        layer=layer,
+    )
+
 def _resolve_metadata_filename(provider: str | None, entity: str | None) -> str:
     """Return the concrete metadata filename via a local typed facade."""
     return str(_operations._get_metadata_filename(provider, entity))
@@ -145,8 +160,10 @@ async def _execute_atomic_metadata_write(
     prepared_write: _PreparedMetadataWrite,
     retry_policy: AdaptiveRetryPolicy,
     context: _MetadataWriteTelemetryContext,
+    write_text: Callable[..., None] | None = None,
 ) -> int:
     """Write prepared metadata atomically and emit retry/final telemetry."""
+    writer = write_text if write_text is not None else atomic_write_text
 
     def _write() -> int:
         retry_state = _MetadataWriteRetryState()
@@ -158,7 +175,7 @@ async def _execute_atomic_metadata_write(
         )
 
         try:
-            atomic_write_text(
+            writer(
                 prepared_write.metadata_path,
                 prepared_write.yaml_content,
                 retry_policy=retry_policy,
@@ -219,6 +236,7 @@ async def _execute_prepared_metadata_write_operation(
     retry_policy: AdaptiveRetryPolicy,
     operation: _PreparedMetadataWriteOperation,
     metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+    write_text: Callable[..., None] | None = None,
 ) -> str:
     """Execute one prepared metadata write operation end-to-end."""
     await _execute_atomic_metadata_write(
@@ -227,6 +245,7 @@ async def _execute_prepared_metadata_write_operation(
         prepared_write=operation.prepared_write,
         retry_policy=retry_policy,
         context=operation.telemetry_context,
+        write_text=write_text,
     )
     return _finalize_metadata_write_operation(
         logger=logger,

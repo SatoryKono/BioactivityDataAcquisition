@@ -35,6 +35,8 @@ class _DeltaWriteRequest:
     partition_cols: list[str] | None
     schema_mode: str | None = None
     merge_schema: bool = False
+    # Stable identity for deterministic retry jitter across concurrent writes.
+    operation_id: str = ""
 
 
 _DeltaWriteHandler = Callable[[_DeltaWriteRequest], Awaitable[None]]

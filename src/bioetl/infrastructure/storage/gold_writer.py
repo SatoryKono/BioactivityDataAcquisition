@@ -139,13 +139,12 @@ def write_deltalake(
     )
 
 
+# Transient Gold write failures only. Programming / validation defects
+# (ValueError, TypeError, KeyError, broad RuntimeError) must surface immediately.
 GOLD_WRITE_RETRY_ERRORS = (
     CommitFailedError,
     OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-    KeyError,
+    TimeoutError,
 )
 
 

@@ -150,6 +150,9 @@ class RowReconciliationConfig:
     preserve_order: bool = True
     report_only: bool = True
     workflow_name: str | None = None
+    # Bound materialization to protect operators from unbounded table scans.
+    # ``None`` means no explicit adapter-side cap (readers may still apply their own).
+    max_rows: int | None = 1_000_000
 
     def __post_init__(self) -> None:
         (

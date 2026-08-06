@@ -113,9 +113,16 @@ class DeltaReader:
                 return scanner.head(limit)
 
             row_count = _try_native_delta_row_count(dt)
-            return scanner.head(
-                row_count if row_count is not None else _FULL_READ_HEAD_LIMIT
-            )
+            if row_count is not None:
+                return scanner.head(row_count)
+            # Unbounded full read: never fall back to a synthetic head limit
+            # that would silently truncate when native count is unavailable.
+            to_table = getattr(scanner, "to_table", None)
+            if callable(to_table):
+                return to_table()
+            # Last-resort head with the documented full-read ceiling only when
+            # the scanner surface lacks an uncapped materialization API.
+            return scanner.head(_FULL_READ_HEAD_LIMIT)
 
         self._logger.debug(
             "Reading Delta table",

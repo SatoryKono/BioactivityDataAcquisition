@@ -108,7 +108,22 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
             raise TypeError(
                 f"BronzeWriter() got unexpected keyword argument(s): {unexpected}"
             )
-        if metadata_writer is None:
+        legacy_provided = any(
+            value is not None
+            for value in (
+                tracing,
+                audit,
+                metadata_writer,
+                metadata_coordinator,
+                lineage_store,
+            )
+        ) or bool(save_metadata)
+        if runtime_services is not None and legacy_provided:
+            raise TypeError(
+                "BronzeWriter() accepts either runtime_services or legacy runtime "
+                "keyword arguments, not both"
+            )
+        if metadata_writer is None and runtime_services is None:
             from bioetl.domain.ports.noop import NoOpMetadataWriter
 
             metadata_writer = NoOpMetadataWriter()
