@@ -113,7 +113,7 @@ class SilverMaintenanceOperations:
                 )
             if audit_context is not None:
                 audit, event_timestamp = audit_context
-                audit.log_event(
+                await audit.log_event(
                     "SilverCsvExport",
                     {"table": table_name, "rows": len(arrow_data), "status": "success"},
                     timestamp=event_timestamp,
@@ -131,7 +131,7 @@ class SilverMaintenanceOperations:
                 )
             if audit_context is not None:
                 audit, event_timestamp = audit_context
-                audit.log_event(
+                await audit.log_event(
                     "SilverCsvExport",
                     {"table": table_name, "status": "failed", "error": str(e)},
                     timestamp=event_timestamp,
@@ -183,7 +183,7 @@ class SilverMaintenanceOperations:
 
         if audit_context is not None:
             audit, event_timestamp = audit_context
-            audit.log_event(
+            await audit.log_event(
                 "SilverVacuum",
                 result,
                 timestamp=event_timestamp,
@@ -226,7 +226,7 @@ class SilverMaintenanceOperations:
 
         if audit_context is not None:
             audit, event_timestamp = audit_context
-            audit.log_event(
+            await audit.log_event(
                 "SilverOptimize",
                 result,
                 timestamp=event_timestamp,

@@ -48,6 +48,7 @@ async def test_maybe_export_csv_uses_explicit_audit_timestamp() -> None:
     retention_manager = MagicMock()
     metrics = MagicMock()
     audit = MagicMock()
+    audit.log_event = AsyncMock()
     fallback_timestamp = datetime(2026, 5, 1, 12, 0, tzinfo=UTC)
     timestamp_factory = MagicMock(return_value=fallback_timestamp)
     explicit_timestamp = datetime(2026, 5, 2, 9, 30, tzinfo=UTC)
@@ -69,7 +70,7 @@ async def test_maybe_export_csv_uses_explicit_audit_timestamp() -> None:
     )
 
     timestamp_factory.assert_not_called()
-    audit.log_event.assert_called_once()
+    audit.log_event.assert_awaited_once()
     assert audit.log_event.call_args.kwargs["timestamp"] == explicit_timestamp
 
 
@@ -81,6 +82,7 @@ async def test_maybe_export_csv_failure_logs_explicit_timestamp() -> None:
     retention_manager = MagicMock()
     metrics = MagicMock()
     audit = MagicMock()
+    audit.log_event = AsyncMock()
     timestamp_factory = MagicMock(return_value=datetime(2026, 5, 1, 12, 0, tzinfo=UTC))
     explicit_timestamp = datetime(2026, 5, 2, 10, 45, tzinfo=UTC)
     operations = SilverMaintenanceOperations(
@@ -102,7 +104,7 @@ async def test_maybe_export_csv_failure_logs_explicit_timestamp() -> None:
         )
 
     timestamp_factory.assert_not_called()
-    audit.log_event.assert_called_once()
+    audit.log_event.assert_awaited_once()
     assert audit.log_event.call_args.kwargs["timestamp"] == explicit_timestamp
 
 
@@ -114,6 +116,7 @@ async def test_vacuum_uses_injected_timestamp_factory_when_missing() -> None:
     retention_manager.vacuum = AsyncMock(return_value=["a", "b"])
     metrics = MagicMock()
     audit = MagicMock()
+    audit.log_event = AsyncMock()
     fallback_timestamp = datetime(2026, 5, 2, 11, 15, tzinfo=UTC)
     timestamp_factory = MagicMock(return_value=fallback_timestamp)
     operations = SilverMaintenanceOperations(
@@ -128,7 +131,7 @@ async def test_vacuum_uses_injected_timestamp_factory_when_missing() -> None:
     await operations.vacuum("chembl.activity", 24, dry_run=True)
 
     timestamp_factory.assert_called_once_with()
-    audit.log_event.assert_called_once()
+    audit.log_event.assert_awaited_once()
     assert audit.log_event.call_args.kwargs["timestamp"] == fallback_timestamp
 
 
@@ -140,6 +143,7 @@ async def test_optimize_prefers_explicit_timestamp_over_factory() -> None:
     retention_manager.optimize = AsyncMock(return_value={"optimized": 3})
     metrics = MagicMock()
     audit = MagicMock()
+    audit.log_event = AsyncMock()
     timestamp_factory = MagicMock(return_value=datetime(2026, 5, 2, 12, 0, tzinfo=UTC))
     explicit_timestamp = datetime(2026, 5, 2, 12, 1, tzinfo=UTC)
     operations = SilverMaintenanceOperations(
@@ -159,5 +163,5 @@ async def test_optimize_prefers_explicit_timestamp_over_factory() -> None:
     )
 
     timestamp_factory.assert_not_called()
-    audit.log_event.assert_called_once()
+    audit.log_event.assert_awaited_once()
     assert audit.log_event.call_args.kwargs["timestamp"] == explicit_timestamp

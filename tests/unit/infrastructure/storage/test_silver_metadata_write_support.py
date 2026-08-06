@@ -128,10 +128,12 @@ class TestSilverMetadataWriteSupport:
         coordinator = MagicMock()
         metadata = MagicMock()
         coordinator.create_silver_metadata.return_value = metadata
+        audit = MagicMock()
+        audit.log_event = AsyncMock()
         ops = _Ops(
             _metadata_coordinator=coordinator,
             _metrics=MagicMock(),
-            _audit=MagicMock(),
+            _audit=audit,
         )
         ops._persist_silver_metadata = AsyncMock(return_value="persisted")
         dq_metrics = BatchDQMetrics(total_records=1, valid_records=1)
@@ -153,13 +155,14 @@ class TestSilverMetadataWriteSupport:
         assert persist_call["table_name"] == "chembl.activity"
         assert persist_call["table_path"] == "data/output/silver/chembl/activity"
         ops._metrics.increment_counter.assert_called_once()
-        ops._audit.log_event.assert_called_once()
+        audit.log_event.assert_awaited_once()
 
-    def test_emit_silver_metadata_write_success_without_audit_is_safe(self) -> None:
+    @pytest.mark.asyncio
+    async def test_emit_silver_metadata_write_success_without_audit_is_safe(self) -> None:
         metrics = MagicMock()
         ops = _Ops(_metrics=metrics, _audit=None)
 
-        _emit_silver_metadata_write_success(
+        await _emit_silver_metadata_write_success(
             ops,
             "chembl.activity",
             [{"entity_id": "CHEMBL1"}],
