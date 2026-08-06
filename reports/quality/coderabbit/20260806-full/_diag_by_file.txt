@@ -1,0 +1,45 @@
+=== scripts/quality/coderabbit/build_matrix.py (3 total, 2 unique) ===
+  - Expected type arguments for generic class "dict"
+  - "L" is constant (because it is uppercase) and cannot be redefined
+
+=== scripts/quality/coderabbit/run_leaves.py (11 total, 2 unique) ===
+  - Could not access item in TypedDict
+  - Type "dict[str, str | int]" is not assignable to return type "LeafResult"
+
+=== src/bioetl/application/core/_base_transformer_structural_support.py (12 total, 1 unique) ===
+  - "object" is not iterable
+
+=== src/bioetl/application/core/batch_executor_runtime_state.py (1 total, 1 unique) ===
+  - Instance variable "_runtime_state" is not initialized in the class body or __init__ method
+
+=== src/bioetl/application/core/preflight/service.py (17 total, 1 unique) ===
+  - Argument of type "object" cannot be assigned to parameter "obj" of type "_IntrospectableCallable" in function "signature"
+
+=== src/bioetl/composition/bootstrap/cli/health.py (16 total, 1 unique) ===
+  - Argument of type "(**_: Unknown) -> NoOpTracing" cannot be assigned to parameter "tracing_resolver" of type "(...) -> TracingPort" in function "build_cli_quarantine_service"
+
+=== src/bioetl/composition/factories/services/common_service_wiring.py (10 total, 5 unique) ===
+  - Argument of type "object | None" cannot be assigned to parameter "bronze_dq_analyzer" of type "BronzeDQAnalyzerPort | None" in function "__init__"
+  - Argument of type "object | None" cannot be assigned to parameter "silver_dq_analyzer" of type "SilverDQAnalyzerPort | None" in function "__init__"
+  - Argument of type "object | None" cannot be assigned to parameter "gold_dq_analyzer" of type "GoldDQAnalyzerPort | None" in function "__init__"
+  - Argument of type "object | None" cannot be assigned to parameter "dq_report_writer" of type "DQReportWriterPort | None" in function "__init__"
+  - Argument of type "object | None" cannot be assigned to parameter "dq_report_service" of type "DQReportService | None" in function "__init__"
+
+=== src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py (14 total, 1 unique) ===
+  - Argument of type "object" cannot be assigned to parameter "x" of type "ConvertibleToInt" in function "__new__"
+
+=== src/bioetl/domain/ports/quality/silver_dq_request.py (16 total, 1 unique) ===
+  - Object of type "Literal[_MISSING_TYPE.MISSING]" is not callable
+
+=== src/bioetl/infrastructure/storage/delta/arrow_converter.py (15 total, 1 unique) ===
+  - Argument of type "ChunkedArray" cannot be assigned to parameter "col" of type "Array" in function "_sanitize_single_null_column"
+
+=== src/bioetl/infrastructure/storage/delta_reader.py (12 total, 1 unique) ===
+  - Type "object" is not assignable to return type "Table"
+
+=== tests/unit/application/core/test_batch_execution_lifecycle.py (28 total, 1 unique) ===
+  - Argument of type "(_ctx: BatchExecutionContext) -> CoroutineType[Any, Any, None]" cannot be assigned to parameter "run_loop" of type "_BatchExtractionLoopRunner" in function "execute"
+
+=== tests/unit/application/core/test_stream2_critical_residuals.py (45 total, 2 unique) ===
+  - Argument of type "Literal['b1']" cannot be assigned to parameter "batch_id" of type "BatchID" in function "process_in_chunks"
+  - Argument of type "SimpleNamespace" cannot be assigned to parameter "options" of type "RunOptions" in function "_build_vacuum_config"

@@ -52,7 +52,9 @@ class _PreflightExecutionHostProtocol(Protocol):
 def _supports_raise_on_unhealthy(validate_fn: object) -> bool:
     """Return True when ``validate_infrastructure`` accepts raise_on_unhealthy."""
     try:
-        signature = inspect.signature(validate_fn)  # type: ignore[arg-type]
+        from typing import Any, cast
+
+        signature = inspect.signature(cast(Any, validate_fn))
     except (TypeError, ValueError):
         return False
     return "raise_on_unhealthy" in signature.parameters

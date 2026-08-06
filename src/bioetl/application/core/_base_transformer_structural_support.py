@@ -3,7 +3,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core._base_transformer_execution_support import (
     TransformerExecutionOwner,
@@ -157,10 +158,10 @@ def _log_structural_policy_events(
     owner: TransformerExecutionOwner,
     context: PipelineContext,
     index: int,
-    events: object,
+    events: Iterable[Any],
 ) -> None:
     """Emit per-event structural-policy log lines from policy outcome."""
-    for event in events:  # type: ignore[attr-defined]
+    for event in events:
         log_method = getattr(context.logger, event.level)
         log_method(
             event.event,

@@ -1178,6 +1178,18 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a Docker runtime manager helper for container lifecycle management; keep it supporting unless it becomes a governed CI workflow or first-class ops entrypoint."
     },
+    "scripts/ops/coderabbit/build_matrix.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the documented matrix builder for the bounded 2026-08 CodeRabbit campaign; remove it after campaign closeout or consolidate it into a canonical quality command if the workflow becomes recurring."
+    },
+    "scripts/ops/coderabbit/run_leaves.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the documented sequential runner for the bounded 2026-08 CodeRabbit campaign; remove it after campaign closeout and keep its API-dependent execution outside ordinary local workflows."
+    },
     "scripts/ops/runtime/mcp/apply-shared-to-grok.ps1": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -1243,6 +1255,48 @@
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a backward-compatible wrapper while the canonical Codex skills mirror audit lives under scripts/ai/codex/check_skills_mirror.sh; remove it once operator/docs callers migrate to the canonical path."
+    },
+    "scripts/engineering/apply_s1_c2_fixes.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the bounded one-shot S1 C2 remediation patcher for auditability; remove it after the corrected application-core behavior and regression coverage are durable in the canonical source tree."
+    },
+    "scripts/engineering/apply_s1_c3c6_fixes.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the bounded one-shot S1 C3-C6 remediation patcher for auditability; remove it after the corrected application-core behavior and regression coverage are durable in the canonical source tree."
+    },
+    "scripts/quality/coderabbit/build_matrix.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded CodeRabbit review-campaign matrix generator; remove it when the campaign closes or consolidate it into a canonical quality command if the workflow becomes recurring."
+    },
+    "scripts/quality/coderabbit/build_streams.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded CodeRabbit residual-stream generator for the current review campaign; remove it after the campaign evidence becomes the durable record."
+    },
+    "scripts/quality/coderabbit/inventory_cm.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded live CodeRabbit critical/major inventory utility; remove it when the review campaign closes rather than promoting it to a public quality entrypoint."
+    },
+    "scripts/quality/coderabbit/rebalance_streams.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded CodeRabbit residual-stream rebalancing utility; remove it after the current campaign or consolidate it if stream planning becomes a governed recurring workflow."
+    },
+    "scripts/quality/coderabbit/run_leaves.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the bounded sequential runner for the current CodeRabbit leaf-review campaign; remove it after campaign completion and keep its API-dependent execution outside ordinary local test workflows."
     },
     "scripts/schema/generate_protein_class_l1_target_type_artifacts.py": {
       "owner": "@bioetl-platform",
