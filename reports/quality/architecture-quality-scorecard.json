@@ -49,15 +49,15 @@
     },
     {
       "evidence_metrics": {
-        "hotspot_budget_warning_count": 0,
+        "hotspot_budget_warning_count": 2,
         "hotspot_family_count": 5,
         "total_duplicate_clusters": 0
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
-      "score": 9.5,
+      "score": 8.5,
       "weight": 0.14,
-      "weighted_score": 1.33
+      "weighted_score": 1.19
     },
     {
       "evidence_metrics": {
@@ -112,7 +112,7 @@
     {
       "evidence_metrics": {
         "expired_compat_count": 0,
-        "hotspot_budget_warning_count": 0,
+        "hotspot_budget_warning_count": 2,
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0,
@@ -123,9 +123,9 @@
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
-      "score": 9.9,
+      "score": 9.7,
       "weight": 0.06,
-      "weighted_score": 0.594
+      "weighted_score": 0.582
     }
   ],
   "debt_budget_policy": {
@@ -162,7 +162,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.41,
+  "integral_score": 9.26,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 53,
@@ -178,7 +178,7 @@
       "application_services_control_plane"
     ],
     "families_at_budget_count": 1,
-    "hotspot_budget_warning_count": 0,
+    "hotspot_budget_warning_count": 2,
     "hotspot_family_count": 5,
     "layer_violations": 0,
     "public_entrypoint_growth_count": 0,
@@ -233,7 +233,7 @@
       "total_duplicate_clusters": 0
     },
     "hotspot_family_baseline": {
-      "budget_warnings": 0,
+      "budget_warnings": 2,
       "path": "reports/quality/hotspot-family-baseline.json",
       "snapshot_date": "2026-07-27"
     },
