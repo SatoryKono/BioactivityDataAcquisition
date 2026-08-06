@@ -659,9 +659,7 @@ def _validate_manifest_provenance(
     if not isinstance(source, dict):
         return "render manifest lacks source provenance"
     commit_sha = source.get("commit_sha")
-    if not isinstance(commit_sha, str) or not _COMMIT_SHA_PATTERN.fullmatch(
-        commit_sha
-    ):
+    if not isinstance(commit_sha, str) or not _COMMIT_SHA_PATTERN.fullmatch(commit_sha):
         return "render manifest commit SHA is missing or invalid"
     source_dashboards = source.get("dashboards")
     if not isinstance(source_dashboards, dict):
@@ -706,6 +704,24 @@ def _validate_manifest_provenance(
         row_state.get("expand_collapsed_rows"), bool
     ):
         return "render manifest lacks row-state provenance"
+
+    requested = manifest.get("requested")
+    if not isinstance(requested, dict):
+        return "render manifest lacks requested browser context"
+    requested_zoom = requested.get("browser_zoom")
+    requested_kiosk = requested.get("kiosk_mode")
+    if not isinstance(requested_zoom, int) or not isinstance(requested_kiosk, str):
+        return "render manifest lacks requested zoom/kiosk provenance"
+    for uid in expected_uids:
+        browser_state = dashboards[uid].get("browserState")
+        if not isinstance(browser_state, dict):
+            return f"render manifest dashboard {uid} lacks actual browser state"
+        if browser_state.get("requestedZoom") != requested_zoom:
+            return f"render manifest dashboard {uid} browser zoom drift"
+        if browser_state.get("actualKiosk") != requested_kiosk:
+            return f"render manifest dashboard {uid} kiosk state drift"
+        if browser_state.get("cssZoom") in {None, ""}:
+            return f"render manifest dashboard {uid} lacks actual CSS zoom"
     return None
 
 

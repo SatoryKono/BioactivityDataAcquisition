@@ -112,7 +112,7 @@ def test_percent_scores_use_integer_precision() -> None:
 def test_dux5_run_context_collapsed_outside_explorer() -> None:
     expected_by_uid = {
         "bioetl-runtime": True,
-        "bioetl-overview-v2": False,
+        "bioetl-overview-v2": True,
     }
     for path in _dashboards():
         data = json.loads(path.read_text(encoding="utf-8"))

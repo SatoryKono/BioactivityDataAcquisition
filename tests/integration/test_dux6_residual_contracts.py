@@ -210,7 +210,7 @@ def test_primary_status_documents_unknown_class() -> None:
 def test_dux6_run_context_collapsed_outside_explorer() -> None:
     expected_by_uid = {
         "bioetl-runtime": True,
-        "bioetl-overview-v2": False,
+        "bioetl-overview-v2": True,
     }
     for path in sorted(DASH.glob("*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))

@@ -1075,6 +1075,35 @@ def test_dq_threshold_state_panel_uses_bounded_reason_severity_with_ok_fallback(
     )
 
 
+def test_dq_current_status_and_reasons_share_one_instant_snapshot() -> None:
+    """WARN/CRIT cannot be reduced from history while reasons use current data."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panels = {
+        panel.get("id"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("id") in {9401, 9101, 9102}
+    }
+    assert set(panels) == {9401, 9101, 9102}
+    for panel_id, panel in panels.items():
+        targets = panel.get("targets", [])
+        assert targets and all(target.get("instant") is True for target in targets), (
+            f"DQ current panel {panel_id} must use an instant query"
+        )
+
+    reasons = panels[9102]
+    expression = str(reasons["targets"][0]["expr"])
+    for marker in (
+        "reason_evidence_unavailable",
+        "verify_dq_reason_rules",
+        '"severity", "warn"',
+        '"severity", "crit"',
+        "unless on (pipeline)",
+    ):
+        assert marker in expression
+    no_value = str(reasons["fieldConfig"]["defaults"]["noValue"]).lower()
+    assert "valid only when current dq status is ok" in no_value
+
+
 def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
     """Runtime diagnostic gauges must not convert missing telemetry to OK."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
@@ -1266,7 +1295,7 @@ def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> No
     assert {"null", "nan"} <= matches
 
 
-def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> None:
+def test_provider_telemetry_freshness_fails_closed_when_status_is_missing() -> None:
     """Provider first screen must expose telemetry freshness separately from health."""
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
@@ -1288,6 +1317,7 @@ def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> 
     assert "bioetl_provider_current_status" in expression
     assert 'provider=~"$provider"' in expression
     assert "or vector(0)" not in expression
+    assert "> bool 0" not in expression
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("unit") == "none"
@@ -1301,7 +1331,7 @@ def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> 
         for mapping in defaults.get("mappings", [])
         if mapping.get("type") == "value"
     )
-    assert value_mapping["options"]["0"]["text"] == "OK"
+    assert value_mapping["options"]["0"]["text"] == "PRESENT"
     assert value_mapping["options"]["1"]["text"] == "WARN"
     special_mapping = next(
         mapping
@@ -1829,6 +1859,21 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         == processed.get("gridPos", {}).get("h")
         == 6
     )
+    if dashboard_name == "bioetl-run-explorer-v1.json":
+        assert identity.get("gridPos", {}).get("w") == 10
+        assert processed.get("gridPos", {}).get("w") == 14
+        assert (
+            "valid empty"
+            in str(
+                identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+            ).lower()
+        )
+        assert (
+            "query error"
+            in str(
+                processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+            ).lower()
+        )
     assert (
         identity.get("options", {}).get("cellHeight")
         == processed.get("options", {}).get("cellHeight")

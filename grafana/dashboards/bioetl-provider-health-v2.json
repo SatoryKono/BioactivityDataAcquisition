@@ -716,7 +716,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Confidence marker for current provider evidence. PRESENT means at least one selected-provider status series exists; missing evidence is fail-closed UNKNOWN and must never be read as healthy.",
+      "description": "Confidence marker for current provider telemetry evidence. PRESENT means at least one selected-provider status series exists; missing evidence is fail-closed UNKNOWN and must never be read as healthy.",
       "fieldConfig": {
         "defaults": {
           "color": {
