@@ -3,7 +3,7 @@
 **Branch:** `audit/root-hygiene-5cycle`  
 **CYCLE_COUNT:** 5  
 **Status:** SUCCESS  
-**End tip:** (see git log on branch)
+**End tip:** `fdf589c75c` on `audit/root-hygiene-5cycle`
 
 ## Preflight
 
