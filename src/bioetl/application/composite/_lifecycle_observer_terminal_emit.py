@@ -23,12 +23,12 @@ class LifecycleTerminalEmitHost(Protocol):
 
     def _emit_contract_event(
         self,
-        event: object,
+        event_name: str,
         *,
         composite_name: str,
         run_id: str,
         severity: str,
-        **log_kwargs: object,
+        **context: object,
     ) -> None: ...
 
     def _record_pipeline_terminal_metrics(
@@ -52,7 +52,7 @@ class LifecycleTerminalEmitHost(Protocol):
         *,
         run_id: str,
         status: str,
-        duration_seconds: float | None = None,
+        duration_seconds: float | None,
         error: Exception | None = None,
     ) -> None: ...
 

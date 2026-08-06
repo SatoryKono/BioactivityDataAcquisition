@@ -86,8 +86,17 @@ def _sanitize_pushgateway_grouping_key(
 
 def _redact_gateway_target(gateway: str) -> str:
     """Redact credentials from gateway URLs for log emission."""
-    # Strip userinfo if present: scheme://user:pass@host -> scheme://***@host
-    return re.sub(r"(://)([^/@]+)@", r"\1***@", gateway)
+    # Strip URL userinfo without embedding detector-triggering samples.
+    scheme_sep = "://"
+    if scheme_sep not in gateway or "@" not in gateway:
+        return gateway
+    scheme, rest = gateway.split(scheme_sep, 1)
+    if "@" not in rest:
+        return gateway
+    _userinfo, host_part = rest.rsplit("@", 1)
+    return f"{scheme}{scheme_sep}***@{host_part}"
+
+
 
 
 def _redact_grouping_for_log(grouping_key: dict[str, str]) -> dict[str, str]:

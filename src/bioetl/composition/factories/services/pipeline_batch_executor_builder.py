@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import Any, TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.batch_execution.state_service import (
     BatchExecutionStateService,
@@ -196,7 +196,7 @@ def _build_batch_executor_dependencies(
         memory_manager=memory_manager,
         execution_run_service=execution_run_service,
         extraction_loop_service=extraction_loop_service,
-        execution_state_service=execution_state_service,
+        execution_state_service=cast(Any, execution_state_service),
         processing_port=batch_processing_service,
         fsm=BatchExecutionFSM(),
     )

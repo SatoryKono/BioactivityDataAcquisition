@@ -36,7 +36,7 @@ from bioetl.application.services.checkpoint.checkpoint_models import CheckpointI
 from bioetl.domain.types import JsonDict, RunID
 
 if TYPE_CHECKING:
-    from opentelemetry.trace import Span
+    from bioetl.domain.ports.observability.tracing import SpanHandle
 
     from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort, TracingPort
 
@@ -87,7 +87,7 @@ class CheckpointService:
 
     @staticmethod
     def _set_trace_result(
-        span: Span,
+        span: SpanHandle,
         *,
         success: bool,
         attributes: Mapping[str, object] | None = None,

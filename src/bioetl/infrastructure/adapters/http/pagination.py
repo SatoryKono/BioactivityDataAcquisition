@@ -33,6 +33,20 @@ class PaginatedFetcherMixin:
         """
         return limit is not None and fetched >= limit
 
+    def _advance_pagination_cursor(
+        self,
+        *,
+        next_cursor: object,
+        seen_cursors: set[object],
+    ) -> object | None:
+        """Return next cursor or None when pagination should terminate."""
+        if next_cursor is None:
+            return None
+        if next_cursor in seen_cursors:
+            return None
+        seen_cursors.add(next_cursor)
+        return next_cursor
+
     async def paginated_fetch(
         self,
         fetch_func: Callable[
@@ -89,10 +103,10 @@ class PaginatedFetcherMixin:
                 if self._should_stop_fetching(fetched, limit):
                     return
 
-            if next_cursor is None:
+            advanced = self._advance_pagination_cursor(
+                next_cursor=next_cursor,
+                seen_cursors=seen_cursors,
+            )
+            if advanced is None:
                 break
-            # Terminate on repeated cursor (including empty pages that re-emit).
-            if next_cursor in seen_cursors:
-                break
-            seen_cursors.add(next_cursor)
-            cursor = next_cursor
+            cursor = advanced

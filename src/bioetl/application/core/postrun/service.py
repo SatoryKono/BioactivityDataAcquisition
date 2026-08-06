@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast, Any, cast
 
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
@@ -57,7 +57,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.ports import TracingPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,6 +87,19 @@ class PostrunService(PostrunServiceSupportMixin):
     METRIC_POSTRUN_PHASE_EVENTS_TOTAL = "bioetl_postrun_phase_events_total"
     METRIC_POSTRUN_PHASE_DURATION_SECONDS = "bioetl_postrun_phase_duration_seconds"
     OPERATION_ERRORS = SHARED_OPERATION_ERRORS
+
+    # Host surface required by PostrunServiceSupportHostProtocol (set in __init__).
+    _config: PipelineConfig
+    _runtime: RuntimeConfig
+    _context: PipelineContext
+    _dq_service: DataQualityService
+    _lifecycle_service: MedallionLifecycleService
+    _compact_orchestrator: PostrunCompactService
+    _cleanup_orchestrator: PostrunCleanupService
+    _dq_report_orchestrator: PostrunDQReportService
+    _metadata_write_orchestrator: PostrunMetadataWriteService
+    _logger: LoggerPort
+    _metrics: MetricsPort
 
     def __init__(
         self,
@@ -167,11 +180,12 @@ class PostrunService(PostrunServiceSupportMixin):
         dq_context: DQReportContext | None,
     ) -> PostrunResult:
         """Execute compaction, DQ, reporting, metadata, and vacuum in order."""
-        compaction = await self._run_compaction_phase()
-        dq_result = self._run_dq_phase(executor)
-        dq_reports = await self._run_dq_report_phase(dq_context)
-        vacuum_result = await self._run_vacuum_phase()
-        await self._run_final_metadata_phase(executor, dq_reports)
+        host = cast(Any, self)
+        compaction = await host._run_compaction_phase()
+        dq_result = host._run_dq_phase(executor)
+        dq_reports = await host._run_dq_report_phase(dq_context)
+        vacuum_result = await host._run_vacuum_phase()
+        await host._run_final_metadata_phase(executor, dq_reports)
         return PostrunResult(
             dq=dq_result,
             dq_reports=dq_reports,

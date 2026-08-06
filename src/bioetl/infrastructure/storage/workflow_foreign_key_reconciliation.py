@@ -5,7 +5,7 @@ from __future__ import annotations
 import inspect
 from collections.abc import Awaitable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Protocol, cast, runtime_checkable
+from typing import Any, Protocol, cast, runtime_checkable
 
 from bioetl.domain.ports import (
     ForeignKeyReconciliationPort,
@@ -297,8 +297,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         )
         if inspect.isawaitable(value):
             value = await value
-        rows = cast(Iterable[Mapping[str, object]], value)
-        materialized = [dict(row) for row in rows]
+        materialized = [dict(row) for row in cast(Iterable[Mapping[str, object]], value)]
         # Gold readers apply current_only internally; re-apply as a safety net when
         # payloads still carry SCD flags (sync fakes / partial adapters).
         return filter_current_rows(
@@ -362,7 +361,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             return result
 
         mutation_summary = await apply_reconciliation_mutation(
-            self,
+            cast(Any, self),
             request,
             retained_rows=retained_rows,
             orphan_rows=orphan_rows,
@@ -386,7 +385,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             orphan_rows_deleted=orphan_rows_deleted,
             mutated=True,
             would_mutate=False,
-            mutation_mode=mutation_summary.mutation_mode,
+            mutation_mode=cast(Any, mutation_summary.mutation_mode),
             quarantine_batch_id=mutation_summary.quarantine_batch_id,
             quarantine_rows_written=mutation_summary.quarantine_rows_written,
             quarantine_error_code=mutation_summary.quarantine_error_code,

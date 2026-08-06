@@ -56,7 +56,7 @@ class _PubChemIdentifierFetchMixin:
         )
         return self._response_mapper.map_compounds(compounds)
 
-    def _warn_smiles_fetch_error(self, smiles: str, error: Exception) -> None:
+    def _warn_smiles_fetch_error(self, smiles: str, error: BaseException) -> None:
         self._logger.warning(
             "smiles_fetch_failed",
             provider=self._provider_name,
@@ -176,7 +176,7 @@ class _PubChemIdentifierFetchMixin:
             valid_keys.append(cleaned)
         return valid_keys
 
-    def _warn_inchikey_fetch_error(self, inchikey: str, error: Exception) -> None:
+    def _warn_inchikey_fetch_error(self, inchikey: str, error: BaseException) -> None:
         self._logger.warning(
             "inchikey_fetch_failed",
             provider=self._provider_name,

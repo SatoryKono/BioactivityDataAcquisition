@@ -24,7 +24,7 @@ from bioetl.infrastructure.validation.pandera_validator import (
 
 if TYPE_CHECKING:
     import pandas as pd
-    import pandera as pa
+    import pandera.pandas as pa
 
 
 class ContractAwareGoldValidator(PanderaGoldValidator):

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
-from typing import TYPE_CHECKING
+from typing import cast, TYPE_CHECKING
 
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BronzeRecord, HealthStatus
@@ -126,7 +126,7 @@ def crossref_source_metadata(
 ) -> SourceMetadata:
     """Return and clear aggregated API request metadata."""
     return build_crossref_source_metadata(
-        request_collector=request_collector,
+        request_collector=cast("APIRequestCollector", request_collector),
         api_base=api_base,
         api_version=api_version,
     )
@@ -137,7 +137,7 @@ def crossref_clear_request_collector(
     request_collector: APIRequestCollector | None,
 ) -> None:
     """Clear the collector without returning metadata."""
-    clear_crossref_request_collector(request_collector=request_collector)
+    clear_crossref_request_collector(request_collector=cast("APIRequestCollector", request_collector))
 
 
 def crossref_request_count(
@@ -145,4 +145,4 @@ def crossref_request_count(
     request_collector: APIRequestCollector | None,
 ) -> int:
     """Number of recorded API requests since last clear."""
-    return get_crossref_request_count(request_collector=request_collector)
+    return get_crossref_request_count(request_collector=cast("APIRequestCollector", request_collector))

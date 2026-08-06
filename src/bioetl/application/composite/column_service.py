@@ -239,7 +239,7 @@ class ColumnOrderService:
         )
 
     @staticmethod
-    def _apply_renames(
+    def _apply_renames_stage(
         columns: list[str],
         rename_map: dict[str, str],
     ) -> list[str]:
