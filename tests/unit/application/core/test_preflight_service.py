@@ -39,7 +39,11 @@ from bioetl.application.core.preflight.health_aggregator import _HealthAggregato
 from bioetl.application.core.preflight.medallion_validator import (
     _MedallionConfigValidator,
 )
-from bioetl.application.core.preflight.service import PreflightService
+from bioetl.application.core.preflight.service import (
+    PreflightService,
+    _supports_raise_on_unhealthy,
+    validate_infrastructure,
+)
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.exceptions import InfrastructureError
@@ -1237,3 +1241,43 @@ class TestPreflightReportDataclass:
         )
 
         assert report.should_block_startup is False
+
+
+@pytest.mark.unit
+class TestValidateInfrastructureKwargCompatibility:
+    """Runner preflight must tolerate validate_infrastructure without raise_on_unhealthy."""
+
+    def test_supports_raise_on_unhealthy_signature_introspection(self) -> None:
+        """Introspection detects the keyword without calling the target."""
+
+        async def with_kw(services: object, *, raise_on_unhealthy: bool = True) -> None:
+            _ = services, raise_on_unhealthy
+
+        async def without_kw(services: object) -> None:
+            _ = services
+
+        assert _supports_raise_on_unhealthy(with_kw) is True
+        assert _supports_raise_on_unhealthy(without_kw) is False
+        assert _supports_raise_on_unhealthy(object()) is False
+
+    @pytest.mark.asyncio
+    async def test_validate_infrastructure_host_omits_kwarg_when_unsupported(
+        self,
+    ) -> None:
+        """Legacy validate_infrastructure call sites must not receive the keyword."""
+        calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+
+        async def legacy_validate(services: object) -> None:
+            calls.append(((services,), {}))
+            return None
+
+        host = MagicMock()
+        host._runtime = MagicMock()
+        host._services = MagicMock(name="services")
+        host._preflight_service = MagicMock()
+        host._preflight_service.validate_infrastructure = legacy_validate
+        host._observer = MagicMock()
+
+        await validate_infrastructure(host)
+        assert calls == [((host._services,), {})]
+
