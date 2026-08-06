@@ -15,7 +15,21 @@ from bioetl.composition.factories.pipeline._creation_wiring import (
     _ServiceBundleDeps,
 )
 
+# Public non-underscore aliases for first-party importers that must not
+# depend on private `_creation_wiring` symbols directly.
+BuildPipelineServicesFn = _BuildPipelineServicesFn
+PipelineCreationInputs = _PipelineCreationInputs
+PipelineCreationRequest = _PipelineCreationRequest
+ServiceBundleDeps = _ServiceBundleDeps
+create_pipeline_with_services_impl = _create_pipeline_with_services_impl
+
 __all__ = [
+    "BuildPipelineServicesFn",
+    "PipelineCreationInputs",
+    "PipelineCreationRequest",
+    "ServiceBundleDeps",
+    "create_pipeline_with_services_impl",
+    # Retained private aliases for in-tree callers mid-migration.
     "_BuildPipelineServicesFn",
     "_PipelineCreationInputs",
     "_PipelineCreationRequest",

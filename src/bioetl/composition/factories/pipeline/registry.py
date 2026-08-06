@@ -63,14 +63,18 @@ def create_pipeline_registration_state() -> PipelineFactoryRegistrationState:
 
 
 _default_registration_state: PipelineFactoryRegistrationState | None = None
+_default_registration_state_lock = threading.RLock()
 
 
 def _get_default_registration_state() -> PipelineFactoryRegistrationState:
-    """Get the lazy default registration-state singleton."""
+    """Get the lazy default registration-state singleton (thread-safe)."""
     global _default_registration_state
-    if _default_registration_state is None:
-        _default_registration_state = create_pipeline_registration_state()
-    return _default_registration_state
+    if _default_registration_state is not None:
+        return _default_registration_state
+    with _default_registration_state_lock:
+        if _default_registration_state is None:
+            _default_registration_state = create_pipeline_registration_state()
+        return _default_registration_state
 
 
 def _register_to_explicit_registry(registry: PipelineRegistryProtocol) -> None:

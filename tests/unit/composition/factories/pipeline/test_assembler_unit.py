@@ -84,12 +84,16 @@ class TestExtractEntityType:
 
     def test_extracts_suffix_after_underscore(self) -> None:
         assert _extract_entity_type("chembl_activity") == "activity"
+        assert (
+            _extract_entity_type("chembl_target_protein_classification")
+            == "target_protein_classification"
+        )
 
     def test_returns_none_when_no_underscore(self) -> None:
         assert _extract_entity_type("chembl") is None
 
     def test_handles_multiple_underscores(self) -> None:
-        assert _extract_entity_type("chembl_compound_record") == "record"
+        assert _extract_entity_type("chembl_compound_record") == "compound_record"
 
 
 @pytest.mark.unit
