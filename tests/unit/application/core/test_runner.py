@@ -117,6 +117,9 @@ def create_mock_services():
     from bioetl.domain.types import HealthStatus
 
     services = MagicMock(spec=PipelineService)
+    # Context-manager exit must not swallow exceptions (MagicMock is truthy).
+    services.__aenter__ = AsyncMock(return_value=services)
+    services.__aexit__ = AsyncMock(return_value=False)
     services.lock = AsyncMock()
     services.lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
     services.lock.release = AsyncMock()

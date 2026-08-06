@@ -209,7 +209,7 @@ def _record_output_ready(host: _PipelineRunnerFlowHostProtocol) -> None:
 
 def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append graceful shutdown ledger entry."""
-    _record_flow_invariants(host)
+    # Ledger write is primary; invariant projection must not block terminal recording.
     _record_run_metrics_event(
         host,
         lambda ledger_service, metrics_snapshot, details: (
@@ -219,6 +219,14 @@ def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
             )
         ),
     )
+    try:
+        _record_flow_invariants(host)
+    except Exception:
+        # Best-effort metrics projection after shutdown ledger is written.
+        host._logger.warning(
+            "shutdown_flow_invariants_failed",
+            run_id=str(host._context.run_id),
+        )
 
 
 def record_run_failed(
