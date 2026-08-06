@@ -145,3 +145,27 @@ repo gates (scenes parity ledger) is fixed in this closeout change.
 - [x] Wave E logs + FINDINGS
 - [x] Doc/grafana findings de-duped vs open GRA / Grafana UX issues
 - [x] No Docker monitoring requirement for Local-Only reaffirmed
+
+
+## PR-based residual re-run (2026-08-06 closeout)
+
+Per #8031 alternate path (**App/PR residual**), re-ran:
+
+```text
+coderabbit review --committed --agent --base main
+```
+
+on branch `fix/cr-c1-wave-e-closeout` after committing Wave E artifacts +
+scenes-parity ledger refresh.
+
+| Field | Value |
+| --- | --- |
+| status | `review_completed` |
+| findings | **0** |
+| reviewedFiles | `scenes-parity-ledger.json`, `CLOSEOUT_wave_E.md`, `FINDINGS_wave_E.md` |
+
+Log: `/tmp/c1-wave-e-rerun2.agent.json`
+
+This proves docs/json surfaces **are reviewable** when presented as committed
+branch diffs against main (PR residual path). Orphan-scope leaves that contain
+only ignored product surfaces still fail with "All files are ignored".
