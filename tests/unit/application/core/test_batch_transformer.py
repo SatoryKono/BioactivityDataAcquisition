@@ -891,6 +891,26 @@ class TestBatchTransformerAggregationHelpers:
         assert len(result.gold_records) == 0
         assert result.gold_excluded_by_contract_count == 1
 
+    def test_build_transform_result_copies_record_lists(self) -> None:
+        """Published TransformResult must not alias mutable aggregation lists."""
+        state = create_transform_aggregation_state()
+        apply_transform_outcome_to_state(
+            state=state,
+            attempt=RecordTransformOutcome(
+                silver_record={"entity_id": "1"},
+                gold_record={"entity_id": "1", "gold": True},
+            ),
+        )
+
+        result = build_transform_result(state)
+        state.silver_records.append({"entity_id": "mutated"})
+        state.gold_records.clear()
+
+        assert len(result.silver_records) == 1
+        assert result.silver_records[0] == {"entity_id": "1"}
+        assert len(result.gold_records) == 1
+        assert result.gold_records[0] == {"entity_id": "1", "gold": True}
+
     async def test_finalize_batch_transform_result_flushes_and_builds_result(
         self,
         mock_context,
