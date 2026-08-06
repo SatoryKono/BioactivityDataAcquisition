@@ -15,10 +15,14 @@ def extract_license_url(
 ) -> str | None:
     """Extract first license URL from publication."""
     licenses = publication.get("license", [])
-    if licenses and len(licenses) > 0:
-        url: str | None = licenses[0].get("URL")
-        return url
-    return None
+    # Crossref ``license`` is list-only; dict/str/None must not index or .get.
+    if not isinstance(licenses, list) or not licenses:
+        return None
+    first = licenses[0]
+    if not isinstance(first, dict):
+        return None
+    url = first.get("URL")
+    return url if isinstance(url, str) and url.strip() else None
 
 
 def extract_journal_info(

@@ -53,7 +53,13 @@ class TokenBucketRateLimiter:
     _lock: asyncio.Lock = field(init=False, default_factory=asyncio.Lock)
 
     def __post_init__(self) -> None:
-        """Initialize bucket with full capacity."""
+        """Validate configuration and initialize bucket with full capacity."""
+        if self.rate <= 0:
+            msg = f"rate must be strictly positive, got {self.rate!r}"
+            raise ValueError(msg)
+        if self.capacity <= 0:
+            msg = f"capacity must be strictly positive, got {self.capacity!r}"
+            raise ValueError(msg)
         self._tokens = float(self.capacity)
         self._last_refill = time.monotonic()
 

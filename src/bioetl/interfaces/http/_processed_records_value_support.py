@@ -37,7 +37,13 @@ def _selector_tokens(raw: str | None) -> tuple[str, ...]:
 
 
 def _promql_string(raw: str) -> str:
-    return raw.replace("\\", "\\\\").replace('"', '\\"')
+    """Escape a value for embedding in a double-quoted PromQL string literal."""
+    return (
+        raw.replace("\\", "\\\\")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace('"', '\\"')
+    )
 
 
 def _as_float(value: float | int | None) -> float | None:
