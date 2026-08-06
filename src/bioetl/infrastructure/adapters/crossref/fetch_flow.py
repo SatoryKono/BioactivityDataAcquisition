@@ -104,12 +104,18 @@ class CrossRefFetchFlow:
         async def _primary_records(
             primary_ids: list[str], request_limit: int | None
         ) -> AsyncIterator[BronzeRecord]:
+            yielded = 0
             for i in range(0, len(primary_ids), self.batch_size):
-                if request_limit is not None and request_limit <= 0:
+                if request_limit is not None and yielded >= request_limit:
                     return
                 batch = primary_ids[i : i + self.batch_size]
                 async for publication in self.batch_fetcher.fetch_batch(batch):
-                    yield publication
+                    yield self.response_mapper.with_lookup_method(
+                        publication, "doi"
+                    )
+                    yielded += 1
+                    if request_limit is not None and yielded >= request_limit:
+                        return
 
         async for publication in self.fallback_decorator.execute(
             filter_ids=filter_ids,

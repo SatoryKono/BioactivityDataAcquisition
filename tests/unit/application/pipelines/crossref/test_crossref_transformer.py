@@ -137,6 +137,22 @@ def test_extract_authors(sample_publication):
     assert authors == ["John Doe", "Jane Smith", "Anonymous"]
 
 
+def test_extract_authors_hardens_malformed_payloads() -> None:
+    """Non-list author payloads and non-dict entries are skipped."""
+    assert extract_authors({"author": None}) == []
+    assert extract_authors({"author": "not-a-list"}) == []
+    assert extract_authors({"author": [{"given": "A", "family": "B"}, "x"]}) == [
+        "A B"
+    ]
+
+
+def test_crossref_package_export_surface() -> None:
+    """Package re-export of CrossRefPublicationTransformer stays importable."""
+    from bioetl.application.pipelines import crossref as crossref_pkg
+
+    assert crossref_pkg.CrossRefPublicationTransformer is CrossRefPublicationTransformer
+
+
 def test_map_doc_type():
     """Test document type mapping using classification function."""
     # Test journal article → EXP / Original Experimental Data / Journal Article

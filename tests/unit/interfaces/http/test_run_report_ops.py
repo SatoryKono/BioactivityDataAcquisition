@@ -143,6 +143,42 @@ def test_load_requires_explicit_owner_selector(tmp_path: Path) -> None:
     assert load_pipeline_run_report_payload(run_id="run1", root=tmp_path) is None
 
 
+def test_load_rejects_dot_only_path_segments(tmp_path: Path) -> None:
+    """Traversal-style segments must not resolve to a loadable path."""
+    assert (
+        load_pipeline_run_report_payload(
+            run_id="..",
+            pipeline_name="chembl_activity",
+            root=tmp_path,
+        )
+        is None
+    )
+    assert (
+        load_pipeline_run_report_payload(
+            run_id="run1",
+            pipeline_name=".",
+            root=tmp_path,
+        )
+        is None
+    )
+
+
+def test_load_malformed_json_returns_none(tmp_path: Path) -> None:
+    target = (
+        tmp_path / "pipeline" / "chembl_activity" / "run1" / "pipeline-run-report.json"
+    )
+    target.parent.mkdir(parents=True)
+    target.write_text("{not-json", encoding="utf-8")
+    assert (
+        load_pipeline_run_report_payload(
+            run_id="run1",
+            pipeline_name="chembl_activity",
+            root=tmp_path,
+        )
+        is None
+    )
+
+
 def test_list_pipeline_run_reports(tmp_path: Path) -> None:
     target = (
         tmp_path / "pipeline" / "chembl_activity" / "run1" / "pipeline-run-report.json"

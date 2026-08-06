@@ -28,12 +28,10 @@ class HealthServerHTTPMixin:
     """Mixin for low-level HTTP request/response lifecycle."""
 
     _logger: LoggerPort | None = cast(Any, None)  # Any: host attr default (PD3)
-    _request_error_allowlist: tuple[type[BaseException], ...] = cast(
-        Any, None
-    )  # Any: host attr default (PD3)
-    _writer_close_allowlist: tuple[type[BaseException], ...] = cast(
-        Any, None
-    )  # Any: host attr default (PD3)
+    # Safe empty defaults so bare mixin use never raises TypeError on except.
+    # Concrete HealthServer overwrites with the real allowlists in __init__.
+    _request_error_allowlist: tuple[type[BaseException], ...] = ()
+    _writer_close_allowlist: tuple[type[BaseException], ...] = ()
     _request_line_timeout_seconds: float = 5.0
     _header_line_timeout_seconds: float = 5.0
     _max_header_lines: int = 100
@@ -280,8 +278,12 @@ class HealthServerHTTPMixin:
             message: Human-readable error message included in the JSON body.
         """
         body = json.dumps({"error": message})
+        try:
+            status_text = HTTPStatus(status_code).phrase
+        except ValueError:
+            status_text = "Error"
         http_response = (
-            f"HTTP/1.1 {status_code} {message}\r\n"
+            f"HTTP/1.1 {status_code} {status_text}\r\n"
             "Content-Type: application/json\r\n"
             f"Content-Length: {len(body)}\r\n"
             "Connection: close\r\n"
