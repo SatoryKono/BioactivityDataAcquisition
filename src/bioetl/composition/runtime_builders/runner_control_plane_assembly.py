@@ -147,6 +147,13 @@ def assemble_runner_control_plane(
             control_plane_refs.required_persistence_profile
             or control_plane_policy.required_profile
         )
+        # Keep ctx aligned with the effective profile after manifest resolution.
+        if effective_required_profile != control_plane_policy.required_profile:
+            ctx = _bind_required_persistence_profile(
+                ctx,
+                required_profile=effective_required_profile,
+                opt_down_requested=degraded_profile_opt_down_requested,
+            )
     _log_effective_required_persistence_profile(
         inputs=inputs,
         configured_profile=control_plane_policy.required_profile,
