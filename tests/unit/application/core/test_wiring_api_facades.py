@@ -78,29 +78,68 @@ def test_canonical_wiring_package_lazy_exports_owner_symbols() -> None:
         getattr(wiring, missing_name)
 
 
-def test_canonical_wiring_export_groups_are_loaded_from_declared_submodules(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """The lazy facade derives exports deterministically from owner modules."""
-    import types
+def test_wiring_package_init_uses_static_export_map_without_submodule_import() -> None:
+    """Importing the package must not eagerly import factory/registry/runtime/transformer."""
+    import sys
 
+    package_name = "bioetl.application.core.wiring"
+    owner_prefixes = (
+        "bioetl.application.core.wiring.factory",
+        "bioetl.application.core.wiring.registry",
+        "bioetl.application.core.wiring.runtime",
+        "bioetl.application.core.wiring.transformer",
+    )
+
+    stale = [
+        name
+        for name in list(sys.modules)
+        if name == package_name or name.startswith(package_name + ".")
+    ]
+    for name in stale:
+        del sys.modules[name]
+
+    wiring = importlib.import_module(package_name)
+
+    for owner in owner_prefixes:
+        assert owner not in sys.modules, f"eager import of {owner}"
+    assert isinstance(wiring._EXPORT_MODULES, dict)
+    assert "PipelineRunner" in wiring._EXPORT_MODULES
+    assert wiring._EXPORT_MODULES["PipelineRunner"].endswith(".factory")
+    # Shared names resolve to the last declared group (runtime overwrites factory).
+    assert wiring._EXPORT_MODULES["BasePipeline"].endswith(".runtime")
+    assert set(wiring.__all__) == set(wiring._EXPORT_MODULES)
+
+
+def test_static_export_groups_cover_each_owner_module_all() -> None:
+    """Static groups stay aligned with each owner module's public surface."""
     import bioetl.application.core.wiring as wiring
 
-    calls: list[str] = []
+    for module_name in (
+        "bioetl.application.core.wiring.factory",
+        "bioetl.application.core.wiring.registry",
+        "bioetl.application.core.wiring.runtime",
+        "bioetl.application.core.wiring.transformer",
+    ):
+        owner = importlib.import_module(module_name)
+        static_names = set(wiring._EXPORT_GROUPS[module_name])
+        assert static_names == set(owner.__all__), module_name
 
-    def _fake_import_module(module_name: str) -> object:
-        calls.append(module_name)
-        return types.SimpleNamespace(__all__=(f"{module_name}.export",))
 
-    monkeypatch.setattr(
-        wiring,
-        "_WIRING_SUBMODULES",
-        ("bioetl.owner.one", "bioetl.owner.two"),
-    )
-    monkeypatch.setattr(wiring, "import_module", _fake_import_module)
-
-    assert wiring._build_export_groups() == {
-        "bioetl.owner.one": ("bioetl.owner.one.export",),
-        "bioetl.owner.two": ("bioetl.owner.two.export",),
-    }
-    assert calls == ["bioetl.owner.one", "bioetl.owner.two"]
+@pytest.mark.parametrize(
+    "export_name",
+    [
+        "BaseTransformer",
+        "DefaultContractPolicy",
+        "NoOpStructuralPolicy",
+        "StructuralPolicyProtocol",
+        "TransformerDependencyContext",
+        "build_structural_policy",
+    ],
+)
+def test_transformer_facade_exports_resolve(export_name: str) -> None:
+    """Every transformer facade export is listed in __all__ and resolves on demand."""
+    transformer = importlib.import_module("bioetl.application.core.wiring.transformer")
+    assert export_name in transformer.__all__
+    assert export_name in transformer._PUBLIC_EXPORTS
+    value = getattr(transformer, export_name)
+    assert value is not None
