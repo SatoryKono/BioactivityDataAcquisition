@@ -20,17 +20,8 @@ from bioetl.application.services.run_reports.paths import (
 
 
 def _load_module() -> ModuleType:
-    path = (
-        Path(__file__).resolve().parents[5]
-        / "scripts"
-        / "ops"
-        / "runtime"
-        / "docker"
-        / "verify_report_bind.py"
-    )
-    # parents: docker -> ops -> scripts -> repo_backed -> unit -> tests -> repo
     # Path(__file__) = tests/unit/repo_backed/scripts/ops/docker/test_*.py
-    # parents[0]=docker, [1]=ops, [2]=scripts, [3]=repo_backed, [4]=unit, [5]=tests, [6]=repo
+    # parents[6] = repository root
     path = (
         Path(__file__).resolve().parents[6]
         / "scripts"

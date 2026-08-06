@@ -4079,7 +4079,7 @@
       },
       "threshold_steps": [],
       "mapping_count": 0,
-      "noValue": "No pipeline-run-report artifacts for this pipeline on disk (reports/run-reports/pipeline/<name>/). Not a Prometheus gap — run the pipeline to write reports, or pick a pipeline with reports.",
+      "noValue": "No pipeline-run-report artifacts for this pipeline (reports/run-reports/pipeline/<name>/). Not Prometheus — run the pipeline, pick a pipeline with reports, or if host has reports but this stays empty: bind mismatch — check /health/ready report_root and run scripts/ops/runtime/docker/verify_report_bind.py",
       "unit": null,
       "risks": []
     },

@@ -76,6 +76,36 @@ def test_load_missing_returns_none(tmp_path: Path) -> None:
     )
 
 
+def test_list_pipeline_payloads_includes_report_root_diagnostics(tmp_path: Path) -> None:
+    target = (
+        tmp_path / "pipeline" / "chembl_assay" / "run1" / "pipeline-run-report.json"
+    )
+    target.parent.mkdir(parents=True)
+    target.write_text(
+        json.dumps(
+            {
+                "schema_version": "pipeline_run_report_v1",
+                "identity": {
+                    "run_id": "run1",
+                    "pipeline_name": "chembl_assay",
+                    "status": "success",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    payload = list_pipeline_run_report_payloads(
+        pipeline_name="chembl_assay",
+        limit=5,
+        root=tmp_path,
+    )
+    assert payload["status"] == "ok"
+    assert payload["count"] == 1
+    assert payload["report_root"] == str(tmp_path.as_posix())
+    assert payload["marker_status"] in {"healthy", "unhealthy"}
+    assert payload["items"][0]["run_id"] == "run1"
+
+
 def test_unresolved_run_id_sentinel_shell_for_grafana() -> None:
     """run_id='-' must not 404; empty shell keeps Run Explorer panels query-clean."""
     assert _is_unresolved_run_scope("-")
@@ -212,11 +242,11 @@ def test_list_pipeline_run_reports_distinguishes_no_artifacts(
         root=tmp_path,
     )
 
-    assert payload == {
-        "status": "ok",
-        "count": 0,
-        "items": [],
-    }
+    assert payload["status"] == "ok"
+    assert payload["count"] == 0
+    assert payload["items"] == []
+    assert payload["report_root"] == str(tmp_path.as_posix())
+    assert "marker_status" in payload
 
 
 def test_load_rejects_wrong_schema_version(tmp_path: Path) -> None:

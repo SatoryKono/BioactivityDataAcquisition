@@ -32,14 +32,15 @@ from pathlib import Path
 from typing import Any
 
 _REPO_ROOT = Path(__file__).resolve().parents[4]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
+_SRC_ROOT = _REPO_ROOT / "src"
+for _path in (_REPO_ROOT, _SRC_ROOT):
+    if str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
 
 from bioetl.application.services.run_reports.paths import (  # noqa: E402
     REPORT_ROOT_MARKER_NAME,
     REPORT_ROOT_MARKER_TOKEN,
     inspect_report_root_marker,
-    resolve_report_root,
 )
 from bioetl.application.services.run_reports.query import (  # noqa: E402
     list_pipeline_reports,
@@ -316,6 +317,4 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    # resolve_report_root is imported for API symmetry / future extension.
-    _ = resolve_report_root
     raise SystemExit(main())

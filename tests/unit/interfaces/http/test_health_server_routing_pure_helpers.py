@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -344,7 +345,8 @@ async def test_routing_mixin_health_handlers_cover_monitor_states() -> None:
 
     ready_without_monitor = await host._handle_readiness()
     assert ready_without_monitor.status == "healthy"
-    assert ready_without_monitor.checks == {"message": "No health monitor configured"}
+    assert ready_without_monitor.checks["message"] == "No health monitor configured"
+    assert "report_root" in ready_without_monitor.checks
     providers_without_monitor = await host._handle_providers()
     assert providers_without_monitor.checks == {
         "message": "No health monitor configured"
@@ -357,6 +359,7 @@ async def test_routing_mixin_health_handlers_cover_monitor_states() -> None:
     }
     ready_unhealthy = await host._handle_readiness()
     assert ready_unhealthy.status == "unhealthy"
+    assert "report_root" in ready_unhealthy.checks
     host.provider_statuses = {"chembl": {"status": "healthy"}}
     ready_healthy = await host._handle_readiness()
     assert ready_healthy.status == "healthy"
@@ -365,6 +368,27 @@ async def test_routing_mixin_health_handlers_cover_monitor_states() -> None:
     assert providers.status == "degraded"
     health_with_monitor = await host._handle_health()
     assert "providers" in health_with_monitor.checks
+
+
+@pytest.mark.asyncio
+async def test_readiness_fails_closed_when_report_root_marker_enforced(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Docker fail-closed: missing bind marker makes /health/ready unhealthy."""
+    from bioetl.interfaces.http.report_root_config import (
+        ENFORCE_REPORT_ROOT_MARKER_ENV,
+        REPORT_ROOT_ENV,
+    )
+
+    empty_root = tmp_path / "run-reports"
+    empty_root.mkdir()
+    monkeypatch.setenv(REPORT_ROOT_ENV, str(empty_root))
+    monkeypatch.setenv(ENFORCE_REPORT_ROOT_MARKER_ENV, "1")
+    host = _RoutingHost()
+    ready = await host._handle_readiness()
+    assert ready.status == "unhealthy"
+    assert ready.checks["report_root"]["marker"] == "missing"
 
 
 @pytest.mark.asyncio
