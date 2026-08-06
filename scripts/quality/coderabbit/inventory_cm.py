@@ -13,11 +13,11 @@ def strip_ansi(raw: bytes) -> str:
     return re.sub(rb"\x1b\[[0-9;]*m", b"", raw).decode("utf-8", errors="replace").strip()
 
 
-def load_search(path: Path) -> list[dict]:
+def load_search(path: Path) -> list[dict[str, object]]:
     text = strip_ansi(path.read_bytes())
     dec = json.JSONDecoder()
     idx = 0
-    items: list[dict] = []
+    items: list[dict[str, object]] = []
     while idx < len(text):
         while idx < len(text) and text[idx].isspace():
             idx += 1
@@ -74,8 +74,8 @@ def main() -> None:
     maj_raw = load_search(OUT / "search_major_residual.json")
     crit_raw = load_search(OUT / "search_critical_residual.json")
 
-    path_clusters: list[dict] = []
-    meta: list[dict] = []
+    path_clusters: list[dict[str, object]] = []
+    meta: list[dict[str, object]] = []
     for it in maj_raw:
         title = it.get("title", "")
         p = path_of(title)
@@ -86,8 +86,8 @@ def main() -> None:
         else:
             meta.append({"number": it["number"], "title": title})
 
-    crit_pc: list[dict] = []
-    crit_meta: list[dict] = []
+    crit_pc: list[dict[str, object]] = []
+    crit_meta: list[dict[str, object]] = []
     for it in crit_raw:
         title = it.get("title", "")
         p = path_of(title)
@@ -96,7 +96,7 @@ def main() -> None:
         else:
             crit_meta.append({"number": it["number"], "title": title})
 
-    streams: dict[str, list[dict]] = defaultdict(list)
+    streams: dict[str, list[dict[str, object]]] = defaultdict(list)
     for m in path_clusters:
         streams[stream_of(m["path"])].append(m)
 
@@ -128,7 +128,7 @@ def main() -> None:
 
     # meta unique
     seen: set[int] = set()
-    meta_all: list[dict] = []
+    meta_all: list[dict[str, object]] = []
     for m in meta + crit_meta:
         n = m["number"]
         if n in seen or n in {x["number"] for x in path_clusters}:
