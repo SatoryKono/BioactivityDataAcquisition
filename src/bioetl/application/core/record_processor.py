@@ -62,8 +62,8 @@ class RecordProcessor:
             tracer: Tracing port for distributed tracing.
             span_executor_factory: Factory for the tracing span executor.
         """
-        _ = config
         self._context = context
+        self._config = config
         span_executor = span_executor_factory(tracer)
         self._span_executor = span_executor
         self._batch_metrics = batch_metrics

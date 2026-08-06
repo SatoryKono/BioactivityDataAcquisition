@@ -47,15 +47,16 @@ class RecordProcessorSpanExecutor:
     ) -> object:
         """Execute coroutine with tracing span."""
         span = self._start_span(name, batch_id, count)
+        error: Exception | None = None
         try:
-            result = await coro
-            self._end_span(span)
-            return result
-        except _PROCESSING_SPAN_ERRORS as error:
-            self._end_span(span, error)
+            return await coro
+        except _PROCESSING_SPAN_ERRORS as exc:
+            error = exc
             if on_error:
-                on_error(error)
+                on_error(exc)
             raise
+        finally:
+            self._end_span(span, error)
 
     async def execute_transform_with_span(
         self,
@@ -67,6 +68,7 @@ class RecordProcessorSpanExecutor:
     ) -> TransformResult:
         """Execute transformation with extended span attributes."""
         span = self._start_transform_span(batch_id, len(records))
+        error: Exception | None = None
         try:
             result = await self._transform_records(
                 transformer=transformer,
@@ -78,11 +80,12 @@ class RecordProcessorSpanExecutor:
                 span.set_attribute("bioetl.silver_count", len(result.silver_records))
                 span.set_attribute("bioetl.gold_count", len(result.gold_records))
                 span.set_attribute("bioetl.quarantined_count", result.quarantined_count)
-            self._end_span(span)
             return result
-        except _PROCESSING_SPAN_ERRORS as error:
-            self._end_span(span, error)
+        except _PROCESSING_SPAN_ERRORS as exc:
+            error = exc
             raise
+        finally:
+            self._end_span(span, error)
 
     def _start_span(
         self,

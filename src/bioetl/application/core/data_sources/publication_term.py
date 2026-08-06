@@ -54,8 +54,21 @@ class PublicationTermDataSource(
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        _ = query, offset
+        _ = query
+        # Offset is applied on the emitted term stream (post-expansion). Upstream
+        # publication pagination is approximated via the term limit multiplier.
+        skip = max(0, offset or 0)
+        seen = 0
+        emitted = 0
         async for term in self._fetch_publication_terms(
-            limit, filter_ids, filter_field
+            None if limit is None else (limit + skip),
+            filter_ids,
+            filter_field,
         ):
+            if seen < skip:
+                seen += 1
+                continue
             yield term
+            emitted += 1
+            if limit is not None and emitted >= limit:
+                return

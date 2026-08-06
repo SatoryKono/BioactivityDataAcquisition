@@ -13,6 +13,7 @@ __all__ = [
     "is_pmid_field",
     "is_smiles_field",
     "normalize_named_text_field",
+    "normalize_plain_text",
     "normalize_special_fallback_field",
 ]
 
