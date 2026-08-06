@@ -70,19 +70,30 @@ def _resolve_data_root_with_mode(settings: Settings) -> tuple[Path, DataRootMode
 
 
 def _private_fallback_data_root() -> Path:
-    """Return a user-private fallback data root for legacy facade callers."""
-    return _private_fallback_data_root_with_mode()[0]
+    """Return a user-private fallback data root for legacy facade callers.
 
-
-def _private_fallback_data_root_with_mode() -> tuple[Path, DataRootMode]:
-    """Return a user-private fallback data root and its mode class."""
+    Kept as a named seam so tests can monkeypatch the private fallback path
+    without reimplementing mode classification.
+    """
     preferred = Path.home() / ".cache" / "bioetl-data"
     try:
-        return _prepare_private_runtime_dir(preferred), "private_cache"
+        return _prepare_private_runtime_dir(preferred)
     except OSError:
         runtime_user = getattr(os, "getuid", lambda: "user")()
         fallback = Path(tempfile.gettempdir()) / f"bioetl-data-{runtime_user}"
-        return _prepare_private_runtime_dir(fallback), "tmp"
+        return _prepare_private_runtime_dir(fallback)
+
+
+def _private_fallback_data_root_with_mode() -> tuple[Path, DataRootMode]:
+    """Return private fallback path via the monkeypatchable seam + mode class."""
+    path = _private_fallback_data_root()
+    preferred = Path.home() / ".cache" / "bioetl-data"
+    try:
+        if path.resolve() == preferred.resolve():
+            return path, "private_cache"
+    except OSError:
+        pass
+    return path, "tmp"
 
 
 def _prepare_private_runtime_dir(path: Path) -> Path:
