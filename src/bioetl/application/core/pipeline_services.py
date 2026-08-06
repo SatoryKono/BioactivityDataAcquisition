@@ -140,12 +140,21 @@ class PipelineService:
         if self.metadata_writer:
             io_tasks.append(self.metadata_writer.aclose())
         results = await asyncio.gather(*io_tasks, return_exceptions=True)
+        cancelled: BaseException | None = None
         for result in results:
-            if isinstance(result, Exception):
+            # gather(return_exceptions=True) can yield BaseException (e.g. CancelledError).
+            if isinstance(result, BaseException):
                 self.logger.error(
-                    "Error during service shutdown", stage="cleanup", error=result
+                    "Error during service shutdown",
+                    stage="cleanup",
+                    error=result,
+                    error_type=type(result).__name__,
                 )
+                if isinstance(result, asyncio.CancelledError) and cancelled is None:
+                    cancelled = result
         self.logger.info("Pipeline services closed.", stage="cleanup")
+        if cancelled is not None:
+            raise cancelled
 
 
 __all__ = ["PipelineService", "PipelineStorageProtocol"]

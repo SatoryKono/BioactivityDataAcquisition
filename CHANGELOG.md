@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Entity ID scheme v2 documented (#7777):** publication-term term types are
+  always uppercased before hashing; `ENTITY_ID_SCHEME_VERSION = "v2"` makes
+  identity changes explicit. Golden/case-fold tests pin the contract.
+- **Subcellular fraction stream aggregation (#7787):**
+  `extract_unique_fraction_records` consumes the full assay stream so
+  `assay_count` / `example_assay_id` stay complete when `limit` caps unique
+  fractions.
+- **`PipelineService.aclose` CancelledError (#7844):** shutdown gather logs
+  `BaseException` results and re-raises `asyncio.CancelledError`.
+
 - **`AuditPort.log_event` is async (#7920):** Aligns the non-write audit
   lifecycle method with the I/O-bound `AuditPort` contract. Implementations
   (`NoOpAudit`, `FileAuditAdapter`) and callers (pipeline runner service,
