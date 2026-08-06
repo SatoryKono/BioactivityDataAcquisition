@@ -169,14 +169,28 @@ class AnomalyDetector:
         Returns:
             Typed domain anomaly with threshold-exceeded semantics.
         """
-        baseline_mean = (min_val + max_val) / 2
-        baseline_stddev = (max_val - min_val) / 4
+        # Avoid arithmetic on infinities for one-sided thresholds.
+        min_finite = min_val if min_val != float("-inf") else None
+        max_finite = max_val if max_val != float("inf") else None
+        if min_finite is not None and max_finite is not None:
+            baseline_mean = (min_finite + max_finite) / 2
+            span = max_finite - min_finite
+            baseline_stddev = span / 4 if span > 0 else 0.0
+        elif max_finite is not None:
+            baseline_mean = max_finite
+            baseline_stddev = 0.0
+        elif min_finite is not None:
+            baseline_mean = min_finite
+            baseline_stddev = 0.0
+        else:
+            baseline_mean = current_value
+            baseline_stddev = 0.0
 
-        z_score = (
-            abs(current_value - baseline_mean) / baseline_stddev
-            if baseline_stddev > 0
-            else 10.0
-        )
+        if baseline_stddev > 0:
+            z_score = abs(current_value - baseline_mean) / baseline_stddev
+        else:
+            # One-sided or zero-width threshold: treat breach as critical distance.
+            z_score = 10.0
 
         if current_value < min_val:
             message = f"Value {current_value:.2f} below minimum threshold {min_val:.2f}"

@@ -111,7 +111,8 @@ class UnifiedLogger:
         """Bind additional context to the logger.
 
         Returns a new UnifiedLogger instance with additional bound context.
-        The pipeline and run_id remain unchanged.
+        The pipeline and run_id remain unchanged; any attempt to override them
+        via kwargs is stripped so correlation fields stay immutable.
 
         Args:
             **kwargs: Key-value pairs to bind to the logger context
@@ -119,11 +120,24 @@ class UnifiedLogger:
         Returns:
             New UnifiedLogger with bound context
         """
+        safe_kwargs = {
+            key: value
+            for key, value in kwargs.items()
+            if key not in {"run_id", "pipeline"}
+        }
         new_logger = object.__new__(self.__class__)
         new_logger._pipeline = self._pipeline
         new_logger._run_id = self._run_id
-        new_logger._logger = self._logger.bind(**kwargs)
+        new_logger._logger = self._logger.bind(**safe_kwargs)
         return new_logger
+
+    def _strip_correlation_overrides(self, kwargs: dict[str, object]) -> dict[str, object]:
+        """Drop run_id/pipeline overrides so bound correlation fields win."""
+        return {
+            key: value
+            for key, value in kwargs.items()
+            if key not in {"run_id", "pipeline"}
+        }
 
     def _ensure_stage(
         self,

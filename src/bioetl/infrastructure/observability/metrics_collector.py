@@ -2,32 +2,38 @@
 
 from __future__ import annotations
 
-from bioetl.infrastructure.observability.metrics_definitions import (
-    ERRORS_TOTAL,
-    RECORDS_PROCESSED_TOTAL,
-)
+from bioetl.domain.ports import MetricsPort
 
 
 class MetricsCollector:
     """Collector for pipeline metrics.
 
-    Wraps Prometheus metrics with pipeline context.
+    Wraps an injected MetricsPort with pipeline context instead of touching
+    raw Prometheus collectors directly from this module.
     """
 
-    # Any: optional Prometheus CollectorRegistry has no strict protocol in domain
     def __init__(
         self,
         pipeline_name: str,
+        metrics: MetricsPort | None = None,
         registry: object = None,
     ) -> None:
         """Initialize the metrics collector.
 
         Args:
             pipeline_name: Name of the pipeline.
-            registry: Optional Prometheus registry (unused as metrics are global).
-
+            metrics: Metrics port used for emission. When omitted, uses the
+                process-wide PrometheusMetrics adapter.
+            registry: Optional Prometheus registry (legacy unused parameter).
         """
         self.pipeline_name = pipeline_name
+        if metrics is None:
+            from bioetl.infrastructure.observability.prometheus_metrics import (
+                PrometheusMetrics,
+            )
+
+            metrics = PrometheusMetrics()
+        self.metrics: MetricsPort = metrics
         self.registry = registry
 
     def record_processed(
@@ -36,33 +42,28 @@ class MetricsCollector:
         count: int = 1,
         run_type: str = "incremental",
     ) -> None:
-        """Record processed records count.
-
-        Args:
-            layer: Pipeline stage label (e.g., "bronze", "silver", "gold").
-            count: Number of records processed (default: 1).
-            run_type: Type of run for metric labelling (default: "incremental").
-
-        """
-        RECORDS_PROCESSED_TOTAL.labels(
-            pipeline=self.pipeline_name,
-            stage=layer,
-            run_type=run_type,
-        ).inc(count)
+        """Record processed records count."""
+        self.metrics.increment_counter(
+            "bioetl_records_processed_total",
+            count,
+            {
+                "pipeline": self.pipeline_name,
+                "stage": layer,
+                "run_type": run_type,
+            },
+        )
 
     def record_error(self, error_code: str, stage: str = "processing") -> None:
-        """Record an error occurrence.
-
-        Args:
-            error_code: Categorised error code identifying the failure type.
-            stage: Pipeline stage where the error occurred (default: "processing").
-
-        """
-        ERRORS_TOTAL.labels(
-            pipeline=self.pipeline_name,
-            stage=stage,
-            error_code=error_code,
-        ).inc()
+        """Record an error occurrence."""
+        self.metrics.increment_counter(
+            "bioetl_errors_total",
+            1,
+            {
+                "pipeline": self.pipeline_name,
+                "stage": stage,
+                "error_code": error_code,
+            },
+        )
 
 
 __all__ = ["MetricsCollector"]

@@ -137,23 +137,29 @@ class TestZScoreCalculation:
     def test_calculate_z_score_zero_stddev_nonzero_mean(
         self, detector: ZScoreDetector
     ) -> None:
-        """Test Z-score calculation when stddev is 0 but mean is nonzero."""
+        """Any deviation from a constant baseline is a high-severity anomaly."""
         z_score = detector._calculate_z_score(value=150.0, mean=100.0, stddev=0.0)
-        assert z_score == pytest.approx(1.0)
+        assert z_score == pytest.approx(10.0)
 
     def test_calculate_z_score_zero_stddev_zero_mean(
         self, detector: ZScoreDetector
     ) -> None:
-        """Test Z-score calculation returns None when stddev and mean are both 0."""
+        """Zero mean constant baseline still flags non-zero observations."""
         z_score = detector._calculate_z_score(value=10.0, mean=0.0, stddev=0.0)
-        assert z_score is None
+        assert z_score == pytest.approx(10.0)
 
     def test_calculate_z_score_zero_stddev_small_deviation(
         self, detector: ZScoreDetector
     ) -> None:
-        """Test Z-score calculation returns None when deviation is small."""
+        """Even small deviations from a constant baseline are anomalies."""
         z_score = detector._calculate_z_score(value=110.0, mean=100.0, stddev=0.0)
-        assert z_score is None
+        assert z_score == pytest.approx(10.0)
+
+    def test_calculate_z_score_zero_stddev_equal_mean(
+        self, detector: ZScoreDetector
+    ) -> None:
+        """Equal to constant mean is not an anomaly."""
+        assert detector._calculate_z_score(value=100.0, mean=100.0, stddev=0.0) is None
 
 
 @pytest.mark.unit
