@@ -58,6 +58,14 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
             self._policy_resolver.build_policy_ref() if self._policy_resolver else None
         )
 
+    def rebind_schema(self, schema: pa.DataFrameSchema | None) -> ContractAwareGoldValidator:
+        """Return a clone bound to ``schema`` preserving DQ config."""
+        return type(self)(
+            schema=schema,
+            strict=self._strict,
+            dq_config=self._dq_config,
+        )
+
     @property
     def policy_ref(self) -> DQPolicyRef | None:
         """Get the current policy reference."""

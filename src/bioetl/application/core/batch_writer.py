@@ -171,3 +171,11 @@ class BatchWriter(BatchWriterTracingMixin, BatchWriterColumnsMixin, BatchWriterI
             Literal["overwrite", "append", "scd2"],
             gold_mode_val.value if hasattr(gold_mode_val, "value") else gold_mode_val,
         )
+
+    def track_batch_written(self, *, stage: str, count: int) -> None:
+        """Public metrics hook for successful layer writes."""
+        self._batch_metrics.track_batch_written(stage=stage, count=count)
+
+    def track_batch_failed(self, *, stage: str, count: int) -> None:
+        """Public metrics hook for failed layer writes."""
+        self._batch_metrics.track_batch_failed(stage=stage, count=count)

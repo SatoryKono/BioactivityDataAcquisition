@@ -73,12 +73,12 @@ def build_postrun_dependency_context(
         logger=logger_port,
         runtime=runtime,
         storage=storage,
-        warning_allowlist=_METADATA_VERSION_ALLOWLIST,
+        warning_allowlist=DEFAULT_METADATA_VERSION_ALLOWLIST,
     )
     return PostrunDependencyContext(
         cleanup_orchestrator=PostrunCleanupService(
             logger=logger_port,
-            warning_allowlist=_POSTRUN_WARNING_ALLOWLIST,
+            warning_allowlist=DEFAULT_POSTRUN_WARNING_ALLOWLIST,
         ),
         dq_report_orchestrator=PostrunDQReportService(
             logger=logger_port,
@@ -87,7 +87,7 @@ def build_postrun_dependency_context(
             bronze_dq_config=bronze_dq_config,
             silver_dq_config=silver_dq_config,
             gold_dq_config=gold_dq_config,
-            warning_allowlist=_POSTRUN_WARNING_ALLOWLIST,
+            warning_allowlist=DEFAULT_POSTRUN_WARNING_ALLOWLIST,
         ),
         metadata_write_orchestrator=PostrunMetadataWriteService(
             config=config,
@@ -103,7 +103,7 @@ def build_postrun_dependency_context(
             config=config,
             storage=storage,
             logger=logger_port,
-            warning_allowlist=_POSTRUN_WARNING_ALLOWLIST,
+            warning_allowlist=DEFAULT_POSTRUN_WARNING_ALLOWLIST,
         ),
     )
 

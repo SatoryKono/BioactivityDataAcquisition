@@ -1,18 +1,21 @@
-# mypy: disable-error-code=attr-defined
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Gold-layer prepare/validate helpers for BatchWriter IO paths."""
 
 from __future__ import annotations
 
-from inspect import signature
-from typing import TYPE_CHECKING
-from unittest.mock import Mock
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.domain.exceptions import SchemaViolationError
 
 if TYPE_CHECKING:
     from bioetl.domain.types import GoldRecord
+
+
+@runtime_checkable
+class _GoldValidatorRebindProtocol(Protocol):
+    """Validators that can rebind to a projected Gold schema."""
+
+    def rebind_schema(self, schema: object) -> object: ...
 
 
 def prepare_gold_records(
@@ -48,7 +51,7 @@ def validate_gold_records(
     """Validate Gold records against schema contract."""
     validator = writer._gold_validator
     target_schema = schema if schema is not None else writer._gold_schema
-    if schema is not None and hasattr(target_schema, "columns"):
+    if schema is not None:
         validator = rebind_gold_validator_schema(validator, target_schema)
 
     result = validator.validate(records)
@@ -66,31 +69,12 @@ def rebind_gold_validator_schema(
     validator: object,
     schema: object,
 ) -> object:
-    """Clone schema-aware validators for projected Gold schemas when supported."""
-    if isinstance(validator, Mock):
-        return validator
-
-    validator_cls = type(validator)
-    try:
-        init_params = signature(validator_cls).parameters
-    except (TypeError, ValueError):
-        return validator
-
-    if "schema" not in init_params:
-        return validator
-
-    validator_kwargs: dict[str, object] = {"schema": schema}
-    if "strict" in init_params:
-        validator_kwargs["strict"] = getattr(validator, "_strict", True)
-
-    dq_config = getattr(validator, "_dq_config", None)
-    if "dq_config" in init_params and dq_config is not None:
-        validator_kwargs["dq_config"] = dq_config
-
-    try:
-        return validator_cls(**validator_kwargs)
-    except TypeError:
-        return validator
+    """Rebind schema-aware validators via their owned rebind/clone API."""
+    rebind = getattr(validator, "rebind_schema", None)
+    if callable(rebind):
+        return rebind(schema)
+    # Validators without a rebind surface keep their original schema binding.
+    return validator
 
 
 def should_defer_gold_validation_to_storage(writer: object) -> bool:

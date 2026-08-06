@@ -166,9 +166,10 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         record_run_started(self)
         debug_export_status = "success"
         try:
-            shutdown_recorded = await self._run_pipeline_lifecycle()
+            await self._run_pipeline_lifecycle()
         except PipelineShutdownError:
             debug_export_status = "shutdown"
+            # Terminal shutdown is recorded only in this outer handler.
             self._record_terminal_shutdown()
             raise
         except _RUN_FAILURE_EXCEPTIONS as exc:
@@ -176,27 +177,36 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             record_run_failed(self, exc)
             raise
         else:
-            if not shutdown_recorded:
-                self._record_successful_completion()
-            else:
-                debug_export_status = "shutdown"
+            self._record_successful_completion()
         finally:
-            await self._finalize_debug_export(debug_export_status)
-            await self._cleanup_after_run()
+            # Guard each finalizer independently so cleanup still runs when
+            # debug-export finalization fails (and vice versa).
+            try:
+                await self._finalize_debug_export(debug_export_status)
+            except _RUN_FAILURE_EXCEPTIONS as error:
+                self._logger.warning(
+                    "debug_export_finalize_outer_failed",
+                    error=str(error),
+                    error_type=type(error).__name__,
+                    run_id=str(self._context.run_id),
+                )
+            try:
+                await self._cleanup_after_run()
+            except _RUN_FAILURE_EXCEPTIONS as error:
+                self._logger.warning(
+                    "cleanup_after_run_failed",
+                    error=str(error),
+                    error_type=type(error).__name__,
+                    run_id=str(self._context.run_id),
+                )
 
-    async def _run_pipeline_lifecycle(self) -> bool:
-        shutdown_recorded = False
+    async def _run_pipeline_lifecycle(self) -> None:
         with self._pipeline_span(), self._observer:
             try:
                 async with self._services, self._lock_runtime_service:
                     await self._run_managed_pipeline()
-            except PipelineShutdownError:
-                self._record_terminal_shutdown()
-                shutdown_recorded = True
-                raise
             finally:
                 self._observer.capture_execution_metrics(self.execution_metrics)
-        return shutdown_recorded
 
     async def _finalize_debug_export(self, status: str) -> None:
         finalize = getattr(self._executor, "finalize_debug_export", None)

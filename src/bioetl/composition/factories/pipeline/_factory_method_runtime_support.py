@@ -27,6 +27,11 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.filtering import InputFilterConfig
+from bioetl.domain.ports import (
+    ExecutionObservabilityPort,
+    PipelineYamlConfigPort,
+    SettingsPort,
+)
 from bioetl.domain.types import GoldSchemaType, RunID
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -69,9 +74,9 @@ def create_factory_runner_from_request(
     run_id: RunID,
     runtime: RuntimeConfig,
     started_at: datetime,
-    settings: Settings,
-    observability: ObservabilityBundle,
-    yaml_config: PipelineYamlConfig,
+    settings: SettingsPort,
+    observability: ExecutionObservabilityPort,
+    yaml_config: PipelineYamlConfigPort,
     control_plane_artifacts: _ControlPlaneArtifacts | None,
     create_with_services_fn: Callable[..., BasePipeline],
     assemble_runner_fn: Callable[..., PipelineRunner],
@@ -82,11 +87,16 @@ def create_factory_runner_from_request(
     from bioetl.composition.factories.dq.context_resolver import extract_dq_configs
 
     artifacts = control_plane_artifacts
+    # Concrete Settings/PipelineYamlConfig still required by the creation-request
+    # dataclass and assembler seams; ports are accepted at this boundary.
+    concrete_settings = cast("Settings", settings)
+    concrete_yaml = cast("PipelineYamlConfig", yaml_config)
+    concrete_observability = cast("ObservabilityBundle", observability)
     pipeline_request = _CreatePipelineWithServicesRequest(
         run_id=run_id,
         runtime=runtime,
         started_at=started_at,
-        settings=settings,
+        settings=concrete_settings,
         logger=observability.logger,
         audit=observability.audit,
         manifest_id=None if artifacts is None else artifacts.manifest_id,
@@ -106,7 +116,7 @@ def create_factory_runner_from_request(
         effective_config_artifact_id=(
             None if artifacts is None else artifacts.effective_config_artifact_id
         ),
-        config=yaml_config,
+        config=concrete_yaml,
         filter_config=filter_config,
         tracer=observability.tracer,
         dq_monitor=observability.dq_monitor,
@@ -119,14 +129,14 @@ def create_factory_runner_from_request(
     )(pipeline_request)
     return assemble_runner_fn(
         pipeline=pipeline,
-        observability=observability,
+        observability=concrete_observability,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
         strict_gold_validation=resolve_strict_gold_validation(
             runtime=runtime,
             settings=settings,
         ),
-        yaml_config=yaml_config,
+        yaml_config=concrete_yaml,
         dq_configs_extractor=lambda config: extract_dq_configs(
             config,
             relaxed_dq=bool(settings.pipeline.relaxed_dq),

@@ -38,9 +38,6 @@ def track_quarantine_metrics(
         return
     if metrics is None:
         return
-    track_quarantined_records = getattr(metrics, "track_quarantined_records", None)
-    if callable(track_quarantined_records):
-        track_quarantined_records(error_type, count)
     metrics.increment_counter(
         "bioetl_dq_records_quarantined_total",
         count,
@@ -70,9 +67,6 @@ def track_processed_quarantined(
         return
     if metrics is None:
         return
-    track_processed_records = getattr(metrics, "track_processed_records", None)
-    if callable(track_processed_records):
-        track_processed_records("quarantined", count)
     metrics.increment_counter(
         "bioetl_records_processed_total",
         count,
@@ -97,9 +91,11 @@ def record_filtered_quarantine_metrics(
     pipeline_metrics: PipelineMetricsRecorder,
     count: int,
 ) -> None:
-    """Emit metrics for filter-rejected records."""
-    if metrics is None:
-        return
+    """Emit metrics for filter-rejected records.
+
+    Pipeline accounting always runs; optional MetricsPort is not required.
+    """
+    _ = metrics
     pipeline_metrics.record_quarantine_records(
         reason=FILTERED_OUT_SILVER,
         count=count,

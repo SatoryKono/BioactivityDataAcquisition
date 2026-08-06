@@ -24,10 +24,6 @@ Note:
 
 from __future__ import annotations
 
-from bioetl.domain.ports import (
-    MetricsPort,
-    TracingPort,
-)
 from bioetl.domain.ports.noop import (
     NoOpMetrics,
     NoOpTracing,
@@ -58,14 +54,14 @@ def create_noop_logger() -> NoOpLogger:
     return NoOpLogger()
 
 
-def create_noop_metrics() -> MetricsPort:
+def create_noop_metrics() -> NoOpMetrics:
     """Create a NoOpMetrics instance for CLI operations.
 
     Returns a metrics collector that silently ignores all metrics.
     Uses warn_on_use=False since CLI intentionally opts out of metrics.
 
     Returns:
-        NoOpMetrics instance implementing MetricsPort interface.
+        NoOpMetrics adapter-facing implementation (satisfies MetricsPort).
 
     Example:
         >>> metrics = create_noop_metrics()
@@ -74,14 +70,14 @@ def create_noop_metrics() -> MetricsPort:
     return NoOpMetrics(warn_on_use=False)
 
 
-def create_noop_tracing() -> TracingPort:
+def create_noop_tracing() -> NoOpTracing:
     """Create a NoOpTracing instance for CLI operations.
 
     Returns a tracer that does nothing when spans are created.
     Used when distributed tracing is not needed for CLI commands.
 
     Returns:
-        NoOpTracing instance implementing TracingPort interface.
+        NoOpTracing adapter-facing implementation (satisfies TracingPort).
 
     Example:
         >>> tracing = create_noop_tracing()
@@ -92,7 +88,7 @@ def create_noop_tracing() -> TracingPort:
     return NoOpTracing()
 
 
-def create_noop_observability_bundle() -> tuple[NoOpLogger, MetricsPort, TracingPort]:
+def create_noop_observability_bundle() -> tuple[NoOpLogger, NoOpMetrics, NoOpTracing]:
     """Create a complete NoOp observability bundle for CLI operations.
 
     Convenience function that creates all three NoOp implementations

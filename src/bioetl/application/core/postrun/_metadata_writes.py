@@ -109,6 +109,8 @@ def _build_silver_metadata_write_coro(
     silver_table = config.table.silver_table
     if not silver_table:
         return None
+    if not storage.is_table_initialized(silver_table, layer="silver"):
+        return None
     silver_path = storage.get_table_path(silver_table, layer="silver")
     version_after = resolve_delta_version(str(silver_path), "silver")
     silver_metadata_write: Awaitable[object] = metadata_writer.finalize_silver_metadata(

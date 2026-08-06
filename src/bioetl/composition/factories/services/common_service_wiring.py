@@ -7,6 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, cast
 
+from bioetl.composition.factories.dq._context_resolver_support import DQServiceBundle
 from bioetl.composition.factories.services.port_factories import (
     create_checkpoint,
     create_lock,
@@ -17,7 +18,6 @@ from bioetl.composition.observability_resolution import (
     resolve_tracing_port as _resolve_tracing_port,
 )
 from bioetl.domain.ports.noop import NoOpAudit
-from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.application.core.wiring.runtime import (
@@ -117,7 +117,7 @@ class CommonServicePorts:
     quarantine: QuarantinePort
     metrics_port: MetricsPort
     tracer: TracingPort
-    dq_services: JsonDict
+    dq_services: DQServiceBundle
 
 
 @dataclass(frozen=True, slots=True)
@@ -130,7 +130,7 @@ class CommonServicePortsRequest:
     pipeline_name: str
     create_dq_services_fn: Callable[
         [Settings, PipelineYamlConfig, LoggerPort, MetricsPort | None],
-        JsonDict,
+        DQServiceBundle,
     ]
     audit: AuditPort | None = None
     metrics: MetricsPort | None = None
@@ -218,9 +218,9 @@ def assemble_pipeline_service(
         dq_monitor=dq_monitor,
         metadata_coordinator=metadata_coordinator,
         metadata_writer=metadata_writer,
-        bronze_dq_analyzer=common_ports.dq_services.get("bronze_analyzer"),
-        silver_dq_analyzer=common_ports.dq_services.get("silver_analyzer"),
-        gold_dq_analyzer=common_ports.dq_services.get("gold_analyzer"),
-        dq_report_writer=common_ports.dq_services.get("report_writer"),
-        dq_report_service=common_ports.dq_services.get("report_service"),
+        bronze_dq_analyzer=common_ports.dq_services.bronze_analyzer,
+        silver_dq_analyzer=common_ports.dq_services.silver_analyzer,
+        gold_dq_analyzer=common_ports.dq_services.gold_analyzer,
+        dq_report_writer=common_ports.dq_services.report_writer,
+        dq_report_service=common_ports.dq_services.report_service,
     )

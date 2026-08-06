@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import time
 from typing import TYPE_CHECKING, Protocol
 
@@ -48,18 +49,26 @@ class _PreflightExecutionHostProtocol(Protocol):
     def _observer(self) -> PipelineObserver: ...
 
 
+def _supports_raise_on_unhealthy(validate_fn: object) -> bool:
+    """Return True when ``validate_infrastructure`` accepts raise_on_unhealthy."""
+    try:
+        signature = inspect.signature(validate_fn)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return False
+    return "raise_on_unhealthy" in signature.parameters
+
+
 async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None:
     """Validate infrastructure health before pipeline execution."""
     start_time = time.perf_counter()
-    try:
-        report = await host._preflight_service.validate_infrastructure(
+    validate_fn = host._preflight_service.validate_infrastructure
+    if _supports_raise_on_unhealthy(validate_fn):
+        report = await validate_fn(
             host._services,
             raise_on_unhealthy=False,
         )
-    except TypeError as exc:
-        if "raise_on_unhealthy" not in str(exc):
-            raise
-        report = await host._preflight_service.validate_infrastructure(host._services)
+    else:
+        report = await validate_fn(host._services)
     if report is None:
         return
     duration = time.perf_counter() - start_time

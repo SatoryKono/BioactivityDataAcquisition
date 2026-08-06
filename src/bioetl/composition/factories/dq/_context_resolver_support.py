@@ -190,11 +190,14 @@ def get_output_root_impl(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
 ) -> Path:
-    bronze_config = pipeline_config.sink.get("bronze")
-    if not settings.test_mode and bronze_config and bronze_config.path:
-        bronze_path = Path(bronze_config.path)
-        return bronze_path.parent.parent.parent
-    return settings.data_dir
+    """Resolve the canonical managed output root from settings.
+
+    Output layout is always ``{data_dir}/output`` (ADR-025). Pipeline sink
+    bronze paths are not used as a climb source — that produced divergent
+    roots when bronze was configured outside the managed tree.
+    """
+    del pipeline_config  # root is settings-scoped, not sink-path-derived
+    return Path(settings.data_dir) / "output"
 
 
 def create_dq_services_impl(

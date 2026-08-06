@@ -22,6 +22,7 @@ class _PreSilverFinalizationFlowMixin:
 
     provider: str = ""
     entity_type: str = ""
+    _record_normalizer: RecordNormalizationProcessor | None = None
 
     if TYPE_CHECKING:
 
@@ -47,8 +48,16 @@ class _PreSilverFinalizationFlowMixin:
             entity_type=self.entity_type,
         )
 
+    def _get_record_normalizer(self) -> RecordNormalizationProcessor:
+        """Return the host-injected normalizer, or lazily create one and cache it."""
+        normalizer = getattr(self, "_record_normalizer", None)
+        if normalizer is None:
+            normalizer = self._build_record_normalizer()
+            self._record_normalizer = normalizer
+        return normalizer
+
     def _normalize_business_data(self, business_data: JsonDict) -> JsonDict:
-        return self._build_record_normalizer().normalize_business_data(business_data)
+        return self._get_record_normalizer().normalize_business_data(business_data)
 
     def _project_pre_silver_findings(
         self,
@@ -57,21 +66,21 @@ class _PreSilverFinalizationFlowMixin:
         context: PipelineContext,
         index: int,
     ) -> JsonDict:
-        return self._build_record_normalizer().project_normalization_findings(
+        return self._get_record_normalizer().project_normalization_findings(
             silver_record,
             context=context,
             index=index,
         )
 
-    def _finalize_staged_business_data(
+    def _project_hashed_silver_record(
         self,
         *,
         context: PipelineContext,
         entity_id: str,
         index: int,
-        business_data: JsonDict,
+        normalized_business_data: JsonDict,
     ) -> JsonDict:
-        normalized_business_data = self._normalize_business_data(business_data)
+        """Shared content-hash → build → project sequence after normalization."""
         content_hash = self.compute_content_hash(
             normalized_business_data,
             exclude_none=True,
@@ -87,6 +96,38 @@ class _PreSilverFinalizationFlowMixin:
             silver_record,
             context=context,
             index=index,
+        )
+
+    def _finalize_business_data_with_entity_id(
+        self,
+        *,
+        context: PipelineContext,
+        entity_id: str,
+        index: int,
+        business_data: JsonDict,
+    ) -> JsonDict:
+        """Shared normalize → hash → build → project sequence for Silver finalization."""
+        normalized_business_data = self._normalize_business_data(business_data)
+        return self._project_hashed_silver_record(
+            context=context,
+            entity_id=entity_id,
+            index=index,
+            normalized_business_data=normalized_business_data,
+        )
+
+    def _finalize_staged_business_data(
+        self,
+        *,
+        context: PipelineContext,
+        entity_id: str,
+        index: int,
+        business_data: JsonDict,
+    ) -> JsonDict:
+        return self._finalize_business_data_with_entity_id(
+            context=context,
+            entity_id=entity_id,
+            index=index,
+            business_data=business_data,
         )
 
     def _finalize_prepared_business_data(
@@ -157,21 +198,11 @@ class _PreSilverFinalizationFlowMixin:
     ) -> JsonDict:
         normalized_business_data = self._normalize_business_data(business_data)
         entity_id = resolve_entity_id(normalized_business_data)
-        content_hash = self.compute_content_hash(
-            normalized_business_data,
-            exclude_none=True,
-        )
-        silver_record = self._build_pre_silver_record(
-            context,
-            entity_id,
-            content_hash,
-            index,
-            normalized_business_data,
-        )
-        return self._project_pre_silver_findings(
-            silver_record,
+        return self._project_hashed_silver_record(
             context=context,
+            entity_id=entity_id,
             index=index,
+            normalized_business_data=normalized_business_data,
         )
 
     def _transform_optional_normalized_business_data(

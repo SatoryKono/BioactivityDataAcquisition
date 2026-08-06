@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.factories.dq.context_resolver import (
+    DQServiceBundle,
     create_dq_services as _create_dq_services_impl,
 )
 from bioetl.composition.factories.dq.context_resolver import (
@@ -36,7 +37,6 @@ from bioetl.composition.factories.services.port_factories import (
     create_metrics,
     create_quarantine,
 )
-from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.application.core.wiring.factory import PipelineService
@@ -170,7 +170,7 @@ class BaseServicesFactory:
         logger: LoggerPort,
         dq_monitor: DQMonitorPort | None,
         metadata_coordinator: MetadataCoordinator | None,
-        dq_services: JsonDict,  # Any: heterogeneous DQ service instances
+        dq_services: DQServiceBundle,
     ) -> PipelineService:
         """Assemble PipelineService from pre-built dependencies."""
         return assemble_pipeline_service(
@@ -204,7 +204,7 @@ class BaseServicesFactory:
         pipeline_config: PipelineYamlConfig,
         logger: LoggerPort,
         metrics: MetricsPort | None = None,
-    ) -> JsonDict:  # Any: heterogeneous DQ service instances
+    ) -> DQServiceBundle:
         """Create DQ analyzers/writer/services when DQ reporting is enabled."""
         return _create_dq_services_impl(
             settings,

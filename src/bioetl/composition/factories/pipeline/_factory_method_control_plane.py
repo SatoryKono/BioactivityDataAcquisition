@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.config import RuntimeConfig
-from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.domain.ports import SettingsPort
 
 
 def apply_optional_control_plane_kwargs(
@@ -34,9 +34,14 @@ def apply_optional_control_plane_kwargs(
 def resolve_strict_gold_validation(
     *,
     runtime: RuntimeConfig,
-    settings: Settings,
+    settings: SettingsPort,
 ) -> bool:
-    """Resolve production/default strict-gold validation policy."""
+    """Resolve production/default strict-gold validation policy.
+
+    Layering residual: keep this thin composition predicate here until a
+    domain/application policy module owns strict-gold enforcement. No clear
+    domain home exists yet for the production/test-mode conjunction.
+    """
     return (
         settings.env == "prod" and not settings.test_mode
     ) or runtime.strict_gold_validation

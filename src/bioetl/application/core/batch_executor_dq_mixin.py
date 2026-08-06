@@ -106,12 +106,10 @@ class _BatchExecutorDQMixin:
         item: _ReservoirT,
     ) -> None:
         """Add item to a bounded deterministic sample ranked by stable content."""
-        if not hasattr(self, "_dq_total_seen"):
-            self._dq_total_seen = 0
-        if not hasattr(self, "_dq_reservoir_ranks"):
-            self._dq_reservoir_ranks = {}
         self._dq_total_seen += 1
-        reservoir_ranks = self._dq_reservoir_ranks.setdefault(id(reservoir), [])
+        # Stage-keyed rank map (initialized on BatchExecutorRuntimeState).
+        stage_key = id(reservoir)
+        reservoir_ranks = self._dq_reservoir_ranks.setdefault(stage_key, [])
         item_rank = self._dq_sample_rank(item)
 
         if len(reservoir) < _DQ_MAX_SAMPLE_SIZE:
