@@ -502,13 +502,29 @@ class TestTrackSilverFilterRejection:
         )
 
     def test_filter_rejection__op_when_metrics_none__a2073d7f(
-        self, recorder_no_metrics: BatchMetricsRecorderService
+        self, recorder_no_metrics: BatchMetricsRecorderService, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """Tracking should remain a no-op when metrics are disabled."""
+        """Prometheus is skipped when metrics are unset; accounting still runs."""
+        accounting_calls: list[dict[str, object]] = []
+
+        def _capture_accounting(**kwargs: object) -> None:
+            accounting_calls.append(dict(kwargs))
+
+        monkeypatch.setattr(
+            "bioetl.application.core.batch_metrics._record_silver_removal_accounting",
+            _capture_accounting,
+        )
         recorder_no_metrics.track_silver_filter_rejection(
             {"reason_code": "required_field_missing"}
         )
         assert recorder_no_metrics._metrics is None
+        assert accounting_calls == [
+            {
+                "outcome": "filtered_out",
+                "reason_code": "required_field_missing",
+                "count": 1,
+            }
+        ]
 
     def test_increments_by_one(
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
