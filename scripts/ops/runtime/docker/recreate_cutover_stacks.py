@@ -18,14 +18,17 @@ import re
 import subprocess
 import sys
 import time
-from pathlib import Path
 from collections.abc import Mapping
+from pathlib import Path
+
+import yaml
+
+if __package__:
+    from . import docker_runtime_preflight as runtime_preflight
+else:  # pragma: no cover - direct operator entrypoint
+    import docker_runtime_preflight as runtime_preflight
 
 SECRET_KEY = re.compile(r"(?:password|secret|token|credential|auth|key)", re.I)
-
-DEFAULT_RUNTIME = Path(
-    r"\\wsl$\Ubuntu\home\fedor\.local\share\bioetl-runtime\BioactivityDataAcquisition2"
-)
 
 MAIN_ENV_KEYS = ("LOG_LEVEL", "NEO4J_USERNAME", "NEO4J_PASSWORD")
 MONITORING_ENV_KEYS = (
@@ -79,6 +82,18 @@ def _container_env(container: str) -> dict[str, str]:
     return result
 
 
+def _container_env_from_candidates(containers: tuple[str, ...]) -> dict[str, str]:
+    failures: list[str] = []
+    for container in containers:
+        try:
+            return _container_env(container)
+        except RuntimeError as exc:
+            failures.append(str(exc))
+    raise RuntimeError(
+        "could not capture environment from any candidate: " + "; ".join(failures)
+    )
+
+
 def _pick_env(source: Mapping[str, str], keys: tuple[str, ...]) -> dict[str, str]:
     selected: dict[str, str] = {}
     for key in keys:
@@ -104,6 +119,17 @@ def _compose_env(
     return merged
 
 
+def _dashboard_source_env(runtime: Path) -> dict[str, str]:
+    contract_path = runtime / "configs/quality/docker_runtime_contracts.yaml"
+    payload = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"Docker runtime contract must be a mapping: {contract_path}")
+    environment = runtime_preflight.dashboard_source_environment(runtime, payload)
+    if "BIOETL_RUNTIME_SOURCE_ID" not in environment:
+        raise ValueError("dashboard source identity contract is missing")
+    return environment
+
+
 def recreate_stack(
     *,
     runtime: Path,
@@ -111,6 +137,7 @@ def recreate_stack(
     compose_file: Path,
     env_overrides: Mapping[str, str],
     profile: str | None = None,
+    build: bool = False,
 ) -> None:
     if not compose_file.is_file():
         raise FileNotFoundError(compose_file)
@@ -136,7 +163,12 @@ def recreate_stack(
     if down.returncode != 0:
         raise RuntimeError(f"compose down failed for {project}: {down.returncode}")
 
-    up = _run([*base_cmd, "up", "-d", "--remove-orphans"], env=env, timeout=600.0)
+    up_command = [*base_cmd, "up", "-d", "--remove-orphans"]
+    if build:
+        # The Ops HTTP source-identity contract lives in application code, so
+        # a checkout cutover must not silently reuse an image built elsewhere.
+        up_command.append("--build")
+    up = _run(up_command, env=env, timeout=600.0)
     print(up.stdout)
     if up.stderr:
         print(up.stderr, file=sys.stderr)
@@ -211,7 +243,7 @@ def _detach_warp_network(containers: tuple[str, ...]) -> None:
 
 def _capture_recreate_env() -> tuple[dict[str, str], dict[str, str]]:
     grafana_env = _container_env("bioetl-grafana")
-    main_env = _container_env("bioetl-main-bioetl-1")
+    main_env = _container_env_from_candidates(("bioetl", "bioetl-main-bioetl-1"))
     monitoring_overrides = _pick_env(grafana_env, MONITORING_ENV_KEYS)
     main_overrides = _pick_env(main_env, MAIN_ENV_KEYS)
     main_overrides.setdefault("LOG_LEVEL", "INFO")
@@ -253,8 +285,8 @@ def main() -> int:
     parser.add_argument(
         "--runtime",
         type=Path,
-        default=DEFAULT_RUNTIME,
-        help="Linux-filesystem BioETL runtime origin",
+        required=True,
+        help="Explicit Linux-filesystem BioETL runtime origin",
     )
     parser.add_argument(
         "--include-tracing-profile",
@@ -267,9 +299,12 @@ def main() -> int:
         help="Only recreate monitoring",
     )
     args = parser.parse_args()
-    runtime: Path = args.runtime
+    runtime = args.runtime.expanduser().resolve()
 
     monitoring_overrides, main_overrides = _capture_recreate_env()
+    source_environment = _dashboard_source_env(runtime)
+    monitoring_overrides.update(source_environment)
+    main_overrides.update(source_environment)
     _print_env_summary("monitoring_env", monitoring_overrides)
     _print_env_summary("main_env", main_overrides)
     _ensure_shared_networks()
@@ -288,6 +323,7 @@ def main() -> int:
             project="bioetl-main",
             compose_file=runtime / "docker-compose.yml",
             env_overrides=main_overrides,
+            build=True,
         )
 
     _detach_warp_network(("bioetl", "bioetl-main-bioetl-1"))

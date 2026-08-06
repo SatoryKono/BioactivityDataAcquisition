@@ -22,9 +22,12 @@ from typing import Any, cast
 _TMP_PATH_MARKER = "".join((chr(0x2F), "tmp", chr(0x2F)))
 
 ROOT = Path(__file__).resolve().parents[4]
-RUNTIME = Path(
-    r"\\wsl$\Ubuntu\home\fedor\.local\share\bioetl-runtime\BioactivityDataAcquisition2"
-)
+_RUNTIME_ORIGIN = os.environ.get("BIOETL_RUNTIME_ORIGIN", "").strip()
+if not _RUNTIME_ORIGIN:
+    raise RuntimeError(
+        "BIOETL_RUNTIME_ORIGIN is required; use runtime_manager.py for normal lifecycle"
+    )
+RUNTIME = Path(_RUNTIME_ORIGIN)
 REPORT_DIR = ROOT / "reports" / "quality"
 OBSERVATION_PATH = REPORT_DIR / "docker-dashboard-cutover-observation.json"
 FINAL_PATH = REPORT_DIR / "docker-dashboard-cutover-final.json"
@@ -373,7 +376,6 @@ def _validate_canonical_compose_files(mon_files: str, main_files: str) -> None:
         raise RuntimeError(f"monitoring still non-canonical: {mon_files}")
     has_known_root = (
         "bioetl-runtime" in main_files
-        or "BioactivityDataAcquisition2" in main_files
         or "/home/" in main_files
     )
     if not has_known_root:
