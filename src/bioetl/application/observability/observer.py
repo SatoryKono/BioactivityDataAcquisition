@@ -42,10 +42,9 @@ from bioetl.domain.runtime_observability_publication_contract import (
 from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports.observability.tracing import SpanHandle as Span
-
     from bioetl.domain.aggregates.events import DomainEvent
     from bioetl.domain.ports import ClockPort, LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.ports.observability.tracing import SpanHandle as Span
 
     class _ObserverEventMixinBase:
         """Typing-only stand-in for skipped observer event mixin imports."""

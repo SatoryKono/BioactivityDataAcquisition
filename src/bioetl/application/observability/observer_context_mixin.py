@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import time
 from datetime import datetime, timedelta
-from typing import cast, TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Self
 from uuid import UUID
 
 from bioetl.application.observability.observer_contract import LifecyclePhase
@@ -23,9 +23,8 @@ from bioetl.domain.types import RunID
 if TYPE_CHECKING:
     from types import TracebackType
 
-    from bioetl.domain.ports.observability.tracing import SpanHandle as Span
-
     from bioetl.domain.ports import ClockPort, MetricsPort, TracingPort
+    from bioetl.domain.ports.observability.tracing import SpanHandle as Span
 
 
 if TYPE_CHECKING:

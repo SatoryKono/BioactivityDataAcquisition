@@ -9,9 +9,8 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.application.observability.tracing_operation_helpers import traced_operation
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports.observability.tracing import SpanHandle
-
     from bioetl.domain.ports import LoggerPort, QuarantinePort, TracingPort
+    from bioetl.domain.ports.observability.tracing import SpanHandle
     from bioetl.domain.types import JsonDict, QuarantineRecordStatus
 
 __all__ = ["_QuarantineSyncHost", "_run_traced_sync_operation"]

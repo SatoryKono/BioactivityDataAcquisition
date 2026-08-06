@@ -8,6 +8,15 @@ from typing import TYPE_CHECKING
 from bioetl.application.observability.tracing_operation_helpers import (
     traced_async_operation,
 )
+from bioetl.application.services.checkpoint.checkpoint_service import (
+    CheckpointService,
+)
+from bioetl.application.services.control_plane.manifest.inspection_service import (
+    RunManifestInspectionService,
+)
+from bioetl.application.services.export_lineage.audit_inspection_service import (
+    AuditInspectionService,
+)
 from bioetl.application.services.workflow._observability_workflow_execution import (
     inspect_audit_run as inspect_audit_run_impl,
 )
@@ -21,15 +30,6 @@ from bioetl.application.services.workflow._observability_workflow_models import 
     AuditRunWorkflowResult,
     CheckpointAuditWorkflowResult,
     RunForensicDossierResult,
-)
-from bioetl.application.services.export_lineage.audit_inspection_service import (
-    AuditInspectionService,
-)
-from bioetl.application.services.checkpoint.checkpoint_service import (
-    CheckpointService,
-)
-from bioetl.application.services.control_plane.manifest.inspection_service import (
-    RunManifestInspectionService,
 )
 
 if TYPE_CHECKING:

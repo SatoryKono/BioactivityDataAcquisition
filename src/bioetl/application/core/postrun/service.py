@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, cast, Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
@@ -24,8 +24,8 @@ from bioetl.application.core.postrun._service_collaborators import (
 from bioetl.application.core.postrun._service_support import (
     PostrunServiceSupportMixin,
 )
-from bioetl.application.services.quality.data_quality_service import DataQualityService
 from bioetl.application.services.medallion.medallion_types import VacuumResult
+from bioetl.application.services.quality.data_quality_service import DataQualityService
 from bioetl.domain.ports import ExecutorMetricsPort
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
@@ -48,16 +48,16 @@ if TYPE_CHECKING:
     from bioetl.application.core.postrun.metadata_write_service import (
         PostrunMetadataWriteService,
     )
+    from bioetl.application.services.medallion.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
     from bioetl.application.services.quality.dq_report_service import (
         DQReportContext,
         DQReportResult,
     )
-    from bioetl.application.services.medallion.medallion_lifecycle import (
-        MedallionLifecycleService,
-    )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import TracingPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,18 +88,7 @@ class PostrunService(PostrunServiceSupportMixin):
     METRIC_POSTRUN_PHASE_DURATION_SECONDS = "bioetl_postrun_phase_duration_seconds"
     OPERATION_ERRORS = SHARED_OPERATION_ERRORS
 
-    # Host surface required by PostrunServiceSupportHostProtocol (set in __init__).
-    _config: PipelineConfig
-    _runtime: RuntimeConfig
-    _context: PipelineContext
-    _dq_service: DataQualityService
-    _lifecycle_service: MedallionLifecycleService
-    _compact_orchestrator: PostrunCompactService
-    _cleanup_orchestrator: PostrunCleanupService
-    _dq_report_orchestrator: PostrunDQReportService
-    _metadata_write_orchestrator: PostrunMetadataWriteService
-    _logger: LoggerPort
-    _metrics: MetricsPort
+    # Host attrs are assigned in __init__; surface contract is _PostrunHostAttrSurface.
 
     def __init__(
         self,
