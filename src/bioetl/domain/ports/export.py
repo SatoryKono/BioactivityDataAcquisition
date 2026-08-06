@@ -45,6 +45,20 @@ class ExportRedactionProfile(StrEnum):
     NONE = "none"
 
 
+def _validate_export_fingerprint_size(size_bytes: int) -> None:
+    if size_bytes < 0:
+        raise ValueError(f"size_bytes must be non-negative, got {size_bytes!r}")
+
+
+def _normalize_export_sha256(sha256: str) -> str:
+    digest = sha256.strip().lower()
+    if len(digest) != 64 or any(ch not in "0123456789abcdef" for ch in digest):
+        raise ValueError(
+            f"sha256 must be a 64-character lowercase hex digest, got {sha256!r}"
+        )
+    return digest
+
+
 @dataclass(frozen=True, slots=True)
 class ExportFileFingerprint:
     """Stable fingerprint for an exported file artifact."""
@@ -54,13 +68,8 @@ class ExportFileFingerprint:
     sha256: str
 
     def __post_init__(self) -> None:
-        if self.size_bytes < 0:
-            raise ValueError(f"size_bytes must be non-negative, got {self.size_bytes!r}")
-        digest = self.sha256.strip().lower()
-        if len(digest) != 64 or any(ch not in "0123456789abcdef" for ch in digest):
-            raise ValueError(
-                f"sha256 must be a 64-character lowercase hex digest, got {self.sha256!r}"
-            )
+        _validate_export_fingerprint_size(self.size_bytes)
+        digest = _normalize_export_sha256(self.sha256)
         if digest != self.sha256:
             object.__setattr__(self, "sha256", digest)
 

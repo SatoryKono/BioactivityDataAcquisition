@@ -10,7 +10,6 @@ from bioetl.domain.exceptions.base import (
     RecoverableError,
 )
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
-from bioetl.domain.exceptions.storage import InfrastructureError, StorageError
 from bioetl.domain.exceptions.internal import (
     CheckpointConflictError,
     InvalidStateError,
@@ -19,6 +18,7 @@ from bioetl.domain.exceptions.internal import (
     RunnerAlreadyExecutedError,
 )
 from bioetl.domain.exceptions.network import ExternalServiceError, NetworkError
+from bioetl.domain.exceptions.storage import InfrastructureError, StorageError
 from bioetl.domain.exceptions.validation import ValidationError
 
 __all__ = ["DomainExceptionContext", "get_domain_exception_context"]

@@ -23,21 +23,6 @@ if TYPE_CHECKING:
         get_domain_exception_context,
     )
     from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
-    from bioetl.domain.exceptions.storage import (
-        BronzeValidationError,
-        BucketNotFoundError,
-        CachedBronzeEmptyError,
-        DeltaOptimizeError,
-        DeltaSchemaValidationError,
-        DeltaTransactionError,
-        DeltaWriteConflictError,
-        InfrastructureError,
-        SchemaEvolutionError,
-        StorageError,
-        StorageQuotaExceededError,
-        TableNotFoundError,
-        UploadError,
-    )
     from bioetl.domain.exceptions.internal import (
         AuthFailureError,
         CheckpointConflictError,
@@ -65,6 +50,21 @@ if TYPE_CHECKING:
     from bioetl.domain.exceptions.pipeline_shutdown import (
         PipelineShutdownError,
         ShutdownReason,
+    )
+    from bioetl.domain.exceptions.storage import (
+        BronzeValidationError,
+        BucketNotFoundError,
+        CachedBronzeEmptyError,
+        DeltaOptimizeError,
+        DeltaSchemaValidationError,
+        DeltaTransactionError,
+        DeltaWriteConflictError,
+        InfrastructureError,
+        SchemaEvolutionError,
+        StorageError,
+        StorageQuotaExceededError,
+        TableNotFoundError,
+        UploadError,
     )
     from bioetl.domain.exceptions.validation import (
         SchemaViolationError,

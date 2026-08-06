@@ -1,10 +1,10 @@
-from typing import Any, cast
 """Lazy pipeline factory catalog support for the public registry facade."""
 
 from __future__ import annotations
 
 import threading
 from collections.abc import Iterator, Mapping
+from typing import Any, cast
 
 from bioetl.composition.factories.pipeline.contract_validator import create_factory
 from bioetl.composition.factories.pipeline.registry_manifest import PIPELINE_CONFIGS
