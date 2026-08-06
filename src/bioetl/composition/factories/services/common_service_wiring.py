@@ -24,19 +24,24 @@ if TYPE_CHECKING:
         PipelineService,
         PipelineStorageProtocol,
     )
+    from bioetl.application.services.quality.dq_report_service import DQReportService
     from bioetl.application.services.lineage.metadata_coordinator import (
         MetadataCoordinator,
     )
     from bioetl.domain.ports import (
         AuditPort,
+        BronzeDQAnalyzerPort,
         CheckpointPort,
         DataSourcePort,
         DQMonitorPort,
+        DQReportWriterPort,
+        GoldDQAnalyzerPort,
         LockPort,
         LoggerPort,
         MetricsPort,
         QuarantinePort,
         SettingsPort,
+        SilverDQAnalyzerPort,
         SilverValidatorPort,
         TracingPort,
     )

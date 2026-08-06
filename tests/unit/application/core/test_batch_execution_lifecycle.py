@@ -167,7 +167,7 @@ async def test_run_service_finalizes_on_cancelled_error(
     )
     execution_context = prepare_execution_context(limit=1, query=None, offset=0)
 
-    async def _cancel_loop(_ctx: BatchExecutionContext) -> None:
+    async def _cancel_loop(execution_context: BatchExecutionContext) -> None:
         raise asyncio.CancelledError()
 
     with pytest.raises(asyncio.CancelledError):
@@ -196,7 +196,7 @@ async def test_run_service_finalizes_on_pipeline_shutdown(
     )
     execution_context = prepare_execution_context(limit=1, query=None, offset=0)
 
-    async def _shutdown_loop(_ctx: BatchExecutionContext) -> None:
+    async def _shutdown_loop(execution_context: BatchExecutionContext) -> None:
         raise PipelineShutdownError("stop")
 
     with pytest.raises(PipelineShutdownError):
