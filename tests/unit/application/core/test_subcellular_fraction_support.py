@@ -1,10 +1,10 @@
-# pyright: reportArgumentType=false
 """Unit tests for subcellular_fraction_support (#7787)."""
 
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
-from typing import Any
+
+from bioetl.domain.types import JsonDict
 
 import pytest
 
@@ -20,7 +20,7 @@ pytestmark = pytest.mark.unit
 async def test_extract_unique_fraction_records_consumes_full_stream_with_limit() -> None:
     """limit caps unique fractions but still aggregates counts from later assays."""
 
-    async def _assays() -> AsyncIterator[dict[str, Any]]:
+    async def _assays() -> AsyncIterator[JsonDict]:
         yield {
             "assay_chembl_id": "A1",
             "assay_subcellular_fraction": "cytosol",

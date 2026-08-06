@@ -69,6 +69,7 @@ def test_publication_term_entity_id_uppercases_unknown_term_types() -> None:
 def test_publication_term_entity_id_golden_digest_v2() -> None:
     """Pin the v2 composite digest so identity changes require a scheme bump."""
     digest = compute_publication_term_entity_id("CHEMBL1", "TARGET", "Alpha Kinase")
+    assert digest == "9f9a4f2b8b2d6c1e"
     assert digest == compute_publication_term_entity_id(
         "CHEMBL1", "target", "Alpha Kinase"
     )
