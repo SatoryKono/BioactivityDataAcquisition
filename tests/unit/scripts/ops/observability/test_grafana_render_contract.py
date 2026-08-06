@@ -122,6 +122,25 @@ def _bind_provenance(tmp_path: Path, manifest: dict[str, object]) -> None:
     (tmp_path / str(manifest["immutable_manifest"])).write_text(text, encoding="utf-8")
 
 
+def test_git_capture_keeps_commit_when_dirty_probe_times_out(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / ".git").mkdir()
+    monkeypatch.setattr(rerender, "_repo_root", lambda: tmp_path)
+
+    def check_output(command: list[str], **_kwargs: object) -> str:
+        if command[1:3] == ["rev-parse", "HEAD"]:
+            return f"{'c' * 40}\n"
+        raise rerender.subprocess.TimeoutExpired(command, timeout=15)
+
+    monkeypatch.setattr(rerender.subprocess, "check_output", check_output)
+
+    assert rerender._git_capture_source() == {
+        "commit_sha": "c" * 40,
+        "working_tree_dirty": None,
+    }
+
+
 @pytest.mark.parametrize(
     "classification", ["telemetry-absent", "not-applicable", "incomplete"]
 )
