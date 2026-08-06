@@ -648,7 +648,8 @@ class TestAdapterPortCompliance:
                 "bioetl.infrastructure.adapters.crossref.client",
                 "CrossRefAdapter",
                 "bioetl/infrastructure/adapters/crossref/client.py",
-                frozenset({"fetch_filtered"}),
+                # Filterable surface lives on the port mixin (peer adapters use mixin markers).
+                frozenset({"_CrossRefPortSurfaceMixin", "fetch_filtered"}),
             ),
             (
                 "bioetl.infrastructure.adapters.openalex.client",

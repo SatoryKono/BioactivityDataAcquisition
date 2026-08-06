@@ -11,7 +11,10 @@ from typing import TYPE_CHECKING, Any
 from bioetl.application.services.quality.dq_report_generation_mixin import (
     DQReportGenerationMixin,
 )
-from bioetl.application.services.quality.dq_report_models import DQReportContext, DQReportResult
+from bioetl.application.services.quality.dq_report_models import (
+    DQReportContext,
+    DQReportResult,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (

@@ -56,7 +56,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
     from bioetl.application.core.transformer_runtime.state import RecordTransformOutcome
-    from bioetl.application.services.export_lineage.debug_export_service import DebugExportService
+    from bioetl.application.services.export_lineage.debug_export_service import (
+        DebugExportService,
+    )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.types import BatchID
