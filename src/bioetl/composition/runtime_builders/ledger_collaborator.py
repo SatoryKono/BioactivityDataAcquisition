@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import cast, TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.ledger.service import (
@@ -138,6 +138,28 @@ def _attach_artifact_recorder(
     return True
 
 
+
+def _metadata_from_layer_writer(writer: object) -> object | None:
+    """Resolve a metadata writer from one layer storage writer."""
+    writer_metadata = None
+    for accessor_name in (
+        "metadata_writer",
+        "get_metadata_writer",
+        "metadata",
+    ):
+        accessor = getattr(writer, accessor_name, None)
+        if callable(accessor) and accessor_name.startswith("get_"):
+            try:
+                writer_metadata = accessor()
+            except (AttributeError, RuntimeError, TypeError, ValueError):
+                writer_metadata = None
+        elif accessor is not None and not callable(accessor):
+            writer_metadata = accessor
+        if writer_metadata is not None:
+            return cast("object | None", writer_metadata)
+    return cast(object | None, getattr(writer, "_metadata_writer", None))
+
+
 def _collect_metadata_writer_candidates(services: object) -> list[object]:
     candidates: list[object] = []
     metadata_writer = getattr(services, "metadata_writer", None)
@@ -153,24 +175,7 @@ def _collect_metadata_writer_candidates(services: object) -> list[object]:
         if writer is None:
             continue
         # Prefer public contract accessors; fall back to legacy private field.
-        writer_metadata = None
-        for accessor_name in (
-            "metadata_writer",
-            "get_metadata_writer",
-            "metadata",
-        ):
-            accessor = getattr(writer, accessor_name, None)
-            if callable(accessor) and accessor_name.startswith("get_"):
-                try:
-                    writer_metadata = accessor()
-                except (AttributeError, RuntimeError, TypeError, ValueError):
-                    writer_metadata = None
-            elif accessor is not None and not callable(accessor):
-                writer_metadata = accessor
-            if writer_metadata is not None:
-                break
-        if writer_metadata is None:
-            writer_metadata = getattr(writer, "_metadata_writer", None)
+        writer_metadata = _metadata_from_layer_writer(writer)
         if writer_metadata is not None:
             candidates.append(writer_metadata)
     return candidates
