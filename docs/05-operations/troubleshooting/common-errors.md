@@ -171,8 +171,8 @@ Operator/developer playbook for frequent BioETL failures.
 | **Symptoms** | Cannot start run |
 | **Root causes** | Concurrent same pipeline; crashed process left local lock |
 | **Diagnosis** | Process list; `bioetl lock check` (local diagnostic only) |
-| **Resolution** | Stop competing process; ADR-003 MemoryLock is process-local |
-| **Prevention** | One runner per pipeline; graceful shutdown ADR-008 |
+| **Resolution** | Stop competing process; ADR-010 MemoryLock is process-local |
+| **Prevention** | One runner per pipeline; graceful shutdown ADR-015 |
 
 ### Silver/Gold write failures
 
