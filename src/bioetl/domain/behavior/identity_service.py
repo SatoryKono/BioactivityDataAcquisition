@@ -74,6 +74,16 @@ class EntityIdentityGenerator:
         self._content_hash_include_fields = content_hash_include_fields
         self._content_hash_exclude_fields = content_hash_exclude_fields or set()
 
+    def has_explicit_content_hash_policy(self) -> bool:
+        """Return True when instance-level include/exclude hash field policy is set.
+
+        Used by transformers to decide whether contract-level legacy hash
+        scoping should be skipped in favor of the identity collaborator policy.
+        """
+        return bool(self._content_hash_include_fields) or bool(
+            self._content_hash_exclude_fields
+        )
+
     def compute_entity_id(
         self,
         provider: str,

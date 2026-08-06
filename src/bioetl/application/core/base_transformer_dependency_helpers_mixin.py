@@ -148,13 +148,8 @@ class _BaseTransformerDependencyHelpersMixin:
         business_data: GoldRecord,
     ) -> GoldRecord:
         """Apply legacy contract hash policy only when no explicit identity policy exists."""
-        identity_include = getattr(
-            identity_service, "_content_hash_include_fields", None
-        )
-        identity_exclude = getattr(
-            identity_service, "_content_hash_exclude_fields", None
-        )
-        if identity_include or identity_exclude:
+        # Public collaborator API (#7811): do not inspect private identity fields.
+        if identity_service.has_explicit_content_hash_policy():
             return dict(business_data)
 
         include_fields = contract_policy.hash_include
