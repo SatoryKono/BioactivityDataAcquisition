@@ -43,6 +43,9 @@ Commands:
     report-module-coverage Generate/check module-level coverage inventory
     check-branch-coverage Enforce branch coverage from reports/coverage/coverage.xml
     report-dead-code-inventory Generate repo-local static dead-code review inventory
+    report-weak-assert-inventory Generate advisory weak-assert triage inventory
+    report-vcr-corpus-budget Generate VCR corpus size budget report
+    report-architecture-suite-burndown Generate architecture suite size burndown inventory
     report-pubchem-property-vocab Extract observed PubChem property-URN vocabulary
     report-publication-nested-vocab Extract nested publication-sidecar vocabularies
     sync-integration-vcr-policy Sync tracked integration/e2e inventory in integration VCR policy
@@ -130,6 +133,9 @@ COMMAND_MODULES: dict[str, str] = {
     "report-module-coverage": "scripts.engineering.qa.report_module_coverage_inventory",
     "check-branch-coverage": "scripts.engineering.qa.check_branch_coverage",
     "report-dead-code-inventory": "scripts.engineering.qa.report_dead_code_inventory",
+    "report-weak-assert-inventory": "scripts.engineering.qa.report_weak_assert_inventory",
+    "report-vcr-corpus-budget": "scripts.engineering.qa.report_vcr_corpus_budget",
+    "report-architecture-suite-burndown": "scripts.engineering.qa.report_architecture_suite_burndown",
     "report-pubchem-property-vocab": "scripts.engineering.qa.extract_pubchem_property_vocab",
     "report-publication-nested-vocab": "scripts.engineering.qa.extract_publication_nested_vocab",
     "sync-integration-vcr-policy": "scripts.engineering.qa.sync_integration_vcr_policy",

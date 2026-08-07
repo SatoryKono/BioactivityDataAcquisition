@@ -1,0 +1,71 @@
+{
+  "schema_version": "vcr-corpus-budget-report-v1",
+  "linked_issue": "#8337",
+  "generated_at_utc": "2026-08-07T13:33:23.533762+00:00",
+  "canonical_root": "tests/fixtures/vcr",
+  "budget": {
+    "soft_max_total_bytes": 150000000,
+    "soft_max_file_count": 500,
+    "gc_policy": {
+      "default_action": "retain",
+      "owner": "@bioetl-platform",
+      "orphan_detection_command": "python -m scripts.engineering.qa report-vcr-corpus-budget",
+      "placement_command": "python -m scripts.engineering.qa.vcr check-placement",
+      "catalog_command": "python -m scripts.engineering.qa report-vcr-metadata --check",
+      "deletion_requires": [
+        "metadata_owner_signoff",
+        "targeted_replay_or_contract_test_proof",
+        "no_active_provider_reference"
+      ],
+      "forbidden_basis": [
+        "filename_age_only",
+        "unreferenced_by_text_search_only",
+        "local_disk_pressure_only"
+      ]
+    }
+  },
+  "measured": {
+    "providers": {
+      "chembl": {
+        "files": 102,
+        "bytes": 112825466
+      },
+      "crossref": {
+        "files": 48,
+        "bytes": 848337
+      },
+      "multi_provider": {
+        "files": 2,
+        "bytes": 104608
+      },
+      "openalex": {
+        "files": 50,
+        "bytes": 7848853
+      },
+      "pubchem": {
+        "files": 62,
+        "bytes": 803016
+      },
+      "pubmed": {
+        "files": 48,
+        "bytes": 1648123
+      },
+      "semanticscholar": {
+        "files": 48,
+        "bytes": 112592
+      },
+      "uniprot": {
+        "files": 34,
+        "bytes": 2155665
+      }
+    },
+    "total_bytes": 126346660,
+    "total_files": 394
+  },
+  "status": {
+    "within_soft_byte_budget": true,
+    "within_soft_file_budget": true,
+    "byte_utilization": 0.8423
+  },
+  "policy_note": "Default action is retain. Deletion requires owner sign-off and replay proof."
+}
