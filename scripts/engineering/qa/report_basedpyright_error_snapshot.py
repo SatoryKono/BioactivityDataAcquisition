@@ -28,7 +28,11 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+from scripts.engineering.common.repo_paths import (
+    REPO_ROOT,
+    resolve_cli_path,
+    resolve_output_path,
+)
 
 ROOT = REPO_ROOT
 DEFAULT_SOURCE = ROOT / "reports" / "bp_live.json"
@@ -100,10 +104,10 @@ def _snapshot_regen_block() -> dict[str, list[str]]:
 
 
 def build_snapshot(source: Path) -> dict[str, Any]:
-    source = resolve_output_path(source, root=ROOT)
+    source = resolve_cli_path(source, root=ROOT)
     source_text = source.read_text(
         encoding="utf-8"
-    )  # NOSONAR - path confined by resolve_output_path
+    )  # NOSONAR - path confined by resolve_cli_path
     payload = json.loads(source_text)
     summary = payload.get("summary") if isinstance(payload, dict) else {}
     diags = payload.get("generalDiagnostics") if isinstance(payload, dict) else []
@@ -142,9 +146,9 @@ def build_snapshot(source: Path) -> dict[str, Any]:
 
 def write_snapshot(*, source: Path, output: Path) -> dict[str, Any]:
     snapshot = build_snapshot(source)
-    output = resolve_output_path(output, root=ROOT)
+    output = resolve_cli_path(output, root=ROOT)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(  # NOSONAR - path confined by resolve_output_path
+    output.write_text(  # NOSONAR - path confined by resolve_cli_path
         json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
@@ -152,12 +156,12 @@ def write_snapshot(*, source: Path, output: Path) -> dict[str, Any]:
 
 
 def check_snapshot(*, source: Path, output: Path) -> None:
-    output = resolve_output_path(output, root=ROOT)
+    output = resolve_cli_path(output, root=ROOT)
     if not output.is_file():
         raise SystemExit(f"missing snapshot: {output}")
     committed_text = output.read_text(
         encoding="utf-8"
-    )  # NOSONAR - path confined by resolve_output_path
+    )  # NOSONAR - path confined by resolve_cli_path
     committed = json.loads(committed_text)
     live = build_snapshot(source)
     committed_errors = int(committed.get("summary", {}).get("error_count", 0))
@@ -197,9 +201,9 @@ def _try_live_basedpyright(target: Path) -> bool:
             return False
     if not completed.stdout.strip():
         return False
-    target = resolve_output_path(target, root=ROOT)
+    target = resolve_cli_path(target, root=ROOT)
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(  # NOSONAR - path confined by resolve_output_path
+    target.write_text(  # NOSONAR - path confined by resolve_cli_path
         completed.stdout,
         encoding="utf-8",
     )

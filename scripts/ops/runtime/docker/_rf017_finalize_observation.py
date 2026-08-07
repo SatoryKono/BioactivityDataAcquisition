@@ -116,7 +116,7 @@ def _evaluate_container(
     if "warp-network" in nets:
         failures.append(f"{name}: warp-network present")
     cfg = str(snap.get("config_files") or "")
-    if _is_non_canonical_path(cfg):
+    if _is_non_canonical_path(cfg):  # NOSONAR - Docker inspection output, not CLI taint
         failures.append(f"{name}: non-canonical config {cfg}")
     return failures, restart_delta, oom, unhealthy
 
@@ -127,7 +127,7 @@ def _check_compose_projects(projects: list[dict[str, object]]) -> list[str]:
         name = str(project.get("Name") or "")
         files = str(project.get("ConfigFiles") or "")
         if name in {"bioetl-main", "bioetl-monitoring"} and _is_non_canonical_path(
-            files
+            files  # NOSONAR - Docker inspection output, not CLI taint
         ):
             failures.append(f"project {name} non-canonical: {files}")
     return failures
