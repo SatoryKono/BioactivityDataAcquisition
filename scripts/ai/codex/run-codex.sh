@@ -179,28 +179,42 @@ echo ""
 log_info "Environment ready - launching Codex"
 echo ""
 
-# Locate .env.codex without creating local secret-bearing files by default.
+# Optional .env.codex for API-key mode. ChatGPT device auth in ~/.codex/auth.json
+# is enough for launch; never create secret-bearing files without an explicit opt-in.
+# shellcheck source=helper/codex-auth-lib.sh
+source "${HELPER_DIR}/codex-auth-lib.sh"
 SCRIPT_DIR_CODEX="${SCRIPT_DIR}"
 ENV_FILE="${SCRIPT_DIR_CODEX}/.env.codex"
 if [[ ! -f "${ENV_FILE}" ]]; then
-    log_warn ".env.codex not found, checking repo root..."
-    # Try repo root as fallback
     ENV_FILE="${REPO_ROOT}/.env.codex"
-    if [[ ! -f "${ENV_FILE}" ]]; then
-        if [[ "${BIOETL_CREATE_LOCAL_ENV_FILES:-0}" != "1" ]]; then
-            log_error ".env.codex not found. Create it manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to generate a local template."
-            exit 1
-        fi
-        log_warn "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.codex in scripts/ai/codex/..."
-        cat > "${SCRIPT_DIR_CODEX}/.env.codex" <<'ENVEOF'
+fi
+if [[ -f "${ENV_FILE}" ]]; then
+    set -a
+    # shellcheck disable=SC1090
+    source "${ENV_FILE}"
+    set +a
+fi
+if ! codex_has_usable_auth; then
+    if [[ ! -f "${SCRIPT_DIR_CODEX}/.env.codex" && ! -f "${REPO_ROOT}/.env.codex" ]]; then
+        if [[ "${BIOETL_CREATE_LOCAL_ENV_FILES:-0}" == "1" ]]; then
+            log_warn "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.codex template in scripts/ai/codex/..."
+            cat > "${SCRIPT_DIR_CODEX}/.env.codex" <<'ENVEOF'
 # OpenAI Codex Configuration
 # Get your API key from: https://platform.openai.com/api-keys
 OPENAI_API_KEY=sk-your-key-here
 ENVEOF
-        log_error "Please edit ${SCRIPT_DIR_CODEX}/.env.codex and add your OpenAI API key"
+            log_error "Edit ${SCRIPT_DIR_CODEX}/.env.codex and add your OpenAI API key, or run: bash scripts/ai/codex/run-codex.sh device-login"
+            exit 1
+        fi
+        log_error "No Codex auth found (no ChatGPT session and no .env.codex API key)."
+        log_info "Recommended under WSL: bash scripts/ai/codex/run-codex.sh device-login"
+        log_info "Or create scripts/ai/codex/.env.codex with OPENAI_API_KEY (opt-in template: BIOETL_CREATE_LOCAL_ENV_FILES=1)."
         exit 1
     fi
+    log_error "Auth files present but unusable. Run device-login or fix OPENAI_API_KEY."
+    exit 1
 fi
+log_info "Auth ready: $(codex_auth_status_label)"
 
 # Process command
 shift || true
