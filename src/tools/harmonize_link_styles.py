@@ -6,7 +6,7 @@ retained temporarily for existing direct invocations.
 
 from __future__ import annotations
 
-from scripts.diagrams import harmonize_link_styles as _harmonize_link_styles
+from scripts.diagrams.fix import harmonize_link_styles as _harmonize_link_styles
 
 main = _harmonize_link_styles.main
 

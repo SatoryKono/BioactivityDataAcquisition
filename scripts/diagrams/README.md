@@ -2,6 +2,22 @@
 
 Diagram lint, render, quality pipeline, and visual verification tooling.
 
+## Package layout
+
+```
+scripts/diagrams/
+├── core/     # path helpers
+├── lint/     # lint + budget
+├── check/    # validation / visual checks
+├── fix/      # codemods and SVG fixes
+├── render/   # bundles, dataflows, PDF/DOCX
+├── cli/      # optional package entry
+├── __main__.py
+└── run_diagram_nightly_suite.py
+```
+
+Public entrypoint: `python -m scripts.diagrams <command>`.
+
 ## Unified Entry Point
 
 ```bash
@@ -15,19 +31,19 @@ python -m scripts.diagrams <command> [args...]
 
 | Command          | Script                              | Description                                |
 | ---------------- | ----------------------------------- | ------------------------------------------ |
-| `lint`           | `lint_diagrams.py`                  | Lint architecture diagrams (.mmd/.mermaid) |
-| `lint-summarize` | `summarize_diagram_lint.py`         | Summarize diagram lint report              |
-| `lint-budget`    | `enforce_diagram_quality_budget.py` | Enforce diagram quality budget             |
+| `lint`           | `lint/lint_diagrams.py`                  | Lint architecture diagrams (.mmd/.mermaid) |
+| `lint-summarize` | `lint/summarize_diagram_lint.py`         | Summarize diagram lint report              |
+| `lint-budget`    | `lint/enforce_diagram_quality_budget.py` | Enforce diagram quality budget             |
 
 ### Check
 
 | Command               | Script                                                    | Description                                                           |
 | --------------------- | --------------------------------------------------------- | --------------------------------------------------------------------- |
 | `checks`              | `run_diagram_checks.sh`                                   | Run unified diagram validation profiles (`pr`, `nightly`, `quick`)    |
-| `check-artifacts`     | `check_diagram_artifacts.py`                              | Check required SVG artifacts and optional PNG compatibility artifacts |
-| `check-quality-gates` | `check_diagram_quality_gates.py`                          | Check diagram quality gates                                           |
-| `check-visual-smoke`  | `check_diagram_visual_smoke.py`                           | Visual smoke test for diagrams; supports `--json-out`                 |
-| `check-svg-text`      | `check_svg_text_visibility.py`                            | Check SVG text visibility                                             |
+| `check-artifacts`     | `check/check_diagram_artifacts.py`                              | Check required SVG artifacts and optional PNG compatibility artifacts |
+| `check-quality-gates` | `check/check_diagram_quality_gates.py`                          | Check diagram quality gates                                           |
+| `check-visual-smoke`  | `check/check_diagram_visual_smoke.py`                           | Visual smoke test for diagrams; supports `--json-out`                 |
+| `check-svg-text`      | `check/check_svg_text_visibility.py`                            | Check SVG text visibility                                             |
 | `check-class-methods` | `scripts/diagrams/check/check_class_method_render_integrity.py` | Check class method render integrity                                   |
 | `check-pdf-bounds`    | `check_pdf_image_bounds.py`                               | Check PDF image bounds                                                |
 | `check-padding`       | `report_diagram_padding.py`                               | Report diagram padding issues                                         |

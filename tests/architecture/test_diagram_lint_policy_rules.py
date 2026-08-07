@@ -27,7 +27,7 @@ pytestmark = pytest.mark.architecture
 def _load_lint_module() -> ModuleType:
     """Load scripts/diagrams/lint/lint_diagrams.py for direct function testing."""
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "diagrams" / "lint_diagrams.py"
+    module_path = repo_root / "scripts" / "diagrams" / "lint" / "lint_diagrams.py"
     spec = importlib.util.spec_from_file_location("lint_diagrams_module", module_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
