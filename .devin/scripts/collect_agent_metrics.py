@@ -192,6 +192,51 @@ class AgentMetricsCollector:
                            f"{metrics['average_duration_ms']:.1f}ms avg")
         
         return "\n".join(report)
+    
+    def analyze_mcp_usage(self, days_threshold: int = 30) -> Dict[str, Any]:
+        """Analyze MCP server usage and provide optimization recommendations."""
+        from datetime import datetime, timedelta
+        
+        recommendations = []
+        unused_servers = []
+        low_usage_servers = []
+        
+        threshold_date = datetime.now() - timedelta(days=days_threshold)
+        
+        for mcp_name, metrics in self.metrics["mcp_servers"].items():
+            if metrics["call_count"] == 0:
+                unused_servers.append(mcp_name)
+            elif metrics["call_count"] < 5:
+                low_usage_servers.append(mcp_name)
+            elif metrics["last_used"]:
+                last_used = datetime.fromisoformat(metrics["last_used"])
+                if last_used < threshold_date:
+                    unused_servers.append(f"{mcp_name} (unused for {days_threshold}+ days)")
+        
+        if unused_servers:
+            recommendations.append({
+                "type": "unused_servers",
+                "servers": unused_servers,
+                "action": "Consider removing or disabling these MCP servers",
+                "priority": "medium"
+            })
+        
+        if low_usage_servers:
+            recommendations.append({
+                "type": "low_usage_servers",
+                "servers": low_usage_servers,
+                "action": "Monitor usage; consider consolidating if usage remains low",
+                "priority": "low"
+            })
+        
+        return {
+            "analysis_date": datetime.now().isoformat(),
+            "days_threshold": days_threshold,
+            "total_mcp_servers": len(self.metrics["mcp_servers"]),
+            "unused_count": len(unused_servers),
+            "low_usage_count": len(low_usage_servers),
+            "recommendations": recommendations
+        }
 
 
 def main():
@@ -210,11 +255,15 @@ def main():
             collector.metrics = collector._create_empty_metrics()
             collector.save_metrics()
             print("Metrics reset successfully")
+        elif command == "analyze-mcp":
+            days_threshold = int(sys.argv[2]) if len(sys.argv) > 2 else 30
+            analysis = collector.analyze_mcp_usage(days_threshold)
+            print(json.dumps(analysis, indent=2, ensure_ascii=False))
         else:
             print(f"Unknown command: {command}")
-            print("Available commands: report, reset")
+            print("Available commands: report, reset, analyze-mcp [days]")
     else:
-        print("Usage: python collect_agent_metrics.py [report|reset]")
+        print("Usage: python collect_agent_metrics.py [report|reset|analyze-mcp [days]]")
 
 
 if __name__ == "__main__":
