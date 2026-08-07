@@ -397,7 +397,7 @@ target-version = "py312"
 src = ["src", "tests"]
 # Docs trees include vendor skill scripts, site mirrors, and one-off evidence
 # extractors — not production surfaces for the repo-wide ruff gate.
-extend-exclude = ["docs"]
+extend-exclude = ["docs", ".devin"]
 
 [tool.ruff.lint]
 select = [

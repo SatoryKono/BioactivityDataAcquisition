@@ -1379,6 +1379,9 @@ def _post_start_report_bind_gate(*, spec: StackSpec, report_dir: Path) -> int:
     # live bind gate so recovery logic remains the subject under test (#8264).
     if os.environ.get("BIOETL_TEST_MODE", "").strip().lower() in {"1", "true", "yes"}:
         return 0
+    # pytest sets PYTEST_CURRENT_TEST; keep live gate for real stacks only.
+    if os.environ.get("PYTEST_CURRENT_TEST"):
+        return 0
     try:
         from scripts.ops.runtime.docker import verify_report_bind as bind_verify
     except ImportError:
