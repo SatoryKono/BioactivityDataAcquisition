@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from collections.abc import Callable, Mapping
+from typing import Any
 
 from bioetl.domain.composite.config_composite_protocols import (
     CompositeConfigProtocol,
@@ -187,7 +186,7 @@ def _build_merge_config[ConfigT](
             merge_data.get("sort_by_gold"), "merge.sort_by_gold"
         )
         or (),
-        field_priorities=_optional_str_tuple_map(  # type: ignore[arg-type]
+        field_priorities=_optional_str_tuple_map(
             merge_data.get("field_priorities"), value_as_tuple=True
         ),  # type: ignore[arg-type]
         normalization_compatibility_overrides=_str_str_map(
@@ -351,7 +350,7 @@ def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
                     "fields": [
                         {
                             "field_name": field.field_name,
-                            "method": field.method.value,
+                            "method": getattr(field.method, "value", field.method),
                             "threshold": field.threshold,
                         }
                         for field in pairing.fields
@@ -436,26 +435,38 @@ def _build_dq_config(dq_data: dict[str, object]) -> CompositeDQConfig:
         for name, raw in overrides_raw.items():
             if isinstance(raw, dict):
                 overrides[str(name)] = DQOverrideConfig(
-                    soft_fail_threshold=raw.get("soft_fail_threshold"),  # type: ignore[arg-type]
-                    hard_fail_threshold=raw.get("hard_fail_threshold"),  # type: ignore[arg-type]
+                    soft_fail_threshold=(
+                        float(str(raw["soft_fail_threshold"]))
+                        if raw.get("soft_fail_threshold") is not None
+                        else None
+                    ),
+                    hard_fail_threshold=(
+                        float(str(raw["hard_fail_threshold"]))
+                        if raw.get("hard_fail_threshold") is not None
+                        else None
+                    ),
                 )
+    required_raw = dq_data.get("required_fields") or ()
+    required_fields = (
+        tuple(str(item) for item in required_raw)
+        if isinstance(required_raw, list | tuple)
+        else ()
+    )
     return CompositeDQConfig(
-        soft_fail_threshold=float(dq_data.get("soft_fail_threshold", 0.10)),
-        hard_fail_threshold=float(dq_data.get("hard_fail_threshold", 0.50)),
+        soft_fail_threshold=float(str(dq_data.get("soft_fail_threshold", 0.10))),
+        hard_fail_threshold=float(str(dq_data.get("hard_fail_threshold", 0.50))),
         enricher_overrides=overrides,
-        required_fields=tuple(
-            str(item) for item in (dq_data.get("required_fields") or ())
-        ),
+        required_fields=required_fields,
     )
 
 
 def _build_execution_config(execution_data: dict[str, object]) -> ExecutionConfig:
     return ExecutionConfig(
-        max_concurrency=int(execution_data.get("max_concurrency", 4)),
+        max_concurrency=int(str(execution_data.get("max_concurrency", 4))),
         checkpoint_enabled=bool(execution_data.get("checkpoint_enabled", True)),
-        retry_max_attempts=int(execution_data.get("retry_max_attempts", 3)),
+        retry_max_attempts=int(str(execution_data.get("retry_max_attempts", 3))),
         retry_backoff_multiplier=float(
-            execution_data.get("retry_backoff_multiplier", 2.0)
+            str(execution_data.get("retry_backoff_multiplier", 2.0))
         ),
     )
 
@@ -470,12 +481,17 @@ def _build_lineage_config(lineage_data: dict[str, object]) -> LineageConfig:
                     str(key): str(value) for key, value in fields.items()
                 }
     track_fields = lineage_data.get("track_source_for_fields") or ()
+    track_tuple = (
+        tuple(str(item) for item in track_fields)
+        if isinstance(track_fields, list | tuple)
+        else ()
+    )
     return LineageConfig(
         track_field_sources=bool(lineage_data.get("track_field_sources", True)),
         track_timestamps=bool(lineage_data.get("track_timestamps", True)),
         track_status=bool(lineage_data.get("track_status", True)),
         provider_lookup_fields=lookup,
-        track_source_for_fields=tuple(str(item) for item in track_fields),
+        track_source_for_fields=track_tuple,
     )
 
 
