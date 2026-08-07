@@ -2,9 +2,9 @@
 # Authentication, model selection, providers, and user MCP credentials remain
 # user-scoped and MUST NOT be committed here.
 #
-# Codex CLI 0.118 accepts the legacy alias `max_threads` under [agents].
-# The newer key `max_concurrent_threads_per_session` is documented but rejected
-# by 0.118 with: expected struct AgentRoleToml in `agents`.
+# `max_threads` is the portable project default. Keep it at three unless a
+# versioned compatibility check and a concurrency benchmark prove a change is
+# safe; user model, auth, provider, and MCP configuration stay user-local.
 
 [agents]
 max_threads = 3
