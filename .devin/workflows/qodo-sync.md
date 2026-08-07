@@ -18,8 +18,8 @@ Compare tracked AI rules and Devin workflows with Qodo platform rules for `Sator
 3. Verify thematic rules in `docs/00-project/ai/rules/cursor/` cover all active Qodo rule themes (dedupe near-duplicates by intent)
 4. Regenerate Cascade mirrors and confirm Devin workflows still match:
    ```bash
-   uv run python scripts/ai/sync_cursor_rules.py --deploy
-   uv run python scripts/ai/sync_windsurf_rules.py
+   uv run python -m scripts.ai.sync.cursor --deploy
+   uv run python -m scripts.ai.sync.windsurf
    ```
 5. Align `.devin/workflows/{review,post-change,pre-commit,qodo-sync,audit-documents}.md` with Windsurf Cascade workflow intent
 6. If DeepWiki navigation notes are stale, update `.devin/wiki.json` pages `Project Governance and Rules` / `AI Runtime Governance` / `Secret Rules`
@@ -28,7 +28,7 @@ Compare tracked AI rules and Devin workflows with Qodo platform rules for `Sator
 ## SSOT
 
 - Rule content canonical source: `docs/00-project/ai/rules/cursor/*.mdc`
-- Cursor deploy: `.cursor/rules/` via `scripts/ai/sync_cursor_rules.py --deploy`
-- Windsurf/Cascade: `docs/00-project/ai/rules/windsurf/` via `scripts/ai/sync_windsurf_rules.py`
+- Cursor deploy: `.cursor/rules/` via `scripts/ai/sync/cursor.py --deploy`
+- Windsurf/Cascade: `docs/00-project/ai/rules/windsurf/` via `scripts/ai/sync/windsurf.py`
 - Devin workflows: `.devin/workflows/` (tracked; keep parity with Cascade `review`, `post-change`, `pre-commit`, `qodo-sync`, plus specialized `audit-documents`)
 - Devin DeepWiki: `.devin/wiki.json` (derived navigation; not normative)

@@ -79,6 +79,6 @@ Coverage matrix: `docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md`
 
 ```bash
 # Evidence: reports/quality/qodo-rules-extract-YYYY-MM-DD.md
-uv run python scripts/ai/sync_cursor_rules.py --deploy
-uv run python scripts/ai/sync_windsurf_rules.py
+uv run python -m scripts.ai.sync.cursor --deploy
+uv run python -m scripts.ai.sync.windsurf
 ```

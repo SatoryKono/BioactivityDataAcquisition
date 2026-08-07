@@ -56,7 +56,7 @@ CODEX_AGENT_ROLE_MEMORY_LINES = {
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+    return Path(__file__).resolve().parents[3]
 
 
 def _atomic_write(path: Path, content: str) -> None:

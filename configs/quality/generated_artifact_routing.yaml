@@ -139,7 +139,7 @@ routes:
       above this entry remain authoritative for known generators.
 
   - id: ai-runtime-governance-mirrors
-    generator: scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py
+    generator: scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py
     output_kind: curated_generated_docs
     commit_policy: tracked_mirror_surface
     outputs:

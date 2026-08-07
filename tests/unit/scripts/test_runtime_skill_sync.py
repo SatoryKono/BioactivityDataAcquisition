@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.ai import runtime_skill_sync
+from scripts.ai.sync import runtime_skills as runtime_skill_sync
 
 pytestmark = pytest.mark.unit
 

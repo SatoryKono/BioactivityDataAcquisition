@@ -20,7 +20,7 @@ bash scripts/ai/codex/check_skills_mirror.sh --sync
 ```
 
 `--sync` regenerates only the transformed docs mirror. Approved cross-runtime
-reconciliation uses `python scripts/ai/runtime_skill_sync.py --mode sync
+reconciliation uses `python -m scripts.ai.sync.runtime_skills --mode sync
 --approved --report <path>`; it preserves sanctioned Devin runtime variants and
 emits a machine-readable drift/sync report for owner review.
 

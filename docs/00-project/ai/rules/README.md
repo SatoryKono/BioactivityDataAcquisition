@@ -82,10 +82,10 @@ cp docs/00-project/ai/rules/cursor/*.mdc .cursor/rules/
 
 ```bash
 # Сгенерировать rules + deploy workflows в .windsurf/
-uv run python scripts/ai/sync_windsurf_rules.py
+uv run python -m scripts.ai.sync.windsurf
 
 # Только проверить синхронизацию
-uv run python scripts/ai/sync_windsurf_rules.py --check
+uv run python -m scripts.ai.sync.windsurf --check
 ```
 
 **Workflows (slash commands):** `/review`, `/post-change`, `/pre-commit`, `/qodo-sync`
@@ -99,7 +99,7 @@ uv run python scripts/ai/sync_windsurf_rules.py --check
 
 При обновлении Qodo/rules:
 1. Править `docs/00-project/ai/rules/cursor/*.mdc`
-2. `sync_cursor_rules.py --deploy` + `sync_windsurf_rules.py`
+2. `python -m scripts.ai.sync.cursor --deploy` + `python -m scripts.ai.sync.windsurf`
 3. Синхронизировать текст `.devin/workflows/{review,post-change,pre-commit,qodo-sync,audit-documents}.md`
 4. При необходимости обновить notes в `.devin/wiki.json` (Project Governance / AI Runtime / Secret Rules)
 
@@ -177,9 +177,9 @@ interfaces/     → CLI
 3. Обновить `docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md` при изменении покрытия
 4. Синхронизировать governance surfaces:
    ```bash
-   uv run python scripts/ai/sync_ai_governance.py
-   uv run python scripts/ai/sync_cursor_rules.py --deploy
-   uv run python scripts/ai/sync_windsurf_rules.py
+   uv run python -m scripts.ai.sync.governance
+   uv run python -m scripts.ai.sync.cursor --deploy
+   uv run python -m scripts.ai.sync.windsurf
    ```
 
 ### Синхронизация с Qodo platform
@@ -189,8 +189,8 @@ interfaces/     → CLI
 После обновления cursor rules:
 
 ```bash
-uv run python scripts/ai/sync_cursor_rules.py --deploy
-uv run python scripts/ai/sync_windsurf_rules.py
+uv run python -m scripts.ai.sync.cursor --deploy
+uv run python -m scripts.ai.sync.windsurf
 ```
 
 ## Команды верификации

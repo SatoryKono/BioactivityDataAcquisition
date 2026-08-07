@@ -18,8 +18,8 @@ Compare tracked AI rules with Qodo platform rules for `SatoryKono/BioactivityDat
 3. Verify thematic rules in `docs/00-project/ai/rules/cursor/` cover all active Qodo rule themes (dedupe near-duplicates by intent)
 4. Regenerate deploy mirrors:
    ```bash
-   uv run python scripts/ai/sync_cursor_rules.py --deploy
-   uv run python scripts/ai/sync_windsurf_rules.py
+   uv run python -m scripts.ai.sync.cursor --deploy
+   uv run python -m scripts.ai.sync.windsurf
    ```
 5. Report gaps: missing themes, stale index counts, files over 12k chars
 6. Keep `.devin/workflows/{review,post-change,pre-commit,qodo-sync,audit-documents}.md` aligned with Cascade workflow intent (five tracked Devin workflows)
@@ -27,6 +27,6 @@ Compare tracked AI rules with Qodo platform rules for `SatoryKono/BioactivityDat
 ## SSOT
 
 - Rule content canonical source: `docs/00-project/ai/rules/cursor/*.mdc`
-- Cursor deploy: `.cursor/rules/` via `scripts/ai/sync_cursor_rules.py --deploy`
-- Windsurf deploy: derived via `scripts/ai/sync_windsurf_rules.py`
+- Cursor deploy: `.cursor/rules/` via `scripts/ai/sync/cursor.py --deploy`
+- Windsurf deploy: derived via `scripts/ai/sync/windsurf.py`
 - Devin workflows: `.devin/workflows/` (tracked parity with Cascade `review`, `post-change`, `pre-commit`, `qodo-sync`, plus specialized `audit-documents`)
