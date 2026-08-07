@@ -1,0 +1,73 @@
+{
+  "pages": [
+    {
+      "title": "Data Schemas and Normalization",
+      "purpose": "Index of the schema hierarchy, normalization profiles, Silver schemas, and Gold contract pages.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schema/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Silver Contract Rules",
+      "parent": "Data Schemas and Normalization",
+      "purpose": "Details the Silver schema hierarchy, provider-specific Pandera contracts, and the field-level normalisation expectations used before persistence.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schema/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Gold Invariants",
+      "parent": "Data Schemas and Normalization",
+      "purpose": "Explains the Gold-layer contract rules, unification expectations, and the strict validation constraints that preserve analysis-ready guarantees.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schema/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Normalization Matrix",
+      "parent": "Data Schemas and Normalization",
+      "purpose": "Documents the normalisation profile matrix, pseudo-null handling, and the relationship between schema fields and transformation policy.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schema/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Silver Schemas",
+      "purpose": "Documents all provider-specific Silver layer Pandera schemas: ETLRecordSchema base, PublicationBaseSchema, and provider schemas for ChEMBL, PubChem, UniProt, PubMed, OpenAlex, CrossRef, and SemanticScholar. Covers field conventions, DQ flags, and content hash.",
+      "parent": "Data Schemas and Normalization",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schema/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Gold Contracts",
+      "purpose": "Documents Gold layer Pandera contracts for unified entities (ChEMBLActivityGoldSchema, ChEMBLMoleculeGoldSchema, publication schemas). Explains schema unification across providers, the _lookup_method field, and contract versioning.",
+      "parent": "Data Schemas and Normalization",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schema/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Normalization Profiles",
+      "purpose": "Explains the normalization profile system: build_standard_profile factory, normalizer families (passthrough, json_string_strict, binary_flag, operator), pseudo-null handling, ChEMBL vocabulary enforcement, and the Pipeline Normalization Field Matrix report.",
+      "parent": "Data Schemas and Normalization",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schema/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    }
+  ]
+}

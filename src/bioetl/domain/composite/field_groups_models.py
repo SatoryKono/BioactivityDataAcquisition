@@ -44,12 +44,17 @@ class FieldMapping:
 
     @property
     def providers(self) -> tuple[str, ...]:
-        """Extract provider names from qualified columns."""
+        """Extract provider names from qualified columns (case-insensitive)."""
         result: list[str] = []
+        seen: set[str] = set()
         for col in self.provider_columns:
             parts = col.split(".")
-            if len(parts) == 3 and parts[0] not in result:
-                result.append(parts[0])
+            if len(parts) != 3:
+                continue
+            provider = parts[0].lower()
+            if provider not in seen:
+                seen.add(provider)
+                result.append(provider)
         return tuple(result)
 
     @property
@@ -66,7 +71,7 @@ class FieldMapping:
         Returns:
             True if this field is available from the specified provider.
         """
-        return provider.lower() in (p.lower() for p in self.providers)
+        return provider.lower() in self.providers
 
     def get_column(self, provider: str) -> str | None:
         """Get qualified column name for a specific provider.

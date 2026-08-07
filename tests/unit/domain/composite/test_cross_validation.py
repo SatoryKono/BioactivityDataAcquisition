@@ -105,14 +105,15 @@ class TestFieldComparisonSpec:
         with pytest.raises(ValueError, match="field_name cannot be empty"):
             FieldComparisonSpec(field_name="", method=ComparisonMethod.EXACT)
 
-    def test_fuzzy_zero_threshold_raises(self):
-        with pytest.raises(ValueError, match="requires positive threshold"):
-            FieldComparisonSpec(
-                field_name="title", method=ComparisonMethod.FUZZY, threshold=0.0
-            )
+    def test_fuzzy_zero_threshold_defaults_to_0_8(self):
+        # Zero is treated as "unset" and becomes the documented FUZZY default.
+        spec = FieldComparisonSpec(
+            field_name="title", method=ComparisonMethod.FUZZY, threshold=0.0
+        )
+        assert spec.threshold == 0.8
 
     def test_numeric_negative_threshold_raises(self):
-        with pytest.raises(ValueError, match="requires positive threshold"):
+        with pytest.raises(ValueError, match="threshold must be in"):
             FieldComparisonSpec(
                 field_name="year",
                 method=ComparisonMethod.NUMERIC_TOLERANCE,

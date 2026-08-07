@@ -1,0 +1,166 @@
+{
+  "version": "1.0",
+  "description": "Agent usage metrics for Devin runtime optimization",
+  "metrics_collection_start": "2026-08-07",
+  "agents": {
+    "py-audit-bot": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0,
+      "success_rate": 0.0,
+      "common_modes": [],
+      "typical_scope": []
+    },
+    "py-debug-bot": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0,
+      "success_rate": 0.0,
+      "common_modes": [],
+      "typical_scope": []
+    },
+    "py-config-bot": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0,
+      "success_rate": 0.0,
+      "common_modes": [],
+      "typical_scope": []
+    },
+    "py-doc-bot": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0,
+      "success_rate": 0.0,
+      "common_modes": [],
+      "typical_scope": []
+    },
+    "py-plan-bot": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0,
+      "success_rate": 0.0,
+      "common_modes": [],
+      "typical_scope": []
+    },
+    "py-test-bot": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0,
+      "success_rate": 0.0,
+      "common_modes": [],
+      "typical_scope": []
+    }
+  },
+  "skills": {
+    "observability-dashboard": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "observability-prometheus": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "technical-designer-mermaid": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "vcr-record": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "verify-architecture": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "research-workflow": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "new-pipeline": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    }
+  },
+  "workflows": {
+    "master": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0,
+      "success_rate": 0.0
+    },
+    "post-change": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0,
+      "success_rate": 0.0
+    },
+    "review": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0,
+      "success_rate": 0.0
+    },
+    "pre-commit": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0,
+      "success_rate": 0.0
+    },
+    "qodo-sync": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0,
+      "success_rate": 0.0
+    }
+  },
+  "mcp_servers": {
+    "memory": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "filesystem": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "fetch": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "github": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "prometheus": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "grafana": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "brave-search": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "mermaid": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    }
+  }
+}

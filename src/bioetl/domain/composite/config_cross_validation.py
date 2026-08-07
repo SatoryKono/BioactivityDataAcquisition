@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 from bioetl.domain.composite.config_validators import (
@@ -10,11 +11,22 @@ from bioetl.domain.composite.config_validators import (
 from bioetl.domain.composite.cross_validation import EnricherFieldPairing
 
 
+def _require_finite_number(value: float | int, name: str) -> None:
+    """Reject non-numeric and non-finite threshold/tolerance inputs."""
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        raise ValueError(f"{name} must be a number, got {type(value).__name__}")
+    if isinstance(value, float) and not math.isfinite(value):
+        raise ValueError(f"{name} must be finite, got {value}")
+
+
 def _validate_cross_validation_thresholds(
     warning_threshold: int,
     error_threshold: int,
     quarantine_threshold: int,
 ) -> None:
+    _require_finite_number(warning_threshold, "warning_threshold")
+    _require_finite_number(error_threshold, "error_threshold")
+    _require_finite_number(quarantine_threshold, "quarantine_threshold")
     if warning_threshold < 1:
         raise ValueError(f"warning_threshold must be >= 1, got {warning_threshold}")
     if error_threshold < 2:
@@ -31,6 +43,8 @@ def _validate_cross_validation_tolerances(
     fuzzy_threshold: float,
     numeric_tolerance: float,
 ) -> None:
+    _require_finite_number(fuzzy_threshold, "fuzzy_threshold")
+    _require_finite_number(numeric_tolerance, "numeric_tolerance")
     if not 0.0 < fuzzy_threshold <= 1.0:
         raise ValueError(
             f"fuzzy_threshold must be in (0.0, 1.0], got {fuzzy_threshold}"
