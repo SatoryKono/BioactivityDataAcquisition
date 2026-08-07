@@ -110,10 +110,10 @@ class TestActivityRecord:
             molecule_id="CHEMBL25",
             target_pref_name="EGFR",
             target_organism="Homo sapiens",
-            target_tax_id="9606",
+            target_tax_id=9606,
         )
         assert record.target_pref_name == "EGFR"
-        assert record.target_tax_id == "9606"
+        assert record.target_tax_id == 9606
 
     def test_missing_required_activity_id_raises(self) -> None:
         """Test missing activity_id raises ValidationError."""

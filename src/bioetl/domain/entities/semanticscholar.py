@@ -103,8 +103,15 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     def _validate_invariants(self) -> None:
         """Validate Semantic Scholar-specific publication invariants."""
         super()._validate_invariants()
-        if not self.paper_id:
+        paper_id = (self.paper_id or "").strip()
+        if not paper_id:
             raise ValueError("Semantic Scholar Paper ID is required")
+        if len(paper_id) != 40 or any(
+            ch not in "0123456789abcdefABCDEF" for ch in paper_id
+        ):
+            raise ValueError(
+                "Semantic Scholar Paper ID must be exactly 40 hexadecimal characters"
+            )
 
 
 __all__ = [

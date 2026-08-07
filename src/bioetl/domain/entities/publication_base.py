@@ -135,8 +135,21 @@ class PublicationEntityBase(BaseEntity):
 
     def __post_init__(self) -> None:
         """Validate the entity and freeze inherited collection-shaped fields."""
+        self._sync_identifier_aliases()
         super().__post_init__()
         freeze_fields(self, ("issn",))
+
+    def _sync_identifier_aliases(self) -> None:
+        """Keep provider IDs and canonical publication_* aliases aligned."""
+        doi = self.doi or self.publication_doi
+        pmid = self.pmid or self.publication_pmid
+        pmc = self.pmc_id or self.publication_pmc_id
+        object.__setattr__(self, "doi", doi)
+        object.__setattr__(self, "publication_doi", doi)
+        object.__setattr__(self, "pmid", pmid)
+        object.__setattr__(self, "publication_pmid", pmid)
+        object.__setattr__(self, "pmc_id", pmc)
+        object.__setattr__(self, "publication_pmc_id", pmc)
 
     def _validate_invariants(self) -> None:
         """Publication entities share the BaseEntity invariant hook chain."""

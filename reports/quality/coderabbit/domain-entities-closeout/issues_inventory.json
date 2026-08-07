@@ -1,0 +1,170 @@
+[
+  {
+    "number": 8131,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/_chembl_activity_target_models.py",
+    "fingerprint": "a26b6192f132",
+    "claim": "In @src/bioetl/domain/entities/_chembl_activity_target_models.py around lines 1 - 19, Move the DTO facade currently defined by _chembl_activity_target_models, including its ActivityRecord, AssayRecord, MoleculeRecord, and TargetRecord re-exports, into the appropriate interfaces or application package. Update consumers to import those DTOs from the new location, and remove the facade module from the domain package so bioetl.domain contains only domain entities and value objects."
+  },
+  {
+    "number": 8132,
+    "severity": "minor",
+    "path": "src/bioetl/domain/entities/chembl_tissue.py",
+    "fingerprint": "bac1303d4453",
+    "claim": "In @src/bioetl/domain/entities/chembl_tissue.py around lines 50 - 54, Update ChEMBLTissue._validate_invariants to validate stripped values for both tissue_id and pref_name, rejecting empty or whitespace-only strings while preserving the existing ValueError messages."
+  },
+  {
+    "number": 8133,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/base.py",
+    "fingerprint": "2f9a3d3bdf61",
+    "claim": "In @src/bioetl/domain/entities/base.py around lines 76 - 84, Update BaseEntity.__post_init__ to validate that run_id, run_type, and ingestion_ts are present, raising ValueError for any missing lineage field before _validate_invariants() runs. Preserve the existing validation for entity_id, content_hash, and _index."
+  },
+  {
+    "number": 8134,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/pubmed.py",
+    "fingerprint": "6ffb7c928a50",
+    "claim": "In @src/bioetl/domain/entities/pubmed.py around lines 21 - 31, Move the ArticleRecord Pydantic DTO and its validation logic from the domain package into the appropriate adapter or interfaces package, updating imports and references accordingly. Keep PubMedPublicationEntity and other domain models free of Pydantic and interface-layer dependencies, while preserving ArticleRecord’s boundary validation behavior."
+  },
+  {
+    "number": 8135,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/bioactivity/__init__.py",
+    "fingerprint": "e1d5422e4e4f",
+    "claim": "In @src/bioetl/domain/entities/bioactivity/__init__.py around lines 3 - 5, Before publishing the public exports in __all__ for Bioactivity and BioactivityState, add the required release artifacts: bump the relevant version, document the contract decision in an ADR, provide migration notes, and define a rollback procedure. Keep the exports unchanged while ensuring all artifacts reference this public API change."
+  },
+  {
+    "number": 8136,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/bioactivity/_entity.py",
+    "fingerprint": "000962169fda",
+    "claim": "In @src/bioetl/domain/entities/bioactivity/_entity.py around lines 193 - 206, Update Bioactivity.with_state to validate transitions before creating the copied entity: permit only the documented forward state transitions and an explicit same-state no-op, while rejecting RAW→VALIDATED and VALIDATED→RAW. Preserve the immutable copy behavior for allowed transitions and use the existing project exception or validation mechanism for illegal transitions."
+  },
+  {
+    "number": 8137,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/chembl.py",
+    "fingerprint": "e65024731235",
+    "claim": "In @src/bioetl/domain/entities/chembl.py around lines 1 - 37, Move the ChEMBL DTO facade currently defined by the re-export module around ActivityRecord, AssayRecord, and the other ChEMBL records out of bioetl.domain into the appropriate interfaces or application package. Update consumers and imports to use the new facade location, while keeping the underlying domain entity modules free of this transfer-model aggregation and preserving the existing public exports."
+  },
+  {
+    "number": 8138,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/entities/_chembl_reference_models.py",
+    "fingerprint": "bf9ae75fc9aa",
+    "claim": "In @src/bioetl/domain/entities/_chembl_reference_models.py around lines 117 - 119, Update the descriptions for CellLineRecord.cell_source_tax_id and TargetComponentRecord.tax_id to explicitly state that these names mirror the raw ChEMBL API fields, while the corresponding domain entities use the standardized taxonomy_id naming."
+  },
+  {
+    "number": 8139,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/entities/__init__.py",
+    "fingerprint": "d7ef7dbfd4e7",
+    "claim": "In @src/bioetl/domain/entities/__init__.py around lines 261 - 263, Remove the unreachable TYPE_CHECKING conditional and its AttributeError raise from the module-level __getattr__ function, leaving the function body consistent with its runtime purpose and preserving the declarations already provided by the earlier TYPE_CHECKING block."
+  },
+  {
+    "number": 8140,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/bioactivity/_converters.py",
+    "fingerprint": "4fd6874fd25b",
+    "claim": "In @src/bioetl/domain/entities/bioactivity/_converters.py around lines 32 - 33, The _safe_str function should normalize integral float values and reject bool inputs. Update _safe_str so booleans return None and floats representing whole numbers are converted to their integer string form (for example, 12345.0 to \"12345\"), while preserving existing behavior for None and other values."
+  },
+  {
+    "number": 8141,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/entities/crossref.py",
+    "fingerprint": "309f867a9d7f",
+    "claim": "In @src/bioetl/domain/entities/crossref.py around lines 169 - 177, The file-wide misc suppression should be removed and replaced with per-line # type: ignore[misc] annotations on the overriding doi and issn assignments in the CrossRef entity. Keep the existing narrowed types, defaults, and runtime validation unchanged while limiting mypy suppression to those two field declarations."
+  },
+  {
+    "number": 8142,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/chembl_structures_foundation.py",
+    "fingerprint": "d9a41654b64e",
+    "claim": "In @src/bioetl/domain/entities/chembl_structures_foundation.py around lines 85 - 90, Update the frozen Target and TargetComponent entities to copy and freeze all list fields via the existing freeze_fields pattern, including Target.component_accessions, component_ids, component_types, component_relationships, component_descriptions, and TargetComponent.protein_classification_ids. Add tests that mutate each caller-provided list after construction and verify the entity values remain unchanged."
+  },
+  {
+    "number": 8143,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/entities/openalex.py",
+    "fingerprint": "300c6f233834",
+    "claim": "In @src/bioetl/domain/entities/openalex.py at line 13, The OpenAlex entity module re-exports LOOKUP_METHODS without registering it in the package-level lazy import map. Add LOOKUP_METHODS to _ENTITY_IMPORTS so both import paths work, or remove its import and __all__ entry to eliminate the re-export; keep the chosen API behavior consistent."
+  },
+  {
+    "number": 8144,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/entities/pubchem.py",
+    "fingerprint": "da1c37f8af24",
+    "claim": "In @src/bioetl/domain/entities/pubchem.py at line 1, Remove the file-wide mypy suppression in the PubChem module and replace it with targeted `# type: ignore[misc]` annotations only on the Pydantic override lines that require them; apply the same narrowing in the corresponding Crossref and ChEMBL model modules, leaving unrelated declarations checked normally."
+  },
+  {
+    "number": 8145,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/_chembl_activity_assay_models.py",
+    "fingerprint": "1fbf04ba5622",
+    "claim": "In @src/bioetl/domain/entities/_chembl_activity_assay_models.py at line 95, Change the taxonomy ID annotations in ActivityRecord.target_tax_id, AssayRecord.assay_tax_id, and AssayRecord.variant_tax_id to int | None, preserving their existing defaults and descriptions. Before applying the changes, verify that adapters do not pass string taxonomy values; update any such adapter inputs to provide integers so the DTO contract no longer relies on downstream coercion."
+  },
+  {
+    "number": 8146,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/publication_base.py",
+    "fingerprint": "65fc9ad608c9",
+    "claim": "In @src/bioetl/domain/entities/publication_base.py around lines 76 - 83, Update PublicationBaseEntity’s identifier handling in __post_init__ or _validate_invariants so each canonical alias is synchronized with its corresponding primary field, ensuring CrossRefPublicationEntity’s required DOI is available through publication_doi and preventing divergent non-null values. Document the primary-versus-canonical identifier split in the class docstring alongside the existing doi, pmid, and pmc_id descriptions."
+  },
+  {
+    "number": 8147,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/entities/bioactivity/_extractors.py",
+    "fingerprint": "ff6d6c5f35cb",
+    "claim": "In @src/bioetl/domain/entities/bioactivity/_extractors.py around lines 139 - 146, In _first_truthy_value, remove the unnecessary resolved_value intermediate binding and return value directly when a truthy field is found; preserve the existing alias iteration and None fallback."
+  },
+  {
+    "number": 8148,
+    "severity": "minor",
+    "path": "src/bioetl/domain/entities/chembl_activity.py",
+    "fingerprint": "3ffd66d1971e",
+    "claim": "In @src/bioetl/domain/entities/chembl_activity.py at line 88, Correct the inline comment for variant_sequence in the activity entity and the corresponding comment in _chembl_activity_assay_models.py to read “Amino acid sequence,” without changing the field or its behavior."
+  },
+  {
+    "number": 8149,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/entities/chembl_compound_record.py",
+    "fingerprint": "4307df01ee92",
+    "claim": "In @src/bioetl/domain/entities/chembl_compound_record.py around lines 54 - 62, Extract the positive-ID and required-string checks from ChemblCompoundRecord._validate_positive_id and _validate_required_str into shared, reusable helpers in the domain validation module, defined without instance state. Update ChemblCompoundRecord and the duplicated inline validations in chembl_structures_foundation.py and chembl_activity.py to use those helpers, preserving the existing uniform error messages."
+  },
+  {
+    "number": 8150,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/uniprot.py",
+    "fingerprint": "99eea39c79d8",
+    "claim": "In @src/bioetl/domain/entities/uniprot.py at line 1, Refresh reports/quality/module-coverage-inventory.json using _refresh_module_coverage_inventory.py to include the added src/bioetl modules, then run the architecture hash guard when feasible."
+  },
+  {
+    "number": 8151,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/semanticscholar.py",
+    "fingerprint": "67f62c133aba",
+    "claim": "In @src/bioetl/domain/entities/semanticscholar.py around lines 103 - 107, Update Semantic Scholar’s _validate_invariants method to require paper_id to be exactly 40 hexadecimal characters, rejecting whitespace and any other arbitrary text while preserving the existing missing-ID ValueError behavior."
+  },
+  {
+    "number": 8152,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/_chembl_molecule_target_models.py",
+    "fingerprint": "71136e3c3173",
+    "claim": "In @src/bioetl/domain/entities/_chembl_molecule_target_models.py around lines 20 - 21, Update the molecule and target model identifier fields, including molecule_id and target_id, to require at least one character via Field(min_length=1) or an equivalent validator. Add unit coverage confirming empty identifiers are rejected, and avoid model_construct in paths that must enforce this validation."
+  },
+  {
+    "number": 8153,
+    "severity": "major",
+    "path": "src/bioetl/domain/entities/_chembl_additional_models.py",
+    "fingerprint": "d25b788b6f55",
+    "claim": "In @src/bioetl/domain/entities/_chembl_additional_models.py around lines 14 - 15, Constrain the ChEMBL identifier fields in TissueRecord and CompoundLinkRecord, specifically tissue_id, molecule_id, and publication_id, using the canonical CHEMBL identifier pattern (or at minimum non-empty validation) so invalid values are rejected at DTO construction. Add CI coverage asserting empty and malformed identifiers fail validation while valid CHEMBL identifiers remain accepted."
+  },
+  {
+    "number": 8154,
+    "severity": "minor",
+    "path": "src/bioetl/domain/entities/_chembl_additional_models.py",
+    "fingerprint": "bdf4d4f705a4",
+    "claim": "In @src/bioetl/domain/entities/_chembl_additional_models.py around lines 54 - 61, Update the four Tanimoto fields in PublicationSimilarityRecord—tid_tani, mol_tani, avg_tani, and max_tani—to enforce inclusive ge=0.0 and le=1.0 validation while retaining optional defaults. Add tests confirming values below 0.0 or above 1.0 are rejected and boundary values 0.0 and 1.0 are accepted."
+  }
+]
