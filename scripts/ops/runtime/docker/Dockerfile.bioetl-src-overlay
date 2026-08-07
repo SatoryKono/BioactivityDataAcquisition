@@ -1,0 +1,7 @@
+# Overlay-only rebuild: refresh /app/src without reinstalling third-party deps.
+# Use when host Docker Desktop already has bioetl-main-bioetl:latest and only
+# interfaces/application code changed (e.g. report_root readiness).
+FROM bioetl-main-bioetl:latest
+USER root
+COPY --chown=root:root src/ ./src/
+USER bioetl
