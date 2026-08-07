@@ -51,7 +51,7 @@ def report_root_marker_path(*, report_root: Path | None = None) -> Path:
 def inspect_report_root_marker(
     *,
     report_root: Path | None = None,
-) -> dict[str, Any]:
+) -> dict[str, Any]:  # Any: health diagnostic payload is JSON-heterogeneous
     """Inspect the bind-identity marker without raising.
 
     Returns a JSON-friendly diagnostic payload suitable for ``/health/ready``
@@ -59,7 +59,7 @@ def inspect_report_root_marker(
     """
     resolved = resolve_report_root(root=report_root)
     marker = report_root_marker_path(report_root=resolved)
-    payload: dict[str, Any] = {
+    payload: dict[str, Any] = {  # Any: health diagnostic payload is JSON-heterogeneous
         "report_root": str(resolved.as_posix()),
         "marker_path": str(marker.as_posix()),
         "marker_token_expected": REPORT_ROOT_MARKER_TOKEN,

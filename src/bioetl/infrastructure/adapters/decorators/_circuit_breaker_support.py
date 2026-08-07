@@ -31,9 +31,14 @@ def _snapshot_from_port(circuit_breaker: CircuitBreakerPort) -> CircuitBreakerSn
 
     recovery_timeout_getter = getattr(circuit_breaker, "get_recovery_timeout", None)
     if callable(recovery_timeout_getter):
-        recovery_timeout = float(cast(Any, recovery_timeout_getter()))
+        recovery_timeout = float(cast(Any, recovery_timeout_getter()))  # Any: legacy breaker duck type
     else:
-        recovery_timeout = float(cast(Any, getattr(circuit_breaker, "recovery_timeout", 60.0)))
+        recovery_timeout = float(
+            cast(
+                Any,  # Any: legacy breaker attribute
+                getattr(circuit_breaker, "recovery_timeout", 60.0),
+            )
+        )
 
     last_failure_getter = getattr(circuit_breaker, "get_last_failure_time", None)
     if callable(last_failure_getter):

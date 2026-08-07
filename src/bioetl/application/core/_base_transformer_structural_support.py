@@ -158,7 +158,7 @@ def _log_structural_policy_events(
     owner: TransformerExecutionOwner,
     context: PipelineContext,
     index: int,
-    events: Iterable[Any],
+    events: Iterable[Any],  # Any: structural policy emits provider-defined event objects
 ) -> None:
     """Emit per-event structural-policy log lines from policy outcome."""
     for event in events:

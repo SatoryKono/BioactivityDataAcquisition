@@ -51,8 +51,8 @@ async def yield_wrapped_fetch_records(
         entity_type,
         limit,
         query,
-        cast("Any", filter_ids),
-        cast("Any", filter_field),
+        cast("Any", filter_ids),  # Any: adapter fetch signatures vary by provider
+        cast("Any", filter_field),  # Any: adapter fetch signatures vary by provider
         offset,
     ):
         yield cast("RecordT", record)
