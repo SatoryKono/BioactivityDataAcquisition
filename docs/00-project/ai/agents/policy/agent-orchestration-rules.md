@@ -34,8 +34,8 @@ ______________________________________________________________________
 | `py-config-bot`          | sonnet | YAML configs (pipeline/DQ/filter)                   | `configs/`              |
 | `py-debug-bot`           | opus   | RCA падений тестов, исправление ошибок              | `src/bioetl/`, `tests/` |
 | `py-doc-bot`             | sonnet | Документация, ADR, CHANGELOG, docstrings, диаграммы | `docs/`, docstrings     |
-| `py-test-swarm`          | opus   | Иерархическое тестирование (L1→L2→L3)               | `tests/`, `reports/`    |
-| `py-review-orchestrator` | opus   | Иерархический code review (S1-S8)                   | `reports/`              |
+| `py-test-bot`          | opus   | Иерархическое тестирование (L1→L2→L3)               | `tests/`, `reports/`    |
+| `py-audit-bot` | opus   | Иерархический code review (S1-S8)                   | `reports/`              |
 
 > Production-код пишем напрямую (без отдельного субагента).
 
@@ -49,9 +49,9 @@ ______________________________________________________________________
 | Создать pipeline config          | `py-config-bot`                     | `task_id=X, mode=create, provider=chembl, entity=mechanism` |
 | Разобрать падение теста          | `py-debug-bot`                      | `task_id=X, phase=post_refactor, failing_test_report="..."` |
 | Обновить docs после рефакторинга | `py-doc-bot`                        | `task_id=X, rf_ids=[RF-001, RF-002]`                        |
-| Полный аудит тестового покрытия  | `py-test-swarm`                     | `task_id=SWARM-001, mode=full_audit`                        |
-| Полный аудит документации        | `documentation-cascade-audit` skill | `/documentation-cascade-audit`                              |
-| Иерархический code review        | `py-review-orchestrator`            | `task_id=REV-001, scope=src/bioetl/`                        |
+| Полный аудит тестового покрытия  | `py-test-bot`                     | `task_id=SWARM-001, mode=full_audit`                        |
+| Полный аудит документации        | `py-doc-bot` skill | `/py-doc-bot`                              |
+| Иерархический code review        | `py-audit-bot`            | `task_id=REV-001, scope=src/bioetl/`                        |
 
 ## Стандартный workflow
 
@@ -65,7 +65,7 @@ ______________________________________________________________________
 
 - **Quick-fix**: test(baseline) → fix → test(final) → doc
 - **Doc-only**: py-doc-bot → py-audit-bot(targeted, docs)
-- **Doc-audit**: `/documentation-audit` или `/documentation-cascade-audit` → py-audit-bot(targeted, docs)
+- **Doc-audit**: `/py-doc-bot` или `/py-doc-bot` → py-audit-bot(targeted, docs)
 - **Config-only**: audit → plan → py-config-bot → test → audit
 
 ## Slash Commands (self-contained)
@@ -79,10 +79,10 @@ Skills now inlined into commands — invoke directly via `/command-name`:
 | `/new-pipeline`                | Scaffolding нового ETL pipeline                               |
 | `/new-composite`               | Создание composite pipeline                                   |
 | `/vcr-record`                  | Управление VCR cassettes                                      |
-| `/documentation-audit`         | Аудит документации                                            |
-| `/documentation-cascade-audit` | Каскадный аудит документации с текущим docs-audit skill stack |
-| `/test-swarm`                  | Иерархическое тестирование (uses py-test-swarm)               |
-| `/review-orchestrator`         | Code review (uses py-review-orchestrator)                     |
+| `/py-doc-bot`         | Аудит документации                                            |
+| `/py-doc-bot` | Каскадный аудит документации с текущим docs-audit skill stack |
+| `/test-swarm`                  | Иерархическое тестирование (uses py-test-bot)               |
+| `/review-orchestrator`         | Code review (uses py-audit-bot)                     |
 | `/mermaid-design`              | Mermaid-диаграммы с ADR-040                                   |
 | `/config-validate`             | Валидация YAML vs JSON-schemas                                |
 | `/schema-parity`               | Silver↔Gold schema parity                                     |

@@ -35,23 +35,23 @@ run_subagent(
 ||  #   | Субагент (`profile`)        | Model  | Роль                                                                                   | Артефакт                                               | Execution Mode |
 || :--: | --------------------------- | ------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------ | -------------- |
 ||  I   | **py-audit-bot**            | parent | Baseline/final аудит, code review, arch guardian, API validation                       | `review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md`     | Foreground     |
-||  II  | **py-architecture-debt-bot** | parent | Полный workflow устранения архитектурного долга: generate -> plan -> execute -> verify | `review_py-architecture-debt-bot_{YYYYMMDD}_{HHMM}.md` | Foreground     |
+||  II  | **py-audit-bot** | parent | Полный workflow устранения архитектурного долга: generate -> plan -> execute -> verify | `review_py-audit-bot_{YYYYMMDD}_{HHMM}.md` | Foreground     |
 || III  | **py-plan-bot**             | parent | Планирование, декомпозиция, composite design                                           | `review_py-plan-bot_{YYYYMMDD}_{HHMM}.md`              | Foreground     |
 ||  IV  | **py-test-bot**             | default subagent model | Тестирование                                                                           | `review_py-test-bot_{YYYYMMDD}_{HHMM}.md`              | Foreground/background |
 ||  V   | **py-config-bot**           | default subagent model | Конфигурации (pipeline, DQ, filter, composite)                                         | `review_py-config-bot_{YYYYMMDD}_{HHMM}.md`            | Foreground     |
 ||  VI  | **py-debug-bot**            | parent | Отладка падений                                                                        | `review_py-debug-bot_{YYYYMMDD}_{HHMM}.md`             | Foreground     |
 || VII  | **py-doc-bot**              | default subagent model | Документация, ADR, диаграммы (Mermaid)                                                 | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md`               | Foreground     |
-|| VIII | **py-test-swarm**            | parent | Иерархическое тестирование (L1→L2→L3)                                                  | test reports                                           | Background     |
-||  IX  | **py-review-orchestrator**  | parent | Иерархический code review (S1-S8)                                                      | review reports                                         | Background     |
+|| VIII | **py-test-bot**            | parent | Иерархическое тестирование (L1→L2→L3)                                                  | test reports                                           | Background     |
+||  IX  | **py-audit-bot**  | parent | Иерархический code review (S1-S8)                                                      | review reports                                         | Background     |
 
-> **Note:** `py-code-bot` removed — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`. Repo-wide documentation audits now route through the `documentation-audit` / `documentation-cascade-audit` skills rather than a dedicated documentation-only subagent profile.
+> **Note:** `py-code-bot` removed — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`. Repo-wide documentation audits now route through the `py-doc-bot` / `py-doc-bot` skills rather than a dedicated documentation-only subagent profile.
 
 ### Разделение ответственности (файловые зоны)
 
 || Субагент                 | Зона записи                                                           | Только чтение                         |
 || ------------------------ | --------------------------------------------------------------------- | ------------------------------------- |
 || orchestrator (direct)    | `src/bioetl/`, `tests/`                                               | `configs/`, `docs/`                   |
-|| py-architecture-debt-bot | `src/bioetl/`, `tests/`, `reports/quality/`, root task JSON artifacts | `configs/`, `docs/` (edits delegated) |
+|| py-audit-bot | `src/bioetl/`, `tests/`, `reports/quality/`, root task JSON artifacts | `configs/`, `docs/` (edits delegated) |
 || py-config-bot            | `configs/`                                                            | `src/bioetl/`, `docs/`                |
 || py-doc-bot               | `docs/`, docstrings, `docs/00-project/ai/agents/scripts/diagrams/`    | `configs/`, `tests/`                  |
 || py-test-bot              | `tests/`                                                              | `src/bioetl/`, `configs/`             |
@@ -316,8 +316,8 @@ ______________________________________________________________________
 - `py-test-bot` (baseline, background) ∥ `py-audit-bot` (baseline, foreground) — оба read-only
 - `orchestrator` (direct) ∥ `py-config-bot` (foreground) — разные файловые зоны (src/ vs configs/)
 - `py-doc-bot` (foreground) ∥ `py-audit-bot` (final, foreground) — если doc changes не влияют на code audit scope
-- `py-test-swarm` (background) для иерархического тестирования L1/L2/L3
-- `py-review-orchestrator` (background) для иерархического code review
+- `py-test-bot` (background) для иерархического тестирования L1/L2/L3
+- `py-audit-bot` (background) для иерархического code review
 
 **Note:** Background subagents не могут запрашивать новые permissions — они используют только уже предоставленные в текущей сессии.
 

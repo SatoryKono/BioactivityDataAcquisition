@@ -83,14 +83,14 @@ Logical `py-*` profiles → Devin custom subagent profiles:
 | Logical Profile | Devin Profile | Model | Tool Access | Execution Mode |
 | --------------- | ------------- | ----- | ----------- | -------------- |
 | `py-audit-bot` | `py-audit-bot` | Parent model | Read-only (read, grep, glob, exec) | Foreground |
-| `py-architecture-debt-bot` | `py-architecture-debt-bot` | Parent model | Read + limited write (reports/) | Foreground |
+| `py-audit-bot` | `py-audit-bot` | Parent model | Read + limited write (reports/) | Foreground |
 | `py-plan-bot` | `py-plan-bot` | Parent model | Read-only | Foreground |
 | `py-test-bot` | `py-test-bot` | Default subagent model | Read + exec (tests) | Foreground/background |
 | `py-config-bot` | `py-config-bot` | Default subagent model | Read + write (configs/) | Foreground |
 | `py-debug-bot` | `py-debug-bot` | Parent model | Read + write (src/, tests/) | Foreground |
 | `py-doc-bot` | `py-doc-bot` | Default subagent model | Read + write (docs/) | Foreground |
-| `py-test-swarm` | `py-test-swarm` | Parent model | Read + exec + write (reports/) | Background |
-| `py-review-orchestrator` | `py-review-orchestrator` | Parent model | Read-only | Background |
+| `py-test-bot` | `py-test-bot` | Parent model | Read + exec + write (reports/) | Background |
+| `py-audit-bot` | `py-audit-bot` | Parent model | Read-only | Background |
 
 ## Devin Subagent Invocation
 
@@ -135,10 +135,10 @@ Use the smallest existing skill that matches the request:
 | --- | --- | --- | --- |
 | Diagnose without fixing | read-only | `py-debug-bot` (foreground) | reproduction and evidence only |
 | Implement a focused fix | write in requested scope | direct implementation; `py-config-bot` when configs change | targeted lint/tests |
-| Review the current diff | read-only | `py-review-orchestrator` (background) or `code-review` skill | diff inspection; no external writes |
+| Review the current diff | read-only | `py-audit-bot` (background) or `code-review` skill | diff inspection; no external writes |
 | Investigate and fix CI | write only after root cause | GitHub CI workflow / `py-debug-bot` | failed checks plus targeted regression |
 | Prepare a PR | branch/commit/push authorized by request | `create-pr` skill | repository quality gates for touched scope |
-| Audit architecture debt | read-only | `py-architecture-debt-bot` (foreground) | architecture/debt gates; budgets MUST NOT increase |
+| Audit architecture debt | read-only | `py-audit-bot` (foreground) | architecture/debt gates; budgets MUST NOT increase |
 
 Templates do not broaden user authority. Diagnosis and review stay read-only unless the user also asks for implementation. Load the selected skill and relevant sources/tests; do not load every ADR or the whole repository by default.
 
@@ -168,7 +168,7 @@ Use for:
 - Long-running test suites
 - Documentation generation
 - Evidence collection campaigns
-- Hierarchical orchestration (py-test-swarm, py-review-orchestrator)
+- Hierarchical orchestration (py-test-bot, py-audit-bot)
 
 **Note:** Background subagents inherit already-granted permissions; unapproved tools are auto-denied.
 

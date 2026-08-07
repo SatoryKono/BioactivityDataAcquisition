@@ -429,9 +429,9 @@ docs/00-project/ai/memory/memory-py-test-bot.md    (v1.0.2) — test structure, 
 docs/00-project/ai/memory/memory-py-config-bot.md  (v1.0.2) — config hierarchy, templates, ADR compliance, composite rules
 docs/00-project/ai/memory/memory-py-debug-bot.md   (v1.0.2) — error classification, debugging methodology, fix patterns
 docs/00-project/ai/memory/memory-py-doc-bot.md     (v1.0.2) — doc structure, ADR management, CHANGELOG, docstrings, diagrams
-docs/00-project/ai/memory/memory-py-architecture-debt-bot.md (v1.0.1) — architecture debt waves, exemption governance, closure gates
-docs/00-project/ai/memory/memory-py-review-orchestrator.md   (v1.0.1) — sector review map, evidence rollup, severity calibration
-docs/00-project/ai/memory/memory-py-test-swarm.md            (v1.0.1) — swarm decomposition, failure telemetry, flakiness protocol
+docs/00-project/ai/memory/memory-py-audit-bot.md (v1.0.1) — architecture debt waves, exemption governance, closure gates
+docs/00-project/ai/memory/memory-py-audit-bot.md   (v1.0.1) — sector review map, evidence rollup, severity calibration
+docs/00-project/ai/memory/memory-py-test-bot.md            (v1.0.1) — swarm decomposition, failure telemetry, flakiness protocol
 ```
 
 Все memory sheets обновлены до версий v1.0.1-v1.0.3 на 2026-07-24 с синхронизированными guardrails по тех. долгу и evidence anchors.
@@ -528,11 +528,11 @@ runtime-specific copies в других деревьях не переопред
 | `py-doc-bot`             | `.codex/skills/py-doc-bot/`                   | Документационные правки          |
 | `py-config-bot`          | `.codex/skills/py-config-bot/`                | Config/docs sync                 |
 | `py-debug-bot`           | `.codex/skills/py-debug-bot/`                 | Failure triage                   |
-| `py-review-orchestrator` | `.codex/skills/py-review-orchestrator/`       | Независимый double-check         |
-| `py-test-swarm`          | `.codex/skills/py-test-swarm/`                | Иерархическое тестирование       |
+| `py-audit-bot` | `.codex/skills/py-audit-bot/`       | Независимый double-check         |
+| `py-test-bot`          | `.codex/skills/py-test-bot/`                | Иерархическое тестирование       |
 | `new-pipeline`           | `.codex/skills/new-pipeline/`                 | Scaffolding pipeline             |
 | `verify-architecture`    | `.codex/skills/verify-architecture/`          | Архитектурные проверки           |
-| `documentation-audit`    | `.codex/skills/documentation-audit/`          | Аудит документации               |
+| `py-doc-bot`    | `.codex/skills/py-doc-bot/`          | Аудит документации               |
 | `architecture-guardian`  | `.codex/skills/public/architecture-guardian/` | Граничный архитектурный review   |
 
 ### 5.2 Runtime-specific conveniences

@@ -4,7 +4,7 @@
 
 - `python -m scripts.engineering.qa generate-debt-tasks`
 - `python -m scripts.engineering.qa reduce-architecture-debt`
-- `.codex/agents/py-architecture-debt-bot.md`
+- `.codex/agents/py-audit-bot.md`
 
 Ты — инженер по автоматизации архитектурного техдолга в проекте BioETL.
 

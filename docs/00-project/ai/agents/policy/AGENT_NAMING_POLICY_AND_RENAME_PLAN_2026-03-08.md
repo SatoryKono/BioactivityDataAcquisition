@@ -9,7 +9,7 @@ Scope constraint: documentation-only in `docs/00-project/ai/**` (no runtime file
 
 Current agent naming mixes multiple patterns:
 
-1. BioETL core orchestration names (`py-audit-bot`, `py-test-swarm`, `py-review-orchestrator`)
+1. BioETL core orchestration names (`py-audit-bot`, `py-test-bot`, `py-audit-bot`)
 1. Generic specialist names (`backend-developer`, `risk-manager`, `data-scientist`)
 1. Non-uniform suffixes (`-pro`, `-master`, `-expert`)
 
@@ -48,11 +48,11 @@ This reduces discoverability and increases naming drift risk.
 1. `wordpress-master` -> `sp-wordpress-engineer`
 1. `qa-expert` -> `sp-qa-engineer`
 1. `m365-admin` -> `sp-microsoft-365-admin`
-1. `architecture-techdebt-automation` -> `py-architecture-debt-bot` (if core) or `sp-architecture-debt-engineer` (if specialist)
+1. `architecture-techdebt-automation` -> `py-audit-bot` (if core) or `sp-architecture-debt-engineer` (if specialist)
 
 Implementation status update:
 
-- Runtime consolidation now uses `py-architecture-debt-bot` as the canonical BioETL architecture-debt workflow surface.
+- Runtime consolidation now uses `py-audit-bot` as the canonical BioETL architecture-debt workflow surface.
 - `architecture-techdebt-automation` remains only as a deprecated generator-only compatibility profile.
 
 ### 3.2 Priority P2 (deduplicate semantics)

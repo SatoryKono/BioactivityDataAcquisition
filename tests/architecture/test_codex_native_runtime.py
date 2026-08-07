@@ -75,14 +75,11 @@ def test_native_agent_negative_fixture_identifies_missing_descriptor(
     )
 
 
-def test_native_skill_projection_is_exact_and_platform_neutral() -> None:
+def test_canonical_skills_are_the_only_project_discovery_surface() -> None:
     assert not native_runtime_contract.validate_skill_adapters(ROOT)
     canonical = native_runtime_contract.canonical_skills(ROOT)
-    discovered = {
-        path.parent.name for path in (ROOT / ".agents/skills").glob("*/SKILL.md")
-    }
-    assert discovered == set(canonical)
-    assert all(not path.is_symlink() for path in (ROOT / ".agents/skills").rglob("*"))
+    assert len(canonical) == 13
+    assert not any((ROOT / ".agents/skills").glob("*/SKILL.md"))
 
 
 def test_native_skill_projection_root_is_tracked_tooling() -> None:
@@ -103,18 +100,18 @@ def test_native_skill_projection_root_is_tracked_tooling() -> None:
     assert ".agents" not in local_only
 
 
-def test_skill_negative_fixture_identifies_adapter_drift(tmp_path: Path) -> None:
+def test_skill_negative_fixture_identifies_invalid_canonical_metadata(tmp_path: Path) -> None:
     shutil.copytree(ROOT / ".codex/skills", tmp_path / ".codex/skills")
-    shutil.copytree(ROOT / ".agents/skills", tmp_path / ".agents/skills")
-    changed = tmp_path / ".agents/skills/py-test-bot/SKILL.md"
+    changed = tmp_path / ".codex/skills/py-test-bot/SKILL.md"
     changed.write_text(
-        changed.read_text(encoding="utf-8") + "\ndrift\n", encoding="utf-8"
+        changed.read_text(encoding="utf-8").replace('name: "py-test-bot"', 'name: "wrong"'),
+        encoding="utf-8",
     )
 
     findings = native_runtime_contract.validate_skill_adapters(tmp_path)
 
     assert any(
-        finding.code == "skill.drift" and "py-test-bot" in finding.path
+        finding.code == "skill.canonical" and "py-test-bot" in finding.message
         for finding in findings
     )
 

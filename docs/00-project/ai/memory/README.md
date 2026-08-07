@@ -37,9 +37,9 @@ profiles в BioETL.
 | `py-config-bot` | `memory-py-config-bot.md` | dedicated |
 | `py-debug-bot` | `memory-py-debug-bot.md` | dedicated |
 | `py-doc-bot` | `memory-py-doc-bot.md` | dedicated |
-| `py-architecture-debt-bot` | `memory-py-architecture-debt-bot.md` | dedicated |
-| `py-review-orchestrator` | `memory-py-review-orchestrator.md` | dedicated |
-| `py-test-swarm` | `memory-py-test-swarm.md` | dedicated |
+| `py-audit-bot` | `memory-py-audit-bot.md` | dedicated |
+| `py-audit-bot` | `memory-py-audit-bot.md` | dedicated |
+| `py-test-bot` | `memory-py-test-bot.md` | dedicated |
 
 If a runtime profile is renamed or added, update this matrix and the matching
 tracked runtime profile anchors in the same change set. On the current `main`

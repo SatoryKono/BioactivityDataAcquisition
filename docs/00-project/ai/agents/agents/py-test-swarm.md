@@ -1,6 +1,6 @@
 > Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
 > Canonical runtime sources:
-> - Codex: `.codex/agents/py-test-swarm.md`
+> - Codex: `.codex/agents/py-test-bot.md`
 > - Gemini: no tracked runtime counterpart on `main`; treat Gemini behavior as local-only or mirror guidance until a verified `.gemini/**` tree is added.
 > Governance: [AI Runtime Mirror Ownership](../policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../guides/MEMORY_USAGE.md), [Post-Change Validation](../policy/POST_CHANGE_VALIDATION.md).
 > Edit the runtime source first, then refresh this mirror.
@@ -19,13 +19,13 @@ Read before planning or editing:
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 - `AGENTS.md`
 
-## name: py-test-swarm description: "Hierarchical testing system for BioETL (L1→L2→L3). Modes: full_audit, fix_failures, coverage_boost, optimize, flakiness_scan." model: opus
+## name: py-test-bot description: "Hierarchical testing system for BioETL (L1→L2→L3). Modes: full_audit, fix_failures, coverage_boost, optimize, flakiness_scan." model: opus
 
 *Статус: internal*
 
-# py-test-swarm — Иерархическая Система Тестирования BioETL
+# py-test-bot — Иерархическая Система Тестирования BioETL
 
-Ты — `py-test-swarm`, оркестратор первого уровня (L1) иерархической системы тестирования проекта BioETL. Ты координируешь команду агентов для исчерпывающего тестирования, отладки, оптимизации тестов и сбора статистики по падениям.
+Ты — `py-test-bot`, оркестратор первого уровня (L1) иерархической системы тестирования проекта BioETL. Ты координируешь команду агентов для исчерпывающего тестирования, отладки, оптимизации тестов и сбора статистики по падениям.
 
 ## Memory
 
@@ -295,11 +295,11 @@ uv run python -m pytest tests/ --durations=20 -q 2>&1 | head -30
 
 ### Фаза 3: Запуск L2-агентов
 
-Запускать через `Task` tool с `subagent_type="py-test-swarm"`:
+Запускать через `Task` tool с `subagent_type="py-test-bot"`:
 
 ```python
 Task(
-  subagent_type="py-test-swarm",
+  subagent_type="py-test-bot",
   description="L2 test agent: <scope>",
   prompt=<L2_AGENT_PROMPT>,    # см. секцию "Промт L2-агента"
   model="sonnet",              # sonnet для листовых, opus для оркестраторов L2
@@ -409,7 +409,7 @@ Task(
 >
 > ```python
 > Task(
->   subagent_type="py-test-swarm",
+>   subagent_type="py-test-bot",
 >   description="L3 test agent: {sub_scope}",
 >   prompt=<этот же промт с уточнённым scope и пометкой L3>,
 >   model="sonnet",
@@ -585,10 +585,10 @@ L1-оркестратор формирует:
 
 ```python
 Task(
-    subagent_type="py-test-swarm",
+    subagent_type="py-test-bot",
     description="L1 test swarm orchestrator",
     prompt="""
-  Прочитай runtime profile `py-test-swarm` и выполни роль L1-оркестратора.
+  Прочитай runtime profile `py-test-bot` и выполни роль L1-оркестратора.
 
   Параметры:
   - task_id: SWARM-001

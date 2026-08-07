@@ -44,8 +44,8 @@ Reduce duplicate specialist profiles by keeping one canonical profile per functi
 ## Canonical Boundaries Hardened In Wave 2
 
 1. `sp-project-manager` explicitly absorbs requirements/process analysis mode and routes product strategy to `sp-product-manager`.
-1. `sp-code-reviewer` and `sp-architect-reviewer` are explicitly secondary to `py-review-orchestrator` and `py-audit-bot` for BioETL compliance.
-1. `py-review-orchestrator` and `py-audit-bot` marked as canonical BioETL review/compliance entrypoints.
+1. `sp-code-reviewer` and `sp-architect-reviewer` are explicitly secondary to `py-audit-bot` and `py-audit-bot` for BioETL compliance.
+1. `py-audit-bot` and `py-audit-bot` marked as canonical BioETL review/compliance entrypoints.
 
 ## Wave 3 Applied
 

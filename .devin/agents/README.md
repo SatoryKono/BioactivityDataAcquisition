@@ -55,18 +55,18 @@ Active set **MUST** match `.devin/agents/ORCHESTRATION.md` and the tracked `py-*
 || Agent                        | Model  | Role                                                                                   |
 || ---------------------------- | ------ | -------------------------------------------------------------------------------------- |
 || `py-audit-bot`               | parent | Baseline/final аудит, code review, arch guardian, API validation                       |
-|| `py-architecture-debt-bot`   | parent | Architecture-debt workflow: generate → plan → execute → verify                         |
+|| `py-audit-bot`   | parent | Architecture-debt workflow: generate → plan → execute → verify                         |
 || `py-plan-bot`                | parent | Task planning, RF-\* decomposition, composite design                                   |
 || `py-test-bot`                | swe-1.6 | Tests (baseline/final/retest), coverage                                                |
 || `py-config-bot`              | swe-1.6 | YAML configs (pipeline/DQ/filter/composite)                                            |
 || `py-debug-bot`               | parent | RCA, bug fixes, regression debugging                                                   |
 || `py-doc-bot`                 | swe-1.6 | Docs, ADR, CHANGELOG, Mermaid diagrams                                                 |
-|| `py-test-swarm`              | parent | Hierarchical testing (L1→L2→L3)                                                        |
-|| `py-review-orchestrator`     | parent | Hierarchical code review (S1–S8)                                                       |
+|| `py-test-bot`              | parent | Hierarchical testing (L1→L2→L3)                                                        |
+|| `py-audit-bot`     | parent | Hierarchical code review (S1–S8)                                                       |
 
 Runtime mapping: `.devin/agents/DEVIN-RUNTIME.md`. Production code is written by the orchestrator directly.
 
-Repo-wide documentation audits are routed through the `documentation-audit` / `documentation-cascade-audit` skills rather than a dedicated documentation-only subagent profile.
+Repo-wide documentation audits are routed through the `py-doc-bot` / `py-doc-bot` skills rather than a dedicated documentation-only subagent profile.
 
 ## Devin vs Codex Runtime
 

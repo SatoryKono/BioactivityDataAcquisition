@@ -98,7 +98,7 @@
 1. `capability-discovery`
 1. `py-test-bot`
 1. `py-debug-bot` при неочевидных bottleneck'ах
-1. `py-test-swarm` если нужно распараллелить исследование по сегментам test suite
+1. `py-test-bot` если нужно распараллелить исследование по сегментам test suite
 1. `verify-unit-tests` после изменений в unit/smoke helpers
 1. `verify-integration-tests` после изменений в integration/e2e/VCR контуре
 1. `verify-architecture` если меняются test orchestration scripts или guardrails
@@ -107,7 +107,7 @@
 ### Suggested Multi-Agent Flow
 
 - `capability-discovery` для подтверждения test wrappers, quality commands и локальных путей.
-- `py-test-swarm` для распараллеленного поиска bottleneck'ов в `unit`,
+- `py-test-bot` для распараллеленного поиска bottleneck'ов в `unit`,
   `integration`, `e2e`, `architecture`, CI wrappers.
 - `py-test-bot` как основной исполнитель для изменений.
 - `py-debug-bot` точечно для самых дорогих мест: collection, fixtures, import

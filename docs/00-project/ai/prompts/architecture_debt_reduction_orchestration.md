@@ -4,7 +4,7 @@
 
 - `python -m scripts.engineering.qa generate-debt-tasks`
 - `python -m scripts.engineering.qa reduce-architecture-debt`
-- `.codex/agents/py-architecture-debt-bot.md`
+- `.codex/agents/py-audit-bot.md`
 - `configs/` изменения выполняются только через `py-config-bot`
 
 # Architecture Debt Reduction — Orchestration Prompt
@@ -98,7 +98,7 @@ ______________________________________________________________________
 | **Тестирование**             | `py-test-bot`            | `sonnet` | После каждого исполнителя. Проверяет, что изменения не сломали тесты.    |
 | **Doc-sync**                 | `py-doc-bot`             | `haiku`  | После каждого исполнителя. Синхронизирует docstrings/docs с изменениями. |
 | **Финальный аудит (arch)**   | `py-audit-bot`           | `opus`   | После завершения ВСЕХ задач. Полная проверка архитектуры.                |
-| **Финальный аудит (review)** | `py-review-orchestrator` | `opus`   | После завершения ВСЕХ задач. Code review изменений.                      |
+| **Финальный аудит (review)** | `py-audit-bot` | `opus`   | После завершения ВСЕХ задач. Code review изменений.                      |
 
 ### 2.3 Шаблоны промтов для субагентов
 
@@ -188,7 +188,7 @@ task_id=AME-FINAL-AUDIT, phase=final
 Выдай финальный отчёт.
 ```
 
-#### py-review-orchestrator (code review)
+#### py-audit-bot (code review)
 
 ```
 task_id=AME-FINAL-REVIEW, scope=src/bioetl/
@@ -242,7 +242,7 @@ ______________________________________________________________________
 │ 4. ФИНАЛИЗАЦИЯ                                          │
 │    Обновить debt_scorecard.yaml (baseline counts)       │
 │    → py-audit-bot (opus)        — архитектурный аудит   │
-│    → py-review-orchestrator (opus) — code review        │
+│    → py-audit-bot (opus) — code review        │
 │    (запускать параллельно)                               │
 └────────────────────────┬────────────────────────────────┘
                          ▼
@@ -371,7 +371,7 @@ ______________________________________________________________________
 | Агент | Статус | Score | Критические замечания |
 |-------|:------:|:-----:|----------------------|
 | py-audit-bot | PASS/FAIL | X/10 | ... |
-| py-review-orchestrator | PASS/FAIL | — | ... |
+| py-audit-bot | PASS/FAIL | — | ... |
 
 ### Рекомендации
 
@@ -435,7 +435,7 @@ reports/
     ├── {task.id}_doc_sync_report.md            ← отчёт py-doc-bot
     ├── {task.id}_debug_report.md               ← отчёт py-debug-bot (если был)
     ├── final_audit_report.md                   ← отчёт py-audit-bot
-    └── final_review_report.md                  ← отчёт py-review-orchestrator
+    └── final_review_report.md                  ← отчёт py-audit-bot
 ```
 
 ### 6.2 Правила размещения файлов

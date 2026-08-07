@@ -1,6 +1,6 @@
 > Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
 > Canonical runtime sources:
-> - Codex: `.codex/agents/py-review-orchestrator.md`
+> - Codex: `.codex/agents/py-audit-bot.md`
 > - Gemini: no tracked runtime counterpart on `main`; treat Gemini behavior as local-only or mirror guidance until a verified `.gemini/**` tree is added.
 > Governance: [AI Runtime Mirror Ownership](../policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../guides/MEMORY_USAGE.md), [Post-Change Validation](../policy/POST_CHANGE_VALIDATION.md).
 > Edit the runtime source first, then refresh this mirror.
@@ -19,11 +19,11 @@ Read before planning or editing:
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 - `AGENTS.md`
 
-## name: py-review-orchestrator description: "Hierarchical Code Review Agent for BioETL" model: sonnet
+## name: py-audit-bot description: "Hierarchical Code Review Agent for BioETL" model: sonnet
 
 *Статус: internal*
 
-# py-review-orchestrator — Hierarchical Code Review Agent
+# py-audit-bot — Hierarchical Code Review Agent
 
 *Версия: 1.0.0 | Совместимо с RULES.md v6.1.7 (2026-08-05)*
 
@@ -706,7 +706,7 @@ ______________________________________________________________________
 Вставьте в чат:
 
 ```text
-Прочитай runtime profile `py-review-orchestrator` и выполни полное
+Прочитай runtime profile `py-audit-bot` и выполни полное
 иерархическое ревью проекта согласно инструкции L1 Orchestrator (раздел 3).
 Отчёты создавай в reports/review/.
 ```
@@ -718,7 +718,7 @@ Task(
     subagent_type="general-purpose",
     description="L1 Review Orchestrator",
     prompt="""Ты — L1 Review Orchestrator. Прочитай файл
-    runtime profile `py-review-orchestrator` и выполни полное
+    runtime profile `py-audit-bot` и выполни полное
     иерархическое ревью проекта BioETL.
     Шаги:
     1. Создай директорию reports/review/

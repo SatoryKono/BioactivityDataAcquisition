@@ -243,14 +243,14 @@ SSOT локальных skills: `.codex/skills/`.
 
 - `py-audit-bot`, `py-test-bot`, `py-doc-bot`, `py-debug-bot`
 - `py-config-bot`, `py-plan-bot`
-- `py-review-orchestrator`
+- `py-audit-bot`
 
 **Скилы в `local/`** (docs mirror для `.codex/skills/` и проектно-специфичных skills):
 
 - `py-audit-bot`, `py-test-bot`, `py-doc-bot`, `py-debug-bot`
-- `py-config-bot`, `py-plan-bot`, `py-review-orchestrator`
-- `py-test-swarm` (L1→L2→L3 иерархическое тестирование)
-- `documentation-cascade-audit` (каскадный аудит документации)
+- `py-config-bot`, `py-plan-bot`, `py-audit-bot`
+- `py-test-bot` (L1→L2→L3 иерархическое тестирование)
+- `py-doc-bot` (каскадный аудит документации)
 - `technical-designer-mermaid` (Mermaid-диаграммы с ADR-040)
 
 `py-code-bot` не является частью preferred active orchestration: с
