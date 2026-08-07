@@ -1,59 +1,35 @@
 #!/usr/bin/env python3
-"""Generate or check `.agents/skills` adapters for canonical Codex skills."""
+"""Deprecated compatibility entrypoint for canonical Codex skill validation."""
 
 from __future__ import annotations
 
 import argparse
-import shutil
+import sys
 from pathlib import Path
 
-from scripts.ai.codex.native_runtime_contract import (
-    DISCOVERY_SKILLS_DIR,
-    GENERATED_MARKER,
-    REPO_ROOT,
-    canonical_skills,
-    render_skill_adapter,
-    validate_skill_adapters,
-)
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-
-def sync(repo_root: Path) -> None:
-    skills = canonical_skills(repo_root)
-    discovery_root = repo_root / DISCOVERY_SKILLS_DIR
-    discovery_root.mkdir(parents=True, exist_ok=True)
-
-    for stale_file in sorted(discovery_root.glob("*/SKILL.md")):
-        if stale_file.parent.name in skills:
-            continue
-        if GENERATED_MARKER in stale_file.read_text(encoding="utf-8"):
-            shutil.rmtree(stale_file.parent)
-
-    for directory_name, (_, description) in skills.items():
-        destination = discovery_root / directory_name / "SKILL.md"
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_text(
-            render_skill_adapter(directory_name, description), encoding="utf-8"
-        )
+from scripts.ai.codex.native_runtime_contract import validate_canonical_skills
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    mode = parser.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--check", action="store_true", help="fail on discovery drift")
-    mode.add_argument("--sync", action="store_true", help="refresh generated adapters")
-    parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
-    args = parser.parse_args()
-    repo_root = args.repo_root.resolve()
-
-    if args.sync:
-        sync(repo_root)
-
-    findings = validate_skill_adapters(repo_root)
-    if findings:
-        for finding in findings:
-            print(f"[FAIL] {finding.code}: {finding.message} ({finding.path})")
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Validate canonical project skills (the only supported behavior).",
+    )
+    parser.parse_args()
+    errors = validate_canonical_skills(REPO_ROOT)
+    for error in errors:
+        print(f"[FAIL] {error}")
+    if errors:
         return 1
-    print(f"[OK] {len(canonical_skills(repo_root))} native skill adapters are in sync")
+    print(
+        "[OK] compatibility entrypoint is read-only; canonical Codex skills are valid"
+    )
     return 0
 
 

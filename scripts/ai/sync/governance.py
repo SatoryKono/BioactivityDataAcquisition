@@ -22,15 +22,10 @@ from pathlib import Path
 
 CANONICAL_SOURCES_BLOCK = """## Canonical Sources
 
-Read before planning or editing:
+- Runtime contract and precedence: `AGENTS.md`
+- Normative source index: `docs/00-project/NORMATIVE_SOURCES.md`
 
-- `docs/00-project/NORMATIVE_SOURCES.md`
-- `docs/00-project/RULES.md`
-- `docs/01-requirements/REQUIREMENTS.md`
-- `docs/02-architecture/decisions/`
-- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
-- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
-- `AGENTS.md`
+Load only the role- and risk-relevant sources selected by those contracts.
 """
 
 NORMATIVE_SKILL_LINE_CODEX = (
@@ -49,12 +44,6 @@ CANONICAL_SOURCES_PATTERN = re.compile(
     r"^## Canonical Sources\s*\n(?:(?!^(?:## |name:|# |\Z)).*\n)*",
     re.MULTILINE,
 )
-CODEX_AGENT_ROLE_MEMORY_LINES = {
-    "py-review-orchestrator.md": "- Role memory: `docs/00-project/ai/memory/memory-py-review-orchestrator.md`",
-    "py-test-swarm.md": "- Role memory: `docs/00-project/ai/memory/memory-py-test-swarm.md`",
-}
-
-
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
 
@@ -79,20 +68,6 @@ def _ensure_canonical_sources(text: str) -> str:
             count=1,
         )
     return CANONICAL_SOURCES_BLOCK + "\n" + cleaned.lstrip("\n")
-
-
-def _ensure_agent_role_memory(text: str, *, filename: str) -> str:
-    line = CODEX_AGENT_ROLE_MEMORY_LINES.get(filename)
-    if line is None:
-        return text
-    token = line.split("`", 2)[1]
-    if token in text:
-        return text
-
-    anchor = "- `AGENTS.md`\n"
-    if anchor in text:
-        return text.replace(anchor, anchor + line + "\n", 1)
-    return text.rstrip() + "\n\n" + line + "\n"
 
 
 GOVERNANCE_SKILL_LINES_CODEX = (
@@ -140,7 +115,6 @@ def normalize_codex_agents(root: Path, *, check_only: bool) -> list[str]:
     for path in sorted(agents_dir.glob("*.md")):
         original = path.read_text(encoding="utf-8")
         updated = _ensure_canonical_sources(original)
-        updated = _ensure_agent_role_memory(updated, filename=path.name)
         if updated != original:
             rel = path.relative_to(root)
             if check_only:
@@ -157,6 +131,27 @@ def inject_docs_agent_sources(root: Path, *, check_only: bool) -> list[str]:
         if path.name == "README.md":
             continue
         original = path.read_text(encoding="utf-8")
+        canonical = root / ".codex/agents" / path.name
+        if canonical.is_file():
+            relative = canonical.relative_to(root).as_posix()
+            header = (
+                "> Mirror status: This file is published under "
+                "`docs/00-project/ai/**` and is not a canonical runtime surface.\n"
+                f"> Canonical runtime source: `{relative}`\n"
+                "> Governance: "
+                "`docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`\n"
+                "> Edit the runtime source first, then refresh this mirror.\n"
+                "______________________________________________________________________\n\n"
+            )
+            updated = header + _strip_mirror_header(
+                canonical.read_text(encoding="utf-8")
+            ).lstrip("\n")
+            if updated != original:
+                if check_only:
+                    issues.append(f"{path.relative_to(root)}: would sync runtime mirror")
+                else:
+                    _atomic_write(path, updated)
+            continue
         if CANONICAL_SOURCES_PATTERN.search(original):
             continue
         match = re.search(r"^_{10,}\s*$", original, re.MULTILINE)
