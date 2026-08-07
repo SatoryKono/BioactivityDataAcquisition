@@ -58,7 +58,7 @@ BioETL содержит два согласованных diagram subtrees с р
 
 - Тема: `theme/mermaid-config.json` + `theme/custom.css` (строки 140–151)
 - Рендер: `render.sh` (SVG + PNG, 300 DPI)
-- Lint: `scripts/diagrams/lint_diagrams.py`
+- Lint: `scripts/diagrams/lint/lint_diagrams.py`
 - Шаблон: `diagrams/_template.mmd`
 - Политика LLM: `docs/02-architecture/diagrams/governance/policy.md` (POL-LLM-DIAGRAMS-001)
 
@@ -174,7 +174,7 @@ View-файлы с ≥3 типами связей и >5 соединениями
 
 ### D6: CI Validation
 
-`scripts/diagrams/lint_diagrams.py` проверяет оба каталога:
+`scripts/diagrams/lint/lint_diagrams.py` проверяет оба каталога:
 
 | Rule       | Description                                                                          |
 | ---------- | ------------------------------------------------------------------------------------ |
@@ -192,7 +192,7 @@ View-файлы с ≥3 типами связей и >5 соединениями
 - `*-full.mermaid` reference views исключены из `SIZE-001`/`SIZE-002`.
 - `00-legend*` исключены из `SIZE-001`/`SIZE-002`.
 
-Примечание по size-normalization (`scripts/diagrams/uniform_diagram_sizes.py`):
+Примечание по size-normalization (`scripts/diagrams/fix/uniform_diagram_sizes.py`):
 
 - `@uniform-group` задаёт групповую нормализацию высоты.
 - `@uniform-width global` (по умолчанию) использует общую ширину для всех групп.
@@ -202,7 +202,7 @@ Pre-commit hooks: `lint-diagrams`, `prune-orphan-diagram-nodes`.
 
 #### GRAPH-001 — Orphan Node Rule
 
-Реализован в `scripts/diagrams/prune_orphan_nodes.py`. Нода считается orphan, если:
+Реализован в `scripts/diagrams/fix/prune_orphan_nodes.py`. Нода считается orphan, если:
 
 - Определена (`NodeId["label"]` или bare `NodeId`) в diagram
 - Не участвует ни в одном edge / message в том же файле
@@ -217,9 +217,9 @@ Pre-commit hooks: `lint-diagrams`, `prune-orphan-diagram-nodes`.
 **Инструмент:**
 
 ```bash
-python scripts/diagrams/prune_orphan_nodes.py --check      # аудит
-python scripts/diagrams/prune_orphan_nodes.py --fix         # удалить garbage orphans
-python scripts/diagrams/prune_orphan_nodes.py --grandfather # exemption для всех текущих
+python scripts/diagrams/fix/prune_orphan_nodes.py --check      # аудит
+python scripts/diagrams/fix/prune_orphan_nodes.py --fix         # удалить garbage orphans
+python scripts/diagrams/fix/prune_orphan_nodes.py --grandfather # exemption для всех текущих
 ```
 
 ### D7: Tool Selection Criteria

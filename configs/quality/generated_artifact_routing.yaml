@@ -577,7 +577,7 @@ routes:
       and should not be treated as canonical process policy.
 
   - id: architecture-diagram-package-family-sources
-    generator: scripts/diagrams/generate_package_family_class_diagrams.py
+    generator: scripts/diagrams/render/generate_package_family_class_diagrams.py
     output_kind: curated_generated_docs
     commit_policy: tracked_curated_generated_doc
     outputs:
@@ -586,7 +586,7 @@ routes:
       source-tree introspection and must not be hand-edited for cleanup.
 
   - id: pipeline-dataflow-generated-docs
-    generator: scripts/diagrams/generate_pipeline_dataflows.py
+    generator: scripts/diagrams/render/generate_pipeline_dataflows.py
     output_kind: curated_generated_docs
     commit_policy: tracked_curated_generated_doc
     outputs:
@@ -607,7 +607,7 @@ routes:
       description cards, field inventory, and pipeline passport.
 
   - id: architecture-diagram-bundles
-    generator: scripts/diagrams/generate_all_bundles.py
+    generator: scripts/diagrams/render/generate_all_bundles.py
     output_kind: curated_generated_docs
     commit_policy: tracked_curated_generated_doc
     outputs:
@@ -615,7 +615,7 @@ routes:
     notes: Diagram bundle markdown is regenerated from curated diagram families.
 
   - id: architecture-diagram-description-indexes
-    generator: scripts/diagrams/generate_description_indexes.py
+    generator: scripts/diagrams/render/generate_description_indexes.py
     output_kind: curated_generated_docs
     commit_policy: tracked_curated_generated_doc
     outputs:

@@ -1,4 +1,4 @@
-"""Compatibility wrapper for ``scripts.diagrams.harmonize_link_styles``.
+"""Compatibility wrapper for ``scripts.diagrams.fix.harmonize_link_styles``.
 
 The canonical diagram codemod lives under ``scripts/diagrams``. This module is
 retained temporarily for existing direct invocations.

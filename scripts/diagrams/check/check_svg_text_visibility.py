@@ -19,16 +19,16 @@ SVG_NS = urlunsplit(("http", "www.w3.org", "/2000/svg", "", ""))
 NS = {"svg": SVG_NS}
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parents[1]
+REPO_ROOT = SCRIPT_DIR.parents[2]
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 try:
-    from .diagram_paths import VISUAL_SMOKE_MANIFEST
+    from scripts.diagrams.core.diagram_paths import VISUAL_SMOKE_MANIFEST
 except ImportError:  # pragma: no cover - direct script execution
-    from scripts.diagrams.diagram_paths import VISUAL_SMOKE_MANIFEST
+    from scripts.diagrams.core.diagram_paths import VISUAL_SMOKE_MANIFEST
 
 
 DEFAULT_MANIFEST = VISUAL_SMOKE_MANIFEST

@@ -19,19 +19,19 @@ Supports two diagram types:
 
 Usage:
     # Check all diagrams (exit 1 on drift)
-    python scripts/diagrams/uniform_diagram_sizes.py --check
+    python scripts/diagrams/fix/uniform_diagram_sizes.py --check
 
     # Fix all diagrams in-place
-    python scripts/diagrams/uniform_diagram_sizes.py --fix
+    python scripts/diagrams/fix/uniform_diagram_sizes.py --fix
 
     # Dry-run: show diff without writing
-    python scripts/diagrams/uniform_diagram_sizes.py --dry-run
+    python scripts/diagrams/fix/uniform_diagram_sizes.py --dry-run
 
     # Process specific files
-    python scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/.../01-domain-ports.mmd
+    python scripts/diagrams/fix/uniform_diagram_sizes.py --fix -f docs/.../01-domain-ports.mmd
 
     # Process specific directory
-    python scripts/diagrams/uniform_diagram_sizes.py --fix --dir docs/.../class-diagrams
+    python scripts/diagrams/fix/uniform_diagram_sizes.py --fix --dir docs/.../class-diagrams
 
 Groupwise sizing (add to .mmd file header):
     %% @uniform-group base    nodes=BaseHttpAdapter,BaseSyncAdapter
@@ -48,16 +48,16 @@ from dataclasses import dataclass
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 for candidate in (SCRIPT_DIR, REPO_ROOT):
     candidate_str = str(candidate)
     if candidate_str not in sys.path:
         sys.path.insert(0, candidate_str)
 
 try:
-    from .diagram_paths import source_dir
+    from scripts.diagrams.core.diagram_paths import source_dir
 except ImportError:  # pragma: no cover - direct script execution
-    from scripts.diagrams.diagram_paths import source_dir
+    from scripts.diagrams.core.diagram_paths import source_dir
 
 # ── Defaults ────────────────────────────────────────────────────────────────
 
@@ -94,7 +94,7 @@ _NBSP = "&nbsp;"
 
 
 def _ensure_repo_path(path: Path) -> Path:
-    repo_root = SCRIPT_DIR.parents[1].resolve()
+    repo_root = SCRIPT_DIR.parents[2].resolve()
     resolved_path = path.resolve()
     if repo_root != resolved_path and repo_root not in resolved_path.parents:
         raise ValueError(

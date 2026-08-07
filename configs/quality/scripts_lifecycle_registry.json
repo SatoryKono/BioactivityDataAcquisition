@@ -518,19 +518,19 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the deterministic Silver/Gold migration parity report helper consumed by reproducibility contract tests and CI artifacts; fold it into a broader governed QA parity runner only if filter-migration report surfaces consolidate."
     },
-    "scripts/diagrams/diagram_paths.py": {
+    "scripts/diagrams/core/diagram_paths.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared diagram path resolver during the diagrams layout migration; keep it non-active unless diagram path discovery becomes a standalone command surface."
     },
-    "scripts/diagrams/pipeline_dataflow_ir.py": {
+    "scripts/diagrams/render/pipeline_dataflow_ir.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as the IR builder for generated pipeline dataflow diagrams; keep it supporting unless promoted to a standalone scripts.diagrams command surface."
     },
-    "scripts/diagrams/pipeline_dataflow_render.py": {
+    "scripts/diagrams/render/pipeline_dataflow_render.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",

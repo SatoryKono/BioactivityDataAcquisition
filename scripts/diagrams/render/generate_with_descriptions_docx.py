@@ -18,14 +18,14 @@ def _resolve_repo_root() -> Path:
     for parent in current.parents:
         if (parent / "pyproject.toml").exists() and (parent / "scripts").exists():
             return parent
-    return current.parents[0]
+    return current.parents[1]
 
 
 REPO_ROOT = _resolve_repo_root()
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.diagrams.diagram_paths import bundle_markdown_path
+from scripts.diagrams.core.diagram_paths import bundle_markdown_path
 
 PAGEBREAK_LUA = REPO_ROOT / "scripts" / "diagrams" / "pagebreak.lua"
 DEFAULT_INPUTS = [

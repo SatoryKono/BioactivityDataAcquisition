@@ -10,9 +10,9 @@ Rewrites:
 - ``==>>`` -> ``-->>``
 
 Usage:
-    python scripts/diagrams/fix_mermaid_operators.py --check
-    python scripts/diagrams/fix_mermaid_operators.py --fix
-    python scripts/diagrams/fix_mermaid_operators.py --fix --dry-run
+    python scripts/diagrams/fix/fix_mermaid_operators.py --check
+    python scripts/diagrams/fix/fix_mermaid_operators.py --fix
+    python scripts/diagrams/fix/fix_mermaid_operators.py --fix --dry-run
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 SCRIPT_DIR = Path(__file__).resolve().parent
 for bootstrap_path in (REPO_ROOT, SCRIPT_DIR):
     bootstrap_path_str = str(bootstrap_path)
@@ -31,9 +31,9 @@ for bootstrap_path in (REPO_ROOT, SCRIPT_DIR):
         sys.path.insert(0, bootstrap_path_str)
 
 try:
-    from .diagram_paths import DIAGRAM_ROOT
+    from scripts.diagrams.core.diagram_paths import DIAGRAM_ROOT
 except ImportError:  # pragma: no cover - direct script execution
-    from scripts.diagrams.diagram_paths import DIAGRAM_ROOT
+    from scripts.diagrams.core.diagram_paths import DIAGRAM_ROOT
 
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 TARGET_DIAGRAM_TYPES = {"classdiagram", "sequencediagram"}

@@ -8,7 +8,7 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Tests for scripts/diagrams/add_svg_text_fallback.py fallback label generation."""
+"""Tests for scripts/diagrams/fix/add_svg_text_fallback.py fallback label generation."""
 
 from __future__ import annotations
 

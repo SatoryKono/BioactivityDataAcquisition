@@ -47,7 +47,7 @@ Use this matrix before moving or deleting diagram files.
 | Path / artifact family | Cleanup class | Source of truth | Rule |
 | --- | --- | --- | --- |
 | `architecture/*.mmd`, `class-diagrams/*.mmd`, `foundation/*.mmd` | canonical source | Mermaid source file | Keep unless source drift is proven and reviewed under ADR-040. |
-| `class-diagrams/90-pkg-*.mmd` | generated source | `scripts/diagrams/generate_package_family_class_diagrams.py` | Regenerate from source tree; do not hand-edit for cleanup. |
+| `class-diagrams/90-pkg-*.mmd` | generated source | `scripts/diagrams/render/generate_package_family_class_diagrams.py` | Regenerate from source tree; do not hand-edit for cleanup. |
 | `views/*.mermaid` | decomposed review view | focused view source | Keep as presentation-oriented slices; do not treat as replacement for canonical `.mmd`. |
 | `**/svg/**`, `**/png/**` | tracked rendered baseline | diagram renderer | Regenerate and commit with source changes; do not hand-edit without render/check evidence. |
 | `bundles/*.bundle.md` | generated bundle | diagram bundle generator | Regenerate from source families. |
@@ -205,7 +205,7 @@ In addition, the directory now publishes AST-derived supplemental package-family
 class diagrams for every `src/bioetl/**` family with more than three top-level
 classes that was not already covered by the curated set.
 
-- Supplemental generator: `scripts/diagrams/generate_package_family_class_diagrams.py`
+- Supplemental generator: `scripts/diagrams/render/generate_package_family_class_diagrams.py`
 - Generated source naming: `class-diagrams/90-pkg-*.mmd`
 - Current supplemental coverage is generated from the live source tree; review
   the current files in `class-diagrams/90-pkg-*.mmd` rather than relying on a
@@ -389,11 +389,11 @@ bash scripts/diagrams/run_diagram_docs_agent.sh
 
 Description PDF generation uses:
 
-- `scripts/diagrams/generate_with_descriptions_pdf.py`
-- `scripts/diagrams/generate_with_descriptions_docx.py`
+- `scripts/diagrams/render/generate_with_descriptions_pdf.py`
+- `scripts/diagrams/render/generate_with_descriptions_docx.py`
 - unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`
 - print CSS: `docs/02-architecture/diagrams/theme/with-descriptions-print.css`
-- post-check: `scripts/diagrams/check_pdf_image_bounds.py`
+- post-check: `scripts/diagrams/check/check_pdf_image_bounds.py`
 
 Description coverage policy:
 
@@ -463,7 +463,7 @@ bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer 
 .\.venv-win\Scripts\python.exe -m scripts.diagrams check-svg-text `
   --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
 
-.\.venv-win\Scripts\python.exe scripts/diagrams/check_diagram_visual_smoke.py `
+.\.venv-win\Scripts\python.exe scripts/diagrams/check/check_diagram_visual_smoke.py `
   --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt `
   --json-out reports/diagrams/diagram-visual-smoke.json
 ```
@@ -536,7 +536,7 @@ by VCS.
 ### Quality Budget
 
 Phase C adds explicit budget enforcement via
-`scripts/diagrams/enforce_diagram_quality_budget.py`.
+`scripts/diagrams/lint/enforce_diagram_quality_budget.py`.
 
 Current PR budget:
 
@@ -557,7 +557,7 @@ mkdir -p reports/diagrams
 uv run python -m scripts.diagrams check-quality-gates \
   --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt \
   --json-out reports/diagrams/diagram-quality-report.json
-uv run python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \
+uv run python scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json \
   > reports/diagrams/diagram-lint-report.json
 uv run python -m scripts.diagrams lint-budget \
   --mode pr \
@@ -580,14 +580,14 @@ ______________________________________________________________________
 
 ## Size Normalization
 
-Use `scripts/diagrams/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:
+Use `scripts/diagrams/fix/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:
 
 ```bash
 # Check normalization drift
-python3 scripts/diagrams/uniform_diagram_sizes.py --check
+python3 scripts/diagrams/fix/uniform_diagram_sizes.py --check
 
 # Fix specific files
-python3 scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd
+python3 scripts/diagrams/fix/uniform_diagram_sizes.py --fix -f docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd
 ```
 
 Grouped diagrams support width strategy override:
@@ -599,7 +599,7 @@ ______________________________________________________________________
 
 ## Validation Rules
 
-`scripts/diagrams/lint_diagrams.py` enforces:
+`scripts/diagrams/lint/lint_diagrams.py` enforces:
 
 | Rule       | Description                                                               | Severity |
 | ---------- | ------------------------------------------------------------------------- | -------- |
@@ -632,7 +632,7 @@ updating its metadata date; timestamp-only refreshes are not valid remediation.
 
 ### Orphan Node Detection (GRAPH-001)
 
-`scripts/diagrams/prune_orphan_nodes.py` detects nodes defined in a diagram but not
+`scripts/diagrams/fix/prune_orphan_nodes.py` detects nodes defined in a diagram but not
 participating in any edge or message.
 
 **Applies to:** `flowchart` / `graph` and `sequenceDiagram` only.
@@ -640,16 +640,16 @@ participating in any edge or message.
 
 ```bash
 # Report orphans (CI mode)
-python scripts/diagrams/prune_orphan_nodes.py --check
+python scripts/diagrams/fix/prune_orphan_nodes.py --check
 
 # Machine-readable output
-python scripts/diagrams/prune_orphan_nodes.py --check --json
+python scripts/diagrams/fix/prune_orphan_nodes.py --check --json
 
 # Remove confirmed garbage orphans (in-place)
-python scripts/diagrams/prune_orphan_nodes.py --fix
+python scripts/diagrams/fix/prune_orphan_nodes.py --fix
 
 # Exempt all current orphans (one-time grandfathering)
-python scripts/diagrams/prune_orphan_nodes.py --grandfather
+python scripts/diagrams/fix/prune_orphan_nodes.py --grandfather
 ```
 
 **To keep an intentional "documentation" node that has no edges:**

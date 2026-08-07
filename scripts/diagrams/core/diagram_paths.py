@@ -19,7 +19,7 @@ try:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_repo_root
 except ModuleNotFoundError:  # pragma: no cover - direct script execution fallback
     SCRIPT_DIR = Path(__file__).resolve().parent
-    REPO_CANDIDATE = SCRIPT_DIR.parents[1]
+    REPO_CANDIDATE = SCRIPT_DIR.parents[2]
     if str(REPO_CANDIDATE) not in sys.path:
         sys.path.insert(0, str(REPO_CANDIDATE))
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_repo_root

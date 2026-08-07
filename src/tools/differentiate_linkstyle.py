@@ -1,4 +1,4 @@
-"""Compatibility wrapper for ``scripts.diagrams.differentiate_linkstyle``.
+"""Compatibility wrapper for ``scripts.diagrams.fix.differentiate_linkstyle``.
 
 The canonical diagram codemod lives under ``scripts/diagrams``. This module is
 retained temporarily for existing direct invocations.

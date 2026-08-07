@@ -19,16 +19,16 @@ EXCEPTIONS (node never flagged as orphan)
 
 USAGE
     # Report only
-    python scripts/diagrams/prune_orphan_nodes.py --check
+    python scripts/diagrams/fix/prune_orphan_nodes.py --check
 
     # Report specific paths
-    python scripts/diagrams/prune_orphan_nodes.py --check path/to/file.mmd another/dir/
+    python scripts/diagrams/fix/prune_orphan_nodes.py --check path/to/file.mmd another/dir/
 
     # Machine-readable output for CI
-    python scripts/diagrams/prune_orphan_nodes.py --check --json
+    python scripts/diagrams/fix/prune_orphan_nodes.py --check --json
 
     # Remove confirmed orphans (writes files in-place)
-    python scripts/diagrams/prune_orphan_nodes.py --fix
+    python scripts/diagrams/fix/prune_orphan_nodes.py --fix
 
 ADR reference: ADR-040-diagram-governance.md (D6 CI Validation)
 """
@@ -44,7 +44,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 for candidate in (SCRIPT_DIR, REPO_ROOT):
     candidate_str = str(candidate)
     if candidate_str not in sys.path:
@@ -54,9 +54,9 @@ if isinstance(sys.stdout, io.TextIOWrapper):
     sys.stdout.reconfigure(encoding="utf-8")
 
 try:
-    from .diagram_paths import DIAGRAM_ROOT, source_dir
+    from scripts.diagrams.core.diagram_paths import DIAGRAM_ROOT, source_dir
 except ImportError:  # pragma: no cover - direct script execution
-    from scripts.diagrams.diagram_paths import DIAGRAM_ROOT, source_dir
+    from scripts.diagrams.core.diagram_paths import DIAGRAM_ROOT, source_dir
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 DEFAULT_DIRS = [
