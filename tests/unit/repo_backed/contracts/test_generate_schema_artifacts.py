@@ -45,6 +45,7 @@ def _load_module() -> ModuleType:
         Path(__file__).resolve().parents[4]
         / "scripts"
         / "schema"
+        / "generation"
         / "generate_schema_artifacts.py"
     )
     spec = importlib.util.spec_from_file_location(
@@ -65,6 +66,7 @@ def _load_contracts_module() -> ModuleType:
         Path(__file__).resolve().parents[4]
         / "scripts"
         / "schema"
+        / "generation"
         / "generate_contracts.py"
     )
     spec = importlib.util.spec_from_file_location(

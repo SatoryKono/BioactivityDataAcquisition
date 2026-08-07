@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from collections.abc import Callable, Mapping
 
 from bioetl.domain.composite.config_composite_protocols import (
@@ -129,6 +131,34 @@ def _build_enricher_configs[ConfigT](
     )
 
 
+
+def _optional_str_tuple_map(
+    raw: object,
+    *,
+    value_as_tuple: bool,
+) -> dict[str, object]:
+    """Parse optional mapping of str keys to str or tuple[str, ...]."""
+    if not isinstance(raw, dict):
+        return {}
+    result: dict[str, object] = {}
+    for key, value in raw.items():
+        key_s = str(key)
+        if value_as_tuple:
+            if isinstance(value, list | tuple):
+                result[key_s] = tuple(str(item) for item in value)
+            else:
+                result[key_s] = (str(value),)
+        else:
+            result[key_s] = str(value)
+    return result
+
+
+def _str_str_map(raw: object) -> dict[str, str]:
+    if not isinstance(raw, dict):
+        return {}
+    return {str(key): str(value) for key, value in raw.items()}
+
+
 def _build_merge_config[ConfigT](
     merge_data: dict[str, object],
     merge_cls: Callable[..., ConfigT],
@@ -157,30 +187,13 @@ def _build_merge_config[ConfigT](
             merge_data.get("sort_by_gold"), "merge.sort_by_gold"
         )
         or (),
-        field_priorities={
-            str(key): tuple(str(item) for item in value)
-            if isinstance(value, list | tuple)
-            else (str(value),)
-            for key, value in (
-                merge_data.get("field_priorities") or {}
-            ).items()  # type: ignore[union-attr]
-        }
-        if isinstance(merge_data.get("field_priorities"), dict)
-        else {},
-        normalization_compatibility_overrides={
-            str(key): str(value)
-            for key, value in (
-                merge_data.get("normalization_compatibility_overrides") or {}
-            ).items()  # type: ignore[union-attr]
-        }
-        if isinstance(merge_data.get("normalization_compatibility_overrides"), dict)
-        else {},
-        field_mappings={
-            str(key): str(value)
-            for key, value in (merge_data.get("field_mappings") or {}).items()  # type: ignore[union-attr]
-        }
-        if isinstance(merge_data.get("field_mappings"), dict)
-        else {},
+        field_priorities=_optional_str_tuple_map(  # type: ignore[arg-type]
+            merge_data.get("field_priorities"), value_as_tuple=True
+        ),  # type: ignore[arg-type]
+        normalization_compatibility_overrides=_str_str_map(
+            merge_data.get("normalization_compatibility_overrides")
+        ),
+        field_mappings=_str_str_map(merge_data.get("field_mappings")),
         column_groups=merge_data.get("column_groups") or (),
         exclude_fields=optional_str_tuple(
             merge_data.get("exclude_fields"), "merge.exclude_fields"
@@ -192,6 +205,57 @@ def _build_merge_config[ConfigT](
             "merge.preserve_all_sources",
         ),
     )
+
+
+
+def _dependency_entry(dependency: Any) -> dict[str, object]:
+    """Serialize one dependency node for composite_to_dict."""
+    entry: dict[str, object] = {
+        "pipeline": dependency.pipeline,
+        "join_keys": list(dependency.join_keys),
+        "required": dependency.required,
+        "timeout_seconds": dependency.timeout_seconds,
+        "silver_table": dependency.silver_table,
+        "key_source": dependency.key_source,
+        "filter_field": dependency.filter_field,
+        "key_filter": dependency.key_filter,
+    }
+    filter_fields = getattr(dependency, "filter_fields", None)
+    if filter_fields:
+        entry["filter_fields"] = list(filter_fields)
+    return entry
+
+
+
+def _enricher_entry(enricher: Any) -> dict[str, object]:
+    """Serialize one enricher node for composite_to_dict."""
+    entry: dict[str, object] = {
+        "pipeline": enricher.pipeline,
+        "join_keys": list(enricher.join_keys),
+        "required": enricher.required,
+        "timeout_seconds": enricher.timeout_seconds,
+        "filter_condition": enricher.filter_condition,
+        "silver_table": enricher.silver_table,
+        "limit": enricher.limit,
+        "fallback_strategy": enricher.fallback_strategy.value,
+        "cardinality": enricher.cardinality.value,
+    }
+    aggregation = getattr(enricher, "aggregation", None)
+    if aggregation is not None:
+        entry["aggregation"] = {
+            "group_by": aggregation.group_by,
+            "order_by": list(aggregation.order_by),
+            "fields": [
+                {
+                    "source_field": field.source_field,
+                    "agg_function": field.agg_function.value,
+                    "filter_condition": field.filter_condition,
+                    "output_field": field.output_field,
+                }
+                for field in aggregation.fields
+            ],
+        }
+    return entry
 
 
 def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
@@ -213,54 +277,11 @@ def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
             "limit": config.seed.limit,
         },
         "dependencies": [
-            {
-                "pipeline": dependency.pipeline,
-                "join_keys": list(dependency.join_keys),
-                "required": dependency.required,
-                "timeout_seconds": dependency.timeout_seconds,
-                "silver_table": dependency.silver_table,
-                "key_source": dependency.key_source,
-                "filter_field": dependency.filter_field,
-                "key_filter": dependency.key_filter,
-                **(
-                    {"filter_fields": list(dependency.filter_fields)}
-                    if dependency.filter_fields
-                    else {}
-                ),
-            }
+            _dependency_entry(dependency)
             for dependency in config.dependencies
         ],
         "enrichers": [
-            {
-                "pipeline": enricher.pipeline,
-                "join_keys": list(enricher.join_keys),
-                "required": enricher.required,
-                "timeout_seconds": enricher.timeout_seconds,
-                "filter_condition": enricher.filter_condition,
-                "silver_table": enricher.silver_table,
-                "limit": enricher.limit,
-                "fallback_strategy": enricher.fallback_strategy.value,
-                "cardinality": enricher.cardinality.value,
-                **(
-                    {
-                        "aggregation": {
-                            "group_by": enricher.aggregation.group_by,
-                            "order_by": list(enricher.aggregation.order_by),
-                            "fields": [
-                                {
-                                    "source_field": field.source_field,
-                                    "agg_function": field.agg_function.value,
-                                    "filter_condition": field.filter_condition,
-                                    "output_field": field.output_field,
-                                }
-                                for field in enricher.aggregation.fields
-                            ],
-                        }
-                    }
-                    if enricher.aggregation is not None
-                    else {}
-                ),
-            }
+            _enricher_entry(enricher)
             for enricher in config.enrichers
         ],
         "merge": {
@@ -458,45 +479,55 @@ def _build_lineage_config(lineage_data: dict[str, object]) -> LineageConfig:
     )
 
 
+def _field_comparison_specs(fields_raw: object) -> tuple[FieldComparisonSpec, ...]:
+    if not isinstance(fields_raw, list | tuple):
+        return ()
+    fields: list[FieldComparisonSpec] = []
+    for field in fields_raw:
+        if not isinstance(field, dict):
+            continue
+        method = field.get("method", "exact")
+        fields.append(
+            FieldComparisonSpec(
+                field_name=str(field.get("field_name") or ""),
+                method=(
+                    ComparisonMethod(str(method))
+                    if not isinstance(method, ComparisonMethod)
+                    else method
+                ),
+                threshold=float(field.get("threshold", 0.0)),
+            )
+        )
+    return tuple(fields)
+
+
+def _enricher_field_pairings(pairings_raw: object) -> tuple[EnricherFieldPairing, ...]:
+    if not isinstance(pairings_raw, list | tuple):
+        return ()
+    pairings: list[EnricherFieldPairing] = []
+    for raw in pairings_raw:
+        if not isinstance(raw, dict):
+            continue
+        pairings.append(
+            EnricherFieldPairing(
+                enricher_pipeline=str(raw.get("enricher_pipeline") or ""),
+                fields=_field_comparison_specs(raw.get("fields") or ()),
+            )
+        )
+    return tuple(pairings)
+
+
 def _build_cross_validation_config(
     cv_data: dict[str, object],
 ) -> CrossValidationConfig:
-    pairings_raw = cv_data.get("enricher_pairings") or ()
-    pairings: list[EnricherFieldPairing] = []
-    if isinstance(pairings_raw, list | tuple):
-        for raw in pairings_raw:
-            if not isinstance(raw, dict):
-                continue
-            fields_raw = raw.get("fields") or ()
-            fields: list[FieldComparisonSpec] = []
-            if isinstance(fields_raw, list | tuple):
-                for field in fields_raw:
-                    if not isinstance(field, dict):
-                        continue
-                    method = field.get("method", "exact")
-                    fields.append(
-                        FieldComparisonSpec(
-                            field_name=str(field.get("field_name") or ""),
-                            method=(
-                                ComparisonMethod(str(method))
-                                if not isinstance(method, ComparisonMethod)
-                                else method
-                            ),
-                            threshold=float(field.get("threshold", 0.0)),
-                        )
-                    )
-            pairings.append(
-                EnricherFieldPairing(
-                    enricher_pipeline=str(raw.get("enricher_pipeline") or ""),
-                    fields=tuple(fields),
-                )
-            )
     return CrossValidationConfig(
         enabled=bool(cv_data.get("enabled", True)),
-        warning_threshold=int(cv_data.get("warning_threshold", 1)),
-        error_threshold=int(cv_data.get("error_threshold", 2)),
-        quarantine_threshold=int(cv_data.get("quarantine_threshold", 2)),
-        fuzzy_threshold=float(cv_data.get("fuzzy_threshold", 0.8)),
-        numeric_tolerance=float(cv_data.get("numeric_tolerance", 0.10)),
-        enricher_pairings=tuple(pairings),
+        warning_threshold=int(str(cv_data.get("warning_threshold", 1))),
+        error_threshold=int(str(cv_data.get("error_threshold", 2))),
+        quarantine_threshold=int(str(cv_data.get("quarantine_threshold", 2))),
+        fuzzy_threshold=float(str(cv_data.get("fuzzy_threshold", 0.8))),
+        numeric_tolerance=float(str(cv_data.get("numeric_tolerance", 0.10))),
+        enricher_pairings=_enricher_field_pairings(
+            cv_data.get("enricher_pairings") or ()
+        ),
     )
