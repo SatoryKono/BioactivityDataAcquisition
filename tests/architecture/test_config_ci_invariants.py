@@ -58,10 +58,10 @@ from bioetl.infrastructure.config.contract_policy_loader import (
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config_from_root,
 )
-from scripts.schema import audit_effective_optionality as optionality_audit_script
-from scripts.schema import check_config_invariants as invariant_script
-from scripts.schema import check_required_filter_fields as required_filter_script
-from scripts.schema.validate_pipeline_configs import _canonical_script
+from scripts.schema.validation import audit_effective_optionality as optionality_audit_script
+from scripts.schema.validation import check_config_invariants as invariant_script
+from scripts.schema.validation import check_required_filter_fields as required_filter_script
+from scripts.schema.validation.validate_pipeline_configs import _canonical_script
 
 pytestmark = pytest.mark.architecture
 

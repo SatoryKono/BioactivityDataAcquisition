@@ -1023,7 +1023,7 @@ CURATED_EXECUTION_PATHS: tuple[dict[str, object], ...] = (
         "platform": "ci_uv",
         "summary": "Canonical config validation path for supported configs.",
         "gate": GATE_CONFIG_VALIDATION,
-        "script_path": "scripts/schema/validate_configs.py",
+        "script_path": "scripts/schema/validation/validate_pipeline_configs.py",
     },
     {
         "name": "bash scripts/engineering/dev/pretest_guardrails.sh",

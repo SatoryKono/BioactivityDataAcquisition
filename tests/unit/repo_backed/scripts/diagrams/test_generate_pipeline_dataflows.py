@@ -45,7 +45,7 @@ from scripts.diagrams.pipeline_dataflow_render import (
     DIAGRAM_FILENAMES,
     render_mermaid_views,
 )
-from scripts.schema.generate_unified_schema_map import build_unified_schema_rows
+from scripts.schema.analysis.generate_unified_schema_map import build_unified_schema_rows
 
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 

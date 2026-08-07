@@ -19,7 +19,7 @@ from typing import Any, cast
 
 import pytest
 
-from scripts.schema.generate_config_matrix import (
+from scripts.schema.analysis.generate_config_matrix import (
     _classify_parameter_key,
     _collect_family_configs,
 )

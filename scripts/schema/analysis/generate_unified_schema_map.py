@@ -23,7 +23,7 @@ from urllib.parse import urlunsplit
 
 import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 ENTITIES_DIR = PROJECT_ROOT / "configs" / "entities"
 SRC_DIR = PROJECT_ROOT / "src"
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "unified_schema_map.csv"

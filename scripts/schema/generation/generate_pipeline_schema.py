@@ -26,7 +26,7 @@ from bioetl.infrastructure.schemas.dq_config import DQConfigFile
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
-project_root = Path(__file__).resolve().parents[2]
+project_root = Path(__file__).resolve().parents[3]
 SCHEMA_DIR = project_root / "configs" / "_schema"
 
 SCHEMAS = {

@@ -129,7 +129,7 @@ sink:
 
 ```bash
 # Валидация всех конфигов
-python scripts/schema/validate_pipeline_configs.py
+python scripts/schema/validation/validate_pipeline_configs.py
 ```
 
 Schema проверяет:

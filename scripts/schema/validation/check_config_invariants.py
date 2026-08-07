@@ -46,7 +46,7 @@ from bioetl.infrastructure.config.config_ci_contract import (
     VALID_LOADING_STRATEGIES,
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 CONFIGS_DIR = PROJECT_ROOT / "configs"
 CONTRACTS_DIR = CONFIGS_DIR / "contracts"
 ENTITIES_DIR = CONFIGS_DIR / "entities"

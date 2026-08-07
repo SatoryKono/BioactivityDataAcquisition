@@ -184,7 +184,7 @@ routes:
     notes: Generated dictionaries are curated docs report artifacts.
 
   - id: schema-generated-source
-    generator: scripts/schema/generate_schema_artifacts.py
+    generator: scripts/schema/generation/generate_schema_artifacts.py
     output_kind: generated_source
     commit_policy: tracked_generated_source
     outputs:
@@ -282,7 +282,7 @@ routes:
       and should not be treated as canonical process policy.
 
   - id: unified-schema-quality-report
-    generator: scripts/schema/generate_unified_schema_map.py
+    generator: scripts/schema/analysis/generate_unified_schema_map.py
     output_kind: working_report
     commit_policy: working_output
     outputs:
@@ -290,7 +290,7 @@ routes:
     notes: Cross-layer schema inventory is a quality report artifact.
 
   - id: field-level-diagnostics-quality-report
-    generator: scripts/schema/generate_field_level_diagnostics.py
+    generator: scripts/schema/analysis/generate_field_level_diagnostics.py
     output_kind: working_report
     commit_policy: working_output
     outputs:
@@ -650,7 +650,7 @@ routes:
       ADR files and must not be hand-edited.
 
   - id: config-comparison-matrix-generated-doc
-    generator: scripts/schema/generate_config_matrix.py
+    generator: scripts/schema/analysis/generate_config_matrix.py
     output_kind: curated_generated_docs
     commit_policy: tracked_curated_generated_doc
     outputs:

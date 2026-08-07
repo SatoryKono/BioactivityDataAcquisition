@@ -6,7 +6,7 @@ Checks:
                must be listed in filters.silver_filters.required_fields.
 
 Usage:
-    python scripts/schema/check_required_filter_fields.py [--verbose]
+    python scripts/schema/validation/check_required_filter_fields.py [--verbose]
 
 Exit codes:
     0 - All configs pass
@@ -22,7 +22,7 @@ from typing import Any
 
 import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 CONFIGS_DIR = PROJECT_ROOT / "configs"
 ENTITIES_DIR = CONFIGS_DIR / "entities"
 

@@ -12438,13 +12438,13 @@
           "text": "from scripts.engineering.qa.config_surface_governance import ("
         },
         {
-          "path": "scripts/schema/generate_config_matrix.py",
+          "path": "scripts/schema/analysis/generate_config_matrix.py",
           "line": 20,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.config_surface_governance import is_sanctioned_partial_key"
         },
         {
-          "path": "scripts/schema/generate_config_matrix.py",
+          "path": "scripts/schema/analysis/generate_config_matrix.py",
           "line": 719,
           "source_group": "scripts",
           "text": "Path(\"scripts/engineering/qa/config_surface_governance.py\"),"
@@ -20496,7 +20496,7 @@
       ]
     },
     {
-      "path": "scripts/schema/audit_effective_optionality.py",
+      "path": "scripts/schema/validation/audit_effective_optionality.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -20506,13 +20506,13 @@
           "path": "scripts/schema/README.md",
           "line": 26,
           "source_group": "scripts",
-          "text": "| `audit-optionality`          | `scripts/schema/audit_effective_optionality.py`                        | Audit or validate `effective_optional_v1` derived from current config surface          |"
+          "text": "| `audit-optionality`          | `scripts/schema/validation/audit_effective_optionality.py`                        | Audit or validate `effective_optional_v1` derived from current config surface          |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 33,
           "source_group": "scripts",
-          "text": "\"audit-optionality\": \"scripts.schema.audit_effective_optionality\","
+          "text": "\"audit-optionality\": \"scripts.schema.validation.audit_effective_optionality\","
         },
         {
           "path": "tests/architecture/test_config_ci_invariants.py",
@@ -20523,7 +20523,7 @@
       ]
     },
     {
-      "path": "scripts/schema/check_config_invariants.py",
+      "path": "scripts/schema/validation/check_config_invariants.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -20533,25 +20533,25 @@
           "path": "docs/02-architecture/decisions/ADR-034-schema-domain-pairs.md",
           "line": 113,
           "source_group": "docs",
-          "text": "- [Config invariants checker](../../../scripts/schema/check_config_invariants.py)"
+          "text": "- [Config invariants checker](../../../scripts/schema/validation/check_config_invariants.py)"
         },
         {
           "path": "scripts/schema/README.md",
           "line": 15,
           "source_group": "scripts",
-          "text": "- `scripts/schema/check_config_invariants.py` and [test_config_ci_invariants.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_config_ci_invariants.py) import the sam"
+          "text": "- `scripts/schema/validation/check_config_invariants.py` and [test_config_ci_invariants.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_config_ci_invariants.py) import the sam"
         },
         {
           "path": "scripts/schema/README.md",
           "line": 24,
           "source_group": "scripts",
-          "text": "| `check-invariants`           | `scripts/schema/check_config_invariants.py`                            | Validate config CI invariants and YAML parse safety (naming, schemas, auth, keys)      |"
+          "text": "| `check-invariants`           | `scripts/schema/validation/check_config_invariants.py`                            | Validate config CI invariants and YAML parse safety (naming, schemas, auth, keys)      |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 31,
           "source_group": "scripts",
-          "text": "\"check-invariants\": \"scripts.schema.check_config_invariants\","
+          "text": "\"check-invariants\": \"scripts.schema.validation.check_config_invariants\","
         },
         {
           "path": "tests/architecture/test_config_ci_invariants.py",
@@ -20562,7 +20562,7 @@
       ]
     },
     {
-      "path": "scripts/schema/check_required_filter_fields.py",
+      "path": "scripts/schema/validation/check_required_filter_fields.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -20572,13 +20572,13 @@
           "path": "scripts/schema/README.md",
           "line": 25,
           "source_group": "scripts",
-          "text": "| `check-required-fields`      | `scripts/schema/check_required_filter_fields.py`                       | Validate `silver_filters.required_fields` cover explicit YAML required/not-null fields |"
+          "text": "| `check-required-fields`      | `scripts/schema/validation/check_required_filter_fields.py`                       | Validate `silver_filters.required_fields` cover explicit YAML required/not-null fields |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 32,
           "source_group": "scripts",
-          "text": "\"check-required-fields\": \"scripts.schema.check_required_filter_fields\","
+          "text": "\"check-required-fields\": \"scripts.schema.validation.check_required_filter_fields\","
         },
         {
           "path": "tests/architecture/test_config_ci_invariants.py",
@@ -20589,7 +20589,7 @@
       ]
     },
     {
-      "path": "scripts/schema/config_gap_analysis.py",
+      "path": "scripts/schema/analysis/config_gap_analysis.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -20611,30 +20611,30 @@
           "path": "docs/00-project/ai/memory/memory-py-config-bot.md",
           "line": 68,
           "source_group": "docs",
-          "text": "| ADR-025 | Pipeline Config Unification (required fields)           | `python scripts/schema/config_gap_analysis.py -v`                                                        |"
+          "text": "| ADR-025 | Pipeline Config Unification (required fields)           | `python scripts/schema/analysis/config_gap_analysis.py -v`                                                        |"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
           "line": 227,
           "source_group": "docs",
-          "text": "| Config gap analysis | `scripts/schema/config_gap_analysis.py` |"
+          "text": "| Config gap analysis | `scripts/schema/analysis/config_gap_analysis.py` |"
         },
         {
           "path": "scripts/schema/README.md",
           "line": 38,
           "source_group": "scripts",
-          "text": "| `analyze-gaps`               | `scripts/schema/config_gap_analysis.py`                                | Config gap analysis between configs and code                                           |"
+          "text": "| `analyze-gaps`               | `scripts/schema/analysis/config_gap_analysis.py`                                | Config gap analysis between configs and code                                           |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 45,
           "source_group": "scripts",
-          "text": "\"analyze-gaps\": \"scripts.schema.config_gap_analysis\","
+          "text": "\"analyze-gaps\": \"scripts.schema.analysis.config_gap_analysis\","
         }
       ]
     },
     {
-      "path": "scripts/schema/generate_config_matrix.py",
+      "path": "scripts/schema/analysis/generate_config_matrix.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -20644,19 +20644,19 @@
           "path": "scripts/engineering/qa/report_config_surface_backlog.py",
           "line": 22,
           "source_group": "scripts",
-          "text": "from scripts.schema.generate_config_matrix import ("
+          "text": "from scripts.schema.analysis.generate_config_matrix import ("
         },
         {
           "path": "scripts/schema/README.md",
           "line": 32,
           "source_group": "scripts",
-          "text": "| `generate-config-matrix`     | `scripts/schema/generate_config_matrix.py`                             | Canonical entity/composite config comparison matrix generator                          |"
+          "text": "| `generate-config-matrix`     | `scripts/schema/analysis/generate_config_matrix.py`                             | Canonical entity/composite config comparison matrix generator                          |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 39,
           "source_group": "scripts",
-          "text": "\"generate-config-matrix\": \"scripts.schema.generate_config_matrix\","
+          "text": "\"generate-config-matrix\": \"scripts.schema.analysis.generate_config_matrix\","
         },
         {
           "path": "tests/architecture/test_config_discrepancy_metrics_ratchets.py",
@@ -20668,30 +20668,30 @@
           "path": "tests/architecture/test_config_discrepancy_metrics_ratchets.py",
           "line": 23,
           "source_group": "tests",
-          "text": "from scripts.schema.generate_config_matrix import ("
+          "text": "from scripts.schema.analysis.generate_config_matrix import ("
         },
         {
           "path": "tests/architecture/test_config_discrepancy_report_drift.py",
           "line": 17,
           "source_group": "tests",
-          "text": "from scripts.schema.generate_config_matrix import _render_parameter_matrix, main"
+          "text": "from scripts.schema.analysis.generate_config_matrix import _render_parameter_matrix, main"
         },
         {
           "path": "tests/architecture/test_config_surface_entity_residual_plateau.py",
           "line": 28,
           "source_group": "tests",
-          "text": "from scripts.schema.generate_config_matrix import ("
+          "text": "from scripts.schema.analysis.generate_config_matrix import ("
         },
         {
           "path": "tests/architecture/test_config_taxonomy_review.py",
           "line": 22,
           "source_group": "tests",
-          "text": "from scripts.schema.generate_config_matrix import ("
+          "text": "from scripts.schema.analysis.generate_config_matrix import ("
         }
       ]
     },
     {
-      "path": "scripts/schema/generate_contracts.py",
+      "path": "scripts/schema/generation/generate_contracts.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -20701,25 +20701,25 @@
           "path": ".github/workflows/schema-governance.yml",
           "line": 12,
           "source_group": "ci",
-          "text": "- 'scripts/schema/generate_contracts.py'"
+          "text": "- 'scripts/schema/generation/generate_contracts.py'"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
           "line": 26,
           "source_group": "ci",
-          "text": "- 'scripts/schema/generate_contracts.py'"
+          "text": "- 'scripts/schema/generation/generate_contracts.py'"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-037-canonical-schema-generation.md",
           "line": 45,
           "source_group": "docs",
-          "text": "(`src/tools/scripts/schema/generate_contracts.py`),"
+          "text": "(`src/tools/scripts/schema/generation/generate_contracts.py`),"
         },
         {
           "path": "docs/04-reference/contracts/gold-schemas.md",
           "line": 21,
           "source_group": "docs",
-          "text": "> кодовых контрактов скриптом `scripts/schema/generate_contracts.py`."
+          "text": "> кодовых контрактов скриптом `scripts/schema/generation/generate_contracts.py`."
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
@@ -20731,13 +20731,13 @@
           "path": "scripts/schema/README.md",
           "line": 31,
           "source_group": "scripts",
-          "text": "| `generate-contracts`         | `scripts/schema/generate_contracts.py`                                 | Generate contracts                                                                     |"
+          "text": "| `generate-contracts`         | `scripts/schema/generation/generate_contracts.py`                                 | Generate contracts                                                                     |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 38,
           "source_group": "scripts",
-          "text": "\"generate-contracts\": \"scripts.schema.generate_contracts\","
+          "text": "\"generate-contracts\": \"scripts.schema.generation.generate_contracts\","
         },
         {
           "path": "tests/unit/contracts/test_contracts_exports.py",
@@ -20748,7 +20748,7 @@
       ]
     },
     {
-      "path": "scripts/schema/generate_field_level_diagnostics.py",
+      "path": "scripts/schema/analysis/generate_field_level_diagnostics.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -20758,24 +20758,24 @@
           "path": "scripts/schema/README.md",
           "line": 34,
           "source_group": "scripts",
-          "text": "| `generate-field-diagnostics` | `scripts/schema/generate_field_level_diagnostics.py`                   | Generate field-level schema drift diagnostics CSV                                      |"
+          "text": "| `generate-field-diagnostics` | `scripts/schema/analysis/generate_field_level_diagnostics.py`                   | Generate field-level schema drift diagnostics CSV                                      |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 41,
           "source_group": "scripts",
-          "text": "\"generate-field-diagnostics\": \"scripts.schema.generate_field_level_diagnostics\","
+          "text": "\"generate-field-diagnostics\": \"scripts.schema.analysis.generate_field_level_diagnostics\","
         },
         {
-          "path": "scripts/schema/generate_field_transformation_spec.py",
+          "path": "scripts/schema/analysis/generate_field_transformation_spec.py",
           "line": 15,
           "source_group": "scripts",
-          "text": "from scripts.schema.generate_field_level_diagnostics import build_field_level_rows"
+          "text": "from scripts.schema.analysis.generate_field_level_diagnostics import build_field_level_rows"
         }
       ]
     },
     {
-      "path": "scripts/schema/generate_field_transformation_spec.py",
+      "path": "scripts/schema/analysis/generate_field_transformation_spec.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -20785,18 +20785,18 @@
           "path": "scripts/schema/README.md",
           "line": 35,
           "source_group": "scripts",
-          "text": "| `generate-field-spec`        | `scripts/schema/generate_field_transformation_spec.py`                 | Generate deterministic per-field transformation specification CSV                      |"
+          "text": "| `generate-field-spec`        | `scripts/schema/analysis/generate_field_transformation_spec.py`                 | Generate deterministic per-field transformation specification CSV                      |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 42,
           "source_group": "scripts",
-          "text": "\"generate-field-spec\": \"scripts.schema.generate_field_transformation_spec\","
+          "text": "\"generate-field-spec\": \"scripts.schema.analysis.generate_field_transformation_spec\","
         }
       ]
     },
     {
-      "path": "scripts/schema/generate_pipeline_schema.py",
+      "path": "scripts/schema/generation/generate_pipeline_schema.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -20806,18 +20806,18 @@
           "path": "scripts/schema/README.md",
           "line": 28,
           "source_group": "scripts",
-          "text": "| `generate-pipeline`          | `scripts/schema/generate_pipeline_schema.py`                           | Generate pipeline JSON schema                                                          |"
+          "text": "| `generate-pipeline`          | `scripts/schema/generation/generate_pipeline_schema.py`                           | Generate pipeline JSON schema                                                          |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 35,
           "source_group": "scripts",
-          "text": "\"generate-pipeline\": \"scripts.schema.generate_pipeline_schema\","
+          "text": "\"generate-pipeline\": \"scripts.schema.generation.generate_pipeline_schema\","
         }
       ]
     },
     {
-      "path": "scripts/schema/generate_protein_class_l1_target_type_artifacts.py",
+      "path": "scripts/schema/generation/generate_protein_class_l1_target_type_artifacts.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -20833,7 +20833,7 @@
           "path": "tests/architecture/test_protein_class_target_type_codegen_contract.py",
           "line": 68,
           "source_group": "tests",
-          "text": "\"Run: python scripts/schema/generate_protein_class_l1_target_type_artifacts.py\""
+          "text": "\"Run: python scripts/schema/generation/generate_protein_class_l1_target_type_artifacts.py\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -20842,7 +20842,7 @@
       "next_step": "Retain as the deterministic protein-class L1 target-type artifact generator consumed by generated-artifact drift tests; promote to an active scripts.schema command only if it becomes a documented public schema generation surface."
     },
     {
-      "path": "scripts/schema/generate_publication_type_classification_artifacts.py",
+      "path": "scripts/schema/generation/generate_publication_type_classification_artifacts.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -20852,13 +20852,13 @@
           "path": "scripts/schema/README.md",
           "line": 30,
           "source_group": "scripts",
-          "text": "| `generate-pubtype`           | `scripts/schema/generate_publication_type_classification_artifacts.py` | Generate publication type classification artifacts                                     |"
+          "text": "| `generate-pubtype`           | `scripts/schema/generation/generate_publication_type_classification_artifacts.py` | Generate publication type classification artifacts                                     |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 37,
           "source_group": "scripts",
-          "text": "\"generate-pubtype\": \"scripts.schema.generate_publication_type_classification_artifacts\","
+          "text": "\"generate-pubtype\": \"scripts.schema.generation.generate_publication_type_classification_artifacts\","
         },
         {
           "path": "tests/architecture/test_publication_type_codegen_contract.py",
@@ -20870,12 +20870,12 @@
           "path": "tests/architecture/test_publication_type_codegen_contract.py",
           "line": 75,
           "source_group": "tests",
-          "text": "\"Run: python scripts/schema/generate_publication_type_classification_artifacts.py\""
+          "text": "\"Run: python scripts/schema/generation/generate_publication_type_classification_artifacts.py\""
         }
       ]
     },
     {
-      "path": "scripts/schema/generate_schema_artifacts.py",
+      "path": "scripts/schema/generation/generate_schema_artifacts.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -20885,37 +20885,37 @@
           "path": ".github/workflows/schema-governance.yml",
           "line": 13,
           "source_group": "ci",
-          "text": "- 'scripts/schema/generate_schema_artifacts.py'"
+          "text": "- 'scripts/schema/generation/generate_schema_artifacts.py'"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
           "line": 27,
           "source_group": "ci",
-          "text": "- 'scripts/schema/generate_schema_artifacts.py'"
+          "text": "- 'scripts/schema/generation/generate_schema_artifacts.py'"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-037-canonical-schema-generation.md",
           "line": 39,
           "source_group": "docs",
-          "text": "На этой основе вводится единый генератор `scripts/schema/generate_schema_artifacts.py`,"
+          "text": "На этой основе вводится единый генератор `scripts/schema/generation/generate_schema_artifacts.py`,"
         },
         {
           "path": "scripts/schema/README.md",
           "line": 29,
           "source_group": "scripts",
-          "text": "| `generate-artifacts`         | `scripts/schema/generate_schema_artifacts.py`                          | Generate schema artifacts                                                              |"
+          "text": "| `generate-artifacts`         | `scripts/schema/generation/generate_schema_artifacts.py`                          | Generate schema artifacts                                                              |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 36,
           "source_group": "scripts",
-          "text": "\"generate-artifacts\": \"scripts.schema.generate_schema_artifacts\","
+          "text": "\"generate-artifacts\": \"scripts.schema.generation.generate_schema_artifacts\","
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
           "line": 149,
           "source_group": "tests",
-          "text": "\"scripts/schema/generate_schema_artifacts.py\","
+          "text": "\"scripts/schema/generation/generate_schema_artifacts.py\","
         },
         {
           "path": "tests/unit/repo_backed/contracts/test_generate_schema_artifacts.py",
@@ -20926,7 +20926,7 @@
       ]
     },
     {
-      "path": "scripts/schema/generate_typed_arrow_schema_sources.py",
+      "path": "scripts/schema/generation/generate_typed_arrow_schema_sources.py",
       "type": "py",
       "status": "temporary_diagnostic",
       "agent_usage": [],
@@ -20936,7 +20936,7 @@
           "path": "docs/00-project/ai/agents/guides/BASEDPRIGHT_PROJECT_DIAGNOSTICS.md",
           "line": 75,
           "source_group": "docs",
-          "text": "Optional rewrite generator: `scripts/schema/generate_typed_arrow_schema_sources.py`."
+          "text": "Optional rewrite generator: `scripts/schema/generation/generate_typed_arrow_schema_sources.py`."
         }
       ],
       "owner": "@bioetl-platform",
@@ -20945,7 +20945,7 @@
       "next_step": "Retain only for the bounded PD7-4 typed Arrow schema migration and its check mode; consolidate into the canonical schema command surface or retire it after the migration closes."
     },
     {
-      "path": "scripts/schema/generate_unified_schema_map.py",
+      "path": "scripts/schema/analysis/generate_unified_schema_map.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -20955,54 +20955,54 @@
           "path": ".github/workflows/docs.yml",
           "line": 27,
           "source_group": "ci",
-          "text": "- 'scripts/schema/generate_unified_schema_map.py'"
+          "text": "- 'scripts/schema/analysis/generate_unified_schema_map.py'"
         },
         {
           "path": ".github/workflows/docs.yml",
           "line": 73,
           "source_group": "ci",
-          "text": "- 'scripts/schema/generate_unified_schema_map.py'"
+          "text": "- 'scripts/schema/analysis/generate_unified_schema_map.py'"
         },
         {
           "path": "scripts/diagrams/pipeline_dataflow_ir.py",
           "line": 21,
           "source_group": "scripts",
-          "text": "from scripts.schema.generate_unified_schema_map import build_unified_schema_row"
+          "text": "from scripts.schema.analysis.generate_unified_schema_map import build_unified_schema_row"
         },
         {
           "path": "scripts/schema/README.md",
           "line": 33,
           "source_group": "scripts",
-          "text": "| `generate-unified-map`       | `scripts/schema/generate_unified_schema_map.py`                        | Generate unified Bronze→Silver→Gold schema map CSV                                     |"
+          "text": "| `generate-unified-map`       | `scripts/schema/analysis/generate_unified_schema_map.py`                        | Generate unified Bronze→Silver→Gold schema map CSV                                     |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 40,
           "source_group": "scripts",
-          "text": "\"generate-unified-map\": \"scripts.schema.generate_unified_schema_map\","
+          "text": "\"generate-unified-map\": \"scripts.schema.analysis.generate_unified_schema_map\","
         },
         {
-          "path": "scripts/schema/generate_field_level_diagnostics.py",
+          "path": "scripts/schema/analysis/generate_field_level_diagnostics.py",
           "line": 14,
           "source_group": "scripts",
-          "text": "from scripts.schema.generate_unified_schema_map import ("
+          "text": "from scripts.schema.analysis.generate_unified_schema_map import ("
         },
         {
-          "path": "scripts/schema/generate_field_transformation_spec.py",
+          "path": "scripts/schema/analysis/generate_field_transformation_spec.py",
           "line": 16,
           "source_group": "scripts",
-          "text": "from scripts.schema.generate_unified_schema_map import build_unified_schema_rows"
+          "text": "from scripts.schema.analysis.generate_unified_schema_map import build_unified_schema_rows"
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
           "line": 48,
           "source_group": "tests",
-          "text": "from scripts.schema.generate_unified_schema_map import build_unified_schema_rows"
+          "text": "from scripts.schema.analysis.generate_unified_schema_map import build_unified_schema_rows"
         }
       ]
     },
     {
-      "path": "scripts/schema/lint_config_paths.py",
+      "path": "scripts/schema/validation/lint_config_paths.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -21012,13 +21012,13 @@
           "path": "scripts/schema/README.md",
           "line": 27,
           "source_group": "scripts",
-          "text": "| `check-config-paths`         | `scripts/schema/lint_config_paths.py`                                  | Check for legacy dq/filter config path references                                      |"
+          "text": "| `check-config-paths`         | `scripts/schema/validation/lint_config_paths.py`                                  | Check for legacy dq/filter config path references                                      |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 34,
           "source_group": "scripts",
-          "text": "\"check-config-paths\": \"scripts.schema.lint_config_paths\","
+          "text": "\"check-config-paths\": \"scripts.schema.validation.lint_config_paths\","
         },
         {
           "path": "tests/unit/scripts/test_lint_config_paths.py",
@@ -21029,7 +21029,7 @@
       ]
     },
     {
-      "path": "scripts/schema/validate_pipeline_configs.py",
+      "path": "scripts/schema/validation/validate_pipeline_configs.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -21051,13 +21051,13 @@
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-2.py",
           "line": 5,
           "source_group": "docs",
-          "text": "- scripts/schema/validate_pipeline_configs.py"
+          "text": "- scripts/schema/validation/validate_pipeline_configs.py"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-025-pipeline-config-unification.md",
           "line": 132,
           "source_group": "docs",
-          "text": "python scripts/schema/validate_pipeline_configs.py"
+          "text": "python scripts/schema/validation/validate_pipeline_configs.py"
         },
         {
           "path": "pyproject.toml",
@@ -21069,24 +21069,24 @@
           "path": "scripts/schema/README.md",
           "line": 17,
           "source_group": "scripts",
-          "text": "- `scripts/schema/validate_pipeline_configs.py` is the canonical validator for `validate-configs`."
+          "text": "- `scripts/schema/validation/validate_pipeline_configs.py` is the canonical validator for `validate-configs`."
         },
         {
           "path": "scripts/schema/README.md",
           "line": 18,
           "source_group": "scripts",
-          "text": "- `docs/00-project/ai/agents/scripts/py-config-bot-2.py` is a compatibility wrapper only; runtime behavior must be updated in `scripts/schema/validate_pipeline_configs.py` first."
+          "text": "- `docs/00-project/ai/agents/scripts/py-config-bot-2.py` is a compatibility wrapper only; runtime behavior must be updated in `scripts/schema/validation/validate_pipeline_configs.py` first."
         },
         {
           "path": "scripts/schema/README.md",
           "line": 36,
           "source_group": "scripts",
-          "text": "| `validate-configs`           | `scripts/schema/validate_pipeline_configs.py`                          | Validate unified pipeline YAML configs against JSON Schema                             |"
+          "text": "| `validate-configs`           | `scripts/schema/validation/validate_pipeline_configs.py`                          | Validate unified pipeline YAML configs against JSON Schema                             |"
         }
       ]
     },
     {
-      "path": "scripts/schema/validate_unified_configs.py",
+      "path": "scripts/schema/validation/validate_unified_configs.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -21096,13 +21096,13 @@
           "path": "scripts/schema/README.md",
           "line": 37,
           "source_group": "scripts",
-          "text": "| `validate-unified-configs`   | `scripts/schema/validate_unified_configs.py`                           | Canonical structural unified-config validator retained for compatibility use cases     |"
+          "text": "| `validate-unified-configs`   | `scripts/schema/validation/validate_unified_configs.py`                           | Canonical structural unified-config validator retained for compatibility use cases     |"
         },
         {
           "path": "scripts/schema/__main__.py",
           "line": 44,
           "source_group": "scripts",
-          "text": "\"validate-unified-configs\": \"scripts.schema.validate_unified_configs\","
+          "text": "\"validate-unified-configs\": \"scripts.schema.validation.validate_unified_configs\","
         }
       ]
     },
