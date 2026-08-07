@@ -1,0 +1,182 @@
+[
+  {
+    "number": 8096,
+    "severity": "major",
+    "path": "src/bioetl/domain/value_objects/activity.py",
+    "claim": "In @src/bioetl/domain/value_objects/activity.py around lines 5 - 13, Add the required public-contract release artifacts for the new exports in the activity module’s __all__: apply the appropriate version bump, add an ADR reference, document migration notes, and provide a rollback procedure. Ensure these artifacts explicitly cover the newly exposed ActivityValue, ConfidenceScore, and RelationOperator API."
+  },
+  {
+    "number": 8097,
+    "severity": "minor",
+    "path": "src/bioetl/domain/value_objects/activity_confidence.py",
+    "claim": "In @src/bioetl/domain/value_objects/activity_confidence.py around lines 18 - 23, Update the validation in ConfidenceScore so boolean values are rejected explicitly rather than accepted as integers; preserve integer acceptance only for non-boolean values and retain the existing type and range error behavior for invalid inputs."
+  },
+  {
+    "number": 8098,
+    "severity": "major",
+    "path": "src/bioetl/domain/value_objects/inchi.py",
+    "claim": "In @src/bioetl/domain/value_objects/inchi.py around lines 48 - 51, Update the suffix validation in the InChI value object’s _validate() method so the normalized value must contain a version and layer after _PREFIX; reject the bare “InChI=” form with ValueError before returning the normalized identifier."
+  },
+  {
+    "number": 8099,
+    "severity": "major",
+    "path": "src/bioetl/domain/value_objects/_molecular_weight.py",
+    "claim": "In @src/bioetl/domain/value_objects/_molecular_weight.py around lines 102 - 112, Update the molecular-weight validation flow in the value-object constructor or validation method to round the parsed value using molecular_weight_precision before applying the exclusive min_molecular_weight and max_molecular_weight check. Ensure values that round to either boundary are rejected, then return the validated rounded value, and add tests covering both minimum and maximum boundary cases."
+  },
+  {
+    "number": 8100,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/publication_field_group_types.py",
+    "claim": "In @src/bioetl/domain/value_objects/publication_field_group_types.py around lines 45 - 62, Update the from_string classmethod docstring to add a Raises section documenting ValueError for unknown or invalid group values, while preserving the existing parsing and error behavior."
+  },
+  {
+    "number": 8101,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/dq_report_results_core.py",
+    "claim": "In @src/bioetl/domain/value_objects/dq_report_results_core.py around lines 151 - 168, Update SchemaDriftResult.__post_init__ so type_changes is deeply immutable: convert each contained mapping to an immutable representation, not only the outer list to a tuple. Preserve the existing type-change data and ensure SchemaDriftResult remains hashable and its entries cannot be modified after construction."
+  },
+  {
+    "number": 8102,
+    "severity": "major",
+    "path": "src/bioetl/domain/value_objects/dq_report_builder.py",
+    "claim": "In @src/bioetl/domain/value_objects/dq_report_builder.py around lines 55 - 67, Update the __post_init__ validation hooks for BronzeDQReport, SilverDQReport, and GoldDQReport to reject naive timestamp values and require an explicitly timezone-aware UTC datetime. Preserve the existing layer validation and raise a clear ValueError when timestamp.tzinfo is missing or does not represent UTC."
+  },
+  {
+    "number": 8103,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/base.py",
+    "claim": "In @src/bioetl/domain/value_objects/base.py around lines 97 - 111, Update the Value Object immutability logic in __setattr__ to use an explicit _initialized state rather than checking for _value, and set that state only after subclass initialization is complete. Preserve normal attribute assignment before initialization while raising the existing immutability error for assignments afterward; update __delattr__ consistently if needed."
+  },
+  {
+    "number": 8104,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/_publication_year.py",
+    "claim": "In @src/bioetl/domain/value_objects/_publication_year.py around lines 216 - 224, Align PublicationYear.__eq__ with the ValueObject equality contract by requiring the other operand to have the same concrete class as self, or explicitly document that PublicationYear is not intended for subclassing if that is the established design. Preserve the existing value-only comparison that ignores _config, and ensure __hash__ remains consistent with the chosen equality behavior."
+  },
+  {
+    "number": 8105,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/publications.py",
+    "claim": "In @src/bioetl/domain/value_objects/publications.py around lines 181 - 199, Update PubMedId.from_raw to pass the non-None, non-empty raw value directly to cls instead of converting it with str(raw), allowing PubMedId._coerce_to_str to handle bool inputs through its explicit guard while preserving existing invalid-value handling."
+  },
+  {
+    "number": 8106,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/pchembl_value.py",
+    "claim": "In @src/bioetl/domain/value_objects/pchembl_value.py around lines 105 - 109, Update PChemblValue.__lt__ to annotate its other parameter as object, matching the existing isinstance guard and NotImplemented behavior. Preserve the current comparison logic; if PChemblValue’s contract requires complete ordering, add functools.total_ordering or implement the remaining comparison methods."
+  },
+  {
+    "number": 8107,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/column_qualifier.py",
+    "claim": "In @src/bioetl/domain/value_objects/column_qualifier.py around lines 106 - 143, Update ColumnQualifier.parse and is_qualified to split qualified names from the left with maxsplit=2, preserving all remaining dots in the field component. Ensure parse can round-trip values accepted by __post_init__, while retaining validation for missing or empty provider, entity, or field parts."
+  },
+  {
+    "number": 8108,
+    "severity": "major",
+    "path": "src/bioetl/domain/value_objects/column_order.py",
+    "claim": "In @src/bioetl/domain/value_objects/column_order.py around lines 207 - 208, Refresh reports/quality/module-coverage-inventory.json using _refresh_module_coverage_inventory.py after the src/bioetl change, then run the architecture hash guard when feasible and include the resulting inventory update."
+  },
+  {
+    "number": 8109,
+    "severity": "major",
+    "path": "src/bioetl/domain/value_objects/dq_report_results_quality.py",
+    "claim": "In @src/bioetl/domain/value_objects/dq_report_results_quality.py around lines 12 - 25, Update CompletenessResult and the related DQ result classes containing required_fields, foreign_keys, or metrics: change those field annotations from dict to Mapping and, in each __post_init__, copy each mapping and wrap it in an immutable Mapping implementation before storing it. Preserve existing tuple conversion for reject_reasons and ensure callers cannot mutate the original or stored mappings after construction."
+  },
+  {
+    "number": 8111,
+    "severity": "major",
+    "path": "src/bioetl/domain/value_objects/dq_result.py",
+    "claim": "In @src/bioetl/domain/value_objects/dq_result.py around lines 77 - 80, Update DQResult.__post_init__ to detect when rule_outcomes is provided as a list and replace it with a tuple via object.__setattr__, matching the existing anomalies conversion and preserving immutability."
+  },
+  {
+    "number": 8113,
+    "severity": "minor",
+    "path": "src/bioetl/domain/value_objects/dq_metrics_calculations.py",
+    "claim": "In @src/bioetl/domain/value_objects/dq_metrics_calculations.py around lines 175 - 188, Update is_valid_numeric to catch OverflowError from math.isfinite(float(v)) for oversized integers and return False, so extract_numeric_values excludes them without aborting. Preserve the existing non-numeric, boolean, and finite-number behavior."
+  },
+  {
+    "number": 8114,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/protein_class_hierarchy.py",
+    "claim": "In @src/bioetl/domain/value_objects/protein_class_hierarchy.py around lines 112 - 115, Update the is_leaf property on the protein class hierarchy value object so it reflects instance state instead of always returning True, using the relationship between leaf_id and the final path_ids entry. Preserve the boolean property interface and ensure it returns True only when the hierarchy resolves to its leaf classification."
+  },
+  {
+    "number": 8115,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/molecular_descriptors.py",
+    "claim": "In @src/bioetl/domain/value_objects/molecular_descriptors.py around lines 100 - 118, Update the return annotations of `_BoundedIntVO.from_raw` and `_BoundedFloatVO.from_raw` from the base value-object types to `Self | None`, preserving their existing invalid-input behavior and concrete subclass construction."
+  },
+  {
+    "number": 8116,
+    "severity": "major",
+    "path": "src/bioetl/domain/value_objects/_publication_field_group_config.py",
+    "claim": "In @src/bioetl/domain/value_objects/_publication_field_group_config.py around lines 19 - 33, Update FieldGroupConfig.__post_init__ to copy any supplied field_groups mapping and replace it with a read-only MappingProxyType via object.__setattr__, preserving the existing values while preventing mutation of DEFAULT_FIELD_GROUP_CONFIG. Ensure the normalized field_groups is hashable so frozen FieldGroupConfig instances can be hashed without TypeError."
+  },
+  {
+    "number": 8118,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/identifiers.py",
+    "claim": "In @src/bioetl/domain/value_objects/identifiers.py around lines 209 - 239, Update the _validate method signature to accept value: int | str while keeping its int return type and existing coercion/validation logic unchanged. This must accurately expose the string input path handled by _coerce_to_int and used by from_raw and CompoundId.__post_init__."
+  },
+  {
+    "number": 8119,
+    "severity": "major",
+    "path": "src/bioetl/domain/value_objects/activity_concentration.py",
+    "claim": "In @src/bioetl/domain/value_objects/activity_concentration.py around lines 69 - 72, Update ActivityConcentration.__post_init__ to reject non-finite values, including NaN and both infinities, before the existing negative-value validation. Ensure __str__, molar_value, and to_unit only operate on finite concentrations while preserving the current error behavior for negative values."
+  },
+  {
+    "number": 8120,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/activity_concentration.py",
+    "claim": "In @src/bioetl/domain/value_objects/activity_concentration.py around lines 74 - 85, The to_unit method produces nondeterministic floating-point results through chained multiplication and division. Replace the conversion arithmetic with deterministic Decimal-based exponent or factor handling, or apply a documented boundary rounding strategy, while preserving Concentration’s value-object invariants and exact expected round-trip values."
+  },
+  {
+    "number": 8122,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/_chemical_identifiers.py",
+    "claim": "In @src/bioetl/domain/value_objects/_chemical_identifiers.py around lines 243 - 252, Update SMILES.from_raw and _is_blank_smiles so the non-blank branch receives a runtime-narrowed raw value without relying on assert, preserving blank-value handling. Remove _validate_smiles_normalization_mode and its call, since SMILESNormalizationMode already constrains valid values to \"soft\" or \"strict\"."
+  },
+  {
+    "number": 8123,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/academic_ids.py",
+    "claim": "In @src/bioetl/domain/value_objects/academic_ids.py around lines 150 - 184, Update ISSN._validate and the corresponding ORCID validation method to verify each identifier’s documented checksum after format validation and normalization. Reject values with an incorrect check digit while preserving acceptance and normalization of correctly formatted identifiers, including uppercase X for ISSN."
+  },
+  {
+    "number": 8124,
+    "severity": "major",
+    "path": "src/bioetl/domain/value_objects/bronze_result.py",
+    "claim": "In @src/bioetl/domain/value_objects/bronze_result.py around lines 25 - 35, Update the value object’s construction validation, especially __post_init__ and _validate_required_strings, to reject relative paths that do not contain valid provider/entity segments before instantiation succeeds. Reuse _parse_provider_entity for consistent normalization and validation so table_name and provider_entity remain non-raising for every successfully constructed instance."
+  },
+  {
+    "number": 8126,
+    "severity": "critical",
+    "path": "src/bioetl/domain/value_objects/bronze_result.py",
+    "claim": "In @src/bioetl/domain/value_objects/bronze_result.py around lines 106 - 115, Update the compression_ratio property in BronzeWriteResult to guard compressed_size before division, returning the documented fallback ratio when the divisor is zero; preserve normal uncompressed_size / compressed_size calculation for nonzero compressed sizes."
+  },
+  {
+    "number": 8127,
+    "severity": "minor",
+    "path": "src/bioetl/domain/value_objects/taxonomy_id.py",
+    "claim": "In @src/bioetl/domain/value_objects/taxonomy_id.py around lines 175 - 184, Update the validate_taxonomy_id doctest examples for None-returning inputs so they do not expect a displayed None result in interactive output, while preserving the valid integer examples and still exercising the None and invalid cases."
+  },
+  {
+    "number": 8128,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/compound_ids.py",
+    "claim": "In @src/bioetl/domain/value_objects/compound_ids.py around lines 66 - 82, Update CompoundId.__post_init__ after the existing CHEMBL and PUBCHEM branches to add a terminal else that raises immediately for any unsupported CompoundSource, ensuring _validated_id is never left unset and preserving the current validation behavior for known sources."
+  },
+  {
+    "number": 8129,
+    "severity": "major",
+    "path": "src/bioetl/domain/value_objects/dq_metrics.py",
+    "claim": "In @src/bioetl/domain/value_objects/dq_metrics.py around lines 133 - 141, Update BatchDQMetrics.__post_init__ to normalize column_stats into an immutable, hashable representation, replacing the mutable dict while preserving its key/value contents and deterministic behavior. Ensure the resulting representation supports the frozen value-object contract and generated hashing; do not use MappingProxyType alone because it remains unhashable."
+  },
+  {
+    "number": 8130,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/value_objects/dq_metrics.py",
+    "claim": "In @src/bioetl/domain/value_objects/dq_metrics.py around lines 23 - 33, In the compatibility alias block of the dq_metrics module, retain _compute_column_stats and _extract_numeric_values because they are used or imported by tests, and remove the other eight unused aliases. Do not alter imports or attempt to address the import cycle."
+  }
+]

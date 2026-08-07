@@ -1,0 +1,152 @@
+[
+  {
+    "number": 8118,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/identifiers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8105,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/publications.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8103,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/base.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8098,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/inchi.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8096,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/activity.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8130,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/dq_metrics.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8129,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/dq_metrics.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8128,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/compound_ids.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8127,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/value_objects/taxonomy_id.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8126,
+    "state": "OPEN",
+    "title": "[CR-FULL][critical] residual in `src/bioetl/domain/value_objects/bronze_result.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8123,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/academic_ids.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8124,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/bronze_result.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8122,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/_chemical_identifiers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8120,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/activity_concentration.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8119,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/activity_concentration.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8115,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/molecular_descriptors.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8111,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/dq_result.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8108,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/column_order.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8107,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/column_qualifier.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8106,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/pchembl_value.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8104,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/_publication_year.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8099,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/_molecular_weight.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8097,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/value_objects/activity_confidence.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8114,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/protein_class_hierarchy.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8113,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/value_objects/dq_metrics_calculations.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8102,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/dq_report_builder.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8116,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/_publication_field_group_config.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8109,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/value_objects/dq_report_results_quality.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8101,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/dq_report_results_core.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8100,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/value_objects/publication_field_group_types.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  }
+]
