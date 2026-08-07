@@ -1,0 +1,187 @@
+[
+  {
+    "number": 8214,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/unit_converter.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8209,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/normalization_service.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8204,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/aggregation_validator.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8197,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/staged_enforcement.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8194,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/_author_helpers.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8193,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/value_validator.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8190,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/identity_service.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8189,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/schema_classifier.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8188,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/normalization_config.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8187,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/preflight_governance.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8184,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/dq_serializer.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8182,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/validation_helpers.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8212,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/dq_rule_evaluator.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8211,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/composite_metadata_helpers.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8210,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/composite_metadata_helpers.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8207,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/merged_metadata_explainability.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8206,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/merged_metadata_explainability.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8205,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/activity_aggregator/_aggregator.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8202,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/_preflight_governance_helpers.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8201,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/_preflight_governance_types.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8200,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/author_normalization_service.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8199,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/dq_policy_resolver.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8198,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/composite_validation_layer.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8196,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/composite_metadata_cv.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8195,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/schema_classifier_helpers.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8192,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/cross_validation_helpers.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8191,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/cross_validation_validator.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8186,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/dq_metrics_calculator.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8183,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/composite_validation_helpers.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8181,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/data_normalization_config.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8180,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/value_validator_rules.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8179,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/schema_metadata_extractor.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8213,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/organism_classification_service_filtering.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8208,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8203,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/_dq_serializer_html/__init__.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8185,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/organism_classification_service_models.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8178,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/_dq_serializer_html/_styles.py` \u2014 Verify each finding against current code. Fix only still-valid issues, skip the "
+  }
+]
