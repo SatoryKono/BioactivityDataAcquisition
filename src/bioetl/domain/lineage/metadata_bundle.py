@@ -214,19 +214,26 @@ class MetadataLineageBundleResult[
     strict_manifest_id_required: bool = False
 
     def __post_init__(self) -> None:
-        """Keep sidecar summary and full lineage fragment explicitly linked."""
+        """Keep sidecar summary and full lineage fragment explicitly linked.
+
+        Anchors are applied to a deep copy of *metadata* so the caller's input
+        object is never mutated (re-using the same metadata with another
+        fragment must not retain previous anchors).
+        """
         artifact_id = _resolve_primary_artifact_id(self.lineage_fragment)
+        metadata = self.metadata.model_copy(deep=True)
         _attach_fragment_anchor(
-            metadata=self.metadata,
+            metadata=metadata,
             fragment_id=self.lineage_fragment.fragment_id,
             artifact_id=artifact_id,
         )
         _validate_bundle_identity_contract(
-            metadata=self.metadata,
+            metadata=metadata,
             fragment=self.lineage_fragment,
             artifact_id=artifact_id,
             strict_manifest_id_required=self.strict_manifest_id_required,
         )
+        object.__setattr__(self, 'metadata', metadata)
 
 
 MetadataLineageBundle = MetadataLineageBundleResult

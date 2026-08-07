@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
@@ -11,6 +12,7 @@ from bioetl.domain.lineage._shared import (
     load_mapping,
     load_optional_datetime,
     load_optional_str,
+    mapping_to_plain,
     normalize_mapping,
 )
 from bioetl.domain.lineage.refs import LineageNodeRef
@@ -52,7 +54,7 @@ class LineageEdge:
     run_id: str | None = None
     manifest_id: str | None = None
     created_at: datetime | None = None
-    attributes: dict[str, object] = field(default_factory=dict)
+    attributes: Mapping[str, object] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Normalize edge attributes for deterministic storage."""
@@ -69,7 +71,7 @@ class LineageEdge:
             "created_at": (
                 self.created_at.isoformat() if self.created_at is not None else None
             ),
-            "attributes": dict(self.attributes),
+            "attributes": mapping_to_plain(self.attributes),
         }
 
     @classmethod
