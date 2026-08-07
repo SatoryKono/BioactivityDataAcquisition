@@ -185,7 +185,10 @@ def is_valid_numeric(v: object) -> TypeGuard[int | float]:
         return False
     if isinstance(v, bool):
         return False
-    return math.isfinite(float(v))
+    try:
+        return math.isfinite(float(v))
+    except OverflowError:
+        return False
 
 
 def extract_numeric_values(
