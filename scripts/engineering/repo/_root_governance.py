@@ -15,6 +15,7 @@ STRUCTURE_CATALOG_FILE = Path("configs/quality/repo_structure_catalog.yaml")
 BASE_ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
     {
         ".codex",
+        ".claude",
         ".cursor",
         ".gemini",
         ".github",
