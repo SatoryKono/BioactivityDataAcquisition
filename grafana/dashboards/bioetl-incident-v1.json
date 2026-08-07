@@ -659,7 +659,8 @@
           "mode": "single",
           "sort": "none"
         }
-      }
+      },
+      "maxDataPoints": 400
     },
     {
       "id": 2007,
