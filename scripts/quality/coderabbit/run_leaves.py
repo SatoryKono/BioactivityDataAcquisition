@@ -1,4 +1,5 @@
 """Sequential CodeRabbit leaf runner for CR-FULL-20260806-full."""
+
 from __future__ import annotations
 
 import json
@@ -59,7 +60,13 @@ def now() -> str:
 def load_progress() -> Progress:
     if PROGRESS.exists():
         return cast(Progress, json.loads(PROGRESS.read_text(encoding="utf-8")))
-    return {"started": now(), "results": {}, "completed": [], "failed": [], "skipped": []}
+    return {
+        "started": now(),
+        "results": {},
+        "completed": [],
+        "failed": [],
+        "skipped": [],
+    }
 
 
 def save_progress(p: Progress) -> None:

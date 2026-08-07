@@ -45,7 +45,11 @@ def build_semantic_fragment_id(
                 edge.edge_type.value,
                 edge.source.node_id,
                 edge.target.node_id,
-                json.dumps(mapping_to_plain(edge.attributes), sort_keys=True, separators=(",", ":")),
+                json.dumps(
+                    mapping_to_plain(edge.attributes),
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
             ]
         )
         for edge in edges

@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 
-def _detach_mapping(value: Mapping[object, object]) -> MappingProxyType:
+def _detach_mapping(value: Mapping[object, object]) -> MappingProxyType[str, object]:
     return MappingProxyType(
         {str(key): _detach_value(item) for key, item in value.items()}
     )

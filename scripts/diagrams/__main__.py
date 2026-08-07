@@ -69,7 +69,9 @@ COMMAND_SPECS = {
     "check-quality-gates": python_command("check/check_diagram_quality_gates.py"),
     "check-visual-smoke": python_command("check/check_diagram_visual_smoke.py"),
     "check-svg-text": python_command("check/check_svg_text_visibility.py"),
-    "check-class-methods": python_command("check/check_class_method_render_integrity.py"),
+    "check-class-methods": python_command(
+        "check/check_class_method_render_integrity.py"
+    ),
     "check-pdf-bounds": python_command("check/check_pdf_image_bounds.py"),
     "check-padding": python_command("check/report_diagram_padding.py"),
     # Fix
@@ -93,7 +95,9 @@ COMMAND_SPECS = {
     ),
     "render-pdf-desc": python_command("render/generate_with_descriptions_pdf.py"),
     "render-docx": python_command("render/generate_with_descriptions_docx.py"),
-    "render-views": python_command("render/generate_all_bundles.py", "--collection", "views"),
+    "render-views": python_command(
+        "render/generate_all_bundles.py", "--collection", "views"
+    ),
     "render-desc-indexes": python_command("render/generate_description_indexes.py"),
     # Suite
     "nightly": python_command("run_diagram_nightly_suite.py"),

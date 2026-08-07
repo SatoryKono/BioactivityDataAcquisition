@@ -214,6 +214,3 @@ async def iter_chembl_as_models(
             yield model_class.model_validate(record)
         else:
             yield model_class.model_construct(**record)
-
-
-

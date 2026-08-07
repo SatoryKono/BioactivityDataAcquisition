@@ -615,9 +615,7 @@ class TestInputValidation:
                 rel_posix = rel_path.as_posix()
                 if rel_posix in self._PICKLE_ALLOWLIST:
                     continue
-                violations.append(
-                    f"{rel_path}: Uses pickle outside reviewed allowlist"
-                )
+                violations.append(f"{rel_path}: Uses pickle outside reviewed allowlist")
 
         assert not violations, (
             "Unreviewed pickle usage (add to allowlist only after security review):\n"

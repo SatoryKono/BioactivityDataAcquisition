@@ -23,7 +23,9 @@ from bioetl.interfaces.http.report_root_config import (
 )
 
 
-def test_configured_report_root_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_configured_report_root_env(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     monkeypatch.setenv(REPORT_ROOT_ENV, str(tmp_path / "run-reports"))
     assert configured_report_root() == tmp_path / "run-reports"
 

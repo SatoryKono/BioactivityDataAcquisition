@@ -67,9 +67,7 @@ class TestXSSPrevention:
                     window_start = max(0, match.start() - 200)
                     window_end = min(len(content), match.end() + 200)
                     window = content[window_start:window_end]
-                    if "html.escape" in window or re.search(
-                        r"\bescape\s*\(", window
-                    ):
+                    if "html.escape" in window or re.search(r"\bescape\s*\(", window):
                         continue
                     rel_path = py_file.relative_to(PROJECT_ROOT)
                     violations.append(f"{rel_path}: {description}")

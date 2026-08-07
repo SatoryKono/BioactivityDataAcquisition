@@ -38,7 +38,6 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         Any, None
     )  # Any: host attr default (PD6)
 
-
     def _finalize_atomic_stream_write(
         self,
         *,
@@ -125,6 +124,7 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
             if temp_path.exists():
                 with contextlib.suppress(OSError):
                     temp_path.unlink()
+
     def _compressed_payload_matches(self, left: Path, right: Path) -> bool:
         """Compare compressed Bronze payloads by full decompressed streams.
 

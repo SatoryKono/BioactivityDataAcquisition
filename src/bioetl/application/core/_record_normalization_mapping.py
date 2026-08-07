@@ -46,7 +46,9 @@ class RecordNormalizationMappingMixin:
 
     provider: str = cast(Any, None)  # Any: host attr default (PD3)
     entity_type: str | None = cast(Any, None)  # Any: host attr default (PD3)
-    profile: _NormalizationProfileLike | None = cast(Any, None)  # Any: host attr default (PD3)
+    profile: _NormalizationProfileLike | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     rule_set: NormalizationRulesPolicy = cast(Any, None)  # Any: host attr default (PD3)
     allow_compatibility_fallback: bool = cast(Any, None)  # Any: host attr default (PD3)
 

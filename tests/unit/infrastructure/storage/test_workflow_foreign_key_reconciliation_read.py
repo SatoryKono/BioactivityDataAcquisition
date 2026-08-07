@@ -123,7 +123,9 @@ async def test_silver_read_applies_current_only_flag() -> None:
 
 def test_artifact_sink_port_is_runtime_checkable() -> None:
     class _Sink:
-        def write_reconcile_debug_artifacts(self, **kwargs: object) -> tuple[object, ...]:
+        def write_reconcile_debug_artifacts(
+            self, **kwargs: object
+        ) -> tuple[object, ...]:
             del kwargs
             return ()
 

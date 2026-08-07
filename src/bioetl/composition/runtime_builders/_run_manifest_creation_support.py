@@ -42,6 +42,7 @@ if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.context import PipelineRunContext as Context
 
+
 def build_manifest_create_request(
     request_inputs: RunManifestCreateRequestInputs,
 ) -> RunManifestCreateSpec:
@@ -105,10 +106,14 @@ def build_manifest_create_request(
     )
     return request
 
-def _launch_context_value(launch_context: object, key: str, default: object = None) -> object:
+
+def _launch_context_value(
+    launch_context: object, key: str, default: object = None
+) -> object:
     if isinstance(launch_context, Mapping):
         return launch_context.get(key, default)
     return _read_attr(launch_context, key, default)
+
 
 def _resolve_replay_reconstructability_status(
     *,
@@ -137,12 +142,16 @@ def _resolve_replay_reconstructability_status(
             not supported
             or capability_value != ReplayCapability.EXACT_REPLAY_SUPPORTED.value
         )
-        return ("not_reconstructable" if not_ok else "reconstructable", strict_requirement)
+        return (
+            "not_reconstructable" if not_ok else "reconstructable",
+            strict_requirement,
+        )
     not_ok = strict_requirement and (
         not strict_exact_replay_supported
         or request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
     )
     return ("not_reconstructable" if not_ok else "reconstructable", strict_requirement)
+
 
 def emit_replay_reconstructability_metric(
     *,
@@ -223,6 +232,7 @@ def emit_replay_reconstructability_metric(
             },
         )
 
+
 def _resolve_replay_lag_seconds(
     *,
     launch_context: object,
@@ -237,6 +247,7 @@ def _resolve_replay_lag_seconds(
         lag_status=lag_status,
         read_attr=_read_attr,
     )
+
 
 def create_ledger_service(inputs: RunnerInputs, ctx: Context) -> Ledger | None:
     """Keep the public ownership seam local to this support module."""

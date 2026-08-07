@@ -139,7 +139,9 @@ def crossref_clear_request_collector(
     request_collector: APIRequestCollector | None,
 ) -> None:
     """Clear the collector without returning metadata."""
-    clear_crossref_request_collector(request_collector=cast("APIRequestCollector", request_collector))
+    clear_crossref_request_collector(
+        request_collector=cast("APIRequestCollector", request_collector)
+    )
 
 
 def crossref_request_count(
@@ -147,4 +149,6 @@ def crossref_request_count(
     request_collector: APIRequestCollector | None,
 ) -> int:
     """Number of recorded API requests since last clear."""
-    return get_crossref_request_count(request_collector=cast("APIRequestCollector", request_collector))
+    return get_crossref_request_count(
+        request_collector=cast("APIRequestCollector", request_collector)
+    )

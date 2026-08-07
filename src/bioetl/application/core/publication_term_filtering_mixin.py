@@ -60,9 +60,7 @@ class PublicationTermFilteringMixin(
             return
         # Scale only when a positive finite term cap is requested.
         upstream_cap = (
-            None
-            if term_cap is None
-            else term_cap * self.PUBLICATION_LIMIT_MULTIPLIER
+            None if term_cap is None else term_cap * self.PUBLICATION_LIMIT_MULTIPLIER
         )
         async for record in self._yield_terms_from_publications(
             filterable.fetch_multi_filtered(

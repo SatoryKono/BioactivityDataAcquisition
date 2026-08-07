@@ -508,7 +508,10 @@ class TestLineageFragments:
         assert gold_dataset.attributes["cv_warn_count"] == 1
         assert gold_dataset.attributes["cv_error_count"] == 1
         assert gold_dataset.attributes["cv_quarantine_count"] == 1
-        assert mapping_to_plain(openalex_source.attributes)["selected_fields"] == ["abstract", "title"]
+        assert mapping_to_plain(openalex_source.attributes)["selected_fields"] == [
+            "abstract",
+            "title",
+        ]
         assert openalex_source.attributes["enrichment_status"] == "success"
         assert openalex_edge.attributes["selected_field_count"] == 2
         assert openalex_edge.attributes["enrichment_status"] == "success"

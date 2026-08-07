@@ -58,16 +58,19 @@ class BatchTracingManagerService:
         """Start the root pipeline execution span."""
         otel_tracer = self._tracer.get_tracer(self.TRACER_NAME)
         span = cast(
-            Span,  # OpenTelemetry span context manager is unparameterized at runtime
+            "Span",  # OpenTelemetry span context manager is unparameterized at runtime
             otel_tracer.start_as_current_span(
                 "pipeline_execution",
-                attributes=cast(dict[str, object], build_execution_span_attributes(
-                    pipeline_name=self._config.pipeline_name,
-                    entity_type=self._config.entity_type,
-                    context=self._context,
-                    adaptive_batch_sizing_enabled=self._adaptive_sizing_enabled,
-                    initial_batch_size=self._initial_batch_size,
-                )),
+                attributes=cast(
+                    dict[str, object],
+                    build_execution_span_attributes(
+                        pipeline_name=self._config.pipeline_name,
+                        entity_type=self._config.entity_type,
+                        context=self._context,
+                        adaptive_batch_sizing_enabled=self._adaptive_sizing_enabled,
+                        initial_batch_size=self._initial_batch_size,
+                    ),
+                ),
             ),
         )
         span.__enter__()
@@ -79,16 +82,19 @@ class BatchTracingManagerService:
         """Start a tracing span for one batch."""
         otel_tracer = self._tracer.get_tracer(self.TRACER_NAME)
         span = cast(
-            Span,  # OpenTelemetry span context manager is unparameterized at runtime
+            "Span",  # OpenTelemetry span context manager is unparameterized at runtime
             otel_tracer.start_as_current_span(
                 f"batch_{batch_id}",
-                attributes=cast(dict[str, object], build_batch_span_attributes(
-                    batch_id=batch_id,
-                    record_count=record_count,
-                    run_type=self._context.run_type.value,
-                    entity_type=self._config.entity_type,
-                    start_index=start_index,
-                )),
+                attributes=cast(
+                    dict[str, object],
+                    build_batch_span_attributes(
+                        batch_id=batch_id,
+                        record_count=record_count,
+                        run_type=self._context.run_type.value,
+                        entity_type=self._config.entity_type,
+                        start_index=start_index,
+                    ),
+                ),
             ),
         )
         span.__enter__()
@@ -103,14 +109,17 @@ class BatchTracingManagerService:
     ) -> Span:
         """Start a tracing span for one layer operation."""
         span = cast(
-            Span,  # OpenTelemetry span context manager is unparameterized at runtime
+            "Span",  # OpenTelemetry span context manager is unparameterized at runtime
             self._tracer.get_tracer(self.TRACER_NAME).start_as_current_span(
                 name,
-                attributes=cast(dict[str, object], build_layer_span_attributes(
-                    batch_id=batch_id,
-                    count=count,
-                    input_count=input_count,
-                )),
+                attributes=cast(
+                    dict[str, object],
+                    build_layer_span_attributes(
+                        batch_id=batch_id,
+                        count=count,
+                        input_count=input_count,
+                    ),
+                ),
             ),
         )
         span.__enter__()

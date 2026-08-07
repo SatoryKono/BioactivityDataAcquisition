@@ -91,8 +91,7 @@ class TestHealthServerCommand:
         source_id = "a" * 64
         monkeypatch.setenv("BIOETL_RUNTIME_SOURCE_ID", source_id.upper())
         assert (
-            server_integration_deps._runtime_source_id_from_environment()
-            == source_id
+            server_integration_deps._runtime_source_id_from_environment() == source_id
         )
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")

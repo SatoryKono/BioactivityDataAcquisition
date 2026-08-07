@@ -110,10 +110,7 @@ class PublicationTermExtractionMixin:
                 for term in terms:
                     yield term
                     term_count += 1
-                    if (
-                        normalized_limit is not None
-                        and term_count >= normalized_limit
-                    ):
+                    if normalized_limit is not None and term_count >= normalized_limit:
                         return
         finally:
             aclose = getattr(publications, "aclose", None)

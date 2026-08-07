@@ -25,9 +25,7 @@ def bind_context_fields[ContextT](
         return context
     if is_dataclass(context) and not isinstance(context, type):
         # Validate keys against dataclass fields before replace.
-        field_names = {
-            field.name for field in context.__dataclass_fields__.values()
-        }
+        field_names = {field.name for field in context.__dataclass_fields__.values()}
         unknown = sorted(set(updates) - field_names)
         if unknown:
             raise TypeError(

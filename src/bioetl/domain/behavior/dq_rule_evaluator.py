@@ -203,7 +203,9 @@ def _evaluate_cross_rules(
     outcomes: list[DQRuleOutcome] = []
     for rule in dq_config.cross_field_validations:
         if _cross_rule_violated(record, rule):
-            outcomes.append(_build_cross_outcome(rule, resolver=resolver, dq_config=dq_config))
+            outcomes.append(
+                _build_cross_outcome(rule, resolver=resolver, dq_config=dq_config)
+            )
     return outcomes
 
 

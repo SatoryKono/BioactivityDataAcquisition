@@ -117,7 +117,9 @@ class FilesystemAdrCatalog(AdrServicePort):
     ) -> AdrValidationReport:
         """Build aggregate validation report from discovered files and issues."""
         errors = sum(1 for issue in issues if issue.severity == AdrIssueSeverity.ERROR)
-        warnings = sum(1 for issue in issues if issue.severity == AdrIssueSeverity.WARNING)
+        warnings = sum(
+            1 for issue in issues if issue.severity == AdrIssueSeverity.WARNING
+        )
         return AdrValidationReport(
             valid=errors == 0,
             total=len(files),

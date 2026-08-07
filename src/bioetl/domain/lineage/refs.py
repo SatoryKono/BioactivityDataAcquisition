@@ -24,14 +24,9 @@ __all__ = [
 ]
 
 
-
 def _node_id_segment(value: str) -> str:
     """Encode a node-id segment so ``:`` / ``@`` cannot collide with delimiters."""
-    return (
-        value.replace("%", "%25")
-        .replace(":", "%3A")
-        .replace("@", "%40")
-    )
+    return value.replace("%", "%25").replace(":", "%3A").replace("@", "%40")
 
 
 class LineageNodeType(StrEnum):

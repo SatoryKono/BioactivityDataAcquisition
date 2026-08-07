@@ -61,9 +61,7 @@ class OpenAlexId(ValueObject[str]):
         normalized = self._strip_openalex_prefix(normalized).strip().upper()
         if self._PATTERN.match(normalized):
             return normalized
-        raise ValueError(
-            f"Invalid OpenAlex ID format: {value!r}. Expected: W<digits>"
-        )
+        raise ValueError(f"Invalid OpenAlex ID format: {value!r}. Expected: W<digits>")
 
     @property
     def url(self) -> str:

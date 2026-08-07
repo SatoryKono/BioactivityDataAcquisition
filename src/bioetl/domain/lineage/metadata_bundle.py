@@ -233,7 +233,7 @@ class MetadataLineageBundleResult[
             artifact_id=artifact_id,
             strict_manifest_id_required=self.strict_manifest_id_required,
         )
-        object.__setattr__(self, 'metadata', metadata)
+        object.__setattr__(self, "metadata", metadata)
 
 
 MetadataLineageBundle = MetadataLineageBundleResult

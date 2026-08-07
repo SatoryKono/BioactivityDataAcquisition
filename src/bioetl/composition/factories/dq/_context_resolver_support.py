@@ -41,8 +41,6 @@ class DQReportServiceFactory(Protocol):
     ) -> object: ...
 
 
-
-
 @dataclass(frozen=True, slots=True)
 class DQServiceBundle:
     """Typed DQ service collaborators created by composition factories."""
@@ -55,6 +53,7 @@ class DQServiceBundle:
 
     def __bool__(self) -> bool:
         return self.report_service is not None
+
 
 def extract_single_dq_config_impl(
     sink: Mapping[str, object],

@@ -158,7 +158,9 @@ class TestSilverMetadataWriteSupport:
         audit.log_event.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def test_emit_silver_metadata_write_success_without_audit_is_safe(self) -> None:
+    async def test_emit_silver_metadata_write_success_without_audit_is_safe(
+        self,
+    ) -> None:
         metrics = MagicMock()
         ops = _Ops(_metrics=metrics, _audit=None)
 
