@@ -35,7 +35,7 @@ import pandas as pd
 import pandera as pa
 import pytest
 
-from scripts.docs.generate_pipeline_normalization_field_matrix import (
+from scripts.docs.matrix.generate_pipeline_normalization_matrix import (
     build_field_matrix_rows,
 )
 from bioetl.application.core.field_specs import (

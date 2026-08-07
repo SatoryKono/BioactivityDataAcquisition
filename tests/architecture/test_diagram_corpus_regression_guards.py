@@ -36,7 +36,7 @@ VIEW_COLLECTION = DIAGRAM_ROOT / "views"
 
 
 def _load_apply_elk_layout() -> ModuleType:
-    module_path = REPO_ROOT / "scripts" / "diagrams" / "apply_elk_layout.py"
+    module_path = REPO_ROOT / "scripts" / "diagrams" / "fix" / "apply_elk_layout.py"
     spec = importlib.util.spec_from_file_location(
         "apply_elk_layout_module", module_path
     )
@@ -125,16 +125,16 @@ def test_apply_elk_default_dir_is_canonical_architecture_tree() -> None:
 
 def test_diagram_codemods_are_owned_by_scripts_diagrams() -> None:
     canonical = {
-        "apply_elk_layout.py",
-        "differentiate_linkstyle.py",
-        "harmonize_link_styles.py",
+        "apply_elk_layout.py": "scripts.diagrams.fix.apply_elk_layout",
+        "differentiate_linkstyle.py": "scripts.diagrams.fix.differentiate_linkstyle",
+        "harmonize_link_styles.py": "scripts.diagrams.fix.harmonize_link_styles",
     }
 
-    for name in canonical:
-        assert (REPO_ROOT / "scripts" / "diagrams" / name).exists()
+    for name, module in canonical.items():
+        assert (REPO_ROOT / "scripts" / "diagrams" / "fix" / name).exists()
         wrapper = (REPO_ROOT / "src" / "tools" / name).read_text(encoding="utf-8")
         assert "Compatibility wrapper" in wrapper
-        assert f"scripts.diagrams.{name[:-3]}" in wrapper
+        assert module in wrapper
 
     runtime_import_hits: list[str] = []
     for path in sorted((REPO_ROOT / "src" / "bioetl").rglob("*.py")):

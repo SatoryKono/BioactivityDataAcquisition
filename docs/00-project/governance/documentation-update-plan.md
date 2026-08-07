@@ -31,7 +31,7 @@
 
 **Текущее состояние:**
 - Техническая документация существует: `docs/02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-passport.md`
-- Генератор: `scripts/diagrams/generate_pipeline_dataflows.py`
+- Генератор: `scripts/diagrams/render/generate_pipeline_dataflows.py`
 - Ссылки на диаграммы и IR JSON присутствуют
 
 **Требуемые действия:**

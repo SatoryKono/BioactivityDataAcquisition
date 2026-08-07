@@ -2,6 +2,22 @@
 
 Diagram lint, render, quality pipeline, and visual verification tooling.
 
+## Package layout
+
+```
+scripts/diagrams/
+├── core/     # path helpers
+├── lint/     # lint + budget
+├── check/    # validation / visual checks
+├── fix/      # codemods and SVG fixes
+├── render/   # bundles, dataflows, PDF/DOCX
+├── cli/      # optional package entry
+├── __main__.py
+└── run_diagram_nightly_suite.py
+```
+
+Public entrypoint: `python -m scripts.diagrams <command>`.
+
 ## Unified Entry Point
 
 ```bash
@@ -15,20 +31,20 @@ python -m scripts.diagrams <command> [args...]
 
 | Command          | Script                              | Description                                |
 | ---------------- | ----------------------------------- | ------------------------------------------ |
-| `lint`           | `lint_diagrams.py`                  | Lint architecture diagrams (.mmd/.mermaid) |
-| `lint-summarize` | `summarize_diagram_lint.py`         | Summarize diagram lint report              |
-| `lint-budget`    | `enforce_diagram_quality_budget.py` | Enforce diagram quality budget             |
+| `lint`           | `lint/lint_diagrams.py`                  | Lint architecture diagrams (.mmd/.mermaid) |
+| `lint-summarize` | `lint/summarize_diagram_lint.py`         | Summarize diagram lint report              |
+| `lint-budget`    | `lint/enforce_diagram_quality_budget.py` | Enforce diagram quality budget             |
 
 ### Check
 
 | Command               | Script                                                    | Description                                                           |
 | --------------------- | --------------------------------------------------------- | --------------------------------------------------------------------- |
 | `checks`              | `run_diagram_checks.sh`                                   | Run unified diagram validation profiles (`pr`, `nightly`, `quick`)    |
-| `check-artifacts`     | `check_diagram_artifacts.py`                              | Check required SVG artifacts and optional PNG compatibility artifacts |
-| `check-quality-gates` | `check_diagram_quality_gates.py`                          | Check diagram quality gates                                           |
-| `check-visual-smoke`  | `check_diagram_visual_smoke.py`                           | Visual smoke test for diagrams; supports `--json-out`                 |
-| `check-svg-text`      | `check_svg_text_visibility.py`                            | Check SVG text visibility                                             |
-| `check-class-methods` | `scripts/diagrams/check_class_method_render_integrity.py` | Check class method render integrity                                   |
+| `check-artifacts`     | `check/check_diagram_artifacts.py`                              | Check required SVG artifacts and optional PNG compatibility artifacts |
+| `check-quality-gates` | `check/check_diagram_quality_gates.py`                          | Check diagram quality gates                                           |
+| `check-visual-smoke`  | `check/check_diagram_visual_smoke.py`                           | Visual smoke test for diagrams; supports `--json-out`                 |
+| `check-svg-text`      | `check/check_svg_text_visibility.py`                            | Check SVG text visibility                                             |
+| `check-class-methods` | `scripts/diagrams/check/check_class_method_render_integrity.py` | Check class method render integrity                                   |
 | `check-pdf-bounds`    | `check_pdf_image_bounds.py`                               | Check PDF image bounds                                                |
 | `check-padding`       | `report_diagram_padding.py`                               | Report diagram padding issues                                         |
 
@@ -40,12 +56,12 @@ python -m scripts.diagrams <command> [args...]
 | `differentiate-linkstyle` | `differentiate_linkstyle.py`                | Add semantic linkStyle groups    |
 | `fix-operators`      | `fix_mermaid_operators.py`                      | Fix Mermaid operators            |
 | `fix-svg-text`       | `add_svg_text_fallback.py`                      | Add SVG text fallback            |
-| `fix-svg-styles`     | `scripts/diagrams/inject_svg_styles.py`         | Inject SVG styles                |
+| `fix-svg-styles`     | `scripts/diagrams/fix/fix_svg_styles.py`         | Inject SVG styles                |
 | `fix-foreign-object` | `strip_svg_foreign_object.py`                   | Strip SVG foreignObject elements |
 | `harmonize-link-styles` | `harmonize_link_styles.py`                   | Harmonize rendered SVG links     |
 | `fix-orphans`        | `prune_orphan_nodes.py`                         | Prune orphan nodes in diagrams   |
 | `fix-sizes`          | `uniform_diagram_sizes.py`                      | Uniform diagram sizes            |
-| `fix-pagebreaks`     | `scripts/diagrams/fix_pagebreaks_in_bundles.py` | Fix pagebreaks in bundles        |
+| `fix-pagebreaks`     | `scripts/diagrams/render/fix_pagebreaks_in_bundles.py` | Fix pagebreaks in bundles        |
 
 ### Render
 
@@ -57,7 +73,7 @@ python -m scripts.diagrams <command> [args...]
 | `render-pdf-desc`     | `generate_with_descriptions_pdf.py`                | Generate PDF with descriptions                             |
 | `render-docx`         | `generate_with_descriptions_docx.py`               | Generate DOCX with descriptions                            |
 | `render-views`        | `generate_all_bundles.py --collection views`       | Refresh views Markdown bundle via the canonical generator  |
-| `render-desc-indexes` | `scripts/diagrams/generate_description_indexes.py` | Refresh family-oriented description indexes                |
+| `render-desc-indexes` | `scripts/diagrams/render/generate_description_indexes.py` | Refresh family-oriented description indexes                |
 
 ### Suite
 
@@ -103,24 +119,24 @@ python -m scripts.diagrams <command> [args...]
 
 | File                                                         | Description                                                                                   |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| `scripts/diagrams/generate_all_bundles.py`                   | Canonical Markdown bundle generator; supports `--collection` for targeted publication refresh |
-| `scripts/diagrams/generate_description_indexes.py`           | Canonical generator for family-oriented description indexes                                   |
-| `scripts/diagrams/generate_package_family_class_diagrams.py` | Supplemental package-family class-diagram generator                                           |
-| `scripts/diagrams/diagram_paths.py`                          | Shared diagram path/constants helper used by rendering and validation tooling                 |
+| `scripts/diagrams/render/generate_all_bundles.py`                   | Canonical Markdown bundle generator; supports `--collection` for targeted publication refresh |
+| `scripts/diagrams/render/generate_description_indexes.py`           | Canonical generator for family-oriented description indexes                                   |
+| `scripts/diagrams/render/generate_package_family_class_diagrams.py` | Supplemental package-family class-diagram generator                                           |
+| `scripts/diagrams/core/diagram_paths.py`                          | Shared diagram path/constants helper used by rendering and validation tooling                 |
 | `scripts/diagrams/run_diagram_checks.sh`                     | Canonical shell entrypoint for diagram validation profiles                                    |
 | `scripts/diagrams/run_diagram_docs_agent.sh`                 | Canonical shell entrypoint for checks + export pipeline                                       |
-| `scripts/diagrams/generate_with_descriptions_docx.py`        | Canonical DOCX exporter for description bundles                                               |
-| `scripts/diagrams/generate_with_descriptions_pdf.py`         | Canonical PDF exporter for description bundles                                                |
+| `scripts/diagrams/render/generate_with_descriptions_docx.py`        | Canonical DOCX exporter for description bundles                                               |
+| `scripts/diagrams/render/generate_with_descriptions_pdf.py`         | Canonical PDF exporter for description bundles                                                |
 | `scripts/diagrams/validate_mermaid_syntax.sh`                | Validate Mermaid syntax, including optional active-doc embedded fences via `--include-embedded` |
 | `scripts/diagrams/svg2png.mjs`                               | Node.js SVG-to-PNG converter                                                                  |
 | `scripts/diagrams/pagebreak.lua`                             | Pandoc Lua filter for pagebreaks                                                              |
 
 ## Bundle Generation Contract
 
-- `scripts/diagrams/generate_all_bundles.py` is the canonical Markdown bundle generator for `architecture`, `class-diagrams`, `foundation`, and `views`.
+- `scripts/diagrams/render/generate_all_bundles.py` is the canonical Markdown bundle generator for `architecture`, `class-diagrams`, `foundation`, and `views`.
 - `scripts/diagrams/run_diagram_checks.sh`, `run_diagram_docs_agent.sh`, `generate_with_descriptions_docx.py`, and `generate_with_descriptions_pdf.py` are the canonical operational entrypoints; legacy `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-*` files are compatibility wrappers only.
 - Markdown bundles prefer `svg/` renders as the primary publication artifact and fall back to `png/` only when an SVG is missing.
-- `scripts/diagrams/generate_description_indexes.py` is the canonical generator for `descriptions/INDEX.md` and `descriptions/class/INDEX.md`.
+- `scripts/diagrams/render/generate_description_indexes.py` is the canonical generator for `descriptions/INDEX.md` and `descriptions/class/INDEX.md`.
 - `python -m scripts.diagrams render-pdf` and `python -m scripts.diagrams render-views` are the supported public entrypoints for collection-specific bundle refresh.
 - `visual-smoke.txt` remains the canonical PR-sized SVG smoke manifest; `visual-smoke-extended.txt` is the nightly blocking tier, `visual-smoke-broad.txt` is the nightly warn-only expansion tier, and `png-compatibility.txt` is a smaller curated manifest for PNG compatibility checks.
 - `check_diagram_visual_smoke.py --json-out <path>` writes `diagram-visual-smoke-report-v1` machine-readable status for CI and local diagnostics.

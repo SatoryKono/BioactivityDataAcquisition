@@ -25,7 +25,7 @@ pytestmark = pytest.mark.architecture
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "diagrams" / "check_diagram_visual_smoke.py"
+    module_path = repo_root / "scripts" / "diagrams" / "check" / "check_diagram_visual_smoke.py"
     spec = importlib.util.spec_from_file_location(
         "check_diagram_visual_smoke_module", module_path
     )

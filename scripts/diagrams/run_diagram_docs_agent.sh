@@ -162,7 +162,7 @@ else
 fi
 
 if [[ "$SKIP_DOCX" -eq 0 ]]; then
-  DOCX_CMD=("$PYTHON_CMD" "$REPO_ROOT/scripts/diagrams/generate_with_descriptions_docx.py")
+  DOCX_CMD=("$PYTHON_CMD" "$REPO_ROOT/scripts/diagrams/render/generate_with_descriptions_docx.py")
   DOCX_CMD+=("${MD_ARGS[@]}")
   log "Generating DOCX bundles: ${DOCX_CMD[*]}"
   "${DOCX_CMD[@]}"
@@ -171,7 +171,7 @@ else
 fi
 
 if [[ "$SKIP_PDF" -eq 0 ]]; then
-  PDF_CMD=("$PYTHON_CMD" "$REPO_ROOT/scripts/diagrams/generate_with_descriptions_pdf.py")
+  PDF_CMD=("$PYTHON_CMD" "$REPO_ROOT/scripts/diagrams/render/generate_with_descriptions_pdf.py")
   PDF_CMD+=("${MD_ARGS[@]}")
   log "Generating PDF bundles: ${PDF_CMD[*]}"
   "${PDF_CMD[@]}"

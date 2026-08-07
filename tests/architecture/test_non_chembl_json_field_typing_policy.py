@@ -36,7 +36,7 @@ from bioetl.domain.normalization.publication_structured_fields import (
 from bioetl.domain.normalization.structured_payload_policies import (
     semantic_sensitive_structured_payload_policies,
 )
-from scripts.docs.generate_pipeline_normalization_field_matrix import (
+from scripts.docs.matrix.generate_pipeline_normalization_matrix import (
     ENTITY_DOMAIN_SCHEMA_REGISTRY,
     ENTITY_SILVER_SCHEMA_REGISTRY,
     build_field_matrix_rows,

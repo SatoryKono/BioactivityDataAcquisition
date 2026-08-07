@@ -45,9 +45,9 @@ import yaml
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from scripts.docs.checks._bootstrap import DOCS_DIR, PROJECT_ROOT
+    from scripts.docs.common.bootstrap import DOCS_DIR, PROJECT_ROOT
 else:
-    from scripts.docs.checks._bootstrap import DOCS_DIR, PROJECT_ROOT
+    from scripts.docs.common.bootstrap import DOCS_DIR, PROJECT_ROOT
 
 SRC_DIR = PROJECT_ROOT / "src" / "bioetl"
 MANDATORY_TRACING_COVERAGE_PATH = (

@@ -237,22 +237,22 @@
 | `docs/02-architecture/adr-registry/status-dashboard.md` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
 | `docs/02-architecture/diagrams/_template.mmd` |  | diagram_kind:diagram_support | diagram_support |  |
 | `docs/02-architecture/diagrams/adr-040-compliance-map.md` |  | diagram_kind:diagram_support | diagram_support |  |
-| `docs/02-architecture/diagrams/architecture/49-chembl-pipeline-activity-dataflow.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/generate_pipeline_dataflows.py |
-| `docs/02-architecture/diagrams/architecture/50-chembl-pipeline-activity-filter-criteria.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/generate_pipeline_dataflows.py |
-| `docs/02-architecture/diagrams/architecture/51a-chembl-pipeline-activity-silver-fields-1.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/generate_pipeline_dataflows.py |
-| `docs/02-architecture/diagrams/architecture/51b-chembl-pipeline-activity-silver-fields-2.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/generate_pipeline_dataflows.py |
-| `docs/02-architecture/diagrams/architecture/52a-chembl-pipeline-activity-gold-fields-1.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/generate_pipeline_dataflows.py |
-| `docs/02-architecture/diagrams/architecture/52b-chembl-pipeline-activity-gold-fields-2.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/generate_pipeline_dataflows.py |
+| `docs/02-architecture/diagrams/architecture/49-chembl-pipeline-activity-dataflow.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/render/generate_pipeline_dataflows.py |
+| `docs/02-architecture/diagrams/architecture/50-chembl-pipeline-activity-filter-criteria.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/render/generate_pipeline_dataflows.py |
+| `docs/02-architecture/diagrams/architecture/51a-chembl-pipeline-activity-silver-fields-1.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/render/generate_pipeline_dataflows.py |
+| `docs/02-architecture/diagrams/architecture/51b-chembl-pipeline-activity-silver-fields-2.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/render/generate_pipeline_dataflows.py |
+| `docs/02-architecture/diagrams/architecture/52a-chembl-pipeline-activity-gold-fields-1.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/render/generate_pipeline_dataflows.py |
+| `docs/02-architecture/diagrams/architecture/52b-chembl-pipeline-activity-gold-fields-2.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/render/generate_pipeline_dataflows.py |
 | `docs/02-architecture/diagrams/architecture/svg/INDEX.md` | architecture-diagram-render-artifacts |  | diagram_render_artifact | docs/02-architecture/diagrams/tooling/render.sh |
-| `docs/02-architecture/diagrams/bundles/architecture.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/generate_all_bundles.py |
-| `docs/02-architecture/diagrams/bundles/class.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/generate_all_bundles.py |
-| `docs/02-architecture/diagrams/bundles/foundation.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/generate_all_bundles.py |
-| `docs/02-architecture/diagrams/bundles/views.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/generate_all_bundles.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-checkpoint.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part1.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part2.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-base-transformer.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-batch-execution.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
+| `docs/02-architecture/diagrams/bundles/architecture.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/render/generate_all_bundles.py |
+| `docs/02-architecture/diagrams/bundles/class.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/render/generate_all_bundles.py |
+| `docs/02-architecture/diagrams/bundles/foundation.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/render/generate_all_bundles.py |
+| `docs/02-architecture/diagrams/bundles/views.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/render/generate_all_bundles.py |
+| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-checkpoint.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
+| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part1.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
+| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part2.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
+| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-base-transformer.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
+| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-batch-execution.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/render/generate_package_family_class_diagrams.py |
 
 ## GitHub Issue Evidence Examples
 
@@ -348,9 +348,9 @@
 | architecture-debt-execution-plan-quality-report | `scripts/engineering/qa/reduce_architecture_debt.py` | ignored_local_output |
 | architecture-debt-task-backlog-quality-report | `scripts/engineering/qa/generate_architecture_debt_tasks.py` | ignored_local_output |
 | architecture-dependency-map-generated-docs | `scripts/engineering/qa/generate_architecture_dependency_map.py` | tracked_curated_generated_doc |
-| architecture-diagram-bundles | `scripts/diagrams/generate_all_bundles.py` | tracked_curated_generated_doc |
-| architecture-diagram-description-indexes | `scripts/diagrams/generate_description_indexes.py` | tracked_curated_generated_doc |
-| architecture-diagram-package-family-sources | `scripts/diagrams/generate_package_family_class_diagrams.py` | tracked_curated_generated_doc |
+| architecture-diagram-bundles | `scripts/diagrams/render/generate_all_bundles.py` | tracked_curated_generated_doc |
+| architecture-diagram-description-indexes | `scripts/diagrams/render/generate_description_indexes.py` | tracked_curated_generated_doc |
+| architecture-diagram-package-family-sources | `scripts/diagrams/render/generate_package_family_class_diagrams.py` | tracked_curated_generated_doc |
 | architecture-diagram-render-artifacts | `docs/02-architecture/diagrams/tooling/render.sh` | tracked_curated_generated_doc |
 | chembl-field-matrix-generated-docs | `scripts/docs/matrix/generate_field_matrix.py` | tracked_curated_generated_doc |
 | ci-quality-integral-gate-report | `scripts/engineering/ci/quality_integral_gate.py` | working_output |
@@ -391,7 +391,7 @@
 | matrix-dictionaries-curated-docs | `scripts/docs/matrix/build_matrix_dicts.py` | tracked_curated_generated_doc |
 | observability-runtime-cardinality-evidence | `scripts/engineering/qa/report_observability_metric_inventory.py` | tracked_quality_baseline |
 | pipeline-config-contract-ownership-quality-baseline | `scripts/engineering/qa/report_pipeline_config_contract_ownership.py` | tracked_quality_baseline |
-| pipeline-dataflow-generated-docs | `scripts/diagrams/generate_pipeline_dataflows.py` | tracked_curated_generated_doc |
+| pipeline-dataflow-generated-docs | `scripts/diagrams/render/generate_pipeline_dataflows.py` | tracked_curated_generated_doc |
 | pipeline-normalization-generated-docs | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | tracked_curated_generated_doc |
 | port-contracts-junit-report | `.github/workflows/port-contracts.yml` | ignored_ci_output |
 | pretest-guardrails-quality-report | `scripts/engineering/dev/pretest_guardrails.sh` | working_output |

@@ -309,19 +309,19 @@ prepare_diagram_scope() {
 
 run_lint_check() {
   if [[ -n "$DIAGRAM_PATH" ]]; then
-    python3 "$REPO_ROOT/scripts/diagrams/lint_diagrams.py" "$REPO_ROOT/$DIAGRAM_PATH"
+    python3 "$REPO_ROOT/scripts/diagrams/lint/lint_diagrams.py" "$REPO_ROOT/$DIAGRAM_PATH"
   else
-    python3 "$REPO_ROOT/scripts/diagrams/lint_diagrams.py" "$DIAGRAM_ROOT"
+    python3 "$REPO_ROOT/scripts/diagrams/lint/lint_diagrams.py" "$DIAGRAM_ROOT"
   fi
   return 0
 }
 
 run_operator_guard() {
   if [[ -n "$DIAGRAM_PATH" ]]; then
-    python3 "$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py" \
+    python3 "$REPO_ROOT/scripts/diagrams/fix/fix_mermaid_operators.py" \
       --check "$REPO_ROOT/$DIAGRAM_PATH"
   else
-    python3 "$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py" \
+    python3 "$REPO_ROOT/scripts/diagrams/fix/fix_mermaid_operators.py" \
       --check "$DIAGRAM_ROOT"
   fi
   return 0
@@ -353,7 +353,7 @@ run_class_method_integrity_check() {
   if [[ -n "$DIAGRAM_PATH" ]]; then
     case "$DIAGRAM_PATH" in
       "${DIAGRAM_ROOT_REL}/class-diagrams/"*.mmd)
-        python3 "$REPO_ROOT/scripts/diagrams/check_class_method_render_integrity.py" \
+        python3 "$REPO_ROOT/scripts/diagrams/check/check_class_method_render_integrity.py" \
           --source-dir "$class_source_dir" \
           --svg-dir "$class_svg_dir" \
           --file "$REPO_ROOT/$DIAGRAM_PATH"
@@ -366,7 +366,7 @@ run_class_method_integrity_check() {
     return 0
   fi
 
-  python3 "$REPO_ROOT/scripts/diagrams/check_class_method_render_integrity.py" \
+  python3 "$REPO_ROOT/scripts/diagrams/check/check_class_method_render_integrity.py" \
     --source-dir "$class_source_dir" \
     --svg-dir "$class_svg_dir"
   return 0
@@ -375,7 +375,7 @@ run_class_method_integrity_check() {
 run_budget_enforcement() {
   local mode="$1"
   local cmd=(
-    python3 "$REPO_ROOT/scripts/diagrams/enforce_diagram_quality_budget.py"
+    python3 "$REPO_ROOT/scripts/diagrams/lint/enforce_diagram_quality_budget.py"
     --mode "$mode"
     --quality-report "$BUDGET_QUALITY_JSON"
     --lint-report "$BUDGET_LINT_JSON"
@@ -415,16 +415,16 @@ run_pr_profile() {
   fi
 
   log "DIAG-T010..T012: Artifact existence/non-empty"
-  python3 "$REPO_ROOT/scripts/diagrams/check_diagram_artifacts.py" \
+  python3 "$REPO_ROOT/scripts/diagrams/check/check_diagram_artifacts.py" \
     --manifest "$RENDER_MANIFEST"
 
   log "DIAG-T014..T015: SVG text visibility"
-  python3 "$REPO_ROOT/scripts/diagrams/check_svg_text_visibility.py" \
+  python3 "$REPO_ROOT/scripts/diagrams/check/check_svg_text_visibility.py" \
     --manifest "$RENDER_MANIFEST"
 
   log "DIAG-T013/DIAG-T026: Visual smoke drift"
   mkdir -p "$REPO_ROOT/reports/diagrams"
-  python3 "$REPO_ROOT/scripts/diagrams/check_diagram_visual_smoke.py" \
+  python3 "$REPO_ROOT/scripts/diagrams/check/check_diagram_visual_smoke.py" \
     --manifest "$RENDER_MANIFEST" \
     --json-out "$REPO_ROOT/reports/diagrams/diagram-visual-smoke.json"
 
@@ -440,16 +440,16 @@ run_pr_profile() {
     BUDGET_QUALITY_JSON="$BUDGET_TMP_DIR/quality.json"
     BUDGET_LINT_JSON="$BUDGET_TMP_DIR/lint.json"
 
-    python3 "$REPO_ROOT/scripts/diagrams/check_diagram_quality_gates.py" \
+    python3 "$REPO_ROOT/scripts/diagrams/check/check_diagram_quality_gates.py" \
       --manifest "$SOURCE_MANIFEST" \
       --json-out "$BUDGET_QUALITY_JSON"
-    python3 "$REPO_ROOT/scripts/diagrams/lint_diagrams.py" \
+    python3 "$REPO_ROOT/scripts/diagrams/lint/lint_diagrams.py" \
       "$lint_target" --json > "$BUDGET_LINT_JSON" || true
 
     log "DIAG-BUDGET: Enforce PR budget"
     run_budget_enforcement pr
   else
-    python3 "$REPO_ROOT/scripts/diagrams/check_diagram_quality_gates.py" \
+    python3 "$REPO_ROOT/scripts/diagrams/check/check_diagram_quality_gates.py" \
       --manifest "$SOURCE_MANIFEST"
   fi
 
@@ -514,16 +514,16 @@ run_quick_profile() {
     fi
     BUDGET_QUALITY_JSON="$BUDGET_TMP_DIR/quality.json"
     BUDGET_LINT_JSON="$BUDGET_TMP_DIR/lint.json"
-    python3 "$REPO_ROOT/scripts/diagrams/check_diagram_quality_gates.py" \
+    python3 "$REPO_ROOT/scripts/diagrams/check/check_diagram_quality_gates.py" \
       --manifest "$SOURCE_MANIFEST" \
       --json-out "$BUDGET_QUALITY_JSON"
-    python3 "$REPO_ROOT/scripts/diagrams/lint_diagrams.py" \
+    python3 "$REPO_ROOT/scripts/diagrams/lint/lint_diagrams.py" \
       "$lint_target" --json > "$BUDGET_LINT_JSON" || true
 
     log "DIAG-BUDGET: Enforce quick-profile PR budget"
     run_budget_enforcement pr
   else
-    python3 "$REPO_ROOT/scripts/diagrams/check_diagram_quality_gates.py" \
+    python3 "$REPO_ROOT/scripts/diagrams/check/check_diagram_quality_gates.py" \
       --manifest "$SOURCE_MANIFEST"
   fi
 

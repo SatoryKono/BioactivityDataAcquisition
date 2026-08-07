@@ -82,7 +82,7 @@ python -m scripts.diagrams render-pdf
 python -m scripts.diagrams render-views
 ```
 
-Нижележащий backend `python -m scripts.diagrams.generate_all_bundles --collection <name>`
+Нижележащий backend `python -m scripts.diagrams.render.generate_all_bundles --collection <name>`
 остаётся canonical leaf implementation, но для обычных пользователей и
 документации следует предпочитать router surface `scripts.diagrams`.
 
@@ -206,7 +206,7 @@ flowchart TB
 
 ### 4.5. Автоматизация: apply_elk_layout.py
 
-Утилита `scripts/diagrams/apply_elk_layout.py` автоматически добавляет ELK init к диаграммам, превышающим порог нод:
+Утилита `scripts/diagrams/fix/apply_elk_layout.py` автоматически добавляет ELK init к диаграммам, превышающим порог нод:
 
 ```bash
 # Предварительный просмотр (без записи)
@@ -239,7 +239,7 @@ ______________________________________________________________________
 
 ### 5.1. Классификация рёбер
 
-Инструмент `scripts/diagrams/differentiate_linkstyle.py` классифицирует связи по 6 семантическим типам:
+Инструмент `scripts/diagrams/fix/differentiate_linkstyle.py` классифицирует связи по 6 семантическим типам:
 
 | Тип                  | Стиль                                 | Семантика                                  |
 | -------------------- | ------------------------------------- | ------------------------------------------ |
@@ -300,10 +300,10 @@ ______________________________________________________________________
 Исключения: `-full.mermaid` reference views и `00-legend*` освобождены от SIZE-001/SIZE-002.
 
 ```bash
-python scripts/diagrams/lint_diagrams.py                  # Проверить всё
-python scripts/diagrams/lint_diagrams.py --json           # JSON-вывод для CI
-python scripts/diagrams/lint_diagrams.py --stale-days 120 # Свой порог
-python scripts/diagrams/check_class_method_render_integrity.py \
+python scripts/diagrams/lint/lint_diagrams.py                  # Проверить всё
+python scripts/diagrams/lint/lint_diagrams.py --json           # JSON-вывод для CI
+python scripts/diagrams/lint/lint_diagrams.py --stale-days 120 # Свой порог
+python scripts/diagrams/check/check_class_method_render_integrity.py \
   --source-dir docs/02-architecture/diagrams/class-diagrams \
   --svg-dir docs/02-architecture/diagrams/class-diagrams/svg
 ```
@@ -324,13 +324,13 @@ python scripts/diagrams/check_class_method_render_integrity.py \
 
 ### 6.3. Управление orphan-нодами
 
-Скрипт `scripts/diagrams/prune_orphan_nodes.py` находит ноды, определённые в диаграмме, но не участвующие ни в одном ребре.
+Скрипт `scripts/diagrams/fix/prune_orphan_nodes.py` находит ноды, определённые в диаграмме, но не участвующие ни в одном ребре.
 
 ```bash
-python scripts/diagrams/prune_orphan_nodes.py --check        # Отчёт (exit 1 при нахождении)
-python scripts/diagrams/prune_orphan_nodes.py --check --json  # JSON для CI
-python scripts/diagrams/prune_orphan_nodes.py --fix           # Удалить orphan-ноды
-python scripts/diagrams/prune_orphan_nodes.py --grandfather   # Пометить все текущие как допустимые
+python scripts/diagrams/fix/prune_orphan_nodes.py --check        # Отчёт (exit 1 при нахождении)
+python scripts/diagrams/fix/prune_orphan_nodes.py --check --json  # JSON для CI
+python scripts/diagrams/fix/prune_orphan_nodes.py --fix           # Удалить orphan-ноды
+python scripts/diagrams/fix/prune_orphan_nodes.py --grandfather   # Пометить все текущие как допустимые
 ```
 
 Нода **не считается orphan**, если:
@@ -345,12 +345,12 @@ python scripts/diagrams/prune_orphan_nodes.py --grandfather   # Пометить
 
 | Хук                          | Скрипт                                           | Назначение            |
 | ---------------------------- | ------------------------------------------------ | --------------------- |
-| `lint-diagrams`              | `scripts/diagrams/lint_diagrams.py`              | Валидация всех правил |
-| `prune-orphan-diagram-nodes` | `scripts/diagrams/prune_orphan_nodes.py --check` | Детекция orphan-нод   |
+| `lint-diagrams`              | `scripts/diagrams/lint/lint_diagrams.py`              | Валидация всех правил |
+| `prune-orphan-diagram-nodes` | `scripts/diagrams/fix/prune_orphan_nodes.py --check` | Детекция orphan-нод   |
 
 ### 6.4. Проверка видимости текста в SVG
 
-Скрипт `scripts/diagrams/check_svg_text_visibility.py` валидирует smoke-набор SVG на предмет
+Скрипт `scripts/diagrams/check/check_svg_text_visibility.py` валидирует smoke-набор SVG на предмет
 типичного регресса: edge-label отображается как белый прямоугольник без видимого текста.
 
 Проверки скрипта:
@@ -360,8 +360,8 @@ python scripts/diagrams/prune_orphan_nodes.py --grandfather   # Пометить
 - наличие инжектированных CSS-правил для `.edgeLabel span` и `text.fo-fallback`.
 
 ```bash
-python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
-python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt --json
+python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt --json
 ```
 
 ______________________________________________________________________
@@ -421,7 +421,7 @@ Bash и передаёт аргументы без отдельного ручн
 ```powershell
 bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json
 .\scripts\diagrams\render.ps1 --svg-only
-.\.venv-win\Scripts\python.exe scripts/diagrams/check_diagram_visual_smoke.py `
+.\.venv-win\Scripts\python.exe scripts/diagrams/check/check_diagram_visual_smoke.py `
   --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt `
   --json-out reports/diagrams/diagram-visual-smoke.json
 ```
@@ -435,16 +435,16 @@ ______________________________________________________________________
 1. **Скопировать шаблон:** `cp _template.mmd architecture/NN-topic.mmd`
 1. **Заполнить метаданные:** `@version`, `@date`, `@type`, `@level`, `@nodes`
 1. **Нарисовать диаграмму:** использовать каноническую палитру цветов
-1. **Проверить lint:** `python scripts/diagrams/lint_diagrams.py`
+1. **Проверить lint:** `python scripts/diagrams/lint/lint_diagrams.py`
 1. **Применить ELK** (если @nodes > 20): `python -m scripts.diagrams apply-elk`
 1. **Применить linkStyle** (если flowchart с 5+ связями): `python -m scripts.diagrams differentiate-linkstyle`
-1. **Проверить orphan-ноды:** `python scripts/diagrams/prune_orphan_nodes.py --check`
+1. **Проверить orphan-ноды:** `python scripts/diagrams/fix/prune_orphan_nodes.py --check`
 1. **Отрендерить:** `bash docs/02-architecture/diagrams/tooling/render.sh`
    Для усиленного рендера больших схем можно задать: `--large-threshold`, `--large-scale`, `--large-png-dpi`.
-1. **Проверить обязательные SVG-артефакты:** `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`
-   Для дополнительной compatibility-проверки PNG используйте curated manifest: `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/png-compatibility.txt --require-png`
-1. **Проверить видимость текста в SVG:** `python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`
-1. **Прогнать quality-gates:** `python scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`
+1. **Проверить обязательные SVG-артефакты:** `python scripts/diagrams/check/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`
+   Для дополнительной compatibility-проверки PNG используйте curated manifest: `python scripts/diagrams/check/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/png-compatibility.txt --require-png`
+1. **Проверить видимость текста в SVG:** `python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`
+1. **Прогнать quality-gates:** `python scripts/diagrams/check/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`
 1. **Добавить в индекс:** обновить `README.md` каталога
 
 ### 9.1. PR-checklist для `classDiagram`
@@ -455,8 +455,8 @@ ______________________________________________________________________
 1. Внутри одного файла не смешиваются стили return-нотации (`): Type` и `) Type`), правило `CLASS-002`.
 1. Нет перегруженных сигнатур методов длиннее ~88 символов, правило `CLASS-003`.
 1. L1-диаграмма содержит только ключевые методы, вторичные операции вынесены в companion L2 (`01a/08a/14a` и т.д.).
-1. Выполнен `python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams/class-diagrams`.
-1. Выполнен `python scripts/diagrams/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`.
+1. Выполнен `python scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams/class-diagrams`.
+1. Выполнен `python scripts/diagrams/check/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`.
 1. Перерендерены изменённые диаграммы через `render.sh`, обязательные `svg`-артефакты обновлены, а `png` обновлены там, где они остаются compatibility/export surface.
 1. Нет drift между `.mmd` и рендер-артефактами в PR.
 
