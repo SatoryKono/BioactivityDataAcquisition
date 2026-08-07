@@ -1,9 +1,21 @@
 {
+  "version": "2.0",
+  "modular": true,
   "repo_notes": [
     {
       "content": "Treat canonical docs, ADRs, configs, tests, and runtime source as source of truth. DeepWiki is a derived navigation surface only and must not contradict AGENTS.md, docs/00-project/ai/memory/README.md, or docs/00-project/ai/memory/agent-memory.md."
     }
   ],
+  "modules": [
+    "wiki-core.json",
+    "wiki-architecture.json",
+    "wiki-pipelines.json", 
+    "wiki-schemas.json",
+    "wiki-providers.json",
+    "wiki-observability.json",
+    "wiki-reference.json"
+  ],
+  "description": "Modular wiki structure for faster loading and easier maintenance. Load modules dynamically based on context.",
   "pages": [
     {
       "title": "BioETL Overview",
