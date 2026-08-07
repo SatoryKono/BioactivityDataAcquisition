@@ -3,7 +3,7 @@
   "linked_issue": "#6891",
   "follow_up_issue": "#7464",
   "parent_epic": "#6890",
-  "snapshot_date": "2026-08-05",
+  "snapshot_date": "2026-08-07",
   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
   "policy": {
     "direction": "shrink_only",
@@ -14,9 +14,9 @@
     "application_core": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 8,
-      "helper_function_ratio": 0.365,
-      "files": 187,
-      "total_loc": 22521,
+      "helper_function_ratio": 0.364,
+      "files": 190,
+      "total_loc": 23078,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 10
     },
@@ -25,16 +25,16 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.325,
       "files": 51,
-      "total_loc": 6298,
+      "total_loc": 6307,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
     "composition_factories_pipeline": {
       "files_ge_250_loc": 1,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.33,
+      "helper_function_ratio": 0.342,
       "files": 32,
-      "total_loc": 3940,
+      "total_loc": 4003,
       "budget_files_ge_250_loc": 2,
       "budget_max_internal_fan_in": 3
     },
@@ -43,16 +43,16 @@
       "max_internal_fan_in": 3,
       "helper_function_ratio": 0.421,
       "files": 140,
-      "total_loc": 15973,
+      "total_loc": 15980,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
     "composition_runtime_builders": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 3,
-      "helper_function_ratio": 0.359,
+      "helper_function_ratio": 0.372,
       "files": 56,
-      "total_loc": 6950,
+      "total_loc": 7183,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 5
     }
@@ -73,10 +73,10 @@
   "closeout_program": {
     "tech_debt_closeout_test_file_count": 51,
     "tech_debt_closeout_test_function_count": 262,
-    "tech_debt_closeout_test_loc": 10467,
+    "tech_debt_closeout_test_loc": 10469,
     "closeout_files_using_live_residual_helpers": 8,
     "fold_into_generic_inventory_count": 60,
     "retained_public_entrypoint_count": 12,
-    "zero_reference_supporting_script_count": 4
+    "zero_reference_supporting_script_count": 5
   }
 }
