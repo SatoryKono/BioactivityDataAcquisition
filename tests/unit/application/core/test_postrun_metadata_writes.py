@@ -99,8 +99,11 @@ async def test_build_final_metadata_write_coroutines_builds_silver_only() -> Non
     metadata_writer.finalize_silver_metadata.assert_awaited_once()
     metadata_writer.finalize_gold_metadata.assert_not_awaited()
 
+
 @pytest.mark.asyncio
-async def test_build_final_metadata_write_coroutines_skips_uninitialized_silver() -> None:
+async def test_build_final_metadata_write_coroutines_skips_uninitialized_silver() -> (
+    None
+):
     """Silver finalize must no-op when the silver table is not initialized."""
     storage = MagicMock()
     storage.get_table_path = MagicMock(return_value="test-output/test_silver")
@@ -142,4 +145,3 @@ async def test_build_final_metadata_write_coroutines_skips_uninitialized_silver(
     storage.is_table_initialized.assert_called_once_with("silver_table", layer="silver")
     storage.get_table_path.assert_not_called()
     metadata_writer.finalize_silver_metadata.assert_not_awaited()
-

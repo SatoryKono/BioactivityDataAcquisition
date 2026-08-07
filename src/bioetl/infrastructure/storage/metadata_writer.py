@@ -53,6 +53,7 @@ async def _execute_prepared_metadata_write_operation(
         write_text=atomic_write_text,
     )
 
+
 class _FacadeMetadataWriterOperations(_BaseMetadataWriterOperations):
     """Operations shim that preserves the historical facade patch seam."""
 

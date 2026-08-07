@@ -37,8 +37,6 @@ class ContractPolicyLoader(Protocol):
         ...
 
 
-
-
 def _default_pii_hasher() -> PiiHasherPort:
     """Prefer salted SHA-256 hasher; fall back to NoOp only when salt is unset.
 
@@ -49,6 +47,7 @@ def _default_pii_hasher() -> PiiHasherPort:
     if not os.environ.get("BIOETL_PII_SALT_CURRENT", "").strip():
         return NoOpPiiHasher()
     return Sha256PiiHasher.from_env()
+
 
 def build_transformer_dependencies(
     *,

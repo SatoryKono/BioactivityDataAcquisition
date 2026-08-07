@@ -96,8 +96,6 @@ def _redact_gateway_target(gateway: str) -> str:
     return f"{scheme}{scheme_sep}***@{host_part}"
 
 
-
-
 def _redact_grouping_for_log(grouping_key: dict[str, str]) -> dict[str, str]:
     """Return a log-safe copy of grouping labels (already bounded)."""
     return dict(grouping_key)

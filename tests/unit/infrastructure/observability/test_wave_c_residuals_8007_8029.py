@@ -127,7 +127,9 @@ def test_pipeline_metric_module_exports_families() -> None:
 
 
 def test_prometheus_registry_builders_exist() -> None:
-    assert callable(getattr(prometheus_metric_registries, "build_counter_registry", None))
+    assert callable(
+        getattr(prometheus_metric_registries, "build_counter_registry", None)
+    )
     assert callable(getattr(prometheus_metric_registries, "build_gauge_registry", None))
 
 

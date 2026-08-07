@@ -76,7 +76,9 @@ def test_load_missing_returns_none(tmp_path: Path) -> None:
     )
 
 
-def test_list_pipeline_payloads_includes_report_root_diagnostics(tmp_path: Path) -> None:
+def test_list_pipeline_payloads_includes_report_root_diagnostics(
+    tmp_path: Path,
+) -> None:
     target = (
         tmp_path / "pipeline" / "chembl_assay" / "run1" / "pipeline-run-report.json"
     )

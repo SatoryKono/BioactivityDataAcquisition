@@ -72,7 +72,9 @@ def _total_order_component(value: object) -> tuple[int, str]:
     return (1, f"{type(value).__name__}:{value!s}")
 
 
-def primary_key_sort_key(primary_key: tuple[object, ...]) -> tuple[tuple[int, str], ...]:
+def primary_key_sort_key(
+    primary_key: tuple[object, ...],
+) -> tuple[tuple[int, str], ...]:
     """Return a total-order sort key for one primary-key tuple."""
     return tuple(_total_order_component(part) for part in primary_key)
 

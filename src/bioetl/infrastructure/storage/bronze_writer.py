@@ -79,7 +79,6 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
     )
     BRONZE_METADATA_SIDECAR_SUFFIX = ".meta.json"
 
-
     @staticmethod
     def _resolve_bronze_runtime_services(
         *,

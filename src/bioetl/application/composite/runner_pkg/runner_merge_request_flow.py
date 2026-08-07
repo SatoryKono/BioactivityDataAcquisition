@@ -127,9 +127,7 @@ async def run_prepared_merge_request(
         return await execute_request(request)
     merge = get_explicit_merger_method(merger, "merge")
     if merge is None:
-        raise AttributeError(
-            "Merger does not implement execute_request() or merge()"
-        )
+        raise AttributeError("Merger does not implement execute_request() or merge()")
     return await merge(
         request.seed_table,
         request.enrichers,

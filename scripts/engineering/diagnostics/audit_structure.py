@@ -31,6 +31,7 @@ if __package__ in {None, ""}:
 
 from scripts.engineering.repo._root_governance import load_root_governance_policy
 
+
 # Configure logging for CLI output (Windows consoles may be cp1252).
 def _configure_cli_logging() -> logging.Logger:
     stream = sys.stdout

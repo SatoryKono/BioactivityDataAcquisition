@@ -89,7 +89,9 @@ def test_checkpoint_writer_write_atomic_removes_temp_on_failure(
     with pytest.raises(OSError, match="replace failed"):
         writer.write_atomic("state.json", "{}")
 
-    leftover_temps = list(tmp_path.glob(".state_*.tmp")) + list(tmp_path.glob("state.tmp"))
+    leftover_temps = list(tmp_path.glob(".state_*.tmp")) + list(
+        tmp_path.glob("state.tmp")
+    )
     assert leftover_temps == []
     assert not (tmp_path / "state.json").exists()
 

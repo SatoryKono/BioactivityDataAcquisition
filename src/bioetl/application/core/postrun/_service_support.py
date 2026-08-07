@@ -58,6 +58,7 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
 
+
 class _PostrunHostAttrSurface(Protocol):
     """Shared attribute surface for postrun host + concrete service."""
 
@@ -72,6 +73,7 @@ class _PostrunHostAttrSurface(Protocol):
     _metadata_write_orchestrator: PostrunMetadataWriteService
     _logger: LoggerPort
     _metrics: MetricsPort
+
 
 class PostrunServiceSupportHostProtocol(_PostrunHostAttrSurface, Protocol):
     """Typed host contract required by PostrunServiceSupportMixin helpers."""
@@ -93,7 +95,9 @@ class PostrunServiceSupportHostProtocol(_PostrunHostAttrSurface, Protocol):
         context: DQReportContext | None,
     ) -> DQReportResult | None: ...
 
-    def _collect_batch_metrics(self, executor: ExecutorMetricsPort) -> dict[str, float]: ...
+    def _collect_batch_metrics(
+        self, executor: ExecutorMetricsPort
+    ) -> dict[str, float]: ...
 
     def _emit_postrun_phase_observability(
         self,
@@ -104,6 +108,7 @@ class PostrunServiceSupportHostProtocol(_PostrunHostAttrSurface, Protocol):
         level: PostrunLogLevel | None = None,
         **extra: object,
     ) -> None: ...
+
 
 class PostrunServiceSupportMixin:
     """Own thin phase execution helpers outside the main postrun shell."""
@@ -244,4 +249,6 @@ class PostrunServiceSupportMixin:
             project_batch_metrics as _project,
         )
 
-        return _project(executor, freshness_anchor_timestamp=self._context.started_at.timestamp())
+        return _project(
+            executor, freshness_anchor_timestamp=self._context.started_at.timestamp()
+        )

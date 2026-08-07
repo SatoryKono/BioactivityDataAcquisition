@@ -136,8 +136,7 @@ class TestSQLInjectionPrevention:
         for py_file, content in source_contents:
             upper = content.upper()
             if not any(
-                keyword in upper
-                for keyword in ("SELECT", "INSERT", "UPDATE", "DELETE")
+                keyword in upper for keyword in ("SELECT", "INSERT", "UPDATE", "DELETE")
             ):
                 continue
 

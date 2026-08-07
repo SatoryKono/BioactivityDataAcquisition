@@ -46,7 +46,9 @@ def bootstrap_config_service(
     pipeline_config_loader = create_pipeline_config_loader(resolved_configs_root)
     dq_config_loader = create_dq_config_loader(resolved_configs_root)
 
-    from bioetl.application.services.quality.config_dq_service import DQConfigLoaderProtocol
+    from bioetl.application.services.quality.config_dq_service import (
+        DQConfigLoaderProtocol,
+    )
 
     return build_cli_config_service(
         registry=create_registered_pipeline_registry(registry),

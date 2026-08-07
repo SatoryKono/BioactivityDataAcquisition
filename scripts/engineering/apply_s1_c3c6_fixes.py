@@ -116,8 +116,7 @@ def should_defer_gold_validation_to_storage(writer: object) -> bool:
             "    def rebind_schema(self, schema: pa.DataFrameSchema | None) -> BasePanderaValidator:\n"
             '        """Return a same-class validator bound to ``schema`` without private attrs."""\n'
             "        return type(self)(schema=schema, strict=self._strict)\n"
-            "\n"
-            + marker
+            "\n" + marker
         )
         if marker not in text:
             raise SystemExit("pandera validate marker missing")
@@ -143,7 +142,9 @@ def should_defer_gold_validation_to_storage(writer: object) -> bool:
         )
         if insert_at not in ctext:
             raise SystemExit("contract validator marker missing")
-        contract.write_text(ctext.replace(insert_at, method + insert_at, 1), encoding="utf-8")
+        contract.write_text(
+            ctext.replace(insert_at, method + insert_at, 1), encoding="utf-8"
+        )
         print("fixed contract rebind_schema")
     else:
         print("contract rebind_schema already present")
@@ -156,7 +157,7 @@ def should_defer_gold_validation_to_storage(writer: object) -> bool:
         (
             "        try:\n"
             "            converted = to_schema()\n"
-            "            select_columns = getattr(converted, \"select_columns\", None)\n"
+            '            select_columns = getattr(converted, "select_columns", None)\n'
             "            if callable(select_columns):\n"
             "                return cast(object, select_columns(list(column_order)))\n"
             "        except _SCHEMA_EXTRACTION_ERRORS:\n"
@@ -166,7 +167,7 @@ def should_defer_gold_validation_to_storage(writer: object) -> bool:
         (
             "        try:\n"
             "            converted = to_schema()\n"
-            "            select_columns = getattr(converted, \"select_columns\", None)\n"
+            '            select_columns = getattr(converted, "select_columns", None)\n'
             "            if callable(select_columns):\n"
             "                return cast(object, select_columns(list(column_order)))\n"
             "        except _SCHEMA_EXTRACTION_ERRORS:\n"
@@ -385,14 +386,14 @@ def should_defer_gold_validation_to_storage(writer: object) -> bool:
     replace_once(
         ROOT / "src/bioetl/application/core/batch_executor_dq_helpers.py",
         (
-            "    replay_timestamp_anchor = getattr(context, \"replay_timestamp_anchor\", None)\n"
+            '    replay_timestamp_anchor = getattr(context, "replay_timestamp_anchor", None)\n'
             '    started_at = getattr(context, "started_at", None)\n'
             "    if started_at is None:\n"
             "        started_at = current_utc_time()\n"
             "    dq_timestamp = replay_timestamp_anchor or started_at\n"
         ),
         (
-            "    replay_timestamp_anchor = getattr(context, \"replay_timestamp_anchor\", None)\n"
+            '    replay_timestamp_anchor = getattr(context, "replay_timestamp_anchor", None)\n'
             "    started_at = context.started_at\n"
             "    if started_at is None:\n"
             '        raise ValueError("PipelineContext.started_at is required for DQ report context")\n'
@@ -517,9 +518,7 @@ def should_defer_gold_validation_to_storage(writer: object) -> bool:
     # --- #7773 mapping: module-scope import for predicate ---
     replace_once(
         ROOT / "src/bioetl/application/core/_record_normalization_mapping.py",
-        (
-            "from bioetl.domain.normalization.json import serialize_json_canonical\n"
-        ),
+        ("from bioetl.domain.normalization.json import serialize_json_canonical\n"),
         (
             "from bioetl.domain.normalization.json import serialize_json_canonical\n"
             "from bioetl.domain.normalization.profiles.base import (\n"

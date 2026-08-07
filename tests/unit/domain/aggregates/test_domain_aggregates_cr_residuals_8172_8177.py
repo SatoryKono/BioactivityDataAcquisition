@@ -90,7 +90,9 @@ def test_emit_record_quarantined_preserves_empty_entity_id() -> None:
 
 
 def test_seal_with_counts_rejects_negative_and_inconsistent_counts() -> None:
-    batch = Batch.create(run_id=_run_id("unit.aggregates.residuals.seal"), created_at=_ts(0))
+    batch = Batch.create(
+        run_id=_run_id("unit.aggregates.residuals.seal"), created_at=_ts(0)
+    )
     with pytest.raises(ValueError, match="non-negative"):
         batch.seal_with_counts(
             record_count=-1,
@@ -117,9 +119,7 @@ def test_quarantine_record_uses_batch_record_index_offset() -> None:
     second = batch.add_record({"id": "b"})
     assert first.index == 10
     assert second.index == 11
-    quarantined = batch.quarantine_record(
-        second, "bad", "ERR", quarantined_at=_ts(2)
-    )
+    quarantined = batch.quarantine_record(second, "bad", "ERR", quarantined_at=_ts(2))
     assert quarantined.index == 11
     assert batch.all_records[1].is_valid is False
     assert batch.quarantined_count == 1

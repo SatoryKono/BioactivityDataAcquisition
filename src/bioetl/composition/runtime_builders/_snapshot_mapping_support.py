@@ -64,4 +64,3 @@ def to_serializable_mapping(value: object) -> dict[str, object]:
     if not isinstance(normalized, dict):
         raise TypeError("Manifest snapshot normalization must return a mapping")
     return normalized
-

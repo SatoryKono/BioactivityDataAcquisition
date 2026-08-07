@@ -27,7 +27,9 @@ def test_strip_doi_transport_prefix_covers_url_and_doi_prefixes(
     assert strip_doi_transport_prefix(raw) == expected
 
 
-def test_strip_doi_transport_prefix_always_strips_uppercase_regardless_of_flag() -> None:
+def test_strip_doi_transport_prefix_always_strips_uppercase_regardless_of_flag() -> (
+    None
+):
     # allow_uppercase_prefix is deprecated and ignored; DOI: always strips.
     assert (
         strip_doi_transport_prefix("DOI:10.1000/xyz123", allow_uppercase_prefix=False)

@@ -1,4 +1,5 @@
 """Build CR-FULL scope matrix for 20260806-full campaign."""
+
 from __future__ import annotations
 
 import json
@@ -95,7 +96,11 @@ def main() -> None:
                 for i in range(0, len(parent), CAP):
                     chunk = parent[i : i + CAP]
                     idx = i // CAP + 1
-                    lid = f"{leaf_id}-root" if len(parent) <= CAP else f"{leaf_id}-root-{idx}"
+                    lid = (
+                        f"{leaf_id}-root"
+                        if len(parent) <= CAP
+                        else f"{leaf_id}-root-{idx}"
+                    )
                     lp = write_list(f"_{lid}.txt", chunk)
                     leaves.append(
                         {
@@ -127,7 +132,9 @@ def main() -> None:
                 }
             )
 
-    def add_file_list(leaf_id: str, wave: str, files: list[str], note: str = "") -> None:
+    def add_file_list(
+        leaf_id: str, wave: str, files: list[str], note: str = ""
+    ) -> None:
         files = sorted(files)
         if not files:
             return
@@ -152,7 +159,9 @@ def main() -> None:
     # Wave A — domain packages
     domain = Path("src/bioetl/domain")
     domain_pkgs = (
-        sorted([p.name for p in domain.iterdir() if p.is_dir() and p.name != "__pycache__"])
+        sorted(
+            [p.name for p in domain.iterdir() if p.is_dir() and p.name != "__pycache__"]
+        )
         if domain.exists()
         else []
     )
@@ -170,10 +179,14 @@ def main() -> None:
     )
 
     add_dir("S02-app-core", "A", "src/bioetl/application/core")
-    add_dir("S03-app-control-plane", "A", "src/bioetl/application/services/control_plane")
+    add_dir(
+        "S03-app-control-plane", "A", "src/bioetl/application/services/control_plane"
+    )
     svc_all = set(git_ls("src/bioetl/application/services"))
     svc_cp = set(git_ls("src/bioetl/application/services/control_plane"))
-    add_file_list("S04-app-services-other", "A", sorted(svc_all - svc_cp), "services excl CP")
+    add_file_list(
+        "S04-app-services-other", "A", sorted(svc_all - svc_cp), "services excl CP"
+    )
 
     app_all = set(git_ls("src/bioetl/application"))
     app_known = (
@@ -181,7 +194,9 @@ def main() -> None:
         | set(git_ls("src/bioetl/application/services"))
         | set(git_ls("src/bioetl/application/pipelines"))
     )
-    add_file_list("S04b-app-residual", "A", sorted(app_all - app_known), "application residual")
+    add_file_list(
+        "S04b-app-residual", "A", sorted(app_all - app_known), "application residual"
+    )
 
     add_dir("S09-composition", "A", "src/bioetl/composition")
     add_dir("S10-interfaces-cli", "A", "src/bioetl/interfaces/cli")
@@ -205,7 +220,9 @@ def main() -> None:
     add_dir("S16-configs-quality", "B", "configs/quality")
     cfg_all = set(git_ls("configs"))
     cfg_q = set(git_ls("configs/quality"))
-    add_file_list("S16b-configs-other", "B", sorted(cfg_all - cfg_q), "configs excl quality")
+    add_file_list(
+        "S16b-configs-other", "B", sorted(cfg_all - cfg_q), "configs excl quality"
+    )
 
     # Wave C
     add_dir("S06-infra-adapters", "C", "src/bioetl/infrastructure/adapters")
@@ -290,7 +307,8 @@ def main() -> None:
         "cap": CAP,
         "leaf_count": len(leaves),
         "total_files_assigned": sum(
-            int(leaf["files"]) if isinstance(leaf["files"], int) else 0 for leaf in leaves
+            int(leaf["files"]) if isinstance(leaf["files"], int) else 0
+            for leaf in leaves
         ),
         "leaves": leaves,
     }

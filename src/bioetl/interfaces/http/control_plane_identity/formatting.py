@@ -15,7 +15,9 @@ def _json_stable_default(value: object) -> object:
     """Normalize non-JSON-native values for deterministic digests."""
     if isinstance(value, set | frozenset):
         # Sets are unordered; sort stringified members so equal sets hash equal.
-        return sorted(value, key=lambda item: json.dumps(item, sort_keys=True, default=str))
+        return sorted(
+            value, key=lambda item: json.dumps(item, sort_keys=True, default=str)
+        )
     return str(value)
 
 

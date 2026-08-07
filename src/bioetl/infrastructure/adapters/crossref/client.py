@@ -143,7 +143,6 @@ class CrossRefAdapter(
             response_mapper=self._response_mapper,
         )
 
-
     async def fetch_filtered(
         self,
         entity_type: str,

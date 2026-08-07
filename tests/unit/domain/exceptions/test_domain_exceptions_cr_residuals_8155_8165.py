@@ -19,7 +19,9 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.exceptions._redaction import _redact_sequence
 from bioetl.domain.exceptions.base_exceptions import BioETLDomainError
-from bioetl.domain.exceptions.network_rate_limit_helpers import resolve_rate_limit_params
+from bioetl.domain.exceptions.network_rate_limit_helpers import (
+    resolve_rate_limit_params,
+)
 from bioetl.domain.exceptions.pipeline_shutdown import (
     PipelineShutdownError,
     ShutdownReason,
@@ -44,8 +46,12 @@ def test_redact_sequence_uses_plain_list_and_tuple() -> None:
     class CustomTuple(tuple):
         pass
 
-    redacted_list = _redact_sequence(CustomList(["secret-token-value"]), "token", seen=set())
-    redacted_tuple = _redact_sequence(CustomTuple(("secret-token-value",)), "token", seen=set())
+    redacted_list = _redact_sequence(
+        CustomList(["secret-token-value"]), "token", seen=set()
+    )
+    redacted_tuple = _redact_sequence(
+        CustomTuple(("secret-token-value",)), "token", seen=set()
+    )
     assert type(redacted_list) is list
     assert type(redacted_tuple) is tuple
 
@@ -152,7 +158,9 @@ def test_network_service_constructors() -> None:
     assert api.status_code == 400
     assert "[400]" in str(api)
 
-    unavailable = ServiceUnavailableError("down", service_name="chembl", status_code=503)
+    unavailable = ServiceUnavailableError(
+        "down", service_name="chembl", status_code=503
+    )
     assert unavailable.service_name == "chembl"
 
     rate = RateLimitError(provider="chembl", retry_after=1.5)
