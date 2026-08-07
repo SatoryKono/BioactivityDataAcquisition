@@ -260,12 +260,8 @@ SKILL_REQUIRED_TOKENS: tuple[str, ...] = (
     POST_CHANGE_TOKEN,
 )
 WRITE_CAPABLE_SKILL_PATHS = (
-    ".codex/skills/repo-config/SKILL.md",
-    ".codex/skills/grafana-dashboard-extension/SKILL.md",
-    ".codex/skills/prometheus-alert-rule-editor/SKILL.md",
-    ".codex/skills/prometheus-metric-discovery/SKILL.md",
-    ".codex/skills/prometheus-query-debugger/SKILL.md",
-    ".codex/skills/prometheus-rule-testing/SKILL.md",
+    ".codex/skills/observability-dashboard/SKILL.md",
+    ".codex/skills/observability-prometheus/SKILL.md",
     ".codex/skills/technical-designer-mermaid/SKILL.md",
     ".codex/skills/vcr-record/SKILL.md",
 )
@@ -305,13 +301,6 @@ ROLE_PROFILE_MEMO_DOC_BY_RUNTIME: dict[Path, tuple[str, ...]] = {
     Path(".codex/agents/py-debug-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".codex/agents/py-doc-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".codex/agents/py-test-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(
-        ".codex/agents/py-architecture-debt-bot.md"
-    ): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(
-        CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH
-    ): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-    Path(".codex/agents/py-test-swarm.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
 }
 ACTIVE_NON_CANONICAL_EVIDENCE_SUMMARIES = (
     Path("docs/reports/evidence/project-test-health/SUMMARY.md"),
@@ -422,32 +411,23 @@ AI_ROLE_PROFILE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
         *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
         "docs/00-project/ai/memory/memory-py-test-bot.md",
     ),
-    Path(".codex/agents/py-architecture-debt-bot.md"): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
-        "docs/00-project/ai/memory/memory-py-architecture-debt-bot.md",
-    ),
-    Path(CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
-        "docs/00-project/ai/memory/memory-py-review-orchestrator.md",
-    ),
-    Path(".codex/agents/py-test-swarm.md"): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
-        "docs/00-project/ai/memory/memory-py-test-swarm.md",
-    ),
 }
 AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     Path("docs/00-project/ai/memory/README.md"): (
-        "memory-py-architecture-debt-bot.md",
-        "memory-py-review-orchestrator.md",
-        "memory-py-test-swarm.md",
+        "memory-py-audit-bot.md",
+        "memory-py-plan-bot.md",
+        "memory-py-test-bot.md",
+        "memory-py-config-bot.md",
+        "memory-py-debug-bot.md",
+        "memory-py-doc-bot.md",
     ),
     AGENT_MEMORY_PATH: (
-        "memory-py-architecture-debt-bot.md",
-        "memory-py-review-orchestrator.md",
-        "memory-py-test-swarm.md",
+        "memory-py-audit-bot.md",
+        "memory-py-plan-bot.md",
+        "memory-py-test-bot.md",
+        "memory-py-config-bot.md",
+        "memory-py-debug-bot.md",
+        "memory-py-doc-bot.md",
     ),
 }
 AI_MIRROR_NOTICE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
@@ -478,11 +458,9 @@ AI_SURFACE_STALE_PATTERNS: tuple[re.Pattern[str], ...] = (
 AI_SURFACE_FORBIDDEN_PATTERNS: dict[Path, tuple[re.Pattern[str], ...]] = {
     Path(CODEX_RUNTIME_DOC_PATH): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
     Path(CODEX_PY_AUDIT_BOT_DOC_PATH): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
-    Path(CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
 }
 RULES_VERSION_LITERAL_PATTERN = re.compile(r"RULES\.md v(\d+(?:\.\d+)*)", re.IGNORECASE)
 AI_SURFACES_WITH_RULES_VERSION_LITERAL_GUARD: tuple[Path, ...] = (
-    Path(".codex/agents/py-review-orchestrator.md"),
     Path("docs/00-project/ai/agents/guides/AGENT.md"),
     Path("docs/00-project/00-map.md"),
 )
