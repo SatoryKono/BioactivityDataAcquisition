@@ -161,6 +161,32 @@ def test_canonical_launcher_exposes_diagnostics_and_baseline_modes() -> None:
     assert "Fast/headless" in readme
 
 
+def test_canonical_launcher_enforces_private_defaults_and_managed_path() -> None:
+    root = _project_root()
+    launcher = (root / "scripts/ai/codex/run-codex.sh").read_text(encoding="utf-8")
+    headless = (root / "scripts/ai/codex/headless.sh").read_text(encoding="utf-8")
+
+    assert "umask 077" in launcher
+    assert "umask 077" in headless
+    assert launcher.index('PATH="${USER_NPM_BIN}:${PATH}"') < launcher.index(
+        'PATH="${LINUX_NPM_BIN}:${PATH}"'
+    )
+    assert 'local_state_audit.py" audit' in launcher
+
+
+def test_environment_check_invokes_tracked_non_executable_helpers_via_bash() -> None:
+    root = _project_root()
+    helper = (root / "scripts/ai/codex/helper/check-env.sh").read_text(
+        encoding="utf-8"
+    )
+
+    assert '[[ -f "${ENSURE_SCRIPT}" ]]' in helper
+    assert 'timeout 10 bash "${ENSURE_SCRIPT}"' in helper
+    assert '[[ -f "${ENSURE_MCP_SCRIPT}" ]]' in helper
+    assert 'timeout 30 bash "${ENSURE_MCP_SCRIPT}"' in helper
+    assert "bash -c" not in helper
+
+
 def test_powershell_codex_launcher_is_thin_transport_to_canonical_wsl_entrypoint() -> (
     None
 ):

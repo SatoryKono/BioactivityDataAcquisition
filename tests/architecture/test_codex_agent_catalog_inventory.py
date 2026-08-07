@@ -12,26 +12,18 @@
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
 import pytest
+
+from scripts.ai.codex.native_runtime_contract import AGENT_NAMES
 
 ROOT = Path(__file__).resolve().parents[2]
 AGENTS_DIR = ROOT / ".codex" / "agents"
 ORCHESTRATION = AGENTS_DIR / "ORCHESTRATION.md"
 README = AGENTS_DIR / "README.md"
 
-ACTIVE_RUNTIME_PROFILES = frozenset(
-    {
-        "py-audit-bot",
-        "py-config-bot",
-        "py-debug-bot",
-        "py-doc-bot",
-        "py-plan-bot",
-        "py-test-bot",
-    }
-)
+ACTIVE_RUNTIME_PROFILES = frozenset(AGENT_NAMES)
 
 
 pytestmark = pytest.mark.architecture
@@ -48,13 +40,10 @@ def test_orchestration_mentions_every_active_profile() -> None:
         assert name in text, f"ORCHESTRATION.md missing active profile {name}"
 
 
-def test_agent_readme_lists_six_active_and_marks_sp_docs_only() -> None:
+def test_agent_readme_uses_the_canonical_active_inventory() -> None:
     text = README.read_text(encoding="utf-8")
-    assert "6 active" in text
-    assert "docs-only" in text.lower() or "Docs-only" in text
-    # No claim that sp-* are runtime agents under .codex/agents
-    assert "Generic Utilities (12 agents)" not in text
+    assert "## Active roles" in text
+    assert "native_runtime_contract.py" in text
     for name in sorted(ACTIVE_RUNTIME_PROFILES):
         assert f"`{name}`" in text
-    # sp profiles must be labeled non-runtime
-    assert re.search(r"sp-code-reviewer.*docs-only", text, re.I | re.S)
+    assert "sp-code-reviewer" not in text
