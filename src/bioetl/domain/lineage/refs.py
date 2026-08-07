@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 
@@ -9,6 +10,7 @@ from bioetl.domain.lineage._shared import (
     load_optional_int,
     load_optional_str,
     load_optional_version,
+    mapping_to_plain,
     normalize_mapping,
 )
 from bioetl.domain.medallion import Layer
@@ -20,6 +22,16 @@ __all__ = [
     "SchemaRef",
     "TransformRef",
 ]
+
+
+
+def _node_id_segment(value: str) -> str:
+    """Encode a node-id segment so ``:`` / ``@`` cannot collide with delimiters."""
+    return (
+        value.replace("%", "%25")
+        .replace(":", "%3A")
+        .replace("@", "%40")
+    )
 
 
 class LineageNodeType(StrEnum):
@@ -43,7 +55,7 @@ class LineageNodeRef:
     node_type: LineageNodeType
     node_id: str
     label: str | None = None
-    attributes: dict[str, object] = field(default_factory=dict)
+    attributes: Mapping[str, object] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Normalize input values for deterministic storage."""
@@ -55,7 +67,7 @@ class LineageNodeRef:
             "node_type": self.node_type.value,
             "node_id": self.node_id,
             "label": self.label,
-            "attributes": dict(self.attributes),
+            "attributes": mapping_to_plain(self.attributes),
         }
 
     @classmethod
@@ -95,9 +107,16 @@ class DatasetRef:
 
     @property
     def node_id(self) -> str:
-        """Return canonical dataset node identifier."""
-        version_part = f"@{self.version}" if self.version is not None else ""
-        return f"{self.layer}:{self.logical_name}{version_part}"
+        """Return canonical dataset node identifier.
+
+        ``logical_name`` and ``version`` are percent-encoded for ``:`` / ``@`` so a
+        name that embeds the version delimiter cannot collide with an explicit
+        versioned reference (e.g. ``foo@1`` vs logical ``foo`` + version ``1``).
+        """
+        name = _node_id_segment(str(self.logical_name))
+        if self.version is None:
+            return f"{self.layer}:{name}"
+        return f"{self.layer}:{name}@{_node_id_segment(str(self.version))}"
 
     def to_node_ref(self) -> LineageNodeRef:
         """Convert dataset reference into generic lineage node."""
