@@ -152,6 +152,10 @@ log_test.txt
 
 !/reports/quality/docs-open-runs-2-4-closeout-2026-07-28.md
 !/reports/quality/test-sys-2026-07-29-closeout.md
+!/reports/quality/codex-efficiency-baseline.json
+!/reports/quality/codex-local-state-audit.json
+!/reports/quality/codex-profile-benchmark.json
+!/reports/quality/codex-optimization-closeout-2026-08-07.md
 !/reports/quality/test-sys-01-bronze-nonchembl-inventory.json
 !/reports/quality/test-basename-collision-inventory.json
 !/reports/quality/test-system-audit-2026-07-29-issue-publish.json
