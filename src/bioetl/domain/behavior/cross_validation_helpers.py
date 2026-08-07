@@ -254,7 +254,12 @@ def _append_threshold_issue(
 
 
 def _is_valid_threshold(value: object | None) -> bool:
-    return value is None or (isinstance(value, (int, float)) and 0 <= value <= 1)
+    if value is None:
+        return True
+    # bool is a subclass of int — reject before numeric range checks.
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    return 0 <= value <= 1
 
 
 def _validate_coverage(

@@ -204,10 +204,20 @@ def _deterministic_record_id(record: JsonDict) -> str:
 def _empty_explainability_summary() -> JsonDict:
     return {
         "record_count": 0,
+        "field_count": 0,
+        "avg_fields_per_record": 0.0,
         "source_provider_distribution": {},
         "merge_strategy_distribution": {},
-        "conflict_summary": {"total_conflicts": 0, "conflict_rate": 0.0},
-        "enrichment_summary": {"total_enrichments": 0, "enrichment_rate": 0.0},
+        "conflict_summary": {
+            "total_conflicts": 0,
+            "conflict_rate": 0.0,
+            "records_with_conflicts": 0,
+        },
+        "enrichment_summary": {
+            "total_enrichments": 0,
+            "enrichment_rate": 0.0,
+            "records_with_enrichments": 0,
+        },
     }
 
 

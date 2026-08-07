@@ -71,8 +71,13 @@ class EntityIdentityGenerator:
         content_hash_exclude_fields: set[str] | None = None,
     ) -> None:
         """Initialize service with optional default content-hash field policy."""
-        self._content_hash_include_fields = content_hash_include_fields
-        self._content_hash_exclude_fields = content_hash_exclude_fields or set()
+        # Snapshot caller sets so later mutations cannot change hash policy.
+        self._content_hash_include_fields = (
+            set(content_hash_include_fields)
+            if content_hash_include_fields is not None
+            else None
+        )
+        self._content_hash_exclude_fields = set(content_hash_exclude_fields or ())
 
     def has_explicit_content_hash_policy(self) -> bool:
         """Return True when instance-level include/exclude hash field policy is set.

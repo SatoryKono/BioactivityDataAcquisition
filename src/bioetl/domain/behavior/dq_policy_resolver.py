@@ -215,12 +215,11 @@ class DQPolicyResolver:
         """Apply contract-specific adjustments to disposition."""
         # If we have a specific contract, we might have contract-specific rules
         # For now, this is a placeholder for future contract-specific logic
+        # Explicit config flag — do not infer contract role from path substrings.
         if (
-            self.config.contract_ref
-            and "gold" in self.config.contract_ref.lower()
+            self.config.strictness_mode == "strict"
             and disposition == DQDisposition.WARN
         ):
-            # Example: Gold contracts might be stricter
             disposition = DQDisposition.QUARANTINE
 
         return disposition

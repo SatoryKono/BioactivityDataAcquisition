@@ -102,7 +102,7 @@ def changed_field_changes(
     old_required = set(old_schema.get("required", []))
     new_required = set(new_schema.get("required", []))
 
-    for field_name in set(old_properties).intersection(new_properties):
+    for field_name in sorted(set(old_properties).intersection(new_properties)):
         old_field = old_properties[field_name]
         new_field = new_properties[field_name]
 

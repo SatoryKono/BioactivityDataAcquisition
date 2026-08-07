@@ -108,13 +108,17 @@ def _build_cross_outcome(
     rule: CrossFieldValidation,
     *,
     resolver: DQPolicyResolver,
+    dq_config: DQConfig,
 ) -> DQRuleOutcome:
-    return resolver.create_rule_outcome(
+    outcome = resolver.create_rule_outcome(
         rule_id=f"cross.{rule.name}",
         violation_kind=DQViolationKind.BUSINESS_RULE_VIOLATION,
         severity=rule.severity,
         affected_fields=list(rule.fields),
         config_path=_config_path(resolver),
+    )
+    return _apply_invalid_record_policy(
+        outcome, dq_config=dq_config, severity=rule.severity
     )
 
 
@@ -199,7 +203,7 @@ def _evaluate_cross_rules(
     outcomes: list[DQRuleOutcome] = []
     for rule in dq_config.cross_field_validations:
         if _cross_rule_violated(record, rule):
-            outcomes.append(_build_cross_outcome(rule, resolver=resolver))
+            outcomes.append(_build_cross_outcome(rule, resolver=resolver, dq_config=dq_config))
     return outcomes
 
 

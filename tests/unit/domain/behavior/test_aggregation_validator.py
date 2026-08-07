@@ -88,11 +88,16 @@ def test_validate_aggregation_config_reports_missing_group_unsupported_and_shado
 
 
 def test_source_field_collection_supports_fallback_nested_schema() -> None:
+    # Arbitrary nested keys are no longer treated as source fields.
     fields = AggregationValidator()._get_source_fields(
         {"outer": {"nested": "value"}, "plain": "value"}
     )
+    assert fields == set()
 
-    assert fields == {"outer", "nested", "plain"}
+    fields = AggregationValidator()._get_source_fields(
+        {"columns": ["a", "b"], "noise": {"x": 1}}
+    )
+    assert fields == {"a", "b"}
 
 
 def test_post_aggregation_uniqueness_reports_duplicate_group_samples() -> None:

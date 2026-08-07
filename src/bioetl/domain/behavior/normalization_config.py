@@ -116,6 +116,8 @@ class NormalizationConfig:
         """Validate configuration."""
         if self.potency_threshold < 0:
             raise ValueError("potency_threshold cannot be negative")
+        if self.high_potency_threshold < 0:
+            raise ValueError("high_potency_threshold cannot be negative")
         if self.high_potency_threshold < self.potency_threshold:
             raise ValueError("high_potency_threshold must be >= potency_threshold")
         valid_methods = {"mean", "median", "geometric_mean"}

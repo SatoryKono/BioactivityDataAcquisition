@@ -85,6 +85,12 @@ def validate_percent_value(value: float) -> tuple[bool, str | None]:
     Returns:
         Tuple of (is_valid, error_message). error_message is None if valid.
     """
+    import math
+
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False, f"Percent inhibition must be numeric, got {type(value).__name__}"
+    if math.isnan(value) or math.isinf(value):
+        return False, f"Percent inhibition must be finite, got {value}"
     if value < 0 or value > 100:
         return False, f"Percent inhibition must be 0-100, got {value}"
     return True, None

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum
 
@@ -25,4 +26,14 @@ class PreflightGovernanceConfig:
     policy: GovernancePolicy
     ci_integration: bool = False
     fail_fast: bool = True
-    issue_code_overrides: dict[str, ValidationSeverity] | None = None
+    issue_code_overrides: Mapping[str, ValidationSeverity] | None = None
+
+    def __post_init__(self) -> None:
+        """Snapshot overrides so callers cannot mutate governance policy later."""
+        if self.issue_code_overrides is None:
+            return
+        object.__setattr__(
+            self,
+            "issue_code_overrides",
+            dict(self.issue_code_overrides),
+        )
