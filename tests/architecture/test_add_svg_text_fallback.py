@@ -26,7 +26,9 @@ pytestmark = pytest.mark.architecture
 
 def _load_fallback_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "diagrams" / "add_svg_text_fallback.py"
+    module_path = (
+        repo_root / "scripts" / "diagrams" / "fix" / "add_svg_text_fallback.py"
+    )
     spec = importlib.util.spec_from_file_location(
         "add_svg_text_fallback_module", module_path
     )
