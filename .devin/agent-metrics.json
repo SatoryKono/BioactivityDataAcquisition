@@ -142,6 +142,26 @@
       "last_used": null,
       "average_duration_ms": 0
     },
+    "docker": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "context7": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "ast-grep": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "mcp-code-interpreter": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
     "prometheus": {
       "call_count": 0,
       "last_used": null,
@@ -157,7 +177,52 @@
       "last_used": null,
       "average_duration_ms": 0
     },
+    "neo4j-cypher": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "neo4j-memory": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
     "mermaid": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "deja": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "adr-analysis": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "mutmut": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "code-analyzer": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "github-actions": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "deepwiki": {
+      "call_count": 0,
+      "last_used": null,
+      "average_duration_ms": 0
+    },
+    "ref": {
       "call_count": 0,
       "last_used": null,
       "average_duration_ms": 0
