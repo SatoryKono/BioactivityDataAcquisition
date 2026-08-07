@@ -54,6 +54,7 @@ Commands:
     report-duplication-baseline  Generate report-only duplication baseline
     report-artifact-duplication-audit  Generate/check JSCPD-excluded governance artifact duplication audit
     report-function-length-inventory Generate report-only near-threshold function length inventory
+    find-complex-functions Report functions with high cognitive complexity
     report-normalization-fallback-inventory Generate report-only fallback normalization inventory
     report-chembl-observed-value-inventory Generate/check observed-value inventory from tracked ChEMBL Bronze fixtures
     report-observability-metric-inventory Generate registry/runtime/docs observability metric inventory
@@ -146,6 +147,7 @@ COMMAND_MODULES: dict[str, str] = {
         "scripts.engineering.qa.report_artifact_duplication_audit"
     ),
     "report-function-length-inventory": "scripts.engineering.qa.report_function_length_inventory",
+    "find-complex-functions": "scripts.engineering.find_complex_functions",
     "report-normalization-fallback-inventory": "scripts.engineering.qa.report_normalization_fallback_inventory",
     "report-chembl-observed-value-inventory": "scripts.engineering.qa.report_chembl_observed_value_inventory",
     "report-observability-metric-inventory": "scripts.engineering.qa.report_observability_metric_inventory",
