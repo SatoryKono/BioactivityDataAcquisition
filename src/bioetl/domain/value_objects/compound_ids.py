@@ -80,6 +80,8 @@ class CompoundId:
                 object.__setattr__(self, "value", str(validated_id.value))
             except ValueError as e:
                 raise ValueError(f"Invalid PubChem CID: {self.value}") from e
+        else:
+            raise ValueError(f"Unsupported compound source: {self.source!r}")
 
     @classmethod
     def from_chembl(cls, chembl_id: str) -> Self:
