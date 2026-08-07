@@ -77,10 +77,16 @@ class ResolutionInfo:
 
     def __post_init__(self) -> None:
         """Validate resolution info."""
-        if self.resolution_type not in {"ignored", "reprocessed", "expired"}:
+        allowed = {
+            status.value
+            for status in QuarantineStatus
+            if status.is_terminal()
+        }
+        if self.resolution_type not in allowed:
+            allowed_list = ", ".join(repr(value) for value in sorted(allowed))
             raise ValueError(
                 f"Invalid resolution_type: {self.resolution_type}. "
-                "Must be 'ignored', 'reprocessed', or 'expired'."
+                f"Must be one of: {allowed_list}."
             )
 
 

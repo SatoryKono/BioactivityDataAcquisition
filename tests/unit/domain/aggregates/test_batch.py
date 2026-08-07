@@ -206,7 +206,7 @@ class TestBatchStateTransitions:
 
         batch.seal_with_counts(
             record_count=3,
-            valid_count=1,
+            valid_count=2,
             quarantined_count=1,
             sealed_at=_ts(10),
         )
@@ -215,7 +215,7 @@ class TestBatchStateTransitions:
         assert batch.status == BatchStatus.SEALED
         assert events[0].__class__.__name__ == "BatchSealed"
         assert events[0].record_count == 3
-        assert events[0].valid_count == 1
+        assert events[0].valid_count == 2
         assert events[0].quarantined_count == 1
 
     def test_cannot_seal_already_sealed(self, batch: Batch) -> None:
@@ -348,8 +348,7 @@ class TestBatchQuarantine:
         """Invariant: Cannot quarantine record from another batch."""
         other_batch = Batch.create(run_id=run_id, created_at=_ts(1))
         foreign_record = other_batch.add_record({"id": "1"})
-
-        batch.add_record({"id": "2"})
+        # Leave target batch empty so foreign index is out of local bounds.
 
         with pytest.raises(ValueError, match="does not belong"):
             batch.quarantine_record(

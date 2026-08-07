@@ -562,10 +562,10 @@ class TestBatchMutationMixin:
     def test_quarantine_record_raises_for_foreign_record(self, run_id):
         """quarantine_record should raise ValueError for record from another batch."""
         batch1 = Batch.create(run_id=run_id, created_at=_ts(0))
+        # Keep batch2 empty so foreign record.index is out of local bounds.
         batch2 = Batch.create(run_id=run_id, created_at=_ts(1))
 
         foreign_record = batch1.add_record({"id": "1"})
-        batch2.add_record({"id": "2"})
 
         with pytest.raises(ValueError, match="does not belong to this batch"):
             batch2.quarantine_record(

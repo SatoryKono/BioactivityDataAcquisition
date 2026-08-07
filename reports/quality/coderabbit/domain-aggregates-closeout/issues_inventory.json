@@ -1,0 +1,38 @@
+[
+  {
+    "number": 8172,
+    "severity": "major",
+    "path": "src/bioetl/domain/aggregates/pipeline_run_stage_result.py",
+    "claim": "In @src/bioetl/domain/aggregates/pipeline_run_stage_result.py around lines 31 - 42, Update _validate_stage_result and its callers to accept started_at, then reject any completed_at for PENDING or RUNNING stages and reject completed_at values earlier than started_at. Ensure duration_seconds only treats valid completed stages as finished and cannot produce a negative duration."
+  },
+  {
+    "number": 8173,
+    "severity": "minor",
+    "path": "src/bioetl/domain/aggregates/_batch_lifecycle.py",
+    "claim": "In @src/bioetl/domain/aggregates/_batch_lifecycle.py around lines 229 - 239, Update the record_id assignment in the RecordQuarantined construction to check entity_id explicitly against None instead of relying on truthiness, preserving valid empty-string and zero identifiers while still mapping a missing entity_id to None."
+  },
+  {
+    "number": 8174,
+    "severity": "minor",
+    "path": "src/bioetl/domain/aggregates/_batch_mixins.py",
+    "claim": "In @src/bioetl/domain/aggregates/_batch_mixins.py around lines 225 - 248, Добавьте в метод seal_with_counts проверку согласованности входных счётчиков до вызова lifecycle.seal: все значения должны быть неотрицательными, а valid_count плюс quarantined_count должен равняться record_count. При нарушении инварианта отклоняйте переход подходящим исключением, не создавая событие BatchSealed."
+  },
+  {
+    "number": 8175,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/aggregates/_batch_mixins.py",
+    "claim": "In @src/bioetl/domain/aggregates/_batch_mixins.py around lines 177 - 196, В методе quarantine_record замените проверки record not in self._records и self._records.index(record) прямым вычислением позиции через BatchRecord.index относительно self._start_index. Проверьте границы полученной позиции и сохраните ошибку ValueError для записей, не принадлежащих батчу; затем замените запись по вычисленному индексу без сравнений содержимого."
+  },
+  {
+    "number": 8176,
+    "severity": "minor",
+    "path": "src/bioetl/domain/aggregates/_quarantine_aggregate.py",
+    "claim": "In @src/bioetl/domain/aggregates/_quarantine_aggregate.py around lines 56 - 67, Исправьте doctest-пример вокруг QuarantineEntry.create, добавив обязательный именованный аргумент created_at. Проверьте сигнатуры start_review и mark_ignored и передайте им явные метки времени, используя согласованные значения timestamp, как и в остальных переходах этого слоя."
+  },
+  {
+    "number": 8177,
+    "severity": "trivial",
+    "path": "src/bioetl/domain/aggregates/_quarantine_value_objects.py",
+    "claim": "In @src/bioetl/domain/aggregates/_quarantine_value_objects.py around lines 78 - 84, Обновите валидацию в методе __post_init__ так, чтобы допустимый набор resolution_type формировался из значений QuarantineStatus, а не из строковых литералов. Сохраните текущую ошибку ValueError и её информативное сообщение, адаптировав перечисление допустимых значений к источнику enum."
+  }
+]
