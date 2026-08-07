@@ -200,8 +200,7 @@ Machine-readable каталог для structure hygiene хранится в
 - допустимую D-серию `docs/D-*.md` как `repo-only sync notes` с каноническими
   successor pages;
 - разрешённый живой состав `docs/plans/**` и правило `max_active_backlog = 1`;
-- допустимые sidecar roots под `src/`: `src/bioetl`, `src/tools`,
-  `src/memory`;
+- допустимые sidecar roots под `src/`: `src/bioetl`, `src/memory`;
 - approved docs-resident code zones under `docs/00-project/ai/agents/**` and
   `docs/plugins/link_checker/**`;
 - tolerated local-only hidden root trees such as `.agent-work/`,
@@ -253,12 +252,9 @@ Machine-readable каталог для structure hygiene хранится в
 ### 0.4. Sidecar code under `src/`
 
 - `src/bioetl/` остаётся canonical runtime tree.
-- `src/tools/` разрешён как approved sidecar tooling surface для project
-  utilities, которые могут импортировать `bioetl`, но не являются primary
-  contributor entrypoint.
 - `src/memory/` разрешён как approved sidecar memory subsystem с собственной
   policy/schema/tooling поверхностью.
-- Новые top-level пакеты под `src/` вне этих трёх roots MUST FAIL structure
+- Новые top-level пакеты под `src/` вне этих двух roots MUST FAIL structure
   governance until they are explicitly ratified.
 
 ### 0.4.1. Shared test support under `tests/`

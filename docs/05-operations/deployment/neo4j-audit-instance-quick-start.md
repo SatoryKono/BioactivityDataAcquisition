@@ -28,7 +28,7 @@ All files are ready to use. No additional setup needed.
 
 ### Code Integration
 
-- **src/tools/neo4j_audit.py** — Helper functions for context-aware connections
+- **scripts/ops/data/neo4j_audit.py** — Helper functions for context-aware connections
 
 ### Documentation
 
@@ -123,7 +123,7 @@ ______________________________________________________________________
 ## Integration Checklist
 
 - [ ] Review docker-compose.neo4j-audit.yml
-- [ ] Review src/tools/neo4j_audit.py
+- [ ] Review scripts/ops/data/neo4j_audit.py
 - [ ] Update Neo4j connection code to use `get_neo4j_uri()` and `get_neo4j_auth()`
 - [ ] Set `LIVE_AUDIT_MODE=1` before running live validation
 - [ ] Test: Run `live --apply --batch-size 5`

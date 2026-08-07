@@ -36,7 +36,7 @@ ______________________________________________________________________
    - Bash version for WSL/Linux
    - Same functionality as PowerShell version
 
-1. ✅ **src/tools/neo4j_audit.py**
+1. ✅ **scripts/ops/data/neo4j_audit.py**
 
    - Helper functions for context-aware Neo4j connection
    - Automatically uses audit instance if LIVE_AUDIT_MODE=1
