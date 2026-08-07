@@ -93,9 +93,9 @@ ______________________________________________________________________
 
 | Файл                           | Директория                       | bioetl? | Unified command                                              | Make-цель    | Описание                                   |
 | ------------------------------ | -------------------------------- | ------- | ------------------------------------------------------------ | ------------ | ------------------------------------------ |
-| `create_pipeline.py`           | src/tools/                       | Да      | —                                                            | —            | Генерация boilerplate для новых пайплайнов |
-| `verify_schema_parity.py`      | src/tools/                       | Да      | —                                                            | —            | Верификация Silver↔Gold schema parity      |
-| `file_merger.py`               | src/tools/                       | Нет     | —                                                            | —            | Объединение файлов с метаданными           |
+| `create_pipeline.py`           | scripts/engineering/dev/          | Да      | `uv run python -m scripts.engineering.dev create-pipeline`   | —            | Генерация boilerplate для новых пайплайнов |
+| `verify_schema_parity.py`      | scripts/schema/validation/        | Да      | `uv run python -m scripts.schema verify-schema-parity`       | —            | Верификация Silver↔Gold schema parity      |
+| `file_merger.py`               | scripts/engineering/common/       | Нет     | —                                                            | —            | Объединение файлов с метаданными           |
 | `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics cleanup`   | `make clean` | Очистка локальных кэшей и build-артефактов |
 | `cleanup_consolidate.py`       | scripts/engineering/diagnostics/ | Нет     | —                                                            | —            | Консолидированный аудит очистки            |
 | `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics audit-structure` | —     | Аудит соответствия File Policy             |
