@@ -219,7 +219,7 @@ class PubChemCid(ValueObject[int]):
                 raise ValueError(f"Invalid PubChem CID: {value!r}") from None
         raise ValueError(f"PubChemCid must be int, got {type(value).__name__}")
 
-    def _validate(self, value: int) -> int:
+    def _validate(self, value: int | str) -> int:
         """Validate PubChem CID.
 
         Args:

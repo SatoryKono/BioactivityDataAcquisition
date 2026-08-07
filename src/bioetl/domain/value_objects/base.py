@@ -36,7 +36,7 @@ class ValueObject[T](ABC):
         _value: The validated internal value.
     """
 
-    __slots__ = ("_value",)
+    __slots__ = ("_value", "_initialized")
 
     _value: T  # Type annotation for mypy
 
@@ -49,8 +49,10 @@ class ValueObject[T](ABC):
         Raises:
             ValueError: If validation fails.
         """
+        object.__setattr__(self, "_initialized", False)
         validated = self._validate(value)
         object.__setattr__(self, "_value", validated)
+        object.__setattr__(self, "_initialized", True)
 
     @property
     def value(self) -> T:
@@ -101,7 +103,7 @@ class ValueObject[T](ABC):
         value: Any,  # Any: Python __setattr__ protocol requires Any
     ) -> None:
         """Prevent mutation of Value Object."""
-        if hasattr(self, "_value"):
+        if getattr(self, "_initialized", False):
             raise AttributeError(f"{self.__class__.__name__} is immutable")
         object.__setattr__(self, name, value)
 

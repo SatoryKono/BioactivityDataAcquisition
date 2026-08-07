@@ -51,6 +51,9 @@ class PublicationFieldGroup(StrEnum):
 
         Returns:
             Matching PublicationFieldGroup enum member.
+
+        Raises:
+            ValueError: If the group name is unknown or invalid.
         """
         normalized = value.lower().strip()
         try:

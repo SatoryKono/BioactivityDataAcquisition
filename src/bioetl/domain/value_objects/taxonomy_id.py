@@ -177,10 +177,10 @@ def validate_taxonomy_id(value: object) -> int | None:
         9606
         >>> validate_taxonomy_id("9606")
         9606
-        >>> validate_taxonomy_id(None)
-        None
-        >>> validate_taxonomy_id("invalid")
-        None
+        >>> validate_taxonomy_id(None) is None
+        True
+        >>> validate_taxonomy_id("invalid") is None
+        True
     """
     vo = TaxonomyId.from_raw(value)
     return vo.value if vo else None

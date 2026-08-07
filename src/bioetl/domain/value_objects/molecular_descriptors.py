@@ -26,9 +26,7 @@ Usage::
 from __future__ import annotations
 
 import math
-from typing import (
-    Any,  # Any: needed for _validate override accepting Any from base class
-)
+from typing import Any, Self  # Any: needed for _validate override accepting Any from base class
 
 from bioetl.domain.schemas.constants import (
     CANONICAL_HBA_COUNT_RANGE,
@@ -101,7 +99,7 @@ class _BoundedIntVO(ValueObject[int]):
     def from_raw(
         cls,
         raw: object,
-    ) -> _BoundedIntVO | None:
+    ) -> Self | None:
         """Create from raw value; returns ``None`` on invalid input.
 
         Args:
@@ -175,7 +173,7 @@ class _BoundedFloatVO(ValueObject[float]):
     def from_raw(
         cls,
         raw: object,
-    ) -> _BoundedFloatVO | None:
+    ) -> Self | None:
         """Create from raw value; returns ``None`` on invalid input.
 
         Args:
