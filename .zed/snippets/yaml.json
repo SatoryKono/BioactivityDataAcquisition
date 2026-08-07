@@ -1,170 +1,97 @@
 {
   "BioETL Pipeline Config": {
     "prefix": "bioetl-pipeline-config",
-    "description": "Create a BioETL pipeline configuration",
+    "description": "Entity pipeline config scaffold (configs/entities shape)",
     "body": [
-      "# BioETL Pipeline Configuration",
-      "pipeline_name: ${1:provider}.${2:entity}",
-      "version: \"1.0.0\"",
-      "idempotency_contract: merge_upsert",
-      "",
-      "provider:",
-      "  name: ${1:provider}",
-      "  base_url: ${3:https://api.example.com}",
-      "  timeout: 30",
-      "  retry:",
-      "    max_attempts: 3",
-      "    backoff_factor: 2",
-      "",
-      "entity:",
-      "  name: ${2:entity}",
-      "  schema: ${4:SchemaName}",
-      "",
-      "extraction:",
-      "  batch_size: 100",
-      "  parallel_requests: 5",
-      "",
-      "transformation:",
-      "  normalize: true",
-      "  validate: true",
-      "",
-      "quality:",
-      "  completeness_threshold: 0.95",
-      "  validity_threshold: 0.90",
-      "",
-      "output:",
-      "  storage: ${5:delta}",
-      "  compression: zstd",
-      "  layer: ${6:curated}"
+      "version: 1.0.0",
+      "provider: ${1:chembl}",
+      "entity: ${2:activity}",
+      "pipeline:",
+      "  pipeline_name: ${1:chembl}_${2:activity}",
+      "  provider: ${1:chembl}",
+      "  entity_type: ${2:activity}",
+      "  description: ${3:Extract records from provider API}",
+      "  field_policy: {}",
+      "  business_primary_keys:",
+      "  - ${4:activity_id}",
+      "  batch_size: 1000",
+      "  checkpoint_interval: 1000",
+      "  sink:",
+      "    silver:",
+      "      mode: merge",
+      "      idempotency_contract: merge_upsert",
+      "      partition_by: []",
+      "    gold:",
+      "      enabled: true"
     ]
   },
-  "BioETL Data Quality Rules": {
-    "prefix": "bioetl-dq-rules",
-    "description": "Create BioETL data quality rules configuration",
+  "BioETL DQ Rule": {
+    "prefix": "bioetl-dq-rule",
+    "description": "DQ ranges/required_fields fragment",
     "body": [
-      "# Data Quality Rules",
-      "rules:",
-      "  - name: ${1:rule_name}",
-      "    description: \"${2:Rule description}\"",
-      "    severity: error",
-      "    condition:",
-      "      field: ${3:field_name}",
-      "      operator: ${4:not_null}",
-      "      value: ${5:value}",
-      "    threshold: ${6:0.95}"
+      "ranges:",
+      "  ${1:standard_value}:",
+      "    min: ${2:0}",
+      "    include_min: false",
+      "required_fields:",
+      "- ${3:standard_type}",
+      "- ${4:standard_value}",
+      "- ${5:standard_units}"
     ]
   },
-  "BioETL Provider Config": {
-    "prefix": "bioetl-provider-config",
-    "description": "Create a BioETL provider configuration",
+  "BioETL Retry Policy": {
+    "prefix": "bioetl-retry-policy",
+    "description": "Provider retry fragment (configs/providers)",
     "body": [
-      "# Provider Configuration",
-      "provider:",
-      "  name: ${1:ProviderName}",
-      "  display_name: \"${2:Display Name}\"",
-      "  base_url: ${3:https://api.example.com}",
-      "  documentation: ${4:https://docs.example.com}",
-      "  auth:",
-      "    type: ${5:none}",
-      "    required: false",
-      "  rate_limit:",
-      "    requests_per_minute: ${6:60}",
-      "    burst_size: ${7:10}",
-      "  endpoints:",
-      "    - name: ${8:endpoint_name}",
-      "      path: ${9:/api/v1/endpoint}",
-      "      method: GET",
-      "      required_params:",
-      "        - ${10:param1}"
+      "retry:",
+      "    use_retry_after: ${1:true}"
     ]
   },
-  "BioETL Schema Mapping": {
-    "prefix": "bioetl-schema-mapping",
-    "description": "Create a BioETL schema mapping configuration",
+  "BioETL Rate Limit": {
+    "prefix": "bioetl-rate-limit",
+    "description": "Provider rate_limit fragment (configs/providers)",
     "body": [
-      "# Schema Mapping",
-      "mapping:",
-      "  source_schema: ${1:SourceSchema}",
-      "  target_schema: ${2:TargetSchema}",
-      "  field_mappings:",
-      "    - source: ${3:source_field}",
-      "      target: ${4:target_field}",
-      "      transformation: ${5:identity}",
-      "      required: true",
-      "    - source: ${6:source_field2}",
-      "      target: ${7:target_field2}",
-      "      transformation: ${8:uppercase}",
-      "      required: false"
+      "rate_limit:",
+      "    requests_per_second: ${1:0.1}",
+      "    burst: ${2:1}"
     ]
   },
-  "BioETL Medallion Config": {
-    "prefix": "bioetl-medallion-config",
-    "description": "Create a BioETL medallion architecture configuration",
+  "BioETL Composite Enricher": {
+    "prefix": "bioetl-composite-enricher",
+    "description": "Composite enricher; join_keys subset of seed.output_keys",
     "body": [
-      "# Medallion Architecture Configuration",
-      "medallion:",
-      "  raw:",
-      "    path: storage/raw/${1:provider}",
-      "    storage: object",
-      "    compression: none",
-      "    append_only: true",
-      "  curated:",
-      "    path: storage/curated/${1:provider}",
-      "    storage: delta",
-      "    compression: zstd",
+      "# ADR-026: enricher.join_keys must be a subset of seed.output_keys",
+      "enrichers:",
+      "  - pipeline: ${1:chembl_compound_record}",
+      "    join_keys:",
+      "    - ${2:molecule_id}",
+      "    required: ${3:false}",
+      "    timeout_seconds: ${4:600}",
+      "    silver_table: silver/${5:chembl}/${6:compound_record}"
+    ]
+  },
+  "BioETL Field Priority": {
+    "prefix": "bioetl-field-priority",
+    "description": "Composite merge field_priorities fragment",
+    "body": [
+      "merge:",
+      "  strategy: left_outer",
+      "  conflict_resolution: seed_priority",
+      "  field_priorities:",
+      "    ${1:canonical_name}:",
+      "    - seed",
+      "    - ${2:chembl_compound_record}"
+    ]
+  },
+  "BioETL Sink Silver Merge": {
+    "prefix": "bioetl-sink-silver",
+    "description": "Silver sink merge fragment",
+    "body": [
+      "sink:",
+      "  silver:",
+      "    mode: merge",
       "    idempotency_contract: merge_upsert",
-      "    idempotency_key: ${2:record_id}",
-      "  serving:",
-      "    path: storage/serving/${1:provider}",
-      "    storage: delta",
-      "    compression: zstd",
-      "    validation: strict"
-    ]
-  },
-  "BioETL Observability Config": {
-    "prefix": "bioetl-observability-config",
-    "description": "Create a BioETL observability configuration",
-    "body": [
-      "# Observability Configuration",
-      "observability:",
-      "  logging:",
-      "    level: INFO",
-      "    structured: true",
-      "    format: json",
-      "  metrics:",
-      "    enabled: true",
-      "    backend: prometheus",
-      "    port: 9090",
-      "  tracing:",
-      "    enabled: false",
-      "    exporter: otlp",
-      "    endpoint: http://localhost:4317"
-    ]
-  },
-  "BioETL Test Config": {
-    "prefix": "bioetl-test-config",
-    "description": "Create a BioETL test configuration",
-    "body": [
-      "# Test Configuration",
-      "tests:",
-      "  unit:",
-      "    path: tests/unit",
-      "    markers:",
-      "      - unit",
-      "      - fast",
-      "  integration:",
-      "    path: tests/integration",
-      "    markers:",
-      "      - integration",
-      "      - slow",
-      "  e2e:",
-      "    path: tests/e2e",
-      "    markers:",
-      "      - e2e",
-      "      - very_slow",
-      "  coverage:",
-      "    threshold: 85",
-      "    branches: true"
+      "    partition_by: []"
     ]
   }
 }
