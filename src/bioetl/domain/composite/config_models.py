@@ -26,10 +26,10 @@ from bioetl.domain.composite.config_merge import MergeConfig
 from bioetl.domain.composite.config_runtime import ExecutionConfig, LineageConfig
 from bioetl.domain.composite.config_schema import DataSchemaConfig, LayerColumnConfig
 from bioetl.domain.composite.config_validators import (
-    _coerce_to_tuple,
-    _require_non_empty,
-    _validate_positive,
-    _validate_positive_limit,
+    coerce_to_tuple,
+    require_non_empty,
+    validate_positive,
+    validate_positive_limit,
 )
 from bioetl.domain.composite.strategy import FallbackStrategy
 
@@ -59,14 +59,14 @@ class SeedConfig:
     limit: int | None = None
 
     def __post_init__(self) -> None:
-        _coerce_to_tuple(self, "output_keys")
+        coerce_to_tuple(self, "output_keys")
         self._validate()
 
     def _validate(self) -> None:
-        _require_non_empty(self.pipeline, "seed pipeline name")
-        _require_non_empty(self.output_keys, "seed output_keys")
-        _require_non_empty(self.silver_table, "seed silver_table")
-        _validate_positive_limit(self.limit, "seed")
+        require_non_empty(self.pipeline, "seed pipeline name")
+        require_non_empty(self.output_keys, "seed output_keys")
+        require_non_empty(self.silver_table, "seed silver_table")
+        validate_positive_limit(self.limit, "seed")
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,14 +84,14 @@ class DependencyConfig:
     key_filter: str | None = None
 
     def __post_init__(self) -> None:
-        _coerce_to_tuple(self, "join_keys")
-        _coerce_to_tuple(self, "filter_fields")
+        coerce_to_tuple(self, "join_keys")
+        coerce_to_tuple(self, "filter_fields")
         self._validate()
 
     def _validate(self) -> None:
-        _require_non_empty(self.pipeline, "dependency pipeline name")
-        _require_non_empty(self.join_keys, f"dependency {self.pipeline} join_keys")
-        _validate_positive(
+        require_non_empty(self.pipeline, "dependency pipeline name")
+        require_non_empty(self.join_keys, f"dependency {self.pipeline} join_keys")
+        validate_positive(
             self.timeout_seconds, f"dependency {self.pipeline} timeout_seconds"
         )
         if self.filter_fields and self.filter_field:
@@ -144,7 +144,7 @@ class EnricherConfig:
     aggregation: AggregationConfig | None = None
 
     def __post_init__(self) -> None:
-        _coerce_to_tuple(self, "join_keys")
+        coerce_to_tuple(self, "join_keys")
         if isinstance(self.fallback_strategy, str):
             object.__setattr__(
                 self,
@@ -166,12 +166,12 @@ class EnricherConfig:
         self._validate()
 
     def _validate(self) -> None:
-        _require_non_empty(self.pipeline, "enricher pipeline name")
-        _require_non_empty(self.join_keys, f"enricher {self.pipeline} join_keys")
-        _validate_positive(
+        require_non_empty(self.pipeline, "enricher pipeline name")
+        require_non_empty(self.join_keys, f"enricher {self.pipeline} join_keys")
+        validate_positive(
             self.timeout_seconds, f"enricher {self.pipeline} timeout_seconds"
         )
-        _validate_positive_limit(self.limit, f"enricher {self.pipeline}")
+        validate_positive_limit(self.limit, f"enricher {self.pipeline}")
         if (
             self.cardinality == EnricherCardinality.MANY_TO_ONE
             and self.aggregation is None

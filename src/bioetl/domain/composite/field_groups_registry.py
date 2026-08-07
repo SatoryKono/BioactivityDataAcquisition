@@ -39,10 +39,11 @@ class FieldGroupRegistry:
         for group_def in groups:
             self._group_to_def[group_def.group_id] = group_def
             for fm in group_def.fields:
-                self._field_to_group[fm.base_name.lower()] = fm.group
+                # Enclosing definition group_id is authoritative (not fm.group).
+                self._field_to_group[fm.base_name.lower()] = group_def.group_id
                 self._field_to_mapping[fm.base_name.lower()] = fm
                 for col in fm.provider_columns:
-                    self._column_to_group[col.lower()] = fm.group
+                    self._column_to_group[col.lower()] = group_def.group_id
 
     @property
     def groups(self) -> tuple[FieldGroupDefinition, ...]:

@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from bioetl.domain.immutability import deep_freeze_json, freeze_fields
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -31,15 +32,20 @@ class MergeResult:
     quarantine_payloads: tuple[JsonDict, ...] = ()
 
     def __post_init__(self) -> None:
-        """Convert lists to tuples for immutability."""
+        """Freeze nested mappings/payloads so callers cannot mutate state."""
         if isinstance(self.sources_used, list):
             object.__setattr__(self, "sources_used", tuple(self.sources_used))
-        if isinstance(self.quarantine_payloads, list):
-            object.__setattr__(
-                self,
-                "quarantine_payloads",
-                tuple(self.quarantine_payloads),
-            )
+        payloads = (
+            tuple(self.quarantine_payloads)
+            if isinstance(self.quarantine_payloads, list)
+            else self.quarantine_payloads
+        )
+        object.__setattr__(
+            self,
+            "quarantine_payloads",
+            tuple(deep_freeze_json(payload) for payload in payloads),
+        )
+        freeze_fields(self, ("field_coverage", "lineage_summary"))
 
     @property
     def enrichment_rate(self) -> float:

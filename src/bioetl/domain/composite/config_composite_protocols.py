@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import Protocol
 
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
+
+__all__ = ["CompositeConfigProtocol"]
 
 
 class _SeedConfigProtocol(Protocol):
@@ -17,6 +19,9 @@ class _SeedConfigProtocol(Protocol):
 
     @property
     def silver_table(self) -> str: ...
+
+    @property
+    def limit(self) -> int | None: ...
 
 
 class _DependencyConfigProtocol(Protocol):
@@ -36,7 +41,41 @@ class _DependencyConfigProtocol(Protocol):
     def silver_table(self) -> str | None: ...
 
     @property
+    def key_source(self) -> str | None: ...
+
+    @property
+    def filter_field(self) -> str | None: ...
+
+    @property
     def filter_fields(self) -> tuple[str, ...] | None: ...
+
+    @property
+    def key_filter(self) -> str | None: ...
+
+
+class _AggregationFieldProtocol(Protocol):
+    @property
+    def source_field(self) -> str: ...
+
+    @property
+    def agg_function(self) -> object: ...
+
+    @property
+    def filter_condition(self) -> str | None: ...
+
+    @property
+    def output_field(self) -> str | None: ...
+
+
+class _AggregationConfigProtocol(Protocol):
+    @property
+    def group_by(self) -> str: ...
+
+    @property
+    def order_by(self) -> tuple[str, ...]: ...
+
+    @property
+    def fields(self) -> Sequence[_AggregationFieldProtocol]: ...
 
 
 class _EnricherConfigProtocol(Protocol):
@@ -51,6 +90,38 @@ class _EnricherConfigProtocol(Protocol):
 
     @property
     def timeout_seconds(self) -> int: ...
+
+    @property
+    def filter_condition(self) -> str | None: ...
+
+    @property
+    def silver_table(self) -> str | None: ...
+
+    @property
+    def limit(self) -> int | None: ...
+
+    @property
+    def fallback_strategy(self) -> object: ...
+
+    @property
+    def cardinality(self) -> object: ...
+
+    @property
+    def aggregation(self) -> _AggregationConfigProtocol | None: ...
+
+
+class _ColumnGroupProtocol(Protocol):
+    @property
+    def name(self) -> str: ...
+
+    @property
+    def fields(self) -> tuple[str, ...]: ...
+
+    @property
+    def pattern(self) -> str | None: ...
+
+    @property
+    def provider_order(self) -> tuple[str, ...]: ...
 
 
 class _MergeConfigProtocol(Protocol):
@@ -72,6 +143,119 @@ class _MergeConfigProtocol(Protocol):
     @property
     def sort_by_gold(self) -> tuple[str, ...]: ...
 
+    @property
+    def field_priorities(self) -> Mapping[str, tuple[str, ...]]: ...
+
+    @property
+    def normalization_compatibility_overrides(self) -> Mapping[str, str]: ...
+
+    @property
+    def field_mappings(self) -> Mapping[str, str]: ...
+
+    @property
+    def column_groups(self) -> Sequence[_ColumnGroupProtocol]: ...
+
+    @property
+    def exclude_fields(self) -> tuple[str, ...]: ...
+
+    @property
+    def preserve_all_sources(self) -> bool: ...
+
+
+class _DQOverrideProtocol(Protocol):
+    @property
+    def soft_fail_threshold(self) -> float | None: ...
+
+    @property
+    def hard_fail_threshold(self) -> float | None: ...
+
+
+class _DQConfigProtocol(Protocol):
+    @property
+    def soft_fail_threshold(self) -> float: ...
+
+    @property
+    def hard_fail_threshold(self) -> float: ...
+
+    @property
+    def required_fields(self) -> tuple[str, ...]: ...
+
+    @property
+    def enricher_overrides(self) -> Mapping[str, _DQOverrideProtocol]: ...
+
+
+class _ExecutionConfigProtocol(Protocol):
+    @property
+    def max_concurrency(self) -> int: ...
+
+    @property
+    def checkpoint_enabled(self) -> bool: ...
+
+    @property
+    def retry_max_attempts(self) -> int: ...
+
+    @property
+    def retry_backoff_multiplier(self) -> float: ...
+
+
+class _LineageConfigProtocol(Protocol):
+    @property
+    def track_field_sources(self) -> bool: ...
+
+    @property
+    def track_timestamps(self) -> bool: ...
+
+    @property
+    def track_status(self) -> bool: ...
+
+    @property
+    def provider_lookup_fields(self) -> Mapping[str, Mapping[str, str]]: ...
+
+    @property
+    def track_source_for_fields(self) -> tuple[str, ...]: ...
+
+
+class _FieldComparisonProtocol(Protocol):
+    @property
+    def field_name(self) -> str: ...
+
+    @property
+    def method(self) -> object: ...
+
+    @property
+    def threshold(self) -> float: ...
+
+
+class _EnricherPairingProtocol(Protocol):
+    @property
+    def enricher_pipeline(self) -> str: ...
+
+    @property
+    def fields(self) -> Sequence[_FieldComparisonProtocol]: ...
+
+
+class _CrossValidationConfigProtocol(Protocol):
+    @property
+    def enabled(self) -> bool: ...
+
+    @property
+    def warning_threshold(self) -> int: ...
+
+    @property
+    def error_threshold(self) -> int: ...
+
+    @property
+    def quarantine_threshold(self) -> int: ...
+
+    @property
+    def fuzzy_threshold(self) -> float: ...
+
+    @property
+    def numeric_tolerance(self) -> float: ...
+
+    @property
+    def enricher_pairings(self) -> Sequence[_EnricherPairingProtocol]: ...
+
 
 class CompositeConfigProtocol(Protocol):
     @property
@@ -91,3 +275,15 @@ class CompositeConfigProtocol(Protocol):
 
     @property
     def merge(self) -> _MergeConfigProtocol: ...
+
+    @property
+    def dq(self) -> _DQConfigProtocol: ...
+
+    @property
+    def execution(self) -> _ExecutionConfigProtocol: ...
+
+    @property
+    def lineage(self) -> _LineageConfigProtocol: ...
+
+    @property
+    def cross_validation(self) -> _CrossValidationConfigProtocol: ...

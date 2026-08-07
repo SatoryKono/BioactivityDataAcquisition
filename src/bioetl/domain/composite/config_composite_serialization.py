@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 
 from bioetl.domain.composite.config_composite_protocols import (
     CompositeConfigProtocol,
 )
+from bioetl.domain.composite.config_cross_validation import CrossValidationConfig
+from bioetl.domain.composite.config_dq import CompositeDQConfig, DQOverrideConfig
 from bioetl.domain.composite.config_parsing import (
     optional_bool,
     optional_int,
@@ -16,6 +18,12 @@ from bioetl.domain.composite.config_parsing import (
     require_object_dict_sequence,
     require_str,
     require_str_tuple,
+)
+from bioetl.domain.composite.config_runtime import ExecutionConfig, LineageConfig
+from bioetl.domain.composite.cross_validation import (
+    ComparisonMethod,
+    EnricherFieldPairing,
+    FieldComparisonSpec,
 )
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
@@ -55,9 +63,14 @@ def _build_dependency_config[ConfigT](
         silver_table=optional_str(
             dep.get("silver_table"), "dependencies[].silver_table"
         ),
+        key_source=optional_str(dep.get("key_source"), "dependencies[].key_source"),
+        filter_field=optional_str(
+            dep.get("filter_field"), "dependencies[].filter_field"
+        ),
         filter_fields=optional_str_tuple(
             dep.get("filter_fields"), "dependencies[].filter_fields"
         ),
+        key_filter=optional_str(dep.get("key_filter"), "dependencies[].key_filter"),
     )
 
 
@@ -76,16 +89,34 @@ def _build_enricher_config[ConfigT](
     enricher_cls: Callable[..., ConfigT],
 ) -> ConfigT:
     """Build one enricher config from serialized mapping."""
-    return enricher_cls(
-        pipeline=require_str(enricher.get("pipeline"), "enrichers[].pipeline"),
-        join_keys=require_str_tuple(enricher.get("join_keys"), "enrichers[].join_keys"),
-        required=optional_bool(enricher.get("required"), False, "enrichers[].required"),
-        timeout_seconds=optional_int(
+    kwargs: dict[str, object] = {
+        "pipeline": require_str(enricher.get("pipeline"), "enrichers[].pipeline"),
+        "join_keys": require_str_tuple(
+            enricher.get("join_keys"), "enrichers[].join_keys"
+        ),
+        "required": optional_bool(
+            enricher.get("required"), False, "enrichers[].required"
+        ),
+        "timeout_seconds": optional_int(
             enricher.get("timeout_seconds"),
             "enrichers[].timeout_seconds",
             600,
         ),
-    )
+        "filter_condition": optional_str(
+            enricher.get("filter_condition"), "enrichers[].filter_condition"
+        ),
+        "silver_table": optional_str(
+            enricher.get("silver_table"), "enrichers[].silver_table"
+        ),
+        "limit": optional_int(enricher.get("limit"), "enrichers[].limit"),
+    }
+    if enricher.get("fallback_strategy") is not None:
+        kwargs["fallback_strategy"] = enricher.get("fallback_strategy")
+    if enricher.get("cardinality") is not None:
+        kwargs["cardinality"] = enricher.get("cardinality")
+    if enricher.get("aggregation") is not None:
+        kwargs["aggregation"] = enricher.get("aggregation")
+    return enricher_cls(**kwargs)
 
 
 def _build_enricher_configs[ConfigT](
@@ -126,6 +157,40 @@ def _build_merge_config[ConfigT](
             merge_data.get("sort_by_gold"), "merge.sort_by_gold"
         )
         or (),
+        field_priorities={
+            str(key): tuple(str(item) for item in value)
+            if isinstance(value, list | tuple)
+            else (str(value),)
+            for key, value in (
+                merge_data.get("field_priorities") or {}
+            ).items()  # type: ignore[union-attr]
+        }
+        if isinstance(merge_data.get("field_priorities"), dict)
+        else {},
+        normalization_compatibility_overrides={
+            str(key): str(value)
+            for key, value in (
+                merge_data.get("normalization_compatibility_overrides") or {}
+            ).items()  # type: ignore[union-attr]
+        }
+        if isinstance(merge_data.get("normalization_compatibility_overrides"), dict)
+        else {},
+        field_mappings={
+            str(key): str(value)
+            for key, value in (merge_data.get("field_mappings") or {}).items()  # type: ignore[union-attr]
+        }
+        if isinstance(merge_data.get("field_mappings"), dict)
+        else {},
+        column_groups=merge_data.get("column_groups") or (),
+        exclude_fields=optional_str_tuple(
+            merge_data.get("exclude_fields"), "merge.exclude_fields"
+        )
+        or (),
+        preserve_all_sources=optional_bool(
+            merge_data.get("preserve_all_sources"),
+            False,
+            "merge.preserve_all_sources",
+        ),
     )
 
 
@@ -145,6 +210,7 @@ def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
             "pipeline": config.seed.pipeline,
             "output_keys": list(config.seed.output_keys),
             "silver_table": config.seed.silver_table,
+            "limit": config.seed.limit,
         },
         "dependencies": [
             {
@@ -153,6 +219,9 @@ def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
                 "required": dependency.required,
                 "timeout_seconds": dependency.timeout_seconds,
                 "silver_table": dependency.silver_table,
+                "key_source": dependency.key_source,
+                "filter_field": dependency.filter_field,
+                "key_filter": dependency.key_filter,
                 **(
                     {"filter_fields": list(dependency.filter_fields)}
                     if dependency.filter_fields
@@ -167,6 +236,30 @@ def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
                 "join_keys": list(enricher.join_keys),
                 "required": enricher.required,
                 "timeout_seconds": enricher.timeout_seconds,
+                "filter_condition": enricher.filter_condition,
+                "silver_table": enricher.silver_table,
+                "limit": enricher.limit,
+                "fallback_strategy": enricher.fallback_strategy.value,
+                "cardinality": enricher.cardinality.value,
+                **(
+                    {
+                        "aggregation": {
+                            "group_by": enricher.aggregation.group_by,
+                            "order_by": list(enricher.aggregation.order_by),
+                            "fields": [
+                                {
+                                    "source_field": field.source_field,
+                                    "agg_function": field.agg_function.value,
+                                    "filter_condition": field.filter_condition,
+                                    "output_field": field.output_field,
+                                }
+                                for field in enricher.aggregation.fields
+                            ],
+                        }
+                    }
+                    if enricher.aggregation is not None
+                    else {}
+                ),
             }
             for enricher in config.enrichers
         ],
@@ -177,6 +270,74 @@ def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
             "output_gold_path": config.merge.output_gold_path,
             "sort_by_silver": list(config.merge.sort_by_silver),
             "sort_by_gold": list(config.merge.sort_by_gold),
+            "field_priorities": {
+                key: list(value) for key, value in config.merge.field_priorities.items()
+            },
+            "normalization_compatibility_overrides": dict(
+                config.merge.normalization_compatibility_overrides
+            ),
+            "field_mappings": dict(config.merge.field_mappings),
+            "column_groups": [
+                {
+                    "name": group.name,
+                    "fields": list(group.fields),
+                    "pattern": group.pattern,
+                    "provider_order": list(group.provider_order),
+                }
+                for group in config.merge.column_groups
+            ],
+            "exclude_fields": list(config.merge.exclude_fields),
+            "preserve_all_sources": config.merge.preserve_all_sources,
+        },
+        "dq": {
+            "soft_fail_threshold": config.dq.soft_fail_threshold,
+            "hard_fail_threshold": config.dq.hard_fail_threshold,
+            "required_fields": list(config.dq.required_fields),
+            "enricher_overrides": {
+                name: {
+                    "soft_fail_threshold": override.soft_fail_threshold,
+                    "hard_fail_threshold": override.hard_fail_threshold,
+                }
+                for name, override in config.dq.enricher_overrides.items()
+            },
+        },
+        "execution": {
+            "max_concurrency": config.execution.max_concurrency,
+            "checkpoint_enabled": config.execution.checkpoint_enabled,
+            "retry_max_attempts": config.execution.retry_max_attempts,
+            "retry_backoff_multiplier": config.execution.retry_backoff_multiplier,
+        },
+        "lineage": {
+            "track_field_sources": config.lineage.track_field_sources,
+            "track_timestamps": config.lineage.track_timestamps,
+            "track_status": config.lineage.track_status,
+            "provider_lookup_fields": {
+                provider: dict(fields)
+                for provider, fields in config.lineage.provider_lookup_fields.items()
+            },
+            "track_source_for_fields": list(config.lineage.track_source_for_fields),
+        },
+        "cross_validation": {
+            "enabled": config.cross_validation.enabled,
+            "warning_threshold": config.cross_validation.warning_threshold,
+            "error_threshold": config.cross_validation.error_threshold,
+            "quarantine_threshold": config.cross_validation.quarantine_threshold,
+            "fuzzy_threshold": config.cross_validation.fuzzy_threshold,
+            "numeric_tolerance": config.cross_validation.numeric_tolerance,
+            "enricher_pairings": [
+                {
+                    "enricher_pipeline": pairing.enricher_pipeline,
+                    "fields": [
+                        {
+                            "field_name": field.field_name,
+                            "method": field.method.value,
+                            "threshold": field.threshold,
+                        }
+                        for field in pairing.fields
+                    ],
+                }
+                for pairing in config.cross_validation.enricher_pairings
+            ],
         },
     }
 
@@ -222,11 +383,120 @@ def composite_from_dict[
     )
     merge = _build_merge_config(merge_data, merge_cls)
 
-    return composite_cls(
-        name=require_str(data.get("name"), "name"),
-        version=require_str(data.get("version"), "version"),
-        seed=seed,
-        dependencies=dependencies,
-        enrichers=enrichers,
-        merge=merge,
+    kwargs: dict[str, object] = {
+        "name": require_str(data.get("name"), "name"),
+        "version": require_str(data.get("version"), "version"),
+        "seed": seed,
+        "dependencies": dependencies,
+        "enrichers": enrichers,
+        "merge": merge,
+    }
+    if isinstance(data.get("dq"), dict):
+        kwargs["dq"] = _build_dq_config(require_object_dict(data.get("dq"), "dq"))
+    if isinstance(data.get("execution"), dict):
+        kwargs["execution"] = _build_execution_config(
+            require_object_dict(data.get("execution"), "execution")
+        )
+    if isinstance(data.get("lineage"), dict):
+        kwargs["lineage"] = _build_lineage_config(
+            require_object_dict(data.get("lineage"), "lineage")
+        )
+    if isinstance(data.get("cross_validation"), dict):
+        kwargs["cross_validation"] = _build_cross_validation_config(
+            require_object_dict(data.get("cross_validation"), "cross_validation")
+        )
+    return composite_cls(**kwargs)
+
+
+def _build_dq_config(dq_data: dict[str, object]) -> CompositeDQConfig:
+    overrides_raw = dq_data.get("enricher_overrides") or {}
+    overrides: dict[str, DQOverrideConfig] = {}
+    if isinstance(overrides_raw, Mapping):
+        for name, raw in overrides_raw.items():
+            if isinstance(raw, dict):
+                overrides[str(name)] = DQOverrideConfig(
+                    soft_fail_threshold=raw.get("soft_fail_threshold"),  # type: ignore[arg-type]
+                    hard_fail_threshold=raw.get("hard_fail_threshold"),  # type: ignore[arg-type]
+                )
+    return CompositeDQConfig(
+        soft_fail_threshold=float(dq_data.get("soft_fail_threshold", 0.10)),
+        hard_fail_threshold=float(dq_data.get("hard_fail_threshold", 0.50)),
+        enricher_overrides=overrides,
+        required_fields=tuple(
+            str(item) for item in (dq_data.get("required_fields") or ())
+        ),
+    )
+
+
+def _build_execution_config(execution_data: dict[str, object]) -> ExecutionConfig:
+    return ExecutionConfig(
+        max_concurrency=int(execution_data.get("max_concurrency", 4)),
+        checkpoint_enabled=bool(execution_data.get("checkpoint_enabled", True)),
+        retry_max_attempts=int(execution_data.get("retry_max_attempts", 3)),
+        retry_backoff_multiplier=float(
+            execution_data.get("retry_backoff_multiplier", 2.0)
+        ),
+    )
+
+
+def _build_lineage_config(lineage_data: dict[str, object]) -> LineageConfig:
+    lookup_raw = lineage_data.get("provider_lookup_fields") or {}
+    lookup: dict[str, dict[str, str]] = {}
+    if isinstance(lookup_raw, Mapping):
+        for provider, fields in lookup_raw.items():
+            if isinstance(fields, Mapping):
+                lookup[str(provider)] = {
+                    str(key): str(value) for key, value in fields.items()
+                }
+    track_fields = lineage_data.get("track_source_for_fields") or ()
+    return LineageConfig(
+        track_field_sources=bool(lineage_data.get("track_field_sources", True)),
+        track_timestamps=bool(lineage_data.get("track_timestamps", True)),
+        track_status=bool(lineage_data.get("track_status", True)),
+        provider_lookup_fields=lookup,
+        track_source_for_fields=tuple(str(item) for item in track_fields),
+    )
+
+
+def _build_cross_validation_config(
+    cv_data: dict[str, object],
+) -> CrossValidationConfig:
+    pairings_raw = cv_data.get("enricher_pairings") or ()
+    pairings: list[EnricherFieldPairing] = []
+    if isinstance(pairings_raw, list | tuple):
+        for raw in pairings_raw:
+            if not isinstance(raw, dict):
+                continue
+            fields_raw = raw.get("fields") or ()
+            fields: list[FieldComparisonSpec] = []
+            if isinstance(fields_raw, list | tuple):
+                for field in fields_raw:
+                    if not isinstance(field, dict):
+                        continue
+                    method = field.get("method", "exact")
+                    fields.append(
+                        FieldComparisonSpec(
+                            field_name=str(field.get("field_name") or ""),
+                            method=(
+                                ComparisonMethod(str(method))
+                                if not isinstance(method, ComparisonMethod)
+                                else method
+                            ),
+                            threshold=float(field.get("threshold", 0.0)),
+                        )
+                    )
+            pairings.append(
+                EnricherFieldPairing(
+                    enricher_pipeline=str(raw.get("enricher_pipeline") or ""),
+                    fields=tuple(fields),
+                )
+            )
+    return CrossValidationConfig(
+        enabled=bool(cv_data.get("enabled", True)),
+        warning_threshold=int(cv_data.get("warning_threshold", 1)),
+        error_threshold=int(cv_data.get("error_threshold", 2)),
+        quarantine_threshold=int(cv_data.get("quarantine_threshold", 2)),
+        fuzzy_threshold=float(cv_data.get("fuzzy_threshold", 0.8)),
+        numeric_tolerance=float(cv_data.get("numeric_tolerance", 0.10)),
+        enricher_pairings=tuple(pairings),
     )

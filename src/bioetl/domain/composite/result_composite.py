@@ -13,6 +13,7 @@ from bioetl.domain.composite.result_seed_dependency import (
     DependencyStatus,
     SeedResult,
 )
+from bioetl.domain.immutability import freeze_fields
 
 if TYPE_CHECKING:
     from bioetl.domain.composite.lineage import CompositeLineageMetadata
@@ -38,6 +39,18 @@ class CompositeResult:
     original_run_id: str | None = None
     _required_enrichers: frozenset[str] = field(default_factory=frozenset)
     _required_dependencies: frozenset[str] = field(default_factory=frozenset)
+
+    def __post_init__(self) -> None:
+        """Freeze result maps so callers cannot mutate composite state."""
+        if not isinstance(self._required_enrichers, frozenset):
+            object.__setattr__(
+                self, "_required_enrichers", frozenset(self._required_enrichers)
+            )
+        if not isinstance(self._required_dependencies, frozenset):
+            object.__setattr__(
+                self, "_required_dependencies", frozenset(self._required_dependencies)
+            )
+        freeze_fields(self, ("dependency_results", "enrichment_results"))
 
     @property
     def is_success(self) -> bool:

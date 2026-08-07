@@ -6,8 +6,8 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.config_validators import (
-    _validate_optional_threshold,
-    _validate_threshold_order,
+    validate_optional_threshold,
+    validate_threshold_order,
 )
 
 if TYPE_CHECKING:
@@ -36,9 +36,9 @@ class DQOverrideConfig:
 
     def __post_init__(self) -> None:
         """Validate threshold values."""
-        _validate_optional_threshold(self.soft_fail_threshold, "soft_fail_threshold")
-        _validate_optional_threshold(self.hard_fail_threshold, "hard_fail_threshold")
-        _validate_threshold_order(self.soft_fail_threshold, self.hard_fail_threshold)
+        validate_optional_threshold(self.soft_fail_threshold, "soft_fail_threshold")
+        validate_optional_threshold(self.hard_fail_threshold, "hard_fail_threshold")
+        validate_threshold_order(self.soft_fail_threshold, self.hard_fail_threshold)
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,6 +95,22 @@ class CompositeDQConfig:
             raise ValueError(
                 "soft_fail_threshold must be less than hard_fail_threshold"
             )
+        for enricher_name, override in self.enricher_overrides.items():
+            soft = (
+                override.soft_fail_threshold
+                if override.soft_fail_threshold is not None
+                else self.soft_fail_threshold
+            )
+            hard = (
+                override.hard_fail_threshold
+                if override.hard_fail_threshold is not None
+                else self.hard_fail_threshold
+            )
+            if soft >= hard:
+                raise ValueError(
+                    f"enricher '{enricher_name}' effective soft_fail_threshold "
+                    f"({soft}) must be less than effective hard_fail_threshold ({hard})"
+                )
 
     def get_enricher_soft_threshold(self, enricher_name: str) -> float:
         """Get effective soft threshold for an enricher.

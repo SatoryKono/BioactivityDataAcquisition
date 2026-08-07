@@ -6,8 +6,8 @@ from dataclasses import dataclass, field
 
 from bioetl.domain.composite.config_merge import ColumnGroupConfig
 from bioetl.domain.composite.config_validators import (
-    _coerce_to_tuple,
-    _coerce_to_typed_tuple,
+    coerce_to_tuple,
+    coerce_to_typed_tuple,
 )
 
 __all__ = ["DataSchemaConfig", "LayerColumnConfig"]
@@ -29,10 +29,10 @@ class LayerColumnConfig:
     rename_fields: dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        _coerce_to_tuple(self, "columns")
-        _coerce_to_tuple(self, "include_groups")
-        _coerce_to_tuple(self, "exclude_fields")
-        _coerce_to_typed_tuple(self, "column_groups", ColumnGroupConfig)
+        coerce_to_tuple(self, "columns")
+        coerce_to_tuple(self, "include_groups")
+        coerce_to_tuple(self, "exclude_fields")
+        coerce_to_typed_tuple(self, "column_groups", ColumnGroupConfig)
         if not isinstance(self.rename_fields, dict):
             object.__setattr__(self, "rename_fields", dict(self.rename_fields))
         self._validate()
@@ -64,7 +64,7 @@ class DataSchemaConfig:
     gold: LayerColumnConfig | None = None
 
     def __post_init__(self) -> None:
-        _coerce_to_typed_tuple(self, "column_groups", ColumnGroupConfig)
+        coerce_to_typed_tuple(self, "column_groups", ColumnGroupConfig)
         if isinstance(self.silver, dict):
             object.__setattr__(self, "silver", LayerColumnConfig(**self.silver))
         if isinstance(self.gold, dict):
@@ -80,7 +80,8 @@ class DataSchemaConfig:
             Layer-specific column groups if configured, otherwise the top-level groups.
         """
         layer_config: LayerColumnConfig | None = getattr(self, layer, None)
-        if layer_config and layer_config.column_groups:
+        # ``None`` means fall back to top-level groups; empty tuple means select none.
+        if layer_config is not None and layer_config.column_groups is not None:
             return layer_config.column_groups
         return self.column_groups
 
@@ -94,8 +95,9 @@ class DataSchemaConfig:
         Returns:
             True if the group should be included; False if the layer config
             restricts inclusion and the group name is absent.
+            ``include_groups is None`` means unrestricted; empty tuple excludes all.
         """
         layer_config = getattr(self, layer, None)
-        if not layer_config or not layer_config.include_groups:
+        if layer_config is None or layer_config.include_groups is None:
             return True
         return group_name in layer_config.include_groups

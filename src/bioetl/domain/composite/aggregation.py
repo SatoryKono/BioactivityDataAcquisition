@@ -12,6 +12,8 @@ import re
 from dataclasses import dataclass
 from enum import StrEnum
 
+from bioetl.domain.composite.config_validators import require_non_empty
+
 
 class AggregationFunction(StrEnum):
     """Supported aggregation functions for 1:M enrichers.
@@ -91,10 +93,6 @@ class EnricherCardinality(StrEnum):
             ) from None
 
 
-def _require_non_empty(value: str | tuple[object, ...], name: str) -> None:
-    """Validate that a value is non-empty."""
-    if not value:
-        raise ValueError(f"{name} cannot be empty")
 
 
 def _coerce_text_sequence(value: object, name: str) -> tuple[object, ...]:
@@ -204,7 +202,7 @@ class AggregationFieldSpec:
 
     def _validate(self) -> None:
         """Validate field specification."""
-        _require_non_empty(self.source_field, "aggregation source_field")
+        require_non_empty(self.source_field, "aggregation source_field")
         if self.filter_condition is not None:
             _validate_aggregation_filter_condition(self.filter_condition)
 
@@ -248,7 +246,7 @@ class AggregationConfig:
 
     def _validate(self) -> None:
         """Validate aggregation configuration."""
-        _require_non_empty(self.group_by, "aggregation group_by")
+        require_non_empty(self.group_by, "aggregation group_by")
         if not self.fields:
             raise ValueError("aggregation.fields cannot be empty")
 
