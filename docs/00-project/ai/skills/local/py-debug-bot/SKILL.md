@@ -6,7 +6,7 @@ ______________________________________________________________________
 
 ---
 name: "py-debug-bot"
-description: "Execute the BioETL py-debug-bot profile for reproducing, isolating, and fixing concrete failures. Use when tests, runtime behavior, CI logs, or user-provided stack traces need root-cause debugging."
+description: "Execute the read-only BioETL py-debug-bot profile for reproducing, isolating, and analyzing concrete failures. Use when tests, runtime behavior, CI logs, or user-provided stack traces need root-cause diagnosis."
 ---
 
 # py-debug-bot
@@ -30,7 +30,7 @@ description: "Execute the BioETL py-debug-bot profile for reproducing, isolating
 ## Trigger Scope
 
 Use this wrapper for failing tests, exceptions, timeouts, flaky behavior, or
-runtime symptoms that require reproduction and a narrow fix.
+runtime symptoms that require reproduction and root-cause guidance.
 
 ## Workflow
 
@@ -38,12 +38,13 @@ runtime symptoms that require reproduction and a narrow fix.
 1. Read and apply `../../agents/py-debug-bot.md`.
 1. Reproduce or explain why reproduction is blocked.
 1. Isolate the smallest responsible code/config/test surface.
-1. Validate the fix with the focused failing test first, then adjacent checks.
+1. Return a bounded remediation proposal and focused regression commands to the
+   authorized parent agent; do not modify files or runtime state.
 
 ## Expected Output
 
 - Root cause.
-- Fix summary.
+- Remediation guidance and confidence.
 - Reproduction command.
 - Focused validation command and result.
 
