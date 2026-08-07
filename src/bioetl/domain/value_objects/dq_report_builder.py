@@ -11,6 +11,13 @@ from bioetl.domain.value_objects.dq_report_enums import DQCheckStatus, DQReportS
 from bioetl.domain.value_objects.dq_report_results import DataFreshnessResult
 
 
+def _require_aware_timestamp(value: datetime, *, field_name: str = "timestamp") -> None:
+    """Reject naive datetimes so DQ report provenance is timezone-explicit."""
+    if value.tzinfo is None or value.tzinfo.utcoffset(value) is None:
+        raise ValueError(f"{field_name} must be timezone-aware UTC, got naive datetime")
+
+
+
 @dataclass(frozen=True, slots=True)
 class DQReportSummary:
     """Summary of DQ report results."""
@@ -62,7 +69,8 @@ class BronzeDQReport:
     summary: DQReportSummary
 
     def __post_init__(self) -> None:
-        """Validate layer is BRONZE."""
+        """Validate layer is BRONZE and timestamp is timezone-aware."""
+        _require_aware_timestamp(self.timestamp)
         if self.layer != MedallionLayer.BRONZE:
             raise ValueError(f"BronzeDQReport layer must be BRONZE, got {self.layer}")
 
@@ -97,7 +105,8 @@ class SilverDQReport:
     metadata_path: str | None = None
 
     def __post_init__(self) -> None:
-        """Validate layer and convert lists."""
+        """Validate layer, timestamp, and convert lists."""
+        _require_aware_timestamp(self.timestamp)
         if self.layer != MedallionLayer.SILVER:
             raise ValueError(f"SilverDQReport layer must be SILVER, got {self.layer}")
         if isinstance(self.source_batch_ids, list):
@@ -129,7 +138,8 @@ class GoldDQReport:
     summary: DQReportSummary
 
     def __post_init__(self) -> None:
-        """Validate layer is GOLD."""
+        """Validate layer is GOLD and timestamp is timezone-aware."""
+        _require_aware_timestamp(self.timestamp)
         if self.layer != MedallionLayer.GOLD:
             raise ValueError(f"GoldDQReport layer must be GOLD, got {self.layer}")
 
