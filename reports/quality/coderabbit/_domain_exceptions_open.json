@@ -1,0 +1,57 @@
+[
+  {
+    "number": 8165,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/base_exceptions.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8163,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/__init__.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8158,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/exceptions/validation.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8156,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/base.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8155,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/_redaction.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8164,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/infrastructure/_storage.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8162,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/network/service.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8161,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/exceptions/storage/_storage.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8160,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/exceptions/storage/__init__.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8157,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/exceptions/storage/_delta.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8159,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/exceptions/network_rate_limit_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  }
+]

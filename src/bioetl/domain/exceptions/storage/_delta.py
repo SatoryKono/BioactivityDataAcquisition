@@ -82,7 +82,8 @@ def _build_schema_validation_message(
     """Build error message for schema validation error."""
     parts = [f"Schema validation failed for '{table_path}'"]
 
-    if expected_columns and actual_columns:
+    # Include one-sided schema mismatches (only expected or only actual present).
+    if expected_columns or actual_columns:
         parts.extend(_format_column_diff(expected_columns, actual_columns))
 
     if type_mismatches:
