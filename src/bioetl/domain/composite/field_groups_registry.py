@@ -111,8 +111,14 @@ class FieldGroupRegistry:
 
         Returns:
             True if the column's semantic group is marked for Gold inclusion.
+            Prefers loaded ``FieldGroupDefinition.include_in_gold`` so custom
+            registry overrides are respected; falls back to enum metadata.
         """
-        return self.get_group(column).include_in_gold
+        group = self.get_group(column)
+        definition = self._group_to_def.get(group)
+        if definition is not None:
+            return definition.include_in_gold
+        return group.include_in_gold
 
     def get_gold_columns(self, columns: list[str]) -> list[str]:
         """Filter columns to only those included in Gold layer.

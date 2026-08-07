@@ -119,12 +119,12 @@ def _validate_unique_enrichers(config: CompositeConfigProtocol) -> None:
     for enricher in config.enrichers:
         (duplicates if enricher.pipeline in seen else seen).add(enricher.pipeline)
     if duplicates:
-        raise ValueError(f"Duplicate enricher pipelines: {duplicates}")
+        raise ValueError(f"Duplicate enricher pipelines: {sorted(duplicates)}")
 
 
 def _validate_unique_dependencies(config: CompositeConfigProtocol) -> None:
     """Validate that dependency pipeline names are unique."""
     names = [dependency.pipeline for dependency in config.dependencies]
     if len(names) != len(set(names)):
-        duplicates = [name for name in names if names.count(name) > 1]
-        raise ValueError(f"Duplicate dependency pipelines: {set(duplicates)}")
+        duplicates = sorted({name for name in names if names.count(name) > 1})
+        raise ValueError(f"Duplicate dependency pipelines: {duplicates}")

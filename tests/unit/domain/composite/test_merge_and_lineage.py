@@ -657,6 +657,7 @@ class TestCompositeResult:
                 "enr1": EnrichmentResult(
                     enricher_name="enr1",
                     status=EnrichmentStatus.SUCCESS,
+                    records_input=100,
                     records_enriched=50,
                 ),
             },
@@ -736,6 +737,7 @@ class TestCompositeResult:
                 "enr1": EnrichmentResult(
                     enricher_name="enr1",
                     status=EnrichmentStatus.SUCCESS,
+                    records_input=100,
                     records_enriched=50,
                 ),
                 "enr2": EnrichmentResult(
@@ -763,6 +765,7 @@ class TestCompositeResult:
                 "enr1": EnrichmentResult(
                     enricher_name="enr1",
                     status=EnrichmentStatus.SUCCESS,
+                    records_input=100,
                     records_enriched=50,
                 ),
                 "enr2": EnrichmentResult(
@@ -790,6 +793,7 @@ class TestCompositeResult:
                 "enr1": EnrichmentResult(
                     enricher_name="enr1",
                     status=EnrichmentStatus.SUCCESS,
+                    records_input=100,
                     records_enriched=50,
                 ),
                 "enr2": EnrichmentResult(
@@ -817,6 +821,7 @@ class TestCompositeResult:
                 "enr1": EnrichmentResult(
                     enricher_name="enr1",
                     status=EnrichmentStatus.SUCCESS,
+                    records_input=100,
                     records_enriched=50,
                 ),
                 "enr2": EnrichmentResult(
@@ -872,11 +877,13 @@ class TestCompositeResult:
                 "enr1": EnrichmentResult(
                     enricher_name="enr1",
                     status=EnrichmentStatus.SUCCESS,
+                    records_input=100,
                     records_enriched=50,
                 ),
                 "enr2": EnrichmentResult(
                     enricher_name="enr2",
                     status=EnrichmentStatus.SUCCESS,
+                    records_input=100,
                     records_enriched=30,
                 ),
             },
