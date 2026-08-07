@@ -290,6 +290,18 @@ def mock_metadata_coordinator_with_records(
     mock_silver_metadata.output = MagicMock()
     mock_silver_metadata.output.artifact_id = None
     mock_silver_metadata.output.lineage_fragment_id = None
+    detached_silver_metadata = MagicMock(spec=SilverMetadata)
+    detached_silver_metadata.runtime = MagicMock()
+    detached_silver_metadata.runtime.run_id = sample_records[0]["_run_id"]
+    detached_silver_metadata.runtime.manifest_id = None
+    detached_silver_metadata.delta = MagicMock()
+    detached_silver_metadata.delta.rows_inserted = len(sample_records)
+    detached_silver_metadata.delta.operation = "append"
+    detached_silver_metadata.delta.primary_key = ["id"]
+    detached_silver_metadata.output = MagicMock()
+    detached_silver_metadata.output.artifact_id = None
+    detached_silver_metadata.output.lineage_fragment_id = None
+    mock_silver_metadata.model_copy.return_value = detached_silver_metadata
     mock.create_silver_metadata.return_value = mock_silver_metadata
     mock.create_silver_metadata_bundle = MagicMock(
         side_effect=lambda input_data: MetadataLineageBundleResult(
@@ -308,6 +320,21 @@ def mock_metadata_coordinator_with_records(
     mock_gold_metadata.delta = MagicMock()
     mock_gold_metadata.delta.rows_inserted = len(sample_records)
     mock_gold_metadata.delta.operation = "overwrite"
+    mock_gold_metadata.runtime.manifest_id = None
+    mock_gold_metadata.output = MagicMock()
+    mock_gold_metadata.output.artifact_id = None
+    mock_gold_metadata.output.lineage_fragment_id = None
+    detached_gold_metadata = MagicMock(spec=GoldMetadata)
+    detached_gold_metadata.runtime = MagicMock()
+    detached_gold_metadata.runtime.run_id = sample_records[0]["_run_id"]
+    detached_gold_metadata.runtime.manifest_id = None
+    detached_gold_metadata.delta = MagicMock()
+    detached_gold_metadata.delta.rows_inserted = len(sample_records)
+    detached_gold_metadata.delta.operation = "overwrite"
+    detached_gold_metadata.output = MagicMock()
+    detached_gold_metadata.output.artifact_id = None
+    detached_gold_metadata.output.lineage_fragment_id = None
+    mock_gold_metadata.model_copy.return_value = detached_gold_metadata
     mock.create_gold_metadata.return_value = mock_gold_metadata
     mock.create_gold_metadata_bundle = MagicMock(
         side_effect=lambda input_data: MetadataLineageBundleResult(

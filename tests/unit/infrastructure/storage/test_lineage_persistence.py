@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from types import SimpleNamespace
 from unittest.mock import MagicMock, call
 
@@ -71,6 +72,10 @@ class _MetadataStub:
         self.runtime = SimpleNamespace(run_id="run-123", manifest_id=None)
         self.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
 
+    def model_copy(self, *, deep: bool = False) -> _MetadataStub:
+        _ = deep
+        return deepcopy(self)
+
 
 @pytest.mark.unit
 def test_resolve_metadata_and_lineage_fragment_prefers_bundle_method() -> None:
@@ -90,9 +95,10 @@ def test_resolve_metadata_and_lineage_fragment_prefers_bundle_method() -> None:
         fallback_factory=MagicMock(return_value=MagicMock()),
     )
 
-    assert resolved_metadata is metadata
+    assert resolved_metadata is not metadata
     assert resolved_fragment == fragment
-    assert metadata.output.lineage_fragment_id == "silver:fragment-1"
+    assert resolved_metadata.output.lineage_fragment_id == "silver:fragment-1"
+    assert metadata.output.lineage_fragment_id is None
 
 
 @pytest.mark.unit

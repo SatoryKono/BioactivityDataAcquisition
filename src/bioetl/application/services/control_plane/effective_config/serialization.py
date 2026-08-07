@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass, is_dataclass
 from datetime import datetime
 from typing import cast
@@ -40,9 +41,11 @@ def to_jsonable(value: object) -> object:
     dataclass_value = dataclass_to_dict(value)
     if dataclass_value is not None:
         return {k: to_jsonable(v) for k, v in dataclass_value.items()}
-    if isinstance(value, dict):
+    if isinstance(value, Mapping):
         return {str(k): to_jsonable(v) for k, v in sorted(value.items())}
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, Sequence) and not isinstance(
+        value, (str, bytes, bytearray)
+    ):
         return [to_jsonable(item) for item in value]
     return value
 
