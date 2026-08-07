@@ -634,3 +634,5 @@ _fail_*.txt
 
 # Local agent workspace (untracked)
 .agents/
+/data/debug_exports
+/data/debug_exports
