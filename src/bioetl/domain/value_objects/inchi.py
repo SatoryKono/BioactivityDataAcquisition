@@ -47,6 +47,12 @@ class InChI(ValueObject[str]):
 
         if not normalized.startswith(self._PREFIX):
             raise ValueError(f"InChI must start with '{self._PREFIX}': {value!r}")
+        # Require version + at least one layer after prefix (reject bare InChI=).
+        suffix = normalized[len(self._PREFIX) :]
+        if not suffix or "/" not in suffix:
+            raise ValueError(
+                f"InChI must include version and layer after '{self._PREFIX}': {value!r}"
+            )
 
         return normalized
 

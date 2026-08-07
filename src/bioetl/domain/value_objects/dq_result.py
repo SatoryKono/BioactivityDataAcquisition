@@ -75,9 +75,11 @@ class DQResult:
     policy_ref: DQPolicyRef | None = None
 
     def __post_init__(self) -> None:
-        """Validate and ensure immutability of anomalies."""
+        """Validate and ensure immutability of anomalies and rule outcomes."""
         if isinstance(self.anomalies, list):
             object.__setattr__(self, "anomalies", tuple(self.anomalies))
+        if isinstance(self.rule_outcomes, list):
+            object.__setattr__(self, "rule_outcomes", tuple(self.rule_outcomes))
 
     @property
     def is_passed(self) -> bool:

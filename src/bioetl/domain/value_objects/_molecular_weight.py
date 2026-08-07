@@ -99,17 +99,18 @@ class MolecularWeight(ValueObject[float]):
         if math.isnan(float_value) or math.isinf(float_value):
             raise ValueError(f"Invalid molecular weight: {value} (NaN or Inf)")
 
-        # Validate range (exclusive bounds)
+        # Round first so range checks use the stored canonical value.
+        precision = self._config.molecular_weight_precision
+        rounded = round(float_value, precision)
+
+        # Validate range (exclusive bounds) against the rounded value.
         min_mw = self._config.min_molecular_weight
         max_mw = self._config.max_molecular_weight
-        if not min_mw < float_value < max_mw:
+        if not min_mw < rounded < max_mw:
             raise ValueError(
-                f"Molecular weight {float_value} outside range ({min_mw}, {max_mw})"
+                f"Molecular weight {rounded} outside range ({min_mw}, {max_mw})"
             )
-
-        # Round to precision
-        precision = self._config.molecular_weight_precision
-        return round(float_value, precision)
+        return rounded
 
     @property
     def min_weight(self) -> float:

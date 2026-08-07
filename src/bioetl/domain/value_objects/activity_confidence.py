@@ -15,7 +15,8 @@ class ConfidenceScore:
 
     def __post_init__(self) -> None:
         """Validate confidence score invariants."""
-        if not isinstance(self.value, int):
+        # bool is a subclass of int — reject before the range check.
+        if isinstance(self.value, bool) or type(self.value) is not int:
             raise TypeError(
                 f"ConfidenceScore must be int, got {type(self.value).__name__}"
             )

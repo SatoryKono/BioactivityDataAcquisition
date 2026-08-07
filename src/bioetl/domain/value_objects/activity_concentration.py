@@ -18,17 +18,22 @@ class ConcentrationUnit(StrEnum):
     FEMTOMOLAR = "fM"
 
     @property
+    def molar_exponent(self) -> int:
+        """Base-10 exponent of this unit relative to molar (M = 10^0)."""
+        exponents = {
+            ConcentrationUnit.MOLAR: 0,
+            ConcentrationUnit.MILLIMOLAR: -3,
+            ConcentrationUnit.MICROMOLAR: -6,
+            ConcentrationUnit.NANOMOLAR: -9,
+            ConcentrationUnit.PICOMOLAR: -12,
+            ConcentrationUnit.FEMTOMOLAR: -15,
+        }
+        return exponents[self]
+
+    @property
     def to_molar_factor(self) -> float:
         """Conversion factor to molar (M)."""
-        factors = {
-            ConcentrationUnit.MOLAR: 1.0,
-            ConcentrationUnit.MILLIMOLAR: 1e-3,
-            ConcentrationUnit.MICROMOLAR: 1e-6,
-            ConcentrationUnit.NANOMOLAR: 1e-9,
-            ConcentrationUnit.PICOMOLAR: 1e-12,
-            ConcentrationUnit.FEMTOMOLAR: 1e-15,
-        }
-        return factors[self]
+        return 10.0 ** self.molar_exponent
 
     @classmethod
     def from_string(cls, unit_str: str) -> ConcentrationUnit:
@@ -68,6 +73,14 @@ class Concentration:
 
     def __post_init__(self) -> None:
         """Validate concentration invariants."""
+        import math
+
+        if isinstance(self.value, bool) or not isinstance(self.value, (int, float)):
+            raise TypeError(
+                f"Concentration value must be numeric, got {type(self.value).__name__}"
+            )
+        if math.isnan(self.value) or math.isinf(self.value):
+            raise ValueError(f"Concentration must be finite: {self.value}")
         if self.value < 0:
             raise ValueError(f"Concentration cannot be negative: {self.value}")
 
@@ -80,8 +93,9 @@ class Concentration:
         Returns:
             New Concentration instance with value expressed in target_unit.
         """
-        molar_value = self.value * self.unit.to_molar_factor
-        target_value = molar_value / target_unit.to_molar_factor
+        # Single exponent delta avoids chained mul/div floating noise.
+        delta = self.unit.molar_exponent - target_unit.molar_exponent
+        target_value = self.value * (10.0 ** delta)
         return Concentration(value=target_value, unit=target_unit)
 
     def to_molar(self) -> Concentration:
