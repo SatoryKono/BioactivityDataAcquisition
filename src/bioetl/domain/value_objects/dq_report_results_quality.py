@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from types import MappingProxyType
+from typing import Mapping
 
 from bioetl.domain.types import GoldRejectReason
 from bioetl.domain.value_objects.dq_report_enums import DQCheckStatus
@@ -13,16 +15,21 @@ from bioetl.domain.value_objects.dq_report_enums import DQCheckStatus
 class CompletenessResult:
     """Completeness check result for Gold layer."""
 
-    required_fields: dict[str, float]
+    required_fields: Mapping[str, float]
     overall_completeness_score: float
     minimum_threshold: float
     status: DQCheckStatus
     reject_reasons: tuple[GoldRejectReason, ...] = ()
 
     def __post_init__(self) -> None:
-        """Convert lists to tuples for immutability."""
+        """Convert lists to tuples and freeze mappings."""
         if isinstance(self.reject_reasons, list):
             object.__setattr__(self, "reject_reasons", tuple(self.reject_reasons))
+        object.__setattr__(
+            self,
+            "required_fields",
+            MappingProxyType(dict(self.required_fields)),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -75,8 +82,16 @@ class ForeignKeyResult:
 class ReferentialIntegrityResult:
     """Referential integrity check result."""
 
-    foreign_keys: dict[str, ForeignKeyResult] = field(default_factory=dict)
+    foreign_keys: Mapping[str, ForeignKeyResult] = field(default_factory=dict)
     status: DQCheckStatus = DQCheckStatus.PASS
+
+    def __post_init__(self) -> None:
+        """Freeze foreign_keys mapping."""
+        object.__setattr__(
+            self,
+            "foreign_keys",
+            MappingProxyType(dict(self.foreign_keys)),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,8 +111,16 @@ class StatisticalProfileResult:
     """Statistical profile check result."""
 
     baseline_period_days: int
-    metrics: dict[str, StatisticalMetric] = field(default_factory=dict)
+    metrics: Mapping[str, StatisticalMetric] = field(default_factory=dict)
     status: DQCheckStatus = DQCheckStatus.PASS
+
+    def __post_init__(self) -> None:
+        """Freeze metrics mapping."""
+        object.__setattr__(
+            self,
+            "metrics",
+            MappingProxyType(dict(self.metrics)),
+        )
 
 
 @dataclass(frozen=True, slots=True)

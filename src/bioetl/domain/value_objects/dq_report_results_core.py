@@ -166,6 +166,14 @@ class SchemaDriftResult:
             object.__setattr__(self, "missing_fields", tuple(self.missing_fields))
         if isinstance(self.type_changes, list):
             object.__setattr__(self, "type_changes", tuple(self.type_changes))
+        # Deep-freeze each type-change mapping.
+        from types import MappingProxyType
+
+        frozen_changes = tuple(
+            MappingProxyType(dict(item)) if isinstance(item, dict) else item
+            for item in self.type_changes
+        )
+        object.__setattr__(self, "type_changes", frozen_changes)
 
 
 @dataclass(frozen=True, slots=True)
