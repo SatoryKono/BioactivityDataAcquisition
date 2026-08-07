@@ -42,9 +42,7 @@ class _CrossRefCoreBlock:
         doi = self.validate_doi(record.get("DOI"))
         # Typed guard (not assert): must survive python -O optimization.
         if doi is None:
-            raise ValueError(
-                "DOI should be validated in _pre_extract_validation"
-            )
+            raise ValueError("DOI should be validated in _pre_extract_validation")
         return build_crossref_core_block_fields(
             record=record,
             doi=doi,

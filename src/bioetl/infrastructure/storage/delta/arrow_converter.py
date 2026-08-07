@@ -270,7 +270,6 @@ class ArrowDataConverter:
             logger=self._logger,
         )
 
-
     def _sanitize_single_null_column(
         self,
         col: pa.Array | pa.ChunkedArray,

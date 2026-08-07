@@ -33,7 +33,7 @@ class ConcentrationUnit(StrEnum):
     @property
     def to_molar_factor(self) -> float:
         """Conversion factor to molar (M)."""
-        return 10.0 ** self.molar_exponent
+        return 10.0**self.molar_exponent
 
     @classmethod
     def from_string(cls, unit_str: str) -> ConcentrationUnit:
@@ -108,7 +108,7 @@ class Concentration:
         """
         # Single exponent delta avoids chained mul/div floating noise.
         delta = self.unit.molar_exponent - target_unit.molar_exponent
-        target_value = self.value * (10.0 ** delta)
+        target_value = self.value * (10.0**delta)
         return Concentration(value=target_value, unit=target_unit)
 
     def to_molar(self) -> Concentration:

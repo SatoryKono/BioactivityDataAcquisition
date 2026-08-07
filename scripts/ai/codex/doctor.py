@@ -115,7 +115,9 @@ def run_mcp(
 ) -> int:
     plan = profile_plan(profile, repo_root)
     catalog_path = repo_root / "scripts/ops/runtime/mcp/shared-servers.json"
-    catalog = cast(dict[str, Any], json.loads(catalog_path.read_text(encoding="utf-8"))["servers"])
+    catalog = cast(
+        dict[str, Any], json.loads(catalog_path.read_text(encoding="utf-8"))["servers"]
+    )
     required = set(_as_str_list(plan.get("required_local")))
     selected_local = sorted(required | set(_as_str_list(plan.get("optional_local"))))
     results: list[dict[str, Any]] = []

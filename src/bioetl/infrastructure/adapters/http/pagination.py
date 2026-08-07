@@ -81,9 +81,7 @@ class PaginatedFetcherMixin:
         cursor = initial_cursor
         page_count = 0
         seen_cursors: set[object] = set()
-        page_limit = (
-            max_pages if max_pages is not None else self._DEFAULT_MAX_PAGES
-        )
+        page_limit = max_pages if max_pages is not None else self._DEFAULT_MAX_PAGES
         if page_limit < 1:
             raise ValueError(f"max_pages must be >= 1, got {page_limit!r}")
 

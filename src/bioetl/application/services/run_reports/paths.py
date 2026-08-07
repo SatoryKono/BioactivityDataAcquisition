@@ -97,4 +97,6 @@ def inspect_report_root_marker(
 
 def report_root_marker_is_healthy(*, report_root: Path | None = None) -> bool:
     """Return True when the bind-identity marker is present and valid."""
-    return inspect_report_root_marker(report_root=report_root).get("status") == "healthy"
+    return (
+        inspect_report_root_marker(report_root=report_root).get("status") == "healthy"
+    )

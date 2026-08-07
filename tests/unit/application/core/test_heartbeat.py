@@ -310,4 +310,3 @@ class TestHeartbeatTask:
         await asyncio.wait_for(heartbeat_task._task, timeout=1.0)
         await heartbeat_task.stop()
         assert not heartbeat_task.is_running
-

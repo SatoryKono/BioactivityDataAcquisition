@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 _WRITE_SPAN_ERRORS = SHARED_OPERATION_ERRORS
 
+
 class BatchWriterIOMixin:
     """Layer write orchestration extracted from BatchWriter."""
 
@@ -190,7 +191,10 @@ class BatchWriterIOMixin:
                     column_order_preview,
                 )
                 # Re-project/validate ag
-                if schema_payload is not None and schema_payload is not self._gold_schema:
+                if (
+                    schema_payload is not None
+                    and schema_payload is not self._gold_schema
+                ):
                     records, available_cols = prepare_gold_records(
                         self,
                         records,

@@ -126,9 +126,12 @@ def test_matrix_generation_writes_leaf_file_list_and_matrix_json(
     assert loaded["leaf_count"] == 1
     assert loaded["total_files_assigned"] == 4
     assert loaded["leaves"][0]["id"] == "S01-domain-pkg"
-    assert Path(loaded["leaves"][0]["use_file_list"]).read_text(
-        encoding="utf-8"
-    ).splitlines() == tracked
+    assert (
+        Path(loaded["leaves"][0]["use_file_list"])
+        .read_text(encoding="utf-8")
+        .splitlines()
+        == tracked
+    )
 
 
 def test_run_leaf_dir_path_invokes_coderabbit_with_prefaced_path(

@@ -194,7 +194,6 @@ def _build_merge_config[ConfigT](
     )
 
 
-
 def _dependency_entry(dependency: Any) -> dict[str, object]:
     """Serialize one dependency node for composite_to_dict."""
     entry: dict[str, object] = {
@@ -213,7 +212,6 @@ def _dependency_entry(dependency: Any) -> dict[str, object]:
     return entry
 
 
-
 def _aggregation_field_entry(field: Any) -> dict[str, object]:
     return {
         "source_field": field.source_field,
@@ -227,9 +225,7 @@ def _aggregation_to_dict(aggregation: Any) -> dict[str, object]:
     return {
         "group_by": aggregation.group_by,
         "order_by": list(aggregation.order_by),
-        "fields": [
-            _aggregation_field_entry(field) for field in aggregation.fields
-        ],
+        "fields": [_aggregation_field_entry(field) for field in aggregation.fields],
     }
 
 
@@ -356,8 +352,7 @@ def _cross_validation_to_dict(cross_validation: Any) -> dict[str, object]:
         "fuzzy_threshold": cross_validation.fuzzy_threshold,
         "numeric_tolerance": cross_validation.numeric_tolerance,
         "enricher_pairings": [
-            _cv_pairing_entry(pairing)
-            for pairing in cross_validation.enricher_pairings
+            _cv_pairing_entry(pairing) for pairing in cross_validation.enricher_pairings
         ],
     }
 
@@ -476,7 +471,9 @@ def _one_dq_override(name: str, raw: dict[str, object]) -> DQOverrideConfig:
     )
 
 
-def _build_dq_overrides(overrides_raw: dict[str, object]) -> dict[str, DQOverrideConfig]:
+def _build_dq_overrides(
+    overrides_raw: dict[str, object],
+) -> dict[str, DQOverrideConfig]:
     overrides: dict[str, DQOverrideConfig] = {}
     for name, raw in overrides_raw.items():
         if isinstance(raw, dict):
@@ -605,4 +602,3 @@ def _build_cross_validation_config(
             cv_data.get("enricher_pairings") or ()
         ),
     )
-

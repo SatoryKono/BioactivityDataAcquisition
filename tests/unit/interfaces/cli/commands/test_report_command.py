@@ -75,5 +75,3 @@ def test_show_pipeline_report_missing(tmp_path: Path) -> None:
             ["--pipeline", "missing", "--run-id", "r1"],
         )
     assert result.exit_code != 0
-
-

@@ -73,17 +73,18 @@ class HealthServer(
 
     _server_close_timeout_seconds: float = 1.0
 
-
-    _LEGACY_CONTROL_PLANE_KEYS = frozenset({
-        "health_monitor",
-        "quarantine_service",
-        "checkpoint_port",
-        "run_manifest_port",
-        "run_ledger_port",
-        "workflow_manifest_port",
-        "metrics_exposition",
-        "runtime_source_id",
-    })
+    _LEGACY_CONTROL_PLANE_KEYS = frozenset(
+        {
+            "health_monitor",
+            "quarantine_service",
+            "checkpoint_port",
+            "run_manifest_port",
+            "run_ledger_port",
+            "workflow_manifest_port",
+            "metrics_exposition",
+            "runtime_source_id",
+        }
+    )
 
     @classmethod
     def _recognized_legacy_ports(

@@ -25,7 +25,9 @@ pytestmark = pytest.mark.architecture
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "diagrams" / "check" / "check_diagram_quality_gates.py"
+    module_path = (
+        repo_root / "scripts" / "diagrams" / "check" / "check_diagram_quality_gates.py"
+    )
     spec = importlib.util.spec_from_file_location(
         "diagram_quality_gates_module", module_path
     )

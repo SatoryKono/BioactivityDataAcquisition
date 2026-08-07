@@ -190,7 +190,9 @@ class BatchProcessingSupportService:
         The historical method name is preserved for caller compatibility.
         """
         await write_silver_then_gold(
-            execute_with_span=cast(Any, self._execute_with_span),  # Any: structural host callback
+            execute_with_span=cast(
+                Any, self._execute_with_span
+            ),  # Any: structural host callback
             writer=self._writer,
             quarantine_manager=self._quarantine_manager,
             logger=self._logger,

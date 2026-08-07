@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import cast
 
 from typing import TYPE_CHECKING, Literal
 
@@ -36,11 +35,13 @@ def _resolve_requested_checkpoint_compatibility_policy(
     pipeline_settings = getattr(settings, "pipeline", None)
     control_plane = getattr(pipeline_settings, "control_plane", None)
     raw_policy = getattr(control_plane, "checkpoint_compatibility_policy", None)
-    if (
-        isinstance(raw_policy, str)
-        and raw_policy in _ALLOWED_CHECKPOINT_COMPATIBILITY_POLICIES
-    ):
-        return cast(CheckpointCompatibilityPolicy, raw_policy)
+    if isinstance(raw_policy, str):
+        if raw_policy == "observe":
+            return "observe"
+        if raw_policy == "soft_fail":
+            return "soft_fail"
+        if raw_policy == "hard_fail":
+            return "hard_fail"
     if raw_policy is not None:
         logger_port.warning(
             "Unsupported checkpoint compatibility policy in settings; "

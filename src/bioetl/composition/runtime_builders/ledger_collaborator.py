@@ -138,7 +138,6 @@ def _attach_artifact_recorder(
     return True
 
 
-
 def _metadata_from_layer_writer(writer: object) -> object | None:
     """Resolve a metadata writer from one layer storage writer."""
     writer_metadata = None

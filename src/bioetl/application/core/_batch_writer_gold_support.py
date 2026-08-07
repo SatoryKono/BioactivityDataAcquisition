@@ -25,7 +25,6 @@ class _GoldValidatorRebindProtocol(Protocol):
     def validate(self, records: object) -> _GoldValidationResult: ...
 
 
-
 @runtime_checkable
 class _GoldWriterHost(Protocol):
     """Minimal BatchWriter surface for Gold prepare/validate helpers."""

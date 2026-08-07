@@ -79,7 +79,9 @@ class PipelineRunnerSupportMixin:
 
     async def _cleanup_after_run(self: _PipelineRunnerCleanupHostProtocol) -> None:
         try:
-            await cast(Any, self._postrun_service).cleanup(self._tracer)  # Any: mixin host protocol bridge
+            await cast(Any, self._postrun_service).cleanup(
+                self._tracer
+            )  # Any: mixin host protocol bridge
         finally:
             self._close_metrics()
 

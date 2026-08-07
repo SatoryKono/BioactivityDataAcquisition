@@ -1,4 +1,5 @@
 """Sequential CodeRabbit leaf runner for CR-FULL-20260806-full."""
+
 from __future__ import annotations
 
 import json

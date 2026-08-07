@@ -18,7 +18,9 @@ def _recovery_timeout(circuit_breaker: CircuitBreakerPort) -> float:
     """Resolve recovery timeout from public getter or legacy attribute."""
     recovery_timeout_getter = getattr(circuit_breaker, "get_recovery_timeout", None)
     if callable(recovery_timeout_getter):
-        return float(cast(Any, recovery_timeout_getter()))  # Any: legacy breaker duck type
+        return float(
+            cast(Any, recovery_timeout_getter())
+        )  # Any: legacy breaker duck type
     return float(
         cast(
             Any,  # Any: legacy breaker attribute

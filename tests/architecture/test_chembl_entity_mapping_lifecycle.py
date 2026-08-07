@@ -50,10 +50,7 @@ def _src_entity_mapping_importers() -> list[str]:
             continue
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         imports_or_loads_alias = any(
-            (
-                isinstance(node, ast.alias)
-                and node.name == "ENTITY_MAPPING"
-            )
+            (isinstance(node, ast.alias) and node.name == "ENTITY_MAPPING")
             or (
                 isinstance(node, ast.Name)
                 and node.id == "ENTITY_MAPPING"

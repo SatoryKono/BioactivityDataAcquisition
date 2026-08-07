@@ -35,7 +35,9 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.application.services.export_lineage.debug_export_service import DebugExportPack
+from bioetl.application.services.export_lineage.debug_export_service import (
+    DebugExportPack,
+)
 from bioetl.infrastructure.export.debug_export_adapter import DebugExportAdapter
 
 pytestmark = pytest.mark.unit

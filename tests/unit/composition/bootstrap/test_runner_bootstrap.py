@@ -98,7 +98,6 @@ def bootstrap_with_light_observability(light_observability: SimpleNamespace):
         yield mock_settings, mock_observability, light_observability
 
 
-
 _LIST_SERVICE_CACHE: PipelineRunnerService | None = None
 
 

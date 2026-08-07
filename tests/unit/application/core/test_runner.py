@@ -50,7 +50,9 @@ from bioetl.application.core.lifecycle.shutdown import (
     ShutdownSignal,
 )
 from bioetl.application.observability.observer import PipelineObserver
-from bioetl.application.services.export_lineage.debug_export_service import DebugExportResult
+from bioetl.application.services.export_lineage.debug_export_service import (
+    DebugExportResult,
+)
 from bioetl.application.services.medallion.medallion_lifecycle import (
     MedallionLifecycleService,
     PrepareResult,

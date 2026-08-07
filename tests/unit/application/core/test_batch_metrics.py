@@ -502,7 +502,9 @@ class TestTrackSilverFilterRejection:
         )
 
     def test_filter_rejection__op_when_metrics_none__a2073d7f(
-        self, recorder_no_metrics: BatchMetricsRecorderService, monkeypatch: pytest.MonkeyPatch
+        self,
+        recorder_no_metrics: BatchMetricsRecorderService,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Prometheus is skipped when metrics are unset; accounting still runs."""
         accounting_calls: list[dict[str, object]] = []

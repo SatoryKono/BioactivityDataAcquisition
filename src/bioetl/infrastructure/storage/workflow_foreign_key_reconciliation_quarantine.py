@@ -322,9 +322,7 @@ def _expire_gold_orphan_rows_once(
 def _require_sql_identifier(name: str, field_name: str) -> str:
     """Reject identifiers that are unsafe to interpolate into Delta merge SQL."""
     if not _SQL_IDENTIFIER_RE.fullmatch(name):
-        raise ValueError(
-            f"{field_name} is not a safe SQL identifier: {name!r}"
-        )
+        raise ValueError(f"{field_name} is not a safe SQL identifier: {name!r}")
     return name
 
 
@@ -333,6 +331,7 @@ async def _delta_table_column_names(
     table_path: str,
 ) -> frozenset[str] | None:
     """Return Gold table column names from Delta schema when available."""
+
     def _inspect() -> frozenset[str]:
         delta_table = module.DeltaTable(table_path)
         schema = delta_table.schema()
@@ -389,8 +388,7 @@ def _build_orphan_key_rows(
         for primary_key in primary_keys:
             if primary_key not in row or row[primary_key] is None:
                 raise ValueError(
-                    f"{operation} orphan row "
-                    f"without non-null primary key {primary_key}"
+                    f"{operation} orphan row without non-null primary key {primary_key}"
                 )
             key_values.append(row[primary_key])
         key_tuple = tuple(key_values)

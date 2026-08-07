@@ -25,7 +25,9 @@ pytestmark = pytest.mark.integration
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[3]
-    module_path = repo_root / "scripts" / "schema" / "validation" / "validate_pipeline_configs.py"
+    module_path = (
+        repo_root / "scripts" / "schema" / "validation" / "validate_pipeline_configs.py"
+    )
     spec = importlib.util.spec_from_file_location(
         "validate_pipeline_configs_module",
         module_path,
