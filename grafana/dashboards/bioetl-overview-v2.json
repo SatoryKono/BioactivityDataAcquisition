@@ -20,203 +20,6 @@
   "links": [],
   "panels": [
     {
-      "id": 9600,
-      "type": "row",
-      "title": "Inspect Alerts",
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 15
-      },
-      "panels": [],
-      "description": "Contains selected-range alert evidence for triage. It supports investigation but does not determine current Fleet Health; expand it after the first-screen verdict points to an alert condition."
-    },
-    {
-      "id": 9601,
-      "type": "table",
-      "title": "Review Active Alerts",
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 16
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Shows firing and pending BioETL alerts from Prometheus for the active time range. An inactive row means no active alert was observed; an empty result or UNKNOWN means alert evidence is unavailable, not OK. Continue in Pipeline Diagnostics for blocker scope.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null+nan",
-                "result": {
-                  "text": "—",
-                  "color": "transparent",
-                  "index": 0
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "gray",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Active Alerts"
-              },
-              {
-                "id": "custom.align",
-                "value": "right"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "applyToRow": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "severity"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^(critical|page|p0|p1)$",
-                      "result": {
-                        "text": "CRITICAL",
-                        "color": "red"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^(warning|warn)$",
-                      "result": {
-                        "text": "WARNING",
-                        "color": "orange"
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "count by (alertname, severity) (ALERTS{alertstate=\"firing\"})",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "dataLinks": [
-          {
-            "title": "Open Runtime Conditions",
-            "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          },
-          {
-            "title": "Open 2. Runtime (alert conditions)",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true
-            },
-            "indexByName": {
-              "alertname": 0,
-              "alertstate": 1,
-              "severity": 2,
-              "Value": 3
-            },
-            "renameByName": {
-              "alertname": "Alert",
-              "alertstate": "State",
-              "severity": "Severity",
-              "Value": "Active Alerts",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
-            }
-          }
-        }
-      ]
-    },
-    {
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -1218,6 +1021,203 @@
       "description": "Summarizes current Control Plane, Runtime, Provider, Data Quality, Data Validation, and Workflow status for the selected scope. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN means incomplete evidence, not OK. Open the affected domain for detail."
     },
     {
+      "id": 9600,
+      "type": "row",
+      "title": "Inspect Alerts",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "panels": [],
+      "description": "Contains selected-range alert evidence for triage. It supports investigation but does not determine current Fleet Health; expand it after the first-screen verdict points to an alert condition."
+    },
+    {
+      "id": 9601,
+      "type": "table",
+      "title": "Review Active Alerts",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Shows firing and pending BioETL alerts from Prometheus for the active time range. An inactive row means no active alert was observed; an empty result or UNKNOWN means alert evidence is unavailable, not OK. Continue in Pipeline Diagnostics for blocker scope.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "—",
+                  "color": "transparent",
+                  "index": 0
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Active Alerts"
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "applyToRow": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "severity"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^(critical|page|p0|p1)$",
+                      "result": {
+                        "text": "CRITICAL",
+                        "color": "red"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^(warning|warn)$",
+                      "result": {
+                        "text": "WARNING",
+                        "color": "orange"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "count by (alertname, severity) (ALERTS{alertstate=\"firing\"})",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        },
+        "dataLinks": [
+          {
+            "title": "Open Runtime Conditions",
+            "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open 2. Runtime (alert conditions)",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+            "targetBlank": false,
+            "includeVars": false
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "alertname": 0,
+              "alertstate": 1,
+              "severity": 2,
+              "Value": 3
+            },
+            "renameByName": {
+              "alertname": "Alert",
+              "alertstate": "State",
+              "severity": "Severity",
+              "Value": "Active Alerts",
+              "Value #A": "Series A",
+              "Value #B": "Series B",
+              "Value #C": "Series C"
+            }
+          }
+        }
+      ]
+    },
+    {
       "id": 9014,
       "type": "row",
       "title": "Inspect Historical Trends",
@@ -1232,283 +1232,300 @@
       "description": "Contains selected-range status trends. These panels provide historical evidence and do not determine current Fleet Health; gaps remain UNKNOWN rather than healthy."
     },
     {
-      "id": 9018,
-      "type": "state-timeline",
-      "title": "Track Runtime Blockers",
+      "type": "row",
+      "id": 9030,
+      "title": "Domain Status Tracks",
+      "collapsed": true,
       "gridPos": {
-        "h": 6,
-        "w": 8,
+        "h": 1,
+        "w": 24,
         "x": 0,
         "y": 23
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
+      "panels": [
+        {
+          "id": 9018,
+          "type": "state-timeline",
+          "title": "Track Runtime Blockers",
+          "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 0,
+            "y": 24
           },
-          "custom": {
-            "fillOpacity": 80,
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 0
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "fillOpacity": 80,
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
                 },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                },
-                "3": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
+                "lineWidth": 0
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARN",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRIT",
+                      "color": "red"
+                    },
+                    "3": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
                 }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
               },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "options": {
+            "dataLinks": [
               {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
+                "title": "Open Runtime",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
               }
             ]
           },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "options": {
-        "dataLinks": [
-          {
-            "title": "Open Runtime",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "max by (pipeline, run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\"), \"run_type\", \"$run_type\", \"\", \"\")",
-          "refId": "A",
-          "legendFormat": "{{pipeline}}/{{run_type}}"
-        }
-      ],
-      "description": "Shows Runtime status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Pipeline Diagnostics for current blockers."
-    },
-    {
-      "id": 9019,
-      "type": "state-timeline",
-      "title": "Track Data Quality Status",
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 23
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "fillOpacity": 80,
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 0
-          },
-          "mappings": [
+          "targets": [
             {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                },
-                "3": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
+              "expr": "max by (pipeline, run_type) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\"), \"run_type\", \"$run_type\", \"\", \"\")",
+              "refId": "A",
+              "legendFormat": "{{pipeline}}/{{run_type}}"
             }
           ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
+          "description": "Shows Runtime status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Pipeline Diagnostics for current blockers.",
+          "maxDataPoints": 400
+        },
+        {
+          "id": 9019,
+          "type": "state-timeline",
+          "title": "Track Data Quality Status",
+          "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 8,
+            "y": 24
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
               },
-              {
-                "color": "orange",
-                "value": 1
+              "custom": {
+                "fillOpacity": 80,
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 0
               },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARN",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRIT",
+                      "color": "red"
+                    },
+                    "3": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "options": {
+            "dataLinks": [
               {
-                "color": "red",
-                "value": 2
+                "title": "Open Data Quality",
+                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
               }
             ]
           },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "options": {
-        "dataLinks": [
-          {
-            "title": "Open Data Quality",
-            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "max by (pipeline, run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\"), \"run_type\", \"$run_type\", \"\", \"\")",
-          "refId": "A",
-          "legendFormat": "{{pipeline}}/{{run_type}}"
-        }
-      ],
-      "description": "Shows Data Quality status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Data Quality for current conditions."
-    },
-    {
-      "id": 9020,
-      "type": "state-timeline",
-      "title": "Track Gold Lifecycle",
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 23
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "fillOpacity": 80,
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 0
-          },
-          "mappings": [
+          "targets": [
             {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "WARN",
-                  "color": "orange"
-                },
-                "2": {
-                  "text": "CRIT",
-                  "color": "red"
-                },
-                "3": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
+              "expr": "max by (pipeline, run_type) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\"), \"run_type\", \"$run_type\", \"\", \"\")",
+              "refId": "A",
+              "legendFormat": "{{pipeline}}/{{run_type}}"
             }
           ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+          "description": "Shows Data Quality status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Data Quality for current conditions.",
+          "maxDataPoints": 400
+        },
+        {
+          "id": 9020,
+          "type": "state-timeline",
+          "title": "Track Gold Lifecycle",
+          "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 16,
+            "y": 24
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "fillOpacity": 80,
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 0
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARN",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRIT",
+                      "color": "red"
+                    },
+                    "3": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "options": {
+            "dataLinks": [
               {
-                "color": "green",
-                "value": null
+                "title": "Open Runtime",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
               },
               {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
+                "title": "Open Control Plane",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
               }
             ]
           },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "options": {
-        "dataLinks": [
-          {
-            "title": "Open Runtime",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          },
-          {
-            "title": "Open Control Plane",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "max by (pipeline, run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\"), \"run_type\", \"$run_type\", \"\", \"\")",
-          "refId": "A",
-          "legendFormat": "{{pipeline}}/{{run_type}}/{{lifecycle_state}}"
+          "targets": [
+            {
+              "expr": "max by (pipeline, run_type) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or label_replace(label_replace(vector(3), \"pipeline\", \"$pipeline\", \"\", \"\"), \"run_type\", \"$run_type\", \"\", \"\")",
+              "refId": "A",
+              "legendFormat": "{{pipeline}}/{{run_type}}/{{lifecycle_state}}"
+            }
+          ],
+          "description": "Shows Gold lifecycle state over the selected range for Pipeline and Run Type. A disabled Gold stage is a valid non-error state, while gaps or missing series remain UNKNOWN. This trend does not determine current Fleet Health; continue in Pipeline Diagnostics or Trust.",
+          "maxDataPoints": 400
         }
-      ],
-      "description": "Shows Gold lifecycle state over the selected range for Pipeline and Run Type. A disabled Gold stage is a valid non-error state, while gaps or missing series remain UNKNOWN. This trend does not determine current Fleet Health; continue in Pipeline Diagnostics or Trust."
+      ]
     },
     {
       "id": 9009,
