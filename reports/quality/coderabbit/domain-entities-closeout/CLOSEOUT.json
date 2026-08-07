@@ -1,0 +1,143 @@
+{
+  "campaign": "CR-FULL-20260806-full",
+  "leaf": "S01-domain-entities",
+  "branch": "grok-260807-108155",
+  "closed_at": "2026-08-07T06:35:05.764540+00:00",
+  "issue_range": "#8131-#8154",
+  "counts": {
+    "total": 24,
+    "fixed": 17,
+    "rejected": 7
+  },
+  "fixed": [
+    8132,
+    8133,
+    8136,
+    8138,
+    8139,
+    8140,
+    8142,
+    8143,
+    8145,
+    8146,
+    8147,
+    8148,
+    8149,
+    8151,
+    8152,
+    8153,
+    8154
+  ],
+  "rejected": [
+    8131,
+    8134,
+    8135,
+    8137,
+    8141,
+    8144,
+    8150
+  ],
+  "dispositions": {
+    "8131": {
+      "status": "reject",
+      "note": "ChEMBL activity/target DTO facade relocation to adapters is ADR-sized layering work; no runtime defect in current domain DTOs."
+    },
+    "8132": {
+      "status": "fixed",
+      "note": "ChEMBLTissue validates stripped tissue_id/pref_name and rejects whitespace-only values."
+    },
+    "8133": {
+      "status": "fixed",
+      "note": "BaseEntity.__post_init__ requires non-empty run_id/run_type and non-None ingestion_ts."
+    },
+    "8134": {
+      "status": "reject",
+      "note": "PubMed ArticleRecord stays domain-facing DTO; adapter move is campaign-wide architecture, not residual product fix."
+    },
+    "8135": {
+      "status": "reject",
+      "note": "Public bioactivity exports do not require version-bump artifacts for residual closeout; no code defect."
+    },
+    "8136": {
+      "status": "fixed",
+      "note": "Bioactivity.with_state enforces documented forward transitions RAW->NORMALIZED->VALIDATED."
+    },
+    "8137": {
+      "status": "reject",
+      "note": "ChEMBL DTO re-export facade remains intentional domain boundary surface."
+    },
+    "8138": {
+      "status": "fixed",
+      "note": "Cell/target tax_id Field descriptions document ChEMBL mirror + NCBI Taxonomy meaning."
+    },
+    "8139": {
+      "status": "fixed",
+      "note": "Removed unreachable TYPE_CHECKING branch from entities.__getattr__."
+    },
+    "8140": {
+      "status": "fixed",
+      "note": "_safe_str rejects bools and normalizes integral floats."
+    },
+    "8141": {
+      "status": "reject",
+      "note": "File-wide mypy misc suppression on CrossRef overrides is established pattern; per-line churn has no product impact."
+    },
+    "8142": {
+      "status": "fixed",
+      "note": "Target/TargetComponent freeze list-shaped fields via freeze_fields."
+    },
+    "8143": {
+      "status": "fixed",
+      "note": "LOOKUP_METHODS registered in package _ENTITY_IMPORTS lazy map."
+    },
+    "8144": {
+      "status": "reject",
+      "note": "File-wide mypy misc suppression on PubChem overrides is established pattern; no product defect."
+    },
+    "8145": {
+      "status": "fixed",
+      "note": "ActivityRecord.target_tax_id typed as int | None."
+    },
+    "8146": {
+      "status": "fixed",
+      "note": "PublicationEntityBase syncs doi/pmid/pmc_id with publication_* aliases."
+    },
+    "8147": {
+      "status": "fixed",
+      "note": "_first_truthy_value returns value directly without redundant intermediate."
+    },
+    "8148": {
+      "status": "fixed",
+      "note": "variant_sequence comment corrected to Amino acid sequence."
+    },
+    "8149": {
+      "status": "fixed",
+      "note": "Shared require_positive_id/require_non_empty_str helpers extracted to _validators."
+    },
+    "8150": {
+      "status": "reject",
+      "note": "Coverage inventory refresh is post-change ops hygiene, not a UniProt entity defect; no module behavior change required for residual."
+    },
+    "8151": {
+      "status": "fixed",
+      "note": "Semantic Scholar paper_id must be 40 hex characters."
+    },
+    "8152": {
+      "status": "fixed",
+      "note": "MoleculeRecord/TargetRecord IDs require min_length=1."
+    },
+    "8153": {
+      "status": "fixed",
+      "note": "TissueRecord/CompoundLinkRecord IDs require min_length=1."
+    },
+    "8154": {
+      "status": "fixed",
+      "note": "Tanimoto fields constrained to [0.0, 1.0]."
+    }
+  },
+  "tests": [
+    "tests/unit/domain/entities/test_domain_entities_cr_residuals_8131_8154.py",
+    "tests/unit/domain/entities (full suite green)"
+  ],
+  "tech_debt_budgets": "unchanged"
+}

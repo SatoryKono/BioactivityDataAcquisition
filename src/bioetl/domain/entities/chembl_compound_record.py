@@ -8,6 +8,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.domain.entities.base import BaseEntity
+from bioetl.domain.entities._validators import (
+    require_non_empty_str,
+    require_positive_id,
+)
 
 __all__ = [
     "CompoundRecord",
@@ -46,17 +50,7 @@ class CompoundRecord(BaseEntity):
         Validates required fields and positive integer constraints.
         Uses simplified checks: int < 1 covers 0 and negatives.
         """
-        self._validate_positive_id(self.record_id, "record_id")
-        self._validate_positive_id(self.src_id, "src_id")
-        self._validate_required_str(self.molecule_id, "molecule_id")
-        self._validate_required_str(self.publication_id, "publication_id")
-
-    def _validate_positive_id(self, value: int, field_name: str) -> None:
-        """Validate that an ID is positive (> 0)."""
-        if value < 1:
-            raise ValueError(f"{field_name} must be > 0, got {value}")
-
-    def _validate_required_str(self, value: str, field_name: str) -> None:
-        """Validate that a string field is non-empty."""
-        if not value:
-            raise ValueError(f"{field_name} is required")
+        require_positive_id(self.record_id, "record_id")
+        require_positive_id(self.src_id, "src_id")
+        require_non_empty_str(self.molecule_id, "molecule_id")
+        require_non_empty_str(self.publication_id, "publication_id")

@@ -48,7 +48,9 @@ class Tissue(BaseEntity):
     uberon_ontology_version: str | None = None
 
     def _validate_invariants(self) -> None:
-        if not self.tissue_id:
+        tissue_id = self.tissue_id.strip() if isinstance(self.tissue_id, str) else self.tissue_id
+        pref_name = self.pref_name.strip() if isinstance(self.pref_name, str) else self.pref_name
+        if not tissue_id:
             raise ValueError("Tissue ChEMBL ID is required")
-        if not self.pref_name:
+        if not pref_name:
             raise ValueError("Tissue pref_name is required")
