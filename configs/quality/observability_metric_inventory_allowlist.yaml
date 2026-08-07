@@ -60,6 +60,10 @@ allowed:
       review_date: "2026-09-30"
   runtime_cardinality_threshold_violations: []
   unused_declared_metrics:
+    - metric: bioetl_adapter_request_p95_seconds
+      owner: "@bioetl-observability"
+      reason: "Compatibility Gauge retained for legacy import paths; process-local p95 emission is intentionally not dual-written (histogram remains canonical). Reviewed residual #8342/#8344."
+      review_date: "2026-09-30"
     - metric: bioetl_dq_anomaly_detected_total
       owner: "@bioetl-observability"
       reason: "Dashboard panel is retained for the DQ event contract while runtime emission is provider-dependent."
