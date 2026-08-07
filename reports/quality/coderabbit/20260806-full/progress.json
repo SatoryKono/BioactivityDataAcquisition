@@ -1,0 +1,69 @@
+{
+  "results": {
+    "S01-domain-lineage": {
+      "status": "ok",
+      "note": "pre-#8215 campaign leaf (issues #8166\u2013#8171 area)"
+    },
+    "S01-domain-aggregates": {
+      "status": "ok",
+      "note": "pre-#8215; residual pack closed #8172\u2013#8177"
+    },
+    "S01-domain-behavior": {
+      "status": "ok",
+      "note": "pre-#8215; residual pack closed"
+    },
+    "S01-domain-composite": {
+      "status": "ok",
+      "retried_from": "rate_limit",
+      "blocker": 8215,
+      "findings": 36,
+      "published_issues": [
+        8220,
+        8221,
+        8222,
+        8223,
+        8224,
+        8225,
+        8226,
+        8227,
+        8228,
+        8229,
+        8230,
+        8231,
+        8232,
+        8233,
+        8234,
+        8235,
+        8236,
+        8237,
+        8238,
+        8239,
+        8240,
+        8241,
+        8242,
+        8243,
+        8244,
+        8245,
+        8246,
+        8247,
+        8248,
+        8249,
+        8250,
+        8251,
+        8252,
+        8253,
+        8254,
+        8255
+      ],
+      "severity_counts": {
+        "major": 14,
+        "minor": 14,
+        "trivial": 8
+      },
+      "log": "logs/S01-domain-composite-retry-8215.log",
+      "reviewed_at": "2026-08-07T07:41:15.499861+00:00",
+      "cli": "coderabbit 0.7.2 --agent --light (WSL)"
+    }
+  },
+  "updated_at": "2026-08-07T07:41:43.368197+00:00"
+}
