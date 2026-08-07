@@ -1,4 +1,4 @@
-"""Typed request/context models for composite merge orchestration."""
+"""Typed request and context models for merge orchestration."""
 
 from __future__ import annotations
 

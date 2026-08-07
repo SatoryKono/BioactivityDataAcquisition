@@ -542,7 +542,7 @@ class TestDependencyExecution:
                 return False
 
         monkeypatch.setattr(
-            "bioetl.application.composite.dependency_coordinator_execution.asyncio.timeout",
+            "bioetl.application.composite.helpers.dependency_coordinator_execution.asyncio.timeout",
             lambda _seconds: _ImmediateTimeout(),
         )
 

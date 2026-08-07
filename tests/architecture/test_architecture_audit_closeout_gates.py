@@ -79,7 +79,10 @@ def test_h1_resolve_generated_at_uses_clock_port_when_opted_in() -> None:
 
 
 def test_h1_export_identity_has_no_direct_datetime_now() -> None:
-    path = ROOT / "src/bioetl/application/services/export_manifest_identity.py"
+    path = (
+        ROOT
+        / "src/bioetl/application/services/export_lineage/export_manifest_identity.py"
+    )
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source)
     for node in ast.walk(tree):

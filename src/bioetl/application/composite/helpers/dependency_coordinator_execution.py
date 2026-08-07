@@ -1,4 +1,4 @@
-"""Single-dependency execution helpers for DependencyCoordinatorService."""
+"""Single-dependency execution collaborators for DependencyCoordinatorService."""
 
 from __future__ import annotations
 

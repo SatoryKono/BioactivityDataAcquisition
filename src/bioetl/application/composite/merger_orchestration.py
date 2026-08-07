@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.merger_orchestration_types import (
+from bioetl.application.composite.helpers.merger_orchestration_types import (
     MergeExecutionContext,
     MergeExecutionRequest,
     MergeExecutionRequestSpec,

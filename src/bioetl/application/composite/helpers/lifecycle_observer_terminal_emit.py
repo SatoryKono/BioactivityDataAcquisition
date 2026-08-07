@@ -1,4 +1,4 @@
-"""Terminal lifecycle emit helpers for composite observer service."""
+"""Terminal lifecycle emit collaborators for the composite observer service."""
 
 from __future__ import annotations
 

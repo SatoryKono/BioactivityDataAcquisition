@@ -20,13 +20,6 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from bioetl.application.composite.coordinator_execution import (
-    complete_enricher_execution,
-    handle_enricher_execution_error,
-    handle_enricher_timeout,
-    run_enricher_with_timeout,
-    start_enricher_execution,
-)
 from bioetl.application.composite.coordinator_planning import (
     apply_enricher_filter,
     build_enricher_tasks,
@@ -34,6 +27,13 @@ from bioetl.application.composite.coordinator_planning import (
 )
 from bioetl.application.composite.coordinator_result_mixin import (
     EnrichmentCoordinatorResultMixin,
+)
+from bioetl.application.composite.helpers.coordinator_execution import (
+    complete_enricher_execution,
+    handle_enricher_execution_error,
+    handle_enricher_timeout,
+    run_enricher_with_timeout,
+    start_enricher_execution,
 )
 from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.domain.composite import CompositeDQConfig, EnricherConfig
