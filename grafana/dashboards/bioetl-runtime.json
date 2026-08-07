@@ -974,7 +974,8 @@
               "sort": "desc"
             }
           },
-          "maxDataPoints": 400
+          "maxDataPoints": 400,
+          "interval": "1m"
         },
         {
           "datasource": {

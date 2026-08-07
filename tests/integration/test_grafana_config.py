@@ -1400,7 +1400,9 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
         int(panel["id"]): panel for panel in get_dashboard_panels(run_explorer)
     }
     assert "Layer accounting" in run_panels[3016]["options"]["content"]
-    assert "Stage timing / failure" in run_panels[3014]["options"]["content"]
+    # #7248 simplified CTA copy while keeping the no-scroll compact HTML contract.
+    assert "Timings" in run_panels[3014]["options"]["content"]
+    assert "failure" in run_panels[3014]["options"]["content"].lower()
 
 
 def test_control_plane_dashboard_links_are_scoped() -> None:

@@ -64,10 +64,11 @@ query, links, and operator fact.
 - **Data sources:** `bioetl_dq_current_reason`, `bioetl_dq_current_status`
 
 ### 9. Inspect Current DQ Reasons
-- **Type:** Table
+- **Type:** Table (under collapsed **Selected Range · Impact & Freshness**, #6574)
 - **Purpose:** Show bounded current DQ reason, severity, and action rows. A
   WARN/CRIT status without an active reason emits
   `reason_evidence_unavailable` with action `verify_dq_reason_rules`.
+  Kept off first paint so the first-screen PromQL budget stays ≤200 chars.
 - **Data sources:** `bioetl_dq_current_reason`
 
 ### 10. Start DQ Triage
