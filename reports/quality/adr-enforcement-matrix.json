@@ -1005,7 +1005,7 @@
       "decision_path": "docs/02-architecture/decisions/ADR-027-dq-rules-externalization.md",
       "enforcement_owner_paths": [
         "scripts/docs/checks/check_links.py",
-        "scripts/schema/lint_config_paths.py",
+        "scripts/schema/validation/lint_config_paths.py",
         "tests/architecture/test_composite_dq_externalization.py",
         "tests/architecture/test_config_ci_invariants.py",
         "tests/contract/silver_schemas/README.md",
@@ -1039,7 +1039,7 @@
         "docs/04-reference/pipelines/README.md",
         "docs/04-reference/publication-validation-index.md",
         "scripts/docs/checks/check_links.py",
-        "scripts/schema/lint_config_paths.py",
+        "scripts/schema/validation/lint_config_paths.py",
         "tests/architecture/test_composite_dq_externalization.py",
         "tests/architecture/test_config_ci_invariants.py",
         "tests/contract/silver_schemas/README.md",
@@ -1057,7 +1057,7 @@
       "decision_path": "docs/02-architecture/decisions/ADR-028-filter-rules-externalization.md",
       "enforcement_owner_paths": [
         "scripts/docs/checks/check_links.py",
-        "scripts/schema/lint_config_paths.py",
+        "scripts/schema/validation/lint_config_paths.py",
         "tests/architecture/test_config_ci_invariants.py",
         "tests/unit/domain/models/test_filter.py",
         "tests/unit/infrastructure/schemas/test_filter_config.py"
@@ -1083,7 +1083,7 @@
         "docs/03-guides/pipeline-configuration.md",
         "docs/04-reference/pipelines/README.md",
         "scripts/docs/checks/check_links.py",
-        "scripts/schema/lint_config_paths.py",
+        "scripts/schema/validation/lint_config_paths.py",
         "src/bioetl/composition/providers/registration_bio.py",
         "src/bioetl/domain/models/filter.py",
         "src/bioetl/infrastructure/config/__init__.py",
@@ -1107,7 +1107,7 @@
       "decision_date": "2026-01-23",
       "decision_path": "docs/02-architecture/decisions/ADR-029-output-metadata-unification.md",
       "enforcement_owner_paths": [
-        "scripts/schema/lint_config_paths.py",
+        "scripts/schema/validation/lint_config_paths.py",
         "tests/architecture/test_config_ci_invariants.py",
         "tests/architecture/test_metadata_output_contract.py",
         "tests/unit/application/services/test_metadata_coordinator.py",
@@ -1132,7 +1132,7 @@
         "docs/03-guides/cheatsheets/adr-matrix.md",
         "docs/03-guides/cheatsheets/pipeline-config.md",
         "docs/03-guides/pipeline-configuration.md",
-        "scripts/schema/lint_config_paths.py",
+        "scripts/schema/validation/lint_config_paths.py",
         "src/bioetl/domain/mapping/publication_fields.py",
         "src/bioetl/domain/models/_metadata_bronze.py",
         "src/bioetl/domain/models/_metadata_gold.py",
