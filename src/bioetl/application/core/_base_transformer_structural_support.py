@@ -91,11 +91,7 @@ def apply_silver_filter(
     *,
     precomputed_decision: FilterDecision | None = None,
 ) -> None:
-    """Check silver filter and raise FilteredOutError if excluded.
-
-    When ``precomputed_decision`` is provided (e.g. from the structural-policy
-    shadow evaluation), the filter is not re-evaluated (#7795).
-    """
+    """Check the Silver filter, reusing a precomputed shadow decision (#7795)."""
     if (
         result is None
         or owner._silver_filters is None

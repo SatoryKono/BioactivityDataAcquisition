@@ -16,7 +16,7 @@
       "max_internal_fan_in": 8,
       "helper_function_ratio": 0.364,
       "files": 190,
-      "total_loc": 23078,
+      "total_loc": 23092,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 10
     },
@@ -25,7 +25,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.325,
       "files": 51,
-      "total_loc": 6307,
+      "total_loc": 6310,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -34,7 +34,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.342,
       "files": 32,
-      "total_loc": 4003,
+      "total_loc": 4002,
       "budget_files_ge_250_loc": 2,
       "budget_max_internal_fan_in": 3
     },
@@ -43,7 +43,7 @@
       "max_internal_fan_in": 3,
       "helper_function_ratio": 0.421,
       "files": 140,
-      "total_loc": 15980,
+      "total_loc": 15983,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -52,7 +52,7 @@
       "max_internal_fan_in": 3,
       "helper_function_ratio": 0.372,
       "files": 56,
-      "total_loc": 7183,
+      "total_loc": 7186,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 5
     }

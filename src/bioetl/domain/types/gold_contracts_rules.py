@@ -35,8 +35,6 @@ __all__ = [
 ]
 
 
-@dataclass(frozen=True, slots=True)
-
 def _decision_literal(raw: str) -> GoldBusinessRuleDecision | None:
     if raw == "pass":
         return "pass"
@@ -48,6 +46,8 @@ def _decision_literal(raw: str) -> GoldBusinessRuleDecision | None:
         return "quarantine"
     return None
 
+
+@dataclass(frozen=True, slots=True)
 class GoldBusinessRuleSpec:
     """Typed Gold DQ business rule specification."""
 

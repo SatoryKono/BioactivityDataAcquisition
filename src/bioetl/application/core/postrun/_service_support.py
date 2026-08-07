@@ -1,4 +1,3 @@
-# Host attrs/methods are initialized by
 """Private support mixin for PostrunService phase and cleanup helpers."""
 
 from __future__ import annotations
@@ -75,7 +74,7 @@ class _PostrunHostAttrSurface(Protocol):
     _metrics: MetricsPort
 
 
-class PostrunServiceSupportHostProtocol(_PostrunHostAttrSurface, Protocol):
+class _PostrunSupportHost(_PostrunHostAttrSurface, Protocol):
     """Typed host contract required by PostrunServiceSupportMixin helpers."""
 
     OPERATION_ERRORS: tuple[type[BaseException], ...]
@@ -114,7 +113,7 @@ class PostrunServiceSupportMixin:
     """Own thin phase execution helpers outside the main postrun shell."""
 
     def _emit_postrun_phase_observability(
-        self: PostrunServiceSupportHostProtocol,
+        self: _PostrunSupportHost,
         *,
         phase: PostrunPhaseName,
         status: str,
@@ -136,7 +135,7 @@ class PostrunServiceSupportMixin:
         )
 
     def _run_dq_phase(
-        self: PostrunServiceSupportHostProtocol,
+        self: _PostrunSupportHost,
         executor: ExecutorMetricsPort,
     ) -> DQResult:
         return run_sync_postrun_phase(
@@ -149,7 +148,7 @@ class PostrunServiceSupportMixin:
         )
 
     async def _run_compaction_phase(
-        self: PostrunServiceSupportHostProtocol,
+        self: _PostrunSupportHost,
     ) -> CompactionResult:
         return await run_async_postrun_phase(
             span_factory=self._postrun_span,
@@ -161,7 +160,7 @@ class PostrunServiceSupportMixin:
         )
 
     async def _run_dq_report_phase(
-        self: PostrunServiceSupportHostProtocol,
+        self: _PostrunSupportHost,
         dq_context: DQReportContext | None,
     ) -> DQReportResult | None:
         return await run_async_postrun_phase(
@@ -173,9 +172,7 @@ class PostrunServiceSupportMixin:
             on_success=describe_dq_report_phase,
         )
 
-    async def _run_vacuum_phase(
-        self: PostrunServiceSupportHostProtocol,
-    ) -> VacuumResult:
+    async def _run_vacuum_phase(self: _PostrunSupportHost) -> VacuumResult:
         return await run_async_postrun_phase(
             span_factory=self._postrun_span,
             phase="vacuum",
@@ -186,7 +183,7 @@ class PostrunServiceSupportMixin:
         )
 
     async def _run_final_metadata_phase(
-        self: PostrunServiceSupportHostProtocol,
+        self: _PostrunSupportHost,
         executor: ExecutorMetricsPort,
         dq_reports: DQReportResult | None,
     ) -> None:
@@ -209,15 +206,13 @@ class PostrunServiceSupportMixin:
         )
 
     def run_dq_checks(
-        self: PostrunServiceSupportHostProtocol,
+        self: _PostrunSupportHost,
         executor: ExecutorMetricsPort,
     ) -> DQResult:
         batch_metrics = self._collect_batch_metrics(executor)
         return self._dq_service.evaluate(batch_metrics)
 
-    async def run_vacuum_if_enabled(
-        self: PostrunServiceSupportHostProtocol,
-    ) -> VacuumResult:
+    async def run_vacuum_if_enabled(self: _PostrunSupportHost) -> VacuumResult:
         return await self._lifecycle_service.finalize_run(
             config=self._config,
             runtime=self._runtime,
@@ -225,24 +220,24 @@ class PostrunServiceSupportMixin:
         )
 
     async def run_silver_compact_if_needed(
-        self: PostrunServiceSupportHostProtocol,
+        self: _PostrunSupportHost,
     ) -> CompactionResult:
         return await self._compact_orchestrator.run_if_needed()
 
     async def cleanup(
-        self: PostrunServiceSupportHostProtocol,
+        self: _PostrunSupportHost,
         tracer: TracingPort | None,
     ) -> None:
         await self._cleanup_orchestrator.cleanup_tracer(tracer)
 
     async def _generate_dq_reports(
-        self: PostrunServiceSupportHostProtocol,
+        self: _PostrunSupportHost,
         context: DQReportContext | None,
     ) -> DQReportResult | None:
         return await self._dq_report_orchestrator.generate_reports(context)
 
     def _collect_batch_metrics(
-        self: PostrunServiceSupportHostProtocol,
+        self: _PostrunSupportHost,
         executor: ExecutorMetricsPort,
     ) -> dict[str, float]:
         from bioetl.application.core.postrun._batch_metrics_projection import (

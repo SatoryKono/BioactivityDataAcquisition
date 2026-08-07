@@ -490,10 +490,18 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     assert first_row_y >= 0
 
     overview = _load("bioetl-overview-v2.json")
-    for row_id in (9014, 9009, 9012, 9600):
+    domain_tracks = _panel(overview, 9030)
+    assert domain_tracks.get("type") == "row"
+    assert domain_tracks.get("collapsed") is True
+    assert len(domain_tracks.get("panels") or []) == 3
+    for row_id in (9009, 9012):
         row = _panel(overview, row_id)
         assert row.get("type") == "row"
-        assert row.get("collapsed") is False
+        assert row.get("collapsed") is True
+        assert len(row.get("panels") or []) > 0
+    alerts = _panel(overview, 9600)
+    assert alerts.get("type") == "row"
+    assert alerts.get("collapsed") is False
     assert _panel(overview, 215)["title"] == "Review First Action"
     assert _panel(overview, 9601).get("type") == "table"
 

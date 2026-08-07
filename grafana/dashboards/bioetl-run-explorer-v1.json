@@ -90,7 +90,7 @@
           "tags": []
         }
       ],
-      "description": "Open another BioETL dashboard while preserving the active time range and supported workflow, pipeline, run type, and run context. The current workspace is the disabled item. Use Trust for recovery safety and domain dashboards for current telemetry."
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. The current workspace is the disabled item. Handoffs preserve the active time range and supported workflow, pipeline, run type, and run context; use Trust for recovery safety and domain dashboards for current telemetry."
     },
     {
       "id": 1,

@@ -222,8 +222,7 @@ class BatchMetricsRecorderService:
         details: JsonDict | None = None,
         count: int = 1,
     ) -> None:
-        """Record bounded Silver-filter reject breakdown labels.
-        `message` remains display-only and is intentionally ignored here.
+        """Record bounded labels; ``message`` remains display-only and ignored.
 
         Pipeline accounting always runs; Prometheus emission is skipped only
         when the metrics port is unset.

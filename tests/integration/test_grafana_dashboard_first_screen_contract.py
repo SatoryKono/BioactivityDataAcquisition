@@ -204,7 +204,6 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
         },
         "bioetl-dq-v2.json": {
             "Monitor Current DQ Status": "bioetl_dq_current_status",
-            "Inspect Current DQ Reasons": "bioetl_dq_current_reason",
         },
     }
 
@@ -234,6 +233,20 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             assert all("$__range" not in expr for expr in expressions), (
                 f"{dashboard_name}:{panel_title} must not use selected range for current status"
             )
+
+    dq_dashboard = load_dashboard(
+        Path("grafana/dashboards") / "bioetl-dq-v2.json"
+    )
+    dq_reason_row = next(
+        panel
+        for panel in dq_dashboard.get("panels", [])
+        if panel.get("title") == "Selected Range · Impact & Freshness"
+    )
+    assert dq_reason_row.get("collapsed") is True
+    assert any(
+        panel.get("title") == "Inspect Current DQ Reasons"
+        for panel in dq_reason_row.get("panels", [])
+    )
 
 
 def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
