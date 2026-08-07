@@ -1,4 +1,4 @@
-"""Finalize and nullify helpers for enrichment cross-validation."""
+"""Finalize and nullify collaborators for enrichment cross-validation."""
 
 from __future__ import annotations
 

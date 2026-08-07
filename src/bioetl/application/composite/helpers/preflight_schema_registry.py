@@ -1,4 +1,4 @@
-"""Schema registry discovery for composite preflight validation."""
+"""Schema registry discovery helpers for composite preflight validation."""
 
 from __future__ import annotations
 

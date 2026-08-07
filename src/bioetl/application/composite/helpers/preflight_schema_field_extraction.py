@@ -1,4 +1,4 @@
-"""Schema field extraction helpers for preflight orchestration."""
+"""Schema field extraction collaborators for preflight orchestration."""
 
 from __future__ import annotations
 

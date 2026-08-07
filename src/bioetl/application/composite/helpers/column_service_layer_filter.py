@@ -1,4 +1,4 @@
-"""Layer-config column filtering helpers for ColumnOrderService."""
+"""Layer-config filtering collaborators for ColumnOrderService."""
 
 from __future__ import annotations
 
