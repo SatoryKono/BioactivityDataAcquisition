@@ -54,15 +54,19 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
         4. payload and error_code are immutable
 
     Example:
+        >>> from datetime import datetime, timezone
+        >>> created_at = datetime(2024, 1, 1, tzinfo=timezone.utc)
+        >>> resolved_at = datetime(2024, 1, 2, tzinfo=timezone.utc)
         >>> entry = QuarantineEntry.create(
         ...     pipeline_name="chembl_activity",
         ...     error_code="SCHEMA_VIOLATION",
         ...     payload={"id": "bad-record"},
         ...     run_id=run_id,
         ...     batch_id=batch_id,
+        ...     created_at=created_at,
         ... )
         >>> entry.start_review()
-        >>> entry.mark_ignored(reason="Known bad data source")
+        >>> entry.mark_ignored(reason="Known bad data source", resolved_at=resolved_at)
         >>> events = entry.collect_events()
     """
 

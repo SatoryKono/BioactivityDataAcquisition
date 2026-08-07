@@ -231,7 +231,7 @@ def emit_record_quarantined(
             occurred_at=occurred_at,
             run_id=run_id,
             batch_id=batch_id,
-            record_id=str(entity_id) if entity_id else None,
+            record_id=str(entity_id) if entity_id is not None else None,
             error_code=error_code,
             error_message=error,
             content_hash=content_hash,

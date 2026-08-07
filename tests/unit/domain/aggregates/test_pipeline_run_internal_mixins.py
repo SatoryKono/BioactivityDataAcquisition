@@ -557,26 +557,26 @@ class TestStageResultValidationFunctions:
     def test_validate_stage_completion_failed_requires_error(self):
         """_validate_stage_completion should require error for FAILED status."""
         with pytest.raises(ValueError, match="Failed stage must have an error"):
-            _validate_stage_completion(StageStatus.FAILED, None, _ts(0))
+            _validate_stage_completion(StageStatus.FAILED, None, _ts(0), _ts(0))
 
     def test_validate_stage_completion_success_requires_timestamp(self):
         """_validate_stage_completion should require completed_at for SUCCESS."""
         with pytest.raises(ValueError, match="must have completed_at"):
-            _validate_stage_completion(StageStatus.SUCCESS, None, None)
+            _validate_stage_completion(StageStatus.SUCCESS, None, None, _ts(0))
 
     def test_validate_stage_completion_failed_requires_timestamp(self):
         """_validate_stage_completion should require completed_at for FAILED."""
         with pytest.raises(ValueError, match="must have completed_at"):
-            _validate_stage_completion(StageStatus.FAILED, "error", None)
+            _validate_stage_completion(StageStatus.FAILED, "error", None, _ts(0))
 
     def test_validate_stage_completion_running_allows_none_timestamp(self):
         """_validate_stage_completion should allow None for RUNNING status."""
-        _validate_stage_completion(StageStatus.RUNNING, None, None)  # Should not raise
+        _validate_stage_completion(StageStatus.RUNNING, None, None, _ts(0))  # Should not raise
 
     def test_validate_stage_result_rejects_negative_records(self):
         """_validate_stage_result should reject negative records_processed."""
         with pytest.raises(ValueError, match="cannot be negative"):
-            _validate_stage_result("test", StageStatus.SUCCESS, None, _ts(0), -1)
+            _validate_stage_result("test", StageStatus.SUCCESS, None, _ts(0), -1, _ts(0))
 
 
 class TestStageResultValueObject:
