@@ -1,4 +1,4 @@
-"""Apply-path helpers for DependencyJoinerService join orchestration."""
+"""Apply-path collaborators for DependencyJoinerService orchestration."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from bioetl.application.composite.dependency_join_context_builders import (
 from bioetl.application.composite.dependency_join_execution import (
     resolve_single_key_join_context,
 )
-from bioetl.application.composite.dependency_join_service_ops import (
+from bioetl.application.composite.helpers.dependency_join_service_ops import (
     execute_composite_dependency_join,
     execute_single_key_dependency_join,
     prepare_dependency_join_context,

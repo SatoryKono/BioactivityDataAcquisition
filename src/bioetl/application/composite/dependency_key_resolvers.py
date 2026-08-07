@@ -9,7 +9,7 @@ from typing import TypeVar
 
 import polars as pl
 
-from bioetl.application.composite.dependency_chained_key_resolver import (
+from bioetl.application.composite.helpers.dependency_chained_key_resolver import (
     ChainedKeyResolver as ChainedKeyResolver,
 )
 from bioetl.application.composite.helpers.resolver_helper import ResolverHelper

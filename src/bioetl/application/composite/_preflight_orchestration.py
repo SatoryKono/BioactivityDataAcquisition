@@ -5,18 +5,18 @@ from __future__ import annotations
 
 from typing import Any, cast
 
-from bioetl.application.composite._preflight_schema_field_extraction import (
+from bioetl.application.composite._preflight_types import (
+    ProfileInfo,
+    SchemaFields,
+)
+from bioetl.application.composite.helpers.preflight_schema_field_extraction import (
     extract_dtype_from_annotation,
     extract_fields_from_annotations,
     extract_fields_from_schema,
     simplify_dtype,
 )
-from bioetl.application.composite._preflight_schema_registry import (
+from bioetl.application.composite.helpers.preflight_schema_registry import (
     load_schema_registry,
-)
-from bioetl.application.composite._preflight_types import (
-    ProfileInfo,
-    SchemaFields,
 )
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.normalization.profiles import resolve_normalization_profile

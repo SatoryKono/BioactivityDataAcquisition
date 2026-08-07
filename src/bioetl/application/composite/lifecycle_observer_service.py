@@ -9,15 +9,15 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 
-from bioetl.application.composite._lifecycle_observer_terminal_emit import (
-    emit_run_failed,
-    emit_run_shutdown,
-)
 from bioetl.application.composite._lifecycle_observer_tracing_helpers import (
     _CompositeSpanHandleProtocol,
 )
 from bioetl.application.composite._lifecycle_observer_tracing_mixin import (
     CompositeLifecycleTracingMixin,
+)
+from bioetl.application.composite.helpers.lifecycle_observer_terminal_emit import (
+    emit_run_failed,
+    emit_run_shutdown,
 )
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort

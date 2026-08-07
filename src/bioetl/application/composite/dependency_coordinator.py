@@ -7,11 +7,6 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from bioetl.application.composite.dependency_coordinator_execution import (
-    execute_dependency_runner,
-    log_dependencies_batch_start,
-    run_single_dependency,
-)
 from bioetl.application.composite.dependency_key_resolvers import (
     ChainedKeyResolver,
     SeedKeyResolver,
@@ -21,6 +16,11 @@ from bioetl.application.composite.dependency_progress_tracker import (
 )
 from bioetl.application.composite.dependency_result_mapper import (
     DependencyResultService,
+)
+from bioetl.application.composite.helpers.dependency_coordinator_execution import (
+    execute_dependency_runner,
+    log_dependencies_batch_start,
+    run_single_dependency,
 )
 from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.domain.composite.result import DependencyResult

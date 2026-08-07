@@ -41,7 +41,7 @@ from bioetl.application.composite import dependency_join_support
 from bioetl.application.composite._preflight_orchestration import (
     PreflightSchemaOrchestrationMixin,
 )
-from bioetl.application.composite._preflight_schema_registry import (
+from bioetl.application.composite.helpers.preflight_schema_registry import (
     find_schema_class,
 )
 from bioetl.application.composite.aggregator import EnricherAggregator

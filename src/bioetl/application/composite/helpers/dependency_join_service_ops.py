@@ -1,4 +1,4 @@
-"""Private operation helpers for DependencyJoinerService."""
+"""Private operation collaborators for DependencyJoinerService."""
 
 from __future__ import annotations
 
