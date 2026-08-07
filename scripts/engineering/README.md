@@ -29,6 +29,7 @@ python scripts/engineering/run.py --help
 
 ```bash
 python -m scripts.engineering.qa report-dep-map --check
+python -m scripts.engineering.qa find-complex-functions
 python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml
 python -m scripts.engineering.repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json
 python -m scripts.engineering.baselines dq-baseline --dry-run
