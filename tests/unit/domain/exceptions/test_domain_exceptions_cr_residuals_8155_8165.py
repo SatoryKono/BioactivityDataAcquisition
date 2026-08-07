@@ -80,7 +80,7 @@ def test_schema_violation_record_id_always_present() -> None:
 def test_pipeline_shutdown_error_nominal() -> None:
     err = PipelineShutdownError(
         "shutdown requested",
-        reason=ShutdownReason.SIGNAL,
+        reason=ShutdownReason.SIGNAL_SIGTERM,
     )
     assert isinstance(err, BioETLError)
     assert "shutdown" in str(err).lower() or err.args
