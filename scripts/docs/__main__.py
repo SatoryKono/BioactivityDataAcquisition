@@ -13,6 +13,7 @@ Commands:
     check-docstrings   Check docstring coverage
     check-kpi          Report documentation KPI metrics
     generate-cleanup-inventory Generate/check documentation cleanup inventory
+    generate-docs-export Generate documentation export artifacts
     export-matrix-structural-contract Export canonical runtime structural contract for ChEMBL matrix sync
     generate-field-matrix Generate code-derived ChemBL Activity field-matrix artifacts
     generate-pipeline-normalization-matrix Generate code-derived normalization field-matrix artifacts for all pipelines
@@ -44,6 +45,7 @@ COMMANDS = {
     "check-docstrings": "scripts.docs.checks.check_docstrings",
     "check-kpi": "scripts.docs.checks.report_docs_kpi",
     "generate-cleanup-inventory": "scripts.docs.checks.documentation_cleanup_inventory",
+    "generate-docs-export": "scripts.docs.build.generate_docs_export",
     "export-matrix-structural-contract": "scripts.docs.matrix.export_structural_contract",
     "generate-field-matrix": "scripts.docs.matrix.generate_field_matrix",
     "generate-pipeline-normalization-matrix": "scripts.docs.matrix.generate_pipeline_normalization_matrix",
