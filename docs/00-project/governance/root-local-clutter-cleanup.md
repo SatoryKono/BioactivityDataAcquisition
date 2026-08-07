@@ -1,7 +1,7 @@
 # Root local clutter cleanup (operator guidance)
 
 **Status:** active
-**Linked issues:** #6703 (RH), #6766 (RH2-01), #6798/#6799 (RH3), #6813/#6814/#6816 (RH4), #6876/#6877 (RH 2026-07-28), #7015–#7023 (RH5 2026-07-29); RH7 #8292–#8295, #8299–#8300, #8306–#8307; epics #6700, #6765, #6795, #6812, #6874, #7015
+**Linked issues:** #6703 (RH), #6766 (RH2-01), #6798/#6799 (RH3), #6813/#6814/#6816 (RH4), #6876/#6877 (RH 2026-07-28), #7015–#7023 (RH5 2026-07-29); RH7 #8292–#8295, #8299–#8300, #8306–#8307, #8310; epics #6700, #6765, #6795, #6812, #6874, #7015
 **Last verified:** 2026-08-07
 
 This note documents **local-only** cleanup for the repository root. It does not
@@ -193,8 +193,9 @@ Campaign branch: `grok-260807-root-hygiene-5cycle` (5 full Stage1–3 cycles).
 | C2 | #8294, #8295 | Purged `logs/`, `test-output/`, `.coverage`; cleanup SAFE + listing-based `nul` support |
 | C3 | #8299, #8300 | Audit forbidden temps without requiring `is_file()`; empty-only `.worktrees` cleanup + registry candidate |
 | C4 | #8306, #8307 | This docs refresh; optional tool-cache purge on audit host |
+| C5 | #8310 | FINAL report + no-op gate verification (`reports/root-hygiene/cycle-5loop-20260807/FINAL_REPORT.md`) |
 
-**Strict gate after RH7 C1–C3:** `check-cleanliness --strict-untracked` OK; tracked root **37 ≡ allowlist**.
+**Strict gate after RH7 C1–C5:** `check-cleanliness --strict-untracked` OK; tracked root **37 ≡ allowlist**.
 
 **Tooling notes (RH7):**
 
@@ -210,6 +211,6 @@ Campaign branch: `grok-260807-root-hygiene-5cycle` (5 full Stage1–3 cycles).
 - Epic RH3: #6795
 - Epic RH4: #6812
 - Epic RH (2026-07-28): #6874
-- RH7 issues: #8292–#8295, #8299–#8300, #8306–#8307
+- RH7 issues: #8292–#8295, #8299–#8300, #8306–#8307, #8310
 - Pack: `.github/ISSUES/RH-2026-07-28-ROOT-HYGIENE-MINIMIZATION-ISSUE-PACK.md`
 - Pack RH4: `.github/ISSUES/RH4-2026-07-28-ROOT-HYGIENE-POST-RH3-RESIDUAL-ISSUE-PACK.md`
