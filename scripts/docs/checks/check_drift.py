@@ -170,9 +170,6 @@ MEMORY_DOC_TOKEN = "../memory/agent-memory.md"
 GEMINI_AUDIT_BOT_TOKEN = GEMINI_PY_AUDIT_BOT_DOC_PATH
 RUNTIME_VERSION_PATTERN = re.compile(r"(?m)^\*Версия:\s*(\d+(?:\.\d+)*)")
 RULES_VERSION_PATTERN = re.compile(r"(?m)^Version:\s*(\d+(?:\.\d+)*)")
-AGENT_MEMORY_SYNC_PATTERN = re.compile(
-    r"Синхронизировано с ORCHESTRATION\.md v(\d+(?:\.\d+)*)"
-)
 LAST_UPDATED_PATTERN = re.compile(r"Последнее обновление:\s*(\d{4}-\d{2}-\d{2})")
 AI_RULES_README_PATH = Path("docs/00-project/ai/rules/README.md")
 CURSOR_RULE_DOCS_DIR = Path("docs/00-project/ai/rules/cursor")
@@ -222,23 +219,22 @@ RUNTIME_MIRROR_RULES: tuple[RuntimeMirrorRule, ...] = (
         canonical=Path(".codex/agents/ORCHESTRATION.md"),
         mirror=Path("docs/00-project/ai/agents/agents/ORCHESTRATION.md"),
         sections=(
-            "## 1. Обзор",
-            "## 2. Стандартный workflow задачи",
-            "## 4. Структура артефактов",
+            "## Authority and bootstrap",
+            "## Risk tiers and routing",
+            "## Standard task loop",
         ),
-        compare_version=True,
     ),
     RuntimeMirrorRule(
         name="py-audit-bot",
         canonical=Path(CODEX_PY_AUDIT_BOT_DOC_PATH),
         mirror=Path("docs/00-project/ai/agents/agents/py-audit-bot.md"),
-        sections=("## Выходы",),
+        sections=("## Purpose", "## Procedure", "## Finding contract"),
     ),
     RuntimeMirrorRule(
         name="py-config-bot",
         canonical=Path(CODEX_PY_CONFIG_BOT_DOC_PATH),
         mirror=Path("docs/00-project/ai/agents/agents/py-config-bot.md"),
-        sections=("## Выходы", "## Обязательные правила", "## Иерархия конфигураций"),
+        sections=("## Purpose and authority", "## Canonical hierarchy", "## Procedure"),
     ),
 )
 
@@ -373,42 +369,41 @@ AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
 AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     Path(skill_path): SKILL_REQUIRED_TOKENS for skill_path in WRITE_CAPABLE_SKILL_PATHS
 }
-AI_ROLE_PROFILE_NORMATIVE_TOKENS: tuple[str, ...] = (
-    NORMATIVE_SOURCES_DOC_TOKEN,
-    RULES_DOC_TOKEN,
-    REQUIREMENTS_DOC_TOKEN,
-)
 AI_ROLE_PROFILE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     Path(CODEX_PY_AUDIT_BOT_DOC_PATH): (
-        *RUNTIME_DOC_TOKENS,
-        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
-        RUNTIME_AGENT_MEMORY_PATH,
+        AGENTS_DOC_TOKEN,
+        NORMATIVE_SOURCES_DOC_TOKEN,
+        ".codex/skills/py-audit-bot/SKILL.md",
         "docs/00-project/ai/memory/memory-py-audit-bot.md",
     ),
     Path(".codex/agents/py-plan-bot.md"): (
-        *RUNTIME_DOC_TOKENS,
-        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
-        RUNTIME_AGENT_MEMORY_PATH,
+        AGENTS_DOC_TOKEN,
+        NORMATIVE_SOURCES_DOC_TOKEN,
+        ".codex/skills/py-plan-bot/SKILL.md",
         "docs/00-project/ai/memory/memory-py-plan-bot.md",
     ),
     Path(CODEX_PY_CONFIG_BOT_DOC_PATH): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
+        AGENTS_DOC_TOKEN,
+        NORMATIVE_SOURCES_DOC_TOKEN,
+        ".codex/skills/py-config-bot/SKILL.md",
         "docs/00-project/ai/memory/memory-py-config-bot.md",
     ),
     Path(".codex/agents/py-debug-bot.md"): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
+        AGENTS_DOC_TOKEN,
+        NORMATIVE_SOURCES_DOC_TOKEN,
+        ".codex/skills/py-debug-bot/SKILL.md",
         "docs/00-project/ai/memory/memory-py-debug-bot.md",
     ),
     Path(".codex/agents/py-doc-bot.md"): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
+        AGENTS_DOC_TOKEN,
+        NORMATIVE_SOURCES_DOC_TOKEN,
+        ".codex/skills/py-doc-bot/SKILL.md",
         "docs/00-project/ai/memory/memory-py-doc-bot.md",
     ),
     Path(".codex/agents/py-test-bot.md"): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
+        AGENTS_DOC_TOKEN,
+        NORMATIVE_SOURCES_DOC_TOKEN,
+        ".codex/skills/py-test-bot/SKILL.md",
         "docs/00-project/ai/memory/memory-py-test-bot.md",
     ),
 }
@@ -1226,9 +1221,6 @@ def _check_active_non_canonical_evidence_summary(
 
 def check_freshness(report: DriftReport) -> None:
     """Verify active docs use consistent freshness/version metadata."""
-    canonical_orchestration = PROJECT_ROOT / ".codex" / "agents" / "ORCHESTRATION.md"
-    orchestration_text = _read_doc(canonical_orchestration)
-    current_orchestration_version = _extract_runtime_version(orchestration_text)
     rules_text = _read_doc(PROJECT_ROOT / RULES_DOC_TOKEN)
     current_rules_version = _extract_rules_version(rules_text)
 
@@ -1241,24 +1233,12 @@ def check_freshness(report: DriftReport) -> None:
             "Agent memory doc missing",
         )
     else:
-        sync_match = AGENT_MEMORY_SYNC_PATTERN.search(agent_memory_text)
-        if sync_match is None:
+        if ".codex/agents/ORCHESTRATION.md" not in agent_memory_text:
             report.add(
                 "freshness",
                 "ERROR",
                 _rel(PROJECT_ROOT / AGENT_MEMORY_PATH),
-                "Agent memory is missing the ORCHESTRATION sync marker",
-            )
-        elif (
-            current_orchestration_version
-            and sync_match.group(1) != current_orchestration_version
-        ):
-            report.add(
-                "freshness",
-                "ERROR",
-                _rel(PROJECT_ROOT / AGENT_MEMORY_PATH),
-                "Agent memory references an outdated ORCHESTRATION version "
-                f"(expected v{current_orchestration_version}, found v{sync_match.group(1)})",
+                "Agent memory is missing the canonical ORCHESTRATION link",
             )
 
         if "reports/plans/<task_id>/" in agent_memory_text:

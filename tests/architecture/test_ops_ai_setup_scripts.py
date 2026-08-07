@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import subprocess
 import sys
 from pathlib import Path
 
@@ -62,11 +63,31 @@ def test_setup_skills_dry_run_previews_optional_personal_copy(
     )
 
     assert result.returncode == 0, result.stderr
-    assert "native skill adapters are in sync" in result.stdout
+    assert "canonical Codex skills are valid" in result.stdout
     assert "Would copy optional personal skills:" in result.stdout
     assert "py-test-bot/" in result.stdout
     assert "paired agents" not in result.stdout
     assert not (tmp_path / ".codex-home").exists()
+
+
+def test_legacy_skill_sync_entrypoint_is_a_read_only_canonical_validator() -> None:
+    root = Path(__file__).resolve().parents[2]
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/ai/codex/sync_native_skills.py",
+            "--check",
+        ],
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "read-only" in result.stdout
+    assert "generate" not in result.stdout.casefold()
+    assert "canonical Codex skills are valid" in result.stdout
 
 
 def test_ops_router_dispatches_setup_commands_to_canonical_codex_scripts() -> None:
