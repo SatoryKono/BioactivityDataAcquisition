@@ -9,10 +9,10 @@ See ADR-026 for architectural decisions.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class AggregationFunction(Enum):
+class AggregationFunction(StrEnum):
     """Supported aggregation functions for 1:M enrichers.
 
     These functions are applied to convert multiple rows per join key
@@ -54,7 +54,7 @@ class AggregationFunction(Enum):
             ) from None
 
 
-class EnricherCardinality(Enum):
+class EnricherCardinality(StrEnum):
     """Cardinality of enricher data relative to seed.
 
     Describes the relationship between seed rows and enricher rows.
@@ -181,7 +181,7 @@ class AggregationConfig:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
-        if isinstance(self.fields, list):
+        if isinstance(self.fields, list | tuple):
             converted = tuple(
                 AggregationFieldSpec(**f) if isinstance(f, dict) else f
                 for f in self.fields

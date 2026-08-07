@@ -137,11 +137,16 @@ class DependencyResult:
 
         Returns:
             DependencyResult with SKIPPED status.
+
+        Note:
+            ``reason`` is accepted for caller diagnostics only. A successful skip is
+            not an error, so ``error_message`` stays ``None``.
         """
+        _ = reason  # caller-facing diagnostic only; not an error payload
         return cls(
             pipeline_name=pipeline_name,
             status=DependencyStatus.SKIPPED,
-            error_message=reason,
+            error_message=None,
         )
 
     @classmethod

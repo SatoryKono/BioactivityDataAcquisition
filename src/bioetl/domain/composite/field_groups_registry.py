@@ -32,6 +32,9 @@ class FieldGroupRegistry:
         self._column_to_group: dict[str, FieldGroupId] = {}
         self._field_to_mapping: dict[str, FieldMapping] = {}
         self._group_to_def: dict[FieldGroupId, FieldGroupDefinition] = {}
+        self._group_rank: dict[FieldGroupId, int] = {
+            group: index for index, group in enumerate(FieldGroupId)
+        }
 
         for group_def in groups:
             self._group_to_def[group_def.group_id] = group_def
@@ -160,14 +163,11 @@ class FieldGroupRegistry:
         """
         system_cols = [c for c in columns if c.startswith("_")]
         data_cols = [c for c in columns if not c.startswith("_")]
-        group_order = list(FieldGroupId)
+        fallback_rank = len(self._group_rank)
 
         def sort_key(column: str) -> tuple[int, int, str]:
             group = self.get_group(column)
-            try:
-                group_idx = group_order.index(group)
-            except ValueError:
-                group_idx = len(group_order)
+            group_idx = self._group_rank.get(group, fallback_rank)
             provider_rank = self._get_provider_rank(column)
             field_name = self._extract_field(column)
             return (group_idx, provider_rank, field_name)
