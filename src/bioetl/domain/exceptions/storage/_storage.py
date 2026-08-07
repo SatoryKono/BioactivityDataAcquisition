@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-from typing import cast
-
 from bioetl.domain.exceptions.base import CriticalError, RecoverableError
 from bioetl.domain.types import ErrorType
 
@@ -15,19 +13,14 @@ class StorageError(RecoverableError):
     error_type = ErrorType.NETWORK_ERROR
 
 
-def bucket_not_found_error(bucket: str) -> StorageError:
-    """Compatibility constructor for legacy BucketNotFoundError.
+class BucketNotFoundError(StorageError):
+    """Raised when a storage bucket does not exist."""
 
-    Args:
-        bucket: Name of the missing storage bucket.
+    error_type = ErrorType.DB_UNAVAILABLE
 
-    Returns:
-        StorageError with DB_UNAVAILABLE type and bucket context attached.
-    """
-    error = StorageError(f"Bucket '{bucket}' not found")
-    error = cast(StorageError, error.with_context(bucket=bucket))
-    error.error_type = ErrorType.DB_UNAVAILABLE  # type: ignore[misc]  # instance override of ClassVar  # pyright: ignore[reportAttributeAccessIssue]
-    return error
+    def __init__(self, bucket: str) -> None:
+        self.bucket = bucket
+        super().__init__(f"Bucket '{bucket}' not found")
 
 
 class TableNotFoundError(StorageError):
@@ -40,20 +33,15 @@ class TableNotFoundError(StorageError):
         super().__init__(f"Table not found: '{table_path}'")
 
 
-def upload_error(key: str, reason: str) -> StorageError:
-    """Compatibility constructor for legacy UploadError.
+class UploadError(StorageError):
+    """Raised when an object upload fails."""
 
-    Args:
-        key: Storage key or path of the object that failed to upload.
-        reason: Human-readable description of the upload failure.
+    error_type = ErrorType.NETWORK_ERROR
 
-    Returns:
-        StorageError with NETWORK_ERROR type and upload context attached.
-    """
-    error = StorageError(f"Failed to upload '{key}': {reason}")
-    error = cast(StorageError, error.with_context(key=key, reason=reason))
-    error.error_type = ErrorType.NETWORK_ERROR  # type: ignore[misc]  # instance override of ClassVar  # pyright: ignore[reportAttributeAccessIssue]
-    return error
+    def __init__(self, key: str, reason: str) -> None:
+        self.key = key
+        self.reason = reason
+        super().__init__(f"Failed to upload '{key}': {reason}")
 
 
 class StorageQuotaExceededError(CriticalError):
@@ -197,75 +185,45 @@ class SchemaEvolutionError(StorageError):
         )
 
 
-def bronze_validation_error(
-    message: str,
-    record_index: int | None = None,
-    original_error: str | None = None,
-) -> StorageError:
-    """Compatibility constructor for legacy BronzeValidationError.
+class BronzeValidationError(StorageError):
+    """Raised when Bronze payload validation fails."""
 
-    Args:
-        message: Primary error message describing the validation failure.
-        record_index: Optional index of the offending record; defaults to None.
-        original_error: Optional original exception message string; defaults to None.
+    error_type = ErrorType.INVALID_DATA
 
-    Returns:
-        StorageError with INVALID_DATA type and validation context attached.
-    """
-    parts = [message]
-    if record_index is not None:
-        parts.append(f"record_index={record_index}")
-    if original_error is not None:
-        parts.append(f"error={original_error}")
-    error = StorageError(", ".join(parts))
-    error = cast(
-        StorageError,
-        error.with_context(
-            record_index=record_index,
-            original_error=original_error,
-        ),
-    )
-    error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar  # pyright: ignore[reportAttributeAccessIssue]
-    return error
+    def __init__(
+        self,
+        message: str,
+        record_index: int | None = None,
+        original_error: str | None = None,
+    ) -> None:
+        self.record_index = record_index
+        self.original_error = original_error
+        parts = [message]
+        if record_index is not None:
+            parts.append(f"record_index={record_index}")
+        if original_error is not None:
+            parts.append(f"error={original_error}")
+        super().__init__(", ".join(parts))
 
 
-def cached_bronze_empty_error(
-    provider: str,
-    entity_type: str,
-    bronze_path: str,
-    date_filter: str | None = None,
-) -> StorageError:
-    """Compatibility constructor for legacy CachedBronzeEmptyError.
+class CachedBronzeEmptyError(StorageError):
+    """Raised when expected cached Bronze data is missing."""
 
-    Args:
-        provider: Provider name whose cached Bronze data was not found.
-        entity_type: Entity type whose cached Bronze data was not found.
-        bronze_path: Path that was searched for Bronze data.
-        date_filter: Optional date filter that was applied; defaults to None.
+    error_type = ErrorType.INVALID_DATA
 
-    Returns:
-        StorageError indicating that no Bronze data was found for the given context.
-    """
-    date_info = f" for date {date_filter}" if date_filter else ""
-    message = (
-        f"No Bronze data found for {provider}/{entity_type}{date_info}. "
-        f"Searched path: {bronze_path}"
-    )
-    error = StorageError(message)
-    error = cast(
-        StorageError,
-        error.with_context(
-            provider=provider,
-            entity_type=entity_type,
-            bronze_path=bronze_path,
-            date_filter=date_filter,
-        ),
-    )
-    error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar  # pyright: ignore[reportAttributeAccessIssue]
-    return error
-
-
-BucketNotFoundError = bucket_not_found_error
-UploadError = upload_error
-BronzeValidationError = bronze_validation_error
-CachedBronzeEmptyError = cached_bronze_empty_error
+    def __init__(
+        self,
+        provider: str,
+        entity_type: str,
+        bronze_path: str,
+        date_filter: str | None = None,
+    ) -> None:
+        self.provider = provider
+        self.entity_type = entity_type
+        self.bronze_path = bronze_path
+        self.date_filter = date_filter
+        date_info = f" for date {date_filter}" if date_filter else ""
+        super().__init__(
+            f"No Bronze data found for {provider}/{entity_type}{date_info}. "
+            f"Searched path: {bronze_path}"
+        )
