@@ -261,9 +261,9 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
         "Review Recent Terminal Runs": (9011, "bioetl_pipeline_runs_total"),
     }
     disclosure_by_panel = {
-        "Track Runtime Blockers": "Inspect Historical Trends",
-        "Track Data Quality Status": "Inspect Historical Trends",
-        "Track Gold Lifecycle": "Inspect Historical Trends",
+        "Track Runtime Blockers": "Domain Status Tracks",
+        "Track Data Quality Status": "Domain Status Tracks",
+        "Track Gold Lifecycle": "Domain Status Tracks",
         "Review Failed Runs": "Inspect Range Evidence",
         "Review Recent Terminal Runs": "Inspect Range Evidence",
     }
@@ -297,7 +297,9 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
         }
         for row in disclosure_rows.values():
             assert row.get("type") == "row"
-            assert row.get("collapsed") is False
+            assert row.get("collapsed") is (
+                row.get("title") in {"Domain Status Tracks", "Inspect Range Evidence"}
+            )
             assert row.get("gridPos", {}).get("y", 0) > max_first_answer_y
         for panel_title, row_title in disclosure_by_panel.items():
             assert panel_title in disclosure_children[row_title]

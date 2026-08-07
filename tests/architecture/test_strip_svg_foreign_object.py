@@ -27,7 +27,9 @@ pytestmark = pytest.mark.architecture
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "diagrams" / "strip_svg_foreign_object.py"
+    module_path = (
+        repo_root / "scripts" / "diagrams" / "fix" / "strip_svg_foreign_object.py"
+    )
     spec = importlib.util.spec_from_file_location(
         "strip_svg_foreign_object_module", module_path
     )
@@ -126,7 +128,9 @@ def test_strip_foreign_objects_accepts_mermaid_html_entities(tmp_path: Path) -> 
 def test_direct_script_execution_can_write_the_result(tmp_path: Path) -> None:
     """The renderer invokes the postprocessor by its canonical file path."""
     repo_root = Path(__file__).resolve().parents[2]
-    script_path = repo_root / "scripts" / "diagrams" / "strip_svg_foreign_object.py"
+    script_path = (
+        repo_root / "scripts" / "diagrams" / "fix" / "strip_svg_foreign_object.py"
+    )
     svg_path = tmp_path / "direct-execution.svg"
     svg_path.write_text(
         """

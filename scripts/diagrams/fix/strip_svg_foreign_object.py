@@ -25,6 +25,7 @@ try:
     from scripts.diagrams.core.diagram_paths import SOURCE_FAMILIES, render_dir
 except ImportError:  # pragma: no cover - direct script execution
     from scripts.diagrams.core.diagram_paths import SOURCE_FAMILIES, render_dir
+from scripts.engineering.common.repo_paths import resolve_output_path
 
 SVG_DIRS = [render_dir(family, "svg") for family in SOURCE_FAMILIES]
 
@@ -50,8 +51,6 @@ def _write_text_atomic(path: Path, payload: str) -> None:
     ) as temp_file:
         temp_file.write(payload)
         temp_path = Path(temp_file.name)
-    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
-
     path = resolve_output_path(path, root=REPO_ROOT)
     temp_path.replace(path)
 

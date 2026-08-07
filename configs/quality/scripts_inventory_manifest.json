@@ -1,20 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-07T15:49:34.104545+00:00",
+  "generated_at": "2026-08-07T16:40:52.950431+00:00",
   "summary": {
-    "total_scripts": 573,
+    "total_scripts": 574,
     "status_counts": {
       "active": 338,
+      "orphan": 1,
       "supporting": 231,
       "temporary_diagnostic": 4
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 15,
-      "ci": 76,
+      "ci": 77,
       "docs": 232,
       "other": 88,
-      "scripts": 463,
+      "scripts": 464,
       "skills": 10,
       "tests": 357
     }
@@ -137,13 +138,13 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 35,
+          "line": 36,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/check_skills_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 76,
+          "line": 79,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/check_skills_mirror.sh\""
         },
@@ -253,19 +254,19 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 36,
+          "line": 37,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/doctor.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 77,
+          "line": 80,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/doctor.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 109,
+          "line": 113,
           "source_group": "ci",
           "text": "run: python3 scripts/ai/codex/doctor.py static --no-write"
         },
@@ -568,13 +569,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 42,
+          "line": 44,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/helper/ensure-mcp.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 83,
+          "line": 87,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/helper/ensure-mcp.sh\""
         },
@@ -1044,13 +1045,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 37,
+          "line": 38,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/mcp_profile_contract.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 78,
+          "line": 81,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/mcp_profile_contract.py\""
         },
@@ -1079,7 +1080,7 @@
       "agent_usage": [
         "README"
       ],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": ".codex/agents/README.md",
@@ -1089,15 +1090,21 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 38,
+          "line": 39,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/native_runtime_contract.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 79,
+          "line": 82,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/native_runtime_contract.py\""
+        },
+        {
+          "path": "scripts/ai/codex/sync_native_skills.py",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "from scripts.ai.codex.native_runtime_contract import validate_canonical_skills"
         },
         {
           "path": "tests/architecture/test_codex_agent_catalog_inventory.py",
@@ -1243,13 +1250,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 43,
+          "line": 45,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/run-codex.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 84,
+          "line": 88,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/run-codex.sh\""
         },
@@ -1442,13 +1449,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 40,
+          "line": 41,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/setup_agents.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 81,
+          "line": 84,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/setup_agents.sh\""
         },
@@ -1478,13 +1485,13 @@
         },
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 97,
+          "line": 98,
           "source_group": "tests",
           "text": "assert \"../ai/codex/setup_agents.sh\" in ops_router"
         },
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 100,
+          "line": 101,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"setup_agents.sh\""
         }
@@ -1527,13 +1534,13 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 39,
+          "line": 40,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/setup_mcp.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 80,
+          "line": 83,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/setup_mcp.py\""
         },
@@ -1560,13 +1567,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 41,
+          "line": 42,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/setup_skills.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 82,
+          "line": 85,
           "source_group": "ci",
           "text": "- \"scripts/ai/codex/setup_skills.sh\""
         },
@@ -1605,11 +1612,23 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
         {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 43,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/codex/sync_native_skills.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 86,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/codex/sync_native_skills.py\""
+        },
+        {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 73,
+          "line": 78,
           "source_group": "tests",
           "text": "\"scripts/ai/codex/sync_native_skills.py\","
         }
@@ -2406,13 +2425,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 48,
+          "line": 50,
           "source_group": "ci",
           "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 89,
+          "line": 93,
           "source_group": "ci",
           "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
         },
@@ -2437,19 +2456,19 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 49,
+          "line": 51,
           "source_group": "ci",
           "text": "- \"scripts/ai/junie/check_junie_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 90,
+          "line": 94,
           "source_group": "ci",
           "text": "- \"scripts/ai/junie/check_junie_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 166,
+          "line": 170,
           "source_group": "ci",
           "text": "run: bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -4603,13 +4622,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 51,
+          "line": 53,
           "source_group": "ci",
           "text": "- \"scripts/ai/sync/governance.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 92,
+          "line": 96,
           "source_group": "ci",
           "text": "- \"scripts/ai/sync/governance.py\""
         },
@@ -4664,13 +4683,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 52,
+          "line": 54,
           "source_group": "ci",
           "text": "- \"scripts/ai/sync/runtime_skills.py\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 93,
+          "line": 97,
           "source_group": "ci",
           "text": "- \"scripts/ai/sync/runtime_skills.py\""
         },
@@ -5915,15 +5934,15 @@
         },
         {
           "path": "tests/architecture/test_strip_svg_foreign_object.py",
-          "line": 30,
+          "line": 31,
           "source_group": "tests",
-          "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"strip_svg_foreign_object.py\""
+          "text": "repo_root / \"scripts\" / \"diagrams\" / \"fix\" / \"strip_svg_foreign_object.py\""
         },
         {
           "path": "tests/architecture/test_strip_svg_foreign_object.py",
-          "line": 129,
+          "line": 132,
           "source_group": "tests",
-          "text": "script_path = repo_root / \"scripts\" / \"diagrams\" / \"strip_svg_foreign_object.py\""
+          "text": "repo_root / \"scripts\" / \"diagrams\" / \"fix\" / \"strip_svg_foreign_object.py\""
         }
       ]
     },
@@ -10978,6 +10997,14 @@
       "next_step": "Retain only as a bounded manual diagnostics utility for refactor evidence packs; route any recurring use through a governed QA report before promoting it back to active inventory."
     },
     {
+      "path": "scripts/engineering/find_complex_functions.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/engineering/qa/__main__.py",
       "type": "py",
       "status": "active",
@@ -12737,7 +12764,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/report_compatibility_importer_census.py",
-          "line": 1141,
+          "line": 1145,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.import_graph_inventory import ("
         },
@@ -15082,7 +15109,7 @@
         },
         {
           "path": "scripts/engineering/repo/cleanup_root_local_clutter.py",
-          "line": 26,
+          "line": 29,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo._root_governance import ("
         },
@@ -17462,13 +17489,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-          "line": 532,
+          "line": 533,
           "source_group": "scripts",
           "text": "1. `scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py`"
         },
         {
           "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-          "line": 597,
+          "line": 598,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import ("
         },
@@ -17573,13 +17600,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-          "line": 531,
+          "line": 532,
           "source_group": "scripts",
           "text": "1. `scripts/ops/observability/grafana/apply_dux5_residual.py`"
         },
         {
           "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-          "line": 596,
+          "line": 597,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import apply_dux5_residual as dux5"
         },
@@ -17684,7 +17711,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
-          "line": 25,
+          "line": 28,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import audit_live_grafana_panels as live_audit"
         },
@@ -17760,7 +17787,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
-          "line": 749,
+          "line": 753,
           "source_group": "scripts",
           "text": "python scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py"
         },
@@ -17973,13 +18000,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
-          "line": 751,
+          "line": 755,
           "source_group": "scripts",
           "text": "# python scripts/ops/observability/grafana/rerender_grafana_screenshots.py"
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
-          "line": 26,
+          "line": 29,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import ("
         },
@@ -18162,13 +18189,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1316,
+          "line": 1320,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1403,
+          "line": 1407,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -18521,7 +18548,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
-          "line": 29,
+          "line": 32,
           "source_group": "scripts",
           "text": "from scripts.ops.runtime.docker import docker_runtime_preflight as runtime_preflight"
         },
@@ -18934,7 +18961,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 1386,
+          "line": 1388,
           "source_group": "scripts",
           "text": "from scripts.ops.runtime.docker import verify_report_bind as bind_verify"
         }
@@ -19130,13 +19157,13 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 44,
+          "line": 46,
           "source_group": "ci",
           "text": "- \"scripts/ops/runtime/mcp/health-shared.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 85,
+          "line": 89,
           "source_group": "ci",
           "text": "- \"scripts/ops/runtime/mcp/health-shared.sh\""
         },
@@ -19828,19 +19855,19 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 54,
+          "line": 56,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_ai_skills_layout.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 95,
+          "line": 99,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_ai_skills_layout.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 179,
+          "line": 183,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_ai_skills_layout.sh"
         },
@@ -19865,19 +19892,19 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 53,
+          "line": 55,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_skills_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 94,
+          "line": 98,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_skills_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 176,
+          "line": 180,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_skills_mirror.sh --check"
         },

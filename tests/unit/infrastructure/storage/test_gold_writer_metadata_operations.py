@@ -63,6 +63,10 @@ def _make_bundle_safe_metadata(run_id: str = "test-run") -> MagicMock:
     metadata = MagicMock()
     metadata.runtime = SimpleNamespace(run_id=run_id, manifest_id=None)
     metadata.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
+    detached = MagicMock()
+    detached.runtime = SimpleNamespace(run_id=run_id, manifest_id=None)
+    detached.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
+    metadata.model_copy.return_value = detached
     return metadata
 
 
@@ -158,7 +162,9 @@ class TestPrepareGoldMetadataWrite:
         assert isinstance(prepared, _PreparedGoldMetadataWrite)
         assert prepared.provider_name == "chembl"
         assert prepared.entity_name == "compound"
-        assert prepared.metadata is metadata
+        assert prepared.metadata is metadata.model_copy.return_value
+        assert prepared.metadata.output.lineage_fragment_id == "gold:prepared-fragment"
+        assert metadata.output.lineage_fragment_id is None
 
     def test_raises_when_coordinator_bundle_is_missing(self) -> None:
         host = MagicMock()
@@ -227,7 +233,9 @@ class TestPrepareGoldMetadataWrite:
 
         prepared = _prepare_gold_metadata_write(host, request)
 
-        assert prepared.metadata is metadata
+        assert prepared.metadata is metadata.model_copy.return_value
+        assert prepared.metadata.output.lineage_fragment_id == fragment.fragment_id
+        assert metadata.output.lineage_fragment_id is None
         assert prepared.lineage_fragment == fragment
 
 
