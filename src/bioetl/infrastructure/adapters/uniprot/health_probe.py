@@ -5,8 +5,6 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-import httpx
-
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.uniprot.query_builder import (
     build_uniprot_health_probe_params,

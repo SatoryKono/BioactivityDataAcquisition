@@ -74,7 +74,12 @@ class ActivityTransformer(BaseChemblTransformer):
             Flat dictionary with prefixed keys and float-converted values.
         """
         return flatten_nested_dict(
-            le_data, "ligand_efficiency_", cast("dict[str, Callable[[object], object] | None]", _LIGAND_EFFICIENCY_FIELDS)
+            le_data,
+                "ligand_efficiency_",
+                cast(
+                    "dict[str, Callable[[object], object] | None]",
+                    _LIGAND_EFFICIENCY_FIELDS,
+                ),
         )
 
     @staticmethod

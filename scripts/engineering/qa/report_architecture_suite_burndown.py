@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Inventory architecture suite size and duplicate ratchet stems (#8331)."""
 from __future__ import annotations
-import argparse, json, re
+import argparse
+import json
+import re
 from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path

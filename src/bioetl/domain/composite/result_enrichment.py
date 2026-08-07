@@ -35,6 +35,24 @@ class EnrichmentResult:
     completed_at: datetime | None = None
     error_message: str | None = None
 
+    def _require_non_negative(self, name: str, value: int | float) -> None:
+        if value >= 0:
+            return
+        raise ValueError(f"{name} must be >= 0, got {value}")
+
+    def _require_bounded_by_input(self, name: str, value: int) -> None:
+        if value <= self.records_input:
+            return
+        raise ValueError(
+            f"{name} cannot exceed records_input: {value} > {self.records_input}"
+        )
+
+    def _validate_rates_and_duration(self) -> None:
+        if 0.0 <= self.dq_error_rate <= 1.0:
+            self._require_non_negative("duration_seconds", self.duration_seconds)
+            return
+        raise ValueError(f"dq_error_rate must be 0.0-1.0, got {self.dq_error_rate}")
+
     def __post_init__(self) -> None:
         """Validate result invariants."""
         for name, value in (
@@ -43,24 +61,10 @@ class EnrichmentResult:
             ("records_not_found", self.records_not_found),
             ("records_errored", self.records_errored),
         ):
-            if value < 0:
-                raise ValueError(f"{name} must be >= 0, got {value}")
-        if self.records_enriched > self.records_input:
-            raise ValueError(
-                "records_enriched cannot exceed records_input: "
-                f"{self.records_enriched} > {self.records_input}"
-            )
-        if self.records_not_found > self.records_input:
-            raise ValueError(
-                "records_not_found cannot exceed records_input: "
-                f"{self.records_not_found} > {self.records_input}"
-            )
-        if not 0.0 <= self.dq_error_rate <= 1.0:
-            raise ValueError(f"dq_error_rate must be 0.0-1.0, got {self.dq_error_rate}")
-        if self.duration_seconds < 0.0:
-            raise ValueError(
-                f"duration_seconds must be >= 0, got {self.duration_seconds}"
-            )
+            self._require_non_negative(name, value)
+        self._require_bounded_by_input("records_enriched", self.records_enriched)
+        self._require_bounded_by_input("records_not_found", self.records_not_found)
+        self._validate_rates_and_duration()
 
     @property
     def is_success(self) -> bool:
@@ -196,13 +200,15 @@ class EnrichmentResult:
         Returns:
             The EnrichmentResult result.
         """
-        if not math.isfinite(timeout_seconds) or timeout_seconds < 0.0:
+        if not math.isfinite(timeout_seconds):
             raise ValueError(
                 f"timeout_seconds must be finite and >= 0, got {timeout_seconds}"
             )
-        resolved_duration = (
-            timeout_seconds if duration_seconds is None else duration_seconds
-        )
+        if timeout_seconds < 0.0:
+            raise ValueError(
+                f"timeout_seconds must be finite and >= 0, got {timeout_seconds}"
+            )
+        resolved_duration = timeout_seconds if duration_seconds is None else duration_seconds
         return cls(
             enricher_name=enricher_name,
             status=EnrichmentStatus.TIMEOUT,

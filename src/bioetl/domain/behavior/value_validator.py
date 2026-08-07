@@ -58,6 +58,18 @@ class ValueValidator:
         default_factory=lambda: DEFAULT_CONCENTRATION_RANGES.copy()
     )
 
+    def _apply_molar_window(self, unit: str, min_m: float, max_m: float, scale: float) -> None:
+        if unit not in self._concentration_ranges:
+            return
+        self._concentration_ranges[unit] = (min_m * scale, max_m * scale)
+
+    def _micromolar_key(self) -> str | None:
+        if "µM" in self._concentration_ranges:
+            return "µM"
+        if "uM" in self._concentration_ranges:
+            return "uM"
+        return None
+
     def __post_init__(self) -> None:
         """Apply configured absolute molar bounds when config is provided."""
         if self.config is None:
@@ -66,16 +78,12 @@ class ValueValidator:
         # when only a single molar range is configured.
         min_m = self.config.concentration_range.min_molar
         max_m = self.config.concentration_range.max_molar
-        # Convert molar bounds to nM for the default nM key when present.
-        if "nM" in self._concentration_ranges:
-            self._concentration_ranges["nM"] = (min_m * 1e9, max_m * 1e9)
-        if "µM" in self._concentration_ranges or "uM" in self._concentration_ranges:
-            um_key = "µM" if "µM" in self._concentration_ranges else "uM"
-            self._concentration_ranges[um_key] = (min_m * 1e6, max_m * 1e6)
-        if "mM" in self._concentration_ranges:
-            self._concentration_ranges["mM"] = (min_m * 1e3, max_m * 1e3)
-        if "M" in self._concentration_ranges:
-            self._concentration_ranges["M"] = (min_m, max_m)
+        self._apply_molar_window("nM", min_m, max_m, 1e9)
+        um_key = self._micromolar_key()
+        if um_key is not None:
+            self._apply_molar_window(um_key, min_m, max_m, 1e6)
+        self._apply_molar_window("mM", min_m, max_m, 1e3)
+        self._apply_molar_window("M", min_m, max_m, 1.0)
 
     def validate_concentration(
         self,

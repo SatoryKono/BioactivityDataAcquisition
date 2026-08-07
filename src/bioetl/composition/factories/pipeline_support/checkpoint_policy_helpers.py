@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -38,7 +40,7 @@ def _resolve_requested_checkpoint_compatibility_policy(
         isinstance(raw_policy, str)
         and raw_policy in _ALLOWED_CHECKPOINT_COMPATIBILITY_POLICIES
     ):
-        return raw_policy
+        return cast(CheckpointCompatibilityPolicy, raw_policy)
     if raw_policy is not None:
         logger_port.warning(
             "Unsupported checkpoint compatibility policy in settings; "

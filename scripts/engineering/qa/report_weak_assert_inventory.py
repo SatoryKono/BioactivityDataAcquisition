@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Advisory inventory of test_* without direct Assert/raises (#8330)."""
 from __future__ import annotations
-import argparse, ast, json
+import argparse
+import ast
+import json
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path

@@ -26,6 +26,25 @@ class InChI(ValueObject[str]):
 
     _PREFIX = "InChI="
 
+    def _require_str(self, value: object) -> str:
+        if isinstance(value, str):
+            return value
+        raise ValueError(f"InChI must be str, got {type(value).__name__}")
+
+    def _require_inchi_layers(self, normalized: str, original: str) -> None:
+        if not normalized.startswith(self._PREFIX):
+            raise ValueError(f"InChI must start with '{self._PREFIX}': {original!r}")
+        # Require version + at least one layer after prefix (reject bare InChI=).
+        suffix = normalized[len(self._PREFIX) :]
+        if not suffix:
+            raise ValueError(
+                f"InChI must include version and layer after '{self._PREFIX}': {original!r}"
+            )
+        if "/" not in suffix:
+            raise ValueError(
+                f"InChI must include version and layer after '{self._PREFIX}': {original!r}"
+            )
+
     def _validate(self, value: str) -> str:
         """Validate and normalize InChI string.
 
@@ -38,22 +57,11 @@ class InChI(ValueObject[str]):
         Raises:
             ValueError: If format is invalid.
         """
-        if not isinstance(value, str):
-            raise ValueError(f"InChI must be str, got {type(value).__name__}")
-
-        normalized = value.strip()
+        text = self._require_str(value)
+        normalized = text.strip()
         if not normalized:
             raise ValueError("InChI cannot be empty")
-
-        if not normalized.startswith(self._PREFIX):
-            raise ValueError(f"InChI must start with '{self._PREFIX}': {value!r}")
-        # Require version + at least one layer after prefix (reject bare InChI=).
-        suffix = normalized[len(self._PREFIX) :]
-        if not suffix or "/" not in suffix:
-            raise ValueError(
-                f"InChI must include version and layer after '{self._PREFIX}': {value!r}"
-            )
-
+        self._require_inchi_layers(normalized, text)
         return normalized
 
     @classmethod
@@ -66,7 +74,9 @@ class InChI(ValueObject[str]):
         Returns:
             InChI if valid, None if input is None, empty, or invalid.
         """
-        if not raw or not raw.strip():
+        if raw is None:
+            return None
+        if not raw.strip():
             return None
         try:
             return cls(raw)

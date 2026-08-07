@@ -7,6 +7,7 @@ to satisfy ARCH-002 (no direct I/O in application/domain).
 
 from __future__ import annotations
 
+import contextlib
 import os
 import tempfile
 from pathlib import Path
@@ -44,12 +45,18 @@ class FileCompositeCheckpointWriter:
 
     def _resolve_path(self, path: str) -> Path:
         """Resolve ``path`` under the checkpoint root; reject traversal escapes."""
-        if not path or path.startswith(("/", "\\")) or ":" in path.split("/", 1)[0]:
-            # Reject absolute / drive-qualified inputs (user-supplied relative only).
-            if Path(path).is_absolute():
-                raise CheckpointPathError(
-                    f"Checkpoint path must be relative to checkpoint root: {path!r}"
-                )
+        # Reject absolute / drive-qualified inputs (user-supplied relative only).
+        if (
+            (
+                not path
+                or path.startswith(("/", "\\"))
+                or ":" in path.split("/", 1)[0]
+            )
+            and Path(path).is_absolute()
+        ):
+            raise CheckpointPathError(
+                f"Checkpoint path must be relative to checkpoint root: {path!r}"
+            )
         candidate = (self._checkpoint_dir / path).resolve()
         if not candidate.is_relative_to(self._checkpoint_dir):
             raise CheckpointPathError(
@@ -96,10 +103,8 @@ class FileCompositeCheckpointWriter:
             temp.replace(full)
         finally:
             if temp.exists():
-                try:
+                with contextlib.suppress(OSError):
                     temp.unlink()
-                except OSError:
-                    pass
 
     def delete(self, path: str) -> bool:
         """Delete checkpoint file. Returns True if existed."""

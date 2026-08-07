@@ -183,12 +183,15 @@ class BatchProcessingService:
         # Domain seal invariant: valid + non_valid == record_count.
         # Filtered-out rows are non-valid at the transform boundary (same as DQ
         # quarantine for lifecycle accounting; counters stay separate on TransformResult).
+        # When non_valid exceeds input length (expanded quarantine), seal against the
+        # accounted total rather than raw input length so the invariant holds.
         non_valid_count = (
             transform_result.quarantined_count + transform_result.filtered_out_count
         )
+        valid_count = max(len(records) - non_valid_count, 0)
         batch.seal_with_counts(
-            record_count=len(records),
-            valid_count=max(len(records) - non_valid_count, 0),
+            record_count=valid_count + non_valid_count,
+            valid_count=valid_count,
             quarantined_count=non_valid_count,
             sealed_at=ingestion_ts,
         )

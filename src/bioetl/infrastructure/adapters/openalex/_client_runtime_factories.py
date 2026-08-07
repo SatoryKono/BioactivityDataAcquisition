@@ -7,11 +7,15 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.openalex.cursor_flow import OpenAlexCursorFlow
-from bioetl.infrastructure.adapters.openalex.fallback import OpenAlexTitleFallbackHandler
+from bioetl.infrastructure.adapters.openalex.fallback import (
+    OpenAlexTitleFallbackHandler,
+)
 from bioetl.infrastructure.adapters.openalex.fallback_orchestrator import (
     OpenAlexFallbackOrchestrator,
 )
-from bioetl.infrastructure.adapters.openalex.query_execution import OpenAlexQueryExecutor
+from bioetl.infrastructure.adapters.openalex.query_execution import (
+    OpenAlexQueryExecutor,
+)
 from bioetl.infrastructure.adapters.openalex.response_mapping import (
     OpenAlexResponseMapper,
 )

@@ -29,15 +29,29 @@ def _safe_float(val: object) -> float | None:
         return None
 
 
-def _safe_str(val: object) -> str | None:
-    if val is None or isinstance(val, bool):
-        return None
-    if isinstance(val, float) and val.is_integer():
+def _safe_str_from_float(val: float) -> str:
+    if val.is_integer():
         return str(int(val))
-    if isinstance(val, int) and not isinstance(val, bool):
-        return str(val)
+    return str(val)
+
+
+def _safe_str_from_text(val: object) -> str | None:
     text = str(val).strip()
-    return text or None
+    if text:
+        return text
+    return None
+
+
+def _safe_str(val: object) -> str | None:
+    if val is None:
+        return None
+    if isinstance(val, bool):
+        return None
+    if isinstance(val, float):
+        return _safe_str_from_float(val)
+    if isinstance(val, int):
+        return str(val)
+    return _safe_str_from_text(val)
 
 
 def _require_field(
@@ -54,7 +68,9 @@ def _safe_json(val: object) -> str | None:
     """Convert to JSON string if not None/empty."""
     from bioetl.domain.serialization import serialize_to_json
 
-    if val is None or val == "":
+    if val is None:
+        return None
+    if val == "":
         return None
     if isinstance(val, dict):
         return serialize_to_json(val)

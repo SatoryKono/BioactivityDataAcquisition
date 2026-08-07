@@ -139,7 +139,7 @@ def _extract_activity_measurement_fields(raw_data: JsonDict) -> dict[str, object
 def _first_truthy_value(raw_data: JsonDict, *field_names: str) -> object | None:
     """Return the first truthy raw value across a set of alias fields."""
     for field_name in field_names:
-        value = raw_data.get(field_name)
+        value: object | None = raw_data.get(field_name)
         if value:
             return value
     return None

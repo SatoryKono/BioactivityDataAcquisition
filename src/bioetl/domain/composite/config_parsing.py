@@ -59,6 +59,18 @@ def require_object_dict_sequence(
     return tuple(result)
 
 
+def _require_non_empty_str(value: object, field_name: str, *, provided: bool) -> str:
+    if not isinstance(value, str):
+        if provided:
+            raise ValueError(f"{field_name} must be a non-empty string when provided")
+        raise ValueError(f"{field_name} must be a non-empty string")
+    if value:
+        return value
+    if provided:
+        raise ValueError(f"{field_name} must be a non-empty string when provided")
+    raise ValueError(f"{field_name} must be a non-empty string")
+
+
 def require_str(value: object, field_name: str) -> str:
     """Validate required string field.
 
@@ -69,9 +81,7 @@ def require_str(value: object, field_name: str) -> str:
     Returns:
         Validated non-empty string value.
     """
-    if not isinstance(value, str) or not value:
-        raise ValueError(f"{field_name} must be a non-empty string")
-    return value
+    return _require_non_empty_str(value, field_name, provided=False)
 
 
 def optional_str(value: object, field_name: str) -> str | None:
@@ -86,9 +96,7 @@ def optional_str(value: object, field_name: str) -> str | None:
     """
     if value is None:
         return None
-    if not isinstance(value, str) or not value:
-        raise ValueError(f"{field_name} must be a non-empty string when provided")
-    return value
+    return _require_non_empty_str(value, field_name, provided=True)
 
 
 def optional_bool(value: object, default: bool, field_name: str) -> bool:
@@ -109,6 +117,14 @@ def optional_bool(value: object, default: bool, field_name: str) -> bool:
     return value
 
 
+def _require_int_value(value: object, field_name: str) -> int:
+    if isinstance(value, bool):
+        raise ValueError(f"{field_name} must be an integer")
+    if isinstance(value, int):
+        return value
+    raise ValueError(f"{field_name} must be an integer")
+
+
 def optional_int(
     value: object,
     field_name: str,
@@ -126,9 +142,7 @@ def optional_int(
     """
     if value is None:
         return default
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{field_name} must be an integer")
-    return value
+    return _require_int_value(value, field_name)
 
 
 def require_int(value: object, field_name: str, default: int | None = None) -> int:
@@ -137,9 +151,22 @@ def require_int(value: object, field_name: str, default: int | None = None) -> i
         if default is None:
             raise ValueError(f"{field_name} must be an integer")
         return default
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{field_name} must be an integer")
-    return value
+    return _require_int_value(value, field_name)
+
+
+def _is_float_coercible(value: object) -> bool:
+    if isinstance(value, bool):
+        return False
+    return isinstance(value, int | float | str)
+
+
+def _coerce_float(value: object, field_name: str) -> float:
+    if not _is_float_coercible(value):
+        raise ValueError(f"{field_name} must be a number")
+    try:
+        return float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must be a number") from exc
 
 
 def require_float(value: object, field_name: str, default: float | None = None) -> float:
@@ -148,12 +175,7 @@ def require_float(value: object, field_name: str, default: float | None = None) 
         if default is None:
             raise ValueError(f"{field_name} must be a number")
         return default
-    if isinstance(value, bool) or not isinstance(value, int | float | str):
-        raise ValueError(f"{field_name} must be a number")
-    try:
-        return float(value)
-    except (TypeError, ValueError) as exc:
-        raise ValueError(f"{field_name} must be a number") from exc
+    return _coerce_float(value, field_name)
 
 
 def optional_float(value: object, field_name: str) -> float | None:
@@ -187,6 +209,12 @@ def require_str_mapping(value: object, field_name: str) -> dict[str, str]:
     return result
 
 
+def _is_non_empty_str(item: object) -> bool:
+    if not isinstance(item, str):
+        return False
+    return bool(item)
+
+
 def require_str_tuple(value: object, field_name: str) -> tuple[str, ...]:
     """Validate required list/tuple of strings.
 
@@ -199,8 +227,9 @@ def require_str_tuple(value: object, field_name: str) -> tuple[str, ...]:
     """
     if not isinstance(value, (list, tuple)):
         raise ValueError(f"{field_name} must be a list")
-    if any(not isinstance(item, str) or not item for item in value):
-        raise ValueError(f"{field_name} must contain non-empty strings")
+    for item in value:
+        if not _is_non_empty_str(item):
+            raise ValueError(f"{field_name} must contain non-empty strings")
     return tuple(value)
 
 

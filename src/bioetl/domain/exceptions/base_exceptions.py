@@ -16,19 +16,42 @@ from typing import Any
 from bioetl.domain.error_types import ErrorType
 
 
-def _freeze_context(value: object) -> object:
-    """Recursively freeze mapping/sequence context payloads."""
+def _freeze_mapping(value: dict[object, object]) -> object:
     from types import MappingProxyType
 
+    return MappingProxyType(
+        {str(key): _freeze_context(item) for key, item in value.items()}
+    )
+
+
+def _freeze_sequence(value: list[object] | tuple[object, ...]) -> object:
+    return tuple(_freeze_context(item) for item in value)
+
+
+def _freeze_context(value: object) -> object:
+    """Recursively freeze mapping/sequence context payloads."""
     if isinstance(value, dict):
-        return MappingProxyType(
-            {str(key): _freeze_context(item) for key, item in value.items()}
-        )
-    if isinstance(value, list):
-        return tuple(_freeze_context(item) for item in value)
-    if isinstance(value, tuple):
-        return tuple(_freeze_context(item) for item in value)
+        return _freeze_mapping(value)
+    if isinstance(value, (list, tuple)):
+        return _freeze_sequence(value)
     return value
+
+
+def _plain_context_set(value: set[object] | frozenset[object]) -> list[object]:
+    plain_items = [_plain_context(item) for item in value]
+    return sorted(plain_items, key=lambda item: (type(item).__name__, repr(item)))
+
+
+def _plain_context_mapping(value: object) -> dict[str, object]:
+    from collections.abc import Mapping
+
+    if not isinstance(value, Mapping):
+        return {}
+    return {str(key): _plain_context(item) for key, item in value.items()}
+
+
+def _plain_context_sequence(value: list[object] | tuple[object, ...]) -> list[object]:
+    return [_plain_context(item) for item in value]
 
 
 def _plain_context(value: object) -> object:
@@ -36,12 +59,11 @@ def _plain_context(value: object) -> object:
     from collections.abc import Mapping
 
     if isinstance(value, Mapping):
-        return {str(key): _plain_context(item) for key, item in value.items()}
+        return _plain_context_mapping(value)
     if isinstance(value, (list, tuple)):
-        return [_plain_context(item) for item in value]
+        return _plain_context_sequence(value)
     if isinstance(value, (set, frozenset)):
-        plain_items = [_plain_context(item) for item in value]
-        return sorted(plain_items, key=lambda item: (type(item).__name__, repr(item)))
+        return _plain_context_set(value)
     return value
 
 

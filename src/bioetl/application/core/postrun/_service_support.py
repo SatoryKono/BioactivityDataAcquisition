@@ -1,4 +1,4 @@
-# Host attrs/methods are initialized by 
+# Host attrs/methods are initialized by
 """Private support mixin for PostrunService phase and cleanup helpers."""
 
 from __future__ import annotations

@@ -186,11 +186,12 @@ class AnomalyDetector:
             baseline_mean = current_value
             baseline_stddev = 0.0
 
-        if baseline_stddev > 0:
-            z_score = abs(current_value - baseline_mean) / baseline_stddev
-        else:
-            # One-sided or zero-width threshold: treat breach as critical distance.
-            z_score = 10.0
+        # One-sided or zero-width threshold: treat breach as critical distance (10.0).
+        z_score = (
+            abs(current_value - baseline_mean) / baseline_stddev
+            if baseline_stddev > 0
+            else 10.0
+        )
 
         if current_value < min_val:
             message = f"Value {current_value:.2f} below minimum threshold {min_val:.2f}"

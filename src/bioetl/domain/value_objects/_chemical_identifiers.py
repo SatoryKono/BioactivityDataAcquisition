@@ -156,7 +156,7 @@ class SMILES(_ValueObjectBase[str]):
         - Optionally can be marked as canonical
     """
 
-    __slots__ = ("_is_canonical", "_initialized")
+    __slots__ = ("_initialized", "_is_canonical")
     _value: str
     _is_canonical: bool  # pyright: ignore[reportUninitializedInstanceVariable]
 

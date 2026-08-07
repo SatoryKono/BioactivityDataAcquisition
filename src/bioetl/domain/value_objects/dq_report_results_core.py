@@ -148,6 +148,26 @@ class ValueDistributionResult:
     status: DQCheckStatus = DQCheckStatus.PASS
 
 
+def _as_tuple(value: object) -> tuple[object, ...]:
+    if isinstance(value, tuple):
+        return value
+    if isinstance(value, list):
+        return tuple(value)
+    return tuple(value)  # type: ignore[arg-type]
+
+
+def _freeze_type_change(item: object) -> object:
+    from types import MappingProxyType
+
+    if isinstance(item, dict):
+        return MappingProxyType(dict(item))
+    return item
+
+
+def _freeze_type_changes(items: tuple[object, ...]) -> tuple[object, ...]:
+    return tuple(_freeze_type_change(item) for item in items)
+
+
 @dataclass(frozen=True, slots=True)
 class SchemaDriftResult:
     """Schema drift detection result."""
@@ -158,22 +178,20 @@ class SchemaDriftResult:
     type_changes: tuple[dict[str, str], ...] = ()
     status: DQCheckStatus = DQCheckStatus.PASS
 
+    def _normalize_field_tuples(self) -> None:
+        object.__setattr__(self, "new_fields", _as_tuple(self.new_fields))
+        object.__setattr__(self, "missing_fields", _as_tuple(self.missing_fields))
+        object.__setattr__(self, "type_changes", _as_tuple(self.type_changes))
+
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
-        if isinstance(self.new_fields, list):
-            object.__setattr__(self, "new_fields", tuple(self.new_fields))
-        if isinstance(self.missing_fields, list):
-            object.__setattr__(self, "missing_fields", tuple(self.missing_fields))
-        if isinstance(self.type_changes, list):
-            object.__setattr__(self, "type_changes", tuple(self.type_changes))
+        self._normalize_field_tuples()
         # Deep-freeze each type-change mapping.
-        from types import MappingProxyType
-
-        frozen_changes = tuple(
-            MappingProxyType(dict(item)) if isinstance(item, dict) else item
-            for item in self.type_changes
+        object.__setattr__(
+            self,
+            "type_changes",
+            _freeze_type_changes(self.type_changes),
         )
-        object.__setattr__(self, "type_changes", frozen_changes)
 
 
 @dataclass(frozen=True, slots=True)

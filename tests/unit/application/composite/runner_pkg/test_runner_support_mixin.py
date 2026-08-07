@@ -232,8 +232,9 @@ def test_build_composite_result_when_called_then_uses_named_artifacts() -> None:
         result = harness._build_composite_result(artifacts)
 
     assert result.seed_result is artifacts.seed_result
-    assert result.dependency_results is artifacts.dependency_results
-    assert result.enrichment_results is artifacts.enrichment_results
+    # Dependency/enrichment maps may be re-wrapped as FrozenDict for immutability.
+    assert result.dependency_results == artifacts.dependency_results
+    assert result.enrichment_results == artifacts.enrichment_results
     assert result.merge_result is artifacts.merge_result
     harness._observer_logger.info.assert_called_once()
 

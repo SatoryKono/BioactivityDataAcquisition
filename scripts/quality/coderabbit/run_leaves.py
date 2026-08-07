@@ -7,7 +7,7 @@ import re
 import subprocess
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from pathlib import Path
 from typing import TypedDict, cast
 
@@ -53,7 +53,7 @@ CODERABBIT = os.environ.get("CODERABBIT_BIN", "coderabbit")
 
 
 def now() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def load_progress() -> Progress:
@@ -105,7 +105,7 @@ def run_leaf(leaf: Leaf, base: str = "main") -> LeafResult:
         # Preferred: temporary approach --dir on longest common prefix
         parts = [Path(f).parts for f in files]
         common: list[str] = []
-        for segs in zip(*parts):
+        for segs in zip(*parts, strict=True):
             if len(set(segs)) == 1:
                 common.append(segs[0])
             else:
@@ -181,7 +181,7 @@ def run_leaf(leaf: Leaf, base: str = "main") -> LeafResult:
         if "all files ignored" in low:
             status = "ignored"
             reason = "all_files_ignored"
-        if "not authenticated" in low or "auth" in low and "fail" in low:
+        if "not authenticated" in low or ("auth" in low and "fail" in low):
             status = "auth_error"
             reason = "auth"
         return {
