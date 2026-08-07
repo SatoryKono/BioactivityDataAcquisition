@@ -18,7 +18,7 @@ class MoleculeRecord(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED)
-    molecule_id: str = Field(description="Unique molecule ChEMBL ID")
+    molecule_id: str = Field(min_length=1, description="Unique molecule ChEMBL ID")
 
     # Core metadata
     pref_name: str | None = Field(default=None, description="Preferred molecule name")
@@ -170,7 +170,7 @@ class TargetRecord(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED)
-    target_id: str = Field(description="Unique target ChEMBL ID")
+    target_id: str = Field(min_length=1, description="Unique target ChEMBL ID")
 
     # Core metadata
     pref_name: str | None = Field(default=None, description="Preferred target name")

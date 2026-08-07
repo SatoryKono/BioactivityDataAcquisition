@@ -85,7 +85,7 @@ class Assay(BaseEntity):
     variant_isoform: str | None = None  # Isoform identifier
     variant_mutation: str | None = None  # Mutation description (e.g., V600E)
     variant_organism: str | None = None  # Organism name
-    variant_sequence: str | None = None  # Amino amolecule_id sequence
+    variant_sequence: str | None = None  # Amino acid sequence
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
     variant_taxonomy_id: int | None = None  # NCBI Taxonomy ID
     # NOTE: _json suffix retained — forensic raw dump, not a renamed business field
