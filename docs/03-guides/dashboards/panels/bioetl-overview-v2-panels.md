@@ -31,18 +31,12 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Type:** Table (`id=215`)
 - **Purpose:** Rank up to four urgency-ordered next actions for the current selectors/fleet and hand off to the recommended board.
 - **Data sources:** `topk(4, bioetl_l0_next_action_route{…} or NO_ROUTE vector fallback)` via recording rule `bioetl_l0_next_action_route`.
-<<<<<<< HEAD
 - **Layout:** first-screen width `w=12` (paired with Review Domain Status `w=12`); `cellHeight: md`.
 - **Columns (left→right):** Action (primary CTA, short labels, color-text + row link via `action_dashboard_uid`) → Priority (short badge `RUNTIME`/`CP`/`GOLD`/`DQ`/`PROV`/`WF`/`MON`/`NR`, color-background, not row-wide) → Why → Pipeline.
 - **Visual hierarchy:** Action is the sole color-text CTA emphasis; Priority is a secondary urgency badge. Table sorted by Priority desc so top row is first click.
-||||||| 565fb33295
-- **Columns:** Priority (score, color-text), Action (row link via `action_dashboard_uid`), Why, Pipeline.
-=======
-- **Columns:** Priority (score, color-text), Action (row link via `action_dashboard_uid`), Why, Pipeline.
 - **Presentation:** The routing UID remains available to the Action data-link but
   is hidden from the rendered table; the panel is tall enough to show all four
   bounded routes without an internal vertical scrollbar.
->>>>>>> origin/agent/grafana-3cycle-audit-20260805-r3
 - **Priority order:** Runtime > Control Plane > Gold lifecycle > DQ > Provider > Workflow > Monitor.
 - **Empty/OK:** `MON` / `NR` (MONITOR / NO_ROUTE scores) with muted gray Action; continue monitoring when Fleet Health is OK.
 - **Notes:** `run_id` is URL handoff only (never a Prometheus label). Panel `links` / `dataLinks` remain full domain shortcuts (`Open Runtime`, …); primary CTA is the Action field link (RFA-00 / #7569).

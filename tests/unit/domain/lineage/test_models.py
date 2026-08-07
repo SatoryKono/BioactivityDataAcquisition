@@ -178,3 +178,14 @@ def test_normalize_mapping_is_immutable_and_detached() -> None:
     except TypeError:
         pass
 
+def test_plain_value_serializes_sets_with_stable_order() -> None:
+    """Set/frozenset attributes must serialize deterministically (#8273)."""
+    from bioetl.domain.lineage._shared import mapping_to_plain
+
+    payload = mapping_to_plain({"tags": {"zeta", "alpha", "mu"}})
+    assert payload["tags"] == ["alpha", "mu", "zeta"]
+    frozen_payload = mapping_to_plain({"tags": frozenset({"b", "a"})})
+    assert frozen_payload["tags"] == ["a", "b"]
+    # repeated conversion is stable
+    assert mapping_to_plain({"tags": {"zeta", "alpha", "mu"}}) == payload
+

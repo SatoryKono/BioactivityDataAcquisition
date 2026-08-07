@@ -237,3 +237,22 @@ class TestExceptionImmutability:
 
         with pytest.raises(Exception):  # dataclass frozen error
             error.field_name = "new_field"  # type: ignore
+
+def test_domain_error_to_dict_json_serializes_nested_mappings() -> None:
+    """Nested frozen context must plain-export for json.dumps (#8271)."""
+    import json
+
+    from bioetl.domain.exceptions.base_exceptions import BioETLDomainError
+
+    err = BioETLDomainError(
+        message="x",
+        context={"a": {"b": 1, "c": [2, {"d": 3}]}, "tags": {"z", "a"}},
+    )
+    payload = err.to_dict()
+    encoded = json.dumps(payload, sort_keys=True)
+    assert "mappingproxy" not in encoded
+    assert payload["context"]["a"]["b"] == 1
+    assert payload["context"]["a"]["c"][1]["d"] == 3
+    # sets become sorted plain lists
+    assert payload["context"]["tags"] == ["a", "z"]
+
