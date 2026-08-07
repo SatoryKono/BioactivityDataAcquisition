@@ -77,7 +77,7 @@ def create_composite_runner_service(
             runtime=cast(CompositeRuntimeConfig, kwargs["runtime"]),
             run_id=cast(str | None, kwargs.get("run_id")),
             logger=cast(LoggerPort, kwargs["logger"]),
-            lock=cast(LockPort, kwargs["lock"]),
+            lock=cast("LockPort", kwargs["lock"]),
             seed_runner_factory=cast(
                 "Callable[[], PipelineRunner]",
                 kwargs["seed_runner_factory"],
