@@ -87,12 +87,9 @@ class CompositeValidator:
             execution_context=config.execution_context,
             config=governance_config,
         )
-        return CompositeValidationReport(
-            structural_result=structural_result,
-            deep_preflight_result=deep_preflight_result,
-            runtime_guard_result=None,
-            execution_decision=governance_decision,
-        )
+        from dataclasses import replace
+
+        return replace(validation_report, execution_decision=governance_decision)
 
     def _run_structural_validation(
         self,

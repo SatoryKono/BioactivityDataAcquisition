@@ -29,7 +29,7 @@
       "field2"
     ],
     "config_path": "contracts/chembl.activity/dq_rules.yaml",
-    "disposition": "warn",
+    "disposition": "fail",
     "rule_id": "cross.all_present"
   },
   {

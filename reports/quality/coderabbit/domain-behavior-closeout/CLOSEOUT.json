@@ -1,0 +1,208 @@
+{
+  "campaign": "CR-FULL-20260806-full",
+  "leaf": "S01-domain-behavior",
+  "branch": "grok-260807-108155",
+  "closed_at": "2026-08-07T06:11:48.746647+00:00",
+  "issue_range": "#8178-#8214",
+  "counts": {
+    "total": 37,
+    "fixed": 30,
+    "rejected": 7
+  },
+  "fixed": [
+    8180,
+    8182,
+    8183,
+    8185,
+    8186,
+    8188,
+    8190,
+    8191,
+    8192,
+    8193,
+    8194,
+    8195,
+    8196,
+    8197,
+    8198,
+    8199,
+    8200,
+    8201,
+    8202,
+    8203,
+    8204,
+    8205,
+    8206,
+    8207,
+    8208,
+    8209,
+    8210,
+    8211,
+    8212,
+    8213
+  ],
+  "rejected": [
+    8178,
+    8179,
+    8181,
+    8184,
+    8187,
+    8189,
+    8214
+  ],
+  "dispositions": {
+    "8178": {
+      "status": "reject",
+      "note": "Presentation CSS in domain is pre-existing DQ HTML report surface; full layer move is ADR-sized, out of residual closeout. No product bug."
+    },
+    "8179": {
+      "status": "reject",
+      "note": "Filesystem contract path extraction remains composition-adjacent domain pure helper; relocating needs wider refactor, no runtime defect."
+    },
+    "8180": {
+      "status": "fixed",
+      "note": "validate_percent_value rejects NaN/Inf/non-numeric before range check."
+    },
+    "8181": {
+      "status": "reject",
+      "note": "No PII-hash enable flag on DataNormalizationConfig; empty default salt is intentional. Fail-closed at use site via #8200."
+    },
+    "8182": {
+      "status": "fixed",
+      "note": "validate_data rejects only None/empty collections; 0/False allowed."
+    },
+    "8183": {
+      "status": "fixed",
+      "note": "Field priorities uniqueness keyed by priority rank across fields."
+    },
+    "8184": {
+      "status": "reject",
+      "note": "DQReportSerializer domain placement is existing design; move to interfaces is ADR-sized without behavior defect."
+    },
+    "8185": {
+      "status": "fixed",
+      "note": "ClassificationStats.__post_init__ enforces non-negative and bucket sum invariants."
+    },
+    "8186": {
+      "status": "fixed",
+      "note": "Incoming schema fields taken as union over full record batch."
+    },
+    "8187": {
+      "status": "reject",
+      "note": "create_ci_gate_report is domain pure projection for CI consumers; removal would break callers without product fix."
+    },
+    "8188": {
+      "status": "fixed",
+      "note": "high_potency_threshold non-negative validation added; nested range configs already validate ordering."
+    },
+    "8189": {
+      "status": "reject",
+      "note": "Registry-diff JSON parse is intentionally in SchemaClassifier domain helper; extraction move is non-residual."
+    },
+    "8190": {
+      "status": "fixed",
+      "note": "EntityIdentityGenerator snapshots include/exclude sets at init."
+    },
+    "8191": {
+      "status": "fixed",
+      "note": "Disposition policy preserves full issue order; rewrites blockers in place."
+    },
+    "8192": {
+      "status": "fixed",
+      "note": "Threshold validator rejects bool before numeric range."
+    },
+    "8193": {
+      "status": "fixed",
+      "note": "ValueValidator.__post_init__ applies NormalizationConfig molar ranges to unit windows."
+    },
+    "8194": {
+      "status": "fixed",
+      "note": "Author dedupe uses str.casefold()."
+    },
+    "8195": {
+      "status": "fixed",
+      "note": "Common field iteration sorted for determinism."
+    },
+    "8196": {
+      "status": "fixed",
+      "note": "error_records uses error markers only; quarantine kept separate."
+    },
+    "8197": {
+      "status": "fixed",
+      "note": "Dropped eager _contract_policies cache; expose as derived property."
+    },
+    "8198": {
+      "status": "fixed",
+      "note": "validate_composite reuses report via dataclasses.replace for execution_decision."
+    },
+    "8199": {
+      "status": "fixed",
+      "note": "Gold substring removed; strictness_mode==strict upgrades WARN to QUARANTINE."
+    },
+    "8200": {
+      "status": "fixed",
+      "note": "AuthorNormalizer.normalize_authors requires non-empty salt."
+    },
+    "8201": {
+      "status": "fixed",
+      "note": "issue_code_overrides accepts Mapping and is snapshotted in __post_init__."
+    },
+    "8202": {
+      "status": "fixed",
+      "note": "governance_impact uses effective blocker flag as SoT."
+    },
+    "8203": {
+      "status": "fixed",
+      "note": "HTML serializer normalizes summary/checks/thresholds to dict before .get."
+    },
+    "8204": {
+      "status": "fixed",
+      "note": "Fallback field collection only uses explicit columns/field_names keys."
+    },
+    "8205": {
+      "status": "fixed",
+      "note": "aggregate_* default method uses self.default_method when method is None."
+    },
+    "8206": {
+      "status": "fixed",
+      "note": "Empty explainability summary schema matches populated summary keys."
+    },
+    "8207": {
+      "status": "fixed",
+      "note": "generate_field_explanation accepts merge_strategy and propagates from record explainer."
+    },
+    "8208": {
+      "status": "fixed",
+      "note": "orjson.dumps protected with NON_STR_KEYS and TypeError/JSONEncodeError fallback."
+    },
+    "8209": {
+      "status": "fixed",
+      "note": "NormalizationResult.value/unit required without cast(Any,None) defaults."
+    },
+    "8210": {
+      "status": "fixed",
+      "note": "CompositeOutputExt builder constructs common kwargs once."
+    },
+    "8211": {
+      "status": "fixed",
+      "note": "ast.literal_eval catches TypeError and RecursionError."
+    },
+    "8212": {
+      "status": "fixed",
+      "note": "Cross-field outcomes apply invalid_record_policy like field/conditional."
+    },
+    "8213": {
+      "status": "fixed",
+      "note": "Documented empty include as explicit filter-none (is not None)."
+    },
+    "8214": {
+      "status": "reject",
+      "note": "UnitConverter doctests already match current Concentration/PChembl API; no functional defect."
+    }
+  },
+  "tests": [
+    "tests/unit/domain/behavior/test_domain_behavior_cr_residuals_8178_8214.py",
+    "tests/unit/domain/behavior (full suite green)"
+  ],
+  "tech_debt_budgets": "unchanged (no budget growth)"
+}

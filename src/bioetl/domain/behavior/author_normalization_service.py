@@ -53,6 +53,8 @@ class AuthorNormalizer:
         Returns:
             JSON string of hashed author names, or None if no authors found.
         """
+        if not isinstance(salt, str) or not salt.strip():
+            raise ValueError("salt must be a non-empty string for PII hashing")
         author_list = self.parse_authors_to_list(authors)
         if not author_list:
             return None

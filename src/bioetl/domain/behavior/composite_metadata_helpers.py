@@ -50,7 +50,7 @@ def _parse_literal(value: object) -> object | None:
         # Fallback for legacy metadata using Python literals (single quotes)
         try:
             return cast("object", ast.literal_eval(value))
-        except (ValueError, SyntaxError, MemoryError):
+        except (ValueError, SyntaxError, MemoryError, TypeError, RecursionError):
             return None
 
 
@@ -137,25 +137,20 @@ def _build_composite_output_ext(
     partition_count: int | None,
     schema_validation: CompositeSchemaValidationMetadata,
 ) -> CompositeOutputExt:
-    """Build ``CompositeOutputExt`` from normalized sample payload."""
-    if partition_count is None:
-        return CompositeOutputExt(
-            composite_run_id=_normalize_optional_str(sample.get("_composite_run_id")),
-            source_providers=parse_composite_list(sample.get("_source_providers")),
-            enrichment_status=parse_composite_status(sample.get("_enrichment_status")),
-            lineage_created_at=parse_lineage_created_at(
-                sample.get("_lineage_created_at")
-            ),
-            schema_validation=schema_validation,
-        )
-    return CompositeOutputExt(
-        partition_count=partition_count,
-        composite_run_id=_normalize_optional_str(sample.get("_composite_run_id")),
-        source_providers=parse_composite_list(sample.get("_source_providers")),
-        enrichment_status=parse_composite_status(sample.get("_enrichment_status")),
-        lineage_created_at=parse_lineage_created_at(sample.get("_lineage_created_at")),
-        schema_validation=schema_validation,
-    )
+    """Build CompositeOutputExt from normalized sample payload."""
+    common = {
+        "composite_run_id": _normalize_optional_str(sample.get("_composite_run_id")),
+        "source_providers": parse_composite_list(sample.get("_source_providers")),
+        "enrichment_status": parse_composite_status(sample.get("_enrichment_status")),
+        "lineage_created_at": parse_lineage_created_at(
+            sample.get("_lineage_created_at")
+        ),
+        "schema_validation": schema_validation,
+    }
+    if partition_count is not None:
+        common["partition_count"] = partition_count
+    return CompositeOutputExt(**common)
+
 
 
 def parse_composite_list(value: object) -> list[str]:

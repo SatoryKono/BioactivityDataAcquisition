@@ -182,11 +182,14 @@ class AggregationValidator:
 
     @staticmethod
     def _collect_fallback_fields(source_schema: JsonDict) -> set[str]:
+        """Collect field names from explicit schema shapes only."""
         fields: set[str] = set()
-        for key, value in source_schema.items():
-            fields.add(key)
-            if isinstance(value, dict):
-                fields.update(value.keys())
+        columns = source_schema.get("columns")
+        if isinstance(columns, list):
+            fields.update(str(item) for item in columns)
+        names = source_schema.get("field_names")
+        if isinstance(names, list):
+            fields.update(str(item) for item in names)
         return fields
 
     def validate_post_aggregation_uniqueness(

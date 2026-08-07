@@ -96,7 +96,13 @@ def format_detail_value(value: object) -> str:
             are joined as comma-separated strings, all others are converted via str().
     """
     if isinstance(value, dict):
-        payload = orjson.dumps(value, option=orjson.OPT_INDENT_2).decode()
+        try:
+            payload = orjson.dumps(
+                value,
+                option=orjson.OPT_INDENT_2 | orjson.OPT_NON_STR_KEYS,
+            ).decode()
+        except (TypeError, orjson.JSONEncodeError):
+            return f"<pre>{escape(str(value))}</pre>"
         return f"<pre>{escape(payload)}</pre>"
     if isinstance(value, (list, tuple)):
         return ", ".join(escape(str(item)) for item in value) if value else "[]"
