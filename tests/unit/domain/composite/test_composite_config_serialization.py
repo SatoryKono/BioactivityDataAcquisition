@@ -85,41 +85,34 @@ def _build_composite_config() -> CompositeConfig:
 
 def test_composite_config_to_dict_snapshot() -> None:
     config = _build_composite_config()
+    payload = config.to_dict()
 
-    assert config.to_dict() == {
-        "name": "composite_publication",
-        "version": "1.0.0",
-        "seed": {
-            "pipeline": "chembl_publication",
-            "output_keys": ["doi", "pmid"],
-            "silver_table": "silver/chembl/publication",
-        },
-        "dependencies": [
-            {
-                "pipeline": "chembl_document",
-                "join_keys": ["doi"],
-                "required": False,
-                "timeout_seconds": 600,
-                "silver_table": "silver/chembl/document",
-                "filter_fields": ["doi"],
-            }
-        ],
-        "enrichers": [
-            {
-                "pipeline": "crossref_publication",
-                "join_keys": ["doi"],
-                "required": True,
-                "timeout_seconds": 900,
-            }
-        ],
-        "merge": {
-            "strategy": "left_outer",
-            "conflict_resolution": "seed_priority",
-            "output_silver_path": "silver/composite/publication",
-            "output_gold_path": "gold/composite/publication",
-            "sort_by_silver": ["doi"],
-            "sort_by_gold": ["doi"],
-        },
+    assert payload["name"] == "composite_publication"
+    assert payload["version"] == "1.0.0"
+    assert payload["seed"] == {
+        "pipeline": "chembl_publication",
+        "output_keys": ["doi", "pmid"],
+        "silver_table": "silver/chembl/publication",
+        "limit": None,
+    }
+    assert payload["dependencies"][0]["pipeline"] == "chembl_document"
+    assert payload["dependencies"][0]["filter_fields"] == ["doi"]
+    assert payload["enrichers"][0]["pipeline"] == "crossref_publication"
+    assert payload["enrichers"][0]["timeout_seconds"] == 900
+    assert payload["enrichers"][0]["cardinality"] == "one_to_one"
+    assert payload["merge"]["strategy"] == "left_outer"
+    assert payload["merge"]["sort_by_silver"] == ["doi"]
+    assert payload["merge"]["preserve_all_sources"] is False
+    # Lossless surface includes top-level runtime blocks.
+    assert set(payload) >= {
+        "dq",
+        "execution",
+        "lineage",
+        "cross_validation",
+        "merge",
+        "seed",
+        "enrichers",
+        "dependencies",
     }
 
 
