@@ -213,7 +213,13 @@ def _normalise_path(path: str, *, root: Path) -> str:
     drive_match = WINDOWS_DRIVE_PATTERN.match(value)
     if drive_match:
         drive, suffix = drive_match.groups()
-        value = f"/mnt/{drive.lower()}/{suffix}"
+        suffix_norm = (suffix or "").lstrip("/")
+        # Return canonical /mnt form without Path() round-trip: on Windows,
+        # Path("/mnt/c/...") becomes a bogus "C:\\mnt\\c\\..." and breaks
+        # dashboard bind equivalence checks used by preflight/start gates.
+        if suffix_norm:
+            return f"/mnt/{drive.lower()}/{suffix_norm}".casefold()
+        return f"/mnt/{drive.lower()}".casefold()
     docker_desktop_match = re.match(
         r"^/(?:run/desktop/mnt/host|host_mnt)/([A-Za-z])(?:/(.*))?$",
         value,
@@ -221,9 +227,9 @@ def _normalise_path(path: str, *, root: Path) -> str:
     )
     if docker_desktop_match:
         drive, suffix = docker_desktop_match.groups()
-        value = f"/mnt/{drive.lower()}"
         if suffix:
-            value = f"{value}/{suffix}"
+            return f"/mnt/{drive.lower()}/{suffix}".casefold()
+        return f"/mnt/{drive.lower()}".casefold()
     wsl_unc_match = re.match(
         r"^//(?:wsl\$|wsl\.localhost)/[^/]+(/.*)$",
         value,
@@ -231,13 +237,42 @@ def _normalise_path(path: str, *, root: Path) -> str:
     )
     if wsl_unc_match:
         value = wsl_unc_match.group(1)
+    if re.match(r"^/mnt/[a-z](?:/|$)", value, flags=re.IGNORECASE):
+        return value.casefold()
     candidate = Path(value)
     if not candidate.is_absolute():
         candidate = root / candidate
+        # Re-enter for absolute Windows paths produced from relative sources.
+        return _normalise_path(str(candidate), root=root)
     normalized = os.path.normcase(os.path.normpath(str(candidate)))
     if re.match(r"^/mnt/[a-z](?:/|$)", normalized, flags=re.IGNORECASE):
         return normalized.casefold()
     return normalized
+
+
+def compose_host_bind_path(path: str | Path, *, root: Path) -> str:
+    """Absolute host path safe as a Compose bind source on Windows/Desktop.
+
+    Relative ./reports binds follow the Compose project working_dir. When that
+    working_dir is a stale Docker Desktop virtual path, the container sees an empty
+    tree while host CLI writers keep filling the real checkout. Absolute
+    drive-letter paths with forward slashes (E:/repo/reports) pin the bind to
+    the selected repository and avoid Git Bash backslash corruption.
+    """
+    raw = str(path).strip().strip('"')
+    candidate = Path(raw)
+    if not candidate.is_absolute():
+        candidate = (root / candidate).resolve()
+    else:
+        try:
+            candidate = candidate.resolve()
+        except OSError:
+            candidate = Path(os.path.abspath(raw))
+    # pathlib as_posix() yields E:/... on Windows — Compose-safe and Git-Bash-safe.
+    posix = candidate.as_posix()
+    if len(posix) >= 2 and posix[1] == ':':
+        return posix[0].upper() + posix[1:]
+    return posix
 
 
 def dashboard_source_environment(
@@ -264,9 +299,12 @@ def dashboard_source_environment(
         environment_name = str(raw_spec.get("environment_name") or "").strip()
         if not relative_source or not environment_name:
             continue
-        normalized_source = _normalise_path(relative_source, root=root)
-        environment[environment_name] = normalized_source
-        identity_mounts[str(target)] = normalized_source
+        # Identity hash stays on the canonical comparison form; Compose env uses
+        # host-safe absolute bind sources so Desktop cannot pin a stale empty tree.
+        identity_mounts[str(target)] = _normalise_path(relative_source, root=root)
+        environment[environment_name] = compose_host_bind_path(
+            relative_source, root=root
+        )
 
     identity_environment = str(
         identity_contract.get("environment_name") or ""
@@ -569,6 +607,20 @@ def _bind_mount_source(volume: object) -> str:
     return ""
 
 
+def _host_port_contract_entry(
+    host_port_contract: Mapping[Any, Any],
+    published: int,
+) -> Any:
+    """Resolve host_ports entry for one published port.
+
+    YAML loads numeric keys as ``int``; callers historically used ``str(port)``.
+    Accept both so ownership checks do not false-positive with expected_owner=None.
+    """
+    if published in host_port_contract:
+        return host_port_contract[published]
+    return host_port_contract.get(str(published))
+
+
 def _findings_published_port(
     *,
     bind: str,
@@ -579,7 +631,7 @@ def _findings_published_port(
     seen_ports: dict[int, str],
 ) -> list[Finding]:
     findings: list[Finding] = []
-    expected = host_port_contract.get(str(published))
+    expected = _host_port_contract_entry(host_port_contract, published)
     expected_owner = (
         f"{expected.get('stack')}/{expected.get('service')}"
         if isinstance(expected, dict)

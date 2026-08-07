@@ -125,6 +125,22 @@ Verify:
 ```bash
 python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay
 curl -s http://127.0.0.1:8000/health/ready | jq .checks.report_root
+
+### Preventing empty Browse Recent Runs (bind mismatch)
+
+Root cause class: Docker Desktop binds `./reports` from a **stale project working_dir**
+(virtual `/mnt/wsl/docker-desktop-bind-mounts/...`) so Ops HTTP sees an empty
+`/app/reports` while host CLI writers fill the real checkout tree.
+
+Guards (fail-closed):
+
+1. `runtime_manager` injects **absolute** compose-safe `BIOETL_DASHBOARD_*` paths
+   (`E:/repo/reports`, not relative `./reports` and not backslash paths).
+2. Main stack `up` uses `--force-recreate` so old empty binds cannot stick.
+3. After successful readiness, `runtime_manager start --stack main` runs
+   `verify_report_bind.py` and fails the start when host has reports but Ops
+   HTTP returns `count=0`.
+4. Operator re-check: `python scripts/ops/runtime/docker/verify_report_bind.py`.
 ```
 
 If verification fails, recreate the main stack from the canonical checkout

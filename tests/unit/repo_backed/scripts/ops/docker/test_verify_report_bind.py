@@ -37,6 +37,46 @@ def _load_module() -> ModuleType:
     return module
 
 
+def test_compose_host_bind_path_uses_drive_letter_forward_slashes(
+    tmp_path: Path,
+) -> None:
+    from scripts.ops.runtime.docker.docker_runtime_preflight import (
+        compose_host_bind_path,
+        dashboard_source_environment,
+    )
+
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    data = tmp_path / "data"
+    data.mkdir()
+    path = compose_host_bind_path("reports", root=tmp_path)
+    assert path.replace("\\", "/").endswith("/reports")
+    assert "\\" not in path
+    env = dashboard_source_environment(
+        tmp_path,
+        {
+            "dashboard_data_plane": {
+                "required_bind_mounts": {
+                    "/app/data": {
+                        "relative_source": "data",
+                        "environment_name": "BIOETL_DASHBOARD_DATA_ROOT",
+                    },
+                    "/app/reports": {
+                        "relative_source": "reports",
+                        "environment_name": "BIOETL_DASHBOARD_REPORT_ROOT",
+                    },
+                },
+                "source_identity": {
+                    "schema_version": "bioetl-dashboard-source-v1",
+                    "environment_name": "BIOETL_RUNTIME_SOURCE_ID",
+                },
+            }
+        },
+    )
+    assert "\\" not in env["BIOETL_DASHBOARD_REPORT_ROOT"]
+    assert env["BIOETL_DASHBOARD_REPORT_ROOT"].replace("\\", "/").endswith("/reports")
+
+
 def test_verify_host_marker_ok_without_ops(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
