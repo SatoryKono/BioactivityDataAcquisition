@@ -12,26 +12,17 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CANONICAL_SKILLS_DIR = Path(".codex/skills")
-DISCOVERY_SKILLS_DIR = Path(".agents/skills")
-GENERATED_MARKER = "<!-- generated-by: scripts/ai/codex/sync_native_skills.py -->"
 AGENT_NAMES = (
-    "py-architecture-debt-bot",
     "py-audit-bot",
     "py-config-bot",
     "py-debug-bot",
     "py-doc-bot",
     "py-plan-bot",
-    "py-review-orchestrator",
     "py-test-bot",
-    "py-test-swarm",
 )
 READ_ONLY_AGENTS = {
-    "py-architecture-debt-bot",
     "py-audit-bot",
-    "py-debug-bot",
     "py-plan-bot",
-    "py-review-orchestrator",
-    "py-test-swarm",
 }
 
 
@@ -266,45 +257,13 @@ def validate_agents(repo_root: Path = REPO_ROOT) -> list[Finding]:
 
 
 def validate_skill_adapters(repo_root: Path = REPO_ROOT) -> list[Finding]:
-    findings: list[Finding] = []
-    try:
-        skills = canonical_skills(repo_root)
-    except ValueError as exc:
-        return [
-            Finding("skill.canonical", str(exc), str(repo_root / CANONICAL_SKILLS_DIR))
-        ]
+    """Canonical `.codex/skills` is the only project discovery surface."""
 
-    discovery_root = repo_root / DISCOVERY_SKILLS_DIR
-    actual = {path.parent.name for path in discovery_root.glob("*/SKILL.md")}
-    expected = set(skills)
-    for missing in sorted(expected - actual):
-        findings.append(
-            Finding(
-                "skill.missing",
-                f"native discovery adapter is missing: {missing}",
-                str(discovery_root),
-            )
-        )
-    for extra in sorted(actual - expected):
-        findings.append(
-            Finding(
-                "skill.unexpected",
-                f"unexpected discovery adapter: {extra}",
-                str(discovery_root),
-            )
-        )
-    for directory_name, (_, description) in skills.items():
-        path = discovery_root / directory_name / "SKILL.md"
-        if not path.is_file():
-            continue
-        expected_content = render_skill_adapter(directory_name, description)
-        if path.read_text(encoding="utf-8") != expected_content:
-            findings.append(
-                Finding(
-                    "skill.drift", "adapter differs from generated contract", str(path)
-                )
-            )
-    return findings
+    try:
+        canonical_skills(repo_root)
+    except ValueError as exc:
+        return [Finding("skill.canonical", str(exc), str(repo_root / CANONICAL_SKILLS_DIR))]
+    return []
 
 
 def validate_native_runtime(repo_root: Path = REPO_ROOT) -> list[Finding]:

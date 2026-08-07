@@ -49,9 +49,8 @@ identity to repository, commit, branch, worktree, task, and source references.
 - `.codex/agents/py-*.toml` exposes the nine governed profiles to native Codex
   custom-agent discovery. Each thin descriptor routes to its matching Markdown
   profile, skill, and memory sheet; the parent model is inherited.
-- `.codex/skills/**` remains the behavioral skill source. Generated,
-  platform-neutral `.agents/skills/*/SKILL.md` adapters expose that catalog to
-  native repository discovery without requiring copies in the user home.
+- `.codex/skills/**` is the sole project-local skill discovery and behavioral
+  source; no duplicate `.agents/skills` adapters are maintained.
 - Validate these surfaces with
   `python3 scripts/ai/codex/doctor.py static --no-write`.
 

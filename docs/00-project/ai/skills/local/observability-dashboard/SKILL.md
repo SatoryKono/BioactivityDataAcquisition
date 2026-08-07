@@ -1,0 +1,39 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source: `.codex/skills/observability-dashboard/SKILL.md`
+> Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
+> Edit the runtime source first, then refresh this mirror.
+______________________________________________________________________
+
+---
+name: "observability-dashboard"
+description: "Edit, render, validate, or debug BioETL Grafana dashboards and their PromQL panels without starting optional monitoring services unless requested."
+---
+
+# Observability Dashboard
+
+## Source Of Truth
+
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
+
+- Dashboard source: `../../../grafana/dashboards/`
+- Render and validation scripts: `../../../scripts/`
+
+## Workflow
+
+1. Confirm that the task touches a shipped dashboard or asks for a render.
+2. Inspect real metric names and labels before changing a query.
+3. Use `mode=edit`, `render`, or `debug`; keep the default runtime local-only.
+4. Do not start `docker-compose.monitoring.yml` unless the user explicitly
+   requested dashboard/render work.
+5. Validate JSON, queries, and relevant dashboard tests; update operator docs
+   when shipped behaviour changes.
+
+This single skill replaces `grafana-dashboard-extension`,
+`grafana-dashboard-render`, `prometheus-metric-discovery`, and
+`prometheus-query-debugger` for dashboard work.

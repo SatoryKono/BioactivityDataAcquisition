@@ -1,0 +1,4 @@
+interface:
+  display_name: "Observability Dashboard"
+  short_description: "Edit and validate Grafana dashboards"
+  default_prompt: "Use $observability-dashboard to edit, render, validate, or debug a BioETL Grafana dashboard."

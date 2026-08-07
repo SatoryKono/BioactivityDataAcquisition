@@ -1,6 +1,6 @@
 ---
 name: research-workflow
-description: "Use when conducting structured research projects that require traceable evidence, explicit decisions, and constrained specifications. Covers the full workflow from initialization through evidence collection, synthesis, decision-making, and spec generation."
+description: "Use for structured research, deep investigation, traceable evidence, and multi-stream synthesis with explicit decisions and constrained specifications."
 context: fork
 agent: general-purpose
 ---
@@ -13,7 +13,12 @@ agent: general-purpose
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 
-This skill provides a unified workflow for structured research projects that require traceable evidence and explicit decisions. It combines evidence collection, synthesis, decision-making, and spec generation into a coherent process.
+This skill provides the single workflow for structured research, deep
+investigation, traceable evidence, and multi-stream synthesis. It replaces the
+retired `deep-research`, `collecting-evidence`, and
+`hierarchical-evidence-orchestration` routes. Use `mode=single` by default and
+`mode=multi-stream` only when the task genuinely benefits from independent
+evidence streams.
 
 ## Workflow Phases
 

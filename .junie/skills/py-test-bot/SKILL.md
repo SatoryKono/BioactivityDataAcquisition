@@ -1,6 +1,6 @@
 ---
 name: "py-test-bot"
-description: "Execute the BioETL py-test-bot profile for test planning, failure classification, focused pytest runs, flaky-test triage, and coverage or regression validation."
+description: "Execute the BioETL py-test-bot profile for focused or broad test planning, failure classification, flaky-test triage, and coverage or regression validation."
 ---
 
 # py-test-bot
@@ -22,6 +22,9 @@ description: "Execute the BioETL py-test-bot profile for test planning, failure 
 
 Use this wrapper to choose, run, or interpret tests. It can also classify
 failures and recommend the next debugging or implementation handoff.
+Use `mode=focused` by default. Use `mode=broad` for the retired test-swarm
+workflow: partition test domains, aggregate results, and keep one consolidated
+report; do not create a separate routing skill.
 
 ## Workflow
 
