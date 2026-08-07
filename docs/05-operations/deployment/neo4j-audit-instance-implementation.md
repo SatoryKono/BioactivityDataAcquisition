@@ -60,7 +60,7 @@ ______________________________________________________________________
 
 - [ ] Review docker-compose.neo4j-audit.yml configuration
 - [ ] Review scripts/ops/runtime/neo4j/start-neo4j-audit.ps1 (or .sh for WSL)
-- [ ] Review src/tools/neo4j_audit.py helper functions
+- [ ] Review scripts/ops/data/neo4j_audit.py helper functions
 
 ### Code Integration (30 minutes)
 
