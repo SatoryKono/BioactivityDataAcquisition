@@ -68,6 +68,7 @@ def build_filter_strategy(
         Callable CellularityFilterStrategy that accepts a CellularityType or None
         and returns True if the record should be kept.
     """
+    # include uses is not None so empty include is explicit filter-none.
     if include is not None:
         return _include_strategy(include, keep_unresolved)
     if exclude is not None:

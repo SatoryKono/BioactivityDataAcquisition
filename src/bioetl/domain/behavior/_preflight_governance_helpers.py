@@ -114,9 +114,18 @@ def determine_governance_impact(
     *,
     issue: ValidationIssue,
     config: PreflightGovernanceConfig,
+    is_effective_blocker: bool | None = None,
 ) -> str:
-    """Determine governance impact of an issue."""
-    if issue.is_blocker():
+    """Determine governance impact of an issue.
+
+    Prefer effective blocker status (policy-adjusted) over raw severity.
+    """
+    blocker = (
+        is_effective_blocker
+        if is_effective_blocker is not None
+        else issue.is_blocker()
+    )
+    if blocker:
         if config.policy in BLOCKING_POLICIES:
             return "execution_blocker"
         return "warning_with_blocker_severity"
@@ -138,5 +147,9 @@ def format_issue(
         "details": issue.details,
         "location": issue.location or "",
         "is_blocker": is_effective_blocker,
-        "governance_impact": determine_governance_impact(issue=issue, config=config),
+        "governance_impact": determine_governance_impact(
+            issue=issue,
+            config=config,
+            is_effective_blocker=is_effective_blocker,
+        ),
     }

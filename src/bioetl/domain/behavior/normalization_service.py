@@ -56,8 +56,8 @@ __all__ = [
 class NormalizationResult:
     """Result of normalizing a bioactivity value."""
 
-    value: float = cast(Any, None)  # Any: host attr default (PD6)
-    unit: str = cast(Any, None)  # Any: host attr default (PD6)
+    value: float
+    unit: str
     pchembl: PChemblValue | None = None
     is_valid: bool = True
     validation_message: str | None = None

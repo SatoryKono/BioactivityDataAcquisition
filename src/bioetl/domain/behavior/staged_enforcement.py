@@ -74,7 +74,11 @@ class StagedEnforcementEngine:
             _build_default_policies() if policies is None else dict(policies)
         )
         self.results: list[CheckResult] = []
-        self._contract_policies = {
+
+    @property
+    def _contract_policies(self) -> dict[str, EnforcementPolicy]:
+        """Contract-oriented policy subset derived from the live policy map."""
+        return {
             name: self.policies[name]
             for name in _CONTRACT_POLICY_NAMES
             if name in self.policies

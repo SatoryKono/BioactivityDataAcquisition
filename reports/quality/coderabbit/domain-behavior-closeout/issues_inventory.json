@@ -1,0 +1,335 @@
+[
+  {
+    "number": 8178,
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/_dq_serializer_html/_styles.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "trivial",
+    "path": "src/bioetl/domain/behavior/_dq_serializer_html/_styles.py",
+    "fingerprint": "be3a50b9d004",
+    "claim": "In @src/bioetl/domain/behavior/_dq_serializer_html/_styles.py around lines 1 - 113, Переместите модуль _dq_serializer_html вместе с _REPORT_STYLES из доменного слоя в слой представления или инфраструктуры, сохранив оформление HTML-отчёта без изменений. Оставьте в домене только структуры и данные отчёта, устранив его зависимость от презентационного CSS и интерфейсного слоя.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8179,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/schema_metadata_extractor.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/schema_metadata_extractor.py",
+    "fingerprint": "6bd8c7de2a9d",
+    "claim": "In @src/bioetl/domain/behavior/schema_metadata_extractor.py around lines 47 - 60, Remove filesystem inspection from the domain-level _extract_contract_path and relocate contract_path extraction to composition or infrastructure. Update extract_schema_metadata to accept the already-resolved contract_path as an input, preserving metadata behavior without accessing module.__file__ in the domain layer. If _extract_contract_path must remain temporarily, replace slash-based parsing with pathlib.PurePath.parts for platform-independent handling.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8180,
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/value_validator_rules.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/value_validator_rules.py",
+    "fingerprint": "e258752c91d3",
+    "claim": "In @src/bioetl/domain/behavior/value_validator_rules.py around lines 79 - 90, Update validate_percent_value to explicitly reject NaN before the range comparison, returning False with an appropriate error message; retain the existing 0–100 validation and valid return behavior for finite values.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8181,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/data_normalization_config.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/data_normalization_config.py",
+    "fingerprint": "3bb8c2e73d16",
+    "claim": "In @src/bioetl/domain/behavior/data_normalization_config.py around lines 42 - 51, Update DataNormalizationConfig.__post_init__ to reject an empty default_pii_salt whenever PII hashing is enabled, requiring an explicit non-empty salt while preserving existing validation for disabled hashing and publication-year bounds.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8182,
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/validation_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/validation_helpers.py",
+    "fingerprint": "dceafc80056c",
+    "claim": "In @src/bioetl/domain/behavior/validation_helpers.py around lines 6 - 16, Обновите validate_data: отклоняйте только значение None и пустые коллекции, не используя обобщённую проверку falsy. Значения 0, False и 0.0 должны проходить валидацию; для коллекций сохраните ValueError при отсутствии элементов.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8183,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/composite_validation_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/composite_validation_helpers.py",
+    "fingerprint": "6301ff56202a",
+    "claim": "In @src/bioetl/domain/behavior/composite_validation_helpers.py around lines 82 - 92, Update _is_valid_field_priorities to track fields by extracted priority value rather than by field name, so duplicate priorities across different fields are detected. Preserve the existing invalid-priority check and return False when the same priority is assigned to conflicting fields.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8184,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/dq_serializer.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/dq_serializer.py",
+    "fingerprint": "87cbfe622909",
+    "claim": "In @src/bioetl/domain/behavior/dq_serializer.py around lines 10 - 19, Переместите DQReportSerializer и связанную сериализацию JSON/YAML и HTML из domain layer в слой interfaces или application adapter, включая функции из _dq_serializer_html и их импорты. В domain оставьте только типизированную проекцию данных, если она действительно требуется, и обновите потребителей на новый адаптер, сохранив текущие форматы отчётов.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8185,
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/organism_classification_service_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/organism_classification_service_models.py",
+    "fingerprint": "ea0648cc292d",
+    "claim": "In @src/bioetl/domain/behavior/organism_classification_service_models.py around lines 30 - 51, Добавьте __post_init__ в ClassificationStats для проверки инвариантов value object: отклоняйте отрицательные значения всех count-полей и требуйте, чтобы total равнялся сумме acellular, unicellular, multicellular и unresolved. Используйте детерминированное исключение с понятным сообщением при нарушении; существующие resolved_count и resolution_rate оставьте без изменений.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8186,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/dq_metrics_calculator.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/dq_metrics_calculator.py",
+    "fingerprint": "f47e91b9bf9c",
+    "claim": "In @src/bioetl/domain/behavior/dq_metrics_calculator.py around lines 107 - 111, Update _extract_incoming_fields in DQMetricsCalculator to derive the incoming schema from the entire records batch instead of only records[0]. Collect and union the keys from every JsonDict in records before _compute_schema_delta uses them, while preserving the existing return type and behavior for empty or single-record inputs.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8187,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/preflight_governance.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/preflight_governance.py",
+    "fingerprint": "999e695d62dd",
+    "claim": "In @src/bioetl/domain/behavior/preflight_governance.py around lines 194 - 216, Remove the CI/CD-specific adapter from create_ci_gate_report in preflight_governance so the domain layer only exposes the raw governance report data and does not build a ci_gate contract with PASS/FAIL fields. Move this transformation into an application or CI integration component, using the existing governance_report shape as input and keeping the domain-facing execution_decision, validation_summary, and detailed_issues flow unchanged.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8188,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/normalization_config.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/normalization_config.py",
+    "fingerprint": "c6281812b248",
+    "claim": "In @src/bioetl/domain/behavior/normalization_config.py around lines 34 - 41, Update the validation in __post_init__ for all numeric range configurations, including molar, pChEMBL, and potency thresholds, to reject non-finite values with math.isfinite(). Strengthen typical_min/typical_max validation so every range enforces min_value <= typical_min < typical_max <= max_value, preserving the existing value-object invariants and deterministic behavior.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8189,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/schema_classifier.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/schema_classifier.py",
+    "fingerprint": "319cab0b0152",
+    "claim": "In @src/bioetl/domain/behavior/schema_classifier.py around lines 133 - 144, Move the registry-diff parsing out of SchemaClassifier by removing json.loads handling from classify_from_registry_diff and making that entry point accept already-parsed JsonDict/schema objects instead. Keep classify_changes as the domain-only path and preserve its current behavior; let the caller in the boundary layer do the string-to-JSON conversion and manual_review error handling for invalid input.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8190,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/identity_service.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/identity_service.py",
+    "fingerprint": "e21f207cf3f5",
+    "claim": "In @src/bioetl/domain/behavior/identity_service.py around lines 67 - 85, Зафиксируйте content-hash policy в __init__: копируйте переданные include и exclude sets, чтобы последующие изменения вызывающего кода не влияли на identity, и сохраните отдельный признак явной policy на основе проверки is not None. Обновите has_explicit_content_hash_policy так, чтобы пустой явно переданный include_fields также считался установленной policy.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8191,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/cross_validation_validator.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/cross_validation_validator.py",
+    "fingerprint": "696d19831916",
+    "claim": "In @src/bioetl/domain/behavior/cross_validation_validator.py around lines 116 - 132, Update _apply_disposition_policy so it preserves every issue in the original order and applies _apply_policy_to_issue only to issues with ValidationSeverity.BLOCKER. Retain non-blocking WARNING and INFO issues unchanged, while preserving the existing empty-input behavior.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8192,
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/cross_validation_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/cross_validation_helpers.py",
+    "fingerprint": "8195c53c2386",
+    "claim": "In @src/bioetl/domain/behavior/cross_validation_helpers.py around lines 256 - 257, Update _is_valid_threshold to explicitly reject bool values before applying the numeric type and [0, 1] range checks, while continuing to accept None and valid int or float thresholds.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8193,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/value_validator.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/value_validator.py",
+    "fingerprint": "66c1d85a2c7a",
+    "claim": "In @src/bioetl/domain/behavior/value_validator.py around lines 55 - 59, Update ValueValidator initialization to apply the provided config when constructing _concentration_ranges, using DEFAULT_CONCENTRATION_RANGES only when config is absent; alternatively remove the unused config parameter and its documented configuration promise.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8194,
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/_author_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/_author_helpers.py",
+    "fingerprint": "269b0b8ef62f",
+    "claim": "In @src/bioetl/domain/behavior/_author_helpers.py around lines 205 - 210, Replace the lowercasing used to build deduplication keys in the visible string-processing helper with Unicode-aware casefolding, while preserving the original first-seen values and ordering in seen and the returned list.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8195,
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/schema_classifier_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/schema_classifier_helpers.py",
+    "fingerprint": "15e6c6ac46fa",
+    "claim": "In @src/bioetl/domain/behavior/schema_classifier_helpers.py at line 105, Сделайте итерацию по общим именам полей в функции, содержащей цикл `for field_name`, детерминированной: замените обход множества на стабильный отсортированный порядок перед созданием `SchemaChange`. Сохраните текущую логику обработки каждого поля и порядок вывода `build_detailed_changes` для одинаковых схем.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8196,
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/composite_metadata_cv.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "trivial",
+    "path": "src/bioetl/domain/behavior/composite_metadata_cv.py",
+    "fingerprint": "fe8c2fa6bea2",
+    "claim": "In @src/bioetl/domain/behavior/composite_metadata_cv.py around lines 145 - 148, В функции, где вызывается `_count_cv_markers`, замените присваивание `error_count` через `max(error_marker_count, quarantine_count)` на прямое использование `error_marker_count`; сохраните без изменений остальные счётчики и логику.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8197,
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/staged_enforcement.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "trivial",
+    "path": "src/bioetl/domain/behavior/staged_enforcement.py",
+    "fingerprint": "aeefe324f10c",
+    "claim": "In @src/bioetl/domain/behavior/staged_enforcement.py around lines 77 - 81, Удалите неиспользуемые `_contract_policies` и `_CONTRACT_POLICY_NAMES` из `__init__` и модуля соответственно, если они не нужны логике вердикта; не оставляйте вычисление атрибута без последующего чтения.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8198,
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/composite_validation_layer.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "trivial",
+    "path": "src/bioetl/domain/behavior/composite_validation_layer.py",
+    "fingerprint": "0095051fc4db",
+    "claim": "In @src/bioetl/domain/behavior/composite_validation_layer.py around lines 65 - 95, Уберите повторное создание CompositeValidationReport в validate_composite: сохраните первоначальный объект validation_report для передачи в apply_governance, затем верните его копию с обновлённым execution_decision через dataclasses.replace. Добавьте необходимый импорт replace и не дублируйте остальные поля отчёта.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8199,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/dq_policy_resolver.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/dq_policy_resolver.py",
+    "fingerprint": "1b434afbd35f",
+    "claim": "In @src/bioetl/domain/behavior/dq_policy_resolver.py around lines 210 - 226, Replace the substring-based `\"gold\" in contract_ref` check in `_apply_contract_adjustments` with an explicit DQConfig flag or configured set of strict contract references, preserving the WARN-to-QUARANTINE adjustment only for explicitly configured contracts. Remove the unused `_violation_kind` parameter from the method signature and update all callers accordingly.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8200,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/author_normalization_service.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/author_normalization_service.py",
+    "fingerprint": "c864c2e3f667",
+    "claim": "In @src/bioetl/domain/behavior/author_normalization_service.py around lines 44 - 60, Validate that salt is non-empty at the start of normalize_authors, before parsing or calling hash_author_name, and reject an empty value using the service’s established validation/error convention. Preserve the existing behavior for valid salts and author inputs.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8201,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/_preflight_governance_types.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/_preflight_governance_types.py",
+    "fingerprint": "c09059c8769d",
+    "claim": "In @src/bioetl/domain/behavior/_preflight_governance_types.py around lines 21 - 28, Update PreflightGovernanceConfig.issue_code_overrides to accept Mapping[str, ValidationSeverity] | None and store a defensive immutable copy during initialization. Preserve the value-object invariants by preventing mutations through either the caller’s original mapping or the configuration instance, while keeping existing defaults and governance behavior unchanged.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8202,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/_preflight_governance_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/_preflight_governance_helpers.py",
+    "fingerprint": "bfa4f41bf5c4",
+    "claim": "In @src/bioetl/domain/behavior/_preflight_governance_helpers.py around lines 113 - 142, Use the effective blocker status as the single source of truth in format_issue: update determine_governance_impact to accept is_effective_blocker and base its policy decision on that value instead of calling issue.is_blocker(). Pass the existing is_effective_blocker from format_issue so is_blocker and governance_impact remain consistent after overrides.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8203,
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/_dq_serializer_html/__init__.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/_dq_serializer_html/__init__.py",
+    "fingerprint": "f3bd8f770ee6",
+    "claim": "In @src/bioetl/domain/behavior/_dq_serializer_html/__init__.py around lines 42 - 51, Normalize the nested payload fields in the HTML serializer before calling .get on them: update the logic in __init__.py around the layer/status/summary/thresholds extraction so data[\"summary\"] and data[\"thresholds\"] are treated as dictionaries only after a type check or safe fallback normalization. Preserve the existing rendering flow in _render_report_header, _render_summary_card, and render_thresholds_html, but ensure None or scalar values for summary/thresholds do not trigger AttributeError and instead fall back to empty dict behavior.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8204,
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/aggregation_validator.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "trivial",
+    "path": "src/bioetl/domain/behavior/aggregation_validator.py",
+    "fingerprint": "558268f1e854",
+    "claim": "In @src/bioetl/domain/behavior/aggregation_validator.py around lines 174 - 190, Уточните fallback-логику в _collect_fallback_fields: не добавляйте произвольные ключи верхнего уровня и вложенных словарей, включая служебные поля схемы. Ограничьте извлечение известными контейнерами полей; если структура source_schema не распознана, возвращайте пустой набор, чтобы _validate_group_by_fields и _validate_source_field отклоняли неизвестные поля.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8205,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/activity_aggregator/_aggregator.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/activity_aggregator/_aggregator.py",
+    "fingerprint": "12864c553b84",
+    "claim": "In @src/bioetl/domain/behavior/activity_aggregator/_aggregator.py around lines 52 - 59, Update aggregate_values and aggregate_with_uncertainty to accept an optional method parameter and use self.default_method when it is omitted, instead of defaulting to the \"median\" literal. Preserve explicit method arguments, including calls from normalization_service.py.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8206,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/merged_metadata_explainability.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/merged_metadata_explainability.py",
+    "fingerprint": "f4508ff7849d",
+    "claim": "In @src/bioetl/domain/behavior/merged_metadata_explainability.py around lines 204 - 211, Обновите _empty_explainability_summary, чтобы его схема полностью совпадала с _build_explainability_summary: добавьте field_count и avg_fields_per_record, а также records_with_conflicts внутри conflict_summary, используя те же значения по умолчанию, что и для пустого результата.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8207,
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/merged_metadata_explainability.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/merged_metadata_explainability.py",
+    "fingerprint": "0586a351e9f0",
+    "claim": "In @src/bioetl/domain/behavior/merged_metadata_explainability.py around lines 45 - 63, Update generate_field_explanation to accept a merge_strategy parameter and use it instead of the hardcoded \"prioritize\" value. Update every generate_field_explanation call within generate_record_explanation to pass through its merge_strategy argument, keeping record- and field-level explanations consistent.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8208,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py",
+    "fingerprint": "63748e5145c9",
+    "claim": "In @src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py around lines 98 - 103, Защитите сериализацию словарей в рендерере, обновив вызов orjson.dumps в ветке isinstance(value, dict): добавьте опцию OPT_NON_STR_KEYS и обработчик default=str, сохранив существующее форматирование и экранирование результата. Убедитесь, что тот же подход применяется во всех аналогичных вызовах orjson.dumps, включая участок, отмеченный как также затронутый.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8209,
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/normalization_service.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "trivial",
+    "path": "src/bioetl/domain/behavior/normalization_service.py",
+    "fingerprint": "e6f650974775",
+    "claim": "In @src/bioetl/domain/behavior/normalization_service.py around lines 55 - 64, Make NormalizationResult.value and NormalizationResult.unit required dataclass fields by removing their cast(Any, None) defaults; keep their float and str types and preserve the existing explicit construction at all call sites.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8210,
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/composite_metadata_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "trivial",
+    "path": "src/bioetl/domain/behavior/composite_metadata_helpers.py",
+    "fingerprint": "08641fd8f041",
+    "claim": "In @src/bioetl/domain/behavior/composite_metadata_helpers.py around lines 134 - 158, Уберите дублирование в функции _build_composite_output_ext: соберите общие аргументы CompositeOutputExt один раз, добавив partition_count только когда он не равен None. Сохраните текущее поведение и передачу всех полей, включая schema_validation.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8211,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/composite_metadata_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/composite_metadata_helpers.py",
+    "fingerprint": "0793167b1497",
+    "claim": "In @src/bioetl/domain/behavior/composite_metadata_helpers.py around lines 43 - 54, Расширьте обработку исключений во внутреннем вызове ast.literal_eval в _parse_literal, добавив TypeError и RecursionError к уже перехватываемым исключениям, чтобы некорректные или глубоко вложенные legacy-строки возвращали None вместо аварийного завершения парсинга.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8212,
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/behavior/dq_rule_evaluator.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "major",
+    "path": "src/bioetl/domain/behavior/dq_rule_evaluator.py",
+    "fingerprint": "617ab6d82dc5",
+    "claim": "In @src/bioetl/domain/behavior/dq_rule_evaluator.py around lines 107 - 118, Cross-field outcomes bypass invalid_record_policy, so error-severity violations are not quarantined. Update _evaluate_cross_rules to pass dq_config into _build_cross_outcome, then apply _apply_invalid_record_policy there consistently with _build_field_outcome and _build_conditional_outcome.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8213,
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/organism_classification_service_filtering.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/organism_classification_service_filtering.py",
+    "fingerprint": "5ab9e9650fd8",
+    "claim": "In @src/bioetl/domain/behavior/organism_classification_service_filtering.py around lines 52 - 75, Update build_filter_strategy so an empty include set is handled explicitly instead of being treated as an active filter; use the existing build_filter_strategy entry point and its _include_strategy / _pass_all_strategy branches to treat set() as “not provided” if that is the intended behavior. Keep the current precedence between include, exclude, and pass-all for non-empty include values, and preserve the keep_unresolved handling unchanged.",
+    "state": "OPEN"
+  },
+  {
+    "number": 8214,
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/behavior/unit_converter.py` — Verify each finding against current code. Fix only still-valid issues, skip the ",
+    "severity": "minor",
+    "path": "src/bioetl/domain/behavior/unit_converter.py",
+    "fingerprint": "b1897908182e",
+    "claim": "In @src/bioetl/domain/behavior/unit_converter.py around lines 121 - 127, Update the doctest examples in UnitConverter, including the examples near lines 35, 67, and the to_pchembl documentation, to import every referenced value object such as Concentration, ConcentrationUnit, and PChemblValue at the start of each example. Verify the asserted displayed results against actual floating-point output and use explicit formatting where necessary so all examples pass with --doctest-modules.",
+    "state": "OPEN"
+  }
+]

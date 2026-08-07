@@ -55,7 +55,7 @@ class ActivityAggregator(_ActivityAggregatorExtensions):
     def aggregate_values(
         self,
         values: Sequence[float],
-        method: str | AggregationMethod = "median",
+        method: str | AggregationMethod | None = None,
     ) -> float:
         """Aggregate multiple values into a single representative value.
 
@@ -81,7 +81,8 @@ class ActivityAggregator(_ActivityAggregatorExtensions):
             raise ValueError("Cannot aggregate empty sequence")
 
         value_list = list(values)
-        parsed_method = self._parse_method(method)
+        effective = self.default_method if method is None else method
+        parsed_method = self._parse_method(effective)
         return self._apply_aggregation(value_list, parsed_method)
 
     def _parse_method(self, method: str | AggregationMethod) -> AggregationMethod:
@@ -114,7 +115,7 @@ class ActivityAggregator(_ActivityAggregatorExtensions):
     def aggregate_with_uncertainty(
         self,
         values: Sequence[float],
-        method: str | AggregationMethod = "median",
+        method: str | AggregationMethod | None = None,
     ) -> tuple[float, float]:
         """Aggregate values and calculate uncertainty.
 
@@ -140,8 +141,9 @@ class ActivityAggregator(_ActivityAggregatorExtensions):
             raise ValueError("Cannot aggregate empty sequence")
 
         value_list = list(values)
-        aggregated = self.aggregate_values(value_list, method)
-        parsed_method = self._parse_method(method)
+        effective = self.default_method if method is None else method
+        aggregated = self.aggregate_values(value_list, effective)
+        parsed_method = self._parse_method(effective)
         uncertainty = self._calculate_uncertainty(value_list, parsed_method, aggregated)
 
         return aggregated, uncertainty

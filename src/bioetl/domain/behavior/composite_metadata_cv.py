@@ -145,7 +145,8 @@ def summarize_composite_cv_dq(
     warning_only_count, error_marker_count, quarantine_count = _count_cv_markers(
         records
     )
-    error_count = max(error_marker_count, quarantine_count)
+    # Keep error and quarantine signals distinct for DQ summary consumers.
+    error_count = error_marker_count
     provenance = _build_cv_rule_provenance(
         warning_only_count=warning_only_count,
         error_count=error_count,

@@ -38,6 +38,31 @@ class ClassificationStats:
     unresolved: int
     conflict_count: int
 
+    def __post_init__(self) -> None:
+        """Reject negative counters and inconsistent bucket totals."""
+        for name in (
+            "total",
+            "acellular",
+            "unicellular",
+            "multicellular",
+            "unresolved",
+            "conflict_count",
+        ):
+            value = getattr(self, name)
+            if value < 0:
+                raise ValueError(f"{name} cannot be negative")
+        bucket_sum = (
+            self.acellular
+            + self.unicellular
+            + self.multicellular
+            + self.unresolved
+        )
+        if bucket_sum != self.total:
+            raise ValueError(
+                "cellularity bucket counts must sum to total "
+                f"(got {bucket_sum} != {self.total})"
+            )
+
     @property
     def resolved_count(self) -> int:
         """Number of successfully classified records."""
