@@ -195,7 +195,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "584",
+      "line": "586",
       "path": "tests/unit/application/core/test_otel_spans.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_postrun_run_explicit_noop_tracer"
@@ -216,7 +216,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "321",
+      "line": "319",
       "path": "tests/unit/application/pipelines/crossref/test_crossref_transformer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_pre_extract_validation_accepts_valid_doi"
@@ -671,7 +671,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "325",
+      "line": "329",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_silver_without_bronze_refs"
@@ -799,7 +799,7 @@
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:106",
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:282",
     "tests/unit/application/core/test_dq_metrics.py:60",
-    "tests/unit/application/core/test_otel_spans.py:584",
+    "tests/unit/application/core/test_otel_spans.py:586",
     "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129"
   ],
   "assertless_families": {
@@ -1292,11 +1292,13 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 52,
+    "marked_test_files": 53,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 52,
-    "unmarked_test_files": []
+    "test_files": 54,
+    "unmarked_test_files": [
+      "tests/unit/repo_backed/scripts/ops/docker/test_verify_report_bind.py"
+    ]
   },
   "report": {
     "assertion_branch_reachability": {
@@ -1495,7 +1497,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "584",
+        "line": "586",
         "path": "tests/unit/application/core/test_otel_spans.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_postrun_run_explicit_noop_tracer"
@@ -1516,7 +1518,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "321",
+        "line": "319",
         "path": "tests/unit/application/pipelines/crossref/test_crossref_transformer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_pre_extract_validation_accepts_valid_doi"
@@ -1971,7 +1973,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "325",
+        "line": "329",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_silver_without_bronze_refs"
@@ -2099,7 +2101,7 @@
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:106",
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:282",
       "tests/unit/application/core/test_dq_metrics.py:60",
-      "tests/unit/application/core/test_otel_spans.py:584",
+      "tests/unit/application/core/test_otel_spans.py:586",
       "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129"
     ],
     "assertless_total_candidates": 105,
@@ -2282,11 +2284,13 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 52,
+      "marked_test_files": 53,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 52,
-      "unmarked_test_files": []
+      "test_files": 54,
+      "unmarked_test_files": [
+        "tests/unit/repo_backed/scripts/ops/docker/test_verify_report_bind.py"
+      ]
     },
     "root": ".",
     "test_file_inventory": {
@@ -2294,8 +2298,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2205,
-      "test_python_file_count": 2436,
+      "test_glob_file_count": 2223,
+      "test_python_file_count": 2456,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2335,13 +2339,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2205,
-    "total_test_functions": 23456,
+    "total_test_files": 2223,
+    "total_test_functions": 23606,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "3ff300aab34d7f1a9252d0524dbf7323db7f014cdd2d717242b9079974cf256d",
+  "source_tree_sha256": "be21e7ef60aa3c326342a02e3c8520e8cf2537ee067b29638c2d0116b7508456",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 105,
@@ -2361,8 +2365,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2205,
-    "test_python_file_count": 2436,
+    "test_glob_file_count": 2223,
+    "test_python_file_count": 2456,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2402,8 +2406,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2205,
-  "total_test_functions": 23456,
+  "total_test_files": 2223,
+  "total_test_functions": 23606,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

@@ -44,6 +44,8 @@ CANONICAL_SOURCES_PATTERN = re.compile(
     r"^## Canonical Sources\s*\n(?:(?!^(?:## |name:|# |\Z)).*\n)*",
     re.MULTILINE,
 )
+
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
 
@@ -148,7 +150,9 @@ def inject_docs_agent_sources(root: Path, *, check_only: bool) -> list[str]:
             ).lstrip("\n")
             if updated != original:
                 if check_only:
-                    issues.append(f"{path.relative_to(root)}: would sync runtime mirror")
+                    issues.append(
+                        f"{path.relative_to(root)}: would sync runtime mirror"
+                    )
                 else:
                     _atomic_write(path, updated)
             continue

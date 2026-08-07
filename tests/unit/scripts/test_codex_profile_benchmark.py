@@ -38,8 +38,11 @@ def test_score_accepts_semantically_equivalent_paths_and_valid_dag_order() -> No
         "validation": list(planning.expected_validation),
     }
 
-    assert profile_benchmark.score_response(navigation, navigation_payload)["total"] == 100
+    assert (
+        profile_benchmark.score_response(navigation, navigation_payload)["total"] == 100
+    )
     assert profile_benchmark.score_response(planning, planning_payload)["total"] == 100
+
 
 def test_parse_jsonl_extracts_only_final_payload_and_usage() -> None:
     stdout = "\n".join(

@@ -129,8 +129,7 @@ def _rule_class(pattern: list[str], decision: str) -> tuple[str, str]:
     if any("bioactivitydataacquisition2" in item.casefold() for item in pattern):
         return "REMOVE", "obsolete_checkout"
     if any(
-        item.startswith(("/tmp/", "/var/tmp/"))
-        or "\\temp\\" in item.casefold()
+        item.startswith(("/tmp/", "/var/tmp/")) or "\\temp\\" in item.casefold()
         for item in pattern
     ):
         return "REMOVE", "temporary_path"
@@ -270,7 +269,8 @@ def audit_retention(
     reference_time = time.time() if now is None else now
     indexed, integrity = _sqlite_index(codex_home)
     groups: dict[str, Counter[str]] = {
-        name: Counter() for name in ("KEEP", "ARCHIVE", "REVIEW_REQUIRED", "CORRUPT", "BLOCKED")
+        name: Counter()
+        for name in ("KEEP", "ARCHIVE", "REVIEW_REQUIRED", "CORRUPT", "BLOCKED")
     }
     index_counts: Counter[str] = Counter()
     for directory_name, archived in (
@@ -304,10 +304,22 @@ def audit_retention(
                 groups["BLOCKED"]["count"] += 1
     policy = {
         "KEEP": {"action": "retain", "restore": "not_required"},
-        "ARCHIVE": {"action": "supported_archive_after_exact_approval", "restore": "verified_backup"},
-        "REVIEW_REQUIRED": {"action": "manual_review_before_any_delete", "restore": "verified_backup"},
-        "CORRUPT": {"action": "quarantine_after_exact_approval", "restore": "verified_backup"},
-        "BLOCKED": {"action": "resolve_access_or_state_first", "restore": "not_applicable"},
+        "ARCHIVE": {
+            "action": "supported_archive_after_exact_approval",
+            "restore": "verified_backup",
+        },
+        "REVIEW_REQUIRED": {
+            "action": "manual_review_before_any_delete",
+            "restore": "verified_backup",
+        },
+        "CORRUPT": {
+            "action": "quarantine_after_exact_approval",
+            "restore": "verified_backup",
+        },
+        "BLOCKED": {
+            "action": "resolve_access_or_state_first",
+            "restore": "not_applicable",
+        },
     }
     return {
         "retention_days": retention_days,
@@ -342,7 +354,11 @@ def _safe_version(executable: Path) -> str:
     except (OSError, subprocess.SubprocessError):
         return "unavailable"
     value = result.stdout.strip().splitlines()[0] if result.stdout.strip() else ""
-    return value[:80] if re.fullmatch(r"[A-Za-z0-9 ._+()-]+", value[:80]) else "unavailable"
+    return (
+        value[:80]
+        if re.fullmatch(r"[A-Za-z0-9 ._+()-]+", value[:80])
+        else "unavailable"
+    )
 
 
 def audit_path(codex_home: Path) -> dict[str, Any]:
@@ -356,14 +372,7 @@ def audit_path(codex_home: Path) -> dict[str, Any]:
             resolved = candidate.resolve()
             if resolved not in candidates:
                 candidates.append(resolved)
-    managed = (
-        Path.home()
-        / ".cache"
-        / "bioetl-codex"
-        / "npm-global"
-        / "bin"
-        / "codex"
-    )
+    managed = Path.home() / ".cache" / "bioetl-codex" / "npm-global" / "bin" / "codex"
     managed_resolved = managed.resolve() if managed.is_file() else None
     selected = candidates[0] if candidates else None
     return {
@@ -511,7 +520,10 @@ def apply_remediation(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
     return {
         "backup": backup,
         "rules": rules,
-        "permissions": {**permissions, "unsafe_after": after["unsafe_directories"] + after["unsafe_files"]},
+        "permissions": {
+            **permissions,
+            "unsafe_after": after["unsafe_directories"] + after["unsafe_files"],
+        },
         "env_files_touched": False,
         "session_files_deleted": 0,
     }
@@ -536,7 +548,11 @@ def restore_backup(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
     for item in reversed(manifest.get("mode_manifest", [])):
         relative = item["relative"]
         destination = codex_home if relative == "." else codex_home / relative
-        if destination.exists() and not destination.is_symlink() and not _is_env_file(destination):
+        if (
+            destination.exists()
+            and not destination.is_symlink()
+            and not _is_env_file(destination)
+        ):
             os.chmod(destination, int(item["mode"]))
             restored_modes += 1
     return {
@@ -555,8 +571,7 @@ def collect_audit(codex_home: Path, retention_days: int) -> dict[str, Any]:
     hard_failures = permissions["errors"] + rules["parse_errors"]
     unsafe = permissions["unsafe_directories"] + permissions["unsafe_files"]
     risky_rules = sum(
-        rules["dispositions"][name]
-        for name in ("NARROW", "REMOVE", "SECRET_REVIEW")
+        rules["dispositions"][name] for name in ("NARROW", "REMOVE", "SECRET_REVIEW")
     )
     status = "FAIL" if hard_failures or unsafe or risky_rules else "PASS"
     if status == "PASS" and (
@@ -595,7 +610,10 @@ def _report_path(requested: Path) -> Path:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "mode", choices=("audit", "retention", "remediate", "restore"), nargs="?", default="audit"
+        "mode",
+        choices=("audit", "retention", "remediate", "restore"),
+        nargs="?",
+        default="audit",
     )
     parser.add_argument(
         "--codex-home",

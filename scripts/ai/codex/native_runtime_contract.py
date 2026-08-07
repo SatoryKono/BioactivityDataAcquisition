@@ -40,9 +40,7 @@ BOOTSTRAP_CORPUS_PATHS = (
     "docs/01-requirements/REQUIREMENTS.md",
     "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
     "docs/00-project/ai/memory/agent-memory.md",
-    *tuple(
-        f"docs/00-project/ai/memory/memory-{name}.md" for name in AGENT_NAMES
-    ),
+    *tuple(f"docs/00-project/ai/memory/memory-{name}.md" for name in AGENT_NAMES),
     "src/memory/DAILY_WORKFLOW.md",
 )
 ACTIVE_RUNTIME_TEXT_PATHS = (
@@ -53,9 +51,7 @@ ACTIVE_RUNTIME_TEXT_PATHS = (
     *tuple(f".codex/agents/{name}.toml" for name in AGENT_NAMES),
     *tuple(f".codex/skills/{name}/SKILL.md" for name in AGENT_NAMES),
     "docs/00-project/ai/memory/agent-memory.md",
-    *tuple(
-        f"docs/00-project/ai/memory/memory-{name}.md" for name in AGENT_NAMES
-    ),
+    *tuple(f"docs/00-project/ai/memory/memory-{name}.md" for name in AGENT_NAMES),
 )
 STALE_RUNTIME_PATTERNS = {
     "provider-specific model label": re.compile(r"\b(?:opus|sonnet)\b", re.I),
@@ -63,9 +59,7 @@ STALE_RUNTIME_PATTERNS = {
         r"Claude Code|WebSearch|WebFetch|TodoWrite|Task tool|Read tool|Grep tool"
     ),
     "ghost skill discovery path": re.compile(r"\.agents/skills"),
-    "retired role name": re.compile(
-        r"py-review-orchestrator|py-architecture-debt-bot"
-    ),
+    "retired role name": re.compile(r"py-review-orchestrator|py-architecture-debt-bot"),
     "stale catalog count": re.compile(r"\b(?:nine|девять)\b", re.I),
 }
 
