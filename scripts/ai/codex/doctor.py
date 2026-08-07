@@ -18,9 +18,9 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
-import setup_mcp  # noqa: E402  # pyright: ignore[reportImplicitRelativeImport]
-from mcp_profile_contract import profile_plan, validate_profile_matrix  # noqa: E402  # pyright: ignore[reportImplicitRelativeImport]
-from native_runtime_contract import Finding, REPO_ROOT, validate_native_runtime  # noqa: E402  # pyright: ignore[reportImplicitRelativeImport]
+import setup_mcp  # pyright: ignore[reportImplicitRelativeImport]
+from mcp_profile_contract import profile_plan, validate_profile_matrix  # pyright: ignore[reportImplicitRelativeImport]
+from native_runtime_contract import Finding, REPO_ROOT, validate_native_runtime  # pyright: ignore[reportImplicitRelativeImport]
 
 
 def _as_str_list(value: object) -> list[str]:

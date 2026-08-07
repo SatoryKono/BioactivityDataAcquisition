@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
-from typing import cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BronzeRecord, HealthStatus
@@ -21,7 +21,9 @@ if TYPE_CHECKING:
         APIRequestCollector,
     )
     from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
-    from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryPlanner
+    from bioetl.infrastructure.adapters.crossref.query_builder import (
+        CrossRefQueryPlanner,
+    )
     from bioetl.infrastructure.adapters.crossref.response_mapper import (
         CrossRefResponseMapper,
     )

@@ -78,7 +78,7 @@ def bind_cached_bronze_context(
     except (AttributeError, TypeError):
         pass
     try:
-        setattr(ctx, "cached_bronze", cached_bronze)
+        ctx.cached_bronze = cached_bronze
         return ctx
     except (AttributeError, TypeError) as exc:
         raise TypeError(

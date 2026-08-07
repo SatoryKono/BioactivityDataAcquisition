@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import Any, cast, TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.composition.factories.dq._context_resolver_support import DQServiceBundle
 from bioetl.composition.factories.services.port_factories import (

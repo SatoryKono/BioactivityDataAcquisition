@@ -124,6 +124,35 @@ def _coerce_text_tuple(value: object, name: str) -> tuple[str, ...]:
 _FILTER_FIELD_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
+def _require_filter_field(field: str) -> None:
+    if not _FILTER_FIELD_RE.fullmatch(field):
+        raise ValueError(
+            f"aggregation filter_condition has invalid field name: {field!r}"
+        )
+
+
+def _validate_null_filter(text: str, upper: str, token: str) -> bool:
+    if token not in upper:
+        return False
+    field = text[: upper.find(token)].strip()
+    _require_filter_field(field)
+    return True
+
+
+def _validate_comparison_filter(text: str) -> bool:
+    for operator in (" == ", " != "):
+        if operator not in text:
+            continue
+        left, right = text.split(operator, 1)
+        _require_filter_field(left.strip())
+        if not right.strip():
+            raise ValueError(
+                "aggregation filter_condition comparison requires a value"
+            )
+        return True
+    return False
+
+
 def _validate_aggregation_filter_condition(condition: str) -> None:
     """Fail closed on empty or unsupported aggregation filter expressions.
 
@@ -135,34 +164,12 @@ def _validate_aggregation_filter_condition(condition: str) -> None:
     if not text:
         raise ValueError("aggregation filter_condition cannot be empty")
     upper = text.upper()
-    if " IS NOT NULL" in upper:
-        field = text[: upper.find(" IS NOT NULL")].strip()
-        if not _FILTER_FIELD_RE.fullmatch(field):
-            raise ValueError(
-                f"aggregation filter_condition has invalid field name: {field!r}"
-            )
+    if _validate_null_filter(text, upper, " IS NOT NULL"):
         return
-    if " IS NULL" in upper:
-        field = text[: upper.find(" IS NULL")].strip()
-        if not _FILTER_FIELD_RE.fullmatch(field):
-            raise ValueError(
-                f"aggregation filter_condition has invalid field name: {field!r}"
-            )
+    if _validate_null_filter(text, upper, " IS NULL"):
         return
-    for operator in (" == ", " != "):
-        if operator in text:
-            left, right = text.split(operator, 1)
-            field = left.strip()
-            value = right.strip()
-            if not _FILTER_FIELD_RE.fullmatch(field):
-                raise ValueError(
-                    f"aggregation filter_condition has invalid field name: {field!r}"
-                )
-            if not value:
-                raise ValueError(
-                    "aggregation filter_condition comparison requires a value"
-                )
-            return
+    if _validate_comparison_filter(text):
+        return
     raise ValueError(
         "aggregation filter_condition uses unsupported syntax; "
         "expected IS NULL / IS NOT NULL / == / != forms, "

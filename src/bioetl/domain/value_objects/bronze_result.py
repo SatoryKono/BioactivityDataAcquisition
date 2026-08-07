@@ -28,16 +28,20 @@ def _normalized_path_parts(relative_path: str) -> list[str]:
     if not normalized:
         raise ValueError("relative_path must include provider/entity segments")
     parts = [part for part in normalized.split("/") if part not in {"", "."}]
-    if any(part == ".." for part in parts):
+    if ".." in parts:
         raise ValueError("relative_path must not contain parent-directory segments")
+    return parts
+
+
+def _strip_v1_prefix(parts: list[str]) -> list[str]:
+    if parts and parts[0] == "v1":
+        return parts[1:]
     return parts
 
 
 def _parse_provider_entity(relative_path: str) -> tuple[str, str]:
     """Parse provider and entity from a Bronze relative path."""
-    parts = _normalized_path_parts(relative_path)
-    if parts and parts[0] == "v1":
-        parts = parts[1:]
+    parts = _strip_v1_prefix(_normalized_path_parts(relative_path))
     if len(parts) < 2 or not parts[0].strip() or not parts[1].strip():
         raise ValueError("relative_path must include provider/entity segments")
     return parts[0], parts[1]

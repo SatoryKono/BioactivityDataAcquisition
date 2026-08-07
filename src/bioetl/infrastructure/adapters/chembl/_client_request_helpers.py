@@ -10,9 +10,9 @@ from pydantic import BaseModel
 
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.chembl.constants import (
-    CHEMBL_DTO_MODELS,
     _NO_PAGINATION_ENTITIES,
     _SILVER_TO_CHEMBL_API_FIELD,
+    CHEMBL_DTO_MODELS,
 )
 from bioetl.infrastructure.adapters.chembl.deduplication import (
     compute_composite_key,

@@ -37,12 +37,12 @@ for _path in (_REPO_ROOT, _SRC_ROOT):
     if str(_path) not in sys.path:
         sys.path.insert(0, str(_path))
 
-from bioetl.application.services.run_reports.paths import (  # noqa: E402
+from bioetl.application.services.run_reports.paths import (
     REPORT_ROOT_MARKER_NAME,
     REPORT_ROOT_MARKER_VALUE,
     inspect_report_root_marker,
 )
-from bioetl.application.services.run_reports.query import (  # noqa: E402
+from bioetl.application.services.run_reports.query import (
     list_pipeline_reports,
 )
 
@@ -90,7 +90,7 @@ def _host_reports_mount(repo: Path) -> Path:
 
 def _json_get(url: str, *, timeout: float = 5.0) -> dict[str, Any] | None:
     try:
-        with urllib.request.urlopen(url, timeout=timeout) as response:  # noqa: S310
+        with urllib.request.urlopen(url, timeout=timeout) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
         print(f"WARN: ops HTTP unreachable at {url}: {exc}")

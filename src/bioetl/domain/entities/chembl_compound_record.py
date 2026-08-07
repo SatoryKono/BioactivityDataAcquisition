@@ -7,11 +7,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.entities._validators import (
     require_non_empty_str,
     require_positive_id,
 )
+from bioetl.domain.entities.base import BaseEntity
 
 __all__ = [
     "CompoundRecord",
