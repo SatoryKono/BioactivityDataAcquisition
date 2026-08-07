@@ -37,33 +37,33 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": "not_evaluated_without_changed_from_ref",
       "limit": 0,
       "metric": "budget_increase_count",
       "name": "debt_scorecard_budget_no_growth",
-      "remediation": "Lower or revert increased scorecard budgets; debt budgets must be flat or decreasing.",
+      "remediation": "Run with --changed-from-ref in CI so scorecard budgets cannot grow.",
       "source_artifact": "configs/quality/debt_scorecard.yaml",
       "status": "pass"
     },
     {
-      "current": "588d2fc835318e5727f25e0ccbafd0e412467eb3937823ffae97d9c6e0ad84c8",
-      "limit": "588d2fc835318e5727f25e0ccbafd0e412467eb3937823ffae97d9c6e0ad84c8",
+      "current": "f26dbf3727b4dc007dcdc1b4bb3366af90aad8d7609af3aedaa6d0b43214b9ff",
+      "limit": "8da3018ddd65d2076a27350470aa77ae9df6ae4adfa64eb286601abc6d52069b",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": {
         "source_module_count": 2315,
-        "source_tree_sha256": "588d2fc835318e5727f25e0ccbafd0e412467eb3937823ffae97d9c6e0ad84c8",
+        "source_tree_sha256": "8da3018ddd65d2076a27350470aa77ae9df6ae4adfa64eb286601abc6d52069b",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2315,
-        "source_tree_sha256": "588d2fc835318e5727f25e0ccbafd0e412467eb3937823ffae97d9c6e0ad84c8",
+        "source_tree_sha256": "8da3018ddd65d2076a27350470aa77ae9df6ae4adfa64eb286601abc6d52069b",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -92,13 +92,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 2,
       "limit": 0,
       "metric": "budget_warnings",
       "name": "hotspot_family_baseline_budget_warnings",
       "remediation": "Reduce hotspot-family metrics to stay at or below reviewed budgets.",
       "source_artifact": "reports/quality/hotspot-family-baseline.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -235,7 +235,7 @@
       "status": "pass"
     },
     {
-      "current": 4,
+      "current": 5,
       "limit": 15,
       "metric": "zero_reference_supporting_script_count",
       "name": "supporting_scripts_zero_reference_count",
@@ -370,7 +370,7 @@
       "status": "pass"
     },
     {
-      "current": 9,
+      "current": 10,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
@@ -379,16 +379,16 @@
       "status": "pass"
     },
     {
-      "current": true,
-      "limit": true,
-      "metric": "inventory_matches_current_static_report",
+      "current": 0,
+      "limit": 0,
+      "metric": "changed_metric_surface_count",
       "name": "observability_touched_metric_inventory_freshness",
-      "remediation": "Regenerate reports/observability/runtime_cardinality_inventory.json before merging metric, dashboard, or alert-rule changes.",
+      "remediation": "Refresh runtime cardinality inventory evidence before merging metric, dashboard, or alert-rule changes.",
       "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
       "status": "pass"
     },
     {
-      "current": 7,
+      "current": 0,
       "limit": 0,
       "metric": "changed_metric_surface_count",
       "name": "observability_touched_metric_review_freshness",
@@ -415,13 +415,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 3,
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
       "remediation": "Regenerate stale quality artifacts with their canonical QA commands.",
       "source_artifact": "reports/quality/*.json",
-      "status": "pass"
+      "status": "fail"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -448,25 +448,29 @@
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
     "architecture_quality_scorecard": false,
-    "config_surface_backlog": false,
+    "config_surface_backlog": true,
     "dq_contract_registry_diagnostics": false,
-    "hotspot_family_baseline": false,
-    "module_coverage_inventory": false,
+    "hotspot_family_baseline": true,
+    "module_coverage_inventory": true,
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 0,
-    "pass": 45,
+    "fail": 3,
+    "pass": 42,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 9.41,
+    "architecture_quality_scorecard_integral_score": 9.26,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 3,
+    "failing_gates": [
+      "module_coverage_source_tree_hash_current",
+      "hotspot_family_baseline_budget_warnings",
+      "generated_artifact_drift"
+    ],
     "gate_count": 45,
-    "pass_count": 45,
-    "release_gate_status": "passing",
+    "pass_count": 42,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }
