@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from bioetl.domain.composite.config_validators import _require_non_empty
+from bioetl.domain.composite.config_validators import require_non_empty
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 __all__ = [
@@ -67,7 +67,7 @@ class ColumnGroupConfig:
 
     def _validate(self) -> None:
         """Validate configuration invariants."""
-        _require_non_empty(self.name, "column group name")
+        require_non_empty(self.name, "column group name")
         if not self.fields and not self.pattern:
             raise ValueError(
                 f"Column group '{self.name}' must have either fields or pattern"

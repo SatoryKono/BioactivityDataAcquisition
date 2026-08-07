@@ -6,7 +6,7 @@ import math
 from dataclasses import dataclass
 
 from bioetl.domain.composite.config_validators import (
-    _coerce_to_typed_tuple,
+    coerce_to_typed_tuple,
 )
 from bioetl.domain.composite.cross_validation import EnricherFieldPairing
 
@@ -68,7 +68,7 @@ class CrossValidationConfig:
     enricher_pairings: tuple[EnricherFieldPairing, ...] = ()
 
     def __post_init__(self) -> None:
-        _coerce_to_typed_tuple(self, "enricher_pairings", EnricherFieldPairing)
+        coerce_to_typed_tuple(self, "enricher_pairings", EnricherFieldPairing)
         self._validate()
 
     def _validate(self) -> None:

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from bioetl.domain.immutability import freeze_fields
+
 __all__ = [
     "ExecutionConfig",
     "LineageConfig",
@@ -59,3 +61,11 @@ class LineageConfig:
     track_status: bool = True
     provider_lookup_fields: dict[str, dict[str, str]] = field(default_factory=dict)
     track_source_for_fields: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        """Freeze nested mappings/sequences so callers cannot mutate state."""
+        if isinstance(self.track_source_for_fields, list):
+            object.__setattr__(
+                self, "track_source_for_fields", tuple(self.track_source_for_fields)
+            )
+        freeze_fields(self, ("provider_lookup_fields",))
