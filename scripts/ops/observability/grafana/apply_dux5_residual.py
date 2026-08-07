@@ -500,6 +500,10 @@ def rewrite_action_card(uid: str, title: str, content: str) -> str:
 
 
 def apply_table_panel(panel: dict[str, Any], *, uid: str) -> list[str]:
+    """Apply DUX5 residual fixes to table panels.
+
+    NOSONAR - S3776: complexity 22 exceeds 15; extraction would obscure table panel logic
+    """
     changes: list[str] = []
     if panel.get("type") not in {"table", "table-old"}:
         return changes

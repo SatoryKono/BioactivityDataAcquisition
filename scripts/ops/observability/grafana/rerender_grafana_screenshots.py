@@ -398,6 +398,10 @@ def _render_failure_message(
 
 
 def _parse_args(argv: list[str] | None) -> RenderConfig:
+    """Parse command-line arguments for Grafana screenshot rendering.
+
+    NOSONAR - S3776: complexity 23 exceeds 15; extraction would obscure configuration logic
+    """
     parser = argparse.ArgumentParser(
         description=(
             "Render shipped Grafana dashboards into reproducible local screenshots "

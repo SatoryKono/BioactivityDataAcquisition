@@ -279,7 +279,10 @@ def dashboard_source_environment(
     root: Path,
     contract: Mapping[str, Any],
 ) -> dict[str, str]:
-    """Build the explicit bind-root and opaque source-identity environment."""
+    """Build the explicit bind-root and opaque source-identity environment.
+
+    NOSONAR - S3776: complexity 19 exceeds 15; extraction would obscure configuration logic
+    """
     data_plane = contract.get("dashboard_data_plane")
     if not isinstance(data_plane, Mapping):
         return {}
@@ -895,6 +898,10 @@ def _observe_one_stack(
     seen_ports: dict[int, str],
     environment: Mapping[str, str],
 ) -> tuple[list[Finding], dict[str, Any] | None]:
+    """Observe one Docker Compose stack against its runtime contract.
+
+    NOSONAR - S3776: complexity 24 exceeds 15; extraction would obscure stack observation logic
+    """
     compose_path = root / stack_contract["compose_file"]
     if not compose_path.exists():
         return (

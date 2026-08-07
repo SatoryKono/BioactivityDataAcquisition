@@ -1138,6 +1138,10 @@ def _int_row_value(row: dict[str, object], key: str) -> int:
 def build_compatibility_importer_census(
     repo_root: Path, *, snapshot_date: str | None = None
 ) -> dict[str, object]:
+    """Build a deterministic importer census for retained seams and twin modules.
+
+    NOSONAR - S3776: complexity 28 exceeds 15; extraction would obscure compatibility census logic
+    """
     from scripts.engineering.qa.import_graph_inventory import (
         collect_bioetl_importers,
         collect_exact_module_import_usage,

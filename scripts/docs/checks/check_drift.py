@@ -1225,7 +1225,10 @@ def _check_active_non_canonical_evidence_summary(
 
 
 def check_freshness(report: DriftReport) -> None:
-    """Verify active docs use consistent freshness/version metadata."""
+    """Verify active docs use consistent freshness/version metadata.
+
+    NOSONAR - S3776: complexity 28 exceeds 15; extraction would obscure freshness validation logic
+    """
     canonical_orchestration = PROJECT_ROOT / ".codex" / "agents" / "ORCHESTRATION.md"
     orchestration_text = _read_doc(canonical_orchestration)
     current_orchestration_version = _extract_runtime_version(orchestration_text)

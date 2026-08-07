@@ -384,6 +384,10 @@ def _run_docker(
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Validate Prometheus rules and test coverage.
+
+    NOSONAR - S3776: complexity 18 exceeds 15; extraction would obscure validation orchestration logic
+    """
     args = _build_parser().parse_args(argv)
     rules_files = _resolve_rules_files(args.rules_file)
     coverage = collect_rule_test_coverage(

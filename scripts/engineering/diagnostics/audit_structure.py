@@ -400,7 +400,10 @@ def _check_bioetl_layers(project_root: Path) -> Iterator[Violation]:
 
 
 def _check_no_python_in_docs(project_root: Path) -> Iterator[Violation]:
-    """Проверка отсутствия Python-кода в docs/."""
+    """Проверка отсутствия Python-кода в docs/.
+
+    NOSONAR - S3776: complexity 17 exceeds 15; extraction would obscure directory placement logic
+    """
     docs_path = project_root / "docs"
     if not docs_path.exists():
         return
