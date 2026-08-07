@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 from bioetl.domain.composite.config_validators import _require_non_empty
@@ -55,6 +56,13 @@ class ColumnGroupConfig:
             object.__setattr__(self, "fields", tuple(self.fields))
         if isinstance(self.provider_order, list):
             object.__setattr__(self, "provider_order", tuple(self.provider_order))
+        if self.pattern is not None:
+            try:
+                re.compile(self.pattern)
+            except re.error as exc:
+                raise ValueError(
+                    f"Column group '{self.name}' has invalid pattern: {exc}"
+                ) from exc
         self._validate()
 
     def _validate(self) -> None:
@@ -169,8 +177,8 @@ class MergeConfig:
             object.__setattr__(self, "sort_by_gold", tuple(self.sort_by_gold))
 
     def _convert_column_groups(self) -> None:
-        """Convert list of column groups to tuple of ColumnGroupConfig."""
-        if isinstance(self.column_groups, list):
+        """Convert list/tuple of column groups to tuple of ColumnGroupConfig."""
+        if isinstance(self.column_groups, list | tuple):
             converted = tuple(
                 ColumnGroupConfig(**g) if isinstance(g, dict) else g
                 for g in self.column_groups
@@ -178,8 +186,8 @@ class MergeConfig:
             object.__setattr__(self, "column_groups", converted)
 
     def _convert_exclude_fields(self) -> None:
-        """Convert list of exclude_fields to tuple."""
-        if isinstance(self.exclude_fields, list):
+        """Convert list/tuple of exclude_fields to tuple."""
+        if isinstance(self.exclude_fields, list | tuple):
             object.__setattr__(self, "exclude_fields", tuple(self.exclude_fields))
 
     def _validate(self) -> None:

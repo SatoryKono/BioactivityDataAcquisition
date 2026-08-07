@@ -87,7 +87,9 @@ class EnricherFieldPairing:
     fields: tuple[FieldComparisonSpec, ...]
 
     def __post_init__(self) -> None:
-        """Validate pairing."""
+        """Normalize then validate pairing."""
+        if isinstance(self.fields, list):
+            object.__setattr__(self, "fields", tuple(self.fields))
         if not self.enricher_pipeline:
             raise ValueError("enricher_pipeline cannot be empty")
         if not self.fields:
@@ -95,8 +97,6 @@ class EnricherFieldPairing:
                 f"EnricherFieldPairing for '{self.enricher_pipeline}' "
                 "must have at least one field"
             )
-        if isinstance(self.fields, list):
-            object.__setattr__(self, "fields", tuple(self.fields))
 
 
 @dataclass(frozen=True, slots=True)

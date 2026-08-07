@@ -95,7 +95,9 @@ class FieldGroupDefinition:
     fields: tuple[FieldMapping, ...] = ()
 
     def __post_init__(self) -> None:
-        """Convert types."""
+        """Validate and convert types."""
+        if not self.display_name:
+            raise ValueError("display_name cannot be empty")
         if isinstance(self.fields, list):
             object.__setattr__(self, "fields", tuple(self.fields))
 

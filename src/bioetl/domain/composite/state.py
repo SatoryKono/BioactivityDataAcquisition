@@ -121,8 +121,7 @@ class CompositePipelineState(StrEnum):
     @property
     def allowed_transitions(self) -> frozenset[CompositePipelineState]:
         """Get the set of states that can be transitioned to from this state."""
-        allowed_values = _STATE_TRANSITIONS.get(self.value, frozenset())
-        return frozenset(CompositePipelineState(v) for v in allowed_values)
+        return _STATE_TRANSITION_SETS.get(self, frozenset())
 
     def can_transition_to(self, target: CompositePipelineState) -> bool:
         """Check if transition to target state is valid.
@@ -196,6 +195,16 @@ _STATE_TRANSITIONS: Mapping[str, frozenset[str]] = {
     "cross_validation_completed": frozenset({"completed"}),
     "completed": frozenset(),  # Terminal state
     "failed": frozenset(),  # Terminal state
+}
+
+# Enum-keyed transition sets cached once at import time (avoids rebuild per access).
+_STATE_TRANSITION_SETS: Mapping[
+    CompositePipelineState, frozenset[CompositePipelineState]
+] = {
+    CompositePipelineState(state_value): frozenset(
+        CompositePipelineState(target) for target in targets
+    )
+    for state_value, targets in _STATE_TRANSITIONS.items()
 }
 
 # Metric values for each state (for Prometheus gauge)
