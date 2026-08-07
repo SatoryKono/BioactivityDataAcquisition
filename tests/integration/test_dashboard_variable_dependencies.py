@@ -83,6 +83,32 @@ def test_incident_provider_derives_from_pipeline_or_workflow():
     assert provider.get("multi") is False
 
 
+def test_provider_derivation_queries_are_re2_compatible_and_in_sync():
+    """Shared provider derivation must parse without Grafana selector errors."""
+    paths = (
+        "grafana/dashboards/bioetl-provider-health-v2.json",
+        "grafana/dashboards/bioetl-incident-v1.json",
+    )
+    definitions = [
+        str(_templating_map(path)["provider"].get("definition") or "")
+        for path in paths
+    ]
+
+    assert len(set(definitions)) == 1
+    definition = definitions[0]
+    assert "(?!" not in definition, "RE2 does not support negative lookahead"
+    assert r"\|" not in definition, "PromQL strings reject an escaped pipe"
+    assert "[|]" in definition
+    assert "[$]__all" in definition
+    assert "[.][*]" in definition
+    assert definition.count("label_replace(") == 5
+    for path in paths:
+        provider = _templating_map(path)["provider"]
+        query = provider.get("query")
+        assert isinstance(query, dict)
+        assert query.get("query") == definition
+
+
 def test_silver_reject_explorer_variable_dependencies():
     dashboard = load_dashboard(pytest.skip("Silver Reject Explorer removed 2026-07-23"))
     variables = {
