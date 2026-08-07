@@ -118,6 +118,12 @@ def test_zed_language_settings_delegate_to_project_sources_of_truth() -> None:
     assert python_settings["format_on_save"] == "off"
     assert "indent_style" not in python_settings
     assert "source.fixAll.ruff" not in python_settings["code_actions_on_format"]
+    assert python_settings["language_servers"] == [
+        "basedpyright",
+        "ruff",
+        "!pylsp",
+    ]
+    assert python_settings["formatter"] == {"language_server": {"name": "ruff"}}
     assert settings["lsp"]["ruff"] == {
         "initialization_options": {
             "settings": {"configurationPreference": "filesystemFirst"}
@@ -463,6 +469,40 @@ def test_zed_snippets_follow_current_bioetl_contracts() -> None:
 
     for snippet in python_snippets.values():
         assert "from __future__ import annotations" in snippet["body"]
+        assert str(snippet["prefix"]).startswith("bioetl-")
+
+    for snippet in yaml_snippets.values():
+        assert str(snippet["prefix"]).startswith("bioetl-")
+
+    required_python = {
+        "bioetl-vo",
+        "bioetl-port",
+        "bioetl-impl",
+        "bioetl-config",
+        "bioetl-factory",
+        "bioetl-error",
+        "bioetl-test-unit",
+        "bioetl-test-async",
+        "bioetl-test-arch",
+        "bioetl-extract",
+        "bioetl-transform",
+        "bioetl-validate",
+        "bioetl-export",
+        "bioetl-log",
+        "bioetl-event",
+    }
+    required_yaml = {
+        "bioetl-pipeline-config",
+        "bioetl-dq-rule",
+        "bioetl-retry-policy",
+        "bioetl-rate-limit",
+        "bioetl-composite-enricher",
+        "bioetl-field-priority",
+    }
+    python_prefixes = {snippet["prefix"] for snippet in python_snippets.values()}
+    yaml_prefixes = {snippet["prefix"] for snippet in yaml_snippets.values()}
+    assert required_python <= python_prefixes
+    assert required_yaml <= yaml_prefixes
 
     rendered_python = "\n".join(
         line for snippet in python_snippets.values() for line in snippet["body"]
@@ -475,11 +515,18 @@ def test_zed_snippets_follow_current_bioetl_contracts() -> None:
     assert "bioetl.pipelines" not in rendered_python
     assert "Optional[" not in rendered_python
     assert "class Config:" not in rendered_python
+    assert "print(" not in rendered_python
+    assert "structlog.get_logger" not in rendered_python
+    assert "LoggerPort" in rendered_python
+    assert "BioETLDomainError" in rendered_python
     assert "data/silver" not in rendered_yaml
     assert "data/gold" not in rendered_yaml
     assert "format: parquet" not in rendered_yaml
     assert "pipeline_name:" in rendered_yaml
     assert "idempotency_contract: merge_upsert" in rendered_yaml
+    assert "seed.output_keys" in rendered_yaml
+    assert "requests_per_second:" in rendered_yaml
+    assert "use_retry_after:" in rendered_yaml
 
 
 def test_zed_env_doctor_healthy_and_missing_module(
