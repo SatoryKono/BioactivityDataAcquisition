@@ -619,3 +619,6 @@ _fail_*.txt
 # Claude Code local/unofficial runtime (not an approved tracked root)
 .claude/
 2026-08-06_20-00-44.gif
+
+# Local agent workspace (untracked)
+.agents/
