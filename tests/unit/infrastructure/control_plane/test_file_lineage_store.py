@@ -144,9 +144,11 @@ def test_file_store_emits_lineage_read_metric_on_manifest_lookup(tmp_path) -> No
     )
 
     store.save(fragment)
+    loaded = store.get(fragment.fragment_id)
+    assert loaded is not None
     metrics.reset_mock()
 
-    assert store.list_by_manifest_id("manifest-2") == [fragment]
+    assert store.list_by_manifest_id("manifest-2") == [loaded]
 
     metrics.increment_counter.assert_called_once_with(
         "bioetl_control_plane_reads_total",

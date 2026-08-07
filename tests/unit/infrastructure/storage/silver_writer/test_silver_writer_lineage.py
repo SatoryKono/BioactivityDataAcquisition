@@ -62,6 +62,10 @@ def _make_bundle_safe_metadata(run_id: str = "test-run") -> MagicMock:
     metadata = MagicMock()
     metadata.runtime = SimpleNamespace(run_id=run_id, manifest_id=None)
     metadata.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
+    detached = MagicMock()
+    detached.runtime = SimpleNamespace(run_id=run_id, manifest_id=None)
+    detached.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
+    metadata.model_copy.return_value = detached
     return metadata
 
 
@@ -525,7 +529,7 @@ class TestSilverWriterLineage:
         )
         assert silver_input.version_after == 7
         mock_metadata_writer.write_silver_metadata.assert_awaited_once_with(
-            metadata=metadata,
+            metadata=metadata.model_copy.return_value,
             base_path=silver_table_path("chembl.activity"),
             table_name="chembl.activity",
             flat_structure=False,
@@ -578,7 +582,7 @@ class TestSilverWriterLineage:
 
         writer._write_silver_metadata_file.assert_awaited_once_with(
             table_path=silver_table_path("chembl.activity"),
-            metadata=metadata,
+            metadata=metadata.model_copy.return_value,
             table_name="chembl.activity",
             provider_name="chembl",
             entity_name="activity",
@@ -691,7 +695,7 @@ class TestSilverWriterLineage:
         assert input_arg.mode == SilverWriteMode.DELETE
         assert input_arg.version_after == 11
         mock_metadata_writer.write_silver_metadata.assert_awaited_once_with(
-            metadata=metadata,
+            metadata=metadata.model_copy.return_value,
             base_path=silver_table_path("composite.publication"),
             table_name="composite.publication",
             flat_structure=False,
@@ -746,7 +750,7 @@ class TestSilverWriterLineage:
 
         writer._write_silver_metadata_file.assert_awaited_once_with(
             table_path=silver_table_path("composite.publication"),
-            metadata=metadata,
+            metadata=metadata.model_copy.return_value,
             table_name="composite.publication",
             provider_name="composite",
             entity_name="publication",
@@ -814,7 +818,7 @@ class TestSilverWriterLineage:
         assert captured_input.records == valid_records
         writer._write_silver_metadata_file.assert_awaited_once_with(
             table_path=silver_table_path("composite.publication"),
-            metadata=metadata,
+            metadata=metadata.model_copy.return_value,
             table_name="composite.publication",
             provider_name="composite",
             entity_name="publication",

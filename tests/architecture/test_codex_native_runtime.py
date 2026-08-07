@@ -12,6 +12,7 @@ import tomllib
 from pathlib import Path
 
 import pytest
+
 pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
 CODEX_SCRIPTS = ROOT / "scripts/ai/codex"
@@ -236,9 +237,10 @@ def test_mcp_doctor_warns_for_shared_optional_failure_and_fails_required(
 def test_mcp_report_path_is_explicit_and_governed(tmp_path: Path) -> None:
     quality_report = Path("reports/quality/codex-mcp-health.json")
 
-    assert doctor._governed_report_path(tmp_path, quality_report) == (
-        tmp_path / quality_report
-    ).resolve()
+    assert (
+        doctor._governed_report_path(tmp_path, quality_report)
+        == (tmp_path / quality_report).resolve()
+    )
     with pytest.raises(ValueError, match="under reports/quality"):
         doctor._governed_report_path(tmp_path, Path("logs/mcp-health.json"))
     with pytest.raises(ValueError, match=r"\.json suffix"):

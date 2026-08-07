@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import Any, cast
-from uuid import uuid4
 
 import pytest
 
@@ -16,6 +15,7 @@ from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
     _build_vacuum_config,
 )
 from bioetl.domain.types.identifiers import BatchID
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 pytestmark = pytest.mark.unit
 
@@ -43,7 +43,7 @@ async def test_streaming_chunk_size_must_be_positive() -> None:
     with pytest.raises(ValueError, match="chunk_size"):
         async for _ in processor.process_in_chunks(
             records=[{"a": 1}],
-            batch_id=BatchID(uuid4()),
+            batch_id=BatchID(deterministic_uuid_from_callsite("streaming-chunk")),
             chunk_size=0,
         ):
             pass

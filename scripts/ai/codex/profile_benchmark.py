@@ -42,7 +42,9 @@ PROFILES: Final = {
     "balanced": Profile(
         "balanced", "gpt-5.6-sol", "high", "default focused implementation and review"
     ),
-    "deep": Profile("deep", "gpt-5.6-sol", "max", "V4 architecture and difficult diagnosis"),
+    "deep": Profile(
+        "deep", "gpt-5.6-sol", "max", "V4 architecture and difficult diagnosis"
+    ),
 }
 
 _OUTPUT_INSTRUCTION = """
@@ -171,14 +173,15 @@ def score_response(task: Task, payload: dict[str, Any]) -> dict[str, int]:
     answer_dict = answer if isinstance(answer, dict) else {}
     expected_items = list(task.expected_answer.items())
     matched = sum(
-        _matches(answer_dict.get(key), expected)
-        for key, expected in expected_items
+        _matches(answer_dict.get(key), expected) for key, expected in expected_items
     )
     correctness = round(60 * matched / len(expected_items))
     validation = payload.get("validation")
-    validation_items = {
-        _normalize(item) for item in validation if isinstance(item, str)
-    } if isinstance(validation, list) else set()
+    validation_items = (
+        {_normalize(item) for item in validation if isinstance(item, str)}
+        if isinstance(validation, list)
+        else set()
+    )
     expected_validation = {_normalize(item) for item in task.expected_validation}
     validation_score = round(
         40 * len(validation_items & expected_validation) / len(expected_validation)
@@ -309,9 +312,7 @@ def _profile_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "runs": len(results),
         "mean_score": _mean([item["scores"]["total"] for item in results]),
-        "mean_correctness": _mean(
-            [item["scores"]["correctness"] for item in results]
-        ),
+        "mean_correctness": _mean([item["scores"]["correctness"] for item in results]),
         "mean_validation_completeness": _mean(
             [item["scores"]["validation_completeness"] for item in results]
         ),
@@ -321,9 +322,7 @@ def _profile_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
         "total_billable_token_proxy": sum(
             item["tokens"]["billable_proxy"] for item in results
         ),
-        "retry_rate": round(
-            sum(item["retries"] for item in results) / len(results), 3
-        ),
+        "retry_rate": round(sum(item["retries"] for item in results) / len(results), 3),
         "failed_runs": sum(item["status"] != "passed" for item in results),
     }
 
@@ -456,11 +455,19 @@ def main() -> int:
         raise SystemExit("--output must be a .json file under reports/quality")
     report = collect_benchmark(args.profiles, timeout_seconds=args.timeout_seconds)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(json.dumps({"summaries": report["summaries"], "recommendation": report["recommendation"]}, indent=2))
-    failed = any(
-        summary["failed_runs"] for summary in report["summaries"].values()
+    output.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
+    print(
+        json.dumps(
+            {
+                "summaries": report["summaries"],
+                "recommendation": report["recommendation"],
+            },
+            indent=2,
+        )
+    )
+    failed = any(summary["failed_runs"] for summary in report["summaries"].values())
     deep_regressed = (
         "deep" in args.profiles
         and not report["recommendation"]["deep_noninferior_to_default"]

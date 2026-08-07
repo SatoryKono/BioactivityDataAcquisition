@@ -29,22 +29,33 @@
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from bioetl.infrastructure.observability.prometheus_metric_label_dispatch import (
     normalize_metric_dispatch_labels,
 )
-from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+from bioetl.infrastructure.observability.prometheus_metrics import (
+    GAUGES,
+    PrometheusMetrics,
+)
 
 
 def test_prometheus_metrics_can_set_adapter_request_p95_gauge() -> None:
     """Registered compatibility gauge accepts endpoint labels without policy error."""
     metrics = PrometheusMetrics()
-    metrics.set_gauge(
-        "bioetl_adapter_request_p95_seconds",
-        0.42,
-        {"provider": "chembl", "endpoint": "/status"},
-    )
+    gauge = MagicMock()
+    with patch.dict(GAUGES, {"bioetl_adapter_request_p95_seconds": gauge}):
+        metrics.set_gauge(
+            "bioetl_adapter_request_p95_seconds",
+            0.42,
+            {"provider": "chembl", "endpoint": "/status"},
+        )
+
+    gauge.labels.assert_called_once_with(provider="chembl", endpoint="/status")
+    gauge.labels().set.assert_called_once_with(0.42)
+
 
 pytestmark = pytest.mark.unit
 

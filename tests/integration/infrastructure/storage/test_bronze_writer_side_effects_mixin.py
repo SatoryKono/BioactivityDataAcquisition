@@ -211,9 +211,9 @@ class TestBronzeWriterSideEffectsMixin:
 
         host._metadata_writer.write_bronze_metadata.assert_awaited_once()
         host._lineage_store.save.assert_called_once_with(fragment)
-        persisted_metadata = host._metadata_writer.write_bronze_metadata.await_args.kwargs[
-            "metadata"
-        ]
+        persisted_metadata = (
+            host._metadata_writer.write_bronze_metadata.await_args.kwargs["metadata"]
+        )
         assert persisted_metadata is detached_metadata
         assert detached_metadata.output.lineage_fragment_id == "bronze:fragment-1"
         assert metadata.output.lineage_fragment_id is None
