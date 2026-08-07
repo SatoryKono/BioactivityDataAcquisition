@@ -11,8 +11,8 @@ on:
       - 'tests/contract/silver_schemas/**'
       - 'scripts/schema/generation/generate_contracts.py'
       - 'scripts/schema/generation/generate_schema_artifacts.py'
-      - 'src/tools/verify_schema_parity.py'
-      - 'src/tools/generate_json_field_typing_inventory.py'
+      - 'scripts/schema/validation/verify_schema_parity.py'
+      - 'scripts/schema/analysis/generate_json_field_typing_inventory.py'
       - 'docs/03-guides/silver-schema-testing-guide.md'
       - 'docs/03-data-model/json-field-typing-inventory.md'
       - '.github/workflows/schema-governance.yml'
@@ -25,8 +25,8 @@ on:
       - 'tests/contract/silver_schemas/**'
       - 'scripts/schema/generation/generate_contracts.py'
       - 'scripts/schema/generation/generate_schema_artifacts.py'
-      - 'src/tools/verify_schema_parity.py'
-      - 'src/tools/generate_json_field_typing_inventory.py'
+      - 'scripts/schema/validation/verify_schema_parity.py'
+      - 'scripts/schema/analysis/generate_json_field_typing_inventory.py'
       - 'docs/03-guides/silver-schema-testing-guide.md'
       - 'docs/03-data-model/json-field-typing-inventory.md'
       - '.github/workflows/schema-governance.yml'
@@ -111,10 +111,10 @@ jobs:
           uv-extras: "dev"
 
       - name: Verify schema parity (Domain → Silver → Gold)
-        run: uv run --frozen --no-build python src/tools/verify_schema_parity.py --mode blocking
+        run: uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking
 
       - name: Rebuild JSON field typing inventory
-        run: uv run --frozen --no-build python src/tools/generate_json_field_typing_inventory.py
+        run: uv run --frozen --no-build python -m scripts.schema generate-json-field-typing-inventory
 
       - name: Ensure JSON field typing inventory is up-to-date
         run: git diff --exit-code docs/03-data-model/json-field-typing-inventory.md

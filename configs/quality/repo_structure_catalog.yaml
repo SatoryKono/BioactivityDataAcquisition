@@ -21,8 +21,6 @@ src_sidecars:
   approved_roots:
     - path: src/bioetl
       role: canonical_runtime_tree
-    - path: src/tools
-      role: approved_sidecar_tooling
     - path: src/memory
       role: approved_sidecar_memory_subsystem
 

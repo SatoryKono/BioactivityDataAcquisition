@@ -177,5 +177,5 @@ merge-blocking coverage status remains owned by the live `coverage-verify` lane.
 The legacy direct paths for the historical architecture, application-deps, and
 constructor-args checks remain supported during the migration window, but new
 integrations should use the grouped QA commands above. The grouped QA commands
-now own the implementation, while the older `src/tools/scripts/check_*` paths
-act only as compatibility wrappers.
+now own the implementation, and the older direct paths have been removed in
+favor of the unified entry point.

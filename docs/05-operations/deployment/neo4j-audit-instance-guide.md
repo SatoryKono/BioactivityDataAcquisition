@@ -67,7 +67,7 @@ ______________________________________________________________________
 When `LIVE_AUDIT_MODE=1` is set:
 
 ```python
-# In src/tools/neo4j_audit.py
+# In scripts/ops/data/neo4j_audit.py
 uri = get_neo4j_uri()
 # Returns: bolt://localhost:7688 (audit instance)
 
@@ -99,7 +99,7 @@ cpus: "2.0"                                      # 2 CPU cores
 - Audit instance: 1024m heap (aggressive, for heavy graph operations)
 - Separate instances prevent resource contention
 
-### src/tools/neo4j_audit.py
+### scripts/ops/data/neo4j_audit.py
 
 Helper functions:
 
