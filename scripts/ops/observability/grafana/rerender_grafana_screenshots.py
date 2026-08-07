@@ -37,6 +37,7 @@ DEFAULT_THEME = "dark"
 DEFAULT_TIMEOUT_SECONDS = 120.0
 _RENDER_MANIFEST_JSON = "render-manifest.json"
 _CAPTURE_ID_RE = re.compile(r"[^A-Za-z0-9._-]+")
+_DASHBOARD_VARIABLE_NAME_RE = re.compile(r"[A-Za-z][A-Za-z0-9_]{0,63}\Z")
 
 
 def _default_tool_playwright_paths() -> tuple[Path, Path]:
@@ -82,6 +83,7 @@ class RenderConfig:
     capture_surface: str = "full"
     kiosk_mode: str = "off"
     browser_zoom: int = 100
+    variables: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -468,6 +470,18 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
     parser.add_argument("--var-pipeline", default="")
     parser.add_argument("--var-run-type", default="")
     parser.add_argument("--var-run-id", default="")
+    parser.add_argument(
+        "--var",
+        dest="variables",
+        action="append",
+        default=[],
+        type=_parse_dashboard_variable,
+        metavar="NAME=VALUE",
+        help=(
+            "Repeatable additional Grafana dashboard variable. Names must be "
+            "bounded identifiers; values are URL-encoded before rendering."
+        ),
+    )
     parser.add_argument("--range-hours", type=int, default=12)
     parser.add_argument(
         "--occurrence-id",
@@ -504,6 +518,7 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         help="Browser zoom percentage recorded and applied by Playwright.",
     )
     args = parser.parse_args(argv)
+    variables = _deduplicate_dashboard_variables(args.variables, parser=parser)
     return RenderConfig(
         base_url=args.base_url.rstrip("/"),
         username=args.username,
@@ -526,7 +541,43 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         capture_surface=str(args.capture_surface),
         kiosk_mode=str(args.kiosk_mode),
         browser_zoom=int(args.browser_zoom),
+        variables=variables,
     )
+
+
+def _parse_dashboard_variable(value: str) -> tuple[str, str]:
+    """Parse one bounded ``NAME=VALUE`` dashboard-variable assignment."""
+    name, separator, raw_value = value.partition("=")
+    name = name.strip()
+    if not separator or not _DASHBOARD_VARIABLE_NAME_RE.fullmatch(name):
+        raise argparse.ArgumentTypeError(
+            "dashboard variables must use NAME=VALUE with a name matching "
+            "[A-Za-z][A-Za-z0-9_]{0,63}"
+        )
+    if not raw_value:
+        raise argparse.ArgumentTypeError(
+            f"dashboard variable {name!r} must have a non-empty value"
+        )
+    if len(raw_value) > 1024:
+        raise argparse.ArgumentTypeError(
+            f"dashboard variable {name!r} exceeds the 1024-character value limit"
+        )
+    return name, raw_value
+
+
+def _deduplicate_dashboard_variables(
+    assignments: list[tuple[str, str]], *, parser: argparse.ArgumentParser
+) -> tuple[tuple[str, str], ...]:
+    """Return stable unique assignments and reject conflicting duplicates."""
+    values: dict[str, str] = {}
+    for name, value in assignments:
+        previous = values.get(name)
+        if previous is not None and previous != value:
+            parser.error(
+                f"dashboard variable {name!r} was assigned conflicting values"
+            )
+        values[name] = value
+    return tuple(sorted(values.items()))
 
 
 def _load_dashboards(config: RenderConfig) -> list[DashboardRecord]:
@@ -571,11 +622,31 @@ def _scope_query_params(config: RenderConfig) -> dict[str, str]:
         params["var-run_id"] = config.run_id
         if config.run_id != "-":
             params["var-quarantine_run_id"] = config.run_id
+    for name, value in config.variables:
+        key = f"var-{name}"
+        existing = params.get(key)
+        if existing is not None and existing != value:
+            raise ValueError(
+                f"dashboard variable {name!r} conflicts with a dedicated scope option"
+            )
+        params[key] = value
     if config.kiosk_mode == "full":
         params["kiosk"] = "1"
     elif config.kiosk_mode == "tv":
         params["kiosk"] = "tv"
     return params
+
+
+def _scope_manifest(config: RenderConfig) -> dict[str, object]:
+    """Return structured, reproducible dashboard scope provenance."""
+    return {
+        "workflow": config.workflow,
+        "pipeline": config.pipeline,
+        "run_type": config.run_type,
+        "run_id": config.run_id,
+        "range_hours": config.range_hours,
+        "variables": dict(config.variables),
+    }
 
 
 def _render_dashboard(record: DashboardRecord, config: RenderConfig) -> Path:
@@ -654,13 +725,7 @@ def _write_manifest(
             }
         },
         "selected_uids": list(config.selected_uids),
-        "scope": {
-            "workflow": config.workflow,
-            "pipeline": config.pipeline,
-            "run_type": config.run_type,
-            "run_id": config.run_id,
-            "range_hours": config.range_hours,
-        },
+        "scope": _scope_manifest(config),
         "dashboards": [
             _dashboard_manifest_entry(
                 record=record,
@@ -1023,6 +1088,7 @@ def _write_merged_playwright_manifest(
         "engine": "playwright",
         "base_url": config.base_url,
         "scope_query": scope_query,
+        "scope": _scope_manifest(config),
         "timeout_ms": int(config.timeout_seconds * 1000),
         "capture_timeout_ms": capture_timeout_ms,
         "requested": {

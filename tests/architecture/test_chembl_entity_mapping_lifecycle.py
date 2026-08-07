@@ -12,7 +12,7 @@
 
 from __future__ import annotations
 
-import re
+import ast
 from pathlib import Path
 
 import pytest
@@ -48,8 +48,20 @@ def _src_entity_mapping_importers() -> list[str]:
         rel = path.relative_to(ROOT).as_posix()
         if Path(rel) == owner:
             continue
-        text = path.read_text(encoding="utf-8")
-        if re.search(r"\bENTITY_MAPPING\b", text):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        imports_or_loads_alias = any(
+            (
+                isinstance(node, ast.alias)
+                and node.name == "ENTITY_MAPPING"
+            )
+            or (
+                isinstance(node, ast.Name)
+                and node.id == "ENTITY_MAPPING"
+                and isinstance(node.ctx, ast.Load)
+            )
+            for node in ast.walk(tree)
+        )
+        if imports_or_loads_alias:
             hits.append(rel)
     return sorted(hits)
 

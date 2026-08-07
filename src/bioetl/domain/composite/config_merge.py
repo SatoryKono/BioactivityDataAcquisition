@@ -170,11 +170,19 @@ class MergeConfig:
             )
 
     def _convert_sort_policies(self) -> None:
-        """Convert sort policy lists to tuples for immutability."""
-        if isinstance(self.sort_by_silver, list):
-            object.__setattr__(self, "sort_by_silver", tuple(self.sort_by_silver))
-        if isinstance(self.sort_by_gold, list):
-            object.__setattr__(self, "sort_by_gold", tuple(self.sort_by_gold))
+        """Normalize and freeze sort policy columns."""
+        if isinstance(self.sort_by_silver, list | tuple):
+            object.__setattr__(
+                self,
+                "sort_by_silver",
+                tuple(column.strip() for column in self.sort_by_silver),
+            )
+        if isinstance(self.sort_by_gold, list | tuple):
+            object.__setattr__(
+                self,
+                "sort_by_gold",
+                tuple(column.strip() for column in self.sort_by_gold),
+            )
 
     def _convert_column_groups(self) -> None:
         """Convert list/tuple of column groups to tuple of ColumnGroupConfig."""

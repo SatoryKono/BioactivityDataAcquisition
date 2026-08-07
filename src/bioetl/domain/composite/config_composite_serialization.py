@@ -51,8 +51,7 @@ def _build_dependency_config[ConfigT](
             dep.get("timeout_seconds"),
             "dependencies[].timeout_seconds",
             600,
-        )
-        or 600,
+        ),
         silver_table=optional_str(
             dep.get("silver_table"), "dependencies[].silver_table"
         ),
@@ -85,8 +84,7 @@ def _build_enricher_config[ConfigT](
             enricher.get("timeout_seconds"),
             "enrichers[].timeout_seconds",
             600,
-        )
-        or 600,
+        ),
     )
 
 

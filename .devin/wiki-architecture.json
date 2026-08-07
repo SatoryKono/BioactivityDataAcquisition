@@ -1,0 +1,93 @@
+{
+  "pages": [
+    {
+      "title": "Architecture",
+      "purpose": "Index of the layer model, import rules, ports, facades, and wiring guidance for the core BioETL architecture.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Layer Boundaries",
+      "parent": "Architecture",
+      "purpose": "Defines the layer separation rules and import boundaries that protect the domain from infrastructure leakage.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Ports",
+      "parent": "Architecture",
+      "purpose": "Shows how the domain port facade and adapter-facing APIs keep the public surface narrow and explicit.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Wiring Rules",
+      "parent": "Architecture",
+      "purpose": "Explains how composition wires interfaces, adapters, and application services without moving policy into runtime glue.",
+      "page_notes": [
+        {
+          "content": "Coverage: composition root, bootstrap ordering, and DI compliance. Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/test_di_compliance.py, src/bioetl/composition/."
+        }
+      ]
+    },
+    {
+      "title": "Domain Layer",
+      "purpose": "Deep dive into the pure domain layer: Ports (Protocol interfaces), Aggregates, Value Objects, Entities, Schemas (Pandera DataFrameModel), Exceptions hierarchy, and the domain's public API facade. Covers domain purity rules and allowed imports.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Application Layer",
+      "purpose": "Covers the orchestration layer: BasePipeline, PipelineRunner, RecordProcessor, BatchExecutor, BaseTransformer, and the data-quality service. Explains how a pipeline run flows from runner to batch to record processing.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Infrastructure Layer",
+      "purpose": "Covers concrete adapters, HTTP client, storage writers, observability implementations, quarantine, locking, and validation. Explains how infrastructure implements domain ports.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Composition Layer",
+      "purpose": "Explains the Dependency Injection wiring layer: factories, provider registry, runtime builders, bootstrap contexts, and how all components are assembled into a runnable pipeline. Covers entrypoints and the composition API.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Interfaces Layer",
+      "purpose": "Documents the CLI (Click-based), HTTP health server, and observability API surfaces. Lists all CLI command groups (run, health, quarantine, checkpoint, run-manifest, export, maintenance, diagnostics) and their options.",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    }
+  ]
+}

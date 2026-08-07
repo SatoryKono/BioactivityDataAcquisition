@@ -1,0 +1,83 @@
+{
+  "pages": [
+    {
+      "title": "Medallion Data Pipeline",
+      "purpose": "Index of the Bronze → Silver → Gold lifecycle, layer-specific write rules, and the Composite Pipeline pattern.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/00-project/RULES.md, docs/02-architecture/decisions/, tests/architecture/, src/bioetl/."
+        }
+      ]
+    },
+    {
+      "title": "Bronze Write Lifecycle",
+      "parent": "Medallion Data Pipeline",
+      "purpose": "Details raw ingestion, append-only guarantees, metadata sidecars, and the write lifecycle for Bronze artifacts.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, src/bioetl/application/, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Silver Upsert",
+      "parent": "Medallion Data Pipeline",
+      "purpose": "Covers normalized Delta Lake writes, merge behavior, drift detection, and Silver DQ signals.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, src/bioetl/application/, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Gold Policy",
+      "parent": "Medallion Data Pipeline",
+      "purpose": "Covers analysis-ready Gold tables, strict validation, rollout modes, and publishing rules.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schema/, configs/entities/, configs/composites/, tests/unit/domain/, tests/architecture/."
+        }
+      ]
+    },
+    {
+      "title": "Bronze Layer",
+      "purpose": "Details raw data ingestion: JSONL+zstd format, path conventions, metadata sidecars, atomic writes, BronzeWriter implementation, and the append-only immutability guarantee.",
+      "parent": "Medallion Data Pipeline",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, src/bioetl/application/, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Silver Layer",
+      "purpose": "Covers normalized Delta Lake tables: schema enforcement via PyArrow, Pandera validation, upsert/merge operations, schema drift detection, DQ metrics computation, SilverWriter write lifecycle, and metadata sidecars.",
+      "parent": "Medallion Data Pipeline",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, src/bioetl/application/, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Gold Layer",
+      "purpose": "Covers analysis-ready Gold tables: strict Pandera validation, write modes (overwrite, append, SCD2), dual-write/shadow-write rollout, GoldWriter pipeline, content-hash guard, and Gold schema contracts.",
+      "parent": "Medallion Data Pipeline",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, src/bioetl/application/, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    },
+    {
+      "title": "Composite Pipeline Pattern",
+      "purpose": "Explains ADR-026: the Seed → Dependency → Enricher → Merge pattern for combining data from multiple providers. Covers MergeService, EnrichmentCoordinatorService, CompositePipelineState FSM, conflict resolution strategies, and checkpoint resumability.",
+      "parent": "Medallion Data Pipeline",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/02-architecture/decisions/ADR-026*.md, configs/composites/, src/bioetl/application/, src/bioetl/infrastructure/storage/, tests/integration/."
+        }
+      ]
+    }
+  ]
+}
