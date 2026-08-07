@@ -1,3 +1,22 @@
+
+
+## Lane classification (pure-unit vs repo_backed vs scripts-tooling)
+
+Canonical classes live in `configs/quality/test_matrix.yaml` under
+`test_lanes.lane_classification` (epic #8326 / #8328):
+
+| Class | Canonical lane | Path / marker |
+| --- | --- | --- |
+| pure_unit | `unit-fast` | `tests/unit/**` excluding scripts + repo_backed; no fs_contract/repo_backed/subprocess_backed/slow |
+| repo_backed | `repo-backed-unit` | `tests/unit/repo_backed/` + `pytest.mark.repo_backed` (serial) |
+| scripts_tooling | `unit-scripts-tooling` | `tests/unit/scripts/` (passport projector owned here only, #8327) |
+| filesystem_contracts | `unit-filesystem-contracts` | `pytest.mark.fs_contract` + classified_modules |
+
+CI `unit-fast` and `unit-other` ignore `tests/unit/scripts` so tooling is not dual-paid.
+Local architecture feedback should prefer `architecture-fast-boundary` over full
+`tests/architecture` (#8331).
+
+
 ______________________________________________________________________
 
 Version: 1.2.0

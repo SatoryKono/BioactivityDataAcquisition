@@ -756,10 +756,12 @@ jobs:
       - name: Run canonical unit-fast lane
         run: |
           mkdir -p reports/test-telemetry
-          # Quick feedback: run the canonical unit-fast lane from test_matrix.yaml.
+          # Quick feedback: canonical unit-fast lane (test_matrix.yaml); excludes scripts + repo_backed (#8327/#8328).
           # Uses HYPOTHESIS_PROFILE=fast for minimal property-based examples
           HYPOTHESIS_PROFILE=fast \
           uv run --frozen --no-build pytest tests/unit/ \
+            --ignore=tests/unit/scripts \
+            --ignore=tests/unit/repo_backed \
             -m "not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" \
             -n auto --dist loadscope --max-worker-restart=0 \
             -q --tb=short \
@@ -810,6 +812,45 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
+
+  # Tooling/script unit tests (passport projector, ops scripts). Single canonical lane (#8327/#8328).
+  unit-scripts-tooling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: smoke-check
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-unit-scripts-tooling"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/unit/scripts/**/*.py', 'tests/conftest.py', 'pyproject.toml', 'configs/quality/test_matrix.yaml') }}
+
+      - name: Run canonical unit-scripts-tooling lane
+        run: |
+          mkdir -p reports/test-telemetry
+          # Serial: passport projector and many script tests use repo FS/subprocess.
+          uv run --frozen --no-build pytest tests/unit/scripts/ \
+            -m "not benchmark and not memory" \
+            -p no:xdist -q --tb=short \
+            --junitxml=reports/test-telemetry/junit-unit-scripts-tooling.xml
+
+      - name: Upload unit-scripts-tooling telemetry
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: test-telemetry-unit-scripts-tooling
+          path: reports/test-telemetry/junit-unit-scripts-tooling.xml
+          if-no-files-found: warn
+          retention-days: 7
+
+
   # Full test matrix runs in parallel for comprehensive coverage
   test-matrix:
     runs-on: ubuntu-latest
@@ -832,7 +873,7 @@ jobs:
             path: tests/unit/infrastructure/
             cache_glob: tests/unit/infrastructure/**/*.py
           - name: unit-other
-            path: tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/repo_backed/
+            path: tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/repo_backed/ --ignore=tests/unit/scripts/
             cache_glob: tests/unit/**/*.py
           - name: integration
             path: tests/integration/
@@ -1009,6 +1050,7 @@ jobs:
       - smoke-check
       - test-fast
       - repo-backed-unit
+      - unit-scripts-tooling
       - test-matrix
     timeout-minutes: 20
     permissions:
@@ -1089,6 +1131,7 @@ jobs:
       - flaky-telemetry
       - track-d-gates
       - test-fast
+      - unit-scripts-tooling
       - test-matrix
       - memory-tests
     timeout-minutes: 10
