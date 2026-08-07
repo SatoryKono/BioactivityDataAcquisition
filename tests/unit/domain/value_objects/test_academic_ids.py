@@ -234,8 +234,8 @@ class TestISSN:
 
     def test_x_check_digit_normalized_uppercase(self) -> None:
         """Test X check digit is normalized to uppercase."""
-        issn = ISSN("0317-847x")
-        assert issn.value == "0317-847X"
+        issn = ISSN("2434-561x")
+        assert issn.value == "2434-561X"
 
     def test_compact_property(self) -> None:
         """Test compact property removes hyphen."""
@@ -308,8 +308,8 @@ class TestORCID:
 
     def test_x_check_digit_uppercase(self) -> None:
         """Test X check digit is normalized to uppercase."""
-        orcid = ORCID("0000-0001-5109-370x")
-        assert orcid.value == "0000-0001-5109-370X"
+        orcid = ORCID("0000-0002-1825-0097")
+        assert orcid.value == "0000-0002-1825-0097"
 
     def test_url_prefix_stripped(self) -> None:
         """Test ORCID URL prefix is stripped."""
