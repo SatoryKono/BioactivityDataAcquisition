@@ -11,6 +11,11 @@ Canonical graph-owned YAML surfaces now also live there:
 
 ## Stable entrypoints
 
+- `bash scripts/memory/run_workflow.sh …` — preferred agent entry for
+  `python -m memory.tooling.workflow` (`pre-task` / `post-task` / `smoke` /
+  `review-curated`). Selects repo `.venv` and sets `PYTHONPATH=src:<repo>`.
+- `python -m memory.tooling.workflow …` — canonical module entry (see
+  `src/memory/DAILY_WORKFLOW.md`).
 - `python -m scripts.memory sync`
 - `python -m scripts.memory query`
 - `python -m scripts.ai.mcp smoke-neo4j-memory`

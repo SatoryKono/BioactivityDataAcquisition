@@ -930,7 +930,7 @@ BioETL автоматически генерирует детальную док
 python scripts/diagrams/render/generate_pipeline_dataflows.py
 
 # Регенерировать конкретный пайплайн
-python scripts/diagrams/generate_pipeline-dataflows.py --pipeline chembl_activity
+python scripts/diagrams/render/generate_pipeline_dataflows.py --pipeline chembl_activity
 
 # Проверить на drift без регенерации
 python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift

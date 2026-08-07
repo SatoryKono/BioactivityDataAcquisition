@@ -56,7 +56,7 @@ make test-deps
 make setup-plugins
 ```
 
-`scripts/engineering/dev/dev_setup.sh` remains a legacy placeholder and is not the
+Canonical bootstrap: `uv sync --extra dev --extra tests --extra tracing`, `make install` / `python -m scripts.ops setup-plugins` (optional `python -m scripts.engineering.dev setup-mcp`). `scripts/engineering/dev/dev_setup.sh` was **removed** and is not the
 supported onboarding path.
 
 ### Verification (Run frequently)
@@ -94,7 +94,7 @@ bioetl run --pipeline chembl_activity --run-type incremental --limit 100
 
 - **`docs/00-project/RULES.md`**: The Project Constitution. Read before major changes.
 - **`AGENT.md`**: Specialized instructions for AI agents.
-- **`docs/03-guides/dashboards/dashboard-extension-llm.md`**: Read before changing `grafana/dashboards/*.json`, dashboard navigation, or Loki/Tempo drilldown behavior.
+- **`docs/03-guides/dashboards/dashboard-extension-llm.md`**: Read before changing `grafana/dashboards/*.json`, dashboard navigation, or legacy Loki/Tempo (removed 2026-07-23; do not use) behavior.
 
 ## 8. Operational Policies (CRITICAL)
 

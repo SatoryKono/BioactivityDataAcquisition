@@ -25,6 +25,9 @@ BioETL.
 
 ## Useful Entry Points
 
+- [grok-closeout.md](grok-closeout.md) — short Grok closeout prompt (issues/PR)
+- [grok-audit-cycle.md](grok-audit-cycle.md) — short Grok audit cycle (default 1 cycle)
+
 - [ai_workspace_setup.md](ai_workspace_setup.md) — internal setup and audit
   prompt for AI workspace configuration
 - [documentation_diagrams_audit.md](documentation_diagrams_audit.md) —

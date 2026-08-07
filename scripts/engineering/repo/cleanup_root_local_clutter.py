@@ -42,10 +42,17 @@ SAFE_ROOT_LOCAL_PATHS: frozenset[str] = frozenset(
         ".xml",
         "coverage.xml",
         "mcp-shell.log",
+        # Windows device-name root clutter (registry: root_transient_helpers_and_outputs).
+        # Prefer shell `rm -f ./nul` or extended \\?\ paths when Path.unlink hits WinError 5.
+        "nul",
+        "NUL",
         "Test Results - Pytest_All.html",
         "Test Results - Pytest_All.xml",
         "test-output",
         "tmp",
+        # Empty local worktree parent only (see _delete_candidate); non-empty
+        # trees are refused so active exclusive worktrees are not destroyed.
+        ".worktrees",
     }
 )
 VENV_ROOT_LOCAL_PATHS: frozenset[str] = frozenset(
@@ -210,7 +217,10 @@ def collect_root_local_cleanup_candidates(
             continue
 
         absolute_path = repo_root / raw_path
-        if not absolute_path.exists() and not absolute_path.is_symlink():
+        if _is_windows_reserved_root_name(raw_path):
+            if not _root_entry_present_by_name(repo_root, raw_path):
+                continue
+        elif not absolute_path.exists() and not absolute_path.is_symlink():
             continue
         candidates.append(
             RootLocalCleanupCandidate(
@@ -224,6 +234,24 @@ def collect_root_local_cleanup_candidates(
     return sorted(candidates, key=lambda candidate: candidate.rel_path)
 
 
+def _is_windows_reserved_root_name(path: str) -> bool:
+    """Return True for Windows reserved device basenames (exact-root clutter)."""
+    return path.casefold() in {"nul", "con", "prn", "aux"}
+
+
+def _root_entry_present_by_name(repo_root: Path, name: str) -> bool:
+    """Return True when ``name`` appears in the root directory listing.
+
+    Do **not** use ``Path.exists()`` for Windows reserved names: on Win32,
+    ``Path('nul').exists()`` is true for the NUL device even when no root
+    file named ``nul`` is present in the working tree.
+    """
+    try:
+        return any(entry.name == name for entry in repo_root.iterdir())
+    except OSError:
+        return False
+
+
 def _candidate_category(path: str) -> str:
     if path in VENV_ROOT_LOCAL_PATHS:
         return "local_virtualenv"
@@ -235,6 +263,8 @@ def _candidate_category(path: str) -> str:
         return "coverage"
     if path == "mcp-shell.log":
         return "local_logs"
+    if _is_windows_reserved_root_name(path):
+        return "windows_device_name_clutter"
     if path == ".xml" or path.startswith("Test Results - Pytest_All."):
         return "test_report_output"
     if path in {"test-output", "tmp"}:
@@ -242,7 +272,66 @@ def _candidate_category(path: str) -> str:
     return "local_cache"
 
 
+def _delete_windows_reserved_name(repo_root: Path, name: str) -> None:
+    """Best-effort delete for Windows reserved device names at exact root.
+
+    On Win32, bare ``Path('nul')`` maps to the NUL device, so ``unlink`` often
+    raises ``PermissionError``. Prefer the ``\\\\?\\`` extended absolute path.
+    """
+    if sys.platform == "win32":
+        absolute = str((repo_root / name).resolve())
+        extended = f"\\\\?\\{absolute}"
+        try:
+            Path(extended).unlink()
+            return
+        except OSError:
+            pass
+    # POSIX / Git-Bash style relative unlink (also works under MSYS when the
+    # directory listing still contains the exact basename).
+    for entry in repo_root.iterdir():
+        if entry.name == name:
+            entry.unlink()
+            return
+    raise FileNotFoundError(name)
+
+
+def _delete_empty_worktrees_dir(repo_root: Path) -> None:
+    """Remove exact-root ``.worktrees`` only when it has no children.
+
+    Non-empty trees may hold exclusive agent/developer worktrees; refuse
+    recursive deletion so cleanup never wipes in-progress checkouts.
+    """
+    target = repo_root / ".worktrees"
+    if not target.exists() and not target.is_symlink():
+        return
+    if target.is_symlink() or target.is_file():
+        target.unlink()
+        return
+    if not target.is_dir():
+        return
+    try:
+        children = list(target.iterdir())
+    except OSError as exc:
+        raise OSError(f"unable to inspect .worktrees: {exc}") from exc
+    if children:
+        raise OSError(
+            "refusing to delete non-empty .worktrees "
+            f"({len(children)} entries); remove worktrees first or rmdir only when empty"
+        )
+    target.rmdir()
+
+
 def _delete_candidate(repo_root: Path, candidate: RootLocalCleanupCandidate) -> None:
+    name = candidate.rel_path
+    if _is_windows_reserved_root_name(name):
+        if not _root_entry_present_by_name(repo_root, name):
+            return
+        _delete_windows_reserved_name(repo_root, name)
+        return
+    if name == ".worktrees":
+        _delete_empty_worktrees_dir(repo_root)
+        return
+
     target = repo_root / candidate.path
     if target.is_symlink() or target.is_file():
         target.unlink()

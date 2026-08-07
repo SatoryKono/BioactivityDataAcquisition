@@ -21,8 +21,11 @@ as a replacement for runtime truth.
    `BIOETL_AI_AGENT`; set `BIOETL_AI_MODEL` only when a stable model identifier
    is known. Do not allow durable task records to fall back to an unidentified
    runtime.
-1. Run `python -m memory.tooling.workflow pre-task ...` before substantial work,
-   using `--profile` when a task-specific ranking profile applies.
+1. Run memory workflow pre-task before substantial work, using `--profile`
+   when a task-specific ranking profile applies. Prefer the project venv and
+   `PYTHONPATH=src` (or `bash scripts/memory/run_workflow.sh pre-task ...`) so
+   `import memory` works outside a fully synced editable install:
+   `python -m memory.tooling.workflow pre-task ...`.
    If rebuild-only artifacts are missing, the workflow refreshes only the
    missing surfaces and uses a bounded workflow-time RAG rebuild instead of a
    full deterministic corpus rebuild.
@@ -157,3 +160,13 @@ If a memory claim looks stale:
 - Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
 - Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
 - Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.
+
+## Grok TUI operator notes
+
+For Grok Build sessions on this repo, prefer short prompts and local config
+hygiene documented in:
+
+- [grok-operator-runbook.md](grok-operator-runbook.md)
+- [grok-tui-config-checklist.md](grok-tui-config-checklist.md)
+- [../../prompts/grok-closeout.md](../../prompts/grok-closeout.md)
+

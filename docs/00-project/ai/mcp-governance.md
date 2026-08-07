@@ -72,6 +72,47 @@ in tracked or generated MCP configuration.
 **untrusted external content**. Full boundary:
 `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`.
 
+### Remote MCP Governance Strategy (2026-08-07)
+
+**Strategy:** Enhanced validation and management (Variant B)
+
+**Rationale:**
+- Remote MCP servers provide unique functionality not available locally
+- Full replacement would lose valuable capabilities
+- Enhanced validation and management provides security benefits without functional loss
+
+**Enhanced Controls:**
+
+1. **Validation Requirements:**
+   - All results from remote MCP MUST be validated before use
+   - Treat as untrusted content requiring verification
+   - Cross-reference with local sources when possible
+   - Limit scope of remote MCP usage to specific, well-defined scenarios
+
+2. **Access Management:**
+   - API keys stored in environment variables only
+   - Regular rotation of API keys (quarterly)
+   - Audit trail of remote MCP usage via agent-metrics.json
+   - Rate limiting and quota monitoring
+
+3. **Fallback Mechanisms:**
+   - Local alternatives for critical operations
+   - Graceful degradation when remote MCP unavailable
+   - Caching of frequently accessed remote data
+   - Clear error handling for remote MCP failures
+
+4. **Usage Guidelines:**
+   - `deepwiki`: Use for repository documentation and navigation queries only
+   - `ref`: Use for code analysis and reference lookups only
+   - Avoid remote MCP for security-sensitive operations
+   - Prefer local MCP servers for core functionality
+
+5. **Monitoring:**
+   - Track usage via `agent-metrics.json` MCP server metrics
+   - Regular review of remote MCP usage patterns
+   - Alert on unusual usage patterns or failures
+   - Periodic security assessment of remote MCP providers
+
 ## Decision: `ast-grep` vs `code-analyzer` (KEEP both)
 
 | Server | Role |

@@ -26,9 +26,13 @@ _MEMORY_WORKFLOW_SMOKE_TITLE = "Memory workflow smoke"
 # Must not be used by production pre-task / post-task CLI paths.
 _SMOKE_RUNTIME = "smoke"
 _SMOKE_AGENT = "memory-workflow-smoke"
+# Smoke writes only under a TemporaryDirectory; force read-write so ambient
+# BIOETL_AI_MEMORY_MODE=read-only|off does not disable session/summary notes.
+_SMOKE_MEMORY_MODE = "read-write"
 _SMOKE_PROVENANCE_ENV = (
     "BIOETL_AI_RUNTIME",
     "BIOETL_AI_AGENT",
+    "BIOETL_AI_MEMORY_MODE",
 )
 
 
@@ -1039,12 +1043,19 @@ def _write_smoke_inputs(root: Path) -> tuple[Path, Path]:
 
 
 def _inject_smoke_provenance_env() -> dict[str, str | None]:
-    """Install smoke-only actor identity; return previous env values to restore."""
+    """Install smoke-only actor identity; return previous env values to restore.
+
+    Also forces ``BIOETL_AI_MEMORY_MODE=read-write`` for the smoke duration so
+    temporary session/summary notes under ``TemporaryDirectory`` can be written
+    even when the caller shell is set to ``read-only`` or ``off``. Production
+    ``pre-task`` / ``post-task`` CLI paths never call this helper.
+    """
     previous: dict[str, str | None] = {}
     for key in _SMOKE_PROVENANCE_ENV:
         previous[key] = os.environ.get(key)
     os.environ["BIOETL_AI_RUNTIME"] = _SMOKE_RUNTIME
     os.environ["BIOETL_AI_AGENT"] = _SMOKE_AGENT
+    os.environ["BIOETL_AI_MEMORY_MODE"] = _SMOKE_MEMORY_MODE
     return previous
 
 
@@ -1066,8 +1077,10 @@ def smoke_workflow(
 
     Injects deterministic non-production provenance
     (``BIOETL_AI_RUNTIME=smoke``, ``BIOETL_AI_AGENT=memory-workflow-smoke``)
-    for the smoke run only, then restores the previous environment. Production
-    ``pre-task`` / ``post-task`` paths remain fail-closed on missing identity.
+    and temporary ``BIOETL_AI_MEMORY_MODE=read-write`` for the smoke run only,
+    then restores the previous environment. Production ``pre-task`` /
+    ``post-task`` paths remain fail-closed on missing identity and honour the
+    caller's persistence mode.
     """
     repo_root = _discover_repo_root() or Path(__file__).resolve().parents[3]
     previous_env = _inject_smoke_provenance_env()

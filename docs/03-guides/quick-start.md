@@ -48,7 +48,7 @@ uv sync --extra dev --extra tests --extra tracing
 uv run python -m scripts.ops setup-plugins
 ```
 
-`scripts/engineering/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
+Canonical bootstrap uses `uv sync` / `make install` / `python -m scripts.ops setup-plugins`. `scripts/engineering/dev/dev_setup.sh` was **removed** and is not a supported path.
 
 `uv` is the preferred package/environment manager for supported bootstrap and
 docs verification flows. `pip` remains the fallback only when `uv` is
