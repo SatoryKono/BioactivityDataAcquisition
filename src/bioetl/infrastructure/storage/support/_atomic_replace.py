@@ -64,10 +64,18 @@ def _replace_with_retry(
     on_retry: ReplaceRetryHook | None = None,
 ) -> None:
     """Replace target path with bounded retry for transient file-lock errors."""
+    # Confinement: temp and target must share the same parent directory.
+    target_resolved = target.expanduser().resolve(strict=False)
+    temp_resolved = temp_path.expanduser().resolve(strict=False)
+    if temp_resolved.parent != target_resolved.parent:
+        raise AtomicWriteError(
+            target_resolved,
+            "temp path parent does not match target parent",
+        )
     retry_count = 0
     while True:
         try:
-            temp_path.replace(target)
+            temp_resolved.replace(target_resolved)
             return
         except OSError as error:
             if not _is_retryable_replace_error(error):

@@ -64,7 +64,7 @@ def _strip_foreign_objects_payload(payload: str) -> tuple[str, int]:
 
 
 def strip_foreign_objects(path: Path) -> int:
-    payload = path.read_text(encoding="utf-8")
+    payload = resolve_output_path(path).read_text(encoding="utf-8")
     stripped, removed = _strip_foreign_objects_payload(payload)
     if removed > 0:
         _write_text_atomic(path, stripped)
@@ -118,7 +118,7 @@ def main() -> int:
 
     changed = 0
     for path in files:
-        payload = path.read_text(encoding="utf-8")
+        payload = resolve_output_path(path).read_text(encoding="utf-8")
         stripped, removed = _strip_foreign_objects_payload(payload)
         if removed == 0:
             continue

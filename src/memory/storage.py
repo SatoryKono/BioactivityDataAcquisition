@@ -168,7 +168,11 @@ def atomic_write_bytes(
                 handle.write(data)
                 handle.flush()
                 os.fsync(handle.fileno())
-            os.replace(temp_path, target)  # noqa: PTH105 - atomic replace is required
+            # Confinement: temp is always under target.parent (mkstemp dir=).
+            target_resolved = target.expanduser().resolve(strict=False)
+            temp_resolved = temp_path.expanduser().resolve(strict=False)
+            temp_resolved.relative_to(target_resolved.parent)
+            os.replace(temp_resolved, target_resolved)  # noqa: PTH105
         finally:
             if temp_path is not None:
                 temp_path.unlink(missing_ok=True)
@@ -244,7 +248,11 @@ def append_jsonl(
                 handle.write(updated)
                 handle.flush()
                 os.fsync(handle.fileno())
-            os.replace(temp_path, target)  # noqa: PTH105 - atomic replace is required
+            # Confinement: temp is always under target.parent (mkstemp dir=).
+            target_resolved = target.expanduser().resolve(strict=False)
+            temp_resolved = temp_path.expanduser().resolve(strict=False)
+            temp_resolved.relative_to(target_resolved.parent)
+            os.replace(temp_resolved, target_resolved)  # noqa: PTH105
         finally:
             if temp_path is not None:
                 temp_path.unlink(missing_ok=True)
