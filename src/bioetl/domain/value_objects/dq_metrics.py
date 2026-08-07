@@ -136,9 +136,16 @@ class BatchDQMetrics:
 
     def __post_init__(self) -> None:
         """Validate and ensure immutability."""
+        from types import MappingProxyType
+
         if isinstance(self.validation_errors, list):
             object.__setattr__(self, "validation_errors", tuple(self.validation_errors))
-        # Note: column_stats dict values are frozen dataclasses, so immutable
+        # Snapshot mapping so callers cannot mutate metrics after construction.
+        object.__setattr__(
+            self,
+            "column_stats",
+            MappingProxyType(dict(self.column_stats)),
+        )
 
     @property
     def error_rate(self) -> float:
