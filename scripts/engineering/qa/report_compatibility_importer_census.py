@@ -241,7 +241,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "surface_id": "checkpoint_compatibility_service_v2",
         "path": "src/bioetl/application/services/checkpoint_compatibility_service_v2.py",
         "module_name": "bioetl.application.services.checkpoint_compatibility_service_v2",
-        "canonical_target": "bioetl.application.services.checkpoint_compatibility_service",
+        "canonical_target": "bioetl.application.services.checkpoint.checkpoint_compatibility_service",
         "owner": "bioetl.application.services",
     },
     {

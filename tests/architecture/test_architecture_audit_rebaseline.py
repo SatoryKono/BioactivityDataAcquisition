@@ -27,6 +27,7 @@ CURRENT_RUNTIME_SURFACES = (
     / "bioetl"
     / "application"
     / "services"
+    / "checkpoint"
     / "checkpoint_compatibility_service.py",
     ROOT / "src" / "bioetl" / "domain" / "transformations" / "hashing.py",
     ROOT / "src" / "bioetl" / "domain" / "aggregates" / "_pipeline_run_mixins.py",
