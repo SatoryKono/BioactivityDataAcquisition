@@ -1,0 +1,306 @@
+{
+  "leaf": "S01-domain-composite",
+  "campaign": "CR-FULL-20260806-full",
+  "parent_issue": 8215,
+  "reviewed_at": "2026-08-07T07:41:15.499861+00:00",
+  "log": "reports/quality/coderabbit/20260806-full/logs/S01-domain-composite-retry-8215.log",
+  "counts": {
+    "findings": 36,
+    "published": 36,
+    "errors": 0,
+    "major": 14,
+    "minor": 14,
+    "trivial": 8
+  },
+  "published": [
+    {
+      "number": 8220,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8220",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/config_runtime.py",
+      "fingerprint": "2fe05b476a53",
+      "finding_id": "S01-domain-composite:2fe05b476a53"
+    },
+    {
+      "number": 8221,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8221",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/__init__.py",
+      "fingerprint": "056eab1d2be5",
+      "finding_id": "S01-domain-composite:056eab1d2be5"
+    },
+    {
+      "number": 8222,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8222",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/result_enrichment.py",
+      "fingerprint": "58c9de7a5f4c",
+      "finding_id": "S01-domain-composite:58c9de7a5f4c"
+    },
+    {
+      "number": 8223,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8223",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/result_enrichment.py",
+      "fingerprint": "54d699f0ac90",
+      "finding_id": "S01-domain-composite:54d699f0ac90"
+    },
+    {
+      "number": 8224,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8224",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/config_cross_validation.py",
+      "fingerprint": "e90e31eae0af",
+      "finding_id": "S01-domain-composite:e90e31eae0af"
+    },
+    {
+      "number": 8225,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8225",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/config_dq.py",
+      "fingerprint": "c8a7e0298881",
+      "finding_id": "S01-domain-composite:c8a7e0298881"
+    },
+    {
+      "number": 8226,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8226",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/result_merge.py",
+      "fingerprint": "057253b2f027",
+      "finding_id": "S01-domain-composite:057253b2f027"
+    },
+    {
+      "number": 8227,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8227",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/config_schema.py",
+      "fingerprint": "6b9e4ff4df73",
+      "finding_id": "S01-domain-composite:6b9e4ff4df73"
+    },
+    {
+      "number": 8228,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8228",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/result_composite.py",
+      "fingerprint": "215a53d1d089",
+      "finding_id": "S01-domain-composite:215a53d1d089"
+    },
+    {
+      "number": 8229,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8229",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/config_composite_validation.py",
+      "fingerprint": "abfae66105e4",
+      "finding_id": "S01-domain-composite:abfae66105e4"
+    },
+    {
+      "number": 8230,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8230",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/result_composite.py",
+      "fingerprint": "257a8c0c5c02",
+      "finding_id": "S01-domain-composite:257a8c0c5c02"
+    },
+    {
+      "number": 8231,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8231",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/config_composite_validation.py",
+      "fingerprint": "b832b89aca91",
+      "finding_id": "S01-domain-composite:b832b89aca91"
+    },
+    {
+      "number": 8232,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8232",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/config_composite_validation.py",
+      "fingerprint": "9e6df0c5b06b",
+      "finding_id": "S01-domain-composite:9e6df0c5b06b"
+    },
+    {
+      "number": 8233,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8233",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/config_composite_validation.py",
+      "fingerprint": "b093124f4c69",
+      "finding_id": "S01-domain-composite:b093124f4c69"
+    },
+    {
+      "number": 8234,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8234",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/result_composite.py",
+      "fingerprint": "8d3bd2bea040",
+      "finding_id": "S01-domain-composite:8d3bd2bea040"
+    },
+    {
+      "number": 8235,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8235",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/field_groups_registry.py",
+      "fingerprint": "d24d26dd71d3",
+      "finding_id": "S01-domain-composite:d24d26dd71d3"
+    },
+    {
+      "number": 8236,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8236",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/config_composite_serialization.py",
+      "fingerprint": "0cac72a7a070",
+      "finding_id": "S01-domain-composite:0cac72a7a070"
+    },
+    {
+      "number": 8237,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8237",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/config_models.py",
+      "fingerprint": "60b2bf8870e6",
+      "finding_id": "S01-domain-composite:60b2bf8870e6"
+    },
+    {
+      "number": 8238,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8238",
+      "severity": "trivial",
+      "path": "src/bioetl/domain/composite/result_seed_dependency.py",
+      "fingerprint": "8512f407c764",
+      "finding_id": "S01-domain-composite:8512f407c764"
+    },
+    {
+      "number": 8239,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8239",
+      "severity": "trivial",
+      "path": "src/bioetl/domain/composite/aggregation.py",
+      "fingerprint": "6d29db0c9430",
+      "finding_id": "S01-domain-composite:6d29db0c9430"
+    },
+    {
+      "number": 8240,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8240",
+      "severity": "major",
+      "path": "src/bioetl/domain/composite/config_composite_serialization.py",
+      "fingerprint": "f2c2cd8e2734",
+      "finding_id": "S01-domain-composite:f2c2cd8e2734"
+    },
+    {
+      "number": 8241,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8241",
+      "severity": "trivial",
+      "path": "src/bioetl/domain/composite/field_groups_models.py",
+      "fingerprint": "87da0074aca4",
+      "finding_id": "S01-domain-composite:87da0074aca4"
+    },
+    {
+      "number": 8242,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8242",
+      "severity": "trivial",
+      "path": "src/bioetl/domain/composite/cross_validation.py",
+      "fingerprint": "c8d0294fbfa0",
+      "finding_id": "S01-domain-composite:c8d0294fbfa0"
+    },
+    {
+      "number": 8243,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8243",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/state.py",
+      "fingerprint": "97681acf3224",
+      "finding_id": "S01-domain-composite:97681acf3224"
+    },
+    {
+      "number": 8244,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8244",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/lineage.py",
+      "fingerprint": "128346bed14e",
+      "finding_id": "S01-domain-composite:128346bed14e"
+    },
+    {
+      "number": 8245,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8245",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/result_seed_dependency.py",
+      "fingerprint": "6d69c89298b2",
+      "finding_id": "S01-domain-composite:6d69c89298b2"
+    },
+    {
+      "number": 8246,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8246",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/lineage.py",
+      "fingerprint": "17c35bf21ddf",
+      "finding_id": "S01-domain-composite:17c35bf21ddf"
+    },
+    {
+      "number": 8247,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8247",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/field_groups_models.py",
+      "fingerprint": "1c67ad776d72",
+      "finding_id": "S01-domain-composite:1c67ad776d72"
+    },
+    {
+      "number": 8248,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8248",
+      "severity": "trivial",
+      "path": "src/bioetl/domain/composite/config_merge.py",
+      "fingerprint": "0ea7168ae34c",
+      "finding_id": "S01-domain-composite:0ea7168ae34c"
+    },
+    {
+      "number": 8249,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8249",
+      "severity": "trivial",
+      "path": "src/bioetl/domain/composite/field_groups_registry.py",
+      "fingerprint": "36cd13645409",
+      "finding_id": "S01-domain-composite:36cd13645409"
+    },
+    {
+      "number": 8250,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8250",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/config_merge.py",
+      "fingerprint": "260c386d5c33",
+      "finding_id": "S01-domain-composite:260c386d5c33"
+    },
+    {
+      "number": 8251,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8251",
+      "severity": "trivial",
+      "path": "src/bioetl/domain/composite/config_merge.py",
+      "fingerprint": "cfeb11863a4d",
+      "finding_id": "S01-domain-composite:cfeb11863a4d"
+    },
+    {
+      "number": 8252,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8252",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/cross_validation.py",
+      "fingerprint": "6945c0f3c0fc",
+      "finding_id": "S01-domain-composite:6945c0f3c0fc"
+    },
+    {
+      "number": 8253,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8253",
+      "severity": "trivial",
+      "path": "src/bioetl/domain/composite/state.py",
+      "fingerprint": "7e8bbdc65d58",
+      "finding_id": "S01-domain-composite:7e8bbdc65d58"
+    },
+    {
+      "number": 8254,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8254",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/field_groups_registry.py",
+      "fingerprint": "ce83fd6a64a2",
+      "finding_id": "S01-domain-composite:ce83fd6a64a2"
+    },
+    {
+      "number": 8255,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8255",
+      "severity": "minor",
+      "path": "src/bioetl/domain/composite/aggregation.py",
+      "fingerprint": "026e763b42c0",
+      "finding_id": "S01-domain-composite:026e763b42c0"
+    }
+  ],
+  "errors": []
+}
