@@ -105,25 +105,34 @@ fi
 
 echo ""
 
-# STEP 4: Setup .env.codex
-log_info "STEP 4: Configuring .env.codex..."
+# STEP 4: Auth surface (.env.codex optional when ChatGPT device auth exists)
+# shellcheck source=codex-auth-lib.sh
+source "${SCRIPT_DIR}/codex-auth-lib.sh"
+log_info "STEP 4: Checking Codex authentication..."
 ENV_FILE="${ROOT_DIR}/.env.codex"
 
-if [[ ! -f "${ENV_FILE}" ]]; then
-    if [[ "${BIOETL_CREATE_LOCAL_ENV_FILES:-0}" != "1" ]]; then
-        log_warn ".env.codex not found; not creating it without BIOETL_CREATE_LOCAL_ENV_FILES=1"
-        log_info "Create ${ENV_FILE} manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to generate a local template."
-    else
-        log_warn "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.codex template"
-        cat > "${ENV_FILE}" <<'ENVEOF'
+if [[ -f "${ENV_FILE}" ]]; then
+    set -a
+    # shellcheck disable=SC1090
+    source "${ENV_FILE}"
+    set +a
+    log_success ".env.codex exists"
+elif [[ "${BIOETL_CREATE_LOCAL_ENV_FILES:-0}" == "1" ]]; then
+    log_warn "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.codex template"
+    cat > "${ENV_FILE}" <<'ENVEOF'
 # OpenAI Codex Configuration
 # Get your API key from: https://platform.openai.com/api-keys
 OPENAI_API_KEY=sk-your-key-here
 ENVEOF
-        log_warn ".env.codex created - please add your API key"
-    fi
+    log_warn ".env.codex created - please add your API key (or use device-login instead)"
 else
-    log_success ".env.codex exists"
+    log_info ".env.codex not found; ChatGPT device auth in ~/.codex/auth.json is enough"
+fi
+
+if codex_has_usable_auth; then
+    log_success "Usable auth: $(codex_auth_status_label)"
+else
+    log_warn "No usable auth yet — run device-login or add OPENAI_API_KEY"
 fi
 
 echo ""
@@ -147,9 +156,10 @@ echo "${SEPARATOR}"
 log_success "Setup completed successfully!"
 echo "${SEPARATOR}"
 echo ""
-log_info "Next steps:"
-echo "  1. Edit .env.codex and add your OpenAI API key"
-echo "  2. Run: .\run-codex.ps1"
+log_info "Next steps (WSL):"
+echo "  1. If needed: bash scripts/ai/codex/run-codex.sh device-login"
+echo "  2. Interactive: bash scripts/ai/codex/run-codex.sh"
+echo "  3. Or from repo: codex   (bashrc wrapper → scripts/ops/launchers/codex/codex.sh)"
 echo ""
 
 exit 0
