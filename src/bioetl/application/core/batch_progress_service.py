@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["BatchProgressService", "TotalRecordsProvider"]
+__all__ = ["BatchProgressService", "TotalRecordsProtocol"]
 
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class TotalRecordsProvider(Protocol):
+class TotalRecordsProtocol(Protocol):
     """Optional data-source capability for total-record estimates."""
 
     async def get_total_records(self) -> int | None: ...
@@ -24,7 +24,7 @@ class BatchProgressService:
         self,
         *,
         logger: LoggerPort,
-        data_source: object | TotalRecordsProvider,
+        data_source: object | TotalRecordsProtocol,
     ) -> None:
         self._logger = logger
         self._data_source = data_source
@@ -43,7 +43,7 @@ class BatchProgressService:
         if self._total_records:
             self._set_progress_thresholds()
             return
-        if isinstance(self._data_source, TotalRecordsProvider):
+        if isinstance(self._data_source, TotalRecordsProtocol):
             result = await self._data_source.get_total_records()
             if isinstance(result, int) and result > 0:
                 self._total_records = result

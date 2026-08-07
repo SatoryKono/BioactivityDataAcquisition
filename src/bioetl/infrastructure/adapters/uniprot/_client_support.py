@@ -7,9 +7,8 @@ from typing import TYPE_CHECKING, Any
 from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import DataSourcePort, LoggerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
 __all__ = ["_create_uniprot_adapter"]
 
@@ -19,7 +18,7 @@ def _create_uniprot_adapter(
     logger: LoggerPort | None,
     _settings: object | None,
     **kwargs: Any,  # Any: forwarding arbitrary kwargs to HTTP client
-) -> UniProtAdapter:
+) -> DataSourcePort:
     """Factory helper for registry-based adapter construction.
 
     Args:

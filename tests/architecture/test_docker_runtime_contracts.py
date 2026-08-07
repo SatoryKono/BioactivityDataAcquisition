@@ -348,17 +348,12 @@ def test_dashboard_data_plane_rejects_healthy_producer_from_stale_checkout(
             "mounts": [
                 {
                     "Type": "bind",
-                    "Source": (
-                        r"E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data"
-                    ),
+                    "Source": "/external/bioetl/data",
                     "Destination": "/app/data",
                 },
                 {
                     "Type": "bind",
-                    "Source": (
-                        "/run/desktop/mnt/host/e/g-drive/05_AI/github/"
-                        "BioactivityDataAcquisition2/reports"
-                    ),
+                    "Source": "/external/bioetl/reports",
                     "Destination": "/app/reports",
                 },
             ],

@@ -5,12 +5,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from bioetl.infrastructure.adapters.pubmed.adapter import PubMedAdapter
-
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config.settings_api import Settings
+
+    from .adapter import PubMedAdapter
 
 __all__ = [
     "_create_pubmed_adapter",
@@ -89,6 +89,8 @@ def _create_pubmed_adapter(
     Raises:
         ValueError: If email, http_client, or logger not provided.
     """
+    from .adapter import PubMedAdapter
+
     email = _resolve_pubmed_email(settings, kwargs)
     if not email:
         raise ValueError("PubMed adapter requires email")

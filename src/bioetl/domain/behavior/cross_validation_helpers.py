@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from typing import cast
 
+from bioetl.domain.behavior.cross_validation_source_helpers import (
+    comparison_source_list as _comparison_source_list,
+)
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import ValidationIssue
 from bioetl.domain.types.validation_severity import (
@@ -298,11 +301,3 @@ def _collect_covered_sources(pairs: list[dict[str, object]]) -> set[str]:
                 covered_sources.add(source_name)
             covered_sources.update(_comparison_source_list(comparison_sources))
     return covered_sources
-
-
-def _comparison_source_list(comparison_sources: object) -> list[str]:
-    if isinstance(comparison_sources, str):
-        return [comparison_sources]
-    if isinstance(comparison_sources, list):
-        return [item for item in comparison_sources if isinstance(item, str)]
-    return []

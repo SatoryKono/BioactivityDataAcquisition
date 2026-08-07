@@ -43,11 +43,9 @@ def test_issue_6220_public_lazy_facades_are_fully_classified() -> None:
     inventory = _load_yaml(ROOT / "configs/quality/public_lazy_facade_inventory.yaml")
     facades = inventory["facades"]
 
-    assert (
-        inventory["row_count"]
-        == closeout["ratchets"]["public_lazy_facade_rows"]["current"]
-    )
-    assert len(facades) == 53
+    ratchet = closeout["ratchets"]["public_lazy_facade_rows"]
+    assert inventory["row_count"] == ratchet["current"]
+    assert len(facades) == inventory["row_count"] <= ratchet["opening"]
     assert not [
         row for row in facades if not row.get("classification") or not row.get("owner")
     ]

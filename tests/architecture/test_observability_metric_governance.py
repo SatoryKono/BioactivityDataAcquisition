@@ -163,6 +163,33 @@ def test_control_plane_recording_rules_are_declared() -> None:
 
 
 @pytest.mark.architecture
+def test_http_panel_contract_recognizes_explicit_backend_failure_copy() -> None:
+    """QUERY ERROR copy must satisfy the backend-failure documentation contract."""
+    contract = inventory._panel_contract(
+        dashboard_uid="example-dashboard",
+        panel={
+            "id": 1,
+            "title": "Example HTTP panel",
+            "description": "Valid empty means no matching rows.",
+            "fieldConfig": {
+                "defaults": {
+                    "noValue": "Backend failure renders as QUERY ERROR."
+                }
+            },
+        },
+        target={
+            "refId": "A",
+            "source": "url",
+            "url": "/ops/example",
+        },
+        datasource_type="BioETL Ops HTTP",
+    )
+
+    assert contract["documents_valid_empty"] is True
+    assert contract["documents_backend_down"] is True
+
+
+@pytest.mark.architecture
 def test_typed_observability_inventory_is_bidirectional_and_source_specific() -> None:
     """Recording outputs, aliases, consumers, and HTTP targets stay distinct."""
     report = inventory.collect_typed_observability_inventory(ROOT)

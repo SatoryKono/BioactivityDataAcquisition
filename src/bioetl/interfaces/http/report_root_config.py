@@ -6,26 +6,24 @@ readiness, and CLI entrypoints call these helpers instead.
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 from bioetl.application.services.run_reports.paths import (
     inspect_report_root_marker,
     resolve_report_root,
 )
+from bioetl.composition.runtime_builders.config_access import load_settings
 
 # Absolute run-reports root inside the main Docker service when bind is correct.
 REPORT_ROOT_ENV = "BIOETL_REPORT_ROOT"
 # When truthy, missing/mismatched marker makes /health/ready unhealthy (fail-closed).
 ENFORCE_REPORT_ROOT_MARKER_ENV = "BIOETL_ENFORCE_REPORT_ROOT_MARKER"
 
-_TRUTHY = frozenset({"1", "true", "yes", "on"})
-
 
 def env_report_root_value() -> str | None:
     """Return stripped ``BIOETL_REPORT_ROOT`` or None when unset/blank."""
-    raw = os.environ.get(REPORT_ROOT_ENV, "").strip()
-    return raw or None
+    configured = load_settings().report_root
+    return str(configured) if configured is not None else None
 
 
 def configured_report_root(*, root: Path | None = None) -> Path:
@@ -43,8 +41,7 @@ def configured_report_root(*, root: Path | None = None) -> Path:
 
 def enforce_report_root_marker() -> bool:
     """Whether readiness must fail closed on a missing report-root marker."""
-    raw = os.environ.get(ENFORCE_REPORT_ROOT_MARKER_ENV, "").strip().lower()
-    return raw in _TRUTHY
+    return load_settings().enforce_report_root_marker
 
 
 def report_root_readiness_check(*, root: Path | None = None) -> dict[str, object]:

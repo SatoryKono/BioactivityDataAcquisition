@@ -1,19 +1,11 @@
-"""Academic identifier Value Objects for BioETL domain.
-
-Contains Value Objects for academic publication identifiers:
-- OpenAlexId: OpenAlex Work IDs (W2741809807)
-- SemanticScholarId: Semantic Scholar Paper IDs (40-char hex)
-- ISSN: International Standard Serial Numbers
-- ORCID: Open Researcher and Contributor IDs
-
-These Value Objects encapsulate validation and normalization rules.
-"""
+"""Validated and normalized academic identifier value objects."""
 
 from __future__ import annotations
 
 import re
 
 from bioetl.domain.value_objects.base import ValueObject
+from bioetl.domain.value_objects.orcid import ORCID
 
 __all__ = [
     "ISSN",
@@ -212,113 +204,6 @@ class ISSN(ValueObject[str]):
     @classmethod
     def from_raw(cls, raw: str | None) -> ISSN | None:
         """Create ISSN from raw string with normalization.
-
-        Args:
-            raw: Raw input value.
-
-        Returns:
-            New instance constructed from the input.
-        """
-        if raw is None:
-            return None
-        if not raw.strip():
-            return None
-        try:
-            return cls(raw)
-        except ValueError:
-            return None
-
-
-class ORCID(ValueObject[str]):
-    """Open Researcher and Contributor ID.
-
-    ORCID is a unique identifier for researchers.
-    Format: NNNN-NNNN-NNNN-NNNN where N is a digit (last digit can be 'X').
-
-    Example: 0000-0002-1825-0097, 0000-0001-5109-3700
-
-    Invariants:
-        - 16 digits total (with or without hyphens)
-        - Last character can be 'X' for checksum 10
-        - Normalized to include hyphens
-        - URL prefixes are automatically stripped
-    """
-
-    __slots__ = ()
-    _value: str
-    _PATTERN = re.compile(r"^(\d{4})-?(\d{4})-?(\d{4})-?(\d{3}[\dXx])$")
-    _URL_PREFIXES = (
-        *(f"{scheme}://orcid.org/" for scheme in ("https", "http")),
-        "orcid.org/",
-        *(f"{scheme}://orcid.org/" for scheme in ("https", "http")),
-        "orcid.org/",
-    )
-
-    def _strip_url_prefix(self, value: str) -> str:
-        """Strip URL prefix from ORCID if present."""
-        for prefix in self._URL_PREFIXES:
-            if value.lower().startswith(prefix.lower()):
-                return value[len(prefix) :]
-        return value
-
-    @staticmethod
-    def _require_str(value: object) -> str:
-        if isinstance(value, str):
-            return value
-        raise ValueError(f"ORCID must be str, got {type(value).__name__}")
-
-    @staticmethod
-    def _orcid_check_digit(body: str) -> str:
-        total = 0
-        for digit in body:
-            total = (total + int(digit)) * 2
-        remainder = total % 11
-        result = (12 - remainder) % 11
-        if result == 10:
-            return "X"
-        return str(result)
-
-    def _match_orcid_parts(self, normalized: str, original: str) -> list[str]:
-        match = self._PATTERN.match(normalized)
-        if match is None:
-            raise ValueError(
-                f"Invalid ORCID format: {original!r}. Expected: NNNN-NNNN-NNNN-NNNN"
-            )
-        parts = [match.group(i) for i in range(1, 5)]
-        parts[-1] = parts[-1].upper()
-        return parts
-
-    def _validate(self, value: str) -> str:
-        """Validate and normalize ORCID."""
-        text = self._require_str(value)
-        normalized = text.strip()
-        if not normalized:
-            raise ValueError("ORCID cannot be empty")
-
-        normalized = self._strip_url_prefix(normalized).strip()
-        parts = self._match_orcid_parts(normalized, text)
-        digits = "".join(parts)
-        body, check = digits[:15], digits[15]
-        expected = self._orcid_check_digit(body)
-        if check != expected:
-            raise ValueError(
-                f"Invalid ORCID checksum: {value!r} (expected check digit {expected})"
-            )
-        return "-".join(parts)
-
-    @property
-    def url(self) -> str:
-        """Get the full ORCID URL for web access."""
-        return f"https://orcid.org/{self._value}"
-
-    @property
-    def compact(self) -> str:
-        """Get ORCID without hyphens."""
-        return self._value.replace("-", "")
-
-    @classmethod
-    def from_raw(cls, raw: str | None) -> ORCID | None:
-        """Create ORCID from raw string with normalization.
 
         Args:
             raw: Raw input value.

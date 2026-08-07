@@ -41,15 +41,16 @@ class _FilteredQuarantineHost(Protocol):
     ) -> None: ...
 
 
+def _list_length(payload: JsonDict, key: str) -> int:
+    value = payload.get(key)
+    return len(value) if isinstance(value, list) else 0
+
+
 class QuarantineServiceFilteredMixin(
     QuarantineServiceAsyncMixin,
     QuarantineServiceSyncMixin,
 ):
-    """Filtered-record explorer + composed sync/async quarantine operators.
-
-    ARCH-REF-04 / #7705: host inherits a single composed mixin instead of three
-    sibling mixins (mixin-depth reduction at the service host).
-    """
+    """Filtered explorer plus composed sync/async quarantine operators."""
 
     async def list_filtered_records(
         self: _FilteredQuarantineHost,
@@ -106,9 +107,7 @@ class QuarantineServiceFilteredMixin(
         self.logger.info(
             "Listed filtered quarantine records",
             pipeline=pipeline,
-            result_count=len(result.get("items", []))
-            if isinstance(result.get("items"), list)
-            else 0,
+            result_count=_list_length(result, "items"),
             total=result.get("total", 0),
         )
         self._record_operator_metrics(
@@ -272,9 +271,7 @@ class QuarantineServiceFilteredMixin(
         self.logger.info(
             "Got filtered quarantine filter options",
             pipeline=pipeline,
-            run_type_count=len(options.get("run_types", []))
-            if isinstance(options.get("run_types"), list)
-            else 0,
+            run_type_count=_list_length(options, "run_types"),
         )
         self._record_operator_metrics(
             operation="filtered_filter_options",
@@ -336,9 +333,7 @@ class QuarantineServiceFilteredMixin(
         self.logger.info(
             "Got filtered quarantine timeseries",
             pipeline=pipeline,
-            rows=len(payload.get("rows", []))
-            if isinstance(payload.get("rows"), list)
-            else 0,
+            rows=_list_length(payload, "rows"),
             bucket=payload.get("bucket", bucket),
         )
         self._record_operator_metrics(

@@ -14,6 +14,8 @@ Status: active navigational memory. Parent: `agent-memory.md`.
 
 - Architecture/import rules: current RULES, accepted ADRs, `.importlinter`, and
   `tests/architecture/`.
+- Boundary reminder: direct `interfaces -> infrastructure` imports are
+  forbidden; verify routing through Application or Composition APIs.
 - Config/schema rules: owning configs, schemas, generators, and config tests.
 - Docs/runtime parity: ownership policy, drift checks, and runtime mirror gate.
 - Structural claims: `docs/reports/evidence/project-file-structure/`,

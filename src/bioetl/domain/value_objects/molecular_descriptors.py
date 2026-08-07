@@ -26,10 +26,7 @@ Usage::
 from __future__ import annotations
 
 import math
-from typing import (  # Any: needed for _validate override accepting Any from base class
-    Any,
-    Self,
-)
+from typing import Self
 
 from bioetl.domain.schemas.constants import (
     CANONICAL_HBA_COUNT_RANGE,
@@ -91,7 +88,7 @@ class _BoundedIntVO(ValueObject[int]):
 
     def _validate(
         self,
-        value: Any,  # Any: accepts str|int|float for coercion beyond base T=int
+        value: object,
     ) -> int:
         n = _coerce_int(value)
         if not self._MIN <= n <= self._MAX:
@@ -165,7 +162,7 @@ class _BoundedFloatVO(ValueObject[float]):
 
     def _validate(
         self,
-        value: Any,  # Any: accepts str|int|float for coercion beyond base T=float
+        value: object,
     ) -> float:
         f = _coerce_float(value)
         if not self._MIN <= f <= self._MAX:

@@ -410,7 +410,6 @@ separate from actual `record:` outputs and direct runtime collector families.
 ## Notes
 
 - `_metrics_defs_pipeline.py` is a facade module that re-exports metrics from other pipeline submodules and does not define new metrics
-- `ADAPTER_REQUEST_P95_SECONDS` is an alias for `ADAPTER_REQUEST_DURATION_SECONDS` for backward compatibility
 - Circuit breaker state values: 0=closed, 1=half-open, 2=open
 - Provider health status values: 0=unhealthy, 1=degraded, 2=healthy
 - Workflow status values: 0=OK, 1=WARN, 2=CRIT

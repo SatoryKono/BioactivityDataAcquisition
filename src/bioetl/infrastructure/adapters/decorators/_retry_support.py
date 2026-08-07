@@ -14,6 +14,11 @@ from bioetl.domain.ports import LoggerPort, MetricsPort
 from bioetl.domain.resilience import RetryConfig
 
 
+def default_retry_config() -> RetryConfig:
+    """Build the canonical decorator retry policy."""
+    return RetryConfig()
+
+
 def is_retryable_exception(exc: Exception, retry_config: RetryConfig) -> bool:
     """Return whether the exception should trigger a retry."""
     if isinstance(exc, CircuitBreakerOpenError):

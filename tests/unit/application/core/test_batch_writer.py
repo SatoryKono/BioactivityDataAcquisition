@@ -46,6 +46,7 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.domain.locking import LockNotHeldError
+from bioetl.domain.ports.storage import SilverWriteRequest
 from bioetl.domain.types import RunType, ValidationResult
 
 
@@ -185,17 +186,18 @@ class TestBatchWriterSilver:
 
         await batch_writer.write_silver(records, batch_id, ingestion_ts)
 
-        call_kwargs = mock_storage.write_silver.call_args[1]
-        silver_records = call_kwargs["records"]
+        request = mock_storage.write_silver.call_args.args[0]
+        assert isinstance(request, SilverWriteRequest)
+        silver_records = request.records
         assert len(silver_records) == 1
         assert "_run_id" not in silver_records[0]
         assert "_run_type" not in silver_records[0]
         assert "_source_batch_id" not in silver_records[0]
         assert "_ingestion_ts" not in silver_records[0]
-        assert call_kwargs["run_id"] == mock_context.run_id
-        assert call_kwargs["run_type"] == mock_context.run_type
-        assert call_kwargs["source_batch_id"] == batch_id
-        assert call_kwargs["ingestion_ts"] == ingestion_ts
+        assert request.run_id == mock_context.run_id
+        assert request.run_type == mock_context.run_type
+        assert request.source_batch_id == batch_id
+        assert request.ingestion_ts == ingestion_ts
 
     async def test_write_silver_uses_table_config(self, mock_storage, mock_context):
         """Test that table configuration is applied."""
@@ -227,9 +229,10 @@ class TestBatchWriterSilver:
 
         await writer.write_silver(records, batch_id, mock_context.started_at)
 
-        call_kwargs = mock_storage.write_silver.call_args[1]
-        assert call_kwargs["table_name"] == "custom_silver_table"
-        assert list(call_kwargs["primary_keys"]) == ["entity_id"]
+        request = mock_storage.write_silver.call_args.args[0]
+        assert isinstance(request, SilverWriteRequest)
+        assert request.table_name == "custom_silver_table"
+        assert request.primary_keys == ["entity_id"]
 
 
 @pytest.mark.unit

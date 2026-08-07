@@ -1,7 +1,4 @@
-"""Circuit breaker for fault tolerance.
-
-Implements RULES.md Section 3.1.4 circuit breaker pattern.
-"""
+"""Circuit breaker for HTTP adapter fault tolerance."""
 
 from __future__ import annotations
 
@@ -47,34 +44,12 @@ METRIC_CIRCUIT_BREAKER_TRIPS = "bioetl_circuit_breaker_trips_total"
 
 
 def _now() -> float:
-    """Return the current monotonic time for circuit breaker state decisions."""
     return time.monotonic()
 
 
 @dataclass
 class CircuitBreakerGuard:
-    """Circuit breaker implementation for HTTP clients.
-
-    Protects against cascading failures by temporarily blocking requests
-    to failing services.
-
-    Args:
-        provider: Provider name for metrics/logging
-        failure_threshold: Consecutive failures before opening (default: 5)
-        recovery_timeout: Seconds to wait in OPEN before testing (default: 300)
-        metrics: Optional MetricsPort for emitting circuit breaker metrics
-
-    Example:
-        >>> cb = CircuitBreakerGuard(provider="chembl", failure_threshold=5)
-        >>> result = await cb.call(fetch_data, url="https://api.example.com")
-
-    Metrics emitted:
-        - circuit_breaker_state{adapter}: 0=Closed, 1=Half-Open, 2=Open
-        - circuit_breaker_trips_total{adapter}: Counter of OPEN transitions
-        - circuit_breaker_success_total{adapter}: Counter of successful calls
-        - circuit_breaker_failure_total{adapter}: Counter of failed calls
-
-    """
+    """Stateful fail-fast guard for asynchronous HTTP client calls."""
 
     provider: str
     failure_threshold: int = 5

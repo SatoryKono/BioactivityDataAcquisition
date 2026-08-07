@@ -14,7 +14,11 @@ from bioetl.domain.ports.observability.metrics import (
     MetricsServerRuntimeStatus,
     resolve_metric_labels,
 )
-from bioetl.domain.ports.observability.tracing import TracingPort
+from bioetl.domain.ports.observability.tracing import (
+    SpanHandle,
+    TracerHandle,
+    TracingPort,
+)
 
 __all__ = [
     "DQMonitorPort",
@@ -26,6 +30,8 @@ __all__ = [
     "MetricsPublisherPort",
     "MetricsServerPort",
     "MetricsServerRuntimeStatus",
+    "SpanHandle",
+    "TracerHandle",
     "TracingPort",
     "resolve_metric_labels",
 ]

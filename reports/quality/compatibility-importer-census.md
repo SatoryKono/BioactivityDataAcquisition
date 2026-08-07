@@ -1,6 +1,6 @@
 # Compatibility Importer Census
 
-- snapshot_date: 2026-08-01
+- snapshot_date: 2026-08-07
 - retained_entrypoint_count: 12
 - retained_public_entrypoint_burden: 0
 - removed_compatibility_surface_count: 23
@@ -105,7 +105,7 @@ Migration prerequisites for `src/bioetl/interfaces/cli/commands/maintenance.py`:
 | `bioetl.application.services.control_plane.workflow_manifest_models` | no | 0 | 0 | `bioetl.application.services.control_plane.workflow.manifest_models` |
 | `bioetl.application.services.control_plane.workflow_manifest_service` | no | 0 | 0 | `bioetl.application.services.control_plane.workflow.manifest_service` |
 | `bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter` | no | 0 | 0 | `bioetl.domain.ports.storage.metadata.MetadataCoordinatorPort` |
-| `bioetl.application.services.checkpoint_compatibility_service_v2` | no | 0 | 0 | `bioetl.application.services.checkpoint_compatibility_service` |
+| `bioetl.application.services.checkpoint_compatibility_service_v2` | no | 0 | 0 | `bioetl.application.services.checkpoint.checkpoint_compatibility_service` |
 | `bioetl.domain.normalization.legacy_fingerprints` | no | 0 | 0 | `bioetl.domain.normalization.fingerprints` |
 
 ## Twin Modules

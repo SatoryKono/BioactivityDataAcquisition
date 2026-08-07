@@ -5,10 +5,10 @@ from __future__ import annotations
 import os
 import stat
 import tempfile
+from collections.abc import Callable
 from contextlib import suppress
 from importlib import import_module
-from pathlib import Path, PurePath
-from collections.abc import Callable
+from pathlib import Path
 from typing import TYPE_CHECKING, Literal, cast
 
 if TYPE_CHECKING:
@@ -21,7 +21,9 @@ __all__ = [
     "build_planned_artifacts",
     "control_plane_root",
     "is_explicit_data_root_configured",
+    "resolve_data_root",
     "resolve_data_root_mode",
+    "resolve_data_root_with_mode",
 ]
 
 
@@ -44,17 +46,17 @@ def is_explicit_data_root_configured(settings: Settings) -> bool:
 def resolve_data_root_mode(settings: Settings) -> DataRootMode:
     """Classify which data-root strategy would be used in the current runtime.
 
-    Shares the single resolution path with ``_resolve_data_root``.
+    Shares the single resolution path with ``resolve_data_root``.
     """
-    return _resolve_data_root_with_mode(settings)[1]
+    return resolve_data_root_with_mode(settings)[1]
 
 
-def _resolve_data_root(settings: Settings) -> Path:
-    """Resolve a writable data root for legacy run-manifest facade callers."""
-    return _resolve_data_root_with_mode(settings)[0]
+def resolve_data_root(settings: Settings) -> Path:
+    """Resolve the writable data root used by run-manifest builders."""
+    return resolve_data_root_with_mode(settings)[0]
 
 
-def _resolve_data_root_with_mode(settings: Settings) -> tuple[Path, DataRootMode]:
+def resolve_data_root_with_mode(settings: Settings) -> tuple[Path, DataRootMode]:
     """Single source of truth for data-root path and mode selection."""
     configured_root = getattr(settings, "data_dir", None)
     if configured_root and str(configured_root).strip():
@@ -147,8 +149,3 @@ def _assert_private_runtime_dir(path: Path) -> None:
             raise OSError(
                 f"private runtime path is not owner-private (mode={oct(mode)}): {path}"
             )
-
-
-def _artifact_path_string(path: PurePath) -> str:
-    """Return portable artifact paths with normalized separators."""
-    return path.as_posix()

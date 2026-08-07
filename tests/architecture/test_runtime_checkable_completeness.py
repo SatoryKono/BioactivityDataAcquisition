@@ -42,6 +42,7 @@ def _discover_all_port_classes() -> list[str]:
 
 ALL_PORT_NAMES = _discover_all_port_classes()
 EXPECTED_PORT_COUNT = 84
+EXPECTED_PROTOCOL_CLASS_COUNT = 85
 RULES_PATH = Path("docs/00-project/RULES.md")
 
 
@@ -49,7 +50,7 @@ class TestAllPortsRuntimeCheckable:
     """Every port protocol MUST be @runtime_checkable (TYPE-004)."""
 
     def test_port_count_matches_live_baseline(self) -> None:
-        """Sanity check: the facade currently exports 82 port protocols."""
+        """Sanity check: the facade currently exports 84 ``*Port`` protocols."""
         assert len(ALL_PORT_NAMES) == EXPECTED_PORT_COUNT, (
             f"Expected {EXPECTED_PORT_COUNT} ports, found {len(ALL_PORT_NAMES)}. "
             f"If you added/removed a port, update this test. "
@@ -60,7 +61,9 @@ class TestAllPortsRuntimeCheckable:
         """RULES.md must not publish stale runtime-checkable port counts."""
         rules_text = RULES_PATH.read_text(encoding="utf-8")
 
-        assert f"Все {EXPECTED_PORT_COUNT} порт" in rules_text
+        assert (
+            f"**{EXPECTED_PROTOCOL_CLASS_COUNT}** `port_protocol_classes`" in rules_text
+        )
         assert "Все 68 порт" not in rules_text
 
     @pytest.mark.parametrize("port_name", ALL_PORT_NAMES)

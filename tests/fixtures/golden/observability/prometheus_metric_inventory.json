@@ -42,8 +42,7 @@
       "gauges": [
         "bioetl_provider_health_status",
         "bioetl_adapter_fallback_hit_rate",
-        "bioetl_rate_limiter_tokens_available",
-        "bioetl_adapter_request_p95_seconds"
+        "bioetl_rate_limiter_tokens_available"
       ],
       "histograms": [
         "bioetl_adapter_request_duration_seconds",

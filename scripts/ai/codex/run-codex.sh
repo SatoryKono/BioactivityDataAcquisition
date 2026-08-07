@@ -187,6 +187,8 @@ echo ""
 
 # Optional .env.codex for API-key mode. ChatGPT device auth in ~/.codex/auth.json
 # is enough for launch; never create secret-bearing files without an explicit opt-in.
+# The default is non-mutating: without BIOETL_CREATE_LOCAL_ENV_FILES=1 this
+# launcher does not create .env automatically.
 # shellcheck source=helper/codex-auth-lib.sh
 source "${HELPER_DIR}/codex-auth-lib.sh"
 SCRIPT_DIR_CODEX="${SCRIPT_DIR}"

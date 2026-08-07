@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from types import TracebackType
+from typing import Protocol
 
 from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
-
-if TYPE_CHECKING:
-    from types import TracebackType
 
 _PIPELINE_TRACE_NAMESPACE = "bioetl.pipeline"
 

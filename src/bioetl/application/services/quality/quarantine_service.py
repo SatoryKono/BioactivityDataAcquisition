@@ -40,9 +40,9 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
         QuarantinePort,
+        SpanHandle,
         TracingPort,
     )
-    from bioetl.domain.ports.observability.tracing import SpanHandle
 
 
 @dataclass

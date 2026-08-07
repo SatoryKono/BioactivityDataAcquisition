@@ -20,6 +20,10 @@ __all__ = [
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Protocol, cast
 
+from bioetl.application.core.batch_operation_errors import (
+    OPERATION_ERRORS,
+    OperationErrorTypes,
+)
 from bioetl.application.core.runner_flow_metrics import (
     record_flow_invariants as _record_flow_invariants_impl,
 )
@@ -29,6 +33,11 @@ from bioetl.application.core.runner_flow_metrics import (
 from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.types import JsonDict
+
+FLOW_INVARIANT_PROJECTION_ERRORS: OperationErrorTypes = (
+    *OPERATION_ERRORS,
+    ArithmeticError,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
@@ -68,7 +77,6 @@ def _record_with_ledger_service(
     host: _PipelineRunnerFlowHostProtocol,
     recorder: Callable[[RunLedgerService], object],
 ) -> None:
-    """Run one ledger write only when control-plane wiring is attached."""
     if host._run_ledger_service is None:
         return
     recorder(host._run_ledger_service)
@@ -78,7 +86,6 @@ def _record_run_metrics_event(
     host: _PipelineRunnerFlowHostProtocol,
     recorder: Callable[[RunLedgerService, dict[str, int], JsonDict | None], object],
 ) -> None:
-    """Append one run-level ledger entry using the current execution metrics."""
     details = host.execution_diagnostics or None
     _record_with_ledger_service(
         host,
@@ -218,7 +225,7 @@ def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
     )
     try:
         _record_flow_invariants(host)
-    except Exception:
+    except FLOW_INVARIANT_PROJECTION_ERRORS:
         # Best-effort metrics projection after shutdown ledger is written.
         host._logger.warning(
             "shutdown_flow_invariants_failed",

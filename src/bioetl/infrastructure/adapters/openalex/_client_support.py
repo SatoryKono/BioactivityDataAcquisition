@@ -5,9 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import DataSourcePort, LoggerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
     from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
@@ -71,7 +70,7 @@ def _create_openalex_adapter(
     logger: LoggerPort | None,
     settings: Settings | None,
     **kwargs: Any,  # Any: forward arbitrary adapter kwargs
-) -> OpenAlexAdapter:
+) -> DataSourcePort:
     """Custom creator for OpenAlex adapter.
 
     Handles logic for obtaining OpenAlex credentials from settings.

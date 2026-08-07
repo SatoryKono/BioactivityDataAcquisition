@@ -35,7 +35,6 @@ class DataQualityService(
         run_type: str = "unknown",
         pipeline_metrics: PipelineMetricsRecorder | None = None,
     ) -> None:
-        """Initialize DataQualityService."""
         self._dq_monitor = dq_monitor
         self._config = config
         self._logger = logger
@@ -113,7 +112,6 @@ class DataQualityService(
                 terminal_status="success",
             )
 
-        # Run anomaly detection if monitor available
         if self._dq_monitor is None:
             self._emit_dq_monitor_disabled_signal()
             return DQResult(

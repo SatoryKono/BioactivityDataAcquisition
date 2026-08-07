@@ -1,21 +1,6 @@
 # mypy: disable-error-code="misc,untyped-decorator"
 # pyright: reportUnsafeMultipleInheritance=false
-"""Centralized configuration for BioETL.
-Uses pydantic-settings for type-safe, validated configuration from environment
-variables and YAML files. All settings are loaded once at startup and validated.
-
-Consolidated configuration (post-refactoring):
-- Settings: Main application settings (pydantic-settings)
-- RuntimeConfig: Re-exported from domain.config for CLI convenience
-
-Usage:
-    >>> from bioetl.infrastructure.config import get_settings
-    >>> settings = get_settings()
-    >>> settings.data_dir  # doctest: +ELLIPSIS
-    ...Path('data')
-    >>> settings.pipeline.batch_size
-    100
-"""
+"""Type-safe BioETL settings loaded from environment and YAML sources."""
 
 from __future__ import annotations
 
@@ -60,27 +45,7 @@ def get_pipeline_config(
     pipeline_name: str,
     config_root: str | None = None,
 ) -> PipelineConfig:
-    """Get PipelineConfig object from YAML configuration.
-
-    Convenience function that loads and maps config in one step.
-    Results are cached for efficiency.
-
-    Uses the canonical function-based domain-config bridge to combine validated
-    YAML config with hierarchical DQ resolution from infrastructure config
-    loaders.
-
-    Args:
-        pipeline_name: Name of the pipeline (e.g., 'chembl_activity')
-        config_root: Root directory for config files. Defaults to 'configs'.
-            Accepts str instead of Path because lru_cache requires hashable args.
-
-    Returns:
-        PipelineConfig instance
-
-    Raises:
-        ValueError: If pipeline configuration not found
-
-    """
+    """Load and cache one validated domain pipeline configuration."""
     from bioetl.infrastructure.config.domain_config_resolver import (
         load_domain_pipeline_config,
     )
@@ -154,6 +119,24 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
         description="Whether salt rotation is active (BIOETL_PII_SALT_ROTATION_ACTIVE)",
     )
 
+    # Process/runtime integration settings. Environment access is centralized
+    # here so interfaces and composition callers consume typed configuration.
+    report_root: Path | None = Field(
+        default=None,
+        description="Run-report root override (BIOETL_REPORT_ROOT)",
+    )
+    enforce_report_root_marker: bool = Field(
+        default=False,
+        description=(
+            "Fail readiness closed when the run-report root marker is invalid "
+            "(BIOETL_ENFORCE_REPORT_ROOT_MARKER)"
+        ),
+    )
+    runtime_source_id: str | None = Field(
+        default=None,
+        description="Opaque runtime source digest (BIOETL_RUNTIME_SOURCE_ID)",
+    )
+
     # Serialization settings
     json_encoder: Literal["orjson", "stdlib", ""] = Field(
         default="",
@@ -187,6 +170,14 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
     def _validate_silver_dedup_timeout_seconds(cls, value: object) -> float:
         """Coerce invalid or non-positive timeout values back to the safe default."""
         return coerce_silver_dedup_timeout_seconds(value)
+
+    @field_validator("report_root", "runtime_source_id", mode="before")
+    @classmethod
+    def _empty_runtime_setting_to_none(cls, value: object) -> object:
+        """Normalize blank optional environment values to ``None``."""
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
 
     semanticscholar_api_key: SecretStr | None = Field(
         default=None,
@@ -226,11 +217,7 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    """Get cached application settings.
-
-    Returns:
-        Settings.
-    """
+    """Return cached application settings."""
     return Settings()
 
 

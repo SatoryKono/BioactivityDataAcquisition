@@ -40,7 +40,9 @@ from bioetl.infrastructure.adapters.common.deduplication import (
     deduplicate_preserving_order,
 )
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
-from bioetl.infrastructure.adapters.uniprot.client import _create_uniprot_adapter
+from bioetl.infrastructure.adapters.uniprot._client_support import (
+    _create_uniprot_adapter,
+)
 from httpx import RequestError
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
@@ -116,7 +118,7 @@ async def test_client_coverage__health_degraded__874078aa(adapter, mock_http_cli
 async def test_probe_health_error(adapter, mock_http_client):
     """Test health probe degrades instead of raising on request failure."""
 
-    mock_http_client.get_once.side_effect = Exception("API Error")
+    mock_http_client.get_once.side_effect = RequestError("API Error")
 
     status = await adapter._probe_health()
 
@@ -126,7 +128,7 @@ async def test_probe_health_error(adapter, mock_http_client):
         provider="uniprot",
         reason="request_error",
         status_code=None,
-        error_type="Exception",
+        error_type="RequestError",
     )
 
 

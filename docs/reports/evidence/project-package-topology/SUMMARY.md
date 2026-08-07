@@ -1,6 +1,6 @@
 # Сводка evidence: project-package-topology
 
-Дата: 2026-08-05
+Дата: 2026-08-07
 Статус: refreshed
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see
@@ -15,11 +15,11 @@ module-coverage producer. The inventory retains its `2026-07-28` coverage-data
 snapshot date because no newer canonical coverage run was substituted for the
 tracked coverage measurements.
 
-Current-baseline note (2026-08-05): architectural planning and GitHub issues
+Current-baseline note (2026-08-07): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2314` with
-`source_tree_sha256=8ea780a858a56ddee874aefbde2b0544ce24eace31eb0e9b6e58e0eafb20d5a8`.
+`source_module_count=2390` with
+`source_tree_sha256=f589db1aeefa4382b8862f119c7e9e6ddd979f3ac367535a82b5262e91823362`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
@@ -58,10 +58,10 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2314`, including two
+- Current Python file count under `src/bioetl` is `2390`, including two
   top-level package modules outside the five first-order architecture layers.
-- Current layer file counts are: `domain=591`, `application=699`,
-  `infrastructure=590`, `composition=282`, `interfaces=150`.
+- Current layer file counts are: `domain=601`, `application=731`,
+  `infrastructure=622`, `composition=282`, `interfaces=152`.
 - Current first-order package counts are: `domain=22`, `application=6`,
   `infrastructure=20`, `composition=5`, `interfaces=2`.
 - `application` and `infrastructure` remain the broadest package surfaces by
@@ -80,6 +80,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `dc8da09a73c81817f66625540e28839f1f7f0654b4b897f87f4e546891b1a212`
+- source_tree_sha256: `f589db1aeefa4382b8862f119c7e9e6ddd979f3ac367535a82b5262e91823362`
 
-`source_module_count=2314`
+`source_module_count=2390`

@@ -4,24 +4,20 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 import re
-from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from datetime import date, datetime
-from math import isnan
 from typing import TYPE_CHECKING, Any, Protocol, cast
-from uuid import UUID
 
 import pyarrow as pa
+from deltalake.exceptions import DeltaError
 
-from bioetl.domain.deterministic_identity import deterministic_uuid
 from bioetl.domain.ports import (
     ForeignKeyReconciliationRequest,
+    LoggerPort,
     QuarantinePort,
     QuarantineWriteRequest,
 )
-from bioetl.domain.types import BatchID, BronzeRecord, MetaDict, RunID
+from bioetl.domain.types import BronzeRecord, MetaDict
 from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
 from bioetl.infrastructure.storage.gold.io_delta_protocols import (
     GoldWriteRetryModuleProtocol,
@@ -33,15 +29,16 @@ from bioetl.infrastructure.storage.gold.io_helpers import load_gold_writer_modul
 from bioetl.infrastructure.storage.silver.operations.delta_operation_protocols import (
     _load_deltalake_module,
 )
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_identity import (
+    build_quarantine_batch_id,
+    coerce_optional_run_id,
+    orphan_error_code,
+)
 from bioetl.infrastructure.time.system_clock import current_utc_time
-
-logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-FOREIGN_KEY_ORPHAN_ERROR_CODE = "FILTERED_OUT_SILVER"
-FOREIGN_KEY_ORPHAN_GOLD_ERROR_CODE = "FILTERED_OUT_GOLD"
 FOREIGN_KEY_ORPHAN_QUARANTINE_CATEGORY = "foreign_key_reconciliation"
 FOREIGN_KEY_ORPHAN_PIPELINE_DEFAULT = "workflow_transforms"
 _CURRENT_FLAG_COLUMNS = ("_is_current", "is_current")
@@ -66,53 +63,12 @@ class ReconciliationMutationHost(Protocol):
 
     quarantine: QuarantinePort | None
     quarantine_pipeline_name: str | None
+    logger: LoggerPort
 
     @property
     def silver_writer(self) -> SilverWriter: ...
 
     gold_writer: object | None
-
-
-def canonical_reconciliation_value(value: object) -> object:
-    """Return deterministic JSON-compatible value used in quarantine batch IDs."""
-    if isinstance(value, float) and isnan(value):
-        return "NaN"
-    if isinstance(value, (date, datetime, UUID)):
-        return str(value)
-    if isinstance(value, Mapping):
-        return {
-            str(key): canonical_reconciliation_value(nested)
-            for key, nested in sorted(value.items(), key=lambda item: str(item[0]))
-        }
-    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
-        return [canonical_reconciliation_value(nested) for nested in value]
-    return value
-
-
-def build_quarantine_batch_id(
-    request: ForeignKeyReconciliationRequest,
-    *,
-    orphan_rows: list[dict[str, object]],
-) -> BatchID:
-    """Build deterministic quarantine batch identity for orphan rows."""
-    return BatchID(
-        deterministic_uuid(
-            "infrastructure.workflow_foreign_key_reconciliation.quarantine_batch",
-            {
-                "action": request.action,
-                "nulls_equal": request.nulls_equal,
-                "orphan_rows": canonical_reconciliation_value(orphan_rows),
-                "reference_keys": list(request.effective_reference_keys),
-                "reference_layer": request.reference_layer,
-                "reference_table": request.reference_table,
-                "mutation_layer": request.effective_mutation_layer,
-                "source_keys": list(request.effective_source_keys),
-                "source_layer": request.source_layer,
-                "source_table": request.source_table,
-                "workflow_name": request.workflow_name,
-            },
-        )
-    )
 
 
 async def apply_reconciliation_mutation(
@@ -124,7 +80,7 @@ async def apply_reconciliation_mutation(
     """Quarantine orphan rows and mutate only the requested storage layer."""
     quarantine_summary = ReconciliationMutationSummary(
         mutation_mode="quarantine_skipped",
-        quarantine_error_code=_orphan_error_code(request) if orphan_rows else None,
+        quarantine_error_code=orphan_error_code(request) if orphan_rows else None,
     )
     if orphan_rows:
         quarantine_summary = await quarantine_orphan_rows(
@@ -219,7 +175,11 @@ async def expire_gold_orphan_rows(
     gold_writer = _require_gold_writer(host)
     module = load_gold_writer_module()
     table_path = gold_writer._resolve_table_path(request.source_table)
-    table_columns = await _delta_table_column_names(module, table_path)
+    table_columns = await _delta_table_column_names(
+        module,
+        table_path,
+        logger=host.logger,
+    )
 
     primary_keys = tuple(
         _require_sql_identifier(key, "primary_keys") for key in request.primary_keys
@@ -331,6 +291,8 @@ def _require_sql_identifier(name: str, field_name: str) -> str:
 async def _delta_table_column_names(
     module: Any,  # Any: gold writer module providing DeltaTable
     table_path: str,
+    *,
+    logger: LoggerPort,
 ) -> frozenset[str] | None:
     """Return Gold table column names from Delta schema when available."""
 
@@ -342,14 +304,22 @@ async def _delta_table_column_names(
 
     try:
         return await asyncio.to_thread(_inspect)
-    except Exception:
-        logging.getLogger(__name__).warning(
-            "Unable to inspect Gold Delta schema; falling back to orphan rows "
-            "(table_path=%s)",
-            table_path,
-            exc_info=True,
+    except (
+        AttributeError,
+        DeltaError,
+        OSError,
+        RuntimeError,
+        TypeError,
+        ValueError,
+        pa.ArrowInvalid,
+        pa.ArrowTypeError,
+    ) as error:
+        logger.warning(
+            "workflow foreign-key reconciliation schema inspection failed",
+            table_path=table_path,
+            error_type=type(error).__name__,
+            fallback="orphan_rows",
         )
-
         return None
 
 
@@ -408,7 +378,7 @@ async def quarantine_orphan_rows(
     orphan_rows: list[dict[str, object]],
 ) -> ReconciliationMutationSummary:
     """Write orphaned rows to quarantine when the quarantine port is configured."""
-    error_code = _orphan_error_code(request)
+    error_code = orphan_error_code(request)
     if host.quarantine is None or not orphan_rows:
         return ReconciliationMutationSummary(
             mutation_mode="quarantine_skipped",
@@ -436,7 +406,7 @@ async def quarantine_orphan_rows(
                 "error_code": error_code,
                 "payload": cast("BronzeRecord", row),
                 "bronze_batch_id": batch_id,
-                "run_id": _coerce_optional_run_id(request.workflow_run_id),
+                "run_id": coerce_optional_run_id(request.workflow_run_id),
                 "metadata": cast(
                     "MetaDict",
                     {
@@ -466,22 +436,6 @@ async def quarantine_orphan_rows(
         quarantine_rows_written=len(quarantine_rows),
         quarantine_error_code=error_code,
     )
-
-
-def _coerce_optional_run_id(workflow_run_id: str | None) -> RunID | None:
-    """Map request workflow_run_id to typed RunID when it is a UUID."""
-    if workflow_run_id is None:
-        return None
-    try:
-        return RunID(UUID(str(workflow_run_id)))
-    except (TypeError, ValueError, AttributeError):
-        return None
-
-
-def _orphan_error_code(request: ForeignKeyReconciliationRequest) -> str:
-    if request.effective_mutation_layer == "gold":
-        return FOREIGN_KEY_ORPHAN_GOLD_ERROR_CODE
-    return FOREIGN_KEY_ORPHAN_ERROR_CODE
 
 
 __all__ = ["ReconciliationMutationSummary", "apply_reconciliation_mutation"]

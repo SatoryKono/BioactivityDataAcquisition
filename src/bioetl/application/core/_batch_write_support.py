@@ -6,6 +6,9 @@ from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.batch_operation_errors import (
+    OPERATION_ERRORS as DOMAIN_EVENT_EMISSION_ERRORS,
+)
 from bioetl.application.core.quarantine_manager import (
     DQQuarantineEntry,
     QuarantineRuntimeService,
@@ -36,7 +39,7 @@ def emit_domain_event(
         return
     try:
         emitter.emit_domain_event(event)
-    except Exception as error:
+    except DOMAIN_EVENT_EMISSION_ERRORS as error:
         if logger is not None:
             logger.warning(
                 "domain_event_emit_failed",
@@ -56,7 +59,6 @@ def emit_batch_written(
     occurred_at: datetime,
     logger: LoggerPort | None = None,
 ) -> None:
-    """Publish a typed ``BatchWritten`` event when run context exists."""
     if run_id is None:
         return
     emit_domain_event(
@@ -82,7 +84,6 @@ def emit_batch_failed(
     occurred_at: datetime,
     logger: LoggerPort | None = None,
 ) -> None:
-    """Publish a typed ``BatchFailed`` event before bubbling the error."""
     if run_id is None:
         return
     emit_domain_event(
@@ -110,7 +111,6 @@ async def _execute_layer_write(
     bronze_refs: list[BronzeWriteResult] | None,
     silver_refs: list[SilverWriteResult] | None,
 ) -> object:
-    """Execute the layer-specific writer call inside its tracing span."""
     if layer == "silver":
         operation = writer.write_silver(
             records,
@@ -219,7 +219,6 @@ async def _quarantine_schema_violation(
     ingestion_ts: datetime,
     error: SchemaViolationError,
 ) -> None:
-    """Track failure metrics and quarantine schema-invalid records."""
     writer.track_batch_failed(stage=layer, count=len(records))
     emit_batch_failed(
         emitter=domain_event_emitter,

@@ -12,9 +12,9 @@
     "conflict": 0
   },
   "surface_totals": {
-    "surfaces_total": 105,
+    "surfaces_total": 103,
     "by_category": {
-      "consumer_alias": 27,
+      "consumer_alias": 25,
       "observability": 11,
       "runtime_gate": 11,
       "silver_config": 10,
@@ -22,7 +22,7 @@
     },
     "by_symbol": {
       "--silver-filter-only": 6,
-      "FILTERED_OUT_SILVER": 14,
+      "FILTERED_OUT_SILVER": 13,
       "FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS": 1,
       "SilverFilterConfig": 1,
       "SilverFiltersConfig": 1,
@@ -38,7 +38,7 @@
       "filters.source_profile": 6,
       "should_write_silver": 1,
       "silver_filter_compatibility_mode": 2,
-      "silver_filter_rejects": 7,
+      "silver_filter_rejects": 6,
       "source_profile": 10,
       "validate_no_semantic_silver_filter_payload": 4
     }
@@ -1422,7 +1422,7 @@
       "symbol": "--silver-filter-only",
       "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "occurrence_count": 1,
-      "first_line": 442,
+      "first_line": 447,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1488,7 +1488,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "occurrence_count": 1,
-      "first_line": 432,
+      "first_line": 437,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1607,17 +1607,6 @@
       "category": "consumer_alias",
       "surface": "legacy_silver_error_code",
       "symbol": "FILTERED_OUT_SILVER",
-      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
-      "occurrence_count": 1,
-      "first_line": 34,
-      "role": "Temporary legacy Silver reject alias",
-      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
-      "notes": ""
-    },
-    {
-      "category": "consumer_alias",
-      "surface": "legacy_silver_error_code",
-      "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
       "occurrence_count": 2,
       "first_line": 74,
@@ -1643,17 +1632,6 @@
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 4,
       "first_line": 723,
-      "role": "Operator summary alias for Silver rejects",
-      "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
-      "notes": ""
-    },
-    {
-      "category": "consumer_alias",
-      "surface": "silver_filter_rejects_summary_alias",
-      "symbol": "silver_filter_rejects",
-      "path": "src/bioetl/application/services/_observability_workflow_quarantine_support.py",
-      "occurrence_count": 1,
-      "first_line": 51,
       "role": "Operator summary alias for Silver rejects",
       "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
       "notes": ""
@@ -1730,7 +1708,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "docs/04-reference/observability/metrics-catalog.md",
       "occurrence_count": 1,
-      "first_line": 88,
+      "first_line": 89,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1741,7 +1719,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/README.md",
       "occurrence_count": 6,
-      "first_line": 856,
+      "first_line": 866,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1752,7 +1730,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/dashboards/bioetl-dq-v2.json",
       "occurrence_count": 2,
-      "first_line": 629,
+      "first_line": 1612,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1818,7 +1796,7 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/README.md",
       "occurrence_count": 2,
-      "first_line": 1255,
+      "first_line": 1266,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""
@@ -1840,7 +1818,7 @@
       "symbol": "should_write_silver",
       "path": "src/bioetl/application/core/base_transformer/base.py",
       "occurrence_count": 1,
-      "first_line": 163,
+      "first_line": 159,
       "role": "Legacy Silver write decision helper",
       "migration_relevance": "Any active semantic use of should_write_silver must be explicit in this inventory.",
       "notes": ""
@@ -1873,7 +1851,7 @@
       "symbol": "apply_silver_filter",
       "path": "src/bioetl/application/core/_base_transformer_structural_support.py",
       "occurrence_count": 1,
-      "first_line": 58,
+      "first_line": 86,
       "role": "Runtime Silver filter application callsite",
       "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
       "notes": ""
@@ -1939,7 +1917,7 @@
       "symbol": "_silver_filters.evaluate",
       "path": "src/bioetl/application/core/_base_transformer_structural_support.py",
       "occurrence_count": 2,
-      "first_line": 74,
+      "first_line": 105,
       "role": "Runtime Silver filter evaluator",
       "migration_relevance": "Evaluator sites are migration-sensitive because they can reject records before Gold.",
       "notes": ""
@@ -1950,7 +1928,7 @@
       "symbol": "_silver_filters.should_include",
       "path": "src/bioetl/application/core/base_transformer/base.py",
       "occurrence_count": 1,
-      "first_line": 171,
+      "first_line": 167,
       "role": "Runtime Silver include predicate",
       "migration_relevance": "Predicate sites are migration-sensitive and must not add semantic Silver gating.",
       "notes": ""
@@ -2170,7 +2148,7 @@
       "symbol": "source_profile",
       "path": "tests/architecture/test_config_ci_invariants.py",
       "occurrence_count": 14,
-      "first_line": 788,
+      "first_line": 792,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""

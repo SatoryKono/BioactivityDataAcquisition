@@ -14,13 +14,6 @@ exemptions:
     owner_tests:
       - tests/unit/interfaces/cli/test_cli_helpers.py
       - tests/unit/interfaces/cli/test_cli_commands_basic.py
-  - source: src/bioetl/application/composite/helpers/resolver_helper.py
-    policy: aggregate_owner
-    reason: >
-      Resolver helper coverage lives in the composite owner test module rather
-      than a same-path thin-package sibling.
-    owner_tests:
-      - tests/unit/application/composite/test_resolver_helper.py
   - source: src/bioetl/domain/schemas/generated/registry.py
     policy: aggregate_owner
     reason: >
