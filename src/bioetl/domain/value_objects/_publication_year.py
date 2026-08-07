@@ -40,7 +40,7 @@ class PublicationYear(ValueObject[int]):
         _config: ValidationConfig for year range validation.
     """
 
-    __slots__ = ("_config",)
+    __slots__ = ("_config", "_initialized")
     _value: int
     _config: ValidationConfig
 
@@ -78,9 +78,11 @@ class PublicationYear(ValueObject[int]):
         from bioetl.domain.config import DEFAULT_VALIDATION_CONFIG
 
         resolved_config = config or DEFAULT_VALIDATION_CONFIG
+        object.__setattr__(self, "_initialized", False)
         object.__setattr__(self, "_config", resolved_config)
         validated = self._validate(value)
         object.__setattr__(self, "_value", validated)
+        object.__setattr__(self, "_initialized", True)
 
     def _coerce_to_int(self, value: int | str) -> int:
         """Coerce value to int, raising ValueError on failure.

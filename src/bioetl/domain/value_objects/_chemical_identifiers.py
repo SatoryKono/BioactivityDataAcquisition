@@ -156,7 +156,7 @@ class SMILES(_ValueObjectBase[str]):
         - Optionally can be marked as canonical
     """
 
-    __slots__ = ("_is_canonical",)
+    __slots__ = ("_is_canonical", "_initialized")
     _value: str
     _is_canonical: bool  # pyright: ignore[reportUninitializedInstanceVariable]
 
@@ -170,9 +170,11 @@ class SMILES(_ValueObjectBase[str]):
         Raises:
             ValueError: If validation fails.
         """
+        object.__setattr__(self, "_initialized", False)
         validated = self._validate(value)
         object.__setattr__(self, "_value", validated)
         object.__setattr__(self, "_is_canonical", is_canonical)
+        object.__setattr__(self, "_initialized", True)
 
     def _validate(self, value: str) -> str:
         """Validate and normalize SMILES.
@@ -241,9 +243,8 @@ class SMILES(_ValueObjectBase[str]):
             empty or invalid.
         """
         _validate_smiles_normalization_mode(mode)
-        if _is_blank_smiles(raw):
+        if raw is None or _is_blank_smiles(raw):
             return _handle_blank_smiles(mode)
-        assert raw is not None
         return _build_smiles_from_raw(
             cls,
             raw,
