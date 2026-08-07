@@ -175,12 +175,12 @@ class _BatchMutationMixin(_BatchReadModelMixin):
             Updated BatchRecord with quarantine status and error information.
         """
         self._assert_open("quarantine_record")
-        if record not in self._records:
+        position = record.index - self._start_index
+        if position < 0 or position >= len(self._records):
             raise ValueError("Record does not belong to this batch")
 
         quarantined = record.with_validation_error(error, error_code)
-        index = self._records.index(record)
-        self._records[index] = quarantined
+        self._records[position] = quarantined
         self._quarantined.append(quarantined)
 
         lifecycle.emit_record_quarantined(
@@ -235,7 +235,22 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
         Batch processing can filter or quarantine records outside the aggregate
         record collection. The transition still belongs to the aggregate; the
         runtime supplies the counts observed at the transform boundary.
+
+        Counts must be non-negative and satisfy
+        valid_count + quarantined_count == record_count.
         """
+        if record_count < 0 or valid_count < 0 or quarantined_count < 0:
+            raise ValueError(
+                "seal counts must be non-negative: "
+                f"record_count={record_count}, valid_count={valid_count}, "
+                f"quarantined_count={quarantined_count}"
+            )
+        if valid_count + quarantined_count != record_count:
+            raise ValueError(
+                "seal counts are inconsistent: "
+                f"valid_count ({valid_count}) + quarantined_count "
+                f"({quarantined_count}) != record_count ({record_count})"
+            )
         self._status, self._sealed_at = lifecycle.seal(
             self._status,
             self._events,
