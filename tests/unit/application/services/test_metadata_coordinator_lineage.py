@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import pytest
 
+from bioetl.domain.lineage._shared import mapping_to_plain
 from bioetl.domain.lineage import LineageEdgeType, LineageNodeType
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.ports import GoldMetadataInput, SilverMetadataInput, SilverRef
@@ -322,16 +323,20 @@ class TestLineageFragments:
             and node.node_id == "source_system:crossref"
         )
 
-        assert silver_dataset.attributes["composite_run_id"] == "comp-run-456"
-        assert silver_dataset.attributes["source_providers"] == ["seed", "crossref"]
-        assert silver_dataset.attributes["provider_fields"] == {
+        silver_attrs = mapping_to_plain(silver_dataset.attributes)
+        assert silver_attrs["composite_run_id"] == "comp-run-456"
+        assert silver_attrs["source_providers"] == ["seed", "crossref"]
+        assert silver_attrs["provider_fields"] == {
             "crossref": ["abstract", "title"],
             "seed": ["doi"],
         }
-        assert silver_dataset.attributes["cv_warn_count"] == 1
-        assert silver_dataset.attributes["cv_error_count"] == 1
-        assert silver_dataset.attributes["cv_quarantine_count"] == 1
-        assert crossref_source.attributes["selected_fields"] == ["abstract", "title"]
+        assert silver_attrs["cv_warn_count"] == 1
+        assert silver_attrs["cv_error_count"] == 1
+        assert silver_attrs["cv_quarantine_count"] == 1
+        assert mapping_to_plain(crossref_source.attributes)["selected_fields"] == [
+            "abstract",
+            "title",
+        ]
         assert any(
             edge.edge_type == LineageEdgeType.DERIVED_FROM
             and edge.source.node_id == silver_dataset.node_id
@@ -487,22 +492,23 @@ class TestLineageFragments:
             and edge.target.node_id == openalex_source.node_id
         )
 
-        assert gold_dataset.attributes["composite_run_id"] == "comp-run-123"
-        assert gold_dataset.attributes["composite_name"] == "composite.publication"
-        assert gold_dataset.attributes["source_providers"] == ["seed", "openalex"]
-        assert gold_dataset.attributes["seed_record_id"] == "seed-001"
-        assert gold_dataset.attributes["field_sources"] == {
+        gold_attrs = mapping_to_plain(gold_dataset.attributes)
+        assert gold_attrs["composite_run_id"] == "comp-run-123"
+        assert gold_attrs["composite_name"] == "composite.publication"
+        assert gold_attrs["source_providers"] == ["seed", "openalex"]
+        assert gold_attrs["seed_record_id"] == "seed-001"
+        assert gold_attrs["field_sources"] == {
             "title": "openalex",
             "doi": "seed",
         }
-        assert gold_dataset.attributes["provider_fields"] == {
+        assert gold_attrs["provider_fields"] == {
             "openalex": ["abstract", "title"],
             "seed": ["doi"],
         }
         assert gold_dataset.attributes["cv_warn_count"] == 1
         assert gold_dataset.attributes["cv_error_count"] == 1
         assert gold_dataset.attributes["cv_quarantine_count"] == 1
-        assert openalex_source.attributes["selected_fields"] == ["abstract", "title"]
+        assert mapping_to_plain(openalex_source.attributes)["selected_fields"] == ["abstract", "title"]
         assert openalex_source.attributes["enrichment_status"] == "success"
         assert openalex_edge.attributes["selected_field_count"] == 2
         assert openalex_edge.attributes["enrichment_status"] == "success"

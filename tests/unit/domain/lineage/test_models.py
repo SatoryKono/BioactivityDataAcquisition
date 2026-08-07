@@ -146,3 +146,35 @@ def test_lineage_shared_helpers_normalize_edge_case_payloads() -> None:
     assert load_mapping("not-a-mapping") == {}
     assert load_optional_version({"version": 3.5}, "version") is None
     assert load_optional_int({"step_index": "7"}, "step_index") == 7
+
+def test_dataset_ref_node_id_encodes_delimiter_collision() -> None:
+    """Names containing @ must not collide with versioned refs (#8168)."""
+    with_at_in_name = DatasetRef(layer="silver", logical_name="foo@1", version=None)
+    versioned = DatasetRef(layer="silver", logical_name="foo", version=1)
+
+    assert with_at_in_name.node_id != versioned.node_id
+    assert with_at_in_name.node_id == "silver:foo%401"
+    assert versioned.node_id == "silver:foo@1"
+
+
+def test_normalize_mapping_is_immutable_and_detached() -> None:
+    """Attribute maps are frozen and do not share nested mutables (#8167)."""
+    from types import MappingProxyType
+
+    nested: dict[str, object] = {"inner": ["a", "b"]}
+    source: dict[str, object] = {"k": nested, 1: "num_key"}  # type: ignore[dict-item]
+    from bioetl.domain.lineage._shared import normalize_mapping
+
+    result = normalize_mapping(source)  # type: ignore[arg-type]
+    assert isinstance(result, MappingProxyType)
+    assert result["k"]["inner"] == ("a", "b")
+    # mutate source after normalize — result must not change
+    nested["inner"].append("c")  # type: ignore[union-attr]
+    source["k"] = {"hijacked": True}
+    assert result["k"]["inner"] == ("a", "b")
+    try:
+        result["k"] = {"x": 1}  # type: ignore[index]
+        raise AssertionError("expected TypeError on MappingProxyType mutation")
+    except TypeError:
+        pass
+
