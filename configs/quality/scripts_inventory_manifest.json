@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-07T08:47:42.399239+00:00",
+  "generated_at": "2026-08-07T08:57:41.988538+00:00",
   "summary": {
     "total_scripts": 565,
     "status_counts": {
@@ -18620,7 +18620,7 @@
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
-          "line": 150,
+          "line": 156,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeout 180"
         },
