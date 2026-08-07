@@ -44,7 +44,21 @@ def _probe_commands(root: Path) -> list[tuple[str, list[str]]]:
         ("launcher_help", ["bash", str(launcher), "--help"]),
         ("headless_help", ["bash", str(headless), "--help"]),
         ("environment_check", ["bash", str(launcher), "check"]),
-        ("mcp_ensure_check", ["bash", str(launcher), "mcp-check"]),
+        (
+            "mcp_ensure_check",
+            [
+                "bash",
+                str(launcher),
+                "mcp-check",
+                "--profile",
+                "stable",
+                "--timeout",
+                "1",
+                "--overall-timeout",
+                "10",
+                "--no-write",
+            ],
+        ),
     ]
 
 
