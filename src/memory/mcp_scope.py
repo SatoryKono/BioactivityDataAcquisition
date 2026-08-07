@@ -22,6 +22,7 @@ def _confine_under_root(path: Path, *, root: Path) -> Path:
         raise ValueError(f"path escapes allowed root {root_resolved}: {path}") from exc
     return resolved
 
+
 _SAFE_COMPONENT = re.compile(r"[^A-Za-z0-9_.-]")
 
 

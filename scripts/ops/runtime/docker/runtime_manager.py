@@ -818,7 +818,7 @@ def _preflight_errors_are_recoverable(
     producer bind/identity drift (fixed by absolute bind env + recreate).
     Cross-stack PROJECT_ORIGIN / MOUNT_ORIGIN / port inventory noise does not
     block starting the selected stack.
-    
+
     NOSONAR - S3776: complexity 29 exceeds 15; extraction would obscure error classification logic
     """
     try:

@@ -119,7 +119,9 @@ def _coerce_text_tuple(value: object, name: str) -> tuple[str, ...]:
     return normalized
 
 
-_FILTER_FIELD_RE = re.compile(r"^[A-Za-z_]\w*$")  # NOSONAR - requires non-digit first char, \w+ alone is insufficient
+_FILTER_FIELD_RE = re.compile(
+    r"^[A-Za-z_]\w*$"
+)  # NOSONAR - requires non-digit first char, \w+ alone is insufficient
 
 
 def _require_filter_field(field: str) -> None:

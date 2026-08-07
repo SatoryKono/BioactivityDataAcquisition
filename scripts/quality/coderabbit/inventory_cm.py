@@ -1,18 +1,18 @@
 """Live inventory: open CR residual critical/major + 5 streams."""
 
-# NOSONAR - S1192: stream literals are intentional for categorization logic
-STREAM_S5_PUBLICATION = "S5 publication"
-STREAM_S4_TRANSFORMER = "S4 transformer"
-STREAM_S3_RECORD_QUARANTINE_FETCH = "S3 record-quarantine-fetch"
-STREAM_S2_CONFIG_SERVICES = "S2 config-services"
-STREAM_S1_LIFECYCLE_RUNNER = "S1 lifecycle-runner"
-
 from __future__ import annotations
 
 import json
 import re
 from collections import defaultdict
 from pathlib import Path
+
+# NOSONAR - S1192: stream literals are intentional for categorization logic
+STREAM_S5_PUBLICATION = "S5 publication"
+STREAM_S4_TRANSFORMER = "S4 transformer"
+STREAM_S3_RECORD_QUARANTINE_FETCH = "S3 record-quarantine-fetch"
+STREAM_S2_CONFIG_SERVICES = "S2 config-services"
+STREAM_S1_LIFECYCLE_RUNNER = "S1 lifecycle-runner"
 
 OUT = Path("reports/quality/coderabbit/_live")
 

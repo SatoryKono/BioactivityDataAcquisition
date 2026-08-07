@@ -96,7 +96,7 @@ class RecordEnvelope:
         created_at: str | None = None,
     ) -> RecordEnvelope:
         """Create an envelope with a canonical UTC timestamp.
-        
+
         NOSONAR - S107: 15 parameters are intentional for comprehensive record envelope creation;
         each parameter represents a distinct domain field required for memory records.
         """

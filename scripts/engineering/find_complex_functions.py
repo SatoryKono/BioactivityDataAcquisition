@@ -2,9 +2,7 @@
 """Find functions with high cognitive complexity in scripts directory."""
 
 import ast
-import sys
 from pathlib import Path
-from typing import Any
 
 
 def calculate_cognitive_complexity(node: ast.AST) -> int:
@@ -21,22 +19,29 @@ def calculate_cognitive_complexity(node: ast.AST) -> int:
             nesting_level += 1
         elif isinstance(child, (ast.BoolOp, ast.Compare)):
             complexity += 1
-        elif isinstance(child, (ast.Lambda, ast.ListComp, ast.DictComp, ast.SetComp, ast.GeneratorExp)):
+        elif isinstance(
+            child,
+            (ast.Lambda, ast.ListComp, ast.DictComp, ast.SetComp, ast.GeneratorExp),
+        ):
             complexity += 1 + nesting_level
-        elif isinstance(child, ast.Ternary):  # Conditional expression
+        elif isinstance(child, ast.IfExp):
             complexity += 1 + nesting_level
         elif isinstance(child, (ast.And, ast.Or)):
             complexity += 1
 
         # Decrease nesting after compound statements
-        if isinstance(child, (ast.If, ast.While, ast.For, ast.AsyncFor, ast.ExceptHandler)):
+        if isinstance(
+            child, (ast.If, ast.While, ast.For, ast.AsyncFor, ast.ExceptHandler)
+        ):
             # This is a simplification - proper nesting tracking would need more context
             pass
 
     return complexity
 
 
-def find_complex_functions(file_path: Path, threshold: int = 15) -> list[tuple[str, int, int]]:
+def find_complex_functions(
+    file_path: Path, threshold: int = 15
+) -> list[tuple[str, int, int]]:
     """Find functions with cognitive complexity above threshold."""
     try:
         source = file_path.read_text(encoding="utf-8")
@@ -57,7 +62,7 @@ def find_complex_functions(file_path: Path, threshold: int = 15) -> list[tuple[s
     return results
 
 
-def main():
+def main() -> None:
     scripts_dir = Path(__file__).parent.parent.parent
     threshold = 15
 

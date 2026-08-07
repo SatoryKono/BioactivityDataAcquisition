@@ -43,9 +43,7 @@ def to_jsonable(value: object) -> object:
         return {k: to_jsonable(v) for k, v in dataclass_value.items()}
     if isinstance(value, Mapping):
         return {str(k): to_jsonable(v) for k, v in sorted(value.items())}
-    if isinstance(value, Sequence) and not isinstance(
-        value, (str, bytes, bytearray)
-    ):
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
         return [to_jsonable(item) for item in value]
     return value
 
