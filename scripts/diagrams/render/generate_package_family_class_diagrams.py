@@ -18,9 +18,9 @@ from datetime import date
 from pathlib import Path
 
 try:
-    from .diagram_paths import DIAGRAM_ROOT, REPO_ROOT
+    from scripts.diagrams.core.diagram_paths import DIAGRAM_ROOT, REPO_ROOT
 except ImportError:  # pragma: no cover - direct script execution
-    from scripts.diagrams.diagram_paths import DIAGRAM_ROOT, REPO_ROOT
+    from scripts.diagrams.core.diagram_paths import DIAGRAM_ROOT, REPO_ROOT
 
 
 SRC_ROOT = REPO_ROOT / "src" / "bioetl"

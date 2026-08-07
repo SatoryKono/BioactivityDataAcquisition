@@ -12,19 +12,19 @@ proper ID-scoped specificity.
 
 Usage:
     # Check all SVGs (exit 1 if injection needed)
-    python scripts/diagrams/inject_svg_styles.py --check
+    python scripts/diagrams/fix/fix_svg_styles.py --check
 
     # Fix all SVGs in-place
-    python scripts/diagrams/inject_svg_styles.py --fix
+    python scripts/diagrams/fix/fix_svg_styles.py --fix
 
     # Dry-run: show what would change
-    python scripts/diagrams/inject_svg_styles.py --dry-run
+    python scripts/diagrams/fix/fix_svg_styles.py --dry-run
 
     # Process specific files
-    python scripts/diagrams/inject_svg_styles.py --fix -f docs/.../svg/10-resilience-patterns.svg
+    python scripts/diagrams/fix/fix_svg_styles.py --fix -f docs/.../svg/10-resilience-patterns.svg
 
     # Process specific directory
-    python scripts/diagrams/inject_svg_styles.py --fix --dir docs/.../architecture/svg
+    python scripts/diagrams/fix/fix_svg_styles.py --fix --dir docs/.../architecture/svg
 """
 
 from __future__ import annotations
@@ -35,9 +35,9 @@ import sys
 from pathlib import Path
 
 try:
-    from .diagram_paths import render_dir
+    from scripts.diagrams.core.diagram_paths import render_dir
 except ImportError:  # pragma: no cover - direct script execution
-    from scripts.diagrams.diagram_paths import render_dir
+    from scripts.diagrams.core.diagram_paths import render_dir
 
 # ── Defaults ────────────────────────────────────────────────────────────────
 

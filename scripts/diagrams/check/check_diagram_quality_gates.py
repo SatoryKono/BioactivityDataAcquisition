@@ -20,14 +20,14 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 try:
-    from .diagram_paths import (
+    from scripts.diagrams.core.diagram_paths import (
         DIAGRAM_ROOT,
         QUALITY_GATE_MANIFEST,
         REPO_ROOT,
         source_dir,
     )
 except ImportError:  # pragma: no cover - direct script execution
-    from scripts.diagrams.diagram_paths import (
+    from scripts.diagrams.core.diagram_paths import (
         DIAGRAM_ROOT,
         QUALITY_GATE_MANIFEST,
         REPO_ROOT,

@@ -575,7 +575,7 @@ render_one() {
       case "$TEXT_LAYER" in
         dual)
           if [[ -n "$PYTHON_BIN" ]]; then
-            "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py" --fix -f "$svg_tmp" >/dev/null 2>&1 || true
+            "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/fix/add_svg_text_fallback.py" --fix -f "$svg_tmp" >/dev/null 2>&1 || true
           fi
           ;;
         fo-only)
@@ -583,12 +583,12 @@ render_one() {
           ;;
         fallback-only)
           if [[ -n "$PYTHON_BIN" ]]; then
-            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py" --fix -f "$svg_tmp" >/dev/null 2>&1; then
+            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/fix/add_svg_text_fallback.py" --fix -f "$svg_tmp" >/dev/null 2>&1; then
               log_err "Failed to add SVG fallback text: $svg_out"
               rm -rf "$svg_tmp_dir"
               return 1
             fi
-            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py" --fix -f "$svg_tmp" >/dev/null 2>&1; then
+            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/fix/strip_svg_foreign_object.py" --fix -f "$svg_tmp" >/dev/null 2>&1; then
               log_err "Failed to strip foreignObject labels: $svg_out"
               rm -rf "$svg_tmp_dir"
               return 1
@@ -617,7 +617,7 @@ render_one() {
       fi
       # Inject CSS overrides for edge label readability
       if [[ -n "$PYTHON_BIN" ]]; then
-        "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/inject_svg_styles.py" --fix -f "$svg_tmp" >/dev/null 2>&1 || true
+        "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/fix/fix_svg_styles.py" --fix -f "$svg_tmp" >/dev/null 2>&1 || true
       fi
       replace_atomically "$svg_tmp" "$svg_out"
       rm -rf "$svg_tmp_dir"
@@ -653,7 +653,7 @@ render_one() {
       case "$TEXT_LAYER" in
         dual)
           if [[ -n "$PYTHON_BIN" ]]; then
-            "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py" --fix -f "$temp_png_svg" >/dev/null 2>&1 || true
+            "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/fix/add_svg_text_fallback.py" --fix -f "$temp_png_svg" >/dev/null 2>&1 || true
           fi
           ;;
         fo-only)
@@ -661,12 +661,12 @@ render_one() {
           ;;
         fallback-only)
           if [[ -n "$PYTHON_BIN" ]]; then
-            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py" --fix -f "$temp_png_svg" >/dev/null 2>&1; then
+            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/fix/add_svg_text_fallback.py" --fix -f "$temp_png_svg" >/dev/null 2>&1; then
               echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
               rm -rf "$temp_png_svg_dir"
               return 1
             fi
-            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py" --fix -f "$temp_png_svg" >/dev/null 2>&1; then
+            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/fix/strip_svg_foreign_object.py" --fix -f "$temp_png_svg" >/dev/null 2>&1; then
               echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
               rm -rf "$temp_png_svg_dir"
               return 1
@@ -684,7 +684,7 @@ render_one() {
           ;;
       esac
       if [[ -n "$PYTHON_BIN" ]]; then
-        "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/inject_svg_styles.py" --fix -f "$temp_png_svg" >/dev/null 2>&1 || true
+        "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/fix/fix_svg_styles.py" --fix -f "$temp_png_svg" >/dev/null 2>&1 || true
       fi
       png_svg_source="$temp_png_svg"
     fi

@@ -22,7 +22,7 @@ def _err(message: str) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Summarize output produced by scripts/diagrams/lint_diagrams.py --json",
+        description="Summarize output produced by scripts/diagrams/lint/lint_diagrams.py --json",
     )
     parser.add_argument("report", type=Path, help="Path to lint JSON report")
     parser.add_argument(

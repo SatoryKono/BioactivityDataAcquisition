@@ -81,7 +81,7 @@ def test_issue_6208_embedded_mermaid_validation_is_repo_wide() -> None:
 
 
 def test_issue_6209_visual_smoke_emits_json_report() -> None:
-    smoke = _read("scripts/diagrams/check_diagram_visual_smoke.py")
+    smoke = _read("scripts/diagrams/check/check_diagram_visual_smoke.py")
     workflow = _read(".github/workflows/docs.yml")
     runner = _read("scripts/diagrams/run_diagram_checks.sh")
 

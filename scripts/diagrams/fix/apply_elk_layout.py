@@ -11,8 +11,8 @@ Can also enforce a unified ELK edge routing mode for diagrams that already
 have ELK init directives.
 
 Usage:
-    python scripts/diagrams/apply_elk_layout.py [--dry-run] [--threshold N] [--no-direction]
-    python scripts/diagrams/apply_elk_layout.py --enforce-routing ORTHOGONAL
+    python scripts/diagrams/fix/apply_elk_layout.py [--dry-run] [--threshold N] [--no-direction]
+    python scripts/diagrams/fix/apply_elk_layout.py --enforce-routing ORTHOGONAL
     python -m scripts.diagrams apply-elk --dry-run
 """
 
@@ -31,7 +31,7 @@ if isinstance(sys.stdout, io.TextIOWrapper):
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 ARCH_DIR = REPO_ROOT / "docs/02-architecture/diagrams/architecture"
 
 # ── Constants ─────────────────────────────────────────────────────────────────

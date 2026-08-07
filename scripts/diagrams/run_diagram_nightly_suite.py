@@ -30,7 +30,7 @@ try:
         VISUAL_SMOKE_MANIFEST,
     )
 except ImportError:  # pragma: no cover - direct script execution
-    from scripts.diagrams.diagram_paths import (
+    from scripts.diagrams.core.diagram_paths import (
         DIAGRAM_THEME_DIR,
         QUALITY_GATE_MANIFEST,
         REPO_ROOT,

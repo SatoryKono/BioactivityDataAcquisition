@@ -8,7 +8,7 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Tests for scripts/diagrams/strip_svg_foreign_object.py."""
+"""Tests for scripts/diagrams/fix/strip_svg_foreign_object.py."""
 
 from __future__ import annotations
 

@@ -8,7 +8,7 @@ flowchart (which supports inline linkStyle) and other diagram types
 Works as a post-processing step after mmdc renders SVG.
 
 Usage:
-    python scripts/diagrams/harmonize_link_styles.py [--dry-run] [--dir DIR]
+    python scripts/diagrams/fix/harmonize_link_styles.py [--dry-run] [--dir DIR]
     python -m scripts.diagrams harmonize-link-styles --dry-run
 
 ADR-040 D9: Cross-Diagram Link Harmonization.
@@ -28,7 +28,7 @@ from xml.etree import ElementTree as ET
 if isinstance(sys.stdout, TextIOWrapper):
     sys.stdout.reconfigure(encoding="utf-8")
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 # ── Canonical semantic palette ────────────────────────────────────────────────
 

@@ -9,10 +9,10 @@ import sys
 import tempfile
 from pathlib import Path
 
-from .pipeline_dataflow_ir import build_pipeline_dataflow_ir
-from .pipeline_dataflow_render import render_text_outputs
+from scripts.diagrams.render.pipeline_dataflow_ir import build_pipeline_dataflow_ir
+from scripts.diagrams.render.pipeline_dataflow_render import render_text_outputs
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DIAGRAM_DIR = PROJECT_ROOT / "docs/02-architecture/diagrams/architecture"
 DEFAULT_DESCRIPTION_DIR = (
     PROJECT_ROOT / "docs/02-architecture/diagrams/descriptions/architecture"

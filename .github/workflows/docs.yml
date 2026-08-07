@@ -293,10 +293,10 @@ jobs:
 
       - name: Validate generated ChEMBL activity artifacts
         run: |
-          python3 scripts/diagrams/check_diagram_artifacts.py \
+          python3 scripts/diagrams/check/check_diagram_artifacts.py \
             --manifest docs/02-architecture/diagrams/manifests/chembl-pipeline-activity-dataflow.txt \
             --require-png
-          python3 scripts/diagrams/check_svg_text_visibility.py \
+          python3 scripts/diagrams/check/check_svg_text_visibility.py \
             --manifest docs/02-architecture/diagrams/manifests/chembl-pipeline-activity-dataflow.txt
 
       - name: Upload generated ChEMBL activity renders
@@ -331,10 +331,10 @@ jobs:
       - name: Diagram policy lint report
         run: |
           set +e
-          python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json
+          python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json
           lint_status=$?
           set -e
-          python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json
+          python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json
           if [ "$lint_status" -ne 0 ]; then
             echo "::error::Diagram lint failed. Fix the reported issues or update the accepted diagram budget."
             exit "$lint_status"
@@ -374,29 +374,29 @@ jobs:
 
       - name: Validate required rendered artifacts (SVG primary)
         run: |
-          python3 scripts/diagrams/check_diagram_artifacts.py \
+          python3 scripts/diagrams/check/check_diagram_artifacts.py \
             --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
 
       - name: Validate SVG text visibility (edge labels and node text)
         run: |
-          python3 scripts/diagrams/check_svg_text_visibility.py \
+          python3 scripts/diagrams/check/check_svg_text_visibility.py \
             --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
 
       - name: Visual smoke regression (selected SVG baselines)
         run: |
           mkdir -p reports/diagrams
-          python3 scripts/diagrams/check_diagram_visual_smoke.py \
+          python3 scripts/diagrams/check/check_diagram_visual_smoke.py \
             --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt \
             --json-out reports/diagrams/diagram-visual-smoke.json
 
       - name: Validate link harmonization post-processor
         run: |
-          python3 scripts/diagrams/harmonize_link_styles.py --dry-run --fail-on-errors
+          python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors
 
       - name: Diagram regression quality gates (DIAG-T018..T023)
         run: |
           mkdir -p reports/diagrams
-          python3 scripts/diagrams/check_diagram_quality_gates.py \
+          python3 scripts/diagrams/check/check_diagram_quality_gates.py \
             --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt \
             --json-out reports/diagrams/diagram-quality-report.json \
             --markdown-out reports/diagrams/diagram-quality-report.md

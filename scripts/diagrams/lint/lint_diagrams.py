@@ -15,17 +15,17 @@ Checks performed:
 
 Usage:
     # Check all diagrams
-    python scripts/diagrams/lint_diagrams.py
+    python scripts/diagrams/lint/lint_diagrams.py
 
     # Check specific paths (files and/or directories)
-    python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams/
-    python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams/mermaid/01-high-level.mermaid
+    python scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams/
+    python scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams/mermaid/01-high-level.mermaid
 
     # Output JSON format
-    python scripts/diagrams/lint_diagrams.py --json
+    python scripts/diagrams/lint/lint_diagrams.py --json
 
     # Set staleness threshold (days)
-    python scripts/diagrams/lint_diagrams.py --stale-days 90
+    python scripts/diagrams/lint/lint_diagrams.py --stale-days 90
 
 References:
     - docs/**/*.mmd
@@ -1043,7 +1043,7 @@ def check_orphan_nodes(path: Path, lines: list[str]) -> list[Issue]:
 
     _sys.path.insert(0, str(Path(__file__).parent))
     try:
-        from scripts.diagrams.prune_orphan_nodes import (
+        from scripts.diagrams.fix.prune_orphan_nodes import (
             detect_diagram_type,
             parse_flowchart_orphans,
             parse_keep_orphans,
@@ -1076,7 +1076,7 @@ def check_orphan_nodes(path: Path, lines: list[str]) -> list[Issue]:
                     f"Orphan node(s) found (no edges): "
                     f"{', '.join(sorted(orphans))}. "
                     "Add %% keep-orphan: NodeId to exempt, or run "
-                    "scripts/diagrams/prune_orphan_nodes.py --fix"
+                    "scripts/diagrams/fix/prune_orphan_nodes.py --fix"
                 ),
             )
         )

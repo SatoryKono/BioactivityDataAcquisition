@@ -16,15 +16,15 @@ import tempfile
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parents[1]
+REPO_ROOT = SCRIPT_DIR.parents[2]
 for import_root in (REPO_ROOT, SCRIPT_DIR):
     if str(import_root) not in sys.path:
         sys.path.insert(0, str(import_root))
 
 try:
-    from .diagram_paths import SOURCE_FAMILIES, render_dir
+    from scripts.diagrams.core.diagram_paths import SOURCE_FAMILIES, render_dir
 except ImportError:  # pragma: no cover - direct script execution
-    from scripts.diagrams.diagram_paths import SOURCE_FAMILIES, render_dir
+    from scripts.diagrams.core.diagram_paths import SOURCE_FAMILIES, render_dir
 
 SVG_DIRS = [render_dir(family, "svg") for family in SOURCE_FAMILIES]
 

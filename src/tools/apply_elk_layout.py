@@ -1,4 +1,4 @@
-"""Compatibility wrapper for ``scripts.diagrams.apply_elk_layout``.
+"""Compatibility wrapper for ``scripts.diagrams.fix.apply_elk_layout``.
 
 The canonical diagram codemod lives under ``scripts/diagrams``. This module is
 retained temporarily for existing direct invocations and architecture tests.

@@ -20,7 +20,7 @@ from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from scripts.docs.passports.source_facts import load_effective_pipeline_facts
 from scripts.schema.analysis.generate_unified_schema_map import build_unified_schema_row
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 IR_SCHEMA_VERSION = "1.0.0"
 GENERATOR_VERSION = "1.0.0"
 

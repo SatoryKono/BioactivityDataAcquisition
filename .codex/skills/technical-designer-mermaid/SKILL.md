@@ -114,11 +114,11 @@ Otherwise use generic Mermaid mode.
 
 7. Run project quality gate after edits.
 
-- `python scripts/diagrams/lint_diagrams.py docs`
+- `python scripts/diagrams/lint/lint_diagrams.py docs`
 - `bash scripts/diagrams/validate_mermaid_syntax.sh`
 - `bash docs/02-architecture/mmd-diagrams/render.sh` (or targeted render command)
 - Optional smoke check:
-  - `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
+  - `python scripts/diagrams/check/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
 
 8. Respect repository delivery rules.
 

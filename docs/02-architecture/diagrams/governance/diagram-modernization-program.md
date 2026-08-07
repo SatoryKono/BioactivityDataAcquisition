@@ -128,11 +128,11 @@ _Основание: POL-LLM-DIAGRAMS-001, ADR-040, DIAGRAM-WORKFLOW-GUIDE.md_
 
 Используемые инструменты и точки интеграции:
 
-1. `scripts/diagrams/lint_diagrams.py`
-1. `scripts/diagrams/check_diagram_visual_smoke.py`
+1. `scripts/diagrams/lint/lint_diagrams.py`
+1. `scripts/diagrams/check/check_diagram_visual_smoke.py`
 1. `scripts/diagrams/validate_mermaid_syntax.sh`
 1. `docs/02-architecture/diagrams/tooling/render.sh`
-1. `scripts/diagrams/add_svg_text_fallback.py`
+1. `scripts/diagrams/fix/add_svg_text_fallback.py`
 1. `.github/workflows/docs.yml`
 1. `.github/workflows/validate-vendored-mermaid-assets.yml`
 

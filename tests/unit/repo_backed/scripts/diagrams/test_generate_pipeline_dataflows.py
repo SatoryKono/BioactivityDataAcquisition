@@ -35,13 +35,13 @@ from types import SimpleNamespace
 import pytest
 
 from scripts.diagrams import __main__ as diagrams_router
-from scripts.diagrams import pipeline_dataflow_ir
-from scripts.diagrams.generate_pipeline_dataflows import main
-from scripts.diagrams.pipeline_dataflow_ir import (
+from scripts.diagrams.render import pipeline_dataflow_ir
+from scripts.diagrams.render.generate_pipeline_dataflows import main
+from scripts.diagrams.render.pipeline_dataflow_ir import (
     PipelineDataflowIR,
     build_pipeline_dataflow_ir,
 )
-from scripts.diagrams.pipeline_dataflow_render import (
+from scripts.diagrams.render.pipeline_dataflow_render import (
     DIAGRAM_FILENAMES,
     render_mermaid_views,
 )
@@ -208,7 +208,7 @@ def test_router_exposes_module_based_generator() -> None:
     command = diagrams_router.COMMAND_SPECS["generate-dataflows"]
 
     assert command.runner == "module"
-    assert command.target == "scripts.diagrams.generate_pipeline_dataflows"
+    assert command.target == "scripts.diagrams.render.generate_pipeline_dataflows"
 
 
 def test_unified_schema_inventory_ignores_composite_workflow_configs() -> None:
@@ -224,14 +224,14 @@ def test_cli_reports_controlled_build_failure(monkeypatch) -> None:
         raise ValueError("simulated build failure")
 
     monkeypatch.setattr(
-        "scripts.diagrams.generate_pipeline_dataflows.build_outputs",
+        "scripts.diagrams.render.generate_pipeline_dataflows.build_outputs",
         boom,
     )
     assert main(["--pipeline", "chembl_activity"]) == 1
 
 
 def test_project_fields_rejects_unknown_groups() -> None:
-    from scripts.diagrams.pipeline_dataflow_ir import _project_fields
+    from scripts.diagrams.render.pipeline_dataflow_ir import _project_fields
 
     with pytest.raises(ValueError, match="Unknown column groups"):
         _project_fields(
@@ -243,7 +243,7 @@ def test_project_fields_rejects_unknown_groups() -> None:
 
 
 def test_project_fields_follows_column_groups_order() -> None:
-    from scripts.diagrams.pipeline_dataflow_ir import _project_fields
+    from scripts.diagrams.render.pipeline_dataflow_ir import _project_fields
 
     result = _project_fields(
         ["a", "b", "c"],

@@ -7,7 +7,7 @@ Applies only to files where:
   4. >= 3 distinct connection types are detected via subgraph-layer heuristics
 
 Usage:
-    python scripts/diagrams/differentiate_linkstyle.py [--dry-run]
+    python scripts/diagrams/fix/differentiate_linkstyle.py [--dry-run]
     python -m scripts.diagrams differentiate-linkstyle --dry-run
 """
 
@@ -23,7 +23,7 @@ if isinstance(sys.stdout, io.TextIOWrapper):
     sys.stdout.reconfigure(encoding="utf-8")  # Windows cp1251 fix
 
 MERMAID_DIR = (
-    Path(__file__).resolve().parents[2] / "docs/02-architecture/diagrams/mermaid"
+    Path(__file__).resolve().parents[3] / "docs/02-architecture/diagrams/mermaid"
 )
 
 # ── Styles per link type ──────────────────────────────────────────────────────
