@@ -1,0 +1,372 @@
+{
+  "schema_version": "branch-coverage-tail-owner-map-v1",
+  "linked_issue": "#8339",
+  "reviewed_on": "2026-08-07",
+  "owner": "@bioetl-architecture",
+  "source_reports": [
+    "reports/quality/branch-coverage-gap-report.md",
+    "reports/quality/module-coverage-inventory.json"
+  ],
+  "gate": {
+    "branch_threshold_percent": 85.0,
+    "branch_rate_percent_from_gap_report": 86.152,
+    "files_below_85_branch_coverage_from_gap_report": 552,
+    "debt_budget_outcome": "reduced_or_unchanged"
+  },
+  "priority_families": [
+    {
+      "family": "infrastructure_quarantine",
+      "current_min_coverage_percent": 24.36,
+      "tail_path": "src/bioetl/infrastructure/quarantine/status_events.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/infrastructure/quarantine/status_events.py",
+          "coverage_percent": 24.36,
+          "missing_lines": 59
+        }
+      ],
+      "owner": "@bioetl-infrastructure",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "infrastructure_storage",
+      "current_min_coverage_percent": 26.32,
+      "tail_path": "src/bioetl/infrastructure/storage/bronze/metadata_snapshot_refs.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/infrastructure/storage/bronze/metadata_snapshot_refs.py",
+          "coverage_percent": 26.32,
+          "missing_lines": 28
+        },
+        {
+          "path": "src/bioetl/infrastructure/storage/delta_reader.py",
+          "coverage_percent": 30.59,
+          "missing_lines": 59
+        },
+        {
+          "path": "src/bioetl/infrastructure/storage/support/retention_dedup.py",
+          "coverage_percent": 32.35,
+          "missing_lines": 46
+        },
+        {
+          "path": "src/bioetl/infrastructure/storage/delta_reader_helpers.py",
+          "coverage_percent": 33.33,
+          "missing_lines": 18
+        },
+        {
+          "path": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+          "coverage_percent": 48.0,
+          "missing_lines": 52
+        }
+      ],
+      "owner": "@bioetl-infrastructure",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "application_services",
+      "current_min_coverage_percent": 27.78,
+      "tail_path": "src/bioetl/application/services/control_plane/manifest/inspection_artifact_refs.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/application/services/control_plane/manifest/inspection_artifact_refs.py",
+          "coverage_percent": 27.78,
+          "missing_lines": 26
+        },
+        {
+          "path": "src/bioetl/application/services/control_plane/replay/_historical_record_payload.py",
+          "coverage_percent": 54.55,
+          "missing_lines": 5
+        },
+        {
+          "path": "src/bioetl/application/services/control_plane/forensic_diff_service.py",
+          "coverage_percent": 59.62,
+          "missing_lines": 21
+        },
+        {
+          "path": "src/bioetl/application/services/run_reports/enrichment.py",
+          "coverage_percent": 74.44,
+          "missing_lines": 23
+        },
+        {
+          "path": "src/bioetl/application/services/run_reports/query.py",
+          "coverage_percent": 80.95,
+          "missing_lines": 32
+        }
+      ],
+      "owner": "@bioetl-application",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "infrastructure_observability",
+      "current_min_coverage_percent": 35.29,
+      "tail_path": "src/bioetl/infrastructure/observability/health_metrics_exposition.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/infrastructure/observability/health_metrics_exposition.py",
+          "coverage_percent": 35.29,
+          "missing_lines": 11
+        },
+        {
+          "path": "src/bioetl/infrastructure/observability/__init__.py",
+          "coverage_percent": 68.75,
+          "missing_lines": 5
+        }
+      ],
+      "owner": "@bioetl-infrastructure",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "domain_run_reports",
+      "current_min_coverage_percent": 51.28,
+      "tail_path": "src/bioetl/domain/run_reports/workflow_reasons.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/domain/run_reports/workflow_reasons.py",
+          "coverage_percent": 51.28,
+          "missing_lines": 19
+        }
+      ],
+      "owner": "@bioetl-domain",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "infrastructure_adapters",
+      "current_min_coverage_percent": 57.95,
+      "tail_path": "src/bioetl/infrastructure/adapters/pubmed/adapter.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/infrastructure/adapters/pubmed/adapter.py",
+          "coverage_percent": 57.95,
+          "missing_lines": 37
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/pubchem/_client_fetch_surface.py",
+          "coverage_percent": 59.46,
+          "missing_lines": 15
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/_idmapping_parser.py",
+          "coverage_percent": 70.27,
+          "missing_lines": 22
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/crossref/fetch_flow.py",
+          "coverage_percent": 74.0,
+          "missing_lines": 13
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/_health_check_policy.py",
+          "coverage_percent": 74.42,
+          "missing_lines": 11
+        }
+      ],
+      "owner": "@bioetl-infrastructure",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "interfaces_http",
+      "current_min_coverage_percent": 58.21,
+      "tail_path": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
+          "coverage_percent": 58.21,
+          "missing_lines": 56
+        },
+        {
+          "path": "src/bioetl/interfaces/http/_health_server_identity_routing_support.py",
+          "coverage_percent": 61.43,
+          "missing_lines": 27
+        },
+        {
+          "path": "src/bioetl/interfaces/http/control_plane_identity/specs.py",
+          "coverage_percent": 75.0,
+          "missing_lines": 4
+        },
+        {
+          "path": "src/bioetl/interfaces/http/_processed_records_prometheus.py",
+          "coverage_percent": 81.25,
+          "missing_lines": 21
+        }
+      ],
+      "owner": "@bioetl-interfaces",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "application_core",
+      "current_min_coverage_percent": 61.26,
+      "tail_path": "src/bioetl/application/core/batch_writer_columns_mixin.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/application/core/batch_writer_columns_mixin.py",
+          "coverage_percent": 61.26,
+          "missing_lines": 43
+        },
+        {
+          "path": "src/bioetl/application/core/_batch_writer_gold_support.py",
+          "coverage_percent": 61.7,
+          "missing_lines": 18
+        },
+        {
+          "path": "src/bioetl/application/core/postrun/_metadata_writes.py",
+          "coverage_percent": 72.0,
+          "missing_lines": 14
+        },
+        {
+          "path": "src/bioetl/application/core/batch_checkpoint_recovery_service.py",
+          "coverage_percent": 81.11,
+          "missing_lines": 17
+        },
+        {
+          "path": "src/bioetl/application/core/_record_processor_span_support.py",
+          "coverage_percent": 82.0,
+          "missing_lines": 9
+        }
+      ],
+      "owner": "@bioetl-application",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "infrastructure_export",
+      "current_min_coverage_percent": 64.13,
+      "tail_path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/infrastructure/export/debug_export_ops.py",
+          "coverage_percent": 64.13,
+          "missing_lines": 33
+        },
+        {
+          "path": "src/bioetl/infrastructure/export/export_writer_adapter.py",
+          "coverage_percent": 81.13,
+          "missing_lines": 10
+        }
+      ],
+      "owner": "@bioetl-infrastructure",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "application_workflow",
+      "current_min_coverage_percent": 64.86,
+      "tail_path": "src/bioetl/application/workflow/transforms/reconcile_rows.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/application/workflow/transforms/reconcile_rows.py",
+          "coverage_percent": 64.86,
+          "missing_lines": 26
+        }
+      ],
+      "owner": "@bioetl-application",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "interfaces_cli",
+      "current_min_coverage_percent": 67.5,
+      "tail_path": "src/bioetl/interfaces/cli/commands/domains/health/server_integration_deps.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/interfaces/cli/commands/domains/health/server_integration_deps.py",
+          "coverage_percent": 67.5,
+          "missing_lines": 13
+        },
+        {
+          "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py",
+          "coverage_percent": 76.25,
+          "missing_lines": 19
+        },
+        {
+          "path": "src/bioetl/interfaces/cli/commands/domains/diagnostics/operations.py",
+          "coverage_percent": 81.67,
+          "missing_lines": 11
+        },
+        {
+          "path": "src/bioetl/interfaces/cli/commands/domains/maintenance/plan.py",
+          "coverage_percent": 82.05,
+          "missing_lines": 14
+        }
+      ],
+      "owner": "@bioetl-interfaces",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "application_composite",
+      "current_min_coverage_percent": 71.0,
+      "tail_path": "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py",
+          "coverage_percent": 71.0,
+          "missing_lines": 29
+        },
+        {
+          "path": "src/bioetl/application/composite/__init__.py",
+          "coverage_percent": 75.0,
+          "missing_lines": 4
+        }
+      ],
+      "owner": "@bioetl-application",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "domain_exceptions",
+      "current_min_coverage_percent": 73.42,
+      "tail_path": "src/bioetl/domain/exceptions/_redaction.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/domain/exceptions/_redaction.py",
+          "coverage_percent": 73.42,
+          "missing_lines": 21
+        }
+      ],
+      "owner": "@bioetl-domain",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "composition_bootstrap",
+      "current_min_coverage_percent": 75.0,
+      "tail_path": "src/bioetl/composition/bootstrap/assembly/health_service.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/composition/bootstrap/assembly/health_service.py",
+          "coverage_percent": 75.0,
+          "missing_lines": 9
+        },
+        {
+          "path": "src/bioetl/composition/bootstrap/__init__.py",
+          "coverage_percent": 75.0,
+          "missing_lines": 4
+        },
+        {
+          "path": "src/bioetl/composition/bootstrap/runtime/pipeline.py",
+          "coverage_percent": 79.49,
+          "missing_lines": 8
+        }
+      ],
+      "owner": "@bioetl-composition",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    },
+    {
+      "family": "composition_providers",
+      "current_min_coverage_percent": 75.86,
+      "tail_path": "src/bioetl/composition/providers/_store.py",
+      "sample_low_modules": [
+        {
+          "path": "src/bioetl/composition/providers/_store.py",
+          "coverage_percent": 75.86,
+          "missing_lines": 7
+        },
+        {
+          "path": "src/bioetl/composition/providers/_registration_biblio_adapters.py",
+          "coverage_percent": 79.49,
+          "missing_lines": 8
+        }
+      ],
+      "owner": "@bioetl-composition",
+      "burn_down_action": "add branch-sensitive unit tests for uncovered conditionals; no gate weaken"
+    }
+  ],
+  "notes": [
+    "Line inventory is a proxy for prioritization when detailed per-file branch lists lag.",
+    "Burn-down must raise branch coverage without lowering the 85% blocking gate."
+  ]
+}

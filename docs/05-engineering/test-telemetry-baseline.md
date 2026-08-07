@@ -94,3 +94,7 @@ trend evidence only.
 2. Fallback path: use resilient CI diagnostics artifacts (`junit_parallel.xml`, `junit_serial.xml`, and the coverage `TOTAL` line from `parallel.log`) when the direct coverage artifact expired.
 3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> ...` with either direct artifacts or fallback diagnostics inputs.
 4. Commit the updated baseline and branch-consumable telemetry summary layer together.
+
+## Refresh policy (#8338)
+
+Refresh via `python -m scripts.engineering.ci.update_test_telemetry_baseline` from clean main coverage-verify artifacts. Structural metadata may be aligned to HEAD without inventing duration metrics when full junit shards are unavailable.

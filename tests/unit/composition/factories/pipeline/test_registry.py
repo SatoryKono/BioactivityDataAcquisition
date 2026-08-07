@@ -47,6 +47,15 @@ from bioetl.composition.factories.pipeline.registry_core import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(scope="session")
+def session_registered_pipeline_names() -> frozenset[str]:
+    """Register pipelines once per session for completeness/list hotspots (#8329)."""
+    register_all_pipelines()
+    return frozenset(get_default_registry().list_pipelines())
+
+
+
+
 class _DummyPipelineFactory:
     silver_schema = None
     pandera_silver_schema = None
@@ -99,7 +108,7 @@ def _iter_pipeline_config_names(config_dir: Path) -> list[str]:
     return found_configs
 
 
-def test_registry_completeness():
+def test_registry_completeness(session_registered_pipeline_names: frozenset[str]):
     """
     Verify that every unified entity pipeline configuration file in configs/entities
     has a corresponding entry in the PipelineRegistry.
@@ -108,16 +117,14 @@ def test_registry_completeness():
     if not config_dir.exists():
         pytest.skip("Config directory not found")
 
-    registry = get_default_registry()
-
     # Pipelines that have configs but are not yet fully integrated
     # These are new providers in development that will be registered later
     pipelines_in_development: set[str] = set()  # All pipelines are now fully integrated
 
     found_configs = _iter_pipeline_config_names(config_dir)
 
-    # Get registered pipelines
-    registered_pipelines = registry.list_pipelines()
+    # Session-scoped registration amortizes factory import cost (#8329).
+    registered_pipelines = session_registered_pipeline_names
 
     # Check for missing handlers (excluding pipelines in development)
     missing_handlers = [
@@ -131,16 +138,17 @@ def test_registry_completeness():
     )
 
 
-def test_registry_contains_expected_pipelines():
+def test_registry_contains_expected_pipelines(
+    session_registered_pipeline_names: frozenset[str],
+):
     """Sanity check that key pipelines are present."""
-    registry = get_default_registry()
     expected = [
         "chembl_activity",
         "pubchem_compound",
         "uniprot_protein",
         "pubmed_publication",
     ]
-    registered = registry.list_pipelines()
+    registered = session_registered_pipeline_names
 
     for pipe in expected:
         assert pipe in registered, f"Expected pipeline {pipe} not found in registry"
