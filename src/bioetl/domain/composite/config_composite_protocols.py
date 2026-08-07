@@ -5,7 +5,16 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import Protocol
 
-from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
+from bioetl.domain.composite.aggregation import (
+    AggregationFunction,
+    EnricherCardinality,
+)
+from bioetl.domain.composite.cross_validation import ComparisonMethod
+from bioetl.domain.composite.strategy import (
+    ConflictResolution,
+    FallbackStrategy,
+    MergeStrategy,
+)
 
 __all__ = ["CompositeConfigProtocol"]
 
@@ -58,7 +67,7 @@ class _AggregationFieldProtocol(Protocol):
     def source_field(self) -> str: ...
 
     @property
-    def agg_function(self) -> object: ...
+    def agg_function(self) -> AggregationFunction: ...
 
     @property
     def filter_condition(self) -> str | None: ...
@@ -101,10 +110,10 @@ class _EnricherConfigProtocol(Protocol):
     def limit(self) -> int | None: ...
 
     @property
-    def fallback_strategy(self) -> object: ...
+    def fallback_strategy(self) -> FallbackStrategy: ...
 
     @property
-    def cardinality(self) -> object: ...
+    def cardinality(self) -> EnricherCardinality: ...
 
     @property
     def aggregation(self) -> _AggregationConfigProtocol | None: ...
@@ -220,7 +229,7 @@ class _FieldComparisonProtocol(Protocol):
     def field_name(self) -> str: ...
 
     @property
-    def method(self) -> object: ...
+    def method(self) -> ComparisonMethod: ...
 
     @property
     def threshold(self) -> float: ...
