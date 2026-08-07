@@ -9,7 +9,7 @@ import polars as pl
 
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
-from bioetl.application.composite.join_planner_identity import (
+from bioetl.application.composite.helpers.join_planner_identity import (
     extract_base_column,
     infer_pipeline_from_table,
     infer_silver_table,

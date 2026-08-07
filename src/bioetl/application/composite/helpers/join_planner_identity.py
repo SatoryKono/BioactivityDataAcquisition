@@ -1,4 +1,4 @@
-"""Pipeline identity and table-path helpers for composite join planning."""
+"""Pipeline identity and table-path helpers for join planning."""
 
 from __future__ import annotations
 

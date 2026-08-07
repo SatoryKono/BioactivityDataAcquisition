@@ -1,4 +1,4 @@
-"""Per-enricher execution helpers for EnrichmentCoordinatorService."""
+"""Per-enricher execution collaborators for EnrichmentCoordinatorService."""
 
 from __future__ import annotations
 

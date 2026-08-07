@@ -16,9 +16,6 @@ from bioetl.application.composite.column_orderer_semantic import (
     group_columns,
 )
 from bioetl.application.composite.column_priority_orderer import get_enricher_prefix
-from bioetl.application.composite.column_service_layer_filter import (
-    filter_columns_by_layer_config,
-)
 from bioetl.application.composite.column_service_priority import (
     ColumnPriorityOrderingPolicy as ColumnPriorityOrderingPolicy,
 )
@@ -28,6 +25,9 @@ from bioetl.application.composite.column_service_support import (
     extract_field_from_qualified_name,
     resolve_publication_field_aliases,
     sort_columns_by_provider,
+)
+from bioetl.application.composite.helpers.column_service_layer_filter import (
+    filter_columns_by_layer_config,
 )
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
 from bioetl.domain.composite import (

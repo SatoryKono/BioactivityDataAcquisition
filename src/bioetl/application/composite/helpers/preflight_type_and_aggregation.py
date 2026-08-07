@@ -1,4 +1,4 @@
-"""Type-compatibility and aggregation preflight checks."""
+"""Type-compatibility and aggregation helpers for preflight checks."""
 
 from __future__ import annotations
 

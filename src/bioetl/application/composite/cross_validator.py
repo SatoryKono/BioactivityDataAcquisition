@@ -5,14 +5,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.cross_validator_finalize import (
-    finalize_cross_validation,
-    nullify_enricher_columns,
-    parse_pipeline_name,
-)
 from bioetl.application.composite.cross_validator_helpers import (
     _build_enricher_detail,
     _count_mismatches_vectorized,
+)
+from bioetl.application.composite.helpers.cross_validator_finalize import (
+    finalize_cross_validation,
+    nullify_enricher_columns,
+    parse_pipeline_name,
 )
 from bioetl.domain.composite.cross_validation import (
     CrossValidationStats,

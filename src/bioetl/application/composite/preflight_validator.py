@@ -20,11 +20,6 @@ from bioetl.application.composite._preflight_orchestration import (
 from bioetl.application.composite._preflight_reporting import (
     PreflightValidationReportingMixin,
 )
-from bioetl.application.composite._preflight_type_and_aggregation import (
-    check_type_compatibility,
-    dtype_in_group,
-    validate_aggregation_ordering,
-)
 from bioetl.application.composite._preflight_types import (
     FieldInfo,
     PreflightValidationError,
@@ -32,6 +27,11 @@ from bioetl.application.composite._preflight_types import (
     ProfileInfo,
     SchemaFields,
     ValidationIssue,
+)
+from bioetl.application.composite.helpers.preflight_type_and_aggregation import (
+    check_type_compatibility,
+    dtype_in_group,
+    validate_aggregation_ordering,
 )
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.ports import LoggerPort

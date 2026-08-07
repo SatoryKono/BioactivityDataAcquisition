@@ -1,4 +1,4 @@
-"""Chained dependency key resolution from Silver tables (ADR-026)."""
+"""Chained dependency key-resolution helpers for Silver tables (ADR-026)."""
 
 from __future__ import annotations
 
