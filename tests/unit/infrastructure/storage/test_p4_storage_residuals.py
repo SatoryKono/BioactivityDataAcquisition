@@ -127,7 +127,9 @@ async def test_row_reconciliation_enforces_max_rows() -> None:
             del table_name, columns, limit
             return [{"id": i} for i in range(5)]
 
-        async def read_gold(self, table_name: str, columns=None, current_only=True, limit=None):
+        async def read_gold(
+            self, table_name: str, columns=None, current_only=True, limit=None
+        ):
             del table_name, columns, current_only, limit
             return [{"id": i} for i in range(5)]
 

@@ -58,7 +58,9 @@ class ValueValidator:
         default_factory=lambda: DEFAULT_CONCENTRATION_RANGES.copy()
     )
 
-    def _apply_molar_window(self, unit: str, min_m: float, max_m: float, scale: float) -> None:
+    def _apply_molar_window(
+        self, unit: str, min_m: float, max_m: float, scale: float
+    ) -> None:
         if unit not in self._concentration_ranges:
             return
         self._concentration_ranges[unit] = (min_m * scale, max_m * scale)

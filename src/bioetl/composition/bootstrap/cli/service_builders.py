@@ -10,7 +10,9 @@ from bioetl.application.core.lifecycle import (
     CheckpointRuntimeService,
 )
 from bioetl.application.services.ops.admin_runtime_api import QuarantineRuntimeService
-from bioetl.application.services.export_lineage.audit_inspection_service import AuditInspectionService
+from bioetl.application.services.export_lineage.audit_inspection_service import (
+    AuditInspectionService,
+)
 from bioetl.application.services.checkpoint.checkpoint_service import CheckpointService
 from bioetl.application.services.quality.config_dq_service import (
     ConfigDQService,

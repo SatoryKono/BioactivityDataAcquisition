@@ -140,9 +140,7 @@ def validate_command(as_json: bool) -> None:
             echo_info("Issues:")
             for i in report.issues:
                 num = f"ADR-{i.number:03d}" if i.number is not None else "ADR-???"
-                echo_info(
-                    f"  - [{i.severity.upper()}] {num} @ {i.path}: {i.message}"
-                )
+                echo_info(f"  - [{i.severity.upper()}] {num} @ {i.path}: {i.message}")
     if not report.valid:
         from bioetl.interfaces.cli.exit_codes import ExitCode
 

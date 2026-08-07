@@ -169,7 +169,9 @@ def _coerce_float(value: object, field_name: str) -> float:
         raise ValueError(f"{field_name} must be a number") from exc
 
 
-def require_float(value: object, field_name: str, default: float | None = None) -> float:
+def require_float(
+    value: object, field_name: str, default: float | None = None
+) -> float:
     """Require a finite numeric value coercible to float."""
     if value is None:
         if default is None:

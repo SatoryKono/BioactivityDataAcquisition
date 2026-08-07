@@ -47,13 +47,8 @@ class FileCompositeCheckpointWriter:
         """Resolve ``path`` under the checkpoint root; reject traversal escapes."""
         # Reject absolute / drive-qualified inputs (user-supplied relative only).
         if (
-            (
-                not path
-                or path.startswith(("/", "\\"))
-                or ":" in path.split("/", 1)[0]
-            )
-            and Path(path).is_absolute()
-        ):
+            not path or path.startswith(("/", "\\")) or ":" in path.split("/", 1)[0]
+        ) and Path(path).is_absolute():
             raise CheckpointPathError(
                 f"Checkpoint path must be relative to checkpoint root: {path!r}"
             )
@@ -129,7 +124,9 @@ class FileCompositeCheckpointWriter:
                 f"Checkpoint glob matched {len(matches)} paths "
                 f"(max {self._max_glob_matches}): {pattern!r}"
             )
-        matches.sort(key=lambda p: p.name, reverse=True)  # deterministic lexical, not mtime
+        matches.sort(
+            key=lambda p: p.name, reverse=True
+        )  # deterministic lexical, not mtime
         return [p.name for p in matches]
 
     def exists(self, path: str) -> bool:

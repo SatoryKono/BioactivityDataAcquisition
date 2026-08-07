@@ -44,7 +44,10 @@ def test_aggregation_enums_are_strenum() -> None:
     assert issubclass(EnricherCardinality, str)
     assert AggregationFunction.COUNT == "count"
     assert AggregationFunction.from_string("FIRST") is AggregationFunction.FIRST
-    assert EnricherCardinality.from_string("many_to_one") is EnricherCardinality.MANY_TO_ONE
+    assert (
+        EnricherCardinality.from_string("many_to_one")
+        is EnricherCardinality.MANY_TO_ONE
+    )
 
 
 def test_field_group_definition_rejects_empty_display_name() -> None:

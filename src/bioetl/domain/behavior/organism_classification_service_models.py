@@ -52,10 +52,7 @@ class ClassificationStats:
             if value < 0:
                 raise ValueError(f"{name} cannot be negative")
         bucket_sum = (
-            self.acellular
-            + self.unicellular
-            + self.multicellular
-            + self.unresolved
+            self.acellular + self.unicellular + self.multicellular + self.unresolved
         )
         if bucket_sum != self.total:
             raise ValueError(

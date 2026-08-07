@@ -17,7 +17,6 @@ def _require_aware_timestamp(value: datetime, *, field_name: str = "timestamp") 
         raise ValueError(f"{field_name} must be timezone-aware UTC, got naive datetime")
 
 
-
 @dataclass(frozen=True, slots=True)
 class DQReportSummary:
     """Summary of DQ report results."""

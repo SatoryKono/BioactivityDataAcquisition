@@ -1,4 +1,5 @@
 """Build open critical/major residual inventory + 5 independent streams."""
+
 from __future__ import annotations
 
 import json
@@ -13,7 +14,9 @@ REPO = "SatoryKono/BioactivityDataAcquisition"
 
 
 def strip_ansi(raw: bytes) -> str:
-    return re.sub(rb"\x1b\[[0-9;]*m", b"", raw).decode("utf-8", errors="replace").strip()
+    return (
+        re.sub(rb"\x1b\[[0-9;]*m", b"", raw).decode("utf-8", errors="replace").strip()
+    )
 
 
 def load_search(path: Path) -> list[dict[str, object]]:

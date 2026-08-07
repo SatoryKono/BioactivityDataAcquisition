@@ -207,4 +207,3 @@ def resolve_replay_lag_seconds(
     if lag_status in {"ready", "not_requested"}:
         return 0.0
     return None
-

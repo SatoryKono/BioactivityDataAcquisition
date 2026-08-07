@@ -34,7 +34,9 @@ from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
-from bioetl.application.services.export_lineage.audit_inspection_service import AuditInspectionResult
+from bioetl.application.services.export_lineage.audit_inspection_service import (
+    AuditInspectionResult,
+)
 from bioetl.application.services.checkpoint.checkpoint_service import CheckpointInfo
 from bioetl.application.services.workflow.observability_workflow_service import (
     ObservabilityWorkflowService,

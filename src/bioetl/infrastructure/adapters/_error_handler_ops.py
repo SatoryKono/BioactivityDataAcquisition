@@ -71,7 +71,6 @@ def log_adapter_error(
     return error_context
 
 
-
 def decide_should_retry(
     *,
     logger: LoggerPort,

@@ -269,9 +269,7 @@ def _terminal_render_manifest(
         "expand_collapsed_rows": True,
         "file_count": 1,
         "file_set": [file_name],
-        "immutable_manifest": (
-            "render-manifest--selected-subset--unit-capture.json"
-        ),
+        "immutable_manifest": ("render-manifest--selected-subset--unit-capture.json"),
         "manifest_kind": "selected-subset",
         "requested": {
             "browser_zoom": 100,

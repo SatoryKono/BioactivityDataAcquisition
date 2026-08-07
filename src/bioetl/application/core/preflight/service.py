@@ -54,7 +54,9 @@ def _supports_raise_on_unhealthy(validate_fn: object) -> bool:
     try:
         from typing import Any, cast
 
-        signature = inspect.signature(cast(Any, validate_fn))  # Any: inspect accepts arbitrary callables
+        signature = inspect.signature(
+            cast(Any, validate_fn)
+        )  # Any: inspect accepts arbitrary callables
     except (TypeError, ValueError):
         return False
     return "raise_on_unhealthy" in signature.parameters

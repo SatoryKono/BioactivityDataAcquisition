@@ -60,7 +60,11 @@ def test_fix_pagebreaks_rejects_write_outside_root(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     module = _load_module(
-        _repo_root() / "scripts" / "diagrams" / "render" / "fix_pagebreaks_in_bundles.py",
+        _repo_root()
+        / "scripts"
+        / "diagrams"
+        / "render"
+        / "fix_pagebreaks_in_bundles.py",
         "fix_pagebreaks_security_module",
     )
     monkeypatch.setattr(module, "DIAGRAM_ROOT", tmp_path)
@@ -75,7 +79,11 @@ def test_fix_pagebreaks_accepts_validated_root_path(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     module = _load_module(
-        _repo_root() / "scripts" / "diagrams" / "render" / "fix_pagebreaks_in_bundles.py",
+        _repo_root()
+        / "scripts"
+        / "diagrams"
+        / "render"
+        / "fix_pagebreaks_in_bundles.py",
         "fix_pagebreaks_security_module_absolute",
     )
     monkeypatch.setattr(module, "DIAGRAM_ROOT", tmp_path)

@@ -663,7 +663,9 @@ def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
         ),
     )
     monkeypatch.setattr(
-        data_roots, "_private_fallback_data_root_with_mode", lambda: (Path("/tmp/x"), "private_cache")
+        data_roots,
+        "_private_fallback_data_root_with_mode",
+        lambda: (Path("/tmp/x"), "private_cache"),
     )
     assert (
         data_roots.resolve_data_root_mode(SimpleNamespace(data_dir=None))
@@ -674,7 +676,11 @@ def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
         data_roots.Path, "mkdir", lambda self, parents=True, exist_ok=True: None
     )
     monkeypatch.setattr(data_roots.os, "access", lambda path, mode: False)
-    monkeypatch.setattr(data_roots, "_private_fallback_data_root_with_mode", lambda: (Path("/tmp/y"), "tmp"))
+    monkeypatch.setattr(
+        data_roots,
+        "_private_fallback_data_root_with_mode",
+        lambda: (Path("/tmp/y"), "tmp"),
+    )
     assert data_roots.resolve_data_root_mode(SimpleNamespace(data_dir=None)) == "tmp"
 
 

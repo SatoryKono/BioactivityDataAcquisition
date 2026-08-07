@@ -26,7 +26,9 @@ pytestmark = pytest.mark.architecture
 def _load_uniform_module() -> ModuleType:
     """Load scripts/diagrams/fix/uniform_diagram_sizes.py as a module."""
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "diagrams" / "fix" / "uniform_diagram_sizes.py"
+    module_path = (
+        repo_root / "scripts" / "diagrams" / "fix" / "uniform_diagram_sizes.py"
+    )
     spec = importlib.util.spec_from_file_location(
         "uniform_diagram_sizes_module",
         module_path,

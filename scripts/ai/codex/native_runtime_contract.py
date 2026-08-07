@@ -265,7 +265,9 @@ def validate_skill_adapters(repo_root: Path = REPO_ROOT) -> list[Finding]:
     try:
         canonical_skills(repo_root)
     except ValueError as exc:
-        return [Finding("skill.canonical", str(exc), str(repo_root / CANONICAL_SKILLS_DIR))]
+        return [
+            Finding("skill.canonical", str(exc), str(repo_root / CANONICAL_SKILLS_DIR))
+        ]
     return []
 
 

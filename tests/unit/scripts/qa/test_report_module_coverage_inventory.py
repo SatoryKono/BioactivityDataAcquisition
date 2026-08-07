@@ -125,9 +125,7 @@ def test_refresh_existing_inventory_reuses_stable_snapshot_digest(
 
     assert refreshed["source_tree_sha256"] == "stable-digest"
     assert refreshed["modules"][0]["source_lines"] == 999
-    assert refreshed["summary"] == {
-        "source_tree_sha256": "stale-summary-digest"
-    }
+    assert refreshed["summary"] == {"source_tree_sha256": "stale-summary-digest"}
 
 
 def test_module_is_declaration_only_treats_private_attrs_surface_as_non_runtime() -> (

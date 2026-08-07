@@ -573,9 +573,7 @@ def _deduplicate_dashboard_variables(
     for name, value in assignments:
         previous = values.get(name)
         if previous is not None and previous != value:
-            parser.error(
-                f"dashboard variable {name!r} was assigned conflicting values"
-            )
+            parser.error(f"dashboard variable {name!r} was assigned conflicting values")
         values[name] = value
     return tuple(sorted(values.items()))
 

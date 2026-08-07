@@ -42,7 +42,9 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
 )
-from bioetl.application.services.export_lineage.pipeline_debug_service import DebugAbortError
+from bioetl.application.services.export_lineage.pipeline_debug_service import (
+    DebugAbortError,
+)
 from bioetl.interfaces.cli import cli
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from tests.unit.interfaces.cli.commands.conftest import mock_asyncio_run

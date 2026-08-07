@@ -292,7 +292,10 @@ class HealthServerRoutingMixin:
         report_root_check = report_root_readiness_check()
         checks: JsonDict = {"report_root": report_root_check}
         status = "healthy"
-        if enforce_report_root_marker() and report_root_check.get("status") != "healthy":
+        if (
+            enforce_report_root_marker()
+            and report_root_check.get("status") != "healthy"
+        ):
             status = "unhealthy"
         if not self._health_monitor:
             if "message" not in checks:

@@ -21,7 +21,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.export_lineage.audit_inspection_service import (
         AuditInspectionService,
     )
-    from bioetl.application.services.checkpoint.checkpoint_service import CheckpointService
+    from bioetl.application.services.checkpoint.checkpoint_service import (
+        CheckpointService,
+    )
     from bioetl.application.services.control_plane.manifest.inspection_service import (
         RunManifestInspectionService,
     )

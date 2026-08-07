@@ -47,9 +47,7 @@ def test_host_report_root_ignores_container_bioetl_report_root(
     assert root == (tmp_path / "reports" / "run-reports").resolve()
     assert mod._looks_like_container_path("/app/reports/run-reports") is True
     assert (
-        mod._looks_like_container_path(
-            r"C:\Program Files\Git\app\reports\run-reports"
-        )
+        mod._looks_like_container_path(r"C:\Program Files\Git\app\reports\run-reports")
         is True
     )
     assert mod._looks_like_container_path(str(tmp_path / "reports")) is False

@@ -17,7 +17,9 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
-async def test_extract_unique_fraction_records_consumes_full_stream_with_limit() -> None:
+async def test_extract_unique_fraction_records_consumes_full_stream_with_limit() -> (
+    None
+):
     """limit caps unique fractions but still aggregates counts from later assays."""
 
     async def _assays() -> AsyncIterator[JsonDict]:

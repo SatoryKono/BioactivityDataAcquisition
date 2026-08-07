@@ -1,4 +1,5 @@
 """Live inventory: open CR residual critical/major + 5 streams."""
+
 from __future__ import annotations
 
 import json
@@ -10,7 +11,9 @@ OUT = Path("reports/quality/coderabbit/_live")
 
 
 def strip_ansi(raw: bytes) -> str:
-    return re.sub(rb"\x1b\[[0-9;]*m", b"", raw).decode("utf-8", errors="replace").strip()
+    return (
+        re.sub(rb"\x1b\[[0-9;]*m", b"", raw).decode("utf-8", errors="replace").strip()
+    )
 
 
 def load_search(path: Path) -> list[dict[str, object]]:
@@ -48,21 +51,18 @@ def stream_of(path: str) -> str:
         return "S5 publication"
     if "base_transformer" in p or "_base_transformer" in p:
         return "S4 transformer"
-    if (
-        any(
-            k in p
-            for k in (
-                "quarantine",
-                "fetch",
-                "filtered_data",
-                "record_",
-                "record_processor",
-                "normalization",
-                "data_sources",
-            )
+    if any(
+        k in p
+        for k in (
+            "quarantine",
+            "fetch",
+            "filtered_data",
+            "record_",
+            "record_processor",
+            "normalization",
+            "data_sources",
         )
-        or name in {"record_processor.py", "normalization_fallbacks.py"}
-    ):
+    ) or name in {"record_processor.py", "normalization_fallbacks.py"}:
         return "S3 record-quarantine-fetch"
     if name in {
         "config.py",
@@ -128,8 +128,7 @@ def main() -> None:
             "subcellular_fraction_support.py"
         ),
         "S3 record-quarantine-fetch": (
-            "record_*, quarantine_*, fetch_*, filtered_*, "
-            "data_sources, normalization_*"
+            "record_*, quarantine_*, fetch_*, filtered_*, data_sources, normalization_*"
         ),
         "S4 transformer": "base_transformer*",
         "S5 publication": "publication_term_*",
@@ -151,9 +150,7 @@ def main() -> None:
     lines: list[str] = []
     lines.append("# Open CodeRabbit residual — CRITICAL + MAJOR")
     lines.append("")
-    lines.append(
-        "Live `gh` snapshot, repo `SatoryKono/BioactivityDataAcquisition`."
-    )
+    lines.append("Live `gh` snapshot, repo `SatoryKono/BioactivityDataAcquisition`.")
     lines.append("")
     lines.append("| Class | Open |")
     lines.append("|-------|-----:|")
@@ -166,13 +163,9 @@ def main() -> None:
     lines.append("## CRITICAL path-clusters")
     lines.append("")
     if not crit_pc:
-        lines.append(
-            "_Нет открытых critical residual path-cluster issues._"
-        )
+        lines.append("_Нет открытых critical residual path-cluster issues._")
     else:
-        for c in sorted(
-            crit_pc, key=lambda x: _issue_number(x) or 0
-        ):
+        for c in sorted(crit_pc, key=lambda x: _issue_number(x) or 0):
             lines.append(f"- **#{c.get('number')}** `{c.get('path')}`")
     lines.append("")
     lines.append("## MAJOR path-clusters (полный список)")
@@ -187,12 +180,8 @@ def main() -> None:
     lines.append("")
     lines.append("## 5 независимых потоков (exclusive path ownership)")
     lines.append("")
-    lines.append(
-        "Все major path-clusters сейчас под `src/bioetl/application/core/*`."
-    )
-    lines.append(
-        "Critical / domain / observability / storage path-clusters закрыты."
-    )
+    lines.append("Все major path-clusters сейчас под `src/bioetl/application/core/*`.")
+    lines.append("Critical / domain / observability / storage path-clusters закрыты.")
     lines.append("")
     lines.append("```")
     lines.append("S1 lifecycle-runner       ──┐")
@@ -207,9 +196,7 @@ def main() -> None:
     for s in order:
         items = sorted(streams[s], key=lambda x: _issue_number(x) or 0)
         ids = ", ".join(f"#{m.get('number')}" for m in items)
-        lines.append(
-            f"| **{s}** | `{roots[s]}` | {len(items)} | {ids} |"
-        )
+        lines.append(f"| **{s}** | `{roots[s]}` | {len(items)} | {ids} |")
     lines.append("")
     for s in order:
         items = sorted(streams[s], key=lambda x: _issue_number(x) or 0)
@@ -220,19 +207,13 @@ def main() -> None:
         lines.append("")
     lines.append("## Правила параллелизма")
     lines.append("")
-    lines.append(
-        "1. Один worktree/agent на stream; path ownership не пересекается."
-    )
-    lines.append(
-        "2. Все потоки под `application/core/` — разные файлы."
-    )
+    lines.append("1. Один worktree/agent на stream; path ownership не пересекается.")
+    lines.append("2. Все потоки под `application/core/` — разные файлы.")
     lines.append("3. Не увеличивать бюджеты техдолга.")
     lines.append(
         "4. Meta issues (#7688, #7946, #8031, #8032) — не в implement-streams."
     )
-    lines.append(
-        "5. После PR: close + evidence; пересчёт inventory."
-    )
+    lines.append("5. После PR: close + evidence; пересчёт inventory.")
     lines.append("")
 
     text = "\n".join(lines)

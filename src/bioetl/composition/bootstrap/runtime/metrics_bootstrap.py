@@ -9,7 +9,10 @@ from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpMetrics
 
 if TYPE_CHECKING:
-    from bioetl.application.services.ops.metrics_service import MetricsService, StartResult
+    from bioetl.application.services.ops.metrics_service import (
+        MetricsService,
+        StartResult,
+    )
     from bioetl.domain.ports import LoggerPort, TracingPort
     from bioetl.infrastructure.config.settings_api import Settings
 
