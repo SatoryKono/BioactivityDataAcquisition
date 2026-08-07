@@ -24,6 +24,7 @@ _STRUCTURAL_ACTION_BY_EVENT: dict[str, str] = {
     "silver_structural_type_coerced_to_null": "nullable_type_to_null",
 }
 
+
 def classify_structural_action(
     details: dict[str, object] | None,
     event_names: set[str],
@@ -157,7 +158,9 @@ def _log_structural_policy_events(
     owner: TransformerExecutionOwner,
     context: PipelineContext,
     index: int,
-    events: Iterable[Any],  # Any: structural policy emits provider-defined event objects
+    events: Iterable[
+        Any
+    ],  # Any: structural policy emits provider-defined event objects
 ) -> None:
     """Emit per-event structural-policy log lines from policy outcome."""
     for event in events:

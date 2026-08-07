@@ -45,13 +45,7 @@ def load_pipeline_run_report_payload(
     except ValueError:
         return None
     base = _effective_root(root)
-    path = (
-        base
-        / "pipeline"
-        / safe_pipeline
-        / safe_run_id
-        / "pipeline-run-report.json"
-    )
+    path = base / "pipeline" / safe_pipeline / safe_run_id / "pipeline-run-report.json"
     return _load_versioned_payload(path, expected_schema="pipeline_run_report_v1")
 
 
@@ -70,13 +64,7 @@ def load_workflow_run_report_payload(
     except ValueError:
         return None
     base = _effective_root(root)
-    path = (
-        base
-        / "workflow"
-        / safe_workflow
-        / safe_run_id
-        / "workflow-run-report.json"
-    )
+    path = base / "workflow" / safe_workflow / safe_run_id / "workflow-run-report.json"
     return _load_versioned_payload(path, expected_schema="workflow_run_report_v1")
 
 

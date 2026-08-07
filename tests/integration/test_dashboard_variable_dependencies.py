@@ -140,8 +140,7 @@ def test_provider_derivation_queries_are_re2_compatible_and_in_sync():
         "grafana/dashboards/bioetl-incident-v1.json",
     )
     definitions = [
-        str(_templating_map(path)["provider"].get("definition") or "")
-        for path in paths
+        str(_templating_map(path)["provider"].get("definition") or "") for path in paths
     ]
 
     assert len(set(definitions)) == 1

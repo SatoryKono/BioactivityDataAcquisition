@@ -54,8 +54,6 @@ def session_registered_pipeline_names() -> frozenset[str]:
     return frozenset(get_default_registry().list_pipelines())
 
 
-
-
 class _DummyPipelineFactory:
     silver_schema = None
     pandera_silver_schema = None

@@ -152,13 +152,10 @@ def _build_composite_output_ext(
         composite_run_id=_normalize_optional_str(sample.get("_composite_run_id")),
         source_providers=parse_composite_list(sample.get("_source_providers")),
         enrichment_status=parse_composite_status(sample.get("_enrichment_status")),
-        lineage_created_at=parse_lineage_created_at(
-            sample.get("_lineage_created_at")
-        ),
+        lineage_created_at=parse_lineage_created_at(sample.get("_lineage_created_at")),
         schema_validation=schema_validation,
         partition_count=partition_count,
     )
-
 
 
 def parse_composite_list(value: object) -> list[str]:

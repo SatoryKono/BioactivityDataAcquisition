@@ -79,7 +79,10 @@ def validate_profile_matrix(repo_root: Path = REPO_ROOT) -> list[str]:
             errors.append(f"{profile}: matrix does not cover selected inventory")
 
     stable_required = set(_as_str_list(profile_plan("stable", repo_root)["required"]))
-    if set(_as_str_list(profile_plan("shared", repo_root)["required"])) != stable_required:
+    if (
+        set(_as_str_list(profile_plan("shared", repo_root)["required"]))
+        != stable_required
+    ):
         errors.append("shared: daily required set must match stable")
     if "mermaid" not in set(_as_str_list(profile_plan("core", repo_root)["required"])):
         errors.append("core: mermaid must be required for diagram readiness")

@@ -204,6 +204,7 @@ def test_metadata_lineage_bundle_allows_legacy_missing_manifest_id_without_stric
 
     assert bundle.metadata.output.artifact_id == "bronze_batch:batch-1"
 
+
 def test_bundle_does_not_mutate_caller_metadata() -> None:
     """Anchors attach to a copy; caller metadata stays clean for reuse (#8169)."""
     metadata = _make_bronze_metadata()
@@ -235,4 +236,3 @@ def test_bundle_does_not_mutate_caller_metadata() -> None:
     assert bundle_b.metadata.output.artifact_id == "bronze_batch:batch-b"
     assert bundle_a.metadata is not metadata
     assert bundle_b.metadata is not metadata
-

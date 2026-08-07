@@ -9,7 +9,9 @@ import pytest
 pytestmark = pytest.mark.unit
 
 from bioetl.domain.behavior.author_normalization_service import AuthorNormalizer
-from bioetl.domain.behavior.composite_validation_helpers import _is_valid_field_priorities
+from bioetl.domain.behavior.composite_validation_helpers import (
+    _is_valid_field_priorities,
+)
 from bioetl.domain.behavior.cross_validation_helpers import _is_valid_threshold
 from bioetl.domain.behavior.cross_validation_validator import (
     CrossValidationDispositionPolicy,
@@ -18,7 +20,9 @@ from bioetl.domain.behavior.cross_validation_validator import (
 from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.behavior.dq_rule_evaluator import evaluate_dq_rules_for_record
 from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
-from bioetl.domain.behavior.organism_classification_service_models import ClassificationStats
+from bioetl.domain.behavior.organism_classification_service_models import (
+    ClassificationStats,
+)
 from bioetl.domain.behavior.validation_helpers import validate_data
 from bioetl.domain.behavior.value_validator_rules import validate_percent_value
 from bioetl.domain.behavior._author_helpers import deduplicate_case_insensitive
@@ -49,12 +53,8 @@ def test_validate_data_allows_zero_and_false() -> None:
 
 
 def test_field_priorities_reject_duplicate_ranks() -> None:
-    assert _is_valid_field_priorities(
-        {"a": {"priority": 1}, "b": {"priority": 2}}
-    )
-    assert not _is_valid_field_priorities(
-        {"a": {"priority": 1}, "b": {"priority": 1}}
-    )
+    assert _is_valid_field_priorities({"a": {"priority": 1}, "b": {"priority": 2}})
+    assert not _is_valid_field_priorities({"a": {"priority": 1}, "b": {"priority": 1}})
 
 
 def test_classification_stats_rejects_inconsistent_buckets() -> None:

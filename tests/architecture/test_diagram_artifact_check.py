@@ -26,7 +26,9 @@ pytestmark = pytest.mark.architecture
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "diagrams" / "check" / "check_diagram_artifacts.py"
+    module_path = (
+        repo_root / "scripts" / "diagrams" / "check" / "check_diagram_artifacts.py"
+    )
     spec = importlib.util.spec_from_file_location(
         "diagram_artifacts_module", module_path
     )
@@ -107,7 +109,9 @@ def test_parse_args_supports_optional_png_requirement() -> None:
 
 def test_direct_script_execution_loads_repository_package() -> None:
     repo_root = Path(__file__).resolve().parents[2]
-    script_path = repo_root / "scripts" / "diagrams" / "check" / "check_diagram_artifacts.py"
+    script_path = (
+        repo_root / "scripts" / "diagrams" / "check" / "check_diagram_artifacts.py"
+    )
 
     result = subprocess.run(
         [sys.executable, str(script_path), "--help"],

@@ -73,5 +73,3 @@ def test_bronze_result_rejects_bad_relative_path_and_zero_compress() -> None:
         checksum_blake2="abc",
     )
     assert result.compression_ratio == 1.0
-
-

@@ -135,7 +135,15 @@ async def test_write_quarantine_requests_rejects_length_mismatch() -> None:
     with pytest.raises(ValueError, match="equal lengths"):
         await write_quarantine_requests_with_events(
             quarantine=quarantine,
-            requests=[{"pipeline": "p", "error_code": "E", "payload": {}, "bronze_batch_id": deterministic_batch_uuid("s3-rqf-residual-1"), "ingestion_ts": datetime.now(UTC)}],  # type: ignore[list-item]
+            requests=[
+                {
+                    "pipeline": "p",
+                    "error_code": "E",
+                    "payload": {},
+                    "bronze_batch_id": deterministic_batch_uuid("s3-rqf-residual-1"),
+                    "ingestion_ts": datetime.now(UTC),
+                }
+            ],  # type: ignore[list-item]
             emitter=None,
             pipeline_name="p",
             error_codes=("E", "E2"),

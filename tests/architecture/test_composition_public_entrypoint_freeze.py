@@ -85,9 +85,7 @@ def test_public_entrypoint_inventory_does_not_exceed_scorecard_max() -> None:
 
 def test_composition_primary_api_modules_are_frozen() -> None:
     present = {
-        path.name
-        for path in COMPOSITION_ROOT.glob("*_api.py")
-        if path.is_file()
+        path.name for path in COMPOSITION_ROOT.glob("*_api.py") if path.is_file()
     }
     present.add("entrypoints.py")
     assert COMPOSITION_ROOT.joinpath("entrypoints.py").is_file()

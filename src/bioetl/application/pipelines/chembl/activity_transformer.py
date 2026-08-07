@@ -75,11 +75,11 @@ class ActivityTransformer(BaseChemblTransformer):
         """
         return flatten_nested_dict(
             le_data,
-                "ligand_efficiency_",
-                cast(
-                    "dict[str, Callable[[object], object] | None]",
-                    _LIGAND_EFFICIENCY_FIELDS,
-                ),
+            "ligand_efficiency_",
+            cast(
+                "dict[str, Callable[[object], object] | None]",
+                _LIGAND_EFFICIENCY_FIELDS,
+            ),
         )
 
     @staticmethod

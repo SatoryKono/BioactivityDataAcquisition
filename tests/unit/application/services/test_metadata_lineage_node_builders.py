@@ -108,8 +108,8 @@ def test_source_request_node_exposes_snapshot_identity() -> None:
 
     assert node is not None
     assert node.attributes["input_snapshot_count"] == 1
-    assert node.attributes["input_snapshot_ids"] == ["chembl-activity-batch-001"]
-    assert node.attributes["input_snapshot_content_hashes"] == ["a" * 64]
+    assert list(node.attributes["input_snapshot_ids"]) == ["chembl-activity-batch-001"]
+    assert list(node.attributes["input_snapshot_content_hashes"]) == ["a" * 64]
 
 
 def test_fragment_timestamp_falls_back_to_sanctioned_time_helper(

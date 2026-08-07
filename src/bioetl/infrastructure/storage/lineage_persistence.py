@@ -170,7 +170,6 @@ def _has_explicit_member(target: object, member_name: str) -> bool:
     return getattr(type(target), member_name, None) is not None
 
 
-
 def resolve_metadata_and_lineage_fragment[MetadataT](
     *,
     coordinator: object | None,

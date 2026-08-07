@@ -155,9 +155,7 @@ class PipelineService:
         if cancelled is None:
             self.logger.info("Pipeline services closed.", stage="cleanup")
         else:
-            self.logger.warning(
-                "Pipeline services closing cancelled.", stage="cleanup"
-            )
+            self.logger.warning("Pipeline services closing cancelled.", stage="cleanup")
             raise cancelled
 
 

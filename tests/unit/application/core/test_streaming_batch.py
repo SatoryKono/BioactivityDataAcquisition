@@ -442,9 +442,7 @@ class TestStreamingBatchProcessor:
         records = [{"id": "1"}]
         batch_id = deterministic_batch_uuid_from_callsite("test_streaming_batch_zero")
         with pytest.raises(ValueError, match="chunk_size must be >= 1"):
-            async for _ in processor.process_in_chunks(
-                records, batch_id, chunk_size=0
-            ):
+            async for _ in processor.process_in_chunks(records, batch_id, chunk_size=0):
                 pass
 
     async def test_process_in_chunks_adapts_size(self, batch_transformer):

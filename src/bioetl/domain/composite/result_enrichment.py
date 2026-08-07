@@ -208,7 +208,9 @@ class EnrichmentResult:
             raise ValueError(
                 f"timeout_seconds must be finite and >= 0, got {timeout_seconds}"
             )
-        resolved_duration = timeout_seconds if duration_seconds is None else duration_seconds
+        resolved_duration = (
+            timeout_seconds if duration_seconds is None else duration_seconds
+        )
         return cls(
             enricher_name=enricher_name,
             status=EnrichmentStatus.TIMEOUT,

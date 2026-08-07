@@ -270,7 +270,7 @@ def compose_host_bind_path(path: str | Path, *, root: Path) -> str:
             candidate = Path(os.path.abspath(raw))
     # pathlib as_posix() yields E:/... on Windows — Compose-safe and Git-Bash-safe.
     posix = candidate.as_posix()
-    if len(posix) >= 2 and posix[1] == ':':
+    if len(posix) >= 2 and posix[1] == ":":
         return posix[0].upper() + posix[1:]
     return posix
 
@@ -292,7 +292,9 @@ def dashboard_source_environment(
 
     environment: dict[str, str] = {}
     identity_mounts: dict[str, str] = {}
-    for target, raw_spec in sorted(mount_contract.items(), key=lambda item: str(item[0])):
+    for target, raw_spec in sorted(
+        mount_contract.items(), key=lambda item: str(item[0])
+    ):
         if not isinstance(raw_spec, Mapping):
             continue
         relative_source = str(raw_spec.get("relative_source") or "").strip()
@@ -306,9 +308,7 @@ def dashboard_source_environment(
             relative_source, root=root
         )
 
-    identity_environment = str(
-        identity_contract.get("environment_name") or ""
-    ).strip()
+    identity_environment = str(identity_contract.get("environment_name") or "").strip()
     schema_version = str(identity_contract.get("schema_version") or "").strip()
     if identity_environment and schema_version and identity_mounts:
         identity_payload = {
@@ -321,7 +321,9 @@ def dashboard_source_environment(
             sort_keys=True,
             separators=(",", ":"),
         ).encode("utf-8")
-        environment[identity_environment] = hashlib.sha256(canonical_payload).hexdigest()
+        environment[identity_environment] = hashlib.sha256(
+            canonical_payload
+        ).hexdigest()
     return environment
 
 
@@ -1385,9 +1387,7 @@ def _dashboard_source_findings(
         return []
 
     expected_environment = dashboard_source_environment(root, contract)
-    identity_environment = str(
-        identity_contract.get("environment_name") or ""
-    ).strip()
+    identity_environment = str(identity_contract.get("environment_name") or "").strip()
     expected_identity = expected_environment.get(identity_environment)
     unmanaged_value = str(identity_contract.get("unmanaged_value") or "unmanaged")
     findings: list[Finding] = []
