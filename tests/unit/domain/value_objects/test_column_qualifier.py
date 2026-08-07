@@ -69,7 +69,7 @@ class TestColumnQualifier:
 
     def test_parse_invalid_format(self) -> None:
         """Reject name without 3 parts."""
-        with pytest.raises(ValueError, match="exactly 3 parts"):
+        with pytest.raises(ValueError, match="provider.entity.field"):
             ColumnQualifier.parse("chembl.title")
 
     def test_is_join_key_true(self) -> None:

@@ -48,7 +48,7 @@ class MolecularWeight(ValueObject[float]):
 
     """
 
-    __slots__ = ("_config",)
+    __slots__ = ("_config", "_initialized")
     _value: float
     _config: ValidationConfig
 
@@ -73,9 +73,11 @@ class MolecularWeight(ValueObject[float]):
         from bioetl.domain.config import DEFAULT_VALIDATION_CONFIG
 
         resolved_config = config or DEFAULT_VALIDATION_CONFIG
+        object.__setattr__(self, "_initialized", False)
         object.__setattr__(self, "_config", resolved_config)
         validated = self._validate(value)
         object.__setattr__(self, "_value", validated)
+        object.__setattr__(self, "_initialized", True)
 
     def _validate(self, value: float | int | str) -> float:
         """Validate and normalize molecular weight.

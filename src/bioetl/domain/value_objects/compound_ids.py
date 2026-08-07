@@ -224,7 +224,7 @@ class AssayId(ValueObject[str]):
         - No leading zeros in numeric part
     """
 
-    __slots__ = ("_chembl_id",)
+    __slots__ = ("_chembl_id", "_initialized")
     _value: str
     _chembl_id: ChemblId
 
@@ -238,9 +238,11 @@ class AssayId(ValueObject[str]):
             ValueError: If format is invalid.
         """
         # Validate using ChemblId
+        object.__setattr__(self, "_initialized", False)
         chembl_id = ChemblId(value)
         object.__setattr__(self, "_chembl_id", chembl_id)
         object.__setattr__(self, "_value", chembl_id.value)
+        object.__setattr__(self, "_initialized", True)
 
     @override
     def _validate(self, value: str) -> str:
