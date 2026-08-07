@@ -25,7 +25,7 @@ from scripts.engineering.qa.report_config_surface_backlog import (
     BACKLOG_PATH,
     build_backlog,
 )
-from scripts.schema.generate_config_matrix import (
+from scripts.schema.analysis.generate_config_matrix import (
     _collect_family_configs,
     _family_metrics,
 )

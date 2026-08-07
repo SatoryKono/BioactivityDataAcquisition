@@ -46046,7 +46046,7 @@
       "freshness": "regenerate",
       "generated_route": "config-comparison-matrix-generated-doc",
       "generated_route_exception": null,
-      "generator": "scripts/schema/generate_config_matrix.py",
+      "generator": "scripts/schema/analysis/generate_config_matrix.py",
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
@@ -69568,7 +69568,7 @@
     },
     {
       "commit_policy": "tracked_curated_generated_doc",
-      "generator": "scripts/schema/generate_config_matrix.py",
+      "generator": "scripts/schema/analysis/generate_config_matrix.py",
       "id": "config-comparison-matrix-generated-doc",
       "notes": "Config comparison matrix is refreshed through `python -m scripts.schema generate-config-matrix --update`.",
       "output_kind": "curated_generated_docs",
@@ -69811,7 +69811,7 @@
     },
     {
       "commit_policy": "working_output",
-      "generator": "scripts/schema/generate_field_level_diagnostics.py",
+      "generator": "scripts/schema/analysis/generate_field_level_diagnostics.py",
       "id": "field-level-diagnostics-quality-report",
       "notes": "Field diagnostics route to reports/quality rather than repository root.",
       "output_kind": "working_report",
@@ -70052,7 +70052,7 @@
     },
     {
       "commit_policy": "tracked_generated_source",
-      "generator": "scripts/schema/generate_schema_artifacts.py",
+      "generator": "scripts/schema/generation/generate_schema_artifacts.py",
       "id": "schema-generated-source",
       "notes": "Runtime generated source is restricted to explicit generated packages.",
       "output_kind": "generated_source",
@@ -70105,7 +70105,7 @@
     },
     {
       "commit_policy": "working_output",
-      "generator": "scripts/schema/generate_unified_schema_map.py",
+      "generator": "scripts/schema/analysis/generate_unified_schema_map.py",
       "id": "unified-schema-quality-report",
       "notes": "Cross-layer schema inventory is a quality report artifact.",
       "output_kind": "working_report",

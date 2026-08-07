@@ -2,7 +2,7 @@
 """Compatibility wrapper for the canonical pipeline config validator.
 
 Canonical script:
-- scripts/schema/validate_pipeline_configs.py
+- scripts/schema/validation/validate_pipeline_configs.py
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 def main() -> int:
     """Run the canonical validator without making this docs path canonical."""
-    validator = importlib.import_module("scripts.schema.validate_pipeline_configs")
+    validator = importlib.import_module("scripts.schema.validation.validate_pipeline_configs")
     return int(validator.main())
 
 

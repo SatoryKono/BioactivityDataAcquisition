@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.schema.generate_config_matrix import _render_parameter_matrix, main
+from scripts.schema.analysis.generate_config_matrix import _render_parameter_matrix, main
 
 pytestmark = [pytest.mark.architecture, pytest.mark.timeout(300)]
 

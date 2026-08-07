@@ -149,7 +149,7 @@ def test_config_validation_inventory_is_self_classified() -> None:
 
 
 def test_validate_configs_reports_validation_depth_summary() -> None:
-    script = (ROOT / "scripts" / "schema" / "validate_pipeline_configs.py").read_text(
+    script = (ROOT / "scripts" / "schema" / "validation" / "validate_pipeline_configs.py").read_text(
         encoding="utf-8"
     )
 
@@ -168,7 +168,7 @@ def test_ai_docs_validate_configs_script_is_wrapper_only() -> None:
         / "py-config-bot-2.py"
     ).read_text(encoding="utf-8")
 
-    assert 'import_module("scripts.schema.validate_pipeline_configs")' in wrapper
+    assert 'import_module("scripts.schema.validation.validate_pipeline_configs")' in wrapper
     assert "def validate_config_tree" not in wrapper
 
 

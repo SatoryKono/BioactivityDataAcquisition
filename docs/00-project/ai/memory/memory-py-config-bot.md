@@ -65,7 +65,7 @@ ______________________________________________________________________
 | ADR     | Rule                                                    | Verification                                                                                             |
 | ------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | ADR-014 | `sort_by` MUST be present in Silver sink                | `grep -A3 "sort_by" configs/entities/{p}/{e}.yaml`                                                       |
-| ADR-025 | Pipeline Config Unification (required fields)           | `python scripts/schema/config_gap_analysis.py -v`                                                        |
+| ADR-025 | Pipeline Config Unification (required fields)           | `python scripts/schema/analysis/config_gap_analysis.py -v`                                                        |
 | ADR-026 | Composite: `seed`, `enrichers`, `merge` sections        | Review structure                                                                                         |
 | ADR-027 | DQ hierarchy: base/provider/entity unified sections     | `grep -rn "^quality:" configs/providers configs/entities --include="*.yaml"`                             |
 | ADR-028 | Filter hierarchy: base/provider/entity unified sections | `grep -rn "^filters:" configs/providers configs/entities --include="*.yaml"`                             |

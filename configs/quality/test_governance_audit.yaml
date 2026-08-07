@@ -1015,7 +1015,7 @@ repo_backed_unit_test_exceptions:
     protected_surface: src/bioetl/composition/factories/services/bundle.py
   - path: tests/unit/repo_backed/contracts/test_generate_schema_artifacts.py
     target_lane: repo-backed-unit
-    protected_surface: scripts/schema/generate_schema_artifacts.py
+    protected_surface: scripts/schema/generation/generate_schema_artifacts.py
   - path: tests/unit/repo_backed/domain/normalization/profiles/test_publication_identifier_profiles.py
     target_lane: repo-backed-unit
     protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml

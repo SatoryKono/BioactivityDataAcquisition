@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.schema import lint_config_paths
+from scripts.schema.validation import lint_config_paths
 
 pytestmark = pytest.mark.unit
 

@@ -34,7 +34,7 @@ import argparse
 import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 # Patterns that indicate legacy (incorrect) paths.
 # Each tuple: (regex-free substring to detect, canonical replacement, description)
