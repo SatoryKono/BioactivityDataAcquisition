@@ -10,6 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Integration tests for Grafana dashboard variable dependency chains."""
 
+import re
 from pathlib import Path
 
 import pytest
@@ -22,6 +23,55 @@ pytestmark = pytest.mark.integration
 def _templating_map(path: str) -> dict[str, dict]:
     dashboard = load_dashboard(Path(path))
     return {v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])}
+
+
+_PROVIDER_DERIVATION_STAGES = (
+    ("hint", "unknown", "src", r".*"),
+    (
+        "hint",
+        "$1",
+        "src",
+        r"^(?:workflow_)?([^_|]+)(?:_[^|]*)?[|].*$",
+    ),
+    (
+        "hint",
+        "$1",
+        "src",
+        r"^(?:unknown|[$]__all|All|[.][*]|)[|]"
+        r"(?:workflow_)?([^_|]+)(?:_[^|]*)?$",
+    ),
+    (
+        "hint",
+        "unknown",
+        "hint",
+        r"^(?:unknown|[$]|[$]__all|All|[.][*]|)$",
+    ),
+)
+
+
+def _apply_label_replace(
+    labels: dict[str, str],
+    destination: str,
+    replacement: str,
+    source: str,
+    pattern: str,
+) -> dict[str, str]:
+    """Model PromQL label_replace for deterministic selector contract tests."""
+    match = re.fullmatch(pattern, labels.get(source, ""))
+    if match is None:
+        return labels
+    rendered = replacement
+    for index, value in enumerate(match.groups(), start=1):
+        rendered = rendered.replace(f"${index}", value or "")
+    return {**labels, destination: rendered}
+
+
+def _derive_provider(pipeline: str, workflow: str) -> str:
+    """Evaluate the shared bounded provider derivation without live Grafana."""
+    labels = {"src": f"{pipeline}|{workflow}"}
+    for stage in _PROVIDER_DERIVATION_STAGES:
+        labels = _apply_label_replace(labels, *stage)
+    return labels["hint"]
 
 
 def test_runtime_variable_dependencies():
@@ -102,11 +152,54 @@ def test_provider_derivation_queries_are_re2_compatible_and_in_sync():
     assert "[$]__all" in definition
     assert "[.][*]" in definition
     assert definition.count("label_replace(") == 5
+    for _destination, _replacement, _source, pattern in _PROVIDER_DERIVATION_STAGES:
+        assert pattern in definition
     for path in paths:
         provider = _templating_map(path)["provider"]
         query = provider.get("query")
         assert isinstance(query, dict)
         assert query.get("query") == definition
+
+    cases = {
+        "explicit pipeline": ("chembl_assay", "chembl_baseline", "chembl"),
+        "workflow-prefixed pipeline": (
+            "workflow_chembl_assay",
+            "pubchem_baseline",
+            "chembl",
+        ),
+        "unknown pipeline workflow fallback": (
+            "unknown",
+            "workflow_pubchem_activity",
+            "pubchem",
+        ),
+        "empty pipeline workflow fallback": (
+            "",
+            "chembl_baseline",
+            "chembl",
+        ),
+        "pipeline sentinel workflow fallback": (
+            "$__all",
+            "chembl_baseline",
+            "chembl",
+        ),
+        "saved default pair": ("unknown", "$__all", "unknown"),
+        "literal All": ("unknown", "All", "unknown"),
+        "wildcard All": ("unknown", ".*", "unknown"),
+        "empty inputs": ("", "", "unknown"),
+        "unknown inputs": ("unknown", "unknown", "unknown"),
+        "workflow aggregate": (
+            "unknown",
+            "workflow_chembl_activity|workflow_pubchem_activity",
+            "unknown",
+        ),
+        "explicit pipeline with workflow aggregate": (
+            "chembl_assay",
+            "workflow_chembl_activity|workflow_pubchem_activity",
+            "chembl",
+        ),
+    }
+    for case, (pipeline, workflow, expected) in cases.items():
+        assert _derive_provider(pipeline, workflow) == expected, case
 
 
 def test_silver_reject_explorer_variable_dependencies():
