@@ -129,7 +129,7 @@ curl -s http://127.0.0.1:8000/health/ready | jq .checks.report_root
 ### Preventing empty Browse Recent Runs (bind mismatch)
 
 Root cause class: Docker Desktop binds `./reports` from a **stale project working_dir**
-(virtual `/mnt/wsl/docker-desktop-bind-mounts/...`) so Ops HTTP sees an empty
+(virtual Docker Desktop WSL bind-mount paths) so Ops HTTP sees an empty
 `/app/reports` while host CLI writers fill the real checkout tree.
 
 Guards (fail-closed):
