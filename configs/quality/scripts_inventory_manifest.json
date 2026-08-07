@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-07T09:04:23.609936+00:00",
+  "generated_at": "2026-08-07T13:16:09.877449+00:00",
   "summary": {
-    "total_scripts": 565,
+    "total_scripts": 567,
     "status_counts": {
-      "active": 331,
+      "active": 333,
       "supporting": 230,
       "temporary_diagnostic": 4
     },
@@ -12,11 +12,11 @@
       "agents": 8,
       "build": 15,
       "ci": 77,
-      "docs": 233,
+      "docs": 234,
       "other": 88,
-      "scripts": 457,
+      "scripts": 459,
       "skills": 10,
-      "tests": 349
+      "tests": 350
     }
   },
   "scripts": [
@@ -103,7 +103,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
         {
           "path": ".codex/skills/SKILLS-CATALOG.md",
@@ -416,6 +416,63 @@
       "next_step": "Retain as the sourced shell environment-check helper used by Codex setup flows; keep it supporting unless it becomes a standalone documented entrypoint."
     },
     {
+      "path": "scripts/ai/codex/helper/codex-auth-lib.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 10,
+      "references": [
+        {
+          "path": "scripts/ai/codex/helper/check-env.sh",
+          "line": 82,
+          "source_group": "scripts",
+          "text": "# shellcheck source=codex-auth-lib.sh"
+        },
+        {
+          "path": "scripts/ai/codex/helper/check-env.sh",
+          "line": 83,
+          "source_group": "scripts",
+          "text": "source \"${SCRIPT_DIR}/codex-auth-lib.sh\""
+        },
+        {
+          "path": "scripts/ai/codex/helper/run-codex-impl.sh",
+          "line": 22,
+          "source_group": "scripts",
+          "text": "# shellcheck source=codex-auth-lib.sh"
+        },
+        {
+          "path": "scripts/ai/codex/helper/run-codex-impl.sh",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "source \"${SCRIPT_DIR}/codex-auth-lib.sh\""
+        },
+        {
+          "path": "scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh",
+          "line": 28,
+          "source_group": "scripts",
+          "text": "# shellcheck source=codex-auth-lib.sh"
+        },
+        {
+          "path": "scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "source \"${SCRIPT_DIR}/codex-auth-lib.sh\""
+        },
+        {
+          "path": "scripts/ai/codex/helper/setup-env.sh",
+          "line": 109,
+          "source_group": "scripts",
+          "text": "# shellcheck source=codex-auth-lib.sh"
+        },
+        {
+          "path": "scripts/ai/codex/helper/setup-env.sh",
+          "line": 110,
+          "source_group": "scripts",
+          "text": "source \"${SCRIPT_DIR}/codex-auth-lib.sh\""
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/codex/helper/diagnose-hang.ps1",
       "type": "ps1",
       "status": "active",
@@ -567,19 +624,19 @@
         },
         {
           "path": "scripts/ai/codex/run-codex.sh",
-          "line": 210,
+          "line": 224,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-codex-impl.sh\" \"$@\""
         },
         {
           "path": "scripts/ai/codex/run-codex.sh",
-          "line": 218,
+          "line": 232,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-codex-impl.sh\" exec --full-auto \"$@\""
         },
         {
           "path": "scripts/ai/codex/run-codex.sh",
-          "line": 243,
+          "line": 257,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-codex-impl.sh\" \"$COMMAND\" \"$@\""
         },
@@ -713,8 +770,38 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 38,
+      "reference_count": 49,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 68,
+          "source_group": "docs",
+          "text": "| `setup-wsl.sh` | `scripts/ai/codex/helper/` | Codex WSL bootstrap (deps + env); dual-OS venv: `setup_env_wsl.sh` |"
+        },
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 275,
+          "source_group": "docs",
+          "text": "**Layer 1: Codex WSL bootstrap** (`scripts/ai/codex/helper/setup-wsl.sh`)"
+        },
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 288,
+          "source_group": "docs",
+          "text": "bash \"$BIOETL_DIR/scripts/ai/codex/helper/setup-wsl.sh\""
+        },
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 314,
+          "source_group": "docs",
+          "text": "bash \"$BIOETL_DIR/scripts/ai/codex/helper/setup-wsl.sh\" 2>/dev/null"
+        },
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 370,
+          "source_group": "docs",
+          "text": "bash \"$BIOETL_DIR/scripts/ai/codex/helper/setup-wsl.sh\""
+        },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 26,
@@ -732,36 +819,6 @@
           "line": 60,
           "source_group": "docs",
           "text": "bash ./scripts/ai/codex/helper/setup-wsl.sh"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 122,
-          "source_group": "docs",
-          "text": "| `scripts/ai/codex/helper/setup-wsl.sh`    | Install all dependencies & configure      | Medium     |"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 147,
-          "source_group": "docs",
-          "text": "bash ./scripts/ai/codex/helper/setup-wsl.sh"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 260,
-          "source_group": "docs",
-          "text": "└─ scripts/ai/codex/helper/setup-wsl.sh ─│"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 323,
-          "source_group": "docs",
-          "text": "bash ./scripts/ai/codex/helper/setup-wsl.sh"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 352,
-          "source_group": "docs",
-          "text": "| **Installation Required** | ✅ Yes (`scripts/ai/codex/helper/setup-wsl.sh`) |"
         }
       ]
     },
@@ -1007,7 +1064,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 33,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -1066,7 +1123,7 @@
       "agent_usage": [
         "ORCHESTRATION"
       ],
-      "reference_count": 34,
+      "reference_count": 39,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
@@ -2316,7 +2373,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-          "line": 103,
+          "line": 106,
           "source_group": "docs",
           "text": "`scripts/ai/junie/check_junie_mirror.sh`"
         },
@@ -2337,7 +2394,7 @@
       "references": [
         {
           "path": "scripts/memory/README.md",
-          "line": 16,
+          "line": 21,
           "source_group": "scripts",
           "text": "- `python -m scripts.ai.mcp smoke-neo4j-memory`"
         },
@@ -2629,7 +2686,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 96,
+          "line": 137,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
         },
@@ -2666,7 +2723,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 96,
+          "line": 137,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
         },
@@ -2830,7 +2887,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 116,
+          "line": 157,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
         }
@@ -2855,7 +2912,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 116,
+          "line": 157,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
         },
@@ -2978,7 +3035,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 90,
+          "line": 131,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
         }
@@ -3003,7 +3060,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 90,
+          "line": 131,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
         },
@@ -3028,7 +3085,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 153,
+          "line": 194,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_docker_docs_wrapper.sh`"
         }
@@ -3099,7 +3156,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 155,
+          "line": 196,
           "source_group": "docs",
           "text": "`scripts/ai/mcp/mcp_dockerhub_wrapper.ps1` (Windows)"
         }
@@ -3118,7 +3175,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 154,
+          "line": 195,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_dockerhub_wrapper.sh` (Linux/WSL),"
         }
@@ -3253,7 +3310,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 122,
+          "line": 163,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
         }
@@ -3278,7 +3335,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 122,
+          "line": 163,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
         },
@@ -3531,7 +3588,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 103,
+          "line": 144,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
         },
@@ -3562,7 +3619,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 103,
+          "line": 144,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
         },
@@ -3593,7 +3650,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 156,
+          "line": 197,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_needle_wrapper.sh`"
         }
@@ -3758,7 +3815,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 157,
+          "line": 198,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_paper_search_wrapper.sh`"
         }
@@ -3835,7 +3892,7 @@
         },
         {
           "path": "scripts/memory/README.md",
-          "line": 26,
+          "line": 31,
           "source_group": "scripts",
           "text": "- `scripts/ai/mcp/neo4j_memory_mcp_adapter.py` bridges Codex framed stdio to the upstream line-delimited server."
         },
@@ -3868,7 +3925,7 @@
         },
         {
           "path": "scripts/memory/README.md",
-          "line": 25,
+          "line": 30,
           "source_group": "scripts",
           "text": "- `scripts/ai/mcp/neo4j_memory_mcp_smoke.py` validates framed stdio behavior for the `neo4j-memory` MCP server."
         },
@@ -4089,7 +4146,7 @@
         },
         {
           "path": "scripts/ai/codex/helper/run-codex-impl.sh",
-          "line": 25,
+          "line": 29,
           "source_group": "scripts",
           "text": "REPO_ENV_LOADER=\"${REPO_ROOT}/scripts/ai/mcp/support/load_repo_env.sh\""
         },
@@ -6235,7 +6292,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/00-project/governance/documentation-update-plan.md",
@@ -6248,6 +6305,12 @@
           "line": 930,
           "source_group": "docs",
           "text": "python scripts/diagrams/render/generate_pipeline_dataflows.py"
+        },
+        {
+          "path": "docs/03-guides/pipeline-configuration.md",
+          "line": 933,
+          "source_group": "docs",
+          "text": "python scripts/diagrams/render/generate_pipeline_dataflows.py --pipeline chembl_activity"
         },
         {
           "path": "docs/03-guides/pipeline-configuration.md",
@@ -6278,12 +6341,6 @@
           "line": 525,
           "source_group": "scripts",
           "text": "\"<!-- Generated by scripts/diagrams/render/generate_pipeline_dataflows.py; do not edit manually. -->\","
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 39,
-          "source_group": "tests",
-          "text": "from scripts.diagrams.render.generate_pipeline_dataflows import main"
         }
       ]
     },
@@ -9124,7 +9181,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 58,
+      "reference_count": 59,
       "references": [
         {
           "path": ".zed/README.md",
@@ -9143,6 +9200,12 @@
           "line": 148,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev setup-mcp"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/GEMINI.md",
+          "line": 59,
+          "source_group": "docs",
+          "text": "Canonical bootstrap: `uv sync --extra dev --extra tests --extra tracing`, `make install` / `python -m scripts.ops setup-plugins` (optional `python -m scripts.engineering.dev setup-mcp`). `scripts/engi"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
@@ -9167,12 +9230,6 @@
           "line": 53,
           "source_group": "docs",
           "text": "python -m scripts.engineering.dev setup-mcp"
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 226,
-          "source_group": "docs",
-          "text": "The generated workspace config from `python -m scripts.engineering.dev setup-mcp`"
         }
       ]
     },
@@ -9348,7 +9405,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-          "line": 84,
+          "line": 87,
           "source_group": "docs",
           "text": "`pretest_guardrails.sh --report-json ...` persists only compact"
         },
@@ -10006,7 +10063,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 32,
+      "reference_count": 33,
       "references": [
         {
           "path": ".zed/README.md",
@@ -10281,13 +10338,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 310,
+          "line": 316,
           "source_group": "tests",
           "text": "assert arch[\"args\"] == [\"scripts/engineering/dev/zed_lint_imports.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 367,
+          "line": 373,
           "source_group": "tests",
           "text": "assert \"zed_lint_imports.py\" in serialized"
         }
@@ -10499,13 +10556,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 324,
+          "line": 330,
           "source_group": "tests",
           "text": "assert dead_code[\"args\"] == [\"scripts/engineering/dev/zed_vulture.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 369,
+          "line": 375,
           "source_group": "tests",
           "text": "assert \"zed_vulture.py\" in serialized"
         }
@@ -10560,13 +10617,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 317,
+          "line": 323,
           "source_group": "tests",
           "text": "assert complexity[\"args\"] == [\"scripts/engineering/dev/zed_xenon.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 368,
+          "line": 374,
           "source_group": "tests",
           "text": "assert \"zed_xenon.py\" in serialized"
         }
@@ -13259,7 +13316,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -13272,6 +13329,12 @@
           "line": 174,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_panel_audit_matrix\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/engineering/qa/test_report_dashboard_panel_audit_matrix.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import report_dashboard_panel_audit_matrix as subject"
         }
       ]
     },
@@ -15797,7 +15860,7 @@
       "references": [
         {
           "path": "scripts/memory/README.md",
-          "line": 19,
+          "line": 24,
           "source_group": "scripts",
           "text": "- `bash scripts/memory/prompts/print_seed.sh`"
         }
@@ -15816,7 +15879,7 @@
       "references": [
         {
           "path": "scripts/memory/README.md",
-          "line": 24,
+          "line": 29,
           "source_group": "scripts",
           "text": "- `query.py` is now a compatibility module alias to `memory.graph.query`."
         },
@@ -15849,6 +15912,27 @@
           "line": 15,
           "source_group": "tests",
           "text": "from scripts.memory.query import ("
+        }
+      ]
+    },
+    {
+      "path": "scripts/memory/run_workflow.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+          "line": 26,
+          "source_group": "docs",
+          "text": "`PYTHONPATH=src` (or `bash scripts/memory/run_workflow.sh pre-task ...`) so"
+        },
+        {
+          "path": "scripts/memory/README.md",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "- `bash scripts/memory/run_workflow.sh …` — preferred agent entry for"
         }
       ]
     },
@@ -15903,7 +15987,7 @@
         },
         {
           "path": "scripts/memory/README.md",
-          "line": 18,
+          "line": 23,
           "source_group": "scripts",
           "text": "- `bash scripts/memory/setup/wsl_startup.sh`"
         }
@@ -15918,7 +16002,7 @@
       "references": [
         {
           "path": "scripts/memory/README.md",
-          "line": 23,
+          "line": 28,
           "source_group": "scripts",
           "text": "- `sync.py` is now a compatibility module alias to `memory.graph.sync`."
         },
@@ -15947,7 +16031,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 56,
+      "reference_count": 61,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
@@ -16740,7 +16824,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 113,
+      "reference_count": 114,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -17321,8 +17405,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
+          "line": 135,
+          "source_group": "docs",
+          "text": "- DUX3 closeout is evidence-only (`dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_residual.py` / `apply_dux6_re"
+        },
         {
           "path": "docs/03-guides/dashboards/operator-ux-v2.md",
           "line": 143,
@@ -17346,7 +17436,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/ISSUES/_dux6_bodies/DUX6-00.md",
@@ -17359,6 +17449,12 @@
           "line": 21,
           "source_group": "docs",
           "text": "1. `scripts/ops/observability/grafana/apply_dux5_residual.py`"
+        },
+        {
+          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
+          "line": 135,
+          "source_group": "docs",
+          "text": "- DUX3 closeout is evidence-only (`dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_residual.py` / `apply_dux6_re"
         },
         {
           "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
@@ -17395,13 +17491,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/03-guides/dashboards/dux6-residual-readability.md",
           "line": 23,
           "source_group": "docs",
           "text": "1. `scripts/ops/observability/grafana/apply_dux6_residual.py`"
+        },
+        {
+          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
+          "line": 135,
+          "source_group": "docs",
+          "text": "- DUX3 closeout is evidence-only (`dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_residual.py` / `apply_dux6_re"
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
@@ -17420,13 +17522,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/03-guides/dashboards/dux7-live-residual-protocol.md",
           "line": 22,
           "source_group": "docs",
           "text": "python scripts/ops/observability/grafana/apply_dux7_live_residual.py"
+        },
+        {
+          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
+          "line": 135,
+          "source_group": "docs",
+          "text": "- DUX3 closeout is evidence-only (`dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_residual.py` / `apply_dux6_re"
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
@@ -17673,7 +17781,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": ".github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md",
@@ -17692,6 +17800,12 @@
           "line": 30,
           "source_group": "other",
           "text": "- `scripts/ops/observability/grafana/render_nav_bus.py`"
+        },
+        {
+          "path": "docs/03-guides/dashboards/README.md",
+          "line": 158,
+          "source_group": "docs",
+          "text": "`scripts/ops/observability/grafana/render_nav_bus.py`). The current dashboard"
         },
         {
           "path": "docs/03-guides/dashboards/dashboard-system-2.0-phase2-residual.md",
@@ -17716,12 +17830,6 @@
           "line": 17,
           "source_group": "docs",
           "text": "Nav HTML is generated by `scripts/ops/observability/grafana/render_nav_bus.py`."
-        },
-        {
-          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
-          "line": 31,
-          "source_group": "docs",
-          "text": "| **Nav bus** | Full portfolio switcher `0–6` (Trust…Run Explorer) | `h≤3`, wrap at 1024px; owned by `render_nav_bus.py` |"
         }
       ],
       "owner": "@bioetl-platform",
@@ -17902,7 +18010,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 644,
+          "line": 694,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1\""
         }
@@ -17927,7 +18035,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 153,
+          "line": 148,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -17939,13 +18047,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1252,
+          "line": 1318,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1339,
+          "line": 1405,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -17957,13 +18065,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 459,
+          "line": 509,
           "source_group": "tests",
           "text": "assert \"setup_grafana_screenshot_runtime.sh\" in detail"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 641,
+          "line": 691,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         }
@@ -18717,7 +18825,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 1383,
+          "line": 1386,
           "source_group": "scripts",
           "text": "from scripts.ops.runtime.docker import verify_report_bind as bind_verify"
         }
@@ -18750,7 +18858,7 @@
         },
         {
           "path": "docs/00-project/governance/root-local-clutter-cleanup.md",
-          "line": 81,
+          "line": 91,
           "source_group": "docs",
           "text": "- `scripts/ops/runtime/docker/watchdog-docker-stable.ps1` defaults state/logs to"
         },
@@ -19523,7 +19631,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 336,
+          "line": 338,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/load_repo_env.sh or pass --username/--password \""
         },
@@ -19535,7 +19643,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 318,
+          "line": 367,
           "source_group": "tests",
           "text": "assert \"scripts/ops/support/load_repo_env.sh\" in hint"
         }
@@ -20264,7 +20372,7 @@
         },
         {
           "path": "tests/unit/repo_backed/contracts/test_generate_schema_artifacts.py",
-          "line": 48,
+          "line": 49,
           "source_group": "tests",
           "text": "/ \"generate_schema_artifacts.py\""
         }
