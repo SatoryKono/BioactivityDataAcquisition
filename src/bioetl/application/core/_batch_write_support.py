@@ -31,10 +31,7 @@ def emit_domain_event(
     *,
     logger: LoggerPort | None = None,
 ) -> None:
-    """Best-effort publish of one typed domain event.
-
-    Emitter failures must not break the write path; log when a logger is available.
-    """
+    """Best-effort publish; log emitter failures when a logger is available."""
     if emitter is None:
         return
     try:

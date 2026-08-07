@@ -75,6 +75,10 @@ def _make_bundle_safe_metadata(run_id: str = "test-run") -> MagicMock:
     metadata = MagicMock()
     metadata.runtime = SimpleNamespace(run_id=run_id, manifest_id=None)
     metadata.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
+    detached = MagicMock()
+    detached.runtime = SimpleNamespace(run_id=run_id, manifest_id=None)
+    detached.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
+    metadata.model_copy.return_value = detached
     return metadata
 
 
@@ -374,7 +378,7 @@ class TestWriteGoldMetadata:
         )
         mixin._write_gold_metadata_file.assert_awaited_once_with(
             table_path="gold/chembl/activity",
-            metadata=metadata,
+            metadata=metadata.model_copy.return_value,
             table_name="chembl.activity",
             provider_name="chembl",
             entity_name="activity",
@@ -498,7 +502,7 @@ class TestWriteGoldMergedMetadata:
         )
         mixin._write_gold_metadata_file.assert_awaited_once_with(
             table_path="gold/composite/publication",
-            metadata=metadata,
+            metadata=metadata.model_copy.return_value,
             table_name="composite.publication",
             provider_name="composite",
             entity_name="publication",

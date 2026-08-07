@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-07T14:26:16.709681+00:00",
+  "generated_at": "2026-08-07T15:50:29.510738+00:00",
   "summary": {
     "total_scripts": 570,
     "status_counts": {
@@ -4539,7 +4539,7 @@
         },
         {
           "path": "scripts/ai/sync/runtime_skills.py",
-          "line": 27,
+          "line": 29,
           "source_group": "scripts",
           "text": "from scripts.ai.sync import governance as sync_ai_governance"
         },
@@ -5097,9 +5097,9 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 72,
+          "line": 73,
           "source_group": "scripts",
-          "text": "\"check-class-methods\": python_command(\"check/check_class_method_render_integrity.py\"),"
+          "text": "\"check/check_class_method_render_integrity.py\""
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
@@ -5309,7 +5309,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 73,
+          "line": 75,
           "source_group": "scripts",
           "text": "\"check-pdf-bounds\": python_command(\"check/check_pdf_image_bounds.py\"),"
         },
@@ -5393,7 +5393,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 74,
+          "line": 76,
           "source_group": "scripts",
           "text": "\"check-padding\": python_command(\"check/report_diagram_padding.py\"),"
         }
@@ -5556,7 +5556,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 79,
+          "line": 81,
           "source_group": "scripts",
           "text": "\"fix-svg-text\": python_command(\"fix/add_svg_text_fallback.py\"),"
         }
@@ -5631,7 +5631,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 78,
+          "line": 80,
           "source_group": "scripts",
           "text": "\"fix-operators\": python_command(\"fix/fix_mermaid_operators.py\"),"
         },
@@ -5688,7 +5688,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 80,
+          "line": 82,
           "source_group": "scripts",
           "text": "\"fix-svg-styles\": python_command(\"fix/fix_svg_styles.py\"),"
         }
@@ -5805,7 +5805,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 81,
+          "line": 83,
           "source_group": "scripts",
           "text": "\"fix-foreign-object\": python_command(\"fix/strip_svg_foreign_object.py\"),"
         },
@@ -5817,15 +5817,15 @@
         },
         {
           "path": "tests/architecture/test_strip_svg_foreign_object.py",
-          "line": 30,
+          "line": 31,
           "source_group": "tests",
-          "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"strip_svg_foreign_object.py\""
+          "text": "repo_root / \"scripts\" / \"diagrams\" / \"fix\" / \"strip_svg_foreign_object.py\""
         },
         {
           "path": "tests/architecture/test_strip_svg_foreign_object.py",
-          "line": 129,
+          "line": 132,
           "source_group": "tests",
-          "text": "script_path = repo_root / \"scripts\" / \"diagrams\" / \"strip_svg_foreign_object.py\""
+          "text": "repo_root / \"scripts\" / \"diagrams\" / \"fix\" / \"strip_svg_foreign_object.py\""
         }
       ]
     },
@@ -5874,7 +5874,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 84,
+          "line": 86,
           "source_group": "scripts",
           "text": "\"fix-sizes\": python_command(\"fix/uniform_diagram_sizes.py\"),"
         },
@@ -6140,21 +6140,21 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 85,
+          "line": 87,
           "source_group": "scripts",
           "text": "\"fix-pagebreaks\": python_command(\"render/fix_pagebreaks_in_bundles.py\"),"
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_write_path_security.py",
-          "line": 63,
+          "line": 67,
           "source_group": "tests",
-          "text": "_repo_root() / \"scripts\" / \"diagrams\" / \"render\" / \"fix_pagebreaks_in_bundles.py\","
+          "text": "/ \"fix_pagebreaks_in_bundles.py\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_write_path_security.py",
-          "line": 78,
+          "line": 86,
           "source_group": "tests",
-          "text": "_repo_root() / \"scripts\" / \"diagrams\" / \"render\" / \"fix_pagebreaks_in_bundles.py\","
+          "text": "/ \"fix_pagebreaks_in_bundles.py\","
         }
       ]
     },
@@ -6203,15 +6203,15 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 92,
+          "line": 94,
           "source_group": "scripts",
           "text": "\"render/generate_all_bundles.py\", \"--collection\", \"architecture\""
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 96,
+          "line": 99,
           "source_group": "scripts",
-          "text": "\"render-views\": python_command(\"render/generate_all_bundles.py\", \"--collection\", \"views\"),"
+          "text": "\"render/generate_all_bundles.py\", \"--collection\", \"views\""
         }
       ]
     },
@@ -6242,19 +6242,19 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 97,
+          "line": 101,
           "source_group": "scripts",
           "text": "\"render-desc-indexes\": python_command(\"render/generate_description_indexes.py\"),"
         },
         {
           "path": "tests/architecture/test_diagram_description_index_contracts.py",
-          "line": 28,
+          "line": 33,
           "source_group": "tests",
-          "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"render\" / \"generate_description_indexes.py\""
+          "text": "/ \"generate_description_indexes.py\""
         },
         {
           "path": "tests/architecture/test_diagram_description_index_contracts.py",
-          "line": 93,
+          "line": 99,
           "source_group": "tests",
           "text": "assert \"generate_description_indexes.py\" in content"
         }
@@ -6332,7 +6332,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 88,
+          "line": 90,
           "source_group": "scripts",
           "text": "\"scripts.diagrams.render.generate_pipeline_dataflows\""
         },
@@ -6383,7 +6383,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 95,
+          "line": 97,
           "source_group": "scripts",
           "text": "\"render-docx\": python_command(\"render/generate_with_descriptions_docx.py\"),"
         },
@@ -6434,7 +6434,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 94,
+          "line": 96,
           "source_group": "scripts",
           "text": "\"render-pdf-desc\": python_command(\"render/generate_with_descriptions_pdf.py\"),"
         },
@@ -6479,13 +6479,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 234,
+          "line": 236,
           "source_group": "tests",
           "text": "from scripts.diagrams.render.pipeline_dataflow_ir import _project_fields"
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 246,
+          "line": 248,
           "source_group": "tests",
           "text": "from scripts.diagrams.render.pipeline_dataflow_ir import _project_fields"
         }
@@ -6632,7 +6632,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 90,
+          "line": 92,
           "source_group": "scripts",
           "text": "\"docs-agent\": shell_command(\"run_diagram_docs_agent.sh\"),"
         }
@@ -6683,7 +6683,7 @@
         },
         {
           "path": "scripts/diagrams/__main__.py",
-          "line": 99,
+          "line": 103,
           "source_group": "scripts",
           "text": "\"nightly\": python_command(\"run_diagram_nightly_suite.py\"),"
         },
@@ -9105,7 +9105,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 225,
+      "reference_count": 228,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
@@ -17690,7 +17690,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
-          "line": 738,
+          "line": 749,
           "source_group": "scripts",
           "text": "python scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py"
         },
@@ -17903,7 +17903,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
-          "line": 740,
+          "line": 751,
           "source_group": "scripts",
           "text": "# python scripts/ops/observability/grafana/rerender_grafana_screenshots.py"
         },
@@ -17921,7 +17921,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/run_grafana_render_matrix.py",
-          "line": 19,
+          "line": 21,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import ("
         },
@@ -18003,7 +18003,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 888,
+          "line": 886,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
@@ -18092,13 +18092,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1318,
+          "line": 1316,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1405,
+          "line": 1403,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -18481,7 +18481,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
-          "line": 490,
+          "line": 491,
           "source_group": "tests",
           "text": "if \"docker_runtime_preflight.py\" in joined:"
         }
@@ -18834,9 +18834,9 @@
         },
         {
           "path": "docs/03-guides/dashboards/panels/bioetl-run-explorer-v1-panels.md",
-          "line": 52,
+          "line": 48,
           "source_group": "docs",
-          "text": "Operator verify: `python scripts/ops/runtime/docker/verify_report_bind.py`."
+          "text": "and report-root bind (`python scripts/ops/runtime/docker/verify_report_bind.py`)."
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
@@ -20103,7 +20103,7 @@
           "path": "tests/architecture/test_config_discrepancy_report_drift.py",
           "line": 17,
           "source_group": "tests",
-          "text": "from scripts.schema.analysis.generate_config_matrix import _render_parameter_matrix, main"
+          "text": "from scripts.schema.analysis.generate_config_matrix import ("
         },
         {
           "path": "tests/architecture/test_config_surface_entity_residual_plateau.py",
@@ -20142,7 +20142,7 @@
           "path": "scripts/schema/analysis/generate_field_transformation_spec.py",
           "line": 15,
           "source_group": "scripts",
-          "text": "from scripts.schema.analysis.generate_field_level_diagnostics import build_field_level_rows"
+          "text": "from scripts.schema.analysis.generate_field_level_diagnostics import ("
         }
       ]
     },
@@ -20212,15 +20212,15 @@
         },
         {
           "path": "scripts/schema/analysis/generate_field_transformation_spec.py",
-          "line": 16,
+          "line": 18,
           "source_group": "scripts",
-          "text": "from scripts.schema.analysis.generate_unified_schema_map import build_unified_schema_rows"
+          "text": "from scripts.schema.analysis.generate_unified_schema_map import ("
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
           "line": 48,
           "source_group": "tests",
-          "text": "from scripts.schema.analysis.generate_unified_schema_map import build_unified_schema_rows"
+          "text": "from scripts.schema.analysis.generate_unified_schema_map import ("
         }
       ]
     },
@@ -20477,7 +20477,7 @@
           "path": "tests/architecture/test_config_ci_invariants.py",
           "line": 61,
           "source_group": "tests",
-          "text": "from scripts.schema.validation import audit_effective_optionality as optionality_audit_script"
+          "text": "from scripts.schema.validation import ("
         }
       ]
     },
@@ -20514,7 +20514,7 @@
         },
         {
           "path": "tests/architecture/test_config_ci_invariants.py",
-          "line": 62,
+          "line": 64,
           "source_group": "tests",
           "text": "from scripts.schema.validation import check_config_invariants as invariant_script"
         }
@@ -20541,9 +20541,9 @@
         },
         {
           "path": "tests/architecture/test_config_ci_invariants.py",
-          "line": 63,
+          "line": 65,
           "source_group": "tests",
-          "text": "from scripts.schema.validation import check_required_filter_fields as required_filter_script"
+          "text": "from scripts.schema.validation import ("
         }
       ]
     },

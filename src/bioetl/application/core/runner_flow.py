@@ -156,10 +156,7 @@ def record_run_started(host: _PipelineRunnerFlowHostProtocol) -> None:
     )
 
 
-def record_stage_started(
-    host: _PipelineRunnerFlowHostProtocol,
-    stage: str,
-) -> None:
+def record_stage_started(host: _PipelineRunnerFlowHostProtocol, stage: str) -> None:
     """Append stage_started ledger entry."""
     _record_with_ledger_service(
         host,
