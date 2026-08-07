@@ -130,6 +130,14 @@ log_test.txt
 !/reports/test-swarm/SWARM-001/flakiness-database.json
 !/reports/quality/
 /reports/quality/*
+
+# Sonar residual ledgers (SNR-R / SNR-R2)
+!/reports/quality/sonar/
+/reports/quality/sonar/*
+!/reports/quality/sonar/live-issues-*.json
+!/reports/quality/sonar/live-snapshot-*.json
+!/reports/quality/sonar/live-vulns-*.md
+!/reports/quality/sonar/live-bugs-*.md
 !/reports/architecture/
 /reports/architecture/*
 !/reports/architecture/issue-pack-2026-08/
