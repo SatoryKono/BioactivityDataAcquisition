@@ -14,6 +14,37 @@ from bioetl.infrastructure.adapters.circuit_breaker_contract import (
 )
 
 
+def _recovery_timeout(circuit_breaker: CircuitBreakerPort) -> float:
+    """Resolve recovery timeout from public getter or legacy attribute."""
+    recovery_timeout_getter = getattr(circuit_breaker, "get_recovery_timeout", None)
+    if callable(recovery_timeout_getter):
+        return float(cast(Any, recovery_timeout_getter()))  # Any: legacy breaker duck type
+    return float(
+        cast(
+            Any,  # Any: legacy breaker attribute
+            getattr(circuit_breaker, "recovery_timeout", 60.0),
+        )
+    )
+
+
+def _as_positive_timestamp(value: object) -> float | None:
+    """Return a positive epoch timestamp or None."""
+    if isinstance(value, int | float) and not isinstance(value, bool) and value > 0:
+        return float(value)
+    return None
+
+
+def _last_failure_time(circuit_breaker: CircuitBreakerPort) -> float | None:
+    """Resolve last failure time from public getter or legacy attributes."""
+    last_failure_getter = getattr(circuit_breaker, "get_last_failure_time", None)
+    if callable(last_failure_getter):
+        return _as_positive_timestamp(last_failure_getter())
+    raw = getattr(circuit_breaker, "last_failure_time", None)
+    if raw is None:
+        raw = getattr(circuit_breaker, "_last_failure_time", None)
+    return _as_positive_timestamp(raw)
+
+
 def _snapshot_from_port(circuit_breaker: CircuitBreakerPort) -> CircuitBreakerSnapshot:
     """Build typed state snapshot from public circuit-breaker port accessors.
 
@@ -29,42 +60,11 @@ def _snapshot_from_port(circuit_breaker: CircuitBreakerPort) -> CircuitBreakerSn
         if isinstance(maybe_snapshot, CircuitBreakerSnapshot):
             return maybe_snapshot
 
-    recovery_timeout_getter = getattr(circuit_breaker, "get_recovery_timeout", None)
-    if callable(recovery_timeout_getter):
-        recovery_timeout = float(cast(Any, recovery_timeout_getter()))  # Any: legacy breaker duck type
-    else:
-        recovery_timeout = float(
-            cast(
-                Any,  # Any: legacy breaker attribute
-                getattr(circuit_breaker, "recovery_timeout", 60.0),
-            )
-        )
-
-    last_failure_getter = getattr(circuit_breaker, "get_last_failure_time", None)
-    if callable(last_failure_getter):
-        raw_lft = last_failure_getter()
-        last_failure_time = (
-            float(raw_lft)
-            if isinstance(raw_lft, int | float) and not isinstance(raw_lft, bool) and raw_lft > 0
-            else None
-        )
-    else:
-        raw_last_failure_time = getattr(circuit_breaker, "last_failure_time", None)
-        if raw_last_failure_time is None:
-            raw_last_failure_time = getattr(circuit_breaker, "_last_failure_time", None)
-        last_failure_time = (
-            float(raw_last_failure_time)
-            if isinstance(raw_last_failure_time, int | float)
-            and not isinstance(raw_last_failure_time, bool)
-            and raw_last_failure_time > 0
-            else None
-        )
-
     return CircuitBreakerSnapshot(
         state=circuit_breaker.get_state(),
         failure_count=circuit_breaker.get_failure_count(),
-        recovery_timeout=recovery_timeout,
-        last_failure_time=last_failure_time,
+        recovery_timeout=_recovery_timeout(circuit_breaker),
+        last_failure_time=_last_failure_time(circuit_breaker),
     )
 
 
