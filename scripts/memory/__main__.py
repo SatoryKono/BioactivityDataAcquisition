@@ -1,19 +1,33 @@
 #!/usr/bin/env python3
-"""Legacy compatibility entry point for ``python -m scripts.memory``."""
+"""Unified entry point for scripts/memory/ commands.
+
+Usage:
+    python -m scripts.memory <command> [args...]
+    python -m scripts.memory --help
+
+Commands:
+    query    Query memory systems
+    sync     Synchronize memory systems
+"""
 
 from __future__ import annotations
 
-import importlib
-import sys
-from pathlib import Path
+from scripts.engineering.common.cli_dispatch import dispatch_cli, module_command
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-SRC_ROOT = REPO_ROOT / "src"
-for path in (REPO_ROOT, SRC_ROOT):
-    if str(path) not in sys.path:
-        sys.path.insert(0, str(path))
+COMMANDS = {
+    "query": "scripts.memory.queries.query",
+    "sync": "scripts.memory.operations.sync",
+}
+COMMAND_SPECS = {name: module_command(module) for name, module in COMMANDS.items()}
 
-main = importlib.import_module("memory.graph.__main__").main
+
+def main(argv: list[str] | None = None) -> int:
+    return dispatch_cli(
+        argv,
+        help_text=__doc__,
+        commands=COMMAND_SPECS,
+    )
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
