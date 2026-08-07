@@ -1,0 +1,187 @@
+[1;38m[[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8214[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][minor] residual in `src/bioetl/domain/behavior/unit_converter.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8209[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/normalization_service.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8204[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/aggregation_validator.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8197[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/staged_enforcement.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8194[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][minor] residual in `src/bioetl/domain/behavior/_author_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8193[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/value_validator.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8190[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/identity_service.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8189[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/schema_classifier.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8188[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/normalization_config.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8187[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/preflight_governance.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8184[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/dq_serializer.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8182[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][minor] residual in `src/bioetl/domain/behavior/validation_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8212[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/dq_rule_evaluator.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8211[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/composite_metadata_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8210[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/composite_metadata_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8207[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][minor] residual in `src/bioetl/domain/behavior/merged_metadata_explainability.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8206[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/merged_metadata_explainability.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8205[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/activity_aggregator/_aggregator.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8202[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/_preflight_governance_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8201[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/_preflight_governance_types.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8200[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/author_normalization_service.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8199[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/dq_policy_resolver.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8198[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/composite_validation_layer.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8196[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/composite_metadata_cv.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8195[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][minor] residual in `src/bioetl/domain/behavior/schema_classifier_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8192[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][minor] residual in `src/bioetl/domain/behavior/cross_validation_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8191[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/cross_validation_validator.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8186[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/dq_metrics_calculator.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8183[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/composite_validation_helpers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8181[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/data_normalization_config.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8180[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][minor] residual in `src/bioetl/domain/behavior/value_validator_rules.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8179[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/schema_metadata_extractor.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8213[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][minor] residual in `src/bioetl/domain/behavior/organism_classification_service_filtering.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8208[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][major] residual in `src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8203[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][minor] residual in `src/bioetl/domain/behavior/_dq_serializer_html/__init__.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8185[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][minor] residual in `src/bioetl/domain/behavior/organism_classification_service_models.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m[1;38m,[m
+  [1;38m{[m
+    [1;34m"number"[m[1;38m:[m 8178[1;38m,[m
+    [1;34m"state"[m[1;38m:[m [32m"OPEN"[m[1;38m,[m
+    [1;34m"title"[m[1;38m:[m [32m"[CR-FULL][trivial] residual in `src/bioetl/domain/behavior/_dq_serializer_html/_styles.py` — Verify each finding against current code. Fix only still-valid issues, skip the "[m
+  [1;38m}[m
+[1;38m][m
