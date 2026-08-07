@@ -1,0 +1,127 @@
+{
+  "schema_version": "architecture-suite-burndown-inventory-v1",
+  "linked_issue": "#8331",
+  "generated_at_utc": "2026-08-07T13:33:18.865496+00:00",
+  "local_lane_recommendation": {
+    "pr_default": "architecture-fast-boundary",
+    "full_audit": "architecture or architecture-slow-governance",
+    "do_not_weaken": [
+      "import-linter",
+      "domain purity",
+      "debt no-growth"
+    ]
+  },
+  "scan": {
+    "file_count": 487,
+    "approx_loc": 93906,
+    "skip_xfail_pattern_hits": 116,
+    "multi_file_families_count": 0,
+    "duplicate_ratchet_candidates": {},
+    "largest_files": [
+      {
+        "path": "tests/architecture/test_removed_surface_freeze_guards.py",
+        "loc": 1717
+      },
+      {
+        "path": "tests/architecture/test_config_ci_invariants.py",
+        "loc": 1385
+      },
+      {
+        "path": "tests/architecture/test_quality_debt_scorecard.py",
+        "loc": 1215
+      },
+      {
+        "path": "tests/architecture/test_test_governance_audit.py",
+        "loc": 1212
+      },
+      {
+        "path": "tests/architecture/test_port_contracts.py",
+        "loc": 1132
+      },
+      {
+        "path": "tests/architecture/test_layer_dependencies.py",
+        "loc": 1078
+      },
+      {
+        "path": "tests/architecture/test_strict_architecture_contracts.py",
+        "loc": 1017
+      },
+      {
+        "path": "tests/architecture/test_regression_metrics.py",
+        "loc": 991
+      },
+      {
+        "path": "tests/architecture/test_adapter_contracts.py",
+        "loc": 959
+      },
+      {
+        "path": "tests/architecture/test_docker_runtime_contracts.py",
+        "loc": 947
+      },
+      {
+        "path": "tests/architecture/test_port_contracts_hypothesis.py",
+        "loc": 847
+      },
+      {
+        "path": "tests/architecture/test_forbidden_imports.py",
+        "loc": 842
+      },
+      {
+        "path": "tests/architecture/test_module_coverage_inventory.py",
+        "loc": 828
+      },
+      {
+        "path": "tests/architecture/test_public_facade_inventory.py",
+        "loc": 777
+      },
+      {
+        "path": "tests/architecture/test_layer_aware_suffix_policy.py",
+        "loc": 698
+      },
+      {
+        "path": "tests/architecture/test_documentation_sync.py",
+        "loc": 691
+      },
+      {
+        "path": "tests/architecture/test_port_contracts_resilience_concurrency.py",
+        "loc": 675
+      },
+      {
+        "path": "tests/architecture/test_root_hygiene_review_registry.py",
+        "loc": 665
+      },
+      {
+        "path": "tests/architecture/test_transformer_signatures.py",
+        "loc": 608
+      },
+      {
+        "path": "tests/architecture/test_aggregate_boundaries.py",
+        "loc": 600
+      },
+      {
+        "path": "tests/architecture/test_observability_metric_governance.py",
+        "loc": 590
+      },
+      {
+        "path": "tests/architecture/test_di_compliance.py",
+        "loc": 582
+      },
+      {
+        "path": "tests/architecture/test_application_services_lazy_facade_governance.py",
+        "loc": 580
+      },
+      {
+        "path": "tests/architecture/test_code_metrics.py",
+        "loc": 564
+      },
+      {
+        "path": "tests/architecture/test_tracing_enforcement.py",
+        "loc": 562
+      }
+    ]
+  },
+  "burndown_policy": {
+    "merge_or_retire": "confirmed duplicates only with owner sign-off",
+    "mass_delete": false
+  }
+}

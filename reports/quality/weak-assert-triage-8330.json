@@ -1,0 +1,136 @@
+{
+  "schema_version": "weak-assert-triage-v1",
+  "linked_issue": "#8330",
+  "reviewed_owners": [
+    "tests/unit/application/core",
+    "tests/unit/scripts"
+  ],
+  "review_outcome": "inventory_landed_no_mass_delete",
+  "notes": [
+    "Direct-assert AST scan is advisory; many cases use helpers/assert_called patterns not counted as ast.Assert.",
+    "No mass-delete performed. Future triage should strengthen true no-assert smoke tests only."
+  ],
+  "application_core_sample": [
+    {
+      "path": "tests/integration/application/core/test_record_processor.py",
+      "name": "test_span_records_transform_result_attributes",
+      "lineno": 604,
+      "owner_bucket": "tests/integration/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_arch_cont_coverage_burn_down.py",
+      "name": "test_record_output_ready_skips_when_all_counts_zero",
+      "lineno": 76,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_base_transformer_structural_support.py",
+      "name": "test_record_structural_policy_metrics__action_only",
+      "lineno": 224,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_base_transformer_structural_support.py",
+      "name": "test_record_structural_policy_metrics__shadow_comparison_only",
+      "lineno": 247,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_base_transformer_structural_support.py",
+      "name": "test_record_structural_policy_metrics__none_values",
+      "lineno": 285,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "name": "test_save_periodic_checkpoint_skips_when_interval_not_reached",
+      "lineno": 94,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "name": "test_save_periodic_checkpoint_persists_total_processed",
+      "lineno": 108,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "name": "test_save_checkpoint_on_exception_skips_zero_totals",
+      "lineno": 122,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "name": "test_save_checkpoint_now_persists_total_processed",
+      "lineno": 163,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "name": "test_save_checkpoint_now_leaves_checkpoint_saved_at_gauge_to_manager",
+      "lineno": 211,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_execution_lifecycle.py",
+      "name": "test_finalize_execution_success_sets_stats_and_ends_span",
+      "lineno": 80,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_execution_lifecycle.py",
+      "name": "test_finalize_execution_shutdown_saves_checkpoint",
+      "lineno": 105,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_execution_lifecycle.py",
+      "name": "test_finalize_execution_error_saves_exception_checkpoint",
+      "lineno": 130,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor.py",
+      "name": "test_execute_checkpoint_uses_resume_offset",
+      "lineno": 570,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor.py",
+      "name": "test_apply_processed_batch_outcome_skips_dq_hook_when_disabled",
+      "lineno": 1164,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor.py",
+      "name": "test_report_batch_progress_forwards_current_counters",
+      "lineno": 1240,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor.py",
+      "name": "test_ensure_extraction_not_shutdown_is_noop_when_not_requested",
+      "lineno": 1263,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_memory_manager.py",
+      "name": "test_logs_size_reduction",
+      "lineno": 226,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_memory_manager.py",
+      "name": "test_does_not_log_when_no_reduction",
+      "lineno": 240,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_memory_manager.py",
+      "name": "test_emits_bounded_memory_metrics_for_pressure_resize",
+      "lineno": 302,
+      "owner_bucket": "tests/unit/application"
+    }
+  ],
+  "unit_scripts_sample": []
+}

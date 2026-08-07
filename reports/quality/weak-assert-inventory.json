@@ -1,0 +1,1323 @@
+{
+  "schema_version": "weak-assert-inventory-v1",
+  "linked_issue": "#8330",
+  "generated_at_utc": "2026-08-07T13:33:23.305501+00:00",
+  "policy": {
+    "mode": "advisory",
+    "blocking_gate": false,
+    "false_positive_note": "Architecture/governance tests often assert via helpers."
+  },
+  "summary": {
+    "total_without_direct_assert": 1149,
+    "unit_without_direct_assert": 1020,
+    "top_owner_buckets": [
+      {
+        "bucket": "tests/unit/domain",
+        "count": 406
+      },
+      {
+        "bucket": "tests/unit/application",
+        "count": 255
+      },
+      {
+        "bucket": "tests/unit/infrastructure",
+        "count": 234
+      },
+      {
+        "bucket": "tests/unit/composition",
+        "count": 62
+      },
+      {
+        "bucket": "tests/unit/interfaces",
+        "count": 37
+      },
+      {
+        "bucket": "tests/contract/silver_schemas",
+        "count": 27
+      },
+      {
+        "bucket": "tests/architecture/test_code_metrics.py",
+        "count": 12
+      },
+      {
+        "bucket": "tests/unit/repo_backed",
+        "count": 11
+      },
+      {
+        "bucket": "tests/integration/test_grafana_dashboard_links.py",
+        "count": 9
+      },
+      {
+        "bucket": "tests/unit/scripts",
+        "count": 9
+      },
+      {
+        "bucket": "tests/architecture/test_aggregate_boundaries.py",
+        "count": 5
+      },
+      {
+        "bucket": "tests/integration/chembl",
+        "count": 5
+      },
+      {
+        "bucket": "tests/integration/test_grafana_config.py",
+        "count": 5
+      },
+      {
+        "bucket": "tests/architecture/test_medallion_invariants.py",
+        "count": 4
+      },
+      {
+        "bucket": "tests/architecture/test_normalization_surface_coverage_ratchet.py",
+        "count": 4
+      },
+      {
+        "bucket": "tests/architecture/test_strict_architecture_contracts.py",
+        "count": 4
+      },
+      {
+        "bucket": "tests/integration/infrastructure",
+        "count": 4
+      },
+      {
+        "bucket": "tests/performance/test_hotspot_budgets.py",
+        "count": 4
+      },
+      {
+        "bucket": "tests/unit/storage",
+        "count": 4
+      },
+      {
+        "bucket": "tests/architecture/test_port_contracts_hypothesis.py",
+        "count": 3
+      },
+      {
+        "bucket": "tests/architecture/test_di_constructors.py",
+        "count": 2
+      },
+      {
+        "bucket": "tests/architecture/test_force_full_scan_publication.py",
+        "count": 2
+      },
+      {
+        "bucket": "tests/architecture/test_layer_dependencies.py",
+        "count": 2
+      },
+      {
+        "bucket": "tests/architecture/test_live_residual_snapshot.py",
+        "count": 2
+      },
+      {
+        "bucket": "tests/architecture/test_no_datetime_now_in_tests.py",
+        "count": 2
+      }
+    ]
+  },
+  "priority_review_paths": [
+    "tests/unit/application/core",
+    "tests/unit/scripts"
+  ],
+  "findings_sample": [
+    {
+      "path": "tests/architecture/test_adapter_port_conformance.py",
+      "name": "test_infrastructure_adapter_signatures_conform_to_ports",
+      "lineno": 238,
+      "owner_bucket": "tests/architecture/test_adapter_port_conformance.py"
+    },
+    {
+      "path": "tests/architecture/test_aggregate_boundaries.py",
+      "name": "test_aggregates_have_validate_invariants",
+      "lineno": 494,
+      "owner_bucket": "tests/architecture/test_aggregate_boundaries.py"
+    },
+    {
+      "path": "tests/architecture/test_aggregate_boundaries.py",
+      "name": "test_aggregates_emit_domain_events",
+      "lineno": 524,
+      "owner_bucket": "tests/architecture/test_aggregate_boundaries.py"
+    },
+    {
+      "path": "tests/architecture/test_aggregate_boundaries.py",
+      "name": "test_aggregates_have_collect_events_method",
+      "lineno": 558,
+      "owner_bucket": "tests/architecture/test_aggregate_boundaries.py"
+    },
+    {
+      "path": "tests/architecture/test_aggregate_boundaries.py",
+      "name": "test_aggregate_state_changes_through_methods_only",
+      "lineno": 575,
+      "owner_bucket": "tests/architecture/test_aggregate_boundaries.py"
+    },
+    {
+      "path": "tests/architecture/test_aggregate_boundaries.py",
+      "name": "test_aggregate_ids_are_immutable",
+      "lineno": 584,
+      "owner_bucket": "tests/architecture/test_aggregate_boundaries.py"
+    },
+    {
+      "path": "tests/architecture/test_code_metrics.py",
+      "name": "test_domain_files_under_limit",
+      "lineno": 110,
+      "owner_bucket": "tests/architecture/test_code_metrics.py"
+    },
+    {
+      "path": "tests/architecture/test_code_metrics.py",
+      "name": "test_application_files_under_limit",
+      "lineno": 118,
+      "owner_bucket": "tests/architecture/test_code_metrics.py"
+    },
+    {
+      "path": "tests/architecture/test_code_metrics.py",
+      "name": "test_composition_files_under_limit",
+      "lineno": 129,
+      "owner_bucket": "tests/architecture/test_code_metrics.py"
+    },
+    {
+      "path": "tests/architecture/test_code_metrics.py",
+      "name": "test_infrastructure_files_under_limit",
+      "lineno": 140,
+      "owner_bucket": "tests/architecture/test_code_metrics.py"
+    },
+    {
+      "path": "tests/architecture/test_code_metrics.py",
+      "name": "test_interfaces_files_under_limit",
+      "lineno": 151,
+      "owner_bucket": "tests/architecture/test_code_metrics.py"
+    },
+    {
+      "path": "tests/architecture/test_code_metrics.py",
+      "name": "test_domain_complexity",
+      "lineno": 206,
+      "owner_bucket": "tests/architecture/test_code_metrics.py"
+    },
+    {
+      "path": "tests/architecture/test_code_metrics.py",
+      "name": "test_application_complexity",
+      "lineno": 212,
+      "owner_bucket": "tests/architecture/test_code_metrics.py"
+    },
+    {
+      "path": "tests/architecture/test_code_metrics.py",
+      "name": "test_infrastructure_complexity",
+      "lineno": 223,
+      "owner_bucket": "tests/architecture/test_code_metrics.py"
+    },
+    {
+      "path": "tests/architecture/test_code_metrics.py",
+      "name": "test_functions_under_100_lines",
+      "lineno": 309,
+      "owner_bucket": "tests/architecture/test_code_metrics.py"
+    },
+    {
+      "path": "tests/architecture/test_code_metrics.py",
+      "name": "test_classes_under_300_lines",
+      "lineno": 394,
+      "owner_bucket": "tests/architecture/test_code_metrics.py"
+    },
+    {
+      "path": "tests/architecture/test_code_metrics.py",
+      "name": "test_classes_under_20_methods",
+      "lineno": 413,
+      "owner_bucket": "tests/architecture/test_code_metrics.py"
+    },
+    {
+      "path": "tests/architecture/test_code_metrics.py",
+      "name": "test_large_classes_have_delegation",
+      "lineno": 497,
+      "owner_bucket": "tests/architecture/test_code_metrics.py"
+    },
+    {
+      "path": "tests/architecture/test_codex_skill_agent_links.py",
+      "name": "test_codex_project_skills_do_not_have_user_global_duplicates",
+      "lineno": 157,
+      "owner_bucket": "tests/architecture/test_codex_skill_agent_links.py"
+    },
+    {
+      "path": "tests/architecture/test_di_constructors.py",
+      "name": "test_no_service_instantiation_in_init",
+      "lineno": 287,
+      "owner_bucket": "tests/architecture/test_di_constructors.py"
+    },
+    {
+      "path": "tests/architecture/test_di_constructors.py",
+      "name": "test_forbidden_services_list_is_current",
+      "lineno": 332,
+      "owner_bucket": "tests/architecture/test_di_constructors.py"
+    },
+    {
+      "path": "tests/architecture/test_di_infrastructure_adapters.py",
+      "name": "test_no_unconditional_service_instantiation",
+      "lineno": 177,
+      "owner_bucket": "tests/architecture/test_di_infrastructure_adapters.py"
+    },
+    {
+      "path": "tests/architecture/test_doc_crossref_integrity.py",
+      "name": "test_code_adr_references_exist",
+      "lineno": 94,
+      "owner_bucket": "tests/architecture/test_doc_crossref_integrity.py"
+    },
+    {
+      "path": "tests/architecture/test_documentation.py",
+      "name": "test_domain_exceptions_have_docstrings",
+      "lineno": 307,
+      "owner_bucket": "tests/architecture/test_documentation.py"
+    },
+    {
+      "path": "tests/architecture/test_force_full_scan_publication.py",
+      "name": "test_all_publication_configs_are_tested",
+      "lineno": 93,
+      "owner_bucket": "tests/architecture/test_force_full_scan_publication.py"
+    },
+    {
+      "path": "tests/architecture/test_force_full_scan_publication.py",
+      "name": "test_non_publication_configs_default_to_incremental",
+      "lineno": 134,
+      "owner_bucket": "tests/architecture/test_force_full_scan_publication.py"
+    },
+    {
+      "path": "tests/architecture/test_gold_schema_contracts.py",
+      "name": "test_schema_is_valid_json",
+      "lineno": 121,
+      "owner_bucket": "tests/architecture/test_gold_schema_contracts.py"
+    },
+    {
+      "path": "tests/architecture/test_layer_dependencies.py",
+      "name": "test_import_linter_contracts",
+      "lineno": 674,
+      "owner_bucket": "tests/architecture/test_layer_dependencies.py"
+    },
+    {
+      "path": "tests/architecture/test_layer_dependencies.py",
+      "name": "test_dead_code_vulture",
+      "lineno": 842,
+      "owner_bucket": "tests/architecture/test_layer_dependencies.py"
+    },
+    {
+      "path": "tests/architecture/test_live_residual_snapshot.py",
+      "name": "test_live_residual_snapshot_is_not_regressed_by_live_hotspot_metrics",
+      "lineno": 45,
+      "owner_bucket": "tests/architecture/test_live_residual_snapshot.py"
+    },
+    {
+      "path": "tests/architecture/test_live_residual_snapshot.py",
+      "name": "test_live_residual_snapshot_dead_code_and_clusters_match_committed_artifacts",
+      "lineno": 74,
+      "owner_bucket": "tests/architecture/test_live_residual_snapshot.py"
+    },
+    {
+      "path": "tests/architecture/test_medallion_invariants.py",
+      "name": "test_silver_writer_no_pandas_parquet",
+      "lineno": 201,
+      "owner_bucket": "tests/architecture/test_medallion_invariants.py"
+    },
+    {
+      "path": "tests/architecture/test_medallion_invariants.py",
+      "name": "test_rebuild_clears_silver_and_gold",
+      "lineno": 264,
+      "owner_bucket": "tests/architecture/test_medallion_invariants.py"
+    },
+    {
+      "path": "tests/architecture/test_medallion_invariants.py",
+      "name": "test_backfill_clears_silver_and_gold",
+      "lineno": 280,
+      "owner_bucket": "tests/architecture/test_medallion_invariants.py"
+    },
+    {
+      "path": "tests/architecture/test_medallion_invariants.py",
+      "name": "test_incremental_does_not_clear_silver_and_gold",
+      "lineno": 296,
+      "owner_bucket": "tests/architecture/test_medallion_invariants.py"
+    },
+    {
+      "path": "tests/architecture/test_medallion_policy.py",
+      "name": "test_medallion_clear_policy",
+      "lineno": 35,
+      "owner_bucket": "tests/architecture/test_medallion_policy.py"
+    },
+    {
+      "path": "tests/architecture/test_no_datetime_now_in_domain.py",
+      "name": "test_allowed_paths_still_exist_and_are_unambiguous",
+      "lineno": 86,
+      "owner_bucket": "tests/architecture/test_no_datetime_now_in_domain.py"
+    },
+    {
+      "path": "tests/architecture/test_no_datetime_now_in_infrastructure.py",
+      "name": "test_datetime_now_in_tests_no_datetime_now_in_94__5391b5b4",
+      "lineno": 106,
+      "owner_bucket": "tests/architecture/test_no_datetime_now_in_infrastructure.py"
+    },
+    {
+      "path": "tests/architecture/test_no_datetime_now_in_tests.py",
+      "name": "test_python_files",
+      "lineno": 71,
+      "owner_bucket": "tests/architecture/test_no_datetime_now_in_tests.py"
+    },
+    {
+      "path": "tests/architecture/test_no_datetime_now_in_tests.py",
+      "name": "test_allowed_paths_still_exist",
+      "lineno": 101,
+      "owner_bucket": "tests/architecture/test_no_datetime_now_in_tests.py"
+    },
+    {
+      "path": "tests/architecture/test_no_transformer_fallback.py",
+      "name": "test_basepipeline_init_does_not_create_transformer",
+      "lineno": 70,
+      "owner_bucket": "tests/architecture/test_no_transformer_fallback.py"
+    },
+    {
+      "path": "tests/architecture/test_no_transformer_fallback.py",
+      "name": "test_all_factories_have_transformer_class",
+      "lineno": 121,
+      "owner_bucket": "tests/architecture/test_no_transformer_fallback.py"
+    },
+    {
+      "path": "tests/architecture/test_normalization_fallback_business_ratchet.py",
+      "name": "test_reviewed_pipeline_fallback_business_counts_do_not_exceed_budgets",
+      "lineno": 93,
+      "owner_bucket": "tests/architecture/test_normalization_fallback_business_ratchet.py"
+    },
+    {
+      "path": "tests/architecture/test_normalization_surface_coverage_ratchet.py",
+      "name": "test_normalization_surface_coverage_does_not_regress_below_reviewed_budgets",
+      "lineno": 158,
+      "owner_bucket": "tests/architecture/test_normalization_surface_coverage_ratchet.py"
+    },
+    {
+      "path": "tests/architecture/test_normalization_surface_coverage_ratchet.py",
+      "name": "test_profile_semantic_invariants_do_not_regress_below_reviewed_budgets",
+      "lineno": 181,
+      "owner_bucket": "tests/architecture/test_normalization_surface_coverage_ratchet.py"
+    },
+    {
+      "path": "tests/architecture/test_normalization_surface_coverage_ratchet.py",
+      "name": "test_chembl_json_ordering_policy_does_not_drift_from_field_matrix",
+      "lineno": 185,
+      "owner_bucket": "tests/architecture/test_normalization_surface_coverage_ratchet.py"
+    },
+    {
+      "path": "tests/architecture/test_normalization_surface_coverage_ratchet.py",
+      "name": "test_chembl_json_ordering_policy_does_not_reappear_in_hash_config_mirrors",
+      "lineno": 191,
+      "owner_bucket": "tests/architecture/test_normalization_surface_coverage_ratchet.py"
+    },
+    {
+      "path": "tests/architecture/test_port_contracts.py",
+      "name": "test_all_port_methods_have_docstrings",
+      "lineno": 537,
+      "owner_bucket": "tests/architecture/test_port_contracts.py"
+    },
+    {
+      "path": "tests/architecture/test_port_contracts_hypothesis.py",
+      "name": "test_noop_metrics_accepts_any_valid_input",
+      "lineno": 551,
+      "owner_bucket": "tests/architecture/test_port_contracts_hypothesis.py"
+    },
+    {
+      "path": "tests/architecture/test_port_contracts_hypothesis.py",
+      "name": "test_noop_metrics_accepts_various_labels",
+      "lineno": 572,
+      "owner_bucket": "tests/architecture/test_port_contracts_hypothesis.py"
+    },
+    {
+      "path": "tests/architecture/test_port_contracts_hypothesis.py",
+      "name": "test_noop_logger_accepts_any_message",
+      "lineno": 606,
+      "owner_bucket": "tests/architecture/test_port_contracts_hypothesis.py"
+    },
+    {
+      "path": "tests/architecture/test_port_contracts_resilience_concurrency.py",
+      "name": "test_checkpoint_delete_non_existent_is_idempotent",
+      "lineno": 193,
+      "owner_bucket": "tests/architecture/test_port_contracts_resilience_concurrency.py"
+    },
+    {
+      "path": "tests/architecture/test_project_remediation_evidence_surface.py",
+      "name": "test_curated_evidence_surface_has_no_unreadable_visible_entries",
+      "lineno": 82,
+      "owner_bucket": "tests/architecture/test_project_remediation_evidence_surface.py"
+    },
+    {
+      "path": "tests/architecture/test_quality_debt_scorecard.py",
+      "name": "test_growth_rollout_warns_registry_section_before_cutoff",
+      "lineno": 1127,
+      "owner_bucket": "tests/architecture/test_quality_debt_scorecard.py"
+    },
+    {
+      "path": "tests/architecture/test_quarantine_immutability.py",
+      "name": "test_quarantine_payload_dataclasses_are_frozen",
+      "lineno": 117,
+      "owner_bucket": "tests/architecture/test_quarantine_immutability.py"
+    },
+    {
+      "path": "tests/architecture/test_regression_metrics.py",
+      "name": "test_architecture_test_p95_duration_tracked",
+      "lineno": 855,
+      "owner_bucket": "tests/architecture/test_regression_metrics.py"
+    },
+    {
+      "path": "tests/architecture/test_removed_surface_freeze_guards.py",
+      "name": "test_module_import_seams_are_confined",
+      "lineno": 1474,
+      "owner_bucket": "tests/architecture/test_removed_surface_freeze_guards.py"
+    },
+    {
+      "path": "tests/architecture/test_removed_surface_freeze_guards.py",
+      "name": "test_imported_symbol_seams_are_confined",
+      "lineno": 1544,
+      "owner_bucket": "tests/architecture/test_removed_surface_freeze_guards.py"
+    },
+    {
+      "path": "tests/architecture/test_scripts_inventory_manifest.py",
+      "name": "test_scripts_inventory_dispatcher_targets_canonical_checker",
+      "lineno": 73,
+      "owner_bucket": "tests/architecture/test_scripts_inventory_manifest.py"
+    },
+    {
+      "path": "tests/architecture/test_strict_architecture_contracts.py",
+      "name": "test_domain_no_infrastructure_imports",
+      "lineno": 681,
+      "owner_bucket": "tests/architecture/test_strict_architecture_contracts.py"
+    },
+    {
+      "path": "tests/architecture/test_strict_architecture_contracts.py",
+      "name": "test_application_no_concrete_infrastructure",
+      "lineno": 834,
+      "owner_bucket": "tests/architecture/test_strict_architecture_contracts.py"
+    },
+    {
+      "path": "tests/architecture/test_strict_architecture_contracts.py",
+      "name": "test_infrastructure_boundaries",
+      "lineno": 861,
+      "owner_bucket": "tests/architecture/test_strict_architecture_contracts.py"
+    },
+    {
+      "path": "tests/architecture/test_strict_architecture_contracts.py",
+      "name": "test_observability_library_isolation",
+      "lineno": 953,
+      "owner_bucket": "tests/architecture/test_strict_architecture_contracts.py"
+    },
+    {
+      "path": "tests/architecture/test_test_matrix_lane_policy.py",
+      "name": "test_no_hypothesis_in_forbidden_dirs",
+      "lineno": 62,
+      "owner_bucket": "tests/architecture/test_test_matrix_lane_policy.py"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_field_types.py",
+      "name": "test_no_object_dtype_without_reason",
+      "lineno": 71,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_field_types.py",
+      "name": "test_id_fields_are_strings",
+      "lineno": 131,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_field_types.py",
+      "name": "test_numeric_fields_not_nullable_without_union",
+      "lineno": 192,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_field_types.py",
+      "name": "test_boolean_fields_use_bool_type",
+      "lineno": 233,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_field_types.py",
+      "name": "test_nullable_int_fields_have_explicit_dtype_guard",
+      "lineno": 312,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_field_types.py",
+      "name": "test_timestamp_fields_use_datetime",
+      "lineno": 366,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_field_types.py",
+      "name": "test_year_fields_are_int",
+      "lineno": 412,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_field_types.py",
+      "name": "test_coerce_used_appropriately",
+      "lineno": 443,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_naming_conventions.py",
+      "name": "test_field_names_are_snake_case",
+      "lineno": 72,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_naming_conventions.py",
+      "name": "test_no_camelcase_fields",
+      "lineno": 95,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_naming_conventions.py",
+      "name": "test_no_abbreviations_without_glossary",
+      "lineno": 116,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_naming_conventions.py",
+      "name": "test_boolean_fields_start_with_is_has_can",
+      "lineno": 207,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_naming_conventions.py",
+      "name": "test_metadata_fields_start_with_underscore",
+      "lineno": 265,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_naming_conventions.py",
+      "name": "test_foreign_keys_have_id_suffix",
+      "lineno": 314,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_naming_conventions.py",
+      "name": "test_chembl_fk_naming_consistency",
+      "lineno": 341,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_naming_conventions.py",
+      "name": "test_common_fields_same_name_across_publications",
+      "lineno": 394,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_naming_conventions.py",
+      "name": "test_no_legacy_dq_field_names",
+      "lineno": 512,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_schema_stability.py",
+      "name": "test_schema_fields_unchanged",
+      "lineno": 64,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_schema_stability.py",
+      "name": "test_fields_have_descriptions",
+      "lineno": 167,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+      "name": "test_selected_pipeline_schema_matches_snapshot",
+      "lineno": 56,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_validations.py",
+      "name": "test_chembl_id_pattern_consistent",
+      "lineno": 79,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_validations.py",
+      "name": "test_pmid_pattern_if_present",
+      "lineno": 122,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_validations.py",
+      "name": "test_year_fields_have_range_check",
+      "lineno": 146,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_validations.py",
+      "name": "test_percentage_fields_bounded",
+      "lineno": 167,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_validations.py",
+      "name": "test_enum_fields_have_isin_check",
+      "lineno": 220,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_validations.py",
+      "name": "test_metadata_fields_not_nullable",
+      "lineno": 279,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/silver_schemas/test_validations.py",
+      "name": "test_publication_doi_validation_consistent",
+      "lineno": 302,
+      "owner_bucket": "tests/contract/silver_schemas"
+    },
+    {
+      "path": "tests/contract/test_bronze_silver_schema_golden_contracts.py",
+      "name": "test_bronze_schema_contract_matches_golden_fixture",
+      "lineno": 157,
+      "owner_bucket": "tests/contract/test_bronze_silver_schema_golden_contracts.py"
+    },
+    {
+      "path": "tests/contract/test_bronze_silver_schema_golden_contracts.py",
+      "name": "test_silver_schema_contract_matches_golden_fixture",
+      "lineno": 164,
+      "owner_bucket": "tests/contract/test_bronze_silver_schema_golden_contracts.py"
+    },
+    {
+      "path": "tests/contract/test_gold_schema_snapshot_registry.py",
+      "name": "test_gold_schema_entity_matches_snapshot",
+      "lineno": 57,
+      "owner_bucket": "tests/contract/test_gold_schema_snapshot_registry.py"
+    },
+    {
+      "path": "tests/e2e/test_chembl_assay_e2e.py",
+      "name": "test_chembl_assay_metadata_fields",
+      "lineno": 101,
+      "owner_bucket": "tests/e2e/test_chembl_assay_e2e.py"
+    },
+    {
+      "path": "tests/e2e/test_chembl_assay_e2e.py",
+      "name": "test_chembl_assay_confidence_score",
+      "lineno": 116,
+      "owner_bucket": "tests/e2e/test_chembl_assay_e2e.py"
+    },
+    {
+      "path": "tests/e2e/test_chembl_molecule_e2e.py",
+      "name": "test_chembl_molecule_structural_fields",
+      "lineno": 93,
+      "owner_bucket": "tests/e2e/test_chembl_molecule_e2e.py"
+    },
+    {
+      "path": "tests/integration/adapters/test_pubmed_coverage.py",
+      "name": "test_adapter_aclose",
+      "lineno": 232,
+      "owner_bucket": "tests/integration/adapters"
+    },
+    {
+      "path": "tests/integration/application/core/test_record_processor.py",
+      "name": "test_span_records_transform_result_attributes",
+      "lineno": 604,
+      "owner_bucket": "tests/integration/application"
+    },
+    {
+      "path": "tests/integration/chembl/test_activity_extraction_params.py",
+      "name": "test_filtered_api_request",
+      "lineno": 83,
+      "owner_bucket": "tests/integration/chembl"
+    },
+    {
+      "path": "tests/integration/chembl/test_assay_extraction_params.py",
+      "name": "test_assay_filtered_api_request",
+      "lineno": 56,
+      "owner_bucket": "tests/integration/chembl"
+    },
+    {
+      "path": "tests/integration/chembl/test_molecule_extraction_params.py",
+      "name": "test_molecule_filtered_api_request",
+      "lineno": 50,
+      "owner_bucket": "tests/integration/chembl"
+    },
+    {
+      "path": "tests/integration/chembl/test_publication_extraction_params.py",
+      "name": "test_publication_filtered_api_request",
+      "lineno": 56,
+      "owner_bucket": "tests/integration/chembl"
+    },
+    {
+      "path": "tests/integration/chembl/test_target_extraction_params.py",
+      "name": "test_target_filtered_api_request",
+      "lineno": 50,
+      "owner_bucket": "tests/integration/chembl"
+    },
+    {
+      "path": "tests/integration/config/test_chembl_observed_value_fixtures.py",
+      "name": "test_dq_only_subsets_remain_within_declared_policy_sets",
+      "lineno": 439,
+      "owner_bucket": "tests/integration/config"
+    },
+    {
+      "path": "tests/integration/infrastructure/storage/test_bronze_writer_cleanup_and_sidecar.py",
+      "name": "test_metadata_writer_not_called_when_save_metadata_disabled",
+      "lineno": 147,
+      "owner_bucket": "tests/integration/infrastructure"
+    },
+    {
+      "path": "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py",
+      "name": "test_log_bronze_audit_skips_when_audit_is_none",
+      "lineno": 84,
+      "owner_bucket": "tests/integration/infrastructure"
+    },
+    {
+      "path": "tests/integration/infrastructure/storage/test_delta_reader.py",
+      "name": "test_aclose_is_noop",
+      "lineno": 586,
+      "owner_bucket": "tests/integration/infrastructure"
+    },
+    {
+      "path": "tests/integration/infrastructure/storage/test_gold_writer_read_cleanup.py",
+      "name": "test_get_history_sorts_by_valid_from",
+      "lineno": 323,
+      "owner_bucket": "tests/integration/infrastructure"
+    },
+    {
+      "path": "tests/integration/test_grafana_config.py",
+      "name": "test_variable_query_sources",
+      "lineno": 1000,
+      "owner_bucket": "tests/integration/test_grafana_config.py"
+    },
+    {
+      "path": "tests/integration/test_grafana_config.py",
+      "name": "test_control_plane_read_panels_do_not_filter_on_missing_pipeline_label",
+      "lineno": 1230,
+      "owner_bucket": "tests/integration/test_grafana_config.py"
+    },
+    {
+      "path": "tests/integration/test_grafana_config.py",
+      "name": "test_control_plane_latency_panels_have_p50_p95_p99",
+      "lineno": 1271,
+      "owner_bucket": "tests/integration/test_grafana_config.py"
+    },
+    {
+      "path": "tests/integration/test_grafana_config.py",
+      "name": "test_workflow_step_panels_apply_status_variable",
+      "lineno": 1584,
+      "owner_bucket": "tests/integration/test_grafana_config.py"
+    },
+    {
+      "path": "tests/integration/test_grafana_config.py",
+      "name": "test_workflow_dashboard_collapses_step_diagnostics_below_first_screen",
+      "lineno": 1629,
+      "owner_bucket": "tests/integration/test_grafana_config.py"
+    },
+    {
+      "path": "tests/integration/test_grafana_dashboard_links.py",
+      "name": "test_exact_identifier_variables_do_not_leak_into_other_dashboards",
+      "lineno": 287,
+      "owner_bucket": "tests/integration/test_grafana_dashboard_links.py"
+    },
+    {
+      "path": "tests/integration/test_grafana_dashboard_links.py",
+      "name": "test_dashboard_top_level_navigation_contract_by_uid",
+      "lineno": 341,
+      "owner_bucket": "tests/integration/test_grafana_dashboard_links.py"
+    },
+    {
+      "path": "tests/integration/test_grafana_dashboard_links.py",
+      "name": "test_dashboard_links_forbid_universal_handoff_patterns",
+      "lineno": 484,
+      "owner_bucket": "tests/integration/test_grafana_dashboard_links.py"
+    },
+    {
+      "path": "tests/integration/test_grafana_dashboard_links.py",
+      "name": "test_navigation_panel_html_bus_preserves_primary_identity_handoff",
+      "lineno": 530,
+      "owner_bucket": "tests/integration/test_grafana_dashboard_links.py"
+    },
+    {
+      "path": "tests/integration/test_grafana_dashboard_links.py",
+      "name": "test_navigation_panel_html_bus_keeps_silver_explorer_forensic_boundary",
+      "lineno": 539,
+      "owner_bucket": "tests/integration/test_grafana_dashboard_links.py"
+    },
+    {
+      "path": "tests/integration/test_grafana_dashboard_links.py",
+      "name": "test_navigation_panel_renders_full_visual_bus_with_disabled_current_item",
+      "lineno": 548,
+      "owner_bucket": "tests/integration/test_grafana_dashboard_links.py"
+    },
+    {
+      "path": "tests/integration/test_grafana_dashboard_links.py",
+      "name": "test_overview_and_runtime_dashboards_expose_data_quality_handoff",
+      "lineno": 580,
+      "owner_bucket": "tests/integration/test_grafana_dashboard_links.py"
+    },
+    {
+      "path": "tests/integration/test_grafana_dashboard_links.py",
+      "name": "test_runtime_and_dq_dashboards_expose_control_plane_handoff",
+      "lineno": 590,
+      "owner_bucket": "tests/integration/test_grafana_dashboard_links.py"
+    },
+    {
+      "path": "tests/integration/test_grafana_dashboard_links.py",
+      "name": "test_navigation_dashboards_do_not_expose_removed_silver_reject_explorer",
+      "lineno": 600,
+      "owner_bucket": "tests/integration/test_grafana_dashboard_links.py"
+    },
+    {
+      "path": "tests/integration/test_runner_lifecycle.py",
+      "name": "test_rebuild_lifecycle_order",
+      "lineno": 504,
+      "owner_bucket": "tests/integration/test_runner_lifecycle.py"
+    },
+    {
+      "path": "tests/performance/test_hotspot_budgets.py",
+      "name": "test_silver_prepare_arrow_data_budget",
+      "lineno": 369,
+      "owner_bucket": "tests/performance/test_hotspot_budgets.py"
+    },
+    {
+      "path": "tests/performance/test_hotspot_budgets.py",
+      "name": "test_silver_write_append_budget",
+      "lineno": 405,
+      "owner_bucket": "tests/performance/test_hotspot_budgets.py"
+    },
+    {
+      "path": "tests/performance/test_hotspot_budgets.py",
+      "name": "test_silver_write_merge_budget",
+      "lineno": 461,
+      "owner_bucket": "tests/performance/test_hotspot_budgets.py"
+    },
+    {
+      "path": "tests/performance/test_hotspot_budgets.py",
+      "name": "test_atomic_write_group_budget",
+      "lineno": 576,
+      "owner_bucket": "tests/performance/test_hotspot_budgets.py"
+    },
+    {
+      "path": "tests/smoke/test_smoke.py",
+      "name": "test_runtime_dependency_importable",
+      "lineno": 110,
+      "owner_bucket": "tests/smoke/test_smoke.py"
+    },
+    {
+      "path": "tests/unit/application/composite/checkpoint/test_checkpoint_service.py",
+      "name": "test_save_sets_checkpoint_saved_at_gauge_from_state_timestamp",
+      "lineno": 1349,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/checkpoint/test_checkpoint_service.py",
+      "name": "test_delete_calls_storage_delete",
+      "lineno": 1425,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/checkpoint/test_checkpoint_service.py",
+      "name": "test_list_all_uses_correct_glob_pattern",
+      "lineno": 1483,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/checkpoint/test_load_validation.py",
+      "name": "test_validate_resume_compatibility_accepts_matching_anchors",
+      "lineno": 84,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_helpers.py",
+      "name": "test_log_enrichment_summary_when_empty_then_no_log_call",
+      "lineno": 132,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py",
+      "name": "test_transition_to_merging_state_when_called_then_validates_and_logs_fsm",
+      "lineno": 149,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py",
+      "name": "test_transition_to_completed_state_when_not_completed_then_transitions",
+      "lineno": 209,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py",
+      "name": "test_delete_checkpoint_safe_when_success_then_deletes",
+      "lineno": 292,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py",
+      "name": "test_delete_checkpoint_safe_when_non_fatal_error_then_logs_warning",
+      "lineno": 302,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py",
+      "name": "test_finalize_pipeline_when_called_then_sets_completed_and_deletes_checkpoint",
+      "lineno": 438,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_observability_mixin.py",
+      "name": "test_generate_dq_reports_when_service_absent_then_logs_debug_and_returns",
+      "lineno": 91,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_observability_mixin.py",
+      "name": "test_generate_dq_reports_when_runtime_error_then_logs_warning_only",
+      "lineno": 124,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_observability_mixin.py",
+      "name": "test_write_cv_quarantine_when_port_absent_then_does_nothing",
+      "lineno": 162,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_observability_mixin.py",
+      "name": "test_write_cv_quarantine_when_empty_payloads_then_does_nothing",
+      "lineno": 173,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_stage_dependency_state_flow.py",
+      "name": "test_calls_host_record_dependencies_stage_started",
+      "lineno": 57,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_stage_dependency_state_flow.py",
+      "name": "test_saves_checkpoint",
+      "lineno": 101,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py",
+      "name": "test_record_completed_enrichment_results_when_failed_then_state_not_updated",
+      "lineno": 181,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py",
+      "name": "test_record_completed_enrichment_results_when_skipped_then_state_updated",
+      "lineno": 194,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py",
+      "name": "test_transition_to_enrichment_completed_when_enriching_then_calls_complete",
+      "lineno": 306,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py",
+      "name": "test_transition_to_enrichment_completed_when_seed_completed_then_transitions_through_enriching",
+      "lineno": 320,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py",
+      "name": "test_resume_seed_phase_when_state_differs_then_fsm_transition_logged",
+      "lineno": 219,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py",
+      "name": "test_collect_successful_dependencies_when_success_then_marks_completed",
+      "lineno": 337,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py",
+      "name": "test_collect_successful_dependencies_when_failed_then_not_marked",
+      "lineno": 352,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py",
+      "name": "test_transition_state_with_fsm_log_when_validate_true_then_calls_fsm_validate",
+      "lineno": 244,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py",
+      "name": "test_transition_state_with_fsm_log_when_validate_false_then_skips_fsm_validate",
+      "lineno": 260,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+      "name": "test_run_preflight_validation_when_no_validator_then_logs_debug_and_skips",
+      "lineno": 180,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+      "name": "test_run_preflight_validation_when_valid_config_then_calls_validator",
+      "lineno": 190,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+      "name": "test_validate_config_consistency_when_consistent_then_no_warning",
+      "lineno": 290,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+      "name": "test_validate_config_consistency_when_mismatch_then_logs_warning",
+      "lineno": 307,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+      "name": "test_validate_config_consistency_when_all_optional_then_logs_info",
+      "lineno": 321,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_dependency_key_resolvers.py",
+      "name": "test_logs_debug_message",
+      "lineno": 83,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_merger.py",
+      "name": "test_no_deduplication_when_no_duplicates",
+      "lineno": 1449,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_preflight_modules.py",
+      "name": "test_log_schema_loading_summary",
+      "lineno": 224,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_preflight_modules.py",
+      "name": "test_log_validation_result_pass",
+      "lineno": 232,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_preflight_modules.py",
+      "name": "test_log_validation_result_fail",
+      "lineno": 246,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_preflight_modules.py",
+      "name": "test_log_resolved_field_sources_empty",
+      "lineno": 265,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_resolver_helper.py",
+      "name": "test_log_methods",
+      "lineno": 87,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_runner.py",
+      "name": "test_records_composite_phase_metric_families_for_successful_run",
+      "lineno": 279,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_runner_fsm.py",
+      "name": "test_run_id",
+      "lineno": 71,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_runner_fsm.py",
+      "name": "test_persist_completed_state_uses_completed_operation",
+      "lineno": 1303,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_runner_heartbeat.py",
+      "name": "test_heartbeat_started_during_execution",
+      "lineno": 189,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_runner_heartbeat.py",
+      "name": "test_lock_released_after_successful_run",
+      "lineno": 218,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_runner_heartbeat.py",
+      "name": "test_custom_heartbeat_interval_used_by_runner",
+      "lineno": 268,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_runner_observability_mixin.py",
+      "name": "test_generate_dq_reports_skips_when_service_missing",
+      "lineno": 81,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_runner_observability_mixin.py",
+      "name": "test_write_cv_quarantine_skips_when_port_missing_or_payload_empty",
+      "lineno": 155,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/composite/test_runner_robustness.py",
+      "name": "test_run_id",
+      "lineno": 80,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_arch_cont_coverage_burn_down.py",
+      "name": "test_record_output_ready_skips_when_all_counts_zero",
+      "lineno": 76,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_base_transformer_structural_support.py",
+      "name": "test_record_structural_policy_metrics__action_only",
+      "lineno": 224,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_base_transformer_structural_support.py",
+      "name": "test_record_structural_policy_metrics__shadow_comparison_only",
+      "lineno": 247,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_base_transformer_structural_support.py",
+      "name": "test_record_structural_policy_metrics__none_values",
+      "lineno": 285,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "name": "test_save_periodic_checkpoint_skips_when_interval_not_reached",
+      "lineno": 94,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "name": "test_save_periodic_checkpoint_persists_total_processed",
+      "lineno": 108,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "name": "test_save_checkpoint_on_exception_skips_zero_totals",
+      "lineno": 122,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "name": "test_save_checkpoint_now_persists_total_processed",
+      "lineno": 163,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "name": "test_save_checkpoint_now_leaves_checkpoint_saved_at_gauge_to_manager",
+      "lineno": 211,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_execution_lifecycle.py",
+      "name": "test_finalize_execution_success_sets_stats_and_ends_span",
+      "lineno": 80,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_execution_lifecycle.py",
+      "name": "test_finalize_execution_shutdown_saves_checkpoint",
+      "lineno": 105,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_execution_lifecycle.py",
+      "name": "test_finalize_execution_error_saves_exception_checkpoint",
+      "lineno": 130,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor.py",
+      "name": "test_execute_checkpoint_uses_resume_offset",
+      "lineno": 570,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor.py",
+      "name": "test_apply_processed_batch_outcome_skips_dq_hook_when_disabled",
+      "lineno": 1164,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor.py",
+      "name": "test_report_batch_progress_forwards_current_counters",
+      "lineno": 1240,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor.py",
+      "name": "test_ensure_extraction_not_shutdown_is_noop_when_not_requested",
+      "lineno": 1263,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_memory_manager.py",
+      "name": "test_logs_size_reduction",
+      "lineno": 226,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_memory_manager.py",
+      "name": "test_does_not_log_when_no_reduction",
+      "lineno": 240,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_memory_manager.py",
+      "name": "test_emits_bounded_memory_metrics_for_pressure_resize",
+      "lineno": 302,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_metrics.py",
+      "name": "test_calls_observe_histogram",
+      "lineno": 142,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_metrics.py",
+      "name": "test_handles_zero_size",
+      "lineno": 172,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_metrics.py",
+      "name": "test_track_batch_created_records_event_and_record_count",
+      "lineno": 193,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_metrics.py",
+      "name": "test_track_batch_written_records_event_and_record_count",
+      "lineno": 221,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_metrics.py",
+      "name": "test_track_batch_failed_records_failed_lifecycle_projection",
+      "lineno": 249,
+      "owner_bucket": "tests/unit/application"
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_metrics.py",
+      "name": "test_track_processed_records_calls_stage_and_flow_counters",
+      "lineno": 287,
+      "owner_bucket": "tests/unit/application"
+    }
+  ],
+  "findings_total": 1149
+}
