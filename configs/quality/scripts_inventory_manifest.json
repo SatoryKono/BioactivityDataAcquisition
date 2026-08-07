@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-07T08:35:18.437244+00:00",
+  "generated_at": "2026-08-07T08:47:42.399239+00:00",
   "summary": {
     "total_scripts": 565,
     "status_counts": {
@@ -12830,7 +12830,7 @@
       "references": [
         {
           "path": "tests/architecture/test_architecture_audit_closeout_gates.py",
-          "line": 238,
+          "line": 241,
           "source_group": "tests",
           "text": "assert (ROOT / \"scripts/engineering/qa/refresh_governance_artifacts.py\").is_file()"
         },
