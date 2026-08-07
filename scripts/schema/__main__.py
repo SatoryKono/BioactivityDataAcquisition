@@ -21,6 +21,7 @@ Commands:
     generate-unified-map   Generate unified Bronze->Silver->Gold schema map CSV
     generate-field-diagnostics Generate field-level schema diagnostics CSV
     generate-field-spec    Generate deterministic field transformation spec CSV
+    generate-json-field-typing-inventory Generate JSON field typing inventory
     validate-configs       Validate unified pipeline YAML configs
     validate-unified-configs Validate legacy unified entity config structure
     analyze-gaps           Config gap analysis
