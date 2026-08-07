@@ -466,7 +466,11 @@ class TestErrorContext:
         [
             (LockLostError, ("key1", "run1"), {"key", "run_id"}),
             (RateLimitError, ("provider1", 30.0), {"provider", "retry_after"}),
-            (SchemaViolationError, ("table1", ["e1"]), {"table", "errors"}),
+            (
+                SchemaViolationError,
+                ("table1", ["e1"]),
+                {"table", "errors", "record_id", "field"},
+            ),
             (BucketNotFoundError, ("bucket1",), {"bucket"}),
             (RetryExhaustedError, ("url1", 3, None), {"url", "attempts", "last_error"}),
         ],
