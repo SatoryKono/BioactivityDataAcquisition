@@ -30,7 +30,7 @@ Modes:
   --sync   Regenerate the transformed docs mirror, then validate parity.
 
 Requires python3 or python on PATH. Preferred:
-  python scripts/ai/sync_ai_governance.py --root . --only skill-mirrors --check
+  python -m scripts.ai.sync.governance --root . --only skill-mirrors --check
 EOF
 }
 
@@ -38,11 +38,11 @@ PYTHON_BIN="$(resolve_python)"
 
 case "$MODE" in
   --check)
-    exec "$PYTHON_BIN" "$REPO_ROOT/scripts/ai/sync_ai_governance.py" \
+    exec "$PYTHON_BIN" "$REPO_ROOT/scripts/ai/sync/governance.py" \
       --root "$REPO_ROOT" --only skill-mirrors --check
     ;;
   --sync)
-    exec "$PYTHON_BIN" "$REPO_ROOT/scripts/ai/sync_ai_governance.py" \
+    exec "$PYTHON_BIN" "$REPO_ROOT/scripts/ai/sync/governance.py" \
       --root "$REPO_ROOT" --only skill-mirrors
     ;;
   -h|--help)

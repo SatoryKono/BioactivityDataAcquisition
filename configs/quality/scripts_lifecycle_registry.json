@@ -488,19 +488,19 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the internal shell uvx resolution and proxy-cleanup helper shared by MCP wrappers; keep it supporting unless command resolution becomes a standalone governed MCP command."
     },
-    "scripts/ai/sync_ai_governance.py": {
+    "scripts/ai/sync/governance.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the AI governance sync helper for Codex/docs agent and skill mirrors; keep it supporting unless it becomes a governed CI workflow."
     },
-    "scripts/ai/sync_cursor_rules.py": {
+    "scripts/ai/sync/cursor.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded manual mirror-sync utility for Cursor rule deploy surfaces while docs expose the direct script path; promote it into a governed AI-rules workflow or retire it once tracked mirrors no longer need explicit sync execution."
     },
-    "scripts/ai/sync_windsurf_rules.py": {
+    "scripts/ai/sync/windsurf.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
