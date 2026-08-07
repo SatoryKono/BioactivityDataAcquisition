@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Final
+from types import MappingProxyType
+from typing import Final, Mapping
 
 from bioetl.domain.value_objects.publication_field_group_types import (
     FIELD_TO_GROUP_MAPPING,
@@ -20,7 +21,7 @@ __all__ = [
 class FieldGroupConfig:
     """Configuration for publication-field grouping operations."""
 
-    field_groups: dict[str, PublicationFieldGroup] = field(
+    field_groups: Mapping[str, PublicationFieldGroup] = field(
         default_factory=lambda: dict(FIELD_TO_GROUP_MAPPING)
     )
     provider_priority: tuple[str, ...] = (
@@ -31,6 +32,14 @@ class FieldGroupConfig:
         "semanticscholar",
     )
     default_group: PublicationFieldGroup = PublicationFieldGroup.TRASH
+
+    def __post_init__(self) -> None:
+        """Snapshot field_groups so callers cannot mutate config later."""
+        object.__setattr__(
+            self,
+            "field_groups",
+            MappingProxyType(dict(self.field_groups)),
+        )
 
     def get_group(self, column: str) -> PublicationFieldGroup:
         """Get semantic group for qualified or unqualified column name.

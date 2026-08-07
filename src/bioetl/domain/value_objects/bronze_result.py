@@ -27,10 +27,12 @@ def _parse_provider_entity(relative_path: str) -> tuple[str, str]:
     normalized = relative_path.replace("\\", "/").strip("/")
     if not normalized:
         raise ValueError("relative_path must include provider/entity segments")
-    parts = normalized.split("/")
-    if parts[0] == "v1":
+    parts = [part for part in normalized.split("/") if part not in {"", "."}]
+    if any(part == ".." for part in parts):
+        raise ValueError("relative_path must not contain parent-directory segments")
+    if parts and parts[0] == "v1":
         parts = parts[1:]
-    if len(parts) >= 2:
+    if len(parts) >= 2 and parts[0].strip() and parts[1].strip():
         return parts[0], parts[1]
     raise ValueError("relative_path must include provider/entity segments")
 
@@ -102,6 +104,8 @@ class BronzeWriteResult:
             raise ValueError("absolute_path cannot be empty")
         if not self.checksum_blake2:
             raise ValueError("checksum_blake2 cannot be empty")
+        # Fail closed on relative paths that lack provider/entity segments.
+        _parse_provider_entity(self.relative_path)
 
     @property
     def compression_ratio(self) -> float:
