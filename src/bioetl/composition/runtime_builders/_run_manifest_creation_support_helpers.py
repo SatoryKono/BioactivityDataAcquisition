@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
@@ -186,7 +188,7 @@ def resolve_replay_lag_seconds(
     *,
     launch_context: object,
     lag_status: str,
-    read_attr,
+    read_attr: Callable[..., object | None],
 ) -> float | None:
     """Return measured replay lag seconds when available; never invent 0 for blocked."""
     from collections.abc import Mapping

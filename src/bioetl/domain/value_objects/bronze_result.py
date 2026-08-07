@@ -22,27 +22,46 @@ __all__ = [
 ]
 
 
+def _clean_path_segments(normalized: str) -> list[str]:
+    parts: list[str] = []
+    for part in normalized.split("/"):
+        if part in {"", "."}:
+            continue
+        parts.append(part)
+    return parts
+
+
 def _normalized_path_parts(relative_path: str) -> list[str]:
     """Return cleaned path segments without empty/dot/parent parts."""
     normalized = relative_path.replace("\\", "/").strip("/")
     if not normalized:
         raise ValueError("relative_path must include provider/entity segments")
-    parts = [part for part in normalized.split("/") if part not in {"", "."}]
+    parts = _clean_path_segments(normalized)
     if ".." in parts:
         raise ValueError("relative_path must not contain parent-directory segments")
     return parts
 
 
 def _strip_v1_prefix(parts: list[str]) -> list[str]:
-    if parts and parts[0] == "v1":
-        return parts[1:]
-    return parts
+    if not parts:
+        return parts
+    if parts[0] != "v1":
+        return parts
+    return parts[1:]
+
+
+def _has_provider_entity(parts: list[str]) -> bool:
+    if len(parts) < 2:
+        return False
+    if not parts[0].strip():
+        return False
+    return bool(parts[1].strip())
 
 
 def _parse_provider_entity(relative_path: str) -> tuple[str, str]:
     """Parse provider and entity from a Bronze relative path."""
     parts = _strip_v1_prefix(_normalized_path_parts(relative_path))
-    if len(parts) < 2 or not parts[0].strip() or not parts[1].strip():
+    if not _has_provider_entity(parts):
         raise ValueError("relative_path must include provider/entity segments")
     return parts[0], parts[1]
 
@@ -125,7 +144,9 @@ class BronzeWriteResult:
             Compression ratio, or 1.0 when either size is zero so callers never
             hit ZeroDivisionError on empty or pre-compression artifacts.
         """
-        if self.uncompressed_size == 0 or self.compressed_size == 0:
+        if self.uncompressed_size == 0:
+            return 1.0
+        if self.compressed_size == 0:
             return 1.0
         return self.uncompressed_size / self.compressed_size
 
