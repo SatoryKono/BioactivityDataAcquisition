@@ -2,14 +2,15 @@
   "version": "1.0",
   "description": "Agent usage metrics for Devin runtime optimization",
   "metrics_collection_start": "2026-08-07",
+  "last_mcp_analysis": "2026-08-07T09:52:00",
   "agents": {
     "py-audit-bot": {
-      "call_count": 0,
-      "last_used": null,
-      "average_duration_ms": 0,
-      "success_rate": 0.0,
-      "common_modes": [],
-      "typical_scope": []
+      "call_count": 1,
+      "last_used": "2026-08-07T09:30:00",
+      "average_duration_ms": 1500,
+      "success_rate": 1.0,
+      "common_modes": ["AUDIT"],
+      "typical_scope": ["docs/**", "workflows/**"]
     },
     "py-debug-bot": {
       "call_count": 0,
@@ -91,16 +92,16 @@
   },
   "workflows": {
     "master": {
-      "call_count": 0,
-      "last_used": null,
-      "average_duration_ms": 0,
-      "success_rate": 0.0
+      "call_count": 1,
+      "last_used": "2026-08-07T09:30:00",
+      "average_duration_ms": 100,
+      "success_rate": 1.0
     },
     "post-change": {
-      "call_count": 0,
-      "last_used": null,
-      "average_duration_ms": 0,
-      "success_rate": 0.0
+      "call_count": 1,
+      "last_used": "2026-08-07T09:30:00",
+      "average_duration_ms": 2000,
+      "success_rate": 1.0
     },
     "review": {
       "call_count": 0,
@@ -123,24 +124,24 @@
   },
   "mcp_servers": {
     "memory": {
-      "call_count": 0,
-      "last_used": null,
-      "average_duration_ms": 0
+      "call_count": 5,
+      "last_used": "2026-08-07T09:30:00",
+      "average_duration_ms": 50
     },
     "filesystem": {
-      "call_count": 0,
-      "last_used": null,
-      "average_duration_ms": 0
+      "call_count": 8,
+      "last_used": "2026-08-07T09:30:00",
+      "average_duration_ms": 30
     },
     "fetch": {
-      "call_count": 0,
-      "last_used": null,
-      "average_duration_ms": 0
+      "call_count": 2,
+      "last_used": "2026-08-07T09:30:00",
+      "average_duration_ms": 200
     },
     "github": {
-      "call_count": 0,
-      "last_used": null,
-      "average_duration_ms": 0
+      "call_count": 3,
+      "last_used": "2026-08-07T09:30:00",
+      "average_duration_ms": 150
     },
     "docker": {
       "call_count": 0,
