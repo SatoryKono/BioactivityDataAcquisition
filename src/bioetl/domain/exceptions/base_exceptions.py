@@ -31,6 +31,20 @@ def _freeze_context(value: object) -> object:
     return value
 
 
+def _plain_context(value: object) -> object:
+    """Recursively convert frozen context into JSON-serializable plain data."""
+    from collections.abc import Mapping
+
+    if isinstance(value, Mapping):
+        return {str(key): _plain_context(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_plain_context(item) for item in value]
+    if isinstance(value, (set, frozenset)):
+        plain_items = [_plain_context(item) for item in value]
+        return sorted(plain_items, key=lambda item: (type(item).__name__, repr(item)))
+    return value
+
+
 class BioETLError(Exception):
     """Base exception for all BioETL errors.
 
@@ -89,7 +103,7 @@ class BioETLDomainError(BioETLError):
         result = {
             "error_type": self.__class__.__name__,
             "message": self.message,
-            "context": dict(self.context) if self.context else {},
+            "context": _plain_context(self.context) if self.context else {},
         }
         if self.original_exception:
             result["original_exception"] = str(self.original_exception)
