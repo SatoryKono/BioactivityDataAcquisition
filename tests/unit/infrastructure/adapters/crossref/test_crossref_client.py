@@ -71,7 +71,7 @@ def adapter(mock_http_client, mock_logger):
     )
 
 
-def test_constructor_requires_injected_http_client_and_logger() -> None:
+def test_crossref_constructor_requires_injected_http_client_and_logger() -> None:
     """Mixin attributes must not become dataclass constructor defaults."""
     parameters = inspect.signature(CrossRefAdapter).parameters
 
