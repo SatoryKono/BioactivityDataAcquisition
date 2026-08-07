@@ -22,19 +22,25 @@ __all__ = [
 ]
 
 
-def _parse_provider_entity(relative_path: str) -> tuple[str, str]:
-    """Parse provider and entity from a Bronze relative path."""
+def _normalized_path_parts(relative_path: str) -> list[str]:
+    """Return cleaned path segments without empty/dot/parent parts."""
     normalized = relative_path.replace("\\", "/").strip("/")
     if not normalized:
         raise ValueError("relative_path must include provider/entity segments")
     parts = [part for part in normalized.split("/") if part not in {"", "."}]
     if any(part == ".." for part in parts):
         raise ValueError("relative_path must not contain parent-directory segments")
+    return parts
+
+
+def _parse_provider_entity(relative_path: str) -> tuple[str, str]:
+    """Parse provider and entity from a Bronze relative path."""
+    parts = _normalized_path_parts(relative_path)
     if parts and parts[0] == "v1":
         parts = parts[1:]
-    if len(parts) >= 2 and parts[0].strip() and parts[1].strip():
-        return parts[0], parts[1]
-    raise ValueError("relative_path must include provider/entity segments")
+    if len(parts) < 2 or not parts[0].strip() or not parts[1].strip():
+        raise ValueError("relative_path must include provider/entity segments")
+    return parts[0], parts[1]
 
 
 @dataclass(frozen=True, slots=True)

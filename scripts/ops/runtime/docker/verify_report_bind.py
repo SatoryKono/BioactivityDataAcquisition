@@ -39,7 +39,7 @@ for _path in (_REPO_ROOT, _SRC_ROOT):
 
 from bioetl.application.services.run_reports.paths import (  # noqa: E402
     REPORT_ROOT_MARKER_NAME,
-    REPORT_ROOT_MARKER_TOKEN,
+    REPORT_ROOT_MARKER_VALUE,
     inspect_report_root_marker,
 )
 from bioetl.application.services.run_reports.query import (  # noqa: E402
@@ -153,11 +153,11 @@ def verify(
         ok = False
         findings.append(
             f"FAIL: host marker missing at {marker_path} "
-            f"(expected token {REPORT_ROOT_MARKER_TOKEN!r})"
+            f"(expected token {REPORT_ROOT_MARKER_VALUE!r})"
         )
     else:
         token = marker_path.read_text(encoding="utf-8").strip()
-        if token != REPORT_ROOT_MARKER_TOKEN:
+        if token != REPORT_ROOT_MARKER_VALUE:
             ok = False
             findings.append(
                 f"FAIL: host marker token mismatch at {marker_path}: {token!r}"

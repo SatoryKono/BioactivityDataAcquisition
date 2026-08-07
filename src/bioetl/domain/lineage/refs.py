@@ -71,7 +71,7 @@ class LineageNodeRef:
         }
 
     @classmethod
-    def from_dict(cls, payload: dict[str, object]) -> LineageNodeRef:
+    def from_dict(cls, payload: Mapping[str, object]) -> LineageNodeRef:
         """Hydrate node reference from serialized payload."""
         raw_attributes = payload.get("attributes", {})
         attributes = (
