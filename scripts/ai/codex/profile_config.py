@@ -109,9 +109,7 @@ def audit_profiles(codex_home: Path) -> dict[str, Any]:
             "exists": path.is_file() and not path.is_symlink(),
             "readable": readable,
             "model": values.get("model", "missing"),
-            "model_reasoning_effort": values.get(
-                "model_reasoning_effort", "missing"
-            ),
+            "model_reasoning_effort": values.get("model_reasoning_effort", "missing"),
             "expected_model": expected["model"],
             "expected_reasoning_effort": expected["model_reasoning_effort"],
             "matches_benchmark": readable and values == expected,
@@ -163,8 +161,7 @@ def create_backup(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
     os.chmod(manifest_path, 0o600)
     verified = all(
         not entry["existed"]
-        or _sha256(backup_dir / "files" / entry["filename"])
-        == entry["sha256"]
+        or _sha256(backup_dir / "files" / entry["filename"]) == entry["sha256"]
         for entry in copied
     )
     return {
@@ -242,7 +239,9 @@ def restore_profiles(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("audit", "apply", "restore"), nargs="?", default="audit")
+    parser.add_argument(
+        "mode", choices=("audit", "apply", "restore"), nargs="?", default="audit"
+    )
     parser.add_argument(
         "--codex-home",
         type=Path,

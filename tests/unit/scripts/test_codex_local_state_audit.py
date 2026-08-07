@@ -79,7 +79,9 @@ def test_remediation_backup_and_restore_on_non_sensitive_sample(
     assert result["permissions"]["unsafe_after"] == 0
     assert stat.S_IMODE(home.stat().st_mode) == 0o700
     assert stat.S_IMODE((home / "sessions").stat().st_mode) == 0o700
-    assert stat.S_IMODE((home / "sessions").iterdir().__next__().stat().st_mode) == 0o600
+    assert (
+        stat.S_IMODE((home / "sessions").iterdir().__next__().stat().st_mode) == 0o600
+    )
 
     restored = local_state_audit.restore_backup(home, backup)
 
