@@ -58,7 +58,7 @@ class BatchTracingManagerService:
         """Start the root pipeline execution span."""
         otel_tracer = self._tracer.get_tracer(self.TRACER_NAME)
         span = cast(
-            Span,  # OpenTelemetry span context manager is unparameterized at runtime
+            "Span",  # TYPE_CHECKING import; cast arg must not evaluate at runtime
             otel_tracer.start_as_current_span(
                 "pipeline_execution",
                 attributes=cast(dict[str, object], build_execution_span_attributes(
@@ -79,7 +79,7 @@ class BatchTracingManagerService:
         """Start a tracing span for one batch."""
         otel_tracer = self._tracer.get_tracer(self.TRACER_NAME)
         span = cast(
-            Span,  # OpenTelemetry span context manager is unparameterized at runtime
+            "Span",  # TYPE_CHECKING import; cast arg must not evaluate at runtime
             otel_tracer.start_as_current_span(
                 f"batch_{batch_id}",
                 attributes=cast(dict[str, object], build_batch_span_attributes(
@@ -103,7 +103,7 @@ class BatchTracingManagerService:
     ) -> Span:
         """Start a tracing span for one layer operation."""
         span = cast(
-            Span,  # OpenTelemetry span context manager is unparameterized at runtime
+            "Span",  # TYPE_CHECKING import; cast arg must not evaluate at runtime
             self._tracer.get_tracer(self.TRACER_NAME).start_as_current_span(
                 name,
                 attributes=cast(dict[str, object], build_layer_span_attributes(
