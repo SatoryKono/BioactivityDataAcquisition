@@ -111,8 +111,13 @@ class ProteinClassHierarchy:
 
     @property
     def is_leaf(self) -> bool:
-        """Return True for resolved component leaf classifications."""
-        return True
+        """Return True when hierarchy resolves to this leaf identifier."""
+        if self.path is not None:
+            if not self.path:
+                return False
+            last = self.path[-1]
+            return last.id == self.leaf_id and not last.is_empty
+        return (not self.l5.is_empty) and self.l5.id == self.leaf_id
 
     def _validate_path(self) -> None:
         if self.path is None:

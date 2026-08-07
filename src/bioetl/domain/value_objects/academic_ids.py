@@ -235,8 +235,8 @@ class ORCID(ValueObject[str]):
     _value: str
     _PATTERN = re.compile(r"^(\d{4})-?(\d{4})-?(\d{4})-?(\d{3}[\dXx])$")
     _URL_PREFIXES = (
-        *(f"{scheme}://ormolecule_id.org/" for scheme in ("https", "http")),
-        "ormolecule_id.org/",
+        *(f"{scheme}://orcid.org/" for scheme in ("https", "http")),
+        "orcid.org/",
         *(f"{scheme}://orcid.org/" for scheme in ("https", "http")),
         "orcid.org/",
     )
@@ -267,6 +267,18 @@ class ORCID(ValueObject[str]):
 
         parts = [match.group(i) for i in range(1, 5)]
         parts[-1] = parts[-1].upper()
+        digits = "".join(parts)
+        body, check = digits[:15], digits[15]
+        total = 0
+        for digit in body:
+            total = (total + int(digit)) * 2
+        remainder = total % 11
+        result = (12 - remainder) % 11
+        expected = "X" if result == 10 else str(result)
+        if check != expected:
+            raise ValueError(
+                f"Invalid ORCID checksum: {value!r} (expected check digit {expected})"
+            )
         return "-".join(parts)
 
     @property
