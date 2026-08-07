@@ -1,6 +1,6 @@
 ---
 name: "py-doc-bot"
-description: "Execute the BioETL py-doc-bot profile for documentation updates, docs drift remediation, runtime mirror sync, and documentation validation. Use when work primarily changes docs or contributor guidance."
+description: "Execute the BioETL py-doc-bot profile for documentation updates, drift remediation, focused or broad documentation audits, runtime mirror sync, and validation."
 ---
 
 # py-doc-bot
@@ -22,7 +22,8 @@ description: "Execute the BioETL py-doc-bot profile for documentation updates, d
 ## Trigger Scope
 
 Use this wrapper for docs edits, doc drift, docs generated artifact refresh,
-runtime mirror updates, and documentation validation.
+runtime mirror updates, and documentation validation. Use `mode=focused` for a
+bounded surface and `mode=broad` for the retired cascade-audit workflow.
 
 ## Workflow
 

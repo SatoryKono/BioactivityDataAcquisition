@@ -1,4 +1,0 @@
-interface:
-  display_name: "Deep Research"
-  short_description: "Run sourced iterative research"
-  default_prompt: "Use $deep-research to investigate a complex question with sourced findings, confidence, and limitations."

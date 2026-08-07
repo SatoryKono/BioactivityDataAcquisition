@@ -1,4 +1,0 @@
-interface:
-  display_name: "Grafana Dashboard Render"
-  short_description: "Render and audit BioETL Grafana dashboards"
-  default_prompt: "Use $grafana-dashboard-render to preflight, rerender, and capture audit evidence for shipped BioETL Grafana dashboards."

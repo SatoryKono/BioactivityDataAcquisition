@@ -1,6 +1,0 @@
-name = "py-test-swarm"
-description = "Coordinate broad BioETL test campaigns, failure triage, coverage work, optimization, and flakiness analysis."
-sandbox_mode = "read-only"
-developer_instructions = """
-Read AGENTS.md, .codex/agents/CODEX-RUNTIME.md, .codex/agents/py-test-swarm.md, .codex/skills/py-test-swarm/SKILL.md, docs/00-project/ai/memory/agent-memory.md, and docs/00-project/ai/memory/memory-py-test-swarm.md before acting. Follow the named Markdown profile and skill as the detailed operating contract. Delegate only when the parent session permits it, keep test ownership disjoint, and aggregate reproducible evidence without weakening quality thresholds.
-"""

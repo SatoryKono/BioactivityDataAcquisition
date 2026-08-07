@@ -16,7 +16,10 @@ Read before planning or editing:
 
 ## 1. Обзор
 
-Команда из **9 активных субагентов** (7 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя работу субагентам через native agent roles (`default` / `explorer` / `worker`) с привязкой к логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
+Команда из **6 активных субагентов** обеспечивает полный жизненный цикл задачи
+разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя
+работу через native agent roles (`default` / `explorer` / `worker`) с привязкой
+к логическим профилям `py-*`. Production-код пишется напрямую оркестратором.
 
 **Запуск логического профиля в Codex runtime:**
 
@@ -31,24 +34,22 @@ spawn_agent(
 
 |  #   | Субагент (`subagent_type`)   | Model  | Роль                                                                                   | Артефакт                                               |
 | :--: | ---------------------------- | ------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-|  I   | **py-audit-bot**             | opus   | Baseline/final аудит, code review, arch guardian, API validation                       | `review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md`     |
-|  II  | **py-architecture-debt-bot** | opus   | Полный workflow устранения архитектурного долга: generate -> plan -> execute -> verify | `review_py-architecture-debt-bot_{YYYYMMDD}_{HHMM}.md` |
-| III  | **py-plan-bot**              | opus   | Планирование, декомпозиция, composite design                                           | `review_py-plan-bot_{YYYYMMDD}_{HHMM}.md`              |
-|  IV  | **py-test-bot**              | sonnet | Тестирование                                                                           | `review_py-test-bot_{YYYYMMDD}_{HHMM}.md`              |
-|  V   | **py-config-bot**            | sonnet | Конфигурации (pipeline, DQ, filter, composite)                                         | `review_py-config-bot_{YYYYMMDD}_{HHMM}.md`            |
-|  VI  | **py-debug-bot**             | opus   | Отладка падений                                                                        | `review_py-debug-bot_{YYYYMMDD}_{HHMM}.md`             |
-| VII  | **py-doc-bot**               | sonnet | Документация, ADR, диаграммы (Mermaid)                                                 | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md`               |
-| VIII | **py-test-swarm**            | opus   | Иерархическое тестирование (L1→L2→L3)                                                  | test reports                                           |
-|  IX  | **py-review-orchestrator**   | opus   | Иерархический code review (S1-S8)                                                      | review reports                                         |
+| I | **py-audit-bot** | inherited | Audit, review, debt, reproducibility | `review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md` |
+| II | **py-plan-bot** | inherited | Planning and decomposition | `review_py-plan-bot_{YYYYMMDD}_{HHMM}.md` |
+| III | **py-test-bot** | inherited | Focused tests and broad campaigns | `review_py-test-bot_{YYYYMMDD}_{HHMM}.md` |
+| IV | **py-config-bot** | inherited | Pipeline, DQ, filter, composite config | `review_py-config-bot_{YYYYMMDD}_{HHMM}.md` |
+| V | **py-debug-bot** | inherited | Failure diagnosis and fixes | `review_py-debug-bot_{YYYYMMDD}_{HHMM}.md` |
+| VI | **py-doc-bot** | inherited | Docs, broad docs audits, Mermaid | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md` |
 
-> **Note:** `py-code-bot` removed in v4.0 — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`. Repo-wide documentation audits now route through the `documentation-audit` / `documentation-cascade-audit` skills rather than a dedicated documentation-only subagent profile.
+> **Note:** production code is written directly by the orchestrator. Broad test,
+> review, debt, reproducibility, and documentation-audit work use modes of the
+> six active profiles; no standalone orchestration profiles are retained.
 
 ### Разделение ответственности (файловые зоны)
 
 | Субагент                 | Зона записи                                                           | Только чтение                         |
 | ------------------------ | --------------------------------------------------------------------- | ------------------------------------- |
 | orchestrator (direct)    | `src/bioetl/`, `tests/`                                               | `configs/`, `docs/`                   |
-| py-architecture-debt-bot | `src/bioetl/`, `tests/`, `reports/quality/`, root task JSON artifacts | `configs/`, `docs/` (edits delegated) |
 | py-config-bot            | `configs/`                                                            | `src/bioetl/`, `docs/`                |
 | py-doc-bot               | `docs/`, docstrings, `docs/00-project/ai/agents/scripts/diagrams/`    | `configs/`, `tests/`                  |
 | py-test-bot              | `tests/`                                                              | `src/bioetl/`, `configs/`             |

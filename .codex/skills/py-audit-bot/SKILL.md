@@ -1,6 +1,6 @@
 ---
 name: "py-audit-bot"
-description: "Execute the BioETL py-audit-bot profile for baseline, final, or targeted audits of code, config, docs, architecture, runtime guidance, and regression risk. Use when the user asks for an audit/review gate or when orchestration requires an independent compliance check."
+description: "Execute the BioETL py-audit-bot profile for baseline, final, targeted, review, debt, or reproducibility audits. Use when the user asks for an audit/review gate or independent compliance check."
 ---
 
 # py-audit-bot
@@ -29,7 +29,8 @@ architecture drift, and validation gaps.
 
 1. Follow the shared wrapper contract.
 1. Read and apply `../../agents/py-audit-bot.md`.
-1. Classify the audit as `baseline`, `final`, or `targeted`.
+1. Classify the audit as `baseline`, `final`, `targeted`, `review`, `debt`, or
+   `reproducibility`.
 1. Ground every finding in file:line evidence or a concrete command result.
 1. Do not raise technical-debt budgets or create new exemptions.
 
@@ -39,6 +40,11 @@ architecture drift, and validation gaps.
   `reports/{LLM}/review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md`.
 - Findings first, ordered by severity, with exact references.
 - Explicit residual risk and skipped checks.
+
+`review` replaces the retired hierarchical review route; `debt` replaces the
+retired architecture-debt route; `reproducibility` replaces the retired replay
+audit route. Delegate only when the active runtime and the requested scope
+permit it.
 
 ## Validation
 

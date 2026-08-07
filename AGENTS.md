@@ -107,12 +107,12 @@ Minimum expectation:
   `docker-compose.monitoring.yml` unless the user explicitly requests
   dashboard/render work. Default Docker surface is **main only** (health on
   `:8000`). Loki, Tempo, and Quarantine Explorer UI were removed.
-- For BioETL Grafana screenshot refresh, render preflight, live reviewed panel
-  audit, or render-blocker diagnosis work, agents **SHOULD** use the local
-  skill `.codex/skills/grafana-dashboard-render/`.
-- For edits to shipped dashboard JSON, queries, variables, navigation, or
-  operator-facing dashboard UX, agents **SHOULD** use the local skill
-  `.codex/skills/grafana-dashboard-extension/`.
+- For BioETL Grafana screenshot refresh, render preflight, panel-audit,
+  render-blocker diagnosis, dashboard JSON, query, variable, navigation, or
+  operator-facing UX work, agents **SHOULD** use
+  `.codex/skills/observability-dashboard/`.
+- For Prometheus alert or recording-rule edits, tests, or query diagnosis,
+  agents **SHOULD** use `.codex/skills/observability-prometheus/`.
 
 ## Related Files
 

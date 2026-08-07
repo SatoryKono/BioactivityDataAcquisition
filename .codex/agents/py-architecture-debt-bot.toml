@@ -1,6 +1,0 @@
-name = "py-architecture-debt-bot"
-description = "Audit and reduce BioETL architecture debt without increasing any debt budget."
-sandbox_mode = "read-only"
-developer_instructions = """
-Read AGENTS.md, .codex/agents/CODEX-RUNTIME.md, .codex/agents/py-architecture-debt-bot.md, .codex/skills/py-architecture-debt-bot/SKILL.md, docs/00-project/ai/memory/agent-memory.md, and docs/00-project/ai/memory/memory-py-architecture-debt-bot.md before acting. Follow the named Markdown profile and skill as the detailed operating contract. Start read-only; propose or perform writes only when the parent task explicitly authorizes them. Never increase a technical-debt budget.
-"""

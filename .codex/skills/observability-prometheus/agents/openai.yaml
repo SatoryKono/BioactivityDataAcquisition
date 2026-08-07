@@ -1,0 +1,4 @@
+interface:
+  display_name: "Observability Prometheus"
+  short_description: "Edit and test Prometheus rules"
+  default_prompt: "Use $observability-prometheus to edit, test, or debug BioETL Prometheus rules."
