@@ -1,0 +1,32 @@
+[
+  {
+    "number": 8176,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/aggregates/_quarantine_aggregate.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8175,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/aggregates/_batch_mixins.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8174,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/aggregates/_batch_mixins.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8173,
+    "state": "OPEN",
+    "title": "[CR-FULL][minor] residual in `src/bioetl/domain/aggregates/_batch_lifecycle.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8177,
+    "state": "OPEN",
+    "title": "[CR-FULL][trivial] residual in `src/bioetl/domain/aggregates/_quarantine_value_objects.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  },
+  {
+    "number": 8172,
+    "state": "OPEN",
+    "title": "[CR-FULL][major] residual in `src/bioetl/domain/aggregates/pipeline_run_stage_result.py` — Verify each finding against current code. Fix only still-valid issues, skip the "
+  }
+]

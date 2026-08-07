@@ -1,0 +1,52 @@
+{
+  "campaign": "CR-FULL-20260806-full",
+  "leaf": "S01-domain-aggregates",
+  "branch": "grok-260807-108155",
+  "closed_at": "2026-08-07T07:20:31.626846+00:00",
+  "issue_range": "#8172-#8177",
+  "counts": {
+    "total": 6,
+    "fixed": 6,
+    "rejected": 0
+  },
+  "fixed": [
+    8172,
+    8173,
+    8174,
+    8175,
+    8176,
+    8177
+  ],
+  "rejected": [],
+  "dispositions": {
+    "8172": {
+      "status": "fixed",
+      "note": "StageResult timing invariants: no completed_at for PENDING/RUNNING; completed_at >= started_at; duration non-negative for valid completions."
+    },
+    "8173": {
+      "status": "fixed",
+      "note": "emit_record_quarantined uses entity_id is not None for record_id mapping."
+    },
+    "8174": {
+      "status": "fixed",
+      "note": "seal_with_counts validates non-negative and consistent counts before seal event."
+    },
+    "8175": {
+      "status": "fixed",
+      "note": "quarantine_record uses BatchRecord.index relative to start_index with bounds check."
+    },
+    "8176": {
+      "status": "fixed",
+      "note": "Doctest passes created_at and resolved_at explicit timestamps."
+    },
+    "8177": {
+      "status": "fixed",
+      "note": "ResolutionInfo allowed types from QuarantineStatus terminal values."
+    }
+  },
+  "tests": [
+    "tests/unit/domain/aggregates/test_domain_aggregates_cr_residuals_8172_8177.py",
+    "tests/unit/domain/aggregates (full suite green)"
+  ],
+  "tech_debt_budgets": "unchanged"
+}
