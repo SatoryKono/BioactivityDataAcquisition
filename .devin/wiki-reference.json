@@ -1,0 +1,63 @@
+{
+  "pages": [
+    {
+      "title": "Reference Documentation",
+      "purpose": "Index of reference materials: CLI commands, configuration formats, data contracts, and operational procedures.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/04-reference/, docs/00-project/RULES.md."
+        }
+      ]
+    },
+    {
+      "title": "CLI Reference",
+      "parent": "Reference Documentation",
+      "purpose": "Documents all CLI commands, their options, and usage examples.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/04-reference/cli/, src/bioetl/interfaces/."
+        }
+      ]
+    },
+    {
+      "title": "Configuration Reference",
+      "parent": "Reference Documentation",
+      "purpose": "Explains configuration file formats, schema validation, and environment variable handling.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: configs/, docs/04-reference/configs/."
+        }
+      ]
+    },
+    {
+      "title": "Data Contracts",
+      "parent": "Reference Documentation",
+      "purpose": "Documents data contracts, schema versions, and compatibility guarantees.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: src/bioetl/domain/schema/, docs/04-reference/contracts/."
+        }
+      ]
+    },
+    {
+      "title": "Operational Procedures",
+      "parent": "Reference Documentation",
+      "purpose": "Covers operational procedures: deployment, monitoring, backup, and disaster recovery.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: docs/04-reference/operations/, scripts/ops/."
+        }
+      ]
+    },
+    {
+      "title": "MCP Inventory",
+      "parent": "AI Runtime Governance",
+      "purpose": "Lists the MCP surfaces, their transport rules, and which runtime config owns each server.",
+      "page_notes": [
+        {
+          "content": "Canonical anchors: .codex/settings.json, .gemini/settings.json, .mcp.json, scripts/ai/.mcp.json, scripts/ai/codex/setup_mcp.py."
+        }
+      ]
+    }
+  ]
+}

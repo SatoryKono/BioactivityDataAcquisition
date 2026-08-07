@@ -1,9 +1,29 @@
 {
-  "version": 1,
+  "version": 2,
   "permissions": {
     "ask": [
       "Read(**/.env*)",
       "Write(**/.env*)"
+    ],
+    "allow": [
+      "Read(**/.devin/**)",
+      "Read(**/docs/**)",
+      "Read(**/configs/**)",
+      "Read(**/src/**)",
+      "Read(**/tests/**)",
+      "Read(**/scripts/**)",
+      "Read(**/Makefile)",
+      "Exec(make)",
+      "Exec(git)",
+      "Exec(python)",
+      "Exec(pytest)",
+      "Exec(mypy)",
+      "Exec(ruff)"
+    ],
+    "deny": [
+      "Write(**/.env*)",
+      "Write(**/docs/**)",
+      "Write(**/configs/**)"
     ]
   },
   "read_config_from": {
