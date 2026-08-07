@@ -89,6 +89,12 @@ def _write_governance(tmp_path: Path) -> None:
                                 "action_if_reintroduced": "safe local log output",
                             },
                             {
+                                "path": "nul",
+                                "current_live_state": "present_local_only_root_surface",
+                                "canonical_path": None,
+                                "action_if_reintroduced": "delete_windows_device_name_root_artifact_do_not_track",
+                            },
+                            {
                                 "path": "Test Results - Pytest_All.html",
                                 "current_live_state": "present_local_only_root_surface",
                                 "canonical_path": None,
@@ -207,6 +213,73 @@ def test_main_apply_deletes_only_exact_reviewed_path(
     assert (tmp_path / ".pytest_cache").exists()
     assert not (tmp_path / "coverage.xml").exists()
     assert (tmp_path / ".env").exists()
+
+
+def test_safe_paths_include_windows_nul_device_name() -> None:
+    """Registry candidate nul must be selectable via SAFE_ROOT_LOCAL_PATHS (RH7-C2)."""
+    assert "nul" in module.SAFE_ROOT_LOCAL_PATHS
+    assert "NUL" in module.SAFE_ROOT_LOCAL_PATHS
+
+
+def test_collect_includes_nul_only_when_listed_in_root_dir(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Do not treat the Win32 NUL device as a present root file via Path.exists()."""
+    _write_governance(tmp_path)
+    monkeypatch.setattr(module, "_tracked_paths", lambda _repo_root: frozenset())
+
+    # Absent from directory listing → not a cleanup candidate.
+    absent = module.collect_root_local_cleanup_candidates(
+        tmp_path, only_paths=frozenset({"nul"})
+    )
+    assert absent == []
+
+    # Force listing membership without relying on Path('nul') open semantics.
+    monkeypatch.setattr(
+        module,
+        "_root_entry_present_by_name",
+        lambda _repo_root, name: name == "nul",
+    )
+    present = module.collect_root_local_cleanup_candidates(
+        tmp_path, only_paths=frozenset({"nul"})
+    )
+    assert [candidate.rel_path for candidate in present] == ["nul"]
+    assert present[0].category == "windows_device_name_clutter"
+
+
+def test_worktrees_empty_deleted_nonempty_refused(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Empty .worktrees is safe to purge; non-empty must not be rmtree'd (RH7-C3)."""
+    _write_governance(tmp_path)
+    # Extend fixture registry with .worktrees candidate in allowed lane.
+    registry = tmp_path / "configs" / "quality" / "root_hygiene_review_registry.yaml"
+    payload = yaml.safe_load(registry.read_text(encoding="utf-8"))
+    payload["review_lanes"][0]["candidates"].append(
+        {
+            "path": ".worktrees",
+            "current_live_state": "present_local_only_root_surface",
+            "canonical_path": None,
+            "action_if_reintroduced": "remove empty only",
+        }
+    )
+    registry.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(module, "_tracked_paths", lambda _repo_root: frozenset())
+
+    empty = tmp_path / ".worktrees"
+    empty.mkdir()
+    assert module.main(["--apply", "--path", ".worktrees"]) == 0
+    assert not empty.exists()
+
+    nonempty = tmp_path / ".worktrees"
+    nonempty.mkdir()
+    (nonempty / "active-wt").mkdir()
+    assert module.main(["--apply", "--path", ".worktrees"]) == 1
+    assert nonempty.exists()
+    assert (nonempty / "active-wt").exists()
 
 
 def test_main_apply_continues_after_delete_error(

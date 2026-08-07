@@ -1,6 +1,6 @@
 ---
 auto_execution_mode: 0
-description: Audit Cursor/Windsurf/Devin guidance against Qodo platform enforcement rules
+description: Audit Cursor/Windsurf/Devin guidance against Qodo platform enforcement rules (coordinated by master.md)
 ---
 
 Canonical BioETL governance references:
@@ -8,8 +8,27 @@ Canonical BioETL governance references:
 - `docs/00-project/RULES.md`
 - `docs/01-requirements/REQUIREMENTS.md`
 - `docs/02-architecture/decisions/`
+- `.devin/workflows/master.md` (coordinator)
 
 Compare tracked AI rules and Devin workflows with Qodo platform rules for `SatoryKono/BioactivityDataAcquisition`.
+
+## Master Workflow Integration
+
+This workflow is coordinated by `master.md` which provides:
+- Conditional execution based on change scope
+- Dependency management between workflows
+- Error handling and rollback strategy
+- Centralized reporting
+
+## Conditional Execution
+
+This workflow executes per master.md matrix:
+- `src/**`: ❌ Skip
+- `tests/**`: ❌ Skip
+- `docs/**`: ❌ Skip
+- `configs/**`: ⚪ If AI rules changed
+- `.devin/**`: ❌ Skip
+- `.codex/**`: ❌ Skip
 
 ## Steps
 
@@ -32,3 +51,9 @@ Compare tracked AI rules and Devin workflows with Qodo platform rules for `Sator
 - Windsurf/Cascade: `docs/00-project/ai/rules/windsurf/` via `scripts/ai/sync/windsurf.py`
 - Devin workflows: `.devin/workflows/` (tracked; keep parity with Cascade `review`, `post-change`, `pre-commit`, `qodo-sync`, plus specialized `audit-documents`)
 - Devin DeepWiki: `.devin/wiki.json` (derived navigation; not normative)
+
+## Error Handling
+
+- **WARNING failure**: Log but continue, report to master.md
+- **Reporting**: Report gaps and drifts
+- **Non-blocking**: Qodo sync failures don't stop other workflows

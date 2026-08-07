@@ -48,7 +48,7 @@ Dashboard System 2.0 checklist: [operator-ux-v2.md](operator-ux-v2.md).
 1. Сохраните `uid`, `templating`, `refresh`, `time` и общую роль dashboard, если изменение не требует отдельного migration decision.
 1. Добавляйте панели с низкой кардинальностью.
 1. Для event-driven stat panels используйте явный zero-fallback, если отсутствие серии означает “0”, а не “ошибка данных”.
-1. Для Loki/Tempo drilldown сохраняйте общие shipped conventions.
+1. Не добавляйте Loki/Tempo/Explore Logs/Traces drilldowns — monitoring surface reduction (2026-07-23); use Prometheus panels and Ops HTTP (:8000) only.
 
 ## 4. Рабочие конвенции
 
@@ -84,32 +84,10 @@ sum(increase(metric_name[24h])) or vector(0)
 
 - Не добавляйте high-cardinality labels в summary/stat panels без необходимости.
 
-### Loki
+### Removed: Loki / Tempo (historical)
 
-- Базовый handoff:
+Loki, Tempo, Explore Logs, and Explore Traces were removed from the default monitoring surface on **2026-07-23** (ADR-010 / monitoring-surface-reduction). Do **not** add LogQL/TraceQL drilldowns or related navigation. Use Prometheus + Grafana + BioETL Ops HTTP on `:8000`.
 
-```logql
-{job="bioetl"}
-```
-
-- Не полагайтесь на encoded interpolation `$pipeline/$provider` внутри `left=...`.
-
-### Tempo
-
-- Базовый handoff должен быть contextual:
-
-```text
-queryType = traceqlSearch
-query = { span."bioetl.pipeline" =~ "${pipeline:regex}" }
-```
-
-- Для provider-only surface используйте:
-
-```text
-query = { span."bioetl.provider" =~ "${provider:regex}" }
-```
-
-- Correlation по-прежнему идёт через `trace_id` / `span_id`, но shipped Explore handoff должен уже открываться в текущем dashboard scope, а не с пустым `{}`.
 
 ## 5. Минимальная проверка после изменений
 

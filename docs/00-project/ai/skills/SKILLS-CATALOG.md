@@ -10,14 +10,14 @@
 - **Canonical runtime source**: `.codex/skills/`
 - **Published mirror**: `docs/00-project/ai/skills/local/`
 - **Curated snapshot**: `docs/00-project/ai/skills/global/`
-- **Reference mirror**: `docs/00-project/ai/skills/_references/`
+- **Reference mirror (generated)**: `docs/00-project/ai/skills/_references/` — not canonical
 
 ## Канонические Правила
 
 - `.codex/skills/` — канонический источник runtime skills для текущего Codex workflow.
 - `docs/00-project/ai/skills/local/` — опубликованное docs-mirror/compatibility layer; его нельзя считать основным authoring source.
 - `docs/00-project/ai/skills/global/` — курируемый snapshot выбранных глобальных skills.
-- `docs/00-project/ai/skills/_references/` — канонический источник reference-бандлов для overlay в `local/`.
+- `docs/00-project/ai/skills/_references/` — **generated/reference mirror** of skill `references/` bundles (not authoring SoT; regenerate via `bash scripts/ai/codex/check_skills_mirror.sh --sync`).
 - Frontmatter (`name`, `description`) в каждом `SKILL.md` считается контрактом триггера.
 
 ## Группы Skills
@@ -110,46 +110,44 @@
 
 ## Индекс Зеркала Документации
 
-- [agent-orchestration](local/agent-orchestration/SKILL.md)
-- [capability-discovery](local/capability-discovery/SKILL.md)
-- [deep-research](local/deep-research/SKILL.md)
-- [documentation-audit](local/documentation-audit/SKILL.md)
-- [documentation-cascade-audit](local/documentation-cascade-audit/SKILL.md)
-- [grafana-dashboard-extension](local/grafana-dashboard-extension/SKILL.md)
-- [grafana-dashboard-render](local/grafana-dashboard-render/SKILL.md)
-- [hierarchical-evidence-orchestration](local/hierarchical-evidence-orchestration/SKILL.md)
+Только **существующие** published mirrors. Runtime source of truth: `.codex/skills/`.
+Skills listed in tables above but without a docs mirror live only in the Codex runtime tree.
+
+### Local published mirrors
+
 - [new-pipeline](local/new-pipeline/SKILL.md)
-- [py-architecture-debt-bot](local/py-architecture-debt-bot/SKILL.md)
+- [observability-dashboard](local/observability-dashboard/SKILL.md)
+- [observability-prometheus](local/observability-prometheus/SKILL.md)
 - [py-audit-bot](local/py-audit-bot/SKILL.md)
-- [py-code-bot (deprecated compatibility marker)](global/py-code-bot/SKILL.md)
 - [py-config-bot](local/py-config-bot/SKILL.md)
 - [py-debug-bot](local/py-debug-bot/SKILL.md)
 - [py-doc-bot](local/py-doc-bot/SKILL.md)
 - [py-plan-bot](local/py-plan-bot/SKILL.md)
-- [py-reproducibility-audit](local/py-reproducibility-audit/SKILL.md)
-- [py-review-orchestrator](local/py-review-orchestrator/SKILL.md)
-- [prometheus-alert-rule-editor](local/prometheus-alert-rule-editor/SKILL.md)
-- [prometheus-metric-discovery](local/prometheus-metric-discovery/SKILL.md)
-- [prometheus-query-debugger](local/prometheus-query-debugger/SKILL.md)
-- [prometheus-rule-testing](local/prometheus-rule-testing/SKILL.md)
 - [py-test-bot](local/py-test-bot/SKILL.md)
-- [py-test-swarm](local/py-test-swarm/SKILL.md)
-- [repo-config](local/repo-config/SKILL.md)
+- [research-workflow](local/research-workflow/SKILL.md)
 - [technical-designer-mermaid](local/technical-designer-mermaid/SKILL.md)
 - [vcr-record](local/vcr-record/SKILL.md)
 - [verify-architecture](local/verify-architecture/SKILL.md)
-- [architecture-guardian (public)](global/public/architecture-guardian/SKILL.md)
 
-## Точки Входа Глобального Snapshot
+### Global curated snapshot
 
-- [documentation-audit](global/documentation-audit/SKILL.md)
 - [gh-address-comments](global/gh-address-comments/SKILL.md)
 - [gh-fix-ci](global/gh-fix-ci/SKILL.md)
+- [new-pipeline](global/new-pipeline/SKILL.md)
 - [openai-docs](global/openai-docs/SKILL.md)
+- [public/architecture-guardian](global/public/architecture-guardian/SKILL.md)
+- [py-audit-bot](global/py-audit-bot/SKILL.md)
+- [py-code-bot](global/py-code-bot/SKILL.md)
+- [py-config-bot](global/py-config-bot/SKILL.md)
+- [py-debug-bot](global/py-debug-bot/SKILL.md)
+- [py-doc-bot](global/py-doc-bot/SKILL.md)
+- [py-plan-bot](global/py-plan-bot/SKILL.md)
+- [py-test-bot](global/py-test-bot/SKILL.md)
+- [vcr-record](global/vcr-record/SKILL.md)
+- [verify-architecture](global/verify-architecture/SKILL.md)
 
 ## Примечания
 
-- `py-code-bot` не является частью preferred active orchestration: начиная с `ORCHESTRATION.md v4.0` production-код по умолчанию пишет orchestrator.
-- Если `py-code-bot` встречается в compatibility mirrors или старых workflow notes, трактуй его как deprecated compatibility profile, а не как рекомендуемый основной шаг.
-- При конфликте между runtime trees и docs mirrors приоритет у runtime source,
-  а не у published mirror или snapshot.
+- `py-code-bot` is a deprecated compatibility marker, not a preferred orchestration step.
+- On conflict between runtime trees and docs mirrors, prefer runtime (`.codex/skills/`).
+- Missing mirrors are intentional until skill-mirror sync is run; do not invent empty SKILL.md stubs in docs/.
