@@ -14,7 +14,7 @@ make precommit-install  # hook-only reinstall via the same maintained hook insta
 python -m scripts.engineering.dev setup-mcp  # optional MCP tooling via canonical backend
 ```
 
-`python -m scripts.engineering.dev setup` is a retained legacy command that now fails fast with guidance to use `make install` or `setup-mcp`. Repository-local references to `dev_setup.sh` should be treated as historical compatibility evidence, not as proof that it is a canonical onboarding command.
+`python -m scripts.engineering.dev setup` is a retained legacy command that now fails fast with guidance to use `make install` or `setup-mcp`. `dev_setup.sh` is **not present** in the tree; treat any remaining doc mentions as historical only.
 
 ## Stable Dual-OS Environments
 

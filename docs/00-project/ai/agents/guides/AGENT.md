@@ -148,7 +148,7 @@ make setup-plugins
 uv run python -m scripts.engineering.dev setup-mcp
 ```
 
-`scripts/engineering/dev/dev_setup.sh` остаётся legacy placeholder и не считается
+Канонический bootstrap: `uv sync` + `make install` / `python -m scripts.ops setup-plugins`. `scripts/engineering/dev/dev_setup.sh` **удалён** и не считается
 поддерживаемым onboarding path.
 
 Если один и тот же checkout используется из Windows PowerShell и WSL, не

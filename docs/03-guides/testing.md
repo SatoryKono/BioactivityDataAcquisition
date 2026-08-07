@@ -1098,8 +1098,8 @@ bash scripts/engineering/dev/setup_env_wsl.sh
 
 Поддерживаемый aggregate flow для локального окружения:
 `uv sync --extra dev --extra tests --extra tracing`,
-`uv run python -m scripts.ops setup-plugins`. `scripts/engineering/dev/dev_setup.sh`
-— legacy placeholder и не является поддерживаемым onboarding/testing path.
+`uv run python -m scripts.ops setup-plugins`.
+Path `scripts/engineering/dev/dev_setup.sh` was removed and is not a supported onboarding/testing path.
 
 ### 7.2. Smoke-check зависимостей и инструментов
 
@@ -1158,7 +1158,7 @@ Active testing documentation в `docs/03-guides/testing.md` и связанны�
   или тестовые логи в active testing docs. Такие артефакты MUST храниться в
   `reports/` или временных директориях.
 - **Deprecated test commands**: Запрещено документировать устаревшие команды
-  запуска тестов (например, `scripts/dev/dev_setup.sh`). Канонические команды
+  запуска тестов. Канонические команды
   MUST быть только из `Makefile` или поддерживаемых скриптов в
   `scripts/engineering/`.
 - **Hardcoded test paths**: Запрещено хардкодить абсолютные пути к тестовым файлам
