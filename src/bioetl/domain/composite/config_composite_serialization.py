@@ -11,13 +11,18 @@ from bioetl.domain.composite.config_cross_validation import CrossValidationConfi
 from bioetl.domain.composite.config_dq import CompositeDQConfig, DQOverrideConfig
 from bioetl.domain.composite.config_parsing import (
     optional_bool,
+    optional_float,
     optional_int,
     optional_str,
     optional_str_tuple,
+    require_float,
+    require_int,
     require_object_dict,
     require_object_dict_sequence,
     require_str,
+    require_str_mapping,
     require_str_tuple,
+    str_key_mapping,
 )
 from bioetl.domain.composite.config_runtime import ExecutionConfig, LineageConfig
 from bioetl.domain.composite.cross_validation import (
@@ -129,6 +134,18 @@ def _build_enricher_configs[ConfigT](
     )
 
 
+def _parse_field_priorities(raw: object) -> dict[str, tuple[str, ...]]:
+    """Parse merge.field_priorities mapping into string-key priority tuples."""
+    priorities_raw = str_key_mapping(raw, "merge.field_priorities")
+    field_priorities: dict[str, tuple[str, ...]] = {}
+    for key, value in priorities_raw.items():
+        if isinstance(value, list | tuple):
+            field_priorities[key] = tuple(str(item) for item in value)
+        else:
+            field_priorities[key] = (str(value),)
+    return field_priorities
+
+
 def _build_merge_config[ConfigT](
     merge_data: dict[str, object],
     merge_cls: Callable[..., ConfigT],
@@ -157,30 +174,15 @@ def _build_merge_config[ConfigT](
             merge_data.get("sort_by_gold"), "merge.sort_by_gold"
         )
         or (),
-        field_priorities={
-            str(key): tuple(str(item) for item in value)
-            if isinstance(value, list | tuple)
-            else (str(value),)
-            for key, value in (
-                merge_data.get("field_priorities") or {}
-            ).items()  # type: ignore[union-attr]
-        }
-        if isinstance(merge_data.get("field_priorities"), dict)
-        else {},
-        normalization_compatibility_overrides={
-            str(key): str(value)
-            for key, value in (
-                merge_data.get("normalization_compatibility_overrides") or {}
-            ).items()  # type: ignore[union-attr]
-        }
-        if isinstance(merge_data.get("normalization_compatibility_overrides"), dict)
-        else {},
-        field_mappings={
-            str(key): str(value)
-            for key, value in (merge_data.get("field_mappings") or {}).items()  # type: ignore[union-attr]
-        }
-        if isinstance(merge_data.get("field_mappings"), dict)
-        else {},
+        field_priorities=_parse_field_priorities(merge_data.get("field_priorities")),
+        normalization_compatibility_overrides=require_str_mapping(
+            merge_data.get("normalization_compatibility_overrides"),
+            "merge.normalization_compatibility_overrides",
+        ),
+        field_mappings=require_str_mapping(
+            merge_data.get("field_mappings"),
+            "merge.field_mappings",
+        ),
         column_groups=merge_data.get("column_groups") or (),
         exclude_fields=optional_str_tuple(
             merge_data.get("exclude_fields"), "merge.exclude_fields"
@@ -409,52 +411,78 @@ def composite_from_dict[
 
 
 def _build_dq_config(dq_data: dict[str, object]) -> CompositeDQConfig:
-    overrides_raw = dq_data.get("enricher_overrides") or {}
+    overrides_raw = str_key_mapping(
+        dq_data.get("enricher_overrides"), "dq.enricher_overrides"
+    )
     overrides: dict[str, DQOverrideConfig] = {}
-    if isinstance(overrides_raw, Mapping):
-        for name, raw in overrides_raw.items():
-            if isinstance(raw, dict):
-                overrides[str(name)] = DQOverrideConfig(
-                    soft_fail_threshold=raw.get("soft_fail_threshold"),  # type: ignore[arg-type]
-                    hard_fail_threshold=raw.get("hard_fail_threshold"),  # type: ignore[arg-type]
-                )
+    for name, raw in overrides_raw.items():
+        if isinstance(raw, dict):
+            overrides[name] = DQOverrideConfig(
+                soft_fail_threshold=optional_float(
+                    raw.get("soft_fail_threshold"),
+                    f"dq.enricher_overrides[{name}].soft_fail_threshold",
+                ),
+                hard_fail_threshold=optional_float(
+                    raw.get("hard_fail_threshold"),
+                    f"dq.enricher_overrides[{name}].hard_fail_threshold",
+                ),
+            )
+    required_fields = (
+        optional_str_tuple(dq_data.get("required_fields"), "dq.required_fields") or ()
+    )
     return CompositeDQConfig(
-        soft_fail_threshold=float(dq_data.get("soft_fail_threshold", 0.10)),
-        hard_fail_threshold=float(dq_data.get("hard_fail_threshold", 0.50)),
-        enricher_overrides=overrides,
-        required_fields=tuple(
-            str(item) for item in (dq_data.get("required_fields") or ())
+        soft_fail_threshold=require_float(
+            dq_data.get("soft_fail_threshold"), "dq.soft_fail_threshold", 0.10
         ),
+        hard_fail_threshold=require_float(
+            dq_data.get("hard_fail_threshold"), "dq.hard_fail_threshold", 0.50
+        ),
+        enricher_overrides=overrides,
+        required_fields=required_fields,
     )
 
 
 def _build_execution_config(execution_data: dict[str, object]) -> ExecutionConfig:
     return ExecutionConfig(
-        max_concurrency=int(execution_data.get("max_concurrency", 4)),
+        max_concurrency=require_int(
+            execution_data.get("max_concurrency"), "execution.max_concurrency", 4
+        ),
         checkpoint_enabled=bool(execution_data.get("checkpoint_enabled", True)),
-        retry_max_attempts=int(execution_data.get("retry_max_attempts", 3)),
-        retry_backoff_multiplier=float(
-            execution_data.get("retry_backoff_multiplier", 2.0)
+        retry_max_attempts=require_int(
+            execution_data.get("retry_max_attempts"),
+            "execution.retry_max_attempts",
+            3,
+        ),
+        retry_backoff_multiplier=require_float(
+            execution_data.get("retry_backoff_multiplier"),
+            "execution.retry_backoff_multiplier",
+            2.0,
         ),
     )
 
 
 def _build_lineage_config(lineage_data: dict[str, object]) -> LineageConfig:
-    lookup_raw = lineage_data.get("provider_lookup_fields") or {}
+    lookup_raw = str_key_mapping(
+        lineage_data.get("provider_lookup_fields"),
+        "lineage.provider_lookup_fields",
+    )
     lookup: dict[str, dict[str, str]] = {}
-    if isinstance(lookup_raw, Mapping):
-        for provider, fields in lookup_raw.items():
-            if isinstance(fields, Mapping):
-                lookup[str(provider)] = {
-                    str(key): str(value) for key, value in fields.items()
-                }
-    track_fields = lineage_data.get("track_source_for_fields") or ()
+    for provider, fields in lookup_raw.items():
+        if isinstance(fields, Mapping):
+            lookup[provider] = {str(key): str(value) for key, value in fields.items()}
+    track_fields = (
+        optional_str_tuple(
+            lineage_data.get("track_source_for_fields"),
+            "lineage.track_source_for_fields",
+        )
+        or ()
+    )
     return LineageConfig(
         track_field_sources=bool(lineage_data.get("track_field_sources", True)),
         track_timestamps=bool(lineage_data.get("track_timestamps", True)),
         track_status=bool(lineage_data.get("track_status", True)),
         provider_lookup_fields=lookup,
-        track_source_for_fields=tuple(str(item) for item in track_fields),
+        track_source_for_fields=track_fields,
     )
 
 
@@ -482,7 +510,11 @@ def _build_cross_validation_config(
                                 if not isinstance(method, ComparisonMethod)
                                 else method
                             ),
-                            threshold=float(field.get("threshold", 0.0)),
+                            threshold=require_float(
+                                field.get("threshold"),
+                                "cross_validation.fields[].threshold",
+                                0.0,
+                            ),
                         )
                     )
             pairings.append(
@@ -493,10 +525,24 @@ def _build_cross_validation_config(
             )
     return CrossValidationConfig(
         enabled=bool(cv_data.get("enabled", True)),
-        warning_threshold=int(cv_data.get("warning_threshold", 1)),
-        error_threshold=int(cv_data.get("error_threshold", 2)),
-        quarantine_threshold=int(cv_data.get("quarantine_threshold", 2)),
-        fuzzy_threshold=float(cv_data.get("fuzzy_threshold", 0.8)),
-        numeric_tolerance=float(cv_data.get("numeric_tolerance", 0.10)),
+        warning_threshold=require_int(
+            cv_data.get("warning_threshold"), "cross_validation.warning_threshold", 1
+        ),
+        error_threshold=require_int(
+            cv_data.get("error_threshold"), "cross_validation.error_threshold", 2
+        ),
+        quarantine_threshold=require_int(
+            cv_data.get("quarantine_threshold"),
+            "cross_validation.quarantine_threshold",
+            2,
+        ),
+        fuzzy_threshold=require_float(
+            cv_data.get("fuzzy_threshold"), "cross_validation.fuzzy_threshold", 0.8
+        ),
+        numeric_tolerance=require_float(
+            cv_data.get("numeric_tolerance"),
+            "cross_validation.numeric_tolerance",
+            0.10,
+        ),
         enricher_pairings=tuple(pairings),
     )
