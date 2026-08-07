@@ -1,5 +1,12 @@
 """Live inventory: open CR residual critical/major + 5 streams."""
 
+# NOSONAR - S1192: stream literals are intentional for categorization logic
+STREAM_S5_PUBLICATION = "S5 publication"
+STREAM_S4_TRANSFORMER = "S4 transformer"
+STREAM_S3_RECORD_QUARANTINE_FETCH = "S3 record-quarantine-fetch"
+STREAM_S2_CONFIG_SERVICES = "S2 config-services"
+STREAM_S1_LIFECYCLE_RUNNER = "S1 lifecycle-runner"
+
 from __future__ import annotations
 
 import json
@@ -48,9 +55,9 @@ def stream_of(path: str) -> str:
     p = path.replace("\\", "/")
     name = p.rsplit("/", 1)[-1]
     if "publication_term" in p:
-        return "S5 publication"
+        return STREAM_S5_PUBLICATION
     if "base_transformer" in p or "_base_transformer" in p:
-        return "S4 transformer"
+        return STREAM_S4_TRANSFORMER
     if any(
         k in p
         for k in (
@@ -63,15 +70,15 @@ def stream_of(path: str) -> str:
             "data_sources",
         )
     ) or name in {"record_processor.py", "normalization_fallbacks.py"}:
-        return "S3 record-quarantine-fetch"
+        return STREAM_S3_RECORD_QUARANTINE_FETCH
     if name in {
         "config.py",
         "pipeline_services.py",
         "entity_id.py",
         "subcellular_fraction_support.py",
     }:
-        return "S2 config-services"
-    return "S1 lifecycle-runner"
+        return STREAM_S2_CONFIG_SERVICES
+    return STREAM_S1_LIFECYCLE_RUNNER
 
 
 def _issue_number(item: dict[str, object]) -> int | None:

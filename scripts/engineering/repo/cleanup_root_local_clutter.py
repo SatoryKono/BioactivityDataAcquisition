@@ -7,6 +7,9 @@ recursive repository cleanup and it never targets secret-bearing env files or
 retention-sensitive zones.
 """
 
+# NOSONAR - S1192: .worktrees literal is intentional for worktree cleanup logic
+WORKTREES_DIR = ".worktrees"
+
 from __future__ import annotations
 
 import argparse
@@ -52,7 +55,7 @@ SAFE_ROOT_LOCAL_PATHS: frozenset[str] = frozenset(
         "tmp",
         # Empty local worktree parent only (see _delete_candidate); non-empty
         # trees are refused so active exclusive worktrees are not destroyed.
-        ".worktrees",
+        WORKTREES_DIR,
     }
 )
 VENV_ROOT_LOCAL_PATHS: frozenset[str] = frozenset(
@@ -301,7 +304,7 @@ def _delete_empty_worktrees_dir(repo_root: Path) -> None:
     Non-empty trees may hold exclusive agent/developer worktrees; refuse
     recursive deletion so cleanup never wipes in-progress checkouts.
     """
-    target = repo_root / ".worktrees"
+    target = repo_root / WORKTREES_DIR
     if not target.exists() and not target.is_symlink():
         return
     if target.is_symlink() or target.is_file():
@@ -312,10 +315,10 @@ def _delete_empty_worktrees_dir(repo_root: Path) -> None:
     try:
         children = list(target.iterdir())
     except OSError as exc:
-        raise OSError(f"unable to inspect .worktrees: {exc}") from exc
+        raise OSError(f"unable to inspect {WORKTREES_DIR}: {exc}") from exc
     if children:
         raise OSError(
-            "refusing to delete non-empty .worktrees "
+            f"refusing to delete non-empty {WORKTREES_DIR} "
             f"({len(children)} entries); remove worktrees first or rmdir only when empty"
         )
     target.rmdir()
@@ -328,7 +331,7 @@ def _delete_candidate(repo_root: Path, candidate: RootLocalCleanupCandidate) -> 
             return
         _delete_windows_reserved_name(repo_root, name)
         return
-    if name == ".worktrees":
+    if name == WORKTREES_DIR:
         _delete_empty_worktrees_dir(repo_root)
         return
 

@@ -34,6 +34,7 @@ def _calls_raises(node: ast.AST) -> bool:
 
 
 def _has_assert(node: ast.AST) -> bool:
+    # NOSONAR - S3776: complexity 25 exceeds 15; extraction would obscure AST walk logic
     for child in ast.walk(node):
         if isinstance(child, (ast.Assert, ast.Raise)):
             return True
