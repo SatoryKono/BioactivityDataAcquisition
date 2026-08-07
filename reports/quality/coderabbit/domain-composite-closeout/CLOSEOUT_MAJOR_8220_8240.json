@@ -1,0 +1,50 @@
+{
+  "campaign": "CR-FULL-20260806-full",
+  "leaf": "S01-domain-composite-major",
+  "branch": "main",
+  "closed_at": "2026-08-07T09:26:01.125681+00:00",
+  "issues": [
+    8220,
+    8221,
+    8225,
+    8226,
+    8227,
+    8228,
+    8229,
+    8230,
+    8231,
+    8232,
+    8234,
+    8235,
+    8237,
+    8240
+  ],
+  "fixed": [
+    8220,
+    8221,
+    8225,
+    8226,
+    8227,
+    8229,
+    8230,
+    8232,
+    8234,
+    8235,
+    8237,
+    8240
+  ],
+  "rejected": [
+    8228,
+    8231
+  ],
+  "counts": {
+    "total": 14,
+    "fixed": 12,
+    "rejected": 2
+  },
+  "tests": [
+    "tests/unit/domain/composite/test_domain_composite_cr_residuals_8220_8240.py",
+    "tests/unit/domain/composite"
+  ],
+  "tech_debt_budgets": "unchanged"
+}
