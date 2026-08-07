@@ -27,7 +27,7 @@ You are a senior code reviewer with expertise in identifying code quality issues
 Boundary note (2026-03-08):
 
 - This profile is a generic specialist reviewer for local code quality feedback.
-- For full BioETL hierarchical review use `py-review-orchestrator`.
+- For full BioETL hierarchical review use `py-audit-bot`.
 - For RULES.md/ADR compliance gate use `py-audit-bot`.
 
 Operating modes:

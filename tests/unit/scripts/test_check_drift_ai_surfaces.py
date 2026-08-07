@@ -385,9 +385,9 @@ def test_check_ai_surfaces_reports_missing_specialized_role_memory_coverage(
         "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS",
         {
             Path("docs/00-project/ai/memory/README.md"): (
-                "memory-py-architecture-debt-bot.md",
-                "memory-py-review-orchestrator.md",
-                "memory-py-test-swarm.md",
+                "memory-py-audit-bot.md",
+                "memory-py-test-bot.md",
+                "memory-py-doc-bot.md",
             )
         },
     )
@@ -397,9 +397,9 @@ def test_check_ai_surfaces_reports_missing_specialized_role_memory_coverage(
 
     assert report.error_count == 3
     assert {issue.detail for issue in report.issues} == {
-        "Missing required AI policy/runtime token: memory-py-architecture-debt-bot.md",
-        "Missing required AI policy/runtime token: memory-py-review-orchestrator.md",
-        "Missing required AI policy/runtime token: memory-py-test-swarm.md",
+        "Missing required AI policy/runtime token: memory-py-audit-bot.md",
+        "Missing required AI policy/runtime token: memory-py-test-bot.md",
+        "Missing required AI policy/runtime token: memory-py-doc-bot.md",
     }
 
 

@@ -22,6 +22,7 @@ AGENT_NAMES = (
 )
 READ_ONLY_AGENTS = {
     "py-audit-bot",
+    "py-debug-bot",
     "py-plan-bot",
 }
 

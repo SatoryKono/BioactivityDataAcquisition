@@ -1,11 +1,3 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime sources:
-> - Codex: `.codex/agents/ORCHESTRATION.md`
-> - Gemini: no tracked runtime counterpart on `main`; treat Gemini behavior as local-only or mirror guidance until a verified `.gemini/**` tree is added.
-> Governance: [AI Runtime Mirror Ownership](../policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../guides/MEMORY_USAGE.md), [Post-Change Validation](../policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
 ## Canonical Sources
 
 Read before planning or editing:
@@ -24,7 +16,10 @@ Read before planning or editing:
 
 ## 1. Обзор
 
-Команда из **9 активных субагентов** (7 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя работу субагентам через native agent roles (`default` / `explorer` / `worker`) с привязкой к логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
+Команда из **6 активных субагентов** обеспечивает полный жизненный цикл задачи
+разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя
+работу через native agent roles (`default` / `explorer` / `worker`) с привязкой
+к логическим профилям `py-*`. Production-код пишется напрямую оркестратором.
 
 **Запуск логического профиля в Codex runtime:**
 
@@ -39,24 +34,22 @@ spawn_agent(
 
 |  #   | Субагент (`subagent_type`)   | Model  | Роль                                                                                   | Артефакт                                               |
 | :--: | ---------------------------- | ------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-|  I   | **py-audit-bot**             | opus   | Baseline/final аудит, code review, arch guardian, API validation                       | `review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md`     |
-|  II  | **py-architecture-debt-bot** | opus   | Полный workflow устранения архитектурного долга: generate -> plan -> execute -> verify | `review_py-architecture-debt-bot_{YYYYMMDD}_{HHMM}.md` |
-| III  | **py-plan-bot**              | opus   | Планирование, декомпозиция, composite design                                           | `review_py-plan-bot_{YYYYMMDD}_{HHMM}.md`              |
-|  IV  | **py-test-bot**              | sonnet | Тестирование                                                                           | `review_py-test-bot_{YYYYMMDD}_{HHMM}.md`              |
-|  V   | **py-config-bot**            | sonnet | Конфигурации (pipeline, DQ, filter, composite)                                         | `review_py-config-bot_{YYYYMMDD}_{HHMM}.md`            |
-|  VI  | **py-debug-bot**             | opus   | Отладка падений                                                                        | `review_py-debug-bot_{YYYYMMDD}_{HHMM}.md`             |
-| VII  | **py-doc-bot**               | sonnet | Документация, ADR, диаграммы (Mermaid)                                                 | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md`               |
-| VIII | **py-test-swarm**            | opus   | Иерархическое тестирование (L1→L2→L3)                                                  | test reports                                           |
-|  IX  | **py-review-orchestrator**   | opus   | Иерархический code review (S1-S8)                                                      | review reports                                         |
+| I | **py-audit-bot** | inherited | Audit, review, debt, reproducibility | `review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md` |
+| II | **py-plan-bot** | inherited | Planning and decomposition | `review_py-plan-bot_{YYYYMMDD}_{HHMM}.md` |
+| III | **py-test-bot** | inherited | Focused tests and broad campaigns | `review_py-test-bot_{YYYYMMDD}_{HHMM}.md` |
+| IV | **py-config-bot** | inherited | Pipeline, DQ, filter, composite config | `review_py-config-bot_{YYYYMMDD}_{HHMM}.md` |
+| V | **py-debug-bot** | inherited | Failure diagnosis and fixes | `review_py-debug-bot_{YYYYMMDD}_{HHMM}.md` |
+| VI | **py-doc-bot** | inherited | Docs, broad docs audits, Mermaid | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md` |
 
-> **Note:** `py-code-bot` removed in v4.0 — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`. Repo-wide documentation audits now route through the `documentation-audit` / `documentation-cascade-audit` skills rather than a dedicated documentation-only subagent profile.
+> **Note:** production code is written directly by the orchestrator. Broad test,
+> review, debt, reproducibility, and documentation-audit work use modes of the
+> six active profiles; no standalone orchestration profiles are retained.
 
 ### Разделение ответственности (файловые зоны)
 
 | Субагент                 | Зона записи                                                           | Только чтение                         |
 | ------------------------ | --------------------------------------------------------------------- | ------------------------------------- |
 | orchestrator (direct)    | `src/bioetl/`, `tests/`                                               | `configs/`, `docs/`                   |
-| py-architecture-debt-bot | `src/bioetl/`, `tests/`, `reports/quality/`, root task JSON artifacts | `configs/`, `docs/` (edits delegated) |
 | py-config-bot            | `configs/`                                                            | `src/bioetl/`, `docs/`                |
 | py-doc-bot               | `docs/`, docstrings, `docs/00-project/ai/agents/scripts/diagrams/`    | `configs/`, `tests/`                  |
 | py-test-bot              | `tests/`                                                              | `src/bioetl/`, `configs/`             |
@@ -241,10 +234,10 @@ ______________________________________________________________________
 | :---------------: | :--------------: | :------------: | :-----------: | :----------: | :---------------: | :---------------: |
 | **py-audit-bot**  | findings → RF-\* |       —        |  config gaps  |      —       |  drift findings   |         —         |
 |  **py-plan-bot**  |        —         |  scope RF-\*   | config RF-\*  |      —       |         —         |       scope       |
-| **py-test-bot**  |        —         |       —        |       —       | FAIL report  |         —         |         —         |
+|  **py-test-bot**  |        —         |       —        |       —       | FAIL report  |         —         |         —         |
 | **py-config-bot** |        —         |  config tests  |       —       |      —       | DQ migration docs |         —         |
 | **py-debug-bot**  |   plan update    | retest trigger |  fix config   |      —       |     fix → doc     |  fix → re-audit   |
-| **py-doc-bot**   |        —         |       —        |       —       |      —       |         —         | terminology check |
+|  **py-doc-bot**   |        —         |       —        |       —       |      —       |         —         | terminology check |
 
 ### Ключевые потоки данных
 
@@ -425,3 +418,172 @@ ______________________________________________________________________
 | `docs/00-project/RULES.md`                             | Архитектурные правила проекта            |
 | `docs/02-architecture/decisions/`                      | ADR-001..ADR-047                         |
 | `docs/00-project/glossary.md`                          | Терминология                             |
+| `tests/architecture/`                                  | Автоматические проверки инвариантов      |
+| `docs/00-project/ai/agents/scripts/py-config-bot-1.py` | Автоматическая проверка конфигов         |
+
+______________________________________________________________________
+
+## 9a. Инлайнированные знания
+
+В Codex CLI ключевые знания для BioETL-профилей инлайнированы непосредственно в файлы субагентов (`.codex/agents/py-*.md`) и подключаются через skill wrappers в `.codex/skills/`.
+
+### 9a.1 Маппинг знаний на субагенты
+
+|  #  | Субагент      | Основные знания                  | Дополнительные                                  |
+| :-: | ------------- | -------------------------------- | ----------------------------------------------- |
+|  I  | py-audit-bot  | ETL system auditing, code review | Software architecture, REST API validation      |
+| II  | py-plan-bot   | Software architecture            | REST API, data engineering, composite pipelines |
+| III | py-test-bot   | Python testing (pytest, VCR.py)  | Data engineering (Pandera, DQ)                  |
+| IV  | py-config-bot | Data engineering, YAML configs   | REST API config                                 |
+|  V  | py-debug-bot  | Python debugging, RCA            | REST API debugging, Pandera issues              |
+| VI  | py-doc-bot    | Technical writing, ADR, diagrams | Bioinformatics terminology, Mermaid             |
+
+### 9a.2 Rule References
+
+Каждый файл субагента содержит секцию `## Rule References` с таблицами:
+
+| Тип              | Формат         | Пример                                  |
+| ---------------- | -------------- | --------------------------------------- |
+| Правило RULES.md | `[RULES-§X.Y]` | `[RULES-§2.1]` — Hexagonal Architecture |
+| ADR              | `[ADR-NNN]`    | `[ADR-010]` — Local-only deployment     |
+| Инвариант        | `[INV:name]`   | `[INV:IMPORT_DOMAIN]` — domain → ничего |
+
+**Verification:** каждый rule reference сопровождается командой проверки (bash).
+
+______________________________________________________________________
+
+## 10. MCP & Tools Integration
+
+### 10.1 Профили readiness
+
+Трековый полный inventory и live readiness — разные слои доказательств.
+Матрица required/optional определена в `scripts/ai/codex/setup_mcp.py` и
+проверяется статически без сети или локальных сервисов.
+
+| Профиль | Required для live readiness | Optional |
+| --- | --- | --- |
+| `stable` | ежедневный host/HTTP набор | remote/auth-managed endpoints пропускаются |
+| `shared` | тот же ежедневный набор, что `stable` | Mermaid, Neo4j, monitoring и прочие расширения |
+| `core` | `stable` + Mermaid | remote/auth-managed endpoints |
+| `ops` | `stable` + Prometheus, Grafana, GitHub Actions | Mermaid и остальные расширения |
+| `graph` | `stable` + оба Neo4j endpoint | Mermaid, monitoring и прочие расширения |
+| `full` | весь явно выбранный inventory | нет |
+
+### 10.2 Протокол использования
+
+1. Использовать runtime tool discovery и выбирать только нужные задаче
+   capability; не предполагать наличие удалённого provider по старому имени.
+1. Для CI запускать
+   `python3 scripts/ai/codex/doctor.py static --no-write`.
+1. Для bounded live smoke запускать
+   `bash scripts/ai/codex/run-codex.sh mcp-check --profile <profile>`.
+1. `FAIL` означает недоступный required server, `WARN` — optional server,
+   `SKIP` — remote/auth-managed endpoint, проверяемый отдельно через
+   `codex mcp list`.
+1. MCP используется для верификации и исследования, а не для production data
+   flow. Никакой monitoring или Docker Compose stack не стартует неявно.
+
+### 10.3 Типовые маршруты
+
+| Задача | Capability | Профиль |
+| --- | --- | --- |
+| Repository evidence | filesystem, AST/code analysis, memory | `stable` |
+| External technical reference | Context7, Ref, DeepWiki или bounded web source | `stable` |
+| Pull request / CI evidence | GitHub, GitHub Actions | `stable` / `ops` |
+| Mermaid validation/render | Mermaid | `core` |
+| Monitoring investigation | Prometheus, Grafana | `ops` |
+| Graph research | Neo4j Cypher/Memory | `graph` |
+
+______________________________________________________________________
+
+## 11. Changelog (ORCHESTRATION.md)
+
+### v4.2 (2026-03-26)
+
+- **CHANGED**: active agent table no longer lists the legacy documentation-only subagent
+- **CHANGED**: repo-wide docs audits now point to `documentation-audit` / `documentation-cascade-audit`
+- **CHANGED**: active agent count updated to 8 (6 core + 2 orchestrator/swarm)
+
+### v4.1 (2026-03-10)
+
+- **PLATFORM**: основной runtime зафиксирован как Codex CLI
+- **ADDED**: `.codex/agents/CODEX-RUNTIME.md` для маппинга logical profiles → native agent roles
+- **CHANGED**: source-of-truth ссылки переключены на `.codex/agents/`
+- **CHANGED**: примеры запуска адаптированы под `spawn_agent(...)`
+
+### v4.0 (2026-03-04)
+
+> Исторический changelog ниже является non-normative. Для текущего workflow ориентируйся на разделы выше и на note о том, что production-код пишет orchestrator напрямую.
+
+- **REMOVED**: `py-code-bot` — production code now written directly by orchestrator
+- **MERGED**: `py-diagram-bot` into `py-doc-bot` (diagrams are documentation artifacts)
+- **ADDED**: `py-test-swarm`, docs-audit orchestration track, `py-review-orchestrator` to agent table
+- **REMOVED**: `.claude/agents/subagents/` reference (deleted in Phase 1)
+- **CHANGED**: Agent count: 8 → 9 (6 core + 3 orchestrator/swarm)
+- **CHANGED**: All workflow references updated: py-code-bot → orchestrator
+- **CHANGED**: MCP matrices reduced from 7×7 to 6×6
+
+### v3.0 (2026-02-08)
+
+- **PLATFORM**: Адаптация для legacy assistant CLI (до текущего Codex runtime)
+- **CHANGED**: Все субагенты переименованы: `pyXxxBot` → `py-xxx-bot` (для `subagent_type` в Task tool)
+- **CHANGED**: 8 старых Claude Code агентов заменены на 7 унифицированных: `py-audit-bot`, `py-plan-bot`, `py-test-bot`, `py-code-bot`, `py-config-bot`, `py-debug-bot`, `py-doc-bot`
+- **CHANGED**: Навыки из skills directory инлайнированы в файлы субагентов (секция `## Инлайнированные знания`)
+- **REMOVED**: `google_drive_search`, `message_compose`, `ask_user_input` (недоступны в CLI)
+- **CHANGED**: `web_search` / `web_fetch` → `WebSearch` / `WebFetch` (встроенные инструменты Claude Code)
+- **CHANGED**: MCP инструменты использовали legacy deferred-loading contract
+- **CHANGED**: §9a — Skill Activation Protocol → Инлайнированные знания
+- **NEW**: Ссылки на `.claude/agents/py-*.md` вместо `SUBAGENT.md`
+
+### v2.2 (2026-02-07)
+
+- **NEW**: §10 — MCP & Tools Integration (матрицы 7×7 для MCP-серверов и Platform Tools)
+- **NEW**: Секция `## MCP Tools` добавлена во все 7 SUBAGENT.md (сценарии, workflows, параметры)
+- **NEW**: Секция `## Platform Tools` добавлена во все 7 SUBAGENT.md (web_search, ask_user_input, google_drive_search)
+- **NEW**: §10.3 — протокол использования MCP (опциональность, верификация, fallback)
+- **NEW**: §10.4 — 8 типовых MCP workflows (schema drift, golden data, contract testing, etc.)
+- **CHANGED**: §10 (Changelog) → §11 (ренумерация)
+
+### v2.1 (2026-02-07)
+
+- **NEW**: §9a — Skill Activation Protocol (маппинг 7 навыков на 7 субагентов)
+- **NEW**: Секция `## Skills` добавлена во все 7 SUBAGENT.md (primary + secondary skills с путями и триггерами)
+- **NEW**: Секция `## Rule References` добавлена во все 7 SUBAGENT.md ([RULES-§], [ADR-], [INV:], [GLOSS:])
+- **NEW**: §9a.3 — формат ссылок на правила с verification-командами
+
+### v2.0 (2026-02-07)
+
+- **NEW**: `py-code-bot` — написание production-кода (`src/bioetl/`), файловая зона `src/`
+- **NEW**: `py-config-bot` — управление конфигурациями (`configs/`), файловая зона `configs/`
+- **NEW**: ID-prefix `CFG-` для config changes
+- **NEW**: Артефакт `04a-config-log.md`
+- **NEW**: Упрощённые режимы: `new-entity` (§8.4), `composite-pipeline` (§8.5)
+- **NEW**: §5.2 — маршрутизация RF-\* по типу изменения
+- **NEW**: §7.6 — config compliance gate
+- **NEW**: §7.7 — zone isolation
+- **CHANGED**: Шаг ⑤ (ранее «рефакторинг») → шаг ④ «реализация» с параллельным py-code-bot + py-config-bot
+- **CHANGED**: Матрица взаимодействий расширена до 7×7
+- **CHANGED**: Счёт subagent-ов: 5 → 7
+
+### v1.0 (2026-02-07)
+
+- Initial release: py-audit-bot, py-plan-bot, py-test-bot, py-debug-bot, py-doc-bot
+
+### v4.3 (2026-07-24)
+
+- **UPDATED**: Memory sheets synchronization — all `memory-py-*.md` updated to v1.0.1-v1.0.3
+- **UPDATED**: MCP memory configuration extended with new entities (agent-memory, memory-usage-policy, daily-workflow, orchestration-map, normative-sources)
+- **UPDATED**: Skill documentation (agent-orchestration) now references memory sheets and daily workflow
+- **UPDATED**: agent-memory.md synchronized to v1.0.17 with ORCHESTRATION.md v4.3
+- **CHANGED**: Memory workflow integration in agent-orchestration skill
+- **CHANGED**: Version references in memory sheets updated to 2026-07-24
+
+### v4.2 (2026-03-26)
+
+- Env file guardrail added (moved to end of changelog in v4.3)
+
+## Env File Guardrail
+
+- Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
+- Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
+- Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.

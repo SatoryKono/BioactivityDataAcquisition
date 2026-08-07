@@ -13,7 +13,7 @@
 1. py-plan-bot (codex) — план RF-\*.
 1. py-doc-bot (codex) — правки документации.
 1. py-test-bot (codex) — проверки после правок.
-1. py-review-orchestrator (codex) — независимый double-check.
+1. py-audit-bot (codex) — независимый double-check.
 
 ПРАВИЛА РАБОТЫ
 
@@ -79,7 +79,7 @@
 1. Сравни состояние с baseline.
 1. Подтверди отсутствие ухудшений и перечисли улучшения по метрикам.
 
-Этап 6 — Double-check (py-review-orchestrator/codex)
+Этап 6 — Double-check (py-audit-bot/codex)
 
 1. Проведи независимую проверку результата.
 1. Подтверди или опровергни вывод final audit.

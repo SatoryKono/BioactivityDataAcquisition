@@ -24,15 +24,12 @@ README = AGENTS_DIR / "README.md"
 
 ACTIVE_RUNTIME_PROFILES = frozenset(
     {
-        "py-architecture-debt-bot",
         "py-audit-bot",
         "py-config-bot",
         "py-debug-bot",
         "py-doc-bot",
         "py-plan-bot",
-        "py-review-orchestrator",
         "py-test-bot",
-        "py-test-swarm",
     }
 )
 
@@ -51,10 +48,9 @@ def test_orchestration_mentions_every_active_profile() -> None:
         assert name in text, f"ORCHESTRATION.md missing active profile {name}"
 
 
-def test_agent_readme_lists_nine_active_and_marks_sp_docs_only() -> None:
+def test_agent_readme_lists_six_active_and_marks_sp_docs_only() -> None:
     text = README.read_text(encoding="utf-8")
-    assert "9 active" in text
-    assert "py-architecture-debt-bot" in text
+    assert "6 active" in text
     assert "docs-only" in text.lower() or "Docs-only" in text
     # No claim that sp-* are runtime agents under .codex/agents
     assert "Generic Utilities (12 agents)" not in text

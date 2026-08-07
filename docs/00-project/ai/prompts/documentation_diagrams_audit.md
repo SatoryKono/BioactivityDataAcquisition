@@ -18,11 +18,11 @@ AI-конфигурация и runtime-поведение аудитируютс
 
 | #   | Агент                      | Surface                                     | Роль                                 |
 | --- | -------------------------- | ------------------------------------------- | ------------------------------------ |
-| A1  | Cross-Reference Auditor    | `documentation-audit`                       | Битые ссылки, nav, orphan docs       |
+| A1  | Cross-Reference Auditor    | `py-doc-bot`                       | Битые ссылки, nav, orphan docs       |
 | A2  | Code-Docs Sync Checker     | `py-doc-bot`                                | Соответствие docs ↔ code/configs     |
 | A3  | ADR Auditor                | `py-audit-bot`                              | ADR completeness, status, conflicts  |
 | A4  | Diagram Validator          | `py-doc-bot` + `technical-designer-mermaid` | Mermaid syntax, ADR-040, code sync   |
-| A5  | Content Freshness Analyzer | `documentation-cascade-audit`               | Freshness, drift, archive candidates |
+| A5  | Content Freshness Analyzer | `py-doc-bot`               | Freshness, drift, archive candidates |
 
 ## Рекомендуемые режимы
 

@@ -28,7 +28,7 @@ Boundary note (2026-03-08):
 
 - This profile focuses on macro architecture and technology trade-offs.
 - It is not the canonical BioETL compliance auditor.
-- For full-project BioETL review use `py-review-orchestrator`.
+- For full-project BioETL review use `py-audit-bot`.
 - For architecture policy and ADR gate checks use `py-audit-bot`.
 
 Operating modes:

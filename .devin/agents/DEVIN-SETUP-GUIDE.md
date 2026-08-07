@@ -46,14 +46,14 @@ BioETL provides 9 custom subagent profiles in `.devin/agents/`:
 | Profile | Model | Role | Execution Mode |
 |---------|-------|------|----------------|
 | `py-audit-bot` | parent | Baseline/final audit, code review, architecture guardian | Foreground |
-| `py-architecture-debt-bot` | parent | Architecture-debt reduction workflow | Foreground |
+| `py-audit-bot` | parent | Architecture-debt reduction workflow | Foreground |
 | `py-plan-bot` | parent | Task planning, RF-* decomposition | Foreground |
 | `py-test-bot` | swe-1.6 | Tests (baseline/final/retest), coverage | Foreground/background |
 | `py-config-bot` | swe-1.6 | YAML configs (pipeline/DQ/filter/composite) | Foreground |
 | `py-debug-bot` | parent | RCA, bug fixes, regression debugging | Foreground |
 | `py-doc-bot` | swe-1.6 | Docs, ADR, CHANGELOG, Mermaid diagrams | Foreground |
-| `py-test-swarm` | parent | Hierarchical testing (L1→L2→L3) | Background |
-| `py-review-orchestrator` | parent | Hierarchical code review (S1–S8) | Background |
+| `py-test-bot` | parent | Hierarchical testing (L1→L2→L3) | Background |
+| `py-audit-bot` | parent | Hierarchical code review (S1–S8) | Background |
 
 ## Usage Examples
 
@@ -118,7 +118,7 @@ Use for:
 - Long-running test suites
 - Documentation generation
 - Evidence collection campaigns
-- Hierarchical orchestration (py-test-swarm, py-review-orchestrator)
+- Hierarchical orchestration (py-test-bot, py-audit-bot)
 
 **Note:** Background subagents inherit already-granted permissions; unapproved tools are auto-denied.
 
@@ -132,7 +132,7 @@ Use for:
 │   ├── README.md                  # Agent catalog
 │   ├── py-audit-bot/
 │   │   └── AGENT.md              # Audit profile
-│   ├── py-architecture-debt-bot/
+│   ├── py-audit-bot/
 │   │   └── AGENT.md              # Architecture debt profile
 │   ├── py-plan-bot/
 │   │   └── AGENT.md              # Planning profile
@@ -144,9 +144,9 @@ Use for:
 │   │   └── AGENT.md              # Debugging profile
 │   ├── py-doc-bot/
 │   │   └── AGENT.md              # Documentation profile
-│   ├── py-test-swarm/
+│   ├── py-test-bot/
 │   │   └── AGENT.md              # Hierarchical testing profile
-│   └── py-review-orchestrator/
+│   └── py-audit-bot/
 │       └── AGENT.md              # Code review orchestration profile
 ├── skills/
 │   └── [BioETL skills catalog]

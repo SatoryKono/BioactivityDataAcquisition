@@ -55,7 +55,7 @@ It must not define runtime behavior independently from tracked runtime trees
 such as `.codex/agents/**`. Edit the active runtime profile first, then refresh this
 mirror when behavior or contributor guidance changes.
 
-## BioETL Core (9 active Codex runtime agents)
+## BioETL Core (6 active Codex runtime agents)
 
 Active set **MUST** match `.codex/agents/ORCHESTRATION.md`, the tracked
 `py-*.md` behavioral profiles, and the native `py-*.toml` descriptors under
@@ -63,23 +63,18 @@ Active set **MUST** match `.codex/agents/ORCHESTRATION.md`, the tracked
 
 | Agent                        | Model | Role                                                                   |
 | ---------------------------- | ----- | ---------------------------------------------------------------------- |
-| `py-audit-bot`               | inherited | Baseline/final audit, code review, architecture guardian           |
-| `py-architecture-debt-bot`   | inherited | Architecture-debt workflow: generate → plan → execute → verify     |
+| `py-audit-bot`               | inherited | Audit, review, debt, reproducibility                               |
 | `py-plan-bot`                | inherited | Task planning, RF-\* decomposition, composite design               |
-| `py-test-bot`                | inherited | Tests (baseline/final/retest), coverage                            |
+| `py-test-bot`                | inherited | Focused tests, broad campaigns, coverage                           |
 | `py-config-bot`              | inherited | YAML configs (pipeline/DQ/filter/composite)                        |
 | `py-debug-bot`               | inherited | RCA and regression diagnosis                                      |
-| `py-doc-bot`                 | inherited | Docs, ADR, CHANGELOG, Mermaid diagrams                             |
-| `py-test-swarm`              | inherited | Hierarchical testing (L1→L2→L3)                                   |
-| `py-review-orchestrator`     | inherited | Hierarchical code review (S1–S8)                                  |
+| `py-doc-bot`                 | inherited | Docs, broad docs audits, Mermaid diagrams                          |
 
 Runtime mapping: `.codex/agents/CODEX-RUNTIME.md`. Production code is written by
 the orchestrator directly (`py-code-bot` skill is a deprecated tombstone only).
 
-Repo-wide documentation audits are no longer routed through a dedicated
-documentation-only agent entry in active orchestration docs; use the
-`documentation-audit` / `documentation-cascade-audit` skill surfaces for that
-workflow.
+Broad documentation audits use `py-doc-bot mode=broad`; review, debt, and broad
+test work use modes of `py-audit-bot` and `py-test-bot`.
 
 ## Docs-only generic utilities (non-runtime)
 
