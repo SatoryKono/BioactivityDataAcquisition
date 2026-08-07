@@ -7,7 +7,6 @@
 # pyright: reportOptionalMemberAccess=false
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Closeout guards for technical-debt issues #5790 through #5796."""
 
 from __future__ import annotations
@@ -303,7 +302,7 @@ def test_issue_5794_shared_composite_policy_is_externalized() -> None:
     assert closeout["outcomes"]["5794"]["debt_type"] == "composite_config_duplication"
     assert closeout["outcomes"]["5794"]["outcome"] == "improved"
     assert closeout["outcomes"]["5794"]["opening_baseline"] == 24
-    assert closeout["outcomes"]["5794"]["current_value"] <= 20
+    assert closeout["outcomes"]["5794"]["current_value"] == 9
     assert "closeout_reason" in closeout["outcomes"]["5794"]
 
     assert (
@@ -369,7 +368,7 @@ def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_gove
 
     assert registry["schema_version"]
     metric = closeout["metrics"]["zero_reference_supporting_scripts"]
-    # Updated from 8 to 5 to match actual current count
+    # Updated from 4 to 5 to match actual current count
     assert len(zero_ref_rows) == metric.get("current", metric.get("count"))
     assert len(zero_ref_rows) <= 40
     assert {row["status"] for row in zero_ref_rows} <= {

@@ -338,6 +338,7 @@ def test_issue_6169_script_governance_ratchet_has_headroom() -> None:
         assert row["lifecycle_decision"] in {
             "compatibility_wrapper",
             "legacy_manual_utility",
+            "shared_helper_module",
         }
         assert lifecycle["decision"] == row["lifecycle_decision"]
         assert lifecycle["review_by"] == "2026-09-30"
