@@ -251,7 +251,7 @@ UUID-like values normalize through canonical string conversion.
 | Shipped profile registry           | [registry.py](../../src/bioetl/domain/normalization/profiles/registry.py)                                             | Registers shipped profiles for `chembl.activity`, `chembl.assay`, `chembl.assay_parameters`, `chembl.cell_line`, `chembl.compound_record`, `chembl.molecule`, `chembl.protein_class`, `chembl.publication`, `chembl.publication_similarity`, `chembl.publication_term`, `chembl.subcellular_fraction`, `chembl.target`, `chembl.target_component`, `chembl.target_protein_classification`, `chembl.tissue`, `crossref.publication`, `openalex.publication`, `pubchem.compound`, `pubmed.publication`, `semanticscholar.publication`, `uniprot.idmapping`, and `uniprot.protein` |
 | Join-key domain policies           | [join_keys.py](../../src/bioetl/domain/normalization/join_keys.py)                                                    | Pure scalar join-key policies for canonical trim/casing behavior                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | Join-key application adapters      | [join_key_normalization.py](../../src/bioetl/application/composite/join_key_normalization.py)                         | Applies canonical join-key policies to composite runtime/config and DataFrame-oriented flows                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Matrix generation                  | [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) | Deterministically emits multi-pipeline CSV and MD artifacts from schemas, profiles, fallback rules, and join-key seams                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Matrix generation                  | [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/matrix/generate_pipeline_normalization_matrix.py) | Deterministically emits multi-pipeline CSV and MD artifacts from schemas, profiles, fallback rules, and join-key seams                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | Fallback inventory                 | [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py) | Reports `fallback_business` vs `fallback_technical_passthrough` debt from the published matrix for governance and ratchets                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 ## Hash Boundaries
@@ -347,7 +347,7 @@ The field matrix must be generated from code, not from spreadsheets.
 
 Current deterministic generator on `main`:
 
-- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py)
+- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/matrix/generate_pipeline_normalization_matrix.py)
 
 Current inputs:
 
@@ -373,7 +373,7 @@ docs.
 Current evidence bundle on `main`:
 
 - canonical plan: [normalization_plan_P0_P6.md](normalization_plan_P0_P6.md)
-- rebuild-only multi-pipeline matrix generator: [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py)
+- rebuild-only multi-pipeline matrix generator: [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/matrix/generate_pipeline_normalization_matrix.py)
 - published multi-pipeline matrix MD: [pipeline_normalization_field_matrix.md](../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md)
 - published multi-pipeline matrix CSV: [pipeline_normalization_field_matrix.csv](../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.csv)
 - fallback inventory report: [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py)
@@ -731,7 +731,7 @@ profiles, fallback seams, and composite join-key policies.
 
 ### Current state on `main`
 
-- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministic multi-pipeline artifacts
+- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/matrix/generate_pipeline_normalization_matrix.py) already generates deterministic multi-pipeline artifacts
 - published outputs include `pipeline_normalization_field_matrix.csv` and
   `pipeline_normalization_field_matrix.md` under
   `docs/reports/generated/pipeline_normalization_field_matrix/`

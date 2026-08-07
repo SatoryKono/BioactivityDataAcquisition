@@ -1016,7 +1016,7 @@ CURATED_EXECUTION_PATHS: tuple[dict[str, object], ...] = (
         "platform": "ci_uv",
         "summary": "Canonical end-to-end published docs verification path.",
         "gate": GATE_DOCS_VERIFICATION,
-        "script_path": "scripts/docs/verify_docs.py",
+        "script_path": "scripts/docs/checks/verify.py",
     },
     {
         "name": "uv run python -m scripts.schema validate-configs",

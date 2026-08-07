@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bootstrap helpers for ``scripts.docs.checks`` modules."""
+"""Consolidated bootstrap helpers for scripts.docs modules."""
 
 from __future__ import annotations
 

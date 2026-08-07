@@ -6992,37 +6992,37 @@
           "text": "- `scripts/docs/_compat_shim.py` and other zero-reference helpers: re-review for"
         },
         {
-          "path": "scripts/docs/check_doc_drift.py",
+          "path": "scripts/docs/checks/check_drift.py",
           "line": 11,
           "source_group": "scripts",
           "text": "from scripts.docs._compat_shim import load_public_api"
         },
         {
-          "path": "scripts/docs/check_doc_drift.py",
+          "path": "scripts/docs/checks/check_drift.py",
           "line": 13,
           "source_group": "scripts",
           "text": "from ._compat_shim import load_public_api"
         },
         {
-          "path": "scripts/docs/check_docstring_coverage.py",
+          "path": "scripts/docs/checks/check_docstrings.py",
           "line": 11,
           "source_group": "scripts",
           "text": "from scripts.docs._compat_shim import load_main"
         },
         {
-          "path": "scripts/docs/check_docstring_coverage.py",
+          "path": "scripts/docs/checks/check_docstrings.py",
           "line": 13,
           "source_group": "scripts",
           "text": "from ._compat_shim import load_main"
         },
         {
-          "path": "scripts/docs/chembl_matrix_structural_contract.py",
+          "path": "scripts/docs/matrix/structural_contract.py",
           "line": 11,
           "source_group": "scripts",
           "text": "from scripts.docs._compat_shim import load_public_api"
         },
         {
-          "path": "scripts/docs/chembl_matrix_structural_contract.py",
+          "path": "scripts/docs/matrix/structural_contract.py",
           "line": 13,
           "source_group": "scripts",
           "text": "from ._compat_shim import load_public_api"
@@ -7100,7 +7100,7 @@
       ]
     },
     {
-      "path": "scripts/docs/check_doc_drift.py",
+      "path": "scripts/docs/checks/check_drift.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7161,7 +7161,7 @@
       "next_step": "Retain as a top-level docs drift compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-drift."
     },
     {
-      "path": "scripts/docs/check_docstring_coverage.py",
+      "path": "scripts/docs/checks/check_docstrings.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7201,7 +7201,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 27,
           "source_group": "tests",
-          "text": "\"scripts/docs/check_docstring_coverage.py\","
+          "text": "\"scripts/docs/checks/check_docstrings.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -7210,7 +7210,7 @@
       "next_step": "Retain as a top-level docstring coverage compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-docstrings."
     },
     {
-      "path": "scripts/docs/checks/_bootstrap.py",
+      "path": "scripts/docs/common/bootstrap.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7495,7 +7495,7 @@
       ]
     },
     {
-      "path": "scripts/docs/chembl_matrix_structural_contract.py",
+      "path": "scripts/docs/matrix/structural_contract.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7505,13 +7505,13 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 28,
           "source_group": "tests",
-          "text": "\"scripts/docs/chembl_matrix_structural_contract.py\","
+          "text": "\"scripts/docs/matrix/structural_contract.py\","
         },
         {
           "path": "tests/unit/scripts/test_chembl_matrix_structural_contract.py",
           "line": 17,
           "source_group": "tests",
-          "text": "from scripts.docs.chembl_matrix_structural_contract import ("
+          "text": "from scripts.docs.matrix.structural_contract import ("
         }
       ],
       "owner": "@bioetl-docs",
@@ -7655,7 +7655,7 @@
       "next_step": "Retain as a shared workbook helper consumed by docs matrix tooling; keep it non-active unless workbook mutation becomes a documented standalone docs command surface."
     },
     {
-      "path": "scripts/docs/enrich_chembl_matrix_normalization_details.py",
+      "path": "scripts/docs/matrix/enrich_normalization_details.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7665,7 +7665,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 29,
           "source_group": "tests",
-          "text": "\"scripts/docs/enrich_chembl_matrix_normalization_details.py\","
+          "text": "\"scripts/docs/matrix/enrich_normalization_details.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -7674,7 +7674,7 @@
       "next_step": "Retain as a top-level ChEMBL matrix enrichment compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
     {
-      "path": "scripts/docs/export_chembl_matrix_structural_contract.py",
+      "path": "scripts/docs/matrix/export_structural_contract.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7684,7 +7684,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 30,
           "source_group": "tests",
-          "text": "\"scripts/docs/export_chembl_matrix_structural_contract.py\","
+          "text": "\"scripts/docs/matrix/export_structural_contract.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -7693,7 +7693,7 @@
       "next_step": "Retain as a top-level ChEMBL structural contract export shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
     {
-      "path": "scripts/docs/filter_chembl_matrix_rows.py",
+      "path": "scripts/docs/matrix/filter_rows.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7703,7 +7703,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 31,
           "source_group": "tests",
-          "text": "\"scripts/docs/filter_chembl_matrix_rows.py\","
+          "text": "\"scripts/docs/matrix/filter_rows.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -7712,7 +7712,7 @@
       "next_step": "Retain as a top-level ChEMBL matrix row-filter compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
     {
-      "path": "scripts/docs/fix_doc_links_auto.py",
+      "path": "scripts/docs/fixers/fix_links_auto.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7722,7 +7722,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 32,
           "source_group": "tests",
-          "text": "\"scripts/docs/fix_doc_links_auto.py\","
+          "text": "\"scripts/docs/fixers/fix_links_auto.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -7731,7 +7731,7 @@
       "next_step": "Retain as a top-level docs link auto-fix compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs fix-links-auto."
     },
     {
-      "path": "scripts/docs/fix_doc_links_explicit.py",
+      "path": "scripts/docs/fixers/fix_links_explicit.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -7741,12 +7741,12 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 33,
           "source_group": "tests",
-          "text": "\"scripts/docs/fix_doc_links_explicit.py\","
+          "text": "\"scripts/docs/fixers/fix_links_explicit.py\","
         }
       ]
     },
     {
-      "path": "scripts/docs/fix_link_warnings.py",
+      "path": "scripts/docs/fixers/link_warnings.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -7756,7 +7756,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 34,
           "source_group": "tests",
-          "text": "\"scripts/docs/fix_link_warnings.py\","
+          "text": "\"scripts/docs/fixers/link_warnings.py\","
         }
       ]
     },
@@ -7886,7 +7886,7 @@
       "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
-      "path": "scripts/docs/generate_chembl_activity_field_matrix.py",
+      "path": "scripts/docs/matrix/generate_field_matrix.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7896,13 +7896,13 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 35,
           "source_group": "tests",
-          "text": "\"scripts/docs/generate_chembl_activity_field_matrix.py\","
+          "text": "\"scripts/docs/matrix/generate_field_matrix.py\","
         },
         {
           "path": "tests/unit/scripts/test_generate_chembl_activity_field_matrix.py",
           "line": 26,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_chembl_activity_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_field_matrix import ("
         }
       ],
       "owner": "@bioetl-docs",
@@ -7911,7 +7911,7 @@
       "next_step": "Retain as a top-level ChEMBL activity-field matrix shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
     {
-      "path": "scripts/docs/generate_chembl_matrix_dictionaries.py",
+      "path": "scripts/docs/matrix/build_matrix_dicts.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -7921,12 +7921,12 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 36,
           "source_group": "tests",
-          "text": "\"scripts/docs/generate_chembl_matrix_dictionaries.py\","
+          "text": "\"scripts/docs/matrix/build_matrix_dicts.py\","
         }
       ]
     },
     {
-      "path": "scripts/docs/generate_pipeline_normalization_field_matrix.py",
+      "path": "scripts/docs/matrix/generate_pipeline_normalization_matrix.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -7936,49 +7936,49 @@
           "path": ".github/ISSUES/CHEMBL-016-Close-Remaining-Chembl-Normalization-Governance-Gaps.md",
           "line": 160,
           "source_group": "other",
-          "text": "- `scripts/docs/generate_pipeline_normalization_field_matrix.py`"
+          "text": "- `scripts/docs/matrix/generate_pipeline_normalization_matrix.py`"
         },
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 37,
           "source_group": "tests",
-          "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\","
+          "text": "\"scripts/docs/matrix/generate_pipeline_normalization_matrix.py\","
         },
         {
           "path": "tests/architecture/test_non_chembl_json_field_typing_policy.py",
           "line": 39,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_pipeline_normalization_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
         },
         {
           "path": "tests/architecture/test_normalization_surface_coverage_ratchet.py",
           "line": 23,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_pipeline_normalization_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
         },
         {
           "path": "tests/contract/test_chembl_case_and_ontology_consistency.py",
           "line": 34,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_pipeline_normalization_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
         },
         {
           "path": "tests/contract/test_non_chembl_cross_layer_contract_matrix.py",
           "line": 70,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_pipeline_normalization_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
         },
         {
           "path": "tests/contract/test_normalization_cross_layer_contracts.py",
           "line": 38,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_pipeline_normalization_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
         },
         {
           "path": "tests/integration/config/test_chembl_dq_catalog_sync.py",
           "line": 21,
           "source_group": "tests",
-          "text": "from scripts.docs.generate_pipeline_normalization_field_matrix import ("
+          "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
         }
       ],
       "owner": "@bioetl-docs",
@@ -7987,7 +7987,7 @@
       "next_step": "Retain as a top-level pipeline normalization matrix compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs generate-pipeline-normalization-matrix."
     },
     {
-      "path": "scripts/docs/matrix/_bootstrap.py",
+      "path": "scripts/docs/common/bootstrap.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -8349,7 +8349,7 @@
       ]
     },
     {
-      "path": "scripts/docs/normalize_chembl_matrix_workbook.py",
+      "path": "scripts/docs/matrix/normalize_values.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -8359,7 +8359,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 38,
           "source_group": "tests",
-          "text": "\"scripts/docs/normalize_chembl_matrix_workbook.py\","
+          "text": "\"scripts/docs/matrix/normalize_values.py\","
         }
       ]
     },
@@ -8688,7 +8688,7 @@
       "next_step": "Retain as the internal passport validation helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
     },
     {
-      "path": "scripts/docs/report_docs_kpi.py",
+      "path": "scripts/docs/checks/report_docs_kpi.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -8704,7 +8704,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 39,
           "source_group": "tests",
-          "text": "\"scripts/docs/report_docs_kpi.py\","
+          "text": "\"scripts/docs/checks/report_docs_kpi.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -8713,7 +8713,7 @@
       "next_step": "Retain as a top-level docs KPI reporting compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-kpi."
     },
     {
-      "path": "scripts/docs/sentence_doc_audit.py",
+      "path": "scripts/docs/fixers/sentence_audit.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -8723,12 +8723,12 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 40,
           "source_group": "tests",
-          "text": "\"scripts/docs/sentence_doc_audit.py\","
+          "text": "\"scripts/docs/fixers/sentence_audit.py\","
         }
       ]
     },
     {
-      "path": "scripts/docs/sync_chembl_matrix_structural_policy.py",
+      "path": "scripts/docs/matrix/sync_structural_policy.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -8738,12 +8738,12 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 41,
           "source_group": "tests",
-          "text": "\"scripts/docs/sync_chembl_matrix_structural_policy.py\","
+          "text": "\"scripts/docs/matrix/sync_structural_policy.py\","
         }
       ]
     },
     {
-      "path": "scripts/docs/sync_repo_identity.py",
+      "path": "scripts/docs/fixers/repo_identity.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
@@ -8753,7 +8753,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 42,
           "source_group": "tests",
-          "text": "\"scripts/docs/sync_repo_identity.py\","
+          "text": "\"scripts/docs/fixers/repo_identity.py\","
         }
       ],
       "owner": "@bioetl-docs",
@@ -8762,7 +8762,7 @@
       "next_step": "Retain as a top-level repo-identity compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs sync-repo-identity."
     },
     {
-      "path": "scripts/docs/verify_docs.py",
+      "path": "scripts/docs/checks/verify.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -8772,7 +8772,7 @@
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 43,
           "source_group": "tests",
-          "text": "\"scripts/docs/verify_docs.py\","
+          "text": "\"scripts/docs/checks/verify.py\","
         }
       ]
     },

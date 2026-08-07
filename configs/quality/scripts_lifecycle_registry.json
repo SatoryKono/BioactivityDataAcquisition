@@ -33,10 +33,10 @@
       "next_step": "Retain as the Python implementation behind the canonical check_junie_mirror.sh entrypoint; keep direct contributor usage routed through the shell wrapper."
     },
     "scripts/docs/fixers/fix_links_auto.py": {
-      "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
       "review_by": "2026-09-30",
-      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
+      "next_step": "Retain as a top-level docs link auto-fix compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs fix-links-auto."
     },
     "scripts/docs/fixers/fix_links_explicit.py": {
       "owner": "@bioetl-platform",
@@ -51,10 +51,10 @@
       "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     "scripts/docs/fixers/repo_identity.py": {
-      "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
       "review_by": "2026-09-30",
-      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
+      "next_step": "Retain as a top-level repo-identity compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs sync-repo-identity."
     },
     "scripts/docs/fixers/sentence_audit.py": {
       "owner": "@bioetl-platform",
@@ -69,28 +69,28 @@
       "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     "scripts/docs/matrix/enrich_normalization_details.py": {
-      "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
       "review_by": "2026-09-30",
-      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+      "next_step": "Retain as a top-level ChEMBL matrix enrichment compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
     "scripts/docs/matrix/export_structural_contract.py": {
-      "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
       "review_by": "2026-09-30",
-      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+      "next_step": "Retain as a top-level ChEMBL structural contract export shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
     "scripts/docs/matrix/filter_rows.py": {
-      "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
       "review_by": "2026-09-30",
-      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+      "next_step": "Retain as a top-level ChEMBL matrix row-filter compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
     "scripts/docs/matrix/generate_field_matrix.py": {
-      "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
       "review_by": "2026-09-30",
-      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+      "next_step": "Retain as a top-level ChEMBL activity-field matrix shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
     "scripts/docs/matrix/normalize_values.py": {
       "owner": "@bioetl-platform",
@@ -548,35 +548,29 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as the legacy root shell Docker setup wrapper while operator references migrate to scripts/ops/docker-setup.sh; keep it supporting and do not promote root setup launchers back to active script inventory."
     },
-    "scripts/docs/_compat_shim.py": {
-      "owner": "@bioetl-docs",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an internal compatibility-shim helper that centralizes thin docs wrappers while the mixed top-level scripts/docs entrypoint surface remains in place; do not expose it as a supported user-facing command."
-    },
-    "scripts/docs/check_doc_drift.py": {
+    "scripts/docs/checks/check_drift.py": {
       "owner": "@bioetl-docs",
       "decision": "compatibility_wrapper",
       "review_by": "2026-09-30",
       "next_step": "Retain as a top-level docs drift compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-drift."
     },
-    "scripts/docs/check_docstring_coverage.py": {
+    "scripts/docs/checks/check_docstrings.py": {
       "owner": "@bioetl-docs",
       "decision": "compatibility_wrapper",
       "review_by": "2026-09-30",
       "next_step": "Retain as a top-level docstring coverage compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-docstrings."
     },
-    "scripts/docs/checks/_bootstrap.py": {
-      "owner": "@bioetl-docs",
+    "scripts/docs/common/bootstrap.py": {
       "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an internal bootstrap helper for scripts.docs.checks modules while repo-root/path setup remains shared across those modules; fold it into a broader canonical scripts bootstrap layer if that consolidation lands."
-    },
-    "scripts/docs/chembl_matrix_structural_contract.py": {
       "owner": "@bioetl-docs",
-      "decision": "compatibility_wrapper",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as consolidated bootstrap for scripts.docs checks/matrix modules (#8043)."
+    },
+    "scripts/docs/matrix/structural_contract.py": {
+      "owner": "@bioetl-docs",
+      "decision": "shared_helper_module",
       "review_by": "2026-09-30",
-      "next_step": "Retain as a top-level ChEMBL matrix compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
+      "next_step": "Retain as the internal structural-contract library for documentation matrix generation and its architecture guard; keep it supporting because it is not a standalone command."
     },
     "scripts/docs/common/markdown.py": {
       "owner": "@bioetl-docs",
@@ -596,65 +590,17 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a shared workbook helper consumed by docs matrix tooling; keep it non-active unless workbook mutation becomes a documented standalone docs command surface."
     },
-    "scripts/docs/enrich_chembl_matrix_normalization_details.py": {
-      "owner": "@bioetl-docs",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a top-level ChEMBL matrix enrichment compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
-    },
-    "scripts/docs/export_chembl_matrix_structural_contract.py": {
-      "owner": "@bioetl-docs",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a top-level ChEMBL structural contract export shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
-    },
-    "scripts/docs/filter_chembl_matrix_rows.py": {
-      "owner": "@bioetl-docs",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a top-level ChEMBL matrix row-filter compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
-    },
-    "scripts/docs/fix_doc_links_auto.py": {
-      "owner": "@bioetl-docs",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a top-level docs link auto-fix compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs fix-links-auto."
-    },
-    "scripts/docs/generate_chembl_activity_field_matrix.py": {
-      "owner": "@bioetl-docs",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a top-level ChEMBL activity-field matrix shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
-    },
-    "scripts/docs/generate_pipeline_normalization_field_matrix.py": {
+    "scripts/docs/matrix/generate_pipeline_normalization_matrix.py": {
       "owner": "@bioetl-docs",
       "decision": "compatibility_wrapper",
       "review_by": "2026-09-30",
       "next_step": "Retain as a top-level pipeline normalization matrix compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs generate-pipeline-normalization-matrix."
     },
-    "scripts/docs/matrix/_bootstrap.py": {
-      "owner": "@bioetl-docs",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an internal bootstrap helper for scripts.docs.matrix modules while matrix-generation internals still share repo-root/path setup; fold it into a broader canonical scripts bootstrap layer if that consolidation lands."
-    },
-    "scripts/docs/matrix/structural_contract.py": {
-      "owner": "@bioetl-docs",
+    "scripts/docs/checks/report_docs_kpi.py": {
       "decision": "shared_helper_module",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as the internal structural-contract library for documentation matrix generation and its architecture guard; keep it supporting because it is not a standalone command."
-    },
-    "scripts/docs/report_docs_kpi.py": {
       "owner": "@bioetl-docs",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a top-level docs KPI reporting compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-kpi."
-    },
-    "scripts/docs/sync_repo_identity.py": {
-      "owner": "@bioetl-docs",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a top-level repo-identity compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs sync-repo-identity."
+      "review_by": "2026-12-31",
+      "next_step": "Canonical docs KPI reporter; invoke via python -m scripts.docs check-kpi (#8043)."
     },
     "scripts/engineering/ci/_compatibility_registry.py": {
       "owner": "@bioetl-platform",
