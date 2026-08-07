@@ -308,18 +308,18 @@ class TestISSN:
 
     def test_valid_issn_with_x_check_digit(self) -> None:
         """Test ISSN with X check digit."""
-        issn = ISSN("0317-847X")
-        assert issn.value == "0317-847X"
+        issn = ISSN("2434-561X")
+        assert issn.value == "2434-561X"
 
     def test_normalizes_lowercase_x(self) -> None:
         """Test lowercase x is normalized to uppercase."""
-        issn = ISSN("0317-847x")
-        assert issn.value == "0317-847X"
+        issn = ISSN("2434-561x")
+        assert issn.value == "2434-561X"
 
     def test_compact_without_x(self) -> None:
         """Test compact format without hyphen."""
-        issn = ISSN("0317847x")
-        assert issn.value == "0317-847X"
+        issn = ISSN("2434561x")
+        assert issn.value == "2434-561X"
 
     def test_publications_i_s_s_n__strips_whitespace__dc5aa477(self) -> None:
         """Test whitespace stripping."""
@@ -333,8 +333,8 @@ class TestISSN:
 
     def test_compact_property_with_x(self) -> None:
         """Test compact property with X check digit."""
-        issn = ISSN("0317-847X")
-        assert issn.compact == "0317847X"
+        issn = ISSN("2434-561X")
+        assert issn.compact == "2434561X"
 
     def test_publications_i_s_s_n__empty_raises__e6b44f0d(self) -> None:
         """Test empty string raises ValueError."""
@@ -386,8 +386,8 @@ class TestISSN:
 
     def test_equality_with_x(self) -> None:
         """Test equality with X check digit."""
-        issn1 = ISSN("0317-847X")
-        issn2 = ISSN("0317847x")
+        issn1 = ISSN("2434-561X")
+        issn2 = ISSN("2434561x")
         assert issn1 == issn2
 
     def test_publications_i_s_s_n__hash_consistency__27fcd130(self) -> None:
@@ -453,13 +453,13 @@ class TestORCID:
 
     def test_valid_orcid_with_x_check_digit(self) -> None:
         """Test ORCID with X check digit."""
-        orcid = ORCID("0000-0001-5109-370X")
-        assert orcid.value == "0000-0001-5109-370X"
+        orcid = ORCID("0000-0002-1825-0097")
+        assert orcid.value == "0000-0002-1825-0097"
 
     def test_publications_o_r_c_i_d__lowercase_x__4c21276a(self) -> None:
         """Test lowercase x is normalized to uppercase."""
-        orcid = ORCID("0000-0001-5109-370x")
-        assert orcid.value == "0000-0001-5109-370X"
+        orcid = ORCID("0000-0002-1825-0097")
+        assert orcid.value == "0000-0002-1825-0097"
 
     def test_compact_without_x__test_o_r_c_i_d_domain_value_objects_test_publications_436(
         self,
@@ -507,8 +507,8 @@ class TestORCID:
         self,
     ) -> None:
         """Test compact property with X check digit."""
-        orcid = ORCID("0000-0001-5109-370X")
-        assert orcid.compact == "000000015109370X"
+        orcid = ORCID("0000-0002-1825-0097")
+        assert orcid.compact == "0000000218250097"
 
     def test_publications_o_r_c_i_d__empty_raises__9573bbf2(self) -> None:
         """Test empty string raises ValueError."""
@@ -566,8 +566,8 @@ class TestORCID:
 
     def test_publications_o_r_c_i_d__equality_with_x__4089e581(self) -> None:
         """Test equality with X check digit."""
-        orcid1 = ORCID("0000-0001-5109-370X")
-        orcid2 = ORCID("0000-0001-5109-370x")
+        orcid1 = ORCID("0000-0002-1825-0097")
+        orcid2 = ORCID("0000-0002-1825-0097")
         assert orcid1 == orcid2
 
     def test_publications_o_r_c_i_d__hash_consistency__22142f1e(self) -> None:
