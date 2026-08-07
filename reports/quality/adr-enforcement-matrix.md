@@ -11,21 +11,21 @@
 
 | ADR | status | implementation owners | enforcement owners | gaps |
 | --- | --- | ---: | ---: | --- |
-| `ADR-001` | `enforced` | 18 | 7 | - |
+| `ADR-001` | `enforced` | 17 | 7 | - |
 | `ADR-002` | `enforced` | 14 | 4 | - |
 | `ADR-004` | `enforced` | 3 | 1 | - |
 | `ADR-005` | `enforced` | 20 | 4 | - |
 | `ADR-006` | `enforced` | 7 | 2 | - |
 | `ADR-007` | `enforced` | 18 | 5 | - |
 | `ADR-009` | `enforced` | 4 | 1 | - |
-| `ADR-010` | `enforced` | 123 | 13 | - |
+| `ADR-010` | `enforced` | 120 | 13 | - |
 | `ADR-011` | `enforced` | 4 | 1 | - |
 | `ADR-012` | `enforced` | 5 | 1 | - |
 | `ADR-013` | `enforced` | 6 | 1 | - |
-| `ADR-014` | `enforced` | 69 | 18 | - |
-| `ADR-015` | `enforced` | 10 | 1 | - |
+| `ADR-014` | `enforced` | 64 | 18 | - |
+| `ADR-015` | `enforced` | 11 | 1 | - |
 | `ADR-016` | `enforced` | 4 | 1 | - |
-| `ADR-017` | `enforced` | 29 | 1 | - |
+| `ADR-017` | `enforced` | 25 | 1 | - |
 | `ADR-018` | `enforced` | 75 | 9 | - |
 | `ADR-019` | `enforced` | 10 | 2 | - |
 | `ADR-020` | `enforced` | 5 | 1 | - |
@@ -33,8 +33,8 @@
 | `ADR-022` | `enforced` | 6 | 1 | - |
 | `ADR-023` | `enforced` | 3 | 1 | - |
 | `ADR-024` | `enforced` | 28 | 10 | - |
-| `ADR-025` | `enforced` | 21 | 3 | - |
-| `ADR-026` | `enforced` | 66 | 6 | - |
+| `ADR-025` | `enforced` | 22 | 3 | - |
+| `ADR-026` | `enforced` | 65 | 6 | - |
 | `ADR-027` | `enforced` | 31 | 6 | - |
 | `ADR-028` | `enforced` | 31 | 5 | - |
 | `ADR-029` | `enforced` | 28 | 8 | - |
@@ -52,15 +52,15 @@
 | `ADR-041` | `enforced` | 6 | 2 | - |
 | `ADR-042` | `enforced` | 13 | 4 | - |
 | `ADR-043` | `enforced` | 6 | 2 | - |
-| `ADR-044` | `enforced` | 21 | 2 | - |
+| `ADR-044` | `enforced` | 23 | 3 | - |
 | `ADR-045` | `enforced` | 27 | 2 | - |
-| `ADR-046` | `enforced` | 14 | 1 | - |
-| `ADR-047` | `enforced` | 75 | 2 | - |
+| `ADR-046` | `enforced` | 15 | 1 | - |
+| `ADR-047` | `enforced` | 76 | 2 | - |
 | `ADR-048` | `enforced` | 17 | 3 | - |
 | `ADR-049` | `enforced` | 5 | 1 | - |
 | `ADR-050` | `enforced` | 23 | 8 | - |
 | `ADR-051` | `enforced` | 10 | 5 | - |
 | `ADR-052` | `enforced` | 8 | 4 | - |
 | `ADR-053` | `enforced` | 19 | 8 | - |
-| `ADR-054` | `enforced` | 5 | 3 | - |
+| `ADR-054` | `enforced` | 6 | 3 | - |
 | `ADR-055` | `enforced` | 11 | 4 | - |
