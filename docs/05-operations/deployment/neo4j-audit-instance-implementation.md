@@ -75,7 +75,7 @@ driver = neo4j.driver("bolt://localhost:7687", auth=(...))
 **After**:
 
 ```python
-from src.tools.neo4j_audit import get_neo4j_uri, get_neo4j_auth
+from scripts.ops.data.neo4j_audit import get_neo4j_uri, get_neo4j_auth
 
 driver = neo4j.driver(get_neo4j_uri(), neo4j.auth.basic(*get_neo4j_auth()))
 ```
@@ -190,7 +190,7 @@ netstat -an | findstr "7475\|7688"
 # ports:
 #   - "7476:7474"
 #   - "7689:7687"
-# Then update src/tools/neo4j_audit.py get_neo4j_uri()
+# Then update scripts/ops/data/neo4j_audit.py get_neo4j_uri()
 ```
 
 ### OOMKilled During Audit
@@ -292,7 +292,7 @@ ______________________________________________________________________
 | docker-compose.neo4j-audit.yml                  | Container config               | ✅ Ready |
 | scripts/ops/runtime/neo4j/start-neo4j-audit.ps1 | Start/stop script (PowerShell) | ✅ Ready |
 | scripts/ops/runtime/neo4j/start-neo4j-audit.sh  | Start/stop script (Bash)       | ✅ Ready |
-| src/tools/neo4j_audit.py                        | Connection helper              | ✅ Ready |
+| scripts/ops/data/neo4j_audit.py                 | Connection helper              | ✅ Ready |
 | NEO4J_AUDIT_INSTANCE_GUIDE.md                   | User guide                     | ✅ Ready |
 | This file                                       | Implementation guide           | ✅ Ready |
 

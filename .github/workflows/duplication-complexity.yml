@@ -57,9 +57,9 @@ jobs:
           # configs/quality/duplication_complexity_exemptions.yaml (xenon scope).
           # DQ analyzers, composite orchestration, CLI formatters, runtime builders,
           # silver storage, control-plane artifacts, quarantine, observability,
-          # quality governance, input adapters, extractor modules, tools, memory.
+          # quality governance, input adapters, extractor modules, memory.
           xenon --max-absolute B --max-modules B --max-average A \
-            --exclude "tests/*,src/tools/*,src/memory/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/composition/runtime_builders/*,src/bioetl/composition/factories/services/*,src/bioetl/infrastructure/storage/silver/*,src/bioetl/infrastructure/control_plane/*,src/bioetl/infrastructure/quarantine/*,src/bioetl/infrastructure/observability/*,src/bioetl/infrastructure/quality/*" src
+            --exclude "tests/*,src/memory/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/composition/runtime_builders/*,src/bioetl/composition/factories/services/*,src/bioetl/infrastructure/storage/silver/*,src/bioetl/infrastructure/control_plane/*,src/bioetl/infrastructure/quarantine/*,src/bioetl/infrastructure/observability/*,src/bioetl/infrastructure/quality/*" src
 
       - name: Strict complexity check for domain layer (CC ≤ 5)
         run: |
@@ -99,7 +99,6 @@ jobs:
 
           # Exempted paths (kept in sync with configs/quality/duplication_complexity_exemptions.yaml)
           EXEMPT_PATHS = {
-              "src/tools/",
               "src/memory/",
               "src/bioetl/infrastructure/adapters/input/",
               "src/bioetl/application/services/dq/",
