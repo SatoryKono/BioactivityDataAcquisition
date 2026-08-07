@@ -24,7 +24,6 @@ _STRUCTURAL_ACTION_BY_EVENT: dict[str, str] = {
     "silver_structural_type_coerced_to_null": "nullable_type_to_null",
 }
 
-
 def classify_structural_action(
     details: dict[str, object] | None,
     event_names: set[str],

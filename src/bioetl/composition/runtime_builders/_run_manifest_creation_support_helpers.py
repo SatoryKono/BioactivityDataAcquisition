@@ -180,3 +180,29 @@ def create_ledger_service(
         run_id=ctx.run_id,
         _entry_id_factory=lambda: create_runtime_occurrence_id("run_ledger_entry"),
     )
+
+
+def resolve_replay_lag_seconds(
+    *,
+    launch_context: object,
+    lag_status: str,
+    read_attr,
+) -> float | None:
+    """Return measured replay lag seconds when available; never invent 0 for blocked."""
+    from collections.abc import Mapping
+
+    raw: object | None = None
+    if isinstance(launch_context, Mapping):
+        raw = launch_context.get("replay_lag_seconds")
+        if raw is None:
+            raw = launch_context.get("parent_run_age_seconds")
+    else:
+        raw = read_attr(launch_context, "replay_lag_seconds", None)
+        if raw is None:
+            raw = read_attr(launch_context, "parent_run_age_seconds", None)
+    if isinstance(raw, int | float) and float(raw) >= 0.0:
+        return float(raw)
+    if lag_status in {"ready", "not_requested"}:
+        return 0.0
+    return None
+

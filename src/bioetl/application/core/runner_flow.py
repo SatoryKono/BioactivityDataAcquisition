@@ -46,7 +46,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
-
 class _PipelineRunnerFlowHostProtocol(Protocol):
     _config: PipelineConfig
     _context: PipelineContext
@@ -62,7 +61,6 @@ class _PipelineRunnerFlowHostProtocol(Protocol):
 
     @property
     def execution_diagnostics(self) -> JsonDict: ...
-
 
 def _record_with_ledger_service(
     host: _PipelineRunnerFlowHostProtocol,
