@@ -50,6 +50,9 @@ SAFE_ROOT_LOCAL_PATHS: frozenset[str] = frozenset(
         "Test Results - Pytest_All.xml",
         "test-output",
         "tmp",
+        # Empty local worktree parent only (see _delete_candidate); non-empty
+        # trees are refused so active exclusive worktrees are not destroyed.
+        ".worktrees",
     }
 )
 VENV_ROOT_LOCAL_PATHS: frozenset[str] = frozenset(
@@ -292,12 +295,41 @@ def _delete_windows_reserved_name(repo_root: Path, name: str) -> None:
     raise FileNotFoundError(name)
 
 
+def _delete_empty_worktrees_dir(repo_root: Path) -> None:
+    """Remove exact-root ``.worktrees`` only when it has no children.
+
+    Non-empty trees may hold exclusive agent/developer worktrees; refuse
+    recursive deletion so cleanup never wipes in-progress checkouts.
+    """
+    target = repo_root / ".worktrees"
+    if not target.exists() and not target.is_symlink():
+        return
+    if target.is_symlink() or target.is_file():
+        target.unlink()
+        return
+    if not target.is_dir():
+        return
+    try:
+        children = list(target.iterdir())
+    except OSError as exc:
+        raise OSError(f"unable to inspect .worktrees: {exc}") from exc
+    if children:
+        raise OSError(
+            "refusing to delete non-empty .worktrees "
+            f"({len(children)} entries); remove worktrees first or rmdir only when empty"
+        )
+    target.rmdir()
+
+
 def _delete_candidate(repo_root: Path, candidate: RootLocalCleanupCandidate) -> None:
     name = candidate.rel_path
     if _is_windows_reserved_root_name(name):
         if not _root_entry_present_by_name(repo_root, name):
             return
         _delete_windows_reserved_name(repo_root, name)
+        return
+    if name == ".worktrees":
+        _delete_empty_worktrees_dir(repo_root)
         return
 
     target = repo_root / candidate.path

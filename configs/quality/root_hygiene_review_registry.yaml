@@ -452,6 +452,10 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: reports
         action_if_reintroduced: keep_untracked_as_local_test_output_or route retained diagnostics into approved reports surfaces
+      - path: .worktrees
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: remove_empty_local_worktrees_parent_via_reviewed_cleanup_or_rmdir; never_commit; refuse_non_empty_recursive_delete_while_active_worktrees_exist
       - path: tmp
         current_live_state: present_local_only_root_surface
         canonical_path: null

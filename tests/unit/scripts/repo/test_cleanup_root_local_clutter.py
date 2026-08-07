@@ -248,6 +248,40 @@ def test_collect_includes_nul_only_when_listed_in_root_dir(
     assert present[0].category == "windows_device_name_clutter"
 
 
+def test_worktrees_empty_deleted_nonempty_refused(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Empty .worktrees is safe to purge; non-empty must not be rmtree'd (RH7-C3)."""
+    _write_governance(tmp_path)
+    # Extend fixture registry with .worktrees candidate in allowed lane.
+    registry = tmp_path / "configs" / "quality" / "root_hygiene_review_registry.yaml"
+    payload = yaml.safe_load(registry.read_text(encoding="utf-8"))
+    payload["review_lanes"][0]["candidates"].append(
+        {
+            "path": ".worktrees",
+            "current_live_state": "present_local_only_root_surface",
+            "canonical_path": None,
+            "action_if_reintroduced": "remove empty only",
+        }
+    )
+    registry.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(module, "_tracked_paths", lambda _repo_root: frozenset())
+
+    empty = tmp_path / ".worktrees"
+    empty.mkdir()
+    assert module.main(["--apply", "--path", ".worktrees"]) == 0
+    assert not empty.exists()
+
+    nonempty = tmp_path / ".worktrees"
+    nonempty.mkdir()
+    (nonempty / "active-wt").mkdir()
+    assert module.main(["--apply", "--path", ".worktrees"]) == 1
+    assert nonempty.exists()
+    assert (nonempty / "active-wt").exists()
+
+
 def test_main_apply_continues_after_delete_error(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
