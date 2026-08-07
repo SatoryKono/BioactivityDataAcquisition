@@ -47,6 +47,7 @@ COMMANDS: dict[str, str] = {
     "generate-unified-map": "scripts.schema.analysis.generate_unified_schema_map",
     "generate-field-diagnostics": "scripts.schema.analysis.generate_field_level_diagnostics",
     "generate-field-spec": "scripts.schema.analysis.generate_field_transformation_spec",
+    "generate-json-field-typing-inventory": "scripts.schema.analysis.generate_json_field_typing_inventory",
     "validate-configs": "scripts.schema.validation.validate_pipeline_configs",
     "validate-unified-configs": "scripts.schema.validation.validate_unified_configs",
     "analyze-gaps": "scripts.schema.analysis.config_gap_analysis",
