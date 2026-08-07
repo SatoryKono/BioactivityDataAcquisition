@@ -181,6 +181,16 @@ class ISSN(ValueObject[str]):
 
         first_part = match.group(1)
         second_part = match.group(2).upper()
+        body = first_part + second_part[:3]
+        check = second_part[3]
+        total = sum((8 - i) * int(digit) for i, digit in enumerate(body))
+        remainder = total % 11
+        expected_num = 0 if remainder == 0 else 11 - remainder
+        expected = "X" if expected_num == 10 else str(expected_num)
+        if check != expected:
+            raise ValueError(
+                f"Invalid ISSN checksum: {value!r} (expected check digit {expected})"
+            )
         return f"{first_part}-{second_part}"
 
     @property
