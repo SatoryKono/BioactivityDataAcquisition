@@ -33,7 +33,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.ai import sync_ai_governance
+from scripts.ai.sync import governance as sync_ai_governance
 
 
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]

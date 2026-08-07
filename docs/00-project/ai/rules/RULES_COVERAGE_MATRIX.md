@@ -74,16 +74,16 @@ ______________________________________________________________________
 | Surface | Path | Sync |
 | ------- | ---- | ---- |
 | Canonical | `docs/00-project/ai/rules/cursor/*.mdc` | edit here |
-| Cursor IDE | `.cursor/rules/*.mdc` | `scripts/ai/sync_cursor_rules.py --deploy` |
-| Windsurf | `docs/00-project/ai/rules/windsurf/rules/*.md` | `scripts/ai/sync_windsurf_rules.py` |
+| Cursor IDE | `.cursor/rules/*.mdc` | `scripts/ai/sync/cursor.py --deploy` |
+| Windsurf | `docs/00-project/ai/rules/windsurf/rules/*.md` | `scripts/ai/sync/windsurf.py` |
 | Devin workflows | `.devin/workflows/*.md` | manual parity with Windsurf workflows |
 | Devin DeepWiki | `.devin/wiki.json` | navigation notes only |
 
 ## Verification commands
 
 ```bash
-uv run python scripts/ai/sync_cursor_rules.py --check
-uv run python scripts/ai/sync_windsurf_rules.py --check
+uv run python -m scripts.ai.sync.cursor --check
+uv run python -m scripts.ai.sync.windsurf --check
 uv run python -m scripts.docs check-drift --runtime-mirrors --freshness
 ```
 

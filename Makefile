@@ -226,7 +226,7 @@ docker-dev: docker-start
 
 # Local governance and live-ops shortcuts
 sync-windsurf-rules:
-	$(RUN) python scripts/ai/sync_windsurf_rules.py
+	$(RUN) python -m scripts.ai.sync.windsurf
 
 precommit-install:
 	bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only
