@@ -7,10 +7,10 @@ recursive repository cleanup and it never targets secret-bearing env files or
 retention-sensitive zones.
 """
 
+from __future__ import annotations
+
 # NOSONAR - S1192: .worktrees literal is intentional for worktree cleanup logic
 WORKTREES_DIR = ".worktrees"
-
-from __future__ import annotations
 
 import argparse
 import json

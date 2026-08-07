@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Check whether the local stack is ready for a full Grafana dashboard audit."""
 
+from __future__ import annotations
+
 # NOSONAR - S1192: *.json pattern is intentional for dashboard file discovery
 DASHBOARD_FILE_PATTERN = "*.json"
-
-from __future__ import annotations
 
 import argparse
 import hashlib
