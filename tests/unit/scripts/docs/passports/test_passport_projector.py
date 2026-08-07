@@ -1,4 +1,9 @@
-"""Tests for deterministic executable-unit passport projections."""
+"""Tests for deterministic executable-unit passport projections.
+
+Canonical lane: ``unit-scripts-tooling`` (#8327/#8328).
+Pure helpers vs full-projection/CLI cases are split by markers so
+``unit-fast`` / ``unit-other`` do not dual-pay this zone.
+"""
 
 from __future__ import annotations
 
@@ -29,9 +34,22 @@ from scripts.docs.passports.projector import (
 from scripts.docs.passports.validation import validate_composite_payload
 from tests.helpers.cli_process import run_repo_command
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    # Owned by unit-scripts-tooling lane; not pure product unit (#8328).
+]
 
 REVISION = "0123456789abcdef0123456789abcdef01234567"
+
+
+@pytest.fixture(scope="module")
+def _passport_projection_bundle(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, dict[Path, bytes]]:
+    """Build full passport outputs once per module (hotspot cost amortisation #8327)."""
+    root = tmp_path_factory.mktemp("passport-projector")
+    outputs = build_all_outputs(output_root=root, source_revision=REVISION)
+    return root, outputs
+
+
 
 
 @dataclass(frozen=True)
@@ -97,6 +115,7 @@ def test_inventory_rejects_registry_config_mismatch_and_duplicate_alias(
         )
 
 
+@pytest.mark.slow
 def test_generation_is_byte_deterministic(tmp_path: Path) -> None:
     first = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
     second = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
@@ -167,8 +186,10 @@ def test_generation_is_subprocess_environment_invariant(tmp_path: Path) -> None:
     assert baseline == alternate
 
 
-def test_workflow_operations_are_classified(tmp_path: Path) -> None:
-    outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
+def test_workflow_operations_are_classified(
+    _passport_projection_bundle: tuple[Path, dict[Path, bytes]],
+) -> None:
+    tmp_path, outputs = _passport_projection_bundle
     core = json.loads(outputs[tmp_path / "generated/workflows/chembl_core.json"])
     operations = {
         item["transform_name"]: item["classification"]
@@ -186,8 +207,10 @@ def test_workflow_operations_are_classified(tmp_path: Path) -> None:
     assert " --> " in core["dag"]["mermaid"]
 
 
-def test_generated_facts_validate_against_published_schemas(tmp_path: Path) -> None:
-    outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
+def test_generated_facts_validate_against_published_schemas(
+    _passport_projection_bundle: tuple[Path, dict[Path, bytes]],
+) -> None:
+    tmp_path, outputs = _passport_projection_bundle
     schema_root = PROJECT_ROOT / "docs/04-reference/passports/schemas"
     pipeline_schema = json.loads(
         (schema_root / "pipeline-passport.schema.json").read_text(encoding="utf-8")
@@ -204,9 +227,9 @@ def test_generated_facts_validate_against_published_schemas(tmp_path: Path) -> N
 
 
 def test_representative_pipeline_projection_profiles_are_explicit(
-    tmp_path: Path,
+    _passport_projection_bundle: tuple[Path, dict[Path, bytes]],
 ) -> None:
-    outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
+    tmp_path, outputs = _passport_projection_bundle
 
     def profiles(pipeline: str) -> set[str]:
         facts = json.loads(outputs[tmp_path / f"generated/pipelines/{pipeline}.json"])
@@ -220,9 +243,9 @@ def test_representative_pipeline_projection_profiles_are_explicit(
 
 
 def test_schema_rejects_unknown_nested_keys_and_incompatible_version(
-    tmp_path: Path,
+    _passport_projection_bundle: tuple[Path, dict[Path, bytes]],
 ) -> None:
-    outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
+    tmp_path, outputs = _passport_projection_bundle
     facts = json.loads(outputs[tmp_path / "generated/pipelines/chembl_activity.json"])
     schema = json.loads(
         (
@@ -270,8 +293,10 @@ def test_composite_validation_fails_closed_for_invalid_invariants() -> None:
     }
 
 
-def test_source_refs_exist_and_metric_labels_are_bounded(tmp_path: Path) -> None:
-    outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
+def test_source_refs_exist_and_metric_labels_are_bounded(
+    _passport_projection_bundle: tuple[Path, dict[Path, bytes]],
+) -> None:
+    tmp_path, outputs = _passport_projection_bundle
     prohibited = {
         "run_id",
         "manifest_id",
@@ -305,6 +330,8 @@ def test_manual_sidecar_is_strict_and_preserved(tmp_path: Path) -> None:
         load_manual_sidecar(sidecar)
 
 
+@pytest.mark.subprocess_backed
+@pytest.mark.slow
 def test_cli_generate_and_check(tmp_path: Path) -> None:
     args = [
         "--output-root",
@@ -319,9 +346,9 @@ def test_cli_generate_and_check(tmp_path: Path) -> None:
 
 
 def test_pipeline_markdown_is_compact_complete_and_not_a_json_dump(
-    tmp_path: Path,
+    _passport_projection_bundle: tuple[Path, dict[Path, bytes]],
 ) -> None:
-    outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
+    tmp_path, outputs = _passport_projection_bundle
     path = tmp_path / "pipelines/chembl-assay.md"
     markdown = outputs[path].decode("utf-8")
     facts = json.loads(outputs[tmp_path / "generated/pipelines/chembl_assay.json"])
@@ -350,9 +377,9 @@ def test_pipeline_markdown_is_compact_complete_and_not_a_json_dump(
 
 
 def test_composite_commands_and_diagram_use_real_composite_cli_options(
-    tmp_path: Path,
+    _passport_projection_bundle: tuple[Path, dict[Path, bytes]],
 ) -> None:
-    outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
+    tmp_path, outputs = _passport_projection_bundle
     facts = json.loads(
         outputs[tmp_path / "generated/pipelines/composite_publication.json"]
     )
@@ -366,8 +393,10 @@ def test_composite_commands_and_diagram_use_real_composite_cli_options(
     assert "Quarantine / nullification" in diagram
 
 
-def test_duplicate_audit_reports_compaction(tmp_path: Path) -> None:
-    outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
+def test_duplicate_audit_reports_compaction(
+    _passport_projection_bundle: tuple[Path, dict[Path, bytes]],
+) -> None:
+    tmp_path, outputs = _passport_projection_bundle
     markdown = [
         content.decode("utf-8")
         for path, content in outputs.items()

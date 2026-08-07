@@ -71,6 +71,68 @@ test_lanes:
       fixture writes are proven xdist-safe in the lane definition.
     benchmark_parallel_policy: >
       Benchmark lanes explicitly disable xdist through pytest_args.
+
+  # ── Lane classification (pure-unit vs repo_backed vs scripts-tooling) ──
+  # Epic #8326 / #8328 — mental model for CI and local test-health.
+  lane_classification:
+    schema_version: 1
+    summary: >
+      Product unit signal (domain/application/infrastructure pure paths) is
+      separated from repository-file contracts and scripts/tooling tests so
+      unit-fast stays a pure-ish feedback lane.
+    classes:
+      pure_unit:
+        description: >
+          Deterministic hexagonal product unit tests without repo FS contracts,
+          subprocess, or scripts tooling. Primary local/CI feedback lane.
+        canonical_lane: unit-fast
+        path_roots:
+          - tests/unit/domain/
+          - tests/unit/application/
+          - tests/unit/infrastructure/
+          - tests/unit/interfaces/
+          - tests/unit/composition/
+        excluded_markers:
+          - fs_contract
+          - repo_backed
+          - subprocess_backed
+          - slow
+          - benchmark
+          - memory
+        excluded_paths:
+          - tests/unit/scripts/
+          - tests/unit/repo_backed/
+      repo_backed:
+        description: >
+          Unit-path tests that intentionally read/write repository files or
+          exercise recovery scripts against checked-in trees. Always serial.
+        canonical_lane: repo-backed-unit
+        path_roots:
+          - tests/unit/repo_backed/
+        required_marker: repo_backed
+      scripts_tooling:
+        description: >
+          Tooling and operator-script tests under tests/unit/scripts (passport
+          projector, docs generators, ops helpers). Not pure product unit.
+          Passport projector full-projection cases are owned exclusively here
+          (#8327) — not dual-collected by unit-fast or unit-other.
+        canonical_lane: unit-scripts-tooling
+        path_roots:
+          - tests/unit/scripts/
+        notes:
+          - unit-fast and unit-other ignore tests/unit/scripts in CI
+          - pure helper cases and CLI/subprocess cases may share modules but CLI uses subprocess_backed/slow
+      filesystem_contracts:
+        description: >
+          Bounded local-filesystem adapter contracts classified via fs_contract
+          and classified_modules list on unit-filesystem-contracts lane.
+        canonical_lane: unit-filesystem-contracts
+        required_marker: fs_contract
+    local_architecture_recommendation: >
+      Prefer architecture-fast-boundary for PR-local architecture feedback;
+      full architecture or architecture-slow-governance for CI/nightly audits
+      (#8331). Do not weaken import-linter, purity, or debt no-growth gates.
+
   execution_defaults:
     pythonpath: src
     direct_runner: scripts/engineering/dev/run_pytest.sh
@@ -107,10 +169,10 @@ test_lanes:
     unit-fast:
       suite_name: unit-fast
       description: >-
-        Fast unit lane over pure-ish unit paths under tests/unit. Excludes slow,
+        Fast pure-ish product unit lane under tests/unit (#8328). Excludes slow,
         benchmark, filesystem-contract, repo-backed, Neo4j/MCP memory tests, and scripts tooling
-        (see unit-scripts-tooling). scripts/ is still importable path-wise but
-        documented as non-domain tooling (T-12).
+        (see unit-scripts-tooling / lane_classification). CI unit-fast ignores
+        tests/unit/scripts and tests/unit/repo_backed so passport projector is not dual-paid (#8327).
       runner_backend: run_pytest
       runner: scripts/engineering/dev/run_pytest.sh
       paths:
@@ -203,7 +265,8 @@ test_lanes:
       description: >-
         Tooling/script tests under tests/unit/scripts. These are not pure hexagonal
         domain unit tests; they exercise repo tooling and may use tmp_path/subprocess.
-        Kept separate from unit-fast mental model (T-12 / #6605).
+        Canonical single lane for passport projector economics (#8327/#8328; T-12 / #6605).
+        CI job unit-scripts-tooling owns this path; unit-fast/unit-other ignore it.
       runner_backend: run_pytest
       runner: scripts/engineering/dev/run_pytest.sh
       paths:

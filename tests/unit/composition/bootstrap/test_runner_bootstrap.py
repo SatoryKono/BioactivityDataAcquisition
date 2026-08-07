@@ -98,6 +98,18 @@ def bootstrap_with_light_observability(light_observability: SimpleNamespace):
         yield mock_settings, mock_observability, light_observability
 
 
+
+_LIST_SERVICE_CACHE: PipelineRunnerService | None = None
+
+
+def _cached_bootstrapped_service() -> PipelineRunnerService:
+    """Amortize full DI bootstrap for list-only integration checks (#8329)."""
+    global _LIST_SERVICE_CACHE
+    if _LIST_SERVICE_CACHE is None:
+        _LIST_SERVICE_CACHE = bootstrap_pipeline_runner_service()
+    return _LIST_SERVICE_CACHE
+
+
 @pytest.mark.unit
 class TestBootstrapPipelineRunnerService:
     """Tests for bootstrap_pipeline_runner_service function."""
@@ -200,7 +212,7 @@ class TestBootstrapPipelineRunnerServiceIntegration:
         self, bootstrap_with_light_observability: tuple[object, object, object]
     ) -> None:
         """Test that the bootstrapped service can list available pipelines."""
-        service = bootstrap_pipeline_runner_service()
+        service = _cached_bootstrapped_service()
 
         pipelines = service.list_pipelines()
 
@@ -211,7 +223,7 @@ class TestBootstrapPipelineRunnerServiceIntegration:
         self, bootstrap_with_light_observability: tuple[object, object, object]
     ) -> None:
         """Test that the bootstrapped service lists known pipeline names."""
-        service = bootstrap_pipeline_runner_service()
+        service = _cached_bootstrapped_service()
 
         pipelines = service.list_pipelines()
 

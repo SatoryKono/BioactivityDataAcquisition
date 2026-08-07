@@ -1,0 +1,1137 @@
+{
+  "schema_version": "observability-emission-assertion-inventory-v1",
+  "linked_issue": "#8340",
+  "reviewed_on": "2026-08-07",
+  "policy": {
+    "domain_tests_must_not_couple_to_prometheus_client": true,
+    "assert_via_MetricsPort_or_fakes": true
+  },
+  "summary": {
+    "files_with_observability_assertions": 100,
+    "critical_path_candidates": 43
+  },
+  "critical_run_paths_covered": [
+    {
+      "path": "tests/integration/test_runner_lifecycle.py",
+      "signals": [
+        "increment_counter",
+        "observer.",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/integration/workflow/test_workflow_runner_service.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/checkpoint/test_checkpoint_service.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_observability_mixin.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_runtime_helpers.py",
+      "signals": [
+        "observer."
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_stage_dependency_state_flow.py",
+      "signals": [
+        "emit_",
+        "observer."
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/test_runner.py",
+      "signals": [
+        "emit_",
+        "increment_counter",
+        "observer."
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/test_runner_observability_mixin.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_execution_lifecycle.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_execution_lifecycle.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor.py",
+      "signals": [
+        "MetricsPort",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor.py",
+      "signals": [
+        "MetricsPort",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor_dq_mixin.py",
+      "signals": [
+        "increment_counter",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor_dq_mixin.py",
+      "signals": [
+        "increment_counter",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor_memory.py",
+      "signals": [
+        "MetricsPort"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor_memory.py",
+      "signals": [
+        "MetricsPort"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_memory_manager.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_memory_manager.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_metrics.py",
+      "signals": [
+        "MetricsPort",
+        "increment_counter",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_metrics.py",
+      "signals": [
+        "MetricsPort",
+        "increment_counter",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_processing_service.py",
+      "signals": [
+        "emit_"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_processing_service.py",
+      "signals": [
+        "emit_"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_checkpoint_manager.py",
+      "signals": [
+        "MetricsPort",
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_checkpoint_manager.py",
+      "signals": [
+        "MetricsPort",
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_postrun_service.py",
+      "signals": [
+        "increment_counter",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_postrun_service.py",
+      "signals": [
+        "increment_counter",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_quarantine_manager.py",
+      "signals": [
+        "MetricsPort",
+        "emit_",
+        "increment_counter",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_quarantine_manager.py",
+      "signals": [
+        "MetricsPort",
+        "emit_",
+        "increment_counter",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_runner.py",
+      "signals": [
+        "increment_counter",
+        "observer.",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_runner.py",
+      "signals": [
+        "increment_counter",
+        "observer.",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_runner_execution_flow.py",
+      "signals": [
+        "LifecyclePhase",
+        "emit_",
+        "observer."
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_runner_execution_flow.py",
+      "signals": [
+        "LifecyclePhase",
+        "emit_",
+        "observer."
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_runner_flow.py",
+      "signals": [
+        "increment_counter",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_runner_flow.py",
+      "signals": [
+        "increment_counter",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/services/test_checkpoint_resume_policy_service.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/services/test_checkpoint_service.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/services/test_checkpoint_telemetry_helpers.py",
+      "signals": [
+        "emit_",
+        "increment_counter"
+      ],
+      "critical_path_candidate": true
+    }
+  ],
+  "residual_gaps": [
+    "Ensure runner success/failure and quarantine paths assert MetricsPort names/labels via port fakes, not prometheus client."
+  ],
+  "inventory": [
+    {
+      "path": "tests/integration/test_runner_lifecycle.py",
+      "signals": [
+        "increment_counter",
+        "observer.",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/integration/workflow/test_workflow_runner_service.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/checkpoint/test_checkpoint_service.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_observability_mixin.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_runtime_helpers.py",
+      "signals": [
+        "observer."
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_stage_dependency_state_flow.py",
+      "signals": [
+        "emit_",
+        "observer."
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/test_runner.py",
+      "signals": [
+        "emit_",
+        "increment_counter",
+        "observer."
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/composite/test_runner_observability_mixin.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_checkpoint_recovery_service.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_execution_lifecycle.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_execution_lifecycle.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor.py",
+      "signals": [
+        "MetricsPort",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor.py",
+      "signals": [
+        "MetricsPort",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor_dq_mixin.py",
+      "signals": [
+        "increment_counter",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor_dq_mixin.py",
+      "signals": [
+        "increment_counter",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor_memory.py",
+      "signals": [
+        "MetricsPort"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_executor_memory.py",
+      "signals": [
+        "MetricsPort"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_memory_manager.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_memory_manager.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_metrics.py",
+      "signals": [
+        "MetricsPort",
+        "increment_counter",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_metrics.py",
+      "signals": [
+        "MetricsPort",
+        "increment_counter",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_processing_service.py",
+      "signals": [
+        "emit_"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_batch_processing_service.py",
+      "signals": [
+        "emit_"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_checkpoint_manager.py",
+      "signals": [
+        "MetricsPort",
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_checkpoint_manager.py",
+      "signals": [
+        "MetricsPort",
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_postrun_service.py",
+      "signals": [
+        "increment_counter",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_postrun_service.py",
+      "signals": [
+        "increment_counter",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_quarantine_manager.py",
+      "signals": [
+        "MetricsPort",
+        "emit_",
+        "increment_counter",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_quarantine_manager.py",
+      "signals": [
+        "MetricsPort",
+        "emit_",
+        "increment_counter",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_runner.py",
+      "signals": [
+        "increment_counter",
+        "observer.",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_runner.py",
+      "signals": [
+        "increment_counter",
+        "observer.",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_runner_execution_flow.py",
+      "signals": [
+        "LifecyclePhase",
+        "emit_",
+        "observer."
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_runner_execution_flow.py",
+      "signals": [
+        "LifecyclePhase",
+        "emit_",
+        "observer."
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_runner_flow.py",
+      "signals": [
+        "increment_counter",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/core/test_runner_flow.py",
+      "signals": [
+        "increment_counter",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/services/test_checkpoint_resume_policy_service.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/services/test_checkpoint_service.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/services/test_checkpoint_telemetry_helpers.py",
+      "signals": [
+        "emit_",
+        "increment_counter"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/services/test_pipeline_runner_models.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/services/test_pipeline_runner_service.py",
+      "signals": [
+        "increment_counter",
+        "records_quarantined"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/unit/application/services/test_quarantine_service.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": true
+    },
+    {
+      "path": "tests/integration/application/core/test_record_processor.py",
+      "signals": [
+        "MetricsPort"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/integration/infrastructure/storage/test_bronze_writer_cleanup_and_sidecar.py",
+      "signals": [
+        "MetricsPort"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/integration/infrastructure/storage/test_bronze_writer_io_mixin_boost.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/integration/memory/test_workflow_tooling.py",
+      "signals": [
+        "emit_"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/integration/test_dq_monitor_integration.py",
+      "signals": [
+        "MetricsPort",
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/integration/test_grafana_config.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/integration/test_grafana_dashboard_links.py",
+      "signals": [
+        "emit_"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/integration/test_grafana_dashboard_metric_semantics.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/integration/test_observability_emission_integration.py",
+      "signals": [
+        "LifecyclePhase",
+        "MetricsPort",
+        "emit_",
+        "increment_counter",
+        "observer.",
+        "set_gauge"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/integration/test_preflight_health_modes.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/integration/test_prometheus_rules_config.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/integration/workflow/test_workflow_foreign_key_reconciliation.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/composite/test_coordinator_logging.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/composite/test_fsm_pipeline_scenarios.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/composite/test_lifecycle_observer_service.py",
+      "signals": [
+        "emit_",
+        "increment_counter",
+        "observer."
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_arch_cont_coverage_burn_down.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_arch_cont_coverage_burn_down.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_base_transformer.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_base_transformer.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_base_transformer_structural_support.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_base_transformer_structural_support.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_dq_metrics.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_dq_metrics.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_dq_report_integration.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_dq_report_integration.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_filtered_data_source.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_filtered_data_source.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_health_aggregator.py",
+      "signals": [
+        "emit_"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_health_aggregator.py",
+      "signals": [
+        "emit_"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_otel_spans.py",
+      "signals": [
+        "increment_counter",
+        "observer.",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_otel_spans.py",
+      "signals": [
+        "increment_counter",
+        "observer.",
+        "records_quarantined",
+        "set_gauge"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_preflight_health_aggregator.py",
+      "signals": [
+        "observer."
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_preflight_health_aggregator.py",
+      "signals": [
+        "observer."
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_preflight_observability_coverage_tranche.py",
+      "signals": [
+        "emit_",
+        "observer."
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_preflight_observability_coverage_tranche.py",
+      "signals": [
+        "emit_",
+        "observer."
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_preflight_service.py",
+      "signals": [
+        "set_gauge"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_preflight_service.py",
+      "signals": [
+        "set_gauge"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_record_processor_metrics.py",
+      "signals": [
+        "MetricsPort",
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/core/test_record_processor_metrics.py",
+      "signals": [
+        "MetricsPort",
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/observability/test_observer.py",
+      "signals": [
+        "LifecyclePhase",
+        "emit_",
+        "increment_counter",
+        "observer.",
+        "set_gauge"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/observability/test_observer_helpers.py",
+      "signals": [
+        "LifecyclePhase",
+        "emit_",
+        "increment_counter",
+        "observer.",
+        "set_gauge"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/observability/test_observer_identity_construction.py",
+      "signals": [
+        "observer."
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/observability/test_pipeline_metrics.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/pipelines/uniprot/test_comment_helpers.py",
+      "signals": [
+        "emit_"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/services/run_reports/test_query.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/services/run_reports/test_writer.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/services/test_cli_run_orchestration_service.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/services/test_data_quality_service.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/services/test_dq_report_generation_mixin.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/services/test_dq_report_service.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/services/test_error_handler.py",
+      "signals": [
+        "MetricsPort"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/services/test_medallion_lifecycle.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/services/test_metrics_port_recording_fake.py",
+      "signals": [
+        "MetricsPort",
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/services/test_observability_branch_depth_extra.py",
+      "signals": [
+        "MetricsPort",
+        "emit_"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/services/test_pipeline_debug_service.py",
+      "signals": [
+        "records_quarantined"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/services/test_shutdown_service.py",
+      "signals": [
+        "increment_counter"
+      ],
+      "critical_path_candidate": false
+    },
+    {
+      "path": "tests/unit/application/services/test_workflow_transform_service.py",
+      "signals": [
+        "increment_counter",
+        "set_gauge"
+      ],
+      "critical_path_candidate": false
+    }
+  ]
+}
