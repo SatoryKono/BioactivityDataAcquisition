@@ -240,10 +240,10 @@ review_lanes:
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
       - path: .agents
-        current_live_state: present_approved_root_surface
-        canonical_path: .agents
-        disposition: must_stay_root
-        action_if_reintroduced: retain_as_curated_shared_agent_skills_adapter_surface_with_gitignore_scoped_skill_markdown
+        current_live_state: absent_from_root_baseline
+        canonical_path: .codex/skills
+        disposition: owner_decision_required
+        action_if_reintroduced: restore_as_curated_shared_agent_skills_adapter_surface_or_use_codex_skills
       - path: .ai
         current_live_state: present_local_only_root_surface
         canonical_path: null
