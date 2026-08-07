@@ -15,7 +15,7 @@ pytestmark = pytest.mark.unit
 
 from bioetl.application.services.run_reports.paths import (
     REPORT_ROOT_MARKER_NAME,
-    REPORT_ROOT_MARKER_TOKEN,
+    REPORT_ROOT_MARKER_VALUE,
 )
 
 
@@ -85,7 +85,7 @@ def test_verify_host_marker_ok_without_ops(
     run_reports = reports / "run-reports"
     run_reports.mkdir(parents=True)
     (reports / REPORT_ROOT_MARKER_NAME).write_text(
-        REPORT_ROOT_MARKER_TOKEN + "\n", encoding="utf-8"
+        REPORT_ROOT_MARKER_VALUE + "\n", encoding="utf-8"
     )
     monkeypatch.setenv("BIOETL_DASHBOARD_REPORT_ROOT", str(reports))
     monkeypatch.setenv("BIOETL_REPORT_ROOT", str(run_reports))
@@ -130,7 +130,7 @@ def test_verify_detects_bind_mismatch(
     run_reports = reports / "run-reports"
     run_reports.mkdir(parents=True)
     (reports / REPORT_ROOT_MARKER_NAME).write_text(
-        REPORT_ROOT_MARKER_TOKEN + "\n", encoding="utf-8"
+        REPORT_ROOT_MARKER_VALUE + "\n", encoding="utf-8"
     )
     monkeypatch.setenv("BIOETL_DASHBOARD_REPORT_ROOT", str(reports))
     monkeypatch.setenv("BIOETL_REPORT_ROOT", str(run_reports))

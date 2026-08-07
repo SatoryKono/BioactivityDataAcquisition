@@ -13,7 +13,7 @@ pytestmark = pytest.mark.unit
 from bioetl.application.services.run_reports.paths import (
     DEFAULT_REPORT_ROOT,
     REPORT_ROOT_MARKER_NAME,
-    REPORT_ROOT_MARKER_TOKEN,
+    REPORT_ROOT_MARKER_VALUE,
     inspect_report_root_marker,
     report_root_marker_is_healthy,
     report_root_marker_path,
@@ -61,7 +61,7 @@ def test_inspect_marker_ok(tmp_path: Path) -> None:
     root = tmp_path / "run-reports"
     root.mkdir()
     marker = tmp_path / REPORT_ROOT_MARKER_NAME
-    marker.write_text(REPORT_ROOT_MARKER_TOKEN + "\n", encoding="utf-8")
+    marker.write_text(REPORT_ROOT_MARKER_VALUE + "\n", encoding="utf-8")
     check = inspect_report_root_marker(report_root=root)
     assert check["status"] == "healthy"
     assert check["marker"] == "ok"

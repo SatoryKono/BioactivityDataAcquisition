@@ -18,7 +18,7 @@ from bioetl.application.services.run_reports.markdown import (
 from bioetl.application.services.run_reports.paths import (
     DEFAULT_REPORT_ROOT,
     REPORT_ROOT_MARKER_NAME,
-    REPORT_ROOT_MARKER_TOKEN,
+    REPORT_ROOT_MARKER_VALUE,
     inspect_report_root_marker,
     report_root_marker_is_healthy,
     report_root_marker_path,
@@ -30,7 +30,7 @@ from bioetl.domain.run_reports.models import PipelineRunReport, WorkflowRunRepor
 __all__ = (
     "DEFAULT_REPORT_ROOT",
     "REPORT_ROOT_MARKER_NAME",
-    "REPORT_ROOT_MARKER_TOKEN",
+    "REPORT_ROOT_MARKER_VALUE",
     "RunReportWriteResult",
     "inspect_report_root_marker",
     "report_root_marker_is_healthy",
