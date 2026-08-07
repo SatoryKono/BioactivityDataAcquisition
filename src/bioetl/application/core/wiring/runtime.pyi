@@ -42,20 +42,28 @@ from bioetl.application.core.batch_progress_service import (
 from bioetl.application.core.batch_tracing import (
     BatchTracingManagerService as BatchTracingManagerService,
 )
-from bioetl.application.core.batch_transformer import BatchTransformer as BatchTransformer
+from bioetl.application.core.batch_transformer import (
+    BatchTransformer as BatchTransformer,
+)
 from bioetl.application.core.batch_writer import BatchWriter as BatchWriter
-from bioetl.application.core.batch_writer import BatchWriterOptions as BatchWriterOptions
+from bioetl.application.core.batch_writer import (
+    BatchWriterOptions as BatchWriterOptions,
+)
 from bioetl.application.core.lifecycle import (
     CheckpointRuntimeService as CheckpointRuntimeService,
 )
 from bioetl.application.core.lifecycle import ShutdownSignal as ShutdownSignal
-from bioetl.application.core.lifecycle.batch_fsm import BatchExecutionFSM as BatchExecutionFSM
+from bioetl.application.core.lifecycle.batch_fsm import (
+    BatchExecutionFSM as BatchExecutionFSM,
+)
 from bioetl.application.core.pipeline_services import PipelineService as PipelineService
 from bioetl.application.core.pipeline_services import (
     PipelineStorageProtocol as PipelineStorageProtocol,
 )
 from bioetl.application.core.protocols import GoldFilterCallback as GoldFilterCallback
-from bioetl.application.core.protocols import GoldTransformCallback as GoldTransformCallback
+from bioetl.application.core.protocols import (
+    GoldTransformCallback as GoldTransformCallback,
+)
 from bioetl.application.core.protocols import TransformCallback as TransformCallback
 from bioetl.application.core.quarantine_manager import (
     QuarantineRuntimeService as QuarantineRuntimeService,
